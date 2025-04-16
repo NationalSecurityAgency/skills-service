@@ -20,9 +20,11 @@ import org.springframework.security.core.userdetails.UserDetails
 import skills.auth.UserAuthService
 import skills.auth.UserInfo
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.MockUserInfoService
 import skills.storage.model.UserTag
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserTagRepo
+import spock.lang.IgnoreIf
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -37,33 +39,28 @@ class PkiUserDetailsServiceSpecs extends DefaultIntSpec {
     @Autowired
     UserTagRepo userTagRepo
 
-    def "handle loading users concurrently"() {
+    @Autowired
+    PkiUserDetailsService pkiUserDetailsService
 
-        PkiUserLookup pkiUserLookup = Mock(PkiUserLookup)
-        pkiUserLookup.lookupUserDn(_) >> { String dn ->
-            new UserInfo(
-                    firstName: "First",
-                    lastName: "Last",
-                    nickname: "",
-                    username: dn,
-                    usernameForDisplay: dn,
-                    userDn: dn,
-                    userTags: [Organization : "XYZ"],
-            )
-        }
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] != "pki" })
+    def "handle loading users concurrently"() {
         int numThreads = 8
         AtomicInteger exceptioncount = new AtomicInteger()
-        List<String> userIdsToSave = (0..100).collect { "User${it}".toString() }
+        List<String> userIdsToSave = getRandomUsers(50)
+        userIdsToSave.each {
+            MockUserInfoService.addUserTags(it, "tag1", "val1")
+        }
         List<UserDetails> collectedUserDetails = Collections.synchronizedList([])
+
         when:
         List<Thread> threads = (1..numThreads).collect {
             Thread.start {
-                PkiUserDetailsService pkiUserDetailsService = new PkiUserDetailsService(userAuthService: userAuthService, pkiUserLookup: pkiUserLookup)
                 userIdsToSave.each {
                     try {
                         UserDetails userDetails = pkiUserDetailsService.loadUserByUsername(it)
                         collectedUserDetails.add(userDetails)
                     } catch (Throwable t){
+                        t.printStackTrace()
                         exceptioncount.incrementAndGet()
                     }
                 }

@@ -118,8 +118,7 @@ class UserAuthService {
     }
 
     private UserInfo createUserInfo(User user, UserAttrs userAttrs) {
-        List<UserRole> userRoles = userRoleRepo.findAllByUserId(user.userId.toLowerCase())
-        return new UserInfo (
+        UserInfo res = new UserInfo (
                 username: user.userId,
                 password: user.password,
                 firstName: userAttrs.firstName,
@@ -128,9 +127,15 @@ class UserAuthService {
                 emailVerified: Boolean.valueOf(userAttrs.emailVerified),
                 userDn: userAttrs.dn,
                 nickname: userAttrs.nickname,
-                authorities: convertRoles(userRoles),
                 usernameForDisplay: userAttrs.userIdForDisplay,
         )
+        return addAuthorities(res)
+    }
+
+    UserInfo addAuthorities(UserInfo userInfo) {
+        List<UserRole> userRoles = userRoleRepo.findAllByUserId(userInfo.username.toLowerCase())
+        userInfo.authorities = convertRoles(userRoles)
+        return userInfo
     }
 
     @Transactional
@@ -140,8 +145,9 @@ class UserAuthService {
     }
 
     @Profile
+    @Transactional
     UserInfo createOrUpdateUser(UserInfo userInfo, boolean refreshSecurityContext=true) {
-        AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.createAppUser(userInfo, true)
+        AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = createOrUpdateAppUser(userInfo)
         UserInfo updatedUserInfo = createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
         if (authMode == AuthMode.FORM && refreshSecurityContext) {
             SecurityContext securityContext = SecurityContextHolder.getContext()
@@ -153,6 +159,12 @@ class UserAuthService {
             }
         }
         return updatedUserInfo
+    }
+
+    @Profile
+    AccessSettingsStorageService.UserAndUserAttrsHolder createOrUpdateAppUser(UserInfo userInfo) {
+        AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.createAppUser(userInfo, true)
+        return userAndUserAttrs
     }
 
     List<String> getProjectsUserIsAdminFor(String userId) {

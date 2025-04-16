@@ -69,6 +69,7 @@ class SkillsService {
                 firstName: userParams.firstName,
                 lastName: userParams.lastName,
                 email: userParams.email,
+                inPkiModeInitCallToAuth: userParams.inPkiModeInitCallToAuth,
                 certificateRegistry: certificateRegistry).init(certificateRegistry != null)
     }
 
@@ -299,6 +300,10 @@ class SkillsService {
         //note that search is only used if the requesting user is a root user
         //otherwise whatever value is supplied for the parameter is ignored by the service
         wsHelper.rootGet("/projects")
+    }
+
+    def invalidateUserCache() {
+        wsHelper.rootPost("/userLookupCache/invalidateAll")
     }
 
     def getProject(String projectId) {
@@ -1272,6 +1277,11 @@ class SkillsService {
     def addRootRole(String userId) {
         userId = getUserId(userId, false)
         return wsHelper.rootPut("/addRoot/${userId}")
+    }
+
+    Boolean doesCurrentUserHasRole(RoleName role) {
+        return wsHelper.appGet("/userInfo/hasRole/${role.toString()}".toString())
+        return res
     }
 
     def expireSkills() {
@@ -2317,6 +2327,8 @@ class SkillsService {
         String firstName = 'Skills'
         String lastName = 'Test'
         String email = null
+
+        boolean inPkiModeInitCallToAuth = true
     }
 
 }

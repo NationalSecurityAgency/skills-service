@@ -35,10 +35,10 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import skills.auth.SecurityMode
+import skills.auth.UserAuthService
 import skills.auth.UserInfo
 import skills.controller.exceptions.SkillException
 
-import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 
 @Component
@@ -62,11 +62,15 @@ class PkiUserLookup {
     @Value('${skills.authorization.userInfoHealthCheckUri}')
     String userInfoHealthCheckUri
 
-    @Value('#{"${skills.authorization.userInfoCache.expiration.hours:24}"}')
-    Long cacheExpirationHours
+    //  24 hours = 86400000 milliseconds = 24 * 60 * 60 * 1000
+    @Value('#{"${skills.authorization.userInfoCache.expiration.milliseconds:86400000}"}')
+    Long cacheExpirationInMs
 
     @Value('#{"${skills.authorization.userInfoCache.maxSize:10000}"}')
     Long cacheMaxSize
+
+    @Autowired
+    UserAuthService userAuthService
 
     LoadingCache userInfoCache
 
@@ -74,13 +78,14 @@ class PkiUserLookup {
 
     @PostConstruct
     void configureCache() {
-        userInfoCache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpirationHours, TimeUnit.HOURS).maximumSize(cacheMaxSize).recordStats().build(new CacheLoader<String, UserInfo>() {
+        userInfoCache = CacheBuilder.newBuilder().expireAfterWrite(cacheExpirationInMs, TimeUnit.MILLISECONDS).maximumSize(cacheMaxSize).recordStats().build(new CacheLoader<String, UserInfo>() {
             @Override
             UserInfo load(String dn) throws Exception {
                 String issuerDn = getIssuerDn()
                 try {
                     UserInfo userInfo = restTemplate.getForObject(userInfoUri, UserInfo, dn, issuerDn)
                     validate(userInfo, dn)
+                    createOrUpdateUser(userInfo)
                     return userInfo
                 } catch (Throwable t) {
                     log.error("Failed while calling [${userInfoUri}], dn=[${dn}], issuerDn=[${issuerDn}]", t)
@@ -114,9 +119,17 @@ class PkiUserLookup {
         return userInfo
     }
 
+    boolean isUserDnCurrentlyCached(String dn) {
+        return userInfoCache.asMap().containsKey(dn)
+    }
+
     void printCacheStats() {
         CacheStats stats = userInfoCache.stats()
         log.debug("\n\nCacheStats: \n${stats}\n\n")
+    }
+
+    void invalidateEntireCache() {
+        userInfoCache.invalidateAll()
     }
 
     @Profile
@@ -169,7 +182,7 @@ class PkiUserLookup {
     }
 
     private String getIssuerDn() {
-        return extractClientCertificate(getServletRequest())?.getIssuerX500Principal()?.getName()
+        return ExtractCertUtil.getIssuerDn(getServletRequest())
     }
 
     private HttpServletRequest getServletRequest() {
@@ -183,14 +196,15 @@ class PkiUserLookup {
         return httpServletRequest
     }
 
-    private X509Certificate extractClientCertificate(HttpServletRequest request) {
-        X509Certificate[] certs = (X509Certificate[]) request?.getAttribute("jakarta.servlet.request.X509Certificate")
-        if (certs != null && certs.length > 0) {
-            log.debug("X.509 client authentication certificate:${certs[0]}")
-            return certs[0]
+    void createOrUpdateUser(UserInfo userInfo) {
+        try {
+            userAuthService.createOrUpdateAppUser(userInfo)
+        } catch (Throwable e) {
+            log.error("Error during createOrUpdateUser", e);
+            SkillException sk = new SkillException("Failed to createOrUpdateUser user info for [${userInfo.username}]")
+            sk.doNotRetry = true
+            throw sk
         }
-        log.error("No client certificate found in request [{}].", request?.getRequestURI())
-        return null
     }
 
     static class Status {

@@ -55,6 +55,9 @@ public class MockUserInfoService {
     static void resetUserTags() {
         currentUserTags.clear()
     }
+    static void removeUserTagsForUser(String userName) {
+        currentUserTags.remove(userName.toLowerCase())
+    }
     static void addUserTags(String username, String key, String value) {
         List<Tuple2<String,String>> tags = currentUserTags[username.toLowerCase()]
         if (tags == null) {

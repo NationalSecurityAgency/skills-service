@@ -28,8 +28,10 @@ import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionCallback
 import org.springframework.transaction.support.TransactionTemplate
 import skills.SpringBootApp
+import skills.auth.pki.PkiUserLookup
 import skills.services.LevelDefinitionStorageService
 import skills.services.LockingService
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.*
 import spock.lang.Specification
 
@@ -78,6 +80,9 @@ class DefaultIntSpec extends Specification {
 
     @Autowired(required=false)
     CertificateRegistry certificateRegistry
+
+    @Autowired(required=false)
+    PkiUserLookup pkiUserLookup
 
     @Autowired
     WaitForAsyncTasksCompletion waitForAsyncTasksCompletion
@@ -147,6 +152,8 @@ class DefaultIntSpec extends Specification {
         dataResetHelper.resetData()
         MockUserInfoService.resetUserTags()
 
+        pkiUserLookup?.invalidateEntireCache()
+
         skillsService = createService()
     }
 
@@ -164,7 +171,7 @@ class DefaultIntSpec extends Specification {
 
     SkillsService createRootSkillService(String username = DEFAULT_ROOT_USER_ID, String password = 'aaaaaaaa') {
         SkillsService rootSkillsService = createService(username, password)
-        if (!rootSkillsService.isRoot()) {
+        if (!rootSkillsService.doesCurrentUserHasRole(RoleName.ROLE_SUPER_DUPER_USER)) {
             rootSkillsService.grantRoot()
         }
         return rootSkillsService

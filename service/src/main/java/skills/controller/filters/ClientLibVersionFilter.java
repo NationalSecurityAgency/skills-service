@@ -21,11 +21,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import skills.auth.pki.ExtractCertUtil;
+import skills.auth.pki.PkiUserLookup;
 import skills.storage.ReadOnlyDataSourceContext;
 
 import java.io.IOException;
@@ -41,6 +44,9 @@ public class ClientLibVersionFilter extends OncePerRequestFilter {
     @Value("${skills.config.db-upgrade-in-progress:false}")
     String upgradeInProgress;
 
+    @Autowired(required = false)
+    PkiUserLookup pkiUserLookup;
+
     private static String HEADER_SKILLS_CLIENT_LIB_VERSION = "Skills-Client-Lib-Version".toLowerCase();
     private static String HEADER_UPGRADE_IN_PROGRESS = "upgrade-in-progress".toLowerCase();
     private static final String ALLOWED_HEADERS = HEADER_SKILLS_CLIENT_LIB_VERSION+", "+HEADER_UPGRADE_IN_PROGRESS;
@@ -54,16 +60,28 @@ public class ClientLibVersionFilter extends OncePerRequestFilter {
         response.addHeader(HEADER_UPGRADE_IN_PROGRESS, Boolean.valueOf(upgradeInProgress).toString());
 
         boolean isGet = request.getMethod().equalsIgnoreCase("GET");
+        boolean inPkiModeAndUserIsNotCached = false;
         if (isGet) {
+            if (pkiUserLookup != null) {
+                String dn = ExtractCertUtil.getDn(request);
+                if (dn != null) {
+                    inPkiModeAndUserIsNotCached = !pkiUserLookup.isUserDnCurrentlyCached(dn);
+                }
+            }
+        }
+
+        boolean shouldStartReadOnly = isGet && !inPkiModeAndUserIsNotCached;
+        if (shouldStartReadOnly) {
             ReadOnlyDataSourceContext.start();
         }
         try {
             filterChain.doFilter(request, response);
         } finally {
-            if (isGet) {
+            if (shouldStartReadOnly) {
                 ReadOnlyDataSourceContext.end();
             }
         }
+
     }
 
 }

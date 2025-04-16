@@ -59,11 +59,6 @@ public class JpaConfig {
         );
     }
 
-    @Bean
-    public JdbcTemplate writerJdbcTemplate() {
-        return new JdbcTemplate(dataSource(writerDataSourceUrl, false, true));
-    }
-
     private DataSource dataSource(String url, boolean readOnly, boolean isAutoCommit) {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(url);

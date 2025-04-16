@@ -61,6 +61,7 @@ class WSHelper {
     String email = null
 
     CertificateRegistry certificateRegistry
+    boolean inPkiModeInitCallToAuth = true
 
     WSHelper init(boolean pkiAuth=false) {
 
@@ -97,7 +98,9 @@ class WSHelper {
 
         restTemplateWrapper = new RestTemplateWrapper(restTemplate, pkiAuth)
         oAuthRestTemplate = restTemplate
-        restTemplateWrapper.auth(skillsService, username, password, firstName, lastName, email)
+        if (!pkiAuth || inPkiModeInitCallToAuth) {
+            restTemplateWrapper.auth(skillsService, username, password, firstName, lastName, email)
+        }
         return this
     }
 

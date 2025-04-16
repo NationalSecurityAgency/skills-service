@@ -390,6 +390,12 @@ class RootController {
         return RequestResult.success()
     }
 
+    @PostMapping('/userLookupCache/invalidateAll')
+    RequestResult invalidateUserLookupCache() {
+        pkiUserLookup.invalidateEntireCache()
+        return RequestResult.success()
+    }
+
 
     @RequestMapping(value = "/dashboardActions", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

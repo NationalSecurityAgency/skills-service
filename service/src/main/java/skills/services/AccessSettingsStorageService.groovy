@@ -42,7 +42,6 @@ import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
-import skills.storage.WriterDatasourceService
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
@@ -65,9 +64,6 @@ class AccessSettingsStorageService {
 
     @Autowired
     UserRepo userRepository
-
-    @Autowired
-    WriterDatasourceService writerDatasourceService
 
     @Autowired
     UserInfoService userInfoService
@@ -492,6 +488,7 @@ class AccessSettingsStorageService {
         return tableResult
     }
 
+    @Transactional()
     @Profile
     UserAndUserAttrsHolder createAppUser(UserInfo userInfo, boolean createOrUpdate) {
         userInfoValidator.validate(userInfo)
@@ -517,6 +514,38 @@ class AccessSettingsStorageService {
             user = createNewUser(userInfo)
         }
         return new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
+    }
+
+    /**
+     * Retreives the existing User and UserAttrs or creates a new one if they do not
+     * already exist. This method DOES NOT update any attributes on existing records
+     * @param userInfo
+     * @return
+     */
+    @Transactional()
+    @Profile
+    UserAndUserAttrsHolder getOrCreate(UserInfo userInfo) {
+        userInfoValidator.validate(userInfo)
+        String userId = userInfo.username?.toLowerCase()
+        UserAttrs userAttrs = userAttrsService.getOrCreate(userId, userInfo)
+
+        User user = loadUserFromLocalDb(userId)
+
+        if (user) {
+            new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
+        } else {
+            // create new user with APP_USER role
+            log.debug("Creating new app user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
+            userAttrsService.lockUser(userId)
+            user = loadUserFromLocalDb(userId)
+            if (!user) {
+                user = createNewUser(userInfo)
+                log.debug("Created new user for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
+            } else {
+                log.debug("Was going to create but already exist for ID [{}], DN [{}]", userInfo.username, userInfo.userDn)
+            }
+            return new UserAndUserAttrsHolder(user: user, userAttrs: userAttrs)
+        }
     }
 
     @Transactional(readOnly=true)
@@ -554,12 +583,12 @@ class AccessSettingsStorageService {
         }
         UserRole role = new UserRole(
                 userRefId: user.id,
-                userId: userId,
+                userId: user.userId,
                 roleName: RoleName.ROLE_SUPER_DUPER_USER
         )
         UserRole supervisorRole = new UserRole(
                 userRefId: user.id,
-                userId: userId,
+                userId: user.userId,
                 roleName: RoleName.ROLE_SUPERVISOR
         )
 
@@ -579,14 +608,12 @@ class AccessSettingsStorageService {
                 userId: userId,
                 password: userInfo.password,
         )
-        writerDatasourceService.insertUser(user)
-        Integer userRefId = writerDatasourceService.getUserRefId(user.userId)
-        if (!userRefId) {
-            throw new SkillException("Must find user id for [${user.userId}]")
-        }
+        userRepository.save(user)
+
+        User savedUser = userRepository.findByUserId(user.userId)
         List<UserRole> roles = getRoles(userInfo)
-        roles.each {it.userRefId = userRefId }
-        writerDatasourceService.insertUserRoles(roles)
+        roles.each {it.userRefId = savedUser.id }
+        userRoleRepository.saveAll(roles)
 
         return user
     }

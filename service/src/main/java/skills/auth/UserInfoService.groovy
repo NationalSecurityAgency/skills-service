@@ -45,9 +45,6 @@ class UserInfoService {
     PkiUserLookup pkiUserLookup
 
     @Autowired
-    UserAuthService userAuthService
-
-    @Autowired
     UserAttrsService userAttrsService
 
     @Profile
@@ -131,13 +128,6 @@ class UserInfoService {
                     SkillException ske = new SkillException("User Info Service does not know about user with provided lookup id of [${userIdParam}]")
                     ske.doNotRetry = !retry
                     throw ske
-                }
-
-                try {
-                    userAuthService.createOrUpdateUser(userInfo)
-                } catch (Throwable e) {
-                    log.error("error during createOrUpdateUser", e);
-                    throw new SkillException("Failed to retrieve user info via [$userIdParam]")
                 }
 
                 userNameRes = userInfo.username

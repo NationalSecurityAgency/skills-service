@@ -21,13 +21,11 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.storage.WriterDatasourceService
 import skills.storage.model.UserAttrs
 import skills.storage.model.UserTag
 import skills.storage.repos.UserAttrsRepo
@@ -51,6 +49,7 @@ class UserAttrsService {
     @Value('#{"${skills.config.attrsAndUserTagsUpdateIntervalHours:7}"}')
     private int attrsAndUserTagsUpdateIntervalHours
 
+    @Transactional
     @Profile
     UserAttrs saveUserAttrs(String userId, UserInfo userInfo) {
         validateUserId(userId)
@@ -66,7 +65,8 @@ class UserAttrsService {
             updateUserTags = true
         } else {
             updateUserAttrs = shouldUpdateUserAttrs(userInfo, userAttrs)
-            updateUserTags = shouldUpdateUserTags(userAttrs)
+            // always update tags
+            updateUserTags = true
 
             if (log.isTraceEnabled()) {
                 use(TimeCategory) {
@@ -87,6 +87,22 @@ class UserAttrsService {
         return updateIfNecessary(updateUserTags, updateUserAttrs, userId, userAttrs, userInfo)
     }
 
+    @Transactional
+    @Profile
+    UserAttrs getOrCreate(String userId, UserInfo userInfo) {
+        validateUserId(userId)
+
+        UserAttrs userAttrs = loadUserAttrsFromLocalDb(userId)
+
+        if (!userAttrs) {
+            // no userAttrs existed, creating for the first time
+            userAttrs = new UserAttrs(userId: userId?.toLowerCase(), userIdForDisplay: userId, userTagsLastUpdated: new Date())
+            return updateIfNecessary(false, true, userId, userAttrs, userInfo)
+        }
+
+        return loadUserAttrsFromLocalDb(userId)
+    }
+
     @Transactional(readOnly = true)
     @Profile
     UserAttrs get(String userId, UserInfo userInfo) {
@@ -96,13 +112,10 @@ class UserAttrsService {
         return userAttrs
     }
 
-    @Autowired
-    WriterDatasourceService writerDatasourceService
-
     @Profile
     private UserAttrs updateIfNecessary(boolean updateUserTags, boolean updateUserAttrs, String userId, UserAttrs userAttrs, UserInfo userInfo) {
         if (updateUserTags || updateUserAttrs) {
-            writerDatasourceService.lockUser(userId)
+            lockUser(userId)
             if (!userAttrs.id) {
                 // this is an insert, reload UserAttrs to verify that another request has not already inserted
                 UserAttrs userAttrs2 = loadUserAttrsFromLocalDb(userId)
@@ -125,8 +138,14 @@ class UserAttrsService {
     }
 
     @Profile
+    void lockUser(String userId) {
+        log.debug("locking user [{}]", userId)
+        lockingService.lockForUserCreateOrUpdate(userId)
+    }
+
+    @Profile
     private void replaceUserTags(String userId, UserInfo userInfo) {
-        writerDatasourceService.deleteUserTagsByUserId(userId)
+        userTagsRepository.deleteByUserId(userId)
         List<UserTag> userTags = userInfo.userTags.collect {
             if (isCollectionOrArray(it.value)) {
                 it.value.collect { value ->
@@ -138,7 +157,7 @@ class UserAttrsService {
         }.flatten()
 
         if (userTags) {
-            writerDatasourceService.saveUserTags(userTags)
+            userTagsRepository.saveAll(userTags)
         }
     }
 
@@ -155,13 +174,6 @@ class UserAttrsService {
                 (userInfo.userDn && userAttrs.dn != userInfo.userDn) ||
                 (userInfo.nickname != null && userAttrs.nickname != (userInfo.nickname ?: "")) ||
                 (userInfo.usernameForDisplay && userAttrs.userIdForDisplay != userInfo.usernameForDisplay)
-    }
-
-    @Profile
-    private boolean shouldUpdateUserTags(UserAttrs userAttrs) {
-        use(TimeCategory) {
-            return userAttrs.userTagsLastUpdated.before(attrsAndUserTagsUpdateIntervalHours.hours.ago)
-        }
     }
 
     private void populate(UserAttrs userAttrs, UserInfo userInfo, boolean updateUserTags) {
@@ -199,11 +211,7 @@ class UserAttrsService {
 
     @Profile
     private void saveUserAttrsInLocalDb(UserAttrs userAttrs) {
-        if (userAttrs.id) {
-            writerDatasourceService.updateUserAttrs(userAttrs)
-        } else {
-            writerDatasourceService.insertUserAttrs(userAttrs)
-        }
+        userAttrsRepo.save(userAttrs)
     }
 
     @Profile

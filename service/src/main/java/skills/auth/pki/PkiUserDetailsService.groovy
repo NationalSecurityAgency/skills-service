@@ -23,8 +23,10 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken
+import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientResponseException
 import skills.auth.SkillsAuthorizationException
+import skills.auth.UserAuthService
 import skills.auth.UserInfo
 import skills.utils.RetryUtil
 
@@ -32,7 +34,7 @@ import skills.utils.RetryUtil
 class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDetailsService<PreAuthenticatedAuthenticationToken> {
 
     @Autowired
-    skills.auth.UserAuthService userAuthService
+    UserAuthService userAuthService
 
     @Autowired
     PkiUserLookup pkiUserLookup
@@ -45,22 +47,14 @@ class PkiUserDetailsService implements UserDetailsService, AuthenticationUserDet
     private UserDetails  doLoadUserByUsername(String dn) throws UsernameNotFoundException {
         try {
             return (UserInfo)RetryUtil.withRetry(3) {
-                UserInfo userInfo
-                userInfo = pkiUserLookup.lookupUserDn(dn)
-                if (userInfo) {
-                    UserInfo existingUserInfo = userAuthService.loadByUserId(userInfo.username?.toLowerCase())
-                    if (existingUserInfo) {
-                        userInfo.password = existingUserInfo.password
-                        userInfo.nickname = existingUserInfo.nickname
-                    } else {
-                        userInfo.password = 'PKI_AUTHENTICATED'
-                    }
-
-                    // update user properties and load user roles, or create the account if this is the first time the user has connected
-                    userInfo = userAuthService.createOrUpdateUser(userInfo)
-                } else {
+                UserInfo userInfo = pkiUserLookup.lookupUserDn(dn)
+                if (!userInfo) {
                     throw new SkillsAuthorizationException("Unknown user [$dn]")
                 }
+                UserInfo existingUserInfo = userAuthService.loadByUserId(userInfo.username?.toLowerCase())
+                userInfo.password = existingUserInfo?.password ?: 'PKI_AUTHENTICATED'
+                userInfo.nickname = existingUserInfo?.nickname
+                userInfo = userAuthService.addAuthorities(userInfo)
 
                 return userInfo
             }

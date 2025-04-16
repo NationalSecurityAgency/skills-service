@@ -15,12 +15,12 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.auth.User
 
-interface UserRepo extends CrudRepository<User, Integer> {
+interface UserRepo extends JpaRepository<User, Integer> {
 
     @Nullable
     User findByUserId(String userId)
