@@ -15,6 +15,8 @@
  */
 package skills.controller.request.model
 
+import skills.services.events.SkillEventsService
+
 class SkillEventRequest {
     String userId
     String idType
@@ -22,7 +24,5 @@ class SkillEventRequest {
     Boolean notifyIfSkillNotApplied = false
     Boolean isRetry = false
 
-    // this is an optional approval message
-    // Note: only applicable in case of self reporting with approval
-    String approvalRequestedMsg
+    SkillEventsService.SkillApprovalParams skillApprovalParams = SkillEventsService.defaultSkillApprovalParams
 }

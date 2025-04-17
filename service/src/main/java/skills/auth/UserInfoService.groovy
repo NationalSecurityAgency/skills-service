@@ -47,6 +47,9 @@ class UserInfoService {
     @Autowired
     UserAttrsService userAttrsService
 
+    @Autowired(required = false)
+    UserAuthService userAuthService
+
     @Profile
     UserInfo getCurrentUser() {
         UserInfo currentUser

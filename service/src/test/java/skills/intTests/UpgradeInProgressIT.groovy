@@ -18,7 +18,6 @@ package skills.intTests
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
@@ -32,7 +31,6 @@ import skills.controller.request.model.SubjectRequest
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.TransactionHelper
 import skills.services.admin.BadgeAdminService
 import skills.services.admin.ProjAdminService
 import skills.services.admin.SkillsAdminService
@@ -52,12 +50,6 @@ import skills.storage.repos.UserRepo
         'skills.authorization.userQueryUri=https://localhost:8189/userQuery?query={query}',
         ], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class UpgradeInProgressIT extends DefaultIntSpec {
-
-    @Autowired
-    JdbcTemplate jdbcTemplate
-
-    @Autowired
-    TransactionHelper transactionHelper
 
     @Autowired
     UserAuthService userAuthService

@@ -24,7 +24,6 @@ import org.springframework.context.ApplicationContext
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import skills.controller.AddSkillHelper
 import skills.dbupgrade.s3.DiskBufferingS3OutputStreamProviderConfigurer
 import skills.dbupgrade.s3.S3SerializedEventsReader
 
@@ -48,11 +47,7 @@ class ReportedSkillEventQueue implements Closeable {
     @Value('#{"${skills.queued-event-path.commit-every-n-records:100}"}')
     Integer reopenFileEveryNRecords
 
-
     BlockingQueue<QueuedSkillEvent> internalQueuedRequests
-
-    @Autowired
-    AddSkillHelper addSkillHelper
 
     @Autowired
     ApplicationContext applicationContext

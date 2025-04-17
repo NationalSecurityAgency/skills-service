@@ -392,7 +392,11 @@ class RootController {
 
     @PostMapping('/userLookupCache/invalidateAll')
     RequestResult invalidateUserLookupCache() {
-        pkiUserLookup.invalidateEntireCache()
+        if (pkiUserLookup) {
+            pkiUserLookup.invalidateEntireCache()
+        } else {
+            log.warn("Called '/root/userLookupCache/invalidateAll' endpoint in non-PKI mode")
+        }
         return RequestResult.success()
     }
 

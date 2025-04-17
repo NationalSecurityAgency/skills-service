@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.PathResource
 import org.springframework.stereotype.Component
-import skills.controller.AddSkillHelper
 
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
@@ -30,9 +29,6 @@ import java.util.concurrent.Executors
 @Slf4j
 @Component
 class FsSerializedEventReader {
-
-    @Autowired
-    AddSkillHelper addSkillHelper
 
     @Autowired
     EventsResourceProcessor eventsResourceProcessor

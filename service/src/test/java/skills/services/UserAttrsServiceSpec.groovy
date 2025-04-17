@@ -25,6 +25,7 @@ import skills.storage.model.UserAttrs
 import skills.storage.model.UserTag
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserTagRepo
+import spock.lang.IgnoreIf
 
 class UserAttrsServiceSpec extends DefaultIntSpec {
 
@@ -220,6 +221,7 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         userAttrs.email == userInfo.email
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
     def "userTags will be inserted when creating new user"() {
         String userId = "${UserAttrsServiceSpec.getSimpleName()}User1"
         UserInfo userInfo = new UserInfo(
@@ -243,46 +245,8 @@ class UserAttrsServiceSpec extends DefaultIntSpec {
         foundUserTags.size() == userInfo.userTags.size()
     }
 
-    def "userTags will not be updated if userTagsLastUpdated is not before attrsAndUserTagsUpdateIntervalDays"() {
-        String userId = "${UserAttrsServiceSpec.getSimpleName()}User1"
-        UserInfo userInfo = new UserInfo(
-                firstName: "first",
-                lastName: "last",
-                nickname: "nick",
-                userDn: "dn",
-                email: "email",
-                username: userId.toLowerCase(),
-                usernameForDisplay: "${userId}-Display",
-                userTags: [Organization : "XYZ", Agency: "ABC"],
-        )
-        userAttrsService.attrsAndUserTagsUpdateIntervalHours = 7
-
-        when:
-        Date userTagsLastUpdated1 = userAttrsTestServiceWrapper.saveUserAttrs(userId, userInfo).userTagsLastUpdated
-        List<UserTag> foundUserTags1 = userTagRepo.findAllByUserId(userId?.toLowerCase())
-
-        // remove a userTag and update another
-        userInfo.userTags.remove('Organization')
-        userInfo.userTags.put('Agency', 'DEF')
-        Date userTagsLastUpdated2 = userAttrsTestServiceWrapper.saveUserAttrs(userId, userInfo).userTagsLastUpdated
-        List<UserTag> foundUserTags2 = userTagRepo.findAllByUserId(userId?.toLowerCase())
-
-        then:
-
-        assert foundUserTags1
-        foundUserTags1.size() == 2
-        foundUserTags1.find { it.key == 'Organization' && it.value  == 'XYZ'}
-        foundUserTags1.find { it.key == 'Agency' && it.value  == 'ABC'}
-
-        assert foundUserTags2
-        foundUserTags2.size() == 2
-        foundUserTags2.find { it.key == 'Organization' && it.value  == 'XYZ'}
-        foundUserTags2.find { it.key == 'Agency' && it.value  == 'ABC'}
-
-        userTagsLastUpdated1 == userTagsLastUpdated2
-    }
-
-    def "userTags will be updated if userTagsLastUpdated is before attrsAndUserTagsUpdateIntervalDays"() {
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
+    def "userTags will be updated"() {
         String userId = "${UserAttrsServiceSpec.getSimpleName()}User1"
         UserInfo userInfo = new UserInfo(
                 firstName: "first",

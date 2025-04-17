@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.SecurityMode
 import skills.auth.SkillsAuthorizationException
+import skills.auth.UserAuthService
 import skills.auth.UserInfo
 
 @Component
@@ -39,7 +40,7 @@ import skills.auth.UserInfo
 class SAML2Utils {
 
     @Autowired
-    skills.auth.UserAuthService userAuthService
+    UserAuthService userAuthService
 
     static final String FIRST_NAME = 'firstName'
     static final String EMAIL = 'email'

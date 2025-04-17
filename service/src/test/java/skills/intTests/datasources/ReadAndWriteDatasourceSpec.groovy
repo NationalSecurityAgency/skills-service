@@ -15,9 +15,7 @@
  */
 package skills.intTests.datasources
 
-import groovy.time.TimeCategory
-import org.springframework.beans.factory.annotation.Autowired
-import skills.auth.pki.PkiUserLookup
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.MockUserInfoService
 import skills.intTests.utils.SkillsFactory
@@ -30,8 +28,6 @@ import spock.lang.IgnoreIf
 
 class ReadAndWriteDatasourceSpec extends DefaultIntSpec {
 
-    @Autowired
-    PkiUserLookup pkiUserLookup
 
     def "new user attributes are saved on read"() {
         SkillsService rootUser = createRootSkillService()

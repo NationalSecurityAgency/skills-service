@@ -62,16 +62,13 @@ class UserInfoServiceSpec extends Specification {
     def "in pki auth mode, look up user by dn if no id type is specified"() {
         UserInfo userInfo = Mock()
         PkiUserLookup userLookup = Mock()
-        UserAuthService authService = Mock()
         1 * userLookup.lookupUserDn("fakeDn") >> userInfo
-        1 * authService.createOrUpdateUser(userInfo)
         1 * userInfo.getUsername() >> "simpleId"
 
         when:
         UserInfoService userInfoService = new UserInfoService()
         userInfoService.authMode = AuthMode.PKI
         userInfoService.pkiUserLookup = userLookup
-        userInfoService.userAuthService = authService
         String userId = userInfoService.getUserName("fakeDn", true)
 
         then:
@@ -81,16 +78,13 @@ class UserInfoServiceSpec extends Specification {
     def "in pki auth mode, look up user by dn if id type of DN is specified"() {
         UserInfo userInfo = Mock()
         PkiUserLookup userLookup = Mock()
-        UserAuthService authService = Mock()
         1 * userLookup.lookupUserDn("fakeDn") >> userInfo
-        1 * authService.createOrUpdateUser(userInfo)
         1 * userInfo.getUsername() >> "simpleId"
 
         when:
         UserInfoService userInfoService = new UserInfoService()
         userInfoService.authMode = AuthMode.PKI
         userInfoService.pkiUserLookup = userLookup
-        userInfoService.userAuthService = authService
         String userId = userInfoService.getUserName("fakeDn", true, "DN")
 
         then:
@@ -142,16 +136,13 @@ class UserInfoServiceSpec extends Specification {
     def "in pki auth mode, throws SkillException if lookup returns no result"() {
         UserInfo userInfo = Mock()
         PkiUserLookup userLookup = Mock()
-        UserAuthService authService = Mock()
         4 * userLookup.lookupUserDn("fakeDn") >> null
-        0 * authService.createOrUpdateUser(userInfo)
         0 * userInfo.getUsername()
 
         when:
         UserInfoService userInfoService = new UserInfoService()
         userInfoService.authMode = AuthMode.PKI
         userInfoService.pkiUserLookup = userLookup
-        userInfoService.userAuthService = authService
         userInfoService.getUserName("fakeDn", true)
 
         then:

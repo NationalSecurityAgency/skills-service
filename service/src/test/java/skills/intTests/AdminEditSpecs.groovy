@@ -1481,6 +1481,10 @@ class AdminEditSpecs extends DefaultIntSpec {
         rootUser.saveUserTag(user1, 'someTag', ["ABC"])
         rootUser.saveUserTag(user2, 'someTag', ["ABC"])
 
+        // account for user tags in PKI mode
+        MockUserInfoService.addUserTags(user1, 'someTag', 'ABC')
+        MockUserInfoService.addUserTags(user2, 'someTag', 'ABC')
+
         skillsService.addSkill(skill1, user1, new Date().minus(5))
         skillsService.addSkill(skill1, user1, new Date().minus(1))
         skillsService.addSkill(skill1, user2, new Date())

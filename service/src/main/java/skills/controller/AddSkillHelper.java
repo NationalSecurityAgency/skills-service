@@ -66,9 +66,10 @@ public class AddSkillHelper {
             incomingDate = new Date(requestedTimestamp);
         }
 
-        if (skillEventRequest != null && skillEventRequest.getApprovalRequestedMsg() != null) {
+        if (skillEventRequest != null && skillEventRequest.getSkillApprovalParams() != null && skillEventRequest.getSkillApprovalParams().getApprovalRequestedMsg() != null) {
             int maxLength = publicProps.getInt(PublicProps.UiProp.maxSelfReportMessageLength);
-            int msgLength = skillEventRequest.getApprovalRequestedMsg().length();
+            String approvalMsg = skillEventRequest.getSkillApprovalParams().getApprovalRequestedMsg();
+            int msgLength = approvalMsg.length();
             SkillsValidator.isTrue(msgLength <= maxLength, String.format("message has length of %d, maximum allowed length is %d", msgLength, maxLength), projectId, skillId);
         }
 
@@ -89,8 +90,7 @@ public class AddSkillHelper {
             Closure<SkillEventResult> closure = new Closure<SkillEventResult>(null) {
                 @Override
                 public SkillEventResult call() {
-                    SkillEventsService.SkillApprovalParams skillApprovalParams = (skillEventRequest !=null && skillEventRequest.getApprovalRequestedMsg() != null) ?
-                            new SkillEventsService.SkillApprovalParams(skillEventRequest.getApprovalRequestedMsg()) : SkillEventsService.getDefaultSkillApprovalParams();
+                    SkillEventsService.SkillApprovalParams skillApprovalParams = skillEventRequest.getSkillApprovalParams();
                     skillApprovalParams.setForAnotherUser(forAnotherUser);
                     return skillsManagementFacade.reportSkill(projectId, skillId, userId, notifyIfSkillNotApplied, dataParam, skillApprovalParams);
                 }

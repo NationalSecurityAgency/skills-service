@@ -29,10 +29,12 @@ import org.springframework.transaction.annotation.Transactional
 import skills.PublicProps
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
+import skills.controller.AddSkillHelper
 import skills.controller.PublicPropsBasedValidator
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
+import skills.controller.request.model.SkillEventRequest
 import skills.controller.result.model.MyQuizAttempt
 import skills.controller.result.model.QuizSkillResult
 import skills.controller.result.model.TableResult
@@ -88,7 +90,7 @@ class QuizRunService {
     QuizToSkillDefRepo quizToSkillDefRepo
 
     @Autowired
-    SkillEventsService skillEventsService
+    AddSkillHelper addSkillHelper
 
     @Autowired
     UserQuizQuestionAttemptRepo quizQuestionAttemptRepo
@@ -871,8 +873,13 @@ class QuizRunService {
     private SkillEventResult reportSkill(String projectId, String skillId, String userId, Date incomingSkillDate) {
         SkillEventResult skillEventResult = null
         if (userCanReportSkill(userId, projectId)) {
-            skillEventResult = skillEventsService.reportSkill(projectId, skillId, userId, false, incomingSkillDate,
-                    new SkillEventsService.SkillApprovalParams(disableChecks: true, isFromPassingQuiz: true))
+            addSkillHelper.addSkill(projectId, skillId, new SkillEventRequest(
+                    userId: userId,
+                    timestamp: incomingSkillDate.time,
+                    skillApprovalParams: new SkillEventsService.SkillApprovalParams(disableChecks: true, isFromPassingQuiz: true),
+                    notifyIfSkillNotApplied: false,
+                    isRetry: false,
+            ))
         }
         return skillEventResult
     }

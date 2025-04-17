@@ -85,6 +85,7 @@ class UserAuthService {
     ApproverRoleDecider approverRoleDecider
 
     @Autowired(required = false)  // only for SecurityMode.FormAuth
+    @Lazy
     SecurityContextRepository securityContextRepository
 
     @Autowired
@@ -132,6 +133,7 @@ class UserAuthService {
         return addAuthorities(res)
     }
 
+    @Transactional(readOnly = true)
     UserInfo addAuthorities(UserInfo userInfo) {
         List<UserRole> userRoles = userRoleRepo.findAllByUserId(userInfo.username.toLowerCase())
         userInfo.authorities = convertRoles(userRoles)
