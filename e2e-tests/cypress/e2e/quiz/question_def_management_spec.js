@@ -300,10 +300,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answer-2"] [data-cy="answerText"]').type('3')
 
-        cy.get('[data-cy="answersError"]').should('not.be.visible')
-        cy.clickSaveDialogBtn()
         cy.get('[data-cy="answersError"]').contains('Answers labeled as correct must have text')
-        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answersError"]').should('not.be.visible')
     });
 
@@ -478,8 +476,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-1_displayText"]').should('have.text', 'b')
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-2_displayText"]').should('have.text', 'c')
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="answer-3_displayText"]').should('not.exist')
-        cy.validateDisplayAnswer(2, 0, true, true)
-        cy.validateDisplayAnswer(2, 1, false, true)
+        cy.validateDisplayAnswer(2, 0, false, true)
+        cy.validateDisplayAnswer(2, 1, true, true)
         cy.validateDisplayAnswer(2, 2, false, true)
 
         cy.get('[data-cy="editQuestionButton_2"]').should('have.focus')
@@ -490,12 +488,12 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="editQuestionButton_2"]').click();
         cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2-more')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer-more')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selected"]')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="notSelected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="notSelected"]')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selected"]').should('not.exist')
 
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'b')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selected"]').should('not.exist')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="notSelected"]')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selected"]').should('exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="notSelected"]').should('not.exist')
 
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').should('have.value', 'c')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="selected"]').should('not.exist')
@@ -510,11 +508,25 @@ describe('Quiz Question CRUD Tests', () => {
         cy.visit('/administrator/quizzes/quiz1');
 
         cy.get('[data-cy="editQuestionButton_2"]').click();
+
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="notSelected"]').should('exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selected"]').should('exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="notSelected"]').should('exist')
         // previous type
         cy.get('[data-cy="answerTypeSelector"] [data-cy="selectionItem_SingleChoice"]')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_MultipleChoice"]').click()
+
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="notSelected"]').should('exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="notSelected"]').should('exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="notSelected"]').should('exist')
+
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selected"]').should('exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selected"]').should('exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="notSelected"]').should('exist')
 
         cy.clickSaveDialogBtn()
         cy.validateDisplayAnswer(2, 0, true, false)
@@ -560,6 +572,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="removeAnswer"]').click()
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
 
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="questionDisplayCard-3"] [data-cy="answer-0_displayText"]').should('have.text', 'Third Answer')
@@ -761,8 +774,8 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-1_displayText"]').should('have.text', 'b')
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-2_displayText"]').should('have.text', 'c')
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-3_displayText"]').should('not.exist')
-        cy.validateDisplayAnswer(4, 0, true, true)
-        cy.validateDisplayAnswer(4, 1, false, true)
+        cy.validateDisplayAnswer(4, 0, false, true)
+        cy.validateDisplayAnswer(4, 1, true, true)
         cy.validateDisplayAnswer(4, 2, false, true)
 
         cy.get('[data-cy="copyQuestionButton_2"]').should('have.focus')
@@ -773,12 +786,12 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="copyQuestionButton_4"]').click();
         cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').contains('This is a question # 2-more')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'Question 2 - First Answer-more')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selected"]')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="notSelected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="notSelected"]')
 
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'b')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selected"]').should('not.exist')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="notSelected"]')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selected"]')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="notSelected"]').should('not.exist')
 
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').should('have.value', 'c')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="selected"]').should('not.exist')
@@ -795,7 +808,13 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="copyQuestionButton_2"]').click();
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_MultipleChoice"]').click()
+
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="selected"]').should('not.exist')
+
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
 
         cy.clickSaveDialogBtn()
         cy.validateDisplayAnswer(4, 0, true, false)
@@ -841,6 +860,11 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="removeAnswer"]').click()
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="selected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
 
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="answer-0_displayText"]').should('have.text', 'Third Answer')

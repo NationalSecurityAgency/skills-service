@@ -530,7 +530,7 @@ describe('Save State Tests', () => {
     cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'Answer Two')
     cy.get('[data-cy="answer-2"] [data-cy="answerText"]').should('have.value', 'Answer Three with edit')
     cy.get('[data-cy="answer-3"] [data-cy="answerText"]').should('have.value', '')
-    cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('exist');
+    cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('not.exist');
     cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('exist');
 
     cy.get('[data-cy="closeDialogBtn"]').click()

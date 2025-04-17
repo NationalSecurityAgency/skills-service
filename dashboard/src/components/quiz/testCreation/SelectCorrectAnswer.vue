@@ -17,6 +17,7 @@ limitations under the License.
 import { useField } from 'vee-validate';
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
 
+const emit = defineEmits(['answer-selected'])
 const props = defineProps({
   name: {
     type: String,
@@ -46,10 +47,20 @@ const props = defineProps({
 const { value, errorMessage } = useField(() => props.name, undefined, {syncVModel: true});
 const model = defineModel()
 const flipSelected = () =>{
-  if (!props.readOnly){
+  if (!props.readOnly && !props.isRadioIcon){
     value.value = !value.value
+  } else if (!props.readOnly && props.isRadioIcon) {
+    value.value = true;
   }
+  emit('answer-selected', parseInt(props.answerNumber))
 }
+const resetValue = () => {
+  value.value = false;
+}
+
+defineExpose({
+  resetValue
+})
 </script>
 
 <template>
