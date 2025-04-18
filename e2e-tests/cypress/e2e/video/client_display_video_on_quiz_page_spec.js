@@ -20,7 +20,7 @@ describe('Display Video on Quiz Page Tests', () => {
     beforeEach(() => {
     });
 
-    it('display video on skill page', () => {
+    it('display video on quiz question card', () => {
         cy.intercept('GET', '/api/quiz-definitions/quiz1/questions/*/videoCaptions').as('getVideoCaptions');
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1, null, { videoUrl: testVideo, captions: 'some', transcript: 'another' })
@@ -35,7 +35,7 @@ describe('Display Video on Quiz Page Tests', () => {
         cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
     });
 
-    it('captions are only loaded if they were configured for that skill', () => {let captionCounter = 0;
+    it('captions are only loaded if they were configured for that quiz question', () => {let captionCounter = 0;
         cy.intercept('GET', '/api/quiz-definitions/quiz1/questions/*/videoCaptions').as('getVideoCaptions');
 
         cy.createQuizDef(1);
