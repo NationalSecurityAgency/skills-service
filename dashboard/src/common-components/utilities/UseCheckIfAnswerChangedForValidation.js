@@ -13,28 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {useLog} from "@/components/utils/misc/useLog.js";
+
 export const useCheckIfAnswerChangedForValidation = () => {
   const cache = new Map()
-  const hasValueChanged = (newValue, answerId) => {
+  const log = useLog()
+  const getStatusIfValueTheSame = (answerId, newValue) => {
     if (!answerId) {
-        return true
+        return null
     }
-    const cachedValue = cache.get(answerId)
-    if (cachedValue === newValue) {
-      return false
+    const cachedItem = cache.get(answerId)
+    if (cachedItem) {
+      const isValueSame = cachedItem.value === newValue
+      if (log.isTraceEnabled()) {
+        log.trace(`useCheckIfAnswerChangedForValidation.hasValueChanged(newValue=${newValue}, answerId=${answerId}): isValueSame=${isValueSame}, cachedItem=${JSON.stringify(cachedItem)}`)
+      }
+      if (isValueSame) {
+        return cachedItem.result
+      }
     }
-    cache.set(answerId, newValue)
-    return true
+    return null
   }
+
+  const setValueAndStatus = (answerId, value, result) => {
+    if (log.isTraceEnabled()) {
+      log.trace(`useCheckIfAnswerChangedForValidation.setValueAndStatus(answerId=${answerId}, value=${value}, result=${JSON.stringify(result)})`)
+    }
+    cache.set(answerId, { value, result })
+  }
+
   const reset = () => {
+    log.trace(`useCheckIfAnswerChangedForValidation.reset()`)
     cache.clear()
   }
-  const removeAnswer = (answerId) => {
-    cache.delete(answerId)
-  }
   return {
-    hasValueChanged,
-    removeAnswer,
+    getStatusIfValueTheSame,
+    setValueAndStatus,
     reset
   }
 }
