@@ -103,23 +103,30 @@ const createValidateAnswerFn = (valueOuter, contextOuter) => {
   if (!QuestionType.isTextInput(contextOuter.parent.questionType)) {
     return true
   }
+  const getResponseBasedOnResult = (result, resContext) => {
+    if (result.valid) {
+      return true
+    }
+    if (result.msg) {
+      return resContext.createError({ message: `Answer to question #${getQuestionNumFromPath(resContext.path)} - ${result.msg}` })
+    }
+    return resContext.createError({ message: `'Field' is invalid` })
+  }
   const doValidateAnswer = (value, context) => {
     if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
       return true
     }
     const forceAnswerValidation = isSubmitting.value
-    if (!forceAnswerValidation && !checkIfAnswerChangedForValidation.hasValueChanged(context.originalValue, getAnswerIdFromContext(context))) {
-      return true
+    if (!forceAnswerValidation) {
+      const existingResultIfValueTheSame = checkIfAnswerChangedForValidation.getStatusIfValueTheSame(getAnswerIdFromContext(context), context.originalValue)
+      if (existingResultIfValueTheSame !== null) {
+        return getResponseBasedOnResult(existingResultIfValueTheSame, context)
+      }
     }
+
     return descriptionValidatorService.validateDescription(value, false, null, true).then((result) => {
-      if (result.valid) {
-        return true
-      }
-      checkIfAnswerChangedForValidation.removeAnswer(getAnswerIdFromContext(context))
-      if (result.msg) {
-        return context.createError({ message: `Answer to question #${getQuestionNumFromPath(context.path)} - ${result.msg}` })
-      }
-      return context.createError({ message: `'Field' is invalid` })
+      checkIfAnswerChangedForValidation.setValueAndStatus(getAnswerIdFromContext(context), value, result)
+      return getResponseBasedOnResult(result, context)
     })
   }
 
@@ -188,14 +195,18 @@ const validateTextAnswer = (value) => {
     return Promise.resolve(false);
   }
 
-  if (!appConfig.paragraphValidationRegex || !checkIfAnswerChangedForValidation.hasValueChanged(value.answerText, value.answerId)) {
+  if (!appConfig.paragraphValidationRegex) {
     return Promise.resolve(true)
   }
+  const existingStatusIfValueTheSame = checkIfAnswerChangedForValidation.getStatusIfValueTheSame(value.answerId, value.answerText)
+  if (existingStatusIfValueTheSame !== null) {
+    return Promise.resolve(existingStatusIfValueTheSame)
+  }
   return descriptionValidatorService.validateDescription(value.answerText, false, null, true).then((result) => {
+    checkIfAnswerChangedForValidation.setValueAndStatus(value.answerId, value.answerText, result)
     if (result.valid) {
       return true
     }
-    checkIfAnswerChangedForValidation.removeAnswer(value.answerId)
     return false
   })
 }
