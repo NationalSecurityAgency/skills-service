@@ -25,6 +25,9 @@ describe('Handle Video without duration Tests', () => {
             cy.wait('@getSkillInfo')
             cy.get('.spinner-border').should('not.exist')
         });
+
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/questions/*/video').as('getQuizVideoProps')
+        // cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
     });
 
     it('upload video without duration', () => {
@@ -74,4 +77,32 @@ describe('Handle Video without duration Tests', () => {
         cy.wait('@reportSkill1')
     });
 
+    it('upload video for quiz without duration', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
+        cy.get('[data-cy="add-video-question-1"]').click()
+
+        cy.wait('@getQuizVideoProps')
+
+        const videoFile = 'create-project-noDuration.webm';
+        cy.fixture(videoFile, null).as('videoFile');
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('cypress/fixtures/create-project-noDuration.webm',  { force: true })
+        cy.get('[data-cy="saveVideoSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', videoFile)
+        cy.get('[data-cy="noDurationWarning"]')
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTotalDuration"]').should('have.text', 'N/A')
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', 'N/A')
+        cy.get('[data-cy="videoPreviewCard"] [title="Play Video"]').click()
+
+        // video is 9 seconds
+        cy.wait(9000)
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', '100%')
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTimeWatched"]').should('have.text', '9 seconds')
+        cy.get('[data-cy="noDurationWarning"]')
+    });
 });
