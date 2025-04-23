@@ -38,6 +38,7 @@ import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveB
 import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
 import { useProjectCommunityReplacement } from '@/components/customization/UseProjectCommunityReplacement.js'
 import { WebVTTParser } from 'webvtt-parser';
+import {useQuizConfig} from "@/stores/UseQuizConfig.js";
 
 const parser = new WebVTTParser();
 const dialogMessages = useDialogMessages()
@@ -51,6 +52,7 @@ const router = useRouter()
 const upgradeInProgressErrorChecker = useUpgradeInProgressErrorChecker()
 const appConfig = useAppConfig()
 const projConfig = useProjConfig()
+const quizConfig = useQuizConfig()
 const projectCommunityReplacement = useProjectCommunityReplacement()
 const timeUtils = useTimeUtils()
 const announcer = useSkillsAnnouncer()
@@ -134,7 +136,14 @@ const isReadOnly = computed(() => {
 const videoUploadWarningMessage = computed(() => {
   const warningMessageValue = appConfig?.videoUploadWarningMessage;
   try {
-    return projectCommunityReplacement.populateProjectCommunity(warningMessageValue, projConfig.getProjectCommunityValue(), `projId=[${container}], skillId=[${item}] config.videoUploadWarningMessage `);
+
+    let communityValue = null
+    if (route.params.projectId) {
+      communityValue = projConfig.getProjectCommunityValue();
+    } else if (route.params.quizId) {
+      communityValue = quizConfig.quizCommunityValue;
+    }
+    return projectCommunityReplacement.populateProjectCommunity(warningMessageValue, communityValue, `projId=[${container}], skillId=[${item}] config.videoUploadWarningMessage `);
   } catch(err) {
     // eslint-disable-next-line vue/no-side-effects-in-computed-properties
     router.push({ name: 'ErrorPage', query: { err } });

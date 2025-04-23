@@ -34,6 +34,7 @@ import skills.controller.result.model.QuizSettingsRes
 import skills.controller.result.model.SettingsResult
 import skills.quizLoading.QuizSettings
 import skills.quizLoading.QuizUserPreferences
+import skills.services.admin.UserCommunityService
 import skills.services.settings.Settings
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
@@ -62,6 +63,9 @@ class QuizSettingsService {
 
     @Autowired
     UserInfoService userInfoService
+
+    @Autowired
+    UserCommunityService userCommunityService
 
     @Autowired
     UserActionsHistoryService userActionsHistoryService
@@ -201,6 +205,14 @@ class QuizSettingsService {
             res.add(new QuizSettingsRes(setting: QuizSettings.QuizUserRole.setting, value: RoleName.ROLE_QUIZ_ADMIN.toString()))
         } else if (usrRoles.contains(RoleName.ROLE_QUIZ_READ_ONLY.toString())) {
             res.add(new QuizSettingsRes(setting: QuizSettings.QuizUserRole.setting, value: RoleName.ROLE_QUIZ_READ_ONLY.toString()))
+        }
+
+        if (userCommunityService.isUserCommunityConfigured()) {
+            boolean isUserCommunityProtectedQuiz = quizSettings.find { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting}?.isEnabled()
+            res.add(new QuizSettingsRes(
+                    setting: QuizSettings.UserCommunityOnlyQuiz.setting,
+                    value: userCommunityService.getCommunityNameBasedOnConfAndItemStatus(isUserCommunityProtectedQuiz),
+            ))
         }
 
         return res.sort({ it.setting })

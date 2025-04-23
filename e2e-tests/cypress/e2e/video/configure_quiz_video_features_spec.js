@@ -59,7 +59,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.wait(5000)
     });
 
-    it.only('video upload warning message supports community.descriptor property ', () => {
+    it('video upload warning message supports community.descriptor property ', () => {
         cy.fixture('vars.json')
             .then((vars) => {
                 cy.logout();
@@ -79,6 +79,10 @@ describe('Configure Video and SkillTree Features Tests', () => {
         }).as('loadConfig');
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1)
+
+        cy.createQuizDef(2, {enableProtectedUserCommunity: true})
+        cy.createQuizQuestionDef(2, 1)
+
         cy.visit('/administrator/quizzes/quiz1');
         cy.wait('@loadConfig')
 
@@ -91,38 +95,35 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
         cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for All Dragons")
 
-        // // nav to project 2
-        // cy.get('[data-cy="breadcrumb-Projects"]').click()
-        // cy.get('[data-cy="projCard_proj2_manageBtn"]').click()
-        //
-        // cy.get('[data-cy="manageBtn_subj1"]').click()
-        // cy.get('[data-cy="manageSkillLink_skill1"]').click()
-        // cy.get('[data-cy="nav-Audio/Video"').click();
-        // cy.wait('@getVideoPropsProj2')
-        // // cy.wait('@getSkillInfoProj2')
-        // cy.get('.spinner-border').should('not.exist')
-        // cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
-        // cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for Divine Dragon")
-        //
-        // // nav to project 1
-        // cy.get('[data-cy="breadcrumb-Projects"]').click()
-        // cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
-        // cy.get('[data-cy="manageBtn_subj1"]').click()
-        // cy.get('[data-cy="manageSkillLink_skill1"]').click()
-        // cy.get('[data-cy="nav-Audio/Video"').click();
-        // cy.wait('@getVideoProps')
-        // // cy.wait('@getSkillInfo')
-        // cy.get('.spinner-border').should('not.exist')
-        // cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
-        // cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for All Dragons")
-        //
-        // // straight to project 2
-        // cy.visit('/administrator/projects/proj2/subjects/subj1/skills/skill1/config-video');
-        // cy.wait('@getVideoPropsProj2')
-        // // cy.wait('@getSkillInfoProj2')
-        // cy.get('.spinner-border').should('not.exist')
-        // cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
-        // cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for Divine Dragon")
+        // nav to quiz 2
+        cy.get('[data-cy="breadcrumb-Quizzes"]').click()
+        cy.get('[data-cy="managesQuizLink_quiz2"]').click()
+        cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
+        cy.get('[data-cy="add-video-question-1"]').click()
+
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
+        cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for Divine Dragon")
+
+        // nav to quiz 1
+        cy.get('[data-cy="breadcrumb-Quizzes"]').click()
+        cy.get('[data-cy="managesQuizLink_quiz1"]').click()
+        cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
+        cy.get('[data-cy="add-video-question-1"]').click()
+
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
+        cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for All Dragons")
+
+        // straight to quiz 2
+        cy.visit('/administrator/quizzes/quiz2/questions/259/config-video');
+
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
+        cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for Divine Dragon")
+
+        // straight to quiz 1
+        cy.visit('/administrator/quizzes/quiz1/questions/259/config-video');
+
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
+        cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for All Dragons")
     });
 
     it('video upload warning message uses community.descriptor after project\'s UC protection is raised', () => {
