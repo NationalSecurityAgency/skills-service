@@ -127,7 +127,6 @@ describe('Configure Video and SkillTree Features Tests', () => {
     });
 
     it('video upload warning message uses community.descriptor after project\'s UC protection is raised', () => {
-        cy.intercept('/admin/projects/proj1/settings').as('getProj1Settings')
         cy.fixture('vars.json')
             .then((vars) => {
                 cy.logout();
@@ -162,19 +161,19 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for All Dragons")
 
         // change UC
-        cy.get('[data-cy="breadcrumb-proj1"]').click()
-        cy.get('[data-cy="btn_edit-project"]').click()
+        cy.get('[data-cy="editQuizButton"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
         cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click({force: true})
         cy.get('[data-cy="restrictCommunityControls"]').contains('Please note that once the restriction is enabled it cannot be lifted/disabled')
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
-        cy.wait('@getProj1Settings')
         cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
 
-        cy.get('[data-cy="manageBtn_subj1"]').click()
-        cy.get('[data-cy="manageSkillLink_skill1"]').click()
-        cy.get('[data-cy="nav-Audio/Video"]').click()
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.wait('@loadConfig')
+
+        cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
+        cy.get('[data-cy="add-video-question-1"]').click()
         cy.wait('@getVideoProps')
         // cy.wait('@getSkillInfo')
         cy.get('.spinner-border').should('not.exist')
@@ -183,8 +182,7 @@ describe('Configure Video and SkillTree Features Tests', () => {
     });
 
     it('video upload warning message uses community.descriptor for a brand new project with UC protection', () => {
-        cy.intercept('/admin/projects/proj1/settings').as('getProj1Settings')
-        cy.intercept('GET', '/admin/projects/proj1/skills/skill1Skill/video').as('getVideoProps1')
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/questions/*/video').as('getVideoProps1')
         cy.fixture('vars.json')
             .then((vars) => {
                 cy.logout();
@@ -204,31 +202,26 @@ describe('Configure Video and SkillTree Features Tests', () => {
                 res.send(conf);
             });
         }).as('loadConfig');
-        cy.visitAdmin();
-        cy.wait('@loadConfig')
 
-        cy.get('[data-cy="newProjectButton"]').click()
-        cy.get('[data-cy="projectName"]').type('proj1')
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="editQuizButton"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
         cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click({force: true})
         cy.get('[data-cy="restrictCommunityControls"]').contains('Please note that once the restriction is enabled it cannot be lifted/disabled')
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
+        cy.get('[data-cy="pageHeader"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
 
-        cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
-        cy.wait('@getProj1Settings')
-        cy.get('[data-cy="btn_Subjects"]').click()
-        cy.get('[data-cy="subjectName"]').type('subj1')
-        cy.clickSaveDialogBtn()
-        cy.get('[data-cy="manageBtn_subj1Subject"]').click()
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.wait('@loadConfig')
 
-        cy.openNewSkillDialog()
-        cy.get('[data-cy="skillName"]').type('skill1')
-        cy.clickSaveDialogBtn()
-        cy.get('[data-cy="manageSkillLink_skill1Skill"]').click()
-        cy.get('[data-cy="nav-Audio/Video"]').click()
+        cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
+        cy.get('[data-cy="add-video-question-1"]').click()
+
         cy.wait('@getVideoProps1')
-        // cy.wait('@getSkillInfo1')
         cy.get('.spinner-border').should('not.exist')
         const videoFile = 'create-subject.webm';
         cy.fixture(videoFile, null).as('videoFile');
