@@ -199,7 +199,7 @@ const validateTextAnswer = (value) => {
     return Promise.resolve(true)
   }
   const existingStatusIfValueTheSame = checkIfAnswerChangedForValidation.getStatusIfValueTheSame(value.answerId, value.answerText)
-  if (existingStatusIfValueTheSame !== null) {
+  if (existingStatusIfValueTheSame !== null && result.valid) {
     return Promise.resolve(existingStatusIfValueTheSame)
   }
   return descriptionValidatorService.validateDescription(value.answerText, false, null, true).then((result) => {
