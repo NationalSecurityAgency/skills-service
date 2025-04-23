@@ -117,7 +117,7 @@ const textAnswerChanged = (providedAnswerText) => {
     });
   });
 }
-const textAnswerChangedDebounced = useDebounceFn((providedAnswerTextOuter) => textAnswerChanged(providedAnswerTextOuter), appConfig.formFieldDebounceInMs, appConfig.formFieldDebounceInMs)
+const textAnswerChangedDebounced = useDebounceFn((providedAnswerTextOuter) => textAnswerChanged(providedAnswerTextOuter), appConfig.formFieldDebounceInMs)
 
 const selectionChanged = (currentAnswer) => { 
   reportAnswer(currentAnswer).then((reportAnswerPromise) => {
