@@ -168,6 +168,8 @@ function validate(value, ctx) {
       reason = `Skill <b>${toSkillName.value}</b> was exported to the Skills Catalog. A skill in the catalog cannot have prerequisites on the learning path.`;
     } else if (res.failureType && res.failureType === 'ReusedSkill') {
       reason = `Skill <b>${toSkillName.value}</b> was reused in another subject or group and cannot have prerequisites in the learning path.`;
+    } else if (res.failureType && res.failureType === 'SkillExistsInBadge' ) {
+      reason = `A skill cannot have a dependency on a badge it exists in. Skill <b>${res.violatingSkillId}</b> exists in the Badge <b>${res.violatingSkillInBadgeId}</b>.`;
     } else {
       reason = res.reason;
     }
