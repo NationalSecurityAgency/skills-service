@@ -336,7 +336,7 @@ const onEnabledChanged = (event) => {
                     </div>
                   </InputGroupAddon>
                   <InputGroupAddon class="w-full">
-                    <span class="ml-2 w-full">{{ skillEnabled ? 'Visible' : 'Hidden'}}</span>
+                    <span class="ml-2 w-full text-gray-700 dark:text-white">{{ skillEnabled ? 'Visible' : 'Hidden'}}</span>
                   </InputGroupAddon>
                 </InputGroup>
               </div>
