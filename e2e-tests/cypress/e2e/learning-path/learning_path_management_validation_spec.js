@@ -34,7 +34,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get(selector).blur({force: true})
         cy.get(selector).click()
         if (searchString) {
-            cy.get(selector).type(`{selectAll}${searchString}`)
+            cy.get(selector).type(`${searchString}`)
         }
         cy.get(`[data-cy="skillsSelectionItem-${projId}-${skillId}"]`).click()
     })
