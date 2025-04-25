@@ -95,7 +95,7 @@ const isSubmitting = useIsSubmitting()
         </div>
       </div>
     </div>
-    <div v-show="showIdField" :class="{ 'md:ml-1 w-full md:w-min lg:w-auto' : isInline }" class="">
+    <div v-show="showIdField" :class="{ 'md:ml-1 w-full md:w-min lg:w-auto md:flex-1' : isInline }" class="">
       <SkillsIdInput
         ref="skillsIdInput"
         style="min-width: 14rem;"

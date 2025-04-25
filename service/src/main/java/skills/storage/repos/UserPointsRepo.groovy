@@ -887,7 +887,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel, 
                 max(ut.value) as userTag
             FROM user_points up
-            LEFT JOIN (
+            JOIN (
                 SELECT upa.user_id, 
                 min(upa.performed_on) AS firstPerformedOn, 
                 max(upa.performed_on) AS lastPerformedOn 

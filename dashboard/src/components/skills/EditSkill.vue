@@ -17,7 +17,7 @@ limitations under the License.
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
-import { number, object, string } from 'yup'
+import { boolean, number, object, string } from 'yup'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import SkillsService from '@/components/skills/SkillsService.js'
@@ -28,8 +28,11 @@ import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEdito
 import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import { useSkillYupValidators } from '@/components/skills/UseSkillYupValidators.js'
-import SettingsService from '@/components/settings/SettingsService.js';
-import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js';
+import SettingsService from '@/components/settings/SettingsService.js'
+import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
+import SkillsInputSwitch from '@/components/utils/inputForm/SkillsInputSwitch.vue'
+import InputGroup from 'primevue/inputgroup'
+import InputGroupAddon from 'primevue/inputgroupaddon'
 
 const show = defineModel()
 const route = useRoute()
@@ -65,6 +68,7 @@ const asyncLoadData = () => {
           }
           initialSkillData.value = { ...skillDetails };
           initialSkillData.value.hasVideoConfigured = resSkill.hasVideoConfigured;
+          skillEnabled.value = resSkill.enabled
           return skillDetails;
         })
     }
@@ -215,6 +219,7 @@ const schema = object({
       async (value) => props.isEdit || (latestSkillVersion.value + 1) >= value
     )
     .label('Version'),
+  'enabled': boolean(),
   'helpUrl': string()
     .urlValidator()
     .nullable()
@@ -231,6 +236,7 @@ const initialSkillData = ref({
   skillName: props.skill.name || '',
   originalSkillId: props.skill.skillId || '',
   version: props.skill.verison || 0,
+  enabled: props.skill.enabled || true,
   pointIncrement: props.skill.pointIncrement || 100,
   numPerformToCompletion: props.skill.numPerformToCompletion || 1,
   timeWindowEnabled: props.skill.timeWindowEnabled || false,
@@ -275,6 +281,10 @@ const onSkillSaved = (skill) => {
 const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
   return (selfReportingType.value === 'Quiz' || selfReportingType.value === 'Video')
 })
+const skillEnabled = ref(true)
+const onEnabledChanged = (event) => {
+  skillEnabled.value = !skillEnabled.value
+}
 
 </script>
 
@@ -293,7 +303,7 @@ const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
     :enable-return-focus="true"
     @saved="onSkillSaved"
   >
-    <div class="flex flex-wrap">
+    <div class="flex flex-wrap flex-col md:flex-row gap-2">
       <div class="flex-1">
         <SkillsNameAndIdInput
           :name-label="`${isCopy ? 'New Skill Name' : 'Skill Name'}`"
@@ -304,14 +314,42 @@ const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
           id-suffix="Skill"
           :name-to-id-sync-enabled="!props.isEdit" />
       </div>
+    </div>
 
-      <div class="lg:max-w-40 lg:ml-4 w-full">
+    <div class="flex flex-col md:flex-row md:flex-1 gap-2 mt-2 pb-2">
+            <div data-cy="visibility" class="flex-1 min-w-[8rem]">
+              <div class="flex flex-col gap-2">
+                <label for="visibilitySwitch">
+                  <span id="visibilityLabel">Initial Visibility:</span>
+                </label>
+                <InputGroup>
+                  <InputGroupAddon>
+                    <div style="width: 3.3rem !important;">
+                      <SkillsInputSwitch data-cy="visibilitySwitch"
+                                         aria-labelledby="visibilityLabel"
+                                         inputId="visibilitySwitch"
+                                         style="height:1rem !important;"
+                                         size="small"
+                                         :disabled="isEdit && props.skill.enabled"
+                                         name="enabled"
+                                         @change="onEnabledChanged" />
+                    </div>
+                  </InputGroupAddon>
+                  <InputGroupAddon class="w-full">
+                    <span class="ml-2 w-full">{{ skillEnabled ? 'Visible' : 'Hidden'}}</span>
+                  </InputGroupAddon>
+                </InputGroup>
+              </div>
+            </div>
+
+      <div class="flex-1">
         <SkillsNumberInput
-          showButtons
-          :disabled="isEdit"
-          :min="latestSkillVersion"
-          label="Version"
-          name="version" />
+            class="flex-1 min-w-[13rem] w-full"
+            showButtons
+            :disabled="isEdit"
+            :min="latestSkillVersion"
+            label="Version"
+            name="version" />
       </div>
     </div>
 
