@@ -75,7 +75,7 @@ class QuizSettingsService {
 
     @Transactional
     void copySettings(String fromQuizId, String toQuizId, boolean enableProtectedUserCommunity) {
-        List<QuizSettingsRes> fromSettings = getSettings(fromQuizId)
+        List<QuizSettingsRes> fromSettings = getSettings(fromQuizId, false)
         List<QuizSettingsRequest> toSettings = new ArrayList<QuizSettingsRequest>()
 
         if (enableProtectedUserCommunity) {
@@ -192,7 +192,7 @@ class QuizSettingsService {
     }
 
     @Transactional(readOnly = true)
-    List<QuizSettingsRes> getSettings(String quizId) {
+    List<QuizSettingsRes> getSettings(String quizId, boolean addUserCommunityOnlyQuizSetting = true) {
         Integer quizRefId = getQuizDefRefId(quizId)
         List<QuizSetting> quizSettings = quizSettingsRepo.findAllByQuizRefId(quizRefId)
         List<QuizSettingsRes> res = quizSettings.collect {
@@ -207,7 +207,7 @@ class QuizSettingsService {
             res.add(new QuizSettingsRes(setting: QuizSettings.QuizUserRole.setting, value: RoleName.ROLE_QUIZ_READ_ONLY.toString()))
         }
 
-        if (userCommunityService.isUserCommunityConfigured()) {
+        if (addUserCommunityOnlyQuizSetting && userCommunityService.isUserCommunityConfigured()) {
             boolean isUserCommunityProtectedQuiz = quizSettings.find { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting}?.isEnabled()
             res.add(new QuizSettingsRes(
                     setting: QuizSettings.UserCommunityOnlyQuiz.setting,
