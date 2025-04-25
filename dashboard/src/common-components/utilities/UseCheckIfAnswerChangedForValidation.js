@@ -13,33 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {useLog} from "@/components/utils/misc/useLog.js";
+
 export const useCheckIfAnswerChangedForValidation = () => {
   const cache = new Map()
-  const hasValueChanged = (newValue, testContext) => {
-    const quizAnswers = testContext?.parent.quizAnswers
-    if (quizAnswers && quizAnswers.length === 1 && quizAnswers[0].id) {
-      const answerId = quizAnswers[0].id
-      const cachedValue = cache.get(answerId)
-      if (cachedValue === newValue) {
-        return false
-      }
-      cache.set(answerId, newValue)
+  const log = useLog()
+  const getStatusIfValueTheSame = (answerId, newValue) => {
+    if (!answerId) {
+        return null
     }
-    return true
+    const cachedItem = cache.get(answerId)
+    if (cachedItem) {
+      const isValueSame = cachedItem.value === newValue
+      if (log.isTraceEnabled()) {
+        log.trace(`useCheckIfAnswerChangedForValidation.hasValueChanged(newValue=${newValue}, answerId=${answerId}): isValueSame=${isValueSame}, cachedItem=${JSON.stringify(cachedItem)}`)
+      }
+      if (isValueSame) {
+        return cachedItem.result
+      }
+    }
+    return null
   }
+
+  const setValueAndStatus = (answerId, value, result) => {
+    if (log.isTraceEnabled()) {
+      log.trace(`useCheckIfAnswerChangedForValidation.setValueAndStatus(answerId=${answerId}, value=${value}, result=${JSON.stringify(result)})`)
+    }
+    cache.set(answerId, { value, result })
+  }
+
   const reset = () => {
+    log.trace(`useCheckIfAnswerChangedForValidation.reset()`)
     cache.clear()
   }
-  const removeAnswer = (testContext) => {
-    const quizAnswers = testContext?.parent.quizAnswers
-    if (quizAnswers && quizAnswers.length === 1 && quizAnswers[0].id) {
-      const answerId = quizAnswers[0].id
-      cache.delete(answerId)
-    }
-  }
   return {
-    hasValueChanged,
-    removeAnswer,
+    getStatusIfValueTheSame,
+    setValueAndStatus,
     reset
   }
 }
