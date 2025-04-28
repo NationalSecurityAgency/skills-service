@@ -571,6 +571,87 @@ class ClientDisplaySpec extends DefaultIntSpec {
         user3Subj2Summary.lastLevelAchieved == null
     }
 
+    def "project summary properly hides disabled skills"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills[0].enabled = false
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        when:
+        def res = skillsService.getSkillSummary("user1", proj1.projectId)
+
+        proj1_skills[0].enabled = true
+        skillsService.updateSkill(proj1_skills[0], proj1_skills[0].skillId)
+        def resAfterEnabled = skillsService.getSkillSummary("user1", proj1.projectId)
+
+        then:
+        res
+        res.totalSkills == 2
+        res.totalPoints == 20
+        res.subjects.size() == 1
+        res.subjects[0].totalSkills == 2
+        res.subjects[0].totalPoints == 20
+
+        resAfterEnabled
+        resAfterEnabled.totalSkills == 3
+        resAfterEnabled.totalPoints == 30
+        resAfterEnabled.subjects.size() == 1
+        resAfterEnabled.subjects[0].totalSkills == 3
+        resAfterEnabled.subjects[0].totalPoints == 30
+    }
+
+    def "subject summary properly hides disabled skills"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills[0].enabled = false
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        when:
+        def res = skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId)
+
+        proj1_skills[0].enabled = true
+        skillsService.updateSkill(proj1_skills[0], proj1_skills[0].skillId)
+        def resAfterEnabled = skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId)
+
+        then:
+        res
+        res.totalSkills == 2
+        res.totalPoints == 20
+        res.skills.size() == 2
+
+        resAfterEnabled
+        resAfterEnabled.totalSkills == 3
+        resAfterEnabled.totalPoints == 30
+        resAfterEnabled.skills.size() == 3
+    }
+
+    def "single summary properly returns an error for a disabled skill"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills[0].enabled = false
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        when:
+        skillsService.getSingleSkillSummary("user1", proj1.projectId, proj1_skills.get(0).skillId)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.resBody.contains("Skill with id [skill1] is not enabled")
+    }
+
     private Date parseDate(String str) {
         Date.parse("yyyy-MM-dd'T'HH:mm:ss", str)
     }
