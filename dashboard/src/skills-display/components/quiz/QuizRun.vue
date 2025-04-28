@@ -91,27 +91,42 @@ const getQuestionNumFromPath = (path) => {
 }
 
 const validateFunCache = new Map()
+
+const getAnswerIdFromContext = (testContext) => {
+  const quizAnswers = testContext?.parent.quizAnswers
+  if (quizAnswers && quizAnswers.length === 1 && quizAnswers[0].id) {
+    return quizAnswers[0].id
+  }
+  return null
+}
 const createValidateAnswerFn = (valueOuter, contextOuter) => {
   if (!QuestionType.isTextInput(contextOuter.parent.questionType)) {
     return true
+  }
+  const getResponseBasedOnResult = (result, resContext) => {
+    if (result.valid) {
+      return true
+    }
+    if (result.msg) {
+      return resContext.createError({ message: `Answer to question #${getQuestionNumFromPath(resContext.path)} - ${result.msg}` })
+    }
+    return resContext.createError({ message: `'Field' is invalid` })
   }
   const doValidateAnswer = (value, context) => {
     if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
       return true
     }
     const forceAnswerValidation = isSubmitting.value
-    if (!forceAnswerValidation && !checkIfAnswerChangedForValidation.hasValueChanged(context.originalValue, context)) {
-      return true
+    if (!forceAnswerValidation) {
+      const existingResultIfValueTheSame = checkIfAnswerChangedForValidation.getStatusIfValueTheSame(getAnswerIdFromContext(context), context.originalValue)
+      if (existingResultIfValueTheSame !== null) {
+        return getResponseBasedOnResult(existingResultIfValueTheSame, context)
+      }
     }
+
     return descriptionValidatorService.validateDescription(value, false, null, true).then((result) => {
-      if (result.valid) {
-        return true
-      }
-      checkIfAnswerChangedForValidation.removeAnswer(context)
-      if (result.msg) {
-        return context.createError({ message: `Answer to question #${getQuestionNumFromPath(context.path)} - ${result.msg}` })
-      }
-      return context.createError({ message: `'Field' is invalid` })
+      checkIfAnswerChangedForValidation.setValueAndStatus(getAnswerIdFromContext(context), value, result)
+      return getResponseBasedOnResult(result, context)
     })
   }
 
@@ -133,6 +148,7 @@ const schema = object({
       .of(
           object({
             'questionType': string(),
+            // important: please note that this logic has to match what's performed by `validateTextAnswer` method beow
             'answerText': string()
                 .trim()
                 .max(appConfig.maxTakeQuizInputTextAnswerLength, (d) => `Answer to question #${getQuestionNumFromPath(d.path)} must not exceed ${numFormat.pretty(appConfig.maxTakeQuizInputTextAnswerLength)} characters`)
@@ -167,6 +183,33 @@ const schema = object({
 const { values, meta, handleSubmit, isSubmitting, resetForm, setFieldValue, validate, validateField, errors, errorBag, setErrors } = useForm({
   validationSchema: schema,
 })
+
+// important: please note that this logic has to match what's performed by `answerText` in the yup schema above
+const validateTextAnswer = (value) => {
+  validateField(value.fieldName)
+  const textAnswer = value.answerText?.trim()
+  if (textAnswer && textAnswer.length === 0) {
+    return Promise.resolve(false);
+  }
+  if (textAnswer && textAnswer.length > appConfig.maxTakeQuizInputTextAnswerLength) {
+    return Promise.resolve(false);
+  }
+
+  if (!appConfig.paragraphValidationRegex) {
+    return Promise.resolve(true)
+  }
+  const existingStatusIfValueTheSame = checkIfAnswerChangedForValidation.getStatusIfValueTheSame(value.answerId, value.answerText)
+  if (existingStatusIfValueTheSame !== null) {
+    return Promise.resolve(existingStatusIfValueTheSame.valid)
+  }
+  return descriptionValidatorService.validateDescription(value.answerText, false, null, true).then((result) => {
+    checkIfAnswerChangedForValidation.setValueAndStatus(value.answerId, value.answerText, result)
+    if (result.valid) {
+      return true
+    }
+    return false
+  })
+}
 
 onMounted(() => {
   if (props.quiz) {
@@ -477,7 +520,7 @@ const doneWithThisRun = () => {
                   :quiz-id="quizId"
                   :quiz-attempt-id="quizAttemptId"
                   :num="index+1"
-                  :validate="validateField"
+                  :validate="validateTextAnswer"
                   @selected-answer="updateSelectedAnswers"
                   @answer-text-changed="updateSelectedAnswers"/>
             </div>

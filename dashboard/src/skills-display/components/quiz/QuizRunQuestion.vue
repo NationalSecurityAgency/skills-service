@@ -117,7 +117,7 @@ const textAnswerChanged = (providedAnswerText) => {
     });
   });
 }
-const textAnswerChangedDebounced = useDebounceFn((providedAnswerTextOuter) => textAnswerChanged(providedAnswerTextOuter), appConfig.formFieldDebounceInMs, appConfig.formFieldDebounceInMs)
+const textAnswerChangedDebounced = useDebounceFn((providedAnswerTextOuter) => textAnswerChanged(providedAnswerTextOuter), appConfig.formFieldDebounceInMs)
 
 const selectionChanged = (currentAnswer) => { 
   reportAnswer(currentAnswer).then((reportAnswerPromise) => {
@@ -149,9 +149,10 @@ const ratingChanged = (value) => {
 const reportAnswer = (answer) => {
   if (!isLoading.value) {
     const reportAnswer = () => QuizRunService.reportAnswer(props.quizId, props.quizAttemptId, answer.changedAnswerId, answer.changedAnswerIdSelected, answer.answerText)
-    if (props.validate && QuestionType.isTextInput(props.q.questionType)) {
-      return props.validate(fieldName.value).then((validationResults) => {
-        if (validationResults.valid) {
+    if (QuestionType.isTextInput(props.q.questionType) ) {
+      const answerInfo = { answerText: answer.answerText, fieldName: fieldName.value, quizId: props.quizId, quizAttemptId: props.quizAttemptId, answerId: answer.changedAnswerId };
+      return props.validate(answerInfo).then((isValid) => {
+        if (isValid) {
           return reportAnswer()
         }
         return null;
