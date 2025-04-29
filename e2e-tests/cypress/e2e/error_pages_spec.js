@@ -103,13 +103,7 @@ describe('Error Pages Tests', () => {
         cy.get('[data-cy=errExplanation]')
             .contains('You do not have permission to view/manage this Project OR this Project does not exist');
 
-        cy.intercept({
-            method: 'GET',
-            url: '/admin/projects/proj1/badges/badge1'
-        })
-            .as('loadBadge');
         cy.visit('/administrator/projects/proj1/badges/badge1');
-        cy.wait('@loadBadge');
         cy.get('[data-cy=errExplanation]')
             .should('be.visible');
         cy.get('[data-cy=errExplanation]')
