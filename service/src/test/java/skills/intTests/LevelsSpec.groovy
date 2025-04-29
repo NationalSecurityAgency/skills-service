@@ -1301,6 +1301,39 @@ class LevelsSpec extends  DefaultIntSpec{
         subjectLevelsBeforeImport[4].pointsTo == subjectLevelsAfterRemoval[4].pointsTo
     }
 
+    def "project and subject levels are properly calculated for disabled skills"() {
+        def disabledSkill = SkillsFactory.createSkill(1, 1, 1)
+
+        disabledSkill.projectId = projId;
+        disabledSkill.subjectId = subject;
+        disabledSkill.skillId = 'disabledSkill'
+        disabledSkill.name = 'Disabled Skill'
+        disabledSkill.pointIncrement = 1000
+        disabledSkill.enabled = false
+
+        skillsService.createSkills([disabledSkill])
+        when:
+        def projectLevelsBeforeEnable = skillsService.getLevels(projId, null).sort {it.level}
+        def subjectLevelsBeforeEnable = skillsService.getLevels(projId, subject).sort(){ it.level }
+
+        disabledSkill.enabled = true
+        skillsService.updateSkill(disabledSkill, disabledSkill.skillId)
+
+        def projectLevelsAfterEnable = skillsService.getLevels(projId, null).sort {it.level}
+        def subjectLevelsAfterEnable = skillsService.getLevels(projId, subject).sort(){ it.level }
+
+        then:
+        validateLevels(projectLevelsBeforeEnable)
+        validateLevels(projectLevelsAfterEnable)
+        projectLevelsBeforeEnable.size() == 5 && projectLevelsAfterEnable.size() == 5
+        (0..4).each { assert projectLevelsBeforeEnable[it].pointsFrom < projectLevelsAfterEnable[it].pointsFrom }
+
+        validateLevels(subjectLevelsBeforeEnable)
+        validateLevels(subjectLevelsAfterEnable)
+        subjectLevelsBeforeEnable.size() == 5 && subjectLevelsAfterEnable.size() == 5
+        (0..4).each { assert subjectLevelsBeforeEnable[it].pointsFrom < subjectLevelsAfterEnable[it].pointsFrom }
+    }
+
     private List<List<String>> setupProjectWithSkills(List<String> subjects = ['testSubject1', 'testSubject2']) {
         List<List<String>> skillIds = []
         skillsService.createProject([projectId: projId, name: "Test Project"])
