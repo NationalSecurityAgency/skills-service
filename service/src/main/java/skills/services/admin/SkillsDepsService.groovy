@@ -354,6 +354,18 @@ class SkillsDepsService {
 
         SkillsGraphRes existingGraph = getDependentSkillsGraph(skillDef.projectId)
         List<CircularLearningPathChecker.BadgeAndSkills> loadedBadges = loadBadgeSkills(skillDef.projectId)
+
+        if (skillDef.type == SkillDef.ContainerType.Badge || prereqSkillDef.type == SkillDef.ContainerType.Badge) {
+            SkillDef badge = skillDef.type == SkillDef.ContainerType.Badge ? skillDef : prereqSkillDef
+            SkillDef skill = skillDef.type == SkillDef.ContainerType.Skill ? skillDef : prereqSkillDef
+            String msg = "A badge cannot have a dependency with a skill it contains. " +
+                    "Badge [ID:${badge.skillId}] can not have a dependency with [ID:${skill.skillId}]".toString()
+            CircularLearningPathChecker.BadgeAndSkills badgeToCheck = loadedBadges.find({it.badgeGraphNode.skillId == badge.skillId})
+            if(badgeToCheck?.skills?.find({ it.skillId == skill.skillId})) {
+                return new DependencyCheckResult(possible: false, failureType: DependencyCheckResult.FailureType.SkillExistsInBadge, reason: msg, violatingSkillId: skill.skillId, violatingSkillInBadgeId: badge.skillId)
+            }
+        }
+
         CircularLearningPathChecker circularLearningPathChecker = new CircularLearningPathChecker(
                 circularLearningPathCheckerMaxIterations: circularLearningPathCheckerMaxIterations,
                 skillDef: skillDef,

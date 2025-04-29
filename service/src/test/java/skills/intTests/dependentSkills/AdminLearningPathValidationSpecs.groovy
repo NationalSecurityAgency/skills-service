@@ -70,7 +70,7 @@ class AdminLearningPathValidationSpecs extends DefaultIntSpec {
         skillsService.addLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1.projectId, badge.badgeId)
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.getMessage().contains("Discovered circular prerequisite [Skill:${p1Skills[0].skillId} -> Badge:${badge.badgeId}(Skill:${p1Skills[0].skillId})]")
+        e.getMessage().contains("A badge cannot have a dependency with a skill it contains. Badge [ID:${badge.badgeId}] can not have a dependency with [ID:${p1Skills[0].skillId}]")
     }
 
     def "skill1 -> badge(skill2) -> skill1 learning path: badge cannot contain the skill"() {

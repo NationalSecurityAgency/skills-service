@@ -93,9 +93,9 @@ class LearningPathValidationEndpointSpecs extends DefaultIntSpec {
         def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, p1Skills[0].skillId, p1.projectId, badge.badgeId)
         then:
         result.possible == false
-        result.failureType == DependencyCheckResult.FailureType.CircularLearningPath.toString()
+        result.failureType == DependencyCheckResult.FailureType.SkillExistsInBadge.toString()
         result.violatingSkillInBadgeId == badge.badgeId
-        result.violatingSkillInBadgeName == badge.name
+        result.violatingSkillId == p1Skills[0].skillId
     }
 
     def "skill1 -> badge(skill2) -> skill1 learning path: badge cannot contain the skill"() {

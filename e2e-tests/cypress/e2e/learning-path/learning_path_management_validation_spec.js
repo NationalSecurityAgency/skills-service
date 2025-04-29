@@ -34,7 +34,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get(selector).blur({force: true})
         cy.get(selector).click()
         if (searchString) {
-            cy.get(selector).type(searchString)
+            cy.get(selector).type(`${searchString}`)
         }
         cy.get(`[data-cy="skillsSelectionItem-${projId}-${skillId}"]`).click()
     })
@@ -282,4 +282,25 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="learningPathTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
     });
 
+    it('Cannot add a skill as a dependency on a badge', () => {
+        cy.createSkill(1, 1, 4)
+
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 4);
+        cy.createBadge(1, 1, { enabled: true });
+
+        visitLearningPath()
+
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill4')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
+        cy.get('[data-cy="learningPathError"]').contains('A skill cannot have a dependency on a badge it exists in. Skill skill4 exists in the Badge badge1')
+        cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
+
+        visitLearningPath()
+
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'skill4');
+        cy.get('[data-cy="learningPathError"]').contains('A skill cannot have a dependency on a badge it exists in. Skill skill4 exists in the Badge badge1')
+        cy.get('[data-cy="addLearningPathItemBtn"]').should('be.disabled')
+    });
 });
