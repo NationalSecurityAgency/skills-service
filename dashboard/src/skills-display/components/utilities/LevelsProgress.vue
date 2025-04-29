@@ -33,6 +33,7 @@ watch(() => props.level, (newVal) => {
     readonly
     disabled
     :cancel="false"
+    aria-hidden="true"
     class="override-readonly-opacity" />
 </template>
 
