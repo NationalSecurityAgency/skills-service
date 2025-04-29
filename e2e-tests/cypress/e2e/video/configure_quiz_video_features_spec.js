@@ -252,12 +252,21 @@ describe('Configure Video and SkillTree Features Tests', () => {
                 res.send(conf);
             });
         }).as('loadConfig');
+
+        cy.intercept('/admin/quiz-definitions/quiz1/settings', (req) => {
+            req.reply((res) => {
+                let conf = res.body;
+                conf = conf.filter((item) => item.setting !== 'user_community')
+                res.send(conf);
+            });
+        }).as('quizConfig')
         cy.intercept('POST', '/public/log').as('reportError')
 
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1)
         cy.visit('/administrator/quizzes/quiz1');
         cy.wait('@loadConfig')
+        cy.wait('@quizConfig')
 
         cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
         cy.get('[data-cy="add-video-question-1"]').click()
