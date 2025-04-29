@@ -209,6 +209,7 @@ class QuizSettingsService {
 
         if (addUserCommunityOnlyQuizSetting && userCommunityService.isUserCommunityConfigured()) {
             boolean isUserCommunityProtectedQuiz = quizSettings.find { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting}?.isEnabled()
+            res.removeAll { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting }
             res.add(new QuizSettingsRes(
                     setting: QuizSettings.UserCommunityOnlyQuiz.setting,
                     value: userCommunityService.getCommunityNameBasedOnConfAndItemStatus(isUserCommunityProtectedQuiz),

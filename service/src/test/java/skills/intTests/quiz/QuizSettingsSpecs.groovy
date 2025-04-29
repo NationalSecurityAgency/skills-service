@@ -115,6 +115,30 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         settings.value == ['val1', 'val2', 'val3', RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
     }
 
+    def "quiz setting returns project user community"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        pristineDragonsUser.createQuizDef(quiz1)
+
+        def quiz2 = QuizDefFactory.createQuiz(2)
+        quiz2.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(quiz2)
+
+        when:
+        def quiz1Setting = pristineDragonsUser.getQuizSettings(quiz1.quizId)
+        def quiz2Setting = pristineDragonsUser.getQuizSettings(quiz2.quizId)
+        then:
+        quiz1Setting.findAll { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting}.size() == 1
+        quiz2Setting.findAll { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting}.size() == 1
+
+        quiz1Setting.find { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting}.value == "All Dragons"
+        quiz2Setting.find { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting}.value == "Divine Dragon"
+    }
+
     def "existing settings are updated and new are inserted"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
