@@ -192,9 +192,10 @@ describe('Client Display Survey Tests', () => {
             // make validate call very slow that way as-you-type validation will not be performed by the time Done button is pressed
             cy.intercept('/api/quizzes/quiz1/attempt/*/answers/*', (req) => {
                 req.reply((res) => {
-                    res.send({ delay: 3000 });
+                    res.send({ delay: 4500 });
                 });
             }).as('reportAnswer');
+            cy.intercept('POST', '/api/validation/description').as('validateDescription')
 
             cy.createSurveyDef(1);
             cy.createTextInputQuestionDef(1, 1);
@@ -210,6 +211,8 @@ describe('Client Display Survey Tests', () => {
             cy.get('[data-cy="startQuizAttempt"]').click()
 
             cy.get('[data-cy="question_1"] [data-cy="textInputAnswer"]').type('a')
+            cy.wait('@validateDescription')
+            cy.wait(500)
 
             cy.get('[data-cy="multipleChoiceMsg"]')
             cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
@@ -217,6 +220,7 @@ describe('Client Display Survey Tests', () => {
 
             cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
 
+            cy.wait(500)
             cy.clickCompleteQuizBtn()
             cy.completedCheck(env);
             cy.wait('@reportAnswer')

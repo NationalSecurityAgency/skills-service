@@ -24,6 +24,9 @@ import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEdito
 import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 import {useDebounceFn} from "@vueuse/core";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import VideoPlayer from "@/common-components/video/VideoPlayer.vue";
+import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
+import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 
 const props = defineProps({
   q: Object,
@@ -42,6 +45,25 @@ const answerOptions = ref([])
 const answerRating = ref(0)
 const answerText = ref(props.q.questionType === QuestionType.TextInput ? (props.q.answerOptions[0]?.answerText || '') : '')
 
+const mediaAttributes = computed(() => {
+  const attr = props.q.mediaAttributes ? JSON.parse(props.q.mediaAttributes) : null;
+  const captionsUrl = attr?.captions
+      ? `/api/quiz-definitions/${props.quizId}/questions/${props.q.id}/videoCaptions`
+      : null;
+  if(attr) {
+    return {
+      videoId: props.q.id,
+      url: attr.videoUrl,
+      videoType: attr.videoType ? attr.videoType : null,
+      isAudio: attr.videoType ? attr.videoType.includes('audio/') : null,
+      captionsUrl,
+      width: attr.width,
+      height: attr.height,
+      transcript: attr.transcript,
+    };
+  }
+  return null;
+})
 const isMultipleChoice = computed(() => {
   return props.q.questionType === QuestionType.MultipleChoice;
 })
@@ -166,6 +188,11 @@ const reportAnswer = (answer) => {
   });
 }
 const needsGrading = computed(() => QuizStatus.isNeedsGrading(props.q.gradedInfo?.status))
+
+const showTranscript = ref(false);
+const toggleTranscript = () => {
+  showTranscript.value = !showTranscript.value;
+}
 </script>
 
 <template>
@@ -188,6 +215,32 @@ const needsGrading = computed(() => QuizStatus.isNeedsGrading(props.q.gradedInfo
       <div class="flex flex-1">
         <div class="flex flex-col w-full">
           <markdown-text :text="q.question" data-cy="questionsText" :instance-id="`${q.id}`" />
+          <div v-if="mediaAttributes">
+            <video-player :video-player-id="`quizVideoFor-${q.id}`"
+                          :options="mediaAttributes"
+                          :storeAndRecoverSizeFromStorage="true"
+                          :align-center="false" />
+            <div v-if="mediaAttributes.transcript" class="text-center">
+              <SkillsButton style="text-decoration: underline; padding-right: 0.25rem; padding-left: 0.5rem;"
+                            class="skills-theme-primary-color"
+                            :label="!showTranscript ? 'View Transcript' : 'Hide Transcript'"
+                            variant="link"
+                            size="small"
+                            text
+                            data-cy="viewTranscriptBtn"
+                            @click="toggleTranscript">
+
+              </SkillsButton>
+            </div>
+            <Card v-if="mediaAttributes.transcript && showTranscript">
+              <template #content>
+                <label for="transcriptDisplay" class="h4">{{ mediaAttributes.isAudio ? 'Audio' : 'Video'}} Transcript:</label>
+                <Panel id="transcriptDisplay" data-cy="videoTranscript">
+                  <p class="m-0">{{ mediaAttributes.transcript }}</p>
+                </Panel>
+              </template>
+            </Card>
+          </div>
           <div v-if="isTextInput">
             <div v-if="needsGrading" class="border rounded-border border-surface px-4">
               <markdown-text

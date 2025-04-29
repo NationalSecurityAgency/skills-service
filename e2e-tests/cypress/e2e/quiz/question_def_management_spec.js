@@ -899,4 +899,48 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('.p-dialog-header [aria-label="Close"]').should('not.exist')
         cy.get('[data-cy="copyQuestionButton_1"]').should('have.focus')
     });
+
+    it('add a video to a question', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.createQuizQuestionDef(1, 2)
+        cy.createQuizMultipleChoiceQuestionDef(1, 3)
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
+        cy.get('[data-cy="add-video-question-1"]').click()
+
+        const videoFile = 'create-subject.webm';
+        cy.fixture(videoFile, null).as('videoFile');
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
+        cy.get('[data-cy="saveVideoSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="add-video-question-1"]').contains("Edit Audio/Video");
+        cy.get('[data-cy="add-video-question-1"]').click();
+
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', videoFile)
+        cy.get('[data-cy="videoCaptions"]').should('have.value', '')
+        cy.get('[data-cy="videoTranscript"]').should('have.value','')
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTotalDuration"]').should('have.text', '7 seconds')
+
+    });
+
+    it('remove a video from a question', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1,  {}, { videoUrl: '/static/videos/create-quiz.mp4', captions: 'some', transcript: 'another' })
+        cy.createQuizQuestionDef(1, 2)
+        cy.createQuizMultipleChoiceQuestionDef(1, 3)
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="add-video-question-1"]').contains("Edit Audio/Video");
+        cy.get('[data-cy="add-video-question-1"]').click()
+
+        cy.get('[data-cy="clearVideoSettingsBtn"]').click()
+        cy.get('.p-dialog-footer').contains('Yes, Do clear').click()
+
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
+    });
 });

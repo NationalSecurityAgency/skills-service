@@ -24,7 +24,6 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.unit.DataSize
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.multipart.MultipartFile
 import skills.auth.UserInfoService
 import skills.controller.exceptions.AttachmentValidator
@@ -32,18 +31,18 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
+import skills.services.quiz.QuizDefService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.Attachment
 import skills.storage.repos.AttachmentRepo
-import skills.storage.repos.SkillDefRepo
 import skills.utils.InputSanitizer
 
 @Service
 @Slf4j
-class AdminVideoService {
+class QuizVideoService {
 
     @Autowired
     UserInfoService userInfoService
@@ -55,10 +54,10 @@ class AdminVideoService {
     SkillAttributeService skillAttributeService
 
     @Autowired
-    SkillDefRepo skillDefRepo
+    UserActionsHistoryService userActionsHistoryService
 
     @Autowired
-    UserActionsHistoryService userActionsHistoryService
+    QuizDefService quizDefService
 
     @Autowired
     VideoHelperService videoHelperService
@@ -69,44 +68,45 @@ class AdminVideoService {
     @Value('#{"${skills.config.allowedVideoUploadMimeTypes}"}')
     List<MediaType> allowedAttachmentMimeTypes;
 
+    SkillVideoAttrs getVideoAttrs(String quizId, Integer questionId) {
+        return quizDefService.getVideoAttributesForQuestion(quizId, questionId)
+    }
+
     @Transactional
-    SkillVideoAttrs saveVideo(String projectId, String skillId, Boolean isAlreadyHosted,
+    SkillVideoAttrs saveVideo(String quizId, Integer questionId, Boolean isAlreadyHosted,
                               MultipartFile file, String videoUrl, String captions, String transcript,
                               Double width, Double height) {
 
-        SkillVideoAttrs existingVideoAttributes = skillAttributeService.getVideoAttrs(projectId, skillId)
+        SkillVideoAttrs existingVideoAttributes = quizDefService.getVideoAttributesForQuestion(quizId, questionId)
         final boolean isEdit = existingVideoAttributes?.videoUrl
 
         SkillVideoAttrs videoAttrs = new SkillVideoAttrs()
         if (isAlreadyHosted) {
-            SkillsValidator.isTrue(existingVideoAttributes?.isInternallyHosted, "Expected video to already be internally hosted but it was not present.", projectId, skillId)
+            SkillsValidator.isTrue(existingVideoAttributes?.isInternallyHosted, "Expected video to already be internally hosted but it was not present.", quizId, questionId.toString())
             videoAttrs = videoHelperService.updateExistingVideo(videoAttrs, existingVideoAttributes)
         } else  {
             if (StringUtils.isBlank(videoUrl) && !file) {
-                throw new SkillException("Either videoUrl or file must be supplied", projectId, skillId)
+                throw new SkillException("Either videoUrl or file must be supplied", quizId, questionId.toString())
             }
 
             if (existingVideoAttributes?.internallyHostedAttachmentUuid) {
                 attachmentRepo.deleteByUuid(existingVideoAttributes.internallyHostedAttachmentUuid)
             }
 
-            videoAttrs = videoHelperService.validateAndSave(videoUrl, projectId, skillId, file, videoAttrs)
+            videoAttrs = videoHelperService.validateAndSave(videoUrl, quizId, null, file, videoAttrs, true)
 
         }
 
         videoAttrs = videoHelperService.verifyCaptionsAndTranscript(videoAttrs, captions, transcript)
         videoAttrs = videoHelperService.setDimensions(videoAttrs, width, height)
 
-        boolean isReadOnly = skillDefRepo.isImportedFromCatalog(projectId, skillId)
-        SkillsValidator.isTrue(!isReadOnly, "Cannot set video attributes of read-only skill", projectId, skillId)
-
-        skillAttributeService.saveVideoAttrs(projectId, skillId, videoAttrs)
+        quizDefService.saveVideoAttributesForQuestion(quizId, questionId, videoAttrs)
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
                 item: DashboardItem.VideoSettings,
-                itemId: skillId,
-                projectId: projectId,
+                itemId: questionId,
+                quizId: quizId,
                 actionAttributes: videoAttrs
         ))
 
@@ -114,20 +114,20 @@ class AdminVideoService {
     }
 
     @Transactional
-    boolean deleteVideoAttrs(String projectId, String skillId) {
-        SkillVideoAttrs existingVideoAttributes = skillAttributeService.getVideoAttrs(projectId, skillId)
+    boolean deleteVideoAttrs(String quizId, Integer questionId) {
+        SkillVideoAttrs existingVideoAttributes = quizDefService.getVideoAttributesForQuestion(quizId, questionId)
 
         if (existingVideoAttributes?.internallyHostedAttachmentUuid) {
             attachmentRepo.deleteByUuid(existingVideoAttributes.internallyHostedAttachmentUuid)
         }
 
-        skillAttributeService.deleteVideoAttrs(projectId, skillId)
+        quizDefService.deleteVideoAttrs(quizId, questionId)
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: DashboardAction.Delete,
                 item: DashboardItem.VideoSettings,
-                itemId: skillId,
-                projectId: projectId,
+                itemId: questionId,
+                quizId: quizId,
         ))
     }
 }

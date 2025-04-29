@@ -66,12 +66,17 @@ export const useQuizConfig = defineStore('quizConfig', () => {
     return quizConfig.value && quizConfig.value.quizUserRole;
   });
 
+  const quizCommunityValue = computed(() => {
+    return quizConfig.value && quizConfig.value['user_community'];
+  });
+
   return {
     quizConfig,
     loadingQuizConfig,
     loadQuizConfigState,
     afterQuizConfigStateLoaded,
     isReadOnlyQuiz,
-    userQuizRole
+    userQuizRole,
+    quizCommunityValue
   }
 })

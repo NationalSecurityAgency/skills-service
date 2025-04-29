@@ -23,6 +23,7 @@ import QuizSingleRunPage from '@/components/quiz/runsHistory/QuizSingleRunPage.v
 import QuizAccessPage from '@/components/quiz/access/QuizAccessPage.vue';
 import UserActionsPage from "@/components/userActions/UserActionsPage.vue";
 import GradeQuizzesPage  from "@/components/quiz/grade/GradeQuizzesPage.vue";
+import VideoConfigPage from "@/components/video/VideoConfigPage.vue";
 
 const createQuizRoutes = () => {
   return {
@@ -45,6 +46,7 @@ const createQuizRoutes = () => {
           message: 'Quiz or Survey',
         },
       },
+      alias: 'questions'
     }, {
       name: 'QuizMetrics',
       path: 'results',
@@ -125,7 +127,19 @@ const createQuizRoutes = () => {
           message: 'User Activity History',
         },
       },
-    }],
+    }, {
+      name: 'ConfigureQuizVideo',
+      path: 'questions/:questionId/config-video',
+      component: VideoConfigPage,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Configure Audio/Video',
+        },
+      },
+      props: true,
+      alias: 'questions/:questionId'
+    },],
   }
 }
 

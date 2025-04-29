@@ -444,4 +444,62 @@ describe('Community Project Creation Tests', () => {
         cy.wait('@contactProject');
         cy.get('@contact').should('have.been.calledOnce');
     });
+
+    it('video transcript is validated against custom validators', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+
+        cy.intercept('POST', '/api/validation/description*').as('validateDescription');
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-video');
+
+        const videoFile = 'create-subject.webm';
+
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.visible')
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile(`cypress/fixtures/${videoFile}`,  { force: true })
+
+        cy.get('[data-cy="videoTranscript"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="videoTranscriptError"]').should('not.be.visible')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="videoTranscript"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="videoTranscript"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="videoTranscriptError"]').contains('Video Transcript - paragraphs may not contain jabberwocky');
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="videoTranscript"]').type('{backspace}');
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled');
+    });
+
+    it('video transcript is validated against custom validators - uc protected project', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+
+        cy.intercept('POST', '/api/validation/description*').as('validateDescription');
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-video');
+
+        const videoFile = 'create-subject.webm';
+
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.visible')
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile(`cypress/fixtures/${videoFile}`,  { force: true })
+
+        cy.get('[data-cy="videoTranscript"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.get('[data-cy="videoTranscriptError"]').should('not.be.visible')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="videoTranscript"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="videoTranscript"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.get('[data-cy="videoTranscriptError"]').contains('Video Transcript - May not contain divinedragon word');
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="videoTranscript"]').type('{backspace}');
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled');
+    });
 });

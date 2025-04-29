@@ -34,6 +34,7 @@ import skills.controller.result.model.QuizSettingsRes
 import skills.controller.result.model.SettingsResult
 import skills.quizLoading.QuizSettings
 import skills.quizLoading.QuizUserPreferences
+import skills.services.admin.UserCommunityService
 import skills.services.settings.Settings
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
@@ -64,6 +65,9 @@ class QuizSettingsService {
     UserInfoService userInfoService
 
     @Autowired
+    UserCommunityService userCommunityService
+
+    @Autowired
     UserActionsHistoryService userActionsHistoryService
 
     @Autowired
@@ -71,7 +75,7 @@ class QuizSettingsService {
 
     @Transactional
     void copySettings(String fromQuizId, String toQuizId, boolean enableProtectedUserCommunity) {
-        List<QuizSettingsRes> fromSettings = getSettings(fromQuizId)
+        List<QuizSettingsRes> fromSettings = getSettings(fromQuizId, false)
         List<QuizSettingsRequest> toSettings = new ArrayList<QuizSettingsRequest>()
 
         if (enableProtectedUserCommunity) {
@@ -188,7 +192,7 @@ class QuizSettingsService {
     }
 
     @Transactional(readOnly = true)
-    List<QuizSettingsRes> getSettings(String quizId) {
+    List<QuizSettingsRes> getSettings(String quizId, boolean addUserCommunityOnlyQuizSetting = true) {
         Integer quizRefId = getQuizDefRefId(quizId)
         List<QuizSetting> quizSettings = quizSettingsRepo.findAllByQuizRefId(quizRefId)
         List<QuizSettingsRes> res = quizSettings.collect {
@@ -201,6 +205,15 @@ class QuizSettingsService {
             res.add(new QuizSettingsRes(setting: QuizSettings.QuizUserRole.setting, value: RoleName.ROLE_QUIZ_ADMIN.toString()))
         } else if (usrRoles.contains(RoleName.ROLE_QUIZ_READ_ONLY.toString())) {
             res.add(new QuizSettingsRes(setting: QuizSettings.QuizUserRole.setting, value: RoleName.ROLE_QUIZ_READ_ONLY.toString()))
+        }
+
+        if (addUserCommunityOnlyQuizSetting && userCommunityService.isUserCommunityConfigured()) {
+            boolean isUserCommunityProtectedQuiz = quizSettings.find { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting}?.isEnabled()
+            res.removeAll { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting }
+            res.add(new QuizSettingsRes(
+                    setting: QuizSettings.UserCommunityOnlyQuiz.setting,
+                    value: userCommunityService.getCommunityNameBasedOnConfAndItemStatus(isUserCommunityProtectedQuiz),
+            ))
         }
 
         return res.sort({ it.setting })

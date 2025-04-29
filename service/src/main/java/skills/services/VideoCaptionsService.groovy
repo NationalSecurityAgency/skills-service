@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.services.attributes.SkillAttributeService
+import skills.storage.repos.QuizQuestionDefRepo
 import skills.storage.repos.SkillAttributesDefRepo
 import skills.utils.InputSanitizer
 
@@ -33,6 +34,9 @@ class VideoCaptionsService {
     @Autowired
     SkillAttributesDefRepo skillAttributesDefRepo
 
+    @Autowired
+    QuizQuestionDefRepo quizQuestionRepo
+
     String getVideoCaptions(String projectId, String skillId) {
         String res = skillAttributesDefRepo.getVideoCaptionsByProjectAndSkillId(projectId, skillId)
         if (StringUtils.isNotBlank(res)) {
@@ -43,6 +47,19 @@ class VideoCaptionsService {
 
     String getVideoTranscript(String projectId, String skillId) {
         String res = skillAttributesDefRepo.getVideoTranscriptsByProjectAndSkillId(projectId, skillId)
+        return StringUtils.isNotBlank(res) ? res : ""
+    }
+
+    String getVideoCaptionsForQuiz(String quizId, Integer questionId) {
+        String res = quizQuestionRepo.getVideoCaptions(quizId, questionId)
+        if (StringUtils.isNotBlank(res)) {
+            return InputSanitizer.unSanitizeCaption(res)
+        }
+        return StringUtils.isNotBlank(res) ? res : ""
+    }
+
+    String getVideoTranscriptForQuiz(String quizId, Integer questionId) {
+        String res = quizQuestionRepo.getVideoTranscripts(quizId, questionId)
         return StringUtils.isNotBlank(res) ? res : ""
     }
 }

@@ -111,8 +111,32 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         def settings = skillsService.getQuizSettings(quiz.quizId)
 
         then:
-        settings.setting == ['name1', 'name2', 'name3', QuizSettings.QuizUserRole.setting]
-        settings.value == ['val1', 'val2', 'val3', RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings.setting == ['name1', 'name2', 'name3', QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings.value == ['val1', 'val2', 'val3', RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
+    }
+
+    def "quiz setting returns project user community"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        pristineDragonsUser.createQuizDef(quiz1)
+
+        def quiz2 = QuizDefFactory.createQuiz(2)
+        quiz2.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(quiz2)
+
+        when:
+        def quiz1Setting = pristineDragonsUser.getQuizSettings(quiz1.quizId)
+        def quiz2Setting = pristineDragonsUser.getQuizSettings(quiz2.quizId)
+        then:
+        quiz1Setting.findAll { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting}.size() == 1
+        quiz2Setting.findAll { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting}.size() == 1
+
+        quiz1Setting.find { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting}.value == "All Dragons"
+        quiz2Setting.find { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting}.value == "Divine Dragon"
     }
 
     def "existing settings are updated and new are inserted"() {
@@ -135,8 +159,8 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         def settings = skillsService.getQuizSettings(quiz.quizId)
 
         then:
-        settings.setting == ['name1', 'name2', 'name3', 'name4', QuizSettings.QuizUserRole.setting]
-        settings.value == ['val1', 'updated', 'val3', 'val4', RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings.setting == ['name1', 'name2', 'name3', 'name4', QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings.value == ['val1', 'updated', 'val3', 'val4', RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
     }
 
     def "validation - setting has to be provided"() {
@@ -196,11 +220,11 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         def settings_t1 = skillsService.getQuizSettings(quiz.quizId)
 
         then:
-        settings_t0.setting == [QuizSettings.MaxNumAttempts.setting, QuizSettings.QuizUserRole.setting]
-        settings_t0.value == ['12', RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings_t0.setting == [QuizSettings.MaxNumAttempts.setting, QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings_t0.value == ['12', RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
 
-        settings_t1.setting == [QuizSettings.MaxNumAttempts.setting, QuizSettings.QuizUserRole.setting]
-        settings_t1.value == ['-1', RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings_t1.setting == [QuizSettings.MaxNumAttempts.setting, QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings_t1.value == ['-1', RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
     }
 
     def "validation: valid MaxNumAttempts setting - must be > -1"() {
@@ -256,11 +280,11 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         def settings_t1 = skillsService.getQuizSettings(quiz.quizId)
 
         then:
-        settings_t0.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting]
-        settings_t0.value == ['2', RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings_t0.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings_t0.value == ['2', RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
 
-        settings_t1.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting]
-        settings_t1.value == ['-1', RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings_t1.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings_t1.value == ['-1', RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
     }
 
     def "validation: valid MinNumQuestionsToPass setting - must be > -1"() {
@@ -372,17 +396,17 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         skillsService.deleteQuizQuestionDef(quiz.quizId,  quizAttempt.questions[2].id)
         def settings_t3 = skillsService.getQuizSettings(quiz.quizId)
         then:
-        settings_t0.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting]
-        settings_t0.value == ['3', RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings_t0.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings_t0.value == ['3', RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
 
-        settings_t1.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting]
-        settings_t1.value == ['2', RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings_t1.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings_t1.value == ['2', RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
 
-        settings_t2.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting]
-        settings_t2.value == ['1', RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings_t2.setting == [QuizSettings.MinNumQuestionsToPass.setting, QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings_t2.value == ['1', RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
 
-        settings_t3.setting == [QuizSettings.QuizUserRole.setting]
-        settings_t3.value == [RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings_t3.setting == [QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings_t3.value == [RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
     }
 
     def "QuizLength setting - when a question is removed adjust the QuizLength setting if needed"() {
@@ -406,17 +430,17 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         skillsService.deleteQuizQuestionDef(quiz.quizId,  quizAttempt.questions[2].id)
         def settings_t3 = skillsService.getQuizSettings(quiz.quizId)
         then:
-        settings_t0.setting == [QuizSettings.QuizLength.setting, QuizSettings.QuizUserRole.setting]
-        settings_t0.value == ['3', RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings_t0.setting == [QuizSettings.QuizLength.setting, QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings_t0.value == ['3', RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
 
-        settings_t1.setting == [QuizSettings.QuizLength.setting, QuizSettings.QuizUserRole.setting]
-        settings_t1.value == ['2', RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings_t1.setting == [QuizSettings.QuizLength.setting, QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings_t1.value == ['2', RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
 
-        settings_t2.setting == [QuizSettings.QuizLength.setting, QuizSettings.QuizUserRole.setting]
-        settings_t2.value == ['1', RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings_t2.setting == [QuizSettings.QuizLength.setting, QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings_t2.value == ['1', RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
 
-        settings_t3.setting == [QuizSettings.QuizUserRole.setting]
-        settings_t3.value == [RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings_t3.setting == [QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings_t3.value == [RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
     }
 
     def "Answers for a question can be randomized"() {
@@ -561,8 +585,8 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         when:
         def settings = skillsService.getQuizSettings(quiz.quizId)
         then:
-        settings.setting == [QuizSettings.QuizUserRole.setting]
-        settings.value == [RoleName.ROLE_QUIZ_ADMIN.toString()]
+        settings.setting == [QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings.value == [RoleName.ROLE_QUIZ_ADMIN.toString(), "All Dragons"]
     }
 
     def "get user read only role"() {
@@ -587,8 +611,8 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         when:
         def settings = otherUser.getQuizSettings(quiz.quizId)
         then:
-        settings.setting == [QuizSettings.QuizUserRole.setting]
-        settings.value == [RoleName.ROLE_QUIZ_READ_ONLY.toString()]
+        settings.setting == [QuizSettings.QuizUserRole.setting, QuizSettings.UserCommunityOnlyQuiz.setting]
+        settings.value == [RoleName.ROLE_QUIZ_READ_ONLY.toString(), "All Dragons"]
     }
 
     def "run quiz - retaking a failed quiz gives only the failed questions if setting is enabled"() {
