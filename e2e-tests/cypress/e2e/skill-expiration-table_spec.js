@@ -354,7 +354,7 @@ describe('Expired Skill Table Tests', () => {
             }],
         ], 1);
 
-        cy.get('[data-pc-section="filter"] [data-pc-name="button"]').click()
+        cy.get('[data-cy=userIdFilter]').clear()
 
         cy.validateTable(tableSelector, [
             [{
