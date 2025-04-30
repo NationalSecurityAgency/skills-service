@@ -285,6 +285,10 @@ const skillEnabled = ref(true)
 const onEnabledChanged = (event) => {
   skillEnabled.value = !skillEnabled.value
 }
+const showVisibilityControl = computed(() => {
+  // always show on create, only show on edit if currently disabled
+  return !(props.isEdit && props.skill.enabled);
+})
 
 </script>
 
@@ -303,48 +307,70 @@ const onEnabledChanged = (event) => {
     :enable-return-focus="true"
     @saved="onSkillSaved"
   >
-    <div class="flex flex-wrap flex-col md:flex-row gap-2">
-      <div class="flex-1">
-        <SkillsNameAndIdInput
-          :name-label="`${isCopy ? 'New Skill Name' : 'Skill Name'}`"
-          name-field-name="skillName"
-          :id-label="`${props.isCopy ? 'New Skill ID' : 'Skill ID'}`"
-          id-field-name="skillId"
-          :is-inline="true"
-          id-suffix="Skill"
-          :name-to-id-sync-enabled="!props.isEdit" />
+    <div v-if="showVisibilityControl">
+      <div class="flex flex-wrap flex-col md:flex-row gap-2">
+        <div class="flex-1">
+          <SkillsNameAndIdInput
+            :name-label="`${isCopy ? 'New Skill Name' : 'Skill Name'}`"
+            name-field-name="skillName"
+            :id-label="`${props.isCopy ? 'New Skill ID' : 'Skill ID'}`"
+            id-field-name="skillId"
+            :is-inline="true"
+            id-suffix="Skill"
+            :name-to-id-sync-enabled="!props.isEdit" />
+        </div>
+      </div>
+
+      <div class="flex flex-col md:flex-row md:flex-1 gap-2 mt-2 pb-2">
+              <div data-cy="visibility" class="flex-1 min-w-[8rem]">
+                <div class="flex flex-col gap-2">
+                  <label for="visibilitySwitch">
+                    <span id="visibilityLabel">Initial Visibility:</span>
+                  </label>
+                  <InputGroup>
+                    <InputGroupAddon>
+                      <div style="width: 3.3rem !important;">
+                        <SkillsInputSwitch data-cy="visibilitySwitch"
+                                           aria-labelledby="visibilityLabel"
+                                           inputId="visibilitySwitch"
+                                           style="height:1rem !important;"
+                                           size="small"
+                                           name="enabled"
+                                           @change="onEnabledChanged" />
+                      </div>
+                    </InputGroupAddon>
+                    <InputGroupAddon class="w-full">
+                      <span class="ml-2 w-full text-gray-700 dark:text-white">{{ skillEnabled ? 'Visible' : 'Hidden'}}</span>
+                    </InputGroupAddon>
+                  </InputGroup>
+                </div>
+              </div>
+
+        <div class="flex-1">
+          <SkillsNumberInput
+              class="flex-1 min-w-[13rem] w-full"
+              showButtons
+              :disabled="isEdit"
+              :min="latestSkillVersion"
+              label="Version"
+              name="version" />
+        </div>
       </div>
     </div>
-
-    <div class="flex flex-col md:flex-row md:flex-1 gap-2 mt-2 pb-2">
-            <div data-cy="visibility" class="flex-1 min-w-[8rem]">
-              <div class="flex flex-col gap-2">
-                <label for="visibilitySwitch">
-                  <span id="visibilityLabel">Initial Visibility:</span>
-                </label>
-                <InputGroup>
-                  <InputGroupAddon>
-                    <div style="width: 3.3rem !important;">
-                      <SkillsInputSwitch data-cy="visibilitySwitch"
-                                         aria-labelledby="visibilityLabel"
-                                         inputId="visibilitySwitch"
-                                         style="height:1rem !important;"
-                                         size="small"
-                                         :disabled="isEdit && props.skill.enabled"
-                                         name="enabled"
-                                         @change="onEnabledChanged" />
-                    </div>
-                  </InputGroupAddon>
-                  <InputGroupAddon class="w-full">
-                    <span class="ml-2 w-full text-gray-700 dark:text-white">{{ skillEnabled ? 'Visible' : 'Hidden'}}</span>
-                  </InputGroupAddon>
-                </InputGroup>
-              </div>
-            </div>
-
+    <div v-else class="flex flex-wrap">
       <div class="flex-1">
+        <SkillsNameAndIdInput
+            :name-label="`${isCopy ? 'New Skill Name' : 'Skill Name'}`"
+            name-field-name="skillName"
+            :id-label="`${props.isCopy ? 'New Skill ID' : 'Skill ID'}`"
+            id-field-name="skillId"
+            :is-inline="true"
+            id-suffix="Skill"
+            :name-to-id-sync-enabled="!props.isEdit" />
+      </div>
+
+      <div class="lg:max-w-40 lg:ml-4 w-full">
         <SkillsNumberInput
-            class="flex-1 min-w-[13rem] w-full"
             showButtons
             :disabled="isEdit"
             :min="latestSkillVersion"
