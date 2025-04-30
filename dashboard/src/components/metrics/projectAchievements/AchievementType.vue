@@ -31,7 +31,7 @@ const isUnknownType = computed(() => {
 
 <template>
   <div style="vertical-align: text-top !important;">
-    <span class="border-info rounded d-inline-block p-1 text-center icon text-secondary">
+    <span class="border-info rounded-sm d-inline-block p-1 text-center icon text-secondary">
       <span v-if="type === types[0]">
         <i class="fa fa-trophy"/>
       </span>

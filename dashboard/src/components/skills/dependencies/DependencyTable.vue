@@ -97,7 +97,7 @@ const isFlex = computed(() => responsive.sm.value)
 </script>
 
 <template>
-  <Card class="mb-4" :pt="{ body: { class: '!p-0' } }">
+  <Card class="mb-4" :pt="{ body: { class: 'p-0!' } }">
     <template #header>
       <SkillsCardHeader title="Learning Path Routes"></SkillsCardHeader>
     </template>

@@ -58,7 +58,7 @@ const hasTags = computed(()=> props.skill.tags && props.skill.tags.length > 0)
     <div v-if="hasTags" data-cy="skillTags" :class="{ 'mt-2': hasBadges }" class="flex gap-2">
       <Chip v-for="(tag, index) in skill.tags"
             :data-cy="`skillTag-${index}`"
-            :pt="{ root: { class: '!p-0'}}"
+            :pt="{ root: { class: 'p-0!'}}"
             v-bind:key="tag.tagId">
         <span class="bg-primary text-primary-contrast rounded-full w-7 h-7 flex items-center justify-center"><i
             class="fas fa-tag" /></span>

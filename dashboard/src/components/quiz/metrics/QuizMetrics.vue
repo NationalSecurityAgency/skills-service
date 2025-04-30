@@ -57,7 +57,7 @@ onMounted(() => {
 
     <SkillsSpinner :is-loading="isLoading"/>
 
-    <Card :pt="{ body: { class: '!p-0' } }">
+    <Card :pt="{ body: { class: 'p-0!' } }">
       <template #content>
         <NoContent2 v-if="!hasMetrics && !isLoading"
                     title="No Results Yet..."
@@ -106,7 +106,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <Card :pt="{ body: { class: '!p-0' } }">
+      <Card :pt="{ body: { class: 'p-0!' } }">
         <template #content>
           <div v-for="(q, index) in metrics.questions" :key="q.id" class="mb-8">
             <QuizQuestionMetrics :q="q" :num="index" :is-survey="isSurvey"/>

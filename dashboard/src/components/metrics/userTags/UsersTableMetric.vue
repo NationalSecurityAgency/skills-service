@@ -27,7 +27,7 @@ defineProps({
 </script>
 
 <template>
-  <Card :no-padding="true" data-cy="usersTableMetric" :pt="{ body: { class: '!p-0' } }">
+  <Card :no-padding="true" data-cy="usersTableMetric" :pt="{ body: { class: 'p-0!' } }">
     <template #header>
       <SkillsCardHeader :title="title"></SkillsCardHeader>
     </template>

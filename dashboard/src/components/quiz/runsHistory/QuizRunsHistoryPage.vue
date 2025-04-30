@@ -194,7 +194,7 @@ const deleteRun = () => {
       <QuizUserTagsChart v-if="userTagsUtils.showUserTagColumn()" class="flex-1 w-full mb-4" :style="`width: ${layoutSizes.tableMaxWidth}px;`"/>
     </div>
 
-    <Card :pt="{ body: { class: '!p-0' } }">
+    <Card :pt="{ body: { class: 'p-0!' } }">
       <template #content>
         <SkillsDataTable
           tableStoredStateId="quizRunHistory"

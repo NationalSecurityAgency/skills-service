@@ -34,7 +34,7 @@ limitations under the License.
                            :class="{ 'skills-theme-menu-primary-color' : filter.count > 0, 'skills-theme-menu-secondary-color' : filter.count === 0, '' : index > 0  }">
             <div class="row no-gutters skills-dropdown-item">
               <div class="col-auto">
-                <i class="text-center border rounded p-1" :class="filter.icon" :aria-hidden="true" />
+                <i class="text-center border rounded-sm p-1" :class="filter.icon" :aria-hidden="true" />
               </div>
               <div class="col">
                 <span class="ml-2 align-middle" v-html="filter.html"></span>

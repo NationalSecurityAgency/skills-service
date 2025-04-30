@@ -209,7 +209,7 @@ const pageAwareTitleLevel = computed(() => route.params.projectId ? 2 : 1)
       </template>
     </SubPageHeader>
 
-    <Card :pt="{ body: { class: '!p-0' } }">
+    <Card :pt="{ body: { class: 'p-0!' } }">
       <template #content>
         <div :style="contentMaxWidthState.main2ContentMaxWidthStyleObj">
             <SkillsDataTable

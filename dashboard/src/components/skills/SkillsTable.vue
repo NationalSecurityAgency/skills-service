@@ -569,7 +569,7 @@ const onRowExpand = () => {
                   :popup="true">
               <template #item="{ item, props }">
                 <a :href="item.url" target="_blank" v-bind="props.action">
-                  <span class="w-7 border text-center rounded text-green-800 bg-green-50 dark:bg-gray-900 dark:text-green-500 dark:border-green-700"><i :class="item.icon"/></span>
+                  <span class="w-7 border text-center rounded-sm text-green-800 bg-green-50 dark:bg-gray-900 dark:text-green-500 dark:border-green-700"><i :class="item.icon"/></span>
                   <span class="">{{ item.label }}</span>
                 </a>
               </template>
@@ -682,7 +682,7 @@ const onRowExpand = () => {
                   :data-cy="`exportedBadge-${slotProps.data.skillId}`">
                   <span><i class="fas fa-book" aria-hidden="true"></i> Exported</span>
                 </Tag>
-                <Chip :pt="{ root: { class: '!p-0'}}"
+                <Chip :pt="{ root: { class: 'p-0!'}}"
                       v-for="(tag) in slotProps.data.tags"
                       :key="tag.tagId"
                       :data-cy="`skillTag-${slotProps.data.skillId}-${tag.tagId}`">

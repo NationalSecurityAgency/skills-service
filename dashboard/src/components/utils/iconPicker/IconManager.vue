@@ -399,7 +399,7 @@ const closeError = () => {
         </template>
         <template #empty v-if="iconPacks[2].icons.length === 0 && !loadingIcons">
           <div class="flex items-center justify-center flex-col py-4">
-            <i class="fas fa-cloud-upload-alt !border-2 !rounded-full !p-8 !text-4xl !text-muted-color" />
+            <i class="fas fa-cloud-upload-alt border-2! rounded-full! p-8! text-4xl! text-muted-color!" />
             <p class="mt-6 mb-0">Drag and drop files to here to upload.</p>
           </div>
         </template>

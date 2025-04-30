@@ -128,7 +128,7 @@ watch(() => searchValue.value, useDebounceFn((newValue) => {
 
 <template>
   <SkillsDialog v-model="model"
-                :pt="{ body: { class: '!p-0' } }"
+                :pt="{ body: { class: 'p-0!' } }"
                 header="Pin Projects"
                 :show-ok-button="false"
                 @on-cancel="done"

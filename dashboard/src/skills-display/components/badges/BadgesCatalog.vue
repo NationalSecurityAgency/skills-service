@@ -102,7 +102,7 @@ const buildBadgeLink = (badge) => {
               aria-label="Search badges"
               data-cy="badgeSearchInput" />
             <InputGroupAddon class="p-0 m-0">
-              <SkillsButton :pt="{ root: { class: '!border-0' } }"
+              <SkillsButton :pt="{ root: { class: 'border-0!' } }"
                 icon="fas fa-times"
                 text
                 outlined

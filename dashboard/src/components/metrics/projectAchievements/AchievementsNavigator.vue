@@ -134,7 +134,7 @@ const getQueryParams = () => {
 </script>
 
 <template>
-  <Card data-cy="achievementsNavigator" :pt="{ body: { class: '!p-0' } }">
+  <Card data-cy="achievementsNavigator" :pt="{ body: { class: 'p-0!' } }">
     <template #header>
       <SkillsCardHeader title="Achievements"></SkillsCardHeader>
     </template>

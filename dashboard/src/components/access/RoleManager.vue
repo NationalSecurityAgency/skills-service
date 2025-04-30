@@ -432,7 +432,7 @@ defineExpose({
 
 <template>
   <div>
-    <Card :pt="{ body: { class: '!p-0' } }">
+    <Card :pt="{ body: { class: 'p-0!' } }">
       <template #header>
         <SkillsCardHeader v-if="title" :title="title"></SkillsCardHeader>
       </template>

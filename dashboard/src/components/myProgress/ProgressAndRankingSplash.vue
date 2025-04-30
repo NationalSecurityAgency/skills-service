@@ -17,6 +17,7 @@ limitations under the License.
 import { computed } from 'vue'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import SkillTreeLogoSvg from '@/components/brand/SkillTreeLogoSvg.vue'
+import SplashPageCard from "@/components/myProgress/SplashPageCard.vue";
 
 const responsive = useResponsiveBreakpoints()
 const logoWidth = computed(() => responsive.sm.value ? '15rem' : '23rem')
@@ -34,54 +35,42 @@ const logoWidth = computed(() => responsive.sm.value ? '15rem' : '23rem')
           training
           platform
         </div>
-        <div class="flex flex-col md:flex-row gap-6 px-6">
-          <Card class="h-100 card-1-border-top">
-            <template #content>
-              <div class="text-primary uppercase text-xl text-center">Gamification</div>
-              <div class="flex gap-2 mt-2">
-                <Avatar icon="fas fa-trophy" class="text-primary bg-primary-contrast border card-1-icon w-min-3rem"
-                        size="large" />
-                <div>
-                  Earn <b>points <i class="far fa-arrow-alt-circle-up skills-color-points"
-                                    aria-hidden="true" /></b>, achieve <b>badges <i
-                  class="fas fa-award skills-color-badges" aria-hidden="true" /></b> and complete
-                  <b>skills <i class="fas fa-graduation-cap skills-color-skills"
-                               aria-hidden="true" /></b>
-                  all from the comfort of your own chair!
-                </div>
-              </div>
-            </template>
-          </Card>
-          <Card class="card-2-border-top h-100">
-            <template #content>
-              <div class="text-primary uppercase text-xl text-center">Go At your Own Pace</div>
-              <div class="flex gap-2 mt-2">
-                <Avatar icon="fas fa-clock" class="text-primary bg-primary-contrast border card-2-icon w-min-3rem"
-                        size="large" />
-                <div>
-                  Learn new <b>skills <i class="fas fa-graduation-cap skills-color-skills"
-                                         aria-hidden="true" /></b> and effectively master advanced
-                  knowledge when it's <b>most convenient <i
-                  class="fas fa-hourglass-half text-success" aria-hidden="true"></i></b> for you!
-                </div>
-              </div>
-            </template>
-          </Card>
-          <Card class="card-1-border-top h-100">
-            <template #content>
-              <div class="text-primary uppercase text-xl text-center">Community</div>
-              <div class="flex gap-2 mt-2">
-                <Avatar icon="fas fa-users" class="text-primary bg-primary-contrast border card-3-icon w-min-3rem"
-                        size="large" />
-                <div>
-                  Take the learning journey <b>together <i class="fas fa-users skills-color-users"
-                                                           aria-hidden="true" /></b> with your
-                  peers and enjoy <b>friendly <i class="fas fa-handshake text-info"
-                                                 aria-hidden="true" /></b> competition!
-                </div>
-              </div>
-            </template>
-          </Card>
+        <div class="flex flex-col lg:flex-row gap-6 px-6">
+          <splash-page-card
+              title="Gamification"
+              icon="fas fa-trophy text"
+              border-color="border-t-green-700"
+              icon-border-color="border-green-700"
+              icon-color="text-green-700 dark:text-green-600">
+            Earn <b>points <i class="far fa-arrow-alt-circle-up skills-color-points"
+                              aria-hidden="true" /></b>, achieve <b>badges <i
+              class="fas fa-award skills-color-badges" aria-hidden="true" /></b> and complete
+            <b>skills <i class="fas fa-graduation-cap skills-color-skills"
+                         aria-hidden="true" /></b>
+            all from the comfort of your own chair!
+          </splash-page-card>
+          <splash-page-card
+              title="Go At your Own Pace"
+              icon="fas fa-clock"
+              border-color="border-t-yellow-500"
+              icon-border-color="border-yellow-500"
+              icon-color="text-yellow-500">
+            Learn new <b>skills <i class="fas fa-graduation-cap skills-color-skills"
+                                   aria-hidden="true" /></b> and effectively master advanced
+            knowledge when it's <b>most convenient <i
+              class="fas fa-hourglass-half text-success" aria-hidden="true"></i></b> for you!
+          </splash-page-card>
+          <splash-page-card
+              title="Community"
+              icon="fas fa-users"
+              border-color="border-t-indigo-500/75"
+              icon-border-color="border-indigo-500"
+              icon-color="text-indigo-500/75 dark:text-indigo-300">
+            Take the learning journey <b>together <i class="fas fa-users skills-color-users"
+                                                     aria-hidden="true" /></b> with your
+            peers and enjoy <b>friendly <i class="fas fa-handshake text-info"
+                                           aria-hidden="true" /></b> competition!
+          </splash-page-card>
         </div>
         <div class="text-center mt-8">
           <div class="mb-4 uppercase text-2xl text-primary">Get Started Now</div>
@@ -108,33 +97,6 @@ const logoWidth = computed(() => responsive.sm.value ? '15rem' : '23rem')
 </template>
 
 <style scoped>
-.card-1-border-top {
-  border-top: 5px solid #007c49;
-}
-
-.card-1-icon {
-  border-color: #007c49 !important;
-  color: #007c49 !important;
-}
-
-.card-2-border-top {
-  border-top: 5px solid #ffc42b;
-}
-
-.card-2-icon {
-  border-color: #ffc42b !important;
-  color: #ffc42b !important;
-}
-
-.card-3-border-top {
-  border-top: 5px solid #e76f51ff;
-}
-
-.card-3-icon {
-  border-color: #e76f51ff !important;
-  color: #e76f51ff !important;
-}
-
 .masthead img {
   position: relative;
   height: 12rem;

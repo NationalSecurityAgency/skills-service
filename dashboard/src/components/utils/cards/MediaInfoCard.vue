@@ -34,7 +34,7 @@ const props = defineProps({
 const cardPt = computed(() => {
   const res = {content: {class: 'p-0'} };
   if (props.addBorder) {
-    res.root = {class: '!border'}
+    res.root = {class: 'border!'}
   }
   return res
 })

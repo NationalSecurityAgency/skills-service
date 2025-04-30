@@ -40,7 +40,7 @@ function openNewGroupModal() {
                    :title-level="1"
                    @add-action="openNewGroupModal">
     </SubPageHeader>
-    <Card :pt="{ body: { class: '!p-0' } }">
+    <Card :pt="{ body: { class: 'p-0!' } }">
       <template #content>
         <GroupDefinitions ref="groupDefinitionsRef"/>
       </template>

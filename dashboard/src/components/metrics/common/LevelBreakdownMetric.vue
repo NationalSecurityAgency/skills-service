@@ -58,7 +58,7 @@ const chartOptions = ref({
   plotOptions: {
     bar: {
       barHeight: '90%',
-      endingShape: 'rounded',
+      endingShape: 'rounded-sm',
       distributed: true,
       horizontal: true,
       dataLabels: {

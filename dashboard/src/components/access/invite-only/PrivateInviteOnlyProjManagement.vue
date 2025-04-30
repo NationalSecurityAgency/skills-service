@@ -37,7 +37,7 @@ const emailFeatureConfigured = computed(() => { return appInfo.emailEnabled });
 <template>
   <div>
     <Card v-if="privateProject"
-          :pt="{ body: { class: '!p-0' } }"
+          :pt="{ body: { class: 'p-0!' } }"
           data-cy="inviteUser"
           class="my-6">
       <template #header>
