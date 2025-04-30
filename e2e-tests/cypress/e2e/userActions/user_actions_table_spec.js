@@ -109,7 +109,7 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="row1-userId"]').should('not.exist')
 
         // reset and filter via enter
-        cy.get('[data-pc-section="filterclearicon"]').click()
+        cy.get('[data-cy="userFilter"]').clear()
         cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2')
         cy.get('[data-cy="userFilter"]').should('be.empty')
         cy.get('[data-cy="userFilter"]').type('OoT{enter}')
@@ -139,7 +139,7 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="row1-action"]').should('not.exist')
 
         // reset
-        cy.get('[data-pc-section="filterclearicon"]').click()
+        cy.get('[data-pc-section="clearicon"]').click()
         cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '4')
     })
 
@@ -162,7 +162,7 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="row1-item"]').should('not.exist')
 
         // reset
-        cy.get('[data-pc-section="filterclearicon"]').click()
+        cy.get('[data-pc-section="clearicon"]').click()
         cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2')
     })
 
@@ -184,7 +184,7 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="row1-itemId"]').should('not.exist')
 
         // reset and filter via enter
-        cy.get('[data-pc-section="filterclearicon"]').click()
+        cy.get('[data-cy="itemIdFilter"]').clear()
         cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2')
         cy.get('[data-cy="itemIdFilter"]').should('be.empty')
         cy.get('[data-cy="itemIdFilter"]').type('seTT{enter}')
@@ -213,7 +213,7 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="row1-projectId"]').should('not.exist')
 
         // reset and filter via enter
-        cy.get('[data-pc-section="filterclearicon"]').click()
+        cy.get('[data-cy="projectIdFilter"]').clear()
         cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '3')
         cy.get('[data-cy="projectIdFilter"]').should('be.empty')
         cy.get('[data-cy="projectIdFilter"]').type('2{enter}')
@@ -245,7 +245,7 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="row1-quizId"]').should('not.exist')
 
         // reset and filter via enter
-        cy.get('[data-pc-section="filterclearicon"]').click()
+        cy.get('[data-cy="quizIdFilter"]').clear()
         cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '3')
         cy.get('[data-cy="quizIdFilter"]').should('be.empty')
         cy.get('[data-cy="quizIdFilter"]').type('2{enter}')
@@ -324,7 +324,7 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="row1-userId"]').should('not.exist')
         cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
 
-        cy.get('[data-pc-section="filterclearicon"]').click()
+        cy.get('[data-cy="projectIdFilter"]').clear()
         cy.get('[data-pc-section="page"]').contains('2').click();
         cy.get('[data-cy="row0-userId"]').contains(adminUserIdForDisplay)
         cy.get('[data-cy="row0-action"]').contains('Create')

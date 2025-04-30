@@ -262,7 +262,7 @@ describe('Projects Invite-Only Tests', () => {
             cy.get(`${tableSelector} tbody [role="row"]`)
                 .should('have.length', '2');
 
-            cy.get(`${tableSelector} [data-pc-section="filterclearicon"]`).click()
+            cy.get(`${tableSelector} [data-cy="clearFilterBtn"]`).click()
             cy.wait('@getApprovedUsers');
             cy.validateTable(tableSelector, [
                 [{

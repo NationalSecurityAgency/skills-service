@@ -199,13 +199,20 @@ const tableFilters = ref({
                   <i class="fas fa-envelope-open-text mr-1" :class="colors.getTextClass(0)" aria-hidden="true"></i>
                 </template>
                 <template #filter="{ filterModel, filterCallback }">
-                  <InputText v-model="filterModel.value"
+                  <div class="flex gap-1">
+                    <InputText v-model="filterModel.value"
                              type="text"
                              class="p-column-filter"
                              data-cy="privateProjectUsers-userIdFilter"
                              style="min-width: 10rem"
                              @input="filterCallback()"
                              placeholder="Search by User ID" />
+                    <SkillsButton
+                        label="Clear"
+                        icon="fas fa-filter"
+                        data-cy="clearFilterBtn"
+                        @click="filterModel.value = ''; filterCallback()"/>
+                  </div>
                 </template>
                 <template #body="slotProps">
                   <div class="flex">
