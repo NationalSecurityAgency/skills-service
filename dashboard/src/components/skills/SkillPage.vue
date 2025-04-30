@@ -187,7 +187,7 @@ const skillId = computed(() => {
           ref="editSkillInPlaceBtn" />
       </template>
       <template #right-of-header
-                v-if="!isLoading && (skillsState.skill.sharedToCatalog || isImported)">
+                v-if="!isLoading && (skillsState.skill.sharedToCatalog || isImported || !skillsState.skill.enabled)">
         <Tag v-if="skillsState.skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i
           class="fas fa-book" aria-hidden="true"></i> EXPORTED
         </Tag>
