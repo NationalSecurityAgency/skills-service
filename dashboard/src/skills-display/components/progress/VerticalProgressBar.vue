@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed } from 'vue'
+import {computed} from 'vue'
+import {useSkillsDisplayThemeState} from "@/skills-display/stores/UseSkillsDisplayThemeState.js";
 
 const props = defineProps({
   totalProgress: {
@@ -43,6 +44,7 @@ const props = defineProps({
   }
 })
 
+const themeState = useSkillsDisplayThemeState()
 const isCompleted = computed(() => props.totalProgress >= 100)
 const computedTotalProgressBeforeToday = computed(() => !isCompleted.value ? props.totalProgressBeforeToday : 0)
 
@@ -58,27 +60,60 @@ const ariaLabelFullMsg = computed(() => {
   }
   return res
 })
+
+const rootPtObjectWithOptionalIncompleteColor = computed(() => {
+  const incompleteColor = themeState.theme.progressIndicators?.incompleteColor
+  return incompleteColor ? { root: { style: `background-color: ${incompleteColor}`} } : {}
+})
+
+const firstProgressBarPt = computed(() => {
+      const rootObj = rootPtObjectWithOptionalIncompleteColor.value
+
+      const bgColor = themeState.theme.progressIndicators?.earnedTodayColor
+      if (bgColor) {
+        return {...rootObj, value: {style: `background-color: ${bgColor}`}}
+      }
+      return {...rootObj, value: {class: 'bg-teal-300!'}}
+    }
+)
+const secondProgressBarPt = computed(() => {
+      const rootPt = { root: { class: 'opacity-100! bg-transparent!' } }
+      const bgColor = themeState.theme.progressIndicators?.beforeTodayColor
+      if (bgColor) {
+        return { ...rootPt, value: {style: `background-color: ${bgColor}`} }
+      }
+      return { ...rootPt, value: {class: 'bg-teal-600!'} }
+    }
+)
+const thirdProgressBarPt = computed(() => {
+      const rootPt = props.disableDailyColor ? rootPtObjectWithOptionalIncompleteColor.value : {}
+      const bgColor = themeState.theme.progressIndicators?.completeColor
+      if (bgColor) {
+        return { ...rootPt, value: {style: `background-color: ${bgColor}`}}
+      }
+      return {...rootPt, value: {class: 'bg-green-700!'}}
+    }
+)
 </script>
 
 <template>
   <div class="user-skill-progress-layers" :style="`height: ${props.barSize+2}px`">
     <ProgressBar v-if="!isCompleted && !disableDailyColor" :value="totalProgress"
-                 :pt="{ value: { class: 'bg-teal-300!' }}"
+                 :pt="firstProgressBarPt"
                  class="progress-bar sd-theme-today-progress is-not-completed"
                  :class="{ 'is-completed': isCompleted, 'is-not-completed': !isCompleted }"
                  :show-value="false"
                  :ariaLabel="ariaLabelFullMsg"
                  :style="styleObject"></ProgressBar>
     <ProgressBar v-if="!isCompleted && !disableDailyColor" :value="computedTotalProgressBeforeToday"
-                 :pt="{ value: { class: 'bg-teal-600!' },
-                    root: { class: 'opacity-100! bg-transparent!' }}"
+                 :pt="secondProgressBarPt"
                  class="progress-bar sd-theme-total-progress  is-not-completed"
                  :class="{ 'is-completed': isCompleted, 'is-not-completed': !isCompleted }"
                  :show-value="false"
                  :ariaLabel="ariaLabelFullMsg"
                  :style="styleObject"></ProgressBar>
     <ProgressBar v-if="isCompleted || disableDailyColor" :value="totalProgress"
-                 :pt="{ value: { class: 'bg-green-700!' }}"
+                 :pt="thirdProgressBarPt"
                  class="is-completed progress-bar"
                  :show-value="false"
                  :ariaLabel="ariaLabelFullMsg"

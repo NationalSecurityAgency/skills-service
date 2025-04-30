@@ -16,8 +16,8 @@
 import tinycolor from 'tinycolor2';
 
 export default {
-  nonCSSConfig: ['charts', 'landingPageTitle', 'disableSkillTreeBrand', 'disableBreadcrumb', 'iconColors', 'prerequisites', 'circleProgressInteriorTextColor', 'disableEncouragementsConfetti'],
-  bothCssAndThemModule: ['progressIndicators', 'pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor', 'infoCards', 'backgroundColor', 'textPrimaryColor', 'textSecondaryColor', 'tiles', 'breadcrumb'],
+  nonCSSConfig: ['progressIndicators', 'charts', 'landingPageTitle', 'disableSkillTreeBrand', 'disableBreadcrumb', 'iconColors', 'prerequisites', 'circleProgressInteriorTextColor', 'disableEncouragementsConfetti'],
+  bothCssAndThemModule: ['pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor', 'infoCards', 'backgroundColor', 'textPrimaryColor', 'textSecondaryColor', 'tiles', 'breadcrumb'],
   selectorKey: {
     maxWidth: {
       selector: 'body #app .sd-theme-home',
@@ -286,25 +286,6 @@ export default {
       foregroundColor: [{
         selector: 'body #app .sd-theme-home .p-tag.p-component',
         styleName: 'color'
-      }]
-    },
-    progressIndicators: {
-      completeColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.is-completed .p-progressbar-value',
-        styleName: 'background-color'
-      }],
-      incompleteColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.p-progressbar-determinate.sd-theme-today-progress.is-not-completed,' +
-            'body #app .sd-theme-home .sd-theme-achieved-skills-progress .p-progressbar.p-component.p-progressbar-determinate.is-completed',
-        styleName: 'background-color'
-      }],
-      beforeTodayColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.sd-theme-total-progress.is-not-completed  .p-progressbar-value',
-        styleName: 'background-color'
-      }],
-      earnedTodayColor: [{
-        selector: 'body #app .sd-theme-home .p-progressbar.p-component.p-progressbar-determinate.sd-theme-today-progress.is-not-completed .p-progressbar-value',
-        styleName: 'background-color'
       }]
     },
     breadcrumb: {
