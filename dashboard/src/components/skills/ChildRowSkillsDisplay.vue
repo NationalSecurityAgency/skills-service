@@ -174,6 +174,9 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
       <i class="fas fa-exclamation-circle"></i> This skill is <b>disabled</b> because import was not
       finalized yet.
     </div>
+    <div v-if="!isImported && isDisabled" class="mb-2 alert alert-warning">
+      <i class="fas fa-exclamation-circle"></i> This skill is <b>disabled</b> because it's visibility is set to hidden.
+    </div>
     <div class="md:flex">
       <div class="flex-1 md:mr-2 mb-2">
         <media-info-card
