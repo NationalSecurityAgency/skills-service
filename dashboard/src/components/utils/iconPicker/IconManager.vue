@@ -14,19 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import {computed, onMounted, ref} from 'vue';
+import {useRoute} from 'vue-router';
 import FileUpload from 'primevue/fileupload';
 import VirtualScroller from 'primevue/virtualscroller';
 import ScrollPanel from 'primevue/scrollpanel';
 import enquire from 'enquire.js';
 import FileUploadService from '@/common-components/utilities/FileUploadService';
-import fontAwesomeIconsCanonical from './font-awesome-index';
-import materialIconsCanonical from './material-index';
 import IconManagerService from './IconManagerService.js';
 import IconRow from './IconRow.vue';
 import TabMenu from "primevue/tabmenu";
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 
 const route = useRoute();
 const emit = defineEmits(['selected-icon', 'set-dismissable']);
@@ -64,37 +63,66 @@ const maxDimensionsString = computed(() => {
   return `${props.maxCustomIconDimensions.width}px x ${props.maxCustomIconDimensions.width}px`
 });
 
+const isLoading = ref(true)
 onMounted(() => {
-  IconManagerService.getIconIndex(route.params.projectId).then((response) => {
-    if (response) {
-      iconPacks.value[2].icons = response;
-      iconPacks.value[2].defaultIcons = response.slice();
-    }
-  });
+  IconManagerService.getIconSetIndexes().then((iconSets) => {
+    const fontAwesomeIcons = iconSets.fontAwesome
+    const materialIcons = iconSets.material
+    console.log(materialIcons)
+    iconPacks.value = [
+      {
+        packName: fontAwesomeIcons.iconPack,
+        headerIcon: 'fab fa-font-awesome-flag',
+        icons: groupIntoRows(fontAwesomeIcons.icons, rowLength),
+        defaultIcons: fontAwesomeIcons.icons.slice(),
+      },
+      {
+        packName: materialIcons.iconPack,
+        headerIcon: 'fas fa-file-alt',
+        icons: groupIntoRows(materialIcons.icons, rowLength), //materialIcons.icons,
+        defaultIcons: materialIcons.icons.slice(),
+      },
+      {
+        packName: 'Custom',
+        headerIcon: 'fas fa-wrench',
+        icons: [],
+        defaultIcons: [],
+      }]
 
-  enquire.register(xsAndSmaller, () => {
-    rowLength = 1;
-    modalWidth.value = "25rem";
-  });
-  enquire.register(smAndUp, () => {
-    rowLength = 3;
-    modalWidth.value = "30rem";
-  });
-  enquire.register(mdAndUp, () => {
-    rowLength = 3;
-    modalWidth.value = "40rem";
-  });
-  enquire.register(lgAndUp, () => {
-    rowLength = 5;
-    modalWidth.value = "60rem";
-  });
-  enquire.register(xlAndUp, () => {
-    rowLength = 6;
-    modalWidth.value = "70rem";
-  });
+    enquire.register(xsAndSmaller, () => {
+      rowLength = 1;
+      modalWidth.value = "25rem";
+    });
+    enquire.register(smAndUp, () => {
+      rowLength = 3;
+      modalWidth.value = "30rem";
+    });
+    enquire.register(mdAndUp, () => {
+      rowLength = 3;
+      modalWidth.value = "40rem";
+    });
+    enquire.register(lgAndUp, () => {
+      rowLength = 5;
+      modalWidth.value = "60rem";
+    });
+    enquire.register(xlAndUp, () => {
+      rowLength = 6;
+      modalWidth.value = "70rem";
+    });
 
-  iconPacks.value[0].icons = groupIntoRows(fontAwesomeIconsCanonical.icons, rowLength);
-  iconPacks.value[1].icons = groupIntoRows(materialIconsCanonical.icons, rowLength);
+    iconPacks.value[0].icons = groupIntoRows(fontAwesomeIcons.icons, rowLength);
+    iconPacks.value[1].icons = groupIntoRows(materialIcons.icons, rowLength);
+
+    IconManagerService.getIconIndex(route.params.projectId).then((response) => {
+      if (response) {
+        iconPacks.value[2].icons = response;
+        iconPacks.value[2].defaultIcons = response.slice();
+      }
+
+    }).finally(() => {
+      isLoading.value = false
+    });
+  })
 });
 
 const xsAndSmaller = '(max-width: 575.98px)';
@@ -109,34 +137,13 @@ let acceptType = 'image/.*';
 const mimeTester = new RegExp(acceptType);
 let selectedCss = '';
 let activePack = ref(0);
-let fontAwesomeIcons = fontAwesomeIconsCanonical;
-let materialIcons = materialIconsCanonical;
 let errorMessage = ref('');
 const fileInfo = ref(null);
 const loadingIcons = ref(false);
 
 let active = ref(0);
 
-const iconPacks = ref([
-  {
-    packName: fontAwesomeIcons.iconPack,
-    headerIcon: 'fab fa-font-awesome-flag',
-    icons: groupIntoRows(fontAwesomeIconsCanonical.icons, rowLength),
-    defaultIcons: fontAwesomeIconsCanonical.icons.slice(),
-  },
-  {
-    packName: materialIcons.iconPack,
-    headerIcon: 'fas fa-file-alt',
-    icons: groupIntoRows(materialIconsCanonical.icons, rowLength), //materialIcons.icons,
-    defaultIcons: materialIconsCanonical.icons.slice(),
-  },
-  {
-    packName: 'Custom',
-    headerIcon: 'fas fa-wrench',
-    icons: [],
-    defaultIcons: [],
-  }
-]);
+const iconPacks = ref([]);
 
 const filterCriteria = ref('');
 
@@ -323,7 +330,11 @@ const closeError = () => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-2" :style="`width: ${modalWidth}`">
+  <div>
+    <div v-if="isLoading" class="w-[20rem]">
+      <skills-spinner :is-loading="true" class="my-8"/>
+    </div>
+    <div v-if="!isLoading" class="flex flex-col gap-2" :style="`width: ${modalWidth}`">
 
       <TabMenu :model="iconPacks" @tab-change="onChange" v-model:activeIndex="active">
         <template #item="{ item, props }">
@@ -409,6 +420,7 @@ const closeError = () => {
 
       <span v-if="iconPacks[active]?.icons?.length === 0 && activePack === iconPacks[active]?.packName && filterCriteria?.length > 0">No icons matched your search</span>
     </div>
+  </div>
 </template>
 
 <style>

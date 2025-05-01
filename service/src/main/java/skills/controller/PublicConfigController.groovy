@@ -28,6 +28,7 @@ import skills.UIConfigProperties
 import skills.auth.AuthMode
 import skills.auth.UserInfoService
 import skills.controller.result.model.SettingsResult
+import skills.icons.IconSetsIndexService
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
 import skills.services.FeatureService
@@ -88,6 +89,8 @@ class PublicConfigController {
     @Autowired
     private ClientRegistrationRepository clientRegistrationRepository
 
+    @Autowired
+    IconSetsIndexService iconSetsIndexService
 
     @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
@@ -264,5 +267,11 @@ class PublicConfigController {
         healthChecker.checkRequiredServices(false)
         Map<String,String> res = new HashMap<>(statusRes)
         return res
+    }
+
+    @GetMapping('/iconSetIndexes')
+    @ResponseBody
+    Map getIconSetsIndexes() {
+        iconSetsIndexService.getIconSetsIndexes()
     }
 }

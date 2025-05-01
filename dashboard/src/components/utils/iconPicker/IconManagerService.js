@@ -33,6 +33,9 @@ const createCustomIconStyleElementIfNotExist = (projectId) => {
 }
 
 export default {
+  getIconSetIndexes() {
+    return axios.get('/public/iconSetIndexes').then((response) => response.data)
+  },
   getIconIndex(projectId) {
     let url = `/app/projects/${encodeURIComponent(projectId)}/customIcons`
     if (!projectId) {
