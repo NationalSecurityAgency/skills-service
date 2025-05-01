@@ -27,7 +27,6 @@
 // the project's config changing)
 
 const { lighthouse, pa11y, prepareAudit } = require("cypress-audit");
-const objectScan = require('object-scan');
 const fs = require('fs');
 const Path = require('path');
 const { makeBadge, ValidationError } = require('badge-maker');
