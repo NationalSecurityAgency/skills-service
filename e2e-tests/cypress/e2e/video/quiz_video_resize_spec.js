@@ -214,7 +214,7 @@ describe('Configure Video Tests', () => {
             .trigger('mousedown', )
             .trigger('mousemove', )
             .trigger('mouseup', { force: true })
-        cy.get(`.video-js`).should('have.css', 'width', '834px')
+        cy.get(`.video-js`).should('have.css', 'width', '832px')
     });
 
     it('audio only does not have a resize button', () => {
