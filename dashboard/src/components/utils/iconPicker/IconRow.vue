@@ -46,7 +46,7 @@ const handleClick = (name, cssClass) => {
   <div :class="['flex flex-row justify-content-start p-2', { 'surface-hover': options.odd }]" style="height: 100px">
     <template v-for="(el, index) of item" :key="index">
       <div class="icon-item w-[5rem]">
-        <button class="p-link text-blue-400"
+        <button class="p-link text-blue-500"
            @click.stop.prevent="handleClick(el.name, el.cssClass)"
            :class="`icon-${el.name}`"
            :data-cy="`${el.cssClass}-link`"
@@ -75,6 +75,10 @@ const handleClick = (name, cssClass) => {
   color: inherit;
   flex: auto;
   text-align: center;
+}
+
+.icon-item:hover {
+  cursor: pointer;
 }
 
 .icon-item i {

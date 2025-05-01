@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 SkillTree
+ * Copyright 2025 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,3724 +16,7801 @@
 // eslint-disable-next-line
 const fontAwesomeIcons = {
   iconPack: 'Font Awesome Free',
-  version: '5.7.1',
+  version: '6.7.2',
   icons: [
     {
+      name: 'a',
+      cssClass: 'fa-solid fa-a',
+      searchTerms: ['letter', 'A', 'initial'],
+    }, {
       name: 'ad',
-      cssClass: 'fas fa-ad',
-    },
-    {
+      cssClass: 'fa-solid fa-ad',
+      searchTerms: ['ad', 'advertisement', 'promotion'],
+    }, {
+      name: 'add',
+      cssClass: 'fa-solid fa-add',
+      searchTerms: ['add', 'plus', 'increase'],
+    }, {
       name: 'address-book',
-      cssClass: 'fas fa-address-book',
-    },
-    {
+      cssClass: 'fa-solid fa-address-book',
+      searchTerms: ['address', 'book', 'contacts'],
+    }, {
       name: 'address-card',
-      cssClass: 'fas fa-address-card',
-    },
-    {
+      cssClass: 'fa-solid fa-address-card',
+      searchTerms: ['address', 'card', 'contact'],
+    }, {
       name: 'adjust',
-      cssClass: 'fas fa-adjust',
-    },
-    {
+      cssClass: 'fa-solid fa-adjust',
+      searchTerms: ['adjust', 'settings', 'modify'],
+    }, {
       name: 'air-freshener',
-      cssClass: 'fas fa-air-freshener',
-    },
-    {
+      cssClass: 'fa-solid fa-air-freshener',
+      searchTerms: ['air', 'freshener', 'scent'],
+    }, {
       name: 'align-center',
-      cssClass: 'fas fa-align-center',
-    },
-    {
+      cssClass: 'fa-solid fa-align-center',
+      searchTerms: ['align', 'center', 'text'],
+    }, {
       name: 'align-justify',
-      cssClass: 'fas fa-align-justify',
-    },
-    {
+      cssClass: 'fa-solid fa-align-justify',
+      searchTerms: ['align', 'justify', 'text'],
+    }, {
       name: 'align-left',
-      cssClass: 'fas fa-align-left',
-    },
-    {
+      cssClass: 'fa-solid fa-align-left',
+      searchTerms: ['align', 'left', 'text'],
+    }, {
       name: 'align-right',
-      cssClass: 'fas fa-align-right',
-    },
-    {
+      cssClass: 'fa-solid fa-align-right',
+      searchTerms: ['align', 'right', 'text'],
+    }, {
       name: 'allergies',
-      cssClass: 'fas fa-allergies',
-    },
-    {
+      cssClass: 'fa-solid fa-allergies',
+      searchTerms: ['allergies', 'health', 'reaction'],
+    }, {
       name: 'ambulance',
-      cssClass: 'fas fa-ambulance',
-    },
-    {
+      cssClass: 'fa-solid fa-ambulance',
+      searchTerms: ['ambulance', 'emergency', 'medical'],
+    }, {
       name: 'american-sign-language-interpreting',
-      cssClass: 'fas fa-american-sign-language-interpreting',
-    },
-    {
+      cssClass: 'fa-solid fa-american-sign-language-interpreting',
+      searchTerms: ['asl', 'interpreting', 'sign'],
+    }, {
       name: 'anchor',
-      cssClass: 'fas fa-anchor',
-    },
-    {
+      cssClass: 'fa-solid fa-anchor',
+      searchTerms: ['anchor', 'marine', 'nautical'],
+    }, {
+      name: 'anchor-circle-check',
+      cssClass: 'fa-solid fa-anchor-circle-check',
+      searchTerms: ['anchor', 'verified', 'check'],
+    }, {
+      name: 'anchor-circle-exclamation',
+      cssClass: 'fa-solid fa-anchor-circle-exclamation',
+      searchTerms: ['anchor', 'alert', 'circle'],
+    }, {
+      name: 'anchor-circle-xmark',
+      cssClass: 'fa-solid fa-anchor-circle-xmark',
+      searchTerms: ['anchor', 'remove', 'circle'],
+    }, {
+      name: 'anchor-lock',
+      cssClass: 'fa-solid fa-anchor-lock',
+      searchTerms: ['anchor', 'lock', 'secure'],
+    }, {
       name: 'angle-double-down',
-      cssClass: 'fas fa-angle-double-down',
-    },
-    {
+      cssClass: 'fa-solid fa-angle-double-down',
+      searchTerms: ['angle', 'double', 'down'],
+    }, {
       name: 'angle-double-left',
-      cssClass: 'fas fa-angle-double-left',
-    },
-    {
+      cssClass: 'fa-solid fa-angle-double-left',
+      searchTerms: ['angle', 'double', 'left'],
+    }, {
       name: 'angle-double-right',
-      cssClass: 'fas fa-angle-double-right',
-    },
-    {
+      cssClass: 'fa-solid fa-angle-double-right',
+      searchTerms: ['angle', 'double', 'right'],
+    }, {
       name: 'angle-double-up',
-      cssClass: 'fas fa-angle-double-up',
-    },
-    {
+      cssClass: 'fa-solid fa-angle-double-up',
+      searchTerms: ['angle', 'double', 'up'],
+    }, {
       name: 'angle-down',
-      cssClass: 'fas fa-angle-down',
-    },
-    {
+      cssClass: 'fa-solid fa-angle-down',
+      searchTerms: ['angle', 'down', 'direction'],
+    }, {
       name: 'angle-left',
-      cssClass: 'fas fa-angle-left',
-    },
-    {
+      cssClass: 'fa-solid fa-angle-left',
+      searchTerms: ['angle', 'left', 'direction'],
+    }, {
       name: 'angle-right',
-      cssClass: 'fas fa-angle-right',
-    },
-    {
+      cssClass: 'fa-solid fa-angle-right',
+      searchTerms: ['angle', 'right', 'direction'],
+    }, {
       name: 'angle-up',
-      cssClass: 'fas fa-angle-up',
-    },
-    {
+      cssClass: 'fa-solid fa-angle-up',
+      searchTerms: ['angle', 'up', 'direction'],
+    }, {
+      name: 'angles-down',
+      cssClass: 'fa-solid fa-angles-down',
+      searchTerms: ['expand', 'down', 'open'],
+    }, {
+      name: 'angles-left',
+      cssClass: 'fa-solid fa-angles-left',
+      searchTerms: ['angles', 'left', 'direction'],
+    }, {
+      name: 'angles-right',
+      cssClass: 'fa-solid fa-angles-right',
+      searchTerms: ['angles', 'right', 'direction'],
+    }, {
+      name: 'angles-up',
+      cssClass: 'fa-solid fa-angles-up',
+      searchTerms: ['angles', 'up', 'direction'],
+    }, {
       name: 'angry',
-      cssClass: 'fas fa-angry',
-    },
-    {
+      cssClass: 'fa-solid fa-angry',
+      searchTerms: ['angry', 'face', 'emotion'],
+    }, {
       name: 'ankh',
-      cssClass: 'fas fa-ankh',
-    },
-    {
+      cssClass: 'fa-solid fa-ankh',
+      searchTerms: ['ankh', 'symbol', 'life'],
+    }, {
       name: 'apple-alt',
-      cssClass: 'fas fa-apple-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-apple-alt',
+      searchTerms: ['apple', 'alternative', 'fruit'],
+    }, {
+      name: 'apple-whole',
+      cssClass: 'fa-solid fa-apple-whole',
+      searchTerms: ['apple', 'whole', 'fruit'],
+    }, {
       name: 'archive',
-      cssClass: 'fas fa-archive',
-    },
-    {
+      cssClass: 'fa-solid fa-archive',
+      searchTerms: ['archive', 'store', 'files'],
+    }, {
       name: 'archway',
-      cssClass: 'fas fa-archway',
-    },
-    {
+      cssClass: 'fa-solid fa-archway',
+      searchTerms: ['archway', 'entrance', 'door'],
+    }, {
+      name: 'area-chart',
+      cssClass: 'fa-solid fa-area-chart',
+      searchTerms: ['area', 'chart', 'data'],
+    }, {
       name: 'arrow-alt-circle-down',
-      cssClass: 'fas fa-arrow-alt-circle-down',
-    },
-    {
+      cssClass: 'fa-solid fa-arrow-alt-circle-down',
+      searchTerms: ['arrow', 'down', 'circle'],
+    }, {
       name: 'arrow-alt-circle-left',
-      cssClass: 'fas fa-arrow-alt-circle-left',
-    },
-    {
+      cssClass: 'fa-solid fa-arrow-alt-circle-left',
+      searchTerms: ['arrow', 'left', 'circle'],
+    }, {
       name: 'arrow-alt-circle-right',
-      cssClass: 'fas fa-arrow-alt-circle-right',
-    },
-    {
+      cssClass: 'fa-solid fa-arrow-alt-circle-right',
+      searchTerms: ['arrow', 'right', 'circle'],
+    }, {
       name: 'arrow-alt-circle-up',
-      cssClass: 'fas fa-arrow-alt-circle-up',
-    },
-    {
+      cssClass: 'fa-solid fa-arrow-alt-circle-up',
+      searchTerms: ['arrow', 'up', 'circle'],
+    }, {
       name: 'arrow-circle-down',
-      cssClass: 'fas fa-arrow-circle-down',
-    },
-    {
+      cssClass: 'fa-solid fa-arrow-circle-down',
+      searchTerms: ['arrow', 'down', 'circle'],
+    }, {
       name: 'arrow-circle-left',
-      cssClass: 'fas fa-arrow-circle-left',
-    },
-    {
+      cssClass: 'fa-solid fa-arrow-circle-left',
+      searchTerms: ['arrow', 'left', 'circle'],
+    }, {
       name: 'arrow-circle-right',
-      cssClass: 'fas fa-arrow-circle-right',
-    },
-    {
+      cssClass: 'fa-solid fa-arrow-circle-right',
+      searchTerms: ['arrow', 'right', 'circle'],
+    }, {
       name: 'arrow-circle-up',
-      cssClass: 'fas fa-arrow-circle-up',
-    },
-    {
+      cssClass: 'fa-solid fa-arrow-circle-up',
+      searchTerms: ['arrow', 'up', 'circle'],
+    }, {
       name: 'arrow-down',
-      cssClass: 'fas fa-arrow-down',
-    },
-    {
+      cssClass: 'fa-solid fa-arrow-down',
+      searchTerms: ['arrow', 'down', 'direction'],
+    }, {
+      name: 'arrow-down-1-9',
+      cssClass: 'fa-solid fa-arrow-down-1-9',
+      searchTerms: ['down', 'arrow', 'one'],
+    }, {
+      name: 'arrow-down-9-1',
+      cssClass: 'fa-solid fa-arrow-down-9-1',
+      searchTerms: ['down', 'arrow', 'nine'],
+    }, {
+      name: 'arrow-down-a-z',
+      cssClass: 'fa-solid fa-arrow-down-a-z',
+      searchTerms: ['down', 'arrow', 'a-z'],
+    }, {
+      name: 'arrow-down-long',
+      cssClass: 'fa-solid fa-arrow-down-long',
+      searchTerms: ['down', 'long', 'arrow'],
+    }, {
+      name: 'arrow-down-short-wide',
+      cssClass: 'fa-solid fa-arrow-down-short-wide',
+      searchTerms: ['down', 'short', 'arrow'],
+    }, {
+      name: 'arrow-down-up-across-line',
+      cssClass: 'fa-solid fa-arrow-down-up-across-line',
+      searchTerms: ['cross', 'line', 'arrow'],
+    }, {
+      name: 'arrow-down-up-lock',
+      cssClass: 'fa-solid fa-arrow-down-up-lock',
+      searchTerms: ['arrow', 'down', 'up', 'lock'],
+    }, {
+      name: 'arrow-down-wide-short',
+      cssClass: 'fa-solid fa-arrow-down-wide-short',
+      searchTerms: ['down', 'wide', 'short'],
+    }, {
+      name: 'arrow-down-z-a',
+      cssClass: 'fa-solid fa-arrow-down-z-a',
+      searchTerms: ['down', 'arrow', 'z-a'],
+    }, {
       name: 'arrow-left',
-      cssClass: 'fas fa-arrow-left',
-    },
-    {
+      cssClass: 'fa-solid fa-arrow-left',
+      searchTerms: ['arrow', 'left', 'direction'],
+    }, {
+      name: 'arrow-left-long',
+      cssClass: 'fa-solid fa-arrow-left-long',
+      searchTerms: ['left', 'long', 'arrow'],
+    }, {
+      name: 'arrow-left-rotate',
+      cssClass: 'fa-solid fa-arrow-left-rotate',
+      searchTerms: ['rotate', 'left', 'arrow'],
+    }, {
+      name: 'arrow-pointer',
+      cssClass: 'fa-solid fa-arrow-pointer',
+      searchTerms: ['pointer', 'arrow', 'click'],
+    }, {
       name: 'arrow-right',
-      cssClass: 'fas fa-arrow-right',
-    },
-    {
+      cssClass: 'fa-solid fa-arrow-right',
+      searchTerms: ['arrow', 'right', 'direction'],
+    }, {
+      name: 'arrow-right-arrow-left',
+      cssClass: 'fa-solid fa-arrow-right-arrow-left',
+      searchTerms: ['right', 'left', 'arrow'],
+    }, {
+      name: 'arrow-right-from-bracket',
+      cssClass: 'fa-solid fa-arrow-right-from-bracket',
+      searchTerms: ['logout', 'exit', 'arrow'],
+    }, {
+      name: 'arrow-right-from-file',
+      cssClass: 'fa-solid fa-arrow-right-from-file',
+      searchTerms: ['arrow', 'right', 'file'],
+    }, {
+      name: 'arrow-right-long',
+      cssClass: 'fa-solid fa-arrow-right-long',
+      searchTerms: ['right', 'long', 'arrow'],
+    }, {
+      name: 'arrow-right-rotate',
+      cssClass: 'fa-solid fa-arrow-right-rotate',
+      searchTerms: ['rotate', 'right', 'arrow'],
+    }, {
+      name: 'arrow-right-to-bracket',
+      cssClass: 'fa-solid fa-arrow-right-to-bracket',
+      searchTerms: ['right', 'arrow', 'bracket'],
+    }, {
+      name: 'arrow-right-to-city',
+      cssClass: 'fa-solid fa-arrow-right-to-city',
+      searchTerms: ['arrow', 'right', 'city'],
+    }, {
+      name: 'arrow-right-to-file',
+      cssClass: 'fa-solid fa-arrow-right-to-file',
+      searchTerms: ['right', 'arrow', 'file'],
+    }, {
+      name: 'arrow-rotate-back',
+      cssClass: 'fa-solid fa-arrow-rotate-back',
+      searchTerms: ['rotate', 'back', 'turn'],
+    }, {
+      name: 'arrow-rotate-backward',
+      cssClass: 'fa-solid fa-arrow-rotate-backward',
+      searchTerms: ['rotate', 'backward', 'turn'],
+    }, {
+      name: 'arrow-rotate-forward',
+      cssClass: 'fa-solid fa-arrow-rotate-forward',
+      searchTerms: ['rotate', 'forward', 'arrow'],
+    }, {
+      name: 'arrow-rotate-left',
+      cssClass: 'fa-solid fa-arrow-rotate-left',
+      searchTerms: ['rotate', 'left', 'turn'],
+    }, {
+      name: 'arrow-rotate-right',
+      cssClass: 'fa-solid fa-arrow-rotate-right',
+      searchTerms: ['rotate', 'right', 'turn'],
+    }, {
+      name: 'arrow-trend-down',
+      cssClass: 'fa-solid fa-arrow-trend-down',
+      searchTerms: ['arrow', 'trend', 'down'],
+    }, {
+      name: 'arrow-trend-up',
+      cssClass: 'fa-solid fa-arrow-trend-up',
+      searchTerms: ['arrow', 'trend', 'up'],
+    }, {
+      name: 'arrow-turn-down',
+      cssClass: 'fa-solid fa-arrow-turn-down',
+      searchTerms: ['turn', 'down', 'arrow'],
+    }, {
+      name: 'arrow-turn-up',
+      cssClass: 'fa-solid fa-arrow-turn-up',
+      searchTerms: ['turn', 'up', 'arrow'],
+    }, {
       name: 'arrow-up',
-      cssClass: 'fas fa-arrow-up',
-    },
-    {
+      cssClass: 'fa-solid fa-arrow-up',
+      searchTerms: ['arrow', 'up', 'direction'],
+    }, {
+      name: 'arrow-up-1-9',
+      cssClass: 'fa-solid fa-arrow-up-1-9',
+      searchTerms: ['up', 'arrow', 'one'],
+    }, {
+      name: 'arrow-up-9-1',
+      cssClass: 'fa-solid fa-arrow-up-9-1',
+      searchTerms: ['up', 'arrow', 'nine'],
+    }, {
+      name: 'arrow-up-a-z',
+      cssClass: 'fa-solid fa-arrow-up-a-z',
+      searchTerms: ['up', 'arrow', 'a-z'],
+    }, {
+      name: 'arrow-up-from-bracket',
+      cssClass: 'fa-solid fa-arrow-up-from-bracket',
+      searchTerms: ['up', 'arrow', 'bracket'],
+    }, {
+      name: 'arrow-up-from-ground-water',
+      cssClass: 'fa-solid fa-arrow-up-from-ground-water',
+      searchTerms: ['arrow', 'up', 'water'],
+    }, {
+      name: 'arrow-up-from-water-pump',
+      cssClass: 'fa-solid fa-arrow-up-from-water-pump',
+      searchTerms: ['arrow', 'up', 'pump'],
+    }, {
+      name: 'arrow-up-long',
+      cssClass: 'fa-solid fa-arrow-up-long',
+      searchTerms: ['up', 'arrow', 'long'],
+    }, {
+      name: 'arrow-up-right-dots',
+      cssClass: 'fa-solid fa-arrow-up-right-dots',
+      searchTerms: ['arrow', 'up', 'right', 'dots'],
+    }, {
+      name: 'arrow-up-right-from-square',
+      cssClass: 'fa-solid fa-arrow-up-right-from-square',
+      searchTerms: ['up', 'right', 'arrow'],
+    }, {
+      name: 'arrow-up-short-wide',
+      cssClass: 'fa-solid fa-arrow-up-short-wide',
+      searchTerms: ['up', 'short', 'arrow'],
+    }, {
+      name: 'arrow-up-wide-short',
+      cssClass: 'fa-solid fa-arrow-up-wide-short',
+      searchTerms: ['up', 'wide', 'short'],
+    }, {
+      name: 'arrow-up-z-a',
+      cssClass: 'fa-solid fa-arrow-up-z-a',
+      searchTerms: ['up', 'arrow', 'z-a'],
+    }, {
+      name: 'arrows',
+      cssClass: 'fa-solid fa-arrows',
+      searchTerms: ['arrows', 'direction', 'navigate'],
+    }, {
       name: 'arrows-alt',
-      cssClass: 'fas fa-arrows-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-arrows-alt',
+      searchTerms: ['arrows', 'expand', 'resize'],
+    }, {
       name: 'arrows-alt-h',
-      cssClass: 'fas fa-arrows-alt-h',
-    },
-    {
+      cssClass: 'fa-solid fa-arrows-alt-h',
+      searchTerms: ['arrows', 'horizontal', 'resize'],
+    }, {
       name: 'arrows-alt-v',
-      cssClass: 'fas fa-arrows-alt-v',
-    },
-    {
+      cssClass: 'fa-solid fa-arrows-alt-v',
+      searchTerms: ['arrows', 'vertical', 'resize'],
+    }, {
+      name: 'arrows-down-to-line',
+      cssClass: 'fa-solid fa-arrows-down-to-line',
+      searchTerms: ['down', 'arrows', 'line'],
+    }, {
+      name: 'arrows-down-to-people',
+      cssClass: 'fa-solid fa-arrows-down-to-people',
+      searchTerms: ['down', 'arrows', 'people'],
+    }, {
+      name: 'arrows-h',
+      cssClass: 'fa-solid fa-arrows-h',
+      searchTerms: ['arrows', 'horizontal', 'direction'],
+    }, {
+      name: 'arrows-left-right',
+      cssClass: 'fa-solid fa-arrows-left-right',
+      searchTerms: ['left', 'right', 'arrows'],
+    }, {
+      name: 'arrows-left-right-to-line',
+      cssClass: 'fa-solid fa-arrows-left-right-to-line',
+      searchTerms: ['left', 'right', 'arrows'],
+    }, {
+      name: 'arrows-rotate',
+      cssClass: 'fa-solid fa-arrows-rotate',
+      searchTerms: ['rotate', 'arrows', 'turn'],
+    }, {
+      name: 'arrows-spin',
+      cssClass: 'fa-solid fa-arrows-spin',
+      searchTerms: ['arrows', 'spin', 'rotate'],
+    }, {
+      name: 'arrows-split-up-and-left',
+      cssClass: 'fa-solid fa-arrows-split-up-and-left',
+      searchTerms: ['arrows', 'split', 'up', 'left'],
+    }, {
+      name: 'arrows-to-circle',
+      cssClass: 'fa-solid fa-arrows-to-circle',
+      searchTerms: ['rearrange', 'items', 'move'],
+    }, {
+      name: 'arrows-to-dot',
+      cssClass: 'fa-solid fa-arrows-to-dot',
+      searchTerms: ['arrows', 'to', 'dot'],
+    }, {
+      name: 'arrows-to-eye',
+      cssClass: 'fa-solid fa-arrows-to-eye',
+      searchTerms: ['arrows', 'to', 'eye'],
+    }, {
+      name: 'arrows-turn-right',
+      cssClass: 'fa-solid fa-arrows-turn-right',
+      searchTerms: ['turn', 'arrows', 'right'],
+    }, {
+      name: 'arrows-turn-to-dots',
+      cssClass: 'fa-solid fa-arrows-turn-to-dots',
+      searchTerms: ['arrows', 'turn', 'dots'],
+    }, {
+      name: 'arrows-up-down',
+      cssClass: 'fa-solid fa-arrows-up-down',
+      searchTerms: ['arrows', 'up', 'down'],
+    }, {
+      name: 'arrows-up-down-left-right',
+      cssClass: 'fa-solid fa-arrows-up-down-left-right',
+      searchTerms: ['arrows', 'up', 'down', 'left', 'right'],
+    }, {
+      name: 'arrows-up-to-line',
+      cssClass: 'fa-solid fa-arrows-up-to-line',
+      searchTerms: ['align', 'up', 'line'],
+    }, {
+      name: 'arrows-v',
+      cssClass: 'fa-solid fa-arrows-v',
+      searchTerms: ['arrows', 'vertical', 'direction'],
+    }, {
+      name: 'asl-interpreting',
+      cssClass: 'fa-solid fa-asl-interpreting',
+      searchTerms: ['asl', 'interpreting', 'sign'],
+    }, {
       name: 'assistive-listening-systems',
-      cssClass: 'fas fa-assistive-listening-systems',
-    },
-    {
+      cssClass: 'fa-solid fa-assistive-listening-systems',
+      searchTerms: ['assistive', 'listening', 'systems'],
+    }, {
       name: 'asterisk',
-      cssClass: 'fas fa-asterisk',
-    },
-    {
+      cssClass: 'fa-solid fa-asterisk',
+      searchTerms: ['asterisk', 'symbol', 'note'],
+    }, {
       name: 'at',
-      cssClass: 'fas fa-at',
-    },
-    {
+      cssClass: 'fa-solid fa-at',
+      searchTerms: ['at', 'symbol', 'email'],
+    }, {
       name: 'atlas',
-      cssClass: 'fas fa-atlas',
-    },
-    {
+      cssClass: 'fa-solid fa-atlas',
+      searchTerms: ['atlas', 'map', 'geography'],
+    }, {
       name: 'atom',
-      cssClass: 'fas fa-atom',
-    },
-    {
+      cssClass: 'fa-solid fa-atom',
+      searchTerms: ['atom', 'science', 'particle'],
+    }, {
       name: 'audio-description',
-      cssClass: 'fas fa-audio-description',
-    },
-    {
+      cssClass: 'fa-solid fa-audio-description',
+      searchTerms: ['audio', 'description', 'media'],
+    }, {
+      name: 'austral-sign',
+      cssClass: 'fa-solid fa-austral-sign',
+      searchTerms: ['austral', 'currency', 'argentina'],
+    }, {
+      name: 'automobile',
+      cssClass: 'fa-solid fa-automobile',
+      searchTerms: ['automobile', 'car', 'vehicle'],
+    }, {
       name: 'award',
-      cssClass: 'fas fa-award',
-    },
-    {
+      cssClass: 'fa-solid fa-award',
+      searchTerms: ['award', 'trophy', 'achievement'],
+    }, {
+      name: 'b',
+      cssClass: 'fa-solid fa-b',
+      searchTerms: ['letter', 'B', 'initial'],
+    }, {
       name: 'baby',
-      cssClass: 'fas fa-baby',
-    },
-    {
+      cssClass: 'fa-solid fa-baby',
+      searchTerms: ['baby', 'infant', 'child'],
+    }, {
       name: 'baby-carriage',
-      cssClass: 'fas fa-baby-carriage',
-    },
-    {
+      cssClass: 'fa-solid fa-baby-carriage',
+      searchTerms: ['carriage', 'baby', 'transport'],
+    }, {
       name: 'backspace',
-      cssClass: 'fas fa-backspace',
-    },
-    {
+      cssClass: 'fa-solid fa-backspace',
+      searchTerms: ['backspace', 'delete', 'key'],
+    }, {
       name: 'backward',
-      cssClass: 'fas fa-backward',
-    },
-    {
+      cssClass: 'fa-solid fa-backward',
+      searchTerms: ['backward', 'reverse', 'play'],
+    }, {
+      name: 'backward-fast',
+      cssClass: 'fa-solid fa-backward-fast',
+      searchTerms: ['backward', 'fast', 'reverse'],
+    }, {
+      name: 'backward-step',
+      cssClass: 'fa-solid fa-backward-step',
+      searchTerms: ['step', 'backward', 'reverse'],
+    }, {
       name: 'bacon',
-      cssClass: 'fas fa-bacon',
-    },
-    {
+      cssClass: 'fa-solid fa-bacon',
+      searchTerms: ['bacon', 'food', 'breakfast'],
+    }, {
+      name: 'bacteria',
+      cssClass: 'fa-solid fa-bacteria',
+      searchTerms: ['bacteria', 'germs', 'microbe'],
+    }, {
+      name: 'bacterium',
+      cssClass: 'fa-solid fa-bacterium',
+      searchTerms: ['bacterium', 'germ', 'microbe'],
+    }, {
+      name: 'bag-shopping',
+      cssClass: 'fa-solid fa-bag-shopping',
+      searchTerms: ['shopping', 'bag', 'purchase'],
+    }, {
+      name: 'bahai',
+      cssClass: 'fa-solid fa-bahai',
+      searchTerms: ['bahai', 'religion', 'faith'],
+    }, {
+      name: 'baht-sign',
+      cssClass: 'fa-solid fa-baht-sign',
+      searchTerms: ['baht', 'currency', 'thailand'],
+    }, {
       name: 'balance-scale',
-      cssClass: 'fas fa-balance-scale',
-    },
-    {
+      cssClass: 'fa-solid fa-balance-scale',
+      searchTerms: ['balance', 'scale', 'measure'],
+    }, {
+      name: 'balance-scale-left',
+      cssClass: 'fa-solid fa-balance-scale-left',
+      searchTerms: ['balance', 'scale', 'left'],
+    }, {
+      name: 'balance-scale-right',
+      cssClass: 'fa-solid fa-balance-scale-right',
+      searchTerms: ['balance', 'scale', 'right'],
+    }, {
       name: 'ban',
-      cssClass: 'fas fa-ban',
-    },
-    {
+      cssClass: 'fa-solid fa-ban',
+      searchTerms: ['ban', 'prohibit', 'forbid'],
+    }, {
+      name: 'ban-smoking',
+      cssClass: 'fa-solid fa-ban-smoking',
+      searchTerms: ['ban', 'smoking', 'prohibition'],
+    }, {
       name: 'band-aid',
-      cssClass: 'fas fa-band-aid',
-    },
-    {
+      cssClass: 'fa-solid fa-band-aid',
+      searchTerms: ['band-aid', 'medical', 'first aid'],
+    }, {
+      name: 'bandage',
+      cssClass: 'fa-solid fa-bandage',
+      searchTerms: ['bandage', 'medical', 'first aid'],
+    }, {
+      name: 'bangladeshi-taka-sign',
+      cssClass: 'fa-solid fa-bangladeshi-taka-sign',
+      searchTerms: ['taka', 'currency', 'bangladesh'],
+    }, {
+      name: 'bank',
+      cssClass: 'fa-solid fa-bank',
+      searchTerms: ['bank', 'finance', 'money'],
+    }, {
+      name: 'bar-chart',
+      cssClass: 'fa-solid fa-bar-chart',
+      searchTerms: ['bar', 'chart', 'data'],
+    }, {
       name: 'barcode',
-      cssClass: 'fas fa-barcode',
-    },
-    {
+      cssClass: 'fa-solid fa-barcode',
+      searchTerms: ['barcode', 'scan', 'product'],
+    }, {
       name: 'bars',
-      cssClass: 'fas fa-bars',
-    },
-    {
+      cssClass: 'fa-solid fa-bars',
+      searchTerms: ['bars', 'menu', 'navigation'],
+    }, {
+      name: 'bars-progress',
+      cssClass: 'fa-solid fa-bars-progress',
+      searchTerms: ['bars', 'progress', 'status'],
+    }, {
+      name: 'bars-staggered',
+      cssClass: 'fa-solid fa-bars-staggered',
+      searchTerms: ['bars', 'staggered', 'menu'],
+    }, {
+      name: 'baseball',
+      cssClass: 'fa-solid fa-baseball',
+      searchTerms: ['baseball', 'sport', 'game'],
+    }, {
       name: 'baseball-ball',
-      cssClass: 'fas fa-baseball-ball',
-    },
-    {
+      cssClass: 'fa-solid fa-baseball-ball',
+      searchTerms: ['baseball', 'ball', 'sport'],
+    }, {
+      name: 'baseball-bat-ball',
+      cssClass: 'fa-solid fa-baseball-bat-ball',
+      searchTerms: ['baseball', 'bat', 'ball'],
+    }, {
+      name: 'basket-shopping',
+      cssClass: 'fa-solid fa-basket-shopping',
+      searchTerms: ['basket', 'shopping', 'purchase'],
+    }, {
+      name: 'basketball',
+      cssClass: 'fa-solid fa-basketball',
+      searchTerms: ['basketball', 'sport', 'game'],
+    }, {
       name: 'basketball-ball',
-      cssClass: 'fas fa-basketball-ball',
-    },
-    {
+      cssClass: 'fa-solid fa-basketball-ball',
+      searchTerms: ['basketball', 'ball', 'sport'],
+    }, {
       name: 'bath',
-      cssClass: 'fas fa-bath',
-    },
-    {
+      cssClass: 'fa-solid fa-bath',
+      searchTerms: ['bath', 'bathtub', 'relax'],
+    }, {
+      name: 'bathtub',
+      cssClass: 'fa-solid fa-bathtub',
+      searchTerms: ['bathtub', 'bath', 'relax'],
+    }, {
+      name: 'battery',
+      cssClass: 'fa-solid fa-battery',
+      searchTerms: ['battery', 'power', 'charge'],
+    }, {
+      name: 'battery-0',
+      cssClass: 'fa-solid fa-battery-0',
+      searchTerms: ['battery', 'zero', 'empty'],
+    }, {
+      name: 'battery-2',
+      cssClass: 'fa-solid fa-battery-2',
+      searchTerms: ['battery', 'two', 'level'],
+    }, {
+      name: 'battery-3',
+      cssClass: 'fa-solid fa-battery-3',
+      searchTerms: ['battery', 'three', 'charge'],
+    }, {
+      name: 'battery-4',
+      cssClass: 'fa-solid fa-battery-4',
+      searchTerms: ['battery', 'four', 'level'],
+    }, {
+      name: 'battery-5',
+      cssClass: 'fa-solid fa-battery-5',
+      searchTerms: ['battery', 'five', 'level'],
+    }, {
+      name: 'battery-car',
+      cssClass: 'fa-solid fa-battery-car',
+      searchTerms: ['battery', 'car', 'electric'],
+    }, {
       name: 'battery-empty',
-      cssClass: 'fas fa-battery-empty',
-    },
-    {
+      cssClass: 'fa-solid fa-battery-empty',
+      searchTerms: ['battery', 'empty', 'power'],
+    }, {
       name: 'battery-full',
-      cssClass: 'fas fa-battery-full',
-    },
-    {
+      cssClass: 'fa-solid fa-battery-full',
+      searchTerms: ['battery', 'full', 'charge'],
+    }, {
       name: 'battery-half',
-      cssClass: 'fas fa-battery-half',
-    },
-    {
+      cssClass: 'fa-solid fa-battery-half',
+      searchTerms: ['battery', 'half', 'charge'],
+    }, {
       name: 'battery-quarter',
-      cssClass: 'fas fa-battery-quarter',
-    },
-    {
+      cssClass: 'fa-solid fa-battery-quarter',
+      searchTerms: ['battery', 'quarter', 'charge'],
+    }, {
       name: 'battery-three-quarters',
-      cssClass: 'fas fa-battery-three-quarters',
-    },
-    {
+      cssClass: 'fa-solid fa-battery-three-quarters',
+      searchTerms: ['battery', 'three-quarters', 'charge'],
+    }, {
       name: 'bed',
-      cssClass: 'fas fa-bed',
-    },
-    {
+      cssClass: 'fa-solid fa-bed',
+      searchTerms: ['bed', 'sleep', 'rest'],
+    }, {
+      name: 'bed-pulse',
+      cssClass: 'fa-solid fa-bed-pulse',
+      searchTerms: ['bed', 'pulse', 'health'],
+    }, {
       name: 'beer',
-      cssClass: 'fas fa-beer',
-    },
-    {
+      cssClass: 'fa-solid fa-beer',
+      searchTerms: ['beer', 'drink', 'alcohol'],
+    }, {
+      name: 'beer-mug-empty',
+      cssClass: 'fa-solid fa-beer-mug-empty',
+      searchTerms: ['empty', 'beer', 'mug'],
+    }, {
       name: 'bell',
-      cssClass: 'fas fa-bell',
-    },
-    {
+      cssClass: 'fa-solid fa-bell',
+      searchTerms: ['bell', 'alert', 'notification'],
+    }, {
+      name: 'bell-concierge',
+      cssClass: 'fa-solid fa-bell-concierge',
+      searchTerms: ['bell', 'concierge', 'service'],
+    }, {
       name: 'bell-slash',
-      cssClass: 'fas fa-bell-slash',
-    },
-    {
+      cssClass: 'fa-solid fa-bell-slash',
+      searchTerms: ['bell', 'mute', 'notification'],
+    }, {
       name: 'bezier-curve',
-      cssClass: 'fas fa-bezier-curve',
-    },
-    {
+      cssClass: 'fa-solid fa-bezier-curve',
+      searchTerms: ['bezier', 'curve', 'design'],
+    }, {
       name: 'bible',
-      cssClass: 'fas fa-bible',
-    },
-    {
+      cssClass: 'fa-solid fa-bible',
+      searchTerms: ['bible', 'book', 'religion'],
+    }, {
       name: 'bicycle',
-      cssClass: 'fas fa-bicycle',
-    },
-    {
+      cssClass: 'fa-solid fa-bicycle',
+      searchTerms: ['bicycle', 'bike', 'transport'],
+    }, {
+      name: 'biking',
+      cssClass: 'fa-solid fa-biking',
+      searchTerms: ['biking', 'cycling', 'sport'],
+    }, {
       name: 'binoculars',
-      cssClass: 'fas fa-binoculars',
-    },
-    {
+      cssClass: 'fa-solid fa-binoculars',
+      searchTerms: ['binoculars', 'view', 'sight'],
+    }, {
       name: 'biohazard',
-      cssClass: 'fas fa-biohazard',
-    },
-    {
+      cssClass: 'fa-solid fa-biohazard',
+      searchTerms: ['biohazard', 'danger', 'toxic'],
+    }, {
       name: 'birthday-cake',
-      cssClass: 'fas fa-birthday-cake',
-    },
-    {
+      cssClass: 'fa-solid fa-birthday-cake',
+      searchTerms: ['cake', 'birthday', 'celebrate'],
+    }, {
+      name: 'bitcoin-sign',
+      cssClass: 'fa-solid fa-bitcoin-sign',
+      searchTerms: ['bitcoin', 'currency', 'crypto'],
+    }, {
+      name: 'blackboard',
+      cssClass: 'fa-solid fa-blackboard',
+      searchTerms: ['blackboard', 'teach', 'learn'],
+    }, {
       name: 'blender',
-      cssClass: 'fas fa-blender',
-    },
-    {
+      cssClass: 'fa-solid fa-blender',
+      searchTerms: ['blender', 'kitchen', 'appliance'],
+    }, {
       name: 'blender-phone',
-      cssClass: 'fas fa-blender-phone',
-    },
-    {
+      cssClass: 'fa-solid fa-blender-phone',
+      searchTerms: ['blender', 'phone', 'kitchen'],
+    }, {
       name: 'blind',
-      cssClass: 'fas fa-blind',
-    },
-    {
+      cssClass: 'fa-solid fa-blind',
+      searchTerms: ['blind', 'disability', 'accessibility'],
+    }, {
       name: 'blog',
-      cssClass: 'fas fa-blog',
-    },
-    {
+      cssClass: 'fa-solid fa-blog',
+      searchTerms: ['blog', 'post', 'writing'],
+    }, {
       name: 'bold',
-      cssClass: 'fas fa-bold',
-    },
-    {
+      cssClass: 'fa-solid fa-bold',
+      searchTerms: ['bold', 'text', 'style'],
+    }, {
       name: 'bolt',
-      cssClass: 'fas fa-bolt',
-    },
-    {
+      cssClass: 'fa-solid fa-bolt',
+      searchTerms: ['bolt', 'lightning', 'electric'],
+    }, {
+      name: 'bolt-lightning',
+      cssClass: 'fa-solid fa-bolt-lightning',
+      searchTerms: ['lightning', 'bolt', 'electric'],
+    }, {
       name: 'bomb',
-      cssClass: 'fas fa-bomb',
-    },
-    {
+      cssClass: 'fa-solid fa-bomb',
+      searchTerms: ['bomb', 'explosive', 'danger'],
+    }, {
       name: 'bone',
-      cssClass: 'fas fa-bone',
-    },
-    {
+      cssClass: 'fa-solid fa-bone',
+      searchTerms: ['bone', 'anatomy', 'health'],
+    }, {
       name: 'book',
-      cssClass: 'fas fa-book',
-    },
-    {
+      cssClass: 'fa-solid fa-book',
+      searchTerms: ['book', 'reading', 'knowledge'],
+    }, {
+      name: 'book-atlas',
+      cssClass: 'fa-solid fa-book-atlas',
+      searchTerms: ['book', 'atlas', 'geography'],
+    }, {
+      name: 'book-bible',
+      cssClass: 'fa-solid fa-book-bible',
+      searchTerms: ['book', 'bible', 'religion'],
+    }, {
+      name: 'book-bookmark',
+      cssClass: 'fa-solid fa-book-bookmark',
+      searchTerms: ['book', 'bookmark', 'read'],
+    }, {
       name: 'book-dead',
-      cssClass: 'fas fa-book-dead',
-    },
-    {
+      cssClass: 'fa-solid fa-book-dead',
+      searchTerms: ['dead', 'book', 'horror'],
+    }, {
+      name: 'book-journal-whills',
+      cssClass: 'fa-solid fa-book-journal-whills',
+      searchTerms: ['book', 'journal', 'whills'],
+    }, {
       name: 'book-medical',
-      cssClass: 'fas fa-book-medical',
-    },
-    {
+      cssClass: 'fa-solid fa-book-medical',
+      searchTerms: ['medical', 'book', 'health'],
+    }, {
       name: 'book-open',
-      cssClass: 'fas fa-book-open',
-    },
-    {
+      cssClass: 'fa-solid fa-book-open',
+      searchTerms: ['open', 'book', 'reading'],
+    }, {
+      name: 'book-open-reader',
+      cssClass: 'fa-solid fa-book-open-reader',
+      searchTerms: ['book', 'open', 'reader'],
+    }, {
+      name: 'book-quran',
+      cssClass: 'fa-solid fa-book-quran',
+      searchTerms: ['quran', 'book', 'religion'],
+    }, {
       name: 'book-reader',
-      cssClass: 'fas fa-book-reader',
-    },
-    {
+      cssClass: 'fa-solid fa-book-reader',
+      searchTerms: ['reader', 'book', 'literature'],
+    }, {
+      name: 'book-skull',
+      cssClass: 'fa-solid fa-book-skull',
+      searchTerms: ['book', 'skull', 'horror'],
+    }, {
+      name: 'book-tanakh',
+      cssClass: 'fa-solid fa-book-tanakh',
+      searchTerms: ['book', 'tanakh', 'jewish'],
+    }, {
       name: 'bookmark',
-      cssClass: 'fas fa-bookmark',
-    },
-    {
+      cssClass: 'fa-solid fa-bookmark',
+      searchTerms: ['bookmark', 'save', 'reference'],
+    }, {
+      name: 'border-all',
+      cssClass: 'fa-solid fa-border-all',
+      searchTerms: ['border', 'all', 'style'],
+    }, {
+      name: 'border-none',
+      cssClass: 'fa-solid fa-border-none',
+      searchTerms: ['border', 'none', 'style'],
+    }, {
+      name: 'border-style',
+      cssClass: 'fa-solid fa-border-style',
+      searchTerms: ['border', 'style', 'design'],
+    }, {
+      name: 'border-top-left',
+      cssClass: 'fa-solid fa-border-top-left',
+      searchTerms: ['border', 'top', 'left'],
+    }, {
+      name: 'bore-hole',
+      cssClass: 'fa-solid fa-bore-hole',
+      searchTerms: ['bore', 'hole', 'drilling'],
+    }, {
+      name: 'bottle-droplet',
+      cssClass: 'fa-solid fa-bottle-droplet',
+      searchTerms: ['bottle', 'droplet', 'water'],
+    }, {
+      name: 'bottle-water',
+      cssClass: 'fa-solid fa-bottle-water',
+      searchTerms: ['bottle', 'water', 'drink'],
+    }, {
+      name: 'bowl-food',
+      cssClass: 'fa-solid fa-bowl-food',
+      searchTerms: ['bowl', 'food', 'meal'],
+    }, {
+      name: 'bowl-rice',
+      cssClass: 'fa-solid fa-bowl-rice',
+      searchTerms: ['bowl', 'rice', 'food'],
+    }, {
       name: 'bowling-ball',
-      cssClass: 'fas fa-bowling-ball',
-    },
-    {
+      cssClass: 'fa-solid fa-bowling-ball',
+      searchTerms: ['bowling', 'ball', 'sport'],
+    }, {
       name: 'box',
-      cssClass: 'fas fa-box',
-    },
-    {
+      cssClass: 'fa-solid fa-box',
+      searchTerms: ['box', 'container', 'storage'],
+    }, {
+      name: 'box-archive',
+      cssClass: 'fa-solid fa-box-archive',
+      searchTerms: ['archive', 'box', 'storage'],
+    }, {
       name: 'box-open',
-      cssClass: 'fas fa-box-open',
-    },
-    {
+      cssClass: 'fa-solid fa-box-open',
+      searchTerms: ['open', 'box', 'container'],
+    }, {
+      name: 'box-tissue',
+      cssClass: 'fa-solid fa-box-tissue',
+      searchTerms: ['tissue', 'box', 'paper'],
+    }, {
       name: 'boxes',
-      cssClass: 'fas fa-boxes',
-    },
-    {
+      cssClass: 'fa-solid fa-boxes',
+      searchTerms: ['boxes', 'storage', 'packaging'],
+    }, {
+      name: 'boxes-alt',
+      cssClass: 'fa-solid fa-boxes-alt',
+      searchTerms: ['boxes', 'alternative', 'storage'],
+    }, {
+      name: 'boxes-packing',
+      cssClass: 'fa-solid fa-boxes-packing',
+      searchTerms: ['boxes', 'packing', 'shipping'],
+    }, {
+      name: 'boxes-stacked',
+      cssClass: 'fa-solid fa-boxes-stacked',
+      searchTerms: ['boxes', 'stacked', 'storage'],
+    }, {
       name: 'braille',
-      cssClass: 'fas fa-braille',
-    },
-    {
+      cssClass: 'fa-solid fa-braille',
+      searchTerms: ['braille', 'text', 'accessibility'],
+    }, {
       name: 'brain',
-      cssClass: 'fas fa-brain',
-    },
-    {
+      cssClass: 'fa-solid fa-brain',
+      searchTerms: ['brain', 'intellect', 'mind'],
+    }, {
+      name: 'brazilian-real-sign',
+      cssClass: 'fa-solid fa-brazilian-real-sign',
+      searchTerms: ['real', 'currency', 'brazil'],
+    }, {
       name: 'bread-slice',
-      cssClass: 'fas fa-bread-slice',
-    },
-    {
+      cssClass: 'fa-solid fa-bread-slice',
+      searchTerms: ['bread', 'slice', 'food'],
+    }, {
+      name: 'bridge',
+      cssClass: 'fa-solid fa-bridge',
+      searchTerms: ['bridge', 'connect', 'cross'],
+    }, {
+      name: 'bridge-circle-check',
+      cssClass: 'fa-solid fa-bridge-circle-check',
+      searchTerms: ['bridge', 'verified', 'check'],
+    }, {
+      name: 'bridge-circle-exclamation',
+      cssClass: 'fa-solid fa-bridge-circle-exclamation',
+      searchTerms: ['bridge', 'alert', 'warning'],
+    }, {
+      name: 'bridge-circle-xmark',
+      cssClass: 'fa-solid fa-bridge-circle-xmark',
+      searchTerms: ['bridge', 'remove', 'circle'],
+    }, {
+      name: 'bridge-lock',
+      cssClass: 'fa-solid fa-bridge-lock',
+      searchTerms: ['bridge', 'lock', 'secure'],
+    }, {
+      name: 'bridge-water',
+      cssClass: 'fa-solid fa-bridge-water',
+      searchTerms: ['bridge', 'water', 'cross'],
+    }, {
       name: 'briefcase',
-      cssClass: 'fas fa-briefcase',
-    },
-    {
+      cssClass: 'fa-solid fa-briefcase',
+      searchTerms: ['briefcase', 'work', 'business'],
+    }, {
+      name: 'briefcase-clock',
+      cssClass: 'fa-solid fa-briefcase-clock',
+      searchTerms: ['briefcase', 'clock', 'time'],
+    }, {
       name: 'briefcase-medical',
-      cssClass: 'fas fa-briefcase-medical',
-    },
-    {
+      cssClass: 'fa-solid fa-briefcase-medical',
+      searchTerms: ['medical', 'briefcase', 'health'],
+    }, {
       name: 'broadcast-tower',
-      cssClass: 'fas fa-broadcast-tower',
-    },
-    {
+      cssClass: 'fa-solid fa-broadcast-tower',
+      searchTerms: ['tower', 'broadcast', 'signal'],
+    }, {
       name: 'broom',
-      cssClass: 'fas fa-broom',
-    },
-    {
+      cssClass: 'fa-solid fa-broom',
+      searchTerms: ['broom', 'cleaning', 'household'],
+    }, {
+      name: 'broom-ball',
+      cssClass: 'fa-solid fa-broom-ball',
+      searchTerms: ['broom', 'ball', 'game'],
+    }, {
       name: 'brush',
-      cssClass: 'fas fa-brush',
-    },
-    {
+      cssClass: 'fa-solid fa-brush',
+      searchTerms: ['brush', 'paint', 'art'],
+    }, {
+      name: 'bucket',
+      cssClass: 'fa-solid fa-bucket',
+      searchTerms: ['bucket', 'container', 'hold'],
+    }, {
       name: 'bug',
-      cssClass: 'fas fa-bug',
-    },
-    {
+      cssClass: 'fa-solid fa-bug',
+      searchTerms: ['bug', 'insect', 'error'],
+    }, {
+      name: 'bug-slash',
+      cssClass: 'fa-solid fa-bug-slash',
+      searchTerms: ['bug', 'slash', 'remove'],
+    }, {
+      name: 'bugs',
+      cssClass: 'fa-solid fa-bugs',
+      searchTerms: ['bugs', 'insects', 'pests'],
+    }, {
       name: 'building',
-      cssClass: 'fas fa-building',
-    },
-    {
+      cssClass: 'fa-solid fa-building',
+      searchTerms: ['office', 'structure', 'skyscraper'],
+    }, {
+      name: 'building-circle-arrow-right',
+      cssClass: 'fa-solid fa-building-circle-arrow-right',
+      searchTerms: ['building', 'navigate', 'arrow'],
+    }, {
+      name: 'building-circle-check',
+      cssClass: 'fa-solid fa-building-circle-check',
+      searchTerms: ['building', 'check', 'verified'],
+    }, {
+      name: 'building-circle-exclamation',
+      cssClass: 'fa-solid fa-building-circle-exclamation',
+      searchTerms: ['building', 'alert', 'circle'],
+    }, {
+      name: 'building-circle-xmark',
+      cssClass: 'fa-solid fa-building-circle-xmark',
+      searchTerms: ['building', 'remove', 'circle'],
+    }, {
+      name: 'building-columns',
+      cssClass: 'fa-solid fa-building-columns',
+      searchTerms: ['building', 'columns', 'structure'],
+    }, {
+      name: 'building-flag',
+      cssClass: 'fa-solid fa-building-flag',
+      searchTerms: ['building', 'flag', 'symbol'],
+    }, {
+      name: 'building-lock',
+      cssClass: 'fa-solid fa-building-lock',
+      searchTerms: ['building', 'lock', 'secure'],
+    }, {
+      name: 'building-shield',
+      cssClass: 'fa-solid fa-building-shield',
+      searchTerms: ['building', 'shield', 'protection'],
+    }, {
+      name: 'building-un',
+      cssClass: 'fa-solid fa-building-un',
+      searchTerms: ['building', 'organization'],
+    }, {
+      name: 'building-user',
+      cssClass: 'fa-solid fa-building-user',
+      searchTerms: ['building', 'user', 'profile'],
+    }, {
+      name: 'building-wheat',
+      cssClass: 'fa-solid fa-building-wheat',
+      searchTerms: ['building', 'wheat', 'agriculture'],
+    }, {
       name: 'bullhorn',
-      cssClass: 'fas fa-bullhorn',
-    },
-    {
+      cssClass: 'fa-solid fa-bullhorn',
+      searchTerms: ['announce', 'loudspeaker', 'alert'],
+    }, {
       name: 'bullseye',
-      cssClass: 'fas fa-bullseye',
-    },
-    {
+      cssClass: 'fa-solid fa-bullseye',
+      searchTerms: ['target', 'aim', 'focus'],
+    }, {
+      name: 'burger',
+      cssClass: 'fa-solid fa-burger',
+      searchTerms: ['burger', 'food', 'meal'],
+    }, {
       name: 'burn',
-      cssClass: 'fas fa-burn',
-    },
-    {
+      cssClass: 'fa-solid fa-burn',
+      searchTerms: ['fire', 'flame', 'heat'],
+    }, {
+      name: 'burst',
+      cssClass: 'fa-solid fa-burst',
+      searchTerms: ['burst', 'explode', 'pop'],
+    }, {
       name: 'bus',
-      cssClass: 'fas fa-bus',
-    },
-    {
+      cssClass: 'fa-solid fa-bus',
+      searchTerms: ['transport', 'vehicle', 'public'],
+    }, {
       name: 'bus-alt',
-      cssClass: 'fas fa-bus-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-bus-alt',
+      searchTerms: ['shuttle', 'alternative', 'transport'],
+    }, {
+      name: 'bus-simple',
+      cssClass: 'fa-solid fa-bus-simple',
+      searchTerms: ['bus', 'simple', 'transport'],
+    }, {
       name: 'business-time',
-      cssClass: 'fas fa-business-time',
-    },
-    {
+      cssClass: 'fa-solid fa-business-time',
+      searchTerms: ['work', 'schedule', 'business'],
+    }, {
+      name: 'c',
+      cssClass: 'fa-solid fa-c',
+      searchTerms: ['letter', 'C', 'initial'],
+    }, {
+      name: 'cab',
+      cssClass: 'fa-solid fa-cab',
+      searchTerms: ['cab', 'taxi', 'transport'],
+    }, {
+      name: 'cable-car',
+      cssClass: 'fa-solid fa-cable-car',
+      searchTerms: ['cable', 'car', 'transport'],
+    }, {
+      name: 'cake',
+      cssClass: 'fa-solid fa-cake',
+      searchTerms: ['cake', 'dessert', 'food'],
+    }, {
+      name: 'cake-candles',
+      cssClass: 'fa-solid fa-cake-candles',
+      searchTerms: ['cake', 'candles', 'celebrate'],
+    }, {
       name: 'calculator',
-      cssClass: 'fas fa-calculator',
-    },
-    {
+      cssClass: 'fa-solid fa-calculator',
+      searchTerms: ['math', 'compute', 'calculate'],
+    }, {
       name: 'calendar',
-      cssClass: 'fas fa-calendar',
-    },
-    {
+      cssClass: 'fa-solid fa-calendar',
+      searchTerms: ['date', 'schedule', 'planner'],
+    }, {
       name: 'calendar-alt',
-      cssClass: 'fas fa-calendar-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-calendar-alt',
+      searchTerms: ['alternative', 'date', 'schedule'],
+    }, {
       name: 'calendar-check',
-      cssClass: 'fas fa-calendar-check',
-    },
-    {
+      cssClass: 'fa-solid fa-calendar-check',
+      searchTerms: ['confirm', 'approve', 'mark'],
+    }, {
       name: 'calendar-day',
-      cssClass: 'fas fa-calendar-day',
-    },
-    {
+      cssClass: 'fa-solid fa-calendar-day',
+      searchTerms: ['daily', 'date', 'schedule'],
+    }, {
+      name: 'calendar-days',
+      cssClass: 'fa-solid fa-calendar-days',
+      searchTerms: ['calendar', 'date', 'schedule'],
+    }, {
       name: 'calendar-minus',
-      cssClass: 'fas fa-calendar-minus',
-    },
-    {
+      cssClass: 'fa-solid fa-calendar-minus',
+      searchTerms: ['remove', 'subtract', 'date'],
+    }, {
       name: 'calendar-plus',
-      cssClass: 'fas fa-calendar-plus',
-    },
-    {
+      cssClass: 'fa-solid fa-calendar-plus',
+      searchTerms: ['add', 'increase', 'date'],
+    }, {
       name: 'calendar-times',
-      cssClass: 'fas fa-calendar-times',
-    },
-    {
+      cssClass: 'fa-solid fa-calendar-times',
+      searchTerms: ['cancel', 'remove', 'date'],
+    }, {
       name: 'calendar-week',
-      cssClass: 'fas fa-calendar-week',
-    },
-    {
+      cssClass: 'fa-solid fa-calendar-week',
+      searchTerms: ['weekly', 'date', 'schedule'],
+    }, {
+      name: 'calendar-xmark',
+      cssClass: 'fa-solid fa-calendar-xmark',
+      searchTerms: ['calendar', 'remove', 'date'],
+    }, {
       name: 'camera',
-      cssClass: 'fas fa-camera',
-    },
-    {
+      cssClass: 'fa-solid fa-camera',
+      searchTerms: ['photo', 'picture', 'capture'],
+    }, {
+      name: 'camera-alt',
+      cssClass: 'fa-solid fa-camera-alt',
+      searchTerms: ['camera', 'alternative', 'photo'],
+    }, {
       name: 'camera-retro',
-      cssClass: 'fas fa-camera-retro',
-    },
-    {
+      cssClass: 'fa-solid fa-camera-retro',
+      searchTerms: ['vintage', 'photo', 'capture'],
+    }, {
+      name: 'camera-rotate',
+      cssClass: 'fa-solid fa-camera-rotate',
+      searchTerms: ['camera', 'rotate', 'photo'],
+    }, {
       name: 'campground',
-      cssClass: 'fas fa-campground',
-    },
-    {
+      cssClass: 'fa-solid fa-campground',
+      searchTerms: ['outdoor', 'nature', 'camping'],
+    }, {
+      name: 'cancel',
+      cssClass: 'fa-solid fa-cancel',
+      searchTerms: ['cancel', 'stop', 'abort'],
+    }, {
       name: 'candy-cane',
-      cssClass: 'fas fa-candy-cane',
-    },
-    {
+      cssClass: 'fa-solid fa-candy-cane',
+      searchTerms: ['sweet', 'holiday', 'treat'],
+    }, {
       name: 'capsules',
-      cssClass: 'fas fa-capsules',
-    },
-    {
+      cssClass: 'fa-solid fa-capsules',
+      searchTerms: ['medicine', 'pills', 'health'],
+    }, {
       name: 'car',
-      cssClass: 'fas fa-car',
-    },
-    {
+      cssClass: 'fa-solid fa-car',
+      searchTerms: ['vehicle', 'transport', 'automobile'],
+    }, {
       name: 'car-alt',
-      cssClass: 'fas fa-car-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-car-alt',
+      searchTerms: ['alternative', 'vehicle', 'transport'],
+    }, {
       name: 'car-battery',
-      cssClass: 'fas fa-car-battery',
-    },
-    {
+      cssClass: 'fa-solid fa-car-battery',
+      searchTerms: ['power', 'energy', 'battery'],
+    }, {
+      name: 'car-burst',
+      cssClass: 'fa-solid fa-car-burst',
+      searchTerms: ['car', 'burst', 'explosion'],
+    }, {
       name: 'car-crash',
-      cssClass: 'fas fa-car-crash',
-    },
-    {
+      cssClass: 'fa-solid fa-car-crash',
+      searchTerms: ['accident', 'collision', 'crash'],
+    }, {
+      name: 'car-on',
+      cssClass: 'fa-solid fa-car-on',
+      searchTerms: ['car', 'on', 'drive'],
+    }, {
+      name: 'car-rear',
+      cssClass: 'fa-solid fa-car-rear',
+      searchTerms: ['car', 'rear', 'vehicle'],
+    }, {
       name: 'car-side',
-      cssClass: 'fas fa-car-side',
-    },
-    {
+      cssClass: 'fa-solid fa-car-side',
+      searchTerms: ['profile', 'vehicle', 'transport'],
+    }, {
+      name: 'car-tunnel',
+      cssClass: 'fa-solid fa-car-tunnel',
+      searchTerms: ['car', 'tunnel', 'transport'],
+    }, {
+      name: 'caravan',
+      cssClass: 'fa-solid fa-caravan',
+      searchTerms: ['caravan', 'travel', 'vehicle'],
+    }, {
       name: 'caret-down',
-      cssClass: 'fas fa-caret-down',
-    },
-    {
+      cssClass: 'fa-solid fa-caret-down',
+      searchTerms: ['dropdown', 'expand', 'arrow'],
+    }, {
       name: 'caret-left',
-      cssClass: 'fas fa-caret-left',
-    },
-    {
+      cssClass: 'fa-solid fa-caret-left',
+      searchTerms: ['back', 'arrow', 'navigate'],
+    }, {
       name: 'caret-right',
-      cssClass: 'fas fa-caret-right',
-    },
-    {
+      cssClass: 'fa-solid fa-caret-right',
+      searchTerms: ['forward', 'arrow', 'navigate'],
+    }, {
       name: 'caret-square-down',
-      cssClass: 'fas fa-caret-square-down',
-    },
-    {
+      cssClass: 'fa-solid fa-caret-square-down',
+      searchTerms: ['dropdown', 'expand', 'arrow'],
+    }, {
       name: 'caret-square-left',
-      cssClass: 'fas fa-caret-square-left',
-    },
-    {
+      cssClass: 'fa-solid fa-caret-square-left',
+      searchTerms: ['back', 'arrow', 'navigate'],
+    }, {
       name: 'caret-square-right',
-      cssClass: 'fas fa-caret-square-right',
-    },
-    {
+      cssClass: 'fa-solid fa-caret-square-right',
+      searchTerms: ['forward', 'arrow', 'navigate'],
+    }, {
       name: 'caret-square-up',
-      cssClass: 'fas fa-caret-square-up',
-    },
-    {
+      cssClass: 'fa-solid fa-caret-square-up',
+      searchTerms: ['up', 'expand', 'arrow'],
+    }, {
       name: 'caret-up',
-      cssClass: 'fas fa-caret-up',
-    },
-    {
+      cssClass: 'fa-solid fa-caret-up',
+      searchTerms: ['up', 'arrow', 'navigate'],
+    }, {
+      name: 'carriage-baby',
+      cssClass: 'fa-solid fa-carriage-baby',
+      searchTerms: ['carriage', 'baby', 'transport'],
+    }, {
       name: 'carrot',
-      cssClass: 'fas fa-carrot',
-    },
-    {
+      cssClass: 'fa-solid fa-carrot',
+      searchTerms: ['vegetable', 'food', 'healthy'],
+    }, {
       name: 'cart-arrow-down',
-      cssClass: 'fas fa-cart-arrow-down',
-    },
-    {
+      cssClass: 'fa-solid fa-cart-arrow-down',
+      searchTerms: ['shopping', 'cart', 'purchase'],
+    }, {
+      name: 'cart-flatbed',
+      cssClass: 'fa-solid fa-cart-flatbed',
+      searchTerms: ['cart', 'flatbed', 'transport'],
+    }, {
+      name: 'cart-flatbed-suitcase',
+      cssClass: 'fa-solid fa-cart-flatbed-suitcase',
+      searchTerms: ['cart', 'flatbed', 'suitcase'],
+    }, {
       name: 'cart-plus',
-      cssClass: 'fas fa-cart-plus',
-    },
-    {
+      cssClass: 'fa-solid fa-cart-plus',
+      searchTerms: ['add', 'shopping', 'cart'],
+    }, {
+      name: 'cart-shopping',
+      cssClass: 'fa-solid fa-cart-shopping',
+      searchTerms: ['cart', 'shopping', 'purchase'],
+    }, {
       name: 'cash-register',
-      cssClass: 'fas fa-cash-register',
-    },
-    {
+      cssClass: 'fa-solid fa-cash-register',
+      searchTerms: ['checkout', 'payment', 'register'],
+    }, {
       name: 'cat',
-      cssClass: 'fas fa-cat',
-    },
-    {
+      cssClass: 'fa-solid fa-cat',
+      searchTerms: ['animal', 'pet', 'feline'],
+    }, {
+      name: 'cedi-sign',
+      cssClass: 'fa-solid fa-cedi-sign',
+      searchTerms: ['cedi', 'currency', 'ghana'],
+    }, {
+      name: 'cent-sign',
+      cssClass: 'fa-solid fa-cent-sign',
+      searchTerms: ['cent', 'currency', 'money'],
+    }, {
       name: 'certificate',
-      cssClass: 'fas fa-certificate',
-    },
-    {
+      cssClass: 'fa-solid fa-certificate',
+      searchTerms: ['award', 'badge', 'recognition'],
+    }, {
+      name: 'chain',
+      cssClass: 'fa-solid fa-chain',
+      searchTerms: ['chain', 'link', 'connect'],
+    }, {
+      name: 'chain-broken',
+      cssClass: 'fa-solid fa-chain-broken',
+      searchTerms: ['chain', 'broken', 'disconnect'],
+    }, {
+      name: 'chain-slash',
+      cssClass: 'fa-solid fa-chain-slash',
+      searchTerms: ['chain', 'slash', 'remove'],
+    }, {
       name: 'chair',
-      cssClass: 'fas fa-chair',
-    },
-    {
+      cssClass: 'fa-solid fa-chair',
+      searchTerms: ['furniture', 'seat', 'rest'],
+    }, {
       name: 'chalkboard',
-      cssClass: 'fas fa-chalkboard',
-    },
-    {
+      cssClass: 'fa-solid fa-chalkboard',
+      searchTerms: ['board', 'teach', 'education'],
+    }, {
       name: 'chalkboard-teacher',
-      cssClass: 'fas fa-chalkboard-teacher',
-    },
-    {
+      cssClass: 'fa-solid fa-chalkboard-teacher',
+      searchTerms: ['instructor', 'education', 'teach'],
+    }, {
+      name: 'chalkboard-user',
+      cssClass: 'fa-solid fa-chalkboard-user',
+      searchTerms: ['chalkboard', 'teacher', 'education'],
+    }, {
+      name: 'champagne-glasses',
+      cssClass: 'fa-solid fa-champagne-glasses',
+      searchTerms: ['champagne', 'glasses', 'celebrate'],
+    }, {
       name: 'charging-station',
-      cssClass: 'fas fa-charging-station',
-    },
-    {
+      cssClass: 'fa-solid fa-charging-station',
+      searchTerms: ['electric', 'charge', 'power'],
+    }, {
       name: 'chart-area',
-      cssClass: 'fas fa-chart-area',
-    },
-    {
+      cssClass: 'fa-solid fa-chart-area',
+      searchTerms: ['graph', 'data', 'statistics'],
+    }, {
       name: 'chart-bar',
-      cssClass: 'fas fa-chart-bar',
-    },
-    {
+      cssClass: 'fa-solid fa-chart-bar',
+      searchTerms: ['graph', 'data', 'statistics'],
+    }, {
+      name: 'chart-column',
+      cssClass: 'fa-solid fa-chart-column',
+      searchTerms: ['chart', 'column', 'data'],
+    }, {
+      name: 'chart-diagram',
+      cssClass: 'fa-solid fa-chart-diagram',
+      searchTerms: ['chart', 'diagram', 'data'],
+    }, {
+      name: 'chart-gantt',
+      cssClass: 'fa-solid fa-chart-gantt',
+      searchTerms: ['chart', 'gantt', 'project'],
+    }, {
       name: 'chart-line',
-      cssClass: 'fas fa-chart-line',
-    },
-    {
+      cssClass: 'fa-solid fa-chart-line',
+      searchTerms: ['trend', 'data', 'statistics'],
+    }, {
       name: 'chart-pie',
-      cssClass: 'fas fa-chart-pie',
-    },
-    {
+      cssClass: 'fa-solid fa-chart-pie',
+      searchTerms: ['graph', 'data', 'statistics'],
+    }, {
+      name: 'chart-simple',
+      cssClass: 'fa-solid fa-chart-simple',
+      searchTerms: ['chart', 'simple', 'data'],
+    }, {
       name: 'check',
-      cssClass: 'fas fa-check',
-    },
-    {
+      cssClass: 'fa-solid fa-check',
+      searchTerms: ['tick', 'confirm', 'approve'],
+    }, {
       name: 'check-circle',
-      cssClass: 'fas fa-check-circle',
-    },
-    {
+      cssClass: 'fa-solid fa-check-circle',
+      searchTerms: ['confirm', 'approve', 'success'],
+    }, {
       name: 'check-double',
-      cssClass: 'fas fa-check-double',
-    },
-    {
+      cssClass: 'fa-solid fa-check-double',
+      searchTerms: ['confirm', 'approve', 'success'],
+    }, {
       name: 'check-square',
-      cssClass: 'fas fa-check-square',
-    },
-    {
+      cssClass: 'fa-solid fa-check-square',
+      searchTerms: ['confirm', 'approve', 'success'],
+    }, {
+      name: 'check-to-slot',
+      cssClass: 'fa-solid fa-check-to-slot',
+      searchTerms: ['check', 'slot', 'confirm'],
+    }, {
       name: 'cheese',
-      cssClass: 'fas fa-cheese',
-    },
-    {
+      cssClass: 'fa-solid fa-cheese',
+      searchTerms: ['dairy', 'food', 'snack'],
+    }, {
       name: 'chess',
-      cssClass: 'fas fa-chess',
-    },
-    {
+      cssClass: 'fa-solid fa-chess',
+      searchTerms: ['game', 'strategy', 'board'],
+    }, {
       name: 'chess-bishop',
-      cssClass: 'fas fa-chess-bishop',
-    },
-    {
+      cssClass: 'fa-solid fa-chess-bishop',
+      searchTerms: ['game', 'strategy', 'board'],
+    }, {
       name: 'chess-board',
-      cssClass: 'fas fa-chess-board',
-    },
-    {
+      cssClass: 'fa-solid fa-chess-board',
+      searchTerms: ['game', 'strategy', 'board'],
+    }, {
       name: 'chess-king',
-      cssClass: 'fas fa-chess-king',
-    },
-    {
+      cssClass: 'fa-solid fa-chess-king',
+      searchTerms: ['game', 'strategy', 'board'],
+    }, {
       name: 'chess-knight',
-      cssClass: 'fas fa-chess-knight',
-    },
-    {
+      cssClass: 'fa-solid fa-chess-knight',
+      searchTerms: ['game', 'strategy', 'board'],
+    }, {
       name: 'chess-pawn',
-      cssClass: 'fas fa-chess-pawn',
-    },
-    {
+      cssClass: 'fa-solid fa-chess-pawn',
+      searchTerms: ['game', 'strategy', 'board'],
+    }, {
       name: 'chess-queen',
-      cssClass: 'fas fa-chess-queen',
-    },
-    {
+      cssClass: 'fa-solid fa-chess-queen',
+      searchTerms: ['game', 'strategy', 'board'],
+    }, {
       name: 'chess-rook',
-      cssClass: 'fas fa-chess-rook',
-    },
-    {
+      cssClass: 'fa-solid fa-chess-rook',
+      searchTerms: ['game', 'strategy', 'board'],
+    }, {
       name: 'chevron-circle-down',
-      cssClass: 'fas fa-chevron-circle-down',
-    },
-    {
+      cssClass: 'fa-solid fa-chevron-circle-down',
+      searchTerms: ['dropdown', 'expand', 'arrow'],
+    }, {
       name: 'chevron-circle-left',
-      cssClass: 'fas fa-chevron-circle-left',
-    },
-    {
+      cssClass: 'fa-solid fa-chevron-circle-left',
+      searchTerms: ['back', 'arrow', 'navigate'],
+    }, {
       name: 'chevron-circle-right',
-      cssClass: 'fas fa-chevron-circle-right',
-    },
-    {
+      cssClass: 'fa-solid fa-chevron-circle-right',
+      searchTerms: ['forward', 'arrow', 'navigate'],
+    }, {
       name: 'chevron-circle-up',
-      cssClass: 'fas fa-chevron-circle-up',
-    },
-    {
+      cssClass: 'fa-solid fa-chevron-circle-up',
+      searchTerms: ['up', 'arrow', 'navigate'],
+    }, {
       name: 'chevron-down',
-      cssClass: 'fas fa-chevron-down',
-    },
-    {
+      cssClass: 'fa-solid fa-chevron-down',
+      searchTerms: ['dropdown', 'expand', 'arrow'],
+    }, {
       name: 'chevron-left',
-      cssClass: 'fas fa-chevron-left',
-    },
-    {
+      cssClass: 'fa-solid fa-chevron-left',
+      searchTerms: ['back', 'arrow', 'navigate'],
+    }, {
       name: 'chevron-right',
-      cssClass: 'fas fa-chevron-right',
-    },
-    {
+      cssClass: 'fa-solid fa-chevron-right',
+      searchTerms: ['forward', 'arrow', 'navigate'],
+    }, {
       name: 'chevron-up',
-      cssClass: 'fas fa-chevron-up',
-    },
-    {
+      cssClass: 'fa-solid fa-chevron-up',
+      searchTerms: ['up', 'arrow', 'navigate'],
+    }, {
       name: 'child',
-      cssClass: 'fas fa-child',
-    },
-    {
+      cssClass: 'fa-solid fa-child',
+      searchTerms: ['youth', 'kid', 'children'],
+    }, {
+      name: 'child-combatant',
+      cssClass: 'fa-solid fa-child-combatant',
+      searchTerms: ['child', 'combatant', 'military'],
+    }, {
+      name: 'child-dress',
+      cssClass: 'fa-solid fa-child-dress',
+      searchTerms: ['child', 'dress', 'clothing'],
+    }, {
+      name: 'child-reaching',
+      cssClass: 'fa-solid fa-child-reaching',
+      searchTerms: ['child', 'reaching', 'growth'],
+    }, {
+      name: 'child-rifle',
+      cssClass: 'fa-solid fa-child-rifle',
+      searchTerms: ['child', 'rifle', 'military'],
+    }, {
+      name: 'children',
+      cssClass: 'fa-solid fa-children',
+      searchTerms: ['children', 'kids', 'youth'],
+    }, {
       name: 'church',
-      cssClass: 'fas fa-church',
-    },
-    {
+      cssClass: 'fa-solid fa-church',
+      searchTerms: ['place', 'worship', 'religion'],
+    }, {
       name: 'circle',
-      cssClass: 'fas fa-circle',
-    },
-    {
+      cssClass: 'fa-solid fa-circle',
+      searchTerms: ['shape', 'round', 'symbol'],
+    }, {
+      name: 'circle-arrow-down',
+      cssClass: 'fa-solid fa-circle-arrow-down',
+      searchTerms: ['down', 'arrow', 'circle'],
+    }, {
+      name: 'circle-arrow-left',
+      cssClass: 'fa-solid fa-circle-arrow-left',
+      searchTerms: ['left', 'arrow', 'circle'],
+    }, {
+      name: 'circle-arrow-right',
+      cssClass: 'fa-solid fa-circle-arrow-right',
+      searchTerms: ['right', 'arrow', 'circle'],
+    }, {
+      name: 'circle-arrow-up',
+      cssClass: 'fa-solid fa-circle-arrow-up',
+      searchTerms: ['circle', 'arrow', 'up'],
+    }, {
+      name: 'circle-check',
+      cssClass: 'fa-solid fa-circle-check',
+      searchTerms: ['check', 'circle', 'verified'],
+    }, {
+      name: 'circle-chevron-down',
+      cssClass: 'fa-solid fa-circle-chevron-down',
+      searchTerms: ['down', 'arrow', 'chevron'],
+    }, {
+      name: 'circle-chevron-left',
+      cssClass: 'fa-solid fa-circle-chevron-left',
+      searchTerms: ['chevron', 'left', 'circle'],
+    }, {
+      name: 'circle-chevron-right',
+      cssClass: 'fa-solid fa-circle-chevron-right',
+      searchTerms: ['next', 'arrow', 'forward'],
+    }, {
+      name: 'circle-chevron-up',
+      cssClass: 'fa-solid fa-circle-chevron-up',
+      searchTerms: ['up', 'circle', 'chevron'],
+    }, {
+      name: 'circle-dollar-to-slot',
+      cssClass: 'fa-solid fa-circle-dollar-to-slot',
+      searchTerms: ['dollar', 'slot', 'payment'],
+    }, {
+      name: 'circle-dot',
+      cssClass: 'fa-solid fa-circle-dot',
+      searchTerms: ['dot', 'circle', 'marker'],
+    }, {
+      name: 'circle-down',
+      cssClass: 'fa-solid fa-circle-down',
+      searchTerms: ['down', 'circle', 'direction'],
+    }, {
+      name: 'circle-exclamation',
+      cssClass: 'fa-solid fa-circle-exclamation',
+      searchTerms: ['alert', 'circle', 'notice'],
+    }, {
+      name: 'circle-h',
+      cssClass: 'fa-solid fa-circle-h',
+      searchTerms: ['health', 'circle', 'medical'],
+    }, {
+      name: 'circle-half-stroke',
+      cssClass: 'fa-solid fa-circle-half-stroke',
+      searchTerms: ['circle', 'half', 'stroke'],
+    }, {
+      name: 'circle-info',
+      cssClass: 'fa-solid fa-circle-info',
+      searchTerms: ['info', 'circle', 'information'],
+    }, {
+      name: 'circle-left',
+      cssClass: 'fa-solid fa-circle-left',
+      searchTerms: ['left', 'circle', 'direction'],
+    }, {
+      name: 'circle-minus',
+      cssClass: 'fa-solid fa-circle-minus',
+      searchTerms: ['remove', 'circle', 'minus'],
+    }, {
+      name: 'circle-nodes',
+      cssClass: 'fa-solid fa-circle-nodes',
+      searchTerms: ['circle', 'nodes', 'connect'],
+    }, {
       name: 'circle-notch',
-      cssClass: 'fas fa-circle-notch',
-    },
-    {
+      cssClass: 'fa-solid fa-circle-notch',
+      searchTerms: ['loading', 'progress', 'spin'],
+    }, {
+      name: 'circle-pause',
+      cssClass: 'fa-solid fa-circle-pause',
+      searchTerms: ['pause', 'circle', 'stop'],
+    }, {
+      name: 'circle-play',
+      cssClass: 'fa-solid fa-circle-play',
+      searchTerms: ['play', 'circle', 'action'],
+    }, {
+      name: 'circle-plus',
+      cssClass: 'fa-solid fa-circle-plus',
+      searchTerms: ['plus', 'circle', 'add'],
+    }, {
+      name: 'circle-question',
+      cssClass: 'fa-solid fa-circle-question',
+      searchTerms: ['question', 'circle', 'inquiry'],
+    }, {
+      name: 'circle-radiation',
+      cssClass: 'fa-solid fa-circle-radiation',
+      searchTerms: ['circle', 'radiation', 'danger'],
+    }, {
+      name: 'circle-right',
+      cssClass: 'fa-solid fa-circle-right',
+      searchTerms: ['right', 'circle', 'direction'],
+    }, {
+      name: 'circle-stop',
+      cssClass: 'fa-solid fa-circle-stop',
+      searchTerms: ['stop', 'circle', 'halt'],
+    }, {
+      name: 'circle-up',
+      cssClass: 'fa-solid fa-circle-up',
+      searchTerms: ['up', 'circle', 'direction'],
+    }, {
+      name: 'circle-user',
+      cssClass: 'fa-solid fa-circle-user',
+      searchTerms: ['user', 'circle', 'profile'],
+    }, {
+      name: 'circle-xmark',
+      cssClass: 'fa-solid fa-circle-xmark',
+      searchTerms: ['circle', 'remove', 'xmark'],
+    }, {
       name: 'city',
-      cssClass: 'fas fa-city',
-    },
-    {
+      cssClass: 'fa-solid fa-city',
+      searchTerms: ['urban', 'town', 'metropolis'],
+    }, {
+      name: 'clapperboard',
+      cssClass: 'fa-solid fa-clapperboard',
+      searchTerms: ['clapperboard', 'film', 'movie'],
+    }, {
       name: 'clinic-medical',
-      cssClass: 'fas fa-clinic-medical',
-    },
-    {
+      cssClass: 'fa-solid fa-clinic-medical',
+      searchTerms: ['health', 'care', 'medical'],
+    }, {
       name: 'clipboard',
-      cssClass: 'fas fa-clipboard',
-    },
-    {
+      cssClass: 'fa-solid fa-clipboard',
+      searchTerms: ['note', 'document', 'record'],
+    }, {
       name: 'clipboard-check',
-      cssClass: 'fas fa-clipboard-check',
-    },
-    {
+      cssClass: 'fa-solid fa-clipboard-check',
+      searchTerms: ['confirm', 'approve', 'record'],
+    }, {
       name: 'clipboard-list',
-      cssClass: 'fas fa-clipboard-list',
-    },
-    {
+      cssClass: 'fa-solid fa-clipboard-list',
+      searchTerms: ['tasks', 'checklist', 'record'],
+    }, {
+      name: 'clipboard-question',
+      cssClass: 'fa-solid fa-clipboard-question',
+      searchTerms: ['clipboard', 'question', 'note'],
+    }, {
+      name: 'clipboard-user',
+      cssClass: 'fa-solid fa-clipboard-user',
+      searchTerms: ['clipboard', 'user', 'profile'],
+    }, {
       name: 'clock',
-      cssClass: 'fas fa-clock',
-    },
-    {
+      cssClass: 'fa-solid fa-clock',
+      searchTerms: ['time', 'watch', 'schedule'],
+    }, {
+      name: 'clock-four',
+      cssClass: 'fa-solid fa-clock-four',
+      searchTerms: ['clock', 'four', 'time'],
+    }, {
+      name: 'clock-rotate-left',
+      cssClass: 'fa-solid fa-clock-rotate-left',
+      searchTerms: ['clock', 'rotate', 'left'],
+    }, {
       name: 'clone',
-      cssClass: 'fas fa-clone',
-    },
-    {
+      cssClass: 'fa-solid fa-clone',
+      searchTerms: ['duplicate', 'copy', 'replicate'],
+    }, {
+      name: 'close',
+      cssClass: 'fa-solid fa-close',
+      searchTerms: ['close', 'exit', 'remove'],
+    }, {
       name: 'closed-captioning',
-      cssClass: 'fas fa-closed-captioning',
-    },
-    {
+      cssClass: 'fa-solid fa-closed-captioning',
+      searchTerms: ['accessibility', 'subtitles', 'text'],
+    }, {
       name: 'cloud',
-      cssClass: 'fas fa-cloud',
-    },
-    {
+      cssClass: 'fa-solid fa-cloud',
+      searchTerms: ['weather', 'sky', 'atmosphere'],
+    }, {
+      name: 'cloud-arrow-down',
+      cssClass: 'fa-solid fa-cloud-arrow-down',
+      searchTerms: ['cloud', 'download', 'data'],
+    }, {
+      name: 'cloud-arrow-up',
+      cssClass: 'fa-solid fa-cloud-arrow-up',
+      searchTerms: ['cloud', 'upload', 'data'],
+    }, {
+      name: 'cloud-bolt',
+      cssClass: 'fa-solid fa-cloud-bolt',
+      searchTerms: ['cloud', 'bolt', 'storm'],
+    }, {
+      name: 'cloud-download',
+      cssClass: 'fa-solid fa-cloud-download',
+      searchTerms: ['cloud', 'download', 'data'],
+    }, {
       name: 'cloud-download-alt',
-      cssClass: 'fas fa-cloud-download-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-cloud-download-alt',
+      searchTerms: ['download', 'data', 'cloud'],
+    }, {
       name: 'cloud-meatball',
-      cssClass: 'fas fa-cloud-meatball',
-    },
-    {
+      cssClass: 'fa-solid fa-cloud-meatball',
+      searchTerms: ['weather', 'cloud', 'atmosphere'],
+    }, {
       name: 'cloud-moon',
-      cssClass: 'fas fa-cloud-moon',
-    },
-    {
+      cssClass: 'fa-solid fa-cloud-moon',
+      searchTerms: ['night', 'weather', 'sky'],
+    }, {
       name: 'cloud-moon-rain',
-      cssClass: 'fas fa-cloud-moon-rain',
-    },
-    {
+      cssClass: 'fa-solid fa-cloud-moon-rain',
+      searchTerms: ['night', 'weather', 'rain'],
+    }, {
       name: 'cloud-rain',
-      cssClass: 'fas fa-cloud-rain',
-    },
-    {
+      cssClass: 'fa-solid fa-cloud-rain',
+      searchTerms: ['weather', 'rain', 'precipitation'],
+    }, {
       name: 'cloud-showers-heavy',
-      cssClass: 'fas fa-cloud-showers-heavy',
-    },
-    {
+      cssClass: 'fa-solid fa-cloud-showers-heavy',
+      searchTerms: ['weather', 'rain', 'storm'],
+    }, {
+      name: 'cloud-showers-water',
+      cssClass: 'fa-solid fa-cloud-showers-water',
+      searchTerms: ['cloud', 'showers', 'water'],
+    }, {
       name: 'cloud-sun',
-      cssClass: 'fas fa-cloud-sun',
-    },
-    {
+      cssClass: 'fa-solid fa-cloud-sun',
+      searchTerms: ['day', 'weather', 'sky'],
+    }, {
       name: 'cloud-sun-rain',
-      cssClass: 'fas fa-cloud-sun-rain',
-    },
-    {
+      cssClass: 'fa-solid fa-cloud-sun-rain',
+      searchTerms: ['weather', 'rain', 'day'],
+    }, {
+      name: 'cloud-upload',
+      cssClass: 'fa-solid fa-cloud-upload',
+      searchTerms: ['cloud', 'upload', 'data'],
+    }, {
       name: 'cloud-upload-alt',
-      cssClass: 'fas fa-cloud-upload-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-cloud-upload-alt',
+      searchTerms: ['upload', 'data', 'cloud'],
+    }, {
+      name: 'clover',
+      cssClass: 'fa-solid fa-clover',
+      searchTerms: ['clover', 'plant', 'symbol'],
+    }, {
+      name: 'cny',
+      cssClass: 'fa-solid fa-cny',
+      searchTerms: ['cny', 'currency', 'china'],
+    }, {
       name: 'cocktail',
-      cssClass: 'fas fa-cocktail',
-    },
-    {
+      cssClass: 'fa-solid fa-cocktail',
+      searchTerms: ['drink', 'beverage', 'cocktail'],
+    }, {
       name: 'code',
-      cssClass: 'fas fa-code',
-    },
-    {
+      cssClass: 'fa-solid fa-code',
+      searchTerms: ['program', 'development', 'software'],
+    }, {
       name: 'code-branch',
-      cssClass: 'fas fa-code-branch',
-    },
-    {
+      cssClass: 'fa-solid fa-code-branch',
+      searchTerms: ['git', 'version', 'control'],
+    }, {
+      name: 'code-commit',
+      cssClass: 'fa-solid fa-code-commit',
+      searchTerms: ['code', 'commit', 'version'],
+    }, {
+      name: 'code-compare',
+      cssClass: 'fa-solid fa-code-compare',
+      searchTerms: ['code', 'compare', 'version'],
+    }, {
+      name: 'code-fork',
+      cssClass: 'fa-solid fa-code-fork',
+      searchTerms: ['code', 'fork', 'branch'],
+    }, {
+      name: 'code-merge',
+      cssClass: 'fa-solid fa-code-merge',
+      searchTerms: ['code', 'merge', 'combine'],
+    }, {
+      name: 'code-pull-request',
+      cssClass: 'fa-solid fa-code-pull-request',
+      searchTerms: ['code', 'pull', 'request'],
+    }, {
       name: 'coffee',
-      cssClass: 'fas fa-coffee',
-    },
-    {
+      cssClass: 'fa-solid fa-coffee',
+      searchTerms: ['beverage', 'drink', 'caffeine'],
+    }, {
       name: 'cog',
-      cssClass: 'fas fa-cog',
-    },
-    {
+      cssClass: 'fa-solid fa-cog',
+      searchTerms: ['settings', 'gear', 'adjust'],
+    }, {
       name: 'cogs',
-      cssClass: 'fas fa-cogs',
-    },
-    {
+      cssClass: 'fa-solid fa-cogs',
+      searchTerms: ['settings', 'gears', 'adjust'],
+    }, {
       name: 'coins',
-      cssClass: 'fas fa-coins',
-    },
-    {
+      cssClass: 'fa-solid fa-coins',
+      searchTerms: ['currency', 'money', 'finance'],
+    }, {
+      name: 'colon-sign',
+      cssClass: 'fa-solid fa-colon-sign',
+      searchTerms: ['colon', 'punctuation', 'symbol'],
+    }, {
       name: 'columns',
-      cssClass: 'fas fa-columns',
-    },
-    {
+      cssClass: 'fa-solid fa-columns',
+      searchTerms: ['layout', 'design', 'structure'],
+    }, {
       name: 'comment',
-      cssClass: 'fas fa-comment',
-    },
-    {
+      cssClass: 'fa-solid fa-comment',
+      searchTerms: ['chat', 'message', 'talk'],
+    }, {
       name: 'comment-alt',
-      cssClass: 'fas fa-comment-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-comment-alt',
+      searchTerms: ['chat', 'message', 'talk'],
+    }, {
       name: 'comment-dollar',
-      cssClass: 'fas fa-comment-dollar',
-    },
-    {
+      cssClass: 'fa-solid fa-comment-dollar',
+      searchTerms: ['money', 'finance', 'chat'],
+    }, {
       name: 'comment-dots',
-      cssClass: 'fas fa-comment-dots',
-    },
-    {
+      cssClass: 'fa-solid fa-comment-dots',
+      searchTerms: ['chat', 'message', 'talk'],
+    }, {
       name: 'comment-medical',
-      cssClass: 'fas fa-comment-medical',
-    },
-    {
+      cssClass: 'fa-solid fa-comment-medical',
+      searchTerms: ['health', 'care', 'chat'],
+    }, {
+      name: 'comment-nodes',
+      cssClass: 'fa-solid fa-comment-nodes',
+      searchTerms: ['comment', 'nodes', 'dialogue'],
+    }, {
       name: 'comment-slash',
-      cssClass: 'fas fa-comment-slash',
-    },
-    {
+      cssClass: 'fa-solid fa-comment-slash',
+      searchTerms: ['block', 'forbid', 'chat'],
+    }, {
+      name: 'comment-sms',
+      cssClass: 'fa-solid fa-comment-sms',
+      searchTerms: ['comment', 'sms', 'text'],
+    }, {
+      name: 'commenting',
+      cssClass: 'fa-solid fa-commenting',
+      searchTerms: ['comment', 'chat', 'message'],
+    }, {
       name: 'comments',
-      cssClass: 'fas fa-comments',
-    },
-    {
+      cssClass: 'fa-solid fa-comments',
+      searchTerms: ['chat', 'messages', 'talk'],
+    }, {
       name: 'comments-dollar',
-      cssClass: 'fas fa-comments-dollar',
-    },
-    {
+      cssClass: 'fa-solid fa-comments-dollar',
+      searchTerms: ['money', 'finance', 'chat'],
+    }, {
       name: 'compact-disc',
-      cssClass: 'fas fa-compact-disc',
-    },
-    {
+      cssClass: 'fa-solid fa-compact-disc',
+      searchTerms: ['music', 'media', 'disc'],
+    }, {
       name: 'compass',
-      cssClass: 'fas fa-compass',
-    },
-    {
+      cssClass: 'fa-solid fa-compass',
+      searchTerms: ['navigation', 'direction', 'travel'],
+    }, {
+      name: 'compass-drafting',
+      cssClass: 'fa-solid fa-compass-drafting',
+      searchTerms: ['compass', 'drafting', 'design'],
+    }, {
       name: 'compress',
-      cssClass: 'fas fa-compress',
-    },
-    {
+      cssClass: 'fa-solid fa-compress',
+      searchTerms: ['shrink', 'reduce', 'size'],
+    }, {
+      name: 'compress-alt',
+      cssClass: 'fa-solid fa-compress-alt',
+      searchTerms: ['compress', 'reduce', 'shrink'],
+    }, {
       name: 'compress-arrows-alt',
-      cssClass: 'fas fa-compress-arrows-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-compress-arrows-alt',
+      searchTerms: ['shrink', 'reduce', 'size'],
+    }, {
+      name: 'computer',
+      cssClass: 'fa-solid fa-computer',
+      searchTerms: ['computer', 'device', 'technology'],
+    }, {
+      name: 'computer-mouse',
+      cssClass: 'fa-solid fa-computer-mouse',
+      searchTerms: ['mouse', 'computer', 'device'],
+    }, {
       name: 'concierge-bell',
-      cssClass: 'fas fa-concierge-bell',
-    },
-    {
+      cssClass: 'fa-solid fa-concierge-bell',
+      searchTerms: ['service', 'hospitality', 'help'],
+    }, {
+      name: 'contact-book',
+      cssClass: 'fa-solid fa-contact-book',
+      searchTerms: ['contacts', 'book', 'list'],
+    }, {
+      name: 'contact-card',
+      cssClass: 'fa-solid fa-contact-card',
+      searchTerms: ['contact', 'card', 'info'],
+    }, {
       name: 'cookie',
-      cssClass: 'fas fa-cookie',
-    },
-    {
+      cssClass: 'fa-solid fa-cookie',
+      searchTerms: ['dessert', 'snack', 'treat'],
+    }, {
       name: 'cookie-bite',
-      cssClass: 'fas fa-cookie-bite',
-    },
-    {
+      cssClass: 'fa-solid fa-cookie-bite',
+      searchTerms: ['dessert', 'snack', 'treat'],
+    }, {
       name: 'copy',
-      cssClass: 'fas fa-copy',
-    },
-    {
+      cssClass: 'fa-solid fa-copy',
+      searchTerms: ['duplicate', 'replicate', 'copy'],
+    }, {
       name: 'copyright',
-      cssClass: 'fas fa-copyright',
-    },
-    {
+      cssClass: 'fa-solid fa-copyright',
+      searchTerms: ['legal', 'rights', 'ownership'],
+    }, {
       name: 'couch',
-      cssClass: 'fas fa-couch',
-    },
-    {
+      cssClass: 'fa-solid fa-couch',
+      searchTerms: ['furniture', 'seat', 'rest'],
+    }, {
+      name: 'cow',
+      cssClass: 'fa-solid fa-cow',
+      searchTerms: ['cow', 'animal', 'farm'],
+    }, {
       name: 'credit-card',
-      cssClass: 'fas fa-credit-card',
-    },
-    {
+      cssClass: 'fa-solid fa-credit-card',
+      searchTerms: ['payment', 'finance', 'transaction'],
+    }, {
+      name: 'credit-card-alt',
+      cssClass: 'fa-solid fa-credit-card-alt',
+      searchTerms: ['credit', 'card', 'alternative'],
+    }, {
       name: 'crop',
-      cssClass: 'fas fa-crop',
-    },
-    {
+      cssClass: 'fa-solid fa-crop',
+      searchTerms: ['edit', 'image', 'resize'],
+    }, {
       name: 'crop-alt',
-      cssClass: 'fas fa-crop-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-crop-alt',
+      searchTerms: ['edit', 'image', 'resize'],
+    }, {
+      name: 'crop-simple',
+      cssClass: 'fa-solid fa-crop-simple',
+      searchTerms: ['crop', 'simple', 'edit'],
+    }, {
       name: 'cross',
-      cssClass: 'fas fa-cross',
-    },
-    {
+      cssClass: 'fa-solid fa-cross',
+      searchTerms: ['symbol', 'mark', 'sign'],
+    }, {
       name: 'crosshairs',
-      cssClass: 'fas fa-crosshairs',
-    },
-    {
+      cssClass: 'fa-solid fa-crosshairs',
+      searchTerms: ['aim', 'target', 'focus'],
+    }, {
       name: 'crow',
-      cssClass: 'fas fa-crow',
-    },
-    {
+      cssClass: 'fa-solid fa-crow',
+      searchTerms: ['bird', 'animal', 'wildlife'],
+    }, {
       name: 'crown',
-      cssClass: 'fas fa-crown',
-    },
-    {
+      cssClass: 'fa-solid fa-crown',
+      searchTerms: ['royalty', 'king', 'queen'],
+    }, {
       name: 'crutch',
-      cssClass: 'fas fa-crutch',
-    },
-    {
+      cssClass: 'fa-solid fa-crutch',
+      searchTerms: ['support', 'aid', 'assist'],
+    }, {
+      name: 'cruzeiro-sign',
+      cssClass: 'fa-solid fa-cruzeiro-sign',
+      searchTerms: ['cruzeiro', 'currency', 'brazil'],
+    }, {
       name: 'cube',
-      cssClass: 'fas fa-cube',
-    },
-    {
+      cssClass: 'fa-solid fa-cube',
+      searchTerms: ['shape', '3D', 'object'],
+    }, {
       name: 'cubes',
-      cssClass: 'fas fa-cubes',
-    },
-    {
+      cssClass: 'fa-solid fa-cubes',
+      searchTerms: ['shapes', '3D', 'objects'],
+    }, {
+      name: 'cubes-stacked',
+      cssClass: 'fa-solid fa-cubes-stacked',
+      searchTerms: ['cubes', 'stacked', 'blocks'],
+    }, {
       name: 'cut',
-      cssClass: 'fas fa-cut',
-    },
-    {
+      cssClass: 'fa-solid fa-cut',
+      searchTerms: ['edit', 'remove', 'clip'],
+    }, {
+      name: 'cutlery',
+      cssClass: 'fa-solid fa-cutlery',
+      searchTerms: ['cutlery', 'dining', 'utensil'],
+    }, {
+      name: 'd',
+      cssClass: 'fa-solid fa-d',
+      searchTerms: ['letter', 'D', 'initial'],
+    }, {
+      name: 'dashboard',
+      cssClass: 'fa-solid fa-dashboard',
+      searchTerms: ['dashboard', 'controls', 'panel'],
+    }, {
       name: 'database',
-      cssClass: 'fas fa-database',
-    },
-    {
+      cssClass: 'fa-solid fa-database',
+      searchTerms: ['data', 'storage', 'information'],
+    }, {
       name: 'deaf',
-      cssClass: 'fas fa-deaf',
-    },
-    {
+      cssClass: 'fa-solid fa-deaf',
+      searchTerms: ['accessibility', 'hearing', 'disability'],
+    }, {
+      name: 'deafness',
+      cssClass: 'fa-solid fa-deafness',
+      searchTerms: ['deafness', 'disability', 'hearing'],
+    }, {
+      name: 'dedent',
+      cssClass: 'fa-solid fa-dedent',
+      searchTerms: ['dedent', 'format', 'text'],
+    }, {
+      name: 'delete-left',
+      cssClass: 'fa-solid fa-delete-left',
+      searchTerms: ['delete', 'left', 'remove'],
+    }, {
       name: 'democrat',
-      cssClass: 'fas fa-democrat',
-    },
-    {
+      cssClass: 'fa-solid fa-democrat',
+      searchTerms: ['politics', 'party', 'election'],
+    }, {
       name: 'desktop',
-      cssClass: 'fas fa-desktop',
-    },
-    {
+      cssClass: 'fa-solid fa-desktop',
+      searchTerms: ['computer', 'screen', 'device'],
+    }, {
+      name: 'desktop-alt',
+      cssClass: 'fa-solid fa-desktop-alt',
+      searchTerms: ['desktop', 'alternative', 'computer'],
+    }, {
       name: 'dharmachakra',
-      cssClass: 'fas fa-dharmachakra',
-    },
-    {
+      cssClass: 'fa-solid fa-dharmachakra',
+      searchTerms: ['buddhism', 'symbol', 'spiritual'],
+    }, {
       name: 'diagnoses',
-      cssClass: 'fas fa-diagnoses',
-    },
-    {
+      cssClass: 'fa-solid fa-diagnoses',
+      searchTerms: ['health', 'medical', 'checkup'],
+    }, {
+      name: 'diagram-next',
+      cssClass: 'fa-solid fa-diagram-next',
+      searchTerms: ['diagram', 'next', 'flow'],
+    }, {
+      name: 'diagram-predecessor',
+      cssClass: 'fa-solid fa-diagram-predecessor',
+      searchTerms: ['diagram', 'predecessor', 'flow'],
+    }, {
+      name: 'diagram-project',
+      cssClass: 'fa-solid fa-diagram-project',
+      searchTerms: ['diagram', 'project', 'flow'],
+    }, {
+      name: 'diagram-successor',
+      cssClass: 'fa-solid fa-diagram-successor',
+      searchTerms: ['diagram', 'successor', 'flow'],
+    }, {
+      name: 'diamond',
+      cssClass: 'fa-solid fa-diamond',
+      searchTerms: ['diamond', 'gem', 'jewel'],
+    }, {
+      name: 'diamond-turn-right',
+      cssClass: 'fa-solid fa-diamond-turn-right',
+      searchTerms: ['diamond', 'turn', 'right'],
+    }, {
       name: 'dice',
-      cssClass: 'fas fa-dice',
-    },
-    {
+      cssClass: 'fa-solid fa-dice',
+      searchTerms: ['game', 'chance', 'random'],
+    }, {
       name: 'dice-d20',
-      cssClass: 'fas fa-dice-d20',
-    },
-    {
+      cssClass: 'fa-solid fa-dice-d20',
+      searchTerms: ['game', 'tabletop', 'dice'],
+    }, {
       name: 'dice-d6',
-      cssClass: 'fas fa-dice-d6',
-    },
-    {
+      cssClass: 'fa-solid fa-dice-d6',
+      searchTerms: ['game', 'chance', 'random'],
+    }, {
       name: 'dice-five',
-      cssClass: 'fas fa-dice-five',
-    },
-    {
+      cssClass: 'fa-solid fa-dice-five',
+      searchTerms: ['game', 'chance', 'random'],
+    }, {
       name: 'dice-four',
-      cssClass: 'fas fa-dice-four',
-    },
-    {
+      cssClass: 'fa-solid fa-dice-four',
+      searchTerms: ['game', 'chance', 'random'],
+    }, {
       name: 'dice-one',
-      cssClass: 'fas fa-dice-one',
-    },
-    {
+      cssClass: 'fa-solid fa-dice-one',
+      searchTerms: ['game', 'chance', 'random'],
+    }, {
       name: 'dice-six',
-      cssClass: 'fas fa-dice-six',
-    },
-    {
+      cssClass: 'fa-solid fa-dice-six',
+      searchTerms: ['game', 'chance', 'random'],
+    }, {
       name: 'dice-three',
-      cssClass: 'fas fa-dice-three',
-    },
-    {
+      cssClass: 'fa-solid fa-dice-three',
+      searchTerms: ['game', 'chance', 'random'],
+    }, {
       name: 'dice-two',
-      cssClass: 'fas fa-dice-two',
-    },
-    {
+      cssClass: 'fa-solid fa-dice-two',
+      searchTerms: ['game', 'chance', 'random'],
+    }, {
+      name: 'digging',
+      cssClass: 'fa-solid fa-digging',
+      searchTerms: ['digging', 'excavation', 'work'],
+    }, {
       name: 'digital-tachograph',
-      cssClass: 'fas fa-digital-tachograph',
-    },
-    {
+      cssClass: 'fa-solid fa-digital-tachograph',
+      searchTerms: ['data', 'recording', 'vehicle'],
+    }, {
       name: 'directions',
-      cssClass: 'fas fa-directions',
-    },
-    {
+      cssClass: 'fa-solid fa-directions',
+      searchTerms: ['navigate', 'route', 'map'],
+    }, {
+      name: 'disease',
+      cssClass: 'fa-solid fa-disease',
+      searchTerms: ['disease', 'illness', 'health'],
+    }, {
+      name: 'display',
+      cssClass: 'fa-solid fa-display',
+      searchTerms: ['display', 'screen', 'monitor'],
+    }, {
       name: 'divide',
-      cssClass: 'fas fa-divide',
-    },
-    {
+      cssClass: 'fa-solid fa-divide',
+      searchTerms: ['math', 'calculate', 'operation'],
+    }, {
       name: 'dizzy',
-      cssClass: 'fas fa-dizzy',
-    },
-    {
+      cssClass: 'fa-solid fa-dizzy',
+      searchTerms: ['emotion', 'face', 'reaction'],
+    }, {
       name: 'dna',
-      cssClass: 'fas fa-dna',
-    },
-    {
+      cssClass: 'fa-solid fa-dna',
+      searchTerms: ['genetics', 'biology', 'science'],
+    }, {
       name: 'dog',
-      cssClass: 'fas fa-dog',
-    },
-    {
+      cssClass: 'fa-solid fa-dog',
+      searchTerms: ['animal', 'pet', 'canine'],
+    }, {
+      name: 'dollar',
+      cssClass: 'fa-solid fa-dollar',
+      searchTerms: ['dollar', 'currency', 'money'],
+    }, {
       name: 'dollar-sign',
-      cssClass: 'fas fa-dollar-sign',
-    },
-    {
+      cssClass: 'fa-solid fa-dollar-sign',
+      searchTerms: ['money', 'currency', 'finance'],
+    }, {
       name: 'dolly',
-      cssClass: 'fas fa-dolly',
-    },
-    {
+      cssClass: 'fa-solid fa-dolly',
+      searchTerms: ['transport', 'cart', 'move'],
+    }, {
+      name: 'dolly-box',
+      cssClass: 'fa-solid fa-dolly-box',
+      searchTerms: ['dolly', 'box', 'transport'],
+    }, {
       name: 'dolly-flatbed',
-      cssClass: 'fas fa-dolly-flatbed',
-    },
-    {
+      cssClass: 'fa-solid fa-dolly-flatbed',
+      searchTerms: ['transport', 'cart', 'move'],
+    }, {
       name: 'donate',
-      cssClass: 'fas fa-donate',
-    },
-    {
+      cssClass: 'fa-solid fa-donate',
+      searchTerms: ['charity', 'give', 'support'],
+    }, {
+      name: 'dong-sign',
+      cssClass: 'fa-solid fa-dong-sign',
+      searchTerms: ['dong', 'currency', 'vietnam'],
+    }, {
       name: 'door-closed',
-      cssClass: 'fas fa-door-closed',
-    },
-    {
+      cssClass: 'fa-solid fa-door-closed',
+      searchTerms: ['close', 'entry', 'exit'],
+    }, {
       name: 'door-open',
-      cssClass: 'fas fa-door-open',
-    },
-    {
+      cssClass: 'fa-solid fa-door-open',
+      searchTerms: ['open', 'entry', 'exit'],
+    }, {
       name: 'dot-circle',
-      cssClass: 'fas fa-dot-circle',
-    },
-    {
+      cssClass: 'fa-solid fa-dot-circle',
+      searchTerms: ['point', 'mark', 'indicator'],
+    }, {
       name: 'dove',
-      cssClass: 'fas fa-dove',
-    },
-    {
+      cssClass: 'fa-solid fa-dove',
+      searchTerms: ['bird', 'peace', 'symbol'],
+    }, {
+      name: 'down-left-and-up-right-to-center',
+      cssClass: 'fa-solid fa-down-left-and-up-right-to-center',
+      searchTerms: ['center', 'align', 'position'],
+    }, {
+      name: 'down-long',
+      cssClass: 'fa-solid fa-down-long',
+      searchTerms: ['down', 'long', 'direction'],
+    }, {
       name: 'download',
-      cssClass: 'fas fa-download',
-    },
-    {
+      cssClass: 'fa-solid fa-download',
+      searchTerms: ['get', 'retrieve', 'data'],
+    }, {
       name: 'drafting-compass',
-      cssClass: 'fas fa-drafting-compass',
-    },
-    {
+      cssClass: 'fa-solid fa-drafting-compass',
+      searchTerms: ['design', 'draw', 'plan'],
+    }, {
       name: 'dragon',
-      cssClass: 'fas fa-dragon',
-    },
-    {
+      cssClass: 'fa-solid fa-dragon',
+      searchTerms: ['mythical', 'creature', 'fantasy'],
+    }, {
       name: 'draw-polygon',
-      cssClass: 'fas fa-draw-polygon',
-    },
-    {
+      cssClass: 'fa-solid fa-draw-polygon',
+      searchTerms: ['shape', 'design', 'draw'],
+    }, {
+      name: 'drivers-license',
+      cssClass: 'fa-solid fa-drivers-license',
+      searchTerms: ['license', 'driver', 'id'],
+    }, {
+      name: 'droplet',
+      cssClass: 'fa-solid fa-droplet',
+      searchTerms: ['droplet', 'water', 'liquid'],
+    }, {
+      name: 'droplet-slash',
+      cssClass: 'fa-solid fa-droplet-slash',
+      searchTerms: ['droplet', 'slash', 'remove'],
+    }, {
       name: 'drum',
-      cssClass: 'fas fa-drum',
-    },
-    {
+      cssClass: 'fa-solid fa-drum',
+      searchTerms: ['music', 'instrument', 'beat'],
+    }, {
       name: 'drum-steelpan',
-      cssClass: 'fas fa-drum-steelpan',
-    },
-    {
+      cssClass: 'fa-solid fa-drum-steelpan',
+      searchTerms: ['music', 'instrument', 'caribbean'],
+    }, {
       name: 'drumstick-bite',
-      cssClass: 'fas fa-drumstick-bite',
-    },
-    {
+      cssClass: 'fa-solid fa-drumstick-bite',
+      searchTerms: ['food', 'chicken', 'meal'],
+    }, {
       name: 'dumbbell',
-      cssClass: 'fas fa-dumbbell',
-    },
-    {
+      cssClass: 'fa-solid fa-dumbbell',
+      searchTerms: ['fitness', 'exercise', 'weight'],
+    }, {
       name: 'dumpster',
-      cssClass: 'fas fa-dumpster',
-    },
-    {
+      cssClass: 'fa-solid fa-dumpster',
+      searchTerms: ['trash', 'waste', 'container'],
+    }, {
       name: 'dumpster-fire',
-      cssClass: 'fas fa-dumpster-fire',
-    },
-    {
+      cssClass: 'fa-solid fa-dumpster-fire',
+      searchTerms: ['chaos', 'mess', 'disaster'],
+    }, {
       name: 'dungeon',
-      cssClass: 'fas fa-dungeon',
-    },
-    {
+      cssClass: 'fa-solid fa-dungeon',
+      searchTerms: ['fantasy', 'adventure', 'game'],
+    }, {
+      name: 'e',
+      cssClass: 'fa-solid fa-e',
+      searchTerms: ['letter', 'E', 'initial'],
+    }, {
+      name: 'ear-deaf',
+      cssClass: 'fa-solid fa-ear-deaf',
+      searchTerms: ['deaf', 'ear', 'hearing'],
+    }, {
+      name: 'ear-listen',
+      cssClass: 'fa-solid fa-ear-listen',
+      searchTerms: ['ear', 'listen', 'hear'],
+    }, {
+      name: 'earth',
+      cssClass: 'fa-solid fa-earth',
+      searchTerms: ['earth', 'planet', 'world'],
+    }, {
+      name: 'earth-africa',
+      cssClass: 'fa-solid fa-earth-africa',
+      searchTerms: ['earth', 'africa', 'globe'],
+    }, {
+      name: 'earth-america',
+      cssClass: 'fa-solid fa-earth-america',
+      searchTerms: ['earth', 'america', 'continent'],
+    }, {
+      name: 'earth-americas',
+      cssClass: 'fa-solid fa-earth-americas',
+      searchTerms: ['earth', 'americas', 'globe'],
+    }, {
+      name: 'earth-asia',
+      cssClass: 'fa-solid fa-earth-asia',
+      searchTerms: ['earth', 'asia', 'continent'],
+    }, {
+      name: 'earth-europe',
+      cssClass: 'fa-solid fa-earth-europe',
+      searchTerms: ['earth', 'europe', 'continent'],
+    }, {
+      name: 'earth-oceania',
+      cssClass: 'fa-solid fa-earth-oceania',
+      searchTerms: ['earth', 'oceania', 'continent'],
+    }, {
       name: 'edit',
-      cssClass: 'fas fa-edit',
-    },
-    {
+      cssClass: 'fa-solid fa-edit',
+      searchTerms: ['modify', 'change', 'update'],
+    }, {
       name: 'egg',
-      cssClass: 'fas fa-egg',
-    },
-    {
+      cssClass: 'fa-solid fa-egg',
+      searchTerms: ['food', 'breakfast', 'meal'],
+    }, {
       name: 'eject',
-      cssClass: 'fas fa-eject',
-    },
-    {
+      cssClass: 'fa-solid fa-eject',
+      searchTerms: ['remove', 'release', 'exit'],
+    }, {
+      name: 'elevator',
+      cssClass: 'fa-solid fa-elevator',
+      searchTerms: ['elevator', 'lift', 'transport'],
+    }, {
+      name: 'ellipsis',
+      cssClass: 'fa-solid fa-ellipsis',
+      searchTerms: ['ellipsis', 'menu', 'more'],
+    }, {
       name: 'ellipsis-h',
-      cssClass: 'fas fa-ellipsis-h',
-    },
-    {
+      cssClass: 'fa-solid fa-ellipsis-h',
+      searchTerms: ['more', 'options', 'menu'],
+    }, {
       name: 'ellipsis-v',
-      cssClass: 'fas fa-ellipsis-v',
-    },
-    {
+      cssClass: 'fa-solid fa-ellipsis-v',
+      searchTerms: ['more', 'options', 'menu'],
+    }, {
+      name: 'ellipsis-vertical',
+      cssClass: 'fa-solid fa-ellipsis-vertical',
+      searchTerms: ['ellipsis', 'vertical', 'menu'],
+    }, {
       name: 'envelope',
-      cssClass: 'fas fa-envelope',
-    },
-    {
+      cssClass: 'fa-solid fa-envelope',
+      searchTerms: ['mail', 'message', 'communication'],
+    }, {
+      name: 'envelope-circle-check',
+      cssClass: 'fa-solid fa-envelope-circle-check',
+      searchTerms: ['envelope', 'check', 'mail'],
+    }, {
       name: 'envelope-open',
-      cssClass: 'fas fa-envelope-open',
-    },
-    {
+      cssClass: 'fa-solid fa-envelope-open',
+      searchTerms: ['mail', 'message', 'communication'],
+    }, {
       name: 'envelope-open-text',
-      cssClass: 'fas fa-envelope-open-text',
-    },
-    {
+      cssClass: 'fa-solid fa-envelope-open-text',
+      searchTerms: ['mail', 'message', 'communication'],
+    }, {
       name: 'envelope-square',
-      cssClass: 'fas fa-envelope-square',
-    },
-    {
+      cssClass: 'fa-solid fa-envelope-square',
+      searchTerms: ['mail', 'message', 'communication'],
+    }, {
+      name: 'envelopes-bulk',
+      cssClass: 'fa-solid fa-envelopes-bulk',
+      searchTerms: ['bulk', 'envelopes', 'mail'],
+    }, {
       name: 'equals',
-      cssClass: 'fas fa-equals',
-    },
-    {
+      cssClass: 'fa-solid fa-equals',
+      searchTerms: ['math', 'operation', 'equal'],
+    }, {
       name: 'eraser',
-      cssClass: 'fas fa-eraser',
-    },
-    {
+      cssClass: 'fa-solid fa-eraser',
+      searchTerms: ['remove', 'delete', 'edit'],
+    }, {
       name: 'ethernet',
-      cssClass: 'fas fa-ethernet',
-    },
-    {
+      cssClass: 'fa-solid fa-ethernet',
+      searchTerms: ['network', 'connection', 'cable'],
+    }, {
+      name: 'eur',
+      cssClass: 'fa-solid fa-eur',
+      searchTerms: ['eur', 'currency', 'euro'],
+    }, {
+      name: 'euro',
+      cssClass: 'fa-solid fa-euro',
+      searchTerms: ['euro', 'currency', 'money'],
+    }, {
       name: 'euro-sign',
-      cssClass: 'fas fa-euro-sign',
-    },
-    {
+      cssClass: 'fa-solid fa-euro-sign',
+      searchTerms: ['currency', 'money', 'finance'],
+    }, {
+      name: 'exchange',
+      cssClass: 'fa-solid fa-exchange',
+      searchTerms: ['exchange', 'swap', 'trade'],
+    }, {
       name: 'exchange-alt',
-      cssClass: 'fas fa-exchange-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-exchange-alt',
+      searchTerms: ['swap', 'trade', 'exchange'],
+    }, {
       name: 'exclamation',
-      cssClass: 'fas fa-exclamation',
-    },
-    {
+      cssClass: 'fa-solid fa-exclamation',
+      searchTerms: ['alert', 'warning', 'notice'],
+    }, {
       name: 'exclamation-circle',
-      cssClass: 'fas fa-exclamation-circle',
-    },
-    {
+      cssClass: 'fa-solid fa-exclamation-circle',
+      searchTerms: ['alert', 'warning', 'notice'],
+    }, {
       name: 'exclamation-triangle',
-      cssClass: 'fas fa-exclamation-triangle',
-    },
-    {
+      cssClass: 'fa-solid fa-exclamation-triangle',
+      searchTerms: ['alert', 'warning', 'notice'],
+    }, {
       name: 'expand',
-      cssClass: 'fas fa-expand',
-    },
-    {
+      cssClass: 'fa-solid fa-expand',
+      searchTerms: ['enlarge', 'increase', 'grow'],
+    }, {
+      name: 'expand-alt',
+      cssClass: 'fa-solid fa-expand-alt',
+      searchTerms: ['expand', 'alternative', 'open'],
+    }, {
       name: 'expand-arrows-alt',
-      cssClass: 'fas fa-expand-arrows-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-expand-arrows-alt',
+      searchTerms: ['enlarge', 'increase', 'grow'],
+    }, {
+      name: 'explosion',
+      cssClass: 'fa-solid fa-explosion',
+      searchTerms: ['explosion', 'burst', 'blast'],
+    }, {
+      name: 'external-link',
+      cssClass: 'fa-solid fa-external-link',
+      searchTerms: ['external', 'link', 'connect'],
+    }, {
       name: 'external-link-alt',
-      cssClass: 'fas fa-external-link-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-external-link-alt',
+      searchTerms: ['link', 'external', 'open'],
+    }, {
+      name: 'external-link-square',
+      cssClass: 'fa-solid fa-external-link-square',
+      searchTerms: ['external', 'link', 'square'],
+    }, {
       name: 'external-link-square-alt',
-      cssClass: 'fas fa-external-link-square-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-external-link-square-alt',
+      searchTerms: ['link', 'external', 'open'],
+    }, {
       name: 'eye',
-      cssClass: 'fas fa-eye',
-    },
-    {
+      cssClass: 'fa-solid fa-eye',
+      searchTerms: ['vision', 'see', 'look'],
+    }, {
       name: 'eye-dropper',
-      cssClass: 'fas fa-eye-dropper',
-    },
-    {
+      cssClass: 'fa-solid fa-eye-dropper',
+      searchTerms: ['color', 'pick', 'design'],
+    }, {
+      name: 'eye-dropper-empty',
+      cssClass: 'fa-solid fa-eye-dropper-empty',
+      searchTerms: ['eye', 'dropper', 'empty'],
+    }, {
+      name: 'eye-low-vision',
+      cssClass: 'fa-solid fa-eye-low-vision',
+      searchTerms: ['eye', 'low', 'vision'],
+    }, {
       name: 'eye-slash',
-      cssClass: 'fas fa-eye-slash',
-    },
-    {
+      cssClass: 'fa-solid fa-eye-slash',
+      searchTerms: ['hide', 'conceal', 'block'],
+    }, {
+      name: 'eyedropper',
+      cssClass: 'fa-solid fa-eyedropper',
+      searchTerms: ['eyedropper', 'color', 'select'],
+    }, {
+      name: 'f',
+      cssClass: 'fa-solid fa-f',
+      searchTerms: ['letter', 'F', 'initial'],
+    }, {
+      name: 'face-angry',
+      cssClass: 'fa-solid fa-face-angry',
+      searchTerms: ['angry', 'face', 'emotion'],
+    }, {
+      name: 'face-dizzy',
+      cssClass: 'fa-solid fa-face-dizzy',
+      searchTerms: ['dizzy', 'face', 'confused'],
+    }, {
+      name: 'face-flushed',
+      cssClass: 'fa-solid fa-face-flushed',
+      searchTerms: ['flushed', 'face', 'embarrassed'],
+    }, {
+      name: 'face-frown',
+      cssClass: 'fa-solid fa-face-frown',
+      searchTerms: ['frown', 'face', 'sad'],
+    }, {
+      name: 'face-frown-open',
+      cssClass: 'fa-solid fa-face-frown-open',
+      searchTerms: ['frown', 'face', 'sad'],
+    }, {
+      name: 'face-grimace',
+      cssClass: 'fa-solid fa-face-grimace',
+      searchTerms: ['grimace', 'face', 'emotion'],
+    }, {
+      name: 'face-grin',
+      cssClass: 'fa-solid fa-face-grin',
+      searchTerms: ['grin', 'face', 'happy'],
+    }, {
+      name: 'face-grin-beam',
+      cssClass: 'fa-solid fa-face-grin-beam',
+      searchTerms: ['grin', 'beam', 'smile'],
+    }, {
+      name: 'face-grin-beam-sweat',
+      cssClass: 'fa-solid fa-face-grin-beam-sweat',
+      searchTerms: ['grin', 'sweat', 'face'],
+    }, {
+      name: 'face-grin-hearts',
+      cssClass: 'fa-solid fa-face-grin-hearts',
+      searchTerms: ['grin', 'hearts', 'love'],
+    }, {
+      name: 'face-grin-squint',
+      cssClass: 'fa-solid fa-face-grin-squint',
+      searchTerms: ['grin', 'squint', 'face'],
+    }, {
+      name: 'face-grin-squint-tears',
+      cssClass: 'fa-solid fa-face-grin-squint-tears',
+      searchTerms: ['grin', 'squint', 'tears'],
+    }, {
+      name: 'face-grin-stars',
+      cssClass: 'fa-solid fa-face-grin-stars',
+      searchTerms: ['smile', 'stars', 'happy'],
+    }, {
+      name: 'face-grin-tears',
+      cssClass: 'fa-solid fa-face-grin-tears',
+      searchTerms: ['grin', 'tears', 'happy'],
+    }, {
+      name: 'face-grin-tongue',
+      cssClass: 'fa-solid fa-face-grin-tongue',
+      searchTerms: ['grin', 'tongue', 'smile'],
+    }, {
+      name: 'face-grin-tongue-squint',
+      cssClass: 'fa-solid fa-face-grin-tongue-squint',
+      searchTerms: ['grin', 'tongue', 'face'],
+    }, {
+      name: 'face-grin-tongue-wink',
+      cssClass: 'fa-solid fa-face-grin-tongue-wink',
+      searchTerms: ['grin', 'tongue', 'wink'],
+    }, {
+      name: 'face-grin-wide',
+      cssClass: 'fa-solid fa-face-grin-wide',
+      searchTerms: ['grin', 'wide', 'smile'],
+    }, {
+      name: 'face-grin-wink',
+      cssClass: 'fa-solid fa-face-grin-wink',
+      searchTerms: ['wink', 'grin', 'smile'],
+    }, {
+      name: 'face-kiss',
+      cssClass: 'fa-solid fa-face-kiss',
+      searchTerms: ['kiss', 'face', 'love'],
+    }, {
+      name: 'face-kiss-beam',
+      cssClass: 'fa-solid fa-face-kiss-beam',
+      searchTerms: ['kiss', 'smile', 'face'],
+    }, {
+      name: 'face-kiss-wink-heart',
+      cssClass: 'fa-solid fa-face-kiss-wink-heart',
+      searchTerms: ['kiss', 'wink', 'heart'],
+    }, {
+      name: 'face-laugh',
+      cssClass: 'fa-solid fa-face-laugh',
+      searchTerms: ['laugh', 'face', 'happy'],
+    }, {
+      name: 'face-laugh-beam',
+      cssClass: 'fa-solid fa-face-laugh-beam',
+      searchTerms: ['laugh', 'beam', 'happy'],
+    }, {
+      name: 'face-laugh-squint',
+      cssClass: 'fa-solid fa-face-laugh-squint',
+      searchTerms: ['laugh', 'squint', 'face'],
+    }, {
+      name: 'face-laugh-wink',
+      cssClass: 'fa-solid fa-face-laugh-wink',
+      searchTerms: ['laugh', 'wink', 'face'],
+    }, {
+      name: 'face-meh',
+      cssClass: 'fa-solid fa-face-meh',
+      searchTerms: ['meh', 'face', 'neutral'],
+    }, {
+      name: 'face-meh-blank',
+      cssClass: 'fa-solid fa-face-meh-blank',
+      searchTerms: ['meh', 'face', 'neutral'],
+    }, {
+      name: 'face-rolling-eyes',
+      cssClass: 'fa-solid fa-face-rolling-eyes',
+      searchTerms: ['rolling', 'eyes', 'face'],
+    }, {
+      name: 'face-sad-cry',
+      cssClass: 'fa-solid fa-face-sad-cry',
+      searchTerms: ['sad', 'cry', 'face'],
+    }, {
+      name: 'face-sad-tear',
+      cssClass: 'fa-solid fa-face-sad-tear',
+      searchTerms: ['sad', 'tear', 'face'],
+    }, {
+      name: 'face-smile',
+      cssClass: 'fa-solid fa-face-smile',
+      searchTerms: ['smile', 'face', 'happy'],
+    }, {
+      name: 'face-smile-beam',
+      cssClass: 'fa-solid fa-face-smile-beam',
+      searchTerms: ['happy', 'smile', 'face'],
+    }, {
+      name: 'face-smile-wink',
+      cssClass: 'fa-solid fa-face-smile-wink',
+      searchTerms: ['smile', 'wink', 'face'],
+    }, {
+      name: 'face-surprise',
+      cssClass: 'fa-solid fa-face-surprise',
+      searchTerms: ['surprise', 'face', 'shock'],
+    }, {
+      name: 'face-tired',
+      cssClass: 'fa-solid fa-face-tired',
+      searchTerms: ['tired', 'face', 'sleepy'],
+    }, {
+      name: 'fan',
+      cssClass: 'fa-solid fa-fan',
+      searchTerms: ['fan', 'air', 'cool'],
+    }, {
       name: 'fast-backward',
-      cssClass: 'fas fa-fast-backward',
-    },
-    {
+      cssClass: 'fa-solid fa-fast-backward',
+      searchTerms: ['rewind', 'back', 'play'],
+    }, {
       name: 'fast-forward',
-      cssClass: 'fas fa-fast-forward',
-    },
-    {
+      cssClass: 'fa-solid fa-fast-forward',
+      searchTerms: ['skip', 'next', 'play'],
+    }, {
+      name: 'faucet',
+      cssClass: 'fa-solid fa-faucet',
+      searchTerms: ['faucet', 'water', 'tap'],
+    }, {
+      name: 'faucet-drip',
+      cssClass: 'fa-solid fa-faucet-drip',
+      searchTerms: ['faucet', 'drip', 'water'],
+    }, {
       name: 'fax',
-      cssClass: 'fas fa-fax',
-    },
-    {
+      cssClass: 'fa-solid fa-fax',
+      searchTerms: ['document', 'send', 'communication'],
+    }, {
       name: 'feather',
-      cssClass: 'fas fa-feather',
-    },
-    {
+      cssClass: 'fa-solid fa-feather',
+      searchTerms: ['light', 'soft', 'nature'],
+    }, {
       name: 'feather-alt',
-      cssClass: 'fas fa-feather-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-feather-alt',
+      searchTerms: ['light', 'soft', 'nature'],
+    }, {
+      name: 'feather-pointed',
+      cssClass: 'fa-solid fa-feather-pointed',
+      searchTerms: ['feather', 'pointed', 'light'],
+    }, {
+      name: 'feed',
+      cssClass: 'fa-solid fa-feed',
+      searchTerms: ['feed', 'news', 'updates'],
+    }, {
       name: 'female',
-      cssClass: 'fas fa-female',
-    },
-    {
+      cssClass: 'fa-solid fa-female',
+      searchTerms: ['woman', 'gender', 'female'],
+    }, {
+      name: 'ferry',
+      cssClass: 'fa-solid fa-ferry',
+      searchTerms: ['ferry', 'boat', 'transport'],
+    }, {
       name: 'fighter-jet',
-      cssClass: 'fas fa-fighter-jet',
-    },
-    {
+      cssClass: 'fa-solid fa-fighter-jet',
+      searchTerms: ['aircraft', 'military', 'plane'],
+    }, {
       name: 'file',
-      cssClass: 'fas fa-file',
-    },
-    {
+      cssClass: 'fa-solid fa-file',
+      searchTerms: ['document', 'paper', 'record'],
+    }, {
       name: 'file-alt',
-      cssClass: 'fas fa-file-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-file-alt',
+      searchTerms: ['document', 'paper', 'record'],
+    }, {
       name: 'file-archive',
-      cssClass: 'fas fa-file-archive',
-    },
-    {
+      cssClass: 'fa-solid fa-file-archive',
+      searchTerms: ['compressed', 'zip', 'file'],
+    }, {
+      name: 'file-arrow-down',
+      cssClass: 'fa-solid fa-file-arrow-down',
+      searchTerms: ['file', 'download', 'arrow'],
+    }, {
+      name: 'file-arrow-up',
+      cssClass: 'fa-solid fa-file-arrow-up',
+      searchTerms: ['file', 'upload', 'arrow'],
+    }, {
       name: 'file-audio',
-      cssClass: 'fas fa-file-audio',
-    },
-    {
+      cssClass: 'fa-solid fa-file-audio',
+      searchTerms: ['sound', 'audio', 'music'],
+    }, {
+      name: 'file-circle-check',
+      cssClass: 'fa-solid fa-file-circle-check',
+      searchTerms: ['file', 'check', 'verified'],
+    }, {
+      name: 'file-circle-exclamation',
+      cssClass: 'fa-solid fa-file-circle-exclamation',
+      searchTerms: ['alert', 'document', 'file'],
+    }, {
+      name: 'file-circle-minus',
+      cssClass: 'fa-solid fa-file-circle-minus',
+      searchTerms: ['file', 'remove', 'circle'],
+    }, {
+      name: 'file-circle-plus',
+      cssClass: 'fa-solid fa-file-circle-plus',
+      searchTerms: ['file', 'add', 'circle'],
+    }, {
+      name: 'file-circle-question',
+      cssClass: 'fa-solid fa-file-circle-question',
+      searchTerms: ['question', 'document', 'file'],
+    }, {
+      name: 'file-circle-xmark',
+      cssClass: 'fa-solid fa-file-circle-xmark',
+      searchTerms: ['file', 'remove', 'circle'],
+    }, {
+      name: 'file-clipboard',
+      cssClass: 'fa-solid fa-file-clipboard',
+      searchTerms: ['clipboard', 'document', 'file'],
+    }, {
       name: 'file-code',
-      cssClass: 'fas fa-file-code',
-    },
-    {
+      cssClass: 'fa-solid fa-file-code',
+      searchTerms: ['program', 'code', 'file'],
+    }, {
       name: 'file-contract',
-      cssClass: 'fas fa-file-contract',
-    },
-    {
+      cssClass: 'fa-solid fa-file-contract',
+      searchTerms: ['legal', 'document', 'contract'],
+    }, {
       name: 'file-csv',
-      cssClass: 'fas fa-file-csv',
-    },
-    {
+      cssClass: 'fa-solid fa-file-csv',
+      searchTerms: ['data', 'spreadsheet', 'file'],
+    }, {
       name: 'file-download',
-      cssClass: 'fas fa-file-download',
-    },
-    {
+      cssClass: 'fa-solid fa-file-download',
+      searchTerms: ['get', 'retrieve', 'file'],
+    }, {
+      name: 'file-edit',
+      cssClass: 'fa-solid fa-file-edit',
+      searchTerms: ['file', 'edit', 'document'],
+    }, {
       name: 'file-excel',
-      cssClass: 'fas fa-file-excel',
-    },
-    {
+      cssClass: 'fa-solid fa-file-excel',
+      searchTerms: ['spreadsheet', 'data', 'file'],
+    }, {
       name: 'file-export',
-      cssClass: 'fas fa-file-export',
-    },
-    {
+      cssClass: 'fa-solid fa-file-export',
+      searchTerms: ['send', 'output', 'file'],
+    }, {
+      name: 'file-fragment',
+      cssClass: 'fa-solid fa-file-fragment',
+      searchTerms: ['file', 'fragment', 'part'],
+    }, {
+      name: 'file-half-dashed',
+      cssClass: 'fa-solid fa-file-half-dashed',
+      searchTerms: ['file', 'half', 'dashed'],
+    }, {
       name: 'file-image',
-      cssClass: 'fas fa-file-image',
-    },
-    {
+      cssClass: 'fa-solid fa-file-image',
+      searchTerms: ['picture', 'photo', 'image'],
+    }, {
       name: 'file-import',
-      cssClass: 'fas fa-file-import',
-    },
-    {
+      cssClass: 'fa-solid fa-file-import',
+      searchTerms: ['receive', 'input', 'file'],
+    }, {
       name: 'file-invoice',
-      cssClass: 'fas fa-file-invoice',
-    },
-    {
+      cssClass: 'fa-solid fa-file-invoice',
+      searchTerms: ['bill', 'document', 'invoice'],
+    }, {
       name: 'file-invoice-dollar',
-      cssClass: 'fas fa-file-invoice-dollar',
-    },
-    {
+      cssClass: 'fa-solid fa-file-invoice-dollar',
+      searchTerms: ['bill', 'document', 'invoice'],
+    }, {
+      name: 'file-lines',
+      cssClass: 'fa-solid fa-file-lines',
+      searchTerms: ['document', 'outline', 'lines'],
+    }, {
       name: 'file-medical',
-      cssClass: 'fas fa-file-medical',
-    },
-    {
+      cssClass: 'fa-solid fa-file-medical',
+      searchTerms: ['health', 'document', 'medical'],
+    }, {
       name: 'file-medical-alt',
-      cssClass: 'fas fa-file-medical-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-file-medical-alt',
+      searchTerms: ['health', 'document', 'medical'],
+    }, {
       name: 'file-pdf',
-      cssClass: 'fas fa-file-pdf',
-    },
-    {
+      cssClass: 'fa-solid fa-file-pdf',
+      searchTerms: ['document', 'paper', 'pdf'],
+    }, {
+      name: 'file-pen',
+      cssClass: 'fa-solid fa-file-pen',
+      searchTerms: ['file', 'pen', 'edit'],
+    }, {
       name: 'file-powerpoint',
-      cssClass: 'fas fa-file-powerpoint',
-    },
-    {
+      cssClass: 'fa-solid fa-file-powerpoint',
+      searchTerms: ['presentation', 'document', 'file'],
+    }, {
       name: 'file-prescription',
-      cssClass: 'fas fa-file-prescription',
-    },
-    {
+      cssClass: 'fa-solid fa-file-prescription',
+      searchTerms: ['health', 'document', 'medical'],
+    }, {
+      name: 'file-shield',
+      cssClass: 'fa-solid fa-file-shield',
+      searchTerms: ['file', 'shield', 'secure'],
+    }, {
       name: 'file-signature',
-      cssClass: 'fas fa-file-signature',
-    },
-    {
+      cssClass: 'fa-solid fa-file-signature',
+      searchTerms: ['sign', 'document', 'contract'],
+    }, {
+      name: 'file-text',
+      cssClass: 'fa-solid fa-file-text',
+      searchTerms: ['text', 'document', 'file'],
+    }, {
       name: 'file-upload',
-      cssClass: 'fas fa-file-upload',
-    },
-    {
+      cssClass: 'fa-solid fa-file-upload',
+      searchTerms: ['send', 'upload', 'file'],
+    }, {
       name: 'file-video',
-      cssClass: 'fas fa-file-video',
-    },
-    {
+      cssClass: 'fa-solid fa-file-video',
+      searchTerms: ['media', 'video', 'file'],
+    }, {
+      name: 'file-waveform',
+      cssClass: 'fa-solid fa-file-waveform',
+      searchTerms: ['file', 'waveform', 'audio'],
+    }, {
       name: 'file-word',
-      cssClass: 'fas fa-file-word',
-    },
-    {
+      cssClass: 'fa-solid fa-file-word',
+      searchTerms: ['document', 'text', 'file'],
+    }, {
+      name: 'file-zipper',
+      cssClass: 'fa-solid fa-file-zipper',
+      searchTerms: ['file', 'zipper', 'compress'],
+    }, {
       name: 'fill',
-      cssClass: 'fas fa-fill',
-    },
-    {
+      cssClass: 'fa-solid fa-fill',
+      searchTerms: ['color', 'paint', 'design'],
+    }, {
       name: 'fill-drip',
-      cssClass: 'fas fa-fill-drip',
-    },
-    {
+      cssClass: 'fa-solid fa-fill-drip',
+      searchTerms: ['color', 'paint', 'design'],
+    }, {
       name: 'film',
-      cssClass: 'fas fa-film',
-    },
-    {
+      cssClass: 'fa-solid fa-film',
+      searchTerms: ['movie', 'media', 'video'],
+    }, {
       name: 'filter',
-      cssClass: 'fas fa-filter',
-    },
-    {
+      cssClass: 'fa-solid fa-filter',
+      searchTerms: ['sort', 'organize', 'search'],
+    }, {
+      name: 'filter-circle-dollar',
+      cssClass: 'fa-solid fa-filter-circle-dollar',
+      searchTerms: ['filter', 'dollar', 'money'],
+    }, {
+      name: 'filter-circle-xmark',
+      cssClass: 'fa-solid fa-filter-circle-xmark',
+      searchTerms: ['filter', 'circle', 'remove'],
+    }, {
       name: 'fingerprint',
-      cssClass: 'fas fa-fingerprint',
-    },
-    {
+      cssClass: 'fa-solid fa-fingerprint',
+      searchTerms: ['security', 'identity', 'biometrics'],
+    }, {
       name: 'fire',
-      cssClass: 'fas fa-fire',
-    },
-    {
+      cssClass: 'fa-solid fa-fire',
+      searchTerms: ['flame', 'heat', 'burn'],
+    }, {
       name: 'fire-alt',
-      cssClass: 'fas fa-fire-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-fire-alt',
+      searchTerms: ['flame', 'heat', 'burn'],
+    }, {
+      name: 'fire-burner',
+      cssClass: 'fa-solid fa-fire-burner',
+      searchTerms: ['burner', 'fire', 'heat'],
+    }, {
       name: 'fire-extinguisher',
-      cssClass: 'fas fa-fire-extinguisher',
-    },
-    {
+      cssClass: 'fa-solid fa-fire-extinguisher',
+      searchTerms: ['safety', 'fire', 'protection'],
+    }, {
+      name: 'fire-flame-curved',
+      cssClass: 'fa-solid fa-fire-flame-curved',
+      searchTerms: ['fire', 'flame', 'curved'],
+    }, {
+      name: 'fire-flame-simple',
+      cssClass: 'fa-solid fa-fire-flame-simple',
+      searchTerms: ['flame', 'fire'],
+    }, {
       name: 'first-aid',
-      cssClass: 'fas fa-first-aid',
-    },
-    {
+      cssClass: 'fa-solid fa-first-aid',
+      searchTerms: ['health', 'emergency', 'care'],
+    }, {
       name: 'fish',
-      cssClass: 'fas fa-fish',
-    },
-    {
+      cssClass: 'fa-solid fa-fish',
+      searchTerms: ['animal', 'aquatic', 'seafood'],
+    }, {
+      name: 'fish-fins',
+      cssClass: 'fa-solid fa-fish-fins',
+      searchTerms: ['fish', 'fins', 'ocean'],
+    }, {
       name: 'fist-raised',
-      cssClass: 'fas fa-fist-raised',
-    },
-    {
+      cssClass: 'fa-solid fa-fist-raised',
+      searchTerms: ['protest', 'power', 'strength'],
+    }, {
       name: 'flag',
-      cssClass: 'fas fa-flag',
-    },
-    {
+      cssClass: 'fa-solid fa-flag',
+      searchTerms: ['symbol', 'marker', 'country'],
+    }, {
       name: 'flag-checkered',
-      cssClass: 'fas fa-flag-checkered',
-    },
-    {
+      cssClass: 'fa-solid fa-flag-checkered',
+      searchTerms: ['finish', 'race', 'marker'],
+    }, {
       name: 'flag-usa',
-      cssClass: 'fas fa-flag-usa',
-    },
-    {
+      cssClass: 'fa-solid fa-flag-usa',
+      searchTerms: ['country', 'national', 'symbol'],
+    }, {
       name: 'flask',
-      cssClass: 'fas fa-flask',
-    },
-    {
+      cssClass: 'fa-solid fa-flask',
+      searchTerms: ['science', 'experiment', 'lab'],
+    }, {
+      name: 'flask-vial',
+      cssClass: 'fa-solid fa-flask-vial',
+      searchTerms: ['flask', 'vial', 'science'],
+    }, {
+      name: 'floppy-disk',
+      cssClass: 'fa-solid fa-floppy-disk',
+      searchTerms: ['floppy', 'disk', 'save'],
+    }, {
+      name: 'florin-sign',
+      cssClass: 'fa-solid fa-florin-sign',
+      searchTerms: ['florin', 'currency', 'netherlands'],
+    }, {
       name: 'flushed',
-      cssClass: 'fas fa-flushed',
-    },
-    {
+      cssClass: 'fa-solid fa-flushed',
+      searchTerms: ['emotion', 'face', 'reaction'],
+    }, {
       name: 'folder',
-      cssClass: 'fas fa-folder',
-    },
-    {
+      cssClass: 'fa-solid fa-folder',
+      searchTerms: ['file', 'directory', 'storage'],
+    }, {
+      name: 'folder-blank',
+      cssClass: 'fa-solid fa-folder-blank',
+      searchTerms: ['folder', 'blank', 'empty'],
+    }, {
+      name: 'folder-closed',
+      cssClass: 'fa-solid fa-folder-closed',
+      searchTerms: ['folder', 'closed', 'file'],
+    }, {
       name: 'folder-minus',
-      cssClass: 'fas fa-folder-minus',
-    },
-    {
+      cssClass: 'fa-solid fa-folder-minus',
+      searchTerms: ['remove', 'folder', 'storage'],
+    }, {
       name: 'folder-open',
-      cssClass: 'fas fa-folder-open',
-    },
-    {
+      cssClass: 'fa-solid fa-folder-open',
+      searchTerms: ['file', 'directory', 'storage'],
+    }, {
       name: 'folder-plus',
-      cssClass: 'fas fa-folder-plus',
-    },
-    {
+      cssClass: 'fa-solid fa-folder-plus',
+      searchTerms: ['add', 'folder', 'storage'],
+    }, {
+      name: 'folder-tree',
+      cssClass: 'fa-solid fa-folder-tree',
+      searchTerms: ['folder', 'tree', 'structure'],
+    }, {
       name: 'font',
-      cssClass: 'fas fa-font',
-    },
-    {
+      cssClass: 'fa-solid fa-font',
+      searchTerms: ['text', 'type', 'style'],
+    }, {
       name: 'font-awesome-logo-full',
-      cssClass: 'fas fa-font-awesome-logo-full',
-    },
-    {
+      cssClass: 'fa-solid fa-font-awesome-logo-full',
+      searchTerms: ['brand', 'logo', 'icon'],
+    }, {
+      name: 'football',
+      cssClass: 'fa-solid fa-football',
+      searchTerms: ['football', 'sport', 'game'],
+    }, {
       name: 'football-ball',
-      cssClass: 'fas fa-football-ball',
-    },
-    {
+      cssClass: 'fa-solid fa-football-ball',
+      searchTerms: ['sport', 'game', 'football'],
+    }, {
       name: 'forward',
-      cssClass: 'fas fa-forward',
-    },
-    {
+      cssClass: 'fa-solid fa-forward',
+      searchTerms: ['next', 'play', 'move'],
+    }, {
+      name: 'forward-fast',
+      cssClass: 'fa-solid fa-forward-fast',
+      searchTerms: ['forward', 'fast', 'next'],
+    }, {
+      name: 'forward-step',
+      cssClass: 'fa-solid fa-forward-step',
+      searchTerms: ['forward', 'next', 'step'],
+    }, {
+      name: 'franc-sign',
+      cssClass: 'fa-solid fa-franc-sign',
+      searchTerms: ['franc', 'currency', 'switzerland'],
+    }, {
       name: 'frog',
-      cssClass: 'fas fa-frog',
-    },
-    {
+      cssClass: 'fa-solid fa-frog',
+      searchTerms: ['animal', 'nature', 'wildlife'],
+    }, {
       name: 'frown',
-      cssClass: 'fas fa-frown',
-    },
-    {
+      cssClass: 'fa-solid fa-frown',
+      searchTerms: ['emotion', 'face', 'sad'],
+    }, {
       name: 'frown-open',
-      cssClass: 'fas fa-frown-open',
-    },
-    {
+      cssClass: 'fa-solid fa-frown-open',
+      searchTerms: ['emotion', 'face', 'sad'],
+    }, {
       name: 'funnel-dollar',
-      cssClass: 'fas fa-funnel-dollar',
-    },
-    {
+      cssClass: 'fa-solid fa-funnel-dollar',
+      searchTerms: ['finance', 'money', 'income'],
+    }, {
       name: 'futbol',
-      cssClass: 'fas fa-futbol',
-    },
-    {
+      cssClass: 'fa-solid fa-futbol',
+      searchTerms: ['sport', 'game', 'football'],
+    }, {
+      name: 'futbol-ball',
+      cssClass: 'fa-solid fa-futbol-ball',
+      searchTerms: ['ball', 'soccer'],
+    }, {
+      name: 'g',
+      cssClass: 'fa-solid fa-g',
+      searchTerms: ['letter', 'G', 'initial'],
+    }, {
       name: 'gamepad',
-      cssClass: 'fas fa-gamepad',
-    },
-    {
+      cssClass: 'fa-solid fa-gamepad',
+      searchTerms: ['gaming', 'controller', 'play'],
+    }, {
       name: 'gas-pump',
-      cssClass: 'fas fa-gas-pump',
-    },
-    {
+      cssClass: 'fa-solid fa-gas-pump',
+      searchTerms: ['fuel', 'petrol', 'gas'],
+    }, {
+      name: 'gauge',
+      cssClass: 'fa-solid fa-gauge',
+      searchTerms: ['gauge', 'measure', 'indicator'],
+    }, {
+      name: 'gauge-high',
+      cssClass: 'fa-solid fa-gauge-high',
+      searchTerms: ['gauge', 'high', 'measure'],
+    }, {
+      name: 'gauge-med',
+      cssClass: 'fa-solid fa-gauge-med',
+      searchTerms: ['gauge', 'medium', 'measure'],
+    }, {
+      name: 'gauge-simple',
+      cssClass: 'fa-solid fa-gauge-simple',
+      searchTerms: ['gauge', 'simple', 'measure'],
+    }, {
+      name: 'gauge-simple-high',
+      cssClass: 'fa-solid fa-gauge-simple-high',
+      searchTerms: ['gauge', 'high', 'measure'],
+    }, {
+      name: 'gauge-simple-med',
+      cssClass: 'fa-solid fa-gauge-simple-med',
+      searchTerms: ['gauge', 'medium', 'measure'],
+    }, {
       name: 'gavel',
-      cssClass: 'fas fa-gavel',
-    },
-    {
+      cssClass: 'fa-solid fa-gavel',
+      searchTerms: ['law', 'justice', 'court'],
+    }, {
+      name: 'gbp',
+      cssClass: 'fa-solid fa-gbp',
+      searchTerms: ['gbp', 'currency', 'pound'],
+    }, {
+      name: 'gear',
+      cssClass: 'fa-solid fa-gear',
+      searchTerms: ['gear', 'settings', 'adjust'],
+    }, {
+      name: 'gears',
+      cssClass: 'fa-solid fa-gears',
+      searchTerms: ['gears', 'settings', 'mechanical'],
+    }, {
       name: 'gem',
-      cssClass: 'fas fa-gem',
-    },
-    {
+      cssClass: 'fa-solid fa-gem',
+      searchTerms: ['jewel', 'precious', 'stone'],
+    }, {
       name: 'genderless',
-      cssClass: 'fas fa-genderless',
-    },
-    {
+      cssClass: 'fa-solid fa-genderless',
+      searchTerms: ['neutral', 'gender', 'identity'],
+    }, {
       name: 'ghost',
-      cssClass: 'fas fa-ghost',
-    },
-    {
+      cssClass: 'fa-solid fa-ghost',
+      searchTerms: ['spirit', 'halloween', 'scary'],
+    }, {
       name: 'gift',
-      cssClass: 'fas fa-gift',
-    },
-    {
+      cssClass: 'fa-solid fa-gift',
+      searchTerms: ['present', 'gift', 'celebration'],
+    }, {
       name: 'gifts',
-      cssClass: 'fas fa-gifts',
-    },
-    {
+      cssClass: 'fa-solid fa-gifts',
+      searchTerms: ['presents', 'gift', 'celebration'],
+    }, {
       name: 'glass-cheers',
-      cssClass: 'fas fa-glass-cheers',
-    },
-    {
+      cssClass: 'fa-solid fa-glass-cheers',
+      searchTerms: ['drink', 'celebrate', 'toast'],
+    }, {
       name: 'glass-martini',
-      cssClass: 'fas fa-glass-martini',
-    },
-    {
+      cssClass: 'fa-solid fa-glass-martini',
+      searchTerms: ['drink', 'cocktail', 'beverage'],
+    }, {
       name: 'glass-martini-alt',
-      cssClass: 'fas fa-glass-martini-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-glass-martini-alt',
+      searchTerms: ['drink', 'cocktail', 'beverage'],
+    }, {
+      name: 'glass-water',
+      cssClass: 'fa-solid fa-glass-water',
+      searchTerms: ['glass', 'water', 'drink'],
+    }, {
+      name: 'glass-water-droplet',
+      cssClass: 'fa-solid fa-glass-water-droplet',
+      searchTerms: ['glass', 'water', 'droplet'],
+    }, {
       name: 'glass-whiskey',
-      cssClass: 'fas fa-glass-whiskey',
-    },
-    {
+      cssClass: 'fa-solid fa-glass-whiskey',
+      searchTerms: ['drink', 'cocktail', 'beverage'],
+    }, {
       name: 'glasses',
-      cssClass: 'fas fa-glasses',
-    },
-    {
+      cssClass: 'fa-solid fa-glasses',
+      searchTerms: ['vision', 'eye', 'accessory'],
+    }, {
       name: 'globe',
-      cssClass: 'fas fa-globe',
-    },
-    {
+      cssClass: 'fa-solid fa-globe',
+      searchTerms: ['earth', 'world', 'global'],
+    }, {
       name: 'globe-africa',
-      cssClass: 'fas fa-globe-africa',
-    },
-    {
+      cssClass: 'fa-solid fa-globe-africa',
+      searchTerms: ['continent', 'world', 'global'],
+    }, {
       name: 'globe-americas',
-      cssClass: 'fas fa-globe-americas',
-    },
-    {
+      cssClass: 'fa-solid fa-globe-americas',
+      searchTerms: ['continent', 'world', 'global'],
+    }, {
       name: 'globe-asia',
-      cssClass: 'fas fa-globe-asia',
-    },
-    {
+      cssClass: 'fa-solid fa-globe-asia',
+      searchTerms: ['continent', 'world', 'global'],
+    }, {
       name: 'globe-europe',
-      cssClass: 'fas fa-globe-europe',
-    },
-    {
+      cssClass: 'fa-solid fa-globe-europe',
+      searchTerms: ['continent', 'world', 'global'],
+    }, {
+      name: 'globe-oceania',
+      cssClass: 'fa-solid fa-globe-oceania',
+      searchTerms: ['globe', 'oceania', 'map'],
+    }, {
       name: 'golf-ball',
-      cssClass: 'fas fa-golf-ball',
-    },
-    {
+      cssClass: 'fa-solid fa-golf-ball',
+      searchTerms: ['sport', 'game', 'golf'],
+    }, {
+      name: 'golf-ball-tee',
+      cssClass: 'fa-solid fa-golf-ball-tee',
+      searchTerms: ['golf', 'ball', 'tee'],
+    }, {
       name: 'gopuram',
-      cssClass: 'fas fa-gopuram',
-    },
-    {
+      cssClass: 'fa-solid fa-gopuram',
+      searchTerms: ['temple', 'architecture', 'india'],
+    }, {
       name: 'graduation-cap',
-      cssClass: 'fas fa-graduation-cap',
-    },
-    {
+      cssClass: 'fa-solid fa-graduation-cap',
+      searchTerms: ['education', 'school', 'graduation'],
+    }, {
       name: 'greater-than',
-      cssClass: 'fas fa-greater-than',
-    },
-    {
+      cssClass: 'fa-solid fa-greater-than',
+      searchTerms: ['math', 'comparison', 'symbol'],
+    }, {
       name: 'greater-than-equal',
-      cssClass: 'fas fa-greater-than-equal',
-    },
-    {
+      cssClass: 'fa-solid fa-greater-than-equal',
+      searchTerms: ['math', 'comparison', 'symbol'],
+    }, {
       name: 'grimace',
-      cssClass: 'fas fa-grimace',
-    },
-    {
+      cssClass: 'fa-solid fa-grimace',
+      searchTerms: ['emotion', 'face', 'reaction'],
+    }, {
       name: 'grin',
-      cssClass: 'fas fa-grin',
-    },
-    {
+      cssClass: 'fa-solid fa-grin',
+      searchTerms: ['emotion', 'face', 'happy'],
+    }, {
       name: 'grin-alt',
-      cssClass: 'fas fa-grin-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-grin-alt',
+      searchTerms: ['emotion', 'face', 'happy'],
+    }, {
       name: 'grin-beam',
-      cssClass: 'fas fa-grin-beam',
-    },
-    {
+      cssClass: 'fa-solid fa-grin-beam',
+      searchTerms: ['emotion', 'face', 'happy'],
+    }, {
       name: 'grin-beam-sweat',
-      cssClass: 'fas fa-grin-beam-sweat',
-    },
-    {
+      cssClass: 'fa-solid fa-grin-beam-sweat',
+      searchTerms: ['emotion', 'face', 'happy'],
+    }, {
       name: 'grin-hearts',
-      cssClass: 'fas fa-grin-hearts',
-    },
-    {
+      cssClass: 'fa-solid fa-grin-hearts',
+      searchTerms: ['emotion', 'face', 'happy'],
+    }, {
       name: 'grin-squint',
-      cssClass: 'fas fa-grin-squint',
-    },
-    {
+      cssClass: 'fa-solid fa-grin-squint',
+      searchTerms: ['emotion', 'face', 'happy'],
+    }, {
       name: 'grin-squint-tears',
-      cssClass: 'fas fa-grin-squint-tears',
-    },
-    {
+      cssClass: 'fa-solid fa-grin-squint-tears',
+      searchTerms: ['emotion', 'face', 'happy'],
+    }, {
       name: 'grin-stars',
-      cssClass: 'fas fa-grin-stars',
-    },
-    {
+      cssClass: 'fa-solid fa-grin-stars',
+      searchTerms: ['emotion', 'face', 'happy'],
+    }, {
       name: 'grin-tears',
-      cssClass: 'fas fa-grin-tears',
-    },
-    {
+      cssClass: 'fa-solid fa-grin-tears',
+      searchTerms: ['emotion', 'face', 'happy'],
+    }, {
       name: 'grin-tongue',
-      cssClass: 'fas fa-grin-tongue',
-    },
-    {
+      cssClass: 'fa-solid fa-grin-tongue',
+      searchTerms: ['emotion', 'face', 'happy'],
+    }, {
       name: 'grin-tongue-squint',
-      cssClass: 'fas fa-grin-tongue-squint',
-    },
-    {
+      cssClass: 'fa-solid fa-grin-tongue-squint',
+      searchTerms: ['emotion', 'face', 'happy'],
+    }, {
       name: 'grin-tongue-wink',
-      cssClass: 'fas fa-grin-tongue-wink',
-    },
-    {
+      cssClass: 'fa-solid fa-grin-tongue-wink',
+      searchTerms: ['emotion', 'face', 'happy'],
+    }, {
       name: 'grin-wink',
-      cssClass: 'fas fa-grin-wink',
-    },
-    {
+      cssClass: 'fa-solid fa-grin-wink',
+      searchTerms: ['emotion', 'face', 'happy'],
+    }, {
+      name: 'grip',
+      cssClass: 'fa-solid fa-grip',
+      searchTerms: ['grip', 'hold', 'grab'],
+    }, {
       name: 'grip-horizontal',
-      cssClass: 'fas fa-grip-horizontal',
-    },
-    {
+      cssClass: 'fa-solid fa-grip-horizontal',
+      searchTerms: ['resize', 'drag', 'move'],
+    }, {
       name: 'grip-lines',
-      cssClass: 'fas fa-grip-lines',
-    },
-    {
+      cssClass: 'fa-solid fa-grip-lines',
+      searchTerms: ['resize', 'drag', 'move'],
+    }, {
       name: 'grip-lines-vertical',
-      cssClass: 'fas fa-grip-lines-vertical',
-    },
-    {
+      cssClass: 'fa-solid fa-grip-lines-vertical',
+      searchTerms: ['resize', 'drag', 'move'],
+    }, {
       name: 'grip-vertical',
-      cssClass: 'fas fa-grip-vertical',
-    },
-    {
+      cssClass: 'fa-solid fa-grip-vertical',
+      searchTerms: ['resize', 'drag', 'move'],
+    }, {
+      name: 'group-arrows-rotate',
+      cssClass: 'fa-solid fa-group-arrows-rotate',
+      searchTerms: ['group', 'arrows', 'rotate'],
+    }, {
+      name: 'guarani-sign',
+      cssClass: 'fa-solid fa-guarani-sign',
+      searchTerms: ['guarani', 'currency', 'paraguay'],
+    }, {
       name: 'guitar',
-      cssClass: 'fas fa-guitar',
-    },
-    {
+      cssClass: 'fa-solid fa-guitar',
+      searchTerms: ['music', 'instrument', 'play'],
+    }, {
+      name: 'gun',
+      cssClass: 'fa-solid fa-gun',
+      searchTerms: ['gun', 'weapon', 'firearm'],
+    }, {
+      name: 'h',
+      cssClass: 'fa-solid fa-h',
+      searchTerms: ['letter', 'H', 'initial'],
+    }, {
       name: 'h-square',
-      cssClass: 'fas fa-h-square',
-    },
-    {
+      cssClass: 'fa-solid fa-h-square',
+      searchTerms: ['shape', 'box', 'design'],
+    }, {
       name: 'hamburger',
-      cssClass: 'fas fa-hamburger',
-    },
-    {
+      cssClass: 'fa-solid fa-hamburger',
+      searchTerms: ['food', 'meal', 'snack'],
+    }, {
       name: 'hammer',
-      cssClass: 'fas fa-hammer',
-    },
-    {
+      cssClass: 'fa-solid fa-hammer',
+      searchTerms: ['tool', 'construction', 'build'],
+    }, {
       name: 'hamsa',
-      cssClass: 'fas fa-hamsa',
-    },
-    {
+      cssClass: 'fa-solid fa-hamsa',
+      searchTerms: ['protection', 'hand', 'symbol'],
+    }, {
+      name: 'hand',
+      cssClass: 'fa-solid fa-hand',
+      searchTerms: ['hand', 'gesture', 'action'],
+    }, {
+      name: 'hand-back-fist',
+      cssClass: 'fa-solid fa-hand-back-fist',
+      searchTerms: ['hand', 'fist', 'gesture'],
+    }, {
+      name: 'hand-dots',
+      cssClass: 'fa-solid fa-hand-dots',
+      searchTerms: ['hand', 'dots', 'gesture'],
+    }, {
+      name: 'hand-fist',
+      cssClass: 'fa-solid fa-hand-fist',
+      searchTerms: ['fist', 'hand', 'gesture'],
+    }, {
       name: 'hand-holding',
-      cssClass: 'fas fa-hand-holding',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-holding',
+      searchTerms: ['support', 'help', 'assist'],
+    }, {
+      name: 'hand-holding-dollar',
+      cssClass: 'fa-solid fa-hand-holding-dollar',
+      searchTerms: ['hand', 'dollar', 'money'],
+    }, {
+      name: 'hand-holding-droplet',
+      cssClass: 'fa-solid fa-hand-holding-droplet',
+      searchTerms: ['hand', 'droplet', 'water'],
+    }, {
+      name: 'hand-holding-hand',
+      cssClass: 'fa-solid fa-hand-holding-hand',
+      searchTerms: ['hand', 'holding', 'support'],
+    }, {
       name: 'hand-holding-heart',
-      cssClass: 'fas fa-hand-holding-heart',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-holding-heart',
+      searchTerms: ['love', 'support', 'care'],
+    }, {
+      name: 'hand-holding-medical',
+      cssClass: 'fa-solid fa-hand-holding-medical',
+      searchTerms: ['hand', 'holding', 'medical'],
+    }, {
       name: 'hand-holding-usd',
-      cssClass: 'fas fa-hand-holding-usd',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-holding-usd',
+      searchTerms: ['money', 'finance', 'support'],
+    }, {
+      name: 'hand-holding-water',
+      cssClass: 'fa-solid fa-hand-holding-water',
+      searchTerms: ['hand', 'water', 'hold'],
+    }, {
       name: 'hand-lizard',
-      cssClass: 'fas fa-hand-lizard',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-lizard',
+      searchTerms: ['gesture', 'hand', 'symbol'],
+    }, {
+      name: 'hand-middle-finger',
+      cssClass: 'fa-solid fa-hand-middle-finger',
+      searchTerms: ['hand', 'middle', 'finger'],
+    }, {
       name: 'hand-paper',
-      cssClass: 'fas fa-hand-paper',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-paper',
+      searchTerms: ['gesture', 'stop', 'symbol'],
+    }, {
       name: 'hand-peace',
-      cssClass: 'fas fa-hand-peace',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-peace',
+      searchTerms: ['gesture', 'peace', 'symbol'],
+    }, {
       name: 'hand-point-down',
-      cssClass: 'fas fa-hand-point-down',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-point-down',
+      searchTerms: ['gesture', 'hand', 'symbol'],
+    }, {
       name: 'hand-point-left',
-      cssClass: 'fas fa-hand-point-left',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-point-left',
+      searchTerms: ['gesture', 'hand', 'symbol'],
+    }, {
       name: 'hand-point-right',
-      cssClass: 'fas fa-hand-point-right',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-point-right',
+      searchTerms: ['gesture', 'hand', 'symbol'],
+    }, {
       name: 'hand-point-up',
-      cssClass: 'fas fa-hand-point-up',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-point-up',
+      searchTerms: ['gesture', 'hand', 'symbol'],
+    }, {
       name: 'hand-pointer',
-      cssClass: 'fas fa-hand-pointer',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-pointer',
+      searchTerms: ['gesture', 'hand', 'symbol'],
+    }, {
       name: 'hand-rock',
-      cssClass: 'fas fa-hand-rock',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-rock',
+      searchTerms: ['gesture', 'hand', 'symbol'],
+    }, {
       name: 'hand-scissors',
-      cssClass: 'fas fa-hand-scissors',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-scissors',
+      searchTerms: ['gesture', 'hand', 'symbol'],
+    }, {
+      name: 'hand-sparkles',
+      cssClass: 'fa-solid fa-hand-sparkles',
+      searchTerms: ['hand', 'sparkles', 'magic'],
+    }, {
       name: 'hand-spock',
-      cssClass: 'fas fa-hand-spock',
-    },
-    {
+      cssClass: 'fa-solid fa-hand-spock',
+      searchTerms: ['gesture', 'hand', 'symbol'],
+    }, {
+      name: 'handcuffs',
+      cssClass: 'fa-solid fa-handcuffs',
+      searchTerms: ['handcuffs', 'restraint', 'security'],
+    }, {
       name: 'hands',
-      cssClass: 'fas fa-hands',
-    },
-    {
+      cssClass: 'fa-solid fa-hands',
+      searchTerms: ['support', 'help', 'assist'],
+    }, {
+      name: 'hands-american-sign-language-interpreting',
+      cssClass: 'fa-solid fa-hands-american-sign-language-interpreting',
+      searchTerms: ['asl', 'interpreting', 'sign'],
+    }, {
+      name: 'hands-asl-interpreting',
+      cssClass: 'fa-solid fa-hands-asl-interpreting',
+      searchTerms: ['asl', 'interpreting', 'sign'],
+    }, {
+      name: 'hands-bound',
+      cssClass: 'fa-solid fa-hands-bound',
+      searchTerms: ['hands', 'bound', 'restricted'],
+    }, {
+      name: 'hands-bubbles',
+      cssClass: 'fa-solid fa-hands-bubbles',
+      searchTerms: ['hands', 'bubbles', 'soap'],
+    }, {
+      name: 'hands-clapping',
+      cssClass: 'fa-solid fa-hands-clapping',
+      searchTerms: ['hands', 'clapping', 'applause'],
+    }, {
       name: 'hands-helping',
-      cssClass: 'fas fa-hands-helping',
-    },
-    {
+      cssClass: 'fa-solid fa-hands-helping',
+      searchTerms: ['support', 'help', 'assist'],
+    }, {
+      name: 'hands-holding',
+      cssClass: 'fa-solid fa-hands-holding',
+      searchTerms: ['hands', 'holding', 'support'],
+    }, {
+      name: 'hands-holding-child',
+      cssClass: 'fa-solid fa-hands-holding-child',
+      searchTerms: ['hands', 'child', 'care'],
+    }, {
+      name: 'hands-holding-circle',
+      cssClass: 'fa-solid fa-hands-holding-circle',
+      searchTerms: ['hands', 'holding', 'circle'],
+    }, {
+      name: 'hands-praying',
+      cssClass: 'fa-solid fa-hands-praying',
+      searchTerms: ['hands', 'praying', 'worship'],
+    }, {
+      name: 'hands-wash',
+      cssClass: 'fa-solid fa-hands-wash',
+      searchTerms: ['wash', 'hands', 'clean'],
+    }, {
       name: 'handshake',
-      cssClass: 'fas fa-handshake',
-    },
-    {
+      cssClass: 'fa-solid fa-handshake',
+      searchTerms: ['agreement', 'deal', 'business'],
+    }, {
+      name: 'handshake-alt',
+      cssClass: 'fa-solid fa-handshake-alt',
+      searchTerms: ['handshake', 'alternative', 'agreement'],
+    }, {
+      name: 'handshake-alt-slash',
+      cssClass: 'fa-solid fa-handshake-alt-slash',
+      searchTerms: ['handshake', 'alternative', 'remove'],
+    }, {
+      name: 'handshake-angle',
+      cssClass: 'fa-solid fa-handshake-angle',
+      searchTerms: ['handshake', 'angle', 'agreement'],
+    }, {
+      name: 'handshake-simple',
+      cssClass: 'fa-solid fa-handshake-simple',
+      searchTerms: ['handshake', 'simple', 'agreement'],
+    }, {
+      name: 'handshake-simple-slash',
+      cssClass: 'fa-solid fa-handshake-simple-slash',
+      searchTerms: ['handshake', 'simple', 'remove'],
+    }, {
+      name: 'handshake-slash',
+      cssClass: 'fa-solid fa-handshake-slash',
+      searchTerms: ['handshake', 'slash', 'remove'],
+    }, {
       name: 'hanukiah',
-      cssClass: 'fas fa-hanukiah',
-    },
-    {
+      cssClass: 'fa-solid fa-hanukiah',
+      searchTerms: ['jewish', 'symbol', 'religion'],
+    }, {
+      name: 'hard-drive',
+      cssClass: 'fa-solid fa-hard-drive',
+      searchTerms: ['hard', 'drive', 'storage'],
+    }, {
       name: 'hard-hat',
-      cssClass: 'fas fa-hard-hat',
-    },
-    {
+      cssClass: 'fa-solid fa-hard-hat',
+      searchTerms: ['construction', 'safety', 'helmet'],
+    }, {
+      name: 'hard-of-hearing',
+      cssClass: 'fa-solid fa-hard-of-hearing',
+      searchTerms: ['hard', 'hearing', 'disability'],
+    }, {
       name: 'hashtag',
-      cssClass: 'fas fa-hashtag',
-    },
-    {
+      cssClass: 'fa-solid fa-hashtag',
+      searchTerms: ['tag', 'social', 'media'],
+    }, {
+      name: 'hat-cowboy',
+      cssClass: 'fa-solid fa-hat-cowboy',
+      searchTerms: ['cowboy', 'hat', 'western'],
+    }, {
+      name: 'hat-cowboy-side',
+      cssClass: 'fa-solid fa-hat-cowboy-side',
+      searchTerms: ['cowboy', 'hat', 'side'],
+    }, {
+      name: 'hat-hard',
+      cssClass: 'fa-solid fa-hat-hard',
+      searchTerms: ['hard', 'hat', 'safety'],
+    }, {
       name: 'hat-wizard',
-      cssClass: 'fas fa-hat-wizard',
-    },
-    {
+      cssClass: 'fa-solid fa-hat-wizard',
+      searchTerms: ['magic', 'fantasy', 'wizard'],
+    }, {
       name: 'haykal',
-      cssClass: 'fas fa-haykal',
-    },
-    {
+      cssClass: 'fa-solid fa-haykal',
+      searchTerms: ['temple', 'architecture', 'religion'],
+    }, {
       name: 'hdd',
-      cssClass: 'fas fa-hdd',
-    },
-    {
+      cssClass: 'fa-solid fa-hdd',
+      searchTerms: ['storage', 'disk', 'data'],
+    }, {
+      name: 'head-side-cough',
+      cssClass: 'fa-solid fa-head-side-cough',
+      searchTerms: ['cough', 'head', 'sick'],
+    }, {
+      name: 'head-side-cough-slash',
+      cssClass: 'fa-solid fa-head-side-cough-slash',
+      searchTerms: ['cough', 'head', 'sick'],
+    }, {
+      name: 'head-side-mask',
+      cssClass: 'fa-solid fa-head-side-mask',
+      searchTerms: ['mask', 'head', 'protection'],
+    }, {
+      name: 'head-side-virus',
+      cssClass: 'fa-solid fa-head-side-virus',
+      searchTerms: ['head', 'virus', 'infection'],
+    }, {
+      name: 'header',
+      cssClass: 'fa-solid fa-header',
+      searchTerms: ['header', 'title', 'top'],
+    }, {
       name: 'heading',
-      cssClass: 'fas fa-heading',
-    },
-    {
+      cssClass: 'fa-solid fa-heading',
+      searchTerms: ['title', 'text', 'header'],
+    }, {
       name: 'headphones',
-      cssClass: 'fas fa-headphones',
-    },
-    {
+      cssClass: 'fa-solid fa-headphones',
+      searchTerms: ['audio', 'music', 'sound'],
+    }, {
       name: 'headphones-alt',
-      cssClass: 'fas fa-headphones-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-headphones-alt',
+      searchTerms: ['audio', 'music', 'sound'],
+    }, {
+      name: 'headphones-simple',
+      cssClass: 'fa-solid fa-headphones-simple',
+      searchTerms: ['headphones', 'audio', 'music'],
+    }, {
       name: 'headset',
-      cssClass: 'fas fa-headset',
-    },
-    {
+      cssClass: 'fa-solid fa-headset',
+      searchTerms: ['audio', 'music', 'sound'],
+    }, {
       name: 'heart',
-      cssClass: 'fas fa-heart',
-    },
-    {
+      cssClass: 'fa-solid fa-heart',
+      searchTerms: ['love', 'emotion', 'symbol'],
+    }, {
       name: 'heart-broken',
-      cssClass: 'fas fa-heart-broken',
-    },
-    {
+      cssClass: 'fa-solid fa-heart-broken',
+      searchTerms: ['sad', 'emotion', 'heart'],
+    }, {
+      name: 'heart-circle-bolt',
+      cssClass: 'fa-solid fa-heart-circle-bolt',
+      searchTerms: ['heart', 'bolt', 'energy'],
+    }, {
+      name: 'heart-circle-check',
+      cssClass: 'fa-solid fa-heart-circle-check',
+      searchTerms: ['heart', 'check', 'verified'],
+    }, {
+      name: 'heart-circle-exclamation',
+      cssClass: 'fa-solid fa-heart-circle-exclamation',
+      searchTerms: ['heart', 'alert', 'circle'],
+    }, {
+      name: 'heart-circle-minus',
+      cssClass: 'fa-solid fa-heart-circle-minus',
+      searchTerms: ['heart', 'minus', 'remove'],
+    }, {
+      name: 'heart-circle-plus',
+      cssClass: 'fa-solid fa-heart-circle-plus',
+      searchTerms: ['heart', 'plus', 'add'],
+    }, {
+      name: 'heart-circle-xmark',
+      cssClass: 'fa-solid fa-heart-circle-xmark',
+      searchTerms: ['heart', 'remove', 'circle'],
+    }, {
+      name: 'heart-crack',
+      cssClass: 'fa-solid fa-heart-crack',
+      searchTerms: ['heart', 'break', 'love'],
+    }, {
+      name: 'heart-music-camera-bolt',
+      cssClass: 'fa-solid fa-heart-music-camera-bolt',
+      searchTerms: ['music', 'media', 'heart'],
+    }, {
+      name: 'heart-pulse',
+      cssClass: 'fa-solid fa-heart-pulse',
+      searchTerms: ['heart', 'pulse', 'health'],
+    }, {
       name: 'heartbeat',
-      cssClass: 'fas fa-heartbeat',
-    },
-    {
+      cssClass: 'fa-solid fa-heartbeat',
+      searchTerms: ['health', 'monitor', 'pulse'],
+    }, {
       name: 'helicopter',
-      cssClass: 'fas fa-helicopter',
-    },
-    {
+      cssClass: 'fa-solid fa-helicopter',
+      searchTerms: ['aircraft', 'vehicle', 'transport'],
+    }, {
+      name: 'helicopter-symbol',
+      cssClass: 'fa-solid fa-helicopter-symbol',
+      searchTerms: ['helicopter', 'symbol', 'air'],
+    }, {
+      name: 'helmet-safety',
+      cssClass: 'fa-solid fa-helmet-safety',
+      searchTerms: ['helmet', 'safety', 'protection'],
+    }, {
+      name: 'helmet-un',
+      cssClass: 'fa-solid fa-helmet-un',
+      searchTerms: ['helmet', 'un', 'safety'],
+    }, {
+      name: 'hexagon-nodes',
+      cssClass: 'fa-solid fa-hexagon-nodes',
+      searchTerms: ['hexagon', 'nodes', 'connect'],
+    }, {
+      name: 'hexagon-nodes-bolt',
+      cssClass: 'fa-solid fa-hexagon-nodes-bolt',
+      searchTerms: ['hexagon', 'nodes', 'bolt'],
+    }, {
       name: 'highlighter',
-      cssClass: 'fas fa-highlighter',
-    },
-    {
+      cssClass: 'fa-solid fa-highlighter',
+      searchTerms: ['mark', 'highlight', 'text'],
+    }, {
       name: 'hiking',
-      cssClass: 'fas fa-hiking',
-    },
-    {
+      cssClass: 'fa-solid fa-hiking',
+      searchTerms: ['outdoor', 'activity', 'exercise'],
+    }, {
+      name: 'hill-avalanche',
+      cssClass: 'fa-solid fa-hill-avalanche',
+      searchTerms: ['hill', 'avalanche', 'danger'],
+    }, {
+      name: 'hill-rockslide',
+      cssClass: 'fa-solid fa-hill-rockslide',
+      searchTerms: ['hill', 'rockslide', 'danger'],
+    }, {
       name: 'hippo',
-      cssClass: 'fas fa-hippo',
-    },
-    {
+      cssClass: 'fa-solid fa-hippo',
+      searchTerms: ['animal', 'wildlife', 'nature'],
+    }, {
       name: 'history',
-      cssClass: 'fas fa-history',
-    },
-    {
+      cssClass: 'fa-solid fa-history',
+      searchTerms: ['past', 'record', 'timeline'],
+    }, {
       name: 'hockey-puck',
-      cssClass: 'fas fa-hockey-puck',
-    },
-    {
+      cssClass: 'fa-solid fa-hockey-puck',
+      searchTerms: ['sport', 'game', 'hockey'],
+    }, {
       name: 'holly-berry',
-      cssClass: 'fas fa-holly-berry',
-    },
-    {
+      cssClass: 'fa-solid fa-holly-berry',
+      searchTerms: ['holiday', 'christmas', 'plant'],
+    }, {
       name: 'home',
-      cssClass: 'fas fa-home',
-    },
-    {
+      cssClass: 'fa-solid fa-home',
+      searchTerms: ['house', 'residence', 'dwelling'],
+    }, {
+      name: 'home-alt',
+      cssClass: 'fa-solid fa-home-alt',
+      searchTerms: ['home', 'alternative', 'house'],
+    }, {
+      name: 'home-lg',
+      cssClass: 'fa-solid fa-home-lg',
+      searchTerms: ['home', 'large', 'house'],
+    }, {
+      name: 'home-lg-alt',
+      cssClass: 'fa-solid fa-home-lg-alt',
+      searchTerms: ['home', 'large', 'alternative'],
+    }, {
+      name: 'home-user',
+      cssClass: 'fa-solid fa-home-user',
+      searchTerms: ['home', 'user', 'profile'],
+    }, {
       name: 'horse',
-      cssClass: 'fas fa-horse',
-    },
-    {
+      cssClass: 'fa-solid fa-horse',
+      searchTerms: ['animal', 'pet', 'equine'],
+    }, {
       name: 'horse-head',
-      cssClass: 'fas fa-horse-head',
-    },
-    {
+      cssClass: 'fa-solid fa-horse-head',
+      searchTerms: ['animal', 'pet', 'equine'],
+    }, {
       name: 'hospital',
-      cssClass: 'fas fa-hospital',
-    },
-    {
+      cssClass: 'fa-solid fa-hospital',
+      searchTerms: ['health', 'care', 'medical'],
+    }, {
       name: 'hospital-alt',
-      cssClass: 'fas fa-hospital-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-hospital-alt',
+      searchTerms: ['health', 'care', 'medical'],
+    }, {
       name: 'hospital-symbol',
-      cssClass: 'fas fa-hospital-symbol',
-    },
-    {
+      cssClass: 'fa-solid fa-hospital-symbol',
+      searchTerms: ['health', 'care', 'medical'],
+    }, {
+      name: 'hospital-user',
+      cssClass: 'fa-solid fa-hospital-user',
+      searchTerms: ['hospital', 'user', 'patient'],
+    }, {
+      name: 'hospital-wide',
+      cssClass: 'fa-solid fa-hospital-wide',
+      searchTerms: ['hospital', 'wide', 'facility'],
+    }, {
       name: 'hot-tub',
-      cssClass: 'fas fa-hot-tub',
-    },
-    {
+      cssClass: 'fa-solid fa-hot-tub',
+      searchTerms: ['spa', 'relax', 'bath'],
+    }, {
+      name: 'hot-tub-person',
+      cssClass: 'fa-solid fa-hot-tub-person',
+      searchTerms: ['hot', 'tub', 'person'],
+    }, {
       name: 'hotdog',
-      cssClass: 'fas fa-hotdog',
-    },
-    {
+      cssClass: 'fa-solid fa-hotdog',
+      searchTerms: ['food', 'snack', 'meal'],
+    }, {
       name: 'hotel',
-      cssClass: 'fas fa-hotel',
-    },
-    {
+      cssClass: 'fa-solid fa-hotel',
+      searchTerms: ['accommodation', 'stay', 'lodge'],
+    }, {
       name: 'hourglass',
-      cssClass: 'fas fa-hourglass',
-    },
-    {
+      cssClass: 'fa-solid fa-hourglass',
+      searchTerms: ['time', 'wait', 'sand'],
+    }, {
+      name: 'hourglass-1',
+      cssClass: 'fa-solid fa-hourglass-1',
+      searchTerms: ['hourglass', 'one', 'time'],
+    }, {
+      name: 'hourglass-2',
+      cssClass: 'fa-solid fa-hourglass-2',
+      searchTerms: ['hourglass', 'time', 'wait'],
+    }, {
+      name: 'hourglass-3',
+      cssClass: 'fa-solid fa-hourglass-3',
+      searchTerms: ['hourglass', 'time', 'wait'],
+    }, {
+      name: 'hourglass-empty',
+      cssClass: 'fa-solid fa-hourglass-empty',
+      searchTerms: ['hourglass', 'empty', 'wait'],
+    }, {
       name: 'hourglass-end',
-      cssClass: 'fas fa-hourglass-end',
-    },
-    {
+      cssClass: 'fa-solid fa-hourglass-end',
+      searchTerms: ['time', 'finish', 'end'],
+    }, {
       name: 'hourglass-half',
-      cssClass: 'fas fa-hourglass-half',
-    },
-    {
+      cssClass: 'fa-solid fa-hourglass-half',
+      searchTerms: ['time', 'half', 'wait'],
+    }, {
       name: 'hourglass-start',
-      cssClass: 'fas fa-hourglass-start',
-    },
-    {
+      cssClass: 'fa-solid fa-hourglass-start',
+      searchTerms: ['time', 'begin', 'start'],
+    }, {
+      name: 'house',
+      cssClass: 'fa-solid fa-house',
+      searchTerms: ['house', 'home', 'building'],
+    }, {
+      name: 'house-chimney',
+      cssClass: 'fa-solid fa-house-chimney',
+      searchTerms: ['house', 'chimney', 'home'],
+    }, {
+      name: 'house-chimney-crack',
+      cssClass: 'fa-solid fa-house-chimney-crack',
+      searchTerms: ['house', 'chimney', 'crack'],
+    }, {
+      name: 'house-chimney-medical',
+      cssClass: 'fa-solid fa-house-chimney-medical',
+      searchTerms: ['medical', 'house', 'chimney'],
+    }, {
+      name: 'house-chimney-user',
+      cssClass: 'fa-solid fa-house-chimney-user',
+      searchTerms: ['house', 'chimney', 'user'],
+    }, {
+      name: 'house-chimney-window',
+      cssClass: 'fa-solid fa-house-chimney-window',
+      searchTerms: ['house', 'chimney', 'window'],
+    }, {
+      name: 'house-circle-check',
+      cssClass: 'fa-solid fa-house-circle-check',
+      searchTerms: ['house', 'check', 'circle'],
+    }, {
+      name: 'house-circle-exclamation',
+      cssClass: 'fa-solid fa-house-circle-exclamation',
+      searchTerms: ['house', 'alert', 'circle'],
+    }, {
+      name: 'house-circle-xmark',
+      cssClass: 'fa-solid fa-house-circle-xmark',
+      searchTerms: ['house', 'remove', 'circle'],
+    }, {
+      name: 'house-crack',
+      cssClass: 'fa-solid fa-house-crack',
+      searchTerms: ['house', 'crack', 'damage'],
+    }, {
       name: 'house-damage',
-      cssClass: 'fas fa-house-damage',
-    },
-    {
+      cssClass: 'fa-solid fa-house-damage',
+      searchTerms: ['damage', 'home', 'repair'],
+    }, {
+      name: 'house-fire',
+      cssClass: 'fa-solid fa-house-fire',
+      searchTerms: ['fire', 'house', 'emergency'],
+    }, {
+      name: 'house-flag',
+      cssClass: 'fa-solid fa-house-flag',
+      searchTerms: ['house', 'flag', 'symbol'],
+    }, {
+      name: 'house-flood-water',
+      cssClass: 'fa-solid fa-house-flood-water',
+      searchTerms: ['flood', 'house', 'water'],
+    }, {
+      name: 'house-flood-water-circle-arrow-right',
+      cssClass: 'fa-solid fa-house-flood-water-circle-arrow-right',
+      searchTerms: ['house', 'flood', 'water'],
+    }, {
+      name: 'house-laptop',
+      cssClass: 'fa-solid fa-house-laptop',
+      searchTerms: ['house', 'laptop', 'home'],
+    }, {
+      name: 'house-lock',
+      cssClass: 'fa-solid fa-house-lock',
+      searchTerms: ['house', 'lock', 'secure'],
+    }, {
+      name: 'house-medical',
+      cssClass: 'fa-solid fa-house-medical',
+      searchTerms: ['medical', 'house', 'health'],
+    }, {
+      name: 'house-medical-circle-check',
+      cssClass: 'fa-solid fa-house-medical-circle-check',
+      searchTerms: ['medical', 'house', 'check'],
+    }, {
+      name: 'house-medical-circle-exclamation',
+      cssClass: 'fa-solid fa-house-medical-circle-exclamation',
+      searchTerms: ['medical', 'house', 'alert'],
+    }, {
+      name: 'house-medical-circle-xmark',
+      cssClass: 'fa-solid fa-house-medical-circle-xmark',
+      searchTerms: ['medical', 'house', 'remove'],
+    }, {
+      name: 'house-medical-flag',
+      cssClass: 'fa-solid fa-house-medical-flag',
+      searchTerms: ['medical', 'house', 'flag'],
+    }, {
+      name: 'house-signal',
+      cssClass: 'fa-solid fa-house-signal',
+      searchTerms: ['house', 'signal', 'communication'],
+    }, {
+      name: 'house-tsunami',
+      cssClass: 'fa-solid fa-house-tsunami',
+      searchTerms: ['house', 'tsunami', 'flood'],
+    }, {
+      name: 'house-user',
+      cssClass: 'fa-solid fa-house-user',
+      searchTerms: ['house', 'user', 'home'],
+    }, {
       name: 'hryvnia',
-      cssClass: 'fas fa-hryvnia',
-    },
-    {
+      cssClass: 'fa-solid fa-hryvnia',
+      searchTerms: ['currency', 'money', 'finance'],
+    }, {
+      name: 'hryvnia-sign',
+      cssClass: 'fa-solid fa-hryvnia-sign',
+      searchTerms: ['hryvnia', 'currency', 'money'],
+    }, {
+      name: 'hurricane',
+      cssClass: 'fa-solid fa-hurricane',
+      searchTerms: ['hurricane', 'storm', 'weather'],
+    }, {
+      name: 'i',
+      cssClass: 'fa-solid fa-i',
+      searchTerms: ['letter', 'I', 'initial'],
+    }, {
       name: 'i-cursor',
-      cssClass: 'fas fa-i-cursor',
-    },
-    {
+      cssClass: 'fa-solid fa-i-cursor',
+      searchTerms: ['pointer', 'select', 'cursor'],
+    }, {
       name: 'ice-cream',
-      cssClass: 'fas fa-ice-cream',
-    },
-    {
+      cssClass: 'fa-solid fa-ice-cream',
+      searchTerms: ['dessert', 'treat', 'food'],
+    }, {
       name: 'icicles',
-      cssClass: 'fas fa-icicles',
-    },
-    {
+      cssClass: 'fa-solid fa-icicles',
+      searchTerms: ['winter', 'cold', 'ice'],
+    }, {
+      name: 'icons',
+      cssClass: 'fa-solid fa-icons',
+      searchTerms: ['icons', 'collection', 'set'],
+    }, {
       name: 'id-badge',
-      cssClass: 'fas fa-id-badge',
-    },
-    {
+      cssClass: 'fa-solid fa-id-badge',
+      searchTerms: ['identity', 'badge', 'card'],
+    }, {
       name: 'id-card',
-      cssClass: 'fas fa-id-card',
-    },
-    {
+      cssClass: 'fa-solid fa-id-card',
+      searchTerms: ['identity', 'badge', 'card'],
+    }, {
       name: 'id-card-alt',
-      cssClass: 'fas fa-id-card-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-id-card-alt',
+      searchTerms: ['identity', 'badge', 'card'],
+    }, {
+      name: 'id-card-clip',
+      cssClass: 'fa-solid fa-id-card-clip',
+      searchTerms: ['id', 'card', 'clip'],
+    }, {
       name: 'igloo',
-      cssClass: 'fas fa-igloo',
-    },
-    {
+      cssClass: 'fa-solid fa-igloo',
+      searchTerms: ['house', 'shelter', 'ice'],
+    }, {
+      name: 'ils',
+      cssClass: 'fa-solid fa-ils',
+      searchTerms: ['ils', 'currency', 'israel'],
+    }, {
       name: 'image',
-      cssClass: 'fas fa-image',
-    },
-    {
+      cssClass: 'fa-solid fa-image',
+      searchTerms: ['picture', 'photo', 'graphic'],
+    }, {
+      name: 'image-portrait',
+      cssClass: 'fa-solid fa-image-portrait',
+      searchTerms: ['portrait', 'image', 'photo'],
+    }, {
       name: 'images',
-      cssClass: 'fas fa-images',
-    },
-    {
+      cssClass: 'fa-solid fa-images',
+      searchTerms: ['pictures', 'photos', 'gallery'],
+    }, {
       name: 'inbox',
-      cssClass: 'fas fa-inbox',
-    },
-    {
+      cssClass: 'fa-solid fa-inbox',
+      searchTerms: ['storage', 'receive', 'mail'],
+    }, {
       name: 'indent',
-      cssClass: 'fas fa-indent',
-    },
-    {
+      cssClass: 'fa-solid fa-indent',
+      searchTerms: ['text', 'format', 'layout'],
+    }, {
+      name: 'indian-rupee',
+      cssClass: 'fa-solid fa-indian-rupee',
+      searchTerms: ['rupee', 'currency', 'india'],
+    }, {
+      name: 'indian-rupee-sign',
+      cssClass: 'fa-solid fa-indian-rupee-sign',
+      searchTerms: ['rupee', 'currency', 'india'],
+    }, {
       name: 'industry',
-      cssClass: 'fas fa-industry',
-    },
-    {
+      cssClass: 'fa-solid fa-industry',
+      searchTerms: ['factory', 'manufacturing', 'business'],
+    }, {
       name: 'infinity',
-      cssClass: 'fas fa-infinity',
-    },
-    {
+      cssClass: 'fa-solid fa-infinity',
+      searchTerms: ['limitless', 'endless', 'eternal'],
+    }, {
       name: 'info',
-      cssClass: 'fas fa-info',
-    },
-    {
+      cssClass: 'fa-solid fa-info',
+      searchTerms: ['information', 'details', 'help'],
+    }, {
       name: 'info-circle',
-      cssClass: 'fas fa-info-circle',
-    },
-    {
+      cssClass: 'fa-solid fa-info-circle',
+      searchTerms: ['information', 'details', 'help'],
+    }, {
+      name: 'inr',
+      cssClass: 'fa-solid fa-inr',
+      searchTerms: ['inr', 'currency', 'india'],
+    }, {
+      name: 'institution',
+      cssClass: 'fa-solid fa-institution',
+      searchTerms: ['institution', 'organization', 'establishment'],
+    }, {
       name: 'italic',
-      cssClass: 'fas fa-italic',
-    },
-    {
+      cssClass: 'fa-solid fa-italic',
+      searchTerms: ['text', 'style', 'font'],
+    }, {
+      name: 'j',
+      cssClass: 'fa-solid fa-j',
+      searchTerms: ['letter', 'J', 'initial'],
+    }, {
+      name: 'jar',
+      cssClass: 'fa-solid fa-jar',
+      searchTerms: ['jar', 'container', 'hold'],
+    }, {
+      name: 'jar-wheat',
+      cssClass: 'fa-solid fa-jar-wheat',
+      searchTerms: ['jar', 'wheat', 'container'],
+    }, {
       name: 'jedi',
-      cssClass: 'fas fa-jedi',
-    },
-    {
+      cssClass: 'fa-solid fa-jedi',
+      searchTerms: ['star', 'wars', 'character'],
+    }, {
+      name: 'jet-fighter',
+      cssClass: 'fa-solid fa-jet-fighter',
+      searchTerms: ['jet', 'fighter', 'aircraft'],
+    }, {
+      name: 'jet-fighter-up',
+      cssClass: 'fa-solid fa-jet-fighter-up',
+      searchTerms: ['jet', 'fighter', 'aircraft'],
+    }, {
       name: 'journal-whills',
-      cssClass: 'fas fa-journal-whills',
-    },
-    {
+      cssClass: 'fa-solid fa-journal-whills',
+      searchTerms: ['book', 'journal', 'record'],
+    }, {
+      name: 'jpy',
+      cssClass: 'fa-solid fa-jpy',
+      searchTerms: ['jpy', 'currency', 'japan'],
+    }, {
+      name: 'jug-detergent',
+      cssClass: 'fa-solid fa-jug-detergent',
+      searchTerms: ['jug', 'detergent', 'cleaning'],
+    }, {
+      name: 'k',
+      cssClass: 'fa-solid fa-k',
+      searchTerms: ['letter', 'K', 'initial'],
+    }, {
       name: 'kaaba',
-      cssClass: 'fas fa-kaaba',
-    },
-    {
+      cssClass: 'fa-solid fa-kaaba',
+      searchTerms: ['religion', 'islam', 'holy'],
+    }, {
       name: 'key',
-      cssClass: 'fas fa-key',
-    },
-    {
+      cssClass: 'fa-solid fa-key',
+      searchTerms: ['lock', 'security', 'access'],
+    }, {
       name: 'keyboard',
-      cssClass: 'fas fa-keyboard',
-    },
-    {
+      cssClass: 'fa-solid fa-keyboard',
+      searchTerms: ['input', 'device', 'type'],
+    }, {
       name: 'khanda',
-      cssClass: 'fas fa-khanda',
-    },
-    {
+      cssClass: 'fa-solid fa-khanda',
+      searchTerms: ['religion', 'symbol', 'sikh'],
+    }, {
+      name: 'kip-sign',
+      cssClass: 'fa-solid fa-kip-sign',
+      searchTerms: ['kip', 'currency', 'laos'],
+    }, {
       name: 'kiss',
-      cssClass: 'fas fa-kiss',
-    },
-    {
+      cssClass: 'fa-solid fa-kiss',
+      searchTerms: ['emotion', 'love', 'affection'],
+    }, {
       name: 'kiss-beam',
-      cssClass: 'fas fa-kiss-beam',
-    },
-    {
+      cssClass: 'fa-solid fa-kiss-beam',
+      searchTerms: ['emotion', 'love', 'affection'],
+    }, {
       name: 'kiss-wink-heart',
-      cssClass: 'fas fa-kiss-wink-heart',
-    },
-    {
+      cssClass: 'fa-solid fa-kiss-wink-heart',
+      searchTerms: ['emotion', 'love', 'affection'],
+    }, {
+      name: 'kit-medical',
+      cssClass: 'fa-solid fa-kit-medical',
+      searchTerms: ['medical', 'kit', 'first aid'],
+    }, {
+      name: 'kitchen-set',
+      cssClass: 'fa-solid fa-kitchen-set',
+      searchTerms: ['kitchen', 'set', 'utensils'],
+    }, {
       name: 'kiwi-bird',
-      cssClass: 'fas fa-kiwi-bird',
-    },
-    {
+      cssClass: 'fa-solid fa-kiwi-bird',
+      searchTerms: ['animal', 'bird', 'wildlife'],
+    }, {
+      name: 'krw',
+      cssClass: 'fa-solid fa-krw',
+      searchTerms: ['krw', 'currency', 'won'],
+    }, {
+      name: 'l',
+      cssClass: 'fa-solid fa-l',
+      searchTerms: ['letter', 'L', 'initial'],
+    }, {
+      name: 'ladder-water',
+      cssClass: 'fa-solid fa-ladder-water',
+      searchTerms: ['ladder', 'water', 'safety'],
+    }, {
+      name: 'land-mine-on',
+      cssClass: 'fa-solid fa-land-mine-on',
+      searchTerms: ['mine', 'land', 'danger'],
+    }, {
       name: 'landmark',
-      cssClass: 'fas fa-landmark',
-    },
-    {
+      cssClass: 'fa-solid fa-landmark',
+      searchTerms: ['building', 'architecture', 'historical'],
+    }, {
+      name: 'landmark-alt',
+      cssClass: 'fa-solid fa-landmark-alt',
+      searchTerms: ['landmark', 'alternative', 'building'],
+    }, {
+      name: 'landmark-dome',
+      cssClass: 'fa-solid fa-landmark-dome',
+      searchTerms: ['landmark', 'dome', 'building'],
+    }, {
+      name: 'landmark-flag',
+      cssClass: 'fa-solid fa-landmark-flag',
+      searchTerms: ['landmark', 'flag', 'symbol'],
+    }, {
       name: 'language',
-      cssClass: 'fas fa-language',
-    },
-    {
+      cssClass: 'fa-solid fa-language',
+      searchTerms: ['speak', 'communication', 'linguistics'],
+    }, {
       name: 'laptop',
-      cssClass: 'fas fa-laptop',
-    },
-    {
+      cssClass: 'fa-solid fa-laptop',
+      searchTerms: ['computer', 'device', 'technology'],
+    }, {
       name: 'laptop-code',
-      cssClass: 'fas fa-laptop-code',
-    },
-    {
+      cssClass: 'fa-solid fa-laptop-code',
+      searchTerms: ['development', 'programming', 'technology'],
+    }, {
+      name: 'laptop-file',
+      cssClass: 'fa-solid fa-laptop-file',
+      searchTerms: ['laptop', 'file', 'document'],
+    }, {
+      name: 'laptop-house',
+      cssClass: 'fa-solid fa-laptop-house',
+      searchTerms: ['laptop', 'house', 'home'],
+    }, {
       name: 'laptop-medical',
-      cssClass: 'fas fa-laptop-medical',
-    },
-    {
+      cssClass: 'fa-solid fa-laptop-medical',
+      searchTerms: ['health', 'technology', 'care'],
+    }, {
+      name: 'lari-sign',
+      cssClass: 'fa-solid fa-lari-sign',
+      searchTerms: ['lari', 'currency', 'georgia'],
+    }, {
       name: 'laugh',
-      cssClass: 'fas fa-laugh',
-    },
-    {
+      cssClass: 'fa-solid fa-laugh',
+      searchTerms: ['emotion', 'happy', 'smile'],
+    }, {
       name: 'laugh-beam',
-      cssClass: 'fas fa-laugh-beam',
-    },
-    {
+      cssClass: 'fa-solid fa-laugh-beam',
+      searchTerms: ['emotion', 'happy', 'smile'],
+    }, {
       name: 'laugh-squint',
-      cssClass: 'fas fa-laugh-squint',
-    },
-    {
+      cssClass: 'fa-solid fa-laugh-squint',
+      searchTerms: ['emotion', 'happy', 'smile'],
+    }, {
       name: 'laugh-wink',
-      cssClass: 'fas fa-laugh-wink',
-    },
-    {
+      cssClass: 'fa-solid fa-laugh-wink',
+      searchTerms: ['emotion', 'happy', 'smile'],
+    }, {
       name: 'layer-group',
-      cssClass: 'fas fa-layer-group',
-    },
-    {
+      cssClass: 'fa-solid fa-layer-group',
+      searchTerms: ['stack', 'layers', 'design'],
+    }, {
       name: 'leaf',
-      cssClass: 'fas fa-leaf',
-    },
-    {
+      cssClass: 'fa-solid fa-leaf',
+      searchTerms: ['nature', 'plant', 'green'],
+    }, {
+      name: 'left-long',
+      cssClass: 'fa-solid fa-left-long',
+      searchTerms: ['left', 'long', 'direction'],
+    }, {
+      name: 'left-right',
+      cssClass: 'fa-solid fa-left-right',
+      searchTerms: ['left', 'right', 'direction'],
+    }, {
+      name: 'legal',
+      cssClass: 'fa-solid fa-legal',
+      searchTerms: ['legal', 'law', 'justice'],
+    }, {
       name: 'lemon',
-      cssClass: 'fas fa-lemon',
-    },
-    {
+      cssClass: 'fa-solid fa-lemon',
+      searchTerms: ['fruit', 'food', 'citrus'],
+    }, {
       name: 'less-than',
-      cssClass: 'fas fa-less-than',
-    },
-    {
+      cssClass: 'fa-solid fa-less-than',
+      searchTerms: ['math', 'comparison', 'symbol'],
+    }, {
       name: 'less-than-equal',
-      cssClass: 'fas fa-less-than-equal',
-    },
-    {
+      cssClass: 'fa-solid fa-less-than-equal',
+      searchTerms: ['math', 'comparison', 'symbol'],
+    }, {
+      name: 'level-down',
+      cssClass: 'fa-solid fa-level-down',
+      searchTerms: ['level', 'down', 'decrease'],
+    }, {
       name: 'level-down-alt',
-      cssClass: 'fas fa-level-down-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-level-down-alt',
+      searchTerms: ['down', 'arrow', 'navigate'],
+    }, {
+      name: 'level-up',
+      cssClass: 'fa-solid fa-level-up',
+      searchTerms: ['level', 'up', 'increase'],
+    }, {
       name: 'level-up-alt',
-      cssClass: 'fas fa-level-up-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-level-up-alt',
+      searchTerms: ['up', 'arrow', 'navigate'],
+    }, {
       name: 'life-ring',
-      cssClass: 'fas fa-life-ring',
-    },
-    {
+      cssClass: 'fa-solid fa-life-ring',
+      searchTerms: ['safety', 'help', 'rescue'],
+    }, {
       name: 'lightbulb',
-      cssClass: 'fas fa-lightbulb',
-    },
-    {
+      cssClass: 'fa-solid fa-lightbulb',
+      searchTerms: ['idea', 'innovation', 'bright'],
+    }, {
+      name: 'line-chart',
+      cssClass: 'fa-solid fa-line-chart',
+      searchTerms: ['line', 'chart', 'data'],
+    }, {
+      name: 'lines-leaning',
+      cssClass: 'fa-solid fa-lines-leaning',
+      searchTerms: ['lines', 'leaning', 'design'],
+    }, {
       name: 'link',
-      cssClass: 'fas fa-link',
-    },
-    {
+      cssClass: 'fa-solid fa-link',
+      searchTerms: ['connect', 'url', 'hyperlink'],
+    }, {
+      name: 'link-slash',
+      cssClass: 'fa-solid fa-link-slash',
+      searchTerms: ['link', 'slash', 'remove'],
+    }, {
       name: 'lira-sign',
-      cssClass: 'fas fa-lira-sign',
-    },
-    {
+      cssClass: 'fa-solid fa-lira-sign',
+      searchTerms: ['currency', 'money', 'finance'],
+    }, {
       name: 'list',
-      cssClass: 'fas fa-list',
-    },
-    {
+      cssClass: 'fa-solid fa-list',
+      searchTerms: ['items', 'tasks', 'organize'],
+    }, {
+      name: 'list-1-2',
+      cssClass: 'fa-solid fa-list-1-2',
+      searchTerms: ['list', 'one', 'two'],
+    }, {
       name: 'list-alt',
-      cssClass: 'fas fa-list-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-list-alt',
+      searchTerms: ['items', 'tasks', 'organize'],
+    }, {
+      name: 'list-check',
+      cssClass: 'fa-solid fa-list-check',
+      searchTerms: ['list', 'check', 'items'],
+    }, {
+      name: 'list-dots',
+      cssClass: 'fa-solid fa-list-dots',
+      searchTerms: ['list', 'dots', 'items'],
+    }, {
+      name: 'list-numeric',
+      cssClass: 'fa-solid fa-list-numeric',
+      searchTerms: ['list', 'numeric', 'order'],
+    }, {
       name: 'list-ol',
-      cssClass: 'fas fa-list-ol',
-    },
-    {
+      cssClass: 'fa-solid fa-list-ol',
+      searchTerms: ['ordered', 'list', 'tasks'],
+    }, {
+      name: 'list-squares',
+      cssClass: 'fa-solid fa-list-squares',
+      searchTerms: ['list', 'squares', 'items'],
+    }, {
       name: 'list-ul',
-      cssClass: 'fas fa-list-ul',
-    },
-    {
+      cssClass: 'fa-solid fa-list-ul',
+      searchTerms: ['unordered', 'list', 'tasks'],
+    }, {
+      name: 'litecoin-sign',
+      cssClass: 'fa-solid fa-litecoin-sign',
+      searchTerms: ['litecoin', 'currency', 'crypto'],
+    }, {
+      name: 'location',
+      cssClass: 'fa-solid fa-location',
+      searchTerms: ['location', 'place', 'site'],
+    }, {
       name: 'location-arrow',
-      cssClass: 'fas fa-location-arrow',
-    },
-    {
+      cssClass: 'fa-solid fa-location-arrow',
+      searchTerms: ['navigate', 'map', 'direction'],
+    }, {
+      name: 'location-crosshairs',
+      cssClass: 'fa-solid fa-location-crosshairs',
+      searchTerms: ['location', 'crosshairs', 'map'],
+    }, {
+      name: 'location-dot',
+      cssClass: 'fa-solid fa-location-dot',
+      searchTerms: ['location', 'dot', 'pin'],
+    }, {
+      name: 'location-pin',
+      cssClass: 'fa-solid fa-location-pin',
+      searchTerms: ['location', 'pin', 'map'],
+    }, {
+      name: 'location-pin-lock',
+      cssClass: 'fa-solid fa-location-pin-lock',
+      searchTerms: ['location', 'pin', 'lock'],
+    }, {
       name: 'lock',
-      cssClass: 'fas fa-lock',
-    },
-    {
+      cssClass: 'fa-solid fa-lock',
+      searchTerms: ['security', 'protect', 'access'],
+    }, {
       name: 'lock-open',
-      cssClass: 'fas fa-lock-open',
-    },
-    {
+      cssClass: 'fa-solid fa-lock-open',
+      searchTerms: ['unlocked', 'access', 'open'],
+    }, {
+      name: 'locust',
+      cssClass: 'fa-solid fa-locust',
+      searchTerms: ['locust', 'insect', 'pest'],
+    }, {
       name: 'long-arrow-alt-down',
-      cssClass: 'fas fa-long-arrow-alt-down',
-    },
-    {
+      cssClass: 'fa-solid fa-long-arrow-alt-down',
+      searchTerms: ['down', 'arrow', 'navigate'],
+    }, {
       name: 'long-arrow-alt-left',
-      cssClass: 'fas fa-long-arrow-alt-left',
-    },
-    {
+      cssClass: 'fa-solid fa-long-arrow-alt-left',
+      searchTerms: ['back', 'arrow', 'navigate'],
+    }, {
       name: 'long-arrow-alt-right',
-      cssClass: 'fas fa-long-arrow-alt-right',
-    },
-    {
+      cssClass: 'fa-solid fa-long-arrow-alt-right',
+      searchTerms: ['forward', 'arrow', 'navigate'],
+    }, {
       name: 'long-arrow-alt-up',
-      cssClass: 'fas fa-long-arrow-alt-up',
-    },
-    {
+      cssClass: 'fa-solid fa-long-arrow-alt-up',
+      searchTerms: ['up', 'arrow', 'navigate'],
+    }, {
+      name: 'long-arrow-down',
+      cssClass: 'fa-solid fa-long-arrow-down',
+      searchTerms: ['long', 'down', 'arrow'],
+    }, {
+      name: 'long-arrow-left',
+      cssClass: 'fa-solid fa-long-arrow-left',
+      searchTerms: ['long', 'left', 'arrow'],
+    }, {
+      name: 'long-arrow-right',
+      cssClass: 'fa-solid fa-long-arrow-right',
+      searchTerms: ['long', 'right', 'arrow'],
+    }, {
+      name: 'long-arrow-up',
+      cssClass: 'fa-solid fa-long-arrow-up',
+      searchTerms: ['up', 'arrow', 'long'],
+    }, {
       name: 'low-vision',
-      cssClass: 'fas fa-low-vision',
-    },
-    {
+      cssClass: 'fa-solid fa-low-vision',
+      searchTerms: ['accessibility', 'sight', 'vision'],
+    }, {
       name: 'luggage-cart',
-      cssClass: 'fas fa-luggage-cart',
-    },
-    {
+      cssClass: 'fa-solid fa-luggage-cart',
+      searchTerms: ['transport', 'travel', 'cart'],
+    }, {
+      name: 'lungs',
+      cssClass: 'fa-solid fa-lungs',
+      searchTerms: ['lungs', 'breathing', 'health'],
+    }, {
+      name: 'lungs-virus',
+      cssClass: 'fa-solid fa-lungs-virus',
+      searchTerms: ['lungs', 'virus', 'infection'],
+    }, {
+      name: 'm',
+      cssClass: 'fa-solid fa-m',
+      searchTerms: ['letter', 'M', 'initial'],
+    }, {
       name: 'magic',
-      cssClass: 'fas fa-magic',
-    },
-    {
+      cssClass: 'fa-solid fa-magic',
+      searchTerms: ['spell', 'fantasy', 'illusion'],
+    }, {
+      name: 'magic-wand-sparkles',
+      cssClass: 'fa-solid fa-magic-wand-sparkles',
+      searchTerms: ['magic', 'wand', 'sparkles'],
+    }, {
       name: 'magnet',
-      cssClass: 'fas fa-magnet',
-    },
-    {
+      cssClass: 'fa-solid fa-magnet',
+      searchTerms: ['attract', 'pull', 'force'],
+    }, {
+      name: 'magnifying-glass',
+      cssClass: 'fa-solid fa-magnifying-glass',
+      searchTerms: ['magnifying', 'glass', 'search'],
+    }, {
+      name: 'magnifying-glass-arrow-right',
+      cssClass: 'fa-solid fa-magnifying-glass-arrow-right',
+      searchTerms: ['magnifying', 'glass', 'search'],
+    }, {
+      name: 'magnifying-glass-chart',
+      cssClass: 'fa-solid fa-magnifying-glass-chart',
+      searchTerms: ['magnifying', 'chart', 'data'],
+    }, {
+      name: 'magnifying-glass-dollar',
+      cssClass: 'fa-solid fa-magnifying-glass-dollar',
+      searchTerms: ['magnifying', 'glass', 'dollar'],
+    }, {
+      name: 'magnifying-glass-location',
+      cssClass: 'fa-solid fa-magnifying-glass-location',
+      searchTerms: ['locate', 'search', 'find'],
+    }, {
+      name: 'magnifying-glass-minus',
+      cssClass: 'fa-solid fa-magnifying-glass-minus',
+      searchTerms: ['magnifying', 'glass', 'minus'],
+    }, {
+      name: 'magnifying-glass-plus',
+      cssClass: 'fa-solid fa-magnifying-glass-plus',
+      searchTerms: ['magnifying', 'glass', 'plus'],
+    }, {
       name: 'mail-bulk',
-      cssClass: 'fas fa-mail-bulk',
-    },
-    {
+      cssClass: 'fa-solid fa-mail-bulk',
+      searchTerms: ['mail', 'post', 'delivery'],
+    }, {
+      name: 'mail-forward',
+      cssClass: 'fa-solid fa-mail-forward',
+      searchTerms: ['mail', 'forward', 'send'],
+    }, {
+      name: 'mail-reply',
+      cssClass: 'fa-solid fa-mail-reply',
+      searchTerms: ['reply', 'mail', 'message'],
+    }, {
+      name: 'mail-reply-all',
+      cssClass: 'fa-solid fa-mail-reply-all',
+      searchTerms: ['reply', 'all', 'mail'],
+    }, {
       name: 'male',
-      cssClass: 'fas fa-male',
-    },
-    {
+      cssClass: 'fa-solid fa-male',
+      searchTerms: ['gender', 'man', 'male'],
+    }, {
+      name: 'manat-sign',
+      cssClass: 'fa-solid fa-manat-sign',
+      searchTerms: ['manat', 'currency', 'money'],
+    }, {
       name: 'map',
-      cssClass: 'fas fa-map',
-    },
-    {
+      cssClass: 'fa-solid fa-map',
+      searchTerms: ['navigation', 'direction', 'travel'],
+    }, {
+      name: 'map-location',
+      cssClass: 'fa-solid fa-map-location',
+      searchTerms: ['map', 'location', 'pin'],
+    }, {
+      name: 'map-location-dot',
+      cssClass: 'fa-solid fa-map-location-dot',
+      searchTerms: ['map', 'location', 'dot'],
+    }, {
       name: 'map-marked',
-      cssClass: 'fas fa-map-marked',
-    },
-    {
+      cssClass: 'fa-solid fa-map-marked',
+      searchTerms: ['location', 'pin', 'map'],
+    }, {
       name: 'map-marked-alt',
-      cssClass: 'fas fa-map-marked-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-map-marked-alt',
+      searchTerms: ['location', 'pin', 'map'],
+    }, {
       name: 'map-marker',
-      cssClass: 'fas fa-map-marker',
-    },
-    {
+      cssClass: 'fa-solid fa-map-marker',
+      searchTerms: ['location', 'pin', 'map'],
+    }, {
       name: 'map-marker-alt',
-      cssClass: 'fas fa-map-marker-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-map-marker-alt',
+      searchTerms: ['location', 'pin', 'map'],
+    }, {
       name: 'map-pin',
-      cssClass: 'fas fa-map-pin',
-    },
-    {
+      cssClass: 'fa-solid fa-map-pin',
+      searchTerms: ['location', 'pin', 'map'],
+    }, {
       name: 'map-signs',
-      cssClass: 'fas fa-map-signs',
-    },
-    {
+      cssClass: 'fa-solid fa-map-signs',
+      searchTerms: ['direction', 'map', 'navigation'],
+    }, {
       name: 'marker',
-      cssClass: 'fas fa-marker',
-    },
-    {
+      cssClass: 'fa-solid fa-marker',
+      searchTerms: ['pen', 'write', 'color'],
+    }, {
       name: 'mars',
-      cssClass: 'fas fa-mars',
-    },
-    {
+      cssClass: 'fa-solid fa-mars',
+      searchTerms: ['gender', 'male', 'symbol'],
+    }, {
+      name: 'mars-and-venus',
+      cssClass: 'fa-solid fa-mars-and-venus',
+      searchTerms: ['mars', 'venus', 'gender'],
+    }, {
+      name: 'mars-and-venus-burst',
+      cssClass: 'fa-solid fa-mars-and-venus-burst',
+      searchTerms: ['mars', 'venus', 'gender'],
+    }, {
       name: 'mars-double',
-      cssClass: 'fas fa-mars-double',
-    },
-    {
+      cssClass: 'fa-solid fa-mars-double',
+      searchTerms: ['gender', 'male', 'symbol'],
+    }, {
       name: 'mars-stroke',
-      cssClass: 'fas fa-mars-stroke',
-    },
-    {
+      cssClass: 'fa-solid fa-mars-stroke',
+      searchTerms: ['gender', 'male', 'symbol'],
+    }, {
       name: 'mars-stroke-h',
-      cssClass: 'fas fa-mars-stroke-h',
-    },
-    {
+      cssClass: 'fa-solid fa-mars-stroke-h',
+      searchTerms: ['gender', 'male', 'symbol'],
+    }, {
+      name: 'mars-stroke-right',
+      cssClass: 'fa-solid fa-mars-stroke-right',
+      searchTerms: ['mars', 'stroke', 'right'],
+    }, {
+      name: 'mars-stroke-up',
+      cssClass: 'fa-solid fa-mars-stroke-up',
+      searchTerms: ['mars', 'stroke', 'up'],
+    }, {
       name: 'mars-stroke-v',
-      cssClass: 'fas fa-mars-stroke-v',
-    },
-    {
+      cssClass: 'fa-solid fa-mars-stroke-v',
+      searchTerms: ['gender', 'male', 'symbol'],
+    }, {
+      name: 'martini-glass',
+      cssClass: 'fa-solid fa-martini-glass',
+      searchTerms: ['martini', 'glass', 'drink'],
+    }, {
+      name: 'martini-glass-citrus',
+      cssClass: 'fa-solid fa-martini-glass-citrus',
+      searchTerms: ['martini', 'glass', 'citrus'],
+    }, {
+      name: 'martini-glass-empty',
+      cssClass: 'fa-solid fa-martini-glass-empty',
+      searchTerms: ['martini', 'glass', 'empty'],
+    }, {
       name: 'mask',
-      cssClass: 'fas fa-mask',
-    },
-    {
+      cssClass: 'fa-solid fa-mask',
+      searchTerms: ['cover', 'face', 'protection'],
+    }, {
+      name: 'mask-face',
+      cssClass: 'fa-solid fa-mask-face',
+      searchTerms: ['mask', 'face', 'protection'],
+    }, {
+      name: 'mask-ventilator',
+      cssClass: 'fa-solid fa-mask-ventilator',
+      searchTerms: ['mask', 'ventilator', 'breathe'],
+    }, {
+      name: 'masks-theater',
+      cssClass: 'fa-solid fa-masks-theater',
+      searchTerms: ['theater', 'masks', 'performance'],
+    }, {
+      name: 'mattress-pillow',
+      cssClass: 'fa-solid fa-mattress-pillow',
+      searchTerms: ['mattress', 'pillow', 'sleep'],
+    }, {
+      name: 'maximize',
+      cssClass: 'fa-solid fa-maximize',
+      searchTerms: ['maximize', 'expand', 'full'],
+    }, {
       name: 'medal',
-      cssClass: 'fas fa-medal',
-    },
-    {
+      cssClass: 'fa-solid fa-medal',
+      searchTerms: ['award', 'achievement', 'recognition'],
+    }, {
       name: 'medkit',
-      cssClass: 'fas fa-medkit',
-    },
-    {
+      cssClass: 'fa-solid fa-medkit',
+      searchTerms: ['health', 'care', 'medical'],
+    }, {
       name: 'meh',
-      cssClass: 'fas fa-meh',
-    },
-    {
+      cssClass: 'fa-solid fa-meh',
+      searchTerms: ['emotion', 'neutral', 'face'],
+    }, {
       name: 'meh-blank',
-      cssClass: 'fas fa-meh-blank',
-    },
-    {
+      cssClass: 'fa-solid fa-meh-blank',
+      searchTerms: ['emotion', 'neutral', 'face'],
+    }, {
       name: 'meh-rolling-eyes',
-      cssClass: 'fas fa-meh-rolling-eyes',
-    },
-    {
+      cssClass: 'fa-solid fa-meh-rolling-eyes',
+      searchTerms: ['emotion', 'bored', 'face'],
+    }, {
       name: 'memory',
-      cssClass: 'fas fa-memory',
-    },
-    {
+      cssClass: 'fa-solid fa-memory',
+      searchTerms: ['storage', 'data', 'computer'],
+    }, {
       name: 'menorah',
-      cssClass: 'fas fa-menorah',
-    },
-    {
+      cssClass: 'fa-solid fa-menorah',
+      searchTerms: ['jewish', 'symbol', 'religion'],
+    }, {
       name: 'mercury',
-      cssClass: 'fas fa-mercury',
-    },
-    {
+      cssClass: 'fa-solid fa-mercury',
+      searchTerms: ['gender', 'symbol', 'gender-neutral'],
+    }, {
+      name: 'message',
+      cssClass: 'fa-solid fa-message',
+      searchTerms: ['message', 'chat', 'text'],
+    }, {
       name: 'meteor',
-      cssClass: 'fas fa-meteor',
-    },
-    {
+      cssClass: 'fa-solid fa-meteor',
+      searchTerms: ['space', 'star', 'celestial'],
+    }, {
       name: 'microchip',
-      cssClass: 'fas fa-microchip',
-    },
-    {
+      cssClass: 'fa-solid fa-microchip',
+      searchTerms: ['technology', 'circuit', 'computer'],
+    }, {
       name: 'microphone',
-      cssClass: 'fas fa-microphone',
-    },
-    {
+      cssClass: 'fa-solid fa-microphone',
+      searchTerms: ['audio', 'sound', 'record'],
+    }, {
       name: 'microphone-alt',
-      cssClass: 'fas fa-microphone-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-microphone-alt',
+      searchTerms: ['audio', 'sound', 'record'],
+    }, {
       name: 'microphone-alt-slash',
-      cssClass: 'fas fa-microphone-alt-slash',
-    },
-    {
+      cssClass: 'fa-solid fa-microphone-alt-slash',
+      searchTerms: ['mute', 'audio', 'sound'],
+    }, {
+      name: 'microphone-lines',
+      cssClass: 'fa-solid fa-microphone-lines',
+      searchTerms: ['microphone', 'lines', 'audio'],
+    }, {
+      name: 'microphone-lines-slash',
+      cssClass: 'fa-solid fa-microphone-lines-slash',
+      searchTerms: ['mute', 'microphone', 'audio'],
+    }, {
       name: 'microphone-slash',
-      cssClass: 'fas fa-microphone-slash',
-    },
-    {
+      cssClass: 'fa-solid fa-microphone-slash',
+      searchTerms: ['mute', 'audio', 'sound'],
+    }, {
       name: 'microscope',
-      cssClass: 'fas fa-microscope',
-    },
-    {
+      cssClass: 'fa-solid fa-microscope',
+      searchTerms: ['science', 'research', 'lab'],
+    }, {
+      name: 'mill-sign',
+      cssClass: 'fa-solid fa-mill-sign',
+      searchTerms: ['mill', 'sign', 'industry'],
+    }, {
+      name: 'minimize',
+      cssClass: 'fa-solid fa-minimize',
+      searchTerms: ['minimize', 'reduce', 'shrink'],
+    }, {
       name: 'minus',
-      cssClass: 'fas fa-minus',
-    },
-    {
+      cssClass: 'fa-solid fa-minus',
+      searchTerms: ['subtract', 'remove', 'decrease'],
+    }, {
       name: 'minus-circle',
-      cssClass: 'fas fa-minus-circle',
-    },
-    {
+      cssClass: 'fa-solid fa-minus-circle',
+      searchTerms: ['subtract', 'remove', 'decrease'],
+    }, {
       name: 'minus-square',
-      cssClass: 'fas fa-minus-square',
-    },
-    {
+      cssClass: 'fa-solid fa-minus-square',
+      searchTerms: ['subtract', 'remove', 'decrease'],
+    }, {
       name: 'mitten',
-      cssClass: 'fas fa-mitten',
-    },
-    {
+      cssClass: 'fa-solid fa-mitten',
+      searchTerms: ['clothing', 'winter', 'hand'],
+    }, {
       name: 'mobile',
-      cssClass: 'fas fa-mobile',
-    },
-    {
+      cssClass: 'fa-solid fa-mobile',
+      searchTerms: ['device', 'phone', 'technology'],
+    }, {
       name: 'mobile-alt',
-      cssClass: 'fas fa-mobile-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-mobile-alt',
+      searchTerms: ['device', 'phone', 'technology'],
+    }, {
+      name: 'mobile-android',
+      cssClass: 'fa-solid fa-mobile-android',
+      searchTerms: ['android', 'mobile', 'device'],
+    }, {
+      name: 'mobile-android-alt',
+      cssClass: 'fa-solid fa-mobile-android-alt',
+      searchTerms: ['android', 'mobile', 'device'],
+    }, {
+      name: 'mobile-button',
+      cssClass: 'fa-solid fa-mobile-button',
+      searchTerms: ['mobile', 'button', 'device'],
+    }, {
+      name: 'mobile-phone',
+      cssClass: 'fa-solid fa-mobile-phone',
+      searchTerms: ['mobile', 'phone', 'device'],
+    }, {
+      name: 'mobile-retro',
+      cssClass: 'fa-solid fa-mobile-retro',
+      searchTerms: ['mobile', 'retro', 'phone'],
+    }, {
+      name: 'mobile-screen',
+      cssClass: 'fa-solid fa-mobile-screen',
+      searchTerms: ['mobile', 'screen', 'device'],
+    }, {
+      name: 'mobile-screen-button',
+      cssClass: 'fa-solid fa-mobile-screen-button',
+      searchTerms: ['mobile', 'screen', 'button'],
+    }, {
       name: 'money-bill',
-      cssClass: 'fas fa-money-bill',
-    },
-    {
+      cssClass: 'fa-solid fa-money-bill',
+      searchTerms: ['currency', 'finance', 'cash'],
+    }, {
+      name: 'money-bill-1',
+      cssClass: 'fa-solid fa-money-bill-1',
+      searchTerms: ['money', 'bill', 'currency'],
+    }, {
+      name: 'money-bill-1-wave',
+      cssClass: 'fa-solid fa-money-bill-1-wave',
+      searchTerms: ['money', 'bill', 'wave'],
+    }, {
       name: 'money-bill-alt',
-      cssClass: 'fas fa-money-bill-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-money-bill-alt',
+      searchTerms: ['currency', 'finance', 'cash'],
+    }, {
+      name: 'money-bill-transfer',
+      cssClass: 'fa-solid fa-money-bill-transfer',
+      searchTerms: ['money', 'transfer', 'bill'],
+    }, {
+      name: 'money-bill-trend-up',
+      cssClass: 'fa-solid fa-money-bill-trend-up',
+      searchTerms: ['money', 'trend', 'up'],
+    }, {
       name: 'money-bill-wave',
-      cssClass: 'fas fa-money-bill-wave',
-    },
-    {
+      cssClass: 'fa-solid fa-money-bill-wave',
+      searchTerms: ['currency', 'finance', 'cash'],
+    }, {
       name: 'money-bill-wave-alt',
-      cssClass: 'fas fa-money-bill-wave-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-money-bill-wave-alt',
+      searchTerms: ['currency', 'finance', 'cash'],
+    }, {
+      name: 'money-bill-wheat',
+      cssClass: 'fa-solid fa-money-bill-wheat',
+      searchTerms: ['money', 'bill', 'wheat'],
+    }, {
+      name: 'money-bills',
+      cssClass: 'fa-solid fa-money-bills',
+      searchTerms: ['money', 'bills', 'currency'],
+    }, {
       name: 'money-check',
-      cssClass: 'fas fa-money-check',
-    },
-    {
+      cssClass: 'fa-solid fa-money-check',
+      searchTerms: ['payment', 'finance', 'check'],
+    }, {
       name: 'money-check-alt',
-      cssClass: 'fas fa-money-check-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-money-check-alt',
+      searchTerms: ['payment', 'finance', 'check'],
+    }, {
+      name: 'money-check-dollar',
+      cssClass: 'fa-solid fa-money-check-dollar',
+      searchTerms: ['money', 'check', 'dollar'],
+    }, {
       name: 'monument',
-      cssClass: 'fas fa-monument',
-    },
-    {
+      cssClass: 'fa-solid fa-monument',
+      searchTerms: ['landmark', 'historical', 'site'],
+    }, {
       name: 'moon',
-      cssClass: 'fas fa-moon',
-    },
-    {
+      cssClass: 'fa-solid fa-moon',
+      searchTerms: ['night', 'sky', 'celestial'],
+    }, {
+      name: 'mortar-board',
+      cssClass: 'fa-solid fa-mortar-board',
+      searchTerms: ['mortar', 'board', 'graduation'],
+    }, {
       name: 'mortar-pestle',
-      cssClass: 'fas fa-mortar-pestle',
-    },
-    {
+      cssClass: 'fa-solid fa-mortar-pestle',
+      searchTerms: ['medicine', 'pharmacy', 'health'],
+    }, {
       name: 'mosque',
-      cssClass: 'fas fa-mosque',
-    },
-    {
+      cssClass: 'fa-solid fa-mosque',
+      searchTerms: ['religion', 'place', 'worship'],
+    }, {
+      name: 'mosquito',
+      cssClass: 'fa-solid fa-mosquito',
+      searchTerms: ['mosquito', 'insect', 'pest'],
+    }, {
+      name: 'mosquito-net',
+      cssClass: 'fa-solid fa-mosquito-net',
+      searchTerms: ['mosquito', 'net', 'protection'],
+    }, {
       name: 'motorcycle',
-      cssClass: 'fas fa-motorcycle',
-    },
-    {
+      cssClass: 'fa-solid fa-motorcycle',
+      searchTerms: ['vehicle', 'transport', 'bike'],
+    }, {
+      name: 'mound',
+      cssClass: 'fa-solid fa-mound',
+      searchTerms: ['mound', 'hill', 'earth'],
+    }, {
       name: 'mountain',
-      cssClass: 'fas fa-mountain',
-    },
-    {
+      cssClass: 'fa-solid fa-mountain',
+      searchTerms: ['nature', 'landscape', 'outdoor'],
+    }, {
+      name: 'mountain-city',
+      cssClass: 'fa-solid fa-mountain-city',
+      searchTerms: ['mountain', 'city', 'landscape'],
+    }, {
+      name: 'mountain-sun',
+      cssClass: 'fa-solid fa-mountain-sun',
+      searchTerms: ['mountain', 'sun', 'landscape'],
+    }, {
+      name: 'mouse',
+      cssClass: 'fa-solid fa-mouse',
+      searchTerms: ['mouse', 'device', 'pointer'],
+    }, {
       name: 'mouse-pointer',
-      cssClass: 'fas fa-mouse-pointer',
-    },
-    {
+      cssClass: 'fa-solid fa-mouse-pointer',
+      searchTerms: ['cursor', 'select', 'click'],
+    }, {
       name: 'mug-hot',
-      cssClass: 'fas fa-mug-hot',
-    },
-    {
+      cssClass: 'fa-solid fa-mug-hot',
+      searchTerms: ['drink', 'coffee', 'warm'],
+    }, {
+      name: 'mug-saucer',
+      cssClass: 'fa-solid fa-mug-saucer',
+      searchTerms: ['mug', 'saucer', 'drink'],
+    }, {
+      name: 'multiply',
+      cssClass: 'fa-solid fa-multiply',
+      searchTerms: ['multiply', 'times', 'remove'],
+    }, {
+      name: 'museum',
+      cssClass: 'fa-solid fa-museum',
+      searchTerms: ['museum', 'art', 'culture'],
+    }, {
       name: 'music',
-      cssClass: 'fas fa-music',
-    },
-    {
+      cssClass: 'fa-solid fa-music',
+      searchTerms: ['sound', 'audio', 'melody'],
+    }, {
+      name: 'n',
+      cssClass: 'fa-solid fa-n',
+      searchTerms: ['letter', 'N', 'initial'],
+    }, {
+      name: 'naira-sign',
+      cssClass: 'fa-solid fa-naira-sign',
+      searchTerms: ['naira', 'currency', 'nigeria'],
+    }, {
+      name: 'navicon',
+      cssClass: 'fa-solid fa-navicon',
+      searchTerms: ['navigation', 'menu', 'icon'],
+    }, {
       name: 'network-wired',
-      cssClass: 'fas fa-network-wired',
-    },
-    {
+      cssClass: 'fa-solid fa-network-wired',
+      searchTerms: ['connection', 'network', 'internet'],
+    }, {
       name: 'neuter',
-      cssClass: 'fas fa-neuter',
-    },
-    {
+      cssClass: 'fa-solid fa-neuter',
+      searchTerms: ['gender', 'neutral', 'identity'],
+    }, {
       name: 'newspaper',
-      cssClass: 'fas fa-newspaper',
-    },
-    {
+      cssClass: 'fa-solid fa-newspaper',
+      searchTerms: ['news', 'media', 'information'],
+    }, {
       name: 'not-equal',
-      cssClass: 'fas fa-not-equal',
-    },
-    {
+      cssClass: 'fa-solid fa-not-equal',
+      searchTerms: ['math', 'comparison', 'symbol'],
+    }, {
+      name: 'notdef',
+      cssClass: 'fa-solid fa-notdef',
+      searchTerms: ['notdef', 'undefined', 'error'],
+    }, {
+      name: 'note-sticky',
+      cssClass: 'fa-solid fa-note-sticky',
+      searchTerms: ['sticky', 'note', 'reminder'],
+    }, {
       name: 'notes-medical',
-      cssClass: 'fas fa-notes-medical',
-    },
-    {
+      cssClass: 'fa-solid fa-notes-medical',
+      searchTerms: ['health', 'document', 'medical'],
+    }, {
+      name: 'o',
+      cssClass: 'fa-solid fa-o',
+      searchTerms: ['letter', 'O', 'initial'],
+    }, {
       name: 'object-group',
-      cssClass: 'fas fa-object-group',
-    },
-    {
+      cssClass: 'fa-solid fa-object-group',
+      searchTerms: ['select', 'group', 'organize'],
+    }, {
       name: 'object-ungroup',
-      cssClass: 'fas fa-object-ungroup',
-    },
-    {
+      cssClass: 'fa-solid fa-object-ungroup',
+      searchTerms: ['deselect', 'ungroup', 'organize'],
+    }, {
       name: 'oil-can',
-      cssClass: 'fas fa-oil-can',
-    },
-    {
+      cssClass: 'fa-solid fa-oil-can',
+      searchTerms: ['fuel', 'oil', 'energy'],
+    }, {
+      name: 'oil-well',
+      cssClass: 'fa-solid fa-oil-well',
+      searchTerms: ['oil', 'well', 'resource'],
+    }, {
       name: 'om',
-      cssClass: 'fas fa-om',
-    },
-    {
+      cssClass: 'fa-solid fa-om',
+      searchTerms: ['spiritual', 'meditation', 'peace'],
+    }, {
       name: 'otter',
-      cssClass: 'fas fa-otter',
-    },
-    {
+      cssClass: 'fa-solid fa-otter',
+      searchTerms: ['animal', 'wildlife', 'nature'],
+    }, {
       name: 'outdent',
-      cssClass: 'fas fa-outdent',
-    },
-    {
+      cssClass: 'fa-solid fa-outdent',
+      searchTerms: ['text', 'format', 'layout'],
+    }, {
+      name: 'p',
+      cssClass: 'fa-solid fa-p',
+      searchTerms: ['letter', 'P', 'initial'],
+    }, {
       name: 'pager',
-      cssClass: 'fas fa-pager',
-    },
-    {
+      cssClass: 'fa-solid fa-pager',
+      searchTerms: ['message', 'communication', 'send'],
+    }, {
       name: 'paint-brush',
-      cssClass: 'fas fa-paint-brush',
-    },
-    {
+      cssClass: 'fa-solid fa-paint-brush',
+      searchTerms: ['art', 'design', 'create'],
+    }, {
       name: 'paint-roller',
-      cssClass: 'fas fa-paint-roller',
-    },
-    {
+      cssClass: 'fa-solid fa-paint-roller',
+      searchTerms: ['paint', 'design', 'home'],
+    }, {
+      name: 'paintbrush',
+      cssClass: 'fa-solid fa-paintbrush',
+      searchTerms: ['paintbrush', 'art', 'design'],
+    }, {
       name: 'palette',
-      cssClass: 'fas fa-palette',
-    },
-    {
+      cssClass: 'fa-solid fa-palette',
+      searchTerms: ['art', 'color', 'design'],
+    }, {
       name: 'pallet',
-      cssClass: 'fas fa-pallet',
-    },
-    {
+      cssClass: 'fa-solid fa-pallet',
+      searchTerms: ['storage', 'transport', 'goods'],
+    }, {
+      name: 'panorama',
+      cssClass: 'fa-solid fa-panorama',
+      searchTerms: ['panorama', 'view', 'landscape'],
+    }, {
       name: 'paper-plane',
-      cssClass: 'fas fa-paper-plane',
-    },
-    {
+      cssClass: 'fa-solid fa-paper-plane',
+      searchTerms: ['send', 'message', 'mail'],
+    }, {
       name: 'paperclip',
-      cssClass: 'fas fa-paperclip',
-    },
-    {
+      cssClass: 'fa-solid fa-paperclip',
+      searchTerms: ['attach', 'document', 'file'],
+    }, {
       name: 'parachute-box',
-      cssClass: 'fas fa-parachute-box',
-    },
-    {
+      cssClass: 'fa-solid fa-parachute-box',
+      searchTerms: ['delivery', 'drop', 'package'],
+    }, {
       name: 'paragraph',
-      cssClass: 'fas fa-paragraph',
-    },
-    {
+      cssClass: 'fa-solid fa-paragraph',
+      searchTerms: ['text', 'format', 'write'],
+    }, {
       name: 'parking',
-      cssClass: 'fas fa-parking',
-    },
-    {
+      cssClass: 'fa-solid fa-parking',
+      searchTerms: ['vehicle', 'space', 'park'],
+    }, {
       name: 'passport',
-      cssClass: 'fas fa-passport',
-    },
-    {
+      cssClass: 'fa-solid fa-passport',
+      searchTerms: ['travel', 'document', 'identity'],
+    }, {
       name: 'pastafarianism',
-      cssClass: 'fas fa-pastafarianism',
-    },
-    {
+      cssClass: 'fa-solid fa-pastafarianism',
+      searchTerms: ['religion', 'symbol', 'spiritual'],
+    }, {
       name: 'paste',
-      cssClass: 'fas fa-paste',
-    },
-    {
+      cssClass: 'fa-solid fa-paste',
+      searchTerms: ['copy', 'insert', 'edit'],
+    }, {
       name: 'pause',
-      cssClass: 'fas fa-pause',
-    },
-    {
+      cssClass: 'fa-solid fa-pause',
+      searchTerms: ['stop', 'break', 'halt'],
+    }, {
       name: 'pause-circle',
-      cssClass: 'fas fa-pause-circle',
-    },
-    {
+      cssClass: 'fa-solid fa-pause-circle',
+      searchTerms: ['stop', 'break', 'halt'],
+    }, {
       name: 'paw',
-      cssClass: 'fas fa-paw',
-    },
-    {
+      cssClass: 'fa-solid fa-paw',
+      searchTerms: ['animal', 'pet', 'wildlife'],
+    }, {
       name: 'peace',
-      cssClass: 'fas fa-peace',
-    },
-    {
+      cssClass: 'fa-solid fa-peace',
+      searchTerms: ['harmony', 'calm', 'symbol'],
+    }, {
       name: 'pen',
-      cssClass: 'fas fa-pen',
-    },
-    {
+      cssClass: 'fa-solid fa-pen',
+      searchTerms: ['write', 'edit', 'tool'],
+    }, {
       name: 'pen-alt',
-      cssClass: 'fas fa-pen-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-pen-alt',
+      searchTerms: ['write', 'edit', 'tool'],
+    }, {
+      name: 'pen-clip',
+      cssClass: 'fa-solid fa-pen-clip',
+      searchTerms: ['pen', 'clip', 'attach'],
+    }, {
       name: 'pen-fancy',
-      cssClass: 'fas fa-pen-fancy',
-    },
-    {
+      cssClass: 'fa-solid fa-pen-fancy',
+      searchTerms: ['write', 'edit', 'tool'],
+    }, {
       name: 'pen-nib',
-      cssClass: 'fas fa-pen-nib',
-    },
-    {
+      cssClass: 'fa-solid fa-pen-nib',
+      searchTerms: ['write', 'edit', 'tool'],
+    }, {
+      name: 'pen-ruler',
+      cssClass: 'fa-solid fa-pen-ruler',
+      searchTerms: ['pen', 'ruler', 'measure'],
+    }, {
       name: 'pen-square',
-      cssClass: 'fas fa-pen-square',
-    },
-    {
+      cssClass: 'fa-solid fa-pen-square',
+      searchTerms: ['write', 'edit', 'tool'],
+    }, {
+      name: 'pen-to-square',
+      cssClass: 'fa-solid fa-pen-to-square',
+      searchTerms: ['pen', 'edit', 'square'],
+    }, {
+      name: 'pencil',
+      cssClass: 'fa-solid fa-pencil',
+      searchTerms: ['edit', 'pencil', 'write'],
+    }, {
       name: 'pencil-alt',
-      cssClass: 'fas fa-pencil-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-pencil-alt',
+      searchTerms: ['write', 'edit', 'tool'],
+    }, {
       name: 'pencil-ruler',
-      cssClass: 'fas fa-pencil-ruler',
-    },
-    {
+      cssClass: 'fa-solid fa-pencil-ruler',
+      searchTerms: ['design', 'measure', 'draw'],
+    }, {
+      name: 'pencil-square',
+      cssClass: 'fa-solid fa-pencil-square',
+      searchTerms: ['pencil', 'square', 'edit'],
+    }, {
+      name: 'people-arrows',
+      cssClass: 'fa-solid fa-people-arrows',
+      searchTerms: ['people', 'arrows', 'direction'],
+    }, {
+      name: 'people-arrows-left-right',
+      cssClass: 'fa-solid fa-people-arrows-left-right',
+      searchTerms: ['people', 'arrows', 'navigation'],
+    }, {
       name: 'people-carry',
-      cssClass: 'fas fa-people-carry',
-    },
-    {
+      cssClass: 'fa-solid fa-people-carry',
+      searchTerms: ['support', 'help', 'assist'],
+    }, {
+      name: 'people-carry-box',
+      cssClass: 'fa-solid fa-people-carry-box',
+      searchTerms: ['people', 'carry', 'box'],
+    }, {
+      name: 'people-group',
+      cssClass: 'fa-solid fa-people-group',
+      searchTerms: ['group', 'people', 'community'],
+    }, {
+      name: 'people-line',
+      cssClass: 'fa-solid fa-people-line',
+      searchTerms: ['line', 'people', 'group'],
+    }, {
+      name: 'people-pulling',
+      cssClass: 'fa-solid fa-people-pulling',
+      searchTerms: ['people', 'pulling', 'together'],
+    }, {
+      name: 'people-robbery',
+      cssClass: 'fa-solid fa-people-robbery',
+      searchTerms: ['robbery', 'people', 'alert'],
+    }, {
+      name: 'people-roof',
+      cssClass: 'fa-solid fa-people-roof',
+      searchTerms: ['community', 'support', 'roof'],
+    }, {
       name: 'pepper-hot',
-      cssClass: 'fas fa-pepper-hot',
-    },
-    {
+      cssClass: 'fa-solid fa-pepper-hot',
+      searchTerms: ['spice', 'food', 'heat'],
+    }, {
       name: 'percent',
-      cssClass: 'fas fa-percent',
-    },
-    {
+      cssClass: 'fa-solid fa-percent',
+      searchTerms: ['math', 'finance', 'rate'],
+    }, {
       name: 'percentage',
-      cssClass: 'fas fa-percentage',
-    },
-    {
+      cssClass: 'fa-solid fa-percentage',
+      searchTerms: ['math', 'finance', 'rate'],
+    }, {
+      name: 'person',
+      cssClass: 'fa-solid fa-person',
+      searchTerms: ['person', 'individual', 'user'],
+    }, {
+      name: 'person-arrow-down-to-line',
+      cssClass: 'fa-solid fa-person-arrow-down-to-line',
+      searchTerms: ['person', 'arrow', 'down'],
+    }, {
+      name: 'person-arrow-up-from-line',
+      cssClass: 'fa-solid fa-person-arrow-up-from-line',
+      searchTerms: ['person', 'rise', 'up'],
+    }, {
+      name: 'person-biking',
+      cssClass: 'fa-solid fa-person-biking',
+      searchTerms: ['biking', 'person', 'activity'],
+    }, {
       name: 'person-booth',
-      cssClass: 'fas fa-person-booth',
-    },
-    {
+      cssClass: 'fa-solid fa-person-booth',
+      searchTerms: ['identity', 'check', 'security'],
+    }, {
+      name: 'person-breastfeeding',
+      cssClass: 'fa-solid fa-person-breastfeeding',
+      searchTerms: ['breastfeeding', 'person', 'mother'],
+    }, {
+      name: 'person-burst',
+      cssClass: 'fa-solid fa-person-burst',
+      searchTerms: ['person', 'burst', 'action'],
+    }, {
+      name: 'person-cane',
+      cssClass: 'fa-solid fa-person-cane',
+      searchTerms: ['person', 'cane', 'mobility'],
+    }, {
+      name: 'person-chalkboard',
+      cssClass: 'fa-solid fa-person-chalkboard',
+      searchTerms: ['person', 'chalkboard', 'teach'],
+    }, {
+      name: 'person-circle-check',
+      cssClass: 'fa-solid fa-person-circle-check',
+      searchTerms: ['person', 'check', 'circle'],
+    }, {
+      name: 'person-circle-exclamation',
+      cssClass: 'fa-solid fa-person-circle-exclamation',
+      searchTerms: ['person', 'circle', 'alert'],
+    }, {
+      name: 'person-circle-minus',
+      cssClass: 'fa-solid fa-person-circle-minus',
+      searchTerms: ['person', 'remove', 'circle'],
+    }, {
+      name: 'person-circle-plus',
+      cssClass: 'fa-solid fa-person-circle-plus',
+      searchTerms: ['person', 'add', 'circle'],
+    }, {
+      name: 'person-circle-question',
+      cssClass: 'fa-solid fa-person-circle-question',
+      searchTerms: ['person', 'question', 'circle'],
+    }, {
+      name: 'person-circle-xmark',
+      cssClass: 'fa-solid fa-person-circle-xmark',
+      searchTerms: ['person', 'remove', 'circle'],
+    }, {
+      name: 'person-digging',
+      cssClass: 'fa-solid fa-person-digging',
+      searchTerms: ['person', 'digging', 'work'],
+    }, {
+      name: 'person-dots-from-line',
+      cssClass: 'fa-solid fa-person-dots-from-line',
+      searchTerms: ['dots', 'person', 'line'],
+    }, {
+      name: 'person-dress',
+      cssClass: 'fa-solid fa-person-dress',
+      searchTerms: ['person', 'dress', 'fashion'],
+    }, {
+      name: 'person-dress-burst',
+      cssClass: 'fa-solid fa-person-dress-burst',
+      searchTerms: ['dress', 'person', 'fashion'],
+    }, {
+      name: 'person-drowning',
+      cssClass: 'fa-solid fa-person-drowning',
+      searchTerms: ['drowning', 'alert', 'person'],
+    }, {
+      name: 'person-falling',
+      cssClass: 'fa-solid fa-person-falling',
+      searchTerms: ['falling', 'person', 'accident'],
+    }, {
+      name: 'person-falling-burst',
+      cssClass: 'fa-solid fa-person-falling-burst',
+      searchTerms: ['falling', 'person', 'burst'],
+    }, {
+      name: 'person-half-dress',
+      cssClass: 'fa-solid fa-person-half-dress',
+      searchTerms: ['person', 'half', 'dress'],
+    }, {
+      name: 'person-harassing',
+      cssClass: 'fa-solid fa-person-harassing',
+      searchTerms: ['harassing', 'person', 'bully'],
+    }, {
+      name: 'person-hiking',
+      cssClass: 'fa-solid fa-person-hiking',
+      searchTerms: ['hiking', 'person', 'outdoor'],
+    }, {
+      name: 'person-military-pointing',
+      cssClass: 'fa-solid fa-person-military-pointing',
+      searchTerms: ['military', 'person', 'point'],
+    }, {
+      name: 'person-military-rifle',
+      cssClass: 'fa-solid fa-person-military-rifle',
+      searchTerms: ['military', 'person', 'rifle'],
+    }, {
+      name: 'person-military-to-person',
+      cssClass: 'fa-solid fa-person-military-to-person',
+      searchTerms: ['military', 'person', 'transition'],
+    }, {
+      name: 'person-praying',
+      cssClass: 'fa-solid fa-person-praying',
+      searchTerms: ['person', 'praying', 'faith'],
+    }, {
+      name: 'person-pregnant',
+      cssClass: 'fa-solid fa-person-pregnant',
+      searchTerms: ['pregnant', 'person', 'mother'],
+    }, {
+      name: 'person-rays',
+      cssClass: 'fa-solid fa-person-rays',
+      searchTerms: ['person', 'rays', 'light'],
+    }, {
+      name: 'person-rifle',
+      cssClass: 'fa-solid fa-person-rifle',
+      searchTerms: ['person', 'rifle', 'military'],
+    }, {
+      name: 'person-running',
+      cssClass: 'fa-solid fa-person-running',
+      searchTerms: ['running', 'person', 'exercise'],
+    }, {
+      name: 'person-shelter',
+      cssClass: 'fa-solid fa-person-shelter',
+      searchTerms: ['person', 'shelter', 'protection'],
+    }, {
+      name: 'person-skating',
+      cssClass: 'fa-solid fa-person-skating',
+      searchTerms: ['skating', 'person', 'activity'],
+    }, {
+      name: 'person-skiing',
+      cssClass: 'fa-solid fa-person-skiing',
+      searchTerms: ['skiing', 'person', 'sport'],
+    }, {
+      name: 'person-skiing-nordic',
+      cssClass: 'fa-solid fa-person-skiing-nordic',
+      searchTerms: ['skiing', 'nordic', 'person'],
+    }, {
+      name: 'person-snowboarding',
+      cssClass: 'fa-solid fa-person-snowboarding',
+      searchTerms: ['snowboarding', 'person', 'sport'],
+    }, {
+      name: 'person-swimming',
+      cssClass: 'fa-solid fa-person-swimming',
+      searchTerms: ['swimming', 'person', 'activity'],
+    }, {
+      name: 'person-through-window',
+      cssClass: 'fa-solid fa-person-through-window',
+      searchTerms: ['person', 'window', 'view'],
+    }, {
+      name: 'person-walking',
+      cssClass: 'fa-solid fa-person-walking',
+      searchTerms: ['walking', 'person', 'movement'],
+    }, {
+      name: 'person-walking-arrow-loop-left',
+      cssClass: 'fa-solid fa-person-walking-arrow-loop-left',
+      searchTerms: ['walking', 'arrow', 'loop'],
+    }, {
+      name: 'person-walking-arrow-right',
+      cssClass: 'fa-solid fa-person-walking-arrow-right',
+      searchTerms: ['walking', 'person', 'arrow'],
+    }, {
+      name: 'person-walking-dashed-line-arrow-right',
+      cssClass: 'fa-solid fa-person-walking-dashed-line-arrow-right',
+      searchTerms: ['walking', 'arrow', 'right'],
+    }, {
+      name: 'person-walking-luggage',
+      cssClass: 'fa-solid fa-person-walking-luggage',
+      searchTerms: ['walking', 'person', 'luggage'],
+    }, {
+      name: 'person-walking-with-cane',
+      cssClass: 'fa-solid fa-person-walking-with-cane',
+      searchTerms: ['walking', 'cane', 'person'],
+    }, {
+      name: 'peseta-sign',
+      cssClass: 'fa-solid fa-peseta-sign',
+      searchTerms: ['peseta', 'currency', 'money'],
+    }, {
+      name: 'peso-sign',
+      cssClass: 'fa-solid fa-peso-sign',
+      searchTerms: ['peso', 'currency', 'money'],
+    }, {
       name: 'phone',
-      cssClass: 'fas fa-phone',
-    },
-    {
+      cssClass: 'fa-solid fa-phone',
+      searchTerms: ['call', 'communication', 'device'],
+    }, {
+      name: 'phone-alt',
+      cssClass: 'fa-solid fa-phone-alt',
+      searchTerms: ['phone', 'alternative', 'device'],
+    }, {
+      name: 'phone-flip',
+      cssClass: 'fa-solid fa-phone-flip',
+      searchTerms: ['phone', 'flip', 'device'],
+    }, {
       name: 'phone-slash',
-      cssClass: 'fas fa-phone-slash',
-    },
-    {
+      cssClass: 'fa-solid fa-phone-slash',
+      searchTerms: ['block', 'mute', 'call'],
+    }, {
       name: 'phone-square',
-      cssClass: 'fas fa-phone-square',
-    },
-    {
+      cssClass: 'fa-solid fa-phone-square',
+      searchTerms: ['call', 'communication', 'device'],
+    }, {
+      name: 'phone-square-alt',
+      cssClass: 'fa-solid fa-phone-square-alt',
+      searchTerms: ['phone', 'square', 'alternative'],
+    }, {
       name: 'phone-volume',
-      cssClass: 'fas fa-phone-volume',
-    },
-    {
+      cssClass: 'fa-solid fa-phone-volume',
+      searchTerms: ['sound', 'call', 'volume'],
+    }, {
+      name: 'photo-film',
+      cssClass: 'fa-solid fa-photo-film',
+      searchTerms: ['photo', 'film', 'media'],
+    }, {
+      name: 'photo-video',
+      cssClass: 'fa-solid fa-photo-video',
+      searchTerms: ['photo', 'video', 'media'],
+    }, {
+      name: 'pie-chart',
+      cssClass: 'fa-solid fa-pie-chart',
+      searchTerms: ['pie', 'chart', 'data'],
+    }, {
       name: 'piggy-bank',
-      cssClass: 'fas fa-piggy-bank',
-    },
-    {
+      cssClass: 'fa-solid fa-piggy-bank',
+      searchTerms: ['savings', 'money', 'finance'],
+    }, {
       name: 'pills',
-      cssClass: 'fas fa-pills',
-    },
-    {
+      cssClass: 'fa-solid fa-pills',
+      searchTerms: ['medicine', 'health', 'pharmacy'],
+    }, {
+      name: 'ping-pong-paddle-ball',
+      cssClass: 'fa-solid fa-ping-pong-paddle-ball',
+      searchTerms: ['ping', 'pong', 'paddle'],
+    }, {
       name: 'pizza-slice',
-      cssClass: 'fas fa-pizza-slice',
-    },
-    {
+      cssClass: 'fa-solid fa-pizza-slice',
+      searchTerms: ['food', 'meal', 'snack'],
+    }, {
       name: 'place-of-worship',
-      cssClass: 'fas fa-place-of-worship',
-    },
-    {
+      cssClass: 'fa-solid fa-place-of-worship',
+      searchTerms: ['religion', 'worship', 'spiritual'],
+    }, {
       name: 'plane',
-      cssClass: 'fas fa-plane',
-    },
-    {
+      cssClass: 'fa-solid fa-plane',
+      searchTerms: ['aircraft', 'travel', 'transport'],
+    }, {
       name: 'plane-arrival',
-      cssClass: 'fas fa-plane-arrival',
-    },
-    {
+      cssClass: 'fa-solid fa-plane-arrival',
+      searchTerms: ['travel', 'arrival', 'airline'],
+    }, {
+      name: 'plane-circle-check',
+      cssClass: 'fa-solid fa-plane-circle-check',
+      searchTerms: ['plane', 'check', 'flight'],
+    }, {
+      name: 'plane-circle-exclamation',
+      cssClass: 'fa-solid fa-plane-circle-exclamation',
+      searchTerms: ['plane', 'alert', 'travel'],
+    }, {
+      name: 'plane-circle-xmark',
+      cssClass: 'fa-solid fa-plane-circle-xmark',
+      searchTerms: ['plane', 'remove', 'circle'],
+    }, {
       name: 'plane-departure',
-      cssClass: 'fas fa-plane-departure',
-    },
-    {
+      cssClass: 'fa-solid fa-plane-departure',
+      searchTerms: ['travel', 'departure', 'airline'],
+    }, {
+      name: 'plane-lock',
+      cssClass: 'fa-solid fa-plane-lock',
+      searchTerms: ['plane', 'lock', 'secure'],
+    }, {
+      name: 'plane-slash',
+      cssClass: 'fa-solid fa-plane-slash',
+      searchTerms: ['plane', 'slash', 'cancel'],
+    }, {
+      name: 'plane-up',
+      cssClass: 'fa-solid fa-plane-up',
+      searchTerms: ['plane', 'up', 'fly'],
+    }, {
+      name: 'plant-wilt',
+      cssClass: 'fa-solid fa-plant-wilt',
+      searchTerms: ['plant', 'wilt', 'disease'],
+    }, {
+      name: 'plate-wheat',
+      cssClass: 'fa-solid fa-plate-wheat',
+      searchTerms: ['plate', 'wheat', 'food'],
+    }, {
       name: 'play',
-      cssClass: 'fas fa-play',
-    },
-    {
+      cssClass: 'fa-solid fa-play',
+      searchTerms: ['start', 'begin', 'action'],
+    }, {
       name: 'play-circle',
-      cssClass: 'fas fa-play-circle',
-    },
-    {
+      cssClass: 'fa-solid fa-play-circle',
+      searchTerms: ['start', 'begin', 'action'],
+    }, {
       name: 'plug',
-      cssClass: 'fas fa-plug',
-    },
-    {
+      cssClass: 'fa-solid fa-plug',
+      searchTerms: ['connect', 'electric', 'power'],
+    }, {
+      name: 'plug-circle-bolt',
+      cssClass: 'fa-solid fa-plug-circle-bolt',
+      searchTerms: ['plug', 'circle', 'bolt'],
+    }, {
+      name: 'plug-circle-check',
+      cssClass: 'fa-solid fa-plug-circle-check',
+      searchTerms: ['plug', 'circle', 'check'],
+    }, {
+      name: 'plug-circle-exclamation',
+      cssClass: 'fa-solid fa-plug-circle-exclamation',
+      searchTerms: ['plug', 'circle', 'alert'],
+    }, {
+      name: 'plug-circle-minus',
+      cssClass: 'fa-solid fa-plug-circle-minus',
+      searchTerms: ['plug', 'circle', 'minus'],
+    }, {
+      name: 'plug-circle-plus',
+      cssClass: 'fa-solid fa-plug-circle-plus',
+      searchTerms: ['plug', 'circle', 'add'],
+    }, {
+      name: 'plug-circle-xmark',
+      cssClass: 'fa-solid fa-plug-circle-xmark',
+      searchTerms: ['plug', 'remove', 'circle'],
+    }, {
       name: 'plus',
-      cssClass: 'fas fa-plus',
-    },
-    {
+      cssClass: 'fa-solid fa-plus',
+      searchTerms: ['add', 'increase', 'more'],
+    }, {
       name: 'plus-circle',
-      cssClass: 'fas fa-plus-circle',
-    },
-    {
+      cssClass: 'fa-solid fa-plus-circle',
+      searchTerms: ['add', 'increase', 'more'],
+    }, {
+      name: 'plus-minus',
+      cssClass: 'fa-solid fa-plus-minus',
+      searchTerms: ['plus', 'minus', 'adjust'],
+    }, {
       name: 'plus-square',
-      cssClass: 'fas fa-plus-square',
-    },
-    {
+      cssClass: 'fa-solid fa-plus-square',
+      searchTerms: ['add', 'increase', 'more'],
+    }, {
       name: 'podcast',
-      cssClass: 'fas fa-podcast',
-    },
-    {
+      cssClass: 'fa-solid fa-podcast',
+      searchTerms: ['audio', 'media', 'broadcast'],
+    }, {
       name: 'poll',
-      cssClass: 'fas fa-poll',
-    },
-    {
+      cssClass: 'fa-solid fa-poll',
+      searchTerms: ['survey', 'data', 'statistics'],
+    }, {
       name: 'poll-h',
-      cssClass: 'fas fa-poll-h',
-    },
-    {
+      cssClass: 'fa-solid fa-poll-h',
+      searchTerms: ['survey', 'data', 'statistics'],
+    }, {
+      name: 'poo',
+      cssClass: 'fa-solid fa-poo',
+      searchTerms: ['poo', 'feces', 'waste'],
+    }, {
+      name: 'poo-bolt',
+      cssClass: 'fa-solid fa-poo-bolt',
+      searchTerms: ['poo', 'bolt', 'storm'],
+    }, {
+      name: 'poo-storm',
+      cssClass: 'fa-solid fa-poo-storm',
+      searchTerms: ['storm', 'poo', 'feces'],
+    }, {
+      name: 'poop',
+      cssClass: 'fa-solid fa-poop',
+      searchTerms: ['poop', 'feces', 'waste'],
+    }, {
       name: 'portrait',
-      cssClass: 'fas fa-portrait',
-    },
-    {
+      cssClass: 'fa-solid fa-portrait',
+      searchTerms: ['image', 'photo', 'picture'],
+    }, {
       name: 'pound-sign',
-      cssClass: 'fas fa-pound-sign',
-    },
-    {
+      cssClass: 'fa-solid fa-pound-sign',
+      searchTerms: ['currency', 'money', 'finance'],
+    }, {
       name: 'power-off',
-      cssClass: 'fas fa-power-off',
-    },
-    {
+      cssClass: 'fa-solid fa-power-off',
+      searchTerms: ['switch', 'on', 'off'],
+    }, {
       name: 'pray',
-      cssClass: 'fas fa-pray',
-    },
-    {
+      cssClass: 'fa-solid fa-pray',
+      searchTerms: ['religion', 'spiritual', 'worship'],
+    }, {
       name: 'praying-hands',
-      cssClass: 'fas fa-praying-hands',
-    },
-    {
+      cssClass: 'fa-solid fa-praying-hands',
+      searchTerms: ['prayer', 'spiritual', 'religion'],
+    }, {
       name: 'prescription',
-      cssClass: 'fas fa-prescription',
-    },
-    {
+      cssClass: 'fa-solid fa-prescription',
+      searchTerms: ['medicine', 'health', 'doctor'],
+    }, {
       name: 'prescription-bottle',
-      cssClass: 'fas fa-prescription-bottle',
-    },
-    {
+      cssClass: 'fa-solid fa-prescription-bottle',
+      searchTerms: ['medicine', 'health', 'bottle'],
+    }, {
       name: 'prescription-bottle-alt',
-      cssClass: 'fas fa-prescription-bottle-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-prescription-bottle-alt',
+      searchTerms: ['medicine', 'health', 'bottle'],
+    }, {
+      name: 'prescription-bottle-medical',
+      cssClass: 'fa-solid fa-prescription-bottle-medical',
+      searchTerms: ['prescription', 'bottle', 'medical'],
+    }, {
       name: 'print',
-      cssClass: 'fas fa-print',
-    },
-    {
+      cssClass: 'fa-solid fa-print',
+      searchTerms: ['document', 'paper', 'output'],
+    }, {
       name: 'procedures',
-      cssClass: 'fas fa-procedures',
-    },
-    {
+      cssClass: 'fa-solid fa-procedures',
+      searchTerms: ['health', 'medical', 'care'],
+    }, {
       name: 'project-diagram',
-      cssClass: 'fas fa-project-diagram',
-    },
-    {
+      cssClass: 'fa-solid fa-project-diagram',
+      searchTerms: ['planning', 'design', 'structure'],
+    }, {
+      name: 'pump-medical',
+      cssClass: 'fa-solid fa-pump-medical',
+      searchTerms: ['medical', 'pump', 'health'],
+    }, {
+      name: 'pump-soap',
+      cssClass: 'fa-solid fa-pump-soap',
+      searchTerms: ['pump', 'soap', 'clean'],
+    }, {
       name: 'puzzle-piece',
-      cssClass: 'fas fa-puzzle-piece',
-    },
-    {
+      cssClass: 'fa-solid fa-puzzle-piece',
+      searchTerms: ['fit', 'connect', 'piece'],
+    }, {
+      name: 'q',
+      cssClass: 'fa-solid fa-q',
+      searchTerms: ['letter', 'Q', 'initial'],
+    }, {
       name: 'qrcode',
-      cssClass: 'fas fa-qrcode',
-    },
-    {
+      cssClass: 'fa-solid fa-qrcode',
+      searchTerms: ['code', 'scan', 'data'],
+    }, {
       name: 'question',
-      cssClass: 'fas fa-question',
-    },
-    {
+      cssClass: 'fa-solid fa-question',
+      searchTerms: ['query', 'inquiry', 'help'],
+    }, {
       name: 'question-circle',
-      cssClass: 'fas fa-question-circle',
-    },
-    {
+      cssClass: 'fa-solid fa-question-circle',
+      searchTerms: ['query', 'inquiry', 'help'],
+    }, {
       name: 'quidditch',
-      cssClass: 'fas fa-quidditch',
-    },
-    {
+      cssClass: 'fa-solid fa-quidditch',
+      searchTerms: ['sport', 'game', 'fantasy'],
+    }, {
+      name: 'quidditch-broom-ball',
+      cssClass: 'fa-solid fa-quidditch-broom-ball',
+      searchTerms: ['quidditch', 'broom', 'game'],
+    }, {
       name: 'quote-left',
-      cssClass: 'fas fa-quote-left',
-    },
-    {
+      cssClass: 'fa-solid fa-quote-left',
+      searchTerms: ['text', 'speak', 'quote'],
+    }, {
+      name: 'quote-left-alt',
+      cssClass: 'fa-solid fa-quote-left-alt',
+      searchTerms: ['quote', 'left', 'alternative'],
+    }, {
       name: 'quote-right',
-      cssClass: 'fas fa-quote-right',
-    },
-    {
+      cssClass: 'fa-solid fa-quote-right',
+      searchTerms: ['text', 'speak', 'quote'],
+    }, {
+      name: 'quote-right-alt',
+      cssClass: 'fa-solid fa-quote-right-alt',
+      searchTerms: ['quote', 'right', 'alternative'],
+    }, {
       name: 'quran',
-      cssClass: 'fas fa-quran',
-    },
-    {
+      cssClass: 'fa-solid fa-quran',
+      searchTerms: ['religion', 'spiritual', 'holy'],
+    }, {
+      name: 'r',
+      cssClass: 'fa-solid fa-r',
+      searchTerms: ['letter', 'R', 'initial'],
+    }, {
       name: 'radiation',
-      cssClass: 'fas fa-radiation',
-    },
-    {
+      cssClass: 'fa-solid fa-radiation',
+      searchTerms: ['danger', 'warning', 'nuclear'],
+    }, {
       name: 'radiation-alt',
-      cssClass: 'fas fa-radiation-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-radiation-alt',
+      searchTerms: ['danger', 'warning', 'nuclear'],
+    }, {
+      name: 'radio',
+      cssClass: 'fa-solid fa-radio',
+      searchTerms: ['radio', 'broadcast', 'audio'],
+    }, {
       name: 'rainbow',
-      cssClass: 'fas fa-rainbow',
-    },
-    {
+      cssClass: 'fa-solid fa-rainbow',
+      searchTerms: ['color', 'pride', 'symbol'],
+    }, {
       name: 'random',
-      cssClass: 'fas fa-random',
-    },
-    {
+      cssClass: 'fa-solid fa-random',
+      searchTerms: ['shuffle', 'mix', 'random'],
+    }, {
+      name: 'ranking-star',
+      cssClass: 'fa-solid fa-ranking-star',
+      searchTerms: ['ranking', 'star', 'award'],
+    }, {
       name: 'receipt',
-      cssClass: 'fas fa-receipt',
-    },
-    {
+      cssClass: 'fa-solid fa-receipt',
+      searchTerms: ['bill', 'document', 'record'],
+    }, {
+      name: 'record-vinyl',
+      cssClass: 'fa-solid fa-record-vinyl',
+      searchTerms: ['vinyl', 'record', 'music'],
+    }, {
+      name: 'rectangle-ad',
+      cssClass: 'fa-solid fa-rectangle-ad',
+      searchTerms: ['rectangle', 'ad', 'advertisement'],
+    }, {
+      name: 'rectangle-list',
+      cssClass: 'fa-solid fa-rectangle-list',
+      searchTerms: ['rectangle', 'list', 'items'],
+    }, {
+      name: 'rectangle-times',
+      cssClass: 'fa-solid fa-rectangle-times',
+      searchTerms: ['rectangle', 'times', 'remove'],
+    }, {
+      name: 'rectangle-xmark',
+      cssClass: 'fa-solid fa-rectangle-xmark',
+      searchTerms: ['rectangle', 'remove', 'xmark'],
+    }, {
       name: 'recycle',
-      cssClass: 'fas fa-recycle',
-    },
-    {
+      cssClass: 'fa-solid fa-recycle',
+      searchTerms: ['environment', 'reuse', 'reduce'],
+    }, {
       name: 'redo',
-      cssClass: 'fas fa-redo',
-    },
-    {
+      cssClass: 'fa-solid fa-redo',
+      searchTerms: ['repeat', 'action', 'redo'],
+    }, {
       name: 'redo-alt',
-      cssClass: 'fas fa-redo-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-redo-alt',
+      searchTerms: ['repeat', 'action', 'redo'],
+    }, {
+      name: 'refresh',
+      cssClass: 'fa-solid fa-refresh',
+      searchTerms: ['refresh', 'reload', 'update'],
+    }, {
       name: 'registered',
-      cssClass: 'fas fa-registered',
-    },
-    {
+      cssClass: 'fa-solid fa-registered',
+      searchTerms: ['legal', 'symbol', 'trademark'],
+    }, {
+      name: 'remove',
+      cssClass: 'fa-solid fa-remove',
+      searchTerms: ['remove', 'delete', 'discard'],
+    }, {
+      name: 'remove-format',
+      cssClass: 'fa-solid fa-remove-format',
+      searchTerms: ['remove', 'format', 'clear'],
+    }, {
+      name: 'reorder',
+      cssClass: 'fa-solid fa-reorder',
+      searchTerms: ['reorder', 'arrange', 'organize'],
+    }, {
+      name: 'repeat',
+      cssClass: 'fa-solid fa-repeat',
+      searchTerms: ['repeat', 'loop', 'again'],
+    }, {
       name: 'reply',
-      cssClass: 'fas fa-reply',
-    },
-    {
+      cssClass: 'fa-solid fa-reply',
+      searchTerms: ['respond', 'answer', 'return'],
+    }, {
       name: 'reply-all',
-      cssClass: 'fas fa-reply-all',
-    },
-    {
+      cssClass: 'fa-solid fa-reply-all',
+      searchTerms: ['respond', 'answer', 'return'],
+    }, {
       name: 'republican',
-      cssClass: 'fas fa-republican',
-    },
-    {
+      cssClass: 'fa-solid fa-republican',
+      searchTerms: ['politics', 'party', 'election'],
+    }, {
       name: 'restroom',
-      cssClass: 'fas fa-restroom',
-    },
-    {
+      cssClass: 'fa-solid fa-restroom',
+      searchTerms: ['toilet', 'bathroom', 'facility'],
+    }, {
       name: 'retweet',
-      cssClass: 'fas fa-retweet',
-    },
-    {
+      cssClass: 'fa-solid fa-retweet',
+      searchTerms: ['share', 'repeat', 'action'],
+    }, {
       name: 'ribbon',
-      cssClass: 'fas fa-ribbon',
-    },
-    {
+      cssClass: 'fa-solid fa-ribbon',
+      searchTerms: ['award', 'recognition', 'symbol'],
+    }, {
+      name: 'right-from-bracket',
+      cssClass: 'fa-solid fa-right-from-bracket',
+      searchTerms: ['logout', 'exit', 'leave'],
+    }, {
+      name: 'right-left',
+      cssClass: 'fa-solid fa-right-left',
+      searchTerms: ['right', 'left', 'direction'],
+    }, {
+      name: 'right-long',
+      cssClass: 'fa-solid fa-right-long',
+      searchTerms: ['right', 'long', 'direction'],
+    }, {
+      name: 'right-to-bracket',
+      cssClass: 'fa-solid fa-right-to-bracket',
+      searchTerms: ['right', 'arrow', 'bracket'],
+    }, {
       name: 'ring',
-      cssClass: 'fas fa-ring',
-    },
-    {
+      cssClass: 'fa-solid fa-ring',
+      searchTerms: ['jewelry', 'accessory', 'circle'],
+    }, {
+      name: 'rmb',
+      cssClass: 'fa-solid fa-rmb',
+      searchTerms: ['rmb', 'currency', 'china'],
+    }, {
       name: 'road',
-      cssClass: 'fas fa-road',
-    },
-    {
+      cssClass: 'fa-solid fa-road',
+      searchTerms: ['path', 'route', 'travel'],
+    }, {
+      name: 'road-barrier',
+      cssClass: 'fa-solid fa-road-barrier',
+      searchTerms: ['road', 'barrier', 'block'],
+    }, {
+      name: 'road-bridge',
+      cssClass: 'fa-solid fa-road-bridge',
+      searchTerms: ['road', 'bridge', 'cross'],
+    }, {
+      name: 'road-circle-check',
+      cssClass: 'fa-solid fa-road-circle-check',
+      searchTerms: ['road', 'circle', 'check'],
+    }, {
+      name: 'road-circle-exclamation',
+      cssClass: 'fa-solid fa-road-circle-exclamation',
+      searchTerms: ['road', 'circle', 'alert'],
+    }, {
+      name: 'road-circle-xmark',
+      cssClass: 'fa-solid fa-road-circle-xmark',
+      searchTerms: ['road', 'circle', 'remove'],
+    }, {
+      name: 'road-lock',
+      cssClass: 'fa-solid fa-road-lock',
+      searchTerms: ['road', 'lock', 'secure'],
+    }, {
+      name: 'road-spikes',
+      cssClass: 'fa-solid fa-road-spikes',
+      searchTerms: ['road', 'spikes', 'safety'],
+    }, {
       name: 'robot',
-      cssClass: 'fas fa-robot',
-    },
-    {
+      cssClass: 'fa-solid fa-robot',
+      searchTerms: ['technology', 'machine', 'AI'],
+    }, {
       name: 'rocket',
-      cssClass: 'fas fa-rocket',
-    },
-    {
+      cssClass: 'fa-solid fa-rocket',
+      searchTerms: ['space', 'launch', 'explore'],
+    }, {
+      name: 'rod-asclepius',
+      cssClass: 'fa-solid fa-rod-asclepius',
+      searchTerms: ['rod', 'asclepius', 'health'],
+    }, {
+      name: 'rod-snake',
+      cssClass: 'fa-solid fa-rod-snake',
+      searchTerms: ['snake', 'rod', 'medical'],
+    }, {
+      name: 'rotate-back',
+      cssClass: 'fa-solid fa-rotate-back',
+      searchTerms: ['rotate', 'back', 'reverse'],
+    }, {
+      name: 'rotate-backward',
+      cssClass: 'fa-solid fa-rotate-backward',
+      searchTerms: ['rotate', 'backward', 'reverse'],
+    }, {
+      name: 'rotate-forward',
+      cssClass: 'fa-solid fa-rotate-forward',
+      searchTerms: ['rotate', 'forward', 'turn'],
+    }, {
+      name: 'rotate-left',
+      cssClass: 'fa-solid fa-rotate-left',
+      searchTerms: ['rotate', 'left', 'turn'],
+    }, {
+      name: 'rotate-right',
+      cssClass: 'fa-solid fa-rotate-right',
+      searchTerms: ['rotate', 'right', 'turn'],
+    }, {
+      name: 'rouble',
+      cssClass: 'fa-solid fa-rouble',
+      searchTerms: ['rouble', 'currency', 'russia'],
+    }, {
       name: 'route',
-      cssClass: 'fas fa-route',
-    },
-    {
+      cssClass: 'fa-solid fa-route',
+      searchTerms: ['path', 'direction', 'map'],
+    }, {
       name: 'rss',
-      cssClass: 'fas fa-rss',
-    },
-    {
+      cssClass: 'fa-solid fa-rss',
+      searchTerms: ['feed', 'news', 'update'],
+    }, {
       name: 'rss-square',
-      cssClass: 'fas fa-rss-square',
-    },
-    {
+      cssClass: 'fa-solid fa-rss-square',
+      searchTerms: ['feed', 'news', 'update'],
+    }, {
+      name: 'rub',
+      cssClass: 'fa-solid fa-rub',
+      searchTerms: ['rub', 'currency', 'russia'],
+    }, {
+      name: 'ruble',
+      cssClass: 'fa-solid fa-ruble',
+      searchTerms: ['ruble', 'currency', 'russia'],
+    }, {
       name: 'ruble-sign',
-      cssClass: 'fas fa-ruble-sign',
-    },
-    {
+      cssClass: 'fa-solid fa-ruble-sign',
+      searchTerms: ['currency', 'money', 'finance'],
+    }, {
+      name: 'rug',
+      cssClass: 'fa-solid fa-rug',
+      searchTerms: ['rug', 'carpet', 'floor'],
+    }, {
       name: 'ruler',
-      cssClass: 'fas fa-ruler',
-    },
-    {
+      cssClass: 'fa-solid fa-ruler',
+      searchTerms: ['measure', 'size', 'tool'],
+    }, {
       name: 'ruler-combined',
-      cssClass: 'fas fa-ruler-combined',
-    },
-    {
+      cssClass: 'fa-solid fa-ruler-combined',
+      searchTerms: ['measure', 'size', 'tool'],
+    }, {
       name: 'ruler-horizontal',
-      cssClass: 'fas fa-ruler-horizontal',
-    },
-    {
+      cssClass: 'fa-solid fa-ruler-horizontal',
+      searchTerms: ['measure', 'size', 'tool'],
+    }, {
       name: 'ruler-vertical',
-      cssClass: 'fas fa-ruler-vertical',
-    },
-    {
+      cssClass: 'fa-solid fa-ruler-vertical',
+      searchTerms: ['measure', 'size', 'tool'],
+    }, {
       name: 'running',
-      cssClass: 'fas fa-running',
-    },
-    {
+      cssClass: 'fa-solid fa-running',
+      searchTerms: ['exercise', 'activity', 'fitness'],
+    }, {
+      name: 'rupee',
+      cssClass: 'fa-solid fa-rupee',
+      searchTerms: ['rupee', 'currency', 'india'],
+    }, {
       name: 'rupee-sign',
-      cssClass: 'fas fa-rupee-sign',
-    },
-    {
+      cssClass: 'fa-solid fa-rupee-sign',
+      searchTerms: ['currency', 'money', 'finance'],
+    }, {
+      name: 'rupiah-sign',
+      cssClass: 'fa-solid fa-rupiah-sign',
+      searchTerms: ['rupiah', 'currency', 'indonesia'],
+    }, {
+      name: 's',
+      cssClass: 'fa-solid fa-s',
+      searchTerms: ['letter', 'S', 'initial'],
+    }, {
+      name: 'sack-dollar',
+      cssClass: 'fa-solid fa-sack-dollar',
+      searchTerms: ['sack', 'dollar', 'money'],
+    }, {
+      name: 'sack-xmark',
+      cssClass: 'fa-solid fa-sack-xmark',
+      searchTerms: ['sack', 'remove', 'money'],
+    }, {
       name: 'sad-cry',
-      cssClass: 'fas fa-sad-cry',
-    },
-    {
+      cssClass: 'fa-solid fa-sad-cry',
+      searchTerms: ['emotion', 'sad', 'face'],
+    }, {
       name: 'sad-tear',
-      cssClass: 'fas fa-sad-tear',
-    },
-    {
+      cssClass: 'fa-solid fa-sad-tear',
+      searchTerms: ['emotion', 'sad', 'face'],
+    }, {
+      name: 'sailboat',
+      cssClass: 'fa-solid fa-sailboat',
+      searchTerms: ['sailboat', 'boat', 'travel'],
+    }, {
       name: 'satellite',
-      cssClass: 'fas fa-satellite',
-    },
-    {
+      cssClass: 'fa-solid fa-satellite',
+      searchTerms: ['space', 'technology', 'communication'],
+    }, {
       name: 'satellite-dish',
-      cssClass: 'fas fa-satellite-dish',
-    },
-    {
+      cssClass: 'fa-solid fa-satellite-dish',
+      searchTerms: ['communication', 'signal', 'technology'],
+    }, {
       name: 'save',
-      cssClass: 'fas fa-save',
-    },
-    {
+      cssClass: 'fa-solid fa-save',
+      searchTerms: ['store', 'keep', 'data'],
+    }, {
+      name: 'scale-balanced',
+      cssClass: 'fa-solid fa-scale-balanced',
+      searchTerms: ['scale', 'balanced', 'measure'],
+    }, {
+      name: 'scale-unbalanced',
+      cssClass: 'fa-solid fa-scale-unbalanced',
+      searchTerms: ['scale', 'unbalanced', 'measure'],
+    }, {
+      name: 'scale-unbalanced-flip',
+      cssClass: 'fa-solid fa-scale-unbalanced-flip',
+      searchTerms: ['scale', 'unbalanced', 'flip'],
+    }, {
       name: 'school',
-      cssClass: 'fas fa-school',
-    },
-    {
+      cssClass: 'fa-solid fa-school',
+      searchTerms: ['education', 'learning', 'institution'],
+    }, {
+      name: 'school-circle-check',
+      cssClass: 'fa-solid fa-school-circle-check',
+      searchTerms: ['school', 'check', 'verified'],
+    }, {
+      name: 'school-circle-exclamation',
+      cssClass: 'fa-solid fa-school-circle-exclamation',
+      searchTerms: ['school', 'alert', 'notice'],
+    }, {
+      name: 'school-circle-xmark',
+      cssClass: 'fa-solid fa-school-circle-xmark',
+      searchTerms: ['school', 'remove', 'alert'],
+    }, {
+      name: 'school-flag',
+      cssClass: 'fa-solid fa-school-flag',
+      searchTerms: ['school', 'flag', 'education'],
+    }, {
+      name: 'school-lock',
+      cssClass: 'fa-solid fa-school-lock',
+      searchTerms: ['school', 'lock', 'secure'],
+    }, {
+      name: 'scissors',
+      cssClass: 'fa-solid fa-scissors',
+      searchTerms: ['scissors', 'cut', 'trim'],
+    }, {
       name: 'screwdriver',
-      cssClass: 'fas fa-screwdriver',
-    },
-    {
+      cssClass: 'fa-solid fa-screwdriver',
+      searchTerms: ['tool', 'repair', 'fix'],
+    }, {
+      name: 'screwdriver-wrench',
+      cssClass: 'fa-solid fa-screwdriver-wrench',
+      searchTerms: ['screwdriver', 'wrench', 'tools'],
+    }, {
       name: 'scroll',
-      cssClass: 'fas fa-scroll',
-    },
-    {
+      cssClass: 'fa-solid fa-scroll',
+      searchTerms: ['document', 'paper', 'text'],
+    }, {
+      name: 'scroll-torah',
+      cssClass: 'fa-solid fa-scroll-torah',
+      searchTerms: ['torah', 'scroll', 'text'],
+    }, {
       name: 'sd-card',
-      cssClass: 'fas fa-sd-card',
-    },
-    {
+      cssClass: 'fa-solid fa-sd-card',
+      searchTerms: ['storage', 'data', 'memory'],
+    }, {
       name: 'search',
-      cssClass: 'fas fa-search',
-    },
-    {
+      cssClass: 'fa-solid fa-search',
+      searchTerms: ['find', 'look', 'query'],
+    }, {
       name: 'search-dollar',
-      cssClass: 'fas fa-search-dollar',
-    },
-    {
+      cssClass: 'fa-solid fa-search-dollar',
+      searchTerms: ['find', 'money', 'finance'],
+    }, {
       name: 'search-location',
-      cssClass: 'fas fa-search-location',
-    },
-    {
+      cssClass: 'fa-solid fa-search-location',
+      searchTerms: ['find', 'map', 'navigate'],
+    }, {
       name: 'search-minus',
-      cssClass: 'fas fa-search-minus',
-    },
-    {
+      cssClass: 'fa-solid fa-search-minus',
+      searchTerms: ['zoom', 'out', 'find'],
+    }, {
       name: 'search-plus',
-      cssClass: 'fas fa-search-plus',
-    },
-    {
+      cssClass: 'fa-solid fa-search-plus',
+      searchTerms: ['zoom', 'in', 'find'],
+    }, {
+      name: 'section',
+      cssClass: 'fa-solid fa-section',
+      searchTerms: ['section', 'part', 'area'],
+    }, {
       name: 'seedling',
-      cssClass: 'fas fa-seedling',
-    },
-    {
+      cssClass: 'fa-solid fa-seedling',
+      searchTerms: ['plant', 'grow', 'nature'],
+    }, {
       name: 'server',
-      cssClass: 'fas fa-server',
-    },
-    {
+      cssClass: 'fa-solid fa-server',
+      searchTerms: ['data', 'storage', 'network'],
+    }, {
       name: 'shapes',
-      cssClass: 'fas fa-shapes',
-    },
-    {
+      cssClass: 'fa-solid fa-shapes',
+      searchTerms: ['design', 'geometry', 'form'],
+    }, {
       name: 'share',
-      cssClass: 'fas fa-share',
-    },
-    {
+      cssClass: 'fa-solid fa-share',
+      searchTerms: ['send', 'distribute', 'connect'],
+    }, {
       name: 'share-alt',
-      cssClass: 'fas fa-share-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-share-alt',
+      searchTerms: ['share', 'send', 'distribute'],
+    }, {
       name: 'share-alt-square',
-      cssClass: 'fas fa-share-alt-square',
-    },
-    {
+      cssClass: 'fa-solid fa-share-alt-square',
+      searchTerms: ['share', 'send', 'square'],
+    }, {
+      name: 'share-from-square',
+      cssClass: 'fa-solid fa-share-from-square',
+      searchTerms: ['share', 'square', 'send'],
+    }, {
+      name: 'share-nodes',
+      cssClass: 'fa-solid fa-share-nodes',
+      searchTerms: ['share', 'nodes', 'connect'],
+    }, {
       name: 'share-square',
-      cssClass: 'fas fa-share-square',
-    },
-    {
+      cssClass: 'fa-solid fa-share-square',
+      searchTerms: ['share', 'send', 'square'],
+    }, {
+      name: 'sheet-plastic',
+      cssClass: 'fa-solid fa-sheet-plastic',
+      searchTerms: ['plastic', 'sheet', 'material'],
+    }, {
+      name: 'shekel',
+      cssClass: 'fa-solid fa-shekel',
+      searchTerms: ['shekel', 'currency', 'israel'],
+    }, {
       name: 'shekel-sign',
-      cssClass: 'fas fa-shekel-sign',
-    },
-    {
+      cssClass: 'fa-solid fa-shekel-sign',
+      searchTerms: ['currency', 'money', 'finance'],
+    }, {
+      name: 'sheqel',
+      cssClass: 'fa-solid fa-sheqel',
+      searchTerms: ['sheqel', 'currency', 'israel'],
+    }, {
+      name: 'sheqel-sign',
+      cssClass: 'fa-solid fa-sheqel-sign',
+      searchTerms: ['sheqel', 'currency', 'sign'],
+    }, {
+      name: 'shield',
+      cssClass: 'fa-solid fa-shield',
+      searchTerms: ['shield', 'protection', 'security'],
+    }, {
       name: 'shield-alt',
-      cssClass: 'fas fa-shield-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-shield-alt',
+      searchTerms: ['protection', 'security', 'defense'],
+    }, {
+      name: 'shield-blank',
+      cssClass: 'fa-solid fa-shield-blank',
+      searchTerms: ['shield', 'blank', 'empty'],
+    }, {
+      name: 'shield-cat',
+      cssClass: 'fa-solid fa-shield-cat',
+      searchTerms: ['shield', 'cat', 'protection'],
+    }, {
+      name: 'shield-dog',
+      cssClass: 'fa-solid fa-shield-dog',
+      searchTerms: ['shield', 'dog', 'protection'],
+    }, {
+      name: 'shield-halved',
+      cssClass: 'fa-solid fa-shield-halved',
+      searchTerms: ['shield', 'halved', 'protection'],
+    }, {
+      name: 'shield-heart',
+      cssClass: 'fa-solid fa-shield-heart',
+      searchTerms: ['shield', 'heart', 'protection'],
+    }, {
+      name: 'shield-virus',
+      cssClass: 'fa-solid fa-shield-virus',
+      searchTerms: ['shield', 'virus', 'protection'],
+    }, {
       name: 'ship',
-      cssClass: 'fas fa-ship',
-    },
-    {
+      cssClass: 'fa-solid fa-ship',
+      searchTerms: ['transport', 'boat', 'sea'],
+    }, {
       name: 'shipping-fast',
-      cssClass: 'fas fa-shipping-fast',
-    },
-    {
+      cssClass: 'fa-solid fa-shipping-fast',
+      searchTerms: ['delivery', 'speed', 'shipping'],
+    }, {
+      name: 'shirt',
+      cssClass: 'fa-solid fa-shirt',
+      searchTerms: ['shirt', 'clothing', 'wear'],
+    }, {
       name: 'shoe-prints',
-      cssClass: 'fas fa-shoe-prints',
-    },
-    {
+      cssClass: 'fa-solid fa-shoe-prints',
+      searchTerms: ['footsteps', 'track', 'path'],
+    }, {
+      name: 'shop',
+      cssClass: 'fa-solid fa-shop',
+      searchTerms: ['shop', 'store', 'retail'],
+    }, {
+      name: 'shop-lock',
+      cssClass: 'fa-solid fa-shop-lock',
+      searchTerms: ['shop', 'lock', 'secure'],
+    }, {
+      name: 'shop-slash',
+      cssClass: 'fa-solid fa-shop-slash',
+      searchTerms: ['shop', 'slash', 'store'],
+    }, {
       name: 'shopping-bag',
-      cssClass: 'fas fa-shopping-bag',
-    },
-    {
+      cssClass: 'fa-solid fa-shopping-bag',
+      searchTerms: ['purchase', 'shopping', 'store'],
+    }, {
       name: 'shopping-basket',
-      cssClass: 'fas fa-shopping-basket',
-    },
-    {
+      cssClass: 'fa-solid fa-shopping-basket',
+      searchTerms: ['purchase', 'shopping', 'store'],
+    }, {
       name: 'shopping-cart',
-      cssClass: 'fas fa-shopping-cart',
-    },
-    {
+      cssClass: 'fa-solid fa-shopping-cart',
+      searchTerms: ['purchase', 'shopping', 'store'],
+    }, {
       name: 'shower',
-      cssClass: 'fas fa-shower',
-    },
-    {
+      cssClass: 'fa-solid fa-shower',
+      searchTerms: ['bath', 'water', 'hygiene'],
+    }, {
+      name: 'shrimp',
+      cssClass: 'fa-solid fa-shrimp',
+      searchTerms: ['shrimp', 'seafood', 'food'],
+    }, {
+      name: 'shuffle',
+      cssClass: 'fa-solid fa-shuffle',
+      searchTerms: ['shuffle', 'mix', 'random'],
+    }, {
+      name: 'shuttle-space',
+      cssClass: 'fa-solid fa-shuttle-space',
+      searchTerms: ['shuttle', 'space', 'travel'],
+    }, {
       name: 'shuttle-van',
-      cssClass: 'fas fa-shuttle-van',
-    },
-    {
+      cssClass: 'fa-solid fa-shuttle-van',
+      searchTerms: ['transport', 'vehicle', 'shuttle'],
+    }, {
       name: 'sign',
-      cssClass: 'fas fa-sign',
-    },
-    {
+      cssClass: 'fa-solid fa-sign',
+      searchTerms: ['board', 'notice', 'information'],
+    }, {
+      name: 'sign-hanging',
+      cssClass: 'fa-solid fa-sign-hanging',
+      searchTerms: ['sign', 'hanging', 'display'],
+    }, {
+      name: 'sign-in',
+      cssClass: 'fa-solid fa-sign-in',
+      searchTerms: ['sign', 'in', 'login'],
+    }, {
       name: 'sign-in-alt',
-      cssClass: 'fas fa-sign-in-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-sign-in-alt',
+      searchTerms: ['login', 'enter', 'access'],
+    }, {
       name: 'sign-language',
-      cssClass: 'fas fa-sign-language',
-    },
-    {
+      cssClass: 'fa-solid fa-sign-language',
+      searchTerms: ['communication', 'sign', 'language'],
+    }, {
+      name: 'sign-out',
+      cssClass: 'fa-solid fa-sign-out',
+      searchTerms: ['sign', 'out', 'exit'],
+    }, {
       name: 'sign-out-alt',
-      cssClass: 'fas fa-sign-out-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-sign-out-alt',
+      searchTerms: ['logout', 'exit', 'leave'],
+    }, {
       name: 'signal',
-      cssClass: 'fas fa-signal',
-    },
-    {
+      cssClass: 'fa-solid fa-signal',
+      searchTerms: ['strength', 'connection', 'signal'],
+    }, {
+      name: 'signal-5',
+      cssClass: 'fa-solid fa-signal-5',
+      searchTerms: ['signal', 'five', 'communication'],
+    }, {
+      name: 'signal-perfect',
+      cssClass: 'fa-solid fa-signal-perfect',
+      searchTerms: ['signal', 'perfect', 'connection'],
+    }, {
       name: 'signature',
-      cssClass: 'fas fa-signature',
-    },
-    {
+      cssClass: 'fa-solid fa-signature',
+      searchTerms: ['sign', 'autograph', 'name'],
+    }, {
+      name: 'signing',
+      cssClass: 'fa-solid fa-signing',
+      searchTerms: ['signing', 'document', 'agreement'],
+    }, {
+      name: 'signs-post',
+      cssClass: 'fa-solid fa-signs-post',
+      searchTerms: ['signs', 'post', 'direction'],
+    }, {
       name: 'sim-card',
-      cssClass: 'fas fa-sim-card',
-    },
-    {
+      cssClass: 'fa-solid fa-sim-card',
+      searchTerms: ['mobile', 'phone', 'data'],
+    }, {
+      name: 'sink',
+      cssClass: 'fa-solid fa-sink',
+      searchTerms: ['sink', 'plumbing', 'kitchen'],
+    }, {
       name: 'sitemap',
-      cssClass: 'fas fa-sitemap',
-    },
-    {
+      cssClass: 'fa-solid fa-sitemap',
+      searchTerms: ['structure', 'organization', 'layout'],
+    }, {
       name: 'skating',
-      cssClass: 'fas fa-skating',
-    },
-    {
+      cssClass: 'fa-solid fa-skating',
+      searchTerms: ['sport', 'ice', 'activity'],
+    }, {
       name: 'skiing',
-      cssClass: 'fas fa-skiing',
-    },
-    {
+      cssClass: 'fa-solid fa-skiing',
+      searchTerms: ['sport', 'snow', 'winter'],
+    }, {
       name: 'skiing-nordic',
-      cssClass: 'fas fa-skiing-nordic',
-    },
-    {
+      cssClass: 'fa-solid fa-skiing-nordic',
+      searchTerms: ['sport', 'snow', 'winter'],
+    }, {
       name: 'skull',
-      cssClass: 'fas fa-skull',
-    },
-    {
+      cssClass: 'fa-solid fa-skull',
+      searchTerms: ['death', 'danger', 'symbol'],
+    }, {
       name: 'skull-crossbones',
-      cssClass: 'fas fa-skull-crossbones',
-    },
-    {
+      cssClass: 'fa-solid fa-skull-crossbones',
+      searchTerms: ['danger', 'toxic', 'warning'],
+    }, {
       name: 'slash',
-      cssClass: 'fas fa-slash',
-    },
-    {
+      cssClass: 'fa-solid fa-slash',
+      searchTerms: ['cut', 'remove', 'delete'],
+    }, {
       name: 'sleigh',
-      cssClass: 'fas fa-sleigh',
-    },
-    {
+      cssClass: 'fa-solid fa-sleigh',
+      searchTerms: ['vehicle', 'winter', 'holiday'],
+    }, {
+      name: 'sliders',
+      cssClass: 'fa-solid fa-sliders',
+      searchTerms: ['sliders', 'controls', 'settings'],
+    }, {
       name: 'sliders-h',
-      cssClass: 'fas fa-sliders-h',
-    },
-    {
+      cssClass: 'fa-solid fa-sliders-h',
+      searchTerms: ['settings', 'adjust', 'controls'],
+    }, {
       name: 'smile',
-      cssClass: 'fas fa-smile',
-    },
-    {
+      cssClass: 'fa-solid fa-smile',
+      searchTerms: ['emotion', 'happy', 'face'],
+    }, {
       name: 'smile-beam',
-      cssClass: 'fas fa-smile-beam',
-    },
-    {
+      cssClass: 'fa-solid fa-smile-beam',
+      searchTerms: ['emotion', 'happy', 'joy'],
+    }, {
       name: 'smile-wink',
-      cssClass: 'fas fa-smile-wink',
-    },
-    {
+      cssClass: 'fa-solid fa-smile-wink',
+      searchTerms: ['emotion', 'happy', 'wink'],
+    }, {
       name: 'smog',
-      cssClass: 'fas fa-smog',
-    },
-    {
+      cssClass: 'fa-solid fa-smog',
+      searchTerms: ['pollution', 'air', 'environment'],
+    }, {
       name: 'smoking',
-      cssClass: 'fas fa-smoking',
-    },
-    {
+      cssClass: 'fa-solid fa-smoking',
+      searchTerms: ['tobacco', 'cigarette', 'smoke'],
+    }, {
       name: 'smoking-ban',
-      cssClass: 'fas fa-smoking-ban',
-    },
-    {
+      cssClass: 'fa-solid fa-smoking-ban',
+      searchTerms: ['prohibition', 'no', 'smoke'],
+    }, {
       name: 'sms',
-      cssClass: 'fas fa-sms',
-    },
-    {
+      cssClass: 'fa-solid fa-sms',
+      searchTerms: ['message', 'text', 'communication'],
+    }, {
       name: 'snowboarding',
-      cssClass: 'fas fa-snowboarding',
-    },
-    {
+      cssClass: 'fa-solid fa-snowboarding',
+      searchTerms: ['sport', 'snow', 'winter'],
+    }, {
       name: 'snowflake',
-      cssClass: 'fas fa-snowflake',
-    },
-    {
+      cssClass: 'fa-solid fa-snowflake',
+      searchTerms: ['winter', 'cold', 'ice'],
+    }, {
       name: 'snowman',
-      cssClass: 'fas fa-snowman',
-    },
-    {
+      cssClass: 'fa-solid fa-snowman',
+      searchTerms: ['winter', 'holiday', 'fun'],
+    }, {
       name: 'snowplow',
-      cssClass: 'fas fa-snowplow',
-    },
-    {
+      cssClass: 'fa-solid fa-snowplow',
+      searchTerms: ['winter', 'snow', 'clearing'],
+    }, {
+      name: 'soap',
+      cssClass: 'fa-solid fa-soap',
+      searchTerms: ['soap', 'clean', 'hygiene'],
+    }, {
+      name: 'soccer-ball',
+      cssClass: 'fa-solid fa-soccer-ball',
+      searchTerms: ['soccer', 'ball', 'football'],
+    }, {
       name: 'socks',
-      cssClass: 'fas fa-socks',
-    },
-    {
+      cssClass: 'fa-solid fa-socks',
+      searchTerms: ['clothing', 'fashion', 'wear'],
+    }, {
       name: 'solar-panel',
-      cssClass: 'fas fa-solar-panel',
-    },
-    {
+      cssClass: 'fa-solid fa-solar-panel',
+      searchTerms: ['energy', 'solar', 'renewable'],
+    }, {
       name: 'sort',
-      cssClass: 'fas fa-sort',
-    },
-    {
+      cssClass: 'fa-solid fa-sort',
+      searchTerms: ['arrange', 'order', 'organize'],
+    }, {
+      name: 'sort-alpha-asc',
+      cssClass: 'fa-solid fa-sort-alpha-asc',
+      searchTerms: ['sort', 'alpha', 'ascending'],
+    }, {
+      name: 'sort-alpha-desc',
+      cssClass: 'fa-solid fa-sort-alpha-desc',
+      searchTerms: ['sort', 'alpha', 'descending'],
+    }, {
       name: 'sort-alpha-down',
-      cssClass: 'fas fa-sort-alpha-down',
-    },
-    {
+      cssClass: 'fa-solid fa-sort-alpha-down',
+      searchTerms: ['sort', 'alphabetical', 'down'],
+    }, {
+      name: 'sort-alpha-down-alt',
+      cssClass: 'fa-solid fa-sort-alpha-down-alt',
+      searchTerms: ['sort', 'alpha', 'down'],
+    }, {
       name: 'sort-alpha-up',
-      cssClass: 'fas fa-sort-alpha-up',
-    },
-    {
+      cssClass: 'fa-solid fa-sort-alpha-up',
+      searchTerms: ['sort', 'alphabetical', 'up'],
+    }, {
+      name: 'sort-alpha-up-alt',
+      cssClass: 'fa-solid fa-sort-alpha-up-alt',
+      searchTerms: ['sort', 'alpha', 'up'],
+    }, {
+      name: 'sort-amount-asc',
+      cssClass: 'fa-solid fa-sort-amount-asc',
+      searchTerms: ['sort', 'amount', 'ascending'],
+    }, {
+      name: 'sort-amount-desc',
+      cssClass: 'fa-solid fa-sort-amount-desc',
+      searchTerms: ['sort', 'amount', 'descending'],
+    }, {
       name: 'sort-amount-down',
-      cssClass: 'fas fa-sort-amount-down',
-    },
-    {
+      cssClass: 'fa-solid fa-sort-amount-down',
+      searchTerms: ['sort', 'quantity', 'down'],
+    }, {
+      name: 'sort-amount-down-alt',
+      cssClass: 'fa-solid fa-sort-amount-down-alt',
+      searchTerms: ['sort', 'amount', 'down'],
+    }, {
       name: 'sort-amount-up',
-      cssClass: 'fas fa-sort-amount-up',
-    },
-    {
+      cssClass: 'fa-solid fa-sort-amount-up',
+      searchTerms: ['sort', 'quantity', 'up'],
+    }, {
+      name: 'sort-amount-up-alt',
+      cssClass: 'fa-solid fa-sort-amount-up-alt',
+      searchTerms: ['sort', 'amount', 'up'],
+    }, {
+      name: 'sort-asc',
+      cssClass: 'fa-solid fa-sort-asc',
+      searchTerms: ['sort', 'ascending', 'order'],
+    }, {
+      name: 'sort-desc',
+      cssClass: 'fa-solid fa-sort-desc',
+      searchTerms: ['sort', 'descending', 'order'],
+    }, {
       name: 'sort-down',
-      cssClass: 'fas fa-sort-down',
-    },
-    {
+      cssClass: 'fa-solid fa-sort-down',
+      searchTerms: ['sort', 'order', 'down'],
+    }, {
+      name: 'sort-numeric-asc',
+      cssClass: 'fa-solid fa-sort-numeric-asc',
+      searchTerms: ['sort', 'numeric', 'ascending'],
+    }, {
+      name: 'sort-numeric-desc',
+      cssClass: 'fa-solid fa-sort-numeric-desc',
+      searchTerms: ['sort', 'numeric', 'descending'],
+    }, {
       name: 'sort-numeric-down',
-      cssClass: 'fas fa-sort-numeric-down',
-    },
-    {
+      cssClass: 'fa-solid fa-sort-numeric-down',
+      searchTerms: ['sort', 'number', 'down'],
+    }, {
+      name: 'sort-numeric-down-alt',
+      cssClass: 'fa-solid fa-sort-numeric-down-alt',
+      searchTerms: ['sort', 'numeric', 'down'],
+    }, {
       name: 'sort-numeric-up',
-      cssClass: 'fas fa-sort-numeric-up',
-    },
-    {
+      cssClass: 'fa-solid fa-sort-numeric-up',
+      searchTerms: ['sort', 'number', 'up'],
+    }, {
+      name: 'sort-numeric-up-alt',
+      cssClass: 'fa-solid fa-sort-numeric-up-alt',
+      searchTerms: ['sort', 'numeric', 'up'],
+    }, {
       name: 'sort-up',
-      cssClass: 'fas fa-sort-up',
-    },
-    {
+      cssClass: 'fa-solid fa-sort-up',
+      searchTerms: ['sort', 'order', 'up'],
+    }, {
       name: 'spa',
-      cssClass: 'fas fa-spa',
-    },
-    {
+      cssClass: 'fa-solid fa-spa',
+      searchTerms: ['relax', 'wellness', 'treatment'],
+    }, {
       name: 'space-shuttle',
-      cssClass: 'fas fa-space-shuttle',
-    },
-    {
+      cssClass: 'fa-solid fa-space-shuttle',
+      searchTerms: ['space', 'travel', 'launch'],
+    }, {
+      name: 'spaghetti-monster-flying',
+      cssClass: 'fa-solid fa-spaghetti-monster-flying',
+      searchTerms: ['monster', 'flying', 'spaghetti'],
+    }, {
+      name: 'spell-check',
+      cssClass: 'fa-solid fa-spell-check',
+      searchTerms: ['spell', 'check', 'proof'],
+    }, {
       name: 'spider',
-      cssClass: 'fas fa-spider',
-    },
-    {
+      cssClass: 'fa-solid fa-spider',
+      searchTerms: ['insect', 'creature', 'arachnid'],
+    }, {
       name: 'spinner',
-      cssClass: 'fas fa-spinner',
-    },
-    {
+      cssClass: 'fa-solid fa-spinner',
+      searchTerms: ['loading', 'wait', 'process'],
+    }, {
       name: 'splotch',
-      cssClass: 'fas fa-splotch',
-    },
-    {
+      cssClass: 'fa-solid fa-splotch',
+      searchTerms: ['paint', 'color', 'splash'],
+    }, {
+      name: 'spoon',
+      cssClass: 'fa-solid fa-spoon',
+      searchTerms: ['spoon', 'utensil', 'kitchen'],
+    }, {
       name: 'spray-can',
-      cssClass: 'fas fa-spray-can',
-    },
-    {
+      cssClass: 'fa-solid fa-spray-can',
+      searchTerms: ['paint', 'art', 'spray'],
+    }, {
+      name: 'spray-can-sparkles',
+      cssClass: 'fa-solid fa-spray-can-sparkles',
+      searchTerms: ['spray', 'can', 'sparkles'],
+    }, {
+      name: 'sprout',
+      cssClass: 'fa-solid fa-sprout',
+      searchTerms: ['sprout', 'growth', 'plant'],
+    }, {
       name: 'square',
-      cssClass: 'fas fa-square',
-    },
-    {
+      cssClass: 'fa-solid fa-square',
+      searchTerms: ['shape', 'box', 'form'],
+    }, {
+      name: 'square-arrow-up-right',
+      cssClass: 'fa-solid fa-square-arrow-up-right',
+      searchTerms: ['square', 'arrow', 'up'],
+    }, {
+      name: 'square-binary',
+      cssClass: 'fa-solid fa-square-binary',
+      searchTerms: ['binary', 'square', 'data'],
+    }, {
+      name: 'square-caret-down',
+      cssClass: 'fa-solid fa-square-caret-down',
+      searchTerms: ['caret', 'down', 'arrow'],
+    }, {
+      name: 'square-caret-left',
+      cssClass: 'fa-solid fa-square-caret-left',
+      searchTerms: ['caret', 'left', 'arrow'],
+    }, {
+      name: 'square-caret-right',
+      cssClass: 'fa-solid fa-square-caret-right',
+      searchTerms: ['caret', 'right', 'arrow'],
+    }, {
+      name: 'square-caret-up',
+      cssClass: 'fa-solid fa-square-caret-up',
+      searchTerms: ['caret', 'up', 'arrow'],
+    }, {
+      name: 'square-check',
+      cssClass: 'fa-solid fa-square-check',
+      searchTerms: ['check', 'square', 'confirm'],
+    }, {
+      name: 'square-envelope',
+      cssClass: 'fa-solid fa-square-envelope',
+      searchTerms: ['envelope', 'square', 'mail'],
+    }, {
       name: 'square-full',
-      cssClass: 'fas fa-square-full',
-    },
-    {
+      cssClass: 'fa-solid fa-square-full',
+      searchTerms: ['shape', 'box', 'solid'],
+    }, {
+      name: 'square-h',
+      cssClass: 'fa-solid fa-square-h',
+      searchTerms: ['square', 'h', 'letter'],
+    }, {
+      name: 'square-minus',
+      cssClass: 'fa-solid fa-square-minus',
+      searchTerms: ['minus', 'square', 'remove'],
+    }, {
+      name: 'square-nfi',
+      cssClass: 'fa-solid fa-square-nfi',
+      searchTerms: ['nfi', 'square', 'icon'],
+    }, {
+      name: 'square-parking',
+      cssClass: 'fa-solid fa-square-parking',
+      searchTerms: ['parking', 'square', 'lot'],
+    }, {
+      name: 'square-pen',
+      cssClass: 'fa-solid fa-square-pen',
+      searchTerms: ['pen', 'square', 'edit'],
+    }, {
+      name: 'square-person-confined',
+      cssClass: 'fa-solid fa-square-person-confined',
+      searchTerms: ['confined', 'square', 'person'],
+    }, {
+      name: 'square-phone',
+      cssClass: 'fa-solid fa-square-phone',
+      searchTerms: ['phone', 'square', 'device'],
+    }, {
+      name: 'square-phone-flip',
+      cssClass: 'fa-solid fa-square-phone-flip',
+      searchTerms: ['phone', 'flip', 'square'],
+    }, {
+      name: 'square-plus',
+      cssClass: 'fa-solid fa-square-plus',
+      searchTerms: ['plus', 'square', 'add'],
+    }, {
+      name: 'square-poll-horizontal',
+      cssClass: 'fa-solid fa-square-poll-horizontal',
+      searchTerms: ['poll', 'horizontal', 'square'],
+    }, {
+      name: 'square-poll-vertical',
+      cssClass: 'fa-solid fa-square-poll-vertical',
+      searchTerms: ['poll', 'vertical', 'square'],
+    }, {
       name: 'square-root-alt',
-      cssClass: 'fas fa-square-root-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-square-root-alt',
+      searchTerms: ['math', 'calculation', 'root'],
+    }, {
+      name: 'square-root-variable',
+      cssClass: 'fa-solid fa-square-root-variable',
+      searchTerms: ['root', 'variable', 'math'],
+    }, {
+      name: 'square-rss',
+      cssClass: 'fa-solid fa-square-rss',
+      searchTerms: ['rss', 'feed', 'square'],
+    }, {
+      name: 'square-share-nodes',
+      cssClass: 'fa-solid fa-square-share-nodes',
+      searchTerms: ['share', 'nodes', 'square'],
+    }, {
+      name: 'square-up-right',
+      cssClass: 'fa-solid fa-square-up-right',
+      searchTerms: ['up', 'right', 'square'],
+    }, {
+      name: 'square-virus',
+      cssClass: 'fa-solid fa-square-virus',
+      searchTerms: ['virus', 'square', 'infection'],
+    }, {
+      name: 'square-xmark',
+      cssClass: 'fa-solid fa-square-xmark',
+      searchTerms: ['square', 'remove', 'xmark'],
+    }, {
+      name: 'staff-aesculapius',
+      cssClass: 'fa-solid fa-staff-aesculapius',
+      searchTerms: ['staff', 'aesculapius', 'health'],
+    }, {
+      name: 'staff-snake',
+      cssClass: 'fa-solid fa-staff-snake',
+      searchTerms: ['staff', 'snake', 'medical'],
+    }, {
+      name: 'stairs',
+      cssClass: 'fa-solid fa-stairs',
+      searchTerms: ['stairs', 'steps', 'climb'],
+    }, {
       name: 'stamp',
-      cssClass: 'fas fa-stamp',
-    },
-    {
+      cssClass: 'fa-solid fa-stamp',
+      searchTerms: ['mark', 'seal', 'imprint'],
+    }, {
+      name: 'stapler',
+      cssClass: 'fa-solid fa-stapler',
+      searchTerms: ['stapler', 'office', 'tool'],
+    }, {
       name: 'star',
-      cssClass: 'fas fa-star',
-    },
-    {
+      cssClass: 'fa-solid fa-star',
+      searchTerms: ['rating', 'favorite', 'symbol'],
+    }, {
       name: 'star-and-crescent',
-      cssClass: 'fas fa-star-and-crescent',
-    },
-    {
+      cssClass: 'fa-solid fa-star-and-crescent',
+      searchTerms: ['symbol', 'moon', 'islam'],
+    }, {
       name: 'star-half',
-      cssClass: 'fas fa-star-half',
-    },
-    {
+      cssClass: 'fa-solid fa-star-half',
+      searchTerms: ['rating', 'half', 'symbol'],
+    }, {
       name: 'star-half-alt',
-      cssClass: 'fas fa-star-half-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-star-half-alt',
+      searchTerms: ['rating', 'half', 'symbol'],
+    }, {
+      name: 'star-half-stroke',
+      cssClass: 'fa-solid fa-star-half-stroke',
+      searchTerms: ['star', 'half', 'rating'],
+    }, {
       name: 'star-of-david',
-      cssClass: 'fas fa-star-of-david',
-    },
-    {
+      cssClass: 'fa-solid fa-star-of-david',
+      searchTerms: ['jewish', 'symbol', 'religion'],
+    }, {
       name: 'star-of-life',
-      cssClass: 'fas fa-star-of-life',
-    },
-    {
+      cssClass: 'fa-solid fa-star-of-life',
+      searchTerms: ['health', 'emergency', 'symbol'],
+    }, {
       name: 'step-backward',
-      cssClass: 'fas fa-step-backward',
-    },
-    {
+      cssClass: 'fa-solid fa-step-backward',
+      searchTerms: ['rewind', 'back', 'play'],
+    }, {
       name: 'step-forward',
-      cssClass: 'fas fa-step-forward',
-    },
-    {
+      cssClass: 'fa-solid fa-step-forward',
+      searchTerms: ['forward', 'next', 'play'],
+    }, {
+      name: 'sterling-sign',
+      cssClass: 'fa-solid fa-sterling-sign',
+      searchTerms: ['sterling', 'currency', 'pound'],
+    }, {
       name: 'stethoscope',
-      cssClass: 'fas fa-stethoscope',
-    },
-    {
+      cssClass: 'fa-solid fa-stethoscope',
+      searchTerms: ['medical', 'health', 'doctor'],
+    }, {
       name: 'sticky-note',
-      cssClass: 'fas fa-sticky-note',
-    },
-    {
+      cssClass: 'fa-solid fa-sticky-note',
+      searchTerms: ['note', 'reminder', 'message'],
+    }, {
       name: 'stop',
-      cssClass: 'fas fa-stop',
-    },
-    {
+      cssClass: 'fa-solid fa-stop',
+      searchTerms: ['halt', 'pause', 'cease'],
+    }, {
       name: 'stop-circle',
-      cssClass: 'fas fa-stop-circle',
-    },
-    {
+      cssClass: 'fa-solid fa-stop-circle',
+      searchTerms: ['halt', 'pause', 'cease'],
+    }, {
       name: 'stopwatch',
-      cssClass: 'fas fa-stopwatch',
-    },
-    {
+      cssClass: 'fa-solid fa-stopwatch',
+      searchTerms: ['time', 'measure', 'duration'],
+    }, {
+      name: 'stopwatch-20',
+      cssClass: 'fa-solid fa-stopwatch-20',
+      searchTerms: ['stopwatch', 'twenty', 'time'],
+    }, {
       name: 'store',
-      cssClass: 'fas fa-store',
-    },
-    {
+      cssClass: 'fa-solid fa-store',
+      searchTerms: ['shop', 'retail', 'business'],
+    }, {
       name: 'store-alt',
-      cssClass: 'fas fa-store-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-store-alt',
+      searchTerms: ['shop', 'retail', 'business'],
+    }, {
+      name: 'store-alt-slash',
+      cssClass: 'fa-solid fa-store-alt-slash',
+      searchTerms: ['store', 'alternative', 'slash'],
+    }, {
+      name: 'store-slash',
+      cssClass: 'fa-solid fa-store-slash',
+      searchTerms: ['store', 'slash', 'remove'],
+    }, {
       name: 'stream',
-      cssClass: 'fas fa-stream',
-    },
-    {
+      cssClass: 'fa-solid fa-stream',
+      searchTerms: ['flow', 'data', 'continuous'],
+    }, {
       name: 'street-view',
-      cssClass: 'fas fa-street-view',
-    },
-    {
+      cssClass: 'fa-solid fa-street-view',
+      searchTerms: ['map', 'navigation', 'view'],
+    }, {
       name: 'strikethrough',
-      cssClass: 'fas fa-strikethrough',
-    },
-    {
+      cssClass: 'fa-solid fa-strikethrough',
+      searchTerms: ['text', 'edit', 'format'],
+    }, {
       name: 'stroopwafel',
-      cssClass: 'fas fa-stroopwafel',
-    },
-    {
+      cssClass: 'fa-solid fa-stroopwafel',
+      searchTerms: ['food', 'snack', 'treat'],
+    }, {
       name: 'subscript',
-      cssClass: 'fas fa-subscript',
-    },
-    {
+      cssClass: 'fa-solid fa-subscript',
+      searchTerms: ['text', 'format', 'edit'],
+    }, {
+      name: 'subtract',
+      cssClass: 'fa-solid fa-subtract',
+      searchTerms: ['subtract', 'remove', 'decrease'],
+    }, {
       name: 'subway',
-      cssClass: 'fas fa-subway',
-    },
-    {
+      cssClass: 'fa-solid fa-subway',
+      searchTerms: ['transport', 'train', 'metro'],
+    }, {
       name: 'suitcase',
-      cssClass: 'fas fa-suitcase',
-    },
-    {
+      cssClass: 'fa-solid fa-suitcase',
+      searchTerms: ['luggage', 'travel', 'bag'],
+    }, {
+      name: 'suitcase-medical',
+      cssClass: 'fa-solid fa-suitcase-medical',
+      searchTerms: ['suitcase', 'medical', 'travel'],
+    }, {
       name: 'suitcase-rolling',
-      cssClass: 'fas fa-suitcase-rolling',
-    },
-    {
+      cssClass: 'fa-solid fa-suitcase-rolling',
+      searchTerms: ['luggage', 'travel', 'bag'],
+    }, {
       name: 'sun',
-      cssClass: 'fas fa-sun',
-    },
-    {
+      cssClass: 'fa-solid fa-sun',
+      searchTerms: ['day', 'light', 'weather'],
+    }, {
+      name: 'sun-plant-wilt',
+      cssClass: 'fa-solid fa-sun-plant-wilt',
+      searchTerms: ['sun', 'plant', 'wilt'],
+    }, {
       name: 'superscript',
-      cssClass: 'fas fa-superscript',
-    },
-    {
+      cssClass: 'fa-solid fa-superscript',
+      searchTerms: ['text', 'format', 'edit'],
+    }, {
       name: 'surprise',
-      cssClass: 'fas fa-surprise',
-    },
-    {
+      cssClass: 'fa-solid fa-surprise',
+      searchTerms: ['emotion', 'shock', 'face'],
+    }, {
       name: 'swatchbook',
-      cssClass: 'fas fa-swatchbook',
-    },
-    {
+      cssClass: 'fa-solid fa-swatchbook',
+      searchTerms: ['color', 'design', 'sample'],
+    }, {
       name: 'swimmer',
-      cssClass: 'fas fa-swimmer',
-    },
-    {
+      cssClass: 'fa-solid fa-swimmer',
+      searchTerms: ['sport', 'water', 'swim'],
+    }, {
       name: 'swimming-pool',
-      cssClass: 'fas fa-swimming-pool',
-    },
-    {
+      cssClass: 'fa-solid fa-swimming-pool',
+      searchTerms: ['water', 'leisure', 'swim'],
+    }, {
       name: 'synagogue',
-      cssClass: 'fas fa-synagogue',
-    },
-    {
+      cssClass: 'fa-solid fa-synagogue',
+      searchTerms: ['religion', 'place', 'worship'],
+    }, {
       name: 'sync',
-      cssClass: 'fas fa-sync',
-    },
-    {
+      cssClass: 'fa-solid fa-sync',
+      searchTerms: ['refresh', 'update', 'reload'],
+    }, {
       name: 'sync-alt',
-      cssClass: 'fas fa-sync-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-sync-alt',
+      searchTerms: ['refresh', 'update', 'reload'],
+    }, {
       name: 'syringe',
-      cssClass: 'fas fa-syringe',
-    },
-    {
+      cssClass: 'fa-solid fa-syringe',
+      searchTerms: ['medicine', 'health', 'injection'],
+    }, {
+      name: 't',
+      cssClass: 'fa-solid fa-t',
+      searchTerms: ['letter', 'T', 'initial'],
+    }, {
+      name: 't-shirt',
+      cssClass: 'fa-solid fa-t-shirt',
+      searchTerms: ['t-shirt', 'clothing', 'wear'],
+    }, {
       name: 'table',
-      cssClass: 'fas fa-table',
-    },
-    {
+      cssClass: 'fa-solid fa-table',
+      searchTerms: ['furniture', 'surface', 'work'],
+    }, {
+      name: 'table-cells',
+      cssClass: 'fa-solid fa-table-cells',
+      searchTerms: ['table', 'cells', 'layout'],
+    }, {
+      name: 'table-cells-column-lock',
+      cssClass: 'fa-solid fa-table-cells-column-lock',
+      searchTerms: ['table', 'cells', 'lock'],
+    }, {
+      name: 'table-cells-large',
+      cssClass: 'fa-solid fa-table-cells-large',
+      searchTerms: ['table', 'large', 'layout'],
+    }, {
+      name: 'table-cells-row-lock',
+      cssClass: 'fa-solid fa-table-cells-row-lock',
+      searchTerms: ['table', 'cells', 'lock'],
+    }, {
+      name: 'table-cells-row-unlock',
+      cssClass: 'fa-solid fa-table-cells-row-unlock',
+      searchTerms: ['table', 'cells', 'unlock'],
+    }, {
+      name: 'table-columns',
+      cssClass: 'fa-solid fa-table-columns',
+      searchTerms: ['table', 'columns', 'layout'],
+    }, {
+      name: 'table-list',
+      cssClass: 'fa-solid fa-table-list',
+      searchTerms: ['table', 'list', 'items'],
+    }, {
       name: 'table-tennis',
-      cssClass: 'fas fa-table-tennis',
-    },
-    {
+      cssClass: 'fa-solid fa-table-tennis',
+      searchTerms: ['sport', 'game', 'ping pong'],
+    }, {
+      name: 'table-tennis-paddle-ball',
+      cssClass: 'fa-solid fa-table-tennis-paddle-ball',
+      searchTerms: ['table', 'tennis', 'paddle'],
+    }, {
       name: 'tablet',
-      cssClass: 'fas fa-tablet',
-    },
-    {
+      cssClass: 'fa-solid fa-tablet',
+      searchTerms: ['device', 'mobile', 'technology'],
+    }, {
       name: 'tablet-alt',
-      cssClass: 'fas fa-tablet-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-tablet-alt',
+      searchTerms: ['device', 'mobile', 'technology'],
+    }, {
+      name: 'tablet-android',
+      cssClass: 'fa-solid fa-tablet-android',
+      searchTerms: ['tablet', 'android', 'device'],
+    }, {
+      name: 'tablet-button',
+      cssClass: 'fa-solid fa-tablet-button',
+      searchTerms: ['tablet', 'button', 'device'],
+    }, {
+      name: 'tablet-screen-button',
+      cssClass: 'fa-solid fa-tablet-screen-button',
+      searchTerms: ['tablet', 'screen', 'button'],
+    }, {
       name: 'tablets',
-      cssClass: 'fas fa-tablets',
-    },
-    {
+      cssClass: 'fa-solid fa-tablets',
+      searchTerms: ['medicine', 'health', 'pharmacy'],
+    }, {
+      name: 'tachograph-digital',
+      cssClass: 'fa-solid fa-tachograph-digital',
+      searchTerms: ['digital', 'tachograph', 'record'],
+    }, {
+      name: 'tachometer',
+      cssClass: 'fa-solid fa-tachometer',
+      searchTerms: ['tachometer', 'speed', 'measure'],
+    }, {
       name: 'tachometer-alt',
-      cssClass: 'fas fa-tachometer-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-tachometer-alt',
+      searchTerms: ['speed', 'measure', 'dashboard'],
+    }, {
+      name: 'tachometer-alt-average',
+      cssClass: 'fa-solid fa-tachometer-alt-average',
+      searchTerms: ['tachometer', 'average', 'speed'],
+    }, {
+      name: 'tachometer-alt-fast',
+      cssClass: 'fa-solid fa-tachometer-alt-fast',
+      searchTerms: ['tachometer', 'fast', 'speed'],
+    }, {
+      name: 'tachometer-average',
+      cssClass: 'fa-solid fa-tachometer-average',
+      searchTerms: ['tachometer', 'average', 'speed'],
+    }, {
+      name: 'tachometer-fast',
+      cssClass: 'fa-solid fa-tachometer-fast',
+      searchTerms: ['tachometer', 'fast', 'speed'],
+    }, {
       name: 'tag',
-      cssClass: 'fas fa-tag',
-    },
-    {
+      cssClass: 'fa-solid fa-tag',
+      searchTerms: ['label', 'price', 'mark'],
+    }, {
       name: 'tags',
-      cssClass: 'fas fa-tags',
-    },
-    {
+      cssClass: 'fa-solid fa-tags',
+      searchTerms: ['labels', 'price', 'mark'],
+    }, {
+      name: 'tanakh',
+      cssClass: 'fa-solid fa-tanakh',
+      searchTerms: ['tanakh', 'book', 'religion'],
+    }, {
       name: 'tape',
-      cssClass: 'fas fa-tape',
-    },
-    {
+      cssClass: 'fa-solid fa-tape',
+      searchTerms: ['adhesive', 'stick', 'fix'],
+    }, {
+      name: 'tarp',
+      cssClass: 'fa-solid fa-tarp',
+      searchTerms: ['tarp', 'cover', 'protection'],
+    }, {
+      name: 'tarp-droplet',
+      cssClass: 'fa-solid fa-tarp-droplet',
+      searchTerms: ['tarp', 'droplet', 'water'],
+    }, {
       name: 'tasks',
-      cssClass: 'fas fa-tasks',
-    },
-    {
+      cssClass: 'fa-solid fa-tasks',
+      searchTerms: ['to-do', 'list', 'manage'],
+    }, {
+      name: 'tasks-alt',
+      cssClass: 'fa-solid fa-tasks-alt',
+      searchTerms: ['tasks', 'alternative', 'list'],
+    }, {
       name: 'taxi',
-      cssClass: 'fas fa-taxi',
-    },
-    {
+      cssClass: 'fa-solid fa-taxi',
+      searchTerms: ['transport', 'vehicle', 'ride'],
+    }, {
       name: 'teeth',
-      cssClass: 'fas fa-teeth',
-    },
-    {
+      cssClass: 'fa-solid fa-teeth',
+      searchTerms: ['dentistry', 'health', 'care'],
+    }, {
       name: 'teeth-open',
-      cssClass: 'fas fa-teeth-open',
-    },
-    {
+      cssClass: 'fa-solid fa-teeth-open',
+      searchTerms: ['dentistry', 'health', 'care'],
+    }, {
+      name: 'teletype',
+      cssClass: 'fa-solid fa-teletype',
+      searchTerms: ['teletype', 'machine', 'communication'],
+    }, {
+      name: 'television',
+      cssClass: 'fa-solid fa-television',
+      searchTerms: ['television', 'screen', 'media'],
+    }, {
+      name: 'temperature-0',
+      cssClass: 'fa-solid fa-temperature-0',
+      searchTerms: ['temperature', 'zero', 'measure'],
+    }, {
+      name: 'temperature-1',
+      cssClass: 'fa-solid fa-temperature-1',
+      searchTerms: ['temperature', 'one', 'measure'],
+    }, {
+      name: 'temperature-2',
+      cssClass: 'fa-solid fa-temperature-2',
+      searchTerms: ['temperature', 'level', 'measure'],
+    }, {
+      name: 'temperature-3',
+      cssClass: 'fa-solid fa-temperature-3',
+      searchTerms: ['temperature', 'three', 'measure'],
+    }, {
+      name: 'temperature-4',
+      cssClass: 'fa-solid fa-temperature-4',
+      searchTerms: ['temperature', 'four', 'measure'],
+    }, {
+      name: 'temperature-arrow-down',
+      cssClass: 'fa-solid fa-temperature-arrow-down',
+      searchTerms: ['temperature', 'down', 'measure'],
+    }, {
+      name: 'temperature-arrow-up',
+      cssClass: 'fa-solid fa-temperature-arrow-up',
+      searchTerms: ['temperature', 'up', 'measure'],
+    }, {
+      name: 'temperature-down',
+      cssClass: 'fa-solid fa-temperature-down',
+      searchTerms: ['temperature', 'down', 'measure'],
+    }, {
+      name: 'temperature-empty',
+      cssClass: 'fa-solid fa-temperature-empty',
+      searchTerms: ['temperature', 'empty', 'measure'],
+    }, {
+      name: 'temperature-full',
+      cssClass: 'fa-solid fa-temperature-full',
+      searchTerms: ['temperature', 'full', 'measure'],
+    }, {
+      name: 'temperature-half',
+      cssClass: 'fa-solid fa-temperature-half',
+      searchTerms: ['temperature', 'half', 'measure'],
+    }, {
       name: 'temperature-high',
-      cssClass: 'fas fa-temperature-high',
-    },
-    {
+      cssClass: 'fa-solid fa-temperature-high',
+      searchTerms: ['weather', 'heat', 'high'],
+    }, {
       name: 'temperature-low',
-      cssClass: 'fas fa-temperature-low',
-    },
-    {
+      cssClass: 'fa-solid fa-temperature-low',
+      searchTerms: ['weather', 'cold', 'low'],
+    }, {
+      name: 'temperature-quarter',
+      cssClass: 'fa-solid fa-temperature-quarter',
+      searchTerms: ['temperature', 'quarter', 'measure'],
+    }, {
+      name: 'temperature-three-quarters',
+      cssClass: 'fa-solid fa-temperature-three-quarters',
+      searchTerms: ['temperature', 'three-quarters', 'measure'],
+    }, {
+      name: 'temperature-up',
+      cssClass: 'fa-solid fa-temperature-up',
+      searchTerms: ['temperature', 'up', 'measure'],
+    }, {
       name: 'tenge',
-      cssClass: 'fas fa-tenge',
-    },
-    {
+      cssClass: 'fa-solid fa-tenge',
+      searchTerms: ['currency', 'money', 'finance'],
+    }, {
+      name: 'tenge-sign',
+      cssClass: 'fa-solid fa-tenge-sign',
+      searchTerms: ['tenge', 'currency', 'kazakhstan'],
+    }, {
+      name: 'tent',
+      cssClass: 'fa-solid fa-tent',
+      searchTerms: ['tent', 'camping', 'outdoor'],
+    }, {
+      name: 'tent-arrow-down-to-line',
+      cssClass: 'fa-solid fa-tent-arrow-down-to-line',
+      searchTerms: ['tent', 'arrow', 'down'],
+    }, {
+      name: 'tent-arrow-left-right',
+      cssClass: 'fa-solid fa-tent-arrow-left-right',
+      searchTerms: ['tent', 'arrow', 'navigation'],
+    }, {
+      name: 'tent-arrow-turn-left',
+      cssClass: 'fa-solid fa-tent-arrow-turn-left',
+      searchTerms: ['tent', 'arrow', 'left'],
+    }, {
+      name: 'tent-arrows-down',
+      cssClass: 'fa-solid fa-tent-arrows-down',
+      searchTerms: ['tent', 'arrows', 'down'],
+    }, {
+      name: 'tents',
+      cssClass: 'fa-solid fa-tents',
+      searchTerms: ['tents', 'camping', 'outdoor'],
+    }, {
       name: 'terminal',
-      cssClass: 'fas fa-terminal',
-    },
-    {
+      cssClass: 'fa-solid fa-terminal',
+      searchTerms: ['command', 'console', 'interface'],
+    }, {
       name: 'text-height',
-      cssClass: 'fas fa-text-height',
-    },
-    {
+      cssClass: 'fa-solid fa-text-height',
+      searchTerms: ['font', 'size', 'text'],
+    }, {
+      name: 'text-slash',
+      cssClass: 'fa-solid fa-text-slash',
+      searchTerms: ['text', 'slash', 'remove'],
+    }, {
       name: 'text-width',
-      cssClass: 'fas fa-text-width',
-    },
-    {
+      cssClass: 'fa-solid fa-text-width',
+      searchTerms: ['font', 'size', 'text'],
+    }, {
       name: 'th',
-      cssClass: 'fas fa-th',
-    },
-    {
+      cssClass: 'fa-solid fa-th',
+      searchTerms: ['grid', 'layout', 'design'],
+    }, {
       name: 'th-large',
-      cssClass: 'fas fa-th-large',
-    },
-    {
+      cssClass: 'fa-solid fa-th-large',
+      searchTerms: ['grid', 'layout', 'design'],
+    }, {
       name: 'th-list',
-      cssClass: 'fas fa-th-list',
-    },
-    {
+      cssClass: 'fa-solid fa-th-list',
+      searchTerms: ['list', 'items', 'organization'],
+    }, {
       name: 'theater-masks',
-      cssClass: 'fas fa-theater-masks',
-    },
-    {
+      cssClass: 'fa-solid fa-theater-masks',
+      searchTerms: ['drama', 'performance', 'art'],
+    }, {
       name: 'thermometer',
-      cssClass: 'fas fa-thermometer',
-    },
-    {
+      cssClass: 'fa-solid fa-thermometer',
+      searchTerms: ['temperature', 'measure', 'heat'],
+    }, {
+      name: 'thermometer-0',
+      cssClass: 'fa-solid fa-thermometer-0',
+      searchTerms: ['thermometer', 'zero', 'measure'],
+    }, {
+      name: 'thermometer-1',
+      cssClass: 'fa-solid fa-thermometer-1',
+      searchTerms: ['thermometer', 'one', 'measure'],
+    }, {
+      name: 'thermometer-2',
+      cssClass: 'fa-solid fa-thermometer-2',
+      searchTerms: ['thermometer', 'temperature', 'measure'],
+    }, {
+      name: 'thermometer-3',
+      cssClass: 'fa-solid fa-thermometer-3',
+      searchTerms: ['thermometer', 'three', 'measure'],
+    }, {
+      name: 'thermometer-4',
+      cssClass: 'fa-solid fa-thermometer-4',
+      searchTerms: ['thermometer', 'four', 'measure'],
+    }, {
       name: 'thermometer-empty',
-      cssClass: 'fas fa-thermometer-empty',
-    },
-    {
+      cssClass: 'fa-solid fa-thermometer-empty',
+      searchTerms: ['temperature', 'low', 'measure'],
+    }, {
       name: 'thermometer-full',
-      cssClass: 'fas fa-thermometer-full',
-    },
-    {
+      cssClass: 'fa-solid fa-thermometer-full',
+      searchTerms: ['temperature', 'high', 'measure'],
+    }, {
       name: 'thermometer-half',
-      cssClass: 'fas fa-thermometer-half',
-    },
-    {
+      cssClass: 'fa-solid fa-thermometer-half',
+      searchTerms: ['temperature', 'medium', 'measure'],
+    }, {
       name: 'thermometer-quarter',
-      cssClass: 'fas fa-thermometer-quarter',
-    },
-    {
+      cssClass: 'fa-solid fa-thermometer-quarter',
+      searchTerms: ['temperature', 'low', 'measure'],
+    }, {
       name: 'thermometer-three-quarters',
-      cssClass: 'fas fa-thermometer-three-quarters',
-    },
-    {
+      cssClass: 'fa-solid fa-thermometer-three-quarters',
+      searchTerms: ['temperature', 'high', 'measure'],
+    }, {
+      name: 'thumb-tack',
+      cssClass: 'fa-solid fa-thumb-tack',
+      searchTerms: ['thumb', 'tack', 'pin'],
+    }, {
+      name: 'thumb-tack-slash',
+      cssClass: 'fa-solid fa-thumb-tack-slash',
+      searchTerms: ['thumb', 'tack', 'pin'],
+    }, {
       name: 'thumbs-down',
-      cssClass: 'fas fa-thumbs-down',
-    },
-    {
+      cssClass: 'fa-solid fa-thumbs-down',
+      searchTerms: ['dislike', 'negative', 'reaction'],
+    }, {
       name: 'thumbs-up',
-      cssClass: 'fas fa-thumbs-up',
-    },
-    {
+      cssClass: 'fa-solid fa-thumbs-up',
+      searchTerms: ['like', 'positive', 'reaction'],
+    }, {
       name: 'thumbtack',
-      cssClass: 'fas fa-thumbtack',
-    },
-    {
+      cssClass: 'fa-solid fa-thumbtack',
+      searchTerms: ['pin', 'attach', 'mark'],
+    }, {
+      name: 'thumbtack-slash',
+      cssClass: 'fa-solid fa-thumbtack-slash',
+      searchTerms: ['thumbtack', 'slash', 'pin'],
+    }, {
+      name: 'thunderstorm',
+      cssClass: 'fa-solid fa-thunderstorm',
+      searchTerms: ['thunderstorm', 'storm', 'weather'],
+    }, {
+      name: 'ticket',
+      cssClass: 'fa-solid fa-ticket',
+      searchTerms: ['ticket', 'entry', 'admission'],
+    }, {
       name: 'ticket-alt',
-      cssClass: 'fas fa-ticket-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-ticket-alt',
+      searchTerms: ['event', 'entry', 'pass'],
+    }, {
+      name: 'ticket-simple',
+      cssClass: 'fa-solid fa-ticket-simple',
+      searchTerms: ['ticket', 'simple', 'entry'],
+    }, {
+      name: 'timeline',
+      cssClass: 'fa-solid fa-timeline',
+      searchTerms: ['timeline', 'history', 'events'],
+    }, {
       name: 'times',
-      cssClass: 'fas fa-times',
-    },
-    {
+      cssClass: 'fa-solid fa-times',
+      searchTerms: ['close', 'remove', 'cancel'],
+    }, {
       name: 'times-circle',
-      cssClass: 'fas fa-times-circle',
-    },
-    {
+      cssClass: 'fa-solid fa-times-circle',
+      searchTerms: ['close', 'remove', 'cancel'],
+    }, {
+      name: 'times-rectangle',
+      cssClass: 'fa-solid fa-times-rectangle',
+      searchTerms: ['times', 'rectangle', 'remove'],
+    }, {
+      name: 'times-square',
+      cssClass: 'fa-solid fa-times-square',
+      searchTerms: ['times', 'square', 'location'],
+    }, {
       name: 'tint',
-      cssClass: 'fas fa-tint',
-    },
-    {
+      cssClass: 'fa-solid fa-tint',
+      searchTerms: ['water', 'color', 'paint'],
+    }, {
       name: 'tint-slash',
-      cssClass: 'fas fa-tint-slash',
-    },
-    {
+      cssClass: 'fa-solid fa-tint-slash',
+      searchTerms: ['block', 'water', 'prohibition'],
+    }, {
       name: 'tired',
-      cssClass: 'fas fa-tired',
-    },
-    {
+      cssClass: 'fa-solid fa-tired',
+      searchTerms: ['emotion', 'fatigue', 'face'],
+    }, {
       name: 'toggle-off',
-      cssClass: 'fas fa-toggle-off',
-    },
-    {
+      cssClass: 'fa-solid fa-toggle-off',
+      searchTerms: ['switch', 'off', 'inactive'],
+    }, {
       name: 'toggle-on',
-      cssClass: 'fas fa-toggle-on',
-    },
-    {
+      cssClass: 'fa-solid fa-toggle-on',
+      searchTerms: ['switch', 'on', 'active'],
+    }, {
       name: 'toilet',
-      cssClass: 'fas fa-toilet',
-    },
-    {
+      cssClass: 'fa-solid fa-toilet',
+      searchTerms: ['bathroom', 'restroom', 'facility'],
+    }, {
       name: 'toilet-paper',
-      cssClass: 'fas fa-toilet-paper',
-    },
-    {
+      cssClass: 'fa-solid fa-toilet-paper',
+      searchTerms: ['bathroom', 'hygiene', 'clean'],
+    }, {
+      name: 'toilet-paper-slash',
+      cssClass: 'fa-solid fa-toilet-paper-slash',
+      searchTerms: ['toilet', 'paper', 'remove'],
+    }, {
+      name: 'toilet-portable',
+      cssClass: 'fa-solid fa-toilet-portable',
+      searchTerms: ['portable', 'toilet', 'restroom'],
+    }, {
+      name: 'toilets-portable',
+      cssClass: 'fa-solid fa-toilets-portable',
+      searchTerms: ['portable', 'toilets', 'restroom'],
+    }, {
       name: 'toolbox',
-      cssClass: 'fas fa-toolbox',
-    },
-    {
+      cssClass: 'fa-solid fa-toolbox',
+      searchTerms: ['tools', 'repair', 'kit'],
+    }, {
       name: 'tools',
-      cssClass: 'fas fa-tools',
-    },
-    {
+      cssClass: 'fa-solid fa-tools',
+      searchTerms: ['tools', 'repair', 'fix'],
+    }, {
       name: 'tooth',
-      cssClass: 'fas fa-tooth',
-    },
-    {
+      cssClass: 'fa-solid fa-tooth',
+      searchTerms: ['dentistry', 'health', 'care'],
+    }, {
       name: 'torah',
-      cssClass: 'fas fa-torah',
-    },
-    {
+      cssClass: 'fa-solid fa-torah',
+      searchTerms: ['religion', 'jewish', 'scripture'],
+    }, {
       name: 'torii-gate',
-      cssClass: 'fas fa-torii-gate',
-    },
-    {
+      cssClass: 'fa-solid fa-torii-gate',
+      searchTerms: ['japanese', 'architecture', 'culture'],
+    }, {
+      name: 'tornado',
+      cssClass: 'fa-solid fa-tornado',
+      searchTerms: ['tornado', 'storm', 'weather'],
+    }, {
+      name: 'tower-broadcast',
+      cssClass: 'fa-solid fa-tower-broadcast',
+      searchTerms: ['tower', 'broadcast', 'signal'],
+    }, {
+      name: 'tower-cell',
+      cssClass: 'fa-solid fa-tower-cell',
+      searchTerms: ['tower', 'cell', 'communication'],
+    }, {
+      name: 'tower-observation',
+      cssClass: 'fa-solid fa-tower-observation',
+      searchTerms: ['tower', 'observation', 'view'],
+    }, {
       name: 'tractor',
-      cssClass: 'fas fa-tractor',
-    },
-    {
+      cssClass: 'fa-solid fa-tractor',
+      searchTerms: ['farming', 'agriculture', 'vehicle'],
+    }, {
       name: 'trademark',
-      cssClass: 'fas fa-trademark',
-    },
-    {
+      cssClass: 'fa-solid fa-trademark',
+      searchTerms: ['legal', 'symbol', 'brand'],
+    }, {
       name: 'traffic-light',
-      cssClass: 'fas fa-traffic-light',
-    },
-    {
+      cssClass: 'fa-solid fa-traffic-light',
+      searchTerms: ['signal', 'road', 'traffic'],
+    }, {
+      name: 'trailer',
+      cssClass: 'fa-solid fa-trailer',
+      searchTerms: ['trailer', 'transport', 'vehicle'],
+    }, {
       name: 'train',
-      cssClass: 'fas fa-train',
-    },
-    {
+      cssClass: 'fa-solid fa-train',
+      searchTerms: ['transport', 'vehicle', 'rail'],
+    }, {
+      name: 'train-subway',
+      cssClass: 'fa-solid fa-train-subway',
+      searchTerms: ['train', 'subway', 'transport'],
+    }, {
+      name: 'train-tram',
+      cssClass: 'fa-solid fa-train-tram',
+      searchTerms: ['train', 'tram', 'transport'],
+    }, {
       name: 'tram',
-      cssClass: 'fas fa-tram',
-    },
-    {
+      cssClass: 'fa-solid fa-tram',
+      searchTerms: ['transport', 'vehicle', 'light rail'],
+    }, {
       name: 'transgender',
-      cssClass: 'fas fa-transgender',
-    },
-    {
+      cssClass: 'fa-solid fa-transgender',
+      searchTerms: ['gender', 'identity', 'symbol'],
+    }, {
       name: 'transgender-alt',
-      cssClass: 'fas fa-transgender-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-transgender-alt',
+      searchTerms: ['gender', 'identity', 'symbol'],
+    }, {
       name: 'trash',
-      cssClass: 'fas fa-trash',
-    },
-    {
+      cssClass: 'fa-solid fa-trash',
+      searchTerms: ['delete', 'remove', 'waste'],
+    }, {
       name: 'trash-alt',
-      cssClass: 'fas fa-trash-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-trash-alt',
+      searchTerms: ['delete', 'remove', 'waste'],
+    }, {
+      name: 'trash-arrow-up',
+      cssClass: 'fa-solid fa-trash-arrow-up',
+      searchTerms: ['trash', 'arrow', 'upload'],
+    }, {
+      name: 'trash-can',
+      cssClass: 'fa-solid fa-trash-can',
+      searchTerms: ['delete', 'remove', 'bin'],
+    }, {
+      name: 'trash-can-arrow-up',
+      cssClass: 'fa-solid fa-trash-can-arrow-up',
+      searchTerms: ['trash', 'can', 'arrow'],
+    }, {
       name: 'trash-restore',
-      cssClass: 'fas fa-trash-restore',
-    },
-    {
+      cssClass: 'fa-solid fa-trash-restore',
+      searchTerms: ['recover', 'restore', 'delete'],
+    }, {
       name: 'trash-restore-alt',
-      cssClass: 'fas fa-trash-restore-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-trash-restore-alt',
+      searchTerms: ['recover', 'restore', 'delete'],
+    }, {
       name: 'tree',
-      cssClass: 'fas fa-tree',
-    },
-    {
+      cssClass: 'fa-solid fa-tree',
+      searchTerms: ['nature', 'plant', 'environment'],
+    }, {
+      name: 'tree-city',
+      cssClass: 'fa-solid fa-tree-city',
+      searchTerms: ['tree', 'city', 'urban'],
+    }, {
+      name: 'triangle-circle-square',
+      cssClass: 'fa-solid fa-triangle-circle-square',
+      searchTerms: ['triangle', 'circle', 'square'],
+    }, {
+      name: 'triangle-exclamation',
+      cssClass: 'fa-solid fa-triangle-exclamation',
+      searchTerms: ['triangle', 'exclamation', 'alert'],
+    }, {
       name: 'trophy',
-      cssClass: 'fas fa-trophy',
-    },
-    {
+      cssClass: 'fa-solid fa-trophy',
+      searchTerms: ['award', 'achievement', 'victory'],
+    }, {
+      name: 'trowel',
+      cssClass: 'fa-solid fa-trowel',
+      searchTerms: ['trowel', 'tool', 'construction'],
+    }, {
+      name: 'trowel-bricks',
+      cssClass: 'fa-solid fa-trowel-bricks',
+      searchTerms: ['trowel', 'bricks', 'construction'],
+    }, {
       name: 'truck',
-      cssClass: 'fas fa-truck',
-    },
-    {
+      cssClass: 'fa-solid fa-truck',
+      searchTerms: ['transport', 'vehicle', 'delivery'],
+    }, {
+      name: 'truck-arrow-right',
+      cssClass: 'fa-solid fa-truck-arrow-right',
+      searchTerms: ['truck', 'arrow', 'right'],
+    }, {
+      name: 'truck-droplet',
+      cssClass: 'fa-solid fa-truck-droplet',
+      searchTerms: ['truck', 'droplet', 'water'],
+    }, {
+      name: 'truck-fast',
+      cssClass: 'fa-solid fa-truck-fast',
+      searchTerms: ['truck', 'fast', 'transport'],
+    }, {
+      name: 'truck-field',
+      cssClass: 'fa-solid fa-truck-field',
+      searchTerms: ['truck', 'field', 'transport'],
+    }, {
+      name: 'truck-field-un',
+      cssClass: 'fa-solid fa-truck-field-un',
+      searchTerms: ['truck', 'field', 'un'],
+    }, {
+      name: 'truck-front',
+      cssClass: 'fa-solid fa-truck-front',
+      searchTerms: ['truck', 'front', 'vehicle'],
+    }, {
       name: 'truck-loading',
-      cssClass: 'fas fa-truck-loading',
-    },
-    {
+      cssClass: 'fa-solid fa-truck-loading',
+      searchTerms: ['transport', 'loading', 'delivery'],
+    }, {
+      name: 'truck-medical',
+      cssClass: 'fa-solid fa-truck-medical',
+      searchTerms: ['medical', 'truck', 'emergency'],
+    }, {
       name: 'truck-monster',
-      cssClass: 'fas fa-truck-monster',
-    },
-    {
+      cssClass: 'fa-solid fa-truck-monster',
+      searchTerms: ['vehicle', 'off-road', 'truck'],
+    }, {
       name: 'truck-moving',
-      cssClass: 'fas fa-truck-moving',
-    },
-    {
+      cssClass: 'fa-solid fa-truck-moving',
+      searchTerms: ['transport', 'delivery', 'moving'],
+    }, {
       name: 'truck-pickup',
-      cssClass: 'fas fa-truck-pickup',
-    },
-    {
+      cssClass: 'fa-solid fa-truck-pickup',
+      searchTerms: ['transport', 'vehicle', 'pickup'],
+    }, {
+      name: 'truck-plane',
+      cssClass: 'fa-solid fa-truck-plane',
+      searchTerms: ['transport', 'vehicle', 'cargo'],
+    }, {
+      name: 'truck-ramp-box',
+      cssClass: 'fa-solid fa-truck-ramp-box',
+      searchTerms: ['truck', 'ramp', 'box'],
+    }, {
+      name: 'try',
+      cssClass: 'fa-solid fa-try',
+      searchTerms: ['try', 'currency', 'turkey'],
+    }, {
       name: 'tshirt',
-      cssClass: 'fas fa-tshirt',
-    },
-    {
+      cssClass: 'fa-solid fa-tshirt',
+      searchTerms: ['clothing', 'fashion', 'wear'],
+    }, {
       name: 'tty',
-      cssClass: 'fas fa-tty',
-    },
-    {
+      cssClass: 'fa-solid fa-tty',
+      searchTerms: ['communication', 'device', 'text'],
+    }, {
+      name: 'turkish-lira',
+      cssClass: 'fa-solid fa-turkish-lira',
+      searchTerms: ['lira', 'currency', 'turkey'],
+    }, {
+      name: 'turkish-lira-sign',
+      cssClass: 'fa-solid fa-turkish-lira-sign',
+      searchTerms: ['lira', 'currency', 'turkey'],
+    }, {
+      name: 'turn-down',
+      cssClass: 'fa-solid fa-turn-down',
+      searchTerms: ['turn', 'down', 'reverse'],
+    }, {
+      name: 'turn-up',
+      cssClass: 'fa-solid fa-turn-up',
+      searchTerms: ['turn', 'up', 'increase'],
+    }, {
       name: 'tv',
-      cssClass: 'fas fa-tv',
-    },
-    {
+      cssClass: 'fa-solid fa-tv',
+      searchTerms: ['screen', 'media', 'entertainment'],
+    }, {
+      name: 'tv-alt',
+      cssClass: 'fa-solid fa-tv-alt',
+      searchTerms: ['tv', 'alternative', 'screen'],
+    }, {
+      name: 'u',
+      cssClass: 'fa-solid fa-u',
+      searchTerms: ['letter', 'U', 'initial'],
+    }, {
       name: 'umbrella',
-      cssClass: 'fas fa-umbrella',
-    },
-    {
+      cssClass: 'fa-solid fa-umbrella',
+      searchTerms: ['protection', 'weather', 'rain'],
+    }, {
       name: 'umbrella-beach',
-      cssClass: 'fas fa-umbrella-beach',
-    },
-    {
+      cssClass: 'fa-solid fa-umbrella-beach',
+      searchTerms: ['vacation', 'sun', 'beach'],
+    }, {
       name: 'underline',
-      cssClass: 'fas fa-underline',
-    },
-    {
+      cssClass: 'fa-solid fa-underline',
+      searchTerms: ['text', 'format', 'style'],
+    }, {
       name: 'undo',
-      cssClass: 'fas fa-undo',
-    },
-    {
+      cssClass: 'fa-solid fa-undo',
+      searchTerms: ['reverse', 'action', 'return'],
+    }, {
       name: 'undo-alt',
-      cssClass: 'fas fa-undo-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-undo-alt',
+      searchTerms: ['reverse', 'action', 'return'],
+    }, {
       name: 'universal-access',
-      cssClass: 'fas fa-universal-access',
-    },
-    {
+      cssClass: 'fa-solid fa-universal-access',
+      searchTerms: ['accessibility', 'inclusion', 'help'],
+    }, {
       name: 'university',
-      cssClass: 'fas fa-university',
-    },
-    {
+      cssClass: 'fa-solid fa-university',
+      searchTerms: ['education', 'institution', 'school'],
+    }, {
       name: 'unlink',
-      cssClass: 'fas fa-unlink',
-    },
-    {
+      cssClass: 'fa-solid fa-unlink',
+      searchTerms: ['remove', 'disconnect', 'detach'],
+    }, {
       name: 'unlock',
-      cssClass: 'fas fa-unlock',
-    },
-    {
+      cssClass: 'fa-solid fa-unlock',
+      searchTerms: ['access', 'open', 'security'],
+    }, {
       name: 'unlock-alt',
-      cssClass: 'fas fa-unlock-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-unlock-alt',
+      searchTerms: ['access', 'open', 'security'],
+    }, {
+      name: 'unlock-keyhole',
+      cssClass: 'fa-solid fa-unlock-keyhole',
+      searchTerms: ['unlock', 'keyhole', 'access'],
+    }, {
+      name: 'unsorted',
+      cssClass: 'fa-solid fa-unsorted',
+      searchTerms: ['unsorted', 'list', 'order'],
+    }, {
+      name: 'up-down',
+      cssClass: 'fa-solid fa-up-down',
+      searchTerms: ['up', 'down', 'direction'],
+    }, {
+      name: 'up-down-left-right',
+      cssClass: 'fa-solid fa-up-down-left-right',
+      searchTerms: ['up', 'down', 'left', 'right'],
+    }, {
+      name: 'up-long',
+      cssClass: 'fa-solid fa-up-long',
+      searchTerms: ['up', 'long', 'direction'],
+    }, {
+      name: 'up-right-and-down-left-from-center',
+      cssClass: 'fa-solid fa-up-right-and-down-left-from-center',
+      searchTerms: ['up', 'down', 'left', 'right'],
+    }, {
+      name: 'up-right-from-square',
+      cssClass: 'fa-solid fa-up-right-from-square',
+      searchTerms: ['up', 'right', 'square'],
+    }, {
       name: 'upload',
-      cssClass: 'fas fa-upload',
-    },
-    {
+      cssClass: 'fa-solid fa-upload',
+      searchTerms: ['send', 'transfer', 'data'],
+    }, {
+      name: 'usd',
+      cssClass: 'fa-solid fa-usd',
+      searchTerms: ['usd', 'currency', 'dollar'],
+    }, {
       name: 'user',
-      cssClass: 'fas fa-user',
-    },
-    {
+      cssClass: 'fa-solid fa-user',
+      searchTerms: ['person', 'individual', 'profile'],
+    }, {
       name: 'user-alt',
-      cssClass: 'fas fa-user-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-user-alt',
+      searchTerms: ['person', 'individual', 'profile'],
+    }, {
       name: 'user-alt-slash',
-      cssClass: 'fas fa-user-alt-slash',
-    },
-    {
+      cssClass: 'fa-solid fa-user-alt-slash',
+      searchTerms: ['block', 'profile', 'user'],
+    }, {
       name: 'user-astronaut',
-      cssClass: 'fas fa-user-astronaut',
-    },
-    {
+      cssClass: 'fa-solid fa-user-astronaut',
+      searchTerms: ['space', 'person', 'explorer'],
+    }, {
       name: 'user-check',
-      cssClass: 'fas fa-user-check',
-    },
-    {
+      cssClass: 'fa-solid fa-user-check',
+      searchTerms: ['confirm', 'approve', 'user'],
+    }, {
       name: 'user-circle',
-      cssClass: 'fas fa-user-circle',
-    },
-    {
+      cssClass: 'fa-solid fa-user-circle',
+      searchTerms: ['profile', 'account', 'user'],
+    }, {
       name: 'user-clock',
-      cssClass: 'fas fa-user-clock',
-    },
-    {
+      cssClass: 'fa-solid fa-user-clock',
+      searchTerms: ['time', 'schedule', 'user'],
+    }, {
       name: 'user-cog',
-      cssClass: 'fas fa-user-cog',
-    },
-    {
+      cssClass: 'fa-solid fa-user-cog',
+      searchTerms: ['settings', 'profile', 'user'],
+    }, {
+      name: 'user-doctor',
+      cssClass: 'fa-solid fa-user-doctor',
+      searchTerms: ['doctor', 'user', 'health'],
+    }, {
       name: 'user-edit',
-      cssClass: 'fas fa-user-edit',
-    },
-    {
+      cssClass: 'fa-solid fa-user-edit',
+      searchTerms: ['modify', 'profile', 'user'],
+    }, {
       name: 'user-friends',
-      cssClass: 'fas fa-user-friends',
-    },
-    {
+      cssClass: 'fa-solid fa-user-friends',
+      searchTerms: ['social', 'connections', 'friends'],
+    }, {
+      name: 'user-gear',
+      cssClass: 'fa-solid fa-user-gear',
+      searchTerms: ['user', 'gear', 'settings'],
+    }, {
       name: 'user-graduate',
-      cssClass: 'fas fa-user-graduate',
-    },
-    {
+      cssClass: 'fa-solid fa-user-graduate',
+      searchTerms: ['education', 'student', 'graduate'],
+    }, {
+      name: 'user-group',
+      cssClass: 'fa-solid fa-user-group',
+      searchTerms: ['user', 'group', 'community'],
+    }, {
       name: 'user-injured',
-      cssClass: 'fas fa-user-injured',
-    },
-    {
+      cssClass: 'fa-solid fa-user-injured',
+      searchTerms: ['health', 'care', 'injury'],
+    }, {
+      name: 'user-large',
+      cssClass: 'fa-solid fa-user-large',
+      searchTerms: ['user', 'large', 'profile'],
+    }, {
+      name: 'user-large-slash',
+      cssClass: 'fa-solid fa-user-large-slash',
+      searchTerms: ['user', 'large', 'remove'],
+    }, {
       name: 'user-lock',
-      cssClass: 'fas fa-user-lock',
-    },
-    {
+      cssClass: 'fa-solid fa-user-lock',
+      searchTerms: ['security', 'profile', 'user'],
+    }, {
       name: 'user-md',
-      cssClass: 'fas fa-user-md',
-    },
-    {
+      cssClass: 'fa-solid fa-user-md',
+      searchTerms: ['doctor', 'health', 'medical'],
+    }, {
       name: 'user-minus',
-      cssClass: 'fas fa-user-minus',
-    },
-    {
+      cssClass: 'fa-solid fa-user-minus',
+      searchTerms: ['remove', 'profile', 'user'],
+    }, {
       name: 'user-ninja',
-      cssClass: 'fas fa-user-ninja',
-    },
-    {
+      cssClass: 'fa-solid fa-user-ninja',
+      searchTerms: ['stealth', 'character', 'role'],
+    }, {
       name: 'user-nurse',
-      cssClass: 'fas fa-user-nurse',
-    },
-    {
+      cssClass: 'fa-solid fa-user-nurse',
+      searchTerms: ['health', 'care', 'nurse'],
+    }, {
+      name: 'user-pen',
+      cssClass: 'fa-solid fa-user-pen',
+      searchTerms: ['user', 'edit', 'profile'],
+    }, {
       name: 'user-plus',
-      cssClass: 'fas fa-user-plus',
-    },
-    {
+      cssClass: 'fa-solid fa-user-plus',
+      searchTerms: ['add', 'profile', 'user'],
+    }, {
       name: 'user-secret',
-      cssClass: 'fas fa-user-secret',
-    },
-    {
+      cssClass: 'fa-solid fa-user-secret',
+      searchTerms: ['identity', 'profile', 'secret'],
+    }, {
       name: 'user-shield',
-      cssClass: 'fas fa-user-shield',
-    },
-    {
+      cssClass: 'fa-solid fa-user-shield',
+      searchTerms: ['security', 'profile', 'user'],
+    }, {
       name: 'user-slash',
-      cssClass: 'fas fa-user-slash',
-    },
-    {
+      cssClass: 'fa-solid fa-user-slash',
+      searchTerms: ['block', 'profile', 'user'],
+    }, {
       name: 'user-tag',
-      cssClass: 'fas fa-user-tag',
-    },
-    {
+      cssClass: 'fa-solid fa-user-tag',
+      searchTerms: ['label', 'profile', 'user'],
+    }, {
       name: 'user-tie',
-      cssClass: 'fas fa-user-tie',
-    },
-    {
+      cssClass: 'fa-solid fa-user-tie',
+      searchTerms: ['business', 'profile', 'professional'],
+    }, {
       name: 'user-times',
-      cssClass: 'fas fa-user-times',
-    },
-    {
+      cssClass: 'fa-solid fa-user-times',
+      searchTerms: ['remove', 'profile', 'user'],
+    }, {
+      name: 'user-xmark',
+      cssClass: 'fa-solid fa-user-xmark',
+      searchTerms: ['remove', 'user', 'block'],
+    }, {
       name: 'users',
-      cssClass: 'fas fa-users',
-    },
-    {
+      cssClass: 'fa-solid fa-users',
+      searchTerms: ['group', 'community', 'people'],
+    }, {
+      name: 'users-between-lines',
+      cssClass: 'fa-solid fa-users-between-lines',
+      searchTerms: ['users', 'lines', 'connect'],
+    }, {
       name: 'users-cog',
-      cssClass: 'fas fa-users-cog',
-    },
-    {
+      cssClass: 'fa-solid fa-users-cog',
+      searchTerms: ['settings', 'group', 'community'],
+    }, {
+      name: 'users-gear',
+      cssClass: 'fa-solid fa-users-gear',
+      searchTerms: ['users', 'gear', 'settings'],
+    }, {
+      name: 'users-line',
+      cssClass: 'fa-solid fa-users-line',
+      searchTerms: ['users', 'line', 'community'],
+    }, {
+      name: 'users-rays',
+      cssClass: 'fa-solid fa-users-rays',
+      searchTerms: ['users', 'rays', 'community'],
+    }, {
+      name: 'users-rectangle',
+      cssClass: 'fa-solid fa-users-rectangle',
+      searchTerms: ['group', 'users', 'community'],
+    }, {
+      name: 'users-slash',
+      cssClass: 'fa-solid fa-users-slash',
+      searchTerms: ['users', 'block', 'remove'],
+    }, {
+      name: 'users-viewfinder',
+      cssClass: 'fa-solid fa-users-viewfinder',
+      searchTerms: ['users', 'viewfinder', 'camera'],
+    }, {
       name: 'utensil-spoon',
-      cssClass: 'fas fa-utensil-spoon',
-    },
-    {
+      cssClass: 'fa-solid fa-utensil-spoon',
+      searchTerms: ['cutlery', 'dining', 'food'],
+    }, {
       name: 'utensils',
-      cssClass: 'fas fa-utensils',
-    },
-    {
+      cssClass: 'fa-solid fa-utensils',
+      searchTerms: ['cutlery', 'dining', 'food'],
+    }, {
+      name: 'v',
+      cssClass: 'fa-solid fa-v',
+      searchTerms: ['letter', 'V', 'initial'],
+    }, {
+      name: 'van-shuttle',
+      cssClass: 'fa-solid fa-van-shuttle',
+      searchTerms: ['van', 'shuttle', 'transport'],
+    }, {
+      name: 'vault',
+      cssClass: 'fa-solid fa-vault',
+      searchTerms: ['vault', 'secure', 'storage'],
+    }, {
+      name: 'vcard',
+      cssClass: 'fa-solid fa-vcard',
+      searchTerms: ['vcard', 'contact', 'information'],
+    }, {
       name: 'vector-square',
-      cssClass: 'fas fa-vector-square',
-    },
-    {
+      cssClass: 'fa-solid fa-vector-square',
+      searchTerms: ['shape', 'design', 'vector'],
+    }, {
       name: 'venus',
-      cssClass: 'fas fa-venus',
-    },
-    {
+      cssClass: 'fa-solid fa-venus',
+      searchTerms: ['gender', 'female', 'symbol'],
+    }, {
       name: 'venus-double',
-      cssClass: 'fas fa-venus-double',
-    },
-    {
+      cssClass: 'fa-solid fa-venus-double',
+      searchTerms: ['gender', 'female', 'symbol'],
+    }, {
       name: 'venus-mars',
-      cssClass: 'fas fa-venus-mars',
-    },
-    {
+      cssClass: 'fa-solid fa-venus-mars',
+      searchTerms: ['gender', 'neutral', 'symbol'],
+    }, {
+      name: 'vest',
+      cssClass: 'fa-solid fa-vest',
+      searchTerms: ['vest', 'clothing', 'wear'],
+    }, {
+      name: 'vest-patches',
+      cssClass: 'fa-solid fa-vest-patches',
+      searchTerms: ['vest', 'patches', 'clothing'],
+    }, {
       name: 'vial',
-      cssClass: 'fas fa-vial',
-    },
-    {
+      cssClass: 'fa-solid fa-vial',
+      searchTerms: ['test', 'sample', 'science'],
+    }, {
+      name: 'vial-circle-check',
+      cssClass: 'fa-solid fa-vial-circle-check',
+      searchTerms: ['vial', 'check', 'verified'],
+    }, {
+      name: 'vial-virus',
+      cssClass: 'fa-solid fa-vial-virus',
+      searchTerms: ['virus', 'vial', 'sample'],
+    }, {
       name: 'vials',
-      cssClass: 'fas fa-vials',
-    },
-    {
+      cssClass: 'fa-solid fa-vials',
+      searchTerms: ['test', 'samples', 'science'],
+    }, {
       name: 'video',
-      cssClass: 'fas fa-video',
-    },
-    {
+      cssClass: 'fa-solid fa-video',
+      searchTerms: ['media', 'film', 'record'],
+    }, {
+      name: 'video-camera',
+      cssClass: 'fa-solid fa-video-camera',
+      searchTerms: ['video', 'camera', 'record'],
+    }, {
       name: 'video-slash',
-      cssClass: 'fas fa-video-slash',
-    },
-    {
+      cssClass: 'fa-solid fa-video-slash',
+      searchTerms: ['mute', 'block', 'video'],
+    }, {
       name: 'vihara',
-      cssClass: 'fas fa-vihara',
-    },
-    {
+      cssClass: 'fa-solid fa-vihara',
+      searchTerms: ['religion', 'place', 'worship'],
+    }, {
+      name: 'virus',
+      cssClass: 'fa-solid fa-virus',
+      searchTerms: ['virus', 'germs', 'infection'],
+    }, {
+      name: 'virus-covid',
+      cssClass: 'fa-solid fa-virus-covid',
+      searchTerms: ['covid', 'virus', 'pandemic'],
+    }, {
+      name: 'virus-covid-slash',
+      cssClass: 'fa-solid fa-virus-covid-slash',
+      searchTerms: ['virus', 'covid', 'slash'],
+    }, {
+      name: 'virus-slash',
+      cssClass: 'fa-solid fa-virus-slash',
+      searchTerms: ['virus', 'slash', 'remove'],
+    }, {
+      name: 'viruses',
+      cssClass: 'fa-solid fa-viruses',
+      searchTerms: ['viruses', 'germs', 'infection'],
+    }, {
+      name: 'voicemail',
+      cssClass: 'fa-solid fa-voicemail',
+      searchTerms: ['voicemail', 'message', 'communication'],
+    }, {
+      name: 'volcano',
+      cssClass: 'fa-solid fa-volcano',
+      searchTerms: ['volcano', 'erupt', 'mountain'],
+    }, {
+      name: 'volleyball',
+      cssClass: 'fa-solid fa-volleyball',
+      searchTerms: ['volleyball', 'sport', 'game'],
+    }, {
       name: 'volleyball-ball',
-      cssClass: 'fas fa-volleyball-ball',
-    },
-    {
+      cssClass: 'fa-solid fa-volleyball-ball',
+      searchTerms: ['sport', 'game', 'volleyball'],
+    }, {
+      name: 'volume-control-phone',
+      cssClass: 'fa-solid fa-volume-control-phone',
+      searchTerms: ['volume', 'control', 'phone'],
+    }, {
       name: 'volume-down',
-      cssClass: 'fas fa-volume-down',
-    },
-    {
+      cssClass: 'fa-solid fa-volume-down',
+      searchTerms: ['sound', 'audio', 'lower'],
+    }, {
+      name: 'volume-high',
+      cssClass: 'fa-solid fa-volume-high',
+      searchTerms: ['volume', 'high', 'sound'],
+    }, {
+      name: 'volume-low',
+      cssClass: 'fa-solid fa-volume-low',
+      searchTerms: ['volume', 'low', 'sound'],
+    }, {
       name: 'volume-mute',
-      cssClass: 'fas fa-volume-mute',
-    },
-    {
+      cssClass: 'fa-solid fa-volume-mute',
+      searchTerms: ['silent', 'audio', 'sound'],
+    }, {
       name: 'volume-off',
-      cssClass: 'fas fa-volume-off',
-    },
-    {
+      cssClass: 'fa-solid fa-volume-off',
+      searchTerms: ['silent', 'audio', 'sound'],
+    }, {
+      name: 'volume-times',
+      cssClass: 'fa-solid fa-volume-times',
+      searchTerms: ['volume', 'mute', 'sound'],
+    }, {
       name: 'volume-up',
-      cssClass: 'fas fa-volume-up',
-    },
-    {
+      cssClass: 'fa-solid fa-volume-up',
+      searchTerms: ['sound', 'audio', 'increase'],
+    }, {
+      name: 'volume-xmark',
+      cssClass: 'fa-solid fa-volume-xmark',
+      searchTerms: ['volume', 'remove', 'sound'],
+    }, {
       name: 'vote-yea',
-      cssClass: 'fas fa-vote-yea',
-    },
-    {
+      cssClass: 'fa-solid fa-vote-yea',
+      searchTerms: ['approve', 'vote', 'yes'],
+    }, {
       name: 'vr-cardboard',
-      cssClass: 'fas fa-vr-cardboard',
-    },
-    {
+      cssClass: 'fa-solid fa-vr-cardboard',
+      searchTerms: ['virtual', 'reality', 'technology'],
+    }, {
+      name: 'w',
+      cssClass: 'fa-solid fa-w',
+      searchTerms: ['letter', 'W', 'initial'],
+    }, {
+      name: 'walkie-talkie',
+      cssClass: 'fa-solid fa-walkie-talkie',
+      searchTerms: ['walkie', 'talkie', 'communication'],
+    }, {
       name: 'walking',
-      cssClass: 'fas fa-walking',
-    },
-    {
+      cssClass: 'fa-solid fa-walking',
+      searchTerms: ['movement', 'walk', 'exercise'],
+    }, {
       name: 'wallet',
-      cssClass: 'fas fa-wallet',
-    },
-    {
+      cssClass: 'fa-solid fa-wallet',
+      searchTerms: ['money', 'finance', 'storage'],
+    }, {
+      name: 'wand-magic',
+      cssClass: 'fa-solid fa-wand-magic',
+      searchTerms: ['wand', 'magic', 'spell'],
+    }, {
+      name: 'wand-magic-sparkles',
+      cssClass: 'fa-solid fa-wand-magic-sparkles',
+      searchTerms: ['wand', 'magic', 'sparkles'],
+    }, {
+      name: 'wand-sparkles',
+      cssClass: 'fa-solid fa-wand-sparkles',
+      searchTerms: ['wand', 'sparkles', 'magic'],
+    }, {
       name: 'warehouse',
-      cssClass: 'fas fa-warehouse',
-    },
-    {
+      cssClass: 'fa-solid fa-warehouse',
+      searchTerms: ['storage', 'building', 'warehouse'],
+    }, {
+      name: 'warning',
+      cssClass: 'fa-solid fa-warning',
+      searchTerms: ['warning', 'alert', 'caution'],
+    }, {
       name: 'water',
-      cssClass: 'fas fa-water',
-    },
-    {
+      cssClass: 'fa-solid fa-water',
+      searchTerms: ['liquid', 'drink', 'fluid'],
+    }, {
+      name: 'water-ladder',
+      cssClass: 'fa-solid fa-water-ladder',
+      searchTerms: ['water', 'ladder', 'safety'],
+    }, {
+      name: 'wave-square',
+      cssClass: 'fa-solid fa-wave-square',
+      searchTerms: ['wave', 'pattern', 'design'],
+    }, {
       name: 'weight',
-      cssClass: 'fas fa-weight',
-    },
-    {
+      cssClass: 'fa-solid fa-weight',
+      searchTerms: ['mass', 'scale', 'measure'],
+    }, {
       name: 'weight-hanging',
-      cssClass: 'fas fa-weight-hanging',
-    },
-    {
+      cssClass: 'fa-solid fa-weight-hanging',
+      searchTerms: ['scale', 'measure', 'weight'],
+    }, {
+      name: 'weight-scale',
+      cssClass: 'fa-solid fa-weight-scale',
+      searchTerms: ['scale', 'weight', 'measure'],
+    }, {
+      name: 'wheat-alt',
+      cssClass: 'fa-solid fa-wheat-alt',
+      searchTerms: ['wheat', 'alternative', 'grain'],
+    }, {
+      name: 'wheat-awn',
+      cssClass: 'fa-solid fa-wheat-awn',
+      searchTerms: ['wheat', 'awn', 'crop'],
+    }, {
+      name: 'wheat-awn-circle-exclamation',
+      cssClass: 'fa-solid fa-wheat-awn-circle-exclamation',
+      searchTerms: ['wheat', 'awn', 'alert'],
+    }, {
       name: 'wheelchair',
-      cssClass: 'fas fa-wheelchair',
-    },
-    {
+      cssClass: 'fa-solid fa-wheelchair',
+      searchTerms: ['accessibility', 'mobility', 'transport'],
+    }, {
+      name: 'wheelchair-alt',
+      cssClass: 'fa-solid fa-wheelchair-alt',
+      searchTerms: ['wheelchair', 'alternative', 'mobility'],
+    }, {
+      name: 'wheelchair-move',
+      cssClass: 'fa-solid fa-wheelchair-move',
+      searchTerms: ['wheelchair', 'move', 'mobility'],
+    }, {
+      name: 'whiskey-glass',
+      cssClass: 'fa-solid fa-whiskey-glass',
+      searchTerms: ['whiskey', 'glass', 'drink'],
+    }, {
       name: 'wifi',
-      cssClass: 'fas fa-wifi',
-    },
-    {
+      cssClass: 'fa-solid fa-wifi',
+      searchTerms: ['internet', 'connection', 'signal'],
+    }, {
+      name: 'wifi-3',
+      cssClass: 'fa-solid fa-wifi-3',
+      searchTerms: ['wifi', 'signal', 'connection'],
+    }, {
+      name: 'wifi-strong',
+      cssClass: 'fa-solid fa-wifi-strong',
+      searchTerms: ['wifi', 'strong', 'signal'],
+    }, {
       name: 'wind',
-      cssClass: 'fas fa-wind',
-    },
-    {
+      cssClass: 'fa-solid fa-wind',
+      searchTerms: ['air', 'breeze', 'nature'],
+    }, {
       name: 'window-close',
-      cssClass: 'fas fa-window-close',
-    },
-    {
+      cssClass: 'fa-solid fa-window-close',
+      searchTerms: ['close', 'exit', 'remove'],
+    }, {
       name: 'window-maximize',
-      cssClass: 'fas fa-window-maximize',
-    },
-    {
+      cssClass: 'fa-solid fa-window-maximize',
+      searchTerms: ['expand', 'full', 'screen'],
+    }, {
       name: 'window-minimize',
-      cssClass: 'fas fa-window-minimize',
-    },
-    {
+      cssClass: 'fa-solid fa-window-minimize',
+      searchTerms: ['reduce', 'small', 'screen'],
+    }, {
       name: 'window-restore',
-      cssClass: 'fas fa-window-restore',
-    },
-    {
+      cssClass: 'fa-solid fa-window-restore',
+      searchTerms: ['restore', 'maximize', 'screen'],
+    }, {
       name: 'wine-bottle',
-      cssClass: 'fas fa-wine-bottle',
-    },
-    {
+      cssClass: 'fa-solid fa-wine-bottle',
+      searchTerms: ['drink', 'alcohol', 'beverage'],
+    }, {
       name: 'wine-glass',
-      cssClass: 'fas fa-wine-glass',
-    },
-    {
+      cssClass: 'fa-solid fa-wine-glass',
+      searchTerms: ['drink', 'alcohol', 'beverage'],
+    }, {
       name: 'wine-glass-alt',
-      cssClass: 'fas fa-wine-glass-alt',
-    },
-    {
+      cssClass: 'fa-solid fa-wine-glass-alt',
+      searchTerms: ['drink', 'alcohol', 'beverage'],
+    }, {
+      name: 'wine-glass-empty',
+      cssClass: 'fa-solid fa-wine-glass-empty',
+      searchTerms: ['wine', 'glass', 'empty'],
+    }, {
+      name: 'won',
+      cssClass: 'fa-solid fa-won',
+      searchTerms: ['won', 'currency', 'south korea'],
+    }, {
       name: 'won-sign',
-      cssClass: 'fas fa-won-sign',
-    },
-    {
+      cssClass: 'fa-solid fa-won-sign',
+      searchTerms: ['currency', 'money', 'finance'],
+    }, {
+      name: 'worm',
+      cssClass: 'fa-solid fa-worm',
+      searchTerms: ['worm', 'creature', 'animal'],
+    }, {
       name: 'wrench',
-      cssClass: 'fas fa-wrench',
-    },
-    {
+      cssClass: 'fa-solid fa-wrench',
+      searchTerms: ['tool', 'repair', 'fix'],
+    }, {
+      name: 'x',
+      cssClass: 'fa-solid fa-x',
+      searchTerms: ['x', 'remove', 'close'],
+    }, {
       name: 'x-ray',
-      cssClass: 'fas fa-x-ray',
-    },
-    {
+      cssClass: 'fa-solid fa-x-ray',
+      searchTerms: ['medical', 'scan', 'image'],
+    }, {
+      name: 'xmark',
+      cssClass: 'fa-solid fa-xmark',
+      searchTerms: ['xmark', 'remove', 'cancel'],
+    }, {
+      name: 'xmark-circle',
+      cssClass: 'fa-solid fa-xmark-circle',
+      searchTerms: ['xmark', 'circle', 'remove'],
+    }, {
+      name: 'xmark-square',
+      cssClass: 'fa-solid fa-xmark-square',
+      searchTerms: ['xmark', 'square', 'remove'],
+    }, {
+      name: 'xmarks-lines',
+      cssClass: 'fa-solid fa-xmarks-lines',
+      searchTerms: ['xmarks', 'lines', 'cross'],
+    }, {
+      name: 'y',
+      cssClass: 'fa-solid fa-y',
+      searchTerms: ['letter', 'Y', 'initial'],
+    }, {
+      name: 'yen',
+      cssClass: 'fa-solid fa-yen',
+      searchTerms: ['yen', 'currency', 'japan'],
+    }, {
       name: 'yen-sign',
-      cssClass: 'fas fa-yen-sign',
-    },
-    {
+      cssClass: 'fa-solid fa-yen-sign',
+      searchTerms: ['currency', 'money', 'finance'],
+    }, {
       name: 'yin-yang',
-      cssClass: 'fas fa-yin-yang',
-    },
+      cssClass: 'fa-solid fa-yin-yang',
+      searchTerms: ['balance', 'harmony', 'symbol'],
+    }, {
+      name: 'z',
+      cssClass: 'fa-solid fa-z',
+      searchTerms: ['letter', 'Z', 'initial'],
+    }, {
+      name: 'zap',
+      cssClass: 'fa-solid fa-zap',
+      searchTerms: ['zap', 'lightning', 'electric'],
+    }
   ],
 };
 export { fontAwesomeIcons as default };

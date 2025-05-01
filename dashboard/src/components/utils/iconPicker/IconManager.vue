@@ -138,7 +138,7 @@ const iconPacks = ref([
   }
 ]);
 
-let filterCriteria = ref('');
+const filterCriteria = ref('');
 
 function groupIntoRows(array, rl) {
   const result = [];
@@ -205,7 +205,9 @@ const isValidCustomIconDimensions = (width, height) => {
 const filter = () => {
   const value = filterCriteria.value.trim();
   const regex = new RegExp(value, 'gi');
-  const filter = (icon) => icon.name.match(regex);
+  const filter = (icon) => {
+    return icon.name.match(regex) || (icon.searchTerms && icon.searchTerms.some(searchTerm => searchTerm.match(regex)))
+  }
 
   const currentPack = iconPacks.value[active.value];
   currentPack.icons = value?.length === 0 ? groupIntoRows(currentPack.defaultIcons, rowLength) : groupIntoRows(currentPack.defaultIcons.filter(filter), rowLength);
