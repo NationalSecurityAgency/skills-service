@@ -170,13 +170,12 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
       <!--                          link-label="Original Skill" data-cy="linkToTheOriginalSkill"/>-->
       .
     </div>
-    <div v-if="isImported && isDisabled" class="mt-4 alert alert-warning" header="Skill Catalog">
-      <i class="fas fa-exclamation-circle"></i> This skill is <b>disabled</b> because import was not
-      finalized yet.
-    </div>
-    <div v-if="!isImported && isDisabled" class="mb-2 alert alert-warning">
-      <i class="fas fa-exclamation-circle"></i> This skill is <b>disabled</b> because it's visibility is set to hidden.
-    </div>
+    <Message v-if="isImported && isDisabled" severity="warn" icon="fa fa-exclamation-triangle" data-cy="skillDisabledWarning" :closable="false">
+      <i class="fas fa-exclamation-circle"></i> This skill is <b>disabled</b> because import was not finalized yet.
+    </Message>
+    <Message v-if="!isImported && isDisabled" severity="warn" icon="fa fa-exclamation-triangle" data-cy="skillDisabledWarning" :closable="false">
+      This skill is <b>disabled</b> because it's visibility is set to hidden.
+    </Message>
     <div class="md:flex">
       <div class="flex-1 md:mr-2 mb-2">
         <media-info-card
