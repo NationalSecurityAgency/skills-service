@@ -17,7 +17,6 @@ package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
-import skills.services.admin.skillReuse.SkillReuseIdUtil
 
 import static skills.intTests.utils.SkillsFactory.*
 
