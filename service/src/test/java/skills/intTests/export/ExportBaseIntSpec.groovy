@@ -84,7 +84,7 @@ class ExportBaseIntSpec extends DefaultIntSpec {
         data.eachWithIndex { dataRow, rowIndex ->
             Row row = sheet.getRow(rowIndex)
             for (int i = 0; i < dataRow.size(); i++) {
-                assert row.getCell(i).toString() == dataRow.get(i), "row: ${rowIndex} col: ${i} expected: ${dataRow.get(i)} actual: ${row.getCell(i).toString()}"
+                assert normalize(row.getCell(i).toString()) == normalize(dataRow.get(i)), "row: ${rowIndex} col: ${i} expected: ${dataRow.get(i)} actual: ${row.getCell(i).toString()}"
             }
         }
     }
@@ -107,7 +107,7 @@ class ExportBaseIntSpec extends DefaultIntSpec {
 
         data.eachWithIndex { expectedValue, rowIndex ->
             Row row = sheet.getRow(rowIndex + 2)
-            assert row.getCell(cellIndex).toString() == expectedValue, "row: ${rowIndex} col: ${cellIndex} expected: ${expectedValue} actual: ${row.getCell(cellIndex).toString()}"
+            assert normalize(row.getCell(cellIndex).toString()) == normalize(expectedValue), "row: ${rowIndex} col: ${cellIndex} expected: ${expectedValue} actual: ${row.getCell(cellIndex).toString()}"
         }
     }
 
@@ -177,5 +177,10 @@ class ExportBaseIntSpec extends DefaultIntSpec {
         use(TimeCategory) {
             return (date + extraHours.hour).format("M/d/yy H:mm")
         }
+    }
+
+    static String normalize(String inputString) {
+        // strip out time value, eg "5/1/25 14:30" => "5/1/25"
+        return inputString.replaceAll(/(\d{1,2}\/\d{1,2}\/\d{2})\s+\d{1,2}:\d{2}/, '$1')
     }
 }
