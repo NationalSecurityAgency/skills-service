@@ -191,7 +191,7 @@ const createResizeSupport = () => {
   <div :class="`flex ${ alignCenter ? 'justify-center' : ''} mt-2`">
     <div :class="{ 'flex-1' : !isConfiguredVideoSize }">
       <div :id="`${vidPlayerId}Container`" data-cy="videoPlayer"  :style="playerWidth ? `width: ${playerWidth}px;` : ''"
-           class="videoPlayerContainer p-0 border rounded border-surface-200 dark:border-surface-600">
+           class="videoPlayerContainer p-0 border rounded-sm border-surface-200 dark:border-surface-600">
           <i v-if="!isPlaying && !options.isAudio"
              class="fas fa-expand-alt fa-rotate-90 handle border border-surface-500 dark:border-surface-300 p-1 text-primary bg-primary-contrast rounded-border"
              :id="`${vidPlayerId}ResizeHandle`"

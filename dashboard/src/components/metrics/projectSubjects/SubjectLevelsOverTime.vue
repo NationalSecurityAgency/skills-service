@@ -142,7 +142,7 @@ const overlayMessage  = computed(() => {
     </template>
     <template #content>
       <div class="flex gap-2 mb-8 flex-col sm:flex-row">
-        <BlockUI :blocked="loading.subjects" rounded="sm" opacity="0.5" spinner-variant="info" spinner-type="grow" spinner-small class="flex flex-1">
+        <BlockUI :blocked="loading.subjects" rounded-sm="sm" opacity="0.5" spinner-variant="info" spinner-type="grow" spinner-small class="flex flex-1">
           <Select :options="subjects.available"
                     v-model="subjects.selected"
                     optionLabel="text"

@@ -55,7 +55,7 @@ const navToSkill = (selectedItem) => {
   <div class="flex mb-2 st-jump-to-skill-height">
     <div style="width: 100%;">
       <skills-selector :options="availableSkills"
-                        class="search-and-nav border rounded"
+                        class="search-and-nav border rounded-sm"
                         v-on:search-change="searchChanged"
                         v-on:added="navToSkill"
                         :is-loading="loading"

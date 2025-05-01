@@ -24,7 +24,7 @@ defineProps(['title', 'subtitle', 'description', 'icon', 'pathName']);
     <template #content>
       <div class="p-8">
         <div class="flex">
-          <div class="flex d-inline-block mt-1 mr-4 border rounded p-2">
+          <div class="flex d-inline-block mt-1 mr-4 border rounded-sm p-2">
             <i class="fa-3x" :class="icon"/>
           </div>
           <div class="flex flex-1 flex-col">

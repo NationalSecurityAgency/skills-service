@@ -18,7 +18,7 @@ limitations under the License.
 </script>
 
 <template>
-  <Card :pt="{ content: { class: '!p-0 !h-full' }, body: { class: '!p-0 !h-full' } }">
+  <Card :pt="{ content: { class: 'p-0! h-full!' }, body: { class: 'p-0! h-full!' } }">
     <template #content>
       <div class="flex flex-col h-full">
         <div>

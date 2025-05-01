@@ -25,7 +25,7 @@ const timeUtils = useTimeUtils()
   <div class="" data-cy="achievementDate">
     <div class="">
       <div class="flex">
-        <Avatar icon="fa fa-medal" class="mr-2" size="large" :pt="{icon: { class: '!text-green-600' }}"/>
+        <Avatar icon="fa fa-medal" class="mr-2" size="large" :pt="{icon: { class: 'text-green-600!' }}"/>
         <div class="">
           <div>Achieved on <Tag severity="secondary" data-cy="achievementOn">{{ timeUtils.formatDate(date, 'MMMM Do YYYY') }}</Tag></div>
           <div class="text-muted-color text-sm skills-theme-secondary-color" data-cy="timePassed">

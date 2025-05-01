@@ -79,7 +79,7 @@ const buildBadgeLink = (badge) => {
       <div v-if="badges && badges.length > 0" class="flex-col md:flex-row flex flex-wrap justify-center gap-4 ">
           <Card class="skills-card-theme-border skills-earned-badge"
                 v-for="(badge, index) in badges" v-bind:key="badge.badgeId"
-                :pt="{ root: { class: '!border' }, content: { class: '!h-full' }, body: { class: '!h-full' } }" :data-cy="`achievedBadge-${badge.badgeId}`">
+                :pt="{ root: { class: 'border!' }, content: { class: 'h-full!' }, body: { class: 'h-full!' } }" :data-cy="`achievedBadge-${badge.badgeId}`">
             <template #header>
               <div class="pt-4 px-4 flex">
                 <div class="flex-1">

@@ -267,7 +267,7 @@ const toggle = (event) => {
                     :aria-label="`Search ${attributes.skillDisplayName}s`"
                     data-cy="skillsSearchInput" />
                   <InputGroupAddon class="p-0 m-0">
-                    <SkillsButton :pt="{ root: { class: '!border-0' } }"
+                    <SkillsButton :pt="{ root: { class: 'border-0!' } }"
                       icon="fas fa-times"
                       text
                       outlined
@@ -337,7 +337,7 @@ const toggle = (event) => {
               icon="fas fa-tag"
               :data-cy="`skillTagFilter-${index}`"
               :key="tag.tagId"
-              :pt="{ root: { class: '!p-0'}}"
+              :pt="{ root: { class: 'p-0!'}}"
               @remove="removeTagFilter(tag)"
               outlined
               removable>

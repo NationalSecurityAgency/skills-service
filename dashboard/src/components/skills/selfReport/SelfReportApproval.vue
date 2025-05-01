@@ -158,7 +158,7 @@ const toggleRow = (row) => {
 </script>
 
 <template>
-  <Card :pt="{ body: { class: '!p-0' } }">
+  <Card :pt="{ body: { class: 'p-0!' } }">
     <template #header>
       <SkillsCardHeader title="Self Reported Skills Requiring Approval">
         <template #headerContent>

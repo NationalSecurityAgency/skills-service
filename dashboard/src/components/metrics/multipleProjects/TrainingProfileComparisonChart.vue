@@ -74,7 +74,7 @@ const options = ref({
       horizontal: props.horizontal,
       distributed: true,
       columnWidth: '50%',
-      endingShape: 'rounded',
+      endingShape: 'rounded-sm',
     },
   },
   dataLabels: {

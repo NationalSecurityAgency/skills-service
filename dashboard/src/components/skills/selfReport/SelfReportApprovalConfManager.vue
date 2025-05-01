@@ -233,7 +233,7 @@ const collapseRow = (row) => {
 </script>
 
 <template>
-  <Card :pt="{ body: { class: '!p-0' } }">
+  <Card :pt="{ body: { class: 'p-0!' } }">
     <template #header>
       <SkillsCardHeader title="Configure Approval Workload"></SkillsCardHeader>
     </template>

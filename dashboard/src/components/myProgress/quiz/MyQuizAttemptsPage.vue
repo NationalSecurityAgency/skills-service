@@ -102,7 +102,7 @@ const hasAttempts = computed(() => attemptHistory.value.length > 0)
         <back-to-my-progress-btn />
       </template>
     </my-progress-title>
-    <Card class="my-6" :pt="{ body: { class: '!p-0' } }">
+    <Card class="my-6" :pt="{ body: { class: 'p-0!' } }">
       <template #content>
         <SkillsSpinner v-if="loadingQuizAttemptsInitially" :is-loading="true" class="my-20"/>
         <div v-else>

@@ -190,7 +190,7 @@ const loadTranscript = () => {
       <div class="flex" style="padding: 0rem 1rem 0rem 1rem !important;">
         <div style="height: 400px; background-color: black;" class="flex column items-center justify-center w-full">
           <div class="text-center mt-12">
-              <span class="border rounded d-inline-block p-4 pl-6">
+              <span class="border rounded-sm d-inline-block p-4 pl-6">
                 <i class="fas fa-play" style="font-size: 3rem;"></i>
               </span>
           </div>

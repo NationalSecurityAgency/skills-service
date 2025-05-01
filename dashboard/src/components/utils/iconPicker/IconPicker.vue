@@ -81,7 +81,7 @@ const themeHelper = useThemesHelper()
     </SkillsButton>
 
     <Popover ref="iconManagerOverlayPanel"
-             :pt="{ content : { class: '!p-0' } }"
+             :pt="{ content : { class: 'p-0!' } }"
                   :show-close-icon="true"
                   :dismissable="dismissable"
                   @hide="panelHidden"

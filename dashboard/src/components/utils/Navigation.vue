@@ -86,7 +86,7 @@ watch(() => props.navItems, () => {
 
     <div class="flex">
       <div id="skillsNavigation" ref="skillsNavigation" class="flex-none hidden md:flex" data-cy="nav-col">
-        <Card style="min-height: calc(100vh - 20rem); !important" :pt="{ body: { class: '!p-0' } }">
+        <Card style="min-height: calc(100vh - 20rem); !important" :pt="{ body: { class: 'p-0!' } }">
           <template #content>
             <div class="text-surface-900 dark:text-surface-0 font-semibold flex">
               <div v-if="!showCollapsed" class="pt-4 px-4 pb-1">Navigate</div>

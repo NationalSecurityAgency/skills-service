@@ -132,7 +132,7 @@ const isFlex = computed(() => responsive.md.value)
       </div>
     </sub-page-header>
 
-    <Card :pt="{ body: { class: '!p-0' } }">
+    <Card :pt="{ body: { class: 'p-0!' } }">
       <template #content>
         <SkillsDataTable :busy="loading"
                          :value="errors"

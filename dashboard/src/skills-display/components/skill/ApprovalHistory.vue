@@ -59,7 +59,7 @@ const getApprover = (item) => {
 
 <template>
   <div class="pt-2">
-    <Timeline :pt="{ eventOpposite: { class: '!p-0 !flex-none' } }" :value="props.events" align="left" data-cy="approvalHistoryTimeline">
+    <Timeline :pt="{ eventOpposite: { class: 'p-0! flex-none!' } }" :value="props.events" align="left" data-cy="approvalHistoryTimeline">
       <template #marker="slotProps">
         <div class="w-[2rem] h-[2rem] p-0 rounded-full text-white flex items-center justify-center" :class="getIconBackground(slotProps.item)">
             <i :class="getIconClass(slotProps.item)"></i>

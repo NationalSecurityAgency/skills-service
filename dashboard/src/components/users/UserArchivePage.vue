@@ -120,7 +120,7 @@ const sortField = (column) => {
 </script>
 
 <template>
-  <Card :pt="{ body: { class: '!p-0' } }">
+  <Card :pt="{ body: { class: 'p-0!' } }">
     <template #header>
       <SkillsCardHeader title="Archived Project Users"></SkillsCardHeader>
     </template>

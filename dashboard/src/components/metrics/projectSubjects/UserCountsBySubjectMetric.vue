@@ -60,7 +60,7 @@ const chartOptions = ref({
     bar: {
       horizontal: false,
       columnWidth: '55%',
-      endingShape: 'rounded',
+      endingShape: 'rounded-sm',
     },
   },
   dataLabels: {

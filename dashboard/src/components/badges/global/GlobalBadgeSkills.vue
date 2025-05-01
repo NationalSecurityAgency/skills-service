@@ -172,7 +172,7 @@ const searchChanged = (query) => {
   <div>
     <sub-page-header title="Skills"/>
 
-    <Card :pt="{ body: { class: '!p-0' } }">
+    <Card :pt="{ body: { class: 'p-0!' } }">
       <template #content>
         <loading-container v-bind:is-loading="loading.availableSkills || loading.badgeSkills || loading.skillOp">
           <div class="px-4 py-6">

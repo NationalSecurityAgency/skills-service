@@ -269,7 +269,7 @@ const selectedSkills = ref([]);
   <SubPageHeader title="Performed Skills" aria-label="Performed Skills" />
 
   <Message v-if="overallErrMsg" severity="error">{{overallErrMsg}}</Message>
-  <Card :pt="{ body: { class: '!p-0' } }">
+  <Card :pt="{ body: { class: 'p-0!' } }">
     <template #content>
 
       <SkillsSpinner :is-loading="!table.options.fields"/>
