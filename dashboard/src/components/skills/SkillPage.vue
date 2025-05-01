@@ -89,7 +89,7 @@ const buildNavItems = () => {
     page: 'ConfigureExpiration'
   })
   items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' })
-  if (!isImported?.value && !isReadOnlyProj.value) {
+  if (!isImported?.value && !isReadOnlyProj.value && !isDisabled) {
     items.push({
       name: 'Add Event',
       iconClass: 'fa-user-plus skills-color-events',
@@ -102,6 +102,9 @@ const buildNavItems = () => {
 
 const isImported = computed(() => {
   return skillsState.skill && skillsState.skill.copiedFromProjectId && skillsState.skill.copiedFromProjectId.length > 0
+})
+const isDisabled = computed(() => {
+  return skillsState.skill && !skillsState.skill.enabled
 })
 
 // Methods

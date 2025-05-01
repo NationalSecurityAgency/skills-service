@@ -140,6 +140,27 @@ describe('Disabled Skills Tests', () => {
     cy.get('[data-cy="childRowDisplay_skill1"]').should('not.contain.text','This skill is disabled');
   })
 
-  it
+  it('cannot add skill events for imported skills', function () {
+    cy.intercept('/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkill1')
+
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    cy.createSkill(1, 1, 1, { enabled: false })
+    cy.createSkill(1, 1, 2)
+
+    // don't even show the add event link for imported skills
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+    cy.get('[data-cy="nav-Add Event"]').should('not.exist');
+
+    // navigate directly to the add skill event page
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/addSkillEvent');
+    cy.wait('@getSkill1')
+    cy.get('[data-cy="subPageHeader"]').contains('Add Skill Events')
+    cy.get('[data-cy="skillId"]').contains('skill1')
+
+    cy.get('[data-cy="addSkillEventButton"]').should('be.disabled');
+    cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should('exist');
+    cy.get('[data-cy="addEventDisabledMsg"]').contains('Unable to add skill for user. Cannot add events to skills that are disabled.');
+  })
 
 })
