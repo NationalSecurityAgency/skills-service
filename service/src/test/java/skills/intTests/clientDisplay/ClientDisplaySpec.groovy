@@ -619,7 +619,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
 
         proj1_skills[0].enabled = true
         skillsService.updateSkill(proj1_skills[0], proj1_skills[0].skillId)
-        def resAfterEnabled = skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId)
+        def resAfterEnabled = skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId as String)
 
         then:
         res
@@ -644,12 +644,33 @@ class ClientDisplaySpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         when:
-        skillsService.getSingleSkillSummary("user1", proj1.projectId, proj1_skills.get(0).skillId)
+        skillsService.getSingleSkillSummary("user1", proj1.projectId, proj1_skills.get(0).skillId as String)
 
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.httpStatus == HttpStatus.BAD_REQUEST
         e.resBody.contains("Skill with id [skill1] is not enabled")
+    }
+
+    def "single summary with subject properly for an enabled skill does not consider disabled skills for next/previous and total skill count"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills[0].enabled = false
+        proj1_skills[2].enabled = false
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        when:
+        def res = skillsService.getSingleSkillSummaryWithSubject("user1", proj1.projectId, proj1_subj.subjectId as String, proj1_skills.get(1).skillId as String)
+
+        then:
+        res
+        res.totalSkills == 1
+        res.prevSkillId == null
+        res.nextSkillId == null
     }
 
     private Date parseDate(String str) {
