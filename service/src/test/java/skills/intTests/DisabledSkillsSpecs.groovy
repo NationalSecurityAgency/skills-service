@@ -15,16 +15,18 @@
  */
 package skills.intTests
 
-
 import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsClientException
+import skills.services.admin.skillReuse.SkillReuseIdUtil
+
+import static skills.intTests.utils.SkillsFactory.*
 
 class DisabledSkillsSpecs extends DefaultIntSpec {
 
     def "disabled skills from getProjects"() {
-        def proj1 = SkillsFactory.createProject(1)
-        def proj1_subj = SkillsFactory.createSubject(1, 1)
-        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(3, 1, 1)
         proj1_skills[0].enabled = false
 
         skillsService.createProject(proj1)
@@ -53,9 +55,9 @@ class DisabledSkillsSpecs extends DefaultIntSpec {
     }
 
     def "disabled skills from getProject"() {
-        def proj1 = SkillsFactory.createProject(1)
-        def proj1_subj = SkillsFactory.createSubject(1, 1)
-        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(3, 1, 1)
         proj1_skills[0].enabled = false
 
         skillsService.createProject(proj1)
@@ -82,9 +84,9 @@ class DisabledSkillsSpecs extends DefaultIntSpec {
     }
 
     def "disabled skills from getSubject"() {
-        def proj1 = SkillsFactory.createProject(1)
-        def proj1_subj = SkillsFactory.createSubject(1, 1)
-        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(3, 1, 1)
         proj1_skills[0].enabled = false
 
         skillsService.createProject(proj1)
@@ -111,9 +113,9 @@ class DisabledSkillsSpecs extends DefaultIntSpec {
     }
 
     def "disabled skills from getSkillsForSubject"() {
-        def proj1 = SkillsFactory.createProject(1)
-        def proj1_subj = SkillsFactory.createSubject(1, 1)
-        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(3, 1, 1)
         proj1_skills[0].enabled = false
 
         skillsService.createProject(proj1)
@@ -140,9 +142,9 @@ class DisabledSkillsSpecs extends DefaultIntSpec {
     }
 
     def "getSkillsForProject does not include disabled skills"() {
-        def proj1 = SkillsFactory.createProject(1)
-        def proj1_subj = SkillsFactory.createSubject(1, 1)
-        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(3, 1, 1)
         proj1_skills[0].enabled = false
 
         skillsService.createProject(proj1)
@@ -163,4 +165,19 @@ class DisabledSkillsSpecs extends DefaultIntSpec {
         skillsAfter
         skillsAfter.size() == 3
     }
+
+    def "cannot report skill events for disabled skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(3, 1, 1)
+        proj1_skills[0].enabled = false
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, proj1_skills)
+
+        when:
+        skillsService.addSkill([projectId: p1.projectId, skillId: proj1_skills[0].skillId], getRandomUsers(1)[0], new Date() - 1)
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Cannot report skill events for a skill that is disabled.")
+    }
+
 }
