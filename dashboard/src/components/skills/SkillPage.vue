@@ -201,7 +201,7 @@ const skillId = computed(() => {
         <Tag v-if="!skillsState.skill.enabled"
              severity="secondary"
              class="ml-2" data-cy="disabledSkillBadge"><i
-          class="fas fa-book mr-1" aria-hidden="true"></i> DISABLED</Tag>
+          class="fas fa-eye-slash mr-1" aria-hidden="true"></i> DISABLED</Tag>
       </template>
     </page-header>
     <navigation :nav-items="navItems">

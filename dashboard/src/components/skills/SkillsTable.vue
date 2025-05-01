@@ -674,7 +674,7 @@ const onRowExpand = () => {
                   severity="secondary"
                   class="mt-1"
                   :data-cy="`disabledBadge-${slotProps.data.skillId}`">
-                  <span><i class="fas fa-book" aria-hidden="true"></i> Disabled</span>
+                  <span><i class="fas fa-eye-slash" aria-hidden="true"></i> Disabled</span>
                 </Tag>
                 <Tag
                   v-if="slotProps.data.sharedToCatalog"
