@@ -89,7 +89,7 @@ const buildNavItems = () => {
     page: 'ConfigureExpiration'
   })
   items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' })
-  if (!isImported?.value && !isReadOnlyProj.value && !isDisabled) {
+  if (!isImported?.value && !isReadOnlyProj.value && !isDisabled.value) {
     items.push({
       name: 'Add Event',
       iconClass: 'fa-user-plus skills-color-events',
