@@ -156,7 +156,7 @@ describe('Icon Manager Tests', () => {
         cy.get('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]').click();
         cy.get('[data-cy="iconPicker"]').click();
         cy.get('[data-cy=icon-search]').type('run');
-        cy.get('.fas.fa-running').should('be.visible');
+        cy.get('.fa-solid.fa-running').should('be.visible');
         //filter should persist between tab changes
         cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Material').click();
         cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Material')
@@ -164,13 +164,13 @@ describe('Icon Manager Tests', () => {
 
         cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Font Awesome Free').click();
         cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Font Awesome Free')
-        cy.get('.fas.fa-running').should('be.visible');
+        cy.get('.fa-solid.fa-running').should('be.visible');
 
         //filter should not persist when icon manager is re-opened
         cy.get('[data-cy="closeIconPickerBtn"]').click();
         cy.get('[data-cy="iconPicker"]').click();
         cy.get('[data-cy=icon-search]').should('have.value', '');
-        cy.get('i.fas.fa-ad').should('be.visible');
+        cy.get('i.fa-solid.fa-ad').should('be.visible');
         cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Material').click();
         cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Material')
         cy.get('i.mi.mi-3d-rotation').should('be.visible');
