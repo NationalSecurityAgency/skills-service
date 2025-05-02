@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.util.StreamUtils
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.CopyToAnotherProjectRequestType
+import skills.controller.request.model.PageVisitRequest
 import skills.services.settings.Settings
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
@@ -2160,6 +2161,10 @@ class SkillsService {
     }
     def restoreArchivedUser(String userId, String projectId) {
         return wsHelper.adminPost("/projects/${projectId}/users/${userId}/restore", [:])
+    }
+
+    def reportPageVisit(PageVisitRequest pageVisitRequest) {
+        return wsHelper.apiPost("/pageVisit", pageVisitRequest)
     }
 
     static private String getAdminGroupDefUrl(String adminGroupId) {

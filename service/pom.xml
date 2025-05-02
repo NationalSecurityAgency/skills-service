@@ -320,9 +320,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8-standalone</artifactId>
-            <version>${wiremock.version}</version>
+            <groupId>org.wiremock</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>${wiremock-standalone.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

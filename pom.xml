@@ -40,7 +40,7 @@
         <logback-access.version>2.0.6</logback-access.version>
 
         <greenmail.version>2.0.0</greenmail.version>
-        <wiremock.version>3.0.1</wiremock.version>
+        <wiremock-standalone.version>3.13.0</wiremock-standalone.version>
         <owasp.encoder.version>1.2.3</owasp.encoder.version>
 
         <micrometer-registry.version>1.10.3</micrometer-registry.version>
