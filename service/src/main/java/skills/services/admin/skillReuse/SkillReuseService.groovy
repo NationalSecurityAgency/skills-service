@@ -77,6 +77,7 @@ class SkillReuseService {
     @Profile
     void reuseSkill(String projectId, SkillsActionRequest skillReuseRequest) {
         // validate
+        validateSkillIsNotDisabled(projectId, skillReuseRequest)
         validateParentIsNotDestination(projectId, skillReuseRequest)
         validateNoAlreadyReusedInDestination(skillReuseRequest, projectId)
         skillCatalogFinalizationService.validateNotInFinalizationState(projectId, "Cannot reuse skills while finalization is running")
@@ -136,6 +137,14 @@ class SkillReuseService {
             if (dependencies && dependencies > 0) {
                 throw new SkillException("Skill must have no dependencies in order to reuse; the skill [${it}] has [${dependencies}] dependencie(s)", projectId, it, ErrorCode.BadParam)
             }
+        }
+    }
+
+    @Profile
+    private void validateSkillIsNotDisabled(String projectId, SkillsActionRequest skillReuseRequest) {
+        SkillDef skillToReuse = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.skillIds[0])
+        if (!Boolean.valueOf(skillToReuse.enabled)) {
+            throw new SkillException("Not allowed to reuse a disabled skill", projectId, skillToReuse.skillId, ErrorCode.BadParam)
         }
     }
 

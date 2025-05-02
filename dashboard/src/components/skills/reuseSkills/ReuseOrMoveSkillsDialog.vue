@@ -117,8 +117,9 @@ const onReuseOrMove = (changedSkills) => {
   movedOrReusedSkills.value = changedSkills
 }
 const hasDestinations = computed(() => destinations.value && destinations.value.length > 0)
-const showStepper = computed(() => !state.value.skillsWereMovedOrReusedAlready && hasDestinations.value && !importFinalizePending.value)
+const showStepper = computed(() => !state.value.skillsWereMovedOrReusedAlready && hasDestinations.value && !importFinalizePending.value && (!hasDisabledSkillSelected.value || !props.isReuseType))
 const importFinalizePending = computed(() => finalizeInfo.value.numSkillsToFinalize && finalizeInfo.value.numSkillsToFinalize > 0)
+const hasDisabledSkillSelected = computed(() => !!props.skills.find(skill => skill.enabled === false))
 
 const onVisibleChanged = (isVisible) => {
   if (!isVisible) {
@@ -161,6 +162,11 @@ const dialogUtils = useDialogUtils()
             v-if="importFinalizePending"
             :title="`Cannot ${textCustomization.actionName}`"
             :message="`Cannot initiate skill ${actionNameLowerCase} while skill finalization is pending.`"/>
+        <no-content2
+            class="mt-8 mb-6"
+            v-if="hasDisabledSkillSelected && props.isReuseType"
+            :title="`Cannot ${textCustomization.actionName}`"
+            :message="`Cannot ${actionNameLowerCase} a disabled skill.`"/>
 
         <Stepper v-if="showStepper"  value="1" :linear="true" class="w-100">
           <StepList>

@@ -124,6 +124,10 @@ const handleActionCompleting = () => {
   emits('on-changed', toRaw(skillsForReuse.value.available))
 }
 
+const textCustomization = props.isReuseType ?
+    { actionName: 'Reuse', actionDirection: 'in' } :
+    { actionName: 'Move', actionDirection: 'to' }
+
 const actionName = computed(() => props.actionName.toLocaleLowerCase())
 const actionNameInPast = computed(() => `${actionName.value}d`)
 const isReuseBtnDisabled = computed(() => {
@@ -198,7 +202,7 @@ const isReuseBtnDisabled = computed(() => {
           data-cy="closeButton"
           @click="emits('on-cancel')" />
         <SkillsButton
-          :label="actionName"
+          :label="textCustomization.actionName"
           icon="fas fa-shipping-fast"
           @click="doMoveOrReuse"
           data-cy="reuseButton"
