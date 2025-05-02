@@ -68,7 +68,6 @@ onMounted(() => {
   IconManagerService.getIconSetIndexes().then((iconSets) => {
     const fontAwesomeIcons = iconSets.fontAwesome
     const materialIcons = iconSets.material
-    console.log(materialIcons)
     iconPacks.value = [
       {
         packName: fontAwesomeIcons.iconPack,
@@ -280,7 +279,6 @@ const uploadFromInput = (event) => {
   }
 }
 const beforeUpload = (upload) => {
-  console.log(upload.files[0]?.type)
   const isImageTypeValid = isValidImageType(upload.files[0]?.type);
 
   if (!isImageTypeValid) {
