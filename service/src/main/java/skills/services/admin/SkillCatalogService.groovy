@@ -220,6 +220,9 @@ class SkillCatalogService {
         if (skillDef.type != SkillDef.ContainerType.Skill) {
             throw new SkillException("Only type=[${SkillDef.ContainerType.Skill}] is supported but provided type=[${skillDef.type}] for skillId=[${skillId}]", projectId, skillId, ErrorCode.BadParam)
         }
+        if (!Boolean.valueOf(skillDef.enabled)) {
+            throw new SkillException("Skill [${skillDef.skillId}] is disabled. Disabled skills may not be exported to the catalog", projectId, skillId, ErrorCode.ExportToCatalogNotAllowed)
+        }
         if (doesSkillNameAlreadyExistInCatalog(skillDef.name)) {
             throw new SkillException("Skill name [${skillDef.name}] already exists in the catalog. Duplicate skill names are not allowed", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
         }

@@ -1815,6 +1815,37 @@ class CatalogSkillTests extends CatalogIntSpec {
         e.getMessage().contains("Skill [skill2] has dependencies. Skills with dependencies may not be exported to the catalog, errorCode:ExportToCatalogNotAllowed")
     }
 
+    def "cannot export a disabled skill"() {
+        // create skills, add dependencies, try to export top of chain
+        def project1 = createProject(1)
+        def project2 = createProject(2)
+
+        def p1subj1 = createSubject(1, 1)
+        def p2subj1 = createSubject(2, 2)
+
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        def skill2 = createSkill(1, 1, 2, 0, 1, 0, 100)
+        skill2.enabled = false
+        def skill3 = createSkill(1, 1, 3, 0, 1, 0, 100)
+
+        skillsService.createProject(project1)
+        skillsService.createProject(project2)
+        skillsService.createSubject(p1subj1)
+        skillsService.createSubject(p2subj1)
+
+        skillsService.createSkill(skill)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3)
+
+        when:
+
+        skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
+
+        then:
+        def e = thrown(Exception)
+        e.getMessage().contains("Skill [skill2] is disabled. Disabled skills may not be exported to the catalog, errorCode:ExportToCatalogNotAllowed")
+    }
+
     def "export skill that other skills depend on"() {
         def project1 = createProject(1)
         def project2 = createProject(2)
