@@ -17,6 +17,8 @@ package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsFactory
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -178,5 +180,24 @@ class DisabledSkillsSpecs extends DefaultIntSpec {
         SkillsClientException ex = thrown(SkillsClientException)
         ex.message.contains("Cannot report skill events for a skill that is disabled.")
     }
+
+    def "disabled skill cannot be added to a badge"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(3, 1, 1)
+        proj1_skills[0].enabled = false
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, proj1_skills)
+        def badge = createBadge()
+        badge.enabled = false
+        skillsService.createBadge(badge)
+
+        when:
+        skillsService.assignSkillToBadge(projectId: p1.projectId, badgeId: badge.badgeId, skillId: proj1_skills[0].skillId)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill [skill1] is not enabled,")
+    }
+
 
 }
