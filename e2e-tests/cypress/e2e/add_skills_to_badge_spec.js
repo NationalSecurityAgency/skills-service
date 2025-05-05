@@ -317,6 +317,29 @@ describe('Add Multiple Skills to Badge Tests', () => {
         cy.get('[data-cy="addSkillsToBadgeModalStep3"]').should('not.exist');
     });
 
+    it('cannot add a disabled skill to a badge', () => {
+        cy.createBadge(1, 1);
+        cy.createSkill(1, 1, 4, { enabled: false});
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]')
+          .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add To Badge"]').click()
+
+        cy.get('[data-cy="hasDisabledSkillSelected"]')
+          .contains('Disabled skills cannot be added to a badge.');
+
+        cy.get('[ data-cy="addSkillsToBadgeModalStep1"]').should('not.exist');
+        cy.get('[ data-cy="addSkillsToBadgeModalStep2"]').should('not.exist');
+        cy.get('[data-cy="addSkillsToBadgeModalStep3"]').should('not.exist');
+    });
+
     it('attempt to add multiple skills to a badge, where one of the skills is already is already a learning path dependency to the badge', () => {
         cy.createBadge(1, 5);
         cy.assignSkillToBadge(1, 5, 1);
