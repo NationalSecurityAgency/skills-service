@@ -619,7 +619,7 @@ class ProjectCopyService {
                               List<SkillInfo> allCollectedSkills, String groupId = null,
                               boolean validateNameAndIdCollisions = false) {
         allCollectedSkills.addAll(skillsToCopy.collect { new SkillInfo(skillDef: it, subjectId: subjectId, groupId: groupId) })
-        skillsToCopy?.findAll { it.enabled == "true" && (!it.copiedFrom) }
+        skillsToCopy?.findAll { (!it.copiedFrom) }
                 ?.each { SkillDefWithExtra fromSkill ->
                     if (validateNameAndIdCollisions) {
                         if (skillDefRepo.existsByProjectIdAndSkillIdAllIgnoreCase(desProjectId, fromSkill.skillId)) {

@@ -523,4 +523,48 @@ class CopySubjectToAnotherProjSpecs extends CopyIntSpec {
         file2.bytes == contents.getBytes()
     }
 
+    def "copy subject with a disabled skill" () {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Subj1Skills = createSkills(2, 1, 1, 100)
+        p1Subj1Skills[0].enabled = false
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Subj1Skills)
+
+        def p2 = createProject(2)
+        skillsService.createProject(p2)
+
+        when:
+        skillsService.copySubjectDefIntoAnotherProject(p1.projectId, p1subj1.subjectId, p2.projectId)
+
+        def copiedSubject1 = skillsService.getSubject([subjectId: p1subj1.subjectId, projectId: p2.projectId])
+        def copiedSubj1Skills = skillsService.getSkillsForSubject(p2.projectId, p1subj1.subjectId)
+        then:
+        copiedSubject1.name == p1subj1.name
+        copiedSubject1.subjectId == p1subj1.subjectId
+        copiedSubject1.numGroups == 0
+        copiedSubject1.numSkills == 1
+        copiedSubject1.numSkillsDisabled == 1
+        copiedSubject1.totalPoints == (100)
+        copiedSubject1.numSkillsReused == 0
+        copiedSubject1.totalPointsReused == 0
+
+        copiedSubj1Skills[0].skillId == p1Subj1Skills[0].skillId
+        copiedSubj1Skills[0].name == p1Subj1Skills[0].name
+        copiedSubj1Skills[0].projectId == p2.projectId
+        copiedSubj1Skills[0].type == "Skill"
+        copiedSubj1Skills[0].pointIncrement == 100
+        copiedSubj1Skills[0].numMaxOccurrencesIncrementInterval == 1
+        copiedSubj1Skills[0].numPerformToCompletion == 1
+        copiedSubj1Skills[0].expirationType == "NEVER"
+
+        copiedSubj1Skills[1].skillId == p1Subj1Skills[1].skillId
+        copiedSubj1Skills[1].name == p1Subj1Skills[1].name
+        copiedSubj1Skills[1].projectId == p2.projectId
+        copiedSubj1Skills[1].type == "Skill"
+        copiedSubj1Skills[1].pointIncrement == 100
+        copiedSubj1Skills[1].numMaxOccurrencesIncrementInterval == 1
+        copiedSubj1Skills[1].numPerformToCompletion == 1
+        copiedSubj1Skills[1].expirationType == "NEVER"
+    }
+
 }

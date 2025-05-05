@@ -64,6 +64,7 @@ class CopySkillsToAnotherProjSubjSpecs extends CopyIntSpec {
         p1Subj1Skills[0].numMaxOccurrencesIncrementInterval = 1
         p1Subj1Skills[0].description = 'first skill'
         p1Subj1Skills[0].helpUrl = 'https://first.com'
+        p1Subj1Skills[0].enabled = false
 
         p1Subj1Skills[1].pointIncrement = 200
         p1Subj1Skills[1].numPerformToCompletion = 4
@@ -112,6 +113,7 @@ class CopySkillsToAnotherProjSubjSpecs extends CopyIntSpec {
         copiedSubj1Skills[0].quizType == null
         copiedSubj1Skills[0].quizId == null
         copiedSubj1Skills[0].quizName == null
+        copiedSubj1Skills[0].enabled == false
 
         copiedSubj1Skills[1].projectId == p2.projectId
         copiedSubj1Skills[1].type == "Skill"
@@ -123,6 +125,7 @@ class CopySkillsToAnotherProjSubjSpecs extends CopyIntSpec {
         copiedSubj1Skills[1].quizType == null
         copiedSubj1Skills[1].quizId == null
         copiedSubj1Skills[1].quizName == null
+        copiedSubj1Skills[1].enabled == true
 
         copiedSubj1Skills[2].projectId == p2.projectId
         copiedSubj1Skills[2].type == "Skill"
@@ -134,12 +137,14 @@ class CopySkillsToAnotherProjSubjSpecs extends CopyIntSpec {
         copiedSubj1Skills[2].quizType == QuizDefParent.QuizType.Quiz.toString()
         copiedSubj1Skills[2].quizId == quiz.quizId
         copiedSubj1Skills[2].quizName == quiz.name
+        copiedSubj1Skills[2].enabled == true
     }
 
     def "skills from a group to subject are copied"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def skill1 = createSkill(1, 1, 22, 0, 12, 512, 18,)
+        skill1.enabled = false
         def skill2 = createSkill(1, 1, 23, 0, 12, 512, 18,)
 
         def group1 = createSkillsGroup(1, 1, 4)
@@ -170,12 +175,14 @@ class CopySkillsToAnotherProjSubjSpecs extends CopyIntSpec {
         skill1Res.name == original1.name
         skill1Res.type == original1.type
         skill1Res.totalPoints == original1.totalPoints
+        skill1Res.enabled == false
 
         def skill2Res = copiedSkills.find { it.skillId == original2.skillId }
         skill2Res.skillId == original2.skillId
         skill2Res.name == original2.name
         skill2Res.type == original2.type
         skill2Res.totalPoints == original2.totalPoints
+        skill2Res.enabled == true
     }
 
     def "copy skills with attachments in skill's description - attachments should be copied"() {
