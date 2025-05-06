@@ -176,11 +176,12 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
     <Message v-if="!isImported && isDisabled" severity="warn" icon="fa fa-exclamation-triangle" data-cy="skillDisabledWarning" :closable="false">
       This skill is <b>disabled</b> because it's visibility is set to hidden.
     </Message>
-    <div class="md:flex">
-      <div class="flex-1 md:mr-2 mb-2">
+    <div class="flex flex-col gap-3">
+    <div class="flex flex-col lg:flex-row gap-3 h-full">
+      <div class="flex-1">
         <media-info-card
-          :title="`${numberFormat.pretty(totalPoints)} Points`"
           class="h-full"
+          :title="`${numberFormat.pretty(totalPoints)} Points`"
           icon-class="fas fa-calculator text-success"
           data-cy="skillOverviewTotalpoints">
           <strong>{{ numberFormat.pretty(skillInfo.pointIncrement) }}</strong> points <i
@@ -189,38 +190,50 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
           v-if="skillInfo.numPerformToCompletion>1">s</span> to Completion
         </media-info-card>
       </div>
-      <div class="flex-1 mb-2">
+      <div class="flex-1">
         <media-info-card
+            class="h-full"
           :title="timeWindowFormatter.timeWindowTitle(skillInfo)"
-          class="h-full"
           icon-class="fas fa-hourglass-half text-info"
           data-cy="skillOverviewTimewindow">
           {{ timeWindowFormatter.timeWindowDescription(skillInfo) }}
         </media-info-card>
       </div>
     </div>
-    <div class="md:flex">
-      <div class="flex-1 md:mr-2 mb-2">
+    <div class="flex flex-col xl:flex-row gap-3 h-full">
+      <div class="flex-1">
         <media-info-card
+            class="h-full"
           :title="`Version # ${skillInfo.version}`"
-          class="h-full"
           icon-class="fas fa-code-branch text-warning"
           data-cy="skillOverviewVersion">
-          Mechanism of adding new skills without affecting existing software running.
+          Versioning allows adding new skills without affecting existing software.
+          It is relevant when using the skills-client library to visualize skills display and user rankings.
         </media-info-card>
       </div>
-      <div class="flex-1 mb-2">
+      <div class="flex-1">
         <media-info-card
+            class="h-full"
           :title="`Self Report: ${selfReportingTitle}`"
-          class="h-full"
           icon-class="fas fa-laptop skills-color-selfreport"
           data-cy="selfReportMediaCard">
-          <div v-if="skillInfo.selfReportingType && skillInfo.selfReportingType !== 'Disabled'">Users can <i>self report</i> this skill
+          <template #right-of-title  v-if="skillInfo.selfReportingType && skillInfo.selfReportingType !== 'Disabled'">
+            <router-link :to="{ name:'Questions', params: { quizId: skillInfo.quizId } }" data-cy="buttonToQuiz">
+              <SkillsButton
+                  :label="`View ${skillInfo.quizType}`"
+                  icon="fa-solid fa-spell-check"
+                  size="small"/>
+            </router-link>
+          </template>
+          <div v-if="skillInfo.selfReportingType && skillInfo.selfReportingType !== 'Disabled'">
+            Users can <b>self report</b> this skill
             <span v-if="skillInfo.selfReportingType === 'Approval'">and will go into an <b
               class="text-primary">approval</b> queue.</span>
             <span v-if="skillInfo.selfReportingType === 'HonorSystem'">and will apply <b class="text-primary">immediately</b>.</span>
             <span v-if="skillInfo.selfReportingType === 'Quiz'">and points will be awarded after the
               <router-link
+                  class="underline"
+                  data-cy="linkToQuiz"
                 :to="{ name:'Questions', params: { quizId: skillInfo.quizId } }"
               >{{ skillInfo.quizName }}</router-link> {{ skillInfo.quizType
               }} is {{ skillInfo.quizType === 'Survey' ? 'completed' : 'passed' }}!
@@ -231,6 +244,7 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
           </div>
         </media-info-card>
       </div>
+    </div>
     </div>
 
     <Card class="mt-2">
