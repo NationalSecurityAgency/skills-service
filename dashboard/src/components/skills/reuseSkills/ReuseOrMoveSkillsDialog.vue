@@ -117,8 +117,9 @@ const onReuseOrMove = (changedSkills) => {
   movedOrReusedSkills.value = changedSkills
 }
 const hasDestinations = computed(() => destinations.value && destinations.value.length > 0)
-const showStepper = computed(() => !state.value.skillsWereMovedOrReusedAlready && hasDestinations.value && !importFinalizePending.value)
+const showStepper = computed(() => !state.value.skillsWereMovedOrReusedAlready && hasDestinations.value && !importFinalizePending.value && (!hasDisabledSkillSelected.value || !props.isReuseType))
 const importFinalizePending = computed(() => finalizeInfo.value.numSkillsToFinalize && finalizeInfo.value.numSkillsToFinalize > 0)
+const hasDisabledSkillSelected = computed(() => !!props.skills.find(skill => skill.enabled === false))
 
 const onVisibleChanged = (isVisible) => {
   if (!isVisible) {
@@ -158,9 +159,14 @@ const dialogUtils = useDialogUtils()
           :message="`There are no Subjects or Groups that this skill can be ${actionNameInPast} ${actionDirection}. Please create additional subjects and/or groups if you want to ${actionNameLowerCase} skills.`" />
         <no-content2
             class="mt-8 mb-6"
-            v-if="importFinalizePending"
+            v-if="importFinalizePending && hasDestinations"
             :title="`Cannot ${textCustomization.actionName}`"
             :message="`Cannot initiate skill ${actionNameLowerCase} while skill finalization is pending.`"/>
+        <no-content2
+            class="mt-8 mb-6"
+            v-if="hasDisabledSkillSelected && props.isReuseType && hasDestinations && !importFinalizePending"
+            :title="`Cannot ${textCustomization.actionName}`"
+            :message="`Cannot ${actionNameLowerCase} a disabled skill.`"/>
 
         <Stepper v-if="showStepper"  value="1" :linear="true" class="w-100">
           <StepList>

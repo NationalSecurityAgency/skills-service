@@ -89,7 +89,7 @@ const buildNavItems = () => {
     page: 'ConfigureExpiration'
   })
   items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' })
-  if (!isImported?.value && !isReadOnlyProj.value) {
+  if (!isImported?.value && !isReadOnlyProj.value && !isDisabled.value) {
     items.push({
       name: 'Add Event',
       iconClass: 'fa-user-plus skills-color-events',
@@ -102,6 +102,9 @@ const buildNavItems = () => {
 
 const isImported = computed(() => {
   return skillsState.skill && skillsState.skill.copiedFromProjectId && skillsState.skill.copiedFromProjectId.length > 0
+})
+const isDisabled = computed(() => {
+  return skillsState.skill && !skillsState.skill.enabled
 })
 
 // Methods
@@ -187,7 +190,7 @@ const skillId = computed(() => {
           ref="editSkillInPlaceBtn" />
       </template>
       <template #right-of-header
-                v-if="!isLoading && (skillsState.skill.sharedToCatalog || isImported)">
+                v-if="!isLoading && (skillsState.skill.sharedToCatalog || isImported || !skillsState.skill.enabled)">
         <Tag v-if="skillsState.skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i
           class="fas fa-book" aria-hidden="true"></i> EXPORTED
         </Tag>
@@ -198,7 +201,7 @@ const skillId = computed(() => {
         <Tag v-if="!skillsState.skill.enabled"
              severity="secondary"
              class="ml-2" data-cy="disabledSkillBadge"><i
-          class="fas fa-book mr-1" aria-hidden="true"></i> DISABLED</Tag>
+          class="fas fa-eye-slash mr-1" aria-hidden="true"></i> DISABLED</Tag>
       </template>
     </page-header>
     <navigation :nav-items="navItems">

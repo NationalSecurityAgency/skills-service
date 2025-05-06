@@ -53,6 +53,9 @@ const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 const isImported = computed(() => {
   return skillsState.skill && skillsState.skill.copiedFromProjectId && skillsState.skill.copiedFromProjectId.length > 0
 })
+const isDisabled = computed(() => {
+  return skillsState.skill && !skillsState.skill.enabled
+})
 const reversedUsersAdded = computed(() => {
   return usersAdded.value.map((e) => e)
       .reverse();
@@ -68,7 +71,8 @@ const addEventDisabled = computed(() => {
   return Boolean(projectTotalPoints.value < minimumPoints.value
       || subjectState.subject.totalPoints < appConfig.minimumSubjectPoints
       || isImported.value
-      || isReadOnlyProj.value);
+      || isReadOnlyProj.value
+      || isDisabled.value);
 });
 const addEventDisabledMsg = computed(() => {
   if (projectTotalPoints.value < minimumPoints.value) {
@@ -79,6 +83,8 @@ const addEventDisabledMsg = computed(() => {
     return 'Unable to add skill for user. Cannot add events to skills imported from the catalog.';
   } else if (isReadOnlyProj.value) {
     return 'Unable to add skill for user. Project is read only.';
+  } else if (isDisabled.value) {
+    return 'Unable to add skill for user. Cannot add events to skills that are disabled.';
   }
   return '';
 });

@@ -184,6 +184,9 @@ class SkillEventsTransactionalService {
         SkillDate skillDate = new SkillDate(date: incomingSkillDateParam ?: new Date(), isProvided: incomingSkillDateParam != null)
 
         SkillDefMin skillDefinition = getSkillDef(userId, projectId, skillId)
+        if (skillDefinition.enabled != null && !Boolean.valueOf(skillDefinition.enabled)) {
+            throw new SkillException("Cannot report skill events for a skill that is disabled.", projectId, skillId, ErrorCode.ReadOnlySkill)
+        }
         if (Boolean.valueOf(skillDefinition.readOnly) && !skillDefinition.selfReportingType) {
             throw new SkillException("Skills imported from the catalog can only be reported if the original skill is configured for Self Reporting", projectId, skillId, ErrorCode.ReadOnlySkill)
         }

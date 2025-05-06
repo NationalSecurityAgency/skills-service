@@ -78,7 +78,8 @@ onMounted(() => {
 })
 
 const hasDestinations = computed(() => destinations.value && destinations.value.length > 0)
-const showStepper = computed(() => !state.value.addedAlready && hasDestinations.value)
+const showStepper = computed(() => !state.value.addedAlready && hasDestinations.value && !hasDisabledSkillSelected.value)
+const hasDisabledSkillSelected = computed(() => !!props.skills.find(skill => skill.enabled === false))
 
 const onVisibleChanged = (isVisible) => {
   if (!isVisible) {
@@ -181,6 +182,13 @@ const addSkillsToBadge = (navToNextStep) => {
           title="No Badges Available"
           data-cy="noBadgesAvailable"
           message="There are no Badges available. A badge must be created before adding skills to it." />
+
+        <no-content2
+            v-if="hasDisabledSkillSelected && hasDestinations"
+            class="my-8"
+            title="Cannot Add"
+            data-cy="hasDisabledSkillSelected"
+            message="Disabled skills cannot be added to a badge." />
 
         <Stepper v-if="showStepper" :linear="true" class="w-100" value="1">
           <StepList>

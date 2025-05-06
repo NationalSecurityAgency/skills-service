@@ -1117,6 +1117,51 @@ describe('Export Skills to the Catalog Tests', () => {
             .contains('Has Prerequisites');
     });
 
+    it('do not allow to export of disabled skills', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 3);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2, { name: 'Something Else' });
+        cy.createSkill(2, 1, 3, { skillId: 'diffId' });
+        cy.createSkill(2, 1, 4);
+        cy.createSkill(2, 1, 5, { enabled: false });
+        cy.createSkill(2, 1, 6);
+        cy.createSkill(2, 1, 7);
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="manageSkillLink_skill1"]')
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+          .should('have.text', 7);
+
+        // export after loading the page
+        cy.exportSkillToCatalog(2, 1, 7);
+
+        cy.get('[data-cy="skillActionsBtn"]')
+          .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click()
+        cy.contains('Note: The are already 1 skill(s) in the Skill Catalog from the provided selection.');
+        cy.contains('This will export 2 Skills');
+        cy.get('[data-cy="dupSkill-skill1"]')
+          .contains('ID Conflict');
+        cy.get('[data-cy="dupSkill-skill1"]')
+          .contains('Name Conflict');
+        cy.get('[data-cy="dupSkill-skill2"]')
+          .contains('ID Conflict');
+        cy.get('[data-cy="dupSkill-diffId"]')
+          .contains('Name Conflict');
+        cy.get('[data-cy="dupSkill-skill5"]')
+          .contains('Is Disabled');
+    });
+
     it('do not include imported skills in Actions count when selecting all skills in a subject', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);

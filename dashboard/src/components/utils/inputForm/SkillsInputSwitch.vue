@@ -15,6 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { useField } from 'vee-validate'
+import { useSkillsInputFallthroughAttributes } from '@/components/utils/inputForm/UseSkillsInputFallthroughAttributes.js'
 const props = defineProps({
   name: {
     type: String,
@@ -22,11 +23,13 @@ const props = defineProps({
   },
 })
 const { value } = useField(() => props.name)
+const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 </script>
 
 <template>
   <ToggleSwitch
-    v-model="value" />
+      v-bind="fallthroughAttributes.rootAttrs.value"
+      v-model="value" />
 </template>
 
 <style scoped>

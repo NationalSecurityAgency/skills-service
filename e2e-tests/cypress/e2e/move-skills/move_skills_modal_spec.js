@@ -176,4 +176,42 @@ describe('Move Skills Modal Tests', () => {
         cy.get('[data-cy="addSkillToGroupBtn-group11"]')
             .should('have.focus');
     });
+
+    it('can move disabled skill', () => {
+        cy.createSubject(1, 2);
+        cy.createSkill(1, 1, 2, { enabled: false});
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="manageSkillLink_skill2"]')
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+          .click();
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
+          .click();
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
+          .click();
+        cy.get('[data-cy="manageSkillLink_skill2"]').should('not.exist');
+    });
+
+    it('cannot reuse disabled skill', () => {
+        cy.createSubject(1, 2);
+        cy.createSkill(1, 1, 2, { enabled: false});
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
+
+        cy.contains('Cannot reuse a disabled skill.');
+
+        cy.get('[data-cy="destinationList"]')
+          .should('not.exist');
+        cy.get('[data-cy="reuseButton"]')
+          .should('not.exist');
+        cy.get('[data-cy="closeButton"]')
+          .should('not.exist');
+        cy.get('[data-cy="okButton"]')
+          .should('not.exist');
+    });
 });

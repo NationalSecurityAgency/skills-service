@@ -234,6 +234,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
                 where subj.project_id = ?1
                   and subj.skill_id = ?2
                   and child.type = 'Skill'
+                  and child.enabled = 'true'
                   and subj.id = rel.parent_ref_id
                   and child.id = rel.child_ref_id''', nativeQuery=true)
     List<DisplayOrderRes> findDisplayOrderByProjectIdAndSubjectId(String projectId, String subjectId)

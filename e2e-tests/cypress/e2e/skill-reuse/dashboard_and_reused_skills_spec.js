@@ -119,6 +119,53 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains('Cannot initiate skill reuse while skill finalization is pending');
     });
 
+    it('finalization is pending message is shown over disabled skill message', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSubject(2, 2);
+        cy.createSkill(2, 1, 11, { enabled: false});
+
+        cy.importSkillFromCatalog(2, 1, 1, 1);
+        cy.importSkillFromCatalog(2, 1, 1, 2);
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1/');
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]')
+          .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
+
+        cy.get('[data-cy="reuseModalContent"]').should('contain.text', 'Cannot initiate skill reuse while skill finalization is pending');
+        cy.get('[data-cy="reuseModalContent"]').should('not.contain.text', 'Cannot reuse a disabled skill');
+    });
+
+    it('no destinations message is shown over finalization is pending message', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 11, { enabled: false});
+
+        cy.importSkillFromCatalog(2, 1, 1, 1);
+        cy.importSkillFromCatalog(2, 1, 1, 2);
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1/');
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]')
+          .click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
+
+        cy.get('[data-cy="reuseModalContent"]').should('contain.text', 'There are no Subjects or Groups that this skill can be reused in');
+        cy.get('[data-cy="reuseModalContent"]').should('not.contain.text', 'Cannot initiate skill reuse while skill finalization is pending');
+    });
+
     it('cannot initiate reuse when finalization is running', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);

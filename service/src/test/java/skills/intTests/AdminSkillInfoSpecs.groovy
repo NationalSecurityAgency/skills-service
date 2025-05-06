@@ -212,7 +212,7 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         skillsWithGroupSkills.skillId.sort() == [proj1_skills.skillId, group.skillId].flatten().sort()
     }
 
-    def "skills are always enabled and cannot be disabled"() {
+    def "skills are always enabled"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
@@ -227,6 +227,23 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         then:
         skill.enabled == true
         skills[0].enabled == true
+    }
+
+    def "skills can be disabled"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1).each { it.enabled = false }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        when:
+        def skill = skillsService.getSkill(proj1_skills[0])
+        def skills = skillsService.getSkillsForSubject(proj1.projectId, proj1_subj.subjectId)
+        then:
+        skill.enabled == false
+        skills[0].enabled == false
     }
 
     def "get skill info returns 404 for nonexistent skill"() {

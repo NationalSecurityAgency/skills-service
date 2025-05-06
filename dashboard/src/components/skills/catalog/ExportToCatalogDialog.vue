@@ -105,7 +105,7 @@ const prepSkillsForExport = () => {
 
         // re-filter if another user added to the filter or if the changes was made in another tab
         enrichedSkills = enrichedSkills.filter((skill) => !skill.skillAlreadyInCatalog)
-        const isExportableSkill = (skill) => !skill.skillIdConflictsWithExistingCatalogSkill && !skill.skillNameConflictsWithExistingCatalogSkill && !skill.hasDependencies
+        const isExportableSkill = (skill) => !skill.skillIdConflictsWithExistingCatalogSkill && !skill.skillNameConflictsWithExistingCatalogSkill && !skill.hasDependencies && skill.enabled
 
         notExportableSkills.value = enrichedSkills.filter((skill) => !isExportableSkill(skill))
         allSkillsAreDups.value = enrichedSkills.length === notExportableSkills.value.length
@@ -224,6 +224,8 @@ const dialogUtils = useDialogUtils()
                     Conflict
                   </Tag>
                   <Tag severity="warn" v-if="dupSkill.hasDependencies" class="ml-1">Has Prerequisites
+                  </Tag>
+                  <Tag severity="warn" v-if="!dupSkill.enabled" class="ml-1">Is Disabled
                   </Tag>
                 </li>
               </ul>
