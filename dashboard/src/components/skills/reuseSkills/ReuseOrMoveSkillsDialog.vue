@@ -159,12 +159,12 @@ const dialogUtils = useDialogUtils()
           :message="`There are no Subjects or Groups that this skill can be ${actionNameInPast} ${actionDirection}. Please create additional subjects and/or groups if you want to ${actionNameLowerCase} skills.`" />
         <no-content2
             class="mt-8 mb-6"
-            v-if="importFinalizePending"
+            v-if="importFinalizePending && hasDestinations"
             :title="`Cannot ${textCustomization.actionName}`"
             :message="`Cannot initiate skill ${actionNameLowerCase} while skill finalization is pending.`"/>
         <no-content2
             class="mt-8 mb-6"
-            v-if="hasDisabledSkillSelected && props.isReuseType"
+            v-if="hasDisabledSkillSelected && props.isReuseType && hasDestinations && !importFinalizePending"
             :title="`Cannot ${textCustomization.actionName}`"
             :message="`Cannot ${actionNameLowerCase} a disabled skill.`"/>
 
