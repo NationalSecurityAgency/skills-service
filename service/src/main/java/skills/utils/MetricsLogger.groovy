@@ -37,6 +37,8 @@ import skills.services.events.SkillEventResult
 
 import jakarta.annotation.PostConstruct
 
+import java.util.concurrent.RejectedExecutionException
+
 @Component
 @Slf4j
 class MetricsLogger {
@@ -56,6 +58,9 @@ class MetricsLogger {
     @Value('${skills.config.ui.enablePageVisitReporting:#{false}}')
     Boolean enablePageVisitReporting
 
+    @Value('#{"${skills.external.metrics.queueCapacity:1000}"}')
+    int queueCapacity
+
     @Autowired
     UserInfoService userInfoService
 
@@ -72,7 +77,7 @@ class MetricsLogger {
             log.info("Enabling external tool reporting to endpoint [{}]", endpointUrl)
             assert endpointUrl
             restTemplate = new RestTemplate();
-            pool = new CachedThreadPool('metrics-logger', minNumOfThreads, maxNumOfThreads)
+            pool = new CachedThreadPool('metrics-logger', minNumOfThreads, maxNumOfThreads, queueCapacity)
             if (enablePageVisitReporting) {
                 log.info("Page visit reporting is enabled")
             }
@@ -115,18 +120,22 @@ class MetricsLogger {
             // user attributes must be obtained from the current thread
             attributes.putAll(getUserAttributes())
 
-            // report to external service in a separate thread
-            pool.submit([ThreadPoolUtils.callable {
-                MetricsMessage message = new MetricsMessage(attributes)
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<MetricsMessage> entity = new HttpEntity<>(message, headers);
-                try {
-                    restTemplate.put(endpointUrl, entity);
-                } catch(Exception ex) {
-                    log.error("Unable to report to external metrics service", ex)
-                }
-            }])
+            try {
+                // report to external service in a separate thread
+                pool.submit([ThreadPoolUtils.callable {
+                    MetricsMessage message = new MetricsMessage(attributes)
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                    HttpEntity<MetricsMessage> entity = new HttpEntity<>(message, headers);
+                    try {
+                        restTemplate.put(endpointUrl, entity);
+                    } catch (Exception ex) {
+                        log.error("Unable to report to external metrics service", ex)
+                    }
+                }])
+            } catch (RejectedExecutionException ree) {
+                log.error("Queue is full with [${queueCapacity}] items. Request was rejected for: ${attributes}")
+            }
         }
     }
 
