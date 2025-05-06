@@ -15,6 +15,12 @@
  */
 @import './base.css';
 
+/* a workaround for @tsparticles/confetti library blocking all click events, can be removed once
+  https://github.com/tsparticles/tsparticles/issues/5465 ticket is resolved */
+#confetti canvas {
+    pointer-events:none;
+}
+
 .w-min-1rem {
     min-width: 1rem
 }
