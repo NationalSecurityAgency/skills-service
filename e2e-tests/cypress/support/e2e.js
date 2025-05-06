@@ -88,7 +88,7 @@ beforeEach(function () {
             method: 'POST',
             url: '/root/saveEmailSettings',
             body: {
-                publicUrl: 'http://localhost:8082/',
+                publicUrl: 'http://localhost:8080/',
                 fromEmail: 'noreploy@skilltreeemail.org',
                 host: 'localhost',
                 port: 1025,

@@ -29,5 +29,10 @@ export default {
     return axios
       .post(`/api/projects/${encodeURIComponent(projId)}/contact`, { message: msg })
       .then((resp) => resp.data)
+  },
+  requestNewInvite(projId) {
+    return axios
+        .post(`/api/projects/${encodeURIComponent(projId)}/newInviteRequest`)
+        .then((resp) => resp.data)
   }
 }

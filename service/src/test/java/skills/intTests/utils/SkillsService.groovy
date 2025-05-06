@@ -1346,6 +1346,9 @@ class SkillsService {
                 value: Boolean.TRUE.toString().toLowerCase()
         ])
     }
+    def requestNewProjectInvite(String projectId) {
+        return wsHelper.apiPost("/projects/${projectId}/newInviteRequest")
+    }
 
     def changeSetting(String project, String setting, Map value){
         return wsHelper.adminPost(getSettingUrl(project, setting), value)

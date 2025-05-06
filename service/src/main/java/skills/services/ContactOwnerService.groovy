@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.UIConfigProperties
@@ -29,7 +30,9 @@ import skills.notify.EmailNotifier
 import skills.notify.Notifier
 import skills.services.admin.ProjAdminService
 import skills.services.admin.UserCommunityService
+import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.Notification
+import skills.storage.model.ProjDef
 
 @Slf4j
 @Component
@@ -54,10 +57,16 @@ class ContactOwnerService {
     ProjAdminService projAdminService
 
     @Autowired
+    ProjDefAccessor projDefAccessor
+
+    @Autowired
     UserCommunityService userCommunityService
 
     @Autowired
     UIConfigProperties uiConfigProperties
+
+    @Value('#{"${skills.config.ui.docsHost}"}')
+    String docsRootHost = ""
 
     @Transactional
     def contactProjectOwner(String projectId, String msg) {
@@ -92,4 +101,40 @@ class ContactOwnerService {
 
         emailNotifier.sendNotification(request)
     }
+
+    @Transactional
+    def sendInviteRequest(String projectId) {
+        SkillsValidator.isTrue(featureService.isEmailServiceFeatureEnabled(), "Email has not been configured for this instance of SkillTree");
+
+        String publicUrl = featureService.getPublicUrl()
+        if(!publicUrl) {
+            return
+        }
+
+        UserInfo currentUser = userInfoService.getCurrentUser()
+        String displayName = currentUser.getUsernameForDisplay()
+        String email = currentUser.getEmail()
+        ProjDef projDef = projDefAccessor.getProjDef(projectId)
+
+        List<String> projectAdmins = accessSettingsStorageService.getProjectAdminIds(projectId)
+        assert projectAdmins, "a project should never have zero admins"
+
+        String docHostNormalized = docsRootHost.endsWith("/") ? docsRootHost : "${docsRootHost}/"
+        Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                userIds: projectAdmins,
+                type: Notification.Type.NewInviteRequest,
+                keyValParams: [
+                        emailSubject: "User Question regarding ${projDef.name}",
+                        userDisplay: displayName,
+                        projectName: projDef.name,
+                        replyTo: email,
+                        accessPageUrl: "${publicUrl}administrator/projects/${projDef.projectId}/access",
+                        inviteOnlyDocsUrl: "${docHostNormalized}dashboard/user-guide/projects.html#invite-only",
+                        communityHeaderDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
+                ]
+        )
+
+        emailNotifier.sendNotification(request)
+    }
+
 }
