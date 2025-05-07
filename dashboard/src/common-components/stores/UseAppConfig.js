@@ -154,6 +154,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxGraderFeedbackMessageLength = computed(() => config.value.maxGraderFeedbackMessageLength)
   const maxTakeQuizInputTextAnswerLength = computed(() => config.value.maxTakeQuizInputTextAnswerLength)
   const disableEncouragementsConfetti = computed(() => isTrue(config.value.disableEncouragementsConfetti))
+  const maxRolePageSize = computed(() => config.value.maxRolePageSize)
   return {
     loadConfigState,
     refreshConfig,
@@ -248,6 +249,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxHostLength,
     maxGraderFeedbackMessageLength,
     maxTakeQuizInputTextAnswerLength,
-    disableEncouragementsConfetti
+    disableEncouragementsConfetti,
+    maxRolePageSize
   }
 })

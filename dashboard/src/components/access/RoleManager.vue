@@ -205,7 +205,7 @@ function getRoleDisplay(roleName) {
 const loadData = () => {
   isLoading.value = true;
   const pageParams = {
-    limit: 200,
+    limit: appConfig.maxRolePageSize,
     page: 1,
     ascending: sortInfo.value.sortOrder === 1,
     orderBy: sortInfo.value.sortBy

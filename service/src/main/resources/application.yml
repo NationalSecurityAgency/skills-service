@@ -183,6 +183,7 @@ skills:
       videoUploadLoadingBarLengthyCalculationTimeoutRatio: 75000
       activityHistoryStartDate:
       disableEncouragementsConfetti: false
+      maxRolePageSize: 200
     client:
       loggingEnabled: false
       loggingLevel: DEBUG
