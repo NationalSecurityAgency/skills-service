@@ -553,7 +553,7 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(2).should('contain.text', 'in 8 days');
     });
 
-    it('users must be able to request a new invite from the expiration invation page', () => {
+    it('users must be able to request a new invite from the expiration invitation page', () => {
         cy.createProject(1);
         cy.setProjToInviteOnly(1)
         const invalidInvite = '/join-project/proj1/51a1bfd875bb1781e887728f03e3cc700271f1d52a2452a71c5df820824ad28b?pn=Proj'
@@ -573,9 +573,21 @@ describe('Projects Invite-Only Tests', () => {
         cy.getEmails().then((emails) => {
             const reminderEmail = emails.find((e) => e.subject === 'New Invite Request for SkillTree Project')
             expect(reminderEmail.to[0].address).to.equal('skills@skills.org');
-            expect(reminderEmail.text).to.contain('User skills@skills.org for display has requested a new invite for This is project 1 because the current invite is no longer valid.');
+            expect(reminderEmail.text).to.contain('User skills@skills.org has requested a new invite for This is project 1 because the current invite is no longer valid');
         });
 
+    })
+
+    it('do not show request new invite button if email service is not configured', () => {
+        cy.intercept('/public/isFeatureSupported?feature=emailservice', 'false').as('emailFeature')
+        cy.createProject(1);
+        cy.setProjToInviteOnly(1)
+        const invalidInvite = '/join-project/proj1/51a1bfd875bb1781e887728f03e3cc700271f1d52a2452a71c5df820824ad28b?pn=Proj'
+        cy.visit(invalidInvite)
+        cy.wait('@emailFeature')
+
+        cy.get('[data-cy="invalidInvite"]').contains('Unfortunately, this invite to Proj training is no longer valid')
+        cy.get('[data-cy="requestNewInvite"]').should('not.exist')
     })
 
     it('delete expired invite', () => {

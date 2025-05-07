@@ -64,10 +64,11 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
     private RequestMatcher projectsApiRequestMatcher
 
     private static final Pattern CONTACT_EXCEPTION = ~/(?i)api\/projects\/[^\/]+\/contact/
+    private static final Pattern NEW_INVITE_EXCEPTION = ~/(?i)api\/projects\/[^\/]+\/newInviteRequest/
     private static final Pattern JOIN_EXCEPTION = ~/(?i)app\/projects\/[^\/]+\/join\/.*/
     private static final Pattern VALIDATE_EXCEPTION = ~/(?i)app\/projects\/[^\/]+\/validateInvite\/.*/
 
-    private static final List<Pattern> EXCEPTIONS = [CONTACT_EXCEPTION, JOIN_EXCEPTION, VALIDATE_EXCEPTION]
+    private static final List<Pattern> EXCEPTIONS = [CONTACT_EXCEPTION, JOIN_EXCEPTION, VALIDATE_EXCEPTION, NEW_INVITE_EXCEPTION]
 
     @Autowired
     InviteOnlyProjectService inviteOnlyProjectService

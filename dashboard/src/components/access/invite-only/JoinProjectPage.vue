@@ -20,11 +20,13 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import MyProgressService from "@/components/myProgress/MyProgressService.js";
+import {useAppInfoState} from "@/stores/UseAppInfoState.js";
 
 const route = useRoute()
 const router = useRouter()
 const announcer = useSkillsAnnouncer()
 const colors = useColors()
+const appInfoState = useAppInfoState()
 
 const inviteInvalid = ref(false)
 const loading = ref(false)
@@ -144,6 +146,7 @@ watch(() => timer.value, (value) => {
             <p class="mt-3">Common reasons for this include expiration of the invite.</p>
 
             <SkillsButton
+                v-if="appInfoState.emailEnabled"
                 class="mt-3"
                 label="Request New Invite"
                 :icon="joinIcon"

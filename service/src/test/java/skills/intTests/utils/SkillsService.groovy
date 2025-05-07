@@ -69,7 +69,7 @@ class SkillsService {
                 skillsService: service,
                 firstName: userParams.firstName,
                 lastName: userParams.lastName,
-                email: userParams.email,
+                email: userParams.email ?: (userParams.username?.contains("@") ? userParams.username : "${userParams.username}@skills.org"),
                 certificateRegistry: certificateRegistry).init(certificateRegistry != null)
     }
 
