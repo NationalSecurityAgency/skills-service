@@ -84,7 +84,7 @@ const maxConfigReached = computed(() => {
 
 const loadData = () => {
   const pageParams = {
-    limit: 200,
+    limit: appConfig.maxRolePageSize,
     page: 1,
     ascending: sortOrder.value === 1,
     orderBy: sortBy.value,
