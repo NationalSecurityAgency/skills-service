@@ -220,7 +220,7 @@ const toggleTranscript = () => {
                           :options="mediaAttributes"
                           :storeAndRecoverSizeFromStorage="true"
                           :align-center="false" />
-            <div v-if="mediaAttributes.transcript" class="text-center">
+            <div v-if="mediaAttributes.transcript">
               <SkillsButton style="text-decoration: underline; padding-right: 0.25rem; padding-left: 0.5rem;"
                             class="skills-theme-primary-color"
                             :label="!showTranscript ? 'View Transcript' : 'Hide Transcript'"
