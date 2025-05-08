@@ -582,7 +582,7 @@ describe('Metrics Tests', () => {
         cy.matchSnapshotImageForElement('[data-cy=userCountsBySubjectMetric]', visualRegressionOptions);
     });
 
-    it.only('subjects - num users per level - many subjects', () => {
+    it('subjects - num users per level - many subjects', () => {
         const response = [];
         for (let i = 0; i < 15; i += 1) {
             response.push(createSubjectObj(`Subject # ${i}`, [1265, 852, 493, 625, 293]));
