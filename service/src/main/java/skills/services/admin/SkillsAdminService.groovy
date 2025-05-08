@@ -177,7 +177,12 @@ class SkillsAdminService {
         }
 
         final isCurrentlyEnabled = Boolean.valueOf(skillDefinition?.enabled)
+        final boolean isEnabledSkillInRequest = Boolean.valueOf(skillRequest.enabled)
+        final boolean isEdit = skillDefinition
 
+        if (isEdit && isCurrentlyEnabled && !isEnabledSkillInRequest) {
+            throw new SkillException("Skill [${originalSkillId}] has already been enabled and cannot be disabled.", skillRequest.projectId, null, ErrorCode.BadParam)
+        }
 
         if (skillDefinition && !groupId) {
             groupId = skillDefinition.groupId
@@ -190,14 +195,12 @@ class SkillsAdminService {
         int numSkillsRequiredDelta = 0
 
         final SkillDef.ContainerType skillType = skillRequest.type ? SkillDef.ContainerType.valueOf(skillRequest.type) : SkillDef.ContainerType.Skill;
-        final boolean isEdit = skillDefinition
         final boolean isSkillsGroup = skillType == SkillDef.ContainerType.SkillsGroup
         final boolean isSkillsGroupChild = StringUtils.isNotBlank(groupId)
         int totalPointsRequested = isSkillsGroup ? 0 : skillRequest.pointIncrement * skillRequest.numPerformToCompletion
         final int incrementRequested = isSkillsGroup ? 0 : skillRequest.pointIncrement
         final int currentOccurrences = isEdit && !isSkillsGroup ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
         final SelfReportingType selfReportingType = skillRequest.selfReportingType && !isSkillsGroup ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
-        final boolean isEnabledSkillInRequest = Boolean.valueOf(skillRequest.enabled)
         final boolean isJustificationRequiredInRequest = Boolean.valueOf(skillRequest.justificationRequired)
         final boolean isSkillCatalogImport = skillRequest instanceof SkillImportRequest;
         final boolean isReplicationRequest = skillRequest instanceof ReplicatedSkillUpdateRequest

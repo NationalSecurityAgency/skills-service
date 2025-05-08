@@ -199,5 +199,21 @@ class DisabledSkillsSpecs extends DefaultIntSpec {
         ex.message.contains("Skill [skill1] is not enabled,")
     }
 
+    def "cannot disable an already enabled skill"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(3, 1, 1)
+        proj1_skills[0].enabled = true
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, proj1_skills)
+
+        when:
+        proj1_skills[0].enabled = false
+        skillsService.updateSkill(proj1_skills[0], proj1_skills[0].skillId)
+        then:
+
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill [${proj1_skills[0].skillId}] has already been enabled and cannot be disabled.")
+    }
+
 
 }
