@@ -188,6 +188,25 @@ Cypress.Commands.add("enableProdMode", (projNum) => {
     });
 });
 
+Cypress.Commands.add("setProjToInviteOnly", (projNum) => {
+    const inviteOnlySetting = 'invite_only'
+    cy.request('POST', `/admin/projects/proj${projNum}/settings/${inviteOnlySetting}`, {
+        projectId: `proj${projNum}`,
+        setting: inviteOnlySetting,
+        value: 'true'
+    });
+});
+
+Cypress.Commands.add("inviteUser", (projNum, userEmail) => {
+    const inviteOnlySetting = 'invite_only'
+    cy.request('POST', `/admin/projects/proj${projNum}/invite`, {
+        recipients: [userEmail],
+        validityDuration: 'P7D',
+    });
+});
+
+
+
 Cypress.Commands.add("saveVideoAttrs", (container, item, videoAttrs, quiz = false) => {
     const url = quiz ? `/admin/quiz-definitions/quiz${container}/questions/${item}/video` : `/admin/projects/proj${container}/skills/skill${item}/video`;
 

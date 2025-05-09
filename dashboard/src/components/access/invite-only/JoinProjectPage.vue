@@ -19,11 +19,14 @@ import AccessService from '@/components/access/AccessService.js'
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import MyProgressService from "@/components/myProgress/MyProgressService.js";
+import {useAppInfoState} from "@/stores/UseAppInfoState.js";
 
 const route = useRoute()
 const router = useRouter()
 const announcer = useSkillsAnnouncer()
 const colors = useColors()
+const appInfoState = useAppInfoState()
 
 const inviteInvalid = ref(false)
 const loading = ref(false)
@@ -62,6 +65,20 @@ const join = () => {
   }
 }
 
+const sendingRequestForNewInvite = ref(false)
+const requestForNewInviteSent = ref(false)
+const requestNewInvite = () => {
+  sendingRequestForNewInvite.value = true
+  const projId = route.params.pid
+  MyProgressService.requestNewInvite(projId)
+      .then(() => {
+        requestForNewInviteSent.value = true
+      })
+      .finally(() => {
+        sendingRequestForNewInvite.value = false
+      })
+}
+
 watch(() => timer.value, (value) => {
   if (value > 0) {
     setTimeout(() => {
@@ -80,8 +97,9 @@ watch(() => timer.value, (value) => {
         <i class="text-surface-0 dark:text-surface-900 text-6xl fa fa-users" aria-hidden="true"></i>
       </div>
     </div>
-    <div class="text-center">
-      <h1 class="text-2xl text-primary"><span v-if="joined">Enrolled!</span><span v-else>Enroll in Training</span></h1>
+    <div class="text-center text-2xl">
+      <h1 class="text-primary" v-if="!inviteInvalid"><span v-if="joined">Enrolled!</span><span v-else>Enroll in Training</span></h1>
+      <h1 class="text-red-800 dark:text-red-200" v-if="inviteInvalid">Invalid Invite</h1>
     </div>
     <div class="max-w-lg lg:max-w-xl mx-auto text-center mt-4">
       <Card class="mt-4">
@@ -89,7 +107,7 @@ watch(() => timer.value, (value) => {
       <skills-spinner :is-loading="loading" />
       <div v-if="!loading">
         <div class="text-center">
-          <div v-if="!joined">
+          <div v-if="!joined && !inviteInvalid">
             <div class="mb-2">
               <p>
                 Exciting News! You're Invited to <span class="text-primary font-bold">{{ projectName }}</span>!
@@ -106,7 +124,6 @@ watch(() => timer.value, (value) => {
                 label="Join Now"
                 :icon="joinIcon"
                 @click="join"
-                :disabled="inviteInvalid"
                 data-cy="joinProject" />
           </div>
           <div v-if="joined">
@@ -124,7 +141,32 @@ watch(() => timer.value, (value) => {
             <Message :closable="false" class="mt-3">Click 'Get Started' to proceed immediately, or wait and you'll be redirected automatically in <Tag>{{ timer }}</Tag> seconds.</Message>
 
           </div>
-          <Message v-if="inviteInvalid" :closable="false" severity="error">{{ invalidMsg }}</Message>
+          <div v-if="inviteInvalid && !requestForNewInviteSent" data-cy="invalidInvite">
+            <p>Unfortunately, this invite to <span class="text-primary font-bold">{{ projectName }}</span> training is no longer valid.</p>
+            <p class="mt-3">Common reasons for this include expiration of the invite.</p>
+
+            <SkillsButton
+                v-if="appInfoState.emailEnabled"
+                class="mt-3"
+                label="Request New Invite"
+                :icon="joinIcon"
+                @click="requestNewInvite"
+                :loading="sendingRequestForNewInvite"
+                data-cy="requestNewInvite" />
+          </div>
+          <div v-if="requestForNewInviteSent" data-cy="inviteRequestSent">
+            <Message :closable="false">Request was sent. Thank your for your patience!</Message>
+
+            <router-link to="/" data-cy="takeMeHome">
+              <SkillsButton
+                  label="Take Me Home"
+                  icon="fas fa-home"
+                  outlined
+                  size="medium"
+                  severity="info"
+                  class="mt-8" />
+            </router-link>
+          </div>
         </div>
       </div>
     </template>

@@ -57,4 +57,10 @@ class ContactOwnersController {
         return RequestResult.success()
     }
 
+    @PostMapping(value="/projects/{projectId}/newInviteRequest", produces = "application/json")
+    RequestResult newInviteRequest(@PathVariable("projectId") String projectId) {
+        contactOwnersService.sendInviteRequest(projectId)
+        return RequestResult.success()
+    }
+
 }

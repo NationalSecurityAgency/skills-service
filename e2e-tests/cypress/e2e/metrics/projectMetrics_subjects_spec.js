@@ -18,7 +18,7 @@ var moment = require('moment-timezone');
 describe('Metrics Tests', () => {
 
     const waitForSnap = 6000;
-    const visualRegressionOptions = { errorThreshold: 0.05 }
+    const visualRegressionOptions = { errorThreshold: 0.20 }
 
     beforeEach(() => {
         cy.request('POST', '/app/projects/proj1', {

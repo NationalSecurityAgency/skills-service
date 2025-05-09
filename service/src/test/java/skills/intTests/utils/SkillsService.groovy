@@ -69,7 +69,7 @@ class SkillsService {
                 skillsService: service,
                 firstName: userParams.firstName,
                 lastName: userParams.lastName,
-                email: userParams.email,
+                email: userParams.email ?: (userParams.username?.contains("@") ? userParams.username : "${userParams.username}@skills.org"),
                 certificateRegistry: certificateRegistry).init(certificateRegistry != null)
     }
 
@@ -1345,6 +1345,9 @@ class SkillsService {
                 projectId: projectId, setting: Settings.INVITE_ONLY_PROJECT.settingName,
                 value: Boolean.TRUE.toString().toLowerCase()
         ])
+    }
+    def requestNewProjectInvite(String projectId) {
+        return wsHelper.apiPost("/projects/${projectId}/newInviteRequest")
     }
 
     def changeSetting(String project, String setting, Map value){

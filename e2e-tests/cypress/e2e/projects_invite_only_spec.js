@@ -553,6 +553,45 @@ describe('Projects Invite-Only Tests', () => {
         cy.get('[data-cy="projectInviteStatusTable"] tr').eq(2).children('td').eq(2).should('contain.text', 'in 8 days');
     });
 
+    it('users must be able to request a new invite from the expiration invitation page', () => {
+        cy.createProject(1);
+        cy.setProjToInviteOnly(1)
+        const invalidInvite = '/join-project/proj1/51a1bfd875bb1781e887728f03e3cc700271f1d52a2452a71c5df820824ad28b?pn=Proj'
+        cy.visit(invalidInvite)
+
+        cy.get('[data-cy="invalidInvite"]').contains('Unfortunately, this invite to Proj training is no longer valid')
+        cy.get('[data-cy="inviteRequestSent"]').should('not.exist')
+        cy.get('[data-cy="requestNewInvite"]').click()
+
+        cy.get('[data-cy="invalidInvite"]').should('not.exist')
+        cy.get('[data-cy="requestNewInvite"]').should('not.exist')
+        cy.get('[data-cy="inviteRequestSent"]')
+        cy.get('[data-cy="takeMeHome"]')
+            .should('have.attr', 'href', '/');
+
+        cy.fixture('vars.json')
+            .then((vars) => {
+                cy.getEmails().then((emails) => {
+                    const userId = Cypress.env('oauthMode') ? vars.oauthUser : vars.defaultUser;
+                    const reminderEmail = emails.find((e) => e.subject === 'New Invite Request for SkillTree Project')
+                    expect(reminderEmail.to[0].address).to.equal(userId);
+                    expect(reminderEmail.text).to.contain(`requested a new invite for This is project 1 because the current invite is no longer valid`);
+                });
+            });
+    })
+
+    it('do not show request new invite button if email service is not configured', () => {
+        cy.intercept('/public/isFeatureSupported?feature=emailservice', 'false').as('emailFeature')
+        cy.createProject(1);
+        cy.setProjToInviteOnly(1)
+        const invalidInvite = '/join-project/proj1/51a1bfd875bb1781e887728f03e3cc700271f1d52a2452a71c5df820824ad28b?pn=Proj'
+        cy.visit(invalidInvite)
+        cy.wait('@emailFeature')
+
+        cy.get('[data-cy="invalidInvite"]').contains('Unfortunately, this invite to Proj training is no longer valid')
+        cy.get('[data-cy="requestNewInvite"]').should('not.exist')
+    })
+
     it('delete expired invite', () => {
         cy.createProject(1);
         cy.intercept('GET', '/admin/projects/proj1/settings')

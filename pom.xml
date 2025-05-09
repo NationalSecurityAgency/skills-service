@@ -39,7 +39,7 @@
 
         <logback-access.version>2.0.6</logback-access.version>
 
-        <greenmail.version>2.0.0</greenmail.version>
+        <greenmail.version>2.1.3</greenmail.version>
         <wiremock-standalone.version>3.13.0</wiremock-standalone.version>
         <owasp.encoder.version>1.2.3</owasp.encoder.version>
 
