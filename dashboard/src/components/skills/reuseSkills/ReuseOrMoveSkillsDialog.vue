@@ -145,7 +145,7 @@ const dialogUtils = useDialogUtils()
   >
     <div data-cy="reuseOrMoveDialog">
       <skills-spinner :is-loading="isLoadingData" class="my-20" />
-      <div v-if="!isLoadingData" data-cy="reuseModalContent" class="w-100">
+      <div v-if="!isLoadingData" data-cy="reuseModalContent" class="w-full">
         <no-content2
           class="mt-8 mb-6"
           v-if="state.skillsWereMovedOrReusedAlready"
@@ -168,7 +168,7 @@ const dialogUtils = useDialogUtils()
             :title="`Cannot ${textCustomization.actionName}`"
             :message="`Cannot ${actionNameLowerCase} a disabled skill.`"/>
 
-        <Stepper v-if="showStepper"  value="1" :linear="true" class="w-100">
+        <Stepper v-if="showStepper"  value="1" :linear="true" class="w-full">
           <StepList>
             <Step value="1">Select Destination</Step>
             <Step value="2">Preview</Step>
