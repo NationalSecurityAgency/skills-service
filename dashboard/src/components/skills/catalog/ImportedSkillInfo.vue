@@ -17,7 +17,7 @@ limitations under the License.
 import { onMounted, ref, computed } from 'vue'
 import CatalogService from '@/components/skills/catalog/CatalogService.js'
 import DateCell from '@/components/utils/table/DateCell.vue'
-import ContactOwnersDialog from '@/components/myProgress/ContactOwnersDialog.vue'
+import ContactProjectAdminsDialog from "@/components/contact/ContactProjectAdminsDialog.vue";
 
 const props = defineProps({
   skill: Object
@@ -111,11 +111,10 @@ const contactProjAdmins = (projInfo) => {
       <Message :closable="false">This skill has not been imported by any other projects yet...</Message>
     </div>
 
-    <contact-owners-dialog
+    <contact-project-admins-dialog
       v-if="contactDialog.show"
       v-model="contactDialog.show"
       :project-id="contactDialog.projectId"
-      :project-name="contactDialog.projectName"
        />
   </div>
 </template>

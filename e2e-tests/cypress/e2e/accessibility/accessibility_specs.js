@@ -449,5 +449,14 @@ describe('Accessibility Tests', () => {
             cy.customA11y();
         });
 
+        it(`support page should use configuration${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/support')
+            cy.injectAxe();
+            cy.get('h1').contains('Support Center')
+            cy.contains('f you have a feature request, need to report a bug, or ')
+            cy.customLighthouse();
+            cy.customA11y();
+        });
     })
 });

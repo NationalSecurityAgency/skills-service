@@ -18,7 +18,7 @@ import { ref, computed } from 'vue'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import { useRoute } from 'vue-router'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
-import ContactOwnersDialog from '@/components/myProgress/ContactOwnersDialog.vue'
+import ContactProjectAdminsDialog from "@/components/contact/ContactProjectAdminsDialog.vue";
 
 const appInfo = useAppInfoState()
 const route = useRoute()
@@ -55,11 +55,9 @@ const projectId = computed(() => route.params.projectId)
         </template>
       </Card>
     </div>
-    <contact-owners-dialog v-if="showContact"
+    <contact-project-admins-dialog v-if="showContact"
                            v-model="showContact"
-                           :project-id="projectId"
-                           :project-name="projectId"
-                            />
+                           :project-id="projectId" />
   </div>
 </template>
 

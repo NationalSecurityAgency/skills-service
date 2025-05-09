@@ -16,31 +16,19 @@ limitations under the License.
 <script setup>
 import SkillTreeArrows from '@/components/header/SkillTreeArrows.vue'
 import dayjs from 'dayjs'
-import { computed } from 'vue'
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import {computed} from 'vue'
+import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
+import {useSupportLinksUtil} from "@/components/contact/UseSupportLinksUtil.js";
 
 const appConfig = useAppConfig()
+const supportLinksUtil = useSupportLinksUtil()
 
 const skillTreeVersionTitle = computed(() => {
     const dateString = dayjs(appConfig.artifactBuildTimestamp).format('llll [(]Z[ from UTC)]')
     return `Build Date: ${dateString}`
   }
 )
-const supportLinksProps = computed(() => {
-  // const configs = this.$store.getters.config
-  // const dupKeys = appConfig.getConfigsThatStartsWith('supportLink')
-  //   .map((filteredConf) => filteredConf.substr(0, 12))
-  const configs = appConfig.getConfigsThatStartsWith('supportLink')
-  const dupKeys = Object.keys(configs).map((conf) => conf.substring(0, 12))
-  //Object.keys(configs).filter((conf) => conf.startsWith('supportLink')).map((filteredConf) => filteredConf.substr(0, 12))
-  const keys = dupKeys.filter((v, i, a) => a.indexOf(v) === i)
-  return keys.map((key) => ({
-    link: configs[key],
-    label: configs[`${key}Label`],
-    icon: configs[`${key}Icon`]
-  }))
-})
-
+const supportLinksProps = supportLinksUtil.supportLinks
 
 </script>
 
@@ -55,7 +43,8 @@ const supportLinksProps = computed(() => {
         </div>
         <div v-if="supportLinksProps && supportLinksProps.length > 0" class="">
               <span v-for="(supportLink, index) in supportLinksProps" :key="supportLink.label">
-                <a :href="supportLink.link" class="underline" :data-cy="`supportLink-${supportLink.label}`"
+                <a :href="supportLink.url" class="underline cursor-pointer" :data-cy="`supportLink-${supportLink.label}`"
+                   @click="supportLink.command"
                    target="_blank"><i :class="supportLink.icon" class="mr-1" aria-hidden="true"/>{{ supportLink.label}}</a>
                 <span v-if="index < supportLinksProps.length - 1" class="mx-1">|</span>
               </span>
