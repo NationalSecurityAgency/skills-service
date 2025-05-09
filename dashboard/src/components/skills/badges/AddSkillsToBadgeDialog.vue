@@ -174,7 +174,7 @@ const addSkillsToBadge = (navToNextStep) => {
     <div data-cy="addSkillsToBadgeModalContent">
       <skills-spinner :is-loading="isLoadingData" class="my-20" />
 
-      <div v-if="!isLoadingData" class="w-100">
+      <div v-if="!isLoadingData" class="w-full">
 
         <no-content2
           v-if="!hasDestinations"
@@ -190,7 +190,7 @@ const addSkillsToBadge = (navToNextStep) => {
             data-cy="hasDisabledSkillSelected"
             message="Disabled skills cannot be added to a badge." />
 
-        <Stepper v-if="showStepper" :linear="true" class="w-100" value="1">
+        <Stepper v-if="showStepper" :linear="true" class="w-full" value="1">
           <StepList>
             <Step value="1">Select Destination</Step>
             <Step value="2">Preview</Step>

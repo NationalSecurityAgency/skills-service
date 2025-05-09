@@ -22,7 +22,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <div v-if="loading" class="card h-100 w-100">
+  <div v-if="loading" class="card h-100 w-full">
     <div class="card-body h-100 text-center">
       <SkillsSpinner variant="info" label="Spinning" style="width: 3rem; height: 3rem;"  class="mt-8"></SkillsSpinner>
     </div>
