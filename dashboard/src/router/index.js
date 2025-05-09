@@ -94,6 +94,7 @@ import SkillsClientPath from '@/router/SkillsClientPath.js'
 import log from 'loglevel'
 import UserArchivePage from '@/components/users/UserArchivePage.vue';
 import UsersTablePage from '@/components/users/UsersTablePage.vue';
+import SupportPage from "@/components/contact/SupportPage.vue";
 
 const routes = [
   {
@@ -920,6 +921,17 @@ const routes = [
       requiresAuth: true,
       announcer: {
         message: 'User Agreement',
+      },
+    },
+  },
+  {
+    path: '/support',
+    component: SupportPage,
+    name: 'SupportPage',
+    meta: {
+      requiresAuth: true,
+      announcer: {
+        message: 'Customer Support',
       },
     },
   }

@@ -183,6 +183,12 @@ skills:
       videoUploadLoadingBarLengthyCalculationTimeoutRatio: 75000
       activityHistoryStartDate:
       disableEncouragementsConfetti: false
+      contactSupportEnabled: false
+      contactSupportExternalUrl: https://skilltreeplatform.dev/
+      contactSupportExternalTitle: Support Center
+      contactSupportExternalDescription: If you have a feature request, need to report a bug, or simply have a question, the best way to get assistance is to visit the Support Center and create a ticket.
+      contactSupportExternalEmail: someSupport@someDomain.com
+      contactSupportExternalEmailDescription: As an alternative, you can reach out to the SkillTree team by sending an email to
     client:
       loggingEnabled: false
       loggingLevel: DEBUG

@@ -1,5 +1,5 @@
 /*
-Copyright 2024 SkillTree
+Copyright 2025 SkillTree
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,30 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-defineProps({
-  isLoading: {
-    type: Boolean,
-    required: true,
-  },
-  sizeInRem: {
-    type: Number,
-    default: 3
-  },
-  isCentered: {
-    type: Boolean,
-    default: true
-  },
-  isInline: {
-    type: Boolean,
-    default: false
-  }
-});
+
+import SkillsDialog from "@/components/utils/inputForm/SkillsDialog.vue";
+
+const model = defineModel()
+
+const close = () => {
+  model.value = false
+}
 </script>
 
 <template>
-  <div v-if="isLoading" :class="{ 'd-flex justify-center text-center' : isCentered, 'inline-block': isInline }">
-    <ProgressSpinner aria-label="Loading" :style="`width: ${sizeInRem}rem; height: ${sizeInRem}rem;`" />
-  </div>
+  <SkillsDialog
+      :style="{ width: '35rem' }"
+      v-model="model"
+      header="SkillTree Support"
+      @on-cancel="close"
+      ok-button-label="Got It"
+      ok-button-icon="fa-solid fa-clipboard-check"
+      :show-cancel-button="false"
+      :maximizable="false"
+  >
+    Select project
+  </SkillsDialog>
 </template>
 
-<style scoped></style>
+<style scoped>
+
+</style>

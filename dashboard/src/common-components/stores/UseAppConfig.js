@@ -154,6 +154,13 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxGraderFeedbackMessageLength = computed(() => config.value.maxGraderFeedbackMessageLength)
   const maxTakeQuizInputTextAnswerLength = computed(() => config.value.maxTakeQuizInputTextAnswerLength)
   const disableEncouragementsConfetti = computed(() => isTrue(config.value.disableEncouragementsConfetti))
+  const contactSupportEnabled = computed(() => isTrue(config.value.contactSupportEnabled))
+  const contactSupportExternalUrl = computed(() => config.value.contactSupportExternalUrl)
+  const contactSupportExternalTitle = computed(() => config.value.contactSupportExternalTitle)
+  const contactSupportExternalDescription = computed(() => config.value.contactSupportExternalDescription)
+  const contactSupportExternalEmail = computed(() => config.value.contactSupportExternalEmail)
+  const contactSupportExternalEmailDescription = computed(() => config.value.contactSupportExternalEmailDescription)
+
   return {
     loadConfigState,
     refreshConfig,
@@ -248,6 +255,12 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxHostLength,
     maxGraderFeedbackMessageLength,
     maxTakeQuizInputTextAnswerLength,
-    disableEncouragementsConfetti
+    disableEncouragementsConfetti,
+    contactSupportEnabled,
+    contactSupportExternalUrl,
+    contactSupportExternalTitle,
+    contactSupportExternalDescription,
+    contactSupportExternalEmail,
+    contactSupportExternalEmailDescription
   }
 })

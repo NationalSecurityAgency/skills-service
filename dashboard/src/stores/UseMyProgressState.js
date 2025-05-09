@@ -39,10 +39,20 @@ export const useMyProgressState = defineStore('myProgressState', () => {
 
   const hasProjects = computed(() => myProjects.value && myProjects.value?.length > 0)
 
+  function afterMyProjectsLoaded() {
+    return new Promise((resolve) => {
+      (function waitForMyProgress() {
+        if (!isLoadingMyProgressSummary.value) return resolve(myProjects.value)
+        setTimeout(waitForMyProgress, 100)
+        return myProjects.value
+      }())
+    })
+  }
 
   return {
     isLoadingMyProgressSummary,
     loadMyProgressSummary,
+    afterMyProjectsLoaded,
     hasProjects,
     myProjects,
     myProgress,

@@ -22,8 +22,8 @@ import ProjectService from '@/components/projects/ProjectService.js'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useWindowSize } from '@vueuse/core'
 import ResponsiveBreakpoints from '@/components/utils/misc/ResponsiveBreakpoints.js'
-import ContactOwnersDialog from '@/components/myProgress/ContactOwnersDialog.vue'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
+import ContactProjectAdminsDialog from "@/components/contact/ContactProjectAdminsDialog.vue";
 
 const route = useRoute()
 const projectId = route.params.projectId
@@ -101,9 +101,8 @@ const handleProjInvitation = () => {
     </div>
     <skills-display-home :id="projectId" class="my-4" />
 
-    <contact-owners-dialog v-if="showContact"
+    <contact-project-admins-dialog v-if="showContact"
                            v-model="showContact"
-                           :project-name="skillsDisplayAttributes.projectName"
                            :project-id="projectId"
                            save-button-label="Submit"
     />
