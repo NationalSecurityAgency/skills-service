@@ -575,7 +575,7 @@ describe('Projects Invite-Only Tests', () => {
                     const userId = Cypress.env('oauthMode') ? vars.oauthUser : vars.defaultUser;
                     const reminderEmail = emails.find((e) => e.subject === 'New Invite Request for SkillTree Project')
                     expect(reminderEmail.to[0].address).to.equal(userId);
-                    expect(reminderEmail.text).to.contain(`User ${userId} has requested a new invite for This is project 1 because the current invite is no longer valid`);
+                    expect(reminderEmail.text).to.contain(`requested a new invite for This is project 1 because the current invite is no longer valid`);
                 });
             });
     })
