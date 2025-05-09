@@ -131,7 +131,7 @@ limitations under the License.
                     "\n\n" +
                     "\nAlways yours," +
                     "\nSkillTree Bot".replaceAll('\r\n', '\n')
-            assert message.recipients.sort() == [skillsServiceUser.email, userAttrs[0].email, userAttrs[1].email]
+            assert message.recipients.sort() == [skillsServiceUser.email, userAttrs[0].email, userAttrs[1].email].sort()
         }
     }
 
