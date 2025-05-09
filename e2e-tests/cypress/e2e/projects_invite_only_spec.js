@@ -572,8 +572,8 @@ describe('Projects Invite-Only Tests', () => {
 
         cy.getEmails().then((emails) => {
             const reminderEmail = emails.find((e) => e.subject === 'New Invite Request for SkillTree Project')
-            expect(reminderEmail.to[0].address).to.equal('skills@skills.org');
-            expect(reminderEmail.text).to.contain('User skills@skills.org has requested a new invite for This is project 1 because the current invite is no longer valid');
+            expect(reminderEmail.to[0].address).to.equal(Cypress.env('proxyUser'));
+            expect(reminderEmail.text).to.contain(`User ${Cypress.env('proxyUser')} has requested a new invite for This is project 1 because the current invite is no longer valid`);
         });
 
     })
