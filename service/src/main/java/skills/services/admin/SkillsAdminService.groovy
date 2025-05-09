@@ -175,10 +175,6 @@ class SkillsAdminService {
                 throw new SkillException("Skill with name [${skillRequest.name}] already exists! Sorry!", skillRequest.projectId, null, ErrorCode.ConstraintViolation)
             }
         }
-
-        final isCurrentlyEnabled = Boolean.valueOf(skillDefinition?.enabled)
-
-
         if (skillDefinition && !groupId) {
             groupId = skillDefinition.groupId
         }
@@ -197,6 +193,7 @@ class SkillsAdminService {
         final int incrementRequested = isSkillsGroup ? 0 : skillRequest.pointIncrement
         final int currentOccurrences = isEdit && !isSkillsGroup ? (skillDefinition.totalPoints / skillDefinition.pointIncrement) : -1
         final SelfReportingType selfReportingType = skillRequest.selfReportingType && !isSkillsGroup ? SkillDef.SelfReportingType.valueOf(skillRequest.selfReportingType) : null;
+        final isCurrentlyEnabled = Boolean.valueOf(skillDefinition?.enabled)
         final boolean isEnabledSkillInRequest = Boolean.valueOf(skillRequest.enabled)
         final boolean isJustificationRequiredInRequest = Boolean.valueOf(skillRequest.justificationRequired)
         final boolean isSkillCatalogImport = skillRequest instanceof SkillImportRequest;
@@ -215,6 +212,10 @@ class SkillsAdminService {
             if (StringUtils.isBlank(skillRequest.justificationRequired)) {
                 skillRequest.justificationRequired = skillDefinition.justificationRequired
             }
+            if (isEdit && isCurrentlyEnabled && !isEnabledSkillInRequest) {
+                throw new SkillException("Skill [${originalSkillId}] has already been enabled and cannot be disabled.", skillRequest.projectId, null, ErrorCode.BadParam)
+            }
+
             if (isSkillsGroup) {
                 // need to update total points for the group
                 groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillRequest, skillDefinition)
