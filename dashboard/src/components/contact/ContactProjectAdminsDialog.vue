@@ -37,6 +37,10 @@ const props = defineProps({
     type: String,
     required: false
   },
+  useProjectIdAsName: {
+    type: Boolean,
+    required: false
+  },
   saveButtonLabel: {
     type: String,
     default: 'Send'
@@ -53,13 +57,18 @@ onMounted(() => {
   const projectId = props.projectId || route.params.projectId;
   if (projectId) {
     preparingMyProjectSelector.value = false
-    ProjectService.getProject(projectId)
-        .then((proj) => {
-          projectInfo.value = {...proj, projectName: proj.name};
-        })
-        .finally(() => {
-          loadingData.value = false;
-        })
+    if (props.useProjectIdAsName) {
+      projectInfo.value = {projectId: projectId, projectName: projectId};
+      loadingData.value = false;
+    } else {
+      ProjectService.getProject(projectId)
+          .then((proj) => {
+            projectInfo.value = {...proj, projectName: proj.name};
+          })
+          .finally(() => {
+            loadingData.value = false;
+          })
+    }
   } else {
     myProgressState.afterMyProjectsLoaded()
         .then((myProjects) => {

@@ -19,7 +19,7 @@ describe('Contact Support Specs', () => {
 
     });
 
-    it('contact support can disabled', () => {
+    it('contact support can be disabled', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;

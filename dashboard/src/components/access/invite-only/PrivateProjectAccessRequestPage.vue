@@ -57,7 +57,8 @@ const projectId = computed(() => route.params.projectId)
     </div>
     <contact-project-admins-dialog v-if="showContact"
                            v-model="showContact"
-                           :project-id="projectId" />
+                           :project-id="projectId"
+                           :use-project-id-as-name="true"/>
   </div>
 </template>
 
