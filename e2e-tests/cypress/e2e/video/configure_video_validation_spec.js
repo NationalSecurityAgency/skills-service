@@ -36,18 +36,19 @@ describe('Configure Video Validation Tests', () => {
         cy.visitVideoConfPage();
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="videoCaptions"]').type(defaultCaption, { delay: 0 })
+        cy.get('[data-pc-section="mask"]').should('not.exist')
+        cy.get('[data-cy="videoCaptions"]').type(defaultCaption)
         cy.get('[data-cy="videoCaptionsError"]').contains('Captions are not valid without a Video')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
 
-        cy.get('[data-cy="videoTranscript"]').type('transcript', { delay: 0 })
+        cy.get('[data-cy="videoTranscript"]').type('transcript')
         cy.get('[data-cy="videoTranscriptError"]').contains('Transcript is not valid without a Video')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
 
         cy.get('[data-cy="showExternalUrlBtn"]').click()
-        cy.get('[data-cy="videoUrl"]').type(testVideo, { delay: 0 })
+        cy.get('[data-cy="videoUrl"]').type(testVideo)
 
         cy.get('[data-cy="videoCaptionsError"]').should('not.be.visible')
         cy.get('[data-cy="videoTranscriptError"]').should('not.be.visible')

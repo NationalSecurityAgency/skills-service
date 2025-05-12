@@ -304,10 +304,24 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.get('[data-cy="selfReportMediaCard"]').contains('Self Report: Quiz')
         cy.get('[data-cy="selfReportMediaCard"]').contains('Users can self report this skill and points will be awarded after the Test Your Trivia Knowledge Quiz is passed!')
+        cy.get('[data-cy="linkToQuiz"]')
+            .should('have.attr', 'href')
+            .and('include', '/administrator/quizzes/quiz1');
+        cy.get('[data-cy="buttonToQuiz"]')
+            .should('have.attr', 'href')
+            .and('include', '/administrator/quizzes/quiz1');
+        cy.get('[data-cy="buttonToQuiz"]').contains('View Quiz')
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2');
         cy.get('[data-cy="selfReportMediaCard"]').contains('Self Report: Survey')
         cy.get('[data-cy="selfReportMediaCard"]').contains('Users can self report this skill and points will be awarded after the Need to know Info Survey is completed!')
+        cy.get('[data-cy="linkToQuiz"]')
+            .should('have.attr', 'href')
+            .and('include', '/administrator/quizzes/quiz2');
+        cy.get('[data-cy="buttonToQuiz"]')
+            .should('have.attr', 'href')
+            .and('include', '/administrator/quizzes/quiz2');
+        cy.get('[data-cy="buttonToQuiz"]').contains('View Survey')
     });
 
     it('view skill table for a quiz', function() {

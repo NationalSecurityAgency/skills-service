@@ -52,7 +52,12 @@ const styleObject = {
           <i class="fa-3x" :class="iconClass" :style="styleObject" aria-hidden="true"/>
         </div>
         <div>
-          <div class="text-2xl mb-2 uppercase" data-cy="mediaInfoCardTitle" style="overflow-wrap: break-word; text-wrap: wrap;">{{ title }}</div>
+          <div class="text-2xl mb-2 uppercase flex gap-2 min-h-[2.5rem]"
+               data-cy="mediaInfoCardTitle"
+               style="overflow-wrap: break-word; text-wrap: wrap;">
+            <div class="flex-1">{{ title }}</div>
+            <div><slot name="right-of-title"></slot></div>
+          </div>
           <div class="text-sm md:min-w-40" data-cy="mediaInfoCardSubTitle">
             <slot>
               {{ subTitle }}

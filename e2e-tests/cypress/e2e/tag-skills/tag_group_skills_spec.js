@@ -43,6 +43,7 @@ describe('Tag Skills Tests', () => {
         cy.get(`${groupSelector} [data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]`).click()
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+        cy.get('[data-pc-name="pcmaximizebutton"]').should('have.focus')
 
         cy.get('[data-cy="newTag"]').type('New Tag 1')
         cy.clickSaveDialogBtn()
@@ -120,6 +121,7 @@ describe('Tag Skills Tests', () => {
 
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+        cy.get('[data-pc-name="pcmaximizebutton"]').should('have.focus')
 
         cy.get('[data-cy="newTag"]').type('New Tag 1')
         cy.clickSaveDialogBtn()
@@ -150,6 +152,7 @@ describe('Tag Skills Tests', () => {
 
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+        cy.get('[data-pc-name="pcmaximizebutton"]').should('have.focus')
 
         cy.get('[data-cy="closeDialogBtn"]').click()
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).should('have.focus')
@@ -159,6 +162,7 @@ describe('Tag Skills Tests', () => {
 
         cy.get(`${groupSelector} [data-cy="skillActionsBtn"]`).click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+        cy.get('[data-pc-name="pcmaximizebutton"]').should('have.focus')
         cy.get('[data-pc-name="dialog"] [aria-label="Close"]').click()
         cy.get('[data-cy="skillActionsBtn"]').should('have.focus')
         for (let i= 0; i < 3 ; i++) {
