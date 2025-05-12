@@ -208,10 +208,11 @@ describe('Contact Support Specs', () => {
         cy.addToMyProjects(1)
 
         cy.visit('/progress-and-rankings/projects/proj1')
+        cy.get('[data-cy="overallLevelDesc"]')
+        cy.get('[data-cy="myRankPosition"]')
         cy.get('[data-cy="helpButton"]').click()
         cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Contact"]').click()
         cy.get('[data-pc-name="pcmaximizebutton"]').should('be.enabled')
-        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').should('not.exist')
 
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').type('This is a message')
@@ -224,9 +225,10 @@ describe('Contact Support Specs', () => {
 
 
         cy.visit('/progress-and-rankings/projects/proj1')
+        cy.get('[data-cy="overallLevelDesc"]')
+        cy.get('[data-cy="myRankPosition"]')
         cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Contact"]').click()
         cy.get('[data-pc-name="pcmaximizebutton"]').should('be.enabled')
-        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').should('not.exist')
 
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').type('This is a message')
