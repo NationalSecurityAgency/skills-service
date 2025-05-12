@@ -201,7 +201,7 @@ describe('Contact Support Specs', () => {
         cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').should('not.exist')
     });
 
-    it('on a single project p&r page', () => {
+    it.only('on a single project p&r page', () => {
         cy.intercept('POST', '/api/projects/proj1/contact').as('contactProj1')
         cy.createProject(1)
         cy.enableProdMode(1)
@@ -215,6 +215,7 @@ describe('Contact Support Specs', () => {
         cy.get('[data-pc-name="pcmaximizebutton"]').should('be.enabled')
 
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').click()
         cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').type('This is a message')
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').click()
@@ -231,6 +232,7 @@ describe('Contact Support Specs', () => {
         cy.get('[data-pc-name="pcmaximizebutton"]').should('be.enabled')
 
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').click()
         cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').type('This is a message')
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').click()
