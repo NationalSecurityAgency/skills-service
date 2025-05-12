@@ -201,7 +201,7 @@ describe('Contact Support Specs', () => {
         cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').should('not.exist')
     });
 
-    it.only('on a single project p&r page', () => {
+    it('on a single project p&r page', () => {
         cy.intercept('POST', '/api/projects/proj1/contact').as('contactProj1')
         cy.createProject(1)
         cy.enableProdMode(1)
