@@ -319,7 +319,7 @@ describe('Add Multiple Skills to Badge Tests', () => {
 
     it('cannot add a disabled skill to a badge', () => {
         cy.createBadge(1, 1);
-        cy.createSkill(1, 1, 4, { enabled: false});
+        cy.createSkill(1, 1, 5, { enabled: false});
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         // must exist initially
