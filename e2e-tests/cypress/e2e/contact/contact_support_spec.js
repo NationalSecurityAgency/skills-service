@@ -24,6 +24,12 @@ describe('Contact Support Specs', () => {
             req.reply((res) => {
                 const conf = res.body;
                 conf.contactSupportEnabled = false;
+                conf.supportLink1 = 'mailto:skilltree@someemail.com'
+                conf.supportLink1Label = 'Email Us'
+                conf.supportLink1Icon = 'fas fa-envelope-open-text'
+                conf.supportLink2 = 'https://skilltreesupport.com'
+                conf.supportLink2Label = 'Support Center'
+                conf.supportLink2Icon = 'fas fa-ambulance'
                 res.send(conf);
             });
         })
@@ -190,6 +196,73 @@ describe('Contact Support Specs', () => {
         cy.get('[data-p="modal"] [data-cy="myProjectSelector"]').should('not.exist')
         cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').should('not.exist')
     });
+
+    it('on a single project p&r page', () => {
+        cy.intercept('POST', '/api/projects/proj1/contact').as('contactProj1')
+        cy.createProject(1)
+        cy.enableProdMode(1)
+        cy.addToMyProjects(1)
+
+        cy.visit('/progress-and-rankings/projects/proj1')
+        cy.get('[data-cy="helpButton"]').click()
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Contact"]').click()
+        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').should('not.exist')
+
+        cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').type('This is a message')
+        cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').click()
+        cy.wait('@contactProj1')
+
+        cy.get('[data-p="modal"] [data-cy="myProjectSelector"]').should('not.exist')
+        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').should('not.exist')
+
+
+        cy.visit('/progress-and-rankings/projects/proj1')
+        cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Contact"]').click()
+        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').should('not.exist')
+
+        cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').type('This is a message')
+        cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').click()
+        cy.wait('@contactProj1')
+
+        cy.get('[data-p="modal"] [data-cy="myProjectSelector"]').should('not.exist')
+        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').should('not.exist')
+    });
+
+    it('navigate to support page if email is not configured', () => {
+        cy.intercept('/public/isFeatureSupported?feature=emailservice', 'false').as('isEmailServiceSupported')
+        cy.intercept('POST', '/api/projects/proj1/contact').as('contactProj1')
+        cy.createProject(1)
+        cy.enableProdMode(1)
+        cy.addToMyProjects(1)
+
+        cy.visit('/progress-and-rankings/projects/proj1')
+        cy.wait('@isEmailServiceSupported')
+        cy.get('[data-cy="helpButton"]').click()
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Contact"]').click()
+        cy.url().should('include', '/support');
+
+        cy.visit('/progress-and-rankings/projects/proj1')
+        cy.wait('@isEmailServiceSupported')
+        cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Contact"]').click()
+        cy.url().should('include', '/support');
+
+        cy.visit('/progress-and-rankings')
+        cy.wait('@isEmailServiceSupported')
+        cy.get('[data-cy="helpButton"]').click()
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Contact"]').click()
+        cy.url().should('include', '/support');
+
+        cy.visit('/progress-and-rankings')
+        cy.wait('@isEmailServiceSupported')
+        cy.get('[data-cy="dashboardFooter"] [data-cy="supportLink-Contact"]').click()
+        cy.url().should('include', '/support');
+
+    });
+
 
 });
 

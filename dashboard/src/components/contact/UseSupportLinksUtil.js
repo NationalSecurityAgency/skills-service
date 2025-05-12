@@ -19,6 +19,7 @@ import {useRouter} from "vue-router";
 import {usePagePath} from "@/components/utils/UsePageLocation.js";
 import {defineStore} from "pinia";
 import {useMyProgressState} from "@/stores/UseMyProgressState.js";
+import {useAppInfoState} from "@/stores/UseAppInfoState.js";
 
 export const useSupportLinksUtil = defineStore('supportLinksStore', () => {
 
@@ -26,10 +27,16 @@ export const useSupportLinksUtil = defineStore('supportLinksStore', () => {
     const router = useRouter()
     const pagePath = usePagePath()
     const myProgressState = useMyProgressState()
+    const appInfoState = useAppInfoState()
 
     const showContactProjectAdminsDialog = ref(false)
     const showContactDialog = () => {
-        if (pagePath.isProgressAndRankingPage.value) {
+        if (!appInfoState.emailEnabled) {
+            router.push('/support')
+            return
+        }
+
+        if (pagePath.isOnProgressAndRankingHomePage.value) {
             myProgressState.afterMyProjectsLoaded().then((myProjects) => {
                 if (myProjects && myProjects.length > 0) {
                     showContactProjectAdminsDialog.value = true
@@ -37,6 +44,8 @@ export const useSupportLinksUtil = defineStore('supportLinksStore', () => {
                     router.push('/support')
                 }
             })
+        } else if (pagePath.isProgressAndRankingPage.value) {
+            showContactProjectAdminsDialog.value = true
         } else {
             router.push('/support')
         }

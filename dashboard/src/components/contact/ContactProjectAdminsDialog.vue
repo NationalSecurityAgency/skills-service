@@ -164,7 +164,7 @@ const close = () => {
         <Message :closable="false" severity="success" icon="fa fa-check">
           Message sent!
         </Message>
-        <p v-if="projectName">The Project Administrator(s) of <strong class="text-primary">{{ projectName }}</strong>
+        <p v-if="projectName" class="mb-8">The Project Administrator(s) of <strong class="text-primary">{{ projectName }}</strong>
           will be notified of your question via email.</p>
         <p v-else>The Project Administrator(s) will be notified of your question via email.</p>
       </div>
