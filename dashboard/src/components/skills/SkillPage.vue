@@ -117,7 +117,7 @@ const loadData = () => {
   skillsState.loadSkill(route.params.projectId, route.params.subjectId, route.params.skillId)
     .then(() => {
       headerOptions.value = buildHeaderOptions()
-      if (subjectState.subject) {
+      if (subjectState.subject && subjectState.subject.subjectId === route.params.subjectId) {
         navItems.value = buildNavItems()
       } else {
         subjectState.loadSubjectDetailsState().then(() => {
