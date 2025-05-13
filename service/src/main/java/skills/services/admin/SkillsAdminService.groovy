@@ -688,6 +688,7 @@ class SkillsAdminService {
         }
 
         SkillDefRes finalRes = convertToSkillDefRes(res)
+        finalRes.subjectId = subjectId
         finalRes.sharedToCatalog = skillCatalogService.isAvailableInCatalog(res.projectId, res.skillId)
         if (finalRes.copiedFromProjectId) {
             finalRes.copiedFromProjectName = projDefRepo.getProjectName(finalRes.copiedFromProjectId)?.projectName
