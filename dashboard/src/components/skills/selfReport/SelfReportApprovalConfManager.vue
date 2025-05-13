@@ -54,7 +54,7 @@ const userTagConfLabel = computed(() => {
 });
 
 const maxRolePageSize = computed(() => {
-  return appConfig.maxRolePageSize ? appConfig.maxRolePageSize: 200
+  return appConfig.maxRolePageSize ? appConfig.maxRolePageSize : 200
 })
 
 onMounted(() => {

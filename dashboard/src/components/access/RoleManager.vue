@@ -178,7 +178,7 @@ const isOnlyOneRole = computed(() => {
 });
 
 const maxRolePageSize = computed(() => {
-  return appConfig.maxRolePageSize ? appConfig.maxRolePageSize: 200
+  return appConfig.maxRolePageSize ? appConfig.maxRolePageSize : 200
 })
 
 function getRoleDisplay(roleName) {
@@ -214,6 +214,7 @@ const loadData = () => {
     ascending: sortInfo.value.sortOrder === 1,
     orderBy: sortInfo.value.sortBy
   };
+
   const getUserRoles = props.quizId ?
       QuizService.getQuizUserRoles(props.quizId).then((result) => {
         assignedLocalAdmins.value = adminGroupsSupported.value ? result.filter((u) => !u.adminGroupId) : result;
