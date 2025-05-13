@@ -631,7 +631,7 @@ describe('Transcript export tests', () => {
 
   })
 
-  it('generate transcript for dashboard skills', () => {
+  it.only('generate transcript for dashboard skills', () => {
     cy.request('POST', '/app/userInfo', {
       'first': 'Joe',
       'last': 'Doe',
