@@ -233,6 +233,7 @@ const skillCreatedOrUpdated = (skill) => {
       v-if="newSkillInfo.show"
       v-model="newSkillInfo.show"
       :skill="newSkillInfo.skill"
+      :is-subject-enabled="subjectState.subject.enabled"
       :is-edit="newSkillInfo.isEdit"
       :is-copy="newSkillInfo.isCopy"
       :group-id="newSkillInfo.groupId"

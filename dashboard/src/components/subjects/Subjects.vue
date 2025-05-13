@@ -32,6 +32,7 @@ import EditSubject from '@/components/subjects/EditSubject.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
+import { useProjDetailsState } from '@/stores/UseProjDetailsState.js'
 
 const projConfig = useProjConfig();
 const announcer = useSkillsAnnouncer()
@@ -39,7 +40,8 @@ const appConfig = useAppConfig()
 const emit = defineEmits(['subjects-changed']);
 const route = useRoute();
 const elementHelper = useElementHelper()
-const subjectsState =useSubjectsState()
+const subjectsState = useSubjectsState()
+const projectDetailsState = useProjDetailsState()
 const dropAndDragEnabled = ref(false)
 
 const subjRef = ref([]);
@@ -100,7 +102,7 @@ const doLoadSubjects = () => {
 const deleteSubject = (subject) => {
   isLoadingData.value = true;
   SubjectsService.deleteSubject(subject).then(() => {
-    // loadProjectDetailsState({ projectId: projectId });
+    projectDetailsState.loadProjectDetailsState()
     doLoadSubjects().then(() => {
       isLoadingData.value = false;
       emit('subjects-changed', subject.subjectId)
@@ -141,7 +143,12 @@ const updateSortAndReloadSubjects = (updateInfo) => {
 const subjectAdded = (subject) => {
   const existingIndex = subjectsState.subjects.findIndex((item) => item.subjectId === subject.originalSubjectId)
   if (existingIndex >= 0) {
+    const existingSubject = subjectsState.subjects[existingIndex]
+    const enabledStateChanged = subject.enabled !== existingSubject.enabled
     subjectsState.subjects.splice(existingIndex, 1, subject)
+    if (enabledStateChanged) {
+      projectDetailsState.loadProjectDetailsState()
+    }
   } else {
     subjectsState.subjects.push(subject)
     SkillsReporter.reportSkill('CreateSubject');

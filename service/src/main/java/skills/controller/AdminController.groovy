@@ -362,6 +362,9 @@ class AdminController {
         subjectRequest.iconClass = InputSanitizer.sanitize(subjectRequest.iconClass)
         subjectRequest.helpUrl = InputSanitizer.sanitizeUrl(subjectRequest.helpUrl)
 
+        // default to enabled
+        subjectRequest.enabled = subjectRequest.enabled == null ? "true" : subjectRequest.enabled
+
         subjAdminService.saveSubject(InputSanitizer.sanitize(projectId), subjectId, subjectRequest)
         return new RequestResult(success: true)
     }
