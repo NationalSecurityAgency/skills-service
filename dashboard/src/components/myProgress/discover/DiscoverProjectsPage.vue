@@ -23,7 +23,6 @@ import {FilterMatchMode} from '@primevue/core/api'
 import {useSkillsAnnouncer} from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
 import {useAppInfoState} from '@/stores/UseAppInfoState.js'
-import ContactOwnersDialog from '@/components/myProgress/ContactOwnersDialog.vue'
 import ProjectDescriptionRow from '@/components/myProgress/discover/ProjectDescriptionRow.vue'
 import {useMyProgressState} from '@/stores/UseMyProgressState.js'
 import NoProjectsInCatalogMsg from '@/components/myProgress/discover/NoProjectsInCatalogMsg.vue'
@@ -31,6 +30,7 @@ import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import {useColors} from '@/skills-display/components/utilities/UseColors.js'
 import MyProgressTitle from "@/components/myProgress/MyProgressTitle.vue";
 import BackToMyProgressBtn from "@/components/myProgress/BackToMyProgressBtn.vue";
+import ContactProjectAdminsDialog from "@/components/contact/ContactProjectAdminsDialog.vue";
 
 const responsive = useResponsiveBreakpoints()
 const announcer = useSkillsAnnouncer()
@@ -321,10 +321,9 @@ const contactProject = (name, id) => {
           </div>
         </div>
 
-        <contact-owners-dialog
+        <contact-project-admins-dialog
             v-if="contactModal.show && appInfoState.emailEnabled"
             v-model="contactModal.show"
-            :projectName="contactModal.projectName"
             :projectId="contactModal.projectId"/>
       </template>
     </Card>

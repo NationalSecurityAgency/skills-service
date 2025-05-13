@@ -28,7 +28,9 @@ export const usePagePath = () => {
   const isProgressAndRankingPage = computed(() => {
     return route.fullPath.toLowerCase().startsWith(progressAndRankingHomePage)
   })
-
+  const isOnProgressAndRankingHomePage = computed(() => {
+    return route.path === progressAndRankingHomePage
+  })
   const settingsHomePage = '/settings'
   const isSettingsPage = computed(() => {
     return route.fullPath.toLowerCase().startsWith(settingsHomePage)
@@ -39,6 +41,7 @@ export const usePagePath = () => {
     isAdminPage,
     progressAndRankingHomePage,
     isProgressAndRankingPage,
+    isOnProgressAndRankingHomePage,
     settingsHomePage,
     isSettingsPage
   }

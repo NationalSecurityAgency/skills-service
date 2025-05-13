@@ -675,7 +675,7 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
 
         cy.get('[data-cy="contactOwnerBtn"]').should('be.visible').click();
-        cy.contains('Contact This is project 1').should('be.visible');
+        cy.get('[data-p="modal"]').contains('Send your message to the administrators of This is project 1 training')
         cy.get('[data-cy="saveDialogBtn"]').should('contain.text', 'Submit');
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
         cy.get('[data-cy="messageNumCharsRemaining"]').should('contain.text', '2,500 characters remaining');

@@ -14,10 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref } from 'vue'
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import {ref} from 'vue'
+import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
+import {usePagePath} from "@/components/utils/UsePageLocation.js";
+import ContactProjectAdminsDialog from "@/components/contact/ContactProjectAdminsDialog.vue";
+import {useRouter} from "vue-router";
+import {useSupportLinksUtil} from "@/components/contact/UseSupportLinksUtil.js";
 
 const appConfig = useAppConfig()
+const pagePath = usePagePath()
+const router = useRouter()
+const supportLinksUtil = useSupportLinksUtil()
 
 const menu = ref()
 let allItemsTmp = [
@@ -46,21 +53,11 @@ let allItemsTmp = [
   }
 ]
 
-const keyLookup = 'supportLink'
-const configs = appConfig.getConfigsThatStartsWith(keyLookup)
-const dupKeys = Object.keys(configs).map((conf) => conf.substring(0, 12))
-const keys = dupKeys.filter((v, i, a) => a.indexOf(v) === i)
-if (keys && keys.length > 0) {
-  const items = keys.map((key) => {
-    return {
-      label: configs[`${key}Label`],
-      icon: configs[`${key}Icon`],
-      url: configs[key]
-    }
-  })
+const additionalSupportLinks = supportLinksUtil.supportLinks
+if (additionalSupportLinks && additionalSupportLinks.length > 0) {
   allItemsTmp.push({
     label: 'Support',
-    items
+    items: additionalSupportLinks
   })
 }
 
@@ -93,6 +90,7 @@ const toggle = (event) => {
         </template>
       </Menu>
     </div>
+    <contact-project-admins-dialog v-if="supportLinksUtil.showContactProjectAdminsDialog" v-model="supportLinksUtil.showContactProjectAdminsDialog"/>
   </div>
 </template>
 

@@ -76,7 +76,7 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 </script>
 
 <template>
-  <div class="field text-left" v-bind="fallthroughAttributes.rootAttrs.value">
+  <div class="flex flex-col gap-2 text-left" v-bind="fallthroughAttributes.rootAttrs.value">
     <label :for="name">
       <span v-if="isRequired" class="mr-1 text-muted-color" aria-label="Required field">*</span>
       <slot name="label">{{ label }}</slot>
@@ -99,12 +99,14 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
       :aria-errormessage="`${name}Error`"
       :aria-describedby="`${name}Error`" />
     <div class="sm:flex">
-      <Message severity="error"
+      <div class="flex-1">
+        <Message severity="error"
                variant="simple"
                size="small"
                :closable="false"
                :data-cy="`${name}Error`"
                :id="`${name}Error`">{{ errorMessage || '' }}</Message>
+      </div>
       <div v-if="maxNumChars">
         <small
           role="alert"
