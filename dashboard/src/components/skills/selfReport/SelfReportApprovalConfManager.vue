@@ -53,6 +53,10 @@ const userTagConfLabel = computed(() => {
   return appConfig.approvalConfUserTagLabel ? appConfig.approvalConfUserTagLabel : appConfig.approvalConfUserTagKey;
 });
 
+const maxRolePageSize = computed(() => {
+  return appConfig.maxRolePageSize ? appConfig.maxRolePageSize: 200
+})
+
 onMounted(() => {
   countUserRoles();
 })
@@ -84,7 +88,7 @@ const maxConfigReached = computed(() => {
 
 const loadData = () => {
   const pageParams = {
-    limit: appConfig.maxRolePageSize,
+    limit: maxRolePageSize.value,
     page: 1,
     ascending: sortOrder.value === 1,
     orderBy: sortBy.value,

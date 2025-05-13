@@ -177,6 +177,10 @@ const isOnlyOneRole = computed(() => {
   return props.roles.length === 1;
 });
 
+const maxRolePageSize = computed(() => {
+  return appConfig.maxRolePageSize ? appConfig.maxRolePageSize: 200
+})
+
 function getRoleDisplay(roleName) {
   if (roleName === ROLE_PROJECT_ADMIN) {
     return 'Administrator';
@@ -205,7 +209,7 @@ function getRoleDisplay(roleName) {
 const loadData = () => {
   isLoading.value = true;
   const pageParams = {
-    limit: appConfig.maxRolePageSize,
+    limit: maxRolePageSize.value,
     page: 1,
     ascending: sortInfo.value.sortOrder === 1,
     orderBy: sortInfo.value.sortBy
