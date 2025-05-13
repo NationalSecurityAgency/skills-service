@@ -211,6 +211,7 @@ const skillId = computed(() => {
       v-if="showEdit"
       v-model="showEdit"
       :skill="skillsState.skill"
+      :is-subject-enabled="subjectState.subject.enabled"
       :is-edit="true"
       :project-user-community="projConfig.getProjectCommunityValue()"
       @skill-saved="skillEdited" />

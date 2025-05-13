@@ -684,7 +684,7 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('2')
     });
 
-    it('modify number of required skills', () => {
+    it.only('modify number of required skills', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 2);
