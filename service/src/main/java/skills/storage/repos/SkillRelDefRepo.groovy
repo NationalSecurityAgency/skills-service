@@ -194,7 +194,6 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.copiedFrom as copiedFrom,
         sd2.readOnly as readOnly,
         sd2.copiedFromProjectId as copiedFromProjectId,
-        subj1.skillId as subjectSkillId,
         pd.name as copiedFromProjectName,
         qDef.quizId as quizId,
         qDef.type as quizType,
@@ -203,8 +202,6 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
     from SkillRelDef srd
         join SkillDef sd1 on sd1.id = srd.parent.id
         join SkillDef sd2 on sd2.id = srd.child.id
-        join SkillDef subj1 on subj1.projectId = sd2.projectId
-        join SkillRelDef srd2 on subj1.id = srd2.parent.id and sd2.id = srd2.child.id 
         left join ProjDef pd on sd2.copiedFromProjectId = pd.projectId
         left join ExportedSkill es on es.skill.id = sd2.id
         left join QuizToSkillDef qToSkill on qToSkill.skillRefId = (case when sd2.copiedFrom is not null then sd2.copiedFrom else sd2.id end)
