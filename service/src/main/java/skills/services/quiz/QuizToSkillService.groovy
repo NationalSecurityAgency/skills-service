@@ -93,7 +93,8 @@ class QuizToSkillService {
         if (!isSkillCatalogImport) {
             saveQuizToSkillAssignment(savedSkill, quizDef)
             boolean isProjectCopyRequest = skillRequest instanceof SkillProjectCopyRequest
-            if (!isProjectCopyRequest && doesQuizHasAtLeastOneRun(quizDef)) {
+            boolean isEnabledSkillInRequest = Boolean.valueOf(skillRequest.enabled)
+            if (!isProjectCopyRequest && isEnabledSkillInRequest && doesQuizHasAtLeastOneRun(quizDef)) {
                 updateAffectedUserPointsAndAchievements(quizDef, savedSkill)
             }
         } else if (doesQuizHasAtLeastOneRun(quizDef)) {
