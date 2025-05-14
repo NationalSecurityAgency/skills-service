@@ -160,6 +160,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const contactSupportExternalDescription = computed(() => config.value.contactSupportExternalDescription)
   const contactSupportExternalEmail = computed(() => config.value.contactSupportExternalEmail)
   const contactSupportExternalEmailDescription = computed(() => config.value.contactSupportExternalEmailDescription)
+  const maxRolePageSize = computed(() => config.value.maxRolePageSize)
 
   return {
     loadConfigState,
@@ -261,6 +262,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     contactSupportExternalTitle,
     contactSupportExternalDescription,
     contactSupportExternalEmail,
-    contactSupportExternalEmailDescription
+    contactSupportExternalEmailDescription,
+    maxRolePageSize
   }
 })
