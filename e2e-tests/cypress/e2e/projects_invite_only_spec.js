@@ -580,6 +580,49 @@ describe('Projects Invite-Only Tests', () => {
             });
     })
 
+    it('show that invite was accepted with the link to the training - user already accepted the invite, ', () => {
+        cy.createProject(1);
+        cy.setProjToInviteOnly(1)
+        cy.inviteUser(1, 'abc@abc.org')
+        cy.getLinkFromEmail()
+            .then((inviteLink) => {
+                cy.register('otherU@skills.org', 'password', false);
+                cy.logout();
+                cy.login('otherU@skills.org', 'password');
+                cy.visit(inviteLink)
+                cy.get('[data-cy="joinProjectContainer"] [data-cy="joinProject"]').click()
+                cy.get('[data-cy="joinProjectContainer"]').contains('Congratulations! You\'re now a member of This is project 1!')
+
+                cy.visit(inviteLink)
+                cy.get('[data-cy="joinProjectContainer"]').contains('Already Enrolled')
+                cy.get('[data-cy="joinProjectContainer"]').contains('Congratulations').should('not.exist')
+                cy.get('[data-cy="joinProjectContainer"]').contains('You\'re already a member of This is project 1')
+                cy.get('[data-cy="joinProjectContainer"] [data-cy="project-link-proj1"]').contains('View Training')
+            })
+    })
+
+    it('show that invite was accepted with the link to the training - non-existent invite', () => {
+        cy.createProject(1);
+        cy.setProjToInviteOnly(1)
+        cy.inviteUser(1, 'abc@abc.org')
+        cy.getLinkFromEmail()
+            .then((inviteLink) => {
+                cy.register('otherU@skills.org', 'password', false);
+                cy.logout();
+                cy.login('otherU@skills.org', 'password');
+                cy.visit(inviteLink)
+                cy.get('[data-cy="joinProjectContainer"] [data-cy="joinProject"]').click()
+                cy.get('[data-cy="joinProjectContainer"]').contains('Congratulations! You\'re now a member of This is project 1!')
+
+                const invalidInvite = '/join-project/proj1/51a1bfd875bb1781e887728f03e3cc700271f1d52a2452a71c5df820824ad28b?pn=Proj'
+                cy.visit(invalidInvite)
+                cy.get('[data-cy="joinProjectContainer"]').contains('Already Enrolled')
+                cy.get('[data-cy="joinProjectContainer"]').contains('Congratulations').should('not.exist')
+                cy.get('[data-cy="joinProjectContainer"]').contains('You\'re already a member of Proj')
+                cy.get('[data-cy="joinProjectContainer"] [data-cy="project-link-proj1"]').contains('View Training')
+            })
+    })
+
     it('do not show request new invite button if email service is not configured', () => {
         cy.intercept('/public/isFeatureSupported?feature=emailservice', 'false').as('emailFeature')
         cy.createProject(1);

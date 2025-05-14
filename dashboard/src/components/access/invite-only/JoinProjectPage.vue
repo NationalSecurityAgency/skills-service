@@ -29,6 +29,7 @@ const colors = useColors()
 const appInfoState = useAppInfoState()
 
 const inviteInvalid = ref(false)
+const userAlreadyHasProjectAccess = ref(false)
 const loading = ref(false)
 const invalidMsg = ref('')
 const joining = ref(false)
@@ -38,8 +39,12 @@ const timer = ref(-1)
 const loadData = () => {
   loading.value = true
   AccessService.isInviteValid(route.params.pid, route.params.inviteToken).then((resp) => {
+    userAlreadyHasProjectAccess.value = resp.userAlreadyHasProjectAccess
     inviteInvalid.value = !resp.valid
     invalidMsg.value = resp.message
+    if (userAlreadyHasProjectAccess.value) {
+      joined.value = true
+    }
   }).finally(() => {
     loading.value = false
   })
@@ -88,18 +93,21 @@ watch(() => timer.value, (value) => {
     router.replace(`/progress-and-rankings/projects/${route.params.pid}`);
   }
 })
+
+const isInviteInvalid = computed(() => inviteInvalid.value && !userAlreadyHasProjectAccess.value)
+const isJoined = computed(() => joined.value || userAlreadyHasProjectAccess.value)
 </script>
 
 <template>
-  <div class="mt-10 mb-20">
+  <div class="mt-10 mb-20" data-cy="joinProjectContainer">
     <div class="flex justify-center">
       <div class="rounded-lg w-24 h-24 p-2 m-2 bg-green-600 font-bold flex items-center justify-center">
         <i class="text-surface-0 dark:text-surface-900 text-6xl fa fa-users" aria-hidden="true"></i>
       </div>
     </div>
     <div class="text-center text-2xl">
-      <h1 class="text-primary" v-if="!inviteInvalid"><span v-if="joined">Enrolled!</span><span v-else>Enroll in Training</span></h1>
-      <h1 class="text-red-800 dark:text-red-200" v-if="inviteInvalid">Invalid Invite</h1>
+      <h1 class="text-primary" v-if="!isInviteInvalid"><span v-if="isJoined"><span v-if="userAlreadyHasProjectAccess">Already </span>Enrolled!</span><span v-else>Enroll in Training</span></h1>
+      <h1 class="text-red-800 dark:text-red-200" v-if="isInviteInvalid">Invalid Invite</h1>
     </div>
     <div class="max-w-lg lg:max-w-xl mx-auto text-center mt-4">
       <Card class="mt-4">
@@ -107,7 +115,7 @@ watch(() => timer.value, (value) => {
       <skills-spinner :is-loading="loading" />
       <div v-if="!loading">
         <div class="text-center">
-          <div v-if="!joined && !inviteInvalid">
+          <div v-if="!isJoined && !isInviteInvalid">
             <div class="mb-2">
               <p>
                 Exciting News! You're Invited to <span class="text-primary font-bold">{{ projectName }}</span>!
@@ -126,22 +134,23 @@ watch(() => timer.value, (value) => {
                 @click="join"
                 data-cy="joinProject" />
           </div>
-          <div v-if="joined">
-            Congratulations! You're now a member of <span class="text-primary font-bold">{{ projectName }}</span>!
+          <div v-if="isJoined">
+            <span v-if="!userAlreadyHasProjectAccess">Congratulations! You're now a member of <span class="text-primary font-bold">{{ projectName }}</span>!</span>
+            <span v-else>You're already a member of <span class="text-primary font-bold">{{ projectName }}</span></span>
             <div class="flex justify-center mt-4 mb-2">
             <router-link :to="{ path: `/progress-and-rankings/projects/${route.params.pid}` }" tabindex="-1">
               <Button
-                label="Get Started"
+                :label="userAlreadyHasProjectAccess ? 'View Training' : 'Get Started'"
                 :aria-label="`Click to navigate to ${projectName} project page.`"
                 :data-cy="`project-link-${route.params.pid}`"
                 icon="far fa-eye"
                 outlined class="w-full" size="small"/>
             </router-link>
             </div>
-            <Message :closable="false" class="mt-3">Click 'Get Started' to proceed immediately, or wait and you'll be redirected automatically in <Tag>{{ timer }}</Tag> seconds.</Message>
+            <Message v-if="!userAlreadyHasProjectAccess" :closable="false" class="mt-3">Click 'Get Started' to proceed immediately, or wait and you'll be redirected automatically in <Tag>{{ timer }}</Tag> seconds.</Message>
 
           </div>
-          <div v-if="inviteInvalid && !requestForNewInviteSent" data-cy="invalidInvite">
+          <div v-if="isInviteInvalid && !requestForNewInviteSent" data-cy="invalidInvite">
             <p>Unfortunately, this invite to <span class="text-primary font-bold">{{ projectName }}</span> training is no longer valid.</p>
             <p class="mt-3">Common reasons for this include expiration of the invite.</p>
 
