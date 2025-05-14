@@ -146,13 +146,14 @@ const isQuizAssignableToSkill = (selectedQuiz, context) => {
 const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
   return (selfReportingType.value === 'Quiz' || selfReportingType.value === 'Video')
 })
-const skillEnabled = ref(!props.isEdit ? true : props.isSubjectEnabled)
+const skillEnabled = ref(props.isSubjectEnabled && !props.isEdit ? true : props.isSubjectEnabled && props.skill.enabled)
 const onEnabledChanged = (event) => {
   skillEnabled.value = !skillEnabled.value
 }
 const showVisibilityControl = computed(() => {
-  // always show on create, only show on edit if currently disabled
-  return (!(props.isEdit && props.skill.enabled)) && props.isSubjectEnabled;
+  // always show on create new skill (when subject is enabled), only show on edit if currently disabled
+  const isCreateNewSkill = !props.isEdit
+  return props.isSubjectEnabled && (isCreateNewSkill || !props.skill.enabled)
 })
 
 const schema = object({
@@ -326,7 +327,7 @@ const onSkillSaved = (skill) => {
         <div data-cy="visibility" class="flex-1 min-w-[8rem]">
           <div class="flex flex-col gap-2">
             <label for="visibilitySwitch">
-                    <span id="visibilityLabel">Initial Visibility:</span>
+              <span id="visibilityLabel">Initial Visibility:</span>
             </label>
             <InputGroup>
               <InputGroupAddon>

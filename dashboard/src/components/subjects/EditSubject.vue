@@ -71,6 +71,11 @@ const onSelectedIcon = (selectedIcon) => {
   currentIcon.value = selectedIcon.css
 }
 
+const showVisibilityControl = computed(() => {
+  // always show on create new subject, only show on edit if currently disabled
+  const isCreateNewSubject = !props.isEdit
+  return isCreateNewSubject || !props.subject.enabled
+})
 
 const checkSubjectNameUnique = (value) => {
   if (!value || value === props.subject.name) {
@@ -191,7 +196,7 @@ const onSubjectSaved = (subject) => {
         </template>
       </SkillsNameAndIdInput>
 
-      <div data-cy="visibility" class="flex-1 min-w-[8rem] mb-2">
+      <div v-if="showVisibilityControl" data-cy="visibility" class="flex-1 min-w-[8rem] mb-2">
         <div class="flex flex-col gap-2">
           <label for="visibilitySwitch">
             <span id="visibilityLabel">Initial Visibility:</span>
