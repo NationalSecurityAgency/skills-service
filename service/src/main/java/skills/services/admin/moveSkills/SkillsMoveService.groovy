@@ -155,13 +155,13 @@ class SkillsMoveService {
     @Profile
     private void updateUserPointsInDestSubject(String projectId, SkillDef destSubj) {
         batchOperationsTransactionalAccessor.createSubjectUserPointsForTheNewUsers(projectId, destSubj.skillId)
-        batchOperationsTransactionalAccessor.updateUserPointsForSubject(projectId, destSubj.skillId)
+        batchOperationsTransactionalAccessor.updateUserPointsForSubject(projectId, destSubj.skillId, true)
     }
 
     @Profile
     private void updateUserPointsInOrigSubject(String projectId, SkillDef origSubj) {
         removeSubjectUserPointsForNonExistentSkillDef(projectId, origSubj)
-        batchOperationsTransactionalAccessor.updateUserPointsForSubject(projectId, origSubj.skillId)
+        batchOperationsTransactionalAccessor.updateUserPointsForSubject(projectId, origSubj.skillId, true)
     }
 
     @Profile
@@ -244,11 +244,11 @@ class SkillsMoveService {
         // optimization - handle the case where skill was moved from a group to its parent subject
         if (destSubj.skillId != origParentSkill.skillId) {
             if (origParentSkill.type == SkillDef.ContainerType.SkillsGroup) {
-                batchOperationsTransactionalAccessor.updateGroupTotalPoints(projectId, origParentSkill.skillId)
+                batchOperationsTransactionalAccessor.updateGroupTotalPoints(projectId, origParentSkill.skillId, true)
                 SkillDef subject = ruleSetDefGraphService.getParentSkill(origParentSkill.id)
-                batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, subject.skillId)
+                batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, subject.skillId, true)
             } else {
-                batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, origParentSkill.skillId)
+                batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, origParentSkill.skillId, true)
             }
         }
     }
@@ -260,12 +260,12 @@ class SkillsMoveService {
         SkillDef destSubj
         if (isGroupDest) {
             SkillDef group = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.groupId)
-            batchOperationsTransactionalAccessor.updateGroupTotalPoints(projectId, skillReuseRequest.groupId)
+            batchOperationsTransactionalAccessor.updateGroupTotalPoints(projectId, skillReuseRequest.groupId, true)
             destSubj = ruleSetDefGraphService.getParentSkill(group.id)
-            batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId)
+            batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId, true)
         } else {
             destSubj = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.subjectId, [SkillDef.ContainerType.Subject])
-            batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId)
+            batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId, true)
         }
         return destSubj
     }
