@@ -76,7 +76,7 @@ const buildCardOptions = () => {
       id: subjectInternal.value.subjectId,
     },
     displayOrder: subject.displayOrder,
-    disabled: !subject.enabled
+    disabled: !subjectInternal.value.enabled
   };
 };
 
