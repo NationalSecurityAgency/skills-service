@@ -34,7 +34,7 @@ describe('Display Video on Skill Page Tests', () => {
 
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 0)
         cy.get('[data-cy="markdownViewer"]').contains('blah blah')
         cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
     });
@@ -144,7 +144,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="certifyTranscriptReadCheckbox"]').should('not.exist')
         cy.get('[data-cy="claimPtsByReadingTranscriptBtn"]').should('not.exist')
         cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 100 points')
-        cy.get('[data-cy="watchVideoAlert"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="viewTranscriptBtn"]')
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
         cy.wait('@reportSkill1')
 
@@ -171,7 +171,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 0)
 
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj1"]').click()
         cy.cdClickSkill(1)
@@ -193,13 +193,13 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="viewTranscriptBtn"]')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 0)
 
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
         cy.wait(15000)
         cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 100 points')
-        cy.get('[data-cy="watchVideoAlert"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="viewTranscriptBtn"]')
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
         cy.wait('@reportSkill1')
     });
@@ -217,13 +217,13 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="viewTranscriptBtn"]')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 0)
 
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
         cy.wait(8000)
         cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 100 points')
-        cy.get('[data-cy="watchVideoAlert"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="viewTranscriptBtn"]')
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
         cy.wait('@reportSkill1')
     });
@@ -280,7 +280,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 0)
         cy.get('[data-cy="videoIsLockedMsg"]').should('not.exist')
     });
 
@@ -296,7 +296,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
         cy.wait(15000)
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 33 points for the skill by watching this Video')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 100)
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 100)
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 33 Points')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 33 points for the skill by watching this Video')
         cy.get('[data-cy="videoError"]').contains('Insufficient project points')
