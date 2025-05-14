@@ -835,9 +835,11 @@ class QuizRunService {
             List<QuizToSkillDefRepo.ProjectIdAndSkillId> skills = quizToSkillDefRepo.getSkillsForQuiz(quizDefId)
             if (skills) {
                 skills.each {
-                    SkillEventResult skillEventResult = reportSkill(it.projectId, it.skillId, userQuizAttempt.userId, userQuizAttempt.completed)
-                    if (skillEventResult) {
-                        res.add(skillEventResult)
+                    if (Boolean.valueOf(it.enabled)) {
+                        SkillEventResult skillEventResult = reportSkill(it.projectId, it.skillId, userQuizAttempt.userId, userQuizAttempt.completed)
+                        if (skillEventResult) {
+                            res.add(skillEventResult)
+                        }
                     }
                 }
             }
