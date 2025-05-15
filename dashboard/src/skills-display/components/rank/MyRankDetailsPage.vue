@@ -139,6 +139,7 @@ const numUsersBehindMe = computed(() => {
               <div class="flex-1">
                 <media-info-card v-if="rankingDistribution.pointsToPassNextUser === -1"
                                  title="You are in the lead!"
+                                 heading-tag-to-use="h2"
                                  class="h-full"
                                  :icon-class="`fas fa-user-friends ${colors.getTextClass(4)}`"
                                  data-cy="myRankTotalUsersStatCard">
@@ -158,6 +159,7 @@ const numUsersBehindMe = computed(() => {
               <div class="flex-1">
                 <media-info-card v-if="rankingDistribution.pointsAnotherUserToPassMe === -1"
                                  title="You just got started!!"
+                                 heading-tag-to-use="h2"
                                  class="h-full"
                                  :icon-class="`fas fa-running ${colors.getTextClass(5)}`"
                                  data-cy="myRankTotalUsersStatCard">
@@ -165,6 +167,7 @@ const numUsersBehindMe = computed(() => {
                 </media-info-card>
                 <media-info-card v-else
                                  title="Your Rank may drop"
+                                 heading-tag-to-use="h2"
                                  class="h-full"
                                  :icon-class="`fas fa-running ${colors.getTextClass(5)}`"
                                  data-cy="myRankTotalUsersStatCard">
@@ -177,6 +180,7 @@ const numUsersBehindMe = computed(() => {
                 <media-info-card v-if="numUsersBehindMe <= 0"
                                  :title="`Earn those ${ attributes.pointDisplayName.toLowerCase() } riches!`"
                                  class="h-full"
+                                 heading-tag-to-use="h2"
                                  :icon-class="`fas fa-glass-cheers ${colors.getTextClass(6)}`"
                                  data-cy="myRankTotalUsersStatCard">
                   <span class="text-lg">Earn {{ attributes.skillDisplayName }} and you will pass your fellow users <i class="fas fa-user-tie" aria-hidden="true"></i> in no time!</span>

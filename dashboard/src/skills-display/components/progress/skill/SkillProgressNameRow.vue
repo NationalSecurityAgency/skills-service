@@ -127,6 +127,7 @@ const skillId = computed(() => {
 const isAudio = computed(() => {
   return props.skill.videoSummary?.videoType?.includes('audio/')
 })
+const titleComponent = computed(() => route.params.skillId ? 'h2' : 'h3')
 </script>
 
 <template>
@@ -151,11 +152,11 @@ const isAudio = computed(() => {
               :to="toRoute"
               data-cy="skillProgressTitle"
               :aria-label="`${skill.isSkillType ? `Navigate to ${skill.skill}` : skill.skill }`">
-              <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
+              <component :is="titleComponent"><highlighted-value :value="skill.skill" :filter="childSkillHighlightString" /></component>
             </router-link>
-            <div v-else class="inline-block" data-cy="skillProgressTitle">
+            <component :is="titleComponent" v-else class="inline-block" data-cy="skillProgressTitle">
               <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
-            </div>
+            </component>
             <SkillsButton :icon="!isExpanded ? 'fas fa-plus' : 'fas fa-minus'"
                     v-if="skill.isSkillsGroupType"
                     outlined

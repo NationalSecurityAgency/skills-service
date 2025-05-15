@@ -23,6 +23,7 @@ import PlacementBadge from '@/skills-display/components/badges/PlacementBadge.vu
 import BadgeHeaderIcons from '@/skills-display/components/badges/BadgeHeaderIcons.vue'
 import ExtraBadgeAward from '@/skills-display/components/badges/ExtraBadgeAward.vue'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
+import {useRoute} from "vue-router";
 
 const props = defineProps({
   badge: {
@@ -48,6 +49,7 @@ const props = defineProps({
 })
 
 const timeUtils = useTimeUtils()
+const route = useRoute()
 const iconCss = computed(() => `${props.badge.iconClass} ${props.iconColor}`)
 const percent = computed(() => {
   if (props.badge.numTotalSkills === 0) {
@@ -90,6 +92,7 @@ const usersAchieved = computed(() => {
 const otherUsersAchieved = computed(() => {
   return (props.badge.numberOfUsersAchieved - 1) === 1 ? 'person has' : 'people have'
 })
+const titleTag = computed(() => route.params.badgeId ? 'h2': 'h3')
 </script>
 
 <template>
@@ -128,7 +131,7 @@ const otherUsersAchieved = computed(() => {
             <div v-if="badge.projectName" class="text-muted-color text-base" data-cy="badgeProjectName">
               <span class="italic">Project:</span> {{ badge.projectName}}
             </div>
-            <highlighted-value :value="badge.badge" :filter="searchString" />
+            <component :is="titleTag"><highlighted-value :value="badge.badge" :filter="searchString" /></component>
           </div>
           <div class="content-end">
             <div class="float-right text-navy" :class="{ 'text-success': percent === 100 }" data-cy="badgePercentCompleted">

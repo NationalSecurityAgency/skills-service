@@ -64,9 +64,7 @@ const buildBadgeLink = (badge) => {
   <Card class="card" data-cy="myBadges">
     <template #header>
       <div class="flex p-4">
-        <div class="flex-1 text-xl uppercase">
-          My Earned Badges
-        </div>
+        <h2 class="flex-1 text-xl uppercase">My Earned Badges</h2>
         <div v-if="badges && badges.length > 0" class="text-muted float-right">
           <Tag severity="info">{{ badges.length }}</Tag> Badge<span v-if="badges.length !== 1">s</span> Earned
         </div>

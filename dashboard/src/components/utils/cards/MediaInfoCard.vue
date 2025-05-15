@@ -28,6 +28,10 @@ const props = defineProps({
   addBorder: {
     type: Boolean,
     default: false
+  },
+  headingTagToUse: {
+    type: String,
+    default: null
   }
 });
 
@@ -42,6 +46,8 @@ const cardPt = computed(() => {
 const styleObject = {
   color: props.iconColor,
 }
+
+const titleTag = computed(() => props.headingTagToUse || 'div')
 </script>
 
 <template>
@@ -55,7 +61,7 @@ const styleObject = {
           <div class="text-2xl mb-2 uppercase flex gap-2 min-h-[2.5rem]"
                data-cy="mediaInfoCardTitle"
                style="overflow-wrap: break-word; text-wrap: wrap;">
-            <div class="flex-1">{{ title }}</div>
+            <component :is="titleTag" class="flex-1">{{ title }}</component>
             <div><slot name="right-of-title"></slot></div>
           </div>
           <div class="text-sm md:min-w-40" data-cy="mediaInfoCardSubTitle">

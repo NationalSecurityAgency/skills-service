@@ -154,9 +154,9 @@ const remove = () => {
                        :series="series"></apexchart>
           </div>
           <div class="flex-1 pt-0 pr-4 text-center sm:text-right">
-            <div class="uppercase text-2xl text-primary skills-break-word" data-cy="project-card-project-name"
+            <h3 class="uppercase text-2xl text-primary skills-break-word" data-cy="project-card-project-name"
                  :aria-label="`Project ${proj.projectName}`">{{ proj.projectName }}
-            </div>
+            </h3>
             <div class="text-2xl text-muted-color mt-2" data-cy="project-card-project-level">
               {{ proj.levelDisplayName }} {{ proj.level }}
             </div>
