@@ -59,7 +59,7 @@ describe('Display Video on Subject Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').should('not.exist')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 0)
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="viewTranscriptBtn"]').should('be.enabled')
 
         cy.get('[data-cy="skillVideo-skill2"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').should('be.enabled')
@@ -90,7 +90,7 @@ describe('Display Video on Subject Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').should('not.exist')
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
-        cy.get('[data-cy="skillVideo-skill3"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+        cy.get('[data-cy="skillVideo-skill3"] [data-cy="percentWatched"]').should('have.text', 0)
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="viewTranscriptBtn"]').should('not.exist')
 
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
@@ -132,7 +132,7 @@ describe('Display Video on Subject Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').click()
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 33 points for the skill by watching this Video')
-        cy.get('[data-cy="skillVideo-skill3"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+        cy.get('[data-cy="skillVideo-skill3"] [data-cy="percentWatched"]').should('have.text', 0)
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="viewTranscriptBtn"]').should('not.exist')
 
         // play 3rd video
@@ -187,7 +187,7 @@ describe('Display Video on Subject Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="videoCollapsed"] [data-cy="expandVideoBtn"]').click()
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="videoPlayer"] [title="Play Video"]')
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 33 points for the skill by watching this Video')
-        cy.get('[data-cy="skillVideo-skill3"] [data-cy="watchVideoAlert"] [data-cy="percentWatched"]').should('have.text', 0)
+        cy.get('[data-cy="skillVideo-skill3"] [data-cy="percentWatched"]').should('have.text', 0)
         cy.get('[data-cy="skillVideo-skill3"] [data-cy="viewTranscriptBtn"]').should('not.exist')
 
         // play 3rd video
