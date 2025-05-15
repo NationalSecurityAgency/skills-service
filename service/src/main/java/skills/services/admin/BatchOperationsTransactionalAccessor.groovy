@@ -128,21 +128,21 @@ class BatchOperationsTransactionalAccessor {
 
     @Transactional
     @Profile
-    void updateSubjectTotalPoints(String projectId, String subjectId) {
-        ruleSetDefinitionScoreUpdater.updateSubjectTotalPoints(projectId, subjectId, false)
+    void updateSubjectTotalPoints(String projectId, String subjectId, Boolean enabledSkillsOnly = false) {
+        ruleSetDefinitionScoreUpdater.updateSubjectTotalPoints(projectId, subjectId, enabledSkillsOnly)
     }
 
 
     @Transactional
     @Profile
-    void updateGroupTotalPoints(String projectId, String groupId) {
-        ruleSetDefinitionScoreUpdater.updateGroupTotalPoints(projectId, groupId, false)
+    void updateGroupTotalPoints(String projectId, String groupId, Boolean enabledSkillsOnly = false) {
+        ruleSetDefinitionScoreUpdater.updateGroupTotalPoints(projectId, groupId, enabledSkillsOnly)
     }
 
     @Transactional
     @Profile
-    void updateProjectsTotalPoints(String projectId) {
-        skillDefRepo.updateProjectsTotalPoints(projectId, false)
+    void updateProjectsTotalPoints(String projectId, Boolean enabledSkillsOnly = false) {
+        skillDefRepo.updateProjectsTotalPoints(projectId, enabledSkillsOnly)
     }
 
     @Transactional
@@ -258,9 +258,9 @@ class BatchOperationsTransactionalAccessor {
 
     @Transactional
     @Profile
-    void updateUserPointsForSubject(String projectId, String subjectId) {
+    void updateUserPointsForSubject(String projectId, String subjectId, Boolean enabledSkillsOnly = false) {
         log.info("Updating UserPoints for subject: projectId=[{}], subjectId=[{}]", projectId, subjectId)
-        PostgresQlNativeRepo.updateUserPointsForSubject(projectId, subjectId, false)
+        PostgresQlNativeRepo.updateUserPointsForSubject(projectId, subjectId, enabledSkillsOnly)
         log.info("Completed updating UserPoints for subject: projectId=[{}], subjectId=[{}]", projectId, subjectId)
     }
 
