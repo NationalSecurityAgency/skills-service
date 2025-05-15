@@ -60,6 +60,7 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         then:
         resp.projectId == proj.projectId
         resp.valid == false
+        resp.userAlreadyHasProjectAccess == false
         resp.message == "Project Invite is for a different user"
 
         cleanup:
@@ -100,6 +101,7 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         then:
         resp.projectId == proj.projectId
         resp.valid == true
+        resp.userAlreadyHasProjectAccess == false
 
         cleanup:
         inviteOnlyProjectService.validateInviteEmail = false
@@ -138,6 +140,7 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         then:
         resp.projectId == proj.projectId
         resp.valid == true
+        resp.userAlreadyHasProjectAccess == false
 
         cleanup:
         inviteOnlyProjectService.validateInviteEmail = false
@@ -170,6 +173,7 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         then:
         resp.projectId == proj.projectId
         resp.valid == false
+        resp.userAlreadyHasProjectAccess == false
         resp.message == "Project Invite has expired"
     }
 
@@ -202,6 +206,7 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         then:
         resp.projectId == proj2.projectId
         resp.valid == false
+        resp.userAlreadyHasProjectAccess == false
         resp.message == "Invalid Project Invite"
     }
 
@@ -229,6 +234,39 @@ class InviteOnlyValidationSpec extends InviteOnlyBaseSpec {
         then:
         resp.projectId == proj2.projectId
         resp.valid == false
+        resp.userAlreadyHasProjectAccess == false
         resp.message == "Invalid Project Invite"
+    }
+
+    def "invite code validation after invite was accepted"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        def users = getRandomUsers(2, true)
+        def otherUser = createService(users[0])
+
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email = EmailUtils.getEmail(greenMail, 0)
+        String invite = extractInviteFromEmail(email.html)
+
+        otherUser.joinProject(proj.projectId, invite)
+
+        when:
+        def resp = otherUser.validateInvite(proj.projectId, invite)
+
+        then:
+        resp.projectId == proj.projectId
+        resp.valid == false
+        resp.userAlreadyHasProjectAccess == true
+        resp.message == "User already has permission to this project"
     }
 }

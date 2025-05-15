@@ -261,45 +261,66 @@ describe('Client Display Theme Components Tests', () => {
     // cy.matchSnapshotImageForElement('[data-cy="filterMenu"] [data-cy="filterBtn"]', 'buttons-badgesFilter')
   })
 
-  it('buttons customization with changing tile background', () => {
+  it('buttons customization with changing tile background - subjects', () => {
     cy.createBadge(1, 1)
     cy.assignSkillToBadge(1, 1, 2)
     cy.enableBadge(1, 1)
 
-    const url = '/?themeParam=buttons|{"backgroundColor":"green","foregroundColor":"white",%20"borderColor":"purple"}&themeParam=tiles|{"backgroundColor":"black"}'
+    const url = '/subjects/subj1?themeParam=buttons|{"backgroundColor":"green","foregroundColor":"white",%20"borderColor":"purple"}&themeParam=tiles|{"backgroundColor":"black"}'
     cy.cdVisit(url, true)
 
-    cy.cdClickSubj(0, 'Subject 1', true)
+    cy.get('[data-cy="filterMenu"]')
+
     cy.matchSnapshotImageForElement('[data-cy="back"]', 'buttons-Back-darkTileBackground')
     cy.matchSnapshotImageForElement('[data-cy="filterMenu"]', 'buttons-skillsFilter-darkTileBackground')
-    cy.cdClickSkill(1)
-    cy.matchSnapshotImageForElement('[data-cy="claimPointsBtn"]', 'buttons-selfReport-darkTileBackground')
-
-    cy.cdVisit(url)
-    cy.cdClickBadges()
-    cy.matchSnapshotImageForElement('[data-cy="badgeDetailsLink_badge1"] [data-pc-name="button"]', 'buttons-viewBadgeDetails-darkTileBackground')
-    // todo: add back
-    // cy.matchSnapshotImageForElement('[data-cy="filterMenu"]', 'buttons-badgesFilter-darkTileBackground')
   })
 
-  it('filter menu with dark tile background', () => {
+  it('buttons customization with changing tile background - skill', () => {
     cy.createBadge(1, 1)
     cy.assignSkillToBadge(1, 1, 2)
     cy.enableBadge(1, 1)
+
+    const url = '/subjects/subj1/skills/skill2?themeParam=buttons|{"backgroundColor":"green","foregroundColor":"white",%20"borderColor":"purple"}&themeParam=tiles|{"backgroundColor":"black"}'
+    cy.cdVisit(url)
+
+    cy.matchSnapshotImageForElement('[data-cy="claimPointsBtn"]', 'buttons-selfReport-darkTileBackground')
+  })
+
+  it('buttons customization with changing tile background - badge', () => {
+    cy.createBadge(1, 1)
+    cy.assignSkillToBadge(1, 1, 2)
+    cy.enableBadge(1, 1)
+
+    const url = '/badges?themeParam=buttons|{"backgroundColor":"green","foregroundColor":"white",%20"borderColor":"purple"}&themeParam=tiles|{"backgroundColor":"black"}'
+    cy.cdVisit(url)
+    cy.get('[data-cy="badgeDetailsLink_badge1"] button').should('be.enabled')
+
+    cy.matchSnapshotImageForElement('[data-cy="badgeDetailsLink_badge1"] [data-pc-name="button"]', 'buttons-viewBadgeDetails-darkTileBackground')
+  })
+
+  it('filter menu with dark tile background - skills', () => {
+    cy.createBadge(1, 1)
+    cy.assignSkillToBadge(1, 1, 2)
 
     const url = '/subjects/subj1/?themeParam=tiles|{"backgroundColor":"black"}&themeParam=textPrimaryColor|white&themeParam=textSecondaryColor|yellow'
     cy.cdVisit(url)
 
     cy.get('[data-cy="clearSkillsSearchInput"]').tab().type('{enter}')
-    // cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
 
     cy.matchSnapshotImageForElement('[data-pc-name="panelmenu"]', {
       name: 'filterMenu-skills'
     })
+  })
 
-    cy.cdBack()
-    cy.cdClickBadges()
-    // cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
+  it('filter menu with dark tile background - badges', () => {
+    cy.createBadge(1, 1)
+    cy.assignSkillToBadge(1, 1, 2)
+    cy.enableBadge(1, 1)
+
+    const url = '/badges/?themeParam=tiles|{"backgroundColor":"black"}&themeParam=textPrimaryColor|white&themeParam=textSecondaryColor|yellow'
+    cy.cdVisit(url)
+
+    cy.get('[data-cy="badgeDetailsLink_badge1"] button').should('be.enabled')
     cy.get('[data-cy="clearSkillsSearchInput"]').tab().type('{enter}')
     cy.matchSnapshotImageForElement('[data-pc-name="panelmenu"]', {
       name: 'filterMenu-badges'

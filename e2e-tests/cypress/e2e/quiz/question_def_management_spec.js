@@ -910,6 +910,9 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
         cy.get('[data-cy="add-video-question-1"]').click()
 
+        cy.get('[data-pc-name="blockui"][aria-busy="true"]').should('not.exist')
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').should('be.enabled')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         const videoFile = 'create-subject.webm';
         cy.fixture(videoFile, null).as('videoFile');
         cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
@@ -924,7 +927,6 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="videoCaptions"]').should('have.value', '')
         cy.get('[data-cy="videoTranscript"]').should('have.value','')
         cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTotalDuration"]').should('have.text', '7 seconds')
-
     });
 
     it('remove a video from a question', function () {

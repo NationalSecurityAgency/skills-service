@@ -167,9 +167,17 @@ class InviteOnlyProjectService {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotBlank(token, "inviteToken")
 
-        ProjectAccessToken projectAccessToken = projectAccessTokenRepo.findByTokenAndProjectId(token, projectId)
         InviteTokenValidationResponse response = new InviteTokenValidationResponse()
         response.projectId = projectId
+        if (userInfoService.isCurrentInviteOnlyPrivateProjUser()) {
+            log.debug("user already has permission to [{}] project", projectId)
+            response.valid = false
+            response.userAlreadyHasProjectAccess = true
+            response.message = "User already has permission to this project"
+            return response
+        }
+        ProjectAccessToken projectAccessToken = projectAccessTokenRepo.findByTokenAndProjectId(token, projectId)
+
         if (!projectAccessToken) {
             log.debug("requested token [{}] for projectId [{}] does not exist", token, projectId)
             response.valid = false

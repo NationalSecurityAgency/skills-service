@@ -18,5 +18,6 @@ package skills.controller.result.model
 class InviteTokenValidationResponse {
     String projectId
     boolean valid
+    boolean userAlreadyHasProjectAccess = false
     String message
 }
