@@ -15,11 +15,12 @@
  */
 package skills.intTests.copySkillsToAnotherProject
 
-import groovy.json.JsonOutput
+
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
 import skills.intTests.copyProject.CopyIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.storage.model.Attachment
 import skills.storage.model.QuizDefParent
@@ -455,5 +456,24 @@ class CopySkillsToAnotherProjSubjSpecs extends CopyIntSpec {
         p2Skill1VideoAttributes.isInternallyHosted == p1Skill1VideoAttributes.isInternallyHosted
         p2Skill1VideoAttributes.internallyHostedFileName == p1Skill1VideoAttributes.internallyHostedFileName
         p2Skill1VideoAttributes.videoType == p1Skill1VideoAttributes.videoType
+    }
+
+    def "do not allow to copy an enabled skill to a destination subject that is not enabled"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Subj1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Subj1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 2)
+        p2subj1.enabled = false
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
+
+        when:
+        skillsService.copySkillDefsIntoAnotherProjectSubject(p1.projectId, p1Subj1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Can't copy enabled skills into a disabled subject, following skills are enabled: ${p1Subj1Skills.collect { it.skillId }.sort()}")
     }
 }

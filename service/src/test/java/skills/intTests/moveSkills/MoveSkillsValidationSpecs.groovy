@@ -123,7 +123,7 @@ class MoveSkillsValidationSpecs extends DefaultIntSpec {
         ex.message.contains("Cannot move skills while finalization is running")
     }
 
-    def "cannot move am enabled skill to a disabled subject"() {
+    def "cannot move an enabled skill to a disabled subject"() {
         def p1 = createProject(1)
 
         def p1subj1 = createSubject(1, 1)

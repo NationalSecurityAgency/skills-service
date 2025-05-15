@@ -156,12 +156,13 @@ class ProjectCopyService {
     @Profile
     private CopyValidationRes validateCopySkillsToAnotherProject(String projectId, List<String> skillIds, String otherProjectId, String otherSubjectId, String otherGroupId = null ) {
         List<SkillDefWithExtra> itemsToCopy
+        SkillDefWithExtra otherSubject
         try {
             ProjDef fromProject = loadProject(projectId)
             ProjDef otherProject = loadProject(otherProjectId)
             validateProjectsCommunityStatus(fromProject, otherProject)
             if (otherSubjectId) {
-                loadSubject(otherProject.projectId, otherSubjectId)
+                otherSubject = loadSubject(otherProject.projectId, otherSubjectId)
             } else {
                 if (!otherGroupId) {
                     throw new SkillException("otherGroupId is required when otherSubjectId is not provided", projectId, null, ErrorCode.BadParam)
@@ -174,6 +175,12 @@ class ProjectCopyService {
         }
 
         List<String> validationErrors = checkForSkillIdAndNameCollisions(itemsToCopy.collect { new SkillIdAndName(skillId: it.skillId, skillName: it.name) }, otherProjectId)
+        if (otherSubject && !Boolean.valueOf(otherSubject.enabled)) {
+            List<String> enabledSkillIds = itemsToCopy.findAll { Boolean.valueOf(it.enabled) }.collect { it.skillId }
+            if (enabledSkillIds) {
+                validationErrors.add("The following Skills are enabled and cannot be added to the destination subject because it is currently disabled: ${enabledSkillIds.sort().subList(0, Math.min(enabledSkillIds.size(), 10)).join(", ")}.".toString())
+            }
+        }
         CopyValidationRes res = new CopyValidationRes(isAllowed: validationErrors?.isEmpty(), validationErrors: validationErrors)
         return res
     }
@@ -201,6 +208,12 @@ class ProjectCopyService {
             SkillDefWithExtra destinationSubject = loadSubject(otherProject.projectId, otherSubjectId)
 
             List<SkillDefWithExtra> skillDefs = getSkillsToCopy(projectId, skillIds)
+            if (!Boolean.valueOf(destinationSubject.enabled)) {
+                List<SkillDefWithExtra> enabledSkills = skillDefs.findAll { Boolean.valueOf(it.enabled) }
+                if (enabledSkills) {
+                    throw new SkillException("Can't copy enabled skills into a disabled subject, following skills are enabled: ${enabledSkills.collect { it.skillId }.sort()}", projectId, null, ErrorCode.BadParam)
+                }
+            }
 
             List<SkillInfo> allCollectedSkills = []
             List<SkillDefWithExtra> skillDefsSorted = skillDefs.sort { skillIds.indexOf(it.skillId) }
