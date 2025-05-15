@@ -31,7 +31,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.createTextInputQuestionDef(1, 1)
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '1')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
 
@@ -57,7 +57,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.createQuizQuestionDef(1, 3)
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '3')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
@@ -86,7 +86,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.createTextInputQuestionDef(1, 5)
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '5')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
@@ -117,7 +117,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.setQuizShowCorrectAnswers(1, true);
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '3')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
@@ -269,7 +269,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.createTextInputQuestionDef(1, 1)
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '1')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
 
@@ -301,7 +301,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.createTextInputQuestionDef(1, 1)
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
 
         cy.get('[data-cy="startQuizAttempt"]').click()
@@ -341,7 +341,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.createTextInputQuestionDef(1, 2)
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
 
@@ -379,7 +379,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.createTextInputQuestionDef(1, 2)
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
 
@@ -421,7 +421,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.createTextInputQuestionDef(1, 2)
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
 
@@ -456,7 +456,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.createTextInputQuestionDef(1, 2)
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
 
@@ -485,7 +485,7 @@ describe('Run Quizzes With Text Input Questions', () => {
 
         // reload the page, all answers are revalidated on load (or visit?)
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.get('[data-cy="question_2"] [data-cy="markdownEditorInput"]')
         cy.wait('@validateDescriptionAnswer1')
         cy.wait('@validateDescriptionAnswer2')
@@ -518,7 +518,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.createTextInputQuestionDef(2, 2)
 
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
 
@@ -546,7 +546,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('@validateDescriptionAnswer2.all').should('have.length.lte', 6)
 
         cy.visit('/progress-and-rankings/quizzes/quiz2');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
 
@@ -571,7 +571,7 @@ describe('Run Quizzes With Text Input Questions', () => {
 
         // navigate back to quiz 1, all answers are revalidated on load
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+        cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
         cy.wait('@validateDescriptionAnswer1')
         cy.wait('@validateDescriptionAnswer2')
         cy.wait(1000)

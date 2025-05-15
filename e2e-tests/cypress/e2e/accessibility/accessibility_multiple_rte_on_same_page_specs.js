@@ -29,7 +29,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
 
         Cypress.Commands.add("getToRte", (tabIndexValues) => {
             cy.visit('/progress-and-rankings/quizzes/quiz1');
-            cy.get('[data-cy="subPageHeader"]').contains('Quiz')
+            cy.get('[data-cy="myProgressTitle"]').contains('Quiz')
             cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '3')
             cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
             cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
