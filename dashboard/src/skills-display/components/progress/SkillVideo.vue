@@ -70,6 +70,8 @@ const isFirstTime = ref(true);
 const transcriptReadCert = ref(false);
 const isMotivationalSkill = computed(() => props.skill && props.skill.isMotivationalSkill)
 
+const shouldShowPercentWatched = computed(() => showPercent.value && (!isAlreadyAchieved.value || justAchieved.value) && isSelfReportTypeVideo.value);
+
 const isAlreadyAchieved = computed(() => {
   return props.skill.points > 0;
 });
@@ -149,13 +151,19 @@ const doReportSkill = () => {
 };
 const loadTranscript = () => {
   transcript.value.loading = true;
-  skillsDisplayService.getVideoTranscript(props.skill.skillId)
-      .then((res) => {
-        transcript.value.transcript = res;
-        transcript.value.loading = false;
-        transcript.value.show = true;
-        nextTick(() => announcer.polite('Transcript displayed'));
-      });
+  if (!transcript.value.show) {
+    skillsDisplayService.getVideoTranscript(props.skill.skillId)
+        .then((res) => {
+          transcript.value.transcript = res;
+          transcript.value.loading = false;
+          transcript.value.show = true;
+          nextTick(() => announcer.polite('Transcript displayed'));
+        });
+  } else {
+    transcript.value.show = false;
+    transcript.value.loading = false;
+  }
+
 };
 
 </script>
@@ -206,6 +214,52 @@ const loadTranscript = () => {
                         :storeAndRecoverSizeFromStorage="true" />
         </div>
       </div>
+      <div class="flex justify-center items-center">
+              <span v-if="skill.videoSummary.hasTranscript">
+                <SkillsButton data-cy="viewTranscriptBtn"
+                              label="View Transcript"
+                              icon="fa-regular fa-rectangle-list"
+                              class="underline"
+                              link
+                              :loading="transcript.loading"
+                              @click="loadTranscript">
+                </SkillsButton>
+              </span>
+
+        <span aria-hidden="true" class="mr-2 text-gray-400" v-if="shouldShowPercentWatched && skill.videoSummary.hasTranscript">|</span>
+        <span v-if="shouldShowPercentWatched"><span class="italic">{{ videoConf.isAudio ? 'Listened To' : 'Watched'}}: </span> <b data-cy="percentWatched">{{ percentWatched }}</b>%</span>
+      </div>
+      <Card v-if="transcript.show" class="mt-1 skills-card-theme-border">
+        <template #title>
+          {{ videoConf.isAudio ? 'Audio' : 'Video'}} Transcript:
+        </template>
+        <template #content>
+          <p class="m-0" data-cy="videoTranscript">{{ transcript.transcript }}</p>
+          <div v-if="isSelfReportTypeVideo && !isAlreadyAchieved && !justAchieved" class="mt-2 flex items-center">
+            <div class="flex flex-1">
+              <Checkbox
+                  inputId="readTranscript"
+                  :binary="true"
+                  name="Transcript Certification"
+                  v-model="transcriptReadCert"
+                  data-cy="certifyTranscriptReadCheckbox"
+              />
+              <label for="readTranscript" class="ml-2">I <b>certify</b> that I fully read the transcript. Please award the skill and its <Tag>{{skill.totalPoints}}</Tag> points.</label>
+            </div>
+            <div class="flex">
+              <SkillsButton
+                  severity="success"
+                  label="Claim Points"
+                  icon="fas fa-check-double"
+                  outlined :disabled="!transcriptReadCert"
+                  data-cy="claimPtsByReadingTranscriptBtn"
+                  @click="achieveSkillByReadingTranscript">
+
+              </SkillsButton>
+            </div>
+          </div>
+        </template>
+      </Card>
       <Message v-if="isSelfReportTypeVideo && isMotivationalSkill && skill.expirationDate">
         <template #container>
           <div class="flex gap-2 p-4 content-center">
@@ -238,68 +292,10 @@ const loadTranscript = () => {
                   class="text-success font-weight-bold">{{ skill.totalPoints }}</span> points<span> and <b>completed</b> the {{ attributes.skillDisplayName.toLowerCase() }}</span>!
               </div>
             </div>
-            <div class="flex items-center">
-              <span v-if="skill.videoSummary.hasTranscript">
-                <SkillsSpinner :is-loading="transcript.loading" small/>
-                <SkillsButton style="text-decoration: underline; padding-right: 0.25rem; padding-left: 0.5rem;"
-                              class="skills-theme-primary-color"
-                              label="View Transcript"
-                              variant="link"
-                              size="small"
-                              text
-                              data-cy="viewTranscriptBtn"
-                              @click="loadTranscript" />
-              </span>
-              <span aria-hidden="true" class="mr-1" v-if="showPercent && skill.videoSummary.hasTranscript">|</span>
-              <span v-if="showPercent"><span class="italic">{{ videoConf.isAudio ? 'Listened To' : 'Watched'}}: </span> <b data-cy="percentWatched">{{ percentWatched }}</b>%</span>
-            </div>
           </div>
         </template>
       </Message>
-      <div v-if="skill.videoSummary.hasTranscript && (!isSelfReportTypeVideo || (isAlreadyAchieved && !justAchieved))" class="text-center">
-        <SkillsSpinner :is-loading="transcript.loading" small />
-        <SkillsButton style="text-decoration: underline; padding-right: 0.25rem; padding-left: 0.5rem;"
-                      class="skills-theme-primary-color"
-                      label="View Transcript"
-                      variant="link"
-                      size="small"
-                      text
-                      data-cy="viewTranscriptBtn"
-                      @click="loadTranscript">
 
-        </SkillsButton>
-      </div>
-      <Card v-if="transcript.show" class="mt-1 skills-card-theme-border">
-        <template #content>
-          <label for="transcriptDisplay" class="h4">{{ videoConf.isAudio ? 'Audio' : 'Video'}} Transcript:</label>
-          <Panel id="transcriptDisplay" data-cy="videoTranscript">
-            <p class="m-0">{{ transcript.transcript }}</p>
-          </Panel>
-          <div v-if="isSelfReportTypeVideo && !isAlreadyAchieved && !justAchieved" class="mt-2 flex items-center">
-            <div class="flex flex-1">
-              <Checkbox
-                  inputId="readTranscript"
-                  :binary="true"
-                  name="Transcript Certification"
-                  v-model="transcriptReadCert"
-                  data-cy="certifyTranscriptReadCheckbox"
-              />
-              <label for="readTranscript" class="ml-2">I <b>certify</b> that I fully read the transcript. Please award the skill and its <Tag>{{skill.totalPoints}}</Tag> points.</label>
-            </div>
-            <div class="flex">
-              <SkillsButton
-                  severity="success"
-                  label="Claim Points"
-                  icon="fas fa-check-double"
-                  outlined :disabled="!transcriptReadCert"
-                        data-cy="claimPtsByReadingTranscriptBtn"
-                        @click="achieveSkillByReadingTranscript">
-                
-              </SkillsButton>
-            </div>
-          </div>
-        </template>
-      </Card>
     </div>
 
     <Message v-if="errNotification.enable" severity="error" :closable="false" class="mt-2" role="alert" data-cy="videoError">
