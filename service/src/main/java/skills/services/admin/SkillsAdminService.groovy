@@ -207,8 +207,8 @@ class SkillsAdminService {
         if (!subject) {
             throw new SkillException("Subject [${parentSkillId}] does not exist", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
         }
-        final isSubjectEnabled = Boolean.valueOf(skillDefinition?.enabled)
-        if (!isSubjectEnabled && isCurrentlyEnabled) {
+        final isSubjectEnabled = Boolean.valueOf(subject?.enabled)
+        if (!isSubjectEnabled && isEnabledSkillInRequest) {
             throw new SkillException("Cannot enable Skill [${originalSkillId}] becuase it's Subject [${parentSkillId}] is disabled", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
         }
         if (isEdit) {

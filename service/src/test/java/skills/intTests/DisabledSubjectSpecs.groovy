@@ -1,0 +1,218 @@
+/**
+ * Copyright 2020 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package skills.intTests
+
+import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
+
+import static skills.intTests.utils.SkillsFactory.*
+
+class DisabledSubjectSpecs extends DefaultIntSpec {
+
+    def "can add a disabled skill to a disabled subject"() {
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        proj1_subj.enabled = false
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+
+        when:
+        def proj1_skill = createSkill(1, 1, 1)
+        proj1_skill.enabled = false
+        skillsService.createSkill(proj1_skill)
+        def projects = skillsService.getProjects()
+
+        then:
+        projects
+        projects.size() == 1
+        projects[0].numSkills == 0
+        projects[0].numSkillsDisabled == 1
+        projects[0].totalPoints == 0
+    }
+
+    def "cannot add an enabled skill to a disabled subject"() {
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        proj1_subj.enabled = false
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+
+        when:
+        def proj1_skill = createSkill(1, 1, 1)
+        proj1_skill.enabled = true
+        skillsService.createSkill(proj1_skill)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] becuase it's Subject [${proj1_subj.subjectId}] is disabled")
+    }
+
+    def "cannot enable a disabled skill that is part of a disabled subject"() {
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        proj1_subj.enabled = false
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        def proj1_skill = createSkill(1, 1, 1)
+        proj1_skill.enabled = false
+        skillsService.createSkill(proj1_skill)
+
+        when:
+        proj1_skill.enabled = true
+        skillsService.updateSkill(proj1_skill, proj1_skill.skillId)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] becuase it's Subject [${proj1_subj.subjectId}] is disabled")
+    }
+
+    def "cannot disable an already enabled subject"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(3, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [])
+
+        when:
+        p1subj1.enabled = false
+        skillsService.updateSubject(p1subj1, p1subj1.subjectId)
+        then:
+
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Cannot disable an existing enabled Subject. SubjectId=[${p1subj1.subjectId}]")
+    }
+
+    def "disabled subject from getProjects"() {
+        def proj1 = createProject(1)
+        def proj1Subj1 = createSubject(1, 1)
+        proj1Subj1.enabled = false
+        List<Map> proj1Subj1Skills = createSkills(3, 1, 1)
+        proj1Subj1Skills.each { it.enabled = false }
+
+        def proj1Subj2 = createSubject(1, 2)
+        List<Map> proj1Subj2Skills = createSkills(3, 1, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1Subj1)
+        skillsService.createSkills(proj1Subj1Skills)
+        skillsService.createSubject(proj1Subj2)
+        skillsService.createSkills(proj1Subj2Skills)
+
+        when:
+        def projects = skillsService.getProjects()
+        def projectsSummary = skillsService.getSkillsSummaryForCurrentUser(proj1.projectId)
+        proj1Subj1.enabled = true
+        skillsService.updateSubject(proj1Subj1, proj1Subj1.subjectId)
+        def projectsAfter = skillsService.getProjects()
+        def projectsSummaryAfter = skillsService.getSkillsSummaryForCurrentUser(proj1.projectId)
+
+        then:
+        projects
+        projects.size() == 1
+        projects[0].numSkills == 3
+        projects[0].numSkillsDisabled == 3
+        projects[0].totalPoints == 30
+
+        projectsSummary
+        projectsSummary.projectId == proj1.projectId
+        projectsSummary.totalPoints == 30
+        projectsSummary.subjects.size() == 1
+        projectsSummary.subjects[0].subjectId == proj1Subj2.subjectId
+        projectsSummary.subjects[0].totalPoints == 30
+        projectsSummary.subjects[0].totalSkills == 3
+
+        projectsAfter
+        projectsAfter.size() == 1
+        projectsAfter[0].numSkills == 6
+        projectsAfter[0].numSkillsDisabled == 0
+        projectsAfter[0].totalPoints == 60
+
+        projectsSummaryAfter
+        projectsSummaryAfter.projectId == proj1.projectId
+        projectsSummaryAfter.totalPoints == 60
+        projectsSummaryAfter.subjects.size() == 2
+        projectsSummaryAfter.subjects[0].subjectId == proj1Subj1.subjectId
+        projectsSummaryAfter.subjects[0].totalPoints == 30
+        projectsSummaryAfter.subjects[0].totalSkills == 3
+        projectsSummaryAfter.subjects[1].subjectId == proj1Subj2.subjectId
+        projectsSummaryAfter.subjects[1].totalPoints == 30
+        projectsSummaryAfter.subjects[1].totalSkills == 3
+    }
+
+    def "cannot get subject summary for a disabled subject"() {
+        def proj1 = createProject(1)
+        def proj1Subj1 = createSubject(1, 1)
+        proj1Subj1.enabled = false
+        List<Map> proj1Subj1Skills = createSkills(3, 1, 1)
+        proj1Subj1Skills.each { it.enabled = false }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1Subj1)
+        skillsService.createSkills(proj1Subj1Skills)
+
+        when:
+        def subjectSummary = skillsService.getSubjectSummaryForCurrentUser(proj1.projectId, proj1Subj1.subjectId)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.resBody.contains("Skill with id [TestSubject1] is not enabled")
+    }
+
+    def "disabled subject from getSubject"() {
+        def proj1 = createProject(1)
+        def proj1Subj1 = createSubject(1, 1)
+        proj1Subj1.enabled = false
+        List<Map> proj1Subj1Skills = createSkills(3, 1, 1)
+        proj1Subj1Skills.each { it.enabled = false }
+
+        def proj1Subj2 = createSubject(1, 2)
+        List<Map> proj1Subj2Skills = createSkills(3, 1, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1Subj1)
+        skillsService.createSkills(proj1Subj1Skills)
+        skillsService.createSubject(proj1Subj2)
+        skillsService.createSkills(proj1Subj2Skills)
+
+        when:
+
+        def subject = skillsService.getSubject(proj1Subj1)
+        proj1Subj1.enabled = true
+        skillsService.updateSubject(proj1Subj1, proj1Subj1.subjectId)
+        def subjectSummaryAfter = skillsService.getSubjectSummaryForCurrentUser(proj1.projectId, proj1Subj1.subjectId)
+
+        def subjectAfter = skillsService.getSubject(proj1Subj1)
+        then:
+        subject
+        subject.numSkills == 0
+        subject.numSkillsDisabled == 3
+        subject.totalPoints == 0
+
+        subjectAfter
+        subjectAfter.numSkills == 3
+        subjectAfter.numSkillsDisabled == 0
+        subjectAfter.totalPoints == 30
+
+        subjectSummaryAfter
+        subjectSummaryAfter.subjectId == proj1Subj1.subjectId
+        subjectSummaryAfter.totalPoints == 30
+        subjectSummaryAfter.totalSkills == 3
+        subjectSummaryAfter.skills.size() == 3
+    }
+
+}
