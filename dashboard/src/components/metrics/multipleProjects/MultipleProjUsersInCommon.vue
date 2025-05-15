@@ -196,7 +196,7 @@ const loadTableData = () => {
 <template>
   <Card data-cy="multiProjectUsersInCommon" class="mb-6">
     <template #header>
-      <SkillsCardHeader title="Find users across multiple projects"></SkillsCardHeader>
+      <SkillsCardHeader title="Find users across multiple projects" title-tag="h2"></SkillsCardHeader>
     </template>
     <template #content>
       <skills-spinner :is-loading="projects.loading" class="mb-8"/>

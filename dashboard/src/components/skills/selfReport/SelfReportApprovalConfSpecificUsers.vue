@@ -108,7 +108,7 @@ const updateSelectedList = () => {
 <template>
   <Card :pt="{ body: { class: 'p-0!' } }">
     <template #header>
-      <SkillsCardHeader title="Split Workload By Specific Users"></SkillsCardHeader>
+      <SkillsCardHeader title="Split Workload By Specific Users" title-tag="h5"></SkillsCardHeader>
     </template>
     <template #content>
       <div class="flex px-4 pt-4 gap-2 flex-col md:flex-row items-center">

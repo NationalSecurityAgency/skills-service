@@ -129,7 +129,7 @@ const updateChart = (res) => {
 <template>
   <Card data-cy="binnedNumUsersPostAchievement">
     <template #header>
-      <SkillsCardHeader title="Usage"></SkillsCardHeader>
+      <SkillsCardHeader title="Usage" title-tag="h4"></SkillsCardHeader>
     </template>
     <template #content>
       <MetricsOverlay :loading="loading" :has-data="!isEmpty" no-data-msg="No achievements yet for this skill.">

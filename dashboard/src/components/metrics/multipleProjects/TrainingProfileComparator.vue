@@ -99,7 +99,7 @@ const filter = (event) => {
 <template>
   <Card data-cy="trainingProfileComparator">
     <template #header>
-      <SkillsCardHeader title="Project definition comparison"></SkillsCardHeader>
+      <SkillsCardHeader title="Project definition comparison" title-tag="h2"></SkillsCardHeader>
     </template>
     <template #content>
       <div class="flex w-full">

@@ -180,7 +180,7 @@ const removeTagConf = (removedItem) => {
 <template>
   <Card :pt="{ body: { class: 'p-0!' } }" data-cy="splitWorkloadBySkillCard">
     <template #header>
-      <SkillsCardHeader title="Split Workload By Skill"></SkillsCardHeader>
+      <SkillsCardHeader title="Split Workload By Skill" title-tag="h5"></SkillsCardHeader>
     </template>
     <template #content>
       <div v-if="!(loadingMeta.skills || loadingMeta.subjects)" class="flex gap-1 items-center pt-4 px-4 flex-col lg:flex-row">

@@ -70,7 +70,7 @@ const loadData = () => {
 <template>
   <Card data-cy="numUsersPostAchievement">
     <template #header>
-      <SkillsCardHeader title="User Counts"></SkillsCardHeader>
+      <SkillsCardHeader title="User Counts" title-tag="h4"></SkillsCardHeader>
     </template>
     <template #content>
       <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">

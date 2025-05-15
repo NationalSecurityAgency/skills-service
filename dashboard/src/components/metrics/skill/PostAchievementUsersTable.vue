@@ -112,7 +112,7 @@ const calculateClientDisplayRoute = (props) => {
 <template>
   <Card data-cy="postAchievementUserList" :no-padding="true" :pt="{ body: { class: 'p-0!' } }">
     <template #header>
-      <SkillsCardHeader title="Users that Achieved this Skill">
+      <SkillsCardHeader title="Users that Achieved this Skill" title-tag="h4">
         <template #headerContent>
           <div class="d-block d-lg-inline-block">
             <mode-selector :options="modeSelectorOptions" @mode-selected="updateMode"/>

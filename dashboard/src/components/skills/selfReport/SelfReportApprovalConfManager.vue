@@ -323,6 +323,7 @@ const collapseRow = (row) => {
         </template>
 
         <template #expansion="slotProps">
+          <h4 class="sr-only">Configuration for {{ slotProps.data.userIdForDisplay}}</h4>
           <div :data-cy="`expandedChild_${slotProps.data.userId}`">
             <self-report-approval-conf-user-tag v-if="userTagConfKey"
                                                 :user-info="slotProps.data"
