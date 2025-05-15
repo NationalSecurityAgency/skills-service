@@ -57,7 +57,7 @@ const runAgain = () => {
         <Message severity="error" v-if="quizResult.outOfTime" data-cy="outOfTimeMsg">You've run out of time!</Message>
       </div>
       <div class="mb-1 mt-6 text-3xl">
-        <span class="font-bold text-success mb-2 skills-page-title-text-color" role="heading" aria-level="1">{{ quizInfo.name }}</span>
+        <h2 class="font-bold text-success mb-2 skills-page-title-text-color inline" role="heading" aria-level="1">{{ quizInfo.name }}</h2>
         <div v-if="!needsGrading" class="text-3xl inline-block ml-2">
           <Tag v-if="!quizResult.gradedRes.passed" class="uppercase text-2xl" severity="warn" data-cy="quizFailed"><i class="far fa-times-circle mr-1" aria-hidden="true"></i>Failed</Tag>
           <Tag v-if="quizResult.gradedRes.passed" class="uppercase text-2xl" severity="success" data-cy="quizPassed"><i class="fas fa-check-double mr-1" aria-hidden="true"></i>Passed</Tag>
