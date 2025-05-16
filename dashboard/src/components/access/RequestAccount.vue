@@ -122,6 +122,7 @@ const onSubmit = handleSubmit((values) => {
   <div>
     <div class="pt-10">
       <div class="max-w-md lg:max-w-xl mx-auto" style="min-width: 20rem;">
+        <h1 class="sr-only">SkillTree New Account</h1>
         <div class="text-center">
           <logo1 class="mb-4" />
           <Message :closable="false" role="heading" aria-level="1">New <span v-if="isRootAccount">Root </span>Account</Message>

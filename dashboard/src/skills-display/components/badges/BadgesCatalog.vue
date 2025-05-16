@@ -93,6 +93,7 @@ const buildBadgeLink = (badge) => {
 <template>
   <Card class="card" data-cy="myBadges">
     <template #header>
+      <h2 class="sr-only">Available Badges</h2>
       <div class="flex p-4" v-if="badges && badges.length > 0">
         <div class="">
           <InputGroup>

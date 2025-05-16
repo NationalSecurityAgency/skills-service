@@ -333,6 +333,7 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
         data-cy="prerequisitesCard" class="mt-4">
     <template #content>
       <div class="pt-4 px-4">
+        <h2 class="sr-only">Skill's Prerequisites</h2>
         <div class="flex flex-wrap gap-4">
           <div class="flex-1 w-min-16rem">
             <graph-legend />

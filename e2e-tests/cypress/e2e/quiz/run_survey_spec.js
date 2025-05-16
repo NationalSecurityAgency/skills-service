@@ -29,7 +29,7 @@ describe('Client Display Survey Tests', () => {
                 cy.log('Visiting Quiz Page in Dashboard')
                 cy.visit('/progress-and-rankings/quizzes/quiz1')
                 if (validateSplash) {
-                    cy.get('[data-cy="subPageHeader"]').contains('Survey')
+                    cy.get('[data-cy="myProgressTitle"]').contains('Survey')
                     cy.get('[data-cy="quizSplashScreen"] [data-cy="startQuizAttempt"]').should('be.enabled')
                 }
             } else {

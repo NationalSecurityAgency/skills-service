@@ -212,6 +212,7 @@ const handleFocus = () => {
               </div>
 
               <badge :badge="badge" :global="true"
+                     title-tag="h2"
                            @badge-updated="saveBadge"
                            @badge-deleted="deleteBadge"
                            @publish-badge="publishBadge"

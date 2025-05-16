@@ -85,7 +85,7 @@ const removeTagConf = (removedIem) => {
 <template>
 <Card :pt="{ body: { class: 'p-0!' } }">
   <template #header>
-    <SkillsCardHeader :title="'Split Workload By ' + tagLabel"></SkillsCardHeader>
+    <SkillsCardHeader :title="'Split Workload By ' + tagLabel" title-tag="h5"></SkillsCardHeader>
   </template>
   <template #content>
     <div class="flex gap-2 px-4 pt-4 flex-col sm:flex-row">

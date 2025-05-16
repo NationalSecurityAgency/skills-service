@@ -101,7 +101,7 @@ const getProgressPercent = (item) => {
   <Card :pt="{ body: { class: 'p-0 m-0' }}" data-cy="leaderboard">
     <template #header>
       <div class="flex-col sm:flex-row flex gap-1 pt-4 px-4">
-        <div class="uppercase text-2xl flex-1">Leaderboard</div>
+        <h2 class="uppercase text-2xl flex-1">Leaderboard</h2>
         <div v-if="!optedOut">
           <SelectButton v-model="selected"
                         :options="options"

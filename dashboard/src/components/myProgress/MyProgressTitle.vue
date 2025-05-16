@@ -24,7 +24,7 @@ defineProps({
     <template #content>
       <div class="flex flex-col sm:flex-row gap-2 items-center">
         <div class="flex-1">
-          <h1 class="text-2xl font-normal m-0 uppercase" role="heading" aria-level="1">{{ title }}</h1>
+          <h1 class="text-2xl font-normal m-0 uppercase" role="heading" aria-level="1" data-cy="myProgressTitle">{{ title }}</h1>
         </div>
         <div>
           <slot name="rightContent"></slot>

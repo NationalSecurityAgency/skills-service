@@ -36,6 +36,7 @@ const hasData = computed(() => userProgress.userProgressSummary.subjects?.length
           :message="`Please contact this ${attributes.projectDisplayName.toLowerCase()}'s administrator.`" />
       </template>
     </Card>
+    <h2 class="sr-only">Subjects</h2>
     <search-all-project-skills v-if="hasData && !attributes.isSummaryOnly" class="mb-4"/>
     <div v-if="hasData" class="grid grid-cols-12 gap-4 mx-0">
       <div v-for="(subject, index) in userProgress.userProgressSummary.subjects"
@@ -48,6 +49,7 @@ const hasData = computed(() => userProgress.userProgressSummary.subjects?.length
 </template>
 
 <style scoped>
+
 @media screen and (min-width: 400px) {
   .xsm\:w-min-20rem {
     min-width: 20rem

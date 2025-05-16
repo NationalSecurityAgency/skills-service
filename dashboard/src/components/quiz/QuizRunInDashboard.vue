@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router'
+import {computed, onMounted, ref} from 'vue';
+import {useRoute, useRouter} from 'vue-router'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
-import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import QuizRunService from '@/skills-display/components/quiz/QuizRunService.js';
 import QuizRun from '@/skills-display/components/quiz/QuizRun.vue';
+import MyProgressTitle from "@/components/myProgress/MyProgressTitle.vue";
 
 const router = useRouter()
 const route = useRoute()
@@ -60,8 +60,7 @@ const navToQuizAttemptsPage = () => {
   <div>
     <SkillsSpinner :is-loading="loadingQuizInfo"/>
     <div v-if="!loadingQuizInfo">
-      <SubPageHeader :title="quizInfo.quizType" class="pt-6 pl-4">
-      </SubPageHeader>
+      <my-progress-title :title="quizInfo.quizType" class="mb-3" />
       <QuizRun v-if="quizId"
       :quiz-id="quizId"
       :quiz="quizInfo"

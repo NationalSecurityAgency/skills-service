@@ -14,12 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-defineProps(['title']);
+defineProps({
+  title: String,
+  titleTag: {
+    type: String,
+    default: 'h3'
+  }
+})
 </script>
 
 <template>
   <div class="border-b p-4 border-surface bg-surface-100 dark:bg-surface-700 flex" data-cy="card-header">
-    <span class="font-bold flex-1"><slot name="headerIcon" />{{ title }}</span>
+    <div class="font-bold flex-1 inline"><slot name="headerIcon" /><component :is="titleTag" class="inline">{{ title }}</component></div>
     <slot name="headerContent" />
   </div>
 </template>

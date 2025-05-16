@@ -80,7 +80,7 @@ const activePointsColor = computed(() => {
       <div class="px-4 pt-4">
         <ribbon :color="ribbonColor" class="subject-tile-ribbon">
           <div class="flex justify-center">
-            <div class="overflow-hidden text-ellipsis text-center max-w-[20rem]">{{ subject.subject }}</div>
+            <h3 class="overflow-hidden text-ellipsis text-center max-w-[20rem]">{{ subject.subject }}</h3>
           </div>
         </ribbon>
       </div>

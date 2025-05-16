@@ -254,6 +254,7 @@ const toggle = (event) => {
         :class="{'skills-display-test-link': skillsDisplayInfo.isLocalTestPath() && themeHelper.isDarkTheme.value }"
         v-if="(skillsInternal && skillsInternal.length > 0 || searchString || showNoDataMsg)">
     <template #header>
+      <h2 class="sr-only">Skills</h2>
       <div class="px-6 pt-4">
         <div class=" flex flex-wrap gap-4 flex-col md:flex-row"
              v-if="skillsInternal && skillsInternal.length > 0">

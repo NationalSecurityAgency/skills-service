@@ -194,7 +194,7 @@ const notAllZeros = (data) => {
 <template>
   <Card data-cy="eventHistoryChart">
     <template #header>
-      <SkillsCardHeader :title="mutableTitle">
+      <SkillsCardHeader :title="mutableTitle" title-tag="h2">
         <template #headerContent>
           <span class="text-muted ml-2">|</span>
           <time-length-selector ref="timeLengthSelector" :options="timeSelectorOptions" @time-selected="updateTimeRange"/>

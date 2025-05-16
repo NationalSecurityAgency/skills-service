@@ -31,8 +31,12 @@ const props = defineProps({
   disableSortControl: {
     type: Boolean,
     default: false,
-  }}
-);
+  },
+  titleTag: {
+    type: String,
+    default: 'h3'
+  }
+});
 
 const emit = defineEmits(['sort-changed-requested', 'badge-updated', 'badge-deleted', 'publish-badge']);
 
@@ -137,6 +141,7 @@ defineExpose({
 <template>
   <div data-cy="badgeCard">
     <nav-card-with-stats-and-controls :options="cardOptions" :isLoading="isLoading"
+                                      :title-tag="titleTag"
                                       :disable-sort-control="disableSortControl"
                                       ref="navCardWithStatsAndControls" @sort-changed-requested="sortRequested"
                                       :data-cy="`badgeCard-${badge.badgeId}`">

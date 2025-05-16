@@ -152,7 +152,7 @@ const loadData = () => {
         <div class="flex flex-1">
           <Card data-cy="usersInProgressByTag" class="w-full">
             <template #header>
-              <SkillsCardHeader title="In Progress"></SkillsCardHeader>
+              <SkillsCardHeader title="In Progress" title-tag="h4"></SkillsCardHeader>
             </template>
             <template #content>
               <metrics-overlay :loading="loading" :has-data="inProgressSeries.length > 0" no-data-msg="No users currently working on this skill.">
@@ -164,7 +164,7 @@ const loadData = () => {
         <div class="flex flex-1">
           <Card data-cy="usersAchievedByTag" class="w-full">
             <template #header>
-              <SkillsCardHeader title="Achieved"></SkillsCardHeader>
+              <SkillsCardHeader title="Achieved" title-tag="h4"></SkillsCardHeader>
             </template>
             <template #content>
               <metrics-overlay :loading="loading" :has-data="achievedSeries.length > 0" no-data-msg="No achievements yet for this skill.">

@@ -20,7 +20,14 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import CardWithVericalSections from '@/components/utils/cards/CardWithVericalSections.vue'
 
 const projConfig = useProjConfig();
-const props = defineProps(['options', 'disableSortControl']);
+const props = defineProps({
+  options: Object,
+  disableSortControl: Boolean,
+  titleTag: {
+    type: String,
+    default: 'h3'
+  }
+});
 const emit = defineEmits(['sort-changed-requested']);
 
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
@@ -62,14 +69,14 @@ defineExpose({
             </div>
           </router-link>
           <div class="media-body">
-            <div
+            <component :is="titleTag"
               class="text-xl font-semibold no-underline overflow-hidden text-ellipsis whitespace-nowrap"
               style="max-width:17rem">
               <router-link v-if="options.icon" :to="options.navTo" data-cy="titleLink" class="no-underline"
                            :aria-label="`${isReadOnlyProj ? 'View' : 'Manage'} ${options.controls.type} ${options.controls.name}`">
                 {{ options.title }}
               </router-link>
-            </div>
+            </component>
             <div class="text-secondary text-xs overflow-hidden text-ellipsis whitespace-nowrap"
                  style="max-width:15rem"
                  data-cy="subTitle">{{ options.subTitle }}

@@ -183,9 +183,7 @@ const chartOptions = ref({
   <Card data-cy="levelBreakdownChart" :pt="{ content: { class: 'mb-0! pb-0!'}}" class="w-min-15rem h-full">
     <template #subtitle>
       <div class="flex">
-        <div>
-          {{ attributes.levelDisplayName }} Breakdown
-        </div>
+        <h2>{{ attributes.levelDisplayName }} Breakdown</h2>
       </div>
     </template>
     <template #content>

@@ -111,6 +111,7 @@ const saml2Login = (registrationId) => {
 <template>
   <div class="pt-20">
     <div class="text-center">
+      <h1 class="sr-only">SkillTree Login Page</h1>
       <div class="mt-8 justify-center">
         <logo1 />
       </div>

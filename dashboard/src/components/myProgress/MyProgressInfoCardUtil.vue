@@ -26,7 +26,7 @@ defineProps({
         <div class="flex flex-col sm:flex-row flex-1 gap-2 items-stretch justify-center">
           <div class="flex-1 pt-4 text-center sm:text-left">
             <div class="uppercase">
-              <slot name="title">{{ title }}</slot>
+              <h2><slot name="title">{{ title }}</slot></h2>
             </div>
             <div class="mt-2">
               <slot name="left-content"></slot>
