@@ -24,4 +24,5 @@ class SubjectRequest {
     String description
     String iconClass
     String helpUrl
+    String enabled
 }

@@ -40,6 +40,9 @@ import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 
+import static skills.storage.model.SkillDef.ContainerType.SkillsGroup
+import static skills.storage.model.SkillDef.ContainerType.Subject
+
 @Service
 @Slf4j
 class SkillsMoveService {
@@ -88,7 +91,7 @@ class SkillsMoveService {
         SkillDef destSubj = updateDestDefinitionPoints(projectId, skillMoveRequest)
         updateOrigDefinitionPoints(projectId, origParentSkill, destSubj)
 
-        SkillDef origSubj = origParentSkill.type == SkillDef.ContainerType.SkillsGroup ? ruleSetDefGraphService.getParentSkill(origParentSkill.id) : origParentSkill
+        SkillDef origSubj = origParentSkill.type == SkillsGroup ? ruleSetDefGraphService.getParentSkill(origParentSkill.id) : origParentSkill
 
         // points and achievements do not need to be updated if skill remains within the same subject
         if (origSubj.skillId != destSubj.skillId) {
@@ -132,7 +135,7 @@ class SkillsMoveService {
 
     @Profile
     private handleEmptyOrigGroup(SkillDef origParentSkill) {
-        if (origParentSkill.type == SkillDef.ContainerType.SkillsGroup) {
+        if (origParentSkill.type == SkillsGroup) {
             Long numChildren = skillRelDefRepo.countChildren(origParentSkill.projectId, origParentSkill.skillId, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
             if (numChildren == 0) {
                 userAchievedLevelRepo.deleteByProjectIdAndSkillId(origParentSkill.projectId, origParentSkill.skillId)
@@ -190,19 +193,23 @@ class SkillsMoveService {
             if (parentSkill.skillId == destParentSkillId) {
                 throw new SkillException("Skill with id [$skillId] already exists under [$destParentSkillId]", projectId, skillId, ErrorCode.BadParam)
             }
+            SkillDef destParentSkill = skillDefAccessor.getSkillDef(projectId, destParentSkillId, [Subject, SkillsGroup])
+            if (Boolean.valueOf(skillToMove.enabled) && !Boolean.valueOf(destParentSkill.enabled)) {
+                throw new SkillException("Skill with id [$skillId] is enabled and cannot be moved to a disabled destination [$destParentSkillId].", projectId, skillId, ErrorCode.BadParam)
+            }
             origParentSkill = parentSkill
 
-            SkillDef subject = (parentSkill.type == SkillDef.ContainerType.SkillsGroup) ? ruleSetDefGraphService.getParentSkill(parentSkill.id) : parentSkill
+            SkillDef subject = (parentSkill.type == SkillsGroup) ? ruleSetDefGraphService.getParentSkill(parentSkill.id) : parentSkill
 
-            boolean isGroupOrig = parentSkill.type == SkillDef.ContainerType.SkillsGroup
+            boolean isGroupOrig = parentSkill.type == SkillsGroup
             boolean stayingInTheSameSubject = skillReuseRequest.subjectId == subject.skillId
             boolean moveSkillBetweenGroupsInTheSameSubject = stayingInTheSameSubject && isGroupOrig && isGroupDest
 
             // handle original
             if (isGroupOrig) {
-                ruleSetDefGraphService.removeGraphRelationship(projectId, parentSkill.skillId, SkillDef.ContainerType.SkillsGroup, projectId, skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+                ruleSetDefGraphService.removeGraphRelationship(projectId, parentSkill.skillId, SkillsGroup, projectId, skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)
                 if (!moveSkillBetweenGroupsInTheSameSubject) {
-                    ruleSetDefGraphService.removeGraphRelationship(projectId, subject.skillId, SkillDef.ContainerType.Subject, projectId, skillId, SkillRelDef.RelationshipType.GroupSkillToSubject)
+                    ruleSetDefGraphService.removeGraphRelationship(projectId, subject.skillId, Subject, projectId, skillId, SkillRelDef.RelationshipType.GroupSkillToSubject)
                 }
                 if (parentSkill.numSkillsRequired > 0) {
                     Long numSkillsInGroup = ruleSetDefGraphService.countChildrenSkills(projectId, parentSkill.skillId, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
@@ -212,17 +219,17 @@ class SkillsMoveService {
                     }
                 }
             } else {
-                ruleSetDefGraphService.removeGraphRelationship(projectId, parentSkill.skillId, SkillDef.ContainerType.Subject, projectId, skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
+                ruleSetDefGraphService.removeGraphRelationship(projectId, parentSkill.skillId, Subject, projectId, skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
             }
 
             // handle destination
             if (isGroupDest) {
-                ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.groupId, SkillDef.ContainerType.SkillsGroup, projectId, skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+                ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.groupId, SkillsGroup, projectId, skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)
                 if (!moveSkillBetweenGroupsInTheSameSubject) {
-                    ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.subjectId, SkillDef.ContainerType.Subject, projectId, skillId, SkillRelDef.RelationshipType.GroupSkillToSubject)
+                    ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.subjectId, Subject, projectId, skillId, SkillRelDef.RelationshipType.GroupSkillToSubject)
                 }
             } else {
-                ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.subjectId, SkillDef.ContainerType.Subject, projectId, skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
+                ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.subjectId, Subject, projectId, skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
             }
         }
 
@@ -233,7 +240,7 @@ class SkillsMoveService {
     private void resetDisplayOrder(SkillDef origParentSkill, String parentSkillId) {
         List<SkillDef> siblingsOrig = ruleSetDefGraphService.getChildrenSkills(origParentSkill, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         displayOrderService.resetDisplayOrder(siblingsOrig)
-        SkillDef desParent = skillDefAccessor.getSkillDef(origParentSkill.projectId, parentSkillId, [SkillDef.ContainerType.Subject, SkillDef.ContainerType.SkillsGroup])
+        SkillDef desParent = skillDefAccessor.getSkillDef(origParentSkill.projectId, parentSkillId, [Subject, SkillsGroup])
         List<SkillDef> siblingsDest = ruleSetDefGraphService.getChildrenSkills(desParent, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         displayOrderService.resetDisplayOrder(siblingsDest)
     }
@@ -243,7 +250,7 @@ class SkillsMoveService {
         // update points for the origination group and/or subject
         // optimization - handle the case where skill was moved from a group to its parent subject
         if (destSubj.skillId != origParentSkill.skillId) {
-            if (origParentSkill.type == SkillDef.ContainerType.SkillsGroup) {
+            if (origParentSkill.type == SkillsGroup) {
                 batchOperationsTransactionalAccessor.updateGroupTotalPoints(projectId, origParentSkill.skillId, true)
                 SkillDef subject = ruleSetDefGraphService.getParentSkill(origParentSkill.id)
                 batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, subject.skillId, true)
@@ -264,7 +271,7 @@ class SkillsMoveService {
             destSubj = ruleSetDefGraphService.getParentSkill(group.id)
             batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId, true)
         } else {
-            destSubj = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.subjectId, [SkillDef.ContainerType.Subject])
+            destSubj = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.subjectId, [Subject])
             batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, destSubj.skillId, true)
         }
         return destSubj

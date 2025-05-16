@@ -176,6 +176,13 @@ const subjectEdited = (updatedSubject) => {
             data-cy="btn_copy-subject"
             :aria-label="`Copy Subject ${subjectState.subject.name} to another project`" />
       </template>
+      <template #right-of-header
+                v-if="!isLoadingData && (!subjectState.subject.enabled)">
+        <Tag v-if="!subjectState.subject.enabled"
+             severity="secondary"
+             class="ml-2" data-cy="disabledSubjectBadge"><i
+            class="fas fa-eye-slash mr-1" aria-hidden="true"></i> DISABLED</Tag>
+      </template>
       <template #footer>
         <!--        <import-finalize-alert />-->
       </template>

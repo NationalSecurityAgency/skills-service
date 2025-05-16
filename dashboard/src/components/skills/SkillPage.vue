@@ -117,7 +117,7 @@ const loadData = () => {
   skillsState.loadSkill(route.params.projectId, route.params.subjectId, route.params.skillId)
     .then(() => {
       headerOptions.value = buildHeaderOptions()
-      if (subjectState.subject) {
+      if (subjectState.subject && subjectState.subject.subjectId === route.params.subjectId) {
         navItems.value = buildNavItems()
       } else {
         subjectState.loadSubjectDetailsState().then(() => {
@@ -211,6 +211,7 @@ const skillId = computed(() => {
       v-if="showEdit"
       v-model="showEdit"
       :skill="skillsState.skill"
+      :is-subject-enabled="subjectState.subject.enabled"
       :is-edit="true"
       :project-user-community="projConfig.getProjectCommunityValue()"
       @skill-saved="skillEdited" />

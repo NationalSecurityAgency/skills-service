@@ -440,7 +440,7 @@ class SkillsLoader {
 
     @Profile
     private List<SkillDef> loadSubjectsFromDB(ProjDef projDef) {
-        return skillDefRepo.findAllByProjectIdAndType(projDef.projectId, ContainerType.Subject)
+        return skillDefRepo.findAllByProjectIdAndTypeAndEnabled(projDef.projectId, ContainerType.Subject, 'true')
     }
 
     @Transactional(readOnly = true)

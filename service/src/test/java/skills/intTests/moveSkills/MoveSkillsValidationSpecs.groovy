@@ -122,4 +122,20 @@ class MoveSkillsValidationSpecs extends DefaultIntSpec {
         SkillsClientException ex = thrown(SkillsClientException)
         ex.message.contains("Cannot move skills while finalization is running")
     }
+
+    def "cannot move an enabled skill to a disabled subject"() {
+        def p1 = createProject(1)
+
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        p1subj2.enabled = false
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.createSubject(p1subj2)
+        when:
+        skillsService.moveSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Skill with id [${p1Skills[0].skillId}] is enabled and cannot be moved to a disabled destination [${p1subj2.subjectId}]")
+    }
 }

@@ -143,11 +143,11 @@ class InceptionProjectService {
         }
 
         List<SubjectRequest> subs = [
-                new SubjectRequest(name: "Projects", subjectId: subjectProjectId, iconClass: "fas fa-project-diagram",
+                new SubjectRequest(name: "Projects", subjectId: subjectProjectId, iconClass: "fas fa-project-diagram", enabled: "true",
                         description: "Project creation and management. Includes CRUD of subjects, badges as well as configuration of levels and project settings."),
-                new SubjectRequest(name: "Skills", subjectId: subjectSkillsId, iconClass: "fas fa-user-ninja",
+                new SubjectRequest(name: "Skills", subjectId: subjectSkillsId, iconClass: "fas fa-user-ninja", enabled: "true",
                         description: "Creation and management of skills including dependency and cross-project skills."),
-                new SubjectRequest(name: "Dashboard", subjectId: subjectDashboardId, iconClass: "fas fa-cubes",
+                new SubjectRequest(name: "Dashboard", subjectId: subjectDashboardId, iconClass: "fas fa-cubes", enabled: "true",
                         description: "Number of ancillary dashboard features including user management."),
         ]
         subs.each {

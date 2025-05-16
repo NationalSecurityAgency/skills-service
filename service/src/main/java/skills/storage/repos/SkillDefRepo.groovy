@@ -166,6 +166,9 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     @Nullable
     List<SkillDef> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
 
+    @Nullable
+    List<SkillDef> findAllByProjectIdAndTypeAndEnabled(@Nullable String id, SkillDef.ContainerType type, String enabled)
+
     List<SkillDef> findAllByProjectIdAndTypeIn(@Nullable String id, List<SkillDef.ContainerType> type)
 
     @Nullable

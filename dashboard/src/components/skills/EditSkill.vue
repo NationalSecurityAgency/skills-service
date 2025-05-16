@@ -40,6 +40,7 @@ const props = defineProps({
   skill: Object,
   isEdit: Boolean,
   isCopy: Boolean,
+  isSubjectEnabled: Boolean,
   groupId: {
     type: String,
     default: null,
@@ -142,6 +143,19 @@ const isQuizAssignableToSkill = (selectedQuiz, context) => {
   return true;
 }
 
+const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
+  return (selfReportingType.value === 'Quiz' || selfReportingType.value === 'Video')
+})
+const skillEnabled = ref(props.isSubjectEnabled && !props.isEdit ? true : props.isSubjectEnabled && props.skill.enabled)
+const onEnabledChanged = (event) => {
+  skillEnabled.value = !skillEnabled.value
+}
+const showVisibilityControl = computed(() => {
+  // always show on create new skill (when subject is enabled), only show on edit if currently disabled
+  const isCreateNewSkill = !props.isEdit
+  return props.isSubjectEnabled && (isCreateNewSkill || !props.skill.enabled)
+})
+
 const schema = object({
   'skillName': string()
     .trim()
@@ -236,7 +250,7 @@ const initialSkillData = ref({
   skillName: props.skill.name || '',
   originalSkillId: props.skill.skillId || '',
   version: props.skill.verison || 0,
-  enabled: props.skill.enabled || true,
+  enabled: skillEnabled.value,
   pointIncrement: props.skill.pointIncrement || 100,
   numPerformToCompletion: props.skill.numPerformToCompletion || 1,
   timeWindowEnabled: props.skill.timeWindowEnabled || false,
@@ -278,18 +292,6 @@ const onSkillSaved = (skill) => {
   emit('skill-saved', skill)
 }
 
-const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
-  return (selfReportingType.value === 'Quiz' || selfReportingType.value === 'Video')
-})
-const skillEnabled = ref(true)
-const onEnabledChanged = (event) => {
-  skillEnabled.value = !skillEnabled.value
-}
-const showVisibilityControl = computed(() => {
-  // always show on create, only show on edit if currently disabled
-  return !(props.isEdit && props.skill.enabled);
-})
-
 </script>
 
 <template>
@@ -322,29 +324,29 @@ const showVisibilityControl = computed(() => {
       </div>
 
       <div class="flex flex-col md:flex-row md:flex-1 gap-2 mt-2 pb-2">
-              <div data-cy="visibility" class="flex-1 min-w-[8rem]">
-                <div class="flex flex-col gap-2">
-                  <label for="visibilitySwitch">
-                    <span id="visibilityLabel">Initial Visibility:</span>
-                  </label>
-                  <InputGroup>
-                    <InputGroupAddon>
-                      <div style="width: 3.3rem !important;">
-                        <SkillsInputSwitch data-cy="visibilitySwitch"
-                                           aria-labelledby="visibilityLabel"
-                                           inputId="visibilitySwitch"
-                                           style="height:1rem !important;"
-                                           size="small"
-                                           name="enabled"
-                                           @change="onEnabledChanged" />
-                      </div>
-                    </InputGroupAddon>
-                    <InputGroupAddon class="w-full">
-                      <span class="ml-2 w-full text-gray-700 dark:text-white">{{ skillEnabled ? 'Visible' : 'Hidden'}}</span>
-                    </InputGroupAddon>
-                  </InputGroup>
+        <div data-cy="visibility" class="flex-1 min-w-[8rem]">
+          <div class="flex flex-col gap-2">
+            <label for="visibilitySwitch">
+              <span id="visibilityLabel">Initial Visibility:</span>
+            </label>
+            <InputGroup>
+              <InputGroupAddon>
+                <div style="width: 3.3rem !important;">
+                  <SkillsInputSwitch data-cy="visibilitySwitch"
+                                     aria-labelledby="visibilityLabel"
+                                     inputId="visibilitySwitch"
+                                     style="height:1rem !important;"
+                                     size="small"
+                                     name="enabled"
+                                     @change="onEnabledChanged" />
                 </div>
-              </div>
+              </InputGroupAddon>
+              <InputGroupAddon class="w-full">
+                <span class="ml-2 w-full text-gray-700 dark:text-white">{{ skillEnabled ? 'Visible' : 'Hidden'}}</span>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+        </div>
 
         <div class="flex-1">
           <SkillsNumberInput

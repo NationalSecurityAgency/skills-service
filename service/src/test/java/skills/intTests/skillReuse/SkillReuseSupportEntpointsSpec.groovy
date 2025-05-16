@@ -229,4 +229,36 @@ class SkillReuseSupportEntpointsSpec extends CatalogIntSpec {
         !res1.isReusedLocally
     }
 
+    def "disabled subject destinations are not available for reuse if the skill being moved is enabled "() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        p1subj2.enabled = false
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.createSubject(p1subj2)
+
+        when:
+        def dest = skillsService.getReuseDestinationsForASkill(p1.projectId, p1Skills[0].skillId)
+        then:
+        !dest
+    }
+
+    def "disabled subject destinations are available for reuse if the skill being moved is disabled "() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1subj2 = createSubject(1, 2)
+        p1subj2.enabled = false
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills[0].enabled = false
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        skillsService.createSubject(p1subj2)
+
+        when:
+        def dest = skillsService.getReuseDestinationsForASkill(p1.projectId, p1Skills[0].skillId)
+        then:
+        dest.size() == 1
+        dest[0].subjectId == "TestSubject2"
+        !dest[0].groupId
+    }
 }
