@@ -15,7 +15,7 @@
  */
 package skills.storage.model
 
-interface SkillDefPartial extends SkillDefSkinny{
+interface SkillDefPartial extends SkillDefSkinny {
     Integer getPointIncrement()
     Integer getPointIncrementInterval()
     Integer getNumMaxOccurrencesIncrementInterval()

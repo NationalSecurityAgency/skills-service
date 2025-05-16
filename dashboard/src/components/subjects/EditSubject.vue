@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
-import { object, string } from 'yup'
+import { boolean, object, string } from 'yup'
 import { useRoute } from 'vue-router'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import SubjectsService from '@/components/subjects/SubjectsService'
@@ -26,6 +26,9 @@ import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import IconPicker from '@/components/utils/iconPicker/IconPicker.vue'
 import { useFocusState } from '@/stores/UseFocusState.js'
+import InputGroupAddon from 'primevue/inputgroupaddon'
+import InputGroup from 'primevue/inputgroup'
+import SkillsInputSwitch from '@/components/utils/inputForm/SkillsInputSwitch.vue'
 
 const focusState = useFocusState()
 const model = defineModel()
@@ -83,6 +86,10 @@ const checkSubjectIdUnique = (value) => {
   return SubjectsService.subjectWithIdExists(route.params.projectId, value)
 }
 
+const skillEnabled = ref(!props.isEdit ? true : props.subject.enabled)
+const onEnabledChanged = (event) => {
+  skillEnabled.value = !skillEnabled.value
+}
 const schema = object({
   'subjectName': string()
     .trim()
@@ -106,6 +113,7 @@ const schema = object({
     .max(appConfig.descriptionMaxLength)
     .customDescriptionValidator('Subject Description')
     .label('Subject Description'),
+  'enabled': boolean(),
   'helpUrl': string()
     .urlValidator()
     .label('Help URL')
@@ -117,6 +125,7 @@ const initialSubjData = {
   subjectName: props.subject.name || '',
   helpUrl: props.subject.helpUrl || '',
   description: props.subject.description || '',
+  enabled: skillEnabled.value,
   iconClass: props.subject.iconClass || 'fas fa-book'
 }
 
@@ -181,6 +190,30 @@ const onSubjectSaved = (subject) => {
           </div>
         </template>
       </SkillsNameAndIdInput>
+
+      <div data-cy="visibility" class="flex-1 min-w-[8rem] mb-2">
+        <div class="flex flex-col gap-2">
+          <label for="visibilitySwitch">
+            <span id="visibilityLabel">Initial Visibility:</span>
+          </label>
+          <InputGroup>
+            <InputGroupAddon>
+              <div style="width: 3.3rem !important;">
+                <SkillsInputSwitch data-cy="visibilitySwitch"
+                                   aria-labelledby="visibilityLabel"
+                                   inputId="visibilitySwitch"
+                                   style="height:1rem !important;"
+                                   size="small"
+                                   name="enabled"
+                                   @change="onEnabledChanged" />
+              </div>
+            </InputGroupAddon>
+            <InputGroupAddon class="w-full">
+              <span class="ml-2 w-full text-gray-700 dark:text-white">{{ skillEnabled ? 'Visible' : 'Hidden'}}</span>
+            </InputGroupAddon>
+          </InputGroup>
+        </div>
+      </div>
 
       <markdown-editor class="" name="description" />
       <help-url-input class="mt-4"

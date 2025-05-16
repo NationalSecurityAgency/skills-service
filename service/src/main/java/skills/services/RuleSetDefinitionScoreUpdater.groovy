@@ -66,7 +66,7 @@ class RuleSetDefinitionScoreUpdater {
     }
 
     @Profile
-    private void updateGroupDef(SkillDef skillDef) {
+    void updateGroupDef(SkillDef skillDef) {
         List<SkillDef> children = skillRelDefRepo.findChildrenByParent(skillDef.id, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
         int total = skillsGroupAdminService.getGroupTotalPoints(children)
         skillDef.totalPoints = total
