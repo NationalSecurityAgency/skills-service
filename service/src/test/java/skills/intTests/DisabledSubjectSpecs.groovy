@@ -22,6 +22,21 @@ import static skills.intTests.utils.SkillsFactory.*
 
 class DisabledSubjectSpecs extends DefaultIntSpec {
 
+    def "can create an initially disabled skill to a disabled subject"() {
+        def proj1 = createProject(1)
+        skillsService.createProject(proj1)
+
+        when:
+        def proj1_subj = createSubject(1, 1)
+        proj1_subj.enabled = false
+        skillsService.createSubject(proj1_subj)
+        def subject = skillsService.getSubject(proj1_subj)
+
+        then:
+        subject
+        subject.enabled == false
+    }
+
     def "can add a disabled skill to a disabled subject"() {
         def proj1 = createProject(1)
         def proj1_subj = createSubject(1, 1)
@@ -166,7 +181,7 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
         skillsService.createSkills(proj1Subj1Skills)
 
         when:
-        def subjectSummary = skillsService.getSubjectSummaryForCurrentUser(proj1.projectId, proj1Subj1.subjectId)
+        skillsService.getSubjectSummaryForCurrentUser(proj1.projectId, proj1Subj1.subjectId)
 
         then:
         SkillsClientException ex = thrown(SkillsClientException)
