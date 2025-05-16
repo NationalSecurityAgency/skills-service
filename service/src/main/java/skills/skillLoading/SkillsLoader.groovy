@@ -76,6 +76,9 @@ class SkillsLoader {
     @Value('#{"${skills.project.minimumPoints:20}"}')
     int minimumProjectPoints
 
+    @Value('#{"${skills.config.ui.daysToRollOff:2}"}')
+    Integer daysToRollOff
+
     @Autowired
     ProjDefRepo projDefRepo
 
@@ -369,9 +372,9 @@ class SkillsLoader {
 
     @Profile
     private OverallSkillSummary.BadgeStats getBadgeStats(ProjDef projDef, String userId) {
-        //these probably need to exclude badges where enabled = FALSE
-        int numBadgesAchieved = achievedLevelRepository.countAchievedForUser(userId, projDef.projectId, ContainerType.Badge)
-        int numTotalBadges = skillDefRepo.countByProjectIdAndTypeWhereEnabled(projDef.projectId, ContainerType.Badge)
+        def badges = loadBadgeSummaries(projDef.projectId, userId)
+        int numTotalBadges = badges.size()
+        int numBadgesAchieved = badges.count{ it -> it.badgeAchieved }.toInteger()
 
         List<UserAchievedLevelRepo.AchievementInfo> recentlyAchievedBadges = getRecentlyAchievedBadges(userId, projDef.projectId)
         List<OverallSkillSummary.SingleBadgeInfo> recentlyAwardedBadges = recentlyAchievedBadges?.collect {
@@ -450,11 +453,16 @@ class SkillsLoader {
         if ( version >= 0 ) {
             badgeDefs = badgeDefs.findAll { it.version <= version }
         }
+
         List<SkillBadgeSummary> badges = badgeDefs.sort({ it.displayOrder }).findAll {
             (it.enabled == null || Boolean.valueOf(it.enabled)) && BadgeUtils.afterStartTime(it)
         }.collect { SkillDefWithExtra badgeDefinition ->
             loadBadgeSummary(projDef, userId, badgeDefinition, version)
         }
+        badges.removeAll{ badgeSummary ->
+            BadgeUtils.shouldRollOff(badgeSummary, daysToRollOff) && !badgeSummary.badgeAchieved
+        }
+
         return badges
     }
 
@@ -1175,12 +1183,13 @@ class SkillsLoader {
         if(loadBadgeDetails) {
             numberOfUsersAchieved = achievedLevelRepository.countNumAchievedForSkill(projDef.projectId, badgeDefinition.skillId)
         }
+        boolean isGem = badgeDefinition.startDate && badgeDefinition.endDate
 
         return new SkillBadgeSummary(
                 badge: InputSanitizer.unsanitizeName(badgeDefinition.name),
                 badgeId: badgeDefinition.skillId,
                 description: InputSanitizer.unsanitizeForMarkdown(badgeDefinition.description),
-                badgeAchieved: achievements?.size() > 0,
+                badgeAchieved: achievements?.size() > 0 || (isGem && numAchievedSkills == numChildSkills),
                 dateAchieved: achievements ? achievements.first().achievedOn : null,
                 numSkillsAchieved: numAchievedSkills,
                 numTotalSkills: numChildSkills,
