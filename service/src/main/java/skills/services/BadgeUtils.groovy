@@ -15,11 +15,13 @@
  */
 package skills.services
 
-import skills.storage.model.SkillDef
+import groovy.time.TimeCategory
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
+import skills.skillLoading.model.SkillBadgeSummary
 import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillDefParent
 import skills.storage.model.SkillDefWithExtra
-import skills.storage.repos.SkillEventsSupportRepo
 
 class BadgeUtils {
 
@@ -41,6 +43,15 @@ class BadgeUtils {
         return withinActiveTimeframe
     }
 
+    public static boolean withinActiveTimeframe(SkillBadgeSummary skillDef) {
+        boolean withinActiveTimeframe = true;
+        if (skillDef.startDate && skillDef.endDate) {
+            Date now = new Date()
+            withinActiveTimeframe = skillDef.startDate.before(now) && skillDef.endDate.after(now)
+        }
+        return withinActiveTimeframe
+    }
+
     public static boolean afterStartTime(SkillDefWithExtra skillDef) {
         boolean withinActiveTimeframe = true;
         if (skillDef.startDate) {
@@ -48,6 +59,22 @@ class BadgeUtils {
             withinActiveTimeframe = skillDef.startDate.before(now)
         }
         return withinActiveTimeframe
+    }
+
+    public static boolean shouldRollOff(SkillBadgeSummary skillDef, Integer daysToRollOff) {
+        if(!withinActiveTimeframe(skillDef)) {
+            boolean shouldRollOff = false
+            use(TimeCategory) {
+                Date now = new Date()
+                Date rollOffDate = skillDef.endDate + daysToRollOff.days
+                if(now.after(rollOffDate)) {
+                    shouldRollOff = true
+                }
+            }
+
+            return shouldRollOff
+        }
+        return false
     }
 
 }
