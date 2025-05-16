@@ -14,19 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
-import { useRoute } from 'vue-router'
-import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
-import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import {useRoute} from 'vue-router'
+import {useSkillsDisplayService} from '@/skills-display/services/UseSkillsDisplayService.js'
+import {useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillProgress from '@/skills-display/components/progress/SkillProgress.vue'
 import {useScrollSkillsIntoViewState} from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
 import {useSkillsDisplaySubjectState} from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import Prerequisites from '@/skills-display/components/skill/prerequisites/Prerequisites.vue'
 import SkillAchievementMsg from "@/skills-display/components/progress/celebration/SkillAchievementMsg.vue";
-import SkillsInputSwitch from "@/components/utils/inputForm/SkillsInputSwitch.vue";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
+import {useMagicKeys, watchDebounced} from "@vueuse/core";
+import {useUserPreferences} from "@/stores/UseUserPreferences.js";
 
 const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
@@ -34,6 +35,8 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 const scrollIntoViewState = useScrollSkillsIntoViewState()
 const route = useRoute()
 const skillState = useSkillsDisplaySubjectState()
+const keys = useMagicKeys()
+const userPreferences = useUserPreferences()
 const skill = computed(() => skillState.skillSummary)
 const loadingSkill = ref(true)
 const displayGroupDescription = ref(false);
@@ -65,6 +68,33 @@ const loadSkillSummary = () => {
       }
     })
 }
+const nextButtonShortcut = ref('Ctrl+Alt+N')
+const previousButtonShortcut = ref('Ctrl+Alt+P')
+userPreferences.afterUserPreferencesLoaded().then((options) => {
+  const debounceOptions = { debounce: 250, maxWait: 1000 }
+  if (options.sd_next_skill_keyboard_shortcut) {
+    nextButtonShortcut.value = options.sd_next_skill_keyboard_shortcut
+  }
+  if (options.sd_previous_skill_keyboard_shortcut) {
+    previousButtonShortcut.value = options.sd_previous_skill_keyboard_shortcut
+  }
+  watchDebounced(
+      keys[nextButtonShortcut.value],
+      () => {
+        nextButtonClicked()
+      },
+      debounceOptions
+  )
+  watchDebounced(
+      keys[previousButtonShortcut.value],
+      () => {
+        prevButtonClicked()
+      },
+      debounceOptions
+  )
+})
+
+
 
 const prevButtonClicked = () => {
   const params = { skillId: skillState.skillSummary.prevSkillId, projectId: route.params.projectId }
@@ -105,6 +135,7 @@ const descriptionToggled = () => {
                 @click="prevButtonClicked" v-if="skill.prevSkillId"
                 outlined
                 size="small"
+                :title="`Previous Skills (${previousButtonShortcut})`"
                 class="skills-theme-btn"
                 data-cy="prevSkill"
                 aria-label="previous skill">
@@ -123,6 +154,7 @@ const descriptionToggled = () => {
                 data-cy="nextSkill"
                 outlined
                 size="small"
+                :title="`Next Skills (${nextButtonShortcut})`"
                 aria-label="next skill">
                 Next
                 <i class="fas fa-arrow-alt-circle-right ml-1" aria-hidden="true"></i>
