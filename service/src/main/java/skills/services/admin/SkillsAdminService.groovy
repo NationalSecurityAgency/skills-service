@@ -211,6 +211,15 @@ class SkillsAdminService {
         if (!isSubjectEnabled && isEnabledSkillInRequest) {
             throw new SkillException("Cannot enable Skill [${originalSkillId}] becuase it's Subject [${parentSkillId}] is disabled", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
         }
+        if (isSkillsGroupChild) {
+            // need to validate skills group
+            if (!skillsGroupSkillDef) {
+                skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+            }
+            if (!Boolean.valueOf(skillsGroupSkillDef?.enabled) && isEnabledSkillInRequest) {
+                throw new SkillException("Cannot enable Skill [${originalSkillId}] becuase it's SkillsGroup [${groupId}] is disabled", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
+            }
+        }
         if (isEdit) {
             validateImportedSkillUpdate(skillRequest, skillDefinition)
             // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
