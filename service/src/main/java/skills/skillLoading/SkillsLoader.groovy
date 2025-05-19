@@ -1184,12 +1184,30 @@ class SkillsLoader {
             numberOfUsersAchieved = achievedLevelRepository.countNumAchievedForSkill(projDef.projectId, badgeDefinition.skillId)
         }
         boolean isGem = badgeDefinition.startDate && badgeDefinition.endDate
+        boolean maintainAchievement = false
+        if(isGem) {
+            if(numAchievedSkills == numChildSkills) {
+                Date mostRecentAchievement
+                groupChildrenMeta.childrenWithPoints.each{ child ->
+                    if(child.achievedOn && !mostRecentAchievement) {
+                        mostRecentAchievement = child.achievedOn
+                    } else {
+                        if(child.achievedOn > mostRecentAchievement) {
+                            mostRecentAchievement = child.achievedOn
+                        }
+                    }
+                }
+                if(mostRecentAchievement < badgeDefinition.endDate) {
+                    maintainAchievement = true
+                }
+            }
+        }
 
         return new SkillBadgeSummary(
                 badge: InputSanitizer.unsanitizeName(badgeDefinition.name),
                 badgeId: badgeDefinition.skillId,
                 description: InputSanitizer.unsanitizeForMarkdown(badgeDefinition.description),
-                badgeAchieved: achievements?.size() > 0 || (isGem && numAchievedSkills == numChildSkills),
+                badgeAchieved: achievements?.size() > 0 || maintainAchievement,
                 dateAchieved: achievements ? achievements.first().achievedOn : null,
                 numSkillsAchieved: numAchievedSkills,
                 numTotalSkills: numChildSkills,
