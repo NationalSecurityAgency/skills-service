@@ -215,5 +215,115 @@ class DisabledSkillsSpecs extends DefaultIntSpec {
         ex.message.contains("Skill [${proj1_skills[0].skillId}] has already been enabled and cannot be disabled.")
     }
 
+    def "can add a disabled skill to an enabled skill group"() {
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        proj1_subj.enabled = true
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+
+        when:
+        def skillsGroup = createSkillsGroup(1,1,2)
+        skillsGroup.enabled = true
+        skillsService.createSkill(skillsGroup)
+
+        def proj1_skill = createSkill(1, 1, 1)
+        proj1_skill.enabled = false
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, proj1_skill)
+        def projects = skillsService.getProjects()
+
+        def subject = skillsService.getSubject(proj1_subj)
+
+        then:
+        projects
+        projects.size() == 1
+        projects[0].numSkills == 0
+        projects[0].numSkillsDisabled == 1
+        projects[0].totalPoints == 0
+        subject
+        subject.enabled == true
+        subject.numSkills == 0
+        subject.numSkillsDisabled == 1
+        subject.numGroups == 1
+        subject.numGroupsDisabled == 0
+        subject.totalPoints == 0
+    }
+
+    def "cannot add an enabled skill to a disabled skill group"() {
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        proj1_subj.enabled = true
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+
+        when:
+        def skillsGroup = createSkillsGroup(1,1,2)
+        skillsGroup.enabled = false
+        skillsService.createSkill(skillsGroup)
+
+        def proj1_skill = createSkill(1, 1, 1)
+        proj1_skill.enabled = true
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, proj1_skill)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Cannot enable Skill [skill1] becuase it's SkillsGroup [skill2] is disabled")
+    }
+
+    def "editing a skill group with a disabled skill does not miscalculate the total points"() {
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        proj1_subj.enabled = true
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+
+        when:
+        def skillsGroup = createSkillsGroup(1,1,3)
+        skillsGroup.enabled = true
+        skillsService.createSkill(skillsGroup)
+
+        def proj1_skill1 = createSkill(1, 1, 1)
+        proj1_skill1.enabled = false
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, proj1_skill1)
+        def proj1_skill2 = createSkill(1, 1, 2)
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, proj1_skill2)
+        def projects = skillsService.getProjects()
+        def subject = skillsService.getSubject(proj1_subj)
+        def skillGroupBeforeUpdate = skillsService.getSkill(skillsGroup)
+
+        skillsGroup.description = 'updated'
+        skillsService.updateSkill(skillsGroup)
+        def subjectAfterUpdate = skillsService.getSubject(proj1_subj)
+
+        def skillGroupAfterUpdate = skillsService.getSkill(skillsGroup)
+
+        then:
+        projects
+        projects.size() == 1
+        projects[0].numSkills == 1
+        projects[0].numSkillsDisabled == 1
+        projects[0].totalPoints == 10
+        subject
+        subject.enabled == true
+        subject.numSkills == 1
+        subject.numSkillsDisabled == 1
+        subject.numGroups == 1
+        subject.numGroupsDisabled == 0
+        subject.totalPoints == 10
+        subjectAfterUpdate
+        subjectAfterUpdate.enabled == true
+        subjectAfterUpdate.numSkills == 1
+        subjectAfterUpdate.numSkillsDisabled == 1
+        subjectAfterUpdate.numGroups == 1
+        subjectAfterUpdate.numGroupsDisabled == 0
+        subjectAfterUpdate.totalPoints == 10
+        skillGroupBeforeUpdate
+        skillGroupBeforeUpdate.totalPoints == 10
+        skillGroupAfterUpdate
+        skillGroupAfterUpdate.totalPoints == 10
+    }
 
 }
