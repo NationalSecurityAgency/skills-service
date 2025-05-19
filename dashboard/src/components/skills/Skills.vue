@@ -245,6 +245,7 @@ const skillCreatedOrUpdated = (skill) => {
       v-if="editGroup.show"
       v-model="editGroup.show"
       :skill="editGroup.skill"
+      :is-subject-enabled="subjectState.subject.enabled"
       :is-edit="editGroup.isEdit"
       @skill-saved="skillCreatedOrUpdated"
       />

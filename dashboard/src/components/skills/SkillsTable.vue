@@ -651,6 +651,13 @@ const onRowExpand = () => {
                 class="text-lg w-min-10rem"
                 :value="slotProps.data.name"
                 :filter="filters.global.value" />
+              <Tag
+                  v-if="!slotProps.data.enabled"
+                  severity="secondary"
+                  class="mt-1"
+                  :data-cy="`disabledBadge-${slotProps.data.skillId}`">
+                <span><i class="fas fa-eye-slash" aria-hidden="true"></i> Disabled</span>
+              </Tag>
             </div>
             <div v-if="!slotProps.data.isGroupType" class="flex-1">
               <div class="flex w-min-10rem">

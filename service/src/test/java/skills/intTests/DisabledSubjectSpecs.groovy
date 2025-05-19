@@ -77,6 +77,59 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
         ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] becuase it's Subject [${proj1_subj.subjectId}] is disabled")
     }
 
+    def "can add a disabled skill group to a disabled subject"() {
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        proj1_subj.enabled = false
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+
+        when:
+        def skillsGroup = createSkillsGroup(1,1,2)
+        skillsGroup.enabled = false
+        skillsService.createSkill(skillsGroup)
+
+        def proj1_skill = createSkill(1, 1, 1)
+        proj1_skill.enabled = false
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, proj1_skill)
+        def projects = skillsService.getProjects()
+
+        def subject = skillsService.getSubject(proj1_subj)
+
+        then:
+        projects
+        projects.size() == 1
+        projects[0].numSkills == 0
+        projects[0].numSkillsDisabled == 1
+        projects[0].totalPoints == 0
+        subject
+        subject.enabled == false
+        subject.numSkills == 0
+        subject.numSkillsDisabled == 1
+        subject.numGroups == 0
+        subject.numGroupsDisabled == 1
+        subject.totalPoints == 0
+    }
+
+    def "cannot add an enabled skill group to a disabled subject"() {
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        proj1_subj.enabled = false
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+
+        when:
+        def proj1_skill = createSkill(1, 1, 1)
+        proj1_skill.enabled = true
+        skillsService.createSkill(proj1_skill)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] becuase it's Subject [${proj1_subj.subjectId}] is disabled")
+    }
+
     def "cannot enable a disabled skill that is part of a disabled subject"() {
         def proj1 = createProject(1)
         def proj1_subj = createSubject(1, 1)
@@ -128,6 +181,14 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1Subj2)
         skillsService.createSkills(proj1Subj2Skills)
 
+        def skillsGroup = createSkillsGroup(1,1,4)
+        skillsGroup.enabled = false
+        skillsService.createSkill(skillsGroup)
+
+        def childSkill = createSkill(1, 1, 5)
+        childSkill.enabled = false
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, childSkill)
+
         when:
         def projects = skillsService.getProjects()
         def projectsSummary = skillsService.getSkillsSummaryForCurrentUser(proj1.projectId)
@@ -140,7 +201,7 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
         projects
         projects.size() == 1
         projects[0].numSkills == 3
-        projects[0].numSkillsDisabled == 3
+        projects[0].numSkillsDisabled == 4
         projects[0].totalPoints == 30
 
         projectsSummary
@@ -153,17 +214,17 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
 
         projectsAfter
         projectsAfter.size() == 1
-        projectsAfter[0].numSkills == 6
+        projectsAfter[0].numSkills == 7
         projectsAfter[0].numSkillsDisabled == 0
-        projectsAfter[0].totalPoints == 60
+        projectsAfter[0].totalPoints == 70
 
         projectsSummaryAfter
         projectsSummaryAfter.projectId == proj1.projectId
-        projectsSummaryAfter.totalPoints == 60
+        projectsSummaryAfter.totalPoints == 70
         projectsSummaryAfter.subjects.size() == 2
         projectsSummaryAfter.subjects[0].subjectId == proj1Subj1.subjectId
-        projectsSummaryAfter.subjects[0].totalPoints == 30
-        projectsSummaryAfter.subjects[0].totalSkills == 3
+        projectsSummaryAfter.subjects[0].totalPoints == 40
+        projectsSummaryAfter.subjects[0].totalSkills == 4
         projectsSummaryAfter.subjects[1].subjectId == proj1Subj2.subjectId
         projectsSummaryAfter.subjects[1].totalPoints == 30
         projectsSummaryAfter.subjects[1].totalSkills == 3
@@ -204,6 +265,14 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1Subj2)
         skillsService.createSkills(proj1Subj2Skills)
 
+        def skillsGroup = createSkillsGroup(1,1,4)
+        skillsGroup.enabled = false
+        skillsService.createSkill(skillsGroup)
+
+        def childSkill = createSkill(1, 1, 5)
+        childSkill.enabled = false
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, childSkill)
+
         when:
 
         def subject = skillsService.getSubject(proj1Subj1)
@@ -215,19 +284,23 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
         then:
         subject
         subject.numSkills == 0
-        subject.numSkillsDisabled == 3
+        subject.numSkillsDisabled == 4
+        subject.numGroups == 0
+        subject.numGroupsDisabled == 1
         subject.totalPoints == 0
 
         subjectAfter
-        subjectAfter.numSkills == 3
+        subjectAfter.numSkills == 4
         subjectAfter.numSkillsDisabled == 0
-        subjectAfter.totalPoints == 30
+        subjectAfter.numGroups == 1
+        subjectAfter.numGroupsDisabled == 0
+        subjectAfter.totalPoints == 40
 
         subjectSummaryAfter
         subjectSummaryAfter.subjectId == proj1Subj1.subjectId
-        subjectSummaryAfter.totalPoints == 30
-        subjectSummaryAfter.totalSkills == 3
-        subjectSummaryAfter.skills.size() == 3
+        subjectSummaryAfter.totalPoints == 40
+        subjectSummaryAfter.totalSkills == 4
+        subjectSummaryAfter.skills.size() == 4
     }
 
 }

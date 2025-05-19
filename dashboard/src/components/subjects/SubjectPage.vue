@@ -72,7 +72,12 @@ const headerOptions = computed(() => {
       label: 'Groups',
       count: subject.numGroups,
       disabledCount: subject.numGroupsDisabled,
-      icon: 'fas fa-layer-group skills-color-groups'
+      icon: 'fas fa-layer-group skills-color-groups',
+      secondaryStats: [{
+        label: 'disabled',
+        count: subject.numGroupsDisabled,
+        badgeVariant: 'warning'
+      }]
     }, {
       label: 'Skills',
       count: subject.numSkills,

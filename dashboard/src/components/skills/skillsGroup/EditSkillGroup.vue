@@ -20,7 +20,7 @@ import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormD
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import SkillsService from '@/components/skills/SkillsService.js'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
-import { object, string } from 'yup'
+import { boolean, object, string } from 'yup'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSkillYupValidators } from '@/components/skills/UseSkillYupValidators.js'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
@@ -30,6 +30,7 @@ const route = useRoute()
 const props = defineProps({
   skill: Object,
   isEdit: Boolean,
+  isSubjectEnabled: Boolean,
 })
 const emit = defineEmits(['skill-saved'])
 const appConfig = useAppConfig()
@@ -72,13 +73,15 @@ const schema = object({
     .max(appConfig.descriptionMaxLength)
     .customDescriptionValidator('Group Description')
     .label('Skill Description'),
+  'enabled': boolean(),
 })
 
 const initialSkillData = ref({
   skillId: props.skill.skillId || '',
   name: props.skill.name || '',
   originalSkillId: props.skill.skillId || '',
-  description: props.skill.description || ''
+  description: props.skill.description || '',
+  enabled: props.isSubjectEnabled,
 })
 
 const saveSkill = (values) => {
