@@ -266,6 +266,7 @@ const doDeleteSkill = () => {
         skillsState.setGroupSkills(skill.groupId, skills)
         const parentGroup = skillsState.subjectSkills.find((item) => item.skillId === skill.groupId)
         parentGroup.totalPoints = skills
+          .filter((item) => item.enabled === true)
           .map((item) => item.totalPoints)
           .reduce((accumulator, currentValue) => {
             return accumulator + currentValue
