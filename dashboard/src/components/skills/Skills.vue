@@ -131,6 +131,7 @@ const skillCreatedOrUpdated = (skill) => {
     const parentGroup = skillsState.subjectSkills.find((item) => item.skillId === skill.groupId)
     const groupSkills = skillsState.getGroupSkills(skill.groupId)
     parentGroup.totalPoints = groupSkills
+      .filter((item) => item.enabled === true)
       .map((item) => item.totalPoints)
       .reduce((accumulator, currentValue) => {
         return accumulator + currentValue
