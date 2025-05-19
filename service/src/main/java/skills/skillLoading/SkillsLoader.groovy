@@ -1185,19 +1185,19 @@ class SkillsLoader {
         }
         boolean isGem = badgeDefinition.startDate && badgeDefinition.endDate
         boolean maintainAchievement = false
+        Date mostRecentAchievement
         if(isGem) {
             if(numAchievedSkills == numChildSkills) {
-                Date mostRecentAchievement
-                groupChildrenMeta.childrenWithPoints.each{ child ->
-                    if(child.achievedOn && !mostRecentAchievement) {
-                        mostRecentAchievement = child.achievedOn
-                    } else {
-                        if(child.achievedOn > mostRecentAchievement) {
+                groupChildrenMeta.childrenWithPoints.each { child ->
+                    if(child.achievedOn) {
+                        if(!mostRecentAchievement) {
+                            mostRecentAchievement = child.achievedOn
+                        } else if(child.achievedOn > mostRecentAchievement) {
                             mostRecentAchievement = child.achievedOn
                         }
                     }
                 }
-                if(mostRecentAchievement < badgeDefinition.endDate) {
+                if(mostRecentAchievement <= badgeDefinition.endDate && mostRecentAchievement >= badgeDefinition.startDate) {
                     maintainAchievement = true
                 }
             }
@@ -1208,7 +1208,7 @@ class SkillsLoader {
                 badgeId: badgeDefinition.skillId,
                 description: InputSanitizer.unsanitizeForMarkdown(badgeDefinition.description),
                 badgeAchieved: achievements?.size() > 0 || maintainAchievement,
-                dateAchieved: achievements ? achievements.first().achievedOn : null,
+                dateAchieved: achievements ? achievements.first().achievedOn : (maintainAchievement && mostRecentAchievement ? mostRecentAchievement : null),
                 numSkillsAchieved: numAchievedSkills,
                 numTotalSkills: numChildSkills,
                 startDate: badgeDefinition.startDate,
