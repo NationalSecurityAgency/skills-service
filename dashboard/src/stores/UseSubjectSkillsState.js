@@ -114,7 +114,6 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
         const foundGroup = subjectSkills.value.find((skill) => skill.skillId === groupId)
         if(foundGroup) {
           foundGroup.numSkillsInGroup = updatedSkills.length
-          console.log(`updatedSkills.length=[${updatedSkills.length}], filtered=[${updatedSkills.filter((item) => item.enabled === true).length}]`)
           foundGroup.totalPoints = updatedSkills.filter((item) => item.enabled === true).map((item) => item.totalPoints).reduce((accumulator, currentValue) => accumulator + currentValue, 0)
         }
       }).finally(() => {
