@@ -27,14 +27,16 @@ const keys = ref(model.value.split(' + '))
 const inputName = props.label.replace(/\s+/g, '_');
 
 const handleKeydown = (event) => {
-  event.preventDefault(); // Prevent default behavior
-  if (event.ctrlKey) {
-    keys.value.push('Ctrl')
-  } else {
-    keys.value.push(event.key);
+  if (event.key !== 'Tab') {
+    event.preventDefault(); // Prevent default behavior
+    if (event.ctrlKey) {
+      keys.value.push('Ctrl')
+    } else {
+      keys.value.push(event.key);
+    }
+    model.value = keys.value.join(' + ');
+    emits('change', model.value)
   }
-  model.value = keys.value.join(' + ');
-  emits('change', model.value)
 };
 
 const clear = () => {
@@ -54,15 +56,19 @@ const clear = () => {
           v-model="model"
           @keydown="handleKeydown"
           size="small"
+          data-cy="shortcutInput"
           :id="`${inputName}ShortcutLabelInput`"
           placeholder="Press keys..."
           aria-label="Keyboard Shortcut Input"
       />
       <InputGroupAddon class="p-0 m-0">
-        <SkillsButton
+        <Button
             icon="fa-solid fa-xmark"
+            aria-label="Clear Shortcut"
+            severity="secondary"
+            variant="text"
             size="small"
-            text
+            data-cy="clearShortcut"
             @click="clear"/>
       </InputGroupAddon>
     </InputGroup>

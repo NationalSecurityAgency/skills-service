@@ -220,7 +220,7 @@ function sdPreviousSkillKeyboardShortcutChanged() {
                      @change="enableDarkModeChanged" />
         <span class="ml-2">{{ settings.enableDarkMode.value ? 'On' : 'Off'}}</span>
       </div>
-      <Fieldset legend="Training Keyboard Shortcuts">
+      <Fieldset legend="Keyboard shortcuts when taking a training" class="mt-3">
         <div class="flex flex-col gap-4 pt-2">
           <keyboard-shortcut-input
               label="Previous Skill"

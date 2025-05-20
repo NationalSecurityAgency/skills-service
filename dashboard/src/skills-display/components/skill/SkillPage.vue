@@ -28,6 +28,7 @@ import SkillAchievementMsg from "@/skills-display/components/progress/celebratio
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import {useMagicKeys, watchDebounced} from "@vueuse/core";
 import {useUserPreferences} from "@/stores/UseUserPreferences.js";
+import {useLog} from "@/components/utils/misc/useLog.js";
 
 const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
@@ -37,6 +38,7 @@ const route = useRoute()
 const skillState = useSkillsDisplaySubjectState()
 const keys = useMagicKeys()
 const userPreferences = useUserPreferences()
+const log = useLog()
 const skill = computed(() => skillState.skillSummary)
 const loadingSkill = ref(true)
 const displayGroupDescription = ref(false);
@@ -73,11 +75,14 @@ const previousButtonShortcut = ref('Ctrl+Alt+P')
 userPreferences.afterUserPreferencesLoaded().then((options) => {
   const debounceOptions = { debounce: 250, maxWait: 1000 }
   if (options.sd_next_skill_keyboard_shortcut) {
-    nextButtonShortcut.value = options.sd_next_skill_keyboard_shortcut
+    nextButtonShortcut.value = options.sd_next_skill_keyboard_shortcut?.toLowerCase().replace(/ /g, '')
   }
   if (options.sd_previous_skill_keyboard_shortcut) {
-    previousButtonShortcut.value = options.sd_previous_skill_keyboard_shortcut
+    previousButtonShortcut.value = options.sd_previous_skill_keyboard_shortcut?.toLowerCase().replace(/ /g, '')
   }
+
+  log.debug(`Next shortcut is : ${nextButtonShortcut.value}`)
+  log.debug(`Previous shortcut is : ${previousButtonShortcut.value}`)
   watchDebounced(
       keys[nextButtonShortcut.value],
       () => {
