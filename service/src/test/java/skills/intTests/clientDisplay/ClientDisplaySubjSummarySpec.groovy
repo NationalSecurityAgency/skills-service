@@ -51,11 +51,12 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
 
         def skillsGroup2 = allSkills[7]
         skillsGroup2.type = 'SkillsGroup'
-        skillsGroup2.enabled = 'false'  // ignored as of 1.10.X
+        skillsGroup2.enabled = 'false'
         skillsService.createSkill(skillsGroup2)
         String skillsGroup2Id = skillsGroup2.skillId
         def group2Children = allSkills[8..9]
         group2Children.each { skill ->
+            skill.enabled = 'false'
             skillsService.assignSkillToSkillsGroup(skillsGroup2Id, skill)
         }
 
