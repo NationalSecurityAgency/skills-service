@@ -464,6 +464,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         skillsService.createSkill(skillsGroup)
         String skillsGroupId = skillsGroup.skillId
         childSkills.each { skill ->
+            skill.enabled = 'false'
             skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
         }
 
