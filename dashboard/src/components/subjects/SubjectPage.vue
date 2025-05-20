@@ -72,7 +72,12 @@ const headerOptions = computed(() => {
       label: 'Groups',
       count: subject.numGroups,
       disabledCount: subject.numGroupsDisabled,
-      icon: 'fas fa-layer-group skills-color-groups'
+      icon: 'fas fa-layer-group skills-color-groups',
+      secondaryStats: [{
+        label: 'disabled',
+        count: subject.numGroupsDisabled,
+        badgeVariant: 'warning'
+      }]
     }, {
       label: 'Skills',
       count: subject.numSkills,
@@ -175,6 +180,13 @@ const subjectEdited = (updatedSubject) => {
             severity="info"
             data-cy="btn_copy-subject"
             :aria-label="`Copy Subject ${subjectState.subject.name} to another project`" />
+      </template>
+      <template #right-of-header
+                v-if="!isLoadingData && (!subjectState.subject.enabled)">
+        <Tag v-if="!subjectState.subject.enabled"
+             severity="secondary"
+             class="ml-2" data-cy="disabledSubjectBadge"><i
+            class="fas fa-eye-slash mr-1" aria-hidden="true"></i> DISABLED</Tag>
       </template>
       <template #footer>
         <!--        <import-finalize-alert />-->

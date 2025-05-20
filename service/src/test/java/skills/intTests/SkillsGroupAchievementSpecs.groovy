@@ -191,37 +191,6 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         subjectSummary.totalSkills == 2
     }
 
-    def "cannot achieve child skills if group is not enabled"() {
-        // NOTE: this test is likely OBE as of v1.10.X and can likely be removed
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(3)
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-
-        def skillsGroup = allSkills[0]
-        skillsGroup.type = 'SkillsGroup'
-        skillsGroup.enabled = false
-        skillsService.createSkill(skillsGroup)
-        String skillsGroupId = skillsGroup.skillId
-        def groupChildren = allSkills[1..2]
-        groupChildren.each { skill ->
-            skill.pointIncrement = 100
-            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
-        }
-
-        when:
-        String userId = 'user1'
-        String projectId = proj.projectId
-        String skillId = groupChildren.first().skillId
-
-        def res = skillsService.addSkill([projectId: projectId, skillId: skillId], userId, new Date())
-
-        then:
-        !res.body.skillApplied
-        !res.body.completed.find { it.id == skillId }
-    }
-
     def "group achieved when child skill gets deleted, all skills required and now user has all skills"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()

@@ -212,7 +212,7 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         skillsWithGroupSkills.skillId.sort() == [proj1_skills.skillId, group.skillId].flatten().sort()
     }
 
-    def "skills are always enabled"() {
+    def "skills are always enabled by default"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
@@ -229,7 +229,7 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         skills[0].enabled == true
     }
 
-    def "skills can be disabled"() {
+    def "skills can be disabled on creation"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1).each { it.enabled = false }

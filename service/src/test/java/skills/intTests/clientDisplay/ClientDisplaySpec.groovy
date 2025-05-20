@@ -19,15 +19,16 @@ import groovy.time.TimeCategory
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
-import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.settings.Settings
+
+import static skills.intTests.utils.SkillsFactory.*
 
 class ClientDisplaySpec extends DefaultIntSpec {
 
     def "summary for an empty subject"() {
-        def proj1 = SkillsFactory.createProject()
-        def subj1 = SkillsFactory.createSubject()
+        def proj1 = createProject()
+        def subj1 = createSubject()
 
         skillsService.createProject(proj1)
         skillsService.createSubject(subj1)
@@ -42,9 +43,9 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "only return project description if setting show_project_description_everywhere=true"() {
-        def proj1 = SkillsFactory.createProject(1)
+        def proj1 = createProject(1)
         proj1.description = "desc1"
-        def proj2 = SkillsFactory.createProject(2)
+        def proj2 = createProject(2)
         proj2.description = "desc2"
 
         skillsService.createProject(proj1)
@@ -59,21 +60,21 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "global badge with no dependencies on requested project should not be included in count of completed badges"() {
-        def proj1 = SkillsFactory.createProject()
-        def subj1 = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(2, 1, 1, 100)
+        def proj1 = createProject()
+        def subj1 = createSubject()
+        def skills = createSkills(2, 1, 1, 100)
         skillsService.createProject(proj1)
         skillsService.createSubject(subj1)
         skillsService.createSkills(skills)
 
-        def proj2 = SkillsFactory.createProject(2)
-        def subj21 = SkillsFactory.createSubject(2, 1)
-        def skills2 = SkillsFactory.createSkills(2, 2, 1, 100)
+        def proj2 = createProject(2)
+        def subj21 = createSubject(2, 1)
+        def skills2 = createSkills(2, 2, 1, 100)
         skillsService.createProject(proj2)
         skillsService.createSubject(subj21)
         skillsService.createSkills(skills2)
 
-        def globalBadge = SkillsFactory.createBadge(1, 1)
+        def globalBadge = createBadge(1, 1)
         SkillsService supervisorService = createSupervisor()
         supervisorService.createGlobalBadge(globalBadge)
         supervisorService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[0].skillId])
@@ -107,7 +108,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "attempt to get subject summary for subject that does not exist"() {
-        def proj1 = SkillsFactory.createProject()
+        def proj1 = createProject()
 
         skillsService.createProject(proj1)
         when:
@@ -118,10 +119,10 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "disabled project badge should not result in summary badges enabled being true"() {
-        def proj1 = SkillsFactory.createProject()
-        def subj1 = SkillsFactory.createSubject()
-        def skill1 = SkillsFactory.createSkill()
-        def badge = SkillsFactory.createBadge()
+        def proj1 = createProject()
+        def subj1 = createSubject()
+        def skill1 = createSkill()
+        def badge = createBadge()
         badge.enabled = 'false'
 
         skillsService.createProject(proj1)
@@ -143,9 +144,9 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "disabled global badge should not result in summary badges enabled being true"() {
-        def proj1 = SkillsFactory.createProject()
-        def subj1 = SkillsFactory.createSubject()
-        def skill1 = SkillsFactory.createSkill()
+        def proj1 = createProject()
+        def subj1 = createSubject()
+        def skill1 = createSkill()
 
         skillsService.createProject(proj1)
         skillsService.createSubject(subj1)
@@ -169,10 +170,10 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "Disabled badges should not result in summary badges enabled being true"() {
-        def proj1 = SkillsFactory.createProject()
-        def subj1 = SkillsFactory.createSubject()
-        def skill1 = SkillsFactory.createSkill()
-        def badge = SkillsFactory.createBadge()
+        def proj1 = createProject()
+        def subj1 = createSubject()
+        def skill1 = createSkill()
+        def badge = createBadge()
         badge.enabled = 'false'
 
         skillsService.createProject(proj1)
@@ -207,39 +208,10 @@ class ClientDisplaySpec extends DefaultIntSpec {
         summaryBothBadgesEnabled.badges.enabled
     }
 
-    def "disabled skills group do not contribute to the summary"() {
-        // NOTE: this test is likely OBE as of v1.10.X and can likely be removed
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(3)
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-
-        def skillsGroup = allSkills[0]
-        skillsGroup.type = 'SkillsGroup'
-        skillsGroup.enabled = false
-        skillsService.createSkill(skillsGroup)
-        String skillsGroupId = skillsGroup.skillId
-        def group1Children = allSkills[1..2]
-        group1Children.each { skill ->
-            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
-        }
-
-        when:
-        def projectSummary = skillsService.getSkillSummary('user1', proj.projectId)
-
-        then:
-        projectSummary.skillsLevel == 0
-        projectSummary.totalPoints == 0
-        projectSummary.subjects
-        projectSummary.subjects[0].skillsLevel == 0
-        projectSummary.subjects[0].totalPoints == 0
-    }
-
     def "enabled skills group do contribute to the summary"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(3)
+        def proj = createProject()
+        def subj = createSubject()
+        def allSkills = createSkills(3)
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
 
@@ -267,9 +239,9 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "skills group calculate totalPoints based on all skills regardless of numSkillsRequired"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def allSkills = SkillsFactory.createSkills(3)
+        def proj = createProject()
+        def subj = createSubject()
+        def allSkills = createSkills(3)
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
 
@@ -297,7 +269,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "project summary includes description if set"() {
-        def proj1 = SkillsFactory.createProject()
+        def proj1 = createProject()
         def desc = "description descraption despaption"
         proj1.description = desc
 
@@ -311,12 +283,12 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "project summary includes skill counts"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        def proj = createProject()
+        def subj = createSubject()
+        def skills = createSkills(3, 1, 1, 100)
 
-        def subj2 = SkillsFactory.createSubject(1, 2)
-        def skillsSubj2 = SkillsFactory.createSkills(2, 1, 2, 100)
+        def subj2 = createSubject(1, 2)
+        def skillsSubj2 = createSkills(2, 1, 2, 100)
 
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
         skillsService.createSubject(subj2)
@@ -390,16 +362,16 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "project summary includes skill counts for skills under groups"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def subjGroup1 = SkillsFactory.createSkillsGroup(1, 1, 11)
-        def subjGroup2 = SkillsFactory.createSkillsGroup(1, 1, 12)
-        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        def proj = createProject()
+        def subj = createSubject()
+        def subjGroup1 = createSkillsGroup(1, 1, 11)
+        def subjGroup2 = createSkillsGroup(1, 1, 12)
+        def skills = createSkills(3, 1, 1, 100)
 
 
-        def subj2 = SkillsFactory.createSubject(1, 2)
-        def subj2Group = SkillsFactory.createSkillsGroup(1, 2, 22)
-        def skillsSubj2 = SkillsFactory.createSkills(2, 1, 2, 100)
+        def subj2 = createSubject(1, 2)
+        def subj2Group = createSkillsGroup(1, 2, 22)
+        def skillsSubj2 = createSkills(2, 1, 2, 100)
 
         skillsService.createProjectAndSubjectAndSkills(proj, subj, [subjGroup1, subjGroup2])
         skillsService.assignSkillToSkillsGroup(subjGroup1.skillId, skills[0])
@@ -480,12 +452,12 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "project summary returns latest level achievement date"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(5, 1, 1, 100)
+        def proj = createProject()
+        def subj = createSubject()
+        def skills = createSkills(5, 1, 1, 100)
 
-        def subj2 = SkillsFactory.createSubject(1, 2)
-        def skillsSubj2 = SkillsFactory.createSkills(5, 1, 2, 100)
+        def subj2 = createSubject(1, 2)
+        def skillsSubj2 = createSkills(5, 1, 2, 100)
 
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
         skillsService.createSubject(subj2)
@@ -572,9 +544,9 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "project summary properly hides disabled skills"() {
-        def proj1 = SkillsFactory.createProject(1)
-        def proj1_subj = SkillsFactory.createSubject(1, 1)
-        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(3, 1, 1)
         proj1_skills[0].enabled = false
 
         skillsService.createProject(proj1)
@@ -604,10 +576,51 @@ class ClientDisplaySpec extends DefaultIntSpec {
         resAfterEnabled.subjects[0].totalPoints == 30
     }
 
+    def "project summary properly hides disabled subjects"() {
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        proj1_subj.enabled = false
+        List<Map> proj1_skills = createSkills(3, 1, 1)
+        proj1_skills.each { it.enabled = false }
+
+        def proj1Subj2 = createSubject(1, 2)
+        List<Map> proj1Subj2Skills = createSkills(3, 1, 2)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+        skillsService.createSubject(proj1Subj2)
+        skillsService.createSkills(proj1Subj2Skills)
+
+        when:
+        def res = skillsService.getSkillSummary("user1", proj1.projectId)
+
+        proj1_subj.enabled = true
+        skillsService.updateSubject(proj1_subj, proj1_subj.subjectId)
+        def resAfterEnabled = skillsService.getSkillSummary("user1", proj1.projectId)
+
+        then:
+        res
+        res.totalSkills == 3
+        res.totalPoints == 30
+        res.subjects.size() == 1
+        res.subjects[0].totalSkills == 3
+        res.subjects[0].totalPoints == 30
+
+        resAfterEnabled
+        resAfterEnabled.totalSkills == 6
+        resAfterEnabled.totalPoints == 60
+        resAfterEnabled.subjects.size() == 2
+        resAfterEnabled.subjects[0].totalSkills == 3
+        resAfterEnabled.subjects[0].totalPoints == 30
+        resAfterEnabled.subjects[1].totalSkills == 3
+        resAfterEnabled.subjects[1].totalPoints == 30
+    }
+
     def "subject summary properly hides disabled skills"() {
-        def proj1 = SkillsFactory.createProject(1)
-        def proj1_subj = SkillsFactory.createSubject(1, 1)
-        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(3, 1, 1)
         proj1_skills[0].enabled = false
 
         skillsService.createProject(proj1)
@@ -633,10 +646,30 @@ class ClientDisplaySpec extends DefaultIntSpec {
         resAfterEnabled.skills.size() == 3
     }
 
+    def "subject summary properly returns an error for a disabled subject"() {
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        proj1_subj.enabled = false
+        List<Map> proj1_skills = createSkills(3, 1, 1)
+        proj1_skills.each { it.enabled = false }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        when:
+        skillsService.getSkillSummary("user1", proj1.projectId, proj1_subj.subjectId as String)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.resBody.contains("Skill with id [TestSubject1] is not enabled")
+    }
+
     def "single summary properly returns an error for a disabled skill"() {
-        def proj1 = SkillsFactory.createProject(1)
-        def proj1_subj = SkillsFactory.createSubject(1, 1)
-        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(3, 1, 1)
         proj1_skills[0].enabled = false
 
         skillsService.createProject(proj1)
@@ -653,9 +686,9 @@ class ClientDisplaySpec extends DefaultIntSpec {
     }
 
     def "single summary with subject properly for an enabled skill does not consider disabled skills for next/previous and total skill count"() {
-        def proj1 = SkillsFactory.createProject(1)
-        def proj1_subj = SkillsFactory.createSubject(1, 1)
-        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        List<Map> proj1_skills = createSkills(3, 1, 1)
         proj1_skills[0].enabled = false
         proj1_skills[2].enabled = false
 

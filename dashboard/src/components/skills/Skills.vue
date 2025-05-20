@@ -131,6 +131,7 @@ const skillCreatedOrUpdated = (skill) => {
     const parentGroup = skillsState.subjectSkills.find((item) => item.skillId === skill.groupId)
     const groupSkills = skillsState.getGroupSkills(skill.groupId)
     parentGroup.totalPoints = groupSkills
+      .filter((item) => item.enabled === true)
       .map((item) => item.totalPoints)
       .reduce((accumulator, currentValue) => {
         return accumulator + currentValue
@@ -233,6 +234,7 @@ const skillCreatedOrUpdated = (skill) => {
       v-if="newSkillInfo.show"
       v-model="newSkillInfo.show"
       :skill="newSkillInfo.skill"
+      :is-subject-enabled="subjectState.subject.enabled"
       :is-edit="newSkillInfo.isEdit"
       :is-copy="newSkillInfo.isCopy"
       :group-id="newSkillInfo.groupId"
@@ -244,6 +246,7 @@ const skillCreatedOrUpdated = (skill) => {
       v-if="editGroup.show"
       v-model="editGroup.show"
       :skill="editGroup.skill"
+      :is-subject-enabled="subjectState.subject.enabled"
       :is-edit="editGroup.isEdit"
       @skill-saved="skillCreatedOrUpdated"
       />

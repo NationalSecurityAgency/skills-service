@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import Badge from 'primevue/badge'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import CardWithVericalSections from '@/components/utils/cards/CardWithVericalSections.vue'
@@ -50,6 +50,28 @@ const focusSortControl = () => {
   sortControl.value.focus();
 };
 
+const titleContainer = ref(null);
+const isWrapping = ref(false);
+const checkFlexWrap = () => {
+  if (titleContainer.value) {
+    const containerWidth = titleContainer.value.clientWidth;
+    const totalChildrenWidth = Array.from(titleContainer.value.children).reduce(
+        (total, child) => total + child.offsetWidth, 0
+    );
+    isWrapping.value = totalChildrenWidth > containerWidth;
+  }
+};
+
+onMounted(() => {
+  checkFlexWrap();
+  const resizeObserver = new ResizeObserver(checkFlexWrap);
+  resizeObserver.observe(titleContainer.value);
+
+  // Cleanup observer on component unmount
+  onBeforeUnmount(() => {
+    resizeObserver.disconnect()
+  })
+});
 defineExpose({
   focusSortControl
 })
@@ -69,14 +91,20 @@ defineExpose({
             </div>
           </router-link>
           <div class="media-body">
-            <component :is="titleTag"
-              class="text-xl font-semibold no-underline overflow-hidden text-ellipsis whitespace-nowrap"
-              style="max-width:17rem">
-              <router-link v-if="options.icon" :to="options.navTo" data-cy="titleLink" class="no-underline"
-                           :aria-label="`${isReadOnlyProj ? 'View' : 'Manage'} ${options.controls.type} ${options.controls.name}`">
-                {{ options.title }}
-              </router-link>
-            </component>
+            <div ref="titleContainer" class="flex flex-wrap">
+              <component :is="titleTag"
+                  class="text-xl font-semibold no-underline overflow-hidden text-ellipsis whitespace-nowrap"
+                  style="max-width:17rem">
+                <router-link v-if="options.icon" :to="options.navTo" data-cy="titleLink" class="no-underline"
+                             :aria-label="`${isReadOnlyProj ? 'View' : 'Manage'} ${options.controls.type} ${options.controls.name}`">
+                  {{ options.title }}
+                </router-link>
+              </component>
+              <Tag v-if="options.disabled"
+                   severity="secondary"
+                   :class="{ 'ml-2': !isWrapping }" data-cy="disabledSubjectBadge"><i
+                  class="fas fa-eye-slash mr-1" aria-hidden="true"></i> DISABLED</Tag>
+            </div>
             <div class="text-secondary text-xs overflow-hidden text-ellipsis whitespace-nowrap"
                  style="max-width:15rem"
                  data-cy="subTitle">{{ options.subTitle }}

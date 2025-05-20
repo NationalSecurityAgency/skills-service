@@ -49,7 +49,6 @@ export default {
       isSkillType: skill.type === 'Skill',
       created: dayjs(skill.created),
       selfReportingType: (skill.type === 'Skill' && !skill.selfReportingType) ? 'Disabled' : skill.selfReportingType,
-      subjectId: this.subjectId,
       isCatalogSkill,
       isCatalogImportedSkills,
       catalogType,

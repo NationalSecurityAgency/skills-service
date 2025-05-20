@@ -140,7 +140,7 @@ describe('Disabled Skills Tests', () => {
     cy.get('[data-cy="childRowDisplay_skill1"]').should('not.contain.text','This skill is disabled');
   })
 
-  it('cannot add skill events for imported skills', function () {
+  it('cannot add skill events for disabled skills', function () {
     cy.intercept('/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkill1')
 
     cy.createProject(1);

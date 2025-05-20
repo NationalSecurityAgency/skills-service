@@ -46,4 +46,5 @@ class SubjectResult {
 
     int numSkillsReused
     int totalPointsReused
+    boolean enabled
 }

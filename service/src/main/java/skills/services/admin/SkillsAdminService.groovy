@@ -200,9 +200,26 @@ class SkillsAdminService {
         final boolean isReplicationRequest = skillRequest instanceof ReplicatedSkillUpdateRequest
         String description = skillRequest.description
 
-        SkillDef subject = null
         SkillDef skillsGroupSkillDef = null
         List<SkillDef> groupChildSkills = null
+        String parentSkillId = skillRequest.subjectId
+        SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, SkillDef.ContainerType.Subject)
+        if (!subject) {
+            throw new SkillException("Subject [${parentSkillId}] does not exist", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
+        }
+        final isSubjectEnabled = Boolean.valueOf(subject?.enabled)
+        if (!isSubjectEnabled && isEnabledSkillInRequest) {
+            throw new SkillException("Cannot enable Skill [${originalSkillId}] becuase it's Subject [${parentSkillId}] is disabled", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
+        }
+        if (isSkillsGroupChild) {
+            // need to validate skills group
+            if (!skillsGroupSkillDef) {
+                skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
+            }
+            if (!Boolean.valueOf(skillsGroupSkillDef?.enabled) && isEnabledSkillInRequest) {
+                throw new SkillException("Cannot enable Skill [${originalSkillId}] becuase it's SkillsGroup [${groupId}] is disabled", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
+            }
+        }
         if (isEdit) {
             validateImportedSkillUpdate(skillRequest, skillDefinition)
             // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
@@ -272,12 +289,6 @@ class SkillsAdminService {
 
             skillDefinition.totalPoints = totalPointsRequested
         } else {
-            String parentSkillId = skillRequest.subjectId
-            subject = skillDefRepo.findByProjectIdAndSkillIdAndType(skillRequest.projectId, parentSkillId, SkillDef.ContainerType.Subject)
-            if (!subject) {
-                throw new SkillException("Subject [${parentSkillId}] does not exist", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
-            }
-
             createdResourceLimitsValidator.validateNumSkillsCreated(subject)
 
             Integer highestDisplayOrder = skillDefRepo.calculateChildSkillsHighestDisplayOrder(skillRequest.projectId, groupId ?: parentSkillId)
@@ -686,6 +697,7 @@ class SkillsAdminService {
         }
 
         SkillDefRes finalRes = convertToSkillDefRes(res)
+        finalRes.subjectId = subjectId
         finalRes.sharedToCatalog = skillCatalogService.isAvailableInCatalog(res.projectId, res.skillId)
         if (finalRes.copiedFromProjectId) {
             finalRes.copiedFromProjectName = projDefRepo.getProjectName(finalRes.copiedFromProjectId)?.projectName

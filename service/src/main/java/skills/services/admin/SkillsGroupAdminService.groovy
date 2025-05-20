@@ -138,8 +138,9 @@ class SkillsGroupAdminService {
     @Profile
     int getGroupTotalPoints(List<SkillDef> groupChildSkills) {
         int totalPoints = 0
-        if (groupChildSkills) {
-            totalPoints = groupChildSkills.collect { it.totalPoints }.sum()
+        List<SkillDef> enabledGroupChildSkills = groupChildSkills.findAll({ Boolean.valueOf(it.enabled) })
+        if (enabledGroupChildSkills) {
+            totalPoints = enabledGroupChildSkills.collect { it.totalPoints }.sum()
         }
         return totalPoints
     }

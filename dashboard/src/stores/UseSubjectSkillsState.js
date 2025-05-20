@@ -114,7 +114,7 @@ export const useSubjectSkillsState = defineStore('subjectSkillsState', () => {
         const foundGroup = subjectSkills.value.find((skill) => skill.skillId === groupId)
         if(foundGroup) {
           foundGroup.numSkillsInGroup = updatedSkills.length
-          foundGroup.totalPoints = updatedSkills.map((item) => item.totalPoints).reduce((accumulator, currentValue) => accumulator + currentValue, 0)
+          foundGroup.totalPoints = updatedSkills.filter((item) => item.enabled === true).map((item) => item.totalPoints).reduce((accumulator, currentValue) => accumulator + currentValue, 0)
         }
       }).finally(() => {
         setLoadingGroupSkills(groupId, false)
