@@ -208,35 +208,6 @@ class ClientDisplaySpec extends DefaultIntSpec {
         summaryBothBadgesEnabled.badges.enabled
     }
 
-    def "disabled skills group do not contribute to the summary"() {
-        // NOTE: this test is likely OBE as of v1.10.X and can likely be removed
-        def proj = createProject()
-        def subj = createSubject()
-        def allSkills = createSkills(3)
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-
-        def skillsGroup = allSkills[0]
-        skillsGroup.type = 'SkillsGroup'
-        skillsGroup.enabled = false
-        skillsService.createSkill(skillsGroup)
-        String skillsGroupId = skillsGroup.skillId
-        def group1Children = allSkills[1..2]
-        group1Children.each { skill ->
-            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
-        }
-
-        when:
-        def projectSummary = skillsService.getSkillSummary('user1', proj.projectId)
-
-        then:
-        projectSummary.skillsLevel == 0
-        projectSummary.totalPoints == 0
-        projectSummary.subjects
-        projectSummary.subjects[0].skillsLevel == 0
-        projectSummary.subjects[0].totalPoints == 0
-    }
-
     def "enabled skills group do contribute to the summary"() {
         def proj = createProject()
         def subj = createSubject()
