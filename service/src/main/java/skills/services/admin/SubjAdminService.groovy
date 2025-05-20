@@ -182,7 +182,9 @@ class SubjAdminService {
 
     private void enableSubject(SkillDefWithExtra subject) {
         List<SkillRelDef.RelationshipType> relationshipTypes = [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.GroupSkillToSubject]
-        skillRelDefRepo.findChildrenByParent(subject.id, relationshipTypes).each { skill ->
+        List<SkillDef> subjectSkills = skillRelDefRepo.findChildrenByParent(subject.id, relationshipTypes)
+        // need to enable skill group children before their group so that point total is calculated correctly
+        subjectSkills.sort { skill -> skill.type == SkillDef.ContainerType.SkillsGroup ? 1 : 0 }.each { skill ->
             skill.enabled = true
             DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(subject.projectId, subject.skillId) {
                 skillDefRepo.save(skill)
