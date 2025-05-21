@@ -72,6 +72,10 @@ describe('Disabled Subject Tests', () => {
   it('enable a disabled subject on the subject page', () => {
     cy.createProject(1);
     cy.createSubject(1, 1, { enabled: false })
+    cy.createSkillsGroup(1, 1, 1, { enabled: false })
+    cy.addSkillToGroup(1, 1, 1, 1, { enabled: false })
+    cy.createSkill(1, 1, 2, { enabled: false })
+
 
     cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject');
     cy.intercept('POST', '/admin/projects/proj1/subjects/subj1').as('updateSubject');
@@ -80,6 +84,18 @@ describe('Disabled Subject Tests', () => {
     cy.wait('@loadSubject')
 
     cy.get('[data-cy="disabledSubjectBadge"]').should('be.visible')
+    cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '0');
+    cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '0');
+    cy.get('[data-cy="pageHeaderStats_Skills_disabled"]').should('have.text', '2');
+    cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '0');
+    cy.get('[data-cy="pageHeaderStats_Groups_disabled"]').should('have.text', '1');
+
+    cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
+    cy.get(`[data-p-index="1"] [data-pc-section="rowtogglebutton"]`).click()
+    cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="skillsTable"]', [
+      [{ colIndex: 2, value: 'Very Great Skill 1 Disabled' }]
+    ], 5, true, null, false);
+
     cy.get('[data-cy=btn_edit-subject]').click();
     cy.get('[data-cy="visibilitySwitch"] [role="switch"]').should('not.be.checked')
     cy.get('[data-cy="visibilitySwitch"]').click()
@@ -88,6 +104,15 @@ describe('Disabled Subject Tests', () => {
     cy.wait('@updateSubject')
 
     cy.get('[data-cy="disabledSubjectBadge"]').should('not.exist')
+    cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '400');
+    cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '2');
+    cy.get('[data-cy="pageHeaderStats_Skills_disabled"]').should('not.exist')
+    cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
+    cy.get('[data-cy="pageHeaderStats_Groups_disabled"]').should('not.exist')
+
+    cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="skillsTable"]', [
+      [{ colIndex: 2, value: 'Very Great Skill 1' }]
+    ], 5, true, null, false);
     cy.get('[data-cy=btn_edit-subject]').click();
 
     // no longer show the visibility switch after the subject is enabled

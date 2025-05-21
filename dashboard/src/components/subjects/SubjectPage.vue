@@ -26,6 +26,7 @@ import EditSubject from '@/components/subjects/EditSubject.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert.vue'
 import CopySubjectOrSkillsDialog from "@/components/subjects/CopySubjectOrSkillsDialog.vue";
+import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 
 const appConfig = useAppConfig()
 const route = useRoute()
@@ -33,6 +34,7 @@ const router = useRouter()
 const announcer = useSkillsAnnouncer()
 const projConfig = useProjConfig()
 const subjectState = useSubjectsState()
+const subjectSkillsState = useSubjectSkillsState()
 const focusState = useFocusState()
 
 const showEditSubject = ref(false)
@@ -141,6 +143,10 @@ const subjectEdited = (updatedSubject) => {
       .then(() => focusState.focusOnLastElement())
   } else {
     focusState.focusOnLastElement()
+  }
+  const enabledStateChanged = updatedSubject.enabled !== subjectState.subject.enabled
+  if (enabledStateChanged) {
+    subjectSkillsState.loadSubjectSkills(updatedSubject.projectId, updatedSubject.subjectId)
   }
   subjectState.subject = updatedSubject;
   announcer.polite(`Subject ${updatedSubject.name} has been edited`)
