@@ -67,6 +67,9 @@ const myRankPosition = computed(() => {
   if (!myRank.value) {
     return 0
   }
+  if (myRank.value.archivedUser) {
+    return 'N/A (Archived)'
+  }
   return myRank.value.optedOut ? 'Opted-Out' : numFormat.pretty(myRank.value.position)
 })
 const totalNumUsers = computed(() => {

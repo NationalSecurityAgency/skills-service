@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-describe('Achieved Sills Progress Tests', () => {
+describe('Achieved Skills Progress Tests', () => {
 
   it('multiple subject with different number of skills', () => {
     cy.createProject(1)

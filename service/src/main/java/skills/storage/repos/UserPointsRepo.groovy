@@ -550,6 +550,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.projectId=?1 and 
                     p.skillId is null and 
                     p.userId not in ?2 and
+                    not exists (select 1 from ArchivedUser au where au.userId = p.userId and au.projectId = p.projectId) and
                     p.userId not in 
                         (select u.userId from Setting s, User u where 
                             s.userRefId=u.id and 
@@ -574,6 +575,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.projectId=?1 and 
                     p.skillId=?2 and 
                     p.userId not in ?3 and
+                    not exists (select 1 from ArchivedUser au where au.userId = p.userId and au.projectId = p.projectId) and 
                     p.userId not in 
                         (select u.userId from Setting s, User u where 
                             s.userRefId=u.id and 
@@ -597,7 +599,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.userId = uAttrs.userId and
                     p.projectId=?1 and 
                     p.skillId=?2 and
-                    (p.points<?3 OR (p.points=?3 and uAttrs.created>?4))
+                    (p.points<?3 OR (p.points=?3 and uAttrs.created>?4)) and 
+                    not exists (select 1 from ArchivedUser au where au.userId = p.userId and au.projectId = p.projectId)
             ''')
     List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, String subjectId, Integer points, LocalDateTime usrCreated, Pageable pageable)
 
@@ -615,7 +618,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.projectId=?1 and 
                     p.skillId is null and
                     p.points<=?2 and
-                    (p.points<?2 OR (p.points=?2 and uAttrs.created>?3))
+                    (p.points<?2 OR (p.points=?2 and uAttrs.created>?3)) and 
+                    not exists (select 1 from ArchivedUser au where au.userId = p.userId and au.projectId = p.projectId)
             ''')
     List<RankedUserRes> findUsersForLeaderboardPointsLessOrEqual(String projectId, Integer points, LocalDateTime usrCreated, Pageable pageable)
 
@@ -632,7 +636,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.userId = uAttrs.userId and
                     p.projectId=?1 and 
                     p.skillId=?2 and
-                    (p.points>?3 OR (p.points=?3 and uAttrs.created<?4))
+                    (p.points>?3 OR (p.points=?3 and uAttrs.created<?4)) and 
+                    not exists (select 1 from ArchivedUser au where au.userId = p.userId and au.projectId = p.projectId)
             ''')
     List<RankedUserRes> findUsersForLeaderboardPointsMoreOrEqual(String projectId, String subjectId, Integer points, LocalDateTime userCreateDate, Pageable pageable)
 
@@ -649,7 +654,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     p.userId = uAttrs.userId and
                     p.projectId=?1 and 
                     p.skillId is null and
-                    (p.points>?2 OR (p.points=?2 and uAttrs.created<?3))
+                    (p.points>?2 OR (p.points=?2 and uAttrs.created<?3)) and 
+                    not exists (select 1 from ArchivedUser au where au.userId = p.userId and au.projectId = p.projectId)
             ''')
     List<RankedUserRes>  findUsersForLeaderboardPointsMoreOrEqual(String projectId, Integer points, LocalDateTime createdDate, Pageable pageable)
 
@@ -659,7 +665,20 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     lower(p.userId) LIKE %?2%''' )
     List<String> findDistinctUserIdsForProject(String projectId, String userIdQuery, Pageable pageable)
 
-    long countByProjectIdAndSkillId(String projectId, @Nullable String skillId)
+
+    @Query('''SELECT count(up) from UserPoints up 
+                where 
+                up.projectId =?1 
+                and up.skillId is null
+                and not exists (select 1 from ArchivedUser au where au.userId = up.userId and au.projectId = up.projectId)''' )
+    long countNonArchivedUsersByProjectId(String projectId)
+
+    @Query('''SELECT count(up) from UserPoints up 
+                where 
+                up.projectId =?1 
+                and up.skillId =?2
+                and not exists (select 1 from ArchivedUser au where au.userId = up.userId and au.projectId = up.projectId)''' )
+    long countNonArchivedUsersByProjectIdAndSkillId(String projectId, String skillId)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
     long deleteBySkillRefId(Integer skillRefId)
@@ -671,6 +690,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             p.skillId=?2 and 
             p.points > ?3 and 
             p.userId not in ?4 and 
+            not exists (select 1 from ArchivedUser au where au.userId = p.userId and au.projectId = p.projectId) and
             p.userId not in 
                 (select u.userId from Setting s, User u where 
                     s.userRefId=u.id and 
@@ -685,6 +705,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             p.skillId is null and 
             p.points > ?2 and 
             p.userId not in ?3 and 
+            not exists (select 1 from ArchivedUser au where au.userId = p.userId and au.projectId = p.projectId) and
             p.userId not in 
                 (select u.userId from Setting s, User u where 
                     s.userRefId=u.id and 
@@ -698,6 +719,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             p.userId = ua.userId and 
             p.projectId=?1 and 
             p.skillId=?2 and 
+            not exists (select 1 from ArchivedUser au where au.userId = p.userId and au.projectId = p.projectId) and
             (p.points > ?3 OR (p.points = ?3 and ua.created < ?4))''' )
     Integer calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(String projectId, String skillId, int points, LocalDateTime created)
 
@@ -705,6 +727,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             p.userId = ua.userId and 
             p.projectId=?1 and 
             p.skillId is null and 
+            not exists (select 1 from ArchivedUser au where au.userId = p.userId and au.projectId = p.projectId) and
             (p.points > ?2 OR (p.points = ?2 and ua.created < ?3))''')
     Integer calculateNumUsersWithHigherScoreAndIfScoreTheSameThenAfterUserCreateDate(String projectId, int points, LocalDateTime created)
 
