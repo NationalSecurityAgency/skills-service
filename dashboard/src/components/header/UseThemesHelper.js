@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ref, computed } from 'vue';
-import { defineStore } from 'pinia'
-import SettingsService from "@/components/settings/SettingsService.js";
+import {computed, ref} from 'vue';
+import {defineStore} from 'pinia'
+import {useUserPreferences} from "@/stores/UseUserPreferences.js";
 
 export const useThemesHelper = defineStore('useThemesHelper', () => {
 
+  const userPreferences = useUserPreferences()
   const themeOptions =[
     { name: 'Light', value: 'skills-light-green' },
     { name: 'Dark', value: 'skills-dark-green' },
@@ -38,9 +39,9 @@ export const useThemesHelper = defineStore('useThemesHelper', () => {
   }
 
   const loadTheme = () => {
-    return SettingsService.getUserSettings().then((response) => {
-      const themeSetting = response.find( (it)=> it.setting === 'enable_dark_mode')
-      const darkModeEnabled = themeSetting?.value.toLowerCase() === 'true';
+    return userPreferences.afterUserPreferencesLoaded().then((response) => {
+      const themeSetting = response.enable_dark_mode
+      const darkModeEnabled = themeSetting?.toLowerCase() === 'true';
       if(darkModeEnabled) {
         currentTheme.value = themeOptions[1];
       } else {

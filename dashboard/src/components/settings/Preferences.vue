@@ -21,11 +21,14 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import {useThemesHelper} from "@/components/header/UseThemesHelper.js";
 import {useUserInfo} from "@/components/utils/UseUserInfo.js";
+import {useUserPreferences} from "@/stores/UseUserPreferences.js";
+import KeyboardShortcutInput from "@/components/settings/KeyboardShortcutInput.vue";
 
 const themeHelper = useThemesHelper()
 const appConfig = useAppConfig();
 const colors = useColors()
 const userInfo = useUserInfo()
+const userPreferences = useUserPreferences()
 
 const isLoading = ref(true);
 const settings = ref({
@@ -35,6 +38,7 @@ const settings = ref({
     setting: 'home_page',
     lastLoadedValue: '',
     dirty: false,
+    type: String,
   },
   rankAndLeaderboardOptOut: {
     settingGroup: 'user.prefs',
@@ -42,6 +46,7 @@ const settings = ref({
     setting: 'rank_and_leaderboard_optOut',
     lastLoadedValue: false,
     dirty: false,
+    type: Boolean,
   },
   enableDarkMode: {
     settingGroup: 'user.prefs',
@@ -49,6 +54,23 @@ const settings = ref({
     setting: 'enable_dark_mode',
     lastLoadedValue: false,
     dirty: false,
+    type: Boolean,
+  },
+  sdPreviousSkillKeyboardShortcut: {
+    settingGroup: 'user.prefs',
+    value: 'Ctrl + Alt + p',
+    setting: 'sd_previous_skill_keyboard_shortcut',
+    lastLoadedValue: false,
+    dirty: false,
+    type: String,
+  },
+  sdNextSkillKeyboardShortcut: {
+    settingGroup: 'user.prefs',
+    value: 'Ctrl + Alt + n',
+    setting: 'sd_next_skill_keyboard_shortcut',
+    lastLoadedValue: false,
+    dirty: false,
+    type: String,
   }
 });
 const errMsg = ref(null);
@@ -63,24 +85,26 @@ let isDirty = computed(() => {
 });
 
 function loadSettings() {
-  SettingsService.getUserSettings()
+  userPreferences.loadUserPreferences()
       .then((response) => {
         if (response) {
-          const entries = Object.entries(settings.value);
+          const prefKeys = Object.keys(settings.value)
           let hasHomeKey = false;
-          entries.forEach((entry) => {
-            const [key, value] = entry;
-            const found = response.find((item) => item.setting === value.setting);
-            if (found) {
-              settings.value[key] = { dirty: false, lastLoadedValue: found.value, ...found };
+          prefKeys.forEach((key) => {
+            const currentSettingsObj = settings.value[key]
+            const newSettingValue = response[currentSettingsObj.setting]
+            if (newSettingValue !== undefined && newSettingValue !== null) {
+              if (currentSettingsObj.type === Boolean) {
+                settings.value[key].value = newSettingValue?.toLowerCase() === 'true';
+              } else {
+                settings.value[key].value = newSettingValue
+              }
+              settings.value[key].lastLoadedValue = settings.value[key].value
               if (key === 'homePage') {
                 hasHomeKey = true;
               }
-              if (key === 'rankAndLeaderboardOptOut' || key === 'enableDarkMode') {
-                settings.value[key].value = settings.value[key].value.toLowerCase() === 'true';
-              }
             }
-          });
+          })
           if (!hasHomeKey) {
             settings.value.homePage.value = appConfig.defaultLandingPage;
           }
@@ -129,6 +153,8 @@ function saveUserSettings(dirtyChanges) {
         });
       })
       .finally(() => {
+        // reload user preferences after saving
+        useUserPreferences().loadUserPreferences()
         isLoading.value = false;
       });
 }
@@ -147,6 +173,12 @@ function rankAndLeaderboardOptOutPrefChanged() {
 
 function enableDarkModeChanged() {
   settings.value.enableDarkMode.dirty = `${settings.value.enableDarkMode.value}` !== `${settings.value.enableDarkMode.lastLoadedValue}`;
+}
+function sdNextSkillKeyboardShortcutChanged() {
+  settings.value.sdNextSkillKeyboardShortcut.dirty = `${settings.value.sdNextSkillKeyboardShortcut.value}` !== `${settings.value.sdNextSkillKeyboardShortcut.lastLoadedValue}`;
+}
+function sdPreviousSkillKeyboardShortcutChanged() {
+  settings.value.sdPreviousSkillKeyboardShortcut.dirty = `${settings.value.sdPreviousSkillKeyboardShortcut.value}` !== `${settings.value.sdPreviousSkillKeyboardShortcut.lastLoadedValue}`;
 }
 </script>
 
@@ -188,6 +220,18 @@ function enableDarkModeChanged() {
                      @change="enableDarkModeChanged" />
         <span class="ml-2">{{ settings.enableDarkMode.value ? 'On' : 'Off'}}</span>
       </div>
+      <Fieldset legend="Keyboard shortcuts when taking a training" class="mt-3">
+        <div class="flex flex-col gap-4 pt-2">
+          <keyboard-shortcut-input
+              label="Previous Skill"
+              v-model="settings.sdPreviousSkillKeyboardShortcut.value"
+              @change="sdPreviousSkillKeyboardShortcutChanged"/>
+          <keyboard-shortcut-input
+              label="Next Skill"
+              v-model="settings.sdNextSkillKeyboardShortcut.value"
+              @change="sdNextSkillKeyboardShortcutChanged"/>
+        </div>
+      </Fieldset>
       <div class="mt-3 flex gap-2">
         <SkillsButton label="Save" icon="fas fa-arrow-circle-right" @click.stop="save" size="small" :disabled="!isDirty" data-cy="userPrefsSettingsSave" />
         <InlineMessage v-if="isDirty" data-cy="unsavedChangesAlert" severity="warn">Unsaved Changes</InlineMessage>

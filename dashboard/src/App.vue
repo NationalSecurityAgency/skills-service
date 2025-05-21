@@ -43,6 +43,7 @@ import { usePrimeVue } from 'primevue/config'
 import ScrollToTop from '@/common-components/utilities/ScrollToTop.vue'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import log from 'loglevel';
+import {useUserPreferences} from "@/stores/UseUserPreferences.js";
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -72,6 +73,7 @@ const addCustomIconCSSForClientDisplay = () => {
 }
 const inceptionConfigurer = useInceptionConfigurer()
 const pageVisitService = usePageVisitService()
+const userPreferences = useUserPreferences()
 const loadUserAndDisplayInfo = () => {
   inceptionConfigurer.configure()
   pageVisitService.reportPageVisit(route.path, route.fullPath)
@@ -81,8 +83,11 @@ const loadUserAndDisplayInfo = () => {
   const loadCustomIconCSS = addCustomIconCSSForClientDisplay()
   const promises = [loadRoot, loadSupervisor, loadEmailEnabled, loadCustomIconCSS]
   if (!skillsDisplayInfo.isSkillsClientPath()) {
-    const loadTheme = themeHelper.loadTheme()
-    promises.push(loadTheme)
+    const loadUserPreferences =
+        userPreferences.loadUserPreferences().then(() => {
+          return themeHelper.loadTheme()
+        })
+    promises.push(loadUserPreferences)
   }
   return Promise.all(promises).then(() => {
     isAppLoaded.value = true
