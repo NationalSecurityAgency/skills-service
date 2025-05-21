@@ -293,71 +293,71 @@ class SkillsDisplayArchivedUsersSpec extends DefaultIntSpec {
         def usr5SubjP2_afterArchive = skillsService.getLeaderboard(users.get(4), proj2.projectId, proj2_subj.subjectId)
 
         then:
-        usr1.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr1.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr1.archivedUser == false
-        usr2.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr2.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr2.archivedUser == false
-        usr3.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr3.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr3.archivedUser == false
-        usr4.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr4.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr4.archivedUser == false
-        usr5.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr5.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr5.archivedUser == false
 
-        usr1Subj.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr1Subj.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr1Subj.archivedUser == false
-        usr2Subj.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr2Subj.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr2Subj.archivedUser == false
-        usr3Subj.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr3Subj.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr3Subj.archivedUser == false
-        usr4Subj.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr4Subj.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr4Subj.archivedUser == false
-        usr5Subj.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr5Subj.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr5Subj.archivedUser == false
 
-        usr1_afterArchive.rankedUsers.collect{ it.userId } == [users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr1_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(3), users.get(2), users.get(1), users.get(0)])
         usr1_afterArchive.archivedUser == false
-        usr2_afterArchive.rankedUsers.collect{ it.userId } == [users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(3), users.get(2), users.get(1), users.get(0)])
         usr2_afterArchive.archivedUser == false
-        usr3_afterArchive.rankedUsers.collect{ it.userId } == [users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr3_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(3), users.get(2), users.get(1), users.get(0)])
         usr3_afterArchive.archivedUser == false
-        usr4_afterArchive.rankedUsers.collect{ it.userId } == [users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr4_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(3), users.get(2), users.get(1), users.get(0)])
         usr4_afterArchive.archivedUser == false
         !usr5_afterArchive.rankedUsers
         usr5_afterArchive.archivedUser == true
 
-        usr1Subj_afterArchive.rankedUsers.collect{ it.userId } == [users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr1Subj_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(3), users.get(2), users.get(1), users.get(0)])
         usr1Subj_afterArchive.archivedUser == false
-        usr2Subj_afterArchive.rankedUsers.collect{ it.userId } == [users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr2Subj_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(3), users.get(2), users.get(1), users.get(0)])
         usr2Subj_afterArchive.archivedUser == false
-        usr3Subj_afterArchive.rankedUsers.collect{ it.userId } == [users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr3Subj_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(3), users.get(2), users.get(1), users.get(0)])
         usr3Subj_afterArchive.archivedUser == false
-        usr4Subj_afterArchive.rankedUsers.collect{ it.userId } == [users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr4Subj_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(3), users.get(2), users.get(1), users.get(0)])
         usr4Subj_afterArchive.archivedUser == false
         !usr5Subj_afterArchive.rankedUsers
         usr5Subj_afterArchive.archivedUser == true
 
         // p2
-        usr1P2_afterArchive.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr1P2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr1P2_afterArchive.archivedUser == false
-        usr2P2_afterArchive.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr2P2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr2P2_afterArchive.archivedUser == false
-        usr3P2_afterArchive.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr3P2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr3P2_afterArchive.archivedUser == false
-        usr4P2_afterArchive.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr4P2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr4P2_afterArchive.archivedUser == false
-        usr5P2_afterArchive.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr5P2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr5P2_afterArchive.archivedUser == false
 
-        usr1SubjP2_afterArchive.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr1SubjP2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr1SubjP2_afterArchive.archivedUser == false
-        usr2SubjP2_afterArchive.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr2SubjP2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr2SubjP2_afterArchive.archivedUser == false
-        usr3SubjP2_afterArchive.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr3SubjP2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr3SubjP2_afterArchive.archivedUser == false
-        usr4SubjP2_afterArchive.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr4SubjP2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr4SubjP2_afterArchive.archivedUser == false
-        usr5SubjP2_afterArchive.rankedUsers.collect{ it.userId } == [users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)]
+        usr5SubjP2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay([users.get(4), users.get(3), users.get(2), users.get(1), users.get(0)])
         usr5SubjP2_afterArchive.archivedUser == false
     }
 
@@ -423,59 +423,65 @@ class SkillsDisplayArchivedUsersSpec extends DefaultIntSpec {
 
 
         then:
-        usr1.rankedUsers.collect{ it.userId } == users[5..0]
+        usr1.rankedUsers.collect{ it.userId } == forDisplay(users[5..0])
         usr1.archivedUser == false
-        usr2.rankedUsers.collect{ it.userId } == users[10..0]
+        usr2.rankedUsers.collect{ it.userId } == forDisplay(users[10..0])
         usr2.archivedUser == false
-        usr3.rankedUsers.collect{ it.userId } == users[20..10]
+        usr3.rankedUsers.collect{ it.userId } == forDisplay(users[20..10])
         usr3.archivedUser == false
-        usr4.rankedUsers.collect{ it.userId } == users[9..0]
+        usr4.rankedUsers.collect{ it.userId } == forDisplay(users[9..0])
         usr4.archivedUser == false
 
-        usr1Subj.rankedUsers.collect{ it.userId } == users[5..0]
+        usr1Subj.rankedUsers.collect{ it.userId } == forDisplay(users[5..0])
         usr1Subj.archivedUser == false
-        usr2Subj.rankedUsers.collect{ it.userId } == users[10..0]
+        usr2Subj.rankedUsers.collect{ it.userId } == forDisplay(users[10..0])
         usr2Subj.archivedUser == false
-        usr3Subj.rankedUsers.collect{ it.userId } == users[20..10]
+        usr3Subj.rankedUsers.collect{ it.userId } == forDisplay(users[20..10])
         usr3Subj.archivedUser == false
-        usr4Subj.rankedUsers.collect{ it.userId } == users[9..0]
+        usr4Subj.rankedUsers.collect{ it.userId } == forDisplay(users[9..0])
         usr4Subj.archivedUser == false
 
-        usr1_afterArchive.rankedUsers.collect{ it.userId } == users.findAll { it != users.get(4) }[5..0]
+        usr1_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users.findAll { it != users.get(4) }[5..0])
         usr1_afterArchive.archivedUser == false
-        usr2_afterArchive.rankedUsers.collect{ it.userId } == users.findAll { it != users.get(4) }[9..0]
+        usr2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users.findAll { it != users.get(4) }[9..0])
         usr2_afterArchive.archivedUser == false
-        usr3_afterArchive.rankedUsers.collect{ it.userId } == users.findAll { it != users.get(4) }[19..9]
+        usr3_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users.findAll { it != users.get(4) }[19..9])
         usr3_afterArchive.archivedUser == false
         !usr4_afterArchive.rankedUsers
         usr4_afterArchive.archivedUser == true
 
-        usr1Subj_afterArchive.rankedUsers.collect{ it.userId } == users.findAll { it != users.get(4) }[5..0]
+        usr1Subj_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users.findAll { it != users.get(4) }[5..0])
         usr1Subj_afterArchive.archivedUser == false
-        usr2Subj_afterArchive.rankedUsers.collect{ it.userId } == users.findAll { it != users.get(4) }[9..0]
+        usr2Subj_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users.findAll { it != users.get(4) }[9..0])
         usr2Subj_afterArchive.archivedUser == false
-        usr3Subj_afterArchive.rankedUsers.collect{ it.userId } == users.findAll { it != users.get(4) }[19..9]
+        usr3Subj_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users.findAll { it != users.get(4) }[19..9])
         usr3Subj_afterArchive.archivedUser == false
         !usr4Subj_afterArchive.rankedUsers
         usr4Subj_afterArchive.archivedUser == true
 
         // p2
-        usr1P2_afterArchive.rankedUsers.collect{ it.userId } == users[5..0]
+        usr1P2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users[5..0])
         usr1P2_afterArchive.archivedUser == false
-        usr2P2_afterArchive.rankedUsers.collect{ it.userId } == users[10..0]
+        usr2P2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users[10..0])
         usr2P2_afterArchive.archivedUser == false
-        usr3P2_afterArchive.rankedUsers.collect{ it.userId } == users[20..10]
+        usr3P2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users[20..10])
         usr3P2_afterArchive.archivedUser == false
-        usr4P2_afterArchive.rankedUsers.collect{ it.userId } == users[9..0]
+        usr4P2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users[9..0])
         usr4P2_afterArchive.archivedUser == false
 
-        usr1SubjP2_afterArchive.rankedUsers.collect{ it.userId } == users[5..0]
+        usr1SubjP2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users[5..0])
         usr1SubjP2_afterArchive.archivedUser == false
-        usr2SubjP2_afterArchive.rankedUsers.collect{ it.userId } == users[10..0]
+        usr2SubjP2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users[10..0])
         usr2SubjP2_afterArchive.archivedUser == false
-        usr3SubjP2_afterArchive.rankedUsers.collect{ it.userId } == users[20..10]
+        usr3SubjP2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users[20..10])
         usr3SubjP2_afterArchive.archivedUser == false
-        usr4SubjP2_afterArchive.rankedUsers.collect{ it.userId } == users[9..0]
+        usr4SubjP2_afterArchive.rankedUsers.collect{ it.userId } == forDisplay(users[9..0])
         usr4SubjP2_afterArchive.archivedUser == false
+    }
+
+    List<String> forDisplay(List<String> users) {
+        return users.collect {
+            userAttrsRepo.findByUserIdIgnoreCase(it)?.userIdForDisplay
+        }
     }
 }
