@@ -42,7 +42,7 @@ const close = () => {
       </div>
 
       <div class="mb-1 mt-6 text-3xl">
-        <h2 class="font-bold text-success mb-2 skills-page-title-text-color" role="heading" aria-level="1">{{ quizInfo.name }}</h2>
+        <h2 class="font-bold text-success mb-2 skills-page-title-text-color">{{ quizInfo.name }}</h2>
       </div>
 
       <div class="flex gap-6 flex-col md:flex-row pt-2 pb-1 text-center">

@@ -41,9 +41,10 @@ watch(timer, (value) => {
   <div>
     <div class="pt-10" data-cy="resetConfirmation">
       <div class="max-w-md lg:max-w-xl mx-auto" >
+        <h1 class="sr-only">Password Successfully Reset</h1>
         <div class="text-center">
           <logo1 class="mb-4" />
-          <Message :closable="false" role="heading" aria-level="1" severity="success">Password Successfully Reset!</Message>
+          <Message :closable="false" severity="success">Password Successfully Reset!</Message>
         </div>
         <Card class="mt-4 text-left">
           <template #content>

@@ -41,7 +41,7 @@ onUnmounted(() => {
 
 <template>
   <div ref="pageHeader">
-    <Card data-cy="pageHeader" class="mt-2" role="heading" aria-level="1">
+    <Card data-cy="pageHeader" class="mt-2">
       <template #content>
         <skills-spinner v-if="loading" :is-loading="loading"/>
         <div v-if="!loading">
