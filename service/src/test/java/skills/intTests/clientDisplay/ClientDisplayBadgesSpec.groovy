@@ -86,19 +86,90 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
 
         Date oneWeekAgo = new Date()-7
         Date twoWeeksAgo = new Date()-14
+        Date tomorrow = new Date()+2
         String badge1 = "badge1"
         Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1',
-                     startDate: twoWeeksAgo, endDate: oneWeekAgo,
+                     startDate: twoWeeksAgo, endDate: tomorrow,
                      description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
         skillsService.addBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
         badge.enabled  = 'true'
         skillsService.updateBadge(badge, badge.badgeId)
 
-        when:
         def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+        assert summaries.size() == 1
+        def projSummary = skillsService.getSkillsSummaryForUser(proj1.projectId, userId)
+        assert projSummary.badges.numTotalBadges == 1
+        assert projSummary.badges.numBadgesCompleted == 0
+
+        Map badgeUpdated = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1',
+                            startDate: twoWeeksAgo, endDate: oneWeekAgo,
+                            description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.updateBadge(badgeUpdated, badge.badgeId)
+
+        when:
+        def summariesUpdated = skillsService.getBadgesSummary(userId, proj1.projectId)
+        def projSummaryUpdated = skillsService.getSkillsSummaryForUser(proj1.projectId, userId)
         then:
-        summaries.size() == 0
+        summariesUpdated.size() == 0
+        projSummaryUpdated.badges.numTotalBadges == 0
+        projSummaryUpdated.badges.numBadgesCompleted == 0
+    }
+
+    def "badges summary for a project - unachieved gem does not roll off too soon"() {
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        Date oneWeekAgo = new Date()-7
+        Date twoWeeksAgo = new Date()-14
+        Date tomorrow = new Date()+2
+        Date yesterday = new Date()-1
+        String badge1 = "badge1"
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1',
+                     startDate: twoWeeksAgo, endDate: tomorrow,
+                     description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+        def projSummary = skillsService.getSkillsSummaryForUser(proj1.projectId, userId)
+        assert projSummary.badges.numTotalBadges == 1
+        assert projSummary.badges.numBadgesCompleted == 0
+        assert summaries.size() == 1
+
+        Map badgeUpdated = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1',
+                            startDate: twoWeeksAgo, endDate: yesterday,
+                            description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.updateBadge(badgeUpdated, badge.badgeId)
+
+        summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+        assert summaries.size() == 1
+        projSummary = skillsService.getSkillsSummaryForUser(proj1.projectId, userId)
+        assert projSummary.badges.numTotalBadges == 1
+        assert projSummary.badges.numBadgesCompleted == 0
+
+        badgeUpdated = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1',
+                        startDate: twoWeeksAgo, endDate: oneWeekAgo,
+                        description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.updateBadge(badgeUpdated, badge.badgeId)
+
+        when:
+        def summariesUpdated = skillsService.getBadgesSummary(userId, proj1.projectId)
+        def projSummaryUpdated = skillsService.getSkillsSummaryForUser(proj1.projectId, userId)
+
+        then:
+        summariesUpdated.size() == 0
+        projSummaryUpdated.badges.numTotalBadges == 0
+        projSummaryUpdated.badges.numBadgesCompleted == 0
     }
 
     def "badges summary for a project - achieved gem is retained"() {
@@ -117,21 +188,103 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
 
         Date oneWeekAgo = new Date()-7
         Date twoWeeksAgo = new Date()-14
+        Date tomorrow = new Date() + 1
+        Date twoDaysAgo = new Date() - 2
         String badge1 = "badge1"
         Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1',
-                     startDate: twoWeeksAgo, endDate: oneWeekAgo,
+                     startDate: twoWeeksAgo, endDate: tomorrow,
                      description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
         skillsService.addBadge(badge)
         skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: proj1_skills.get(0).skillId])
         badge.enabled  = 'true'
         skillsService.updateBadge(badge, badge.badgeId)
-        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, twoWeeksAgo)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, oneWeekAgo)
+
+        Map badgeUpdated = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1',
+                        startDate: twoWeeksAgo, endDate: twoDaysAgo,
+                        description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.updateBadge(badgeUpdated, badge.badgeId)
 
         when:
         def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+        def projSummary = skillsService.getSkillsSummaryForUser(proj1.projectId, userId)
         then:
         summaries.size() == 1
+        projSummary.badges.numTotalBadges == 1
+        projSummary.badges.numBadgesCompleted == 1
     }
+
+    def "badge summary is correct for a project with multiple badges and gems"() {
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement = 40
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        Date oneWeekAgo = new Date()-7
+        Date twoWeeksAgo = new Date()-14
+        Date tomorrow = new Date()+2
+        Date yesterday = new Date() - 1
+        Date threeDaysAgo = new Date() - 3
+
+        Map unachievedBadge = [projectId: proj1.projectId, badgeId: "badge1", name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        Map achievedBadge = [projectId: proj1.projectId, badgeId: "badge2", name: 'Badge 2', description: 'This is a badge', iconClass: "fa fa-seleted-icon",]
+        Map unachievedGemNotRolledOff = [projectId: proj1.projectId, badgeId: "badge3", name: 'Badge 3', startDate: twoWeeksAgo, endDate: tomorrow, description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        Map unachievedGemRolledOff = [projectId: proj1.projectId, badgeId: "badge4", name: 'Badge 4', startDate: twoWeeksAgo, endDate: tomorrow, description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        Map achievedGem = [projectId: proj1.projectId, badgeId: "badge5", name: 'Badge 5', startDate: twoWeeksAgo, endDate: tomorrow, description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(unachievedBadge)
+        skillsService.addBadge(achievedBadge)
+        skillsService.addBadge(unachievedGemNotRolledOff)
+        skillsService.addBadge(unachievedGemRolledOff)
+        skillsService.addBadge(achievedGem)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: "badge1", skillId: proj1_skills.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: "badge2", skillId: proj1_skills.get(1).skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: "badge3", skillId: proj1_skills.get(2).skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: "badge4", skillId: proj1_skills.get(3).skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: "badge5", skillId: proj1_skills.get(4).skillId])
+        unachievedBadge.enabled  = 'true'
+        achievedBadge.enabled  = 'true'
+        unachievedGemNotRolledOff.enabled  = 'true'
+        unachievedGemRolledOff.enabled  = 'true'
+        achievedGem.enabled  = 'true'
+        skillsService.updateBadge(unachievedBadge, unachievedBadge.badgeId)
+        skillsService.updateBadge(achievedBadge, achievedBadge.badgeId)
+        skillsService.updateBadge(unachievedGemNotRolledOff, unachievedGemNotRolledOff.badgeId)
+        skillsService.updateBadge(unachievedGemRolledOff, unachievedGemRolledOff.badgeId)
+        skillsService.updateBadge(achievedGem, achievedGem.badgeId)
+
+        def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+        assert summaries.size() == 5
+        def projSummary = skillsService.getSkillsSummaryForUser(proj1.projectId, userId)
+        assert projSummary.badges.numTotalBadges == 5
+        assert projSummary.badges.numBadgesCompleted == 0
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, oneWeekAgo)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(4).skillId], userId, oneWeekAgo)
+
+        unachievedGemNotRolledOff.endDate = yesterday
+        unachievedGemRolledOff.endDate  = threeDaysAgo
+        achievedGem.endDate  = threeDaysAgo
+        skillsService.updateBadge(unachievedGemNotRolledOff, unachievedGemNotRolledOff.badgeId)
+        skillsService.updateBadge(unachievedGemRolledOff, unachievedGemRolledOff.badgeId)
+        skillsService.updateBadge(achievedGem, achievedGem.badgeId)
+
+        when:
+        def summariesUpdated = skillsService.getBadgesSummary(userId, proj1.projectId)
+        def projSummaryUpdated = skillsService.getSkillsSummaryForUser(proj1.projectId, userId)
+        then:
+        summariesUpdated.size() == 4
+        projSummaryUpdated.badges.numTotalBadges == 4
+        projSummaryUpdated.badges.numBadgesCompleted == 2
+    }
+
 
     def "badges summary for a project - one badge - achieved"() {
         String userId = "user1"

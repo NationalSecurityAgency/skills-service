@@ -143,7 +143,7 @@ const titleTag = computed(() => route.params.badgeId ? 'h2': 'h3')
         <vertical-progress-bar :total-progress="percent" :bar-size="6" class="mt-1" />
 
         <div v-if="showBadgeBonusDetails" style="font-size: 1.2em;">
-          <Message v-if="badge.numberOfUsersAchieved > 0 || badge.badgeAchieved"
+          <Message v-if="badge.numberOfUsersAchieved > 0"
                    :closable="false"
                    icon="fas fa-trophy">
             <span v-if="!badge.badgeAchieved">{{ badge.numberOfUsersAchieved }} {{ usersAchieved }} achieved this badge so far - <span
@@ -154,9 +154,8 @@ const titleTag = computed(() => route.params.badgeId ? 'h2': 'h3')
             <span v-else>You've achieved this badge</span>
             <span v-if="achievementOrder !== ''"> - <span
               class="time-style">and you were the {{ achievementOrder }}!</span></span>
-            <span v-if="badge.gem && timeUtils.isInThePast(badge.endDate)"><br />This badge has since expired, but you still get to keep it!</span>
           </Message>
-          <Message v-else-if="!badge.badgeAchieved && badge.numberOfUsersAchieved === 0"
+          <Message v-else-if="badge.numberOfUsersAchieved === 0"
                    :closable="false"
                    icon="fas fa-car-side">
             No one

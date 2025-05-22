@@ -372,9 +372,10 @@ class SkillsLoader {
 
     @Profile
     private OverallSkillSummary.BadgeStats getBadgeStats(ProjDef projDef, String userId) {
-        def badges = loadBadgeSummaries(projDef.projectId, userId)
-        int numTotalBadges = badges.size()
-        int numBadgesAchieved = badges.count{ it -> it.badgeAchieved }.toInteger()
+        //these probably need to exclude badges where enabled = FALSE
+        Date rollOffDate = new Date() - daysToRollOff
+        int numBadgesAchieved = achievedLevelRepository.countAchievedForUser(userId, projDef.projectId, ContainerType.Badge)
+        int numTotalBadges = skillDefRepo.countBadgesByProjectIdAndEnabledAndActive(projDef.projectId, userId, rollOffDate)
 
         List<UserAchievedLevelRepo.AchievementInfo> recentlyAchievedBadges = getRecentlyAchievedBadges(userId, projDef.projectId)
         List<OverallSkillSummary.SingleBadgeInfo> recentlyAwardedBadges = recentlyAchievedBadges?.collect {
@@ -1183,32 +1184,13 @@ class SkillsLoader {
         if(loadBadgeDetails) {
             numberOfUsersAchieved = achievedLevelRepository.countNumAchievedForSkill(projDef.projectId, badgeDefinition.skillId)
         }
-        boolean isGem = badgeDefinition.startDate && badgeDefinition.endDate
-        boolean maintainAchievement = false
-        Date mostRecentAchievement
-        if(isGem) {
-            if(numAchievedSkills == numChildSkills) {
-                groupChildrenMeta.childrenWithPoints.each { child ->
-                    if(child.achievedOn) {
-                        if(!mostRecentAchievement) {
-                            mostRecentAchievement = child.achievedOn
-                        } else if(child.achievedOn > mostRecentAchievement) {
-                            mostRecentAchievement = child.achievedOn
-                        }
-                    }
-                }
-                if(mostRecentAchievement <= badgeDefinition.endDate && mostRecentAchievement >= badgeDefinition.startDate) {
-                    maintainAchievement = true
-                }
-            }
-        }
 
         return new SkillBadgeSummary(
                 badge: InputSanitizer.unsanitizeName(badgeDefinition.name),
                 badgeId: badgeDefinition.skillId,
                 description: InputSanitizer.unsanitizeForMarkdown(badgeDefinition.description),
-                badgeAchieved: achievements?.size() > 0 || maintainAchievement,
-                dateAchieved: achievements ? achievements.first().achievedOn : (maintainAchievement && mostRecentAchievement ? mostRecentAchievement : null),
+                badgeAchieved: achievements?.size() > 0,
+                dateAchieved: achievements ? achievements.first().achievedOn : null,
                 numSkillsAchieved: numAchievedSkills,
                 numTotalSkills: numChildSkills,
                 startDate: badgeDefinition.startDate,
