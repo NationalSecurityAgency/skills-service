@@ -47,7 +47,6 @@ const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
 
 <template>
   <Card class="skills-theme-page-title" data-cy="skillsTitle"
-        role="heading" aria-level="1"
         :pt="{ body: { class: 'p-0!' }, content: { class: 'px-2! pt-2! pb-3!' } }">
     <template #content>
       <div class="flex flex-wrap flex-col md:flex-row content-center gap-2" :class="{'px-2': !renderDivWhereBackButtonResides}">

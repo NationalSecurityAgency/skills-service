@@ -170,6 +170,7 @@ defineExpose({
             'gap-2 sm:flex-row flex-wrap': !projectsState.shouldTileProjectsCards
           }">
           <div class="text-truncate">
+            <h2>
             <router-link
                 :to="{ name:'Subjects', params: { projectId: projectInternal.projectId }}"
                 class="no-underline mb-0 pb-0" :title="`${projectInternal.name}`"
@@ -183,8 +184,9 @@ defineExpose({
                 shape="circle">
                 {{ projectInternal.name.substring(0, 2) }}
               </Avatar>
-              <h2 class="text-2xl font-bold ml-2 skills-break-word inline">{{ projectInternal.name }}</h2>
+              <div class="text-2xl font-bold ml-2 skills-break-word inline">{{ projectInternal.name }}</div>
             </router-link>
+            </h2>
             <div v-if="projectInternal.userCommunity" class="my-2" data-cy="userCommunity">
               <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
               <span

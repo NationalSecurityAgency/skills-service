@@ -43,9 +43,10 @@ watch(timer, (value) => {
   <div>
     <div class="pt-10" data-cy="resetRequestConfirmation">
       <div class="max-w-md lg:max-w-xl mx-auto">
+        <h1 class="sr-only">Reset Password For SkillTree Dashboard</h1>
         <div class="mt-8 text-center">
           <logo1 class="mb-4" />
-          <Message :closable="false" role="heading" aria-level="1">Reset Password For SkillTree Dashboard</Message>
+          <Message :closable="false">Reset Password For SkillTree Dashboard</Message>
         </div>
         <Card class="mt-4 text-left">
           <template #content>

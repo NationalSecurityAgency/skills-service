@@ -125,7 +125,7 @@ const onSubmit = handleSubmit((values) => {
         <h1 class="sr-only">SkillTree New Account</h1>
         <div class="text-center">
           <logo1 class="mb-4" />
-          <Message :closable="false" role="heading" aria-level="1">New <span v-if="isRootAccount">Root </span>Account</Message>
+          <Message :closable="false">New <span v-if="isRootAccount">Root </span>Account</Message>
         </div>
         <Card v-if="!oAuthOnly" class="mt-4 text-left">
           <template #content>

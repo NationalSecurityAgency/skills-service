@@ -71,7 +71,7 @@ function addClicked() {
 </script>
 
 <template>
-  <div class="flex flex-wrap pb-2" data-cy="subPageHeader" :class="`mb-${marginBottom}`" role="heading" :aria-level="titleLevel">
+  <div class="flex flex-wrap pb-2" data-cy="subPageHeader" :class="`mb-${marginBottom}`">
     <div class="flex-1 text-left">
       <h1 v-if="titleLevel === 1" class="text-2xl uppercase font-normal my-0">{{ title }}</h1>
       <h2 v-if="titleLevel === 2" class="text-2xl uppercase font-normal my-0">{{ title }}</h2>
