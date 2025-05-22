@@ -31,6 +31,8 @@ const route = useRoute()
 const position = computed(() => numberFormat.pretty(progress.userRanking.position))
 const totalUsers = computed(() => numberFormat.pretty(progress.userRanking.numUsers))
 const optedOut = computed(() => progress.userRanking.optedOut)
+const userArchived = computed(() => progress.userRanking.archivedUser)
+const showRanking = computed(() => !optedOut.value && !userArchived.value)
 onMounted(() => {
   progress.loadUserSkillsRanking(route.params.subjectId)
 })
@@ -45,18 +47,24 @@ const toRankDetailsPage = computed(() => {
 </script>
 
 <template>
-  <UserProgressCard title="My Rank" icon="fa fa-users" :route="toRankDetailsPage" :is-summary-only="attributes.isSummaryOnly"
+  <UserProgressCard title="My Rank" icon="fa fa-users" :route="toRankDetailsPage" :is-summary-only="userArchived || attributes.isSummaryOnly"
                     component-name="myRank"
                     :loading="progress.loadingUserSkillsRanking">
     <template #userRanking>
       <div class="py-2 user-rank-text">
+        <div v-if="userArchived" data-cy="userArchivedMessage">
+          <div class="text-2xl">Archived User</div>
+          <div style="font-size: 0.8rem; line-height: 1rem;" class="mt-2">
+            Rank is not available for archived users!
+          </div>
+        </div>
         <div v-if="optedOut" data-cy="optedOutMessage">
           <div class="text-2xl">Opted-Out</div>
           <div style="font-size: 0.8rem; line-height: 1rem;" class="mt-2">
             Your position would be <b>#{{ position }}</b> if you opt-in!
           </div>
         </div>
-        <div v-else>
+        <div v-if="showRanking">
           <div class="text-3xl font-semibold" style="line-height: 1.2em" data-cy="myRankPosition">#{{ position }}</div>
           <div class="mt-2">out of</div>
           <div><span class="font-semibold">{{ totalUsers }}</span> {{ parseInt(totalUsers) === 1 ? 'user' : 'users' }}</div>

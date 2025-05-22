@@ -32,6 +32,7 @@ import skills.services.settings.SettingsDataAccessor
 import skills.skillLoading.model.*
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
+import skills.storage.repos.ArchivedUsersRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserAttrsRepo
@@ -71,12 +72,41 @@ class RankingLoader {
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
 
+    @Autowired
+    ArchivedUsersRepo archivedUsersRepo
+
+    @Profile
     SkillsRanking getUserSkillsRanking(String projectId, String userId, String subjectId = null) {
+        // always calculate total number of users
+        int numUsers = findNumberOfUsers(projectId, subjectId) as int
+
+        if (isUserArchived(projectId, userId)) {
+            return new SkillsRanking(numUsers: numUsers, position: -1, archivedUser: true)
+        }
+
         Integer points = subjectId ?
                 userPointsRepository.findPointsByProjectIdAndUserIdAndSkillId(projectId, userId, subjectId) :
                 userPointsRepository.findPointsByProjectIdAndUserId(projectId, userId)
 
-        return doGetUserSkillsRanking(userId, projectId, points, subjectId)
+        OptOutInfo optOut = getOptOutInfo(userId, projectId)
+
+        SkillsRanking ranking
+        if (points) {
+            List<String> excludedIds = optOut.admins ?: ['$%^&*']
+            int numUsersWithMorePoints = calculateNumberOfUsersWithGreaterPoints(subjectId, projectId, points, excludedIds)
+            int position = numUsersWithMorePoints + 1
+            ranking = new SkillsRanking(numUsers: numUsers, position: position, optedOut: optOut.isPersonalOptOut())
+        } else {
+            // last one
+            ranking = new SkillsRanking(numUsers: numUsers + 1, position: numUsers + 1, optedOut: optOut.isPersonalOptOut())
+        }
+
+        return ranking
+    }
+
+    @Profile
+    private boolean isUserArchived(String projectId, String userId) {
+        return archivedUsersRepo.existsByProjectIdAndUserId(projectId, userId)
     }
 
     private Sort getPointsSort(boolean ptsAsc, boolean timestampAsc = true) {
@@ -88,6 +118,9 @@ class RankingLoader {
     @Profile
     LeaderboardRes getLeaderboard(String projectId, String userId, LeaderboardRes.Type type, String subjectId = null) {
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
+        if (isUserArchived(projectId, userAttrs.userId)) {
+            return new LeaderboardRes(archivedUser: true, type: type)
+        }
         LocalDateTime userCreatedDate = userAttrs.created
         OptOutInfo optOutInfo = getOptOutInfo(userId, projectId)
 
@@ -183,27 +216,6 @@ class RankingLoader {
         return res
     }
 
-    @Profile
-    private SkillsRanking doGetUserSkillsRanking(String userId, String projectId, Integer points, String subjectId = null) {
-        // always calculate total number of users
-        int numUsers = findNumberOfUsers(projectId, subjectId) as int
-
-        OptOutInfo optOut = getOptOutInfo(userId, projectId)
-
-        SkillsRanking ranking
-        if (points) {
-            List<String> excludedIds = optOut.admins ?: ['$%^&*']
-            int numUsersWithMorePoints = calculateNumberOfUsersWithGreaterPoints(subjectId, projectId, points, excludedIds)
-            int position = numUsersWithMorePoints + 1
-            ranking = new SkillsRanking(numUsers: numUsers, position: position, optedOut: optOut.isPersonalOptOut())
-        } else {
-            // last one
-            ranking = new SkillsRanking(numUsers: numUsers + 1, position: numUsers + 1, optedOut: optOut.isPersonalOptOut())
-        }
-
-        return ranking
-    }
-
     static class OptOutInfo {
         boolean personalOptOut
         boolean allAdminOptOut
@@ -238,7 +250,10 @@ class RankingLoader {
 
     @Profile
     private long findNumberOfUsers(String projectId, String subjectId) {
-        userPointsRepository.countByProjectIdAndSkillId(projectId, subjectId)
+        if (subjectId) {
+            return userPointsRepository.countNonArchivedUsersByProjectIdAndSkillId(projectId, subjectId)
+        }
+        return userPointsRepository.countNonArchivedUsersByProjectId(projectId)
     }
 
     SkillsRankingDistribution getRankingDistribution(String projectId, String userId, String subjectId = null) {

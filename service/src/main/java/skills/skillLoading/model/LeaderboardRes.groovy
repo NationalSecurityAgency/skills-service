@@ -28,4 +28,5 @@ class LeaderboardRes {
     Integer availablePoints
     List<RankedUserRes> rankedUsers
     boolean optedOut
+    boolean archivedUser = false
 }

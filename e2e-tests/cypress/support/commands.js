@@ -1670,4 +1670,8 @@ Cypress.Commands.add('openNewSkillDialog', ()  => {
     cy.get('[data-cy="skillName"]').should('have.focus')
 })
 
-
+Cypress.Commands.add('archiveUser', (userId)  => {
+    cy.request('POST', '/admin/projects/proj1/users/archive', {
+        userIds: [userId]
+    });
+})
