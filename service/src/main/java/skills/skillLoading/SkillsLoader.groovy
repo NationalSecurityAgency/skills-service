@@ -76,6 +76,9 @@ class SkillsLoader {
     @Value('#{"${skills.project.minimumPoints:20}"}')
     int minimumProjectPoints
 
+    @Value('#{"${skills.config.ui.daysToRollOff:2}"}')
+    Integer daysToRollOff
+
     @Autowired
     ProjDefRepo projDefRepo
 
@@ -370,8 +373,9 @@ class SkillsLoader {
     @Profile
     private OverallSkillSummary.BadgeStats getBadgeStats(ProjDef projDef, String userId) {
         //these probably need to exclude badges where enabled = FALSE
+        Date rollOffDate = new Date() - daysToRollOff
         int numBadgesAchieved = achievedLevelRepository.countAchievedForUser(userId, projDef.projectId, ContainerType.Badge)
-        int numTotalBadges = skillDefRepo.countByProjectIdAndTypeWhereEnabled(projDef.projectId, ContainerType.Badge)
+        int numTotalBadges = skillDefRepo.countBadgesByProjectIdAndEnabledAndActive(projDef.projectId, userId, rollOffDate)
 
         List<UserAchievedLevelRepo.AchievementInfo> recentlyAchievedBadges = getRecentlyAchievedBadges(userId, projDef.projectId)
         List<OverallSkillSummary.SingleBadgeInfo> recentlyAwardedBadges = recentlyAchievedBadges?.collect {
@@ -450,11 +454,16 @@ class SkillsLoader {
         if ( version >= 0 ) {
             badgeDefs = badgeDefs.findAll { it.version <= version }
         }
+
         List<SkillBadgeSummary> badges = badgeDefs.sort({ it.displayOrder }).findAll {
             (it.enabled == null || Boolean.valueOf(it.enabled)) && BadgeUtils.afterStartTime(it)
         }.collect { SkillDefWithExtra badgeDefinition ->
             loadBadgeSummary(projDef, userId, badgeDefinition, version)
         }
+        badges.removeAll{ badgeSummary ->
+            BadgeUtils.shouldRollOff(badgeSummary, daysToRollOff) && !badgeSummary.badgeAchieved
+        }
+
         return badges
     }
 

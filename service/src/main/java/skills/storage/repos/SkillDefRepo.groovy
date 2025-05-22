@@ -249,6 +249,15 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         ''')
     int countByProjectIdAndTypeWhereEnabled(@Nullable @Param('projectId') String projectId, @Param('type') SkillDef.ContainerType type)
 
+    @Query(value='''
+        select count(s) from skill_definition s
+        where s.type = 'Badge' and s.enabled = 'true' and s.project_id = :projectId and
+         (s.end_date is null or s.end_date >= :endDate or 
+          (exists ( select 1 from user_achievement ua where ua.project_id = s.project_id and s.skill_id = ua.skill_id and ua.level is null and ua.user_id = :userId))
+         )
+    ''', nativeQuery = true)
+    int countBadgesByProjectIdAndEnabledAndActive(@Nullable @Param('projectId') String projectId, @Param('userId') String userId, @Param('endDate') Date endDate)
+
     @Query('''select count(c) 
             from SkillRelDef r, SkillDef c 
             where r.parent.id=?1 and c.id = r.child.id and r.type=?2 and c.type = 'Skill' and c.enabled = ?3
