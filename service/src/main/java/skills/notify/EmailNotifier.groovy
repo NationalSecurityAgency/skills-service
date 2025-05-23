@@ -189,6 +189,7 @@ class EmailNotifier implements Notifier {
                     log.warn("NotificationBuilder produced a replyTo email that is not a valid email address [{}], using the default configured value of [{}]", emailRes.replyToEmail, fromEmail)
                 }
 
+                log.info("Sending notification: from [{}], to [{}], subject [{}]", fromEmail, userIds, emailRes.subject)
                 log.debug("sending notification [{}] to [{}]", emailRes.html, userIds)
                 List<String> failedUserIds = []
 
@@ -219,6 +220,7 @@ class EmailNotifier implements Notifier {
                 if (!failedUserIds) {
                     removeNotificationImmediately(notification.id)
                 } else {
+                    log.info("failed to send notification to [{}] users, first 10: [{}]", failedUserIds.size(), failedUserIds.take(10))
                     notification.failedCount = notification.failedCount + 1
                     //only some failed. Update the notification to only include the failed ids
                     notification.userId = JsonOutput.toJson(failedUserIds)
