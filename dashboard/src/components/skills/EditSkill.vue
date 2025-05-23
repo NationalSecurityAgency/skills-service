@@ -45,6 +45,7 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  isGroupEnabled: Boolean,
   projectUserCommunity: String,
 })
 const emit = defineEmits(['skill-saved'])
@@ -146,14 +147,14 @@ const isQuizAssignableToSkill = (selectedQuiz, context) => {
 const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
   return (selfReportingType.value === 'Quiz' || selfReportingType.value === 'Video')
 })
-const skillEnabled = ref(props.isSubjectEnabled && !props.isEdit ? true : props.isSubjectEnabled && props.skill.enabled)
+const skillEnabled = ref(props.isSubjectEnabled && (!props.groupId || props.isGroupEnabled) && !props.isEdit ? true : props.isSubjectEnabled && props.skill.enabled)
 const onEnabledChanged = (event) => {
   skillEnabled.value = !skillEnabled.value
 }
 const showVisibilityControl = computed(() => {
   // always show on create new skill (when subject is enabled), only show on edit if currently disabled
   const isCreateNewSkill = !props.isEdit
-  return props.isSubjectEnabled && (isCreateNewSkill || !props.skill.enabled)
+  return props.isSubjectEnabled && (!props.groupId || props.isGroupEnabled) && (isCreateNewSkill || !props.skill.enabled)
 })
 
 const schema = object({

@@ -74,7 +74,7 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] becuase it's Subject [${proj1_subj.subjectId}] is disabled")
+        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] because it's Subject [${proj1_subj.subjectId}] is disabled")
     }
 
     def "can add a disabled skill group to a disabled subject"() {
@@ -127,7 +127,7 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] becuase it's Subject [${proj1_subj.subjectId}] is disabled")
+        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] because it's Subject [${proj1_subj.subjectId}] is disabled")
     }
 
     def "cannot enable a disabled skill that is part of a disabled subject"() {
@@ -147,9 +147,13 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] becuase it's Subject [${proj1_subj.subjectId}] is disabled")
+        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] because it's Subject [${proj1_subj.subjectId}] is disabled")
     }
 
+    // TODO
+    def "cannot enable a disabled skill group that is part of a disabled subject"() {
+
+    }
     def "cannot disable an already enabled subject"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)

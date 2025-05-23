@@ -181,7 +181,7 @@ class QuizSettingsService {
             Integer minNumQuestionsToPass = Integer.valueOf(quizSettingsRequest.value)
             int numDeclaredQuestions = quizQuestionDefRepo.countByQuizId(quizId)
             if (numDeclaredQuestions == 0) {
-                throw new SkillQuizException("Cannot modify [${quizSettingsRequest.setting}] becuase there is 0 declared questions", quizId, ErrorCode.BadParam)
+                throw new SkillQuizException("Cannot modify [${quizSettingsRequest.setting}] because there is 0 declared questions", quizId, ErrorCode.BadParam)
             }
 
             if (numDeclaredQuestions < minNumQuestionsToPass) {
