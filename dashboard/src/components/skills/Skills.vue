@@ -81,9 +81,10 @@ const newSkillInfo = ref({
   isEdit: false,
   isCopy: false,
   groupId: null,
+  isGroupEnabled: true,
   version: 1
 })
-const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId = null) => {
+const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId = null, isGroupEnabled = true) => {
   if (skill.isGroupType) {
     createOrUpdateGroup(skill, isEdit)
   } else {
@@ -92,7 +93,8 @@ const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId
       isEdit,
       show: true,
       isCopy,
-      groupId
+      groupId,
+      isGroupEnabled
     }
   }
 }
@@ -235,6 +237,7 @@ const skillCreatedOrUpdated = (skill) => {
       v-model="newSkillInfo.show"
       :skill="newSkillInfo.skill"
       :is-subject-enabled="subjectState.subject.enabled"
+      :is-group-enabled="newSkillInfo.isGroupEnabled"
       :is-edit="newSkillInfo.isEdit"
       :is-copy="newSkillInfo.isCopy"
       :group-id="newSkillInfo.groupId"

@@ -237,7 +237,7 @@ const handleEditBtnClick = (skill) => {
     editImportedSkillInfo.value.skill = skill
     editImportedSkillInfo.value.show = true
   } else {
-    createOrUpdateSkill(skill, true, false, skill.groupId)
+    createOrUpdateSkill(skill, true, false, skill.groupId, skill.enabled)
   }
 }
 
@@ -720,7 +720,7 @@ const onRowExpand = () => {
                     :id="`copySkillButton_${slotProps.data.skillId}`"
                     v-if="slotProps.data.type === 'Skill' && !slotProps.data.isCatalogImportedSkills"
                     icon="fas fa-copy"
-                    @click="createOrUpdateSkill(slotProps.data, false, true, slotProps.data.groupId)"
+                    @click="createOrUpdateSkill(slotProps.data, false, true, slotProps.data.groupId, slotProps.data.enabled)"
                     size="small"
                     outlined
                     severity="info"

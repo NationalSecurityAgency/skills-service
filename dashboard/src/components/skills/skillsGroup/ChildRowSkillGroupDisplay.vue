@@ -177,7 +177,7 @@ const groupChanged = (updatedGroup) => {
                 outlined
                 severity="info"
                 :track-for-focus="true"
-                @click="createOrUpdateSkill({}, false, false, skillInfo.skillId)"
+                @click="createOrUpdateSkill({enabled: skillInfo.enabled}, false, false, skillInfo.skillId, skillInfo.enabled)"
                 :disabled="addDisabled"
                 :aria-label="`Add skill to ${skillInfo.name} group`"
                 :data-cy="`addSkillToGroupBtn-${skillInfo.skillId}`" />
