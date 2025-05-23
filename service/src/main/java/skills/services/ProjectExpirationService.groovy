@@ -86,6 +86,7 @@ class ProjectExpirationService {
         lastTouchedList.each {
             SettingsResult result = settingService.getProjectSetting(it.projectId, Settings.EXPIRING_UNUSED.getSettingName(), SETTING_GROUP)
             if (!result || (result.getValue() == Boolean.FALSE.toString() && result.getUpdated().before(expireOlderThan))) {
+                log.info("flagging project [${it.projectId}] for expiration. Last touched [${it.lastTouched}].  ${Settings.EXPIRING_UNUSED.getSettingName()}: [${result?.getValue()}], updated: [${result?.getUpdated()}]")
                 ProjectSettingsRequest psr = new ProjectSettingsRequest()
                 psr.projectId = it.getProjectId()
                 psr.setting = Settings.EXPIRING_UNUSED.getSettingName()
@@ -160,7 +161,10 @@ class ProjectExpirationService {
                                 communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
                         ],
                 )
+                log.info("Sending notification to Project Admins for Project [${it.projectId}]")
                 notifier.sendNotification(request)
+            } else {
+                log.warn("No Project Admins found for Project [${it.projectId}]")
             }
         }
     }
