@@ -300,13 +300,12 @@ describe('Skills Display Badges Tests', () => {
     cy.createBadge(1, 1, { enabled: true, startDate: twoDaysAgoMoment, endDate: tomorrow })
 
     cy.reportSkill(1, 1, Cypress.env('proxyUser'), twoDaysAgo);
-    cy.reportSkill(1, 1, Cypress.env('proxyUser'), anHourAgo); // achieve badge
 
-    cy.cdVisit('/', true);
+    cy.cdVisit('/', false);
     cy.cdClickBadges();
-    cy.get('[data-cy=achievedBadges]').contains('Badge 1');
+    cy.get('[data-cy=availableBadges]').contains('Badge 1');
 
-    cy.get('[data-cy="earnedBadgeLink_badge1"]').click();
+    cy.get('[data-cy="badgeDetailsLink_badge1"]').click();
     cy.get('[data-cy="badge_badge1_gem"]').contains('Expires in a day')
   });
 
@@ -333,17 +332,18 @@ describe('Skills Display Badges Tests', () => {
 
     cy.createBadge(1, 1)
     cy.assignSkillToBadge(1, 1, 1);
-    cy.createBadge(1, 1, { enabled: true, startDate: twoDaysAgoMoment, endDate: yesterday })
-
     cy.reportSkill(1, 1, Cypress.env('proxyUser'), twoDaysAgo);
-    cy.reportSkill(1, 1, Cypress.env('proxyUser'), anHourAgo); // achieve badge
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), yesterday); // achieve badge
+    cy.createBadge(1, 1, { enabled: true, startDate: twoDaysAgoMoment, endDate: anHourAgo })
+
+    // cy.updateBadge
 
     cy.cdVisit('/', true);
     cy.cdClickBadges();
-    cy.get('[data-cy=availableBadges]').contains('Badge 1');
-    cy.get('[data-cy="badge_badge1_gem"]').contains('Expired a day ago')
+    cy.get('[data-cy=achievedBadges]').contains('Badge 1');
+    cy.get('[data-cy="badge_badge1_gem"]').should('not.exist')
 
-    cy.get('[data-cy="badgeDetailsLink_badge1"]').click();
-    cy.get('[data-cy="badge_badge1_gem"]').contains('Expired a day ago')
+    cy.get('[data-cy="earnedBadgeLink_badge1"]').click();
+    cy.get('[data-cy="badge_badge1_gem"]').should('not.exist')
   });
 })
