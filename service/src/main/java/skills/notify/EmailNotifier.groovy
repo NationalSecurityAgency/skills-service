@@ -220,7 +220,7 @@ class EmailNotifier implements Notifier {
                 if (!failedUserIds) {
                     removeNotificationImmediately(notification.id)
                 } else {
-                    log.info("failed to send notification to [{}]", failedUserIds)
+                    log.info("failed to send notification to [{}] users, first 10: [{}]", failedUserIds.size(), failedUserIds.take(10))
                     notification.failedCount = notification.failedCount + 1
                     //only some failed. Update the notification to only include the failed ids
                     notification.userId = JsonOutput.toJson(failedUserIds)
