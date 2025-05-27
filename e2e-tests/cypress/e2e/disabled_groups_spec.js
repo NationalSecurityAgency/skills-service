@@ -50,6 +50,7 @@ describe('Disabled Group Tests', () => {
     cy.createProject(1);
     cy.createSubject(1, 1)
     cy.createSkillsGroup(1, 1, 1, { enabled: false });
+    cy.addSkillToGroup(1, 1, 1, 1, { enabled: false })
 
     cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject');
     cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/group1').as('updateGroup')
@@ -58,6 +59,17 @@ describe('Disabled Group Tests', () => {
     cy.wait('@loadSubject')
     cy.get('[data-cy="subjectCard-subj1"] [data-cy="disabledSubjectBadge"]').should('not.exist')
     cy.get('[data-cy="disabledBadge-group1"]').should('be.visible')
+    cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '0');
+    cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '0');
+    cy.get('[data-cy="pageHeaderStats_Skills_disabled"]').should('have.text', '1');
+    cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '0');
+    cy.get('[data-cy="pageHeaderStats_Groups_disabled"]').should('have.text', '1');
+
+    cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
+    cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="skillsTable"]', [
+      [{ colIndex: 2, value: 'Very Great Skill 1 Disabled' }]
+    ], 5, true, null, false);
+    cy.get('[data-cy="disabledBadge-skill1"]').should('be.visible')
 
     cy.get('[data-cy="editSkillButton_group1"]').click();
 
@@ -68,6 +80,16 @@ describe('Disabled Group Tests', () => {
     cy.wait('@updateGroup')
 
     cy.get('[data-cy="disabledBadge-group1"]').should('not.exist')
+    cy.get('[data-cy="disabledBadge-skill1"]').should('not.exist')
+    cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '200');
+    cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '1');
+    cy.get('[data-cy="pageHeaderStats_Skills_disabled"]').should('not.exist')
+    cy.get('[data-cy="pageHeaderStat_Groups"] [data-cy="statValue"]').should('have.text', '1');
+    cy.get('[data-cy="pageHeaderStats_Groups_disabled"]').should('not.exist')
+
+    cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy="skillsTable"]', [
+      [{ colIndex: 2, value: 'Very Great Skill 1' }]
+    ], 5, true, null, false);
     cy.get('[data-cy="editSkillButton_group1"]').click();
 
     // no longer show the visibility switch after the group is enabled
