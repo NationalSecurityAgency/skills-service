@@ -117,13 +117,17 @@ const reportSkills = (createdSkill) => {
 
 const skillCreatedOrUpdated = (skill) => {
   const skills = skill.groupId ? skillsState.getGroupSkills(skill.groupId) : skillsState.subjectSkills
-  const item1Index = skills.findIndex((item) => item.skillId === skill.originalSkillId)
+  const existingIndex = skills.findIndex((item) => item.skillId === skill.originalSkillId)
   const createdSkill = ({
     ...skill,
     subjectId: route.params.subjectId
   })
-  if (item1Index >= 0) {
-    skills.splice(item1Index, 1, createdSkill)
+  if (existingIndex >= 0) {
+    const existingSkill = skills[existingIndex]
+    if (skill.isGroupType && skill.enabled !== existingSkill.enabled) {
+      skillsState.loadGroupSkills(skill.projectId, skill.skillId)
+    }
+    skills.splice(existingIndex, 1, createdSkill)
   } else {
     skills.push(createdSkill)
     SkillsReporter.reportSkill('CreateSkill')
