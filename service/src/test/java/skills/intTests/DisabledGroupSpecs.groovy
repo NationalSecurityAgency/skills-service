@@ -77,7 +77,7 @@ class DisabledGroupSpecs extends DefaultIntSpec {
         groupSkills.findAll { it.enabled == false }.size() == 3
     }
 
-    def "can enable a disabled skill that is part of a disabled group"() {
+    def "cannot enable a disabled skill that is part of a disabled group"() {
         def proj = createProject()
         def subj = createSubject()
         def skills = createSkills(3)
