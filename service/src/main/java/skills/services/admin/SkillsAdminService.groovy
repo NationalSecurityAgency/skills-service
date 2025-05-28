@@ -238,7 +238,7 @@ class SkillsAdminService {
                 groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillRequest, skillDefinition)
                 boolean enabledGroup = !isCurrentlyEnabled && isEnabledSkillInRequest
                 if (enabledGroup) {
-                    groupChildSkills.each {
+                    groupChildSkills.findAll {it.copiedFrom == null }.each {
                         it.enabled = true
                     }
                 }

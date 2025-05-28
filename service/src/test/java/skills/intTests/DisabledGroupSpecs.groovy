@@ -218,4 +218,72 @@ class DisabledGroupSpecs extends DefaultIntSpec {
         skillSummaryAfter.skillId == skillsGroupId
         skillSummaryAfter.totalPoints == 30
     }
+
+    def "enabling a group with imported skills does not enabled the imported skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj2 = createSubject(2, 2)
+        def p2skillsGroup = createSkillsGroup(2, 2, 10)
+        p2skillsGroup.enabled = 'false'
+        String skillsGroupId = p2skillsGroup.skillId
+        def p2skills = createSkills(5, 2, 2, 100)
+        p2skills.each { it.enabled = 'false' }
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj2, [p2skills, p2skillsGroup].flatten())
+
+        def nonImportedChildSkill = createSkill(2, 2, 55)
+        nonImportedChildSkill.enabled = 'false'
+        skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, nonImportedChildSkill)
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalog(p2.projectId, p2subj2.subjectId, p2skillsGroup.skillId,
+                p1skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        when:
+
+        def group = skillsService.getSkill(p2skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(p2.projectId, skillsGroupId)
+        p2skillsGroup.enabled = true
+        skillsService.updateSkill(p2skillsGroup)
+        def skillSummaryAfter = skillsService.getSingleSkillSummaryForCurrentUser(p2.projectId, skillsGroupId)
+        def groupAfter = skillsService.getSkill(p2skillsGroup)
+        def groupSkillsAfter = skillsService.getSkillsForGroup(p2.projectId, skillsGroupId)
+        then:
+
+        group
+        group.skillId == skillsGroupId
+        group.name == p2skillsGroup.name
+        group.type == p2skillsGroup.type
+        group.numSkillsInGroup == 6
+        group.numSelfReportSkills == 0
+        group.totalPoints == 0
+        group.enabled == false
+
+        groupSkills
+        groupSkills.size() == 6
+        groupSkills.findAll { !it.enabled }.size() == 6
+        groupSkills.findAll { !it.enabled && it.copiedFromProjectId == p1.projectId }.size() == 5
+
+        groupAfter
+        groupAfter.skillId == skillsGroupId
+        groupAfter.name == p2skillsGroup.name
+        groupAfter.type == p2skillsGroup.type
+        groupAfter.numSkillsInGroup == 6
+        groupAfter.numSelfReportSkills == 0
+        groupAfter.enabled == true
+        groupAfter.totalPoints == 10
+
+        groupSkillsAfter
+        groupSkillsAfter.size() == 6
+        groupSkillsAfter.findAll { !it.enabled }.size() == 5
+        groupSkillsAfter.findAll { !it.enabled && it.copiedFromProjectId == p1.projectId }.size() == 5
+
+        skillSummaryAfter
+        skillSummaryAfter.type == p2skillsGroup.type
+        skillSummaryAfter.skillId == skillsGroupId
+        skillSummaryAfter.totalPoints == 10
+    }
 }

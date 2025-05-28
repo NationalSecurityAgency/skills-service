@@ -17,6 +17,7 @@ package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsFactory
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -323,4 +324,58 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
         subjectSummaryAfter.skills.size() == 4
     }
 
+    def "enabling a subject with imported skills does not enabled the imported skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj2 = createSubject(2, 2)
+        p2subj2.enabled = 'false'
+        def p2skillsGroup = createSkillsGroup(2, 2, 10)
+        p2skillsGroup.enabled = 'false'
+        def p2skills = createSkills(5, 2, 2, 100)
+        p2skills.each { it.enabled = 'false' }
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj2, [p2skills, p2skillsGroup].flatten())
+
+        def nonImportedChildSkill = createSkill(2, 2, 55)
+        nonImportedChildSkill.enabled = 'false'
+        skillsService.assignSkillToSkillsGroup(p2skillsGroup.skillId, nonImportedChildSkill)
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalog(p2.projectId, p2subj2.subjectId, p2skillsGroup.skillId,
+                p1skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        when:
+
+        def subject = skillsService.getSubject(p2subj2)
+        p2subj2.enabled = 'true'
+        skillsService.updateSubject(p2subj2, p2subj2.subjectId)
+        def subjectSummaryAfter = skillsService.getSubjectSummaryForCurrentUser(p2.projectId, p2subj2.subjectId)
+
+        def subjectAfter = skillsService.getSubject(p2subj2)
+        then:
+        subject
+        subject.numSkills == 0
+        subject.numSkillsDisabled == 11
+        subject.numSkillsImportedAndDisabled == 5
+        subject.numGroups == 0
+        subject.numGroupsDisabled == 1
+        subject.totalPoints == 0
+
+        subjectAfter
+        subjectAfter.numSkills == 6
+        subjectAfter.numSkillsDisabled == 5  // imported skills are still disabled
+        subjectAfter.numSkillsImportedAndDisabled == 5
+        subjectAfter.numGroups == 1
+        subjectAfter.numGroupsDisabled == 0
+        subjectAfter.totalPoints == 510
+
+        subjectSummaryAfter
+        subjectSummaryAfter.subjectId == p2subj2.subjectId
+        subjectSummaryAfter.totalPoints == 510
+        subjectSummaryAfter.totalSkills == 6
+        subjectSummaryAfter.skills.size() == 6
+    }
 }
