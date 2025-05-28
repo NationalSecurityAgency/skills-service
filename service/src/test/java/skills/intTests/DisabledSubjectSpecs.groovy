@@ -150,10 +150,26 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
         ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] because it's Subject [${proj1_subj.subjectId}] is disabled")
     }
 
-    // TODO
     def "cannot enable a disabled skill group that is part of a disabled subject"() {
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        proj1_subj.enabled = false
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsGroup.enabled = false
 
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkill(skillsGroup)
+
+        when:
+        skillsGroup.enabled = true
+        skillsService.updateSkill(skillsGroup, skillsGroup.skillId)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Cannot enable Skill [${skillsGroup.skillId}] because it's Subject [${proj1_subj.subjectId}] is disabled")
     }
+
     def "cannot disable an already enabled subject"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)

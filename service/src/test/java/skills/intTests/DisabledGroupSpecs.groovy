@@ -77,6 +77,34 @@ class DisabledGroupSpecs extends DefaultIntSpec {
         groupSkills.findAll { it.enabled == false }.size() == 3
     }
 
+    def "can enable a disabled skill that is part of a disabled group"() {
+        def proj = createProject()
+        def subj = createSubject()
+        def skills = createSkills(3)
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsGroup.enabled = false
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skill.enabled = false
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        def res = skillsService.getSkill(skillsGroup)
+        def groupSkills = skillsService.getSkillsForGroup(proj.projectId, skillsGroupId)
+
+        when:
+        skills[0].enabled = true
+        skillsService.updateSkill(skills[0], skills[0].skillId)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Cannot enable Skill [${skills[0].skillId}] because it's SkillsGroup [${skillsGroupId}] is disabled")
+    }
+
     def "cannot add an enabled skill to a disabled group"() {
         def proj = createProject()
         def subj = createSubject()
