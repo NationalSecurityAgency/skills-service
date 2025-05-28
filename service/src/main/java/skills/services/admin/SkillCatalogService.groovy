@@ -419,6 +419,11 @@ class SkillCatalogService {
             insufficientPointsForFinalizationValidator.validateSubjectPoints(it.totalIncPendingFinalized, projectId, it.subjectId)
         }
 
+        long numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup = skillDefRepo.countNumSkillsToFinalizeThatBelongToADisabledSubjectOrGroup(projectId)
+        if (numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup > 0) {
+            throw new SkillException("Cannot finalize imported skills, there are [${numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup}] skill(s) pending finalization that belong to a disabled subject or group", projectId)
+        }
+
         skillCatalogFinalizationService.requestFinalizationOfImportedSkills(projectId)
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: DashboardAction.FinalizeCatalogImport,
@@ -429,7 +434,8 @@ class SkillCatalogService {
     }
 
     CatalogFinalizeInfoResult getFinalizeInfo(String projectId) {
-        int numDisabled = skillDefRepo.countByProjectIdAndEnabledAndCopiedFromIsNotNull(projectId, Boolean.FALSE.toString())
+        long numSkillsToFinalize = skillDefRepo.countByProjectIdAndEnabledAndCopiedFromIsNotNull(projectId, Boolean.FALSE.toString())
+        long numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup = skillDefRepo.countNumSkillsToFinalizeThatBelongToADisabledSubjectOrGroup(projectId)
         boolean isRunning = skillCatalogFinalizationService.getCurrentState(projectId) == SkillCatalogFinalizationService.FinalizeState.RUNNING
         SkillDefRepo.MinMaxPoints points = skillDefRepo.getSkillMinAndMaxTotalPoints(projectId)
 
@@ -440,9 +446,11 @@ class SkillCatalogService {
                 new SkillWithPointsResult(skillId: it.skillId, skillName: it.skillName, totalPoints: it.totalPoints)
             }
         }
+
         return new CatalogFinalizeInfoResult(
                 projectId: projectId,
-                numSkillsToFinalize: numDisabled,
+                numSkillsToFinalize: numSkillsToFinalize,
+                numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup: numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup,
                 isRunning: isRunning,
                 projectSkillMinPoints: points.getMinPoints(),
                 projectSkillMaxPoints: points.getMaxPoints(),

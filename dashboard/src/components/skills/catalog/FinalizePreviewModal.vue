@@ -50,17 +50,20 @@ const loadFinalizeInfo = () => {
   // finalizeInfoState.loadInfo()
 
   loadingTotalPointsNotFinalized.value = true
+  const numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup = finalizeInfoState.info.numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup
   CatalogService.getTotalPointsIncNotFinalized(route.params.projectId)
     .then((countData) => {
-      if (countData.insufficientProjectPoints || countData.subjectsWithInsufficientPoints.length > 0) {
+      if (countData.insufficientProjectPoints || countData.subjectsWithInsufficientPoints.length > 0 || numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup > 0) {
         canFinalize.value = false
         if (countData.insufficientProjectPoints) {
           noFinalizeMsg.value = `Finalization cannot be performed until ${countData.projectName} has at least ${appConfig.minimumProjectPoints} points. Finalizing currently imported Skills would only bring ${countData.projectName} to ${countData.projectTotalPoints} points.`
-        } else {
+        } else if (countData.subjectsWithInsufficientPoints.length > 0) {
           const insufficientSubjects = countData.subjectsWithInsufficientPoints.map((c) => c.subjectName).join(', ')
           const insufficientSubjectsWithPts = countData.subjectsWithInsufficientPoints.map((c) => `${c.subjectName}: ${c.totalPoints} points`).join(', ')
           noFinalizeMsg.value = `Finalization cannot be performed until ${insufficientSubjects} ${countData.subjectsWithInsufficientPoints.length > 1 ? 'have' : 'has'}
                 at least ${appConfig.minimumSubjectPoints} points. Finalizing the currently imported skills would only result in ${insufficientSubjectsWithPts}.`
+        } else if (numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup > 0) {
+          noFinalizeMsg.value = `Finalization cannot be performed, there ${pluralSupport.areOrIs(numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup)} [${numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup}] skill${pluralSupport.plural(numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup)} pending finalization that belong to a disabled subject or group.`
         }
       } else {
         canFinalize.value = true

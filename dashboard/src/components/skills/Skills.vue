@@ -28,12 +28,14 @@ import EditSkill from '@/components/skills/EditSkill.vue'
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import EditSkillGroup from '@/components/skills/skillsGroup/EditSkillGroup.vue'
 import ImportFromCatalogDialog from '@/components/skills/catalog/ImportFromCatalogDialog.vue'
+import { useFinalizeInfoState } from '@/stores/UseFinalizeInfoState.js'
 
 const appConfig = useAppConfig()
 const projConfig = useProjConfig()
 const route = useRoute()
 const skillsState = useSubjectSkillsState()
 const subjectState = useSubjectsState()
+const finalizeInfoState = useFinalizeInfoState()
 const announcer = useSkillsAnnouncer()
 const isLoading = computed(() => {
   // return this.loadingSubjectSkills || this.isLoadingProjConfig;
@@ -126,6 +128,7 @@ const skillCreatedOrUpdated = (skill) => {
     const existingSkill = skills[existingIndex]
     if (skill.isGroupType && skill.enabled !== existingSkill.enabled) {
       skillsState.loadGroupSkills(skill.projectId, skill.skillId)
+      finalizeInfoState.loadInfo()
     }
     skills.splice(existingIndex, 1, createdSkill)
   } else {
