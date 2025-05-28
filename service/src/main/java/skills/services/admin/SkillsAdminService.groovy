@@ -209,7 +209,7 @@ class SkillsAdminService {
         }
         final isSubjectEnabled = Boolean.valueOf(subject?.enabled)
         if (!isSubjectEnabled && isEnabledSkillInRequest) {
-            throw new SkillException("Cannot enable Skill [${originalSkillId}] becuase it's Subject [${parentSkillId}] is disabled", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
+            throw new SkillException("Cannot enable Skill [${originalSkillId}] because it's Subject [${parentSkillId}] is disabled", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
         }
         if (isSkillsGroupChild) {
             // need to validate skills group
@@ -217,7 +217,7 @@ class SkillsAdminService {
                 skillsGroupSkillDef = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(skillRequest.projectId, groupId, SkillDef.ContainerType.SkillsGroup)
             }
             if (!Boolean.valueOf(skillsGroupSkillDef?.enabled) && isEnabledSkillInRequest) {
-                throw new SkillException("Cannot enable Skill [${originalSkillId}] becuase it's SkillsGroup [${groupId}] is disabled", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
+                throw new SkillException("Cannot enable Skill [${originalSkillId}] because it's SkillsGroup [${groupId}] is disabled", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
             }
         }
         if (isEdit) {
@@ -236,6 +236,12 @@ class SkillsAdminService {
             if (isSkillsGroup) {
                 // need to update total points for the group
                 groupChildSkills = skillsGroupAdminService.validateSkillsGroupAndReturnChildren(skillRequest, skillDefinition)
+                boolean enabledGroup = !isCurrentlyEnabled && isEnabledSkillInRequest
+                if (enabledGroup) {
+                    groupChildSkills.each {
+                        it.enabled = true
+                    }
+                }
                 totalPointsRequested = skillsGroupAdminService.getGroupTotalPoints(groupChildSkills)
 
                 if (isEnabledSkillInRequest && skillDefinition.numSkillsRequired != skillRequest.numSkillsRequired) {
@@ -250,9 +256,10 @@ class SkillsAdminService {
                     groupChildSkills.each {
                         it.groupId = skillRequest.skillId
                     }
+                }
+                if (skillIdChanged || enabledGroup) {
                     skillDefRepo.saveAll(groupChildSkills)
                 }
-
             }
             shouldRebuildScores = skillDefinition.totalPoints != totalPointsRequested || (!Boolean.valueOf(skillDefinition.enabled) && isEnabledSkillInRequest)
             occurrencesDelta = isSkillsGroup ? 0 : skillRequest.numPerformToCompletion - currentOccurrences

@@ -74,7 +74,7 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] becuase it's Subject [${proj1_subj.subjectId}] is disabled")
+        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] because it's Subject [${proj1_subj.subjectId}] is disabled")
     }
 
     def "can add a disabled skill group to a disabled subject"() {
@@ -127,7 +127,7 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] becuase it's Subject [${proj1_subj.subjectId}] is disabled")
+        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] because it's Subject [${proj1_subj.subjectId}] is disabled")
     }
 
     def "cannot enable a disabled skill that is part of a disabled subject"() {
@@ -147,7 +147,27 @@ class DisabledSubjectSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] becuase it's Subject [${proj1_subj.subjectId}] is disabled")
+        ex.message.contains("Cannot enable Skill [${proj1_skill.skillId}] because it's Subject [${proj1_subj.subjectId}] is disabled")
+    }
+
+    def "cannot enable a disabled skill group that is part of a disabled subject"() {
+        def proj1 = createProject(1)
+        def proj1_subj = createSubject(1, 1)
+        proj1_subj.enabled = false
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsGroup.enabled = false
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkill(skillsGroup)
+
+        when:
+        skillsGroup.enabled = true
+        skillsService.updateSkill(skillsGroup, skillsGroup.skillId)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Cannot enable Skill [${skillsGroup.skillId}] because it's Subject [${proj1_subj.subjectId}] is disabled")
     }
 
     def "cannot disable an already enabled subject"() {
