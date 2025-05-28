@@ -678,6 +678,131 @@ describe('Finalize Imported Skills Tests', () => {
             .should('be.enabled');
     });
 
+    it('cannot finalize imported skills if imported skills belongs to a disabled subject', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.createSkill(1, 1, 3);
+        cy.createSkill(1, 1, 4);
+        cy.createSubject(1, 2, { enabled: false })
+
+        cy.bulkImportSkillFromCatalog(1, 2, [
+            {
+                projNum: 2,
+                skillNum: 1
+            },
+            {
+                projNum: 2,
+                skillNum: 2
+            },
+        ]);
+
+        cy.intercept('POST', '/admin/projects/proj1/subjects/subj2').as('updateSubject');
+        cy.intercept('/admin/projects/proj1/pendingFinalization/pointTotals')
+          .as('loadPendingPoints');
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
+          .click();
+        cy.wait('@loadPendingPoints');
+        //intercept and wait on count loading
+        cy.get('[data-cy="no-finalize"]')
+          .should('exist')
+          .contains('Finalization cannot be performed, there are [2] skills pending finalization that belong to a disabled subject or group.');
+        cy.get('[data-cy="saveDialogBtn"]')
+          .should('be.disabled');
+        cy.get('[data-cy="closeDialogBtn"]')
+          .should('be.enabled');
+        cy.get('[data-cy="closeDialogBtn"]')
+          .click();
+
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="disabledSubjectBadge"]').should('be.visible')
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="editBtn"]').click();
+
+        cy.get('[data-cy="visibilitySwitch"] [role="switch"]').should('not.be.checked')
+        cy.get('[data-cy="visibilitySwitch"]').click()
+        cy.get('[data-cy="visibilitySwitch"] [role="switch"]').should('be.checked')
+        cy.clickSave()
+        cy.wait('@updateSubject')
+        cy.get('[data-cy="subjectCard-subj2"] [data-cy="disabledSubjectBadge"]').should('not.exist')
+
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
+          .click();
+        cy.wait('@loadPendingPoints');
+        cy.get('[data-cy="no-finalize"]')
+          .should('not.exist');
+        cy.get('[data-cy="saveDialogBtn"]')
+          .should('be.enabled');
+    });
+
+    it('cannot finalize imported skills if imported skills belongs to a disabled group', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.createSkill(2, 1, 2);
+
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 2);
+
+        cy.createSkillsGroup(1, 1, 5, { enabled: false });
+        cy.bulkImportSkillsIntoGroupFromCatalog(1, 1, 5, [
+            {
+                projNum: 2,
+                skillNum: 1
+            },
+            {
+                projNum: 2,
+                skillNum: 2
+            },
+        ]);
+
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1').as('loadSubject');
+        cy.intercept('POST', '/admin/projects/proj1/subjects/subj1/skills/group5').as('updateGroup')
+        cy.intercept('/admin/projects/proj1/pendingFinalization/pointTotals')
+          .as('loadPendingPoints');
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+        cy.wait('@loadSubject')
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
+          .click();
+        cy.wait('@loadPendingPoints');
+        //intercept and wait on count loading
+        cy.get('[data-cy="no-finalize"]')
+          .should('exist')
+          .contains('Finalization cannot be performed, there are [2] skills pending finalization that belong to a disabled subject or group.');
+        cy.get('[data-cy="saveDialogBtn"]')
+          .should('be.disabled');
+        cy.get('[data-cy="closeDialogBtn"]')
+          .should('be.enabled');
+        cy.get('[data-cy="closeDialogBtn"]')
+          .click();
+
+        cy.get('[data-cy="disabledBadge-group5"]').should('be.visible')
+
+        cy.get('[data-cy="editSkillButton_group5"]').click();
+
+        cy.get('[data-cy="visibilitySwitch"] [role="switch"]').should('not.be.checked')
+        cy.get('[data-cy="visibilitySwitch"]').click()
+        cy.get('[data-cy="visibilitySwitch"] [role="switch"]').should('be.checked')
+        cy.clickSave()
+        cy.wait('@updateGroup')
+        cy.get('[data-cy="disabledBadge-group5"]').should('not.exist')
+
+        cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
+          .click();
+        cy.wait('@loadPendingPoints');
+        cy.get('[data-cy="no-finalize"]')
+          .should('not.exist');
+        cy.get('[data-cy="saveDialogBtn"]')
+          .should('be.enabled');
+    });
+
     it('Check the point system and warn users when finalizing skills catalog if imported points are outside of the exiting point scheme', () => {
         cy.createSkill(1, 1, 1, { pointIncrement: 52 });
         cy.createSkill(1, 1, 2, { pointIncrement: 673 });

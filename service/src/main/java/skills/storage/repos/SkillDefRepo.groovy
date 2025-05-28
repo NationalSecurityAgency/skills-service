@@ -279,6 +279,18 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
 
     long countByProjectIdAndEnabledAndCopiedFromIsNotNull(String projectId, String enabled)
 
+    @Query(value='''select count(child) 
+        from SkillRelDef srd, SkillDef child, SkillDef parent
+        where parent.enabled != 'true'
+          and child.copiedFrom is not null
+          and parent.copiedFrom is null
+          and child.enabled != 'true'
+          and srd.parent = parent
+          and srd.child = child
+          and parent.projectId = ?1
+      ''')
+    long countNumSkillsToFinalizeThatBelongToADisabledSubjectOrGroup(String projectId)
+
     @Query(value='''select count(sd) 
         from SkillRelDef srd, SkillDef sd
         where 

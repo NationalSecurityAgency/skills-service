@@ -150,7 +150,7 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
   <loading-container class="child-row" v-bind:is-loading="loading" :data-cy="`childRowDisplay_${skillInfo.skillId}`">
     <div v-if="isImported" class="mt-4 alert alert-info" header="Skill Catalog">
       This skill was <b>imported</b> from the
-      <Badge class=""><i class="fas fa-book"></i> CATALOG</Badge>
+      <Badge class=""><i class="fas fa-book pr-1"></i> CATALOG</Badge>
       and was initially
       defined in the <b class="text-primary">{{ skillInfo.copiedFromProjectName }}</b> project.
       This skill is
