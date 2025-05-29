@@ -23,6 +23,7 @@ class CatalogFinalizeInfoResult {
     String projectId
 
     Integer numSkillsToFinalize
+    Integer numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup
 
     Boolean isRunning
 

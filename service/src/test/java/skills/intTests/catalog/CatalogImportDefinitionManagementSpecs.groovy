@@ -628,6 +628,22 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         e.message.contains("Cannot import skills in the middle of the finalization process")
     }
 
+    def "do not allow finalizing if imported skills belongs to a disabled subject"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+        def disabledSubject = createSubject(2, 4)
+        disabledSubject.enabled = false
+        skillsService.createSubject(disabledSubject)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, disabledSubject.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(project2.p.projectId, false)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Cannot finalize imported skills, there are [1] skill(s) pending finalization that belong to a disabled subject or group")
+    }
+
     def "get all skills for a project does not include disabled skills by default"() {
         def project1 = createProjWithCatalogSkills(1)
         def project2 = createProjWithCatalogSkills(2)

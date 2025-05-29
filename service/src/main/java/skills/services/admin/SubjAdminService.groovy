@@ -185,12 +185,14 @@ class SubjAdminService {
         List<SkillDef> subjectSkills = skillRelDefRepo.findChildrenByParent(subject.id, relationshipTypes)
         // need to enable skill group children before their group so that point total is calculated correctly
         subjectSkills.sort { skill -> skill.type == SkillDef.ContainerType.SkillsGroup ? 1 : 0 }.each { skill ->
-            skill.enabled = true
-            DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(subject.projectId, subject.skillId) {
-                skillDefRepo.save(skill)
-            }
-            if (skill.type == SkillDef.ContainerType.SkillsGroup) {
-                ruleSetDefinitionScoreUpdater.updateGroupDef(skill)
+            if (skill.copiedFrom == null) {
+                skill.enabled = true
+                DataIntegrityExceptionHandlers.skillDataIntegrityViolationExceptionHandler.handle(subject.projectId, subject.skillId) {
+                    skillDefRepo.save(skill)
+                }
+                if (skill.type == SkillDef.ContainerType.SkillsGroup) {
+                    ruleSetDefinitionScoreUpdater.updateGroupDef(skill)
+                }
             }
         }
         ruleSetDefinitionScoreUpdater.updateSubjectSkillDef(skillDefRepo.findById(subject.id).get())
