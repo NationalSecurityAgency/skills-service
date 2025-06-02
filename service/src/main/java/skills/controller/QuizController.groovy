@@ -238,8 +238,13 @@ class QuizController {
 
     @RequestMapping(value = "/{quizId}/metrics", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    QuizMetrics getQuizMetrics(@PathVariable("quizId") String quizId) {
-        return quizDefService.getMetrics(quizId);
+    QuizMetrics getQuizMetrics(@PathVariable("quizId") String quizId, @RequestParam(required = false) String startDate, @RequestParam(required = false) String endDate) {
+        if(startDate && endDate) {
+            return quizDefService.getMetrics(quizId, startDate, endDate);
+        }
+        else {
+            return quizDefService.getMetrics(quizId);
+        }
     }
 
     @RequestMapping(value = "/{quizId}/runs", method = RequestMethod.GET, produces = "application/json")

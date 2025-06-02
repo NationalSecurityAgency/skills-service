@@ -79,8 +79,8 @@ export default {
       newDisplayOrderIndex
     })
   },
-  getQuizMetrics(quizId) {
-    return axios.get(`/admin/quiz-definitions/${quizId}/metrics`).then((response) => response.data)
+  getQuizMetrics(quizId, params) {
+    return axios.get(`/admin/quiz-definitions/${quizId}/metrics`, { params }).then((response) => response.data)
   },
   getQuizAnswerSelectionHistory(quizId, answerDefId, params) {
     return axios

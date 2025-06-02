@@ -35,15 +35,16 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
         Integer getNumDistinctUsers()
     }
     @Nullable
-    @Query('''select
-        quizAttempt.status as status, count(quizAttempt.id) as numAttempts, count(distinct quizAttempt.userId) as numDistinctUsers
-        from UserQuizAttempt quizAttempt, QuizDef quizDef
-        where quizAttempt.quizDefinitionRefId = quizDef.id
-            and quizDef.quizId = ?1
+    @Query(value='''select
+        quizAttempt.status as status, count(quizAttempt.id) as numAttempts, count(distinct quizAttempt.user_id) as numDistinctUsers
+        from user_quiz_attempt quizAttempt, quiz_definition quizDef
+        where quizAttempt.quiz_definition_ref_id = quizDef.id
+            and quizDef.quiz_id = ?1
             and quizAttempt.status in ('PASSED', 'FAILED')
+            and quizAttempt.completed >= ?2 and quizAttempt.completed <= ?3
         group by quizAttempt.status
-     ''')
-    List<QuizCounts> getUserQuizAttemptCounts(String quizId)
+     ''', nativeQuery = true)
+    List<QuizCounts> getUserQuizAttemptCounts(String quizId, Date startDate, Date endDate)
 
     @Nullable
     @Query(value = '''select AVG((extract('epoch' from quizAttempt.completed) * 1000)- (extract('epoch' from quizAttempt.started) * 1000))
@@ -56,13 +57,14 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
     Double getAverageMsRuntimeForQuiz(String quizId)
 
 
-    @Query('''select count(distinct quizAttempt.userId)
-        from UserQuizAttempt quizAttempt, QuizDef quizDef
-        where quizAttempt.quizDefinitionRefId = quizDef.id
-            and quizDef.quizId = ?1
+    @Query(value='''select count(distinct quizAttempt.user_id)
+        from user_quiz_attempt quizAttempt, quiz_definition quizDef
+        where quizAttempt.quiz_definition_ref_id = quizDef.id
+            and quizDef.quiz_id = ?1
             and quizAttempt.status in ('PASSED', 'FAILED')
-     ''')
-    Integer getDistinctNumUsersByQuizId(String quizId)
+            and quizAttempt.completed >= ?2 and quizAttempt.completed <= ?3
+     ''', nativeQuery = true)
+    Integer getDistinctNumUsersByQuizId(String quizId, Date startDate, Date endDate)
 
     @Nullable
     @Query('''select quizAttempt      
