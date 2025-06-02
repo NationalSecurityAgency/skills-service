@@ -25,6 +25,7 @@ import StatsCard from '@/components/metrics/utils/StatsCard.vue';
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import QuizQuestionMetrics from '@/components/quiz/metrics/QuizQuestionMetrics.vue';
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
+import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
 
 const timeUtils = useTimeUtils();
 const route = useRoute();
@@ -32,27 +33,50 @@ const colors = useColors()
 const isLoading = ref(true);
 const quizId = ref(route.params.quizId);
 const metrics = ref(null);
+const filterRange = ref([]);
 
 const isSurvey = computed(() => metrics.value && metrics.value.quizType === 'Survey');
 const hasMetrics = computed(() => metrics.value && metrics.value.numTaken > 0);
 
 onMounted(() => {
+  loadQuizMetrics()
+})
+
+const loadQuizMetrics = () => {
   isLoading.value = true;
-  QuizService.getQuizMetrics(quizId.value)
+  const startDate = filterRange.value?.length > 0 ? filterRange.value[0] : null;
+  const endDate = filterRange.value?.length > 0 ? filterRange.value[1] : null;
+  QuizService.getQuizMetrics(quizId.value, { startDate: startDate, endDate: endDate })
       .then((res) => {
         metrics.value = res;
       })
       .finally(() => {
         isLoading.value = false;
       });
+}
 
-})
+const applyDateFilter = () => {
+  loadQuizMetrics()
+};
+
+const clearDateFilter = () => {
+  filterRange.value = [];
+  loadQuizMetrics()
+};
 </script>
 
 <template>
   <div>
     <SubPageHeader title="Results"
                    aria-label="results">
+      <template #underTitle>
+        <div class="flex gap-2 items-center">
+          Filter by Date(s):
+          <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()"/>
+          <SkillsButton label="Apply" @click="applyDateFilter" />
+          <SkillsButton label="Clear" @click="clearDateFilter" />
+        </div>
+      </template>
     </SubPageHeader>
 
     <SkillsSpinner :is-loading="isLoading"/>

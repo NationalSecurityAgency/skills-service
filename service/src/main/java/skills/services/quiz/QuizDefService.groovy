@@ -53,6 +53,8 @@ import skills.storage.repos.*
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
+import java.text.SimpleDateFormat
+
 import static org.springframework.data.domain.Sort.Direction.DESC
 
 @Service
@@ -755,10 +757,16 @@ class QuizDefService {
     }
 
     @Transactional
-    QuizMetrics getMetrics(String quizId) {
+    QuizMetrics getMetrics(String quizId, String startDateString = '1900-01-01', String endDateString = '2100-12-31') {
         QuizDef quiz = findQuizDef(quizId)
         boolean isSurvey = quiz.type == QuizDefParent.QuizType.Survey
-        List<UserQuizAttemptRepo.QuizCounts> quizCounts = userQuizAttemptRepo.getUserQuizAttemptCounts(quizId)
+        def format = new SimpleDateFormat("yyyy-MM-dd")
+        Date startDate = format.parse(startDateString + " 00:00:00")
+        Date endDate = format.parse(endDateString + " 23:59:59")
+
+        log.info("[{}] [{}] [{}] [{}]", startDateString, endDateString, startDate, endDate)
+
+        List<UserQuizAttemptRepo.QuizCounts> quizCounts = userQuizAttemptRepo.getUserQuizAttemptCounts(quizId, startDate, endDate)
 
         int totalNumAttempts = quizCounts ? quizCounts.collect { it.getNumAttempts() }.sum() : 0
         UserQuizAttemptRepo.QuizCounts passedQuizCounts = quizCounts.find{
@@ -770,7 +778,7 @@ class QuizDefService {
         int numAttemptsPassed = passedQuizCounts ? passedQuizCounts.getNumAttempts() : 0
         int numAttemptsFailed = failedQuizCounts ? failedQuizCounts.getNumAttempts() : 0
 
-        Integer totalNumDistinctUsers = isSurvey ? totalNumAttempts : userQuizAttemptRepo.getDistinctNumUsersByQuizId(quizId)
+        Integer totalNumDistinctUsers = isSurvey ? totalNumAttempts : userQuizAttemptRepo.getDistinctNumUsersByQuizId(quizId, startDate, endDate)
         int numDistinctUsersPassed = passedQuizCounts ? passedQuizCounts.getNumDistinctUsers() : 0
         int numDistinctUsersFailed = failedQuizCounts ? failedQuizCounts.getNumDistinctUsers() : 0
 
@@ -778,8 +786,8 @@ class QuizDefService {
 
         QuizQuestionsResult quizQuestionsResult = getQuestionDefs(quizId)
         List<QuizQuestionDefResult> questionDefResults = quizQuestionsResult?.questions
-        List<UserQuizQuestionAttemptRepo.IdAndStatusCount> questionIdAndStatusCounts = userQuizQuestionAttemptRepo.getUserQuizQuestionAttemptCounts(quizId)
-        List<UserQuizQuestionAttemptRepo.IdAndStatusCount> answerIdAndStatusCounts = userQuizQuestionAttemptRepo.getUserQuizAnswerAttemptCounts(quizId)
+        List<UserQuizQuestionAttemptRepo.IdAndStatusCount> questionIdAndStatusCounts = userQuizQuestionAttemptRepo.getUserQuizQuestionAttemptCounts(quizId, startDate, endDate)
+        List<UserQuizQuestionAttemptRepo.IdAndStatusCount> answerIdAndStatusCounts = userQuizQuestionAttemptRepo.getUserQuizAnswerAttemptCounts(quizId, startDate, endDate)
 
         Map<Integer, List<UserQuizQuestionAttemptRepo.IdAndStatusCount>> byQuestionId = questionIdAndStatusCounts.groupBy { it.getId()}
         Map<Integer, List<UserQuizQuestionAttemptRepo.IdAndStatusCount>> byAnswerId = answerIdAndStatusCounts.groupBy { it.getId()}
