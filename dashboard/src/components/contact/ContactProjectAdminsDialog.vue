@@ -14,17 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {onMounted, ref, compile, computed} from 'vue'
-import {useSkillsAnnouncer} from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { computed, onMounted, ref } from 'vue'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import MyProgressService from '@/components/myProgress/MyProgressService.js'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
-import {object, string} from 'yup'
-import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
-import {useRoute} from "vue-router";
-import ProjectService from "@/components/projects/ProjectService.js";
-import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
-import SkillsSelector from "@/components/skills/SkillsSelector.vue";
-import {useMyProgressState} from "@/stores/UseMyProgressState.js";
+import { object, string } from 'yup'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useRoute } from 'vue-router'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import { useMyProgressState } from '@/stores/UseMyProgressState.js'
 
 const model = defineModel()
 const announcer = useSkillsAnnouncer()
@@ -61,7 +59,7 @@ onMounted(() => {
       projectInfo.value = {projectId: projectId, projectName: projectId};
       loadingData.value = false;
     } else {
-      ProjectService.getProject(projectId)
+      MyProgressService.findProjectName(projectId)
           .then((proj) => {
             projectInfo.value = {...proj, projectName: proj.name};
           })
