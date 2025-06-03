@@ -24,6 +24,7 @@ import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 import SkillTreeHeaderSvgIcon from '@/components/brand/SkillTreeHeaderSvgIcon.vue'
 import UpgradeInProgressWarning from '@/components/header/UpgradeInProgressWarning.vue'
+import NotificationButton from "@/components/header/NotificationButton.vue";
 
 const pathPath = usePagePath()
 const appInfoState = useAppInfoState()
@@ -58,6 +59,7 @@ const themeHelper = useThemesHelper()
             <inception-button v-if="pathPath.isAdminPage.value"
                               class="mr-2"
                               data-cy="inception-button" />
+            <notification-button data-cy="notification-button" />
             <settings-button data-cy="settings-button" class="ml-2" />
             <help-button data-cy="help-button" class="ml-2" />
           </div>
