@@ -26,7 +26,9 @@ import QuizService from '@/components/quiz/QuizService.js'
 import DateCell from '@/components/utils/table/DateCell.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
+import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 
+const timeUtils = useTimeUtils()
 const props = defineProps({
   answerDefId: Number,
   isSurvey: Boolean,
@@ -34,6 +36,7 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  dateRange: Array,
 })
 
 const route = useRoute();
@@ -105,11 +108,15 @@ const isTextInput = computed(() => {
 
 const loadData = () => {
   tableOptions.value.busy = true;
+  const dateRange = timeUtils.prepareDateRange(props.dateRange)
+
   const params = {
     limit: tableOptions.value.pagination.pageSize,
     ascending: sortInfo.value.sortOrder === 1,
     page: tableOptions.value.pagination.currentPage,
     orderBy: sortInfo.value.sortBy,
+    startDate: dateRange.startDate,
+    endDate: dateRange.endDate,
   };
   return QuizService.getQuizAnswerSelectionHistory(quizId.value, props.answerDefId, params)
       .then((res) => {
