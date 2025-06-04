@@ -2832,4 +2832,93 @@
             <column name="attributes" type="jsonb" />
         </addColumn>
     </changeSet>
+
+    <changeSet id="52" author="skills team">
+        <createTable tableName="web_notifications">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <!-- optional lookup id that can be used for in-code notification creation on app startup to make sure we don't duplicate -->
+            <column name="lookup_id" type="varchar(255)" />
+
+            <!--  will be null for any global notification -->
+            <column name="user_id" type="varchar(255)" />
+
+            <column name="title" type="varchar(255)" />
+            <column name="notification" type="text" />
+            <column name="notified_on" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="index_lookup_id_user_id"
+                     tableName="web_notifications">
+            <column name="lookup_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_web_notifications_user_id"
+                     tableName="web_notifications">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_web_notifications_notified_on"
+                     tableName="web_notifications">
+            <column name="notified_on" type="datetime"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="web_notifications"
+                                 constraintName="fk_web_notifications_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+
+        <createTable tableName="web_notifications_ack">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="web_notifications_ref_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="index_web_notifications_ack_user_id"
+                     tableName="web_notifications_ack">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="user_id"
+                                 baseTableName="web_notifications_ack"
+                                 constraintName="fk_web_notifications_ack_user_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="user_id"
+                                 referencedTableName="user_attrs"/>
+
+        <createIndex indexName="index_web_notifications_ack_notification_ref_id"
+                     tableName="web_notifications_ack">
+            <column name="web_notifications_ref_id" type="datetime"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="web_notifications_ref_id"
+                                 baseTableName="web_notifications_ack"
+                                 constraintName="fk_web_notifications_ack_notification_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="web_notifications"/>
+
+    </changeSet>
+
 </databaseChangeLog>
