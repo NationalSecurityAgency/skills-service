@@ -19,10 +19,13 @@ import java.text.SimpleDateFormat
 
 class TimeRangeFormatterUtil {
 
-    public static List<Date> formatTimeRange(String start, String end) {
+    static String defaultStart = "1900-01-01 00:00:00"
+    static String defaultEnd = "2100-12-31 23:59:59"
+
+    static List<Date> formatTimeRange(String start, String end) {
         def format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        Date startDate = format.parse(start)
-        Date endDate = format.parse(end)
+        Date startDate = start ? format.parse(start) : format.parse(defaultStart)
+        Date endDate = end ? format.parse(end) : format.parse(defaultEnd)
 
         return [startDate, endDate]
     }

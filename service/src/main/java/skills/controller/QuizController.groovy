@@ -234,8 +234,8 @@ class QuizController {
                                        @RequestParam int page,
                                        @RequestParam String orderBy,
                                        @RequestParam Boolean ascending,
-                                       @RequestParam String startDate,
-                                       @RequestParam String endDate) {
+                                       @RequestParam(required = false) String startDate,
+                                       @RequestParam(required = false) String endDate) {
         PageRequest pageRequest = TablePageUtil.validateAndConstructQuizPageRequest(limit, page, orderBy, ascending)
         List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate)
         return quizDefService.getUserQuestionAnswers(quizId, answerDefId, pageRequest, dates[0], dates[1])
@@ -243,7 +243,7 @@ class QuizController {
 
     @RequestMapping(value = "/{quizId}/metrics", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    QuizMetrics getQuizMetrics(@PathVariable("quizId") String quizId, @RequestParam String startDate, @RequestParam String endDate) {
+    QuizMetrics getQuizMetrics(@PathVariable("quizId") String quizId, @RequestParam(required = false) String startDate, @RequestParam(required = false) String endDate) {
         List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate)
         return quizDefService.getMetrics(quizId, dates[0], dates[1]);
     }
