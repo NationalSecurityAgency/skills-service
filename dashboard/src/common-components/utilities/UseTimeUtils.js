@@ -131,6 +131,21 @@ export const useTimeUtils = () => {
     return dayjs(date).isBefore(now);
   }
 
+  const prepareDateRange = (dateRange = null) => {
+    let [startDate, endDate] = dateRange
+    if(!startDate) {
+      startDate = '1900-01-01'
+    }
+    if(!endDate) {
+      endDate = '2100-12-31'
+    }
+
+    const newStartDate = dayjs(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+    const newEndDate = dayjs(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+
+    return { startDate: newStartDate, endDate: newEndDate };
+  }
+
   return {
     timeFromNow,
     isToday,
@@ -140,6 +155,7 @@ export const useTimeUtils = () => {
     simpleClockFilter,
     relativeTime,
     isWithinNDays,
-    isInThePast
+    isInThePast,
+    prepareDateRange
   }
 }
