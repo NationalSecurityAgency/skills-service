@@ -39,8 +39,15 @@ export const useColors = () => {
     return null;
   }
 
+  const borderLeftColors = ['border-l-blue-500', 'border-l-green-500', 'border-l-cyan-500', 'border-l-indigo-500', 'border-l-teal-500', 'border-l-orange-500', 'border-l-purple-500']
+  const getLeftBorderClass = (index = 1) => {
+    const colorIndex = index % borderLeftColors.length
+    return borderLeftColors[colorIndex]
+  }
+
   return {
     getTextClass,
-    getRankTextClass
+    getRankTextClass,
+    getLeftBorderClass
   }
 }
