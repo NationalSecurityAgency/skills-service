@@ -26,6 +26,7 @@ import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import QuizQuestionMetrics from '@/components/quiz/metrics/QuizQuestionMetrics.vue';
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
+import dayjs from "dayjs";
 
 const timeUtils = useTimeUtils();
 const route = useRoute();
@@ -44,9 +45,9 @@ onMounted(() => {
 
 const loadQuizMetrics = () => {
   isLoading.value = true;
-  const startDate = filterRange.value?.length > 0 ? filterRange.value[0] : null;
-  const endDate = filterRange.value?.length > 0 ? filterRange.value[1] : null;
-  QuizService.getQuizMetrics(quizId.value, { startDate: startDate, endDate: endDate })
+  const dateRange = timeUtils.prepareDateRange(filterRange.value)
+
+  QuizService.getQuizMetrics(quizId.value, { startDate: dateRange.startDate, endDate: dateRange.endDate })
       .then((res) => {
         metrics.value = res;
       })
@@ -63,6 +64,10 @@ const clearDateFilter = () => {
   filterRange.value = [];
   loadQuizMetrics()
 };
+
+const isFiltered = computed(() => {
+  return filterRange.value.length > 0
+})
 </script>
 
 <template>
@@ -72,7 +77,7 @@ const clearDateFilter = () => {
       <template #underTitle>
         <div class="flex gap-2 items-center">
           Filter by Date(s):
-          <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()"/>
+          <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" placeholder="Select a date range" />
           <SkillsButton label="Apply" @click="applyDateFilter" />
           <SkillsButton label="Clear" @click="clearDateFilter" />
         </div>
@@ -83,14 +88,19 @@ const clearDateFilter = () => {
 
     <Card :pt="{ body: { class: 'p-0!' } }">
       <template #content>
-        <NoContent2 v-if="!hasMetrics && !isLoading"
+        <NoContent2 v-if="!hasMetrics && !isLoading && !isFiltered"
                     title="No Results Yet..."
                     class="my-8 py-8"
                     :message="`Results will be available once at least 1 ${metrics.quizType} is completed`"
                     data-cy="noMetricsYet"/>
+        <NoContent2 v-if="isFiltered && !hasMetrics && !isLoading"
+                    title="No Results For This Period"
+                    class="my-8 py-8"
+                    :message="`There are no results available for this time period. Please clear the filter or try a new timeframe.`"
+                    data-cy="noMetricsYet"/>
       </template>
     </Card>
-    <div v-if="hasMetrics">
+    <div v-if="hasMetrics && !isLoading">
       <div class="flex gap-4 flex-col lg:flex-row flex-wrap mb-4">
         <div class="flex-1">
           <StatsCard class="w-full h-full w-min-14rem" title="Total" :icon="`fas fa-pen-square ${colors.getTextClass(0)}`" :stat-num="metrics.numTaken" data-cy="metricsCardTotal">
@@ -133,7 +143,7 @@ const clearDateFilter = () => {
       <Card :pt="{ body: { class: 'p-0!' } }">
         <template #content>
           <div v-for="(q, index) in metrics.questions" :key="q.id" class="mb-8">
-            <QuizQuestionMetrics :q="q" :num="index" :is-survey="isSurvey"/>
+            <QuizQuestionMetrics :q="q" :num="index" :is-survey="isSurvey" :dateRange="filterRange"/>
           </div>
         </template>
       </Card>

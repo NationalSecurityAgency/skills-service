@@ -78,8 +78,9 @@ interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt,
               and answerAttempt.user_quiz_attempt_ref_id = quizAttempt.id
               and quizAttempt.status in ('PASSED', 'FAILED')
               and answerAttempt.quiz_answer_definition_ref_id = ?1
+              and (quizAttempt.completed >= ?3 and quizAttempt.completed <= ?4)
      ''', nativeQuery = true)
-    Page<UserQuizAnswer> findUserAnswers(Integer quizAnswerDefinitionRefId, String usersTableAdditionalUserTagKey, PageRequest pageRequest)
+    Page<UserQuizAnswer> findUserAnswers(Integer quizAnswerDefinitionRefId, String usersTableAdditionalUserTagKey, Date startDate, Date endDate, PageRequest pageRequest)
 
 
 }

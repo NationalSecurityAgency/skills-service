@@ -703,8 +703,9 @@ class QuizDefService {
     }
 
     @Transactional
-    TableResult getUserQuestionAnswers(String quizId, Integer answerDefId, PageRequest pageRequest) {
+    TableResult getUserQuestionAnswers(String quizId, Integer answerDefId, PageRequest pageRequest, Date startDate, Date endDate) {
         Optional<QuizAnswerDef> optionalQuizAnswerDef = quizAnswerRepo.findById(answerDefId)
+
         if (!optionalQuizAnswerDef.isPresent()) {
             throw new SkillQuizException("Provided answer id [${answerDefId}] does not exist", ErrorCode.BadParam)
         }
@@ -713,7 +714,7 @@ class QuizDefService {
             throw new SkillQuizException("Provided answer id [${answerDefId}] does not belong to quiz [${quizId}]", ErrorCode.BadParam)
         }
 
-        Page<UserQuizAnswer> answerAttemptsPage = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, usersTableAdditionalUserTagKey, pageRequest)
+        Page<UserQuizAnswer> answerAttemptsPage = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, usersTableAdditionalUserTagKey, startDate, endDate, pageRequest)
         long count = answerAttemptsPage.getTotalElements()
         List<UserQuizAnswer> answerAttempts = answerAttemptsPage.getContent()
         return new TableResult(totalCount: count, data: answerAttempts, count: count)
@@ -757,14 +758,9 @@ class QuizDefService {
     }
 
     @Transactional
-    QuizMetrics getMetrics(String quizId, String startDateString = '1900-01-01', String endDateString = '2100-12-31') {
+    QuizMetrics getMetrics(String quizId, Date startDate, Date endDate) {
         QuizDef quiz = findQuizDef(quizId)
         boolean isSurvey = quiz.type == QuizDefParent.QuizType.Survey
-        def format = new SimpleDateFormat("yyyy-MM-dd")
-        Date startDate = format.parse(startDateString + " 00:00:00")
-        Date endDate = format.parse(endDateString + " 23:59:59")
-
-        log.info("[{}] [{}] [{}] [{}]", startDateString, endDateString, startDate, endDate)
 
         List<UserQuizAttemptRepo.QuizCounts> quizCounts = userQuizAttemptRepo.getUserQuizAttemptCounts(quizId, startDate, endDate)
 

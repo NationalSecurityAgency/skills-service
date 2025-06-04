@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, inject, useAttrs } from 'vue'
+import { inject } from 'vue'
 import { useField } from 'vee-validate'
-import Calendar from "primevue/calendar";
+import DatePicker from "primevue/datepicker";
 import {
   useSkillsInputFallthroughAttributes
 } from '@/components/utils/inputForm/UseSkillsInputFallthroughAttributes.js'
@@ -62,7 +62,7 @@ const handleOnInput = (event) => {
 <template>
   <div class="field" v-bind="fallthroughAttributes.rootAttrs.value">
     <label v-if="label" :for="`input${name}`" class="block"><span v-if="isRequired">*</span> {{ label }} </label>
-    <Calendar v-model="value"
+    <DatePicker v-model="value"
               v-bind="fallthroughAttributes.inputAttrs.value"
               @keydown.enter="onEnter"
               @input="handleOnInput"

@@ -25,7 +25,8 @@ import QuizAnswerHistory from '@/components/quiz/metrics/QuizAnswerHistory.vue'
 const props = defineProps({
   q: Object,
   isSurvey: Boolean,
-  num: Number
+  num: Number,
+  dateRange: Array,
 })
 
 const responsive = useResponsiveBreakpoints()
@@ -229,6 +230,7 @@ const removeExpanderClass = (rowData) => {
         <QuizAnswerHistory :answer-def-id="slotProps.data.id"
                            :is-survey="isSurvey"
                            :data-cy="`row${slotProps.index}-answerHistory`"
+                           :dateRange="dateRange"
                            class="mb-6" />
       </template>
     </SkillsDataTable>
