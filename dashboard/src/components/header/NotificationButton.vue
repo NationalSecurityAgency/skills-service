@@ -22,7 +22,7 @@ import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vu
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 import WebNotificationsService from "@/components/header/WebNotificationsService.js";
 import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
-import { useStorage } from '@vueuse/core'
+import {useStorage} from '@vueuse/core'
 
 const timeUtils = useTimeUtils()
 const colors = useColors()
@@ -73,7 +73,7 @@ onMounted(() => {
   alertNewNotif.value = true
   const {isPending, start, stop} = useTimeoutFn(() => {
     alertNewNotif.value = false
-  }, 5000)
+  }, 7000)
 })
 
 
@@ -108,6 +108,15 @@ const acknowledgeNotification = (notification) => {
 const loadingOrNotNotifications = computed(() => {
   return loadingNotifications.value || notifications.value.length === 0
 })
+
+const notifClasses = (index) => {
+  let res = colors.getLeftBorderClass(index)
+  if (index % 2 !== 0) {
+    return `bg-gray-100 dark:bg-gray-800 ${res}`
+  }
+
+  return res
+}
 </script>
 
 <template>
@@ -133,17 +142,20 @@ const loadingOrNotNotifications = computed(() => {
         aria-controls="user_settings_menu">
     </Button>
     <Popover ref="notificationsPopover" aria-label="Notifications">
-      <ScrollPanel :style="`width: 100%; height: ${loadingOrNotNotifications? '200': '400'}px`">
-        <div class="flex flex-col w-[25rem] skills-notification">
-          <div class="flex gap-2 align-items-center border-b-1 border-b-gray-200 mb-2">
-            <div class="font-bold flex-1 text-orange-800 dark:text-orange-400">Notifications</div>
-            <div>
-              <!--            <SkillsButton label="Clear All" severity="danger" icon="fa-solid fa-xmark" size="small"/>-->
-            </div>
+      <div class="flex flex-col w-[25rem] skills-notification">
+        <div class="flex gap-2 items-center border-b-1 border-b-gray-200 mb-2 pb-2">
+          <div class="flex-1 text-orange-800 dark:text-orange-400 uppercase">Notifications</div>
+          <div>
+            <SkillsButton label="Clear All" severity="danger" icon="fa-solid fa-trash" size="small"/>
           </div>
+        </div>
+
+        <ScrollPanel :style="`width: 100%; height: ${loadingOrNotNotifications? '200': '400'}px`">
+
+
 
           <div v-if="loadingNotifications" class="flex flex-col justify-center items-center pt-5">
-            <skills-spinner :is-loading="true" />
+            <skills-spinner :is-loading="true"/>
             Loading Notifications...
           </div>
 
@@ -160,31 +172,32 @@ const loadingOrNotNotifications = computed(() => {
           </div>
 
           <div v-if="!loadingNotifications"
-              v-for="(notification, index) in notifications"
-              :key="notification.id"
-              class="mb-2 px-3 border-l-2"
-              :class="colors.getLeftBorderClass(index)">
+               v-for="(notification, index) in notifications"
+               :key="notification.id"
+               class="mb-2 pl-2 pr-3 border-l-2 pt-1"
+               :class="notifClasses(index)">
             <div class="flex gap-2 items-center">
               <div class="font-bold flex-1 ">{{ notification.title }}</div>
-              <div class="text-sm text-gray-600 dark:text-gray-200">{{ timeUtils.formatDate(notification.notifiedOn, 'YYYY-MM-DD') }}</div>
+              <div class="text-sm text-gray-600 dark:text-gray-200">
+                {{ timeUtils.formatDate(notification.notifiedOn, 'YYYY-MM-DD') }}
+              </div>
             </div>
-            <div class="flex pl-1 mt-2">
+            <div class="flex">
               <div class="flex-1 ">
                 <markdown-text :text="notification.notification" data-cy="questionsText"
                                :instance-id="`${notification.id}`"/>
               </div>
-              <div>
-                <SkillsButton severity="danger" icon="fa-solid fa-xmark" size="small"
-                              @click="acknowledgeNotification(notification)"
+              <div class="pt-2">
+                <SkillsButton severity="warn" icon="fa-solid fa-trash" size="small"
+                              @click="acknowledgeNotification(notification); notification.updating = true"
+                              :loading="notification.updating"
                               aria-label="Dismiss Notification"/>
               </div>
             </div>
-            <!--          <div class="text-right">-->
-            <!--            <SkillsButton size="small"  label="Learn More" />-->
-            <!--          </div>-->
           </div>
-        </div>
-      </ScrollPanel>
+
+        </ScrollPanel>
+      </div>
     </Popover>
   </div>
 </template>
