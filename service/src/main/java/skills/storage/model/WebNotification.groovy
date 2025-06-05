@@ -39,6 +39,7 @@ class WebNotification {
     String lookupId
 
     Date notifiedOn
+    Date showUntil
     String title
     String notification
 
