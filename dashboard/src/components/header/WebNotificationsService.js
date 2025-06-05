@@ -19,8 +19,10 @@ export default {
     getNotifications() {
         return axios.get('/api/webNotifications').then((response) => response.data)
     },
-    ackNotification(notificationId) {
-        return axios.post(`/api/webNotifications/${notificationId}/acknowledge`)
+    dismissNotification(notificationId) {
+        return axios.post(`/api/webNotifications/${notificationId}/dismiss`)
+    },
+    dismissAllNotifications() {
+        return axios.post(`/api/webNotifications/dismissAll`)
     }
-
 }

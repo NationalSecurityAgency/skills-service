@@ -32,6 +32,7 @@ class NewVersionsNotifCreator {
     private final List<WebNotification> newVersionsNotifications = [
             new WebNotification(
                     notifiedOn: new Date(),
+                    showUntil: new Date() + 30,
                     lookupId: "new-versions-1",
                     title: "SkillTree 3.6 Version Released",
                     notification: """- Draft mode for subject/skill creation
@@ -46,7 +47,10 @@ class NewVersionsNotifCreator {
 
     @PostConstruct
     void createNewVersionsNotification() {
-        newVersionsNotifications.each {
+        List<WebNotification> notificationsToAdd = newVersionsNotifications.findAll {
+            !it.showUntil || it.showUntil > new Date()
+        }
+        notificationsToAdd.each {
             List<WebNotification> existingNotifications = webNotificationsRepo.findAllByLookupId(it.lookupId)
             if (!existingNotifications) {
                 log.info("Adding new version notification: {}", it)

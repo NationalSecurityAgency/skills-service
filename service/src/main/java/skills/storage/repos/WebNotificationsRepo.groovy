@@ -20,12 +20,21 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import skills.storage.model.WebNotification
 
+import java.util.stream.Stream
+
 interface WebNotificationsRepo extends JpaRepository<WebNotification, Integer> {
 
     @Query("""select n from WebNotification n 
-        where (n.userId = :userId or n.userId is null) 
+        where (n.userId = :userId or n.userId is null)
+            and (n.showUntil > CURRENT_TIMESTAMP or n.showUntil is null) 
             and n.id not in (select a.webNotificationsRefId from WebNotificationAck a where a.userId = :userId)""")
     List<WebNotification> findUsersNotifications(String userId, Pageable pageRequest)
+
+    @Query("""select n from WebNotification n 
+        where (n.userId = :userId or n.userId is null) 
+            and (n.showUntil > CURRENT_TIMESTAMP or n.showUntil is null)
+            and n.id not in (select a.webNotificationsRefId from WebNotificationAck a where a.userId = :userId)""")
+    Stream<WebNotification> findAllUsersNotifications(String userId)
 
     List<WebNotification> findAllByLookupId(String lookupId)
 

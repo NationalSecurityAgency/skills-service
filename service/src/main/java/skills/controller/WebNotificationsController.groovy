@@ -17,11 +17,7 @@ package skills.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import skills.controller.result.model.RequestResult
 import skills.profile.EnableCallStackProf
 import skills.services.webNotifications.WebNotificationRes
@@ -41,10 +37,15 @@ class WebNotificationsController {
         return webNotificationsService.getWebNotificationsForCurrentUser()
     }
 
-    @PostMapping('/webNotifications/{notificationId}/acknowledge')
+    @PostMapping('/webNotifications/{notificationId}/dismiss')
     RequestResult getWebNotificationsForCurrentUser(@PathVariable("notificationId") Integer notificationId) {
-        webNotificationsService.acknowledgeNotification(notificationId)
+        webNotificationsService.dismissNotification(notificationId)
         return RequestResult.success()
     }
 
+    @PostMapping('/webNotifications/dismissAll')
+    RequestResult dismissAllWebNotifications() {
+        webNotificationsService.dismissAllNotificationsForCurrentUser()
+        return RequestResult.success()
+    }
 }

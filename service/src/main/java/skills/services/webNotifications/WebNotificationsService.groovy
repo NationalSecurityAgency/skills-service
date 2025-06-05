@@ -16,11 +16,11 @@
 package skills.services.webNotifications
 
 import groovy.util.logging.Slf4j
-import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
@@ -28,6 +28,8 @@ import skills.storage.model.WebNotification
 import skills.storage.model.WebNotificationAck
 import skills.storage.repos.WebNotificationsAckRepo
 import skills.storage.repos.WebNotificationsRepo
+
+import java.util.stream.Stream
 
 @Service
 @Slf4j
@@ -42,6 +44,7 @@ class WebNotificationsService {
     @Autowired
     WebNotificationsAckRepo webNotificationsAckRepo
 
+    @Transactional(readOnly = true)
     List<WebNotificationRes> getWebNotificationsForCurrentUser() {
         String currentUser = userInfoService.currentUserId
         PageRequest latestPlease = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "notifiedOn"))
@@ -59,7 +62,7 @@ class WebNotificationsService {
     }
 
     @Transactional
-    void acknowledgeNotification(Integer notificationId) {
+    void dismissNotification(Integer notificationId) {
         WebNotification webNotification = webNotificationsRepo.findById(notificationId)?.get()
         if (!webNotification) {
             throw new SkillException("Failed to find web notification with id [${notificationId}]", ErrorCode.BadParam)
@@ -78,4 +81,13 @@ class WebNotificationsService {
         }
     }
 
+    @Transactional
+    void dismissAllNotificationsForCurrentUser() {
+        String currentUser = userInfoService.currentUserId
+        webNotificationsRepo.findAllUsersNotifications(currentUser).withCloseable { Stream<WebNotification> notifications ->
+            notifications.each { webNotification ->
+                webNotificationsAckRepo.save(new WebNotificationAck(userId: currentUser, webNotificationsRefId: webNotification.id))
+            }
+        }
+    }
 }
