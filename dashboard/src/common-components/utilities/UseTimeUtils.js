@@ -132,7 +132,7 @@ export const useTimeUtils = () => {
   }
 
   const prepareDateRange = (dateRange = null) => {
-    let [startDate, endDate] = dateRange
+    let [startDate, endDate] = dateRange ? dateRange : [null, null]
     if(!startDate) {
       startDate = '1900-01-01'
     }
