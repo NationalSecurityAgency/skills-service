@@ -2849,6 +2849,7 @@
             <column name="notified_on" type="datetime">
                 <constraints nullable="false"/>
             </column>
+            <column name="show_until" type="datetime"/>
             <column name="created" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
@@ -2868,6 +2869,10 @@
         <createIndex indexName="index_web_notifications_notified_on"
                      tableName="web_notifications">
             <column name="notified_on" type="datetime"/>
+        </createIndex>
+        <createIndex indexName="index_web_notifications_show_until"
+                     tableName="web_notifications">
+            <column name="show_until" type="datetime"/>
         </createIndex>
         <addForeignKeyConstraint baseColumnNames="user_id"
                                  baseTableName="web_notifications"

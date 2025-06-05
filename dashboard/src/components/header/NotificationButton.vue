@@ -99,11 +99,20 @@ onMounted(() => {
 })
 const notificationCount = computed(() => notifications.value ? notifications.value.length : 0)
 
-const acknowledgeNotification = (notification) => {
-  WebNotificationsService.ackNotification(notification.id)
+const dismissNotification = (notification) => {
+  WebNotificationsService.dismissNotification(notification.id)
       .then(() => {
         notifications.value = notifications.value.filter(n => n.id !== notification.id)
       })
+}
+const dismissAllNotifications = () => {
+  loadingNotifications.value = true
+  WebNotificationsService.dismissAllNotifications()
+      .then(() => {
+        notifications.value = []
+      }).finally(() => {
+    loadingNotifications.value = false
+  })
 }
 const loadingOrNotNotifications = computed(() => {
   return loadingNotifications.value || notifications.value.length === 0
@@ -146,13 +155,17 @@ const notifClasses = (index) => {
         <div class="flex gap-2 items-center border-b-1 border-b-gray-200 mb-2 pb-2">
           <div class="flex-1 text-orange-800 dark:text-orange-400 uppercase">Notifications</div>
           <div>
-            <SkillsButton label="Clear All" severity="danger" icon="fa-solid fa-trash" size="small"/>
+            <SkillsButton
+                label="Dismiss All"
+                severity="danger"
+                icon="fa-solid fa-trash"
+                size="small"
+                :disabled="!notifications || notifications.length === 0"
+                @click="dismissAllNotifications"/>
           </div>
         </div>
 
         <ScrollPanel :style="`width: 100%; height: ${loadingOrNotNotifications? '200': '400'}px`">
-
-
 
           <div v-if="loadingNotifications" class="flex flex-col justify-center items-center pt-5">
             <skills-spinner :is-loading="true"/>
@@ -189,7 +202,7 @@ const notifClasses = (index) => {
               </div>
               <div class="pt-2">
                 <SkillsButton severity="warn" icon="fa-solid fa-trash" size="small"
-                              @click="acknowledgeNotification(notification); notification.updating = true"
+                              @click="dismissNotification(notification); notification.updating = true"
                               :loading="notification.updating"
                               aria-label="Dismiss Notification"/>
               </div>
