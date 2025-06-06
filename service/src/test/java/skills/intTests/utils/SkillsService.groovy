@@ -825,6 +825,11 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    def getApiAllSubjectsBadgesAndSkills(String projectId) {
+        String url = "/projects/${projectId}/skillsSubjectsAndBadges"
+        wsHelper.apiGet(url)
+    }
+
     def documentVisitedSkillId(String projectId, String skillId) {
         String url = "/projects/${projectId}/skills/visited/${skillId}"
         wsHelper.apiPost(url, [])
