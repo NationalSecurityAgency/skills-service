@@ -17,6 +17,7 @@ package skills.services.webNotifications
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -44,10 +45,13 @@ class WebNotificationsService {
     @Autowired
     WebNotificationsAckRepo webNotificationsAckRepo
 
+    @Value('#{"${skills.config.webNotifications.maxNumToReturn:20}"}')
+    private int maxNumWebNotificationsToReturn
+
     @Transactional(readOnly = true)
     List<WebNotificationRes> getWebNotificationsForCurrentUser() {
         String currentUser = userInfoService.currentUserId
-        PageRequest latestPlease = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "notifiedOn"))
+        PageRequest latestPlease = PageRequest.of(0, maxNumWebNotificationsToReturn, Sort.by(Sort.Direction.DESC, "notifiedOn"))
         List<WebNotification> webNotifications = webNotificationsRepo.findUsersNotifications(currentUser, latestPlease)
         return webNotifications.collect { convert(it) }
     }
