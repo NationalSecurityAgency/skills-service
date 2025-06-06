@@ -47,4 +47,7 @@ class SkillsService {
                 data: items,
         )
     }
+    List<SkillDefRepo.SkillWithAchievementDetails> getAllSkillsSubjectsAndBadgesWithAchievementDetails(String projectId, String userId) {
+        return skillDefRepo.findAllSkillsSubjectsAndBadgesWithAchievementDetails(projectId, userId)
+    }
 }

@@ -56,6 +56,7 @@ import skills.skillLoading.SkillsLoader;
 import skills.skillLoading.SkillsService;
 import skills.skillLoading.model.*;
 import skills.storage.model.Attachment;
+import skills.storage.repos.SkillDefRepo;
 import skills.utils.MetricsLogger;
 import skills.utils.TablePageUtil;
 
@@ -63,7 +64,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -187,6 +187,16 @@ class UserSkillsController {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
 
         return skillsService.getSkillsForProject(userId, projectId, query, pageRequest);
+    }
+    @RequestMapping(value = "/projects/{projectId}/skillsSubjectsAndBadges", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @Profile
+    public List<SkillDefRepo.SkillWithAchievementDetails> getAllProjectSkillsSubjectsAndBadges(HttpServletRequest request,
+                                                                                               @PathVariable("projectId") String projectId,
+                                                                                               @RequestParam(name = "userId", required = false) String userIdParam,
+                                                                                               @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        return skillsService.getAllSkillsSubjectsAndBadgesWithAchievementDetails(projectId, userId);
     }
 
     @RequestMapping(value = "/projects/{projectId}/summary", method = RequestMethod.GET, produces = "application/json")
