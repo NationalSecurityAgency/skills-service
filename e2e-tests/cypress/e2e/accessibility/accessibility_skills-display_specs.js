@@ -294,7 +294,7 @@ describe('Accessibility forProgress and Rankings Pages Tests', () => {
       cy.customA11y();
     })
 
-    it(`"My Progress" landing page with many skills${darkMode}`, () => {
+    it(`"Training wide search dialog${darkMode}`, () => {
       cy.setDarkModeIfNeeded(darkMode)
       cy.createSubject(1, 1)
       cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem' })
