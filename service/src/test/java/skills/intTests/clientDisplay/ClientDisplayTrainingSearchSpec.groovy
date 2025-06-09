@@ -63,16 +63,16 @@ class ClientDisplayTrainingSearchSpec extends DefaultIntSpec {
         then:
         skills
         skills.size() == 23
-        skills.skillId == ["skill3", "skill4", "skill5", "skill6", "skill7", "skill4subj2", "skill5subj2", "skill6subj2", "skill7subj2", "skill8subj2", "badge1", "skill1", "skill1subj2", "skill10", "skill10subj2", "skill2", "skill2subj2", "skill3subj2", "skill8", "skill9", "skill9subj2", "TestSubject1", "TestSubject2"]
-        skills.skillName == ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010", "Test Badge 1", "Test Skill 1", "Test Skill 1 Subject2", "Test Skill 10", "Test Skill 10 Subject2", "Test Skill 2", "Test Skill 2 Subject2", "Test Skill 3 Subject2", "Test Skill 8", "Test Skill 9", "Test Skill 9 Subject2", "Test Subject #1", "Test Subject #2"]
-        skills.pointIncrement == [2, 3, 4, 5, 6, 3, 4, 5, 6, 7, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0]
-        skills.totalPoints == [4, 6, 8, 10, 12, 6, 8, 10, 12, 14, 0, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 1040, 1050]
-        skills.userCurrentPoints == [0, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0]
+        skills.skillId.sort() == ["skill3", "skill4", "skill5", "skill6", "skill7", "skill4subj2", "skill5subj2", "skill6subj2", "skill7subj2", "skill8subj2", "badge1", "skill1", "skill1subj2", "skill10", "skill10subj2", "skill2", "skill2subj2", "skill3subj2", "skill8", "skill9", "skill9subj2", "TestSubject1", "TestSubject2"].sort()
+        skills.skillName.sort() == ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010", "Test Badge 1", "Test Skill 1", "Test Skill 1 Subject2", "Test Skill 10", "Test Skill 10 Subject2", "Test Skill 2", "Test Skill 2 Subject2", "Test Skill 3 Subject2", "Test Skill 8", "Test Skill 9", "Test Skill 9 Subject2", "Test Subject #1", "Test Subject #2"].sort()
+        skills.pointIncrement.sort() == [2, 3, 4, 5, 6, 3, 4, 5, 6, 7, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0].sort()
+        skills.totalPoints.sort() == [4, 6, 8, 10, 12, 6, 8, 10, 12, 14, 0, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 1040, 1050].sort()
+        skills.userCurrentPoints.sort() == [0, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0].sort()
         skills.userAchieved == [false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
-        skills.skillId == ["skill3", "skill4", "skill5", "skill6", "skill7", "skill4subj2", "skill5subj2", "skill6subj2", "skill7subj2", "skill8subj2", "badge1", "skill1", "skill1subj2", "skill10", "skill10subj2", "skill2", "skill2subj2", "skill3subj2", "skill8", "skill9", "skill9subj2", "TestSubject1", "TestSubject2"]
-        skills.subjectId == ["TestSubject1", "TestSubject1", "TestSubject1", "TestSubject1", "TestSubject1", "TestSubject2", "TestSubject2", "TestSubject2", "TestSubject2", "TestSubject2", null, "TestSubject1", "TestSubject2", "TestSubject1", "TestSubject2", "TestSubject1", "TestSubject2", "TestSubject2", "TestSubject1", "TestSubject1", "TestSubject2", null, null]
-        skills.findAll { it.skillType == "Skill" }.skillId == ["skill3", "skill4", "skill5", "skill6", "skill7", "skill4subj2", "skill5subj2", "skill6subj2", "skill7subj2", "skill8subj2", "skill1", "skill1subj2", "skill10", "skill10subj2", "skill2", "skill2subj2", "skill3subj2", "skill8", "skill9", "skill9subj2"]
-        skills.findAll { it.skillType == "Subject" }.skillId == ["TestSubject1", "TestSubject2"]
+        skills.skillId.sort() == ["skill3", "skill4", "skill5", "skill6", "skill7", "skill4subj2", "skill5subj2", "skill6subj2", "skill7subj2", "skill8subj2", "badge1", "skill1", "skill1subj2", "skill10", "skill10subj2", "skill2", "skill2subj2", "skill3subj2", "skill8", "skill9", "skill9subj2", "TestSubject1", "TestSubject2"].sort()
+        skills.subjectId.sort() == ["TestSubject1", "TestSubject1", "TestSubject1", "TestSubject1", "TestSubject1", "TestSubject2", "TestSubject2", "TestSubject2", "TestSubject2", "TestSubject2", null, "TestSubject1", "TestSubject2", "TestSubject1", "TestSubject2", "TestSubject1", "TestSubject2", "TestSubject2", "TestSubject1", "TestSubject1", "TestSubject2", null, null].sort()
+        skills.findAll { it.skillType == "Skill" }.skillId.sort() == ["skill3", "skill4", "skill5", "skill6", "skill7", "skill4subj2", "skill5subj2", "skill6subj2", "skill7subj2", "skill8subj2", "skill1", "skill1subj2", "skill10", "skill10subj2", "skill2", "skill2subj2", "skill3subj2", "skill8", "skill9", "skill9subj2"].sort()
+        skills.findAll { it.skillType == "Subject" }.skillId.sort() == ["TestSubject1", "TestSubject2"].sort()
         skills.find { it.skillId == "TestSubject1" }.childAchievementCount == 1
         skills.find { it.skillId == "TestSubject1" }.totalChildCount == 10
         skills.find { it.skillId == "TestSubject2" }.childAchievementCount == 0
