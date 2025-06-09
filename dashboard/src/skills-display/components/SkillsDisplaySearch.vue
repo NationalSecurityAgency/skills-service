@@ -192,7 +192,7 @@ const getProgressLabel = (skill) => {
           </div>
         </template>
         <template #empty>
-          <div class="p-4">No Results Found</div>
+          <div class="p-4">No results found</div>
         </template>
       </Listbox>
     </div>
