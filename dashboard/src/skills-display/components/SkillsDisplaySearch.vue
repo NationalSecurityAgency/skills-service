@@ -141,6 +141,7 @@ const getProgressLabel = (skill) => {
 <template>
   <SkillsDialog
       v-model="model"
+      data-cy="trainingSearchDialog"
       header="Search for Subjects, Skills or Badges"
       :enable-return-focus="true"
       @on-cancel="closeMe"
