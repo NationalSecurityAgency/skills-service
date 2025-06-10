@@ -77,9 +77,9 @@ const isFiltered = computed(() => {
       <template #underTitle>
         <div class="flex gap-2 items-center">
           Filter by Date(s):
-          <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" placeholder="Select a date range" />
-          <SkillsButton label="Apply" @click="applyDateFilter" />
-          <SkillsButton label="Clear" @click="clearDateFilter" />
+          <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" placeholder="Select a date range" data-cy="metricsDateFilter" />
+          <SkillsButton label="Apply" @click="applyDateFilter" data-cy="applyDateFilterButton" />
+          <SkillsButton label="Clear" @click="clearDateFilter" data-cy="clearDateFilterButton" />
         </div>
       </template>
     </SubPageHeader>

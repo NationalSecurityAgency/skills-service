@@ -15,12 +15,19 @@
  */
 package skills.intTests.quiz
 
-
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.services.quiz.QuizQuestionType
+import skills.storage.model.UserQuizAttempt
+import skills.storage.repos.UserQuizAttemptRepo
+
+import java.text.SimpleDateFormat
 
 class QuizMetricsSpecs extends DefaultIntSpec {
+
+    @Autowired
+    UserQuizAttemptRepo userQuizAttemptRepo
 
     def "quiz metrics: number of attempts is more than distinct users"() {
         List<String> users = getRandomUsers(5, true)
@@ -243,6 +250,90 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         q3_question.answers[1].numAnsweredWrong == 1
     }
 
+    def "quiz metrics - passed and failed are filtered appropriately"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        List<String> users = getRandomUsers(10, true)
+        List<Date> dates = (0..3).collect { new Date() - it }.reverse()
+
+        runQuiz(users[0], quiz, quizInfo, true, dates[0], true)
+        runQuiz(users[1], quiz, quizInfo, true, dates[0], true)
+        runQuiz(users[2], quiz, quizInfo, false, dates[0], true)
+        runQuiz(users[3], quiz, quizInfo, false, dates[0], true)
+        runQuiz(users[4], quiz, quizInfo, true, dates[1], true)
+        runQuiz(users[5], quiz, quizInfo, true, dates[1], true)
+        runQuiz(users[6], quiz, quizInfo, true, dates[2], true)
+        runQuiz(users[7], quiz, quizInfo, true, dates[3], true)
+        runQuiz(users[8], quiz, quizInfo, false, dates[3], true)
+        runQuiz(users[9], quiz, quizInfo, true, dates[3], true)
+
+        def format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        String tomorrow = format.format(new Date() + 1)
+
+        when:
+        def metrics_day4 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[0]), format.format(dates[1]))
+        def metrics_day3 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[1]), format.format(dates[2]))
+        def metrics_day2 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[2]), format.format(dates[3]))
+        def metrics_day1 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[3]), tomorrow)
+        def metrics_day4_to_2 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[0]), format.format(dates[2]))
+        def metrics_day4_to_1 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[0]), tomorrow)
+        def metrics_day3_to_1 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[1]), tomorrow)
+
+        then:
+        metrics_day4.numTaken == 4
+        metrics_day4.numPassed == 2
+        metrics_day4.numFailed == 2
+        metrics_day4.numPassedDistinctUsers == 2
+        metrics_day4.numFailedDistinctUsers == 2
+        metrics_day4.numTakenDistinctUsers == 4
+
+        metrics_day3.numTaken == 2
+        metrics_day3.numPassed == 2
+        metrics_day3.numFailed == 0
+        metrics_day3.numPassedDistinctUsers == 2
+        metrics_day3.numFailedDistinctUsers == 0
+        metrics_day3.numTakenDistinctUsers == 2
+
+        metrics_day2.numTaken == 1
+        metrics_day2.numPassed == 1
+        metrics_day2.numFailed == 0
+        metrics_day2.numPassedDistinctUsers == 1
+        metrics_day2.numFailedDistinctUsers == 0
+        metrics_day2.numTakenDistinctUsers == 1
+
+        metrics_day1.numTaken == 3
+        metrics_day1.numPassed == 2
+        metrics_day1.numFailed == 1
+        metrics_day1.numPassedDistinctUsers == 2
+        metrics_day1.numFailedDistinctUsers == 1
+        metrics_day1.numTakenDistinctUsers == 3
+
+        metrics_day4_to_2.numTaken == 6
+        metrics_day4_to_2.numPassed == 4
+        metrics_day4_to_2.numFailed == 2
+        metrics_day4_to_2.numPassedDistinctUsers == 4
+        metrics_day4_to_2.numFailedDistinctUsers == 2
+        metrics_day4_to_2.numTakenDistinctUsers == 6
+
+        metrics_day4_to_1.numTaken == 10
+        metrics_day4_to_1.numPassed == 7
+        metrics_day4_to_1.numFailed == 3
+        metrics_day4_to_1.numPassedDistinctUsers == 7
+        metrics_day4_to_1.numFailedDistinctUsers == 3
+        metrics_day4_to_1.numTakenDistinctUsers == 10
+
+        metrics_day3_to_1.numTaken == 6
+        metrics_day3_to_1.numPassed == 5
+        metrics_day3_to_1.numFailed == 1
+        metrics_day3_to_1.numPassedDistinctUsers == 5
+        metrics_day3_to_1.numFailedDistinctUsers == 1
+        metrics_day3_to_1.numTakenDistinctUsers == 6
+    }
 
     def createSimpleQuiz(Integer num) {
         def quiz = QuizDefFactory.createQuiz(num, "Fancy Description")
@@ -288,4 +379,17 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         }
     }
 
+    void runQuiz(String userId, def quiz, def quizInfo, boolean pass, Date startDate, boolean complete = true) {
+        def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, userId).body
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, userId)
+        skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[pass ? 0 : 1].id, userId)
+        if (complete) {
+            skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, userId).body
+        }
+
+        UserQuizAttempt userQuizAttempt = userQuizAttemptRepo.findById(quizAttempt.id).get()
+        userQuizAttempt.started = startDate
+        userQuizAttempt.completed = startDate
+        userQuizAttemptRepo.save(userQuizAttempt)
+    }
 }

@@ -1960,6 +1960,11 @@ class SkillsService {
         return wsHelper.adminGet(url)
     }
 
+    def getQuizMetricsWithinRange(String quizId, String startDate, String endDate) {
+        String url = "${getQuizDefUrl(quizId)}/metrics?startDate=${startDate}&endDate=${endDate}"
+        return wsHelper.adminGet(url)
+    }
+
     def saveQuizSettings(String quizId, List settings) {
         String url = "${getQuizDefUrl(quizId)}/settings"
         return wsHelper.adminPost(url, settings)
