@@ -18,7 +18,9 @@ package skills.intTests.webNotifications
 
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.storage.model.WebNotification
 import skills.storage.repos.WebNotificationsRepo
@@ -32,13 +34,8 @@ class DismissNotificationsSpecs extends DefaultIntSpec {
         webNotificationsRepo.deleteAll()
     }
 
-
     def "dismiss a single notification"() {
         List<SkillsService> users = getRandomUsers(3).collect { createService(it) }
-
-        String datePattern = "yyyy-MM-dd'T'HH:mm:ss"
-        Closure formatDate = { Date theDate -> theDate.format(datePattern) }
-        Closure parseDate = { String theDate -> Date.parse(datePattern, theDate) }
 
         List<WebNotification> notifications = [
                 new WebNotification(
@@ -103,7 +100,7 @@ class DismissNotificationsSpecs extends DefaultIntSpec {
         u3Notifs_t1.title == [ notifications[0..1].title, notifications[4].title].flatten()
     }
 
-    def "expired notifications are not returned"() {
+    def "dismiss all notification"() {
         List<SkillsService> users = getRandomUsers(3).collect { createService(it) }
 
         List<WebNotification> notifications = [
@@ -115,22 +112,22 @@ class DismissNotificationsSpecs extends DefaultIntSpec {
                         notification: "G1 - message",
                 ),
                 new WebNotification(
-                        notifiedOn: new Date()-2,
-                        showUntil: new Date()-1,
+                        notifiedOn: new Date()-1,
+                        showUntil: new Date() + 30,
                         lookupId: "global-2",
                         title: "2 - Global 2",
                         notification: "G2 - message",
                 ),
                 new WebNotification(
-                        notifiedOn: new Date()-5,
-                        showUntil: new Date()-2,
+                        notifiedOn: new Date()-2,
+                        showUntil: new Date() + 30,
                         lookupId: "user1-1",
                         title: "3 - User 1 - 1",
                         notification: "U1-1 - message",
                         userId: users[0].userName
                 ),
                 new WebNotification(
-                        notifiedOn: new Date(),
+                        notifiedOn: new Date()-3,
                         showUntil: new Date() + 30,
                         lookupId: "user1-2",
                         title: "4 - User 1 - 2",
@@ -138,7 +135,7 @@ class DismissNotificationsSpecs extends DefaultIntSpec {
                         userId: users[0].userName
                 ),
                 new WebNotification(
-                        notifiedOn: new Date(),
+                        notifiedOn: new Date()-4,
                         showUntil: new Date() + 30,
                         lookupId: "user3-1",
                         title: "5 - User 3 - 1",
@@ -148,82 +145,28 @@ class DismissNotificationsSpecs extends DefaultIntSpec {
         ]
         webNotificationsRepo.saveAll(notifications)
         when:
-        def u1Notifs = users[0].getWebNotifications().sort { it.title }
-        def u2Notifs = users[1].getWebNotifications().sort { it.title }
-        def u3Notifs = users[2].getWebNotifications().sort { it.title }
+        def u1Notifs_t0 = users[0].getWebNotifications()
+        def u2Notifs_t0 = users[1].getWebNotifications()
+        def u3Notifs_t0 = users[2].getWebNotifications()
+
+        users[0].dismissAllWebNotifications()
+
+        def u1Notifs_t1 = users[0].getWebNotifications()
+        def u2Notifs_t1 = users[1].getWebNotifications()
+        def u3Notifs_t1 = users[2].getWebNotifications()
 
         then:
-        u1Notifs.title == [ notifications[0].title, notifications[3].title].flatten()
-        u1Notifs.notification ==  [ notifications[0].notification, notifications[3].notification]
+        u1Notifs_t0.title == notifications[0..3].title
+        u2Notifs_t0.title == notifications[0..1].title
+        u3Notifs_t0.title == [ notifications[0..1].title, notifications[4].title].flatten()
 
-        // just global notifications
-        u2Notifs.title == [ notifications[0].title]
-        u2Notifs.notification == [ notifications[0].notification]
-
-        u3Notifs.title == [ notifications[0].title, notifications[4].title]
-        u3Notifs.notification == [ notifications[0].notification, notifications[4].notification]
+        // after dismissal
+        !u1Notifs_t1
+        u2Notifs_t1.title == notifications[0..1].title
+        u3Notifs_t1.title == [ notifications[0..1].title, notifications[4].title].flatten()
     }
 
-    def "expired notifications are not returned - all global notifs are expired"() {
-        List<SkillsService> users = getRandomUsers(3).collect { createService(it) }
-
-        List<WebNotification> notifications = [
-                new WebNotification(
-                        notifiedOn: new Date()-5,
-                        showUntil: new Date()-4,
-                        lookupId: "global-1",
-                        title: "1 - Global 1",
-                        notification: "G1 - message",
-                ),
-                new WebNotification(
-                        notifiedOn: new Date()-2,
-                        showUntil: new Date()-1,
-                        lookupId: "global-2",
-                        title: "2 - Global 2",
-                        notification: "G2 - message",
-                ),
-                new WebNotification(
-                        notifiedOn: new Date()-5,
-                        showUntil: new Date()-2,
-                        lookupId: "user1-1",
-                        title: "3 - User 1 - 1",
-                        notification: "U1-1 - message",
-                        userId: users[0].userName
-                ),
-                new WebNotification(
-                        notifiedOn: new Date(),
-                        showUntil: new Date() + 30,
-                        lookupId: "user1-2",
-                        title: "4 - User 1 - 2",
-                        notification: "U1-2 - message",
-                        userId: users[0].userName
-                ),
-                new WebNotification(
-                        notifiedOn: new Date()-20,
-                        showUntil: new Date()-10,
-                        lookupId: "user3-1",
-                        title: "5 - User 3 - 1",
-                        notification: "U3-1 - message",
-                        userId: users[2].userName
-                ),
-        ]
-        webNotificationsRepo.saveAll(notifications)
-        when:
-        def u1Notifs = users[0].getWebNotifications().sort { it.title }
-        def u2Notifs = users[1].getWebNotifications().sort { it.title }
-        def u3Notifs = users[2].getWebNotifications().sort { it.title }
-
-        then:
-        u1Notifs.title == [ notifications[3].title].flatten()
-        u1Notifs.notification ==  [ notifications[3].notification]
-
-        // just global notifications
-        !u2Notifs
-
-        !u3Notifs
-    }
-
-    def "only first 20 notifications are returned"() {
+    def "dismiss all notification even if they exceed the default page size"() {
         List<SkillsService> users = getRandomUsers(3).collect { createService(it) }
 
         List<WebNotification> notifications = (0..30).collect {
@@ -267,6 +210,12 @@ class DismissNotificationsSpecs extends DefaultIntSpec {
         def u2Notifs = users[1].getWebNotifications()
         def u3Notifs = users[2].getWebNotifications()
 
+        users[0].dismissAllWebNotifications()
+
+        def u1Notifs_t1 = users[0].getWebNotifications()
+        def u2Notifs_t1 = users[1].getWebNotifications()
+        def u3Notifs_t1 = users[2].getWebNotifications()
+
         then:
         u1Notifs.size() == 20
         u1Notifs.title == [ notifications[31].title, notifications[32].title, notifications[0..17].title].flatten()
@@ -279,9 +228,19 @@ class DismissNotificationsSpecs extends DefaultIntSpec {
         u3Notifs.size() == 20
         u3Notifs.title == [ notifications[33].title, notifications[0..18].title].flatten()
         u3Notifs.notification == [ notifications[33].notification, notifications[0..18].notification].flatten()
+
+        !u1Notifs_t1
+
+        u2Notifs_t1.size() == 20
+        u2Notifs_t1.title == notifications[0..19].title
+        u2Notifs_t1.notification == notifications[0..19].notification
+
+        u3Notifs_t1.size() == 20
+        u3Notifs_t1.title == [ notifications[33].title, notifications[0..18].title].flatten()
+        u3Notifs_t1.notification == [ notifications[33].notification, notifications[0..18].notification].flatten()
     }
 
-    def "dismissed notifications are not returned"() {
+    def "not allowed to dismiss others notifications"() {
         List<SkillsService> users = getRandomUsers(3).collect { createService(it) }
 
         List<WebNotification> notifications = [
@@ -294,14 +253,14 @@ class DismissNotificationsSpecs extends DefaultIntSpec {
                 ),
                 new WebNotification(
                         notifiedOn: new Date()-1,
-                        showUntil: new Date()+10,
+                        showUntil: new Date() + 30,
                         lookupId: "global-2",
                         title: "2 - Global 2",
                         notification: "G2 - message",
                 ),
                 new WebNotification(
                         notifiedOn: new Date()-2,
-                        showUntil: new Date()+10,
+                        showUntil: new Date() + 30,
                         lookupId: "user1-1",
                         title: "3 - User 1 - 1",
                         notification: "U1-1 - message",
@@ -326,41 +285,27 @@ class DismissNotificationsSpecs extends DefaultIntSpec {
         ]
         webNotificationsRepo.saveAll(notifications)
         when:
-        def u1Notifs_t0 = users[0].getWebNotifications()
-        def u2Notifs_t0 = users[1].getWebNotifications()
-        def u3Notifs_t0 = users[2].getWebNotifications()
-
-        users[0].dismissWebNotification(u1Notifs_t0[1].id)
-        users[0].dismissWebNotification(u1Notifs_t0[2].id)
-
-        users[2].dismissWebNotification(u3Notifs_t0[0].id)
-
-        def u1Notifs_t1 = users[0].getWebNotifications()
-        def u2Notifs_t1 = users[1].getWebNotifications()
-        def u3Notifs_t1 = users[2].getWebNotifications()
+        def u3Notifs = users[2].getWebNotifications()
+        users[0].dismissWebNotification(u3Notifs[2].id)
 
         then:
-        u1Notifs_t0.title == notifications[0..3].title
-        u1Notifs_t0.notification == notifications[0..3].notification
-
-        // just global notifications
-        u2Notifs_t0.title == notifications[0..1].title
-        u2Notifs_t0.notification == notifications[0..1].notification
-
-        u3Notifs_t0.title == [ notifications[0..1].title, notifications[4].title].flatten()
-        u3Notifs_t0.notification == [ notifications[0..1].notification, notifications[4].notification].flatten()
-
-        // after dismissal
-        u1Notifs_t1.title == [ notifications[0].title, notifications[3].title].flatten()
-        u1Notifs_t1.notification ==  [ notifications[0].notification, notifications[3].notification]
-
-        // nothing dismissed for this user
-        u2Notifs_t1.title == notifications[0..1].title
-        u2Notifs_t1.notification == notifications[0..1].notification
-
-        u3Notifs_t1.title == [ notifications[1].title, notifications[4].title]
-        u3Notifs_t1.notification == [ notifications[1].notification, notifications[4].notification]
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.message.contains("User [${users[0].userName}] is not allowed to dismiss notification [${u3Notifs[2].id}]")
     }
+
+    def "can't dismiss what doesn't exist"() {
+        List<SkillsService> users = getRandomUsers(3).collect { createService(it) }
+
+        when:
+        users[0].dismissWebNotification(1)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.message.contains("Failed to find web notification with id [1]")
+    }
+
 }
 
 
