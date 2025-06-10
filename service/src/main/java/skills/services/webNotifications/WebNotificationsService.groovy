@@ -67,14 +67,15 @@ class WebNotificationsService {
 
     @Transactional
     void dismissNotification(Integer notificationId) {
-        WebNotification webNotification = webNotificationsRepo.findById(notificationId)?.get()
-        if (!webNotification) {
+        Optional<WebNotification> webNotificationOptional = webNotificationsRepo.findById(notificationId)
+        if (webNotificationOptional.isEmpty()) {
             throw new SkillException("Failed to find web notification with id [${notificationId}]", ErrorCode.BadParam)
         }
+        WebNotification webNotification = webNotificationOptional.get()
         String currentUser = userInfoService.currentUserId
         if (webNotification.userId) {
             if (webNotification.userId != currentUser) {
-                throw new SkillException("User [${currentUser}] is not allowed to acknowledge notification [${notificationId}]", ErrorCode.BadParam)
+                throw new SkillException("User [${currentUser}] is not allowed to dismiss notification [${notificationId}]", ErrorCode.BadParam)
             }
         }
 
