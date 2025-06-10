@@ -39,14 +39,14 @@ const userPreferences = useUserPreferences()
 const keys = useMagicKeys({
   passive: false,
   onEventFired(e) {
-    if (searchTrainingButtonShortcut.value === 'Ctrl+K' && e.ctrlKey && e.key === 'k' && e.type === 'keydown') {
+    if (searchTrainingButtonShortcut.value?.toLowerCase() === 'ctrl+k' && e.ctrlKey && e.key === 'k' && e.type === 'keydown') {
       e.preventDefault()
     }
   },
 })
 
 const showSkillsDisplaySearchDialog = ref(false)
-const searchTrainingButtonShortcut = ref('Ctrl+K')
+const searchTrainingButtonShortcut = ref('ctrl+k')
 userPreferences.afterUserPreferencesLoaded().then((options) => {
   const debounceOptions = { debounce: 250, maxWait: 1000 }
   if (options.sd_search_training_keyboard_shortcut) {
@@ -115,6 +115,9 @@ const handleProjInvitation = () => {
     ProjectService.addToMyProjects(projectId)
   }
 }
+const toTitleCase = (str) => {
+  return str.toLowerCase().split('+').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
 </script>
 
 <template>
@@ -128,7 +131,8 @@ const handleProjInvitation = () => {
         :track-for-focus="true"
         @click="showSkillsDisplaySearchDialog = true"
         data-cy="skillsDisplaySearchBtn"
-        label="Search Project"
+        label="Search"
+        :title="`Search Project (${toTitleCase(searchTrainingButtonShortcut)})`"
         icon="fa-solid fa-magnifying-glass" />
 
       <SkillsButton
@@ -138,7 +142,7 @@ const handleProjInvitation = () => {
           :track-for-focus="true"
           @click="showContact = true"
           data-cy="contactOwnerBtn"
-          label="Contact Project"
+          label="Contact"
           icon="fas fa-mail-bulk" />
     </div>
     <skills-display-home :id="projectId" class="my-4" />

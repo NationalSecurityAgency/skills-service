@@ -235,7 +235,7 @@ function sdSearchKeyboardShortcutChanged() {
       <Fieldset legend="Keyboard shortcuts when taking a training" class="mt-3">
         <div class="flex flex-col gap-4 pt-2">
           <keyboard-shortcut-input
-              label="Search Training"
+              label="Search"
               v-model="settings.sdSearchKeyboardShortcut.value"
               @change="sdSearchKeyboardShortcutChanged"/>
           <keyboard-shortcut-input

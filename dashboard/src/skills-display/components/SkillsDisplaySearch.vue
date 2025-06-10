@@ -21,6 +21,7 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import { useFocusState } from '@/stores/UseFocusState.js'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 
 const emit = defineEmits(['level-changed', 'hidden']);
 const props = defineProps({
@@ -140,21 +141,23 @@ const getProgressLabel = (skill) => {
 
 <template>
   <SkillsDialog
+      :pt="{ content: { class: 'p-5!' } }"
       v-model="model"
       data-cy="trainingSearchDialog"
-      header="Search for Subjects, Skills or Badges"
+      aria-label="Search for Subjects, Skills or Badges"
       :enable-return-focus="true"
       @on-cancel="closeMe"
+      :show-header="false"
       :show-ok-button="false"
       :show-cancel-button="false"
       :maximizable="false"
       :style="{ width: '40rem !important' }">
 
     <div class="card flex justify-center">
-      <Listbox class="w-full"
+      <Listbox class="w-full border-none!"
                data-cy="trainingSearchListBox"
                aria-label="Search for Subjects, Skills or Badges"
-               :pt="{ listContainer: { tabindex: '0'} }"
+               :pt="{ listContainer: { tabindex: '0'}, header: { class: 'p-0! pb-1!' }, list: { class: 'p-0!' } }"
                @filter="filterEvent"
                @update:modelValue="navToSkill"
                ref="trainingSearchListBoxRef"
@@ -164,23 +167,23 @@ const getProgressLabel = (skill) => {
                :autofocus="true"
                :auto-option-focus="false"
                filter
-               filterPlaceholder="Search..."
+               filterPlaceholder="Search for Subjects, Skills or Badges"
       >
         <template #option="slotProps">
-          <div class="py-1 w-full sd-theme-primary-color" :data-cy="`searchRes-${slotProps.option.skillId}`">
+          <div class="py-0 w-full sd-theme-primary-color" :data-cy="`searchRes-${slotProps.option.skillId}`">
             <div class="flex flex-nowrap">
               <div class="flex-1 flex items-center"
                    data-cy="skillName"
                    :aria-label="`Selected ${slotProps.option.skillName} ${slotProps.option.skillType}${slotProps.option.subjectName ? ` from ${slotProps.option.subjectName} subject` : ''}. You have earned ${getUserProgress(slotProps.option)} ${getProgressLabel(slotProps.option)} out of ${getTotalProgress(slotProps.option)} for this ${slotProps.option.skillType}. Click to navigate to the ${slotProps.option.skillType}.`">
-                <i :class="`${getIconClass(slotProps.option)} mr-1 text-xl`" aria-hidden="true" />
+                <i :class="`${getIconClass(slotProps.option)} mr-1 text-xl`" style="min-width: 25px" aria-hidden="true" />
                 <highlighted-value :value="slotProps.option.skillName" :filter="query" class="text-xl" />
               </div>
               <div
                   class=""
                   data-cy="points"
-                  :class="{'font-green-300': slotProps.option.userAchieved}" aria-hidden="true">
+                  :class="{'text-green-700': slotProps.option.userAchieved}" aria-hidden="true">
                 <i v-if="slotProps.option.userAchieved" class="fas fa-check mr-1" aria-hidden="" />
-                <span class="text-orange-600 font-medium">{{ getUserProgress(slotProps.option) }}</span> / {{ getTotalProgress(slotProps.option) }} <span class="italic">{{ getProgressLabel(slotProps.option) }}</span>
+                <span class="text-orange-700 font-medium">{{ getUserProgress(slotProps.option) }}</span> / {{ getTotalProgress(slotProps.option) }} <span class="italic">{{ getProgressLabel(slotProps.option) }}</span>
               </div>
             </div>
 
@@ -192,7 +195,10 @@ const getProgressLabel = (skill) => {
           </div>
         </template>
         <template #empty>
-          <div class="p-4">No results found</div>
+          <div v-if="!isSearching" class="p-4">No results found</div>
+          <div v-else>
+            <SkillsSpinner :is-loading="isSearching" class="mt-4"/>
+          </div>
         </template>
       </Listbox>
     </div>
