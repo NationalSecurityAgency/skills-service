@@ -921,7 +921,7 @@ child_achievement_counts AS (
              srd.parent_ref_id
      )
 
-SELECT
+SELECT DISTINCT
     s.skill_id AS skillId,
     s.name AS skillName,
     s.type as skillType,
@@ -929,7 +929,7 @@ SELECT
     s.total_points AS totalPoints,
     ss.name AS subjectName,
     ss.skill_id AS subjectId,
-    CASE WHEN ua.id IS NOT NULL THEN true ELSE false END AS userAchieved,
+    CASE WHEN ua.id IS NOT NULL OR COALESCE(cac.ua_count, 0) >= COALESCE(cac.child_skill_count, 1) THEN true ELSE false END AS userAchieved,
     COALESCE(up.points, 0) AS userCurrentPoints,
     COALESCE(cac.ua_count, 0) AS childAchievementCount,
     COALESCE(cac.child_skill_count, 0) AS totalChildCount
