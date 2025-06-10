@@ -901,8 +901,8 @@ skill_subjects AS (
         skill_relationship_definition srd
             JOIN
         skill_definition sd ON srd.parent_ref_id = sd.id
-    WHERE
-        sd.type = 'Subject'
+    WHERE sd.project_id = :projectId 
+      AND sd.type = 'Subject'
 ),
 child_achievement_counts AS (
          SELECT
@@ -913,10 +913,14 @@ child_achievement_counts AS (
              skill_relationship_definition srd
                  JOIN
              skill_definition parent_skill ON srd.parent_ref_id = parent_skill.id
+                 JOIN
+             skill_definition child_skill ON srd.child_ref_id = child_skill.id
                  LEFT JOIN
              user_achievement ua ON srd.child_ref_id = ua.skill_ref_id
                  AND ua.user_id = :userId
-                 AND parent_skill.type IN ('Badge', 'Subject')
+         WHERE parent_skill.project_id = :projectId
+             AND child_skill.project_id = :projectId
+             AND srd.type IN ('RuleSetDefinition', 'BadgeRequirement')
          GROUP BY
              srd.parent_ref_id
      )
@@ -944,6 +948,7 @@ FROM
         LEFT JOIN child_achievement_counts cac ON s.id = cac.parent_ref_id
 WHERE
     s.enabled = 'true'
+  AND s.type in ('Skill', 'Subject', 'Badge')
   AND s.project_id = :projectId
 ORDER BY s.name ASC
     ''', nativeQuery = true)
