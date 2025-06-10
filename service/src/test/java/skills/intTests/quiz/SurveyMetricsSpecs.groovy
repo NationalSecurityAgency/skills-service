@@ -23,12 +23,19 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsService
 import skills.services.quiz.QuizQuestionType
+import skills.storage.model.UserQuizAttempt
+import skills.storage.repos.UserQuizAttemptRepo
 import spock.lang.IgnoreIf
+
+import java.text.SimpleDateFormat
 
 class SurveyMetricsSpecs extends DefaultIntSpec {
 
     @Value('${skills.config.ui.usersTableAdditionalUserTagKey}')
     String usersTableAdditionalUserTagKey
+
+    @Autowired
+    UserQuizAttemptRepo userQuizAttemptRepo
 
     def "survey metrics counts"() {
         List<String> users = getRandomUsers(9, true)
@@ -463,6 +470,73 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         s1_answ4.data.answerTxt == [null, null, null]
 
     }
+    
+    def "survey metrics are filtered appropriately"() {
+        def surveyInfo = createSimpleSurvey(1)
+
+        List<String> users = getRandomUsers(10, true)
+        List<Date> dates = (0..3).collect { new Date() - it }.reverse()
+
+        reportSurvey(users[0], surveyInfo, [[0], [0, 2]], "Cool Answer", 3, false, dates[0])
+        reportSurvey(users[1], surveyInfo, [[0], [0, 2]], "Cool Answer", 3, false, dates[0])
+        reportSurvey(users[2], surveyInfo, [[0], [0, 2]], "Cool Answer", 3, false, dates[0])
+        reportSurvey(users[3], surveyInfo, [[0], [0, 2]], "Cool Answer", 3, false, dates[0])
+        reportSurvey(users[4], surveyInfo, [[0], [0, 2]], "Cool Answer", 3, false, dates[1])
+        reportSurvey(users[5], surveyInfo, [[0], [0, 2]], "Cool Answer", 3, false, dates[1])
+        reportSurvey(users[6], surveyInfo, [[0], [0, 2]], "Cool Answer", 3, false, dates[2])
+        reportSurvey(users[7], surveyInfo, [[0], [0, 2]], "Cool Answer", 3, false, dates[3])
+        reportSurvey(users[8], surveyInfo, [[0], [0, 2]], "Cool Answer", 3, false, dates[3])
+        reportSurvey(users[9], surveyInfo, [[0], [0, 2]], "Cool Answer", 3, false, dates[3])
+
+        def format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        String tomorrow = format.format(new Date() + 1)
+
+        when:
+        def metrics_day4 = skillsService.getQuizMetricsWithinRange(surveyInfo.quizId, format.format(dates[0]), format.format(dates[1]))
+        def metrics_day3 = skillsService.getQuizMetricsWithinRange(surveyInfo.quizId, format.format(dates[1]), format.format(dates[2]))
+        def metrics_day2 = skillsService.getQuizMetricsWithinRange(surveyInfo.quizId, format.format(dates[2]), format.format(dates[3]))
+        def metrics_day1 = skillsService.getQuizMetricsWithinRange(surveyInfo.quizId, format.format(dates[3]), tomorrow)
+        def metrics_day4_to_2 = skillsService.getQuizMetricsWithinRange(surveyInfo.quizId, format.format(dates[0]), format.format(dates[2]))
+        def metrics_day4_to_1 = skillsService.getQuizMetricsWithinRange(surveyInfo.quizId, format.format(dates[0]), tomorrow)
+        def metrics_day3_to_1 = skillsService.getQuizMetricsWithinRange(surveyInfo.quizId, format.format(dates[1]), tomorrow)
+
+        then:
+        metrics_day4.numTaken == 4
+        metrics_day4.numPassed == 4
+        metrics_day4.numPassedDistinctUsers == 4
+        metrics_day4.numTakenDistinctUsers == 4
+
+        metrics_day3.numTaken == 2
+        metrics_day3.numPassed == 2
+        metrics_day3.numPassedDistinctUsers == 2
+        metrics_day3.numTakenDistinctUsers == 2
+
+        metrics_day2.numTaken == 1
+        metrics_day2.numPassed == 1
+        metrics_day2.numPassedDistinctUsers == 1
+        metrics_day2.numTakenDistinctUsers == 1
+
+        metrics_day1.numTaken == 3
+        metrics_day1.numPassed == 3
+        metrics_day1.numPassedDistinctUsers == 3
+        metrics_day1.numTakenDistinctUsers == 3
+
+        metrics_day4_to_2.numTaken == 6
+        metrics_day4_to_2.numPassed == 6
+        metrics_day4_to_2.numPassedDistinctUsers == 6
+        metrics_day4_to_2.numTakenDistinctUsers == 6
+
+        metrics_day4_to_1.numTaken == 10
+        metrics_day4_to_1.numPassed == 10
+        metrics_day4_to_1.numPassedDistinctUsers == 10
+        metrics_day4_to_1.numTakenDistinctUsers == 10
+
+        metrics_day3_to_1.numTaken == 6
+        metrics_day3_to_1.numPassed == 6
+        metrics_day3_to_1.numPassedDistinctUsers == 6
+        metrics_day3_to_1.numTakenDistinctUsers == 6
+    }
+
 
     def createSimpleSurvey(Integer num) {
         def survey = QuizDefFactory.createQuizSurvey(num, "Fancy Description")
@@ -479,7 +553,7 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
         return quizInfo
     }
 
-    Object reportSurvey(String userId, def quizInfo, List<List<Integer>> answerOptions, String textAnswer, Integer rating, boolean inProgress = false) {
+    Object reportSurvey(String userId, def quizInfo, List<List<Integer>> answerOptions, String textAnswer, Integer rating, boolean inProgress = false, Date completionDate = null) {
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quizInfo.quizId, userId).body
 
         answerOptions.eachWithIndex{ List<Integer> answers, int questionNum ->
@@ -495,7 +569,13 @@ class SurveyMetricsSpecs extends DefaultIntSpec {
             skillsService.completeQuizAttemptForUserId(quizInfo.quizId, quizAttempt.id, userId).body
         }
 
+        if(completionDate) {
+            UserQuizAttempt userQuizAttempt = userQuizAttemptRepo.findById(quizAttempt.id).get()
+            userQuizAttempt.started = completionDate
+            userQuizAttempt.completed = completionDate
+            userQuizAttemptRepo.save(userQuizAttempt)
+        }
+
         return quizAttempt
     }
-
 }
