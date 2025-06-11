@@ -182,21 +182,21 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.get('[data-cy="breadcrumb-subj1"]').focus()
         cy.realPress(["Control", "k"]);
         cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]').click();
+        cy.realPress('Escape');
 
         // initiate training-wide search dialog from the subject page
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1')
         cy.get('[data-cy="skillsTitle"]').contains('Subject 1')
         cy.realPress(["Control", "k"]);
         cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]').click();
+        cy.realPress('Escape');
 
         // initiate training-wide search dialog from the project page
         cy.visit('/progress-and-rankings/projects/proj1');
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').should('have.text', 'Project: This is project 1');
         cy.realPress(["Control", "k"]);
         cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]').click();
+        cy.realPress('Escape');
     })
 
     it('customize training search shortcuts and navigate p&r without refresh', () => {
@@ -209,8 +209,8 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.addToMyProjects(1);
 
         cy.visit('/settings/preferences')
-        cy.get('[data-cy="Search_TrainingShortcut"] [data-cy="clearShortcut"]').click()
-        cy.get('[data-cy="Search_TrainingShortcut"] [data-cy="shortcutInput"]').focus()
+        cy.get('[data-cy="SearchShortcut"] [data-cy="clearShortcut"]').click()
+        cy.get('[data-cy="SearchShortcut"] [data-cy="shortcutInput"]').focus()
         cy.realPress("Control");
         cy.realPress("Shift");
         cy.realPress("L");
@@ -233,7 +233,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.get('[data-cy="trainingSearchDialog"]').should('not.exist')
         cy.realPress(["Control", "Shift", "l"]);
         cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
-        cy.get('[data-pc-name="dialog"] [data-pc-name="pcclosebutton"]').click();
+        cy.realPress('Escape');
     })
 
     it('tab should not be one of the shortcut keys', () => {
