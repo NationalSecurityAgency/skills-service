@@ -261,7 +261,7 @@ const isProjectExpiring = computed(() => {
           </router-link>
           <SkillsButton
             id="projectShareBtn"
-            v-if="projConfig.isProjConfigDiscoverable"
+            v-if="!projConfig.isProjConfigInviteOnly"
             ref="shareProjectButton"
             size="small"
             severity="info"
