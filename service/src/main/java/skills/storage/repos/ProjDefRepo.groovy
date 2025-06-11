@@ -443,14 +443,11 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                    COALESCE((SELECT value FROM Setting WHERE projectId = pd.projectId AND setting = 'user_community' and value = 'true'), 'false') as protectedCommunityEnabled,
                    COALESCE((SELECT value FROM Setting WHERE projectId = pd.projectId AND setting = 'invite_only' and value = 'true'), 'false') as inviteOnlyEnabled,
                    pd.totalPoints as totalPoints,
-                   ss.value as orderVal
-            FROM Setting s, Setting ss, Users uu, ProjDef pd
-            
-            LEFT JOIN UserPoints up on pd.projectId = up.projectId and
-                  up.userId=?1 and up.skillId is null
-            WHERE (((s.setting = 'production.mode.enabled' or s.setting = 'invite_only') and s.projectId = pd.projectId and s.value = 'true') or s.setting = 'my_project') and 
-                (ss.setting = 'my_project' and uu.userId=?1 and uu.id = ss.userRefId and ss.projectId = pd.projectId)
-            GROUP BY up.points, pd.projectId, pd.name, pd.id, ss.value
+                   s.value as orderVal
+            FROM Setting s, Users uu, ProjDef pd
+            LEFT JOIN UserPoints up on pd.projectId = up.projectId and up.userId=?1 and up.skillId is null
+            WHERE (s.setting = 'my_project' and uu.userId=?1 and uu.id = s.userRefId and s.projectId = pd.projectId)
+            GROUP BY up.points, pd.projectId, pd.name, pd.id, s.value
     ''')
     List<ProjectSummaryResult> getProjectSummaries(String userId)
 
