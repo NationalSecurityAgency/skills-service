@@ -160,19 +160,19 @@ class AdminUsersService {
     }
 
     @Transactional(readOnly = true)
-    TableResultWithTotalPoints loadUsersPageForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints) {
+    TableResultWithTotalPoints loadUsersPageForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
         TableResultWithTotalPoints result = new TableResultWithTotalPoints()
         result.totalPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
         Long totalProjectUsers = countTotalProjUsers(projectId)
         if (totalProjectUsers) {
             query = query ? query.trim() : ''
             result.totalCount = totalProjectUsers
-            List<ProjectUser> projectUsers = findDistinctUsersForProject(projectId, query, pageRequest, minimumPoints)
+            List<ProjectUser> projectUsers = findDistinctUsersForProject(projectId, query, pageRequest, minimumPoints, maximumPoints)
             result.data = projectUsers
             if (!projectUsers) {
                 result.count = 0
             } else if (query || minimumPoints > 0) {
-                result.count = userPointsRepo.countDistinctUserIdByProjectIdAndUserIdLike(projectId, query, minimumPoints)
+                result.count = userPointsRepo.countDistinctUserIdByProjectIdAndUserIdLike(projectId, query, minimumPoints, maximumPoints)
             } else {
                 result.count = totalProjectUsers
             }
@@ -181,8 +181,8 @@ class AdminUsersService {
     }
 
     @Profile
-    private List<ProjectUser> findDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints) {
-        Stream<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, pageRequest)
+    private List<ProjectUser> findDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
+        Stream<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, pageRequest)
         try {
             return projectUsers.collect(Collectors.toList());
         } finally {
@@ -191,8 +191,8 @@ class AdminUsersService {
     }
 
     @Profile
-    Stream<ProjectUser> streamAllDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints) {
-        return userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, pageRequest)
+    Stream<ProjectUser> streamAllDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
+        return userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, pageRequest)
     }
 
     @Profile
@@ -223,7 +223,7 @@ class AdminUsersService {
         return result
     }
 
-    TableResultWithTotalPoints loadUsersPageForSkills(String projectId, List<String> skillIds, String query, PageRequest pageRequest, int minimumPoints) {
+    TableResultWithTotalPoints loadUsersPageForSkills(String projectId, List<String> skillIds, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
         TableResultWithTotalPoints result = new TableResultWithTotalPoints()
         if (!skillIds) {
             return result
@@ -233,12 +233,12 @@ class AdminUsersService {
         if (totalProjectUsersWithSkills) {
             query = query ? query.trim() : ''
             result.totalCount = totalProjectUsersWithSkills
-            List<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(projectId, usersTableAdditionalUserTagKey, skillIds, query, minimumPoints, pageRequest)
+            List<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(projectId, usersTableAdditionalUserTagKey, skillIds, query, minimumPoints, maximumPoints, pageRequest)
             result.data = projectUsers
             if (!projectUsers) {
                 result.count = 0
             } else if (query || minimumPoints > 0) {
-                result.count = userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(projectId, skillIds, query, minimumPoints)
+                result.count = userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(projectId, skillIds, query, minimumPoints, maximumPoints)
             } else {
                 result.count = totalProjectUsersWithSkills
             }
@@ -246,7 +246,7 @@ class AdminUsersService {
         return result
     }
 
-    TableResultWithTotalPoints loadUsersPageForSubject(String projectId, String subjectId, String query, PageRequest pageRequest, int minimumPoints) {
+    TableResultWithTotalPoints loadUsersPageForSubject(String projectId, String subjectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
         TableResultWithTotalPoints result = new TableResultWithTotalPoints()
         if (!subjectId) {
             return result
@@ -256,12 +256,12 @@ class AdminUsersService {
         if (totalProjectUsersWithSkills) {
             query = query ? query.trim() : ''
             result.totalCount = totalProjectUsersWithSkills
-            List<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectId, query, minimumPoints, pageRequest)
+            List<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectId, query, minimumPoints, maximumPoints, pageRequest)
             result.data = projectUsers
             if (!projectUsers) {
                 result.count = 0
             } else if (query || minimumPoints > 0) {
-                result.count = PostgresQlNativeRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, query, minimumPoints)
+                result.count = PostgresQlNativeRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, query, minimumPoints, maximumPoints)
             } else {
                 result.count = totalProjectUsersWithSkills
             }
