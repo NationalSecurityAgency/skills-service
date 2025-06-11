@@ -448,7 +448,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
             
             LEFT JOIN UserPoints up on pd.projectId = up.projectId and
                   up.userId=?1 and up.skillId is null
-            WHERE ((s.setting = 'production.mode.enabled' or s.setting = 'invite_only') and s.projectId = pd.projectId and s.value = 'true') and 
+            WHERE (((s.setting = 'production.mode.enabled' or s.setting = 'invite_only') and s.projectId = pd.projectId and s.value = 'true') or s.setting = 'my_project') and 
                 (ss.setting = 'my_project' and uu.userId=?1 and uu.id = ss.userRefId and ss.projectId = pd.projectId)
             GROUP BY up.points, pd.projectId, pd.name, pd.id, ss.value
     ''')
