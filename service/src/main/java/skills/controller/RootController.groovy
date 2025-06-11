@@ -35,6 +35,7 @@ import skills.controller.request.model.ContactUsersRequest
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SuggestRequest
 import skills.controller.request.model.UserTagRequest
+import skills.controller.request.model.WebNotificationRequest
 import skills.controller.result.model.*
 import skills.dbupgrade.ReportedSkillEventQueue
 import skills.profile.EnableCallStackProf
@@ -50,6 +51,8 @@ import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
+import skills.services.webNotifications.WebNotificationRes
+import skills.services.webNotifications.WebNotificationsService
 import skills.settings.EmailConfigurationResult
 import skills.settings.EmailConnectionInfo
 import skills.settings.EmailSettingsService
@@ -117,6 +120,9 @@ class RootController {
 
     @Autowired
     UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    WebNotificationsService webNotificationsService
 
     @Autowired
     ExpireUserAchievementsTaskExecutor expireUserAchievementsTaskExecutor
@@ -428,6 +434,11 @@ class RootController {
     @CompileStatic
     Map getDashboardActionAttributes(@PathVariable("actionId") Long actionId) {
         return userActionsHistoryService.getActionAttributes(actionId)
+    }
+
+    @PostMapping('/webNotifications/create')
+    WebNotificationRes createWebNotification(@RequestBody WebNotificationRequest webNotificationRequest) {
+        return webNotificationsService.createANotificationForUser(webNotificationRequest)
     }
 
     private String getUserId(String userKey) {

@@ -2187,6 +2187,9 @@ class SkillsService {
     def dismissAllWebNotifications() {
         return wsHelper.apiPost("/webNotifications/dismissAll", [])
     }
+    def createWebNotificationAsRoot(Map props) {
+        return wsHelper.rootPost("/webNotifications/create", props)
+    }
 
     static private String getAdminGroupDefUrl(String adminGroupId) {
         return "/admin-group-definitions/${adminGroupId}".toString()
