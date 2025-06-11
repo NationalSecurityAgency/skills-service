@@ -570,7 +570,7 @@ class MyProgressSpec extends DefaultIntSpec {
     }
 
 
-    def "numProjectsContributed  are only counted from projects in the production mode even if they are part of My Projects"() {
+    def "numProjectsContributed counts projects that are part of My Projects even if hidden"() {
         List skills = []
         List projs = (1..3).collect { int projNum ->
             def project = SkillsFactory.createProject(projNum)
@@ -602,9 +602,9 @@ class MyProgressSpec extends DefaultIntSpec {
         def res2 = skillsService.getMyProgressSummary()
 
         then:
-        res.numProjectsContributed == 0
-        res1.numProjectsContributed == 1
-        res2.numProjectsContributed == 2
+        res.numProjectsContributed == 1
+        res1.numProjectsContributed == 2
+        res2.numProjectsContributed == 3
     }
 
     def "badges are only counted from My Projects "() {

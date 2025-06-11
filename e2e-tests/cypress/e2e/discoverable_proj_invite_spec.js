@@ -24,7 +24,9 @@ describe('Copy Invite URL Tests', () => {
     })
 
     const proj1Url = '/progress-and-rankings/projects/proj1'
+    const proj3Url = '/progress-and-rankings/projects/proj3'
     const proj1Share = `${proj1Url}?invited=true`
+    const proj3Share = `${proj3Url}?invited=true`
 
     it('retrieve share url', { browser: 'chrome' }, () => {
         // this is needed to grant headless chrome permissions to copy-and-paste
@@ -125,13 +127,6 @@ describe('Copy Invite URL Tests', () => {
         });
     });
 
-    it('share button does not exist for non-discoverable projects', () => {
-        cy.visit('/administrator/projects/proj3')
-        cy.contains('No Subjects Yet')
-
-        cy.get('[data-cy="shareProjBtn"]').should('not.exist')
-    });
-
     it('focus is returned to the share button', () => {
         cy.visit('/administrator/projects/proj1')
         cy.contains('No Subjects Yet')
@@ -163,5 +158,18 @@ describe('Copy Invite URL Tests', () => {
         cy.get('[data-cy="project-card-project-name"]').should('not.exist')
     });
 
+    it('shared url adds project to My Projects for non-Catalog projects', ()  => {
+        cy.visit(proj3Share);
+        cy.get('[data-cy="skillsDisplayHome"]').contains('My Level');
+        cy.get('[data-cy="breadcrumb-Progress And Rankings"]').click()
+        cy.get('[data-cy="project-card-project-name"]').should('exist')
+    });
+
+    it('regular project url does NOT add project to My Projects for non-Catalog projects', ()  => {
+        cy.visit(proj3Url);
+        cy.get('[data-cy="skillsDisplayHome"]').contains('My Level');
+        cy.get('[data-cy="breadcrumb-Progress And Rankings"]').click()
+        cy.get('[data-cy="project-card-project-name"]').should('not.exist')
+    });
 });
 
