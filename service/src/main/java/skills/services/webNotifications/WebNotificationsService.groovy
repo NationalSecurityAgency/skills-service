@@ -25,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.WebNotificationRequest
 import skills.storage.model.WebNotification
 import skills.storage.model.WebNotificationAck
 import skills.storage.repos.WebNotificationsAckRepo
@@ -95,4 +97,21 @@ class WebNotificationsService {
             }
         }
     }
+
+    @Transactional
+    WebNotificationRes createANotificationForUser(WebNotificationRequest webNotificationRequest) {
+        SkillsValidator.isNotBlank(webNotificationRequest.title, "title")
+        SkillsValidator.isNotBlank(webNotificationRequest.notification, "notification")
+        WebNotification newNotif = new WebNotification(
+                notifiedOn: webNotificationRequest.notifiedOn ?: new Date(),
+                showUntil: webNotificationRequest.showUntil ?: new Date() + 30,
+                title: webNotificationRequest.title,
+                notification: webNotificationRequest.notification,
+                userId: webNotificationRequest.userId
+        )
+        WebNotification saved =webNotificationsRepo.saveAndFlush(newNotif)
+        return convert(saved)
+    }
+
+
 }

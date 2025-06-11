@@ -1675,3 +1675,11 @@ Cypress.Commands.add('archiveUser', (userId)  => {
         userIds: [userId]
     });
 })
+
+Cypress.Commands.add('dismissAllWebNotifications', ()  => {
+    cy.request('POST', '/api/webNotifications/dismissAll');
+})
+
+Cypress.Commands.add('createWebNotification', (notification)  => {
+    cy.request('POST', '/root/webNotifications/create', notification);
+})
