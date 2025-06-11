@@ -181,7 +181,7 @@ const getProgressLabel = (skill) => {
               <div
                   class=""
                   data-cy="points"
-                  :class="{'text-green-700': slotProps.option.userAchieved}" aria-hidden="true">
+                  :class="{'text-green-700 dark:text-green-500': slotProps.option.userAchieved}" aria-hidden="true">
                 <i v-if="slotProps.option.userAchieved" class="fas fa-check mr-1" aria-hidden="" />
                 <span class="text-orange-700 font-medium">{{ getUserProgress(slotProps.option) }}</span> / {{ getTotalProgress(slotProps.option) }} <span class="italic">{{ getProgressLabel(slotProps.option) }}</span>
               </div>
