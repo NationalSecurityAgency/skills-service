@@ -174,7 +174,7 @@ const getProgressLabel = (skill) => {
         <template #option="slotProps">
           <div class="py-0 w-full sd-theme-primary-color" :data-cy="`searchRes-${slotProps.option.skillId}`">
             <div class="flex flex-nowrap">
-              <div class="flex-1 flex items-center"
+              <div class="flex-1 flex items-center inline"
                    data-cy="skillName"
                    :aria-label="`Selected ${slotProps.option.skillName} ${slotProps.option.skillType}${slotProps.option.subjectName ? ` from ${slotProps.option.subjectName} ${attributes.subjectDisplayName}` : ''}. You have earned ${getUserProgress(slotProps.option)} ${getProgressLabel(slotProps.option)} out of ${getTotalProgress(slotProps.option)} for this ${slotProps.option.skillType}. Click to navigate to the ${slotProps.option.skillType}.`">
                 <i :class="`${getIconClass(slotProps.option)} mr-1 text-xl`" style="min-width: 25px" aria-hidden="true" />
