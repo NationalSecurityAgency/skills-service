@@ -2178,6 +2178,19 @@ class SkillsService {
         return wsHelper.apiPost("/pageVisit", pageVisitRequest)
     }
 
+    def getWebNotifications() {
+        return wsHelper.apiGet("/webNotifications")
+    }
+    def dismissWebNotification(Integer notificationId) {
+        return wsHelper.apiPost("/webNotifications/${notificationId}/dismiss".toString(), [])
+    }
+    def dismissAllWebNotifications() {
+        return wsHelper.apiPost("/webNotifications/dismissAll", [])
+    }
+    def createWebNotificationAsRoot(Map props) {
+        return wsHelper.rootPost("/webNotifications/create", props)
+    }
+
     static private String getAdminGroupDefUrl(String adminGroupId) {
         return "/admin-group-definitions/${adminGroupId}".toString()
     }
