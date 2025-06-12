@@ -135,4 +135,34 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
     })
 
+    it('search dialog honers custom labels', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            {
+                value: 'Course',
+                setting: 'subject.displayName',
+                projectId: 'proj1',
+            },
+            {
+                value: 'Assessment',
+                setting: 'skill.displayName',
+                projectId: 'proj1',
+            },
+        ]);
+
+        cy.visit('/progress-and-rankings/projects/proj1');
+        cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
+
+        cy.get('input.p-listbox-filter')
+          .invoke('attr', 'placeholder')
+          .should('contain', 'Search for Courses, Assessments or Badges');
+        cy.get('[data-cy="subjectName"]').first().should('have.text', "Course: Subject 1");
+    });
+
+
 })
