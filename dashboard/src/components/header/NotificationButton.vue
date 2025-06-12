@@ -35,7 +35,7 @@ const lastViewedNotificationDate = useStorage('lastViewedNotificationDate', null
 const confirm = useConfirm()
 
 const notificationsPopover = ref();
-const toggle = (event) => {
+const toggle = (event=null) => {
   notificationsPopover.value.toggle(event);
   afterNotificationsLoaded().then(() => {
     if (latestNotification.value) {
@@ -103,11 +103,15 @@ onMounted(() => {
   })
 })
 const notificationCount = computed(() => notifications.value ? notifications.value.length : 0)
+const hasNotifications = computed(() => notificationCount.value > 0)
 
 const dismissNotification = (notification) => {
   WebNotificationsService.dismissNotification(notification.id)
       .then(() => {
         notifications.value = notifications.value.filter(n => n.id !== notification.id)
+        if (notifications.value.length === 0) {
+          toggle()
+        }
       })
 }
 const confirmDismissAllNotifications = (event) => {
@@ -151,15 +155,17 @@ const notifClasses = (index) => {
 }
 
 const onPopoverShow = () => {
-  nextTick(() => {
-    document.getElementById('dismissAllNotifBtn').focus()
-  })
+  if (hasNotifications.value) {
+    nextTick(() => {
+      document.getElementById('dismissAllNotifBtn').focus()
+    })
+  }
 }
 </script>
 
 <template>
   <div class="d-inline relative">
-    <div v-if="!loadingNotifications && notificationCount > 0"
+    <div v-if="!loadingNotifications && hasNotifications"
          class="absolute -top-2 -right-1 z-10"
          :aria-label="`You have ${notificationCount} new notifications`"
          :class="{'animate-bounce': alertNewNotif && hasNonViewedNotifications}">
@@ -185,18 +191,18 @@ const onPopoverShow = () => {
         aria-controls="user_settings_menu">
     </Button>
     <Popover ref="notificationsPopover" aria-label="Notifications" @show="onPopoverShow">
-      <div class="flex flex-col w-[25rem] skills-notification" data-cy="notifPanel">
+      <div class="flex flex-col w-max-[50rem]" data-cy="notifPanel">
         <div class="flex gap-2 items-center border-b-1 border-b-gray-200 mb-2 pb-2">
           <div class="flex-1 text-orange-800 dark:text-orange-400 uppercase">Notifications</div>
           <div>
             <SkillsButton
+                v-if="hasNotifications"
                 id="dismissAllNotifBtn"
                 label="Dismiss All"
                 severity="danger"
                 icon="fa-solid fa-trash"
                 size="small"
                 data-cy="dismissAllNotifBtn"
-                :disabled="!notifications || notifications.length === 0"
                 @click="confirmDismissAllNotifications"/>
           </div>
         </div>
@@ -208,7 +214,7 @@ const onPopoverShow = () => {
             Loading Notifications...
           </div>
 
-          <div v-if="!loadingNotifications && notifications.length === 0" class="py-8 text-center">
+          <div v-if="!loadingNotifications && !hasNotifications" class="py-8 text-center w-[18rem]">
             <div class="text-gray-400 mb-2">
               <i class="fa-regular fa-bell-slash text-4xl"></i>
             </div>
@@ -228,8 +234,8 @@ const onPopoverShow = () => {
                :data-cy="`notif-${index}`">
             <div class="flex gap-2 items-center">
               <div class="font-bold flex-1" data-cy="notifTitle">{{ notification.title }}</div>
-              <div class="text-sm text-gray-600 dark:text-gray-200">
-                {{ timeUtils.formatDate(notification.notifiedOn, 'YYYY-MM-DD') }}
+              <div class="text-sm text-gray-600 dark:text-gray-200" :title="timeUtils.formatDate(notification.notifiedOn, 'dddd, MMMM D, YYYY')">
+                {{ timeUtils.relativeTime(notification.notifiedOn) }}
               </div>
             </div>
             <div class="flex">
@@ -254,7 +260,4 @@ const onPopoverShow = () => {
 </template>
 
 <style>
-.skills-notification .toastui-editor-contents a {
-  //text-decoration: underline !important;
-}
 </style>

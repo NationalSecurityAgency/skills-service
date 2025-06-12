@@ -30,6 +30,10 @@ class CreateNotificationsAsRootSpecs extends DefaultIntSpec {
     @Autowired
     WebNotificationsRepo webNotificationsRepo
 
+    String datePattern = "yyyy-MM-dd'T'HH:mm:ss"
+    Closure formatDate = { Date theDate -> theDate.format(datePattern) }
+    Closure parseDate = { String theDate -> Date.parse(datePattern, theDate) }
+
     def setup() {
         webNotificationsRepo.deleteAll()
     }
@@ -112,8 +116,7 @@ class CreateNotificationsAsRootSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.httpStatus == HttpStatus.BAD_REQUEST
-        e.message.contains("Failed to find web notification with id [1]")
+        e.httpStatus == HttpStatus.FORBIDDEN
     }
 
 }

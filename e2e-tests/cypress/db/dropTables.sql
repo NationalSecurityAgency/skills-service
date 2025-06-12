@@ -104,4 +104,6 @@ drop table IF EXISTS user_quiz_answer_graded CASCADE;
 
 drop table IF EXISTS archived_users CASCADE;
 
+drop table IF EXISTS web_notifications CASCADE;
+
 drop function IF EXISTS f_select_lock_and_insert;

@@ -23,7 +23,7 @@ describe('Web Notifications Tests', () => {
         cy.visit('/progress-and-rankings');
         cy.get('[data-cy="notifBtn"]').click()
         cy.get('[data-cy="notifPanel"]').contains('No new notifications')
-        cy.get('[data-cy="dismissAllNotifBtn"]').should('be.disabled')
+        cy.get('[data-cy="dismissAllNotifBtn"]').should('not.exist')
         cy.realPress('Escape');
         cy.get('[data-cy="notifBtn"]').should('be.focused')
     });
@@ -99,6 +99,31 @@ describe('Web Notifications Tests', () => {
         cy.get('[data-cy="notifPanel"] [data-cy="notif-2"]').should('not.exist')
     });
 
+    it('dismissing last notification closes popup', () => {
+        cy.loginAsRootUser()
+        cy.createWebNotification({
+            title: "Title 1",
+            notification: "Notification 1",
+        })
+        cy.loginAsDefaultUser()
+        cy.visit('/progress-and-rankings');
+        cy.get('[data-cy="notifCount"]').should('have.text', '1')
+        cy.get('[data-cy="notifBtn"]').click()
+        cy.get('[data-cy="dismissAllNotifBtn"]').should('be.focused')
+        cy.get('[data-cy="notifPanel"] [data-cy="notif-0"] [data-cy="notifTitle"]').contains('Title 1')
+
+        cy.get('[data-cy="notifPanel"] [data-cy="notif-0"] [data-cy="dismissNotifBtn"]').click()
+        cy.get('[data-cy="notifPanel"]').should('not.exist')
+        cy.get('[data-cy="notifCount"]').should('not.exist')
+
+        cy.visit('/progress-and-rankings');
+        cy.get('[data-cy="notifBtn"]').click()
+        cy.get('[data-cy="notifPanel"]').contains('No new notifications')
+        cy.get('[data-cy="dismissAllNotifBtn"]').should('not.exist')
+        cy.get('[data-cy="notifCount"]').should('not.exist')
+    });
+
+
     it('dismiss all notifications', () => {
         cy.loginAsRootUser()
         cy.createWebNotification({
@@ -134,7 +159,7 @@ describe('Web Notifications Tests', () => {
         cy.get('[data-cy="notifPanel"] [data-cy="notif-1"]').should('not.exist')
         cy.get('[data-cy="notifPanel"] [data-cy="notif-2"]').should('not.exist')
         cy.get('[data-cy="notifCount"]').should('not.exist')
-        cy.get('[data-cy="dismissAllNotifBtn"]').should('be.disabled')
+        cy.get('[data-cy="dismissAllNotifBtn"]').should('not.exist')
     });
 
     it('cancel dismiss-all-notifications action', () => {

@@ -17,7 +17,10 @@ package skills.services.webNotifications
 
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
+import jakarta.transaction.Transactional
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import skills.storage.model.WebNotification
 import skills.storage.repos.WebNotificationsRepo
@@ -26,35 +29,70 @@ import skills.storage.repos.WebNotificationsRepo
 @Slf4j
 class NewVersionsNotifCreator {
 
+    @Value('#{"${skills.config.ui.docsHost}"}')
+    String docsRootHost
+
     @Autowired
     WebNotificationsRepo webNotificationsRepo
 
-    private final List<WebNotification> newVersionsNotifications = [
-            new WebNotification(
-                    notifiedOn: new Date(),
-                    showUntil: new Date() + 30,
-                    lookupId: "new-versions-1",
-                    title: "SkillTree 3.6 Version Released",
-                    notification: """- Draft mode for subject/skill creation
-- Audio/video in quizzes and surveys
-- Context-aware contact system
-- Keyboard shortcuts for training navigation
-- Screen reader-friendly headings
-- [Learn More](https://skilltreeplatform.dev/dashboard/user-guide/projects.html#invite-only)""",
+    private static class WebNotifWrapper {
+        WebNotification notif
+        Date releaseNoLaterThan
+    }
+
+    private final List<WebNotifWrapper> newVersionsNotifications = [
+            new WebNotifWrapper(
+                    releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-07-12'),
+                    notif: new WebNotification(
+                            notifiedOn: new Date(),
+                            showUntil: Date.parse('yyyy-MM-dd', '2025-09-01'),
+                            lookupId: "new-versions-2",
+                            title: "Version 3.7 Released",
+                            notification: """- A training-wide search with a click or keyboard shortcut
+- Ability to easily share non-catalog projects
+- Unobtrusive alerts for updates and new features
+- Filter quiz and survey results by completion date range
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
+            ),
+            new WebNotifWrapper(
+                    releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-05-28'),
+                    notif: new WebNotification(
+                            notifiedOn: new Date(),
+                            showUntil: Date.parse('yyyy-MM-dd', '2025-08-01'),
+                            lookupId: "new-versions-1",
+                            title: "Version 3.6 Released",
+                            notification: """- Skill and Subject draft mode until fully configured
+- Audio and video support for quiz and survey questions
+- Context-aware contact process
+- 1,000+ additional Font Awesome icons
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
             )
     ]
 
 
     @PostConstruct
+    @Transactional
     void createNewVersionsNotification() {
-        List<WebNotification> notificationsToAdd = newVersionsNotifications.findAll {
-            !it.showUntil || it.showUntil > new Date()
+        assert docsRootHost // must have it configured
+        List<String> lookupIds = newVersionsNotifications.collect { it.notif.lookupId }
+        boolean lookupIdsUnique = lookupIds.toSet().size() == lookupIds.size()
+        if (!lookupIdsUnique) {
+            throw new IllegalStateException("lookupIds must be unique: ${lookupIds}")
         }
-        notificationsToAdd.each {
-            List<WebNotification> existingNotifications = webNotificationsRepo.findAllByLookupId(it.lookupId)
+
+        List<WebNotifWrapper> notificationsToAdd = newVersionsNotifications.findAll {
+            !it.notif.showUntil || it.notif.showUntil > new Date()
+        }
+        notificationsToAdd.each {WebNotifWrapper wrap ->
+            WebNotification webNotification = wrap.notif
+            if (wrap.releaseNoLaterThan < wrap.notif.notifiedOn) {
+                webNotification.notifiedOn = wrap.releaseNoLaterThan
+            }
+            webNotification.notification = webNotification.notification.replaceAll("\\{\\{docsRootHost\\}\\}", docsRootHost)
+            List<WebNotification> existingNotifications = webNotificationsRepo.findAllByLookupId(webNotification.lookupId)
             if (!existingNotifications) {
-                log.info("Adding new version notification: {}", it)
-                webNotificationsRepo.save(it)
+                log.info("Adding new version notification: {}", webNotification)
+                webNotificationsRepo.save(webNotification)
             }
         }
     }
