@@ -81,7 +81,47 @@ class ClientDisplayTrainingSearchSpec extends DefaultIntSpec {
         skills.find { it.skillId == "badge1" }.childAchievementCount == 1
         skills.find { it.skillId == "badge1" }.totalChildCount == 1
         skills.find { it.skillId == "badge1" }.userAchieved  == true
+    }
 
+    def "get skills, subjects and badges - multiple badges with dependencies"() {
+        def p1 = createProject(1)
+        def p1Subj1 = createSubject(1, 1)
+        def p1Subj1Skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1Subj1, p1Subj1Skills)
+
+        def badge1 = createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Subj1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Subj1Skills[1].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Subj1Skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Subj1Skills[3].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge2.badgeId, p1.projectId, badge1.badgeId)
+
+        skillsService.addSkill([projectId: p1.projectId, skillId: p1Subj1Skills.get(0).skillId], skillsService.userName, new Date())
+        when:
+        def skills = skillsService.getApiAllSubjectsBadgesAndSkills(p1.projectId)
+        then:
+        skills
+        skills.size() == 8
+        skills.findAll { it.skillType == "Skill" }.skillId.sort() == ["skill1", "skill2", "skill3", "skill4", "skill5"].sort()
+        skills.findAll { it.skillType == "Subject" }.skillId.sort() == ["TestSubject1"].sort()
+        skills.find { it.skillId == "TestSubject1" }.childAchievementCount == 1
+        skills.find { it.skillId == "TestSubject1" }.totalChildCount == 5
+        skills.findAll { Boolean.valueOf(it.userAchieved) }.skillId  == ['skill1']
+        skills.findAll { it.skillType == "Badge" }.skillId.sort() == ["badge1", "badge2"].sort()
+        skills.find { it.skillId == "badge1" }.childAchievementCount == 1
+        skills.find { it.skillId == "badge1" }.totalChildCount == 2
+        skills.find { it.skillId == "badge1" }.userAchieved  == false
+        skills.find { it.skillId == "badge2" }.childAchievementCount == 0
+        skills.find { it.skillId == "badge2" }.totalChildCount == 2
+        skills.find { it.skillId == "badge1" }.userAchieved  == false
     }
 
     def "empty projects"() {
