@@ -22,6 +22,7 @@ import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 const emit = defineEmits(['level-changed', 'hidden']);
 const props = defineProps({
@@ -37,6 +38,7 @@ const skillsDisplayService = useSkillsDisplayService()
 const skillDisplayInfo = useSkillsDisplayInfo()
 const announcer = useSkillsAnnouncer()
 const focusState = useFocusState()
+const attributes = useSkillsDisplayAttributesState()
 
 const selected = ref('')
 const query = ref('')
@@ -57,7 +59,7 @@ const loadSkillsSubjectsAndBadges = (event) => {
         let results = res.data
         searchRes.value = results
         if (results && results.length > 0) {
-          announcer.polite(`Showing ${results.length} items.  Type to search for a Subjects, Skills or Badges. Use arrow keys to select and enter or click to navigate to the Subject, Skill or Badge.`)
+          announcer.polite(`Showing ${results.length} items.  Type to search for a ${attributes.subjectDisplayName}s, ${attributes.skillDisplayName}s or Badges. Use arrow keys to select and enter or click to navigate to the ${attributes.subjectDisplayName}, ${attributes.skillDisplayName} or Badge.`)
         } else {
           announcer.assertive('No subjects, skills or badges found.')
         }
@@ -144,7 +146,7 @@ const getProgressLabel = (skill) => {
       :pt="{ content: { class: 'p-5!' } }"
       v-model="model"
       data-cy="trainingSearchDialog"
-      aria-label="Search for Subjects, Skills or Badges"
+      :aria-label="`Search for ${attributes.subjectDisplayName}s, ${attributes.skillDisplayName}s or Badges`"
       :enable-return-focus="true"
       @on-cancel="closeMe"
       :show-header="false"
@@ -156,7 +158,7 @@ const getProgressLabel = (skill) => {
     <div class="card flex justify-center">
       <Listbox class="w-full border-none!"
                data-cy="trainingSearchListBox"
-               aria-label="Search for Subjects, Skills or Badges"
+               :aria-label="`Search for ${attributes.subjectDisplayName}s, ${attributes.skillDisplayName}s or Badges`"
                :pt="{ listContainer: { tabindex: '0'}, header: { class: 'p-0! pb-1!' }, list: { class: 'p-0!' } }"
                @filter="filterEvent"
                @update:modelValue="navToSkill"
@@ -167,14 +169,14 @@ const getProgressLabel = (skill) => {
                :autofocus="true"
                :auto-option-focus="false"
                filter
-               filterPlaceholder="Search for Subjects, Skills or Badges"
+               :filterPlaceholder="`Search for ${attributes.subjectDisplayName}s, ${attributes.skillDisplayName}s or Badges`"
       >
         <template #option="slotProps">
           <div class="py-0 w-full sd-theme-primary-color" :data-cy="`searchRes-${slotProps.option.skillId}`">
             <div class="flex flex-nowrap">
               <div class="flex-1 flex items-center"
                    data-cy="skillName"
-                   :aria-label="`Selected ${slotProps.option.skillName} ${slotProps.option.skillType}${slotProps.option.subjectName ? ` from ${slotProps.option.subjectName} subject` : ''}. You have earned ${getUserProgress(slotProps.option)} ${getProgressLabel(slotProps.option)} out of ${getTotalProgress(slotProps.option)} for this ${slotProps.option.skillType}. Click to navigate to the ${slotProps.option.skillType}.`">
+                   :aria-label="`Selected ${slotProps.option.skillName} ${slotProps.option.skillType}${slotProps.option.subjectName ? ` from ${slotProps.option.subjectName} ${attributes.subjectDisplayName}` : ''}. You have earned ${getUserProgress(slotProps.option)} ${getProgressLabel(slotProps.option)} out of ${getTotalProgress(slotProps.option)} for this ${slotProps.option.skillType}. Click to navigate to the ${slotProps.option.skillType}.`">
                 <i :class="`${getIconClass(slotProps.option)} mr-1 text-xl`" style="min-width: 25px" aria-hidden="true" />
                 <highlighted-value :value="slotProps.option.skillName" :filter="query" class="text-xl" />
               </div>
@@ -188,7 +190,7 @@ const getProgressLabel = (skill) => {
             </div>
 
             <div v-if="isSkill(slotProps.option)" data-cy="subjectName" aria-hidden="true" class="mt-1">
-              <span class="italic ">Subject:</span> <span
+              <span class="italic ">{{ attributes.subjectDisplayName }}:</span> <span
                 class="text-info skills-theme-primary-color alt-color-handle-hover">{{ slotProps.option.subjectName
               }}</span>
             </div>
