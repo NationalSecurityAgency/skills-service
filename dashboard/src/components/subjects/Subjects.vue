@@ -33,6 +33,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useProjDetailsState } from '@/stores/UseProjDetailsState.js'
+import { useFinalizeInfoState } from '@/stores/UseFinalizeInfoState.js'
 
 const projConfig = useProjConfig();
 const announcer = useSkillsAnnouncer()
@@ -42,6 +43,7 @@ const route = useRoute();
 const elementHelper = useElementHelper()
 const subjectsState = useSubjectsState()
 const projectDetailsState = useProjDetailsState()
+const finalizeInfoState = useFinalizeInfoState()
 const dropAndDragEnabled = ref(false)
 
 const subjRef = ref([]);
@@ -148,6 +150,7 @@ const subjectAdded = (subject) => {
     subjectsState.subjects.splice(existingIndex, 1, subject)
     if (enabledStateChanged) {
       projectDetailsState.loadProjectDetailsState()
+      finalizeInfoState.loadInfo()
     }
   } else {
     subjectsState.subjects.push(subject)

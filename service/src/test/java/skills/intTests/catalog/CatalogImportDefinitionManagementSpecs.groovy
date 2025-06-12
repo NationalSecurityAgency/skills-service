@@ -628,6 +628,22 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         e.message.contains("Cannot import skills in the middle of the finalization process")
     }
 
+    def "do not allow finalizing if imported skills belongs to a disabled subject"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2)
+        def disabledSubject = createSubject(2, 4)
+        disabledSubject.enabled = false
+        skillsService.createSubject(disabledSubject)
+
+        skillsService.importSkillFromCatalog(project2.p.projectId, disabledSubject.subjectId, project1.p.projectId, project1.s1_skills[0].skillId)
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(project2.p.projectId, false)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Cannot finalize imported skills, there are [1] skill(s) pending finalization that belong to a disabled subject or group")
+    }
+
     def "get all skills for a project does not include disabled skills by default"() {
         def project1 = createProjWithCatalogSkills(1)
         def project2 = createProjWithCatalogSkills(2)
@@ -1065,6 +1081,35 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum, errorCode:MaxSkillsThreshold")
+    }
+    def "dedupe finalization info numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup for disabled group in disabled subject"() {
+        def project1 = createProjWithCatalogSkills(1)
+
+        def project2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        p2subj1.enabled = 'false'
+        def group = createSkillsGroup(2, 1, 10001)
+        group.enabled = 'false'
+        def groupSkills = createSkillsStartingAt(4, 1001, 2, 1)
+        groupSkills.each {
+            it.enabled = 'false'
+        }
+
+        skillsService.createProject(project2)
+        skillsService.createSubject(p2subj1)
+        skillsService.createSkill(group)
+        groupSkills.each {
+            skillsService.assignSkillToSkillsGroup(group.skillId, it)
+        }
+        skillsService.bulkImportSkillsIntoGroupFromCatalog(project2.projectId, p2subj1.subjectId, group.skillId,
+                project1.s1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        when:
+        def finalizeInfo = skillsService.getCatalogFinalizeInfo(project2.projectId)
+
+        then:
+        finalizeInfo.numSkillsToFinalize == 3
+        finalizeInfo.numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup == 3
     }
 
     def "cannot import when number of skills to be imported would exceed max skills per subject including disabled group skills"() {

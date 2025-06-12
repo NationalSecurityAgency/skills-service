@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
@@ -24,6 +24,9 @@ import { boolean, object, string } from 'yup'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSkillYupValidators } from '@/components/skills/UseSkillYupValidators.js'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
+import InputGroup from 'primevue/inputgroup'
+import SkillsInputSwitch from '@/components/utils/inputForm/SkillsInputSwitch.vue'
+import InputGroupAddon from 'primevue/inputgroupaddon'
 
 const show = defineModel()
 const route = useRoute()
@@ -51,6 +54,15 @@ const asyncLoadData = () => {
   return Promise.resolve({})
 }
 
+const skillEnabled = ref(props.isSubjectEnabled && !props.isEdit ? true : props.isSubjectEnabled && props.skill.enabled)
+const onEnabledChanged = (event) => {
+  skillEnabled.value = !skillEnabled.value
+}
+const showVisibilityControl = computed(() => {
+  // always show on create new skill (when subject is enabled), only show on edit if currently disabled
+  const isCreateNewSkill = !props.isEdit
+  return props.isSubjectEnabled && (isCreateNewSkill || !props.skill.enabled)
+})
 const schema = object({
   'name': string()
     .trim()
@@ -81,7 +93,7 @@ const initialSkillData = ref({
   name: props.skill.name || '',
   originalSkillId: props.skill.skillId || '',
   description: props.skill.description || '',
-  enabled: props.isSubjectEnabled,
+  enabled: skillEnabled.value,
 })
 
 const saveSkill = (values) => {
@@ -131,6 +143,30 @@ const onSkillSaved = (skill) => {
       id-field-name="skillId"
       id-suffix="Group"
       :name-to-id-sync-enabled="!props.isEdit" />
+
+    <div v-if="showVisibilityControl" data-cy="visibility" class="flex-1 min-w-[8rem] mb-2">
+      <div class="flex flex-col gap-2">
+        <label for="visibilitySwitch">
+          <span id="visibilityLabel">Initial Visibility:</span>
+        </label>
+        <InputGroup>
+          <InputGroupAddon>
+            <div style="width: 3.3rem !important;">
+              <SkillsInputSwitch data-cy="visibilitySwitch"
+                                 aria-labelledby="visibilityLabel"
+                                 inputId="visibilitySwitch"
+                                 style="height:1rem !important;"
+                                 size="small"
+                                 name="enabled"
+                                 @change="onEnabledChanged" />
+            </div>
+          </InputGroupAddon>
+          <InputGroupAddon class="w-full">
+            <span class="ml-2 w-full text-gray-700 dark:text-white">{{ skillEnabled ? 'Visible' : 'Hidden'}}</span>
+          </InputGroupAddon>
+        </InputGroup>
+      </div>
+    </div>
 
     <markdown-editor
       class="mt-8"

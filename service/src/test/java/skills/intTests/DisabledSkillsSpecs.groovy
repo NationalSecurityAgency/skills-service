@@ -269,7 +269,7 @@ class DisabledSkillsSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException ex = thrown(SkillsClientException)
-        ex.message.contains("Cannot enable Skill [skill1] becuase it's SkillsGroup [skill2] is disabled")
+        ex.message.contains("Cannot enable Skill [skill1] because it's SkillsGroup [skill2] is disabled")
     }
 
     def "editing a skill group with a disabled skill does not miscalculate the total points"() {

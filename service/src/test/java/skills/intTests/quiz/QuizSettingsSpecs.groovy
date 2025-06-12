@@ -335,7 +335,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.httpStatus == HttpStatus.BAD_REQUEST
-        e.message.contains("Cannot modify [${QuizSettings.MinNumQuestionsToPass.setting}] becuase there is 0 declared questions")
+        e.message.contains("Cannot modify [${QuizSettings.MinNumQuestionsToPass.setting}] because there is 0 declared questions")
         e.message.contains("quizId:${quiz.quizId}")
     }
 

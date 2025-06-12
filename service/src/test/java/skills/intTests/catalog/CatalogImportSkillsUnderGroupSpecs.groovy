@@ -15,6 +15,7 @@
  */
 package skills.intTests.catalog
 
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.UserPoints
 
@@ -70,6 +71,24 @@ class CatalogImportSkillsUnderGroupSpecs extends CatalogIntSpec {
         !user_p2_pts.skillId
         user_projSummary.points == 200
         user_projSummary.totalPoints == 500
+    }
+
+    def "do not allow finalizing if imported skills belongs to a disabled group"() {
+        def project1 = createProjWithCatalogSkills(1)
+        def project2 = createProjWithCatalogSkills(2, 2)
+
+        def p2skillsGroup = createSkillsGroup(2, 1, 10)
+        p2skillsGroup.enabled = 'false'
+        skillsService.createSkill(p2skillsGroup)
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalog(project2.p.projectId, project2.s1.subjectId, p2skillsGroup.skillId,
+                project1.s1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(project2.p.projectId, false)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Cannot finalize imported skills, there are [3] skill(s) pending finalization that belong to a disabled subject or group")
     }
 
     def "import skills under a group - update to user existing points for subject and project"() {

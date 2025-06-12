@@ -28,12 +28,14 @@ import EditSkill from '@/components/skills/EditSkill.vue'
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import EditSkillGroup from '@/components/skills/skillsGroup/EditSkillGroup.vue'
 import ImportFromCatalogDialog from '@/components/skills/catalog/ImportFromCatalogDialog.vue'
+import { useFinalizeInfoState } from '@/stores/UseFinalizeInfoState.js'
 
 const appConfig = useAppConfig()
 const projConfig = useProjConfig()
 const route = useRoute()
 const skillsState = useSubjectSkillsState()
 const subjectState = useSubjectsState()
+const finalizeInfoState = useFinalizeInfoState()
 const announcer = useSkillsAnnouncer()
 const isLoading = computed(() => {
   // return this.loadingSubjectSkills || this.isLoadingProjConfig;
@@ -81,9 +83,10 @@ const newSkillInfo = ref({
   isEdit: false,
   isCopy: false,
   groupId: null,
+  isGroupEnabled: true,
   version: 1
 })
-const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId = null) => {
+const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId = null, isGroupEnabled = true) => {
   if (skill.isGroupType) {
     createOrUpdateGroup(skill, isEdit)
   } else {
@@ -92,7 +95,8 @@ const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId
       isEdit,
       show: true,
       isCopy,
-      groupId
+      groupId,
+      isGroupEnabled
     }
   }
 }
@@ -115,13 +119,18 @@ const reportSkills = (createdSkill) => {
 
 const skillCreatedOrUpdated = (skill) => {
   const skills = skill.groupId ? skillsState.getGroupSkills(skill.groupId) : skillsState.subjectSkills
-  const item1Index = skills.findIndex((item) => item.skillId === skill.originalSkillId)
+  const existingIndex = skills.findIndex((item) => item.skillId === skill.originalSkillId)
   const createdSkill = ({
     ...skill,
     subjectId: route.params.subjectId
   })
-  if (item1Index >= 0) {
-    skills.splice(item1Index, 1, createdSkill)
+  if (existingIndex >= 0) {
+    const existingSkill = skills[existingIndex]
+    if (skill.isGroupType && skill.enabled !== existingSkill.enabled) {
+      skillsState.loadGroupSkills(skill.projectId, skill.skillId)
+      finalizeInfoState.loadInfo()
+    }
+    skills.splice(existingIndex, 1, createdSkill)
   } else {
     skills.push(createdSkill)
     SkillsReporter.reportSkill('CreateSkill')
@@ -235,6 +244,7 @@ const skillCreatedOrUpdated = (skill) => {
       v-model="newSkillInfo.show"
       :skill="newSkillInfo.skill"
       :is-subject-enabled="subjectState.subject.enabled"
+      :is-group-enabled="newSkillInfo.isGroupEnabled"
       :is-edit="newSkillInfo.isEdit"
       :is-copy="newSkillInfo.isCopy"
       :group-id="newSkillInfo.groupId"
