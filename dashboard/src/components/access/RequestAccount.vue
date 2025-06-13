@@ -214,7 +214,7 @@ const onSubmit = handleSubmit((values) => {
                               data-cy="createAccountButton">
                 </SkillsButton>
               </div>
-              <div v-if="createInProgress && isRootAccount" class="mt-2 text-primary">
+              <div v-if="createInProgress && isRootAccount" class="mt-2 text-center">
                 Bootstrapping! May take a second...
               </div>
               <div v-if="!isRootAccount" class="p-1">
