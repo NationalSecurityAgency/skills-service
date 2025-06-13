@@ -31,12 +31,14 @@ import {useColors} from '@/skills-display/components/utilities/UseColors.js'
 import MyProgressTitle from "@/components/myProgress/MyProgressTitle.vue";
 import BackToMyProgressBtn from "@/components/myProgress/BackToMyProgressBtn.vue";
 import ContactProjectAdminsDialog from "@/components/contact/ContactProjectAdminsDialog.vue";
+import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 
 const responsive = useResponsiveBreakpoints()
 const announcer = useSkillsAnnouncer()
 const appInfoState = useAppInfoState()
 const myProgressState = useMyProgressState()
 const colors = useColors()
+const numberFormat = useNumberFormat()
 
 const isLoading = ref(true)
 const searchValue = ref('')
@@ -298,15 +300,15 @@ const contactProject = (name, id) => {
               <template #expansion="slotProps">
                 <div>
                   <p>
-                    <Tag>{{ slotProps.data.numSubjects }}</Tag>
+                    <Tag>{{ numberFormat.pretty(slotProps.data.numSubjects) }}</Tag>
                     Subjects
                   </p>
                   <p class="my-1">
-                    <Tag>{{ slotProps.data.numBadges }}</Tag>
+                    <Tag>{{ numberFormat.pretty(slotProps.data.numBadges) }}</Tag>
                     Badges
                   </p>
                   <p>
-                    <Tag>{{ slotProps.data.totalPoints }}</Tag>
+                    <Tag>{{ numberFormat.pretty(slotProps.data.totalPoints) }}</Tag>
                     Points
                   </p>
                   <project-description-row :project-id="slotProps.data.projectId"/>

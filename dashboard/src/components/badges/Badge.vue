@@ -154,7 +154,7 @@ defineExpose({
                                          @delete="deleteBadge"/>
       </template>
       <template #footer>
-        <i v-if="badge.endDate" class="fas fa-gem absolute" style="font-size: 1rem; top: 2.6rem; left: 1.6rem; color: purple" aria-hidden="true"/>
+        <i v-if="badge.endDate" class="fas fa-gem absolute" style="font-size: 1.1rem; top: 1.2rem; left: 1.6rem; color: purple" aria-hidden="true"/>
         <div class="mt-1" style="height: 2.5rem;">
           <div v-if="!live" data-cy="badgeStatus" class="flex items-end">
             <div class="flex-1">
