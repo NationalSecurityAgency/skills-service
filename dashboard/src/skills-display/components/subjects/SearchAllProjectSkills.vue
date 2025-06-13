@@ -20,10 +20,12 @@ import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisp
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
 
 const skillsDisplayService = useSkillsDisplayService()
 const announcer = useSkillsAnnouncer()
 const skillDisplayInfo = useSkillsDisplayInfo()
+const attributes = useSkillsDisplayAttributesState()
 
 const selected = ref('')
 const query = ref('')
@@ -45,7 +47,7 @@ const search = (event) => {
       if (results && results.length > 0) {
         const firstRes = results[0]
         // eslint-disable-next-line max-len
-        announcer.polite(`Showing ${results.length} skills for ${query.value ? query.value : 'an empty'} search string. Selected ${firstRes.skillName} skill from ${firstRes.subjectName} subject. You have earned ${firstRes.userCurrentPoints} points out of ${firstRes.totalPoints} for this skill. Click to navigate to the skill.`)
+        announcer.polite(`Showing ${results.length} skills for ${query.value ? query.value : 'an empty'} search string. Selected ${firstRes.skillName} ${attributes.skillDisplayName} from ${firstRes.subjectName} ${attributes.subjectDisplayName}. You have earned ${firstRes.userCurrentPoints} points out of ${firstRes.totalPoints} for this ${attributes.skillDisplayName}. Click to navigate to the ${attributes.skillDisplayName}.`)
       } else {
         announcer.assertive(`No skills found for ${query.value} search string. Consider changing the search query.`)
       }
@@ -80,7 +82,7 @@ const navToSkill = (event) => {
       fluid
       data-cy="searchSkillsAcrossSubjects"
       :pt="{ dropdown: { 'aria-label': 'click to select a skill' } }"
-      placeholder="Search for a skill across subjects..."
+      :placeholder="`Search for a ${attributes.skillDisplayName} across ${attributes.subjectDisplayNamePlural}...`"
       optionLabel="skillName"
     >
       <template #option="slotProps">
