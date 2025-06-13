@@ -1117,12 +1117,12 @@ class SkillsService {
         return wsHelper.apiGet(url.toString())
     }
 
-    def getProjectUsers(String projectId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = "", int minimumPoints = 0) {
-        return wsHelper.adminGet("${getProjectUrl(projectId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}".toString())
+    def getProjectUsers(String projectId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = "", int minimumPoints = 0, int maximumPoints = 999999) {
+        return wsHelper.adminGet("${getProjectUrl(projectId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}".toString())
     }
 
-    def getUserProgressExcelExport(String projectId, String orderBy = 'totalPoints', boolean ascending = true, String query = "", int minimumPoints = 0) {
-        return downloadAttachment("/admin${getProjectUrl(projectId)}/users/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}".toString())
+    def getUserProgressExcelExport(String projectId, String orderBy = 'totalPoints', boolean ascending = true, String query = "", int minimumPoints = 0, int maximumPoints = 999999) {
+        return downloadAttachment("/admin${getProjectUrl(projectId)}/users/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}".toString())
     }
 
     def getUserAchievementsExcelExport(String projectId, Map params=null) {
@@ -1135,8 +1135,8 @@ class SkillsService {
         return downloadAttachment("/admin${getSubjectUrl(projectId, subjectId)}/skills/export/excel".toString())
     }
 
-    def getSubjectUsers(String projectId, String subjectId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0) {
-        return wsHelper.adminGet("${getSubjectUrl(projectId, subjectId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}".toString())
+    def getSubjectUsers(String projectId, String subjectId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 999999) {
+        return wsHelper.adminGet("${getSubjectUrl(projectId, subjectId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}".toString())
     }
 
     def getUserStats(String projectId, String userId) {
@@ -1152,16 +1152,16 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/lastSkillEvent".toString())
     }
 
-    def getSkillUsers(String projectId, String skillId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0) {
-        return wsHelper.adminGet("${getSkillUrl(projectId, null, skillId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}".toString())
+    def getSkillUsers(String projectId, String skillId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 999999) {
+        return wsHelper.adminGet("${getSkillUrl(projectId, null, skillId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}".toString())
     }
 
-    def getBadgeUsers(String projectId, String badgeId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0) {
-        return wsHelper.adminGet("${getBadgeUrl(projectId, badgeId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}".toString())
+    def getBadgeUsers(String projectId, String badgeId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 999999) {
+        return wsHelper.adminGet("${getBadgeUrl(projectId, badgeId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}".toString())
     }
 
-    def getUserTagUsers(String projectId, String tagKey, String tagValue, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0) {
-        return wsHelper.adminGet("${getProjectUrl(projectId)}/userTags/${tagKey}/${tagValue}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}".toString())
+    def getUserTagUsers(String projectId, String tagKey, String tagValue, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 999999) {
+        return wsHelper.adminGet("${getProjectUrl(projectId)}/userTags/${tagKey}/${tagValue}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}".toString())
     }
 
     def getLevels(String projectId, String subjectId = null) {
