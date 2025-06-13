@@ -875,6 +875,88 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
                                                       @Param('userId') String userId,
                                                       @Param('query') String query,
                                                       PageRequest pageRequest)
+
+    static interface SkillWithAchievementDetails {
+        String getSkillId()
+        String getSkillName()
+        String getSkillType()
+        Integer getPointIncrement()
+        Integer getTotalPoints()
+        String getSubjectName()
+        String getSubjectId()
+        Boolean getUserAchieved()
+        Integer getUserCurrentPoints()
+        Integer getChildAchievementCount()
+        Integer getTotalChildCount()
+    }
+
+    @Query(value = '''
+WITH
+skill_subjects AS (
+    SELECT
+        srd.child_ref_id,
+        sd.name,
+        sd.skill_id
+    FROM
+        skill_relationship_definition srd
+            JOIN
+        skill_definition sd ON srd.parent_ref_id = sd.id
+    WHERE sd.project_id = :projectId 
+      AND sd.type = 'Subject'
+),
+child_achievement_counts AS (
+         SELECT
+             srd.parent_ref_id,
+             COUNT(DISTINCT ua.id) AS ua_count,
+             COUNT(DISTINCT srd.child_ref_id) AS child_skill_count
+         FROM
+             skill_relationship_definition srd
+                 JOIN
+             skill_definition parent_skill ON srd.parent_ref_id = parent_skill.id
+                 JOIN
+             skill_definition child_skill ON srd.child_ref_id = child_skill.id
+                 LEFT JOIN
+             user_achievement ua ON srd.child_ref_id = ua.skill_ref_id
+                 AND ua.user_id = :userId
+         WHERE parent_skill.project_id = :projectId
+             AND child_skill.project_id = :projectId
+             AND srd.type IN ('RuleSetDefinition', 'BadgeRequirement')
+         GROUP BY
+             srd.parent_ref_id
+     )
+
+SELECT DISTINCT
+    s.skill_id AS skillId,
+    s.name AS skillName,
+    s.type as skillType,
+    s.point_increment AS pointIncrement,
+    s.total_points AS totalPoints,
+    ss.name AS subjectName,
+    ss.skill_id AS subjectId,
+    CASE WHEN ua.id IS NOT NULL OR COALESCE(cac.ua_count, 0) >= COALESCE(cac.child_skill_count, 1) THEN true ELSE false END AS userAchieved,
+    COALESCE(up.points, 0) AS userCurrentPoints,
+    COALESCE(cac.ua_count, 0) AS childAchievementCount,
+    COALESCE(cac.child_skill_count, 0) AS totalChildCount
+FROM
+    skill_definition s
+        LEFT JOIN skill_subjects ss ON s.id = ss.child_ref_id
+        LEFT JOIN user_achievement ua ON s.id = ua.skill_ref_id
+        AND s.type = 'Skill'
+        AND ua.user_id = :userId
+        LEFT JOIN user_points up ON s.id = up.skill_ref_id
+        AND up.user_id = :userId
+        LEFT JOIN child_achievement_counts cac ON s.id = cac.parent_ref_id
+WHERE
+    s.enabled = 'true'
+  AND s.type in ('Skill', 'Subject', 'Badge')
+  AND s.project_id = :projectId
+ORDER BY s.name ASC
+    ''', nativeQuery = true)
+    List<SkillWithAchievementDetails> findAllSkillsSubjectsAndBadgesWithAchievementDetails(
+            @Param('projectId') String projectId,
+            @Param('userId') String userId
+    )
+
     static interface SkillNameAndSubjectId {
         String getSkillName()
         String getSubjectId()

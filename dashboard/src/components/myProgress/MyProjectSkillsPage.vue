@@ -20,16 +20,48 @@ import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkil
 import SkillsDisplayHome from '@/skills-display/components/SkillsDisplayHome.vue'
 import ProjectService from '@/components/projects/ProjectService.js'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
-import { useWindowSize } from '@vueuse/core'
+import { useWindowSize, watchDebounced, useMagicKeys } from '@vueuse/core'
 import ResponsiveBreakpoints from '@/components/utils/misc/ResponsiveBreakpoints.js'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import ContactProjectAdminsDialog from "@/components/contact/ContactProjectAdminsDialog.vue";
+import SkillsDisplaySearch from '@/skills-display/components/SkillsDisplaySearch.vue'
+import { useUserPreferences } from '@/stores/UseUserPreferences.js'
+import { useLog } from '@/components/utils/misc/useLog.js'
 
 const route = useRoute()
 const projectId = route.params.projectId
 const skillsDisplayAttributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
 const appInfo = useAppInfoState()
+
+const log = useLog()
+const userPreferences = useUserPreferences()
+const keys = useMagicKeys({
+  passive: false,
+  onEventFired(e) {
+    if (searchTrainingButtonShortcut.value?.toLowerCase() === 'ctrl+k' && e.ctrlKey && e.key === 'k' && e.type === 'keydown') {
+      e.preventDefault()
+    }
+  },
+})
+
+const showSkillsDisplaySearchDialog = ref(false)
+const searchTrainingButtonShortcut = ref('ctrl+k')
+userPreferences.afterUserPreferencesLoaded().then((options) => {
+  const debounceOptions = { debounce: 250, maxWait: 1000 }
+  if (options.sd_search_training_keyboard_shortcut) {
+    searchTrainingButtonShortcut.value = options.sd_search_training_keyboard_shortcut?.toLowerCase().replace(/ /g, '')
+  }
+
+  log.debug(`Search training shortcut is : ${searchTrainingButtonShortcut.value}`)
+  watchDebounced(
+      keys[searchTrainingButtonShortcut.value],
+      () => {
+        showSkillsDisplaySearchDialog.value = true
+      },
+      debounceOptions
+  )
+})
 
 const windowSize = useWindowSize()
 const currentWidth = ref(windowSize.width)
@@ -83,21 +115,35 @@ const handleProjInvitation = () => {
     ProjectService.addToMyProjects(projectId)
   }
 }
+const toTitleCase = (str) => {
+  return str.toLowerCase().split('+').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
 </script>
 
 <template>
   <div style="position: relative">
-    <div v-if="appInfo.emailEnabled" :class="{
+    <div :class="{
       'contact-button-inline': isContactButtonInline,
       'text-center': !isContactButtonInline
     }">
       <SkillsButton
-        id="contactProjectAdminsBtn"
+        id="skillsDisplaySearchBtn"
         :track-for-focus="true"
-        @click="showContact = true"
-        data-cy="contactOwnerBtn"
-        label="Contact Project"
-        icon="fas fa-mail-bulk" />
+        @click="showSkillsDisplaySearchDialog = true"
+        data-cy="skillsDisplaySearchBtn"
+        label="Search"
+        :title="`Search Project (${toTitleCase(searchTrainingButtonShortcut)})`"
+        icon="fa-solid fa-magnifying-glass" />
+
+      <SkillsButton
+          v-if="appInfo.emailEnabled"
+          class="ml-2"
+          id="contactProjectAdminsBtn"
+          :track-for-focus="true"
+          @click="showContact = true"
+          data-cy="contactOwnerBtn"
+          label="Contact"
+          icon="fas fa-mail-bulk" />
     </div>
     <skills-display-home :id="projectId" class="my-4" />
 
@@ -106,6 +152,8 @@ const handleProjInvitation = () => {
                            :project-id="projectId"
                            save-button-label="Submit"
     />
+
+    <skills-display-search ref="skillsDisplaySearch" v-if="showSkillsDisplaySearchDialog" v-model="showSkillsDisplaySearchDialog" :project-id="projectId" />
   </div>
 </template>
 

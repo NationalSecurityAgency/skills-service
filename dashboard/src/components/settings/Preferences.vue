@@ -56,6 +56,14 @@ const settings = ref({
     dirty: false,
     type: Boolean,
   },
+  sdSearchKeyboardShortcut: {
+    settingGroup: 'user.prefs',
+    value: 'Ctrl + k',
+    setting: 'sd_search_training_keyboard_shortcut',
+    lastLoadedValue: false,
+    dirty: false,
+    type: String,
+  },
   sdPreviousSkillKeyboardShortcut: {
     settingGroup: 'user.prefs',
     value: 'Ctrl + Alt + p',
@@ -180,6 +188,10 @@ function sdNextSkillKeyboardShortcutChanged() {
 function sdPreviousSkillKeyboardShortcutChanged() {
   settings.value.sdPreviousSkillKeyboardShortcut.dirty = `${settings.value.sdPreviousSkillKeyboardShortcut.value}` !== `${settings.value.sdPreviousSkillKeyboardShortcut.lastLoadedValue}`;
 }
+function sdSearchKeyboardShortcutChanged() {
+  settings.value.sdSearchKeyboardShortcut.dirty = `${settings.value.sdSearchKeyboardShortcut.value}` !== `${settings.value.sdSearchKeyboardShortcut.lastLoadedValue}`;
+}
+
 </script>
 
 <template>
@@ -222,6 +234,10 @@ function sdPreviousSkillKeyboardShortcutChanged() {
       </div>
       <Fieldset legend="Keyboard shortcuts when taking a training" class="mt-3">
         <div class="flex flex-col gap-4 pt-2">
+          <keyboard-shortcut-input
+              label="Search"
+              v-model="settings.sdSearchKeyboardShortcut.value"
+              @change="sdSearchKeyboardShortcutChanged"/>
           <keyboard-shortcut-input
               label="Previous Skill"
               v-model="settings.sdPreviousSkillKeyboardShortcut.value"
