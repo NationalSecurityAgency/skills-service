@@ -91,6 +91,7 @@ const showContact = ref(false)
 
 themeState.theme.disableSkillTreeBrand = true
 themeState.theme.disableBreadcrumb = true
+themeState.theme.disableSearchButton = true
 themeState.theme.pageTitle = {
   textAlign: 'left',
   fontSize: '1.5rem',
@@ -153,7 +154,10 @@ const toTitleCase = (str) => {
                            save-button-label="Submit"
     />
 
-    <skills-display-search ref="skillsDisplaySearch" v-if="showSkillsDisplaySearchDialog" v-model="showSkillsDisplaySearchDialog" :project-id="projectId" />
+    <skills-display-search v-if="showSkillsDisplaySearchDialog"
+                           ref="skillsDisplaySearch"
+                           v-model="showSkillsDisplaySearchDialog"
+                           :project-id="projectId" />
   </div>
 </template>
 
