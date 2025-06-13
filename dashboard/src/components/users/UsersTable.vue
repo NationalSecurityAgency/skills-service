@@ -33,6 +33,7 @@ import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js';
+import {useProjDetailsState} from "@/stores/UseProjDetailsState.js";
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
@@ -43,12 +44,16 @@ const userInfo = useUserInfo()
 const exportUtil = useExportUtil()
 const numberFormat = useNumberFormat()
 const projConfig = useProjConfig()
+const projectDetailsState = useProjDetailsState()
+const projectPoints = computed(() => {
+  return projectDetailsState.isLoading ? 999999 : projectDetailsState.project.totalPoints;
+})
 
 let filters = ref({
   user: '',
   progress: [0, 100],
   minimumPoints: 0,
-  maximumPoints: 100,
+  maximumPoints: projectPoints.value,
 })
 
 const data = ref([])
@@ -103,7 +108,7 @@ const reset = () => {
   filters.value.user = ''
   filters.value.minimumPoints = 0
   filters.value.maximumPoints = totalPoints.value
-  filters.value.progress = 0
+  filters.value.progress = [0, 100]
   currentPage.value = 1
   loadData().then(() => {
     nextTick(() => announcer.polite('Users table filters have been removed'))
@@ -237,7 +242,7 @@ const archiveUsers = () => {
                          data-cy="users-progress-input" aria-label="minimum user progress input filter" inputId="minimumProgress"
                          class="w-16" />
               <InputText v-model.number="filters.progress[1]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="maximumProgress"
-                         data-cy="users-progress-input" aria-label="maximum user progress input filter" inputId="maximumProgress"
+                         data-cy="users-max-progress-input" aria-label="maximum user progress input filter" inputId="maximumProgress"
                          class="w-16" />
             </div>
           </div>
