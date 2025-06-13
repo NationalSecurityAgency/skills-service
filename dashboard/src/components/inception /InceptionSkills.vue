@@ -31,6 +31,7 @@ skillsDisplayAttributes.internalBackButton = false
 themeState.theme.landingPageTitle = 'Dashboard Skills'
 themeState.theme.disableSkillTreeBrand = true
 themeState.theme.disableBreadcrumb = true
+themeState.theme.disableSearchButton = true
 skillsDisplayAttributes.loadConfigStateIfNeeded()
 
 
