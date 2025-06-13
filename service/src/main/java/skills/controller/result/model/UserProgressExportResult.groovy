@@ -40,7 +40,7 @@ class UserProgressExportResult extends AbstractXlsxStreamingView {
         String projectId = model.get(PROJECT_ID) as String
         String query = model.get(QUERY) as String
         Integer minimumPoints = model.get(MINIMUM_POINTS) as Integer
-        Integer maximumPoints = model.get(MINIMUM_POINTS) as Integer
+        Integer maximumPoints = model.get(MAXIMUM_POINTS) as Integer
         PageRequest pageRequest = model.get(PAGE_REQUEST) as PageRequest
 
         // define excel file name to be exported
