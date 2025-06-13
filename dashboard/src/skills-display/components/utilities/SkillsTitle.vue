@@ -14,18 +14,53 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import SkillsDisplayBreadcrumb from '@/skills-display/components/header/SkillsDisplayBreadcrumb.vue'
 import PoweredBySkilltree from '@/skills-display/components/header/PoweredBySkilltree.vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useSkillsDisplayBreadcrumbState } from '@/skills-display/stores/UseSkillsDisplayBreadcrumbState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import SkillsDisplaySearch from '@/skills-display/components/SkillsDisplaySearch.vue'
+import { useUserPreferences } from '@/stores/UseUserPreferences.js'
+import { useLog } from '@/components/utils/misc/useLog.js'
+import { useMagicKeys, watchDebounced } from '@vueuse/core'
+import { useRoute } from 'vue-router'
 
 const attributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
 const breadcrumb = useSkillsDisplayBreadcrumbState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
+const log = useLog()
+const userPreferences = useUserPreferences()
+const route = useRoute()
+const keys = useMagicKeys({
+  passive: false,
+  onEventFired(e) {
+    if (searchTrainingButtonShortcut.value?.toLowerCase() === 'ctrl+k' && e.ctrlKey && e.key === 'k' && e.type === 'keydown') {
+      e.preventDefault()
+    }
+  },
+})
+
+const projectId = route.params.projectId
+const showSkillsDisplaySearchDialog = ref(false)
+const searchTrainingButtonShortcut = ref('ctrl+k')
+userPreferences.afterUserPreferencesLoaded().then((options) => {
+  const debounceOptions = { debounce: 250, maxWait: 1000 }
+  if (options.sd_search_training_keyboard_shortcut) {
+    searchTrainingButtonShortcut.value = options.sd_search_training_keyboard_shortcut?.toLowerCase().replace(/ /g, '')
+  }
+
+  log.debug(`Search training shortcut is : ${searchTrainingButtonShortcut.value}`)
+  watchDebounced(
+      keys[searchTrainingButtonShortcut.value],
+      () => {
+        showSkillsDisplaySearchDialog.value = true
+      },
+      debounceOptions
+  )
+})
 
 const props = defineProps({
   backButton: { type: Boolean, default: true },
@@ -38,9 +73,13 @@ const showBackButton = computed(() => {
 const navigateBack = () => {
   breadcrumb.navUpBreadcrumb()
 }
+const toTitleCase = (str) => {
+  return str.toLowerCase().split('+').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
 
+const disableSearchButton = computed(() => themeState.theme.disableSearchButton)
 const disableBreadcrumb = computed(() => themeState.theme.disableBreadcrumb)
-const renderDivWhereBackButtonResides = computed(() => (showBackButton.value || !themeState.theme.disableSkillTreeBrand) && !themeState.theme?.breadcrumb?.align)
+const renderDivWhereBackButtonResides = computed(() => (showBackButton.value || !disableSearchButton.value || !themeState.theme.disableSkillTreeBrand) && !themeState.theme?.breadcrumb?.align)
 const renderDivWhereBrandResides = computed(() => showBackButton.value || !themeState.theme.disableSkillTreeBrand)
 const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
 </script>
@@ -60,6 +99,16 @@ const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
             class="skills-theme-btn"
             data-cy="back"
             aria-label="navigate back" />
+
+          <SkillsButton
+              v-if="!disableSearchButton"
+              id="skillsDisplaySearchBtn"
+              :track-for-focus="true"
+              :class="{'ml-2': showBackButton}"
+              @click="showSkillsDisplaySearchDialog = true"
+              data-cy="skillsDisplaySearchBtn"
+              :title="`Search Project (${toTitleCase(searchTrainingButtonShortcut)})`"
+              icon="fa-solid fa-magnifying-glass" />
         </div>
 
         <div :class="{'mx-5': showBackButton}" class="text-center flex-1">
@@ -77,6 +126,11 @@ const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
             <powered-by-skilltree :animate-power-by-label="animatePowerByLabel && skillsDisplayInfo.isHomePage.value" />
           </div>
         </div>
+
+        <skills-display-search v-if="showSkillsDisplaySearchDialog && !disableSearchButton"
+                               ref="skillsDisplaySearch"
+                               v-model="showSkillsDisplaySearchDialog"
+                               :project-id="projectId" />
       </div>
     </template>
   </Card>

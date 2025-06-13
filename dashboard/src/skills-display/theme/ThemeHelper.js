@@ -16,7 +16,7 @@
 import tinycolor from 'tinycolor2';
 
 export default {
-  nonCSSConfig: ['progressIndicators', 'charts', 'landingPageTitle', 'disableSkillTreeBrand', 'disableBreadcrumb', 'iconColors', 'prerequisites', 'circleProgressInteriorTextColor', 'disableEncouragementsConfetti'],
+  nonCSSConfig: ['progressIndicators', 'charts', 'landingPageTitle', 'disableSkillTreeBrand', 'disableSearchButton', 'disableBreadcrumb', 'iconColors', 'prerequisites', 'circleProgressInteriorTextColor', 'disableEncouragementsConfetti'],
   bothCssAndThemModule: ['pageTitleTextColor', 'pageTitle', 'skillTreeBrandColor', 'infoCards', 'backgroundColor', 'textPrimaryColor', 'textSecondaryColor', 'tiles', 'breadcrumb'],
   selectorKey: {
     maxWidth: {

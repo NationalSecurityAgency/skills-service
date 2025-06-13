@@ -59,6 +59,49 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.get('[data-cy="badgeTitle"]').contains('Badge 1')
     })
 
+    it('client-display: navigate to skills, subjects, and badges using training-wide search dialog', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.createBadge(1, 1, { enabled: true });
+
+
+        cy.cdVisit('/');
+        cy.contains('Overall Point');
+
+        // navigate to subject 1
+        cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
+        cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
+        cy.get('input.p-listbox-filter').type('subject 1')
+        cy.realPress('ArrowDown');
+        cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', 'Subject 1');
+        cy.realPress('Enter');
+        cy.get('[data-cy="skillsTitle"]').contains('Subject 1')
+
+        // navigate to skill 1
+        cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
+        cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
+        cy.get('input.p-listbox-filter').type('skill 1')
+        cy.realPress('ArrowDown');
+        cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', 'Very Great Skill 1');
+        cy.realPress('Enter');
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="skillOrder"]').contains('Skill 1 of 3')
+
+        // navigate to badge 1
+        cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
+        cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
+        cy.get('input.p-listbox-filter').type('badge 1')
+        cy.realPress('ArrowDown');
+        cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', 'Badge 1');
+        cy.realPress('Enter');
+        cy.get('[data-cy="badgeTitle"]').contains('Badge 1')
+    })
+
     it('no results after filtering training-wide search dialog', () => {
         cy.createProject(1)
         cy.createSubject(1, 1)
