@@ -208,6 +208,8 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <!-- TODO: remove once spring boot raises the version to > 42.7.7            -->
+            <version>42.7.7</version>
         </dependency>
 
         <dependency>
