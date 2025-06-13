@@ -154,6 +154,68 @@ describe('App Features Tests', () => {
             .should('have.attr', 'href', 'https://skilltreesupport.com');
     });
 
+    it('Validate Help Links for Guides', () => {
+        cy.visit('/progress-and-rankings');
+        cy.get('[data-cy="helpButton"]').click();
+
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Official Docs"] a')
+            .should('have.attr', 'href', 'https://skilltreeplatform.dev');
+
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Training"] a')
+            .should('have.attr', 'href', 'https://skilltreeplatform.dev/training-participation/');
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Admin"] a')
+            .should('have.attr', 'href', 'https://skilltreeplatform.dev/dashboard/user-guide/');
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Integration"] a')
+            .should('have.attr', 'href', 'https://skilltreeplatform.dev/skills-client/');
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Accessibility"] a')
+            .should('have.attr', 'href', 'https://skilltreeplatform.dev/training-participation/accessibility.html');
+    });
+
+    it('Accessibility Guide link direct to training vs admin accessibility guide based on current page', () => {
+        cy.enableProdMode(1);
+        cy.addToMyProjects(1);
+
+        const trainingAccessibilityLink = 'https://skilltreeplatform.dev/training-participation/accessibility.html'
+        const adminAccessibilityLink = 'https://skilltreeplatform.dev/dashboard/user-guide/accessibility.html'
+        const validateLink = (expectedLink) => {
+            cy.get('[data-cy="helpButton"]').click();
+            cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Accessibility"] a')
+                .should('have.attr', 'href', expectedLink);
+            cy.realPress('Escape');
+        }
+
+        cy.visit('/progress-and-rankings');
+        validateLink(trainingAccessibilityLink);
+
+        cy.get('[data-cy="manageMyProjsBtn"]').click();
+        cy.get('[data-cy="discoverProjectsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1');
+        validateLink(trainingAccessibilityLink)
+
+        cy.get('[data-cy="backToProgressAndRankingBtn"]').click()
+        cy.get('[data-cy="project-link-proj1"]')
+        validateLink(trainingAccessibilityLink)
+
+        cy.get('[data-cy="project-link-proj1"]').click()
+        cy.get('[data-cy="myRankPosition"]')
+        cy.get('[data-cy="pointHistoryChartPlaceholder-animationEnded"]')
+        validateLink(trainingAccessibilityLink)
+
+        cy.get('[data-cy="settings-button"]').click();
+        cy.get('[data-p="popup"][data-pc-name="menu"]  [aria-label="Project Admin"]').click()
+        cy.get('[data-cy="projCard_proj1_manageBtn"]')
+        validateLink(adminAccessibilityLink)
+
+        cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
+        cy.get('[data-cy="projectLastReportedSkillValue"]').contains('Never')
+        validateLink(adminAccessibilityLink)
+
+        cy.get('[data-cy="settings-button"]').click();
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Settings"]').click()
+        cy.get('[data-cy="nickname"]')
+        validateLink(adminAccessibilityLink)
+    });
+
+
     it('ability to enable page visits reporting to the backend', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply({
