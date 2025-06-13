@@ -171,7 +171,7 @@ describe('App Features Tests', () => {
             .should('have.attr', 'href', 'https://skilltreeplatform.dev/training-participation/accessibility.html');
     });
 
-    it('Accessibility Guide link direct to training vs admin accessibility guide based on current page', () => {
+    it.only('Accessibility Guide link direct to training vs admin accessibility guide based on current page', () => {
         cy.enableProdMode(1);
         cy.addToMyProjects(1);
 
@@ -182,6 +182,8 @@ describe('App Features Tests', () => {
             cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Accessibility"] a')
                 .should('have.attr', 'href', expectedLink);
             cy.realPress('Escape');
+            cy.wait(1000)
+            cy.get('[data-p="popup"][data-pc-name="menu"]').should('not.exist');
         }
 
         cy.visit('/progress-and-rankings');
