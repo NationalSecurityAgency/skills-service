@@ -96,7 +96,7 @@ watch(() => props.navItems, () => {
                         @click="flipCollapsed"
                         :aria-label="collapsed ? 'Expand Navigation' : 'Collapse Navigation'"
                         :title="collapsed ? 'Expand Navigation' : 'Collapse Navigation'">
-                  <i v-if="!collapsed" class="fas fa-compress-alt"/><i v-else class="fas fa-expand-alt"/>
+                  <i v-if="!collapsed" class="fas fa-compress-alt"/><i v-else class="fas fa-expand-alt my-2"/>
                 </Button>
               </div>
             </div>
@@ -106,7 +106,7 @@ watch(() => props.navItems, () => {
                            :to="{ name: navItem.page }"
                            v-slot="{ navigate, isExactActive }"
                            custom>
-                <li :class="{ 'bg-primary ': isExactActive }" :data-cy="`navLine-${navItem.name}`" class="pl-2 pr-5">
+                <li :class="{ 'bg-primary ': isExactActive, 'pr-5': !showCollapsed, 'pr-2': showCollapsed }" :data-cy="`navLine-${navItem.name}`" class="pl-2">
                   <Button link
                           class="no-underline w-full"
                           @click="(e) => { navigate(e); }"
@@ -115,8 +115,8 @@ watch(() => props.navItems, () => {
                           :data-cy="`nav-${navItem.name}`">
                     <div class="flex justify-start items-center w-full"
                          :class="{'mr-4': !showCollapsed, 'text-zinc-100 dark:text-slate-900': isExactActive }">
-                      <i :class="`${navItem.iconClass} ${colors.getTextClass(index)}${isExactActive ? ' text-primary bg-primary-contrast rounded-border border py-1' : ''}`"
-                         class="fas mr-2 w-8"
+                      <i :class="`${navItem.iconClass} ${colors.getTextClass(index)}${isExactActive ? ' text-primary bg-primary-contrast rounded-border border py-1' : ''}${!showCollapsed ? ' mr-2' : ' text-[1.3rem]'} `"
+                         class="fas w-8"
                          aria-hidden="true"/> <span v-if="!showCollapsed" class="">{{ navItem.name }}</span>
                     </div>
                   </Button>
