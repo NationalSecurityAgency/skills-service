@@ -313,7 +313,7 @@ const toggle = (event) => {
                     data-cy="groupToggle"
                     aria-controls="group_control_menu">
                   <i class="fas fa-list mr-1" aria-hidden="true"></i>
-                  <span>Groups</span>
+                  <span>{{ attributes.groupDisplayNamePlural }}</span>
                   <i class="fas fa-caret-down ml-2"></i>
                 </Button>
                 <div id="group_control_menu">

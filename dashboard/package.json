@@ -38,6 +38,7 @@
     "number-format.js": "2.0.9",
     "pdfkit": "0.17.1",
     "pinia": "3.0.3",
+    "pluralize": "8.0.0",
     "postmate": "1.5.2",
     "primevue": "4.3.5",
     "sortablejs": "1.15.6",

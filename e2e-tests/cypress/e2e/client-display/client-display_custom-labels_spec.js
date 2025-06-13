@@ -16,33 +16,42 @@
 
 describe('Client Display Custom Label Tests', () => {
 
-    it('verify custom labels', () => {
-        cy.createProject(1);
-        cy.createSubject(1, 1);
-        cy.createSkill(1, 1, 1);
-        cy.createSubject(1, 2);
-        cy.createSkillsGroup(1, 1, 1);
+
+    before(() => {
+        Cypress.env('disableResetDb', true);
+        cy.resetDb();
+        cy.loginAsDefaultUser()
+
+        cy.createProject(1, { name: 'With Custom Labels'});
+        cy.createSubject(1, 1, {name: 'Fancy'});
+        cy.createSkill(1, 1, 1, { name: 'Expertise 1'});
+        cy.createSubject(1, 2, {name: 'Comedy'});
+        cy.createSkillsGroup(1, 1, 1, {name: 'Bunch'});
         cy.addSkillToGroup(1, 1, 1, 2, {
+            name: 'Expertise 2',
             pointIncrement: 10,
             numPerformToCompletion: 5
         });
         cy.addSkillToGroup(1, 1, 1, 3, {
+            name: 'Expertise 3',
             pointIncrement: 15,
             numPerformToCompletion: 2
         });
-        cy.createSubject(1, 3);
-        cy.createSkill(1, 3, 1, { selfReportingType: 'HonorSystem' });
+        cy.createSubject(1, 3, {name: 'Magic'});
+        cy.createSkill(1, 3, 1, { selfReportingType: 'HonorSystem', name: 'Expertise 1a' });
         cy.createSkill(1, 3, 2, {
             selfReportingType: 'Approval',
             pointIncrement: 50,
             pointIncrementInterval: 0,
             justificationRequired: false,
+            name: 'Expertise 2a'
         });
         cy.createSkill(1, 3, 3, {
             selfReportingType: 'Approval',
             pointIncrement: 50,
             pointIncrementInterval: 0,
             justificationRequired: true,
+            name: 'Expertise 3a'
         });
 
         cy.loginAsRootUser();
@@ -50,18 +59,7 @@ describe('Client Display Custom Label Tests', () => {
         cy.assignSkillToGlobalBadge(1, 1, 1);
         cy.assignProjectToGlobalBadge(1, 1);
         cy.enableGlobalBadge();
-        cy.fixture('vars.json')
-            .then((vars) => {
-                cy.logout();
-
-                if (!Cypress.env('oauthMode')) {
-                    cy.log('NOT in oauthMode, using form login');
-                    cy.login(vars.defaultUser, vars.defaultPass);
-                } else {
-                    cy.log('oauthMode, using loginBySingleSignOn');
-                    cy.loginBySingleSignOn();
-                }
-            });
+        cy.loginAsDefaultUser()
 
         cy.request('POST', '/admin/projects/proj1/settings', [
             {
@@ -89,15 +87,28 @@ describe('Client Display Custom Label Tests', () => {
                 setting: 'level.displayName',
                 projectId: 'proj1',
             },
+            {
+                value: 'Unit',
+                setting: 'point.displayName',
+                projectId: 'proj1',
+            },
         ]);
 
         const proxyUser = Cypress.env('proxyUser');
         cy.reportSkill(1, 1, proxyUser, '2021-02-24 10:00');
+    });
+    after(() => {
+        Cypress.env('disableResetDb', false);
+    });
 
-        cy.cdVisit('/');
-        cy.contains('Stage 2 Progress');
+    it('verify custom labels - project page', () => {
+        cy.visit('/progress-and-rankings/projects/proj1');
         cy.get('[data-cy="pointHistoryChartNoData"]')
-        cy.contains('My Stage');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains('Work Role: With Custom Labels');
+        cy.get('[data-cy="overallPoints"]').contains('Overall Units');
+        cy.get('[data-cy="levelProgress"]').contains('Stage 2 Progress');
+        cy.get('[data-cy="pointsTillNextLevelSubtitle"]').contains('70 Units to Stage 2');
+        cy.get('[data-cy="overallLevel"]').contains('My Stage');
         cy.get('[data-cy="overallLevelDesc"]')
             .contains('Stage 1 out of 5');
         cy.get('[data-cy="subjectTile"]')
@@ -106,10 +117,21 @@ describe('Client Display Custom Label Tests', () => {
             .contains('Stage 2');
         cy.get('[data-cy="subjectTile"]')
             .contains('Stage 0');
-        cy.contains('Level')
-            .should('not.exist');
+        cy.get('[data-cy="achievedSkillsProgress"]').contains('Achieved Courses');
+        cy.get('[data-cy="downloadTranscriptCard"]').contains('You have Completed 0 out of 6 Courses!')
+        cy.get('[data-cy="searchSkillsAcrossSubjects"] input')
+            .should('have.attr', 'placeholder', 'Search for a Course across Competencies...');
 
-        cy.cdClickRank();
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Level', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Skill', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Subject', { matchCase: false }).should('be.visible');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Project', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Point', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Group', { matchCase: false }).should('not.exist');
+    })
+
+    it('verify custom labels - rank page', () => {
+        cy.visit('/progress-and-rankings/projects/proj1/rank')
         cy.get('[data-cy="levelBreakdownChart-animationEnded"]')
         cy.get('[data-cy="myRankLevelStatCard"]')
             .contains('My Stage');
@@ -120,29 +142,50 @@ describe('Client Display Custom Label Tests', () => {
         cy.contains('Level')
             .should('not.exist');
 
-        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
-            .click();
-        cy.get('[data-cy="title"]').contains('User Skills')
-        cy.get('[data-cy="pointHistoryChartNoData"]')
-        cy.get('[data-cy="subjectTileBtn"]').should('have.length', 3).should('be.visible');
-        cy.cdClickSubj(0);
-        cy.contains('Stage 3 Progress');
-        cy.contains('My Stage');
-        cy.contains('Level')
-            .should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Level', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Skill', { matchCase: false }).filter('[data-cy="userColumn"]').should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Subject', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Project', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Point', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Group', { matchCase: false }).should('not.exist');
+    })
+
+    it('verify custom labels - subject page', () => {
+        cy.cdVisit('/subjects/subj1');
+
+        cy.get('[data-cy="overallPoints"]').contains('Overall Units');
+        cy.get('[data-cy="levelProgress"]').contains('Stage 3 Progress');
+        cy.get('[data-cy="pointsTillNextLevelSubtitle"]').contains('26 Units to Stage 3');
+        cy.get('[data-cy="overallLevel"]').contains('My Stage');
+        cy.get('[data-cy="overallLevelDesc"]').contains('Stage 2 out of 5');
+        cy.get('[data-cy="achievedSkillsProgress"]').contains('Achieved Courses');
+
+        cy.get('[data-cy="groupToggle"]').contains('KSAS')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 2 Competencies');
+
         cy.get('[data-cy="skillsSearchInput"]')
             .invoke('attr', 'placeholder')
             .should('contain', 'Search courses');
         cy.get('[data-cy="skillDetailsToggle"]')
             .contains('Course Details');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj1"] [data-cy="breadcrumbItemLabel"]')
-          .should('have.text', 'Competency:');
+            .should('have.text', 'Competency:');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj1"] [data-cy="breadcrumbItemValue"]')
-          .should('have.text', 'subj1');
+            .should('have.text', 'subj1');
 
-        cy.cdClickRank();
-        cy.get('[data-cy="myRankLevelStatCard"]').contains('My Stage');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Level', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Skill', { matchCase: false }).not('[data-pc-section="header"] h2.sr-only').should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Subject', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Project', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Point', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Group', { matchCase: false }).should('not.exist');
+    })
+
+    it('verify custom labels - subject rank page', () => {
+        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/rank');
         cy.get('[data-cy="levelBreakdownChart-animationEnded"]')
+        cy.get('[data-cy="myRankLevelStatCard"]')
+            .contains('My Stage');
         cy.get('[data-cy="levelBreakdownChart"]')
             .contains('Stage Breakdown');
         cy.get('[data-cy="levelBreakdownChart"]')
@@ -150,17 +193,25 @@ describe('Client Display Custom Label Tests', () => {
         cy.contains('Level')
             .should('not.exist');
 
-        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-subj1]')
-            .click();
-        cy.get('[data-cy="skillProgressTitle-skill1"]')
-        cy.get('[data-cy="pointHistoryChartNoData"]')
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Level', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Skill', { matchCase: false }).filter('[data-cy="userColumn"]').should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Subject', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Project', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Point', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Group', { matchCase: false }).should('not.exist');
+    })
 
+    it('verify custom labels - single skill', () => {
+        // TODO: stopped here
         cy.cdClickSkill(0, true, 'Course');
         cy.get('[data-cy="skillProgressTitle-skill1"]').contains('Very Great Skill 1')
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-subj1"] [data-cy="breadcrumbItemLabel"]')
-          .should('have.text', 'Competency:');
+            .should('have.text', 'Competency:');
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumb-skill1"] [data-cy="breadcrumbItemLabel"]')
-          .should('have.text', 'Course:');
+            .should('have.text', 'Course:');
+    })
+
+    it('verify custom labels', () => {
 
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Overview]')
             .click();

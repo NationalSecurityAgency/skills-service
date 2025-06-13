@@ -19,12 +19,12 @@ import CircleProgress from '@/skills-display/components/progress/CircleProgress.
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { computed } from 'vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
-import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
 import SkillLevel from '@/skills-display/components/progress/MySkillLevel.vue'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
 import AchievementCelebration from "@/skills-display/components/progress/celebration/AchievementCelebration.vue";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 const props = defineProps({
   isSubject: {
@@ -40,8 +40,8 @@ const userProgress = computed(() => {
 })
 const themeState = useSkillsDisplayThemeState()
 const attributes = useSkillsDisplayAttributesState()
+const pluralize = usePluralize()
 const numFormat = useNumberFormat()
-const pluralSupport = useLanguagePluralSupport()
 
 const totalSkills = computed(() => userProgress.value?.totalSkills || 0)
 const skillsAchieved = computed(() => userProgress.value?.skillsAchieved || 0)
@@ -112,7 +112,7 @@ const levelStats = computed(() => {
               <div v-if="!isLevelComplete">
                 <div data-cy="pointsTillNextLevelSubtitle">
                   <Tag data-cy="pointsTillNextLevel">{{ numFormat.pretty(levelStats.pointsTillNextLevel) }}</Tag>
-                  {{ attributes.pointDisplayName }}{{ pluralSupport.plural(levelStats.pointsTillNextLevel) }} to {{ attributes.levelDisplayName }} {{levelStats.nextLevel }}
+                  {{ pluralize.plural(attributes.pointDisplayName, levelStats.pointsTillNextLevel) }} to {{ attributes.levelDisplayName }} {{levelStats.nextLevel }}
                 </div>
                 <div class="mt-1">
                   You can do it!
@@ -125,7 +125,7 @@ const levelStats = computed(() => {
       <div class="mt-9 mx-8 mb-4 flex justify-center sd-theme-achieved-skills-progress" data-cy="achievedSkillsProgress">
         <div class="w-11/12">
         <div class="flex mb-1" :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`">
-          <div class="flex-1 text-lg font-medium">Achieved Skills</div>
+          <div class="flex-1 text-lg font-medium">Achieved {{ attributes.skillDisplayNamePlural }}</div>
           <div><span class="text-orange-700 dark:text-orange-400 font-medium sd-theme-primary-color" data-cy="numAchievedSkills">{{skillsAchieved}}</span> / <span data-cy="numTotalSkills">{{totalSkills}}</span></div>
         </div>
         <vertical-progress-bar
