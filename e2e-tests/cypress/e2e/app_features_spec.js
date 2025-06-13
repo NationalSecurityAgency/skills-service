@@ -171,7 +171,7 @@ describe('App Features Tests', () => {
             .should('have.attr', 'href', 'https://skilltreeplatform.dev/training-participation/accessibility.html');
     });
 
-    it.only('Accessibility Guide link direct to training vs admin accessibility guide based on current page', () => {
+    it('Accessibility Guide link direct to training vs admin accessibility guide based on current page', () => {
         cy.enableProdMode(1);
         cy.addToMyProjects(1);
 
