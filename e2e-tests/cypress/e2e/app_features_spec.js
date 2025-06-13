@@ -181,8 +181,9 @@ describe('App Features Tests', () => {
             cy.get('[data-cy="helpButton"]').click();
             cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Accessibility"] a')
                 .should('have.attr', 'href', expectedLink);
-            cy.realPress('Escape');
+            cy.get('[data-p="popup"][data-pc-name="menu"]').should('be.visible');
             cy.wait(1000)
+            cy.realPress('Escape');
             cy.get('[data-p="popup"][data-pc-name="menu"]').should('not.exist');
         }
 
