@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {ref} from 'vue'
+import {ref, computed} from 'vue'
 import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
 import {usePagePath} from "@/components/utils/UsePageLocation.js";
 import ContactProjectAdminsDialog from "@/components/contact/ContactProjectAdminsDialog.vue";
@@ -27,42 +27,57 @@ const router = useRouter()
 const supportLinksUtil = useSupportLinksUtil()
 
 const menu = ref()
-let allItemsTmp = [
-  {
-    label: 'Official Docs',
-    icon: 'fas fa-book',
-    url: `${appConfig.docsHost}`
-  },
-  {
-    separator: true
-  },
-  {
-    label: 'Guides',
-    items: [
-      {
-        label: 'Dashboard',
-        icon: 'fas fa-info-circle',
-        url: `${appConfig.docsHost}/dashboard/user-guide/`
-      },
-      {
-        label: 'Integration',
-        icon: 'fas fa-hands-helping',
-        url: `${appConfig.docsHost}/skills-client/`
-      }
-    ]
+
+const items = computed(() => {
+
+  const accessibilityGuideLink = pagePath.isProgressAndRankingPage.value ? '/training-participation/accessibility.html' : '/dashboard/user-guide/accessibility.html'
+
+  const allItemsTmp = [
+    {
+      label: 'Official Docs',
+      icon: 'fas fa-book',
+      url: `${appConfig.docsHost}`
+    },
+    {
+      separator: true
+    },
+    {
+      label: 'Guides',
+      items: [
+        {
+          label: 'Training',
+          icon: 'fa-solid fa-graduation-cap',
+          url: `${appConfig.docsHost}/training-participation/`
+        },
+        {
+          label: 'Admin',
+          icon: 'fa-solid fa-user-gear',
+          url: `${appConfig.docsHost}/dashboard/user-guide/`
+        },
+        {
+          label: 'Integration',
+          icon: 'fa-solid fa-hands-helping',
+          url: `${appConfig.docsHost}/skills-client/`
+        },
+        {
+          label: 'Accessibility',
+          icon: 'fa-solid fa-universal-access',
+          url: `${appConfig.docsHost}${accessibilityGuideLink}`
+        }
+      ]
+    }
+  ]
+
+  const additionalSupportLinks = supportLinksUtil.supportLinks
+  if (additionalSupportLinks && additionalSupportLinks.length > 0) {
+    allItemsTmp.push({
+      label: 'Support',
+      items: additionalSupportLinks
+    })
   }
-]
 
-const additionalSupportLinks = supportLinksUtil.supportLinks
-if (additionalSupportLinks && additionalSupportLinks.length > 0) {
-  allItemsTmp.push({
-    label: 'Support',
-    items: additionalSupportLinks
-  })
-}
-
-const items = ref(allItemsTmp)
-
+  return allItemsTmp
+})
 const toggle = (event) => {
   menu.value.toggle(event)
 }
