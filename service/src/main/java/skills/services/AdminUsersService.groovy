@@ -171,7 +171,7 @@ class AdminUsersService {
             result.data = projectUsers
             if (!projectUsers) {
                 result.count = 0
-            } else if (query || minimumPoints > 0) {
+            } else if (query || minimumPoints > 0 || maximumPoints < result.totalPoints) {
                 result.count = userPointsRepo.countDistinctUserIdByProjectIdAndUserIdLike(projectId, query, minimumPoints, maximumPoints)
             } else {
                 result.count = totalProjectUsers
@@ -237,7 +237,7 @@ class AdminUsersService {
             result.data = projectUsers
             if (!projectUsers) {
                 result.count = 0
-            } else if (query || minimumPoints > 0) {
+            } else if (query || minimumPoints > 0 || maximumPoints < result.totalPoints) {
                 result.count = userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(projectId, skillIds, query, minimumPoints, maximumPoints)
             } else {
                 result.count = totalProjectUsersWithSkills
@@ -260,7 +260,7 @@ class AdminUsersService {
             result.data = projectUsers
             if (!projectUsers) {
                 result.count = 0
-            } else if (query || minimumPoints > 0) {
+            } else if (query || minimumPoints > 0 || maximumPoints < result.totalPoints) {
                 result.count = PostgresQlNativeRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, query, minimumPoints, maximumPoints)
             } else {
                 result.count = totalProjectUsersWithSkills
