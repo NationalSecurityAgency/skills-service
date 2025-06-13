@@ -25,6 +25,7 @@ import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 const props = defineProps({
   skill: Object,
@@ -47,6 +48,7 @@ const numFormat = useNumberFormat()
 const timeUtils = useTimeUtils()
 const appConfig = useAppConfig()
 const attributes = useSkillsDisplayAttributesState()
+const pluralize = usePluralize()
 const route = useRoute()
 const skillDisplayInfo = useSkillsDisplayInfo()
 
@@ -221,7 +223,7 @@ const titleComponent = computed(() => route.params.skillId ? 'h2' : 'h3')
            aria-hidden="true" />
         <span v-if="skill.isSkillsGroupType">
           <animated-number :num="numChildSkillsComplete" />
-          / {{ numFormat.pretty(numSkillsRequired) }} Skill{{ (numSkillsRequired === 1) ? '' : 's' }}
+          / {{ numFormat.pretty(numSkillsRequired) }} {{ pluralize.plural(attributes.subjectDisplayName, numSkillsRequired) }}
           {{ someSkillsAreOptional ? 'Required' : '' }}
         </span>
         <span v-else class="content-end">
