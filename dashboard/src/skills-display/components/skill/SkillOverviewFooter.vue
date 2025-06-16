@@ -27,6 +27,7 @@ import QuizFooter from "@/skills-display/components/skill/QuizFooter.vue";
 import ApprovalHistory from '@/skills-display/components/skill/ApprovalHistory.vue';
 import QuizType from '@/skills-display/components/quiz/QuizType.js';
 import { useSelfReportHelper } from '@/skills-display/UseSelfReportHelper.js';
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 const props = defineProps({
   skill: Object
@@ -37,6 +38,7 @@ const timeUtils = useTimeUtils()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const skillsDisplayService = useSkillsDisplayService()
 const attributes = useSkillsDisplayAttributesState()
+const pluralize =usePluralize()
 const skillState = useSkillsDisplaySubjectState()
 const selfReportHelper = useSelfReportHelper()
 const log = useLog()
@@ -74,13 +76,10 @@ const showTimeline = computed(() => {
 const showApprovalJustification = ref(false)
 const requestApprovalLoading = ref(false)
 const removeRejectionLoading = ref(false)
-const rejectionDialogYOffset = ref(0)
-const approvalRequestedMsg = ref('')
 
 const justificationInput = ref(null)
 const displayApprovalJustificationInput = () => {
   showApprovalJustification.value = true
-  // nextTick(() => justificationInput.value.focusOnMarkdownEditor())
 }
 
 const isPendingApproval = () => {
@@ -174,13 +173,6 @@ const reportSkill = (approvalRequestedMsg) => {
     requestApprovalLoading.value = false
   })
 }
-// testWasTaken(testResult) {
-//   const { gradedRes } = testResult;
-//   if (gradedRes && gradedRes.passed && gradedRes.associatedSkillResults) {
-//     const skill = gradedRes.associatedSkillResults.find((e) => e.projectId ===  skillInternal.value.projectId && e.skillId ===  skillInternal.value.skillId);
-//     this.updateEarnedPoints(skill);
-//   }
-// },
 const updateEarnedPoints = (res) => {
   if (res.pointsEarned > 0 || isMotivationalSkill.value) {
     log.trace(`Skill ${skillInternal.value.skillId} earned ${res.pointsEarned} points`)
@@ -197,6 +189,8 @@ const focusOnId = (elementId) => {
 defineExpose({
   updateEarnedPoints
 })
+
+const skillLabelLower = computed(() => attributes.skillDisplayNameLower)
 </script>
 
 <template>
@@ -209,12 +203,12 @@ defineExpose({
             <i class="fas fa-user-shield text-2xl" aria-hidden="true"></i>
           </div>
           <div class="flex-1 italic pt-1" data-cy="honorSystemAlert">
-            This skill can be submitted under the <span class="font-size-1">Honor System</span>, claim <span class="font-size-1">
-            <Tag severity="info">{{ numFormat.pretty(skillInternal.pointIncrement) }}</Tag></span> points once you've completed the skill.
+            This {{ skillLabelLower }} can be submitted under the <span class="font-size-1">Honor System</span>, claim <span class="font-size-1">
+            <Tag severity="info">{{ numFormat.pretty(skillInternal.pointIncrement) }}</Tag></span> {{ pluralize.plural(attributes.pointDisplayName,  skillInternal.pointIncrement).toLowerCase() }} once you've completed the {{ skillLabelLower }}.
           </div>
           <div class="col-auto">
             <SkillsButton
-              label="Claim Points"
+              :label="`Claim ${attributes.pointDisplayNamePlural}`"
               icon="fas fa-check-double"
               class="skills-theme-btn"
               :disabled="selfReportDisabled"
@@ -236,12 +230,12 @@ defineExpose({
             <i class="fas fa-user-shield text-2xl" aria-hidden="true"></i>
           </div>
           <div class="flex-1 italic pt-1" data-cy="honorSystemAlert">
-            This skill's achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skillInternal.expirationDate) }}</span>, but your <span class="font-size-1">
+            This {{ attributes.skillDisplayNameLower }}'s achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skillInternal.expirationDate) }}</span>, but your <span class="font-size-1">
             <Tag severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> points can be retained by performing another <span class="font-size-1">Honor System</span> request.
           </div>
           <div class="col-auto">
             <SkillsButton
-                label="Claim Points"
+                :label="`Claim ${attributes.pointDisplayNamePlural}`"
                 icon="fas fa-check-double"
                 class="skills-theme-btn"
                 :disabled="selfReportDisabled"
@@ -265,9 +259,9 @@ defineExpose({
               <i class="fas fa-traffic-light text-2xl" aria-hidden="true"></i>
             </div>
             <div class="flex-1" data-cy="requestApprovalAlert">
-              This skill requires <span class="font-size-1">approval</span>.
+              This {{ skillLabelLower }} requires <span class="font-size-1">approval</span>.
               Request <span class="font-size-1"><Tag severity="info">{{ numFormat.pretty(skillInternal.pointIncrement)
-              }}</Tag></span> points once you've completed the skill.
+              }}</Tag></span> {{ pluralize.plural(attributes.pointDisplayName,  skillInternal.pointIncrement).toLowerCase() }} once you've completed the {{ skillLabelLower }}.
             </div>
             <div class="">
               <SkillsButton
@@ -306,8 +300,8 @@ defineExpose({
               <i class="fas fa-traffic-light text-2xl" aria-hidden="true"></i>
             </div>
             <div class="flex-1" data-cy="requestApprovalAlert">
-              This skill's achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skillInternal.expirationDate) }}</span>, but your <span class="font-size-1">
-              <Tag severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> points can be retained by submitting another <span class="font-size-1">approval</span> request.
+              This {{ attributes.skillDisplayNameLower }}'s achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skillInternal.expirationDate) }}</span>, but your <span class="font-size-1">
+              <Tag severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> {{ pluralize.plural(attributes.groupDisplayName,  skillInternal.totalPoints) }} can be retained by submitting another <span class="font-size-1">approval</span> request.
             </div>
             <div class="">
               <SkillsButton
@@ -344,7 +338,7 @@ defineExpose({
              severity="warn"
              v-if="isPendingApproval() && !showTimeline && selfReport.msgHidden" class="mb-2 alert alert-info italic"
              data-cy="pendingApprovalStatus">
-      This skill is <span class="font-size-1 normal-font">pending approval</span>.
+      This {{ attributes.skillDisplayNameLower }} is <span class="font-size-1 normal-font">pending approval</span>.
       Submitted {{ timeUtils.relativeTime(skillInternal.selfReporting.requestedOn) }}
     </Message>
     <div v-if="isRejected" class="alert alert-danger mt-2" data-cy="selfReportRejectedAlert">
@@ -388,18 +382,18 @@ defineExpose({
             severity="success">
             Congrats! You just earned
             <Tag>{{ selfReport.res.pointsEarned }}</Tag>
-            points<span
-            v-if="isCompleted"> and <b>completed</b> the {{ attributes.skillDisplayName.toLowerCase() }}</span>!
+            {{ pluralize.plural(attributes.pointDisplayName, selfReport.res.pointsEarned).toLowerCase() }}<span
+            v-if="isCompleted"> and <b>completed</b> the {{ skillLabelLower }}</span>!
           </Message>
           <Message v-if="isPointsEarned && isMotivationalSkill && !firstReport && isRetention" severity="success" icon="fas fa-birthday-cake">
-            Congratulations! You just retained your <Tag>{{ skillInternal.totalPoints }}</Tag> points!
+            Congratulations! You just retained your <Tag>{{ skillInternal.totalPoints }}</Tag> {{ attributes.pointDisplayNamePlural }}!
           </Message>
           <Message
             v-if="selfReport.res && !isPointsEarned && (isAlreadyPerformed() || !isApprovalRequired)"
             severity="warn"
             @close="selfReport.res = null"
             icon="fas fa-cloud-sun-rain">
-            <span><b>Unfortunately</b> no points.</span>
+            <span><b>Unfortunately</b> no {{ attributes.pointDisplayNamePlural }}.</span>
             {{ selfReport.res?.explanation }}
           </Message>
 
@@ -410,7 +404,7 @@ defineExpose({
             v-if="!isAlreadyPerformed() && isApprovalRequired">
             <div>
               <b>Submitted successfully!</b>
-              This {{ attributes.skillDisplayName.toLowerCase() }} <b class="text-info">requires approval</b> from a
+              This {{ skillLabelLower }} <b class="text-info">requires approval</b> from a
               {{ attributes.projectDisplayName.toLowerCase() }} administrator. Now let's play the waiting game!
             </div>
           </Message>

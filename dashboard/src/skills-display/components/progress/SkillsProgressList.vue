@@ -400,7 +400,7 @@ const toggle = (event) => {
 
       <no-content2
         v-if="!(skillsInternal && skillsInternal.length > 0) && showNoDataMsg"
-        :title="`${attributes.skillDisplayName}s have not been added yet.`"
+        :title="`${attributes.skillDisplayNamePlural} have not been added yet.`"
         :message="`Please contact this ${attributes.projectDisplayName.toLowerCase()}'s administrator.`" />
     </template>
   </Card>

@@ -19,11 +19,13 @@ import ThemeHelper from '@/skills-display/theme/ThemeHelper.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import UniqueIdGenerator from '@/utils/UniqueIdGenerator.js'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
+import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
 
 export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState', () => {
 
   const log = useLog()
   const themeHelper = useThemesHelper()
+  const attributes = useSkillsDisplayAttributesState()
   const themeStyleId = UniqueIdGenerator.uniqueId('custom-theme-style-node-')
   const colors = {
     info: '#146c75',
@@ -83,7 +85,7 @@ export const useSkillsDisplayThemeState = defineStore('skillsDisplayThemeState',
   }
 
 
-  const landingPageTitle = computed(() => theme.value.landingPageTitle || 'User Skills')
+  const landingPageTitle = computed(() => theme.value.landingPageTitle || `User ${attributes.skillDisplayNamePlural}`)
 
   const graphBadgeColor = computed(() => theme?.value?.prerequisites?.badgeColor || 'indigo')
   const graphSkillColor = computed(() => theme?.value?.prerequisites?.skillColor || 'orange')

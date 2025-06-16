@@ -16,12 +16,12 @@ limitations under the License.
 <script setup>
 import { computed } from 'vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
-import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import SelfReportType from "@/components/skills/selfReport/SelfReportType.js";
 import QuizType from "@/skills-display/components/quiz/QuizType.js";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 const props = defineProps({
   skill: Object,
@@ -31,7 +31,7 @@ const props = defineProps({
   },
 })
 const numFormat = useNumberFormat()
-const pluralSupport = useLanguagePluralSupport()
+const pluralize = usePluralize()
 const themeState = useSkillsDisplayThemeState()
 const attributes = useSkillsDisplayAttributesState()
 
@@ -42,15 +42,15 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
   const minutes = props.skill.pointIncrementInterval > 60 ? props.skill.pointIncrementInterval % 60 : props.skill.pointIncrementInterval;
   const occur = props.skill.maxOccurrencesWithinIncrementInterval;
   const points = occur * props.skill.pointIncrement;
-  let res = `Up-to ${numFormat.pretty(points)} ${attributes.pointDisplayName.toLowerCase()}s within `;
+  let res = `Up-to ${numFormat.pretty(points)} ${attributes.pointDisplayNamePlural.toLowerCase()} within `;
   if (hours) {
-    res = `${res} ${hours} hr${pluralSupport.sOrNone(hours)}`;
+    res = `${res} ${hours} ${pluralize.plural('hr', hours)}`;
   }
   if (minutes) {
     if (hours) {
       res = ` ${res} and`;
     }
-    res = `${res} ${minutes} min${pluralSupport.sOrNone(minutes)}`;
+    res = `${res} ${minutes} ${pluralize.plural('min', minutes)}`;
   }
   return res;
 })
@@ -68,7 +68,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
         :icon-color="themeState.infoCards().iconColors[0]"
         :add-border="true"
         data-cy="overallPointsEarnedCard">
-        <Tag>Overall</Tag> {{ attributes.pointDisplayName }}s Earned
+        <Tag>Overall</Tag> {{ attributes.pointDisplayNamePlural }} Earned
       </media-info-card>
     </div>
 
@@ -80,7 +80,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
         :icon-color="themeState.infoCards().iconColors[1]"
         :add-border="true"
         data-cy="pointsAchievedTodayCard">
-        {{ attributes.pointDisplayName }}s Achieved <Tag>Today</Tag>
+        {{ attributes.pointDisplayNamePlural }} Achieved <Tag>Today</Tag>
       </media-info-card>
     </div>
 
@@ -92,7 +92,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
         :icon-color="themeState.infoCards().iconColors[2]"
         :add-border="true"
         data-cy="pointsPerOccurrenceCard">
-        {{ attributes.pointDisplayName }}s per Occurrence
+        {{ attributes.pointDisplayNamePlural }} per Occurrence
       </media-info-card>
     </div>
 
@@ -109,7 +109,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
             You passed <b>{{ skill.selfReporting.quizName }}</b> quiz. Well done!
           </div>
           <div v-else>
-            Pass <b>{{ skill.selfReporting.quizName }}</b> quiz to earn the skill
+            Pass <b>{{ skill.selfReporting.quizName }}</b> quiz to earn the {{ attributes.skillDisplayNameLower }}
           </div>
         </div>
 
@@ -118,7 +118,7 @@ const hours = props.skill.pointIncrementInterval > 59 ? Math.floor(props.skill.p
             You completed <b>{{ skill.selfReporting.quizName }}</b> survey. Well done!
           </div>
           <div v-else>
-            Complete <b>{{ skill.selfReporting.quizName }}</b> survey to earn the skill
+            Complete <b>{{ skill.selfReporting.quizName }}</b> survey to earn the {{ attributes.skillDisplayNameLower }}
           </div>
         </div>
 
