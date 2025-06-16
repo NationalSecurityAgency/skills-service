@@ -74,8 +74,10 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const subjectDisplayName = computed(() => config.value.subjectDisplayName || 'Subject')
   const subjectDisplayNamePlural = computed(() => pluralize.plural(subjectDisplayName.value))
   const groupDisplayName = computed(() => config.value.groupDisplayName || 'Group')
+  const groupDisplayNameLower = computed(() => groupDisplayName.value.toLowerCase())
   const groupDisplayNamePlural = computed(() => pluralize.plural(groupDisplayName.value))
   const skillDisplayName = computed(() => config.value.skillDisplayName || 'Skill')
+  const skillDisplayNameLower = computed(() => skillDisplayName.value.toLowerCase())
   const skillDisplayNamePlural = computed(() => pluralize.plural(skillDisplayName.value))
   const pointDisplayName = computed(() => config.value.pointDisplayName || 'Point')
   const pointDisplayNamePlural = computed(() => pluralize.plural(pointDisplayName.value))
@@ -122,8 +124,10 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     subjectDisplayName,
     subjectDisplayNamePlural,
     groupDisplayName,
+    groupDisplayNameLower,
     groupDisplayNamePlural,
     skillDisplayName,
+    skillDisplayNameLower,
     skillDisplayNamePlural,
     pointDisplayName,
     pointDisplayNamePlural,

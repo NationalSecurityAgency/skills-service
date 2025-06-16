@@ -24,6 +24,8 @@ import QuizRun from '@/skills-display/components/quiz/QuizRun.vue';
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue';
 import AnimatedNumber from '@/skills-display/components/utilities/AnimatedNumber.vue';
+import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 const props = defineProps({
   skill: {
@@ -35,6 +37,8 @@ const props = defineProps({
 const route = useRoute()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const skillState = useSkillsDisplaySubjectState()
+const attributes = useSkillsDisplayAttributesState()
+const pluralize = usePluralize()
 
 const skillInternal = ref({});
 const quizInfo = ref({});
@@ -101,6 +105,7 @@ const loadQuizInfo = () => {
 }
 
 const associatedSkillNotCompleted = computed(() => skillInternal.value.points < skillInternal.value.totalPoints)
+const pointsLabel = computed(() => pluralize.plural(attributes.pointDisplayName,  skillInternal.value.pointIncrement).toLowerCase())
 </script>
 
 <template>
@@ -119,17 +124,17 @@ const associatedSkillNotCompleted = computed(() => skillInternal.value.points < 
           <template #splashPageTitle v-if="associatedSkillNotCompleted">
             <div class="mb-6">
               <i class="fas fa-glass-cheers text-info skills-theme-quiz-correct-answer" style="font-size: 1.5rem;"></i> You will earn <Tag severity="success">
-              <AnimatedNumber :num="skillInternal.pointIncrement"></AnimatedNumber></Tag> points for
+              <AnimatedNumber :num="skillInternal.pointIncrement"></AnimatedNumber></Tag> {{ pointsLabel }} for
               <span class="font-bold text-primary" style="font-size: 1.2rem">{{ skillInternal.skill }}</span>
-              skill by <span v-if="isSurveySkill">completing this survey</span><span v-else>passing this quiz</span>.
+              {{ attributes.skillDisplayNameLower }} by <span v-if="isSurveySkill">completing this survey</span><span v-else>passing this quiz</span>.
             </div>
           </template>
           <template #aboveTitleWhenPassed>
             <Message class="mb-6" severity="success" :closable="false" icon="fas fa-glass-cheers">
               Congrats!! You just earned <Tag severity="success">
-              <AnimatedNumber :num="skillInternal.pointIncrement"></AnimatedNumber></Tag> points for
+              <AnimatedNumber :num="skillInternal.pointIncrement"></AnimatedNumber></Tag> {{ pointsLabel }} for
               <span class="font-bold" style="font-size: 1.2rem">{{ skillInternal.skill }}</span>
-              skill by <span v-if="isSurveySkill">completing the survey</span><span v-else>passing the quiz</span>.
+              {{ attributes.skillDisplayNameLower }} by <span v-if="isSurveySkill">completing the survey</span><span v-else>passing the quiz</span>.
             </Message>
           </template>
         </QuizRun>
