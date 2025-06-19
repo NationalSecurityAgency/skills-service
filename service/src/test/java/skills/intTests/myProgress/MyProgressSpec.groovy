@@ -484,7 +484,7 @@ class MyProgressSpec extends DefaultIntSpec {
         res1.mostRecentAchievedSkill
     }
 
-    def "skills are only counted from projects in the production mode even if they are part of My Projects"() {
+    def "skills are only counted from projects in the production mode unless they are part of My Projects"() {
         List skills = []
         List projs = (1..3).collect { int projNum ->
             def project = SkillsFactory.createProject(projNum)
@@ -502,6 +502,8 @@ class MyProgressSpec extends DefaultIntSpec {
         }
 
         skillsService.disableProdMode(projs[1])
+        def initialRes = skillsService.getMyProgressSummary()
+        skillsService.removeMyProject(projs[1].projectId)
         assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
 
         assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
@@ -518,6 +520,12 @@ class MyProgressSpec extends DefaultIntSpec {
         def res1 = skillsService.getMyProgressSummary()
 
         then:
+        initialRes.totalSkills == 6
+        initialRes.numAchievedSkills == 0
+        initialRes.numAchievedSkillsLastMonth == 0
+        initialRes.numAchievedSkillsLastWeek == 0
+        !initialRes.mostRecentAchievedSkill
+
         res.totalSkills == 4
         res.numAchievedSkills == 1
         res.numAchievedSkillsLastMonth == 1
