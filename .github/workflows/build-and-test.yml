@@ -118,10 +118,6 @@ jobs:
           distribution: 'temurin'
           java-version: '24' # The JDK version to make available on the path.
 
-      - uses: browser-actions/setup-chrome@v1
-        with:
-          chrome-version: '137.0.7151.119'
-
       - name: Print Versions
         run: |
           java -version
