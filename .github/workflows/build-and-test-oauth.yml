@@ -16,12 +16,12 @@ name: Continuous Integration with OAuth
 
 on:
   workflow_dispatch:
-#  push:
-#    paths-ignore:
-#      - 'README.md'
-#  pull_request:
-#    paths-ignore:
-#      - 'README.md'
+  push:
+    paths-ignore:
+      - 'README.md'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
 
 jobs:
   build-skills-service-for-ui-tests:
@@ -32,12 +32,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.17.0'
+          node-version: ${{ vars.NODE_VERSION }}
 
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '19' # The JDK version to make available on the path.
+          java-version: ${{ vars.JAVA_VERSION }}
 
       - name: Print Versions
         run: |
@@ -108,12 +108,12 @@ jobs:
 
     - uses: actions/setup-node@v4
       with:
-        node-version: '20.17.0'
+        node-version: ${{ vars.NODE_VERSION }}
 
     - uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '19' # The JDK version to make available on the path.
+        java-version: ${{ vars.JAVA_VERSION }}
 
     - name: Print Versions
       run: |
