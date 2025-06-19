@@ -72,7 +72,7 @@ jobs:
           path: ./service/target/*.jar
 
   ui-tests-against-postgres:
-#    if: github.event_name == 'schedule-never'
+    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
     needs: [build-skills-service-for-ui-tests]
     strategy:
@@ -256,7 +256,10 @@ jobs:
     steps:
       - name: Install libs
         run: |
+          apt update
+          apt install -y postgresql-client
           psql --version
+          apt install fonts-noto-color-emoji
 
       - uses: actions/checkout@v4
 
