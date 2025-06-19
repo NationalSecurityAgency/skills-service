@@ -38,7 +38,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.17.0'
+          node-version: $SKILLS_NODE_VERSION
 
       - uses: actions/setup-java@v4
         with:
@@ -113,7 +113,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.17.0'
+          node-version: $SKILLS_NODE_VERSION
 
       - uses: actions/setup-java@v4
         with:
@@ -191,7 +191,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.17.0'
+          node-version: $SKILLS_NODE_VERSION
 
       - name: Print Versions
         run: |
@@ -268,7 +268,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.17.0'
+          node-version: $SKILLS_NODE_VERSION
 
       - uses: actions/setup-java@v4
         with:
@@ -354,7 +354,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.17.0'
+          node-version: $SKILLS_NODE_VERSION
 
       - uses: actions/setup-java@v4
         with:
@@ -409,7 +409,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.17.0'
+          node-version: $SKILLS_NODE_VERSION
 
       - uses: actions/setup-java@v4
         with:
