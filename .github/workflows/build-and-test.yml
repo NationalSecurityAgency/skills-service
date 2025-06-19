@@ -1,4 +1,4 @@
-# Copyright 2020 SkillTree
+# Copyright 2025 SkillTree
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,20 +36,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup node version [${{ vars.NODE_VERSION }}]
+        uses: actions/setup-node@v4
         with:
-          node-version: '20.17.0'
+          node-version: ${{ vars.NODE_VERSION }}
 
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '19' # The JDK version to make available on the path.
+          java-version: ${{ vars.JAVA_VERSION }}
 
       - name: Print Versions
         run: |
           java -version
           mvn --version
-          google-chrome --version 
+          google-chrome --version
+          mvn -v
 
       - name: Cache local Maven repository
         uses: actions/cache@v4
@@ -104,21 +106,19 @@ jobs:
 
       - name: Install libs
         run: |
-          sudo apt-get update
           sudo apt-get install -y postgresql-client
           sudo psql --version
-          sudo apt-get install fonts-noto-color-emoji
 
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.17.0'
+          node-version: ${{ vars.NODE_VERSION }}
 
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '19' # The JDK version to make available on the path.
+          java-version: ${{ vars.JAVA_VERSION }}
 
       - name: Print Versions
         run: |
@@ -126,7 +126,6 @@ jobs:
           npm -v
           node -v
           google-chrome --version
-          fc-list > font-list.txt
 
       - uses: actions/download-artifact@v4
         with:
@@ -191,7 +190,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.17.0'
+          node-version: ${{ vars.NODE_VERSION }}
 
       - name: Print Versions
         run: |
@@ -224,9 +223,9 @@ jobs:
 
   ui-tests-against-postgres-cypress-dashboard:
     if: github.event_name == 'schedule-never'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 #    container:
-#      image: cypress/browsers:node-20.6.1-chrome-116.0.5845.187-1-ff-117.0-edge-116.0.1938.76-1
+#      image: cypress/browsers:node-22.16.0-chrome-137.0.7151.119-1-ff-139.0.4-edge-137.0.3296.62-1
     needs: [build-skills-service-for-ui-tests]
     strategy:
       # when one test fails, DO NOT cancel the other
@@ -259,25 +258,22 @@ jobs:
     steps:
       - name: Install libs
         run: |
-          sudo apt-get update
           sudo apt-get install -y postgresql-client
           sudo psql --version
-          sudo apt-get install fonts-noto-color-emoji
 
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.17.0'
 
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '19' # The JDK version to make available on the path.
+          java-version: ${{ vars.JAVA_VERSION }}
 
       - name: Print Versions
         run: |
           java -version
+          npm -v
+          node -v
+          google-chrome --version
 
       - uses: actions/download-artifact@v4
         with:
@@ -354,12 +350,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.17.0'
+          node-version: ${{ vars.NODE_VERSION }}
 
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '19' # The JDK version to make available on the path.
+          java-version: ${{ vars.JAVA_VERSION }}
 
       - name: Print Versions
         run: |
@@ -409,12 +405,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.17.0'
+          node-version: ${{ vars.NODE_VERSION }}
 
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '19' # The JDK version to make available on the path.
+          java-version: ${{ vars.JAVA_VERSION }}
 
       - name: Print Versions
         run: |
