@@ -95,7 +95,7 @@ class ManageMyProjectsSpec extends DefaultIntSpec {
         forMyProjects.collect { it.projectId } == projects.collect { it.projectId }.sort()
     }
 
-    def "projects should not be available if prod-mode is disabled"() {
+    def "projects should be available if prod-mode is disabled but still saved to my projects"() {
         List projects = (1..3).collect {
             def proj = SkillsFactory.createProject(it)
             anotherUser.createProject(proj)
@@ -116,9 +116,38 @@ class ManageMyProjectsSpec extends DefaultIntSpec {
 
         then:
         forMyProjects.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
+        forMyProjects1.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
+        forMyProjects2.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
+    }
+
+    def "projects should not be available if prod-mode is disabled and not still saved to my projects"() {
+        List projects = (1..3).collect {
+            def proj = SkillsFactory.createProject(it)
+            anotherUser.createProject(proj)
+            anotherUser.enableProdMode(proj)
+            skillsService.addMyProject(proj.projectId)
+            return proj
+        }
+
+        when:
+        def forMyProjects = skillsService.getAvailableMyProjects()
+
+        anotherUser.disableProdMode(projects[1])
+        skillsService.removeMyProject(projects[1].projectId)
+        def forMyProjects1 = skillsService.getAvailableMyProjects()
+
+        anotherUser.disableProdMode(projects[0])
+        anotherUser.disableProdMode(projects[2])
+        skillsService.removeMyProject(projects[0].projectId)
+        skillsService.removeMyProject(projects[2].projectId)
+        def forMyProjects2 = skillsService.getAvailableMyProjects()
+
+        then:
+        forMyProjects.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
         forMyProjects1.collect { it.projectId }  == [projects[0].projectId, projects[2].projectId]
         !forMyProjects2
     }
+
 
     def "add and remove my project - single project"() {
         def proj1 = SkillsFactory.createProject()
