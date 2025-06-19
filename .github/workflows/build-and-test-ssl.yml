@@ -18,13 +18,13 @@ on:
   schedule:
     - cron: '0 7 * * *'
   workflow_dispatch:
-#  push:
-#  pull_request:
-#    paths-ignore:
-#      - 'README.md'
-#      - '.github/workflows/build-and-test-postgres.yml'
-#      - '.github/workflows/publish-image-snapshot.yml'
-#      - '.gitlab-ci.yml'
+  push:
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - '.github/workflows/build-and-test-postgres.yml'
+      - '.github/workflows/publish-image-snapshot.yml'
+      - '.gitlab-ci.yml'
 
 jobs:
 
@@ -61,12 +61,12 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.17.0'
+          node-version: ${{ vars.NODE_VERSION }}
 
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '19' # The JDK version to make available on the path.
+          java-version: ${{ vars.JAVA_VERSION }}
 
       - name: Print Versions
         run: |
