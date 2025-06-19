@@ -14,6 +14,9 @@
 
 name: Continuous Integration
 
+env:
+  NODE_VERSION: 20
+
 on:
   schedule:
     - cron: '0 5 * * *'
@@ -38,7 +41,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: $SKILLS_NODE_VERSION
+          node-version: $NODE_VERSION
 
       - uses: actions/setup-java@v4
         with:
@@ -113,7 +116,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: $SKILLS_NODE_VERSION
+          node-version: $NODE_VERSION
 
       - uses: actions/setup-java@v4
         with:
@@ -191,7 +194,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: $SKILLS_NODE_VERSION
+          node-version: $NODE_VERSION
 
       - name: Print Versions
         run: |
@@ -268,7 +271,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: $SKILLS_NODE_VERSION
+          node-version: $NODE_VERSION
 
       - uses: actions/setup-java@v4
         with:
@@ -354,7 +357,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: $SKILLS_NODE_VERSION
+          node-version: $NODE_VERSION
 
       - uses: actions/setup-java@v4
         with:
@@ -409,7 +412,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: $SKILLS_NODE_VERSION
+          node-version: $NODE_VERSION
 
       - uses: actions/setup-java@v4
         with:
