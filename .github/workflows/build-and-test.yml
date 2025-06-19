@@ -104,7 +104,6 @@ jobs:
 
       - name: Install libs
         run: |
-#          sudo apt-get update
           sudo apt-get install -y postgresql-client
           sudo psql --version
           sudo apt-get install fonts-noto-color-emoji
@@ -259,7 +258,6 @@ jobs:
     steps:
       - name: Install libs
         run: |
-#          sudo apt-get update
           sudo apt-get install -y postgresql-client
           sudo psql --version
           sudo apt-get install fonts-noto-color-emoji
