@@ -49,7 +49,8 @@ jobs:
         run: |
           java -version
           mvn --version
-          google-chrome --version 
+          google-chrome --version
+          mvn -v
 
       - name: Cache local Maven repository
         uses: actions/cache@v4
@@ -180,8 +181,8 @@ jobs:
 
   combine-cypress-mochawesome-results:
     runs-on: ubuntu-latest
-#    if: ${{ !cancelled() }}
-    if: github.event_name == 'schedule-never'
+    if: ${{ !cancelled() }}
+#    if: github.event_name == 'schedule-never'
     needs: [ui-tests-against-postgres]
     steps:
       - uses: actions/checkout@v4
@@ -222,8 +223,8 @@ jobs:
   ui-tests-against-postgres-cypress-dashboard:
 #    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
-    container:
-      image: cypress/browsers:node-22.16.0-chrome-137.0.7151.119-1-ff-139.0.4-edge-137.0.3296.62-1
+#    container:
+#      image: cypress/browsers:node-22.16.0-chrome-137.0.7151.119-1-ff-139.0.4-edge-137.0.3296.62-1
     needs: [build-skills-service-for-ui-tests]
     strategy:
       # when one test fails, DO NOT cancel the other
@@ -256,10 +257,8 @@ jobs:
     steps:
       - name: Install libs
         run: |
-          apt update
-          apt install -y postgresql-client
-          psql --version
-          apt install fonts-noto-color-emoji
+          sudo apt-get install -y postgresql-client
+          sudo psql --version
 
       - uses: actions/checkout@v4
 
