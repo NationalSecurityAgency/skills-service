@@ -417,20 +417,12 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     @Query(value='''SELECT count(sd)
         from SkillDef sd 
         where 
-            sd.type='Skill' and 
-            sd.projectId IN 
-            (
-                select s.projectId
-                from Setting s
-                where s.projectId = sd.projectId
-                  and s.setting = 'production.mode.enabled'
-                  and s.value = 'true'
-            ) and 
+            sd.type='Skill' and
             sd.projectId IN (
                 select s.projectId
                 from Setting s, User uu
-                where (s.setting = 'my_project' and uu.userId=?1 and uu.id = s.userRefId and s.projectId = sd.projectId)
-            )  
+                where (s.setting = 'my_project' and uu.userId=?1 and uu.id = s.userRefId and s.projectId = sd.projectId)            
+            )
     ''')
     Integer countTotalProductionSkills(String userId)
 
