@@ -43,7 +43,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '19' # The JDK version to make available on the path.
+          java-version: '24' # The JDK version to make available on the path.
 
       - name: Print Versions
         run: |
@@ -72,7 +72,7 @@ jobs:
           path: ./service/target/*.jar
 
   ui-tests-against-postgres:
-    if: github.event_name == 'schedule-never'
+#    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
     needs: [build-skills-service-for-ui-tests]
     strategy:
@@ -104,7 +104,7 @@ jobs:
 
       - name: Install libs
         run: |
-          sudo apt-get update
+#          sudo apt-get update
           sudo apt-get install -y postgresql-client
           sudo psql --version
           sudo apt-get install fonts-noto-color-emoji
@@ -118,7 +118,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '19' # The JDK version to make available on the path.
+          java-version: '24' # The JDK version to make available on the path.
 
       - name: Print Versions
         run: |
@@ -259,7 +259,7 @@ jobs:
     steps:
       - name: Install libs
         run: |
-          sudo apt-get update
+#          sudo apt-get update
           sudo apt-get install -y postgresql-client
           sudo psql --version
           sudo apt-get install fonts-noto-color-emoji
@@ -273,11 +273,14 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '19' # The JDK version to make available on the path.
+          java-version: '24' # The JDK version to make available on the path.
 
       - name: Print Versions
         run: |
           java -version
+          npm -v
+          node -v
+          google-chrome --version
 
       - uses: actions/download-artifact@v4
         with:
@@ -359,7 +362,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '19' # The JDK version to make available on the path.
+          java-version: '24' # The JDK version to make available on the path.
 
       - name: Print Versions
         run: |
@@ -414,7 +417,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '19' # The JDK version to make available on the path.
+          java-version: '24' # The JDK version to make available on the path.
 
       - name: Print Versions
         run: |
