@@ -256,7 +256,6 @@ jobs:
     steps:
       - name: Install libs
         run: |
-          apt-get install -y postgresql-client
           psql --version
 
       - uses: actions/checkout@v4
