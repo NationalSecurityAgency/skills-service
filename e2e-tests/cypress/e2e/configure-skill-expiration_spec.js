@@ -323,7 +323,7 @@ describe('Configure Skill Expiration Tests', () => {
 
         // yearly
         cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').click();
-
+        cy.wait(1000)
         cy.get('[data-cy="yearlyMonth"]').click()
         cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('October').click()
         cy.get('[data-cy="yearlyDayOfMonth"]').click()
