@@ -176,20 +176,20 @@ if (props.isEdit) {
     <template #default>
       <div v-if="isEdit" class="flex flex-col gap-3">
         <SkillsNumberInput isRequired :min="1" label="Level" name="level" disabled/>
-        <SkillsNumberInput v-if="!levelAsPoints" showButtons isRequired :min="0" :max="100" suffix="%" label="Percent"
+        <SkillsNumberInput v-if="!levelAsPoints" isRequired :min="0" :max="100" suffix="%" label="Percent"
                            name="percent"/>
-        <SkillsNumberInput v-if="levelAsPoints" showButtons isRequired :min="0" label="Points From" name="pointsFrom"/>
-        <SkillsNumberInput v-if="levelAsPoints" showButtons isRequired :min="0" label="Points To" name="pointsTo"/>
+        <SkillsNumberInput v-if="levelAsPoints" isRequired :min="0" label="Points From" name="pointsFrom"/>
+        <SkillsNumberInput v-if="levelAsPoints" isRequired :min="0" label="Points To" name="pointsTo"/>
       </div>
       <template v-else>
         <template v-if="!levelAsPoints">
           <div class="w-full">
-            <SkillsNumberInput showButtons isRequired :min="0" :max="100" suffix="%" label="Percent" name="percent" />
+            <SkillsNumberInput isRequired :min="0" :max="100" suffix="%" label="Percent" name="percent" />
           </div>
         </template>
         <template v-else>
           <div class="w-full">
-            <SkillsNumberInput showButtons isRequired :min="0" data-cy="pointsInput" label="Points" name="points" />
+            <SkillsNumberInput isRequired :min="0" data-cy="pointsInput" label="Points" name="points" />
           </div>
         </template>
       </template>
