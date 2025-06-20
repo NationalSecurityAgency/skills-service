@@ -22,6 +22,7 @@ describe('Configure Skill Expiration Tests', () => {
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
         Cypress.Commands.add("visitExpirationConfPage", (projNum) => {
             cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-expiration');
+            cy.wait(2000)
             cy.wait('@getExpirationProps')
             cy.wait('@getSkillInfo')
             cy.get('.spinner-border').should('not.exist')
@@ -313,7 +314,7 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled');
     });
 
-    it('expiration date shows properly in skills table', () => {
+    it('expiration date shows properly in skills table - yearly', () => {
         const tableSelector = '[data-cy="skillsTable"]';
         cy.createProject(1)
         cy.createSubject(1, 1);
@@ -342,15 +343,30 @@ describe('Configure Skill Expiration Tests', () => {
                 value: 'Every year on October 30th'
             }],
         ], 1, false, null, false);
+    })
+
+    it('expiration date shows properly in skills table - multiple years', () => {
+        const tableSelector = '[data-cy="skillsTable"]';
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
 
         // yearly plural
         cy.visitExpirationConfPage();
-        cy.get('[data-cy="yearlyYears-sb"] [data-pc-section="incrementbutton"]').click();
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').click();
+        cy.wait(2000)
+        cy.get('[data-cy="yearlyYears-sb"]').type('{backspace}2')
+        cy.get('[data-cy="yearlyMonth"]').click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('October').click()
+        cy.get('[data-cy="yearlyDayOfMonth"]').click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('30').click()
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings')
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Expiration"]').click()
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
 
         cy.validateTable(tableSelector, [
@@ -359,6 +375,13 @@ describe('Configure Skill Expiration Tests', () => {
                 value: 'Every 2 years on October 30th'
             }],
         ], 1, false, null, false);
+    })
+
+    it('expiration date shows properly in skills table - monthly', () => {
+        const tableSelector = '[data-cy="skillsTable"]';
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
 
         // monthly
         cy.visitExpirationConfPage();
@@ -367,6 +390,8 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings')
         cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Expiration"]').click()
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
         cy.validateTable(tableSelector, [
             [{
@@ -391,13 +416,27 @@ describe('Configure Skill Expiration Tests', () => {
                 value: 'Every month on the 15th day of the month'
             }],
         ], 1, false, null, false);
+    })
+
+    it('expiration date shows properly in skills table - multiple months', () => {
+        const tableSelector = '[data-cy="skillsTable"]';
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
 
         cy.visitExpirationConfPage();
-        cy.get('[data-cy=monthlyMonths-sb] [data-pc-section="incrementbutton"]').click();
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').click();
+        cy.wait(2000)
+        cy.get('[data-cy=monthlyMonths-sb]').type('{backspace}2')
+        cy.get('[data-cy="monthlyDayOption"] [value="SET_DAY_OF_MONTH"]').click();
+        cy.get('[data-cy="monthlyDay"]').click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('15').click()
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings')
         cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Expiration"]').click()
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
         cy.validateTable(tableSelector, [
             [{
@@ -418,13 +457,23 @@ describe('Configure Skill Expiration Tests', () => {
                 value: 'Every 2 months on the last day of the month'
             }],
         ], 1, false, null, false);
+    })
+
+    it('expiration date shows properly in skills table - daily', () => {
+        const tableSelector = '[data-cy="skillsTable"]';
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
 
         // daily
         cy.visitExpirationConfPage();
         cy.get('[data-cy="expirationTypeSelector"] [data-cy="dailyRadio"]').click();
+        cy.wait(1000)
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings')
         cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Expiration"]').click()
         cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Expiration').click();
         cy.validateTable(tableSelector, [
             [{
