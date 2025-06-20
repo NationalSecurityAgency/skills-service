@@ -69,7 +69,6 @@ const resetTimeWindow = (checked) => {
       <SkillsNumberInput
         class="flex-1 mx-2"
         :class="{ 'text-color-secondary' : disabled }"
-        showButtons
         :disabled="!value"
         label="Hours"
         name="pointIncrementIntervalHrs" />
@@ -77,7 +76,6 @@ const resetTimeWindow = (checked) => {
       <SkillsNumberInput
         class="flex-1 mx-2"
         :class="{ 'text-color-secondary' : disabled }"
-        showButtons
         :min="0"
         :disabled="!value"
         label="Minutes"
@@ -87,7 +85,6 @@ const resetTimeWindow = (checked) => {
         class="flex-1 mx-2"
         :class="{ 'text-color-secondary' : disabled }"
         :min="1"
-        showButtons
         :disabled="!value"
         label="Window's Max Occurrences"
         name="numPointIncrementMaxOccurrences" />
