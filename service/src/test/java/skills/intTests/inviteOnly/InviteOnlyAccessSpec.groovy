@@ -746,4 +746,45 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         canAccessUser2 == false // does not belong to private project
     }
 
+    def "invite only project appears in my projects and catalog after accepting invite"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        subj.description = "subj descrip"
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+        def badge = SkillsFactory.createBadge(99, 1)
+        badge.description = "badge descrip"
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        def user = getRandomUsers(1, true)[0]
+        def newService = createService(user)
+
+        when:
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def invite = extractInviteFromEmail(email.html)
+
+        def projectsBeforeJoining = newService.getAvailableMyProjects()
+        def myProjectsBeforeJoining = newService.getMyProgressSummary()
+        newService.joinProject(proj.projectId, invite)
+        def projectsAfterJoining = newService.getAvailableMyProjects()
+        def myProjectsAfterJoining = newService.getMyProgressSummary()
+
+
+        then:
+        projectsBeforeJoining == []
+        myProjectsBeforeJoining.projectSummaries == []
+        projectsAfterJoining[0].projectId == proj.projectId
+        myProjectsAfterJoining.projectSummaries[0].projectId == proj.projectId
+    }
 }
