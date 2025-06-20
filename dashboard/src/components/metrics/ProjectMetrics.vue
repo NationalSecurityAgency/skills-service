@@ -46,10 +46,8 @@ const buildTagCharts = () => {
          data-cy="userTagCharts">
       <div class="" v-for="(tagChart, index) in tagCharts" :key="`${tagChart.key}-${index}`" style="min-width: 30vw;">
         <user-tag-table v-if="tagChart.type === 'table'"
-                        class="h-100 w-full"
                         :tag-chart="tagChart" />
         <user-tag-chart v-if="tagChart.type !== 'table'"
-                        class="h-100 w-full"
                         :chart-type="tagChart.type"
                         :tag-key="tagChart.key"
                         :title="tagChart.title" />

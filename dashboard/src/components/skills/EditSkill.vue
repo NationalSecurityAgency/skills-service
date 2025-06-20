@@ -352,7 +352,6 @@ const onSkillSaved = (skill) => {
         <div class="flex-1">
           <SkillsNumberInput
               class="flex-1 min-w-[13rem] w-full"
-              showButtons
               :disabled="isEdit"
               :min="latestSkillVersion"
               label="Version"
@@ -374,7 +373,6 @@ const onSkillSaved = (skill) => {
 
       <div class="lg:max-w-40 lg:ml-4 w-full">
         <SkillsNumberInput
-            showButtons
             :disabled="isEdit"
             :min="latestSkillVersion"
             label="Version"
@@ -392,7 +390,6 @@ const onSkillSaved = (skill) => {
 
       <SkillsNumberInput
         class="flex-1 min-w-[15rem]"
-        showButtons
         :min="0"
         :is-required="true"
         :disabled="occurrencesToCompletionAndTimeWindowDisabled"
