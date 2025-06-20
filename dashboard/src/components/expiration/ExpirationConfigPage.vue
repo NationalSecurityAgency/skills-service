@@ -370,7 +370,6 @@ const saveSettings = handleSubmit((values) => {
                       name="yearlyYears"
                       inputClass="w-24"
                       inputId="minmax-buttons"
-                      showButtons
                       :suffix="` year${yearlyYears > 1 ? 's' : ''}`"
                       :min="0" :max="99"/>
                   <!--                  <span class="ml-2">year{{yearlyYears > 1 ? 's' : ''}} on:</span>-->
@@ -427,7 +426,6 @@ const saveSettings = handleSubmit((values) => {
                       name="monthlyMonths"
                       inputClass="w-24"
                       inputId="minmax-buttons"
-                      showButtons
                       :suffix="` month${monthlyMonths > 1 ? 's' : ''}`"
                       :min="0" :max="99"/>
                   <!--                  <span class="ml-2">year{{monthlyMonths > 1 ? 's' : ''}} on:</span>-->
@@ -487,7 +485,6 @@ const saveSettings = handleSubmit((values) => {
                       name="dailyDays"
                       inputClass="w-24"
                       inputId="minmax-buttons"
-                      showButtons
                       :suffix="` day${dailyDays > 1 ? 's' : ''}`"
                       :min="0" :max="999"/>
                   <span class="">of inactivity</span>

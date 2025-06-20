@@ -14,11 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, inject, useAttrs } from 'vue'
-import { useField } from 'vee-validate'
-import {
-  useSkillsInputFallthroughAttributes
-} from '@/components/utils/inputForm/UseSkillsInputFallthroughAttributes.js'
+import {inject} from 'vue'
+import {useField} from 'vee-validate'
+import {useSkillsInputFallthroughAttributes} from '@/components/utils/inputForm/UseSkillsInputFallthroughAttributes.js'
 
 defineOptions({
   inheritAttrs: false
@@ -75,7 +73,6 @@ const handleOnInput = (event) => {
           :disabled="disabled"
           :data-cy="$attrs['data-cy'] || name"
           :autofocus="autofocus"
-          show-buttons
           fluid
           :id="name"
           :inputId="`input${name}`"
