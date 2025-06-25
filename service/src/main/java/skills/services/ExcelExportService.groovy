@@ -72,7 +72,7 @@ class ExcelExportService {
     ProjDefRepo projDefRepo
 
     @Transactional(readOnly = true)
-    void exportUsersProgress(Workbook workbook, String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
+    void exportUsersProgress(Workbook workbook, String projectId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent) {
         String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getProjectUserCommunity(projectId))
         Sheet sheet = workbook.createSheet()
         List<String> headers
@@ -93,6 +93,8 @@ class ExcelExportService {
         Cell cell = null
 
         Integer projectPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
+        int minimumPoints = Math.floor((minimumPointsPercent / 100) * projectPoints)
+        int maximumPoints = Math.ceil((maximumPointsPercent / 100) * projectPoints)
         Stream<ProjectUser> projectUsers = adminUsersService.streamAllDistinctUsersForProject(projectId, query, pageRequest, minimumPoints, maximumPoints)
         try {
             projectUsers.each { ProjectUser user ->
