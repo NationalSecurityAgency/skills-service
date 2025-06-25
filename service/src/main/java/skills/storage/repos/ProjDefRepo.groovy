@@ -353,6 +353,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT project_id, COUNT(id) AS groupCount FROM skill_definition WHERE type = 'SkillsGroup' and enabled = 'true' GROUP BY project_id) groups ON groups.project_id = pd.project_id
                 LEFT JOIN (SELECT ss.project_id as myProjectId FROM settings ss, users uu WHERE ss.setting = 'my_project' and uu.user_id=?1 and uu.id = ss.user_ref_id) theSettings ON theSettings.myProjectId = pd.project_id
                 WHERE pd.project_id = s.project_id and (
+                      (s.setting = 'keep_in_catalog' and s.value = 'true' and not exists (select s2.setting from settings s2 where s2.setting = 'my_project' and s2.project_id = pd.project_id)) or
                       (s.setting = 'my_project' and not exists (select s2.setting from settings s2 where (s2.setting = 'production.mode.enabled' or s2.setting = 'invite_only') and s2.value = 'true' and s2.project_id = pd.project_id)) or
                       (s.setting = 'production.mode.enabled' and s.value = 'true') or
                       (s.setting = 'invite_only' and s.value = 'true' and exists 
@@ -386,6 +387,7 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                 LEFT JOIN (SELECT ss.project_id as myProjectId FROM settings ss, users uu WHERE ss.setting = 'my_project' and uu.user_id=?1 and uu.id = ss.user_ref_id) theSettings ON theSettings.myProjectId = pd.project_id
                 WHERE pd.project_id = s.project_id and
                       (
+                          (s.setting = 'keep_in_catalog' and s.value = 'true' and not exists (select s2.setting from settings s2 where s2.setting = 'my_project' and s2.project_id = pd.project_id)) or 
                           (s.setting = 'my_project' and not exists (select s2.setting from settings s2 where (s2.setting = 'production.mode.enabled' or s2.setting = 'invite_only') and s2.value = 'true' and s2.project_id = pd.project_id)) or 
                           (s.setting = 'production.mode.enabled' and s.value = 'true') or
                           (s.setting = 'invite_only' and s.value = 'true' and exists 

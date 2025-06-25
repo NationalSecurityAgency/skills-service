@@ -58,6 +58,7 @@ class ProjAdminService {
     static final String rootUserPinnedProjectGroup = "pinned_project"
     static final String myProjectGroup = "my_projects"
     static final String myProjectSetting = "my_project"
+    static final String keepInCatalogSetting = "keep_in_catalog"
     public static final String PINNED = "pinned"
 
     @Autowired
@@ -336,13 +337,18 @@ class ProjAdminService {
             )
         }).sort { it.value }
 
-        SettingsRequest alreadyExistProjectRequest =  finalRes.find({ ((UserProjectSettingsRequest)it).getProjectId() == projectId})
+        Boolean keepInCatalog = false
+        SettingsRequest alreadyExistProjectRequest =  finalRes.find({ ((UserProjectSettingsRequest)it).getProjectId() == projectId && ((UserProjectSettingsRequest)it).setting == 'my_project'})
         if(!alreadyExistProjectRequest) {
             UserProjectSettingsRequest newProjectAdded = new UserProjectSettingsRequest(
                     projectId: projectId,
                     settingGroup: myProjectGroup,
                     setting: myProjectSetting,
             )
+
+            if(addMyProjectRequest.isHiddenProject) {
+                keepInCatalog = true
+            }
 
             // new project should always appear first in the list
             int insertIndex = 0;
@@ -356,7 +362,19 @@ class ProjAdminService {
         }
 
         finalRes.eachWithIndex{ def entry, int i ->
-            entry.value = "sort_${StringUtils.leftPad(i.toString(), 4, "0")}"
+            if(entry.setting != keepInCatalogSetting) {
+                entry.value = "sort_${StringUtils.leftPad(i.toString(), 4, "0")}"
+            }
+        }
+
+        if(keepInCatalog) {
+            UserProjectSettingsRequest hiddenProjectAdded = new UserProjectSettingsRequest(
+                    projectId: projectId,
+                    settingGroup: myProjectGroup,
+                    setting: keepInCatalogSetting,
+                    value: true,
+            )
+            finalRes.push(hiddenProjectAdded)
         }
 
         User user = userRepo.findByUserId(currentUserIdLower)
