@@ -1075,6 +1075,7 @@ class AdminController {
                                 @RequestParam int maximumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
+        SkillsValidator.isTrue(maximumPoints <=100, "Minimum Points is greater than 100", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest, minimumPoints, maximumPoints)
