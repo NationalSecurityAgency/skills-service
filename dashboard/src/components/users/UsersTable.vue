@@ -45,15 +45,10 @@ const exportUtil = useExportUtil()
 const numberFormat = useNumberFormat()
 const projConfig = useProjConfig()
 const projectDetailsState = useProjDetailsState()
-const projectPoints = computed(() => {
-  return projectDetailsState.isLoading ? 999999 : projectDetailsState.project.totalPoints;
-})
 
 let filters = ref({
   user: '',
   progress: [0, 100],
-  minimumPoints: 0,
-  maximumPoints: projectPoints.value,
 })
 
 const data = ref([])
@@ -87,18 +82,17 @@ const applyFilters = () => {
   if (filters.value.progress[0] < 0) {
     filters.value.progress[0] = 0
   }
-  filters.value.minimumPoints = Math.floor(totalPoints.value * (filters.value.progress[0] / 100))
-  filters.value.maximumPoints = Math.ceil(totalPoints.value * (filters.value.progress[1] / 100));
+
   loadData().then(() => {
     let filterMessage = 'Users table has been filtered by'
     if (filters.value.user) {
       filterMessage += ` ${filters.value.user}`
     }
-    if (filters.value.minimumPoints > 0) {
-      filterMessage += `${filters.value.user ? ' and' : ''} users with at least ${filters.value.minimumPoints} points`
+    if (filters.value.progress[0] > 0) {
+      filterMessage += `${filters.value.user ? ' and' : ''} users with at least ${filters.value.progress[0]} percent complete`
     }
-    if (filters.value.maximumPoints < totalPoints.value) {
-      filterMessage += `${filters.value.user ? ' and' : ''} users with at most ${filters.value.maximumPoints} points`
+    if (filters.value.progress < 100) {
+      filterMessage += `${filters.value.user ? ' and' : ''} users with at most ${filters.value.progress[1]} percent complete`
     }
     nextTick(() => announcer.polite(filterMessage))
   })
@@ -106,8 +100,6 @@ const applyFilters = () => {
 
 const reset = () => {
   filters.value.user = ''
-  filters.value.minimumPoints = 0
-  filters.value.maximumPoints = totalPoints.value
   filters.value.progress = [0, 100]
   currentPage.value = 1
   loadData().then(() => {
@@ -155,8 +147,8 @@ const loadData = () => {
     page: currentPage.value,
     byColumn: 0,
     orderBy: sortInfo.value.sortBy,
-    minimumPoints: filters.value.minimumPoints,
-    maximumPoints: filters.value.maximumPoints,
+    minimumPoints: filters.value.progress[0],
+    maximumPoints: filters.value.progress[1],
   }).then((res) => {
     data.value = res.data
     totalRows.value = res.count
@@ -194,8 +186,8 @@ const exportUsers = () => {
     ascending: sortInfo.value.sortOrder !== -1,
     page: currentPage.value,
     orderBy: sortInfo.value.sortBy,
-    minimumPoints: filters.value.minimumPoints,
-    maximumPoints: filters.value.maximumPoints,
+    minimumPoints: filters.value.progress[0],
+    maximumPoints: filters.value.progress[1],
   }).then((res) => {
     isLoading.value = false
     isExporting.value = false

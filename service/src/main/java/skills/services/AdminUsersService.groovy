@@ -160,9 +160,11 @@ class AdminUsersService {
     }
 
     @Transactional(readOnly = true)
-    TableResultWithTotalPoints loadUsersPageForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
+    TableResultWithTotalPoints loadUsersPageForProject(String projectId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent) {
         TableResultWithTotalPoints result = new TableResultWithTotalPoints()
         result.totalPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
+        int minimumPoints = Math.floor((minimumPointsPercent / 100) * result.totalPoints)
+        int maximumPoints = Math.ceil((maximumPointsPercent / 100) * result.totalPoints)
         Long totalProjectUsers = countTotalProjUsers(projectId)
         if (totalProjectUsers) {
             query = query ? query.trim() : ''
@@ -223,12 +225,14 @@ class AdminUsersService {
         return result
     }
 
-    TableResultWithTotalPoints loadUsersPageForSkills(String projectId, List<String> skillIds, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
+    TableResultWithTotalPoints loadUsersPageForSkills(String projectId, List<String> skillIds, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent) {
         TableResultWithTotalPoints result = new TableResultWithTotalPoints()
         if (!skillIds) {
             return result
         }
         result.totalPoints = skillDefRepo.getTotalPointsSumForSkills(projectId, skillIds) ?: 0
+        int minimumPoints = Math.floor((minimumPointsPercent / 100) * result.totalPoints)
+        int maximumPoints = Math.ceil((maximumPointsPercent / 100) * result.totalPoints)
         Long totalProjectUsersWithSkills = userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdIn(projectId, skillIds)
         if (totalProjectUsersWithSkills) {
             query = query ? query.trim() : ''
@@ -246,12 +250,14 @@ class AdminUsersService {
         return result
     }
 
-    TableResultWithTotalPoints loadUsersPageForSubject(String projectId, String subjectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
+    TableResultWithTotalPoints loadUsersPageForSubject(String projectId, String subjectId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent) {
         TableResultWithTotalPoints result = new TableResultWithTotalPoints()
         if (!subjectId) {
             return result
         }
         result.totalPoints = skillDefRepo.getTotalPointsByProjectIdAndSkillId(projectId, subjectId) ?: 0
+        int minimumPoints = Math.floor((minimumPointsPercent / 100) * result.totalPoints)
+        int maximumPoints = Math.ceil((maximumPointsPercent / 100) * result.totalPoints)
         Long totalProjectUsersWithSkills = PostgresQlNativeRepo.countDistinctUsersByProjectIdAndSubjectId(projectId, subjectId)
         if (totalProjectUsersWithSkills) {
             query = query ? query.trim() : ''
