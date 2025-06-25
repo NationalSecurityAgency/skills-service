@@ -1075,7 +1075,7 @@ class AdminController {
                                 @RequestParam int maximumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
-        SkillsValidator.isTrue(maximumPoints <=100, "Minimum Points is greater than 100", projectId)
+        SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest, minimumPoints, maximumPoints)
@@ -1098,6 +1098,7 @@ class AdminController {
                                     @RequestParam int maximumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
+        SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
 
         PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE, ascending ? ASC : DESC, orderBy)
         ModelAndView mav = new ModelAndView(userProgressExportResult);
@@ -1167,6 +1168,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
+        SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return adminUsersService.loadUsersPageForSubject(projectId, subjectId, query, pageRequest, minimumPoints, maximumPoints)
@@ -1186,6 +1188,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
+        SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return adminUsersService.loadUsersPageForSkills(projectId, Collections.singletonList(skillId), query, pageRequest, minimumPoints, maximumPoints)
@@ -1205,6 +1208,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
+        SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         List<SkillDefRes> badgeSkills = getBadgeSkills(projectId, badgeId)

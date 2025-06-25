@@ -346,7 +346,7 @@ class UserPointsSpecs extends DefaultIntSpec {
     def 'get project users with paging and minimum points'() {
         when:
         def results1 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0)
-        def results2 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 40)
+        def results2 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 5)
 
         then:
         results1
@@ -368,8 +368,8 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     def 'get project users with paging and maximum points'() {
         when:
-        def results1 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0, 200)
-        def results2 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0, 40)
+        def results1 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0, 100)
+        def results2 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0, 4)
 
         then:
         results1
@@ -390,8 +390,8 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     def 'get project users with paging and minimum and maximum points'() {
         when:
-        def results1 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 30, 80)
-        def results2 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 40, 80)
+        def results1 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0, 100)
+        def results2 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 5, 80)
 
         then:
         results1
@@ -451,8 +451,8 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         when:
         def results1 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0)
-        def results2 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 40)
-        def results3 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 80)
+        def results2 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 10)
+        def results3 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 25)
 
         then:
         results1
@@ -485,9 +485,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(4), twoDaysAgo)
 
         when:
-        def results1 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0, 420)
-        def results2 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0, 65)
-        def results3 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0, 25)
+        def results1 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0, 100)
+        def results2 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0, 10)
+        def results3 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0, 5)
 
         then:
         results1
@@ -520,9 +520,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(4), twoDaysAgo)
 
         when:
-        def results1 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 25, 90)
-        def results2 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 30, 65)
-        def results3 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 40, 50)
+        def results1 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0, 100)
+        def results2 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 5, 10)
+        def results3 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 10, 15)
 
         then:
         results1
@@ -644,9 +644,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(4), twoDaysAgo)
 
         when:
-        def results1 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0, 200)
-        def results2 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0, 65)
-        def results3 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0, 25)
+        def results1 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0, 100)
+        def results2 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0, 40)
+        def results3 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0, 10)
 
         then:
         results1
@@ -674,10 +674,10 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(4), twoDaysAgo)
 
         when:
-        def results1 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0, 200)
-        def results2 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 25, 75)
-        def results3 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 30, 40)
-        def results4 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 36, 40)
+        def results1 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0, 100)
+        def results2 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 5, 50)
+        def results3 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 5, 25)
+        def results4 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 30, 35)
 
         then:
         results1
