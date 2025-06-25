@@ -346,7 +346,7 @@ class ProjAdminService {
                     setting: myProjectSetting,
             )
 
-            if(addMyProjectRequest.isHiddenProject) {
+            if(addMyProjectRequest?.isHiddenProject) {
                 keepInCatalog = true
             }
 

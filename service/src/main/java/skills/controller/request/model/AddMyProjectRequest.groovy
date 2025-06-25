@@ -20,5 +20,5 @@ import groovy.transform.Canonical
 @Canonical
 class AddMyProjectRequest {
    Integer newSortIndex
-   Boolean isHiddenProject
+   Boolean isHiddenProject = false
 }
