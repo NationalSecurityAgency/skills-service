@@ -106,4 +106,6 @@ drop table IF EXISTS archived_users CASCADE;
 
 drop table IF EXISTS web_notifications CASCADE;
 
+drop table IF EXISTS web_notifications_ack CASCADE;
+
 drop function IF EXISTS f_select_lock_and_insert;
