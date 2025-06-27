@@ -76,11 +76,15 @@ const navigateBack = () => {
 const toTitleCase = (str) => {
   return str.toLowerCase().split('+').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
+const isTrueCaseInsensitive = (value) => {
+  return value === true || String(value).toLowerCase() === 'true';
+}
 
-const disableSearchButton = computed(() => themeState.theme.disableSearchButton)
-const disableBreadcrumb = computed(() => themeState.theme.disableBreadcrumb)
-const renderDivWhereBackButtonResides = computed(() => (showBackButton.value || !disableSearchButton.value || !themeState.theme.disableSkillTreeBrand) && !themeState.theme?.breadcrumb?.align)
-const renderDivWhereBrandResides = computed(() => showBackButton.value || !themeState.theme.disableSkillTreeBrand)
+const disableSearchButton = computed(() => isTrueCaseInsensitive(themeState.theme.disableSearchButton))
+const disableBreadcrumb = computed(() => isTrueCaseInsensitive(themeState.theme.disableBreadcrumb))
+const disableSkillTreeBrand = computed(() => isTrueCaseInsensitive(themeState.theme.disableSkillTreeBrand))
+const renderDivWhereBackButtonResides = computed(() => (showBackButton.value || !disableSearchButton.value || !disableSkillTreeBrand.value))
+const renderDivWhereBrandResides = computed(() => showBackButton.value || !disableSkillTreeBrand.value)
 const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
 </script>
 
@@ -104,6 +108,7 @@ const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
               v-if="!disableSearchButton"
               id="skillsDisplaySearchBtn"
               :track-for-focus="true"
+              class="skills-search-btn"
               :class="{'ml-2': showBackButton}"
               @click="showSkillsDisplaySearchDialog = true"
               data-cy="skillsDisplaySearchBtn"
@@ -121,7 +126,7 @@ const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
         </div>
 
         <div v-if="renderDivWhereBrandResides" class="md:w-32">
-          <div v-if="!themeState.theme.disableSkillTreeBrand"
+          <div v-if="!disableSkillTreeBrand"
                class="flex items-center justify-center" >
             <powered-by-skilltree :animate-power-by-label="animatePowerByLabel && skillsDisplayInfo.isHomePage.value" />
           </div>

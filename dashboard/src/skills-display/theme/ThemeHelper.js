@@ -161,6 +161,20 @@ export default {
         styleName: 'line-height'
       }
     },
+  searchButton: {
+    padding: {
+      selector: 'body #app .sd-theme-home .skills-theme-page-title .skills-search-btn',
+      styleName: 'padding'
+    },
+    fontSize: {
+      selector: 'body #app .sd-theme-home .skills-theme-page-title .skills-search-btn',
+      styleName: 'font-size'
+    },
+    lineHeight: {
+      selector: 'body #app .sd-theme-home .skills-theme-page-title .skills-search-btn',
+      styleName: 'line-height'
+    }
+  },
     tiles: {
       backgroundColor: [{
         selector: '.sd-theme-home .p-card, '

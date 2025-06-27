@@ -64,8 +64,9 @@ describe('Client Display Theme Components Tests', () => {
     const titleBg = `themeParam=tiles|{"backgroundColor":"${bgColor}"}`
     const disableBrand = `themeParam=disableSkillTreeBrand|true`
     const disableBackButton = 'disableBackButton=true'
+    const disableSearchButton = `themeParam=disableSearchButton|true`
     const breadcrumb = 'themeParam=breadcrumb|{"align": "start"}'
-    cy.cdVisit(`/subjects/subj1/skills/skill1?themeParam=pageTitle|${pageTitle}&${titleBg}&${disableBrand}&${disableBackButton}&${breadcrumb}`)
+    cy.cdVisit(`/subjects/subj1/skills/skill1?themeParam=pageTitle|${pageTitle}&${titleBg}&${disableBrand}&${disableBackButton}&${disableSearchButton}&${breadcrumb}`)
 
     cy.get('[data-cy="skillsTitle"]')
     cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]')
@@ -455,7 +456,6 @@ describe('Client Display Theme Components Tests', () => {
     cy.matchSnapshotImageForElement('[data-cy="overallLevel"] [data-cy="trophyIcon"]')
   })
 
-
   it('backButton settings', () => {
     const backButton = JSON.stringify({
       padding: '1rem 3rem 4rem 2rem',
@@ -470,6 +470,19 @@ describe('Client Display Theme Components Tests', () => {
     cy.matchSnapshotImageForElement('[data-cy="back"]')
   })
 
+  it('searchButton settings', () => {
+    const searchButton = JSON.stringify({
+      padding: '1rem 3rem 4rem 2rem',
+      fontSize: '3rem',
+      lineHeight: '2rem',
+    })
+    const url = `/subjects/subj1?themeParam=searchButton|${searchButton}`
+    cy.cdVisit(url)
+
+    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+    cy.wait(1111)
+    cy.matchSnapshotImageForElement('[data-cy="skillsDisplaySearchBtn"]')
+  })
 
   it('maxWidth setting - 75%', () => {
     cy.ignoreSkillsClientError()
