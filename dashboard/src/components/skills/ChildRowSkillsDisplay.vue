@@ -217,7 +217,7 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
           :title="`Self Report: ${selfReportingTitle}`"
           icon-class="fas fa-laptop skills-color-selfreport"
           data-cy="selfReportMediaCard">
-          <template #right-of-title  v-if="skillInfo.selfReportingType && skillInfo.selfReportingType !== 'Disabled'">
+          <template #right-of-title  v-if="skillInfo.selfReportingType && skillInfo.selfReportingType !== 'Disabled' && skillInfo.selfReportingType  === 'Quiz'">
             <router-link :to="{ name:'Questions', params: { quizId: skillInfo.quizId } }" data-cy="buttonToQuiz">
               <SkillsButton
                   :label="`View ${skillInfo.quizType}`"
