@@ -24,13 +24,13 @@ export default {
     const url = '/api/availableForMyProjects'
     return axios.get(url).then((response) => response.data)
   },
-  addToMyProjects(projectId) {
+  addToMyProjects(projectId, hiddenProject = false) {
     const url = `/api/myprojects/${encodeURIComponent(projectId)}`
-    return axios.post(url).then((response) => response.data)
+    return axios.post(url, { isHiddenProject: hiddenProject }).then((response) => response.data)
   },
   moveMyProject(projectId, newSortIndex) {
     const url = `/api/myprojects/${encodeURIComponent(projectId)}`
-    return axios.post(url, { newSortIndex }).then((response) => response.data)
+    return axios.post(url, { newSortIndex: newSortIndex }).then((response) => response.data)
   },
   removeFromMyProjects(projectId) {
     const url = `/api/myprojects/${encodeURIComponent(projectId)}`
