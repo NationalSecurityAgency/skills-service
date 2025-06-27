@@ -30,6 +30,8 @@ const appConfig = useAppConfig()
 const route = useRoute()
 const myProgressState = useMyProgressState()
 
+console.log(appConfig);
+
 const props = defineProps({
   projectId: {
     type: String,
@@ -168,7 +170,7 @@ const close = () => {
       </div>
     </div>
 
-    <div class="mt-4 text-center">
+    <div class="mt-4 text-center" v-if="appConfig.contactSupportEnabled">
       <hr
           class="mb-2 h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25 dark:via-neutral-400"/>
       Found a software bug or a SkillTree system-wide issue?
