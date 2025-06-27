@@ -512,13 +512,21 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.cdVisit('/');
         cy.cdClickSubj(0);
 
+        cy.get('[data-cy=toggleSkillDetails]')
+          .click();
         cy.get('[data-cy="approvalPending"]').should('exist');
+        cy.get('[data-cy="pendingApprovalStatus"]').should('exist');
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="requestApprovalBtn"]').should('not.exist')
 
         cy.approveRequest();
         cy.cdVisit('/');
         cy.cdClickSubj(0);
 
+        cy.get('[data-cy=toggleSkillDetails]')
+          .click();
         cy.get('[data-cy="approvalPending"]').should('not.exist');
+        cy.get('[data-cy="pendingApprovalStatus"]').should('not.exist');
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="requestApprovalBtn"]').should('exist')
     });
 
     it('self report - skill was rejected', () => {

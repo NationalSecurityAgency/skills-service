@@ -84,7 +84,7 @@ const displayApprovalJustificationInput = () => {
 }
 
 const isPendingApproval = () => {
-  return skillInternal.value.selfReporting && skillInternal.value.selfReporting.requestedOn !== null && skillInternal.value.selfReporting.requestedOn !== undefined && !isRejected.value
+  return skillInternal.value.selfReporting && skillInternal.value.selfReporting.requestedOn !== null && skillInternal.value.selfReporting.requestedOn !== undefined && !isRejected.value  && !skillInternal.value.selfReporting.approved
 }
 const selfReportConfigured = () => {
   return skillInternal.value.selfReporting && skillInternal.value.selfReporting && skillInternal.value.selfReporting.enabled
