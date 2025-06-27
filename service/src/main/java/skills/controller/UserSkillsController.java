@@ -559,7 +559,7 @@ class UserSkillsController {
 
         if (attachment.getProjectId() != null && inviteOnlyProjectService.isInviteOnlyProject(attachment.getProjectId())) {
             String userId = userInfoService.getCurrentUserId();
-            if (!inviteOnlyProjectService.isPrivateProjRoleOrAdminRole(attachment.getProjectId(), userId)) {
+            if (!inviteOnlyProjectService.isPrivateProjRoleOrAdminRole(attachment.getProjectId(), userId) && !userInfoService.isCurrentUserASuperDuperUser()) {
                 throw new InviteOnlyAccessDeniedException("Access is denied", attachment.getProjectId());
             }
         }
