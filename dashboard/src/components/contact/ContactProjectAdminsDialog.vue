@@ -30,8 +30,6 @@ const appConfig = useAppConfig()
 const route = useRoute()
 const myProgressState = useMyProgressState()
 
-console.log(appConfig);
-
 const props = defineProps({
   projectId: {
     type: String,
