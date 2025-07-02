@@ -29,6 +29,7 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 import LinkToSkillPage from '@/components/utils/LinkToSkillPage.vue'
 import { useRoute } from 'vue-router'
+import SelfReportType from "@/components/skills/selfReport/SelfReportType.js";
 
 const config = useProjConfig()
 const timeWindowFormatter = useTimeWindowFormatter()
@@ -217,7 +218,7 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
           :title="`Self Report: ${selfReportingTitle}`"
           icon-class="fas fa-laptop skills-color-selfreport"
           data-cy="selfReportMediaCard">
-          <template #right-of-title  v-if="skillInfo.selfReportingType && skillInfo.selfReportingType !== 'Disabled' && skillInfo.selfReportingType  === 'Quiz'">
+          <template #right-of-title  v-if="skillInfo.selfReportingType && skillInfo.selfReportingType !== 'Disabled' && SelfReportType.isQuizOrSurvey(skillInfo.selfReportingType)">
             <router-link :to="{ name:'Questions', params: { quizId: skillInfo.quizId } }" data-cy="buttonToQuiz">
               <SkillsButton
                   :label="`View ${skillInfo.quizType}`"
