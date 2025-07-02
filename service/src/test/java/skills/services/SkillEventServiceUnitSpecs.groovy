@@ -15,7 +15,6 @@
  */
 package skills.services
 
-
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.messaging.simp.broker.BrokerAvailabilityEvent
 import skills.quizLoading.QuizRunService
@@ -251,6 +250,30 @@ class SkillEventServiceUnitSpecs extends Specification {
 
         cleanup:
         loggerHelper.stop()
+    }
+
+    def "requests are dropped once the queue is full"() {
+        SimpMessagingTemplate mockMessagingTemplate = Mock()
+        BrokerAvailabilityEvent brokerAvailable = new BrokerAvailabilityEvent(true, this)
+        SkillEventPublisher skillEventPublisher = new SkillEventPublisher(messagingTemplate: mockMessagingTemplate, queueCapacity: 2, maxNumOfThreads: 2, minNumOfThreads: 1)
+        SkillEventResult result = new SkillEventResult(projectId: 'project1')
+
+        int invocations = 0
+        mockMessagingTemplate.convertAndSendToUser(*_) >> { args ->
+            invocations++
+            Thread.sleep(500)
+        }
+
+        when:
+        skillEventPublisher.init()
+        skillEventPublisher.handleBrokerAvailabilityEvent(brokerAvailable)
+        (1..10).each {
+            skillEventPublisher.publishSkillUpdate(result, "user${it}")
+        }
+        Thread.sleep(3000)
+
+        then:
+        invocations == 4
     }
 
     def "notify user of achievements does not fail with project level achievements"() {
