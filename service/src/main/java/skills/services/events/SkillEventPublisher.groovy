@@ -48,16 +48,16 @@ class SkillEventPublisher {
     SimpMessagingTemplate messagingTemplate;
 
     @Value('#{"${skills.event.messaging.minNumOfThreads:3}"}')
-    Integer minNumOfThreads
+    Integer minNumOfThreads = 3
 
     @Value('#{"${skills.event.messaging.maxNumOfThreads:10}"}')
-    Integer maxNumOfThreads
+    Integer maxNumOfThreads = 10
 
     @Value('#{"${skills.event.messaging.queueCapacity:1000}"}')
-    int queueCapacity
+    int queueCapacity = 1000
 
     @Value('#{"${skills.event.messaging.enabled:true}"}')
-    Boolean enabled
+    Boolean enabled = true
 
     private CachedThreadPool pool
 
@@ -97,7 +97,7 @@ class SkillEventPublisher {
                     }
                 }])
             } catch (RejectedExecutionException ree) {
-                log.error("Queue is full with [${queueCapacity}] items, unable to send message.")
+                log.error("Queue is full with [${queueCapacity}] items, unable to send message. user [${userId}], result [${result}]")
             }
         }
     }
