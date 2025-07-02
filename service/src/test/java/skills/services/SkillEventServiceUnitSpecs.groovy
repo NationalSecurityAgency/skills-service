@@ -206,11 +206,15 @@ class SkillEventServiceUnitSpecs extends Specification {
         SkillEventResult result = new SkillEventResult(projectId: 'project1')
 
         when:
+        skillEventPublisher.init()
         skillEventPublisher.publishSkillUpdate(result, 'user1')
+        Thread.sleep(500)
         skillEventPublisher.handleBrokerAvailabilityEvent(brokerAvailable)
         skillEventPublisher.publishSkillUpdate(result, 'user2')
+        Thread.sleep(500)
         skillEventPublisher.handleBrokerAvailabilityEvent(brokerUnavailable)
         skillEventPublisher.publishSkillUpdate(result, 'user3')
+        Thread.sleep(500)
 
         then:
         0 * mockMessagingTemplate.convertAndSendToUser('user1', '/queue/project1-skill-updates', result)
@@ -218,6 +222,32 @@ class SkillEventServiceUnitSpecs extends Specification {
         0 * mockMessagingTemplate.convertAndSendToUser('user3', '/queue/project1-skill-updates', result)
         loggerHelper.getLogEvents().find() { it.message.contains ("Failed to publish skill update since the broker is unavailable. user [user1], result [${result}]")}
         loggerHelper.getLogEvents().find() { it.message.contains ("Failed to publish skill update since the broker is unavailable. user [user3], result [${result}]")}
+
+        cleanup:
+        loggerHelper.stop()
+    }
+
+    def "test SkillEventPublisher will not publish messages unless enabled == true"() {
+
+        LoggerHelper loggerHelper = new LoggerHelper(SkillEventPublisher.class)
+        SimpMessagingTemplate mockMessagingTemplate = Mock()
+        BrokerAvailabilityEvent brokerAvailable = new BrokerAvailabilityEvent(true, this)
+        SkillEventPublisher skillEventPublisher = new SkillEventPublisher(messagingTemplate: mockMessagingTemplate)
+        SkillEventResult result = new SkillEventResult(projectId: 'project1')
+
+        when:
+        skillEventPublisher.enabled = false
+        skillEventPublisher.init()
+        skillEventPublisher.handleBrokerAvailabilityEvent(brokerAvailable)
+        skillEventPublisher.publishSkillUpdate(result, 'user1')
+        skillEventPublisher.publishSkillUpdate(result, 'user2')
+        skillEventPublisher.publishSkillUpdate(result, 'user3')
+
+        then:
+        0 * mockMessagingTemplate.convertAndSendToUser('user1', '/queue/project1-skill-updates', result)
+        0 * mockMessagingTemplate.convertAndSendToUser('user2', '/queue/project1-skill-updates', result)
+        0 * mockMessagingTemplate.convertAndSendToUser('user3', '/queue/project1-skill-updates', result)
+        loggerHelper.getLogEvents().find() { it.message.contains ("Event messaging is disabled")}
 
         cleanup:
         loggerHelper.stop()
