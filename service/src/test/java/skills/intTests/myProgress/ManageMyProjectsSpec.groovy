@@ -148,6 +148,39 @@ class ManageMyProjectsSpec extends DefaultIntSpec {
         !forMyProjects2
     }
 
+    def "hidden projects should not be available to other users"() {
+        SkillsService user1 = createService(randomUsers[0])
+        SkillsService user2 = createService(randomUsers[1])
+        SkillsService user3 = createService(randomUsers[2])
+
+        List projects = (1..3).collect {
+            def proj = SkillsFactory.createProject(it)
+            skillsService.createProject(proj)
+            skillsService.disableProdMode(proj)
+            user1.addMyHiddenProject(proj.projectId)
+            return proj
+        }
+
+        when:
+        def user1Projects = user1.getAvailableMyProjects()
+        def user2Projects = user2.getAvailableMyProjects()
+        def user3Projects = user3.getAvailableMyProjects()
+
+        skillsService.enableProdMode(projects[0])
+        user3.addMyHiddenProject(projects[1].projectId)
+
+        def user1Projects2 = user1.getAvailableMyProjects()
+        def user2Projects2 = user2.getAvailableMyProjects()
+        def user3Projects2 = user3.getAvailableMyProjects()
+
+        then:
+        user1Projects.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
+        user2Projects.collect { it.projectId } == []
+        user3Projects.collect { it.projectId } == []
+        user1Projects2.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
+        user2Projects2.collect { it.projectId } == [projects[0].projectId]
+        user3Projects2.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId]
+    }
 
     def "add and remove my project - single project"() {
         def proj1 = SkillsFactory.createProject()

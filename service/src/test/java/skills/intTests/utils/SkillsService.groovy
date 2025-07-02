@@ -871,6 +871,11 @@ class SkillsService {
         wsHelper.apiPost(url, null)
     }
 
+    def addMyHiddenProject(String projectId) {
+        String url = "/myprojects/${projectId}"
+        wsHelper.apiPost(url, [isHiddenProject: true])
+    }
+
     def moveMyProject(String projectId, Integer newSortIndex) {
         String url = "/myprojects/${projectId}"
         wsHelper.apiPost(url, [newSortIndex: newSortIndex])
