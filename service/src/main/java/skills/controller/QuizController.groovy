@@ -51,8 +51,10 @@ import skills.services.video.QuizVideoService
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.auth.RoleName
 import skills.utils.TablePageUtil
+import skills.utils.TimeRangeFormatterUtil
 
 import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
@@ -231,15 +233,19 @@ class QuizController {
                                        @RequestParam int limit,
                                        @RequestParam int page,
                                        @RequestParam String orderBy,
-                                       @RequestParam Boolean ascending) {
+                                       @RequestParam Boolean ascending,
+                                       @RequestParam(required = false) String startDate,
+                                       @RequestParam(required = false) String endDate) {
         PageRequest pageRequest = TablePageUtil.validateAndConstructQuizPageRequest(limit, page, orderBy, ascending)
-        return quizDefService.getUserQuestionAnswers(quizId, answerDefId, pageRequest)
+        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate)
+        return quizDefService.getUserQuestionAnswers(quizId, answerDefId, pageRequest, dates[0], dates[1])
     }
 
     @RequestMapping(value = "/{quizId}/metrics", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    QuizMetrics getQuizMetrics(@PathVariable("quizId") String quizId) {
-        return quizDefService.getMetrics(quizId);
+    QuizMetrics getQuizMetrics(@PathVariable("quizId") String quizId, @RequestParam(required = false) String startDate, @RequestParam(required = false) String endDate) {
+        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate)
+        return quizDefService.getMetrics(quizId, dates[0], dates[1]);
     }
 
     @RequestMapping(value = "/{quizId}/runs", method = RequestMethod.GET, produces = "application/json")
