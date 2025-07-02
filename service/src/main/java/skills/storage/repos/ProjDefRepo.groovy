@@ -344,17 +344,18 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(groups.groupCount, 0) AS numGroups,
                     pd.created, 
                     theSettings.myProjectId AS myProjectId,
+                    u.id as userRefId,
                     case when (pd.description is not null and pd.description != '') then true else false end as hasDescription
-                FROM settings s, project_definition pd
+                FROM settings s, users u, project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) AS skillUpdated FROM skill_definition WHERE type = 'Skill' and enabled = 'true' GROUP BY project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount, MAX(updated) AS badgeUpdated FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount, MAX(updated) AS subjectUpdated FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS groupCount FROM skill_definition WHERE type = 'SkillsGroup' and enabled = 'true' GROUP BY project_id) groups ON groups.project_id = pd.project_id
                 LEFT JOIN (SELECT ss.project_id as myProjectId, uu.id as userRefId FROM settings ss, users uu WHERE ss.setting = 'my_project' and uu.user_id=?1 and uu.id = ss.user_ref_id) theSettings ON theSettings.myProjectId = pd.project_id
-                WHERE pd.project_id = s.project_id and (
-                      (s.setting = 'keep_in_catalog' and s.value = 'true' and s.user_ref_id = theSettings.userRefId and not exists (select s2.setting from settings s2 where s2.setting = 'my_project' and s2.project_id = pd.project_id and s2.user_ref_id = s.user_ref_id)) or
-                      (s.setting = 'my_project' and s.user_ref_id = theSettings.userRefId and not exists (select s2.setting from settings s2 where (s2.setting = 'production.mode.enabled' or s2.setting = 'invite_only') and s2.value = 'true' and s2.project_id = pd.project_id)) or
+                WHERE pd.project_id = s.project_id and u.user_id = ?1 and (
+                      (s.setting = 'keep_in_catalog' and s.value = 'true' and s.user_ref_id = u.id and not exists (select s2.setting from settings s2 where s2.setting = 'my_project' and s2.project_id = pd.project_id and s2.user_ref_id = s.user_ref_id)) or
+                      (s.setting = 'my_project' and s.user_ref_id = u.id and not exists (select s2.setting from settings s2 where (s2.setting = 'production.mode.enabled' or s2.setting = 'invite_only') and s2.value = 'true' and s2.project_id = pd.project_id)) or
                       (s.setting = 'production.mode.enabled' and s.value = 'true') or
                       (s.setting = 'invite_only' and s.value = 'true' and exists 
                           (
@@ -378,18 +379,19 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
                     COALESCE(groups.groupCount, 0) AS numGroups,
                     pd.created, 
                     theSettings.myProjectId AS myProjectId,
+                    u.id as userRefId,
                     case when (pd.description is not null and pd.description != '') then true else false end as hasDescription
-                FROM settings s, project_definition pd
+                FROM settings s, users u, project_definition pd
                 LEFT JOIN (SELECT project_id, MAX(event_time) AS latest FROM user_events GROUP BY project_id) events ON events.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS skillCount, MAX(updated) AS skillUpdated FROM skill_definition WHERE type = 'Skill' and enabled = 'true' GROUP BY project_id) skills ON skills.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS badgeCount, MAX(updated) AS badgeUpdated FROM skill_definition WHERE type = 'Badge' GROUP BY project_id) badges ON badges.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS subjectCount, MAX(updated) AS subjectUpdated FROM skill_definition WHERE type = 'Subject' GROUP BY project_id) subjects ON subjects.project_id = pd.project_id
                 LEFT JOIN (SELECT project_id, COUNT(id) AS groupCount FROM skill_definition WHERE type = 'SkillsGroup' and enabled = 'true' GROUP BY project_id) groups ON groups.project_id = pd.project_id
                 LEFT JOIN (SELECT ss.project_id as myProjectId, uu.id as userId FROM settings ss, users uu WHERE ss.setting = 'my_project' and uu.user_id=?1 and uu.id = ss.user_ref_id) theSettings ON theSettings.myProjectId = pd.project_id
-                WHERE pd.project_id = s.project_id and
+                WHERE pd.project_id = s.project_id and u.user_id = ?1 and
                       (
-                          (s.setting = 'keep_in_catalog' and s.value = 'true' and theSettings.userId = s.user_ref_id and not exists (select s2.setting from settings s2 where s2.setting = 'my_project' and s2.project_id = pd.project_id and s.user_ref_id = s2.user_ref_id)) or 
-                          (s.setting = 'my_project' and theSettings.userId = s.user_ref_id and not exists (select s2.setting from settings s2 where (s2.setting = 'production.mode.enabled' or s2.setting = 'invite_only') and s2.value = 'true' and s2.project_id = pd.project_id)) or 
+                          (s.setting = 'keep_in_catalog' and s.value = 'true' and u.id = s.user_ref_id and not exists (select s2.setting from settings s2 where s2.setting = 'my_project' and s2.project_id = pd.project_id and s2.user_ref_id = s.user_ref_id)) or 
+                          (s.setting = 'my_project' and u.id = s.user_ref_id and not exists (select s2.setting from settings s2 where (s2.setting = 'production.mode.enabled' or s2.setting = 'invite_only') and s2.value = 'true' and s2.project_id = pd.project_id)) or 
                           (s.setting = 'production.mode.enabled' and s.value = 'true') or
                           (s.setting = 'invite_only' and s.value = 'true' and exists 
                               (
