@@ -102,6 +102,33 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.get('[data-cy="badgeTitle"]').contains('Badge 1')
     })
 
+    it('navigate from one subject to another using training-wide search dialog', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSubject(1, 2)
+
+        cy.visit('/progress-and-rankings/projects/proj1');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').should('have.text', 'Project: This is project 1');
+
+        // navigate to subject 1
+        cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
+        cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
+        cy.get('input.p-listbox-filter').type('subject 1')
+        cy.realPress('ArrowDown');
+        cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', 'Subject 1');
+        cy.realPress('Enter');
+        cy.get('[data-cy="skillsTitle"]').contains('Subject 1')
+
+        // navigate to subject 2
+        cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
+        cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
+        cy.get('input.p-listbox-filter').type('subject 2')
+        cy.realPress('ArrowDown');
+        cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', 'Subject 2');
+        cy.realPress('Enter');
+        cy.get('[data-cy="skillsTitle"]').contains('Subject 2')
+    })
+
     it('no results after filtering training-wide search dialog', () => {
         cy.createProject(1)
         cy.createSubject(1, 1)

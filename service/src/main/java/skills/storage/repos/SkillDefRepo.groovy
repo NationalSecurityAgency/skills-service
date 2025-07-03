@@ -920,7 +920,8 @@ child_achievement_counts AS (
                  AND ua.user_id = :userId
          WHERE parent_skill.project_id = :projectId
              AND child_skill.project_id = :projectId
-             AND srd.type IN ('RuleSetDefinition', 'BadgeRequirement')
+             AND child_skill.type = 'Skill'
+             AND srd.type IN ('RuleSetDefinition', 'BadgeRequirement', 'GroupSkillToSubject')
          GROUP BY
              srd.parent_ref_id
      )
