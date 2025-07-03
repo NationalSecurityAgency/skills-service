@@ -108,6 +108,9 @@ export default {
         'body #app .sd-theme-home .toastui-editor-popup label,' +
         'body #app .sd-theme-home .p-chip.p-component,' +
         'body #app .sd-theme-home .p-inputtext.p-component,' +
+        '.p-listbox-option,' +
+        '.p-listbox-empty-message,' +
+        'div[data-cy="trainingSearchDialog"],' +
         '.p-autocomplete-panel.p-component .p-autocomplete-item,' +
         '.p-autocomplete-panel.p-component .p-autocomplete-item .text-orange-600,' +
         '.p-autocomplete-panel.p-component .p-autocomplete-item .text-orange-700,' +
@@ -187,6 +190,7 @@ export default {
           + 'body #app .sd-theme-home .p-chip.p-component,'
           + '.p-autocomplete-panel.p-component,'
           + '.p-popover.p-component,'
+          + '.p-listbox.p-component,'
           + '.p-autocomplete-overlay.p-component,'
           + '.p-popover.p-component .p-panelmenu-panel,'
           + '.sd-theme-home .apexcharts-menu.apexcharts-menu-open,'
@@ -195,7 +199,8 @@ export default {
           + '.sd-theme-home .toastui-editor-defaultUI-toolbar,'
           + '.sd-theme-home .toastui-editor-popup,'
           + '.sd-theme-home .editor-help-footer,'
-          + '.sd-theme-home .sd-theme-tile-background',
+          + '.sd-theme-home .sd-theme-tile-background,'
+          + '.p-dialog',
         styleName: 'background-color'
       }, {
         selector: '.p-autocomplete-panel.p-component .p-autocomplete-item:hover,' +
@@ -209,6 +214,8 @@ export default {
           '.p-autocomplete-panel.p-component .p-autocomplete-item:hover .text-orange-700,' +
           '.p-popover.p-component .p-panelmenu-item.p-focus > .p-panelmenu-item-content .p-panelmenu-item-link,' +
           '.p-popover.p-component .p-panelmenu.p-component .p-panelmenu-header:focus .p-panelmenu-header-content .sd-theme-menu-header,' +
+          '.p-listbox-option.p-focus,' +
+          '.p-listbox-option:hover,' +
           'body #app .sd-theme-home .sd-theme-tile-background-color,' +
           'body #app .sd-theme-home .p-paginator.p-component .p-paginator-element.p-link.p-highlight,' +
           'body #app .sd-theme-home .fa-stack .fa-stack-1x.fa-inverse,' +
