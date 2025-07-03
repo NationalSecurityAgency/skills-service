@@ -42,9 +42,6 @@ const showBackButton = computed(() => {
 const navigateBack = () => {
   breadcrumb.navUpBreadcrumb()
 }
-const toTitleCase = (str) => {
-  return str.toLowerCase().split('+').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-}
 const isTrueCaseInsensitive = (value) => {
   return value === true || String(value).toLowerCase() === 'true';
 }
