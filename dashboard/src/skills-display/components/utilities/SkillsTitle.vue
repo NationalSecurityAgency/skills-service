@@ -14,18 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import SkillsDisplayBreadcrumb from '@/skills-display/components/header/SkillsDisplayBreadcrumb.vue'
 import PoweredBySkilltree from '@/skills-display/components/header/PoweredBySkilltree.vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useSkillsDisplayBreadcrumbState } from '@/skills-display/stores/UseSkillsDisplayBreadcrumbState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import SkillsDisplaySearch from '@/skills-display/components/SkillsDisplaySearch.vue'
 
 const attributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
 const breadcrumb = useSkillsDisplayBreadcrumbState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
+
+const projectId = attributes.projectId
+const showSkillsDisplaySearchDialog = ref(false)
 
 const props = defineProps({
   backButton: { type: Boolean, default: true },
@@ -38,10 +42,15 @@ const showBackButton = computed(() => {
 const navigateBack = () => {
   breadcrumb.navUpBreadcrumb()
 }
+const isTrueCaseInsensitive = (value) => {
+  return value === true || String(value).toLowerCase() === 'true';
+}
 
-const disableBreadcrumb = computed(() => themeState.theme.disableBreadcrumb)
-const renderDivWhereBackButtonResides = computed(() => (showBackButton.value || !themeState.theme.disableSkillTreeBrand) && !themeState.theme?.breadcrumb?.align)
-const renderDivWhereBrandResides = computed(() => showBackButton.value || !themeState.theme.disableSkillTreeBrand)
+const disableSearchButton = computed(() => isTrueCaseInsensitive(themeState.theme.disableSearchButton))
+const disableBreadcrumb = computed(() => isTrueCaseInsensitive(themeState.theme.disableBreadcrumb))
+const disableSkillTreeBrand = computed(() => isTrueCaseInsensitive(themeState.theme.disableSkillTreeBrand))
+const renderDivWhereBackButtonResides = computed(() => (showBackButton.value || !disableSearchButton.value || !disableSkillTreeBrand.value))
+const renderDivWhereBrandResides = computed(() => showBackButton.value || !disableSkillTreeBrand.value)
 const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
 </script>
 
@@ -60,6 +69,17 @@ const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
             class="skills-theme-btn"
             data-cy="back"
             aria-label="navigate back" />
+
+          <SkillsButton
+              v-if="!disableSearchButton"
+              id="skillsDisplaySearchBtn"
+              :track-for-focus="true"
+              class="skills-search-btn"
+              :class="{'ml-2': showBackButton}"
+              @click="showSkillsDisplaySearchDialog = true"
+              data-cy="skillsDisplaySearchBtn"
+              title="Search Project"
+              icon="fa-solid fa-magnifying-glass" />
         </div>
 
         <div :class="{'mx-5': showBackButton}" class="text-center flex-1">
@@ -72,11 +92,16 @@ const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
         </div>
 
         <div v-if="renderDivWhereBrandResides" class="md:w-32">
-          <div v-if="!themeState.theme.disableSkillTreeBrand"
+          <div v-if="!disableSkillTreeBrand"
                class="flex items-center justify-center" >
             <powered-by-skilltree :animate-power-by-label="animatePowerByLabel && skillsDisplayInfo.isHomePage.value" />
           </div>
         </div>
+
+        <skills-display-search v-if="showSkillsDisplaySearchDialog && !disableSearchButton"
+                               ref="skillsDisplaySearch"
+                               v-model="showSkillsDisplaySearchDialog"
+                               :project-id="projectId" />
       </div>
     </template>
   </Card>

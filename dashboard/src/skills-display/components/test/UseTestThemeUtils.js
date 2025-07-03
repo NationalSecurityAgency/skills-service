@@ -88,7 +88,7 @@ export const useTestThemeUtils = () => {
         if (val === 'null') {
           delete themeRes[key]
         } else {
-          if (val.includes('{')) {
+          if (val?.includes('{')) {
             val = JSON.parse(val)
           }
           themeRes[key] = val
