@@ -28,7 +28,8 @@ class ClientDisplayTrainingSearchSpec extends DefaultIntSpec {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def p1Skills = createSkills(10, 1, 1, 100, 2)
-
+        def subj1Group1 = createSkillsGroup(1, 1, 11)
+        def childSkills = createSkills(3, 1, 1, 100)
         def p1subj2 = createSubject(1, 2)
         def p1SkillsSubj2 = createSkills(10, 1, 2, 100, 2)
 
@@ -43,6 +44,12 @@ class ClientDisplayTrainingSearchSpec extends DefaultIntSpec {
         }
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
         skillsService.createProjectAndSubjectAndSkills(null, p1subj2, p1SkillsSubj2)
+        skillsService.createSkill(subj1Group1)
+        childSkills.eachWithIndex { it, index ->
+            it.name = "child skill $index".toString()
+            it.skillId = "child$index".toString()
+            skillsService.assignSkillToSkillsGroup(subj1Group1.skillId, it)
+        }
 
         skillsService.addSkill(p1Skills[3], skillsService.userName, new Date() - 1)
         skillsService.addSkill(p1Skills[3], skillsService.userName, new Date())
@@ -62,19 +69,18 @@ class ClientDisplayTrainingSearchSpec extends DefaultIntSpec {
         def skills = skillsService.getApiAllSubjectsBadgesAndSkills(p1.projectId)
         then:
         skills
-        skills.size() == 23
-        skills.skillId.sort() == ["skill3", "skill4", "skill5", "skill6", "skill7", "skill4subj2", "skill5subj2", "skill6subj2", "skill7subj2", "skill8subj2", "badge1", "skill1", "skill1subj2", "skill10", "skill10subj2", "skill2", "skill2subj2", "skill3subj2", "skill8", "skill9", "skill9subj2", "TestSubject1", "TestSubject2"].sort()
-        skills.skillName.sort() == ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010", "Test Badge 1", "Test Skill 1", "Test Skill 1 Subject2", "Test Skill 10", "Test Skill 10 Subject2", "Test Skill 2", "Test Skill 2 Subject2", "Test Skill 3 Subject2", "Test Skill 8", "Test Skill 9", "Test Skill 9 Subject2", "Test Subject #1", "Test Subject #2"].sort()
-        skills.pointIncrement.sort() == [2, 3, 4, 5, 6, 3, 4, 5, 6, 7, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0].sort()
-        skills.totalPoints.sort() == [4, 6, 8, 10, 12, 6, 8, 10, 12, 14, 0, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 1040, 1050].sort()
-        skills.userCurrentPoints.sort() == [0, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0].sort()
-        skills.userAchieved == [false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false]
-        skills.skillId.sort() == ["skill3", "skill4", "skill5", "skill6", "skill7", "skill4subj2", "skill5subj2", "skill6subj2", "skill7subj2", "skill8subj2", "badge1", "skill1", "skill1subj2", "skill10", "skill10subj2", "skill2", "skill2subj2", "skill3subj2", "skill8", "skill9", "skill9subj2", "TestSubject1", "TestSubject2"].sort()
-        skills.subjectId.sort() == ["TestSubject1", "TestSubject1", "TestSubject1", "TestSubject1", "TestSubject1", "TestSubject2", "TestSubject2", "TestSubject2", "TestSubject2", "TestSubject2", null, "TestSubject1", "TestSubject2", "TestSubject1", "TestSubject2", "TestSubject1", "TestSubject2", "TestSubject2", "TestSubject1", "TestSubject1", "TestSubject2", null, null].sort()
-        skills.findAll { it.skillType == "Skill" }.skillId.sort() == ["skill3", "skill4", "skill5", "skill6", "skill7", "skill4subj2", "skill5subj2", "skill6subj2", "skill7subj2", "skill8subj2", "skill1", "skill1subj2", "skill10", "skill10subj2", "skill2", "skill2subj2", "skill3subj2", "skill8", "skill9", "skill9subj2"].sort()
+        skills.size() == 26
+        skills.skillId.sort() == ["child0", "child1", "child2", "skill3", "skill4", "skill5", "skill6", "skill7", "skill4subj2", "skill5subj2", "skill6subj2", "skill7subj2", "skill8subj2", "badge1", "skill1", "skill1subj2", "skill10", "skill10subj2", "skill2", "skill2subj2", "skill3subj2", "skill8", "skill9", "skill9subj2", "TestSubject1", "TestSubject2"].sort()
+        skills.skillName.sort() == ["child skill 0", "child skill 1", "child skill 2", "001", "002", "003", "004", "005", "006", "007", "008", "009", "010", "Test Badge 1", "Test Skill 1", "Test Skill 1 Subject2", "Test Skill 10", "Test Skill 10 Subject2", "Test Skill 2", "Test Skill 2 Subject2", "Test Skill 3 Subject2", "Test Skill 8", "Test Skill 9", "Test Skill 9 Subject2", "Test Subject #1", "Test Subject #2"].sort()
+        skills.pointIncrement.sort() == [2, 3, 4, 5, 6, 3, 4, 5, 6, 7, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0].sort()
+        skills.totalPoints.sort() == [4, 6, 8, 10, 12, 6, 8, 10, 12, 14, 0, 100, 100, 100, 200, 200, 200, 200, 200, 200, 200, 200, 200, 200, 1340, 1050].sort()
+        skills.userCurrentPoints.sort() == [0, 6, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0].sort()
+        skills.userAchieved.sort() == [false, true, false, false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false].sort()
+        skills.subjectId.sort() == ["TestSubject1", "TestSubject1", "TestSubject1", "TestSubject1", "TestSubject1", "TestSubject1", "TestSubject1", "TestSubject1", "TestSubject2", "TestSubject2", "TestSubject2", "TestSubject2", "TestSubject2", null, "TestSubject1", "TestSubject2", "TestSubject1", "TestSubject2", "TestSubject1", "TestSubject2", "TestSubject2", "TestSubject1", "TestSubject1", "TestSubject2", null, null].sort()
+        skills.findAll { it.skillType == "Skill" }.skillId.sort() == ["child0", "child1", "child2", "skill3", "skill4", "skill5", "skill6", "skill7", "skill4subj2", "skill5subj2", "skill6subj2", "skill7subj2", "skill8subj2", "skill1", "skill1subj2", "skill10", "skill10subj2", "skill2", "skill2subj2", "skill3subj2", "skill8", "skill9", "skill9subj2"].sort()
         skills.findAll { it.skillType == "Subject" }.skillId.sort() == ["TestSubject1", "TestSubject2"].sort()
         skills.find { it.skillId == "TestSubject1" }.childAchievementCount == 1
-        skills.find { it.skillId == "TestSubject1" }.totalChildCount == 10
+        skills.find { it.skillId == "TestSubject1" }.totalChildCount == 13
         skills.find { it.skillId == "TestSubject2" }.childAchievementCount == 0
         skills.find { it.skillId == "TestSubject2" }.totalChildCount == 10
         skills.findAll { it.skillType == "Badge" }.skillId == ["badge1"]
