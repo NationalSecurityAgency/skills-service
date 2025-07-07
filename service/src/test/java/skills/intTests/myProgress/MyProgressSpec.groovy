@@ -15,24 +15,17 @@
  */
 package skills.intTests.myProgress
 
-import groovy.json.JsonOutput
 import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
-import org.apache.commons.lang3.builder.ToStringBuilder
-import org.apache.commons.lang3.builder.ToStringStyle
-import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
-import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
 import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
 import skills.services.settings.Settings
-import skills.storage.repos.UserAchievedLevelRepo
-import spock.lang.IgnoreRest
 
 @Slf4j
 class MyProgressSpec extends DefaultIntSpec {
@@ -484,7 +477,7 @@ class MyProgressSpec extends DefaultIntSpec {
         res1.mostRecentAchievedSkill
     }
 
-    def "skills are only counted from projects in the production mode even if they are part of My Projects"() {
+    def "skills are only counted from projects in the production mode unless they are part of My Projects"() {
         List skills = []
         List projs = (1..3).collect { int projNum ->
             def project = SkillsFactory.createProject(projNum)
@@ -502,6 +495,8 @@ class MyProgressSpec extends DefaultIntSpec {
         }
 
         skillsService.disableProdMode(projs[1])
+        def initialRes = skillsService.getMyProgressSummary()
+        skillsService.removeMyProject(projs[1].projectId)
         assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
 
         assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
@@ -518,6 +513,12 @@ class MyProgressSpec extends DefaultIntSpec {
         def res1 = skillsService.getMyProgressSummary()
 
         then:
+        initialRes.totalSkills == 6
+        initialRes.numAchievedSkills == 0
+        initialRes.numAchievedSkillsLastMonth == 0
+        initialRes.numAchievedSkillsLastWeek == 0
+        !initialRes.mostRecentAchievedSkill
+
         res.totalSkills == 4
         res.numAchievedSkills == 1
         res.numAchievedSkillsLastMonth == 1
@@ -529,6 +530,42 @@ class MyProgressSpec extends DefaultIntSpec {
         res1.numAchievedSkillsLastMonth == 2
         res1.numAchievedSkillsLastWeek == 1
         res1.mostRecentAchievedSkill
+    }
+
+
+    def "skills are counted from private projects"() {
+        List skills = []
+        List projs = (1..3).collect { int projNum ->
+            def project = SkillsFactory.createProject(projNum)
+            skillsService.createProject(project)
+            skillsService.enableProdMode(project)
+            skillsService.addMyProject(project.projectId)
+
+            skillsService.createSubject(SkillsFactory.createSubject(projNum, 1))
+            def skillsForProj = SkillsFactory.createSkills(projNum, projNum, 1, 200)
+            skillsService.createSkills(skillsForProj)
+
+            skills.addAll(skillsForProj)
+
+            return project
+        }
+
+        skillsService.disableProdMode(projs[1])
+        skillsService.configuredProjectAsInviteOnly(projs[1].projectId)
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+
+        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[3].skillId], userId, new Date()).body.completed.find { it.type == "Skill"}
+
+        when:
+        def res = skillsService.getMyProgressSummary()
+
+        then:
+        res.totalSkills == 6
+        res.numAchievedSkills == 3
+        res.numAchievedSkillsLastMonth == 3
+        res.numAchievedSkillsLastWeek == 3
+        res.mostRecentAchievedSkill
     }
 
     def "numProjectsContributed are only counted from My Projects "() {
@@ -570,7 +607,7 @@ class MyProgressSpec extends DefaultIntSpec {
     }
 
 
-    def "numProjectsContributed  are only counted from projects in the production mode even if they are part of My Projects"() {
+    def "numProjectsContributed counts projects that are part of My Projects even if hidden"() {
         List skills = []
         List projs = (1..3).collect { int projNum ->
             def project = SkillsFactory.createProject(projNum)
@@ -602,9 +639,9 @@ class MyProgressSpec extends DefaultIntSpec {
         def res2 = skillsService.getMyProgressSummary()
 
         then:
-        res.numProjectsContributed == 0
-        res1.numProjectsContributed == 1
-        res2.numProjectsContributed == 2
+        res.numProjectsContributed == 1
+        res1.numProjectsContributed == 2
+        res2.numProjectsContributed == 3
     }
 
     def "badges are only counted from My Projects "() {

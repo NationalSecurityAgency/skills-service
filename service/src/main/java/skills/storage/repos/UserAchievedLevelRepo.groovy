@@ -958,16 +958,10 @@ select count(distinct ua) from UserAchievement ua where ua.projectId = :projectI
             skillDef.project_id IN 
             (
                 select s.project_id
-                from settings s
-                where s.project_id = skillDef.project_id
-                  and s.setting = 'production.mode.enabled'
-                  and s.value = 'true'
-            ) and 
-            skillDef.project_id IN (
-                select s.project_id
                 from settings s, users uu
-                where (s.setting = 'my_project' and uu.user_id=:userId and uu.id = s.user_ref_id and s.project_id = skillDef.project_id)
-            ) 
+                where s.project_id = skillDef.project_id
+                      and (s.setting = 'my_project' and uu.user_id=:userId and uu.id = s.user_ref_id and s.project_id = skillDef.project_id)
+            )
     ''', nativeQuery = true)
     AchievedSkillsCount countAchievedProductionSkillsForUserByDayWeekMonth(@Param('userId') String userId)
 

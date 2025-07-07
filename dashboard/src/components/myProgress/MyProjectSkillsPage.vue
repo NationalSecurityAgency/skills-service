@@ -113,7 +113,7 @@ onMounted(() => {
 const handleProjInvitation = () => {
   const isInvited = route.query.invited
   if (isInvited) {
-    ProjectService.addToMyProjects(projectId)
+    ProjectService.addToMyProjects(projectId, true)
   }
 }
 const toTitleCase = (str) => {

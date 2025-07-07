@@ -95,7 +95,7 @@ class ManageMyProjectsSpec extends DefaultIntSpec {
         forMyProjects.collect { it.projectId } == projects.collect { it.projectId }.sort()
     }
 
-    def "projects should not be available if prod-mode is disabled"() {
+    def "projects should be available if prod-mode is disabled but still saved to my projects"() {
         List projects = (1..3).collect {
             def proj = SkillsFactory.createProject(it)
             anotherUser.createProject(proj)
@@ -116,8 +116,70 @@ class ManageMyProjectsSpec extends DefaultIntSpec {
 
         then:
         forMyProjects.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
+        forMyProjects1.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
+        forMyProjects2.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
+    }
+
+    def "projects should not be available if prod-mode is disabled and not still saved to my projects"() {
+        List projects = (1..3).collect {
+            def proj = SkillsFactory.createProject(it)
+            anotherUser.createProject(proj)
+            anotherUser.enableProdMode(proj)
+            skillsService.addMyProject(proj.projectId)
+            return proj
+        }
+
+        when:
+        def forMyProjects = skillsService.getAvailableMyProjects()
+
+        anotherUser.disableProdMode(projects[1])
+        skillsService.removeMyProject(projects[1].projectId)
+        def forMyProjects1 = skillsService.getAvailableMyProjects()
+
+        anotherUser.disableProdMode(projects[0])
+        anotherUser.disableProdMode(projects[2])
+        skillsService.removeMyProject(projects[0].projectId)
+        skillsService.removeMyProject(projects[2].projectId)
+        def forMyProjects2 = skillsService.getAvailableMyProjects()
+
+        then:
+        forMyProjects.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
         forMyProjects1.collect { it.projectId }  == [projects[0].projectId, projects[2].projectId]
         !forMyProjects2
+    }
+
+    def "hidden projects should not be available to other users"() {
+        SkillsService user1 = createService(randomUsers[0])
+        SkillsService user2 = createService(randomUsers[1])
+        SkillsService user3 = createService(randomUsers[2])
+
+        List projects = (1..3).collect {
+            def proj = SkillsFactory.createProject(it)
+            skillsService.createProject(proj)
+            skillsService.disableProdMode(proj)
+            user1.addMyHiddenProject(proj.projectId)
+            return proj
+        }
+
+        when:
+        def user1Projects = user1.getAvailableMyProjects()
+        def user2Projects = user2.getAvailableMyProjects()
+        def user3Projects = user3.getAvailableMyProjects()
+
+        skillsService.enableProdMode(projects[0])
+        user3.addMyHiddenProject(projects[1].projectId)
+
+        def user1Projects2 = user1.getAvailableMyProjects()
+        def user2Projects2 = user2.getAvailableMyProjects()
+        def user3Projects2 = user3.getAvailableMyProjects()
+
+        then:
+        user1Projects.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
+        user2Projects.collect { it.projectId } == []
+        user3Projects.collect { it.projectId } == []
+        user1Projects2.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
+        user2Projects2.collect { it.projectId } == [projects[0].projectId]
+        user3Projects2.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId]
     }
 
     def "add and remove my project - single project"() {

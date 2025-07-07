@@ -357,50 +357,6 @@ describe('My Progress Tests', () => {
             .contains('You still have 2 projects to explore.');
     });
 
-    it('mySkills page - projects that do not have "production mode" enabled are not included', function () {
-        cy.createProject(3);
-        cy.addToMyProjects(3);
-
-        cy.createSubject(3, 1);
-        cy.createSubject(3, 2);
-
-        cy.createSkill(3, 1, 1);
-        cy.createSkill(3, 1, 2);
-        cy.createSkill(3, 1, 3);
-        cy.createSkill(3, 1, 4);
-
-        cy.createBadge(3, 1);
-
-        cy.loginAsProxyUser();
-        cy.visit('/progress-and-rankings/');
-
-        cy.get('[data-cy=numProjectsContributed]')
-            .contains(new RegExp(/^1$/));
-        cy.get('[data-cy=numProjectsAvailable]')
-            .contains(new RegExp(/^\/ 2$/));
-        cy.get('[data-cy=info-snap-footer]')
-            .contains('You still have 1 project to explore.');
-
-        cy.get('[data-cy=numSkillsAvailable]').should('have.text', '10')
-        cy.get('[data-cy=numBadgesAvailable]')
-            .contains(new RegExp(/^\/ 2$/));
-
-        cy.get('[data-cy=project-link-card-proj1]')
-            .should('be.visible');
-        cy.get('[data-cy=project-link-card-proj1]')
-            .find('[data-cy=project-card-project-name]')
-            .contains('This is project 1');
-
-        cy.get('[data-cy=project-link-card-proj2]')
-            .should('be.visible');
-        cy.get('[data-cy=project-link-card-proj2]')
-            .find('[data-cy=project-card-project-name]')
-            .contains('This is project 2');
-
-        cy.get('[data-cy=project-link-card-proj3]')
-            .should('not.exist');
-    });
-
     it('mySkills page - projects that are not added to My Projects are not included', function () {
         cy.createProject(3);
         cy.enableProdMode(3);
@@ -458,26 +414,6 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
             .click();
         cy.get('[data-cy="backToProgressAndRankingBtn"]');
-    });
-
-    it('My Progress page - no projects with production mode enabled', function () {
-        // remove production mode from all projects
-        cy.loginAsRootUser();
-        cy.request('POST', '/admin/projects/proj1/settings/production.mode.enabled', {
-            projectId: 'proj1',
-            setting: 'production.mode.enabled',
-            value: 'false'
-        });
-        cy.request('POST', '/admin/projects/proj2/settings/production.mode.enabled', {
-            projectId: 'proj2',
-            setting: 'production.mode.enabled',
-            value: 'false'
-        });
-
-        cy.loginAsProxyUser();
-        cy.visit('/progress-and-rankings/');
-
-        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
     });
 
     it('change sort order using keyboard', function () {
