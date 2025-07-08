@@ -20,6 +20,15 @@ dayjs.extend(utcPlugin);
 
 describe('Quiz and Survey Metrics', () => {
 
+    Cypress.Commands.add('prevMonth', () => {
+        cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-name="pcprevbutton"]').click()
+        cy.wait(150);
+    });
+    Cypress.Commands.add('setDay', (dayNum) => {
+        let re = new RegExp(String.raw`^${dayNum}$`)
+        cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="day"]').contains(re).click()
+    });
+
     it('no quiz runs - no metrics', function () {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1)
@@ -277,5 +286,84 @@ describe('Quiz and Survey Metrics', () => {
             [{ colIndex: 1, value: 'user1' }, { colIndex: 2, value: 'CORRECT' }],
         ], 5);
 
+    });
+
+    it('filter quiz run metrics', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.createQuizMultipleChoiceQuestionDef(1, 2);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
+        cy.runQuizForUser(1, 2, [{selectedIndex: [0]}, {selectedIndex: [1,2]}]);
+        cy.runQuizForUser(1, 2, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
+        cy.runQuizForUser(1, 3, [{selectedIndex: [0]}, {selectedIndex: [1,2]}]);
+
+        cy.visit('/administrator/quizzes/quiz1/results');
+
+        cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardValue"]').should('have.text', '4')
+        cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardDescription"]').contains('4 attempts by 3 users')
+
+        cy.get('[data-cy="metricsCardPassed"] [data-cy="statCardValue"]').should('have.text', '2')
+        cy.get('[data-cy="metricsCardPassed"] [data-cy="statCardDescription"]').contains('2 attempts passed by 2 users')
+
+        cy.get('[data-cy="metricsCardFailed"] [data-cy="statCardValue"]').should('have.text', '2')
+        cy.get('[data-cy="metricsCardFailed"] [data-cy="statCardDescription"]').contains('2 attempts failed by 2 users')
+
+        cy.get('[data-cy="metricsCardRuntime"] [data-cy="statCardDescription"]').contains('Average Quiz runtime for 4 attempts')
+
+        cy.get('[data-cy="metricsDateFilter"]').click()
+        cy.prevMonth()
+        cy.setDay(1)
+        cy.setDay(1)
+
+        cy.get('[data-cy="applyDateFilterButton"]').click()
+        cy.get('[data-cy="noMetricsYet"]').should('exist')
+
+        cy.get('[data-cy="clearDateFilterButton"]').click()
+
+        cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardValue"]').should('have.text', '4')
+        cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardDescription"]').contains('4 attempts by 3 users')
+
+        cy.get('[data-cy="metricsCardPassed"] [data-cy="statCardValue"]').should('have.text', '2')
+        cy.get('[data-cy="metricsCardPassed"] [data-cy="statCardDescription"]').contains('2 attempts passed by 2 users')
+
+        cy.get('[data-cy="metricsCardFailed"] [data-cy="statCardValue"]').should('have.text', '2')
+        cy.get('[data-cy="metricsCardFailed"] [data-cy="statCardDescription"]').contains('2 attempts failed by 2 users')
+
+        cy.get('[data-cy="metricsCardRuntime"] [data-cy="statCardDescription"]').contains('Average Quiz runtime for 4 attempts')
+
+    });
+
+    it('filter survey metrics', function () {
+        cy.createSurveyDef(1);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 1);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0, 2]}], true);
+        cy.runQuizForUser(1, 2, [{selectedIndex: [0, 2]}], true);
+
+        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardValue"]').should('have.text', '2')
+        cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardDescription"]').contains('Survey was completed 2 times')
+
+        cy.get('[data-cy="metricsCardPassed"]').should('not.exist')
+        cy.get('[data-cy="metricsCardFailed"]').should('not.exist')
+
+        cy.get('[data-cy="metricsCardRuntime"] [data-cy="statCardDescription"]').contains('Average Survey runtime for 2 users')
+
+        cy.get('[data-cy="metricsDateFilter"]').click()
+        cy.prevMonth()
+        cy.setDay(1)
+        cy.setDay(1)
+
+        cy.get('[data-cy="applyDateFilterButton"]').click()
+        cy.get('[data-cy="noMetricsYet"]').should('exist')
+
+        cy.get('[data-cy="clearDateFilterButton"]').click()
+
+        cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardValue"]').should('have.text', '2')
+        cy.get('[data-cy="metricsCardTotal"] [data-cy="statCardDescription"]').contains('Survey was completed 2 times')
+
+        cy.get('[data-cy="metricsCardPassed"]').should('not.exist')
+        cy.get('[data-cy="metricsCardFailed"]').should('not.exist')
+
+        cy.get('[data-cy="metricsCardRuntime"] [data-cy="statCardDescription"]').contains('Average Survey runtime for 2 users')
     });
 });
