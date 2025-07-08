@@ -176,7 +176,7 @@ const numUsersBehindMe = computed(() => {
                                  data-cy="myRankTotalUsersStatCard">
                  <span class="text-lg">There is a competitor right behind you, only
                   <Tag>{{ numFormat.pretty(rankingDistribution.pointsAnotherUserToPassMe) }}</Tag>
-                  points behind. Don't let them pass you!</span>
+                  {{ attributes.pointDisplayNamePlural?.toLowerCase() }} behind. Don't let them pass you!</span>
                 </media-info-card>
               </div>
               <div class="flex-1">

@@ -140,7 +140,7 @@ const descriptionToggled = () => {
                 @click="prevButtonClicked" v-if="skill.prevSkillId"
                 outlined
                 size="small"
-                :title="`Previous Skills (${previousButtonShortcut})`"
+                :title="`Previous ${attributes.skillDisplayName} (${previousButtonShortcut})`"
                 class="skills-theme-btn"
                 data-cy="prevSkill"
                 aria-label="previous skill">
@@ -159,7 +159,7 @@ const descriptionToggled = () => {
                 data-cy="nextSkill"
                 outlined
                 size="small"
-                :title="`Next Skills (${nextButtonShortcut})`"
+                :title="`Next ${attributes.skillDisplayName} (${nextButtonShortcut})`"
                 aria-label="next skill">
                 Next
                 <i class="fas fa-arrow-alt-circle-right ml-1" aria-hidden="true"></i>

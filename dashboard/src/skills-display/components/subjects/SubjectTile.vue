@@ -138,7 +138,7 @@ const activePointsColor = computed(() => {
         <div class="pt-6" >
           <router-link v-if="!attributes.isSummaryOnly"
             :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('SubjectDetailsPage'), params: { subjectId: subject.subjectId } }"
-            :aria-label="`Click to navigate to the ${subject.subject} subject page.`"
+            :aria-label="`Click to navigate to the ${subject.subject} ${attributes.subjectDisplayName} page.`"
             data-cy="subjectTileBtn" tabindex="-1">
             <Button
               label="View"
