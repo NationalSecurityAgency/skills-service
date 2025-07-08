@@ -1072,7 +1072,7 @@ class AdminController {
                                 @RequestParam String orderBy,
                                 @RequestParam Boolean ascending,
                                 @RequestParam int minimumPoints,
-                                @RequestParam int maximumPoints) {
+                                @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
         SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
@@ -1095,7 +1095,7 @@ class AdminController {
                                     @RequestParam String orderBy,
                                     @RequestParam Boolean ascending,
                                     @RequestParam int minimumPoints,
-                                    @RequestParam int maximumPoints) {
+                                    @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
         SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
@@ -1164,7 +1164,7 @@ class AdminController {
                                 @RequestParam String orderBy,
                                 @RequestParam Boolean ascending,
                                 @RequestParam int minimumPoints,
-                                @RequestParam int maximumPoints) {
+                                @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
@@ -1184,7 +1184,7 @@ class AdminController {
                               @RequestParam String orderBy,
                               @RequestParam Boolean ascending,
                               @RequestParam int minimumPoints,
-                              @RequestParam int maximumPoints) {
+                              @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
@@ -1204,7 +1204,7 @@ class AdminController {
                               @RequestParam String orderBy,
                               @RequestParam Boolean ascending,
                               @RequestParam int minimumPoints,
-                              @RequestParam int maximumPoints) {
+                              @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)

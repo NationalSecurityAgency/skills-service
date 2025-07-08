@@ -343,6 +343,21 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.data.get(0).totalPoints == 35
     }
 
+    def 'get project users works appropriately with no maximum points'() {
+        when:
+        def result = skillsService.wsHelper.adminGet("/projects/${projId}/users?limit=10&ascending=1&page=1&byColumn=0&orderBy=userId&query=&minimumPoints=0".toString())
+
+        then:
+        result
+        result.count == 2
+        result.totalCount == 2  // total user count
+        result.data.size() == 2
+        result.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        result.data.get(0).totalPoints == 70
+        result.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        result.data.get(1).totalPoints == 35
+    }
+
     def 'get project users with paging and minimum points'() {
         when:
         def results1 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0)
