@@ -109,7 +109,7 @@ describe('Custom Label with Reused Data Tests', () => {
         Cypress.env('disableResetDb', false);
     });
 
-    it('verify custom labels - project page in dashboar', () => {
+    it('verify custom labels - project page in dashboard', () => {
         cy.visit('/progress-and-rankings/projects/proj1');
         cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains('Work Role: With Custom Labels');
@@ -126,7 +126,7 @@ describe('Custom Label with Reused Data Tests', () => {
         cy.get('[data-cy="subjectTile"]')
             .contains('Stage 0');
         cy.get('[data-cy="achievedSkillsProgress"]').contains('Achieved Courses');
-        cy.get('[data-cy="downloadTranscriptCard"]').contains('You have Completed 0 out of 6 Courses!')
+        cy.get('[data-cy="downloadTranscriptCard"]').contains('You have Completed 0 out of 6 courses!')
         cy.get('[data-cy="searchSkillsAcrossSubjects"] input')
             .should('have.attr', 'placeholder', 'Search for a Course across Competencies...');
 
@@ -155,7 +155,7 @@ describe('Custom Label with Reused Data Tests', () => {
         cy.get('[data-cy="subjectTile"]')
             .contains('Stage 0');
         cy.get('[data-cy="achievedSkillsProgress"]').contains('Achieved Courses');
-        cy.get('[data-cy="downloadTranscriptCard"]').contains('You have Completed 0 out of 6 Courses!')
+        cy.get('[data-cy="downloadTranscriptCard"]').contains('You have Completed 0 out of 6 courses!')
         cy.get('[data-cy="searchSkillsAcrossSubjects"] input')
             .should('have.attr', 'placeholder', 'Search for a Course across Competencies...');
 
@@ -199,7 +199,7 @@ describe('Custom Label with Reused Data Tests', () => {
         cy.get('[data-cy="achievedSkillsProgress"]').contains('Achieved Courses');
 
         cy.get('[data-cy="groupToggle"]').contains('KSAS')
-        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 2 Competencies');
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 2 Courses');
 
         cy.get('[data-cy="skillsSearchInput"]')
             .invoke('attr', 'placeholder')
