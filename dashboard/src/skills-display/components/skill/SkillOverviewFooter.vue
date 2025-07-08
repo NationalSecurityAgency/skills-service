@@ -301,7 +301,7 @@ const skillLabelLower = computed(() => attributes.skillDisplayNameLower)
             </div>
             <div class="flex-1" data-cy="requestApprovalAlert">
               This {{ attributes.skillDisplayNameLower }}'s achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skillInternal.expirationDate) }}</span>, but your <span class="font-size-1">
-              <Tag severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> {{ pluralize.plural(attributes.groupDisplayName,  skillInternal.totalPoints) }} can be retained by submitting another <span class="font-size-1">approval</span> request.
+              <Tag severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> {{ pluralize.plural(attributes.pointDisplayNameLower,  skillInternal.totalPoints) }} can be retained by submitting another <span class="font-size-1">approval</span> request.
             </div>
             <div class="">
               <SkillsButton
@@ -386,14 +386,14 @@ const skillLabelLower = computed(() => attributes.skillDisplayNameLower)
             v-if="isCompleted"> and <b>completed</b> the {{ skillLabelLower }}</span>!
           </Message>
           <Message v-if="isPointsEarned && isMotivationalSkill && !firstReport && isRetention" severity="success" icon="fas fa-birthday-cake">
-            Congratulations! You just retained your <Tag>{{ skillInternal.totalPoints }}</Tag> {{ attributes.pointDisplayNamePlural }}!
+            Congratulations! You just retained your <Tag>{{ skillInternal.totalPoints }}</Tag> {{ pluralize.plural(attributes.pointDisplayNameLower, skillInternal.totalPoints) }}!
           </Message>
           <Message
             v-if="selfReport.res && !isPointsEarned && (isAlreadyPerformed() || !isApprovalRequired)"
             severity="warn"
             @close="selfReport.res = null"
             icon="fas fa-cloud-sun-rain">
-            <span><b>Unfortunately</b> no {{ attributes.pointDisplayNamePlural }}.</span>
+            <span><b>Unfortunately</b> no {{ attributes.pointDisplayNamePlural?.toLowerCase() }}.</span>
             {{ selfReport.res?.explanation }}
           </Message>
 

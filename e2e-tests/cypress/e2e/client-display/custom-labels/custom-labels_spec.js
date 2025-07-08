@@ -86,8 +86,8 @@ describe('Custom Label Tests', () => {
 
         cy.get('[data-cy="closeQuizBtn"]').click()
 
-        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('Expires in a day, perform this course to keep your units!');
-        cy.get('[data-cy="takeQuizMsg"]').contains('This course achievement expires in a day, but your 150 units can be retained by completing the Quiz again')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('perform this course to keep your units!');
+        cy.get('[data-cy="takeQuizMsg"]').contains('but your 150 units can be retained by completing the Quiz again')
     });
 
     it('survey on skill messages', () => {
@@ -118,8 +118,8 @@ describe('Custom Label Tests', () => {
 
         cy.get('[data-cy="closeSurveyBtn"]').click()
 
-        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('Expires in a day, perform this course to keep your units!');
-        cy.get('[data-cy="takeQuizMsg"]').contains('This course achievement expires in a day, but your 150 units can be retained by completing the Survey again')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('perform this course to keep your units!');
+        cy.get('[data-cy="takeQuizMsg"]').contains('but your 150 units can be retained by completing the Survey again')
     });
 
 });

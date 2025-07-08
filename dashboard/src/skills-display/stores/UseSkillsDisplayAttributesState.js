@@ -80,6 +80,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const skillDisplayNameLower = computed(() => skillDisplayName.value.toLowerCase())
   const skillDisplayNamePlural = computed(() => pluralize.plural(skillDisplayName.value))
   const pointDisplayName = computed(() => config.value.pointDisplayName || 'Point')
+  const pointDisplayNameLower = computed(() => pointDisplayName.value.toLowerCase())
   const pointDisplayNamePlural = computed(() => pluralize.plural(pointDisplayName.value))
   const projectName = computed(() => config.value.projectName || route.params.projectId)
   const projectUserCommunityDescriptor = computed(() => {
@@ -130,6 +131,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     skillDisplayNameLower,
     skillDisplayNamePlural,
     pointDisplayName,
+    pointDisplayNameLower,
     pointDisplayNamePlural,
     internalBackButton,
     isSummaryOnly,

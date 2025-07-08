@@ -108,7 +108,7 @@ const pointsLabelWithTotalPts = computed(() => pluralize.plural(attributes.point
                   severity="info">{{ numFormat.pretty(skill.totalPoints) }}</Tag></span> {{ pointsLabelWithTotalPts }}!
               </div>
               <div class="flex-1" data-cy="quizAlert" v-else-if="isCompleted && isMotivationalSkill">
-                This {{ attributes.skillDisplayNameLower }} achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skill.expirationDate) }}</span>, but your <span class="font-size-1">
+                This {{ attributes.skillDisplayNameLower }}'s achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skill.expirationDate) }}</span>, but your <span class="font-size-1">
                 <Tag severity="info">{{ numFormat.pretty(skill.totalPoints) }}</Tag></span> {{  pointsLabelWithTotalPts }} can be retained by completing the {{ typeWord }} again.
               </div>
               <SkillsButton
