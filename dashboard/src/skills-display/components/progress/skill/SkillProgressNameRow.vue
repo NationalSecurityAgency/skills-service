@@ -210,7 +210,7 @@ const groupLabel = computed(() => attributes.groupDisplayName)
            aria-hidden="true" />
         <span v-if="skill.isSkillsGroupType">
           <animated-number :num="numChildSkillsComplete" />
-          / {{ numFormat.pretty(numSkillsRequired) }} {{ pluralize.plural(attributes.subjectDisplayName, numSkillsRequired) }}
+          / {{ numFormat.pretty(numSkillsRequired) }} {{ pluralize.plural(attributes.skillDisplayName, numSkillsRequired) }}
           {{ someSkillsAreOptional ? 'Required' : '' }}
         </span>
         <span v-else class="content-end">

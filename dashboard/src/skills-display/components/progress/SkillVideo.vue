@@ -22,10 +22,10 @@ import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisp
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js';
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js';
 import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue';
-import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 const VideoPlayer = defineAsyncComponent(() =>
     import('@/common-components/video/VideoPlayer.vue')
@@ -48,6 +48,7 @@ const emit = defineEmits(['points-earned'])
 const router = useRouter()
 const announcer = useSkillsAnnouncer()
 const skillsDisplayInfo = useSkillsDisplayInfo()
+const pluralize = usePluralize()
 const attributes = useSkillsDisplayAttributesState()
 
 const skillsDisplayService = useSkillsDisplayService()
@@ -131,7 +132,7 @@ const doReportSkill = () => {
         if (res.pointsEarned > 0) {
           justAchieved.value = true;
           emit('points-earned', res.pointsEarned);
-          nextTick(() => announcer.polite(`Congratulations! You just earned ${res.pointsEarned} points and completed ${props.skill.skill} skill`));
+          nextTick(() => announcer.polite(`Congratulations! You just earned ${res.pointsEarned} ${attributes.pointDisplayNamePlural} and completed ${props.skill.skill} ${attributes.skillDisplayNameLower}`));
         }
       }).catch((e) => {
         if (e.response.data && e.response.data.errorCode
@@ -165,7 +166,7 @@ const loadTranscript = () => {
   }
 
 };
-
+const totalPointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNameLower, props.skill.totalPoints))
 </script>
 
 <template>
@@ -192,7 +193,7 @@ const loadTranscript = () => {
       <template #overlay>
         <div class="text-center text-primary bg-surface-0 dark:bg-surface-900 p-2 rounded-border mb-20" data-cy="videoIsLockedMsg">
           <i class="fas fa-lock" style="font-size: 1.2rem;"></i>
-          <div class="font-weight-bold">Complete this {{ attributes.skillDisplayName.toLowerCase() }}'s prerequisites to unlock the {{ videoConf.isAudio ? 'audio' : 'video'}}</div>
+          <div class="font-weight-bold">Complete this {{ attributes.skillDisplayNameLower }}'s prerequisites to unlock the {{ videoConf.isAudio ? 'audio' : 'video'}}</div>
         </div>
       </template>
       <div class="flex" style="padding: 0rem 1rem 0rem 1rem !important;">
@@ -244,12 +245,12 @@ const loadTranscript = () => {
                   v-model="transcriptReadCert"
                   data-cy="certifyTranscriptReadCheckbox"
               />
-              <label for="readTranscript" class="ml-2">I <b>certify</b> that I fully read the transcript. Please award the skill and its <Tag>{{skill.totalPoints}}</Tag> points.</label>
+              <label for="readTranscript" class="ml-2">I <b>certify</b> that I fully read the transcript. Please award the {{ attributes.skillDisplayNameLower }} and its <Tag>{{skill.totalPoints}}</Tag> {{ totalPointsLbl }}.</label>
             </div>
             <div class="flex">
               <SkillsButton
                   severity="success"
-                  label="Claim Points"
+                  :label="`Claim ${attributes.pointDisplayNamePlural}`"
                   icon="fas fa-check-double"
                   outlined :disabled="!transcriptReadCert"
                   data-cy="claimPtsByReadingTranscriptBtn"
@@ -267,8 +268,8 @@ const loadTranscript = () => {
               <i class="fas fa-user-shield text-2xl" aria-hidden="true"></i>
             </div>
             <div class="flex-1 italic pt-1" data-cy="videoAlert">
-              This skill's achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skill.expirationDate) }}</span>, but your <span class="font-size-1">
-            <Tag severity="info">{{ numFormat.pretty(skill.totalPoints) }}</Tag></span> points can be retained by {{ videoConf.isAudio ? 'listening to the audio again.' : 'watching the video again.'}}
+              This {{ attributes.skillDisplayNameLower }}'s achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skill.expirationDate) }}</span>, but your <span class="font-size-1">
+            <Tag severity="info">{{ numFormat.pretty(skill.totalPoints) }}</Tag></span> {{ totalPointsLbl }} can be retained by {{ videoConf.isAudio ? 'listening to the audio again.' : 'watching the video again.'}}
             </div>
           </div>
         </template>
@@ -285,11 +286,11 @@ const loadTranscript = () => {
             <div class="flex-1" data-cy="watchVideoMsg">
               <div v-if="!justAchieved">
                 <i class="fas fa-video font-size-2 mr-1 animate__bounceIn" aria-hidden="true"></i>
-                Earn <b>{{ skill.totalPoints }}</b> points for the  {{ attributes.skillDisplayName.toLowerCase() }} {{ videoConf.isAudio ? 'by listening to this Audio.' : 'by watching this Video.' }}
+                Earn <b>{{ skill.totalPoints }}</b> {{ totalPointsLbl }} for the  {{ attributes.skillDisplayNameLower }} {{ videoConf.isAudio ? 'by listening to this Audio.' : 'by watching this Video.' }}
               </div>
               <div v-if="justAchieved">
                 <i class="fas fa-birthday-cake text-success mr-1 animate__bounceIn" style="font-size: 1.2rem"></i> Congrats! You just earned <span
-                  class="text-success font-weight-bold">{{ skill.totalPoints }}</span> points<span> and <b>completed</b> the {{ attributes.skillDisplayName.toLowerCase() }}</span>!
+                  class="text-success font-weight-bold">{{ skill.totalPoints }}</span> {{ totalPointsLbl }}<span> and <b>completed</b> the {{ attributes.skillDisplayNameLower }}</span>!
               </div>
             </div>
           </div>
