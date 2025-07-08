@@ -231,7 +231,7 @@ const skillLabelLower = computed(() => attributes.skillDisplayNameLower)
           </div>
           <div class="flex-1 italic pt-1" data-cy="honorSystemAlert">
             This {{ attributes.skillDisplayNameLower }}'s achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skillInternal.expirationDate) }}</span>, but your <span class="font-size-1">
-            <Tag severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> points can be retained by performing another <span class="font-size-1">Honor System</span> request.
+            <Tag severity="info">{{ numFormat.pretty(skillInternal.totalPoints) }}</Tag></span> {{ pluralize.plural(attributes.pointDisplayNameLower,  skillInternal.totalPoints) }} can be retained by performing another <span class="font-size-1">Honor System</span> request.
           </div>
           <div class="col-auto">
             <SkillsButton

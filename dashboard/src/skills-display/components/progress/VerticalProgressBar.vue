@@ -16,6 +16,7 @@ limitations under the License.
 <script setup>
 import {computed} from 'vue'
 import {useSkillsDisplayThemeState} from "@/skills-display/stores/UseSkillsDisplayThemeState.js";
+import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
 
 const props = defineProps({
   totalProgress: {
@@ -47,6 +48,7 @@ const props = defineProps({
 const themeState = useSkillsDisplayThemeState()
 const isCompleted = computed(() => props.totalProgress >= 100)
 const computedTotalProgressBeforeToday = computed(() => !isCompleted.value ? props.totalProgressBeforeToday : 0)
+const attributes = useSkillsDisplayAttributesState()
 
 const styleObject = computed(() => {
   return {
@@ -56,7 +58,7 @@ const styleObject = computed(() => {
 const ariaLabelFullMsg = computed(() => {
   let res = props.ariaLabel
   if (props.isLocked) {
-    res += ' This skill is locked.'
+    res += ` This ${attributes.skillDisplayNameLower} is locked.`
   }
   return res
 })
