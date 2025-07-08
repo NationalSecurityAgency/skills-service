@@ -343,10 +343,70 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.data.get(0).totalPoints == 35
     }
 
+    def 'get project users works appropriately with no maximum points'() {
+        when:
+        def result = skillsService.wsHelper.adminGet("/projects/${projId}/users?limit=10&ascending=1&page=1&byColumn=0&orderBy=userId&query=&minimumPoints=0".toString())
+
+        then:
+        result
+        result.count == 2
+        result.totalCount == 2  // total user count
+        result.data.size() == 2
+        result.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        result.data.get(0).totalPoints == 70
+        result.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        result.data.get(1).totalPoints == 35
+    }
+
     def 'get project users with paging and minimum points'() {
         when:
         def results1 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0)
-        def results2 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 40)
+        def results2 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 5)
+
+        then:
+        results1
+        results1.count == 2 // result count
+        results1.totalCount == 2  // total user count
+        results1.data.size() == 2
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).totalPoints == 70
+        results1.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results1.data.get(1).totalPoints == 35
+        results2
+        results2.count == 1
+        results2.totalCount == 2
+        results2.data.size() == 1
+        results2.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results2.data.get(0).totalPoints == 70
+    }
+
+
+    def 'get project users with paging and maximum points'() {
+        when:
+        def results1 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0, 100)
+        def results2 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0, 4)
+
+        then:
+        results1
+        results1.count == 2 // result count
+        results1.totalCount == 2  // total user count
+        results1.data.size() == 2
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).totalPoints == 70
+        results1.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results1.data.get(1).totalPoints == 35
+        results2
+        results2.count == 1
+        results2.totalCount == 2
+        results2.data.size() == 1
+        results2.data.get(0).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results2.data.get(0).totalPoints == 35
+    }
+
+    def 'get project users with paging and minimum and maximum points'() {
+        when:
+        def results1 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0, 100)
+        def results2 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 5, 80)
 
         then:
         results1
@@ -406,8 +466,8 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         when:
         def results1 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0)
-        def results2 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 40)
-        def results3 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 80)
+        def results2 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 10)
+        def results3 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 25)
 
         then:
         results1
@@ -424,6 +484,76 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.totalCount == 5
         results2.data.size() == 3
         results2.data.get(0).totalPoints == 70
+
+        results3
+        results3.count == 0
+        results3.totalCount == 5
+        results3.data.size() == 0
+    }
+
+    def 'get subject users with maximum points'() {
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(2), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(3), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(4), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(2), twoDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(3), twoDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(4), twoDaysAgo)
+
+        when:
+        def results1 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0, 100)
+        def results2 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0, 10)
+        def results3 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0, 5)
+
+        then:
+        results1
+        results1.count == 5
+        results1.totalCount == 5
+        results1.data.size() == 5
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).totalPoints == 35
+        results1.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results1.data.get(1).totalPoints == 35
+
+        results2
+        results2.count == 2
+        results2.totalCount == 5
+        results2.data.size() == 2
+        results2.data.get(0).totalPoints == 35
+
+        results3
+        results3.count == 0
+        results3.totalCount == 5
+        results3.data.size() == 0
+    }
+
+    def 'get subject users with minimum and maximum points'() {
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(2), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(3), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(4), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(2), twoDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(3), twoDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(1).get(0)], sampleUserIds.get(4), twoDaysAgo)
+
+        when:
+        def results1 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 0, 100)
+        def results2 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 5, 10)
+        def results3 = skillsService.getSubjectUsers(projId, subjects.get(1), 10, 1, "userId", true, "", 10, 15)
+
+        then:
+        results1
+        results1.count == 5
+        results1.totalCount == 5
+        results1.data.size() == 5
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).totalPoints == 35
+        results1.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results1.data.get(1).totalPoints == 35
+
+        results2
+        results2.count == 2
+        results2.totalCount == 5
+        results2.data.size() == 2
+        results2.data.get(0).totalPoints == 35
 
         results3
         results3.count == 0
@@ -517,6 +647,72 @@ class UserPointsSpecs extends DefaultIntSpec {
         results3
         results3.count == 0
         results3.totalCount == 4
+    }
+
+
+    def 'get skill users with maximum points'() {
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(2), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(3), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(4), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(2), twoDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(3), twoDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(4), twoDaysAgo)
+
+        when:
+        def results1 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0, 100)
+        def results2 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0, 40)
+        def results3 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0, 10)
+
+        then:
+        results1
+        results1.count == 4
+        results1.totalCount == 4
+        results1.data.size() == 4
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).totalPoints == 35
+
+        results2
+        results2.count == 1
+        results2.totalCount == 4
+
+        results3
+        results3.count == 0
+        results3.totalCount == 4
+    }
+
+    def 'get skill users with minimum and maximum points'() {
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(2), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(3), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(4), threeDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(2), twoDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(3), twoDaysAgo)
+        skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(4), twoDaysAgo)
+
+        when:
+        def results1 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 0, 100)
+        def results2 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 5, 50)
+        def results3 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 5, 25)
+        def results4 = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0), 10, 1, "userId", true, "", 30, 35)
+
+        then:
+        results1
+        results1.count == 4
+        results1.totalCount == 4
+        results1.data.size() == 4
+        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).totalPoints == 35
+
+        results2
+        results2.count == 4
+        results2.totalCount == 4
+
+        results3
+        results3.count == 1
+        results3.totalCount == 4
+
+        results4
+        results4.count == 0
+        results4.totalCount == 4
     }
 
     def 'can not get skills with negative points'() {

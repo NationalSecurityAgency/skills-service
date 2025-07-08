@@ -33,6 +33,7 @@ import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js';
+import {useProjDetailsState} from "@/stores/UseProjDetailsState.js";
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
@@ -43,11 +44,11 @@ const userInfo = useUserInfo()
 const exportUtil = useExportUtil()
 const numberFormat = useNumberFormat()
 const projConfig = useProjConfig()
+const projectDetailsState = useProjDetailsState()
 
 let filters = ref({
   user: '',
-  progress: 0,
-  minimumPoints: 0
+  progress: [0, 100],
 })
 
 const data = ref([])
@@ -75,20 +76,23 @@ onMounted(() => {
 
 const applyFilters = () => {
   currentPage.value = 1
-  if (filters.value.progress > 100) {
-    filters.value.progress = 100
+  if (filters.value.progress[1] > 100) {
+    filters.value.progress[1] = 100
   }
-  if (filters.value.progress < 0) {
-    filters.value.progress = 0
+  if (filters.value.progress[0] < 0) {
+    filters.value.progress[0] = 0
   }
-  filters.value.minimumPoints = Math.floor(totalPoints.value * (filters.value.progress / 100))
+
   loadData().then(() => {
     let filterMessage = 'Users table has been filtered by'
     if (filters.value.user) {
       filterMessage += ` ${filters.value.user}`
     }
-    if (filters.value.minimumPoints > 0) {
-      filterMessage += `${filters.value.user ? ' and' : ''} users with at least ${filters.value.minimumPoints} points`
+    if (filters.value.progress[0] > 0) {
+      filterMessage += `${filters.value.user ? ' and' : ''} users with at least ${filters.value.progress[0]} percent complete`
+    }
+    if (filters.value.progress < 100) {
+      filterMessage += `${filters.value.user ? ' and' : ''} users with at most ${filters.value.progress[1]} percent complete`
     }
     nextTick(() => announcer.polite(filterMessage))
   })
@@ -96,8 +100,7 @@ const applyFilters = () => {
 
 const reset = () => {
   filters.value.user = ''
-  filters.value.minimumPoints = 0
-  filters.value.progress = 0
+  filters.value.progress = [0, 100]
   currentPage.value = 1
   loadData().then(() => {
     nextTick(() => announcer.polite('Users table filters have been removed'))
@@ -144,7 +147,8 @@ const loadData = () => {
     page: currentPage.value,
     byColumn: 0,
     orderBy: sortInfo.value.sortBy,
-    minimumPoints: filters.value.minimumPoints
+    minimumPoints: filters.value.progress[0],
+    maximumPoints: filters.value.progress[1],
   }).then((res) => {
     data.value = res.data
     totalRows.value = res.count
@@ -182,7 +186,8 @@ const exportUsers = () => {
     ascending: sortInfo.value.sortOrder !== -1,
     page: currentPage.value,
     orderBy: sortInfo.value.sortBy,
-    minimumPoints: filters.value.minimumPoints
+    minimumPoints: filters.value.progress[0],
+    maximumPoints: filters.value.progress[1],
   }).then((res) => {
     isLoading.value = false
     isExporting.value = false
@@ -210,21 +215,26 @@ const archiveUsers = () => {
                      data-cy="users-skillIdFilter" aria-label="user filter" />
         </div>
         <div class="flex-1">
+          <div>
+            <label for="minimumProgress">User Progress Filter</label>
+          </div>
           <div class="flex gap-2">
             <div class="flex-1">
-              <label for="minimumProgress">Minimum User Progress</label>
               <div class="flex mt-4 items-center">
                 <span class="mr-4">0%</span>
                 <div class="flex flex-1 flex-col">
-                  <Slider v-model="filters.progress" v-on:keydown.enter="applyFilters" :min="0" :max="100"
+                  <Slider v-model="filters.progress" v-on:keydown.enter="applyFilters" :min="0" :max="100" range
                           data-cy="users-progress-range" aria-label="user progress range filter" />
                 </div>
                 <span class="ml-4">100%</span>
               </div>
             </div>
-            <div class="flex">
-              <InputText v-model.number="filters.progress" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="minimumProgress"
-                         data-cy="users-progress-input" aria-label="user progress input filter" inputId="minimumProgress"
+            <div class="flex gap-2">
+              <InputText v-model.number="filters.progress[0]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="minimumProgress"
+                         data-cy="users-progress-input" aria-label="minimum user progress input filter" inputId="minimumProgress"
+                         class="w-16" />
+              <InputText v-model.number="filters.progress[1]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="maximumProgress"
+                         data-cy="users-max-progress-input" aria-label="maximum user progress input filter" inputId="maximumProgress"
                          class="w-16" />
             </div>
           </div>

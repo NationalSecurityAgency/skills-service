@@ -220,7 +220,7 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
         def excelExportSortPointsAsc = skillsService.getUserProgressExcelExport(p2.projectId)
         def excelExportSortPointsDesc = skillsService.getUserProgressExcelExport(p2.projectId, 'totalPoints', !ascending)
         def excelExportQueryFilter = skillsService.getUserProgressExcelExport(p2.projectId, 'totalPoints', ascending, users[0])
-        def excelExportMinPointsFilter = skillsService.getUserProgressExcelExport(p2.projectId, 'totalPoints', ascending, "", 50)
+        def excelExportMinPointsFilter = skillsService.getUserProgressExcelExport(p2.projectId, 'totalPoints', ascending, "", 20)
 
         List<List<String>> expectedDataForSortAsc = [
                 ["For All Dragons Only"],
