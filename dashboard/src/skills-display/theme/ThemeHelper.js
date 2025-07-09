@@ -231,6 +231,14 @@ export default {
       watermarkIconColor: {
         selector: 'body #app .sd-theme-home .watermark-icon',
         styleName: 'color'
+      },
+      subTitleOverlayTextColor: {
+        selector: 'body #app .sd-theme-home .skills-progress-card .user-rank-text',
+        styleName: 'color'
+      },
+      subTitleOverlayBackgroundColor: {
+        selector: 'body #app .sd-theme-home .skills-progress-card .user-rank-text',
+        styleName: 'background-color'
       }
     },
     stars: {
