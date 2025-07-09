@@ -695,6 +695,43 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         file1.bytes == contents.getBytes()
     }
 
+    def "root user can download attachment"() {
+        def users = getRandomUsers(2, true)
+        def newService = createService(users[0])
+
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        newService.createProject(proj)
+        newService.createSubject(subj)
+
+        String filename = 'test-pdf.pdf'
+        String contents = 'Test is a test'
+        Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
+        def result = newService.uploadAttachment(resource, proj.projectId, null, null)
+        String attachmentHref = result.href
+
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.description = "Here is a [Link](${attachmentHref})".toString()
+        skill.pointIncrement = 200
+
+        newService.createSkill(skill)
+
+        newService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        assert attachments.size() == 1
+        String url = "/api/download/${attachments[0].uuid}"
+
+        when:
+        SkillsService.FileAndHeaders res = localRootSkillsService.downloadAttachment(url)
+        File file1 = res.file
+
+        then:
+        file1
+        file1.bytes == contents.getBytes()
+
+    }
+
     def 'current user is allowed to remove ROLE_PRIVATE_PROJECT_USER from myself'() {
         def proj = SkillsFactory.createProject(99)
         skillsService.createProject(proj)
