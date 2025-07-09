@@ -291,6 +291,22 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         metrics_day4.numPassedDistinctUsers == 2
         metrics_day4.numFailedDistinctUsers == 2
         metrics_day4.numTakenDistinctUsers == 4
+        metrics_day4.questions[0].numAnsweredCorrect == 4
+        metrics_day4.questions[0].numAnsweredWrong == 0
+        metrics_day4.questions[0].answers[0].numAnswered == 4
+        metrics_day4.questions[0].answers[0].numAnsweredCorrect == 4
+        metrics_day4.questions[0].answers[0].numAnsweredWrong == 0
+        metrics_day4.questions[0].answers[1].numAnswered == 0
+        metrics_day4.questions[0].answers[1].numAnsweredCorrect == 0
+        metrics_day4.questions[0].answers[1].numAnsweredWrong == 0
+        metrics_day4.questions[1].numAnsweredCorrect == 2
+        metrics_day4.questions[1].numAnsweredWrong == 2
+        metrics_day4.questions[1].answers[0].numAnswered == 2
+        metrics_day4.questions[1].answers[0].numAnsweredCorrect == 2
+        metrics_day4.questions[1].answers[0].numAnsweredWrong == 0
+        metrics_day4.questions[1].answers[1].numAnswered == 2
+        metrics_day4.questions[1].answers[1].numAnsweredCorrect == 0
+        metrics_day4.questions[1].answers[1].numAnsweredWrong == 2
 
         metrics_day3.numTaken == 2
         metrics_day3.numPassed == 2
@@ -298,6 +314,22 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         metrics_day3.numPassedDistinctUsers == 2
         metrics_day3.numFailedDistinctUsers == 0
         metrics_day3.numTakenDistinctUsers == 2
+        metrics_day3.questions[0].numAnsweredCorrect == 2
+        metrics_day3.questions[0].numAnsweredWrong == 0
+        metrics_day3.questions[0].answers[0].numAnswered == 2
+        metrics_day3.questions[0].answers[0].numAnsweredCorrect == 2
+        metrics_day3.questions[0].answers[0].numAnsweredWrong == 0
+        metrics_day3.questions[0].answers[1].numAnswered == 0
+        metrics_day3.questions[0].answers[1].numAnsweredCorrect == 0
+        metrics_day3.questions[0].answers[1].numAnsweredWrong == 0
+        metrics_day3.questions[1].numAnsweredCorrect == 2
+        metrics_day3.questions[1].numAnsweredWrong == 0
+        metrics_day3.questions[1].answers[0].numAnswered == 2
+        metrics_day3.questions[1].answers[0].numAnsweredCorrect == 2
+        metrics_day3.questions[1].answers[0].numAnsweredWrong == 0
+        metrics_day3.questions[1].answers[1].numAnswered == 0
+        metrics_day3.questions[1].answers[1].numAnsweredCorrect == 0
+        metrics_day3.questions[1].answers[1].numAnsweredWrong == 0
 
         metrics_day2.numTaken == 1
         metrics_day2.numPassed == 1
@@ -305,6 +337,22 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         metrics_day2.numPassedDistinctUsers == 1
         metrics_day2.numFailedDistinctUsers == 0
         metrics_day2.numTakenDistinctUsers == 1
+        metrics_day2.questions[0].numAnsweredCorrect == 1
+        metrics_day2.questions[0].numAnsweredWrong == 0
+        metrics_day2.questions[0].answers[0].numAnswered == 1
+        metrics_day2.questions[0].answers[0].numAnsweredCorrect == 1
+        metrics_day2.questions[0].answers[0].numAnsweredWrong == 0
+        metrics_day2.questions[0].answers[1].numAnswered == 0
+        metrics_day2.questions[0].answers[1].numAnsweredCorrect == 0
+        metrics_day2.questions[0].answers[1].numAnsweredWrong == 0
+        metrics_day2.questions[1].numAnsweredCorrect == 1
+        metrics_day2.questions[1].numAnsweredWrong == 0
+        metrics_day2.questions[1].answers[0].numAnswered == 1
+        metrics_day2.questions[1].answers[0].numAnsweredCorrect == 1
+        metrics_day2.questions[1].answers[0].numAnsweredWrong == 0
+        metrics_day2.questions[1].answers[1].numAnswered == 0
+        metrics_day2.questions[1].answers[1].numAnsweredCorrect == 0
+        metrics_day2.questions[1].answers[1].numAnsweredWrong == 0
 
         metrics_day1.numTaken == 3
         metrics_day1.numPassed == 2
@@ -312,6 +360,22 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         metrics_day1.numPassedDistinctUsers == 2
         metrics_day1.numFailedDistinctUsers == 1
         metrics_day1.numTakenDistinctUsers == 3
+        metrics_day1.questions[0].numAnsweredCorrect == 3
+        metrics_day1.questions[0].numAnsweredWrong == 0
+        metrics_day1.questions[0].answers[0].numAnswered == 3
+        metrics_day1.questions[0].answers[0].numAnsweredCorrect == 3
+        metrics_day1.questions[0].answers[0].numAnsweredWrong == 0
+        metrics_day1.questions[0].answers[1].numAnswered == 0
+        metrics_day1.questions[0].answers[1].numAnsweredCorrect == 0
+        metrics_day1.questions[0].answers[1].numAnsweredWrong == 0
+        metrics_day1.questions[1].numAnsweredCorrect == 2
+        metrics_day1.questions[1].numAnsweredWrong == 1
+        metrics_day1.questions[1].answers[0].numAnswered == 2
+        metrics_day1.questions[1].answers[0].numAnsweredCorrect == 2
+        metrics_day1.questions[1].answers[0].numAnsweredWrong == 0
+        metrics_day1.questions[1].answers[1].numAnswered == 1
+        metrics_day1.questions[1].answers[1].numAnsweredCorrect == 0
+        metrics_day1.questions[1].answers[1].numAnsweredWrong == 1
 
         metrics_day4_to_2.numTaken == 6
         metrics_day4_to_2.numPassed == 4
@@ -319,6 +383,22 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         metrics_day4_to_2.numPassedDistinctUsers == 4
         metrics_day4_to_2.numFailedDistinctUsers == 2
         metrics_day4_to_2.numTakenDistinctUsers == 6
+        metrics_day4_to_2.questions[0].numAnsweredCorrect == 6
+        metrics_day4_to_2.questions[0].numAnsweredWrong == 0
+        metrics_day4_to_2.questions[0].answers[0].numAnswered == 6
+        metrics_day4_to_2.questions[0].answers[0].numAnsweredCorrect == 6
+        metrics_day4_to_2.questions[0].answers[0].numAnsweredWrong == 0
+        metrics_day4_to_2.questions[0].answers[1].numAnswered == 0
+        metrics_day4_to_2.questions[0].answers[1].numAnsweredCorrect == 0
+        metrics_day4_to_2.questions[0].answers[1].numAnsweredWrong == 0
+        metrics_day4_to_2.questions[1].numAnsweredCorrect == 4
+        metrics_day4_to_2.questions[1].numAnsweredWrong == 2
+        metrics_day4_to_2.questions[1].answers[0].numAnswered == 4
+        metrics_day4_to_2.questions[1].answers[0].numAnsweredCorrect == 4
+        metrics_day4_to_2.questions[1].answers[0].numAnsweredWrong == 0
+        metrics_day4_to_2.questions[1].answers[1].numAnswered == 2
+        metrics_day4_to_2.questions[1].answers[1].numAnsweredCorrect == 0
+        metrics_day4_to_2.questions[1].answers[1].numAnsweredWrong == 2
 
         metrics_day4_to_1.numTaken == 10
         metrics_day4_to_1.numPassed == 7
@@ -326,6 +406,22 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         metrics_day4_to_1.numPassedDistinctUsers == 7
         metrics_day4_to_1.numFailedDistinctUsers == 3
         metrics_day4_to_1.numTakenDistinctUsers == 10
+        metrics_day4_to_1.questions[0].numAnsweredCorrect == 10
+        metrics_day4_to_1.questions[0].numAnsweredWrong == 0
+        metrics_day4_to_1.questions[0].answers[0].numAnswered == 10
+        metrics_day4_to_1.questions[0].answers[0].numAnsweredCorrect == 10
+        metrics_day4_to_1.questions[0].answers[0].numAnsweredWrong == 0
+        metrics_day4_to_1.questions[0].answers[1].numAnswered == 0
+        metrics_day4_to_1.questions[0].answers[1].numAnsweredCorrect == 0
+        metrics_day4_to_1.questions[0].answers[1].numAnsweredWrong == 0
+        metrics_day4_to_1.questions[1].numAnsweredCorrect == 7
+        metrics_day4_to_1.questions[1].numAnsweredWrong == 3
+        metrics_day4_to_1.questions[1].answers[0].numAnswered == 7
+        metrics_day4_to_1.questions[1].answers[0].numAnsweredCorrect == 7
+        metrics_day4_to_1.questions[1].answers[0].numAnsweredWrong == 0
+        metrics_day4_to_1.questions[1].answers[1].numAnswered == 3
+        metrics_day4_to_1.questions[1].answers[1].numAnsweredCorrect == 0
+        metrics_day4_to_1.questions[1].answers[1].numAnsweredWrong == 3
 
         metrics_day3_to_1.numTaken == 6
         metrics_day3_to_1.numPassed == 5
@@ -333,6 +429,22 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         metrics_day3_to_1.numPassedDistinctUsers == 5
         metrics_day3_to_1.numFailedDistinctUsers == 1
         metrics_day3_to_1.numTakenDistinctUsers == 6
+        metrics_day3_to_1.questions[0].numAnsweredCorrect == 6
+        metrics_day3_to_1.questions[0].numAnsweredWrong == 0
+        metrics_day3_to_1.questions[0].answers[0].numAnswered == 6
+        metrics_day3_to_1.questions[0].answers[0].numAnsweredCorrect == 6
+        metrics_day3_to_1.questions[0].answers[0].numAnsweredWrong == 0
+        metrics_day3_to_1.questions[0].answers[1].numAnswered == 0
+        metrics_day3_to_1.questions[0].answers[1].numAnsweredCorrect == 0
+        metrics_day3_to_1.questions[0].answers[1].numAnsweredWrong == 0
+        metrics_day3_to_1.questions[1].numAnsweredCorrect == 5
+        metrics_day3_to_1.questions[1].numAnsweredWrong == 1
+        metrics_day3_to_1.questions[1].answers[0].numAnswered == 5
+        metrics_day3_to_1.questions[1].answers[0].numAnsweredCorrect == 5
+        metrics_day3_to_1.questions[1].answers[0].numAnsweredWrong == 0
+        metrics_day3_to_1.questions[1].answers[1].numAnswered == 1
+        metrics_day3_to_1.questions[1].answers[1].numAnsweredCorrect == 0
+        metrics_day3_to_1.questions[1].answers[1].numAnsweredWrong == 1
     }
 
     def createSimpleQuiz(Integer num) {

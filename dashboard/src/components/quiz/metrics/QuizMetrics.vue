@@ -26,11 +26,12 @@ import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import QuizQuestionMetrics from '@/components/quiz/metrics/QuizQuestionMetrics.vue';
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
-import dayjs from "dayjs";
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 
 const timeUtils = useTimeUtils();
 const route = useRoute();
 const colors = useColors()
+const announcer = useSkillsAnnouncer();
 const isLoading = ref(true);
 const quizId = ref(route.params.quizId);
 const metrics = ref(null);
@@ -57,10 +58,12 @@ const loadQuizMetrics = () => {
 }
 
 const applyDateFilter = () => {
+  announcer.polite(`Results have been filtered by date, from ${filterRange.value[0]}` + filterRange.value.length > 1 ? ` to ${filterRange.value[1]}` : '')
   loadQuizMetrics()
 };
 
 const clearDateFilter = () => {
+  announcer.polite("Clearing the date range filter")
   filterRange.value = [];
   loadQuizMetrics()
 };
