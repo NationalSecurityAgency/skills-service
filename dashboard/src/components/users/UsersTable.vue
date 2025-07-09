@@ -230,12 +230,18 @@ const archiveUsers = () => {
               </div>
             </div>
             <div class="flex gap-2">
-              <InputText v-model.number="filters.progress[0]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="minimumProgress"
-                         data-cy="users-progress-input" aria-label="minimum user progress input filter" inputId="minimumProgress"
-                         class="w-16" />
-              <InputText v-model.number="filters.progress[1]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="maximumProgress"
-                         data-cy="users-max-progress-input" aria-label="maximum user progress input filter" inputId="maximumProgress"
-                         class="w-16" />
+              <InputGroup class="p-0 m-0">
+                <InputGroupAddon> &gt;= </InputGroupAddon>
+                <InputText v-model.number="filters.progress[0]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="minimumProgress"
+                           data-cy="users-progress-input" aria-label="minimum user progress input filter" inputId="minimumProgress"
+                           class="p-0 m-0" />
+              </InputGroup>
+              <InputGroup class="p-0 m-0">
+                <InputGroupAddon> &lt; </InputGroupAddon>
+                <InputText v-model.number="filters.progress[1]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="maximumProgress"
+                           data-cy="users-max-progress-input" aria-label="maximum user progress input filter" inputId="maximumProgress"
+                           class="p-0 m-0" />
+              </InputGroup>
             </div>
           </div>
         </div>
@@ -391,4 +397,8 @@ const archiveUsers = () => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.p-inputgroup .p-inputtext {
+  width: 60px;
+}
+</style>

@@ -978,7 +978,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                  lower(usattr.user_id_for_display) like lower(CONCAT('%', :userId, '%'))) AND
                 not exists (select 1 from archived_users au where au.user_id = up.user_id and au.project_id = :projectId)
             group by up.user_id
-        ) AS temp  WHERE total_points >= :minimumPoints and total_points <= :maximumPoints
+        ) AS temp  WHERE total_points >= :minimumPoints and total_points < :maximumPoints
     ''', nativeQuery = true)
     Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId, @Param("subjectId") String subjectId, @Param("userId") String userId, @Param("minimumPoints") int minimumPoints, @Param("maximumPoints") int maximumPoints)
 
@@ -1147,7 +1147,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%'))  OR
              lower(ua.user_id_for_display) like lower(CONCAT('%', :userId, '%'))
             ) AND not exists (select 1 from archived_users au where au.user_id = ua.user_id and au.project_id = :projectId)
-        GROUP BY up.user_id) AS projectUser WHERE projectUser.totalPoints >= :minimumPoints AND projectUser.totalPoints <= :maximumPoints
+        GROUP BY up.user_id) AS projectUser WHERE projectUser.totalPoints >= :minimumPoints AND projectUser.totalPoints < :maximumPoints
     ''', nativeQuery = true)
     List<ProjectUser> findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId,
                                                                                    @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,

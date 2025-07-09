@@ -258,6 +258,11 @@ class AdminUsersService {
         result.totalPoints = skillDefRepo.getTotalPointsByProjectIdAndSkillId(projectId, subjectId) ?: 0
         int minimumPoints = Math.floor((minimumPointsPercent / 100) * result.totalPoints)
         int maximumPoints = Math.ceil((maximumPointsPercent / 100) * result.totalPoints)
+
+        if(maximumPointsPercent == 100) {
+            maximumPoints += 1
+        }
+
         Long totalProjectUsersWithSkills = PostgresQlNativeRepo.countDistinctUsersByProjectIdAndSubjectId(projectId, subjectId)
         if (totalProjectUsersWithSkills) {
             query = query ? query.trim() : ''
