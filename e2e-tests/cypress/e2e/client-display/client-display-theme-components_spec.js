@@ -421,6 +421,25 @@ describe('Client Display Theme Components Tests', () => {
     cy.matchSnapshotImageForElement('[data-cy="myBadges"]', 'watermarkIconColor for my badges')
   })
 
+  it('tiles subtitle overlay colors', () => {
+    cy.createBadge(1, 1)
+    cy.assignSkillToBadge(1, 1, 2)
+    cy.enableBadge(1, 1)
+
+    const tiles = JSON.stringify({
+      backgroundColor: encodeURIComponent('#152E4d'),
+      watermarkIconColor: 'rgba(243,198,54)',
+      subTitleOverlayTextColor: 'rgb(0,255,0)',
+      subTitleOverlayBackgroundColor: 'rgba(243,198,54,0.3)'
+    })
+    const url = `/?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|black}&themeParam=textPrimaryColor|white`
+    cy.cdVisit(url)
+
+    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+    cy.wait(1111)
+    cy.matchSnapshotImageForElement('[data-cy="myRank"]', 'subtitle overlay colors for my rank')
+    cy.matchSnapshotImageForElement('[data-cy="myBadges"]', 'subtitle overlay colors for my badges')
+  })
 
   it('badge settings', () => {
     const badges = JSON.stringify({
