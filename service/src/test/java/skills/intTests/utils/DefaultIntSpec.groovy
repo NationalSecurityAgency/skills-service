@@ -46,6 +46,7 @@ class DefaultIntSpec extends Specification {
     };
 
     SkillsService skillsService
+    SkillsService localRootSkillsService
 
     GreenMail greenMail
 
@@ -171,8 +172,8 @@ class DefaultIntSpec extends Specification {
         greenMail = new GreenMail(ServerSetupTest.SMTP)
         greenMail.start()
 
-        SkillsService rootSkillsService = createRootSkillService()
-        rootSkillsService.getWsHelper().rootPost("/saveEmailSettings", [
+        localRootSkillsService = createRootSkillService()
+        localRootSkillsService.getWsHelper().rootPost("/saveEmailSettings", [
                 "host"       : "localhost",
                 "port"       : ServerSetupTest.SMTP.port,
                 "protocol"   : "smtp",
