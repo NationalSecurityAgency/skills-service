@@ -237,7 +237,7 @@ const archiveUsers = () => {
                            class="p-0 m-0" />
               </InputGroup>
               <InputGroup class="p-0 m-0">
-                <InputGroupAddon> &lt; </InputGroupAddon>
+                <InputGroupAddon> &lt;{{ filters.progress[1] === 100 ? '=' : ''}} </InputGroupAddon>
                 <InputText v-model.number="filters.progress[1]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="maximumProgress"
                            data-cy="users-max-progress-input" aria-label="maximum user progress input filter" inputId="maximumProgress"
                            class="p-0 m-0" />

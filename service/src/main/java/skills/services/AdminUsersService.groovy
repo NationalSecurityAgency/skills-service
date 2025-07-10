@@ -259,6 +259,9 @@ class AdminUsersService {
         int minimumPoints = Math.floor((minimumPointsPercent / 100) * result.totalPoints)
         int maximumPoints = Math.ceil((maximumPointsPercent / 100) * result.totalPoints)
 
+        // Because the database query uses "less than" logic, special consideration must be made
+        // for when maximum points are not filtered at all so as not to exclude users who have
+        // reached 100% completion; thus, a single point is added to the high end of the search
         if(maximumPointsPercent == 100) {
             maximumPoints += 1
         }
