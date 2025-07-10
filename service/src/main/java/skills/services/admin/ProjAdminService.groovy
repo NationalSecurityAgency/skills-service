@@ -113,6 +113,9 @@ class ProjAdminService {
     ProjectExpirationService projectExpirationService
 
     @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
+
+    @Autowired
     UserRepo userRepo
 
     @Autowired
@@ -326,7 +329,11 @@ class ProjAdminService {
             throw new SkillException("Project with id [${projectId}] does NOT exist")
         }
 
-        String currentUserIdLower = userInfoService.getCurrentUserId().toLowerCase()
+        String userId = userInfoService.getCurrentUserId()
+        String currentUserIdLower = userId.toLowerCase()
+        if (inviteOnlyProjectService.isInviteOnlyProject(projectId) && !inviteOnlyProjectService.canUserAccess(projectId, userId)) {
+            throw new SkillsAuthorizationException("User [${userId}] does not have access to project [${projectId}]")
+        }
         List<SettingsResult> allExistingProjects = settingsService.getUserProjectSettingsForAllProjectsForGroup(currentUserIdLower, myProjectGroup)
         List<SettingsRequest> finalRes = allExistingProjects.collect({
             new UserProjectSettingsRequest(
