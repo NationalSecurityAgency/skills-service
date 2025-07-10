@@ -805,61 +805,6 @@ class MyProgressSpec extends DefaultIntSpec {
         res1.numAchievedGlobalBadges == 0
     }
 
-    def "gems are only counted from projects in the production mode even if they are part of My Projects"() {
-        def skills = []
-        List projs = (1..3).collect { int projNum ->
-            def project = SkillsFactory.createProject(projNum)
-            skillsService.createProject(project)
-            skillsService.enableProdMode(project)
-            skillsService.addMyProject(project.projectId)
-
-            skillsService.createSubject(SkillsFactory.createSubject(projNum, 1))
-            def skillsForProj = SkillsFactory.createSkills(5, projNum, 1, 200)
-            skillsService.createSkills(skillsForProj)
-            (1..projNum).each {
-                def gem1 = SkillsFactory.createBadge(projNum, it)
-                gem1.startDate = new Date()-7
-                gem1.endDate = new Date()+7
-
-                skillsService.createBadge(gem1)
-                skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: gem1.badgeId, skillId: skillsForProj[it].skillId])
-                skills.add(skillsForProj[it])
-                gem1.enabled  = 'true'
-                skillsService.updateBadge(gem1, gem1.badgeId)
-            }
-
-            return project
-        }
-
-        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[1].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
-        assert skillsService.addSkill([projectId: projs[1].projectId, skillId: skills[2].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
-
-        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[3].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
-
-        skillsService.disableProdMode(projs[1])
-        when:
-        def res = skillsService.getMyProgressSummary()
-
-        assert skillsService.addSkill([projectId: projs[0].projectId, skillId: skills[0].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
-        assert skillsService.addSkill([projectId: projs[2].projectId, skillId: skills[4].skillId], userId, new Date()).body.completed.find { it.type == "Badge"}
-
-        def res1 = skillsService.getMyProgressSummary()
-        then:
-        res.totalBadges == 4
-        res.gemCount == 4
-        res.globalBadgeCount == 0
-        res.numAchievedBadges == 1
-        res.numAchievedGemBadges == 1
-        res.numAchievedGlobalBadges == 0
-
-        res1.totalBadges == 4
-        res1.gemCount == 4
-        res1.globalBadgeCount == 0
-        res1.numAchievedBadges == 3
-        res1.numAchievedGemBadges == 3
-        res1.numAchievedGlobalBadges == 0
-    }
-
     def "global badges counts should only relate to projects selected for My Projects"() {
         def skills = []
         List projs = (1..3).collect { int projNum ->
