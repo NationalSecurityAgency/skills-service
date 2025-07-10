@@ -18,12 +18,14 @@ import { computed } from 'vue'
 import { useTranscriptPdfExport } from '@/skills-display/components/userTranscript/UseTranscriptPdfExport.js'
 import { useLoadTranscriptData } from '@/skills-display/components/userTranscript/UseLoadTranscriptData.js'
 import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
-import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
+import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 const loadTranscriptData = useLoadTranscriptData()
 const transcriptPdfExport = useTranscriptPdfExport()
 const userProgressSummaryState = useUserProgressSummaryState()
-const plural = useLanguagePluralSupport()
+const pluralize = usePluralize()
+const attributes = useSkillsDisplayAttributesState()
 
 const totalSkills = computed(() => userProgressSummaryState.userProgressSummary?.totalSkills || 0)
 const skillsAchieved = computed(() => userProgressSummaryState.userProgressSummary?.skillsAchieved || 0)
@@ -42,7 +44,7 @@ const exportTranscriptToPdf = () => {
         <div class="flex-1">
           You have Completed
           <Tag>{{ skillsAchieved }}</Tag>
-          out of <Tag severity="secondary">{{ totalSkills }}</Tag> skill{{ plural.plural(totalSkills) }}!
+          out of <Tag severity="secondary">{{ totalSkills }}</Tag> {{ pluralize.plural(attributes.skillDisplayNameLower, totalSkills) }}!
         </div>
         <div>
           <SkillsButton

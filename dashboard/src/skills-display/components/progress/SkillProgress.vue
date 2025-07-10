@@ -217,7 +217,7 @@ watch(() => props.expandGroups, (newValue) => {
       </div>
       <div v-if="skill.type === 'Skill'">
         <div v-if="isSkillLocked && skill.dependencyInfo" class="text-center text-muted locked-text">
-          *** Skill has
+          *** {{ attributes.skillDisplayName }} has
           <Tag>{{ skill.dependencyInfo.numDirectDependents }}</Tag>
           direct prerequisite(s).
           <span v-if="enableDrillDown">Click <i class="fas fa-lock icon"></i> to see its prerequisites.</span>

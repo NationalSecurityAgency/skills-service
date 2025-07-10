@@ -313,7 +313,7 @@ const toggle = (event) => {
                     data-cy="groupToggle"
                     aria-controls="group_control_menu">
                   <i class="fas fa-list mr-1" aria-hidden="true"></i>
-                  <span>Groups</span>
+                  <span>{{ attributes.groupDisplayNamePlural }}</span>
                   <i class="fas fa-caret-down ml-2"></i>
                 </Button>
                 <div id="group_control_menu">
@@ -400,7 +400,7 @@ const toggle = (event) => {
 
       <no-content2
         v-if="!(skillsInternal && skillsInternal.length > 0) && showNoDataMsg"
-        :title="`${attributes.skillDisplayName}s have not been added yet.`"
+        :title="`${attributes.skillDisplayNamePlural} have not been added yet.`"
         :message="`Please contact this ${attributes.projectDisplayName.toLowerCase()}'s administrator.`" />
     </template>
   </Card>

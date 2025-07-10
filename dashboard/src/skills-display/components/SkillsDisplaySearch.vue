@@ -59,9 +59,9 @@ const loadSkillsSubjectsAndBadges = (event) => {
         let results = res.data
         searchRes.value = results
         if (results && results.length > 0) {
-          announcer.polite(`Showing ${results.length} items.  Type to search for a ${attributes.subjectDisplayName}s, ${attributes.skillDisplayName}s or Badges. Use arrow keys to select and enter or click to navigate to the ${attributes.subjectDisplayName}, ${attributes.skillDisplayName} or Badge.`)
+          announcer.polite(`Showing ${results.length} items.  Type to search for a ${attributes.subjectDisplayNamePlural}, ${attributes.skillDisplayNamePlural} or Badges. Use arrow keys to select and enter or click to navigate to the ${attributes.subjectDisplayName}, ${attributes.skillDisplayName} or Badge.`)
         } else {
-          announcer.assertive('No subjects, skills or badges found.')
+          announcer.assertive(`No ${attributes.subjectDisplayNamePlural}, ${attributes.skillDisplayNamePlural} or badges found.`)
         }
 
       }).finally(() => {
@@ -137,7 +137,7 @@ const getTotalProgress = (skill) => {
   return isSkill(skill) ? skill.totalPoints : skill.totalChildCount
 }
 const getProgressLabel = (skill) => {
-  return isSkill(skill) ? 'Points' : 'Skills'
+  return isSkill(skill) ? attributes.pointDisplayNamePlural : attributes.skillDisplayNamePlural
 }
 </script>
 

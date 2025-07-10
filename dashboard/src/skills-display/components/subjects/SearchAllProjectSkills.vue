@@ -20,10 +20,12 @@ import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisp
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
 
 const skillsDisplayService = useSkillsDisplayService()
 const announcer = useSkillsAnnouncer()
 const skillDisplayInfo = useSkillsDisplayInfo()
+const attributes = useSkillsDisplayAttributesState()
 
 const selected = ref('')
 const query = ref('')
@@ -45,9 +47,9 @@ const search = (event) => {
       if (results && results.length > 0) {
         const firstRes = results[0]
         // eslint-disable-next-line max-len
-        announcer.polite(`Showing ${results.length} skills for ${query.value ? query.value : 'an empty'} search string. Selected ${firstRes.skillName} skill from ${firstRes.subjectName} subject. You have earned ${firstRes.userCurrentPoints} points out of ${firstRes.totalPoints} for this skill. Click to navigate to the skill.`)
+        announcer.polite(`Showing ${results.length} ${attributes.skillDisplayNamePlural} for ${query.value ? query.value : 'an empty'} search string. Selected ${firstRes.skillName} ${attributes.skillDisplayName} from ${firstRes.subjectName} ${attributes.subjectDisplayName}. You have earned ${firstRes.userCurrentPoints} ${attributes.pointDisplayNamePlural} out of ${firstRes.totalPoints} for this ${attributes.skillDisplayName}. Click to navigate to the ${attributes.skillDisplayName}.`)
       } else {
-        announcer.assertive(`No skills found for ${query.value} search string. Consider changing the search query.`)
+        announcer.assertive(`No ${attributes.skillDisplayNamePlural} found for ${query.value} search string. Consider changing the search query.`)
       }
 
     }).finally(() => {
@@ -80,7 +82,7 @@ const navToSkill = (event) => {
       fluid
       data-cy="searchSkillsAcrossSubjects"
       :pt="{ dropdown: { 'aria-label': 'click to select a skill' } }"
-      placeholder="Search for a skill across subjects..."
+      :placeholder="`Search for a ${attributes.skillDisplayName} across ${attributes.subjectDisplayNamePlural}...`"
       optionLabel="skillName"
     >
       <template #option="slotProps">
@@ -89,7 +91,7 @@ const navToSkill = (event) => {
             <div
               class="flex-1 flex items-center"
               data-cy="skillName"
-              :aria-label="`Selected ${slotProps.option.skillName} skill from ${slotProps.option.subjectName} subject. You have earned ${slotProps.option.userCurrentPoints} points out of ${slotProps.option.totalPoints} for this skill. Click to navigate to the skill. Type to search for a skill across all subjects.`">
+              :aria-label="`Selected ${slotProps.option.skillName} ${attributes.skillDisplayNameLower} from ${slotProps.option.subjectName} ${attributes.subjectDisplayName}. You have earned ${slotProps.option.userCurrentPoints} ${attributes.pointDisplayNamePlural} out of ${slotProps.option.totalPoints} for this ${attributes.skillDisplayNameLower}. Click to navigate to the ${attributes.skillDisplayNameLower}. Type to search for a ${attributes.skillDisplayNameLower} across all ${attributes.subjectDisplayNamePlural}.`">
               <i class="fas fa-graduation-cap mr-1 text-xl text-green-800"
                  aria-hidden="true" />
               <highlighted-value :value="slotProps.option.skillName" :filter="query" class="text-xl" />

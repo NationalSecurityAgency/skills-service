@@ -19,6 +19,7 @@ import axios from 'axios'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useRoute } from 'vue-router'
 import { useLog } from '@/components/utils/misc/useLog.js'
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttributesState', () => {
   const loadingConfig = ref(true)
@@ -34,6 +35,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
 
   const log = useLog()
   const skillsDisplayInfo = useSkillsDisplayInfo()
+  const pluralize = usePluralize()
   const route = useRoute()
   const loadConfigStateIfNeeded = (optionalToPathObj = null) => {
     if (skillsDisplayInfo.isSkillsDisplayPath(optionalToPathObj)) {
@@ -66,11 +68,20 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
 
   const displayProjectDescription = computed(() => config.value.displayProjectDescription)
   const levelDisplayName = computed(() => config.value.levelDisplayName || 'Level')
+  const levelDisplayNamePlural = computed(() => pluralize.plural(levelDisplayName.value))
   const projectDisplayName = computed(() => config.value.projectDisplayName || 'Project')
+  const projectDisplayNamePlural = computed(() => pluralize.plural(projectDisplayName.value))
   const subjectDisplayName = computed(() => config.value.subjectDisplayName || 'Subject')
+  const subjectDisplayNamePlural = computed(() => pluralize.plural(subjectDisplayName.value))
   const groupDisplayName = computed(() => config.value.groupDisplayName || 'Group')
+  const groupDisplayNameLower = computed(() => groupDisplayName.value.toLowerCase())
+  const groupDisplayNamePlural = computed(() => pluralize.plural(groupDisplayName.value))
   const skillDisplayName = computed(() => config.value.skillDisplayName || 'Skill')
+  const skillDisplayNameLower = computed(() => skillDisplayName.value.toLowerCase())
+  const skillDisplayNamePlural = computed(() => pluralize.plural(skillDisplayName.value))
   const pointDisplayName = computed(() => config.value.pointDisplayName || 'Point')
+  const pointDisplayNameLower = computed(() => pointDisplayName.value.toLowerCase())
+  const pointDisplayNamePlural = computed(() => pluralize.plural(pointDisplayName.value))
   const projectName = computed(() => config.value.projectName || route.params.projectId)
   const projectUserCommunityDescriptor = computed(() => {
     return config.value.projectUserCommunityDescriptor || null
@@ -104,15 +115,24 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     loadingConfig,
     displayProjectDescription,
     levelDisplayName,
+    levelDisplayNamePlural,
     isInIframe,
     maxSelfReportMessageLength,
     groupDescriptionsOn,
     groupInfoOnSkillPage,
     projectDisplayName,
+    projectDisplayNamePlural,
     subjectDisplayName,
+    subjectDisplayNamePlural,
     groupDisplayName,
+    groupDisplayNameLower,
+    groupDisplayNamePlural,
     skillDisplayName,
+    skillDisplayNameLower,
+    skillDisplayNamePlural,
     pointDisplayName,
+    pointDisplayNameLower,
+    pointDisplayNamePlural,
     internalBackButton,
     isSummaryOnly,
     userId,

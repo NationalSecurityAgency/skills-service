@@ -75,7 +75,7 @@
     "cyServices:kill:client-display:1": "for procid in $(ps -aux | grep \"client-display\" | grep \"vue-cli-service serve\" | grep -v \"grep\" | awk '{print $2}'); do echo \"killing skills-display  ${procid}\"; kill -9 $procid; done",
     "cyServices:kill": "npm run cyServices:kill:skills-service && npm run cyServices:kill:client-display && npm run cyServices:kill:client-display:1 && npm run fake-smtp:stop",
     "print-env": "print-env",
-    "fake-smtp:start": "docker run -p 1080:1080 -p 1025:1025 --restart unless-stopped maildev/maildev:2.1.0",
+    "fake-smtp:start": "docker run -p 1080:1080 -p 1025:1025 --restart unless-stopped maildev/maildev:2.2.1",
     "fake-smtp:start:ci": "mkdir -p ./logs && nohup npm run fake-smtp:start > ./logs/fake-smtp.log &",
     "fake-smtp:stop": "fuser -k 1081/tcp"
   },
