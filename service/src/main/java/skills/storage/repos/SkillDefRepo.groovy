@@ -426,31 +426,6 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     ''')
     Integer countTotalProductionSkills(String userId)
 
-    @Query(value='''SELECT count(sd)
-        from SkillDef sd 
-        where (
-        (
-            sd.type = 'Badge' and 
-            sd.projectId IN 
-            (
-                select s.projectId
-                from Setting s
-                where s.projectId = sd.projectId
-                  and s.setting = 'production.mode.enabled'
-                  and s.value = 'true'
-            ) and
-            sd.projectId IN (
-                select s.projectId
-                from Setting s, User uu
-                where (s.setting = 'my_project' and uu.userId=?1 and uu.id = s.userRefId and s.projectId = sd.projectId)
-            )
-        ) OR 
-        sd.type='GlobalBadge') and
-      sd.enabled = 'true'
-      ''')
-    Integer countTotalProductionBadges(String userId)
-
-
     @Query(value='''SELECT count(sd) as totalCount,
             sum(case when sd.startDate is not null and sd.endDate is not null then 1 end) as gemCount,
             sum(case when sd.type='GlobalBadge' then 1 end) as globalCount
@@ -486,8 +461,6 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
                 and uu.user_id=?1 
                 and uu.id = s.user_ref_id 
                 and s.project_id = s1.project_id 
-                and s1.setting = 'production.mode.enabled' 
-                and s1.value = 'true'
         )
         
         SELECT count(sd.id) as totalCount,

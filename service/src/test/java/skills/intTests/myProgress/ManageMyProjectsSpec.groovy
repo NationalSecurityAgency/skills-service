@@ -15,13 +15,12 @@
  */
 package skills.intTests.myProgress
 
-
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
-import spock.lang.IgnoreRest
 
 @Slf4j
 class ManageMyProjectsSpec extends DefaultIntSpec {
@@ -180,6 +179,166 @@ class ManageMyProjectsSpec extends DefaultIntSpec {
         user1Projects2.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
         user2Projects2.collect { it.projectId } == [projects[0].projectId]
         user3Projects2.collect { it.projectId }  == [projects[0].projectId, projects[1].projectId]
+    }
+
+    def "hidden projects added to my projects should return badge counts"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skills = SkillsFactory.createSkills(3, 99, 1, 100, 1)
+        def badge = SkillsFactory.createBadge(99, 1)
+        def badge2 = SkillsFactory.createBadge(99, 2)
+        def badge3 = SkillsFactory.createBadge(99, 3)
+
+        Date twoWeekInFuture = new Date()+14
+        Date twoWeeksAgo = new Date()-14
+        def gem1 = SkillsFactory.createBadge(99, 4)
+        gem1.enabled = false;
+        gem1.startDate = twoWeeksAgo
+        gem1.endDate = twoWeekInFuture
+
+        def gem2 = SkillsFactory.createBadge(99, 5)
+        gem2.enabled = false;
+        gem2.startDate = twoWeeksAgo
+        gem2.endDate = twoWeekInFuture
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: skills[0].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+        skillsService.createBadge(badge3)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge3.badgeId, skillId: skills[1].skillId])
+        badge3.enabled = true
+        skillsService.createBadge(badge3)
+
+        skillsService.createBadge(gem1)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: gem1.badgeId, skillId: skills[0].skillId])
+        gem1.enabled = true
+        skillsService.createBadge(gem1)
+        skillsService.createBadge(gem2)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: gem2.badgeId, skillId: skills[1].skillId])
+        gem2.enabled = true
+        skillsService.createBadge(gem2)
+
+        def users = getRandomUsers(2, true)
+        def newService = createService(users[0])
+        def newService1 = createService(users[1])
+
+        when:
+        def projectsBeforeJoining = newService.getAvailableMyProjects()
+        def myProjectsBeforeJoining = newService.getMyProgressSummary()
+        newService.addMyHiddenProject(proj.projectId)
+        newService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId]).body
+        def projectsAfterJoining = newService.getAvailableMyProjects()
+        def myProjectsAfterJoining = newService.getMyProgressSummary()
+
+        newService1.addMyHiddenProject(proj.projectId)
+        def myProjectsAfterJoining1 = newService1.getMyProgressSummary()
+
+        then:
+        projectsBeforeJoining == []
+        myProjectsBeforeJoining.projectSummaries == []
+        projectsAfterJoining[0].projectId == proj.projectId
+        myProjectsAfterJoining.projectSummaries[0].projectId == proj.projectId
+
+        myProjectsAfterJoining.totalBadges == 5
+        myProjectsAfterJoining.gemCount == 2
+        myProjectsAfterJoining.globalBadgeCount == 0
+
+        myProjectsAfterJoining.numAchievedBadges == 3
+        myProjectsAfterJoining.numAchievedGemBadges == 1
+        myProjectsAfterJoining.numAchievedGlobalBadges == 0
+
+        myProjectsAfterJoining1.projectSummaries[0].projectId == proj.projectId
+
+        myProjectsAfterJoining1.totalBadges == 5
+        myProjectsAfterJoining1.gemCount == 2
+        myProjectsAfterJoining1.globalBadgeCount == 0
+
+        myProjectsAfterJoining1.numAchievedBadges == 0
+        myProjectsAfterJoining1.numAchievedGemBadges == 0
+        myProjectsAfterJoining1.numAchievedGlobalBadges == 0
+    }
+
+    def "hidden project's that are in My Projects also contribute to My Badges"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skills = SkillsFactory.createSkills(3, 99, 1, 100, 1)
+        def badge = SkillsFactory.createBadge(99, 1)
+        def badge2 = SkillsFactory.createBadge(99, 2)
+        def badge3 = SkillsFactory.createBadge(99, 3)
+
+        Date twoWeekInFuture = new Date() + 14
+        Date twoWeeksAgo = new Date() - 14
+        def gem1 = SkillsFactory.createBadge(99, 4)
+        gem1.enabled = false;
+        gem1.startDate = twoWeeksAgo
+        gem1.endDate = twoWeekInFuture
+
+        def gem2 = SkillsFactory.createBadge(99, 5)
+        gem2.enabled = false;
+        gem2.startDate = twoWeeksAgo
+        gem2.endDate = twoWeekInFuture
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: skills[0].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+        skillsService.createBadge(badge3)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge3.badgeId, skillId: skills[1].skillId])
+        badge3.enabled = true
+        skillsService.createBadge(badge3)
+
+        skillsService.createBadge(gem1)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: gem1.badgeId, skillId: skills[0].skillId])
+        gem1.enabled = true
+        skillsService.createBadge(gem1)
+        skillsService.createBadge(gem2)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: gem2.badgeId, skillId: skills[1].skillId])
+        gem2.enabled = true
+        skillsService.createBadge(gem2)
+
+        def users = getRandomUsers(2, true)
+        def newService = createService(users[0])
+        def newService1 = createService(users[1])
+
+        when:
+        def progressBadgesBeforeJoin = newService.getMyProgressBadges()
+        newService.addMyHiddenProject(proj.projectId)
+        newService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId]).body
+        def progressBadgesAfterJoin = newService.getMyProgressBadges()
+
+        newService1.addMyHiddenProject(proj.projectId)
+        def progressBadgesAfterJoin1 = newService.getMyProgressBadges()
+
+        println JsonOutput.prettyPrint(JsonOutput.toJson(progressBadgesAfterJoin))
+        then:
+        progressBadgesBeforeJoin == []
+        progressBadgesAfterJoin.size() == 5
+        progressBadgesAfterJoin.find { it.badgeId == badge.badgeId }.badgeAchieved == true
+        progressBadgesAfterJoin.find { it.badgeId == badge2.badgeId }.badgeAchieved == true
+        progressBadgesAfterJoin.find { it.badgeId == badge3.badgeId }.badgeAchieved == false
+        progressBadgesAfterJoin.find { it.badgeId == gem1.badgeId }.badgeAchieved == true
+        progressBadgesAfterJoin.find { it.badgeId == gem2.badgeId }.badgeAchieved == false
+        progressBadgesAfterJoin1.size() == 5
+        progressBadgesAfterJoin1.find { it.badgeId == badge.badgeId }.badgeAchieved == true
+        progressBadgesAfterJoin1.find { it.badgeId == badge2.badgeId }.badgeAchieved == true
+        progressBadgesAfterJoin1.find { it.badgeId == badge3.badgeId }.badgeAchieved == false
+        progressBadgesAfterJoin1.find { it.badgeId == gem1.badgeId }.badgeAchieved == true
+        progressBadgesAfterJoin1.find { it.badgeId == gem2.badgeId }.badgeAchieved == false
     }
 
     def "add and remove my project - single project"() {
