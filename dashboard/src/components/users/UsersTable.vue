@@ -206,7 +206,7 @@ const archiveUsers = () => {
   <div class="w-full">
     <div class="px-6 py-4">
       <div class="flex flex-col lg:flex-row gap-6 my-2">
-        <div class="flex-1">
+        <div class="xl:flex-1">
           <div>
             <label for="userFilter">User Filter</label>
           </div>
@@ -229,7 +229,7 @@ const archiveUsers = () => {
                 <span class="ml-4">100%</span>
               </div>
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-2 w-[12rem]">
               <InputGroup class="p-0 m-0">
                 <InputGroupAddon> &gt;= </InputGroupAddon>
                 <InputText v-model.number="filters.progress[0]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="minimumProgress"
@@ -398,7 +398,4 @@ const archiveUsers = () => {
 </template>
 
 <style scoped>
-.p-inputgroup .p-inputtext {
-  width: 60px;
-}
 </style>
