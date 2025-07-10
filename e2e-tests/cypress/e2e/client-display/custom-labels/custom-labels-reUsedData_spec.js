@@ -181,7 +181,11 @@ describe('Custom Label with Reused Data Tests', () => {
             .should('not.exist');
 
         cy.get('[data-cy="skillsDisplayHome"]').contains('Level', { matchCase: false }).should('not.exist');
-        cy.get('[data-cy="skillsDisplayHome"]').contains('Skill', { matchCase: false }).filter('[data-cy="userColumn"]').should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').contains('Skill', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="mediaInfoCardTitle"]').contains('Skill', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="mediaInfoCardSubTitle"]').contains('Skill', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelBreakdownChart"]').contains('Skill', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="mediaInfoCardSubTitle"]').contains('Skill', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Subject', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Project', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Point', { matchCase: false }).should('not.exist');
@@ -259,7 +263,11 @@ describe('Custom Label with Reused Data Tests', () => {
             .should('not.exist');
 
         cy.get('[data-cy="skillsDisplayHome"]').contains('Level', { matchCase: false }).should('not.exist');
-        cy.get('[data-cy="skillsDisplayHome"]').contains('Skill', { matchCase: false }).filter('[data-cy="userColumn"]').should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').contains('Skill', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="mediaInfoCardTitle"]').contains('Skill', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="mediaInfoCardSubTitle"]').contains('Skill', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="levelBreakdownChart"]').contains('Skill', { matchCase: false }).should('not.exist');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="mediaInfoCardSubTitle"]').contains('Skill', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Subject', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Project', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Point', { matchCase: false }).should('not.exist');
