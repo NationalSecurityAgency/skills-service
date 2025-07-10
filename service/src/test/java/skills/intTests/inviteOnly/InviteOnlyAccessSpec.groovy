@@ -990,6 +990,7 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         def subj = SkillsFactory.createSubject(99)
         def skills = SkillsFactory.createSkills(3, 99, 1, 100, 1)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
         def users = getRandomUsers(2, true)
         def newService = createService(users[0])
 
