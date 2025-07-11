@@ -339,13 +339,10 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     @Query(value = '''WITH mp AS (
             SELECT s.project_id AS project_id
-            FROM settings s, users uu, settings s1
+            FROM settings s, users uu
             WHERE s.setting = 'my_project'
               AND uu.user_id=?1
               AND uu.id = s.user_ref_id
-              AND s.project_id = s1.project_id
-              AND s1.setting = 'production.mode.enabled'
-              AND s1.value = 'true'
         )
         SELECT COUNT(ua.id) AS totalCount,
                COALESCE(SUM(CASE WHEN skillDef.start_date IS NOT null and skillDef.end_date IS NOT null THEN 1 END), 0) AS gemCount,

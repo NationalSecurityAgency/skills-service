@@ -15,6 +15,7 @@
  */
 package skills.intTests.inviteOnly
 
+import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
@@ -787,22 +788,52 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         def proj = SkillsFactory.createProject(99)
         def subj = SkillsFactory.createSubject(99)
         subj.description = "subj descrip"
-        def skill = SkillsFactory.createSkill(99, 1)
-        skill.pointIncrement = 200
+        def skills = SkillsFactory.createSkills(3, 99, 1, 100, 1)
         def badge = SkillsFactory.createBadge(99, 1)
-        badge.description = "badge descrip"
+        def badge2 = SkillsFactory.createBadge(99, 2)
+        def badge3 = SkillsFactory.createBadge(99, 3)
+
+        Date twoWeekInFuture = new Date()+14
+        Date twoWeeksAgo = new Date()-14
+        def gem1 = SkillsFactory.createBadge(99, 4)
+        gem1.enabled = false;
+        gem1.startDate = twoWeeksAgo
+        gem1.endDate = twoWeekInFuture
+
+        def gem2 = SkillsFactory.createBadge(99, 5)
+        gem2.enabled = false;
+        gem2.startDate = twoWeeksAgo
+        gem2.endDate = twoWeekInFuture
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
-        skillsService.createSkill(skill)
+        skillsService.createSkills(skills)
         skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
         skillsService.createBadge(badge)
-        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
         badge.enabled = true
         skillsService.createBadge(badge)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: skills[0].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+        skillsService.createBadge(badge3)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge3.badgeId, skillId: skills[1].skillId])
+        badge3.enabled = true
+        skillsService.createBadge(badge3)
 
-        def user = getRandomUsers(1, true)[0]
-        def newService = createService(user)
+        skillsService.createBadge(gem1)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: gem1.badgeId, skillId: skills[0].skillId])
+        gem1.enabled = true
+        skillsService.createBadge(gem1)
+        skillsService.createBadge(gem2)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: gem2.badgeId, skillId: skills[1].skillId])
+        gem2.enabled = true
+        skillsService.createBadge(gem2)
+
+        def users = getRandomUsers(2, true)
+        def newService = createService(users[0])
+        def newService1 = createService(users[1])
 
         when:
         skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
@@ -814,14 +845,188 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         def projectsBeforeJoining = newService.getAvailableMyProjects()
         def myProjectsBeforeJoining = newService.getMyProgressSummary()
         newService.joinProject(proj.projectId, invite)
+        newService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId]).body
         def projectsAfterJoining = newService.getAvailableMyProjects()
         def myProjectsAfterJoining = newService.getMyProgressSummary()
 
+        greenMail.purgeEmailFromAllMailboxes()
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail1@email.foo"]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email2 = EmailUtils.getEmail(greenMail, 0)
+        def invite2 = extractInviteFromEmail(email2.html)
+
+        newService1.joinProject(proj.projectId, invite2)
+        def myProjectsAfterJoining1 = newService1.getMyProgressSummary()
+
+        skillsService.revokeInviteOnlyProjectAccess(proj.projectId, users[0])
+        def myProjectsAfterRevoke = newService.getMyProgressSummary()
 
         then:
         projectsBeforeJoining == []
         myProjectsBeforeJoining.projectSummaries == []
         projectsAfterJoining[0].projectId == proj.projectId
         myProjectsAfterJoining.projectSummaries[0].projectId == proj.projectId
+
+        myProjectsAfterJoining.totalBadges == 5
+        myProjectsAfterJoining.gemCount == 2
+        myProjectsAfterJoining.globalBadgeCount == 0
+
+        myProjectsAfterJoining.numAchievedBadges == 3
+        myProjectsAfterJoining.numAchievedGemBadges == 1
+        myProjectsAfterJoining.numAchievedGlobalBadges == 0
+
+        myProjectsAfterJoining1.projectSummaries[0].projectId == proj.projectId
+
+        myProjectsAfterJoining1.totalBadges == 5
+        myProjectsAfterJoining1.gemCount == 2
+        myProjectsAfterJoining1.globalBadgeCount == 0
+
+        myProjectsAfterJoining1.numAchievedBadges == 0
+        myProjectsAfterJoining1.numAchievedGemBadges == 0
+        myProjectsAfterJoining1.numAchievedGlobalBadges == 0
+
+        myProjectsAfterRevoke.projectSummaries == []
+        myProjectsAfterRevoke.totalBadges == 0
+        myProjectsAfterRevoke.gemCount == 0
+        myProjectsAfterRevoke.globalBadgeCount == 0
+        myProjectsAfterRevoke.numAchievedBadges == 0
+        myProjectsAfterRevoke.numAchievedGemBadges == 0
+        myProjectsAfterRevoke.numAchievedGlobalBadges == 0
     }
+
+    def "invite only project's badges are in my badges"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        subj.description = "subj descrip"
+        def skills = SkillsFactory.createSkills(3, 99, 1, 100, 1)
+        def badge = SkillsFactory.createBadge(99, 1)
+        def badge2 = SkillsFactory.createBadge(99, 2)
+        def badge3 = SkillsFactory.createBadge(99, 3)
+
+        Date twoWeekInFuture = new Date() + 14
+        Date twoWeeksAgo = new Date() - 14
+        def gem1 = SkillsFactory.createBadge(99, 4)
+        gem1.enabled = false;
+        gem1.startDate = twoWeeksAgo
+        gem1.endDate = twoWeekInFuture
+
+        def gem2 = SkillsFactory.createBadge(99, 5)
+        gem2.enabled = false;
+        gem2.startDate = twoWeeksAgo
+        gem2.endDate = twoWeekInFuture
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: skills[0].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+        skillsService.createBadge(badge3)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge3.badgeId, skillId: skills[1].skillId])
+        badge3.enabled = true
+        skillsService.createBadge(badge3)
+
+        skillsService.createBadge(gem1)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: gem1.badgeId, skillId: skills[0].skillId])
+        gem1.enabled = true
+        skillsService.createBadge(gem1)
+        skillsService.createBadge(gem2)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: gem2.badgeId, skillId: skills[1].skillId])
+        gem2.enabled = true
+        skillsService.createBadge(gem2)
+
+        def users = getRandomUsers(2, true)
+        def newService = createService(users[0])
+        def newService1 = createService(users[1])
+
+        when:
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def invite = extractInviteFromEmail(email.html)
+
+        def progressBadgesBeforeJoin = newService.getMyProgressBadges()
+        newService.joinProject(proj.projectId, invite)
+        newService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId]).body
+        def progressBadgesAfterJoin = newService.getMyProgressBadges()
+
+        greenMail.purgeEmailFromAllMailboxes()
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail1@email.foo"]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email2 = EmailUtils.getEmail(greenMail, 0)
+        def invite2 = extractInviteFromEmail(email2.html)
+
+        newService1.joinProject(proj.projectId, invite2)
+        def progressBadgesAfterJoin1 = newService.getMyProgressBadges()
+
+        println JsonOutput.prettyPrint(JsonOutput.toJson(progressBadgesAfterJoin))
+        then:
+        progressBadgesBeforeJoin == []
+        progressBadgesAfterJoin.size() == 5
+        progressBadgesAfterJoin.find { it.badgeId == badge.badgeId }.badgeAchieved == true
+        progressBadgesAfterJoin.find { it.badgeId == badge2.badgeId }.badgeAchieved == true
+        progressBadgesAfterJoin.find { it.badgeId == badge3.badgeId }.badgeAchieved == false
+        progressBadgesAfterJoin.find { it.badgeId == gem1.badgeId }.badgeAchieved == true
+        progressBadgesAfterJoin.find { it.badgeId == gem2.badgeId }.badgeAchieved == false
+        progressBadgesAfterJoin1.size() == 5
+        progressBadgesAfterJoin1.find { it.badgeId == badge.badgeId }.badgeAchieved == true
+        progressBadgesAfterJoin1.find { it.badgeId == badge2.badgeId }.badgeAchieved == true
+        progressBadgesAfterJoin1.find { it.badgeId == badge3.badgeId }.badgeAchieved == false
+        progressBadgesAfterJoin1.find { it.badgeId == gem1.badgeId }.badgeAchieved == true
+        progressBadgesAfterJoin1.find { it.badgeId == gem2.badgeId }.badgeAchieved == false
+    }
+
+    def "users that are not invited must NOT be able to add invite-only project to my projects"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skills = SkillsFactory.createSkills(3, 99, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+        def users = getRandomUsers(2, true)
+        def newService = createService(users[0])
+
+        when:
+        newService.addMyHiddenProject(proj.projectId)
+        then:
+        def err = thrown(SkillsClientException)
+        err.httpStatus == HttpStatus.FORBIDDEN
+    }
+
+    def "users that are invited must be able to add invite-only project to my projects"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skills = SkillsFactory.createSkills(3, 99, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+        def users = getRandomUsers(2, true)
+        def newService = createService(users[0])
+
+        when:
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def invite = extractInviteFromEmail(email.html)
+
+        newService.joinProject(proj.projectId, invite)
+        def myProjectsAfterJoining = newService.getMyProgressSummary()
+        newService.removeMyProject(proj.projectId)
+        def myProjectsAfterJoining_t1 = newService.getMyProgressSummary()
+        newService.addMyHiddenProject(proj.projectId)
+        def myProjectsAfterJoining_t2 = newService.getMyProgressSummary()
+        then:
+        myProjectsAfterJoining.projectSummaries[0].projectId == proj.projectId
+        myProjectsAfterJoining_t1.projectSummaries == []
+        myProjectsAfterJoining_t2.projectSummaries[0].projectId == proj.projectId
+    }
+
 }
