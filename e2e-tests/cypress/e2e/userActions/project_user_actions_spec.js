@@ -63,6 +63,31 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-cy="row0-item"]').contains('Subject')
     });
 
+    it('reset filter using Reset button in no-results message', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' })
+
+        cy.visit('/administrator/projects/proj1/activityHistory')
+        cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]')
+            .should('have.text', '3')
+
+        cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]')
+            .should('have.text', '3')
+        cy.get('[data-cy="itemFilter"]').click()
+        cy.get('[data-pc-section="optionlabel"]').contains('Subject').click()
+
+        cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]')
+            .should('have.text', '1')
+
+        cy.get('[data-cy="userFilter"]').type('blah')
+        cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]')
+            .should('have.text', '0')
+        cy.get('[data-cy="tblFilterResetBtn"]').click()
+        cy.get('[data-cy="dashboardActionsForEverything"] [data-cy="skillsBTableTotalRows"]')
+            .should('have.text', '3')
+    });
+
     it('show start of recording activity warning', () => {
         const tomorrow = dayjs().add(1, 'day');
         cy.intercept('GET', '/public/config', (req) => {

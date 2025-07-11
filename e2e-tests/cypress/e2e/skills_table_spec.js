@@ -679,7 +679,7 @@ describe('Skills Table Tests', () => {
     cy.get(tableSelector).contains(`No Skills Found`)
 
     // reset list by clearing filter when there are no results
-    cy.get('[data-cy="skillResetBtnNoFilterRes"]').click()
+    cy.get('[data-cy="tblFilterResetBtn"]').click()
     cy.get('[data-cy=skillsBTableTotalRows]').contains(12)
   })
 

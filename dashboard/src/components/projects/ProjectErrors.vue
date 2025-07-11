@@ -25,6 +25,7 @@ import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveB
 import Column from 'primevue/column'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 
 const dialogMessages = useDialogMessages()
 const route = useRoute();
@@ -186,12 +187,7 @@ const isFlex = computed(() => responsive.md.value)
           </template>
 
           <template #empty>
-            <div class="flex justify-center flex-wrap" data-cy="emptyTable">
-              <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle"
-                 aria-hidden="true"></i>
-              <span class="flex items-center justify-center">There are no records to show
-              </span>
-            </div>
+            <table-no-res data-cy="emptyTable" no-res-msg="No issues found" />
           </template>
         </SkillsDataTable>
       </template>

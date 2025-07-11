@@ -19,6 +19,7 @@ import { useRoute } from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 
 const props = defineProps({
   tagChart: Object
@@ -120,17 +121,11 @@ const loadData = (shouldHighlight = false) => {
     <template #content>
       <skills-spinner :is-loading="isLoading" class="mb-8"/>
       <div v-if="!isLoading">
-        <div class="flex gap-2">
-          <div class="flex">
-            <SkillsTextInput label="Filter" v-model="filters.tag" v-on:keydown.enter="filter" id="userTagTable-tagFilter" name="userTagTable-tagFilter"/>
-          </div>
-          <div class="mt-8">
-            <SkillsButton size="small" @click="filter" data-cy="userTagTable-filterBtn" title="search by tag">
-              <i class="fa fa-search"/><span class="sr-only">filter tags</span>
-            </SkillsButton>
-            <SkillsButton size="small" severity="danger" class="ml-2" @click="clearFilter" data-cy="userTagTable-clearBtn" title="clear filter">
-              <i class="fas fa-eraser"></i><span class="sr-only">clear filter</span>
-            </SkillsButton>
+        <div class="flex flex-col mb-3">
+          <SkillsTextInput label="Filter" v-model="filters.tag" v-on:keydown.enter="filter" id="userTagTable-tagFilter" name="userTagTable-tagFilter"/>
+          <div class="flex gap-2">
+            <SkillsButton @click="filter" icon="fa-solid fa-search" label="Filter" data-cy="userTagTable-filterBtn" />
+            <SkillsButton severity="danger" icon="fa-solid fa-eraser" label="Clear" @click="clearFilter" data-cy="userTagTable-clearBtn" />
           </div>
         </div>
         <SkillsDataTable :value="table.items"
@@ -165,10 +160,7 @@ const loadData = (shouldHighlight = false) => {
           </template>
 
           <template #empty>
-            <div class="flex justify-center flex-wrap" data-cy="emptyTable">
-              <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
-              <span class="flex items-center justify-center">There are no records to show</span>
-            </div>
+            <table-no-res />
           </template>
         </SkillsDataTable>
       </div>

@@ -194,11 +194,6 @@ const doRemoveSkill = () => {
             <template #expansion="slotProps">
               <imported-skill-info :skill="slotProps.data"></imported-skill-info>
             </template>
-            <template #empty>
-              <div class="text-center">
-                <i class="fas fa-exclamation-circle" aria-hidden="true" /> There are no records to show
-              </div>
-            </template>
           </SkillsDataTable>
         </div>
       </template>
