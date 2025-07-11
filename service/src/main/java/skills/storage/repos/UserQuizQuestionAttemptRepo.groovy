@@ -37,9 +37,10 @@ interface UserQuizQuestionAttemptRepo extends JpaRepository<UserQuizQuestionAtte
             and questionDef.quizId = ?1
             and quizAttempt.id = questionAttempt.userQuizAttemptRefId
             and quizAttempt.status in ('PASSED', 'FAILED')
+            and quizAttempt.completed >= ?2 and quizAttempt.completed <= ?3
         group by questionAttempt.quizQuestionDefinitionRefId, questionAttempt.status
      ''')
-    List<IdAndStatusCount> getUserQuizQuestionAttemptCounts(String quizId)
+    List<IdAndStatusCount> getUserQuizQuestionAttemptCounts(String quizId, Date startDate, Date endDate)
 
     @Query('''select
         answerAttempt.quizAnswerDefinitionRefId as id, answerAttempt.status as status, count(answerAttempt.userId) as count
@@ -48,9 +49,10 @@ interface UserQuizQuestionAttemptRepo extends JpaRepository<UserQuizQuestionAtte
             and answerDef.quizId = ?1
             and quizAttempt.id = answerAttempt.userQuizAttemptRefId
             and quizAttempt.status in ('PASSED', 'FAILED')
+            and quizAttempt.completed >= ?2 and quizAttempt.completed <= ?3
         group by answerAttempt.quizAnswerDefinitionRefId, answerAttempt.status
      ''')
-    List<IdAndStatusCount> getUserQuizAnswerAttemptCounts(String quizId)
+    List<IdAndStatusCount> getUserQuizAnswerAttemptCounts(String quizId, Date startDate, Date endDate)
 
     @Nullable
     List<UserQuizQuestionAttempt> findAllByUserQuizAttemptRefId(Integer userQuizAttemptRefId)
