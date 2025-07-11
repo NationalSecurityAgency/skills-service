@@ -78,11 +78,15 @@ const isFiltered = computed(() => {
     <SubPageHeader title="Results"
                    aria-label="results">
       <template #underTitle>
-        <div class="flex gap-2 items-center">
-          Filter by Date(s):
-          <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" placeholder="Select a date range" data-cy="metricsDateFilter" />
-          <SkillsButton label="Apply" @click="applyDateFilter" data-cy="applyDateFilterButton" />
-          <SkillsButton label="Clear" @click="clearDateFilter" data-cy="clearDateFilterButton" />
+        <div class="flex flex-wrap gap-2 items-center">
+          <div>
+            Filter by Date(s):
+          </div>
+          <div class="flex gap-2">
+            <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" placeholder="Select a date range" data-cy="metricsDateFilter" />
+            <SkillsButton label="Apply" @click="applyDateFilter" data-cy="applyDateFilterButton" />
+            <SkillsButton label="Clear" @click="clearDateFilter" data-cy="clearDateFilterButton" />
+          </div>
         </div>
       </template>
     </SubPageHeader>
