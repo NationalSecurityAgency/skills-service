@@ -858,7 +858,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 where
                     usr.project_id = ?1 and 
                     usr.skill_id is null and 
-                    usr.points >= ?3 and usr.points <= ?4 and
+                    usr.points >= ?3 and usr.points < ?4 and
                     (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', ?2, '%')) OR
                     (lower(CONCAT(usattr.user_id_for_display, ' (', usattr.last_name, ', ', usattr.first_name,  ')')) like lower(CONCAT('%', ?2, '%'))) OR
                      lower(usattr.user_id_for_display) like lower(CONCAT('%', ?2, '%')))
@@ -937,7 +937,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                  (lower(ua.user_id_for_display) like lower(CONCAT('%', ?3, '%')))
                 ) and 
                 up.skill_id is null and
-                up.points >= ?4 and up.points <= ?5 and
+                up.points >= ?4 and up.points < ?5 and
                 not exists (select 1 from archived_users au where au.user_id = up.user_id and au.project_id = ?1)
             GROUP BY up.user_id''', nativeQuery = true)
     Stream<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, int maximumPoints, Pageable pageable)
@@ -1012,7 +1012,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 up.user_id = usattr.user_id and
                 up.project_id=?1 and 
                 up.skill_id in (?2) and 
-                up.points >= ?4 and up.points <= ?5 and
+                up.points >= ?4 and up.points < ?5 and
                 (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', ?3, '%')) OR
                  lower(usattr.user_id_for_display) like lower(CONCAT('%', ?3, '%'))) AND
                 not exists (select 1 from archived_users au where au.user_id = up.user_id and au.project_id = ?1)) 
@@ -1047,7 +1047,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             WHERE 
                 up.project_id=?1 and 
                 up.skill_id in (?3) and
-                up.points >= ?5 and up.points <= ?6 and
+                up.points >= ?5 and up.points < ?6 and
                 (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', ?4, '%'))  OR
                  lower(ua.user_id_for_display) like lower(CONCAT('%', ?4, '%'))
                 ) AND 

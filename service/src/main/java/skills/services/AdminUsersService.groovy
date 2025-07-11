@@ -165,6 +165,14 @@ class AdminUsersService {
         result.totalPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
         int minimumPoints = Math.floor((minimumPointsPercent / 100) * result.totalPoints)
         int maximumPoints = Math.ceil((maximumPointsPercent / 100) * result.totalPoints)
+
+        // Because the database query uses "less than" logic, special consideration must be made
+        // for when maximum points are not filtered at all so as not to exclude users who have
+        // reached 100% completion; thus, a single point is added to the high end of the search
+        if(maximumPointsPercent == 100) {
+            maximumPoints += 1
+        }
+
         Long totalProjectUsers = countTotalProjUsers(projectId)
         if (totalProjectUsers) {
             query = query ? query.trim() : ''
@@ -233,6 +241,14 @@ class AdminUsersService {
         result.totalPoints = skillDefRepo.getTotalPointsSumForSkills(projectId, skillIds) ?: 0
         int minimumPoints = Math.floor((minimumPointsPercent / 100) * result.totalPoints)
         int maximumPoints = Math.ceil((maximumPointsPercent / 100) * result.totalPoints)
+
+        // Because the database query uses "less than" logic, special consideration must be made
+        // for when maximum points are not filtered at all so as not to exclude users who have
+        // reached 100% completion; thus, a single point is added to the high end of the search
+        if(maximumPointsPercent == 100) {
+            maximumPoints += 1
+        }
+
         Long totalProjectUsersWithSkills = userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdIn(projectId, skillIds)
         if (totalProjectUsersWithSkills) {
             query = query ? query.trim() : ''
