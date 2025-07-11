@@ -206,7 +206,7 @@ const archiveUsers = () => {
   <div class="w-full">
     <div class="px-6 py-4">
       <div class="flex flex-col lg:flex-row gap-6 my-2">
-        <div class="flex-1">
+        <div class="xl:flex-1">
           <div>
             <label for="userFilter">User Filter</label>
           </div>
@@ -229,13 +229,19 @@ const archiveUsers = () => {
                 <span class="ml-4">100%</span>
               </div>
             </div>
-            <div class="flex gap-2">
-              <InputText v-model.number="filters.progress[0]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="minimumProgress"
-                         data-cy="users-progress-input" aria-label="minimum user progress input filter" inputId="minimumProgress"
-                         class="w-16" />
-              <InputText v-model.number="filters.progress[1]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="maximumProgress"
-                         data-cy="users-max-progress-input" aria-label="maximum user progress input filter" inputId="maximumProgress"
-                         class="w-16" />
+            <div class="flex gap-2 w-[12rem]">
+              <InputGroup class="p-0 m-0">
+                <InputGroupAddon> &gt;= </InputGroupAddon>
+                <InputText v-model.number="filters.progress[0]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="minimumProgress"
+                           data-cy="users-progress-input" aria-label="minimum user progress input filter" inputId="minimumProgress"
+                           class="p-0 m-0" />
+              </InputGroup>
+              <InputGroup class="p-0 m-0">
+                <InputGroupAddon> &lt;{{ filters.progress[1] === 100 ? '=' : ''}} </InputGroupAddon>
+                <InputText v-model.number="filters.progress[1]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="maximumProgress"
+                           data-cy="users-max-progress-input" aria-label="maximum user progress input filter" inputId="maximumProgress"
+                           class="p-0 m-0" />
+              </InputGroup>
             </div>
           </div>
         </div>
@@ -391,4 +397,5 @@ const archiveUsers = () => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>
