@@ -39,7 +39,7 @@ describe('Project Errors Tests', () => {
         cy.get('[data-cy=nav-Issues]')
             .click();
         cy.get('[data-cy=projectErrorsTable]')
-            .contains('There are no records to show');
+            .contains('No issues found');
 
         cy.reportSkill(1, 42, 'user@skills.org', '2021-02-24 10:00', false);
         cy.reportSkill(1, 75, 'user@skills.org', '2021-02-24 10:00', false);
