@@ -30,6 +30,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import InputGroup from 'primevue/inputgroup'
 import LoadingContainer from '@/components/utils/LoadingContainer.vue'
+import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 
 const route = useRoute()
 const userInfo = useUserInfo()
@@ -162,22 +163,7 @@ const onFilter = (filterEvent) => {
               </template>
 
               <template #empty>
-                <div class="flex justify-center flex-wrap h-48">
-                  <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle fa-3x"
-                     aria-hidden="true"></i>
-                  <span class="w-full">
-                      <span class="flex items-center justify-center">There are no records to show</span>
-                      <span v-if="filtering" class="flex items-center justify-center">  Click
-                        <SkillsButton class="flex flex items-center justify-center px-1"
-                                      label="Reset"
-                                      link
-                                      size="small"
-                                      @click="clearFilter"
-                                      :aria-label="`Reset filter for ${quizType} results`"
-                                      data-cy="clearFilterBtn2" /> to clear the existing filter.
-                      </span>
-                    </span>
-                </div>
+                <table-no-res :showResetFilter="filtering" @resetFilter="clearFilter"/>
               </template>
               <Column v-for="col of options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
                       :class="{'flex': responsive.md.value }">

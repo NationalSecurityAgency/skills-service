@@ -50,6 +50,7 @@ import SkillNameRouterLink from '@/components/skills/SkillNameRouterLink.vue';
 import { useFocusState } from '@/stores/UseFocusState.js'
 import skillsService from '@/components/skills/SkillsService.js';
 import CopySubjectOrSkillsDialog from "@/components/subjects/CopySubjectOrSkillsDialog.vue";
+import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -858,24 +859,9 @@ const onRowExpand = () => {
       <template #paginatorstart>
         <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ totalRows }}</span>
       </template>
-      <!--      <template #paginatorend>-->
-      <!--        &lt;!&ndash;        <SkillsButton type="button" icon="fas fa-download" text @click="exportCSV" label="Export"/>&ndash;&gt;-->
-      <!--      </template>-->
 
       <template #empty>
-        <div class="flex justify-center flex-wrap">
-          <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle"
-             aria-hidden="true"></i>
-          <span class="flex items-center justify-center">No Skills Found.
-            <SkillsButton class="flex flex items-center justify-center px-1"
-                          label="Reset"
-                          link
-                          size="small"
-                          @click="clearFilter"
-                          aria-label="Reset skills filter"
-                          data-cy="skillResetBtnNoFilterRes" /> to clear the existing filter.
-              </span>
-        </div>
+        <table-no-res no-res-msg="No Skills Found." :showResetFilter="true" @resetFilter="clearFilter"/>
       </template>
     </SkillsDataTable>
 

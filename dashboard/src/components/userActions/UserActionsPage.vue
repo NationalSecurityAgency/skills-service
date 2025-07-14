@@ -30,6 +30,8 @@ import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { useContentMaxWidthState } from '@/stores/UseContentMaxWidthState.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import {useDebounceFn} from "@vueuse/core";
 
 const route = useRoute()
 const userInfo = useUserInfo()
@@ -37,15 +39,6 @@ const contentMaxWidthState = useContentMaxWidthState()
 const responsive = useResponsiveBreakpoints()
 const numberFormat = useNumberFormat()
 
-const filters = ref({
-  user: '',
-  action: '',
-  item: '',
-  itemId: '',
-  projectId: '',
-  quizId: ''
-})
-const filtering = ref(false)
 const filterOptions = ref({
   loading: true,
   actions: [],
@@ -170,14 +163,26 @@ const formatLabel = (originalLabel) => {
       .replace(/^./, (match) => match.toUpperCase());
 }
 
+const userEnteredFilter = computed(() => {
+  const f = tableFilters.value
+  return f.global.value || f.userIdForDisplay.value || f.action.value ||
+      f.item.value || f.itemId.value || f.projectId.value ||
+      f.quizId.value
+})
 const clearFilter = () => {
-  filters.value.global.value = null
-  loadData().then(() => filtering.value = false)
+  tableFilters.value.global.value = null
+  tableFilters.value.userIdForDisplay.value = null
+  tableFilters.value.action.value = null
+  tableFilters.value.item.value = null
+  tableFilters.value.itemId.value = null
+  tableFilters.value.projectId.value = null
+  tableFilters.value.quizId.value = null
+  loadData()
 }
-const onFilter = (filterEvent) => {
+const onFilter = useDebounceFn((filterEvent) => {
   tableOptions.value.pagination.currentPage = 1
-  loadData().then(() => filtering.value = true)
-}
+  loadData()
+}, 300)
 const pageChanged = (pagingInfo) => {
   tableOptions.value.pagination.pageSize = pagingInfo.rows
   tableOptions.value.pagination.currentPage = pagingInfo.page + 1
@@ -240,22 +245,7 @@ const pageAwareTitleLevel = computed(() => route.params.projectId ? 2 : 1)
           </template>
 
           <template #empty>
-            <div class="flex justify-center flex-wrap h-48">
-              <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle fa-3x"
-                 aria-hidden="true"></i>
-              <span class="w-full">
-                <span class="flex items-center justify-center">There are no records to show</span>
-                <span v-if="filtering" class="flex items-center justify-center">  Click
-                    <SkillsButton class="flex flex items-center justify-center px-1"
-                                  label="Reset"
-                                  link
-                                  size="small"
-                                  @click="clearFilter"
-                                  :aria-label="`Reset filter for $ {quizType} results`"
-                                  data-cy="userResetBtn" /> to clear the existing filter.
-              </span>
-            </span>
-            </div>
+            <table-no-res :show-reset-filter="userEnteredFilter" @reset-filter="clearFilter"/>
           </template>
 
           <Column expander style="width: 20rem" :showFilterMenu="false" :class="{'flex': responsive.md.value }">

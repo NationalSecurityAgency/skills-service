@@ -34,6 +34,7 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js';
 import {useProjDetailsState} from "@/stores/UseProjDetailsState.js";
+import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
@@ -379,12 +380,7 @@ const archiveUsers = () => {
         </template>
 
         <template #empty>
-          <div class="flex justify-center flex-wrap">
-            <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle"
-               aria-hidden="true"></i>
-            <span class="flex items-center justify-center">There are no records to show
-              </span>
-          </div>
+          <table-no-res />
         </template>
       </SkillsDataTable>
     </div>

@@ -37,6 +37,7 @@ import UsersService from '@/components/users/UsersService.js'
 import StringHighlighter from '@/common-components/utilities/StringHighlighter.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 
 const dialogMessages = useDialogMessages()
 const timeUtils = useTimeUtils()
@@ -357,22 +358,7 @@ const selectedSkills = ref([]);
           </template>
 
           <template #empty>
-            <div class="flex justify-center flex-wrap h-48">
-              <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle fa-3x"
-                 aria-hidden="true"></i>
-              <span class="w-full">
-                  <span class="flex items-center justify-center">There are no records to show</span>
-                  <span v-if="filtering" class="flex items-center justify-center">  Click
-                      <SkillsButton class="flex flex items-center justify-center px-1"
-                                    label="Reset"
-                                    link
-                                    size="small"
-                                    @click="clearFilter"
-                                    aria-label="Reset filter for performed skills"
-                                    data-cy="noResults-performedSkills-resetBtn" /> to clear the existing filter.
-                </span>
-              </span>
-            </div>
+            <table-no-res :showResetFilter="filtering" @resetFilter="clearFilter"/>
           </template>
           <Column selectionMode="multiple" :class="{'flex': responsive.md.value }" v-if="!projConfig.isReadOnlyProj">
             <template #header>

@@ -28,6 +28,7 @@ import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveB
 import Column from 'primevue/column'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 
 const route = useRoute();
 const numberFormat = useNumberFormat()
@@ -295,10 +296,7 @@ const getQueryParams = () => {
         </template>
 
         <template #empty>
-          <div class="flex justify-center flex-wrap" data-cy="emptyTable">
-            <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle" aria-hidden="true"></i>
-            <span class="flex items-center justify-center">There are no records to show</span>
-          </div>
+          <table-no-res data-cy="emptyTable" />
         </template>
       </SkillsDataTable>
     </template>

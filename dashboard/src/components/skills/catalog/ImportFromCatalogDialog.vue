@@ -34,6 +34,7 @@ import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
+import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 
 const model = defineModel()
 const props = defineProps({
@@ -381,9 +382,7 @@ const dialogUtils = useDialogUtils()
             <skill-to-import-info :skill="slotProps.data" />
           </template>
           <template #empty>
-            <div class="text-center">
-              <i class="fas fa-exclamation-circle" aria-hidden="true" /> There are no records to show
-            </div>
+            <table-no-res />
           </template>
         </SkillsDataTable>
       </div>

@@ -40,6 +40,7 @@ import QuizRunStatus from '@/components/quiz/runsHistory/QuizRunStatus.vue'
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
+import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 
 const route = useRoute()
 const userInfo = useUserInfo()
@@ -255,22 +256,7 @@ const deleteRun = () => {
           </template>
 
           <template #empty>
-            <div class="flex justify-center flex-wrap h-48">
-              <i class="flex items-center justify-center mr-1 fas fa-exclamation-circle fa-3x"
-                 aria-hidden="true"></i>
-              <span class="w-full">
-                <span class="flex items-center justify-center">There are no records to show</span>
-                <span v-if="filtering" class="flex items-center justify-center">  Click
-                    <SkillsButton class="flex flex items-center justify-center px-1"
-                                  label="Reset"
-                                  link
-                                  size="small"
-                                  @click="clearFilter"
-                                  :aria-label="`Reset filter for ${quizType} results`"
-                                  data-cy="userResetBtn" /> to clear the existing filter.
-              </span>
-            </span>
-            </div>
+            <table-no-res :showResetFilter="filtering" @resetFilter="clearFilter"/>
           </template>
           <Column v-for="(col, index) in options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
                   :class="{'flex': responsive.lg.value }">
