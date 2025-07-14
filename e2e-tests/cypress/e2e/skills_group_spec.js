@@ -761,6 +761,14 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
         cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).contains('1 out of 2')
         cy.get('[data-cy="saveDialogBtn"]').should('not.be.enabled')
+
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [data-pc-section="option"]').contains('All Skills').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [data-pc-section="option"]').contains('1 out of 2').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('not.be.enabled')
     });
 
 
