@@ -1180,7 +1180,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillsService.createSubject(subject2)
         skillsService.createSkills(skills2)
 
-        def users = getRandomUsers(6)
+        def users = getRandomUsers(9)
         skillsService.addSkill(skills[0], users[0], new Date())
         skillsService.addSkill(skills[1], users[0], new Date())
         skillsService.addSkill(skills[2], users[0], new Date())
@@ -1195,6 +1195,9 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         skillsService.addSkill(skills[0], users[3], new Date())
         skillsService.addSkill(skills[0], users[4], new Date())
+        skillsService.addSkill(skills[0], users[6], new Date())
+        skillsService.addSkill(skills[0], users[7], new Date())
+        skillsService.addSkill(skills[0], users[8], new Date())
 
         skillsService.addSkill(skills2[0], users[3], new Date())
         skillsService.addSkill(skills2[1], users[3], new Date())
@@ -1224,10 +1227,10 @@ class UserPointsSpecs extends DefaultIntSpec {
         def proj2_25 = skillsService.getProjectUsers(proj2.projectId,  10, 1, "userId", true, "", 0, 25)
 
         then:
-        projFull.count == 5
-        proj76.count == 4
-        proj75.count == 3
-        proj50.count == 2
+        projFull.count == 8
+        proj76.count == 7
+        proj75.count == 6
+        proj50.count == 5
         proj25.count == 0
         proj2_Full.count == 5
         proj2_76.count == 4
@@ -1251,7 +1254,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillsService.createSubject(subject2)
         skillsService.createSkills(skills2)
 
-        def users = getRandomUsers(6)
+        def users = getRandomUsers(9)
         skillsService.addSkill(skills[0], users[0], new Date())
         skillsService.addSkill(skills[1], users[0], new Date())
         skillsService.addSkill(skills[2], users[0], new Date())
@@ -1266,6 +1269,9 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         skillsService.addSkill(skills[0], users[3], new Date())
         skillsService.addSkill(skills[0], users[4], new Date())
+        skillsService.addSkill(skills[0], users[6], new Date())
+        skillsService.addSkill(skills[0], users[7], new Date())
+        skillsService.addSkill(skills[0], users[8], new Date())
 
         skillsService.addSkill(skills2[0], users[3], new Date())
         skillsService.addSkill(skills2[1], users[3], new Date())
@@ -1295,10 +1301,10 @@ class UserPointsSpecs extends DefaultIntSpec {
         def subj2_25 = skillsService.getSubjectUsers(projId, subject2.subjectId, 10, 1, "userId", true, "", 0, 25)
 
         then:
-        subj100.count == 5
-        subj76.count == 4
-        subj75.count == 3
-        subj50.count == 2
+        subj100.count == 8
+        subj76.count == 7
+        subj75.count == 6
+        subj50.count == 5
         subj25.count == 0
         subj2_100.count == 5
         subj2_76.count == 4
