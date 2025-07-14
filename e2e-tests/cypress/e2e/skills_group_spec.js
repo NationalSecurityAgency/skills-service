@@ -722,6 +722,56 @@ describe('Skills Group Tests', () => {
         cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).contains('1 out of 2')
     });
 
+    it('should not be able to save if number of skills required is not modified', () => {
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 2);
+        const groupId = 'group1'
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredAllSkills"]`).contains('all skills')
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).should('be.enabled');
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
+        // -1 === all skills
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).contains('All Skills')
+        cy.get('[data-cy="saveDialogBtn"]').should('not.be.enabled')
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [data-pc-section="option"]').contains('1 out of 2').click()
+        cy.clickSaveDialogBtn()
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).contains('1')
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('2')
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).should('be.enabled');
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).contains('1 out of 2')
+        cy.get('[data-cy="saveDialogBtn"]').should('not.be.enabled')
+
+        //refresh and validate
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="requiredSkillsNum"]`).contains('1')
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="requiredSkillsSection"] [data-cy="numSkillsInGroup"]`).contains('2')
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).should('be.enabled');
+
+        cy.get(`[data-cy="ChildRowSkillGroupDisplay_${groupId}"] [data-cy="editRequired"]`).click();
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).contains('1 out of 2')
+        cy.get('[data-cy="saveDialogBtn"]').should('not.be.enabled')
+
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [data-pc-section="option"]').contains('All Skills').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get(`[data-cy="editRequiredModal-${groupId}"] [data-cy="requiredSkillsNumSelect"]`).click()
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [data-pc-section="option"]').contains('1 out of 2').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('not.be.enabled')
+    });
+
+
     it('when the skill is removed and numSkillsRequired==skills.size then display "All Skills" tag', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 });
