@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
@@ -24,7 +24,7 @@ import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
-const emit = defineEmits(['level-changed', 'hidden']);
+const emit = defineEmits(['hidden']);
 const props = defineProps({
   projectId: {
     type: String,
@@ -139,6 +139,9 @@ const getTotalProgress = (skill) => {
 const getProgressLabel = (skill) => {
   return isSkill(skill) ? attributes.pointDisplayNamePlural : attributes.skillDisplayNamePlural
 }
+const dialogPosition = computed(() => {
+  return skillDisplayInfo.isSkillsClientPath() ? 'top' : 'center'
+});
 </script>
 
 <template>
@@ -149,6 +152,7 @@ const getProgressLabel = (skill) => {
       :aria-label="`Search for ${attributes.subjectDisplayName}s, ${attributes.skillDisplayName}s or Badges`"
       :enable-return-focus="true"
       @on-cancel="closeMe"
+      :position="dialogPosition"
       :show-header="false"
       :show-ok-button="false"
       :show-cancel-button="false"
