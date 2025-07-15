@@ -205,7 +205,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
     })
 
-    it('search dialog honers custom labels', () => {
+    it('search dialog honors custom labels', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
@@ -234,5 +234,60 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.get('[data-cy="subjectName"]').first().should('have.text', "Course: Subject 1");
     });
 
+    it('client-display: training-wide search dialog is visible and displayed with position=top when in client-display iframe', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.createBadge(1, 1, { enabled: true });
+
+        cy.visit('/test-skills-client/proj1')
+        cy.wrapIframe().contains('Overall Points');
+
+        cy.wrapIframe().find('[data-cy="skillsDisplaySearchBtn"]').click()
+        cy.wait(1000)
+        cy.wrapIframe().find('[data-cy="trainingSearchDialog"]').should('be.visible')
+        cy.wrapIframe().find('[data-cy="trainingSearchDialog"]').first().then(($el) => {
+            const bounding = $el[0].getBoundingClientRect();
+            const windowWidth = Cypress.config('viewportWidth');
+            const windowHeight = Cypress.config('viewportHeight');
+
+            expect(bounding.top).to.be.gte(0);
+            expect(bounding.left).to.be.gte(0);
+            expect(bounding.right).to.be.lte(windowWidth);
+            expect(bounding.bottom).to.be.lte(windowHeight);
+        });
+    })
+
+    it('training-wide search dialog is visible and displayed with position=center when not in client-display iframe', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.createBadge(1, 1, { enabled: true });
+
+        cy.visit('/progress-and-rankings/projects/proj1');
+        cy.contains('Overall Points');
+
+        cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
+        cy.wait(1000)
+        cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
+        cy.get('[data-cy="trainingSearchDialog"]').first().then(($el) => {
+            const bounding = $el[0].getBoundingClientRect();
+            const windowWidth = Cypress.config('viewportWidth');
+            const windowHeight = Cypress.config('viewportHeight');
+
+            expect(bounding.top).to.be.gte(0);
+            expect(bounding.left).to.be.gte(0);
+            expect(bounding.right).to.be.lte(windowWidth);
+            expect(bounding.bottom).to.be.lte(windowHeight);
+        });
+    })
 
 })
