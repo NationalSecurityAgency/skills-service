@@ -230,7 +230,7 @@ const archiveUsers = () => {
                 <span class="ml-4">100%</span>
               </div>
             </div>
-            <div class="flex gap-2 w-[12rem]">
+            <div class="flex gap-2 w-[14rem]">
               <InputGroup class="p-0 m-0">
                 <InputGroupAddon> &gt;= </InputGroupAddon>
                 <InputText v-model.number="filters.progress[0]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="minimumProgress"

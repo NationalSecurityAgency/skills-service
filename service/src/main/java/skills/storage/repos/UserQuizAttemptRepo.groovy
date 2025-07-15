@@ -53,8 +53,9 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
             where quizAttempt.quiz_definition_ref_id = quizDef.id
                     and quizDef.quiz_id = ?1
                     and quizAttempt.status  in ('PASSED', 'FAILED')
+                    and quizAttempt.completed >= ?2 and quizAttempt.completed <= ?3
      ''', nativeQuery = true)
-    Double getAverageMsRuntimeForQuiz(String quizId)
+    Double getAverageMsRuntimeForQuiz(String quizId, Date startDate, Date endDate)
 
 
     @Query(value='''select count(distinct quizAttempt.user_id)

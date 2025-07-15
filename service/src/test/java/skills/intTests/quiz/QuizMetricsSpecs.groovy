@@ -21,7 +21,7 @@ import skills.intTests.utils.QuizDefFactory
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.UserQuizAttempt
 import skills.storage.repos.UserQuizAttemptRepo
-
+import groovy.time.TimeCategory
 import java.text.SimpleDateFormat
 
 class QuizMetricsSpecs extends DefaultIntSpec {
@@ -92,6 +92,43 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         q1_metrics.avgAttemptRuntimeInMs >= 650
         q2_metrics.avgAttemptRuntimeInMs >= 810
     }
+
+    def "quiz metrics: average runtime with time range"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        List<String> users = getRandomUsers(10, true)
+        List<Date> dates = (0..5).collect { new Date() - it }.reverse()
+
+        use(TimeCategory) {
+            runQuiz(users[0], quiz, true, dates[0], dates[0] + 30.minutes, true)
+            runQuiz(users[1], quiz, true, dates[0], dates[0] + 45.minutes, true)
+            runQuiz(users[2], quiz, false, dates[0], dates[0] + 3.minutes, true)
+            runQuiz(users[3], quiz, false, dates[0], dates[0] + 15.minutes, true)
+            runQuiz(users[4], quiz, true, dates[1], dates[1] + 200.minutes, true)
+            runQuiz(users[5], quiz, true, dates[1], dates[1] + 320.minutes, true)
+            runQuiz(users[6], quiz, true, dates[2], dates[2] + 400.minutes, true)
+            runQuiz(users[7], quiz, true, dates[3], dates[3] + 15.minutes, true)
+            runQuiz(users[8], quiz, false, dates[3], dates[3] + 90.minutes, true)
+            runQuiz(users[9], quiz, true, dates[3], dates[3] + 110.minutes, true)
+        }
+
+        def format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        String tomorrow = format.format(new Date() + 1)
+
+        when:
+        def metrics_day4_to_2 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[0]), format.format(dates[2]))
+        def metrics_day4_to_1 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[0]), tomorrow)
+        def metrics_day3_to_1 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[1]), tomorrow)
+
+        then:
+        metrics_day4_to_2.avgAttemptRuntimeInMs >= 6130000
+        metrics_day4_to_1.avgAttemptRuntimeInMs >= 7368000
+        metrics_day3_to_1.avgAttemptRuntimeInMs >= 11350000
+    }
+
 
     def "quiz metrics - answers: single choice question"() {
         List<String> users = getRandomUsers(5, true)
@@ -261,16 +298,16 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         List<String> users = getRandomUsers(10, true)
         List<Date> dates = (0..3).collect { new Date() - it }.reverse()
 
-        runQuiz(users[0], quiz, quizInfo, true, dates[0], true)
-        runQuiz(users[1], quiz, quizInfo, true, dates[0], true)
-        runQuiz(users[2], quiz, quizInfo, false, dates[0], true)
-        runQuiz(users[3], quiz, quizInfo, false, dates[0], true)
-        runQuiz(users[4], quiz, quizInfo, true, dates[1], true)
-        runQuiz(users[5], quiz, quizInfo, true, dates[1], true)
-        runQuiz(users[6], quiz, quizInfo, true, dates[2], true)
-        runQuiz(users[7], quiz, quizInfo, true, dates[3], true)
-        runQuiz(users[8], quiz, quizInfo, false, dates[3], true)
-        runQuiz(users[9], quiz, quizInfo, true, dates[3], true)
+        runQuiz(users[0], quiz,  true, dates[0], dates[0], true)
+        runQuiz(users[1], quiz,  true, dates[0], dates[0], true)
+        runQuiz(users[2], quiz,  false, dates[0], dates[0], true)
+        runQuiz(users[3], quiz,  false, dates[0], dates[0],true)
+        runQuiz(users[4], quiz,  true, dates[1], dates[1],true)
+        runQuiz(users[5], quiz,  true, dates[1], dates[1],true)
+        runQuiz(users[6], quiz,  true, dates[2], dates[2],true)
+        runQuiz(users[7], quiz,  true, dates[3], dates[3],true)
+        runQuiz(users[8], quiz,  false, dates[3], dates[3],true)
+        runQuiz(users[9], quiz,  true, dates[3], dates[3],true)
 
         def format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         String tomorrow = format.format(new Date() + 1)
@@ -491,17 +528,20 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         }
     }
 
-    void runQuiz(String userId, def quiz, def quizInfo, boolean pass, Date startDate, boolean complete = true) {
+    void runQuiz(String userId, def quiz, boolean pass, Date startDate, Date endDate, boolean complete = true) {
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, userId).body
         skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, userId)
         skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[pass ? 0 : 1].id, userId)
+
         if (complete) {
             skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, userId).body
         }
 
         UserQuizAttempt userQuizAttempt = userQuizAttemptRepo.findById(quizAttempt.id).get()
         userQuizAttempt.started = startDate
-        userQuizAttempt.completed = startDate
+        if (complete) {
+            userQuizAttempt.completed = endDate
+        }
         userQuizAttemptRepo.save(userQuizAttempt)
     }
 }
