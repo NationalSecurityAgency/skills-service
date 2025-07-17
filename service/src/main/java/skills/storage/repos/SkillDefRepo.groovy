@@ -630,7 +630,9 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     Integer getProjectsTotalPoints(@Param('projectId') String projectId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
     static interface MinMaxPoints {
+        @Nullable
         Integer getMinPoints()
+        @Nullable
         Integer getMaxPoints()
     }
 
