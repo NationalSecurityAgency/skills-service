@@ -19,12 +19,9 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
-import org.springframework.lang.Nullable
-import skills.storage.model.LevelDef
-import skills.storage.model.LevelDefInterface
-import skills.storage.model.SkillDef
-import skills.storage.model.SkillDefMin
-import skills.storage.model.SkillRelDef
+import skills.storage.model.*
+
+import javax.annotation.Nullable
 
 /**
  * Custom repo to support latency aware actions of reporting skill events code
@@ -50,11 +47,13 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
 
     static interface TinyUserPoints {
         Integer getId()
+        @Nullable
         Integer getSkillRefId()
         Integer getPoints()
     }
 
     static interface TinyUserAchievement {
+        @Nullable
         Integer getSkillRefId()
         Integer getLevel()
     }
