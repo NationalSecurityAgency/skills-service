@@ -19,9 +19,8 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
+import org.springframework.lang.Nullable
 import skills.storage.model.*
-
-import javax.annotation.Nullable
 
 /**
  * Custom repo to support latency aware actions of reporting skill events code
