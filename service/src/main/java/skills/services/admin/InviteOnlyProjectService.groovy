@@ -265,7 +265,7 @@ class InviteOnlyProjectService {
      * @return The list of emails that were successfully sent as well as those that could not be sent
      */
     @Transactional
-    InviteUsersResult inviteUsers(String projectId, List<String> emailAddresses, String duration=DEFAULT_DURATION) {
+    InviteUsersResult inviteUsers(String projectId, List<String> emailAddresses, List<String> ccRecipients, String duration=DEFAULT_DURATION) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotEmpty(emailAddresses, "emailAddresses")
         boolean enabled = featureService.isEmailServiceFeatureEnabled()
@@ -297,7 +297,8 @@ class InviteOnlyProjectService {
                                         publicUrl       : publicUrl,
                                         validTime       : invite.validFor,
                                         inviteCode      : invite.token,
-                                        communityHeaderDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
+                                        communityHeaderDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor,
+                                        ccRecipients    : ccRecipients.join(',')
                                 ],
                         )
                         notifier.sendNotification(request)
@@ -322,7 +323,8 @@ class InviteOnlyProjectService {
                 item: DashboardItem.ProjectInvite,
                 actionAttributes: [
                         emailAddresses: emailAddresses,
-                        duration      : duration
+                        duration      : duration,
+                        ccRecipients: ccRecipients
                 ],
                 itemId: projectId,
                 projectId: projectId,
