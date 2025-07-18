@@ -79,7 +79,9 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
 
     static interface UserQuizAttemptStats {
         Boolean getIsAttemptAlreadyInProgress()
+        @Nullable
         Integer getUserNumPreviousQuizAttempts()
+        @Nullable
         Boolean getUserQuizPassed()
         Date getUserLastQuizAttemptCompleted()
     }
