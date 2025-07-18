@@ -144,6 +144,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         String getChildProjectId()
         String getChildSkillId()
 
+        @Nullable
         String getChildAchievedSkillId()
     }
 
