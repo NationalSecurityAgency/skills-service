@@ -849,7 +849,9 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         String getSkillType()
         Integer getPointIncrement()
         Integer getTotalPoints()
+        @Nullable
         String getSubjectName()
+        @Nullable
         String getSubjectId()
         Boolean getUserAchieved()
         Integer getUserCurrentPoints()
