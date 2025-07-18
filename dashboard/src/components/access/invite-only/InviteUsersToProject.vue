@@ -242,7 +242,7 @@ const ccEmailsUpdated = (newEmails) => {
               data-cy="inviteRecipient">
         </Chip>
       </div>
-      <label v-if="ccRecipients.length > 0">CC To:</label>
+      <label v-if="ccRecipients?.length > 0">CC To:</label>
       <div class="mb-4" data-cy="ccRecipients">
         <Chip v-for="(email) of ccRecipients"
               :key="email"
