@@ -78,11 +78,13 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
     UserQuizAttempt getByUserIdAndQuizIdAndState(String userId, String quizId, QuizAttemptStatus quizAttemptStatus)
 
     static interface UserQuizAttemptStats {
+        @Nullable
         Boolean getIsAttemptAlreadyInProgress()
         @Nullable
         Integer getUserNumPreviousQuizAttempts()
         @Nullable
         Boolean getUserQuizPassed()
+        @Nullable
         Date getUserLastQuizAttemptCompleted()
     }
 
