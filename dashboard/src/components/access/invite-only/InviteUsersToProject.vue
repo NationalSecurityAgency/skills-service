@@ -19,6 +19,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import AccessService from '@/components/access/AccessService.js'
 import { useRoute } from 'vue-router'
+import EmailField from "@/components/access/invite-only/EmailField.vue";
 
 const emit = defineEmits(['invites-sent'])
 
@@ -38,6 +39,7 @@ const expirationOptions = ref([
   { value: 'P30D', text: '30 days' }
 ])
 const currentEmails = ref('')
+const ccEmails = ref('')
 const invalidEmails = ref('')
 const failedEmails = ref('')
 const failedEmailsErrors = ref(null)
@@ -45,11 +47,12 @@ const successMsg = ref('')
 const showSuccessMsg = ref(false)
 
 const inviteRecipients = ref([])
+const ccRecipients = ref([])
 
 const hasEmails = computed(() => currentEmails.value.length > 0)
 const tooManyEmails = computed(() => inviteRecipients.value.length >= appConfig.maxProjectInviteEmails)
-const splitCurrentEmails = () => {
-  return currentEmails.value.split(/;|,|\r?\n/)
+const splitCurrentEmails = (emails) => {
+  return emails.value.split(/;|,|\r?\n/)
 }
 
 const validEmail = /^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]{1,64}@[a-zA-Z0-9.-]{1,64}$/i
@@ -65,10 +68,16 @@ const removeName = (pmail) => {
   return pmail
 }
 const addEmails = () => {
-  if (currentEmails.value.length > 0) {
-    const potentialEmails = splitCurrentEmails()
+  inviteRecipients.value = addEmailGroup(currentEmails)
+  ccRecipients.value = addEmailGroup(ccEmails)
+}
+
+const addEmailGroup = (emails) => {
+  if (emails.value.length > 0) {
+    const potentialEmails = splitCurrentEmails(emails)
     const invalid = []
     let successful = 0
+    const recipients = []
 
     const maxReached = potentialEmails.filter((pmail) => {
       if (tooManyEmails.value) {
@@ -79,9 +88,9 @@ const addEmails = () => {
       const isValid = isValidEmail(email)
       if (!isValid) {
         invalid.push(pmail)
-      } else if (!inviteRecipients.value.find((invited) => invited === email)) {
+      } else if (!recipients.find((invited) => invited === email)) {
         successful += 1
-        inviteRecipients.value.push(email)
+        recipients.push(email)
       }
       return false
     })
@@ -98,16 +107,22 @@ const addEmails = () => {
       invalidEmails.value = invalid.join(', ')
     }
     if (maxReached.length > 0 || invalid.length > 0) {
-      currentEmails.value = [...invalid, ...maxReached].join('\n')
+      emails.value = [...invalid, ...maxReached].join('\n')
     } else {
-      currentEmails.value = ''
+      emails.value = ''
     }
+
+    return recipients
   }
 }
 
 const removeRecipient = (email) => {
   const idx = inviteRecipients.value.indexOf(email)
   inviteRecipients.value.splice(idx, 1)
+}
+const removeCcRecipient = (email) => {
+  const idx = ccRecipients.value.indexOf(email)
+  ccRecipients.value.splice(idx, 1)
 }
 
 const maxRecipients = 50
@@ -122,11 +137,13 @@ const sendInvites = () => {
 
   const inviteRequest = {
     validityDuration: toRaw(expirationTime.value?.value),
-    recipients: toRaw(inviteRecipients.value)
+    recipients: toRaw(inviteRecipients.value),
+    ccRecipients: toRaw(ccRecipients.value)
   }
 
   AccessService.sendProjectInvites(route.params.projectId, inviteRequest).then((resp) => {
     inviteRecipients.value = []
+    ccRecipients.value = []
     if (resp.unsuccessful) {
       failedEmails.value = resp.unsuccessful.join(', ')
       failedEmailsErrors.value = resp.unsuccessfulErrors
@@ -147,6 +164,14 @@ const sendInvites = () => {
   }).finally(() => {
     sending.value = false
   })
+}
+
+const inviteEmailsUpdated = (newEmails) => {
+  currentEmails.value = newEmails;
+}
+
+const ccEmailsUpdated = (newEmails) => {
+ ccEmails.value = newEmails;
 }
 </script>
 
@@ -172,22 +197,14 @@ const sendInvites = () => {
       </div>
 
       <div class="field pt-4" data-cy="inviteEmail">
-        <label class="text-secondary" id="inviteEmailLabel" for="currentEmailsInput">
-          Email Addresses:
-        </label>
-
-        <!--        @input="clearInvalid"-->
-        <Textarea id="currentEmailsInput"
-                  v-model="currentEmails"
-                  class="w-full"
-                  rows="5"
-                  aria-labelledby="inviteEmailLabel"
-                  data-cy="inviteEmailInput" />
-        <small class="italic">
-          ** Email Addresses of users to invite to access this project. Must be unique as each email address will be
+        <EmailField label="Email Addresses" description="** Email Addresses of users to invite to access this project. Must be unique as each email address will be
           sent a one-time use invite token. Comma separated, semi-colon separated, and one email per line input formats
-          are supported.
-        </small>
+          are supported." field="invite" @updateAddresses="inviteEmailsUpdated" v-model="currentEmails" />
+
+        <EmailField label="CC" description="** Users to CC on the invites. Each user will receive a copy of each invite sent.
+          Comma separated, semi-colon separated, and one email per line input formats
+          are supported." field="cc" @updateAddresses="ccEmailsUpdated" v-model="ccEmails" :rows="1" />
+
         <div class="mt-2">
           <SkillsButton
             @click="addEmails"
@@ -223,6 +240,17 @@ const sendInvites = () => {
               removable
               @remove="removeRecipient(email)"
               data-cy="inviteRecipient">
+        </Chip>
+      </div>
+      <label v-if="ccRecipients.length > 0">CC To:</label>
+      <div class="mb-4" data-cy="ccRecipients">
+        <Chip v-for="(email) of ccRecipients"
+              :key="email"
+              :label="email"
+              class="mr-2"
+              removable
+              @remove="removeCcRecipient(email)"
+              data-cy="ccRecipient">
         </Chip>
       </div>
       <hr />
