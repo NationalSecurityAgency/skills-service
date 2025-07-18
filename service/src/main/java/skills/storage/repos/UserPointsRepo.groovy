@@ -528,7 +528,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     static interface RankedUserRes {
         String getUserId()
         String getUserIdForDisplay()
+        @Nullable
         String getUserFirstName()
+        @Nullable
         String getUserLastName()
         String getUserNickname()
         Integer getPoints()
