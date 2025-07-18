@@ -13,32 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.services.userActions
+package skills.services.attributes
 
-enum DashboardItem {
-    Project,
-    Subject,
-    Badge,
-    GlobalBadge,
-    Skill,
-    SkillsGroup,
-    AdminGroup,
-    Quiz,
-    QuizAttempt,
-    Question,
-    Tag,
-    VideoSettings,
-    SlidesSettings,
-    ExpirationSettings,
-    Level,
-    LearningPathItem,
-    Approver,
-    SkillEvents,
-    UserRole,
-    Settings,
-    ProjectPin,
-    ProjectIssue,
-    TrustedClientSecret,
-    ProjectInvite,
-    UserPreference
+import groovy.transform.Canonical
+
+@Canonical
+class SlidesAttrs {
+    String url
+    String type
+    Boolean isInternallyHosted
+    String internallyHostedFileName
+    String internallyHostedAttachmentUuid
 }
