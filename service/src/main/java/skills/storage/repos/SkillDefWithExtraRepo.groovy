@@ -52,12 +52,15 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
 
     static interface SkillDescDBRes {
         String getSkillId()
+        @Nullable
         String getDescription()
+        @Nullable
         String getHelpUrl()
         @Nullable
         Date getAchievedOn()
         SelfReportingType getSelfReportingType()
         Integer getCopiedFrom()
+        @Nullable
         ContainerType getType()
         String getEnabled()
         String getJustificationRequired()
