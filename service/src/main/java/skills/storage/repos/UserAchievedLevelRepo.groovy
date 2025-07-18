@@ -922,6 +922,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     static interface SkillStatsItem {
         Integer getNumUsersAchieved()
+        @Nullable
         Date getLastAchieved()
     }
 
