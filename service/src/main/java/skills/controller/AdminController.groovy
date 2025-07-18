@@ -253,7 +253,7 @@ class AdminController {
         SkillsValidator.isTrue(!inviteRequest?.recipients?.isEmpty(), "at least one email is required")
         SkillsValidator.isTrue(inviteRequest?.recipients?.size() <= maxInviteEmails, "No more than ${maxInviteEmails} project invites may  be sent at one time")
 
-        InviteUsersResult res = inviteOnlyProjectService.inviteUsers(projectId, inviteRequest.recipients, inviteRequest.validityDuration)
+        InviteUsersResult res = inviteOnlyProjectService.inviteUsers(projectId, inviteRequest.recipients, inviteRequest.ccRecipients, inviteRequest.validityDuration)
         return res
     }
 

@@ -311,4 +311,28 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
 
     }
 
+    def "Can CC users on invites"() {
+        def proj = SkillsFactory.createProject(99)
+        def subj = SkillsFactory.createSubject(99)
+        def skill = SkillsFactory.createSkill(99, 1)
+        skill.pointIncrement = 200
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        def ccRecipients = ["ccRecipient1@test.foo", "ccRecipient2@email.bar"]
+
+        when:
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo", "numbertwo@email.bar", "numberone@email.baz"], ccRecipients: ccRecipients])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 2 }
+
+        then:
+
+        EmailUtils.getEmail(greenMail).each {
+            it.ccRecipients?.contains(ccRecipients[0])
+            it.ccRecipients?.contains(ccRecipients[1])
+        }
+    }
 }
