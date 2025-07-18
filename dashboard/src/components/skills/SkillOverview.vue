@@ -20,6 +20,7 @@ import { useSkillsState } from '@/stores/UseSkillsState.js'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import LoadingContainer from '@/components/utils/LoadingContainer.vue';
 import ChildRowSkillsDisplay from '@/components/skills/ChildRowSkillsDisplay.vue';
+import SlideDeck from "@/components/slides/SlideDeck.vue";
 
 const route = useRoute();
 const skillsState = useSkillsState();
@@ -31,6 +32,11 @@ const skillsState = useSkillsState();
     <loading-container :is-loading="skillsState.loadingSkill">
       <Card>
         <template #content>
+          <slide-deck class="mb-5"
+              :pdf-url="'/api/download/30c30837-4584-4d85-88c6-60fc21693561'"
+          />
+
+
           <child-row-skills-display 
             v-if="skillsState.skill && skillsState.skill.skillId" 
             :skill="skillsState.skill" />

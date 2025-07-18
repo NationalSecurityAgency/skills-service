@@ -657,6 +657,19 @@ class AdminController {
         return res
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/slides", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    SkillVideoAttrs saveSkillSkildesAttrs(@PathVariable("projectId") String projectId,
+                                        @PathVariable("skillId") String skillId,
+                                        @RequestParam(name = "file", required = false) MultipartFile file,
+                                        @RequestParam(name = "slidesUrl", required = false) String videoUrl,
+                                        @RequestParam(name = "isAlreadyHosted", required = false, defaultValue = "false") Boolean isAlreadyHosted) {
+
+        SkillVideoAttrs res = adminVideoService.saveVideo(projectId, skillId, isAlreadyHosted, file, videoUrl, captions, transcript, width, height)
+        return res
+    }
+
+
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/video", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult deleteSkillVideoAttrs(@PathVariable("projectId") String projectId,

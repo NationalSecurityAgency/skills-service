@@ -54,6 +54,10 @@ class SkillAttributeService {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, videoAttrs)
     }
 
+    void saveSlidesAttrs(String projectId, String skillId, SlidesAttrs slidesAttrs) {
+        saveAttrs(projectId, skillId, SkillAttributesType.Slides, slidesAttrs)
+    }
+
     @Transactional
     boolean deleteVideoAttrs(String projectId, String skillId) {
         int numRemoved = deleteAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video)
@@ -65,9 +69,14 @@ class SkillAttributeService {
     }
 
     SkillVideoAttrs getVideoAttrs(String projectId, String skillId) {
-        SkillVideoAttrs skillVideoAttrs = getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, SkillVideoAttrs.class)
+        SkillVideoAttrs skillVideoAttrs = getAttrs(projectId, skillId, SkillAttributesType.Video, SkillVideoAttrs.class)
         skillVideoAttrs.captions = InputSanitizer.unSanitizeCaption(skillVideoAttrs.captions)
         return skillVideoAttrs
+    }
+
+    SlidesAttrs getSlidesAttrs(String projectId, String skillId) {
+        SlidesAttrs slidesAttrs = getAttrs(projectId, skillId, SkillAttributesType.Slides, SlidesAttrs.class)
+        return slidesAttrs
     }
 
     void saveExpirationAttrs(String projectId, String skillId, ExpirationAttrs skillExpirationAttrs) {

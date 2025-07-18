@@ -135,6 +135,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const projectMetricsTagCharts = computed(() => config.value.projectMetricsTagCharts)
   const maxDailyUserEvents = computed(() => config.value.maxDailyUserEvents)
   const allowedVideoUploadMimeTypes = computed(() => config.value.allowedVideoUploadMimeTypes)
+  const allowedSlidesUploadMimeTypes = computed(() => config.value.allowedSlidesUploadMimeTypes)
   const videoUploadWarningMessage = computed(() => config.value.videoUploadWarningMessage)
   const maxVideoCaptionsLength = computed(() => config.value.maxVideoCaptionsLength)
   const maxVideoTranscriptLength = computed(() => config.value.maxVideoTranscriptLength)
@@ -236,6 +237,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     approvalConfUserTagLabel,
     projectMetricsTagCharts,
     maxDailyUserEvents,
+    allowedSlidesUploadMimeTypes,
     allowedVideoUploadMimeTypes,
     videoUploadWarningMessage,
     maxVideoCaptionsLength,

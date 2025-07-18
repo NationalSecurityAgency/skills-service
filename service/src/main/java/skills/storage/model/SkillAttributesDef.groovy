@@ -30,7 +30,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 class SkillAttributesDef {
 
     static enum SkillAttributesType {
-        Video, BonusAward, AchievementExpiration
+        Video, BonusAward, AchievementExpiration, Slides
     };
 
     @Id
