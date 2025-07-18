@@ -869,9 +869,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         String getSkillId()
         String getSubjectId()
         String getSkillName()
+        @Nullable
         Integer getNumUserAchieved()
+        @Nullable
         Integer getNumUsersInProgress()
+        @Nullable
         Date getLastReported()
+        @Nullable
         Date getLastAchieved()
     }
 
