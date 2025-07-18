@@ -37,6 +37,7 @@ interface UserActionsHistoryRepo extends CrudRepository<UserActionsHistory, Long
         String getUserId()
         String getUserIdForDisplay()
         String getProjectId()
+        @Nullable
         String getQuizId()
 
         Date getCreated()
