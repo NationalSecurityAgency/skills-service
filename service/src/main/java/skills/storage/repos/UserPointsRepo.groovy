@@ -532,6 +532,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         String getUserFirstName()
         @Nullable
         String getUserLastName()
+        @Nullable
         String getUserNickname()
         Integer getPoints()
         LocalDateTime getUserFirstSeenTimestamp()
