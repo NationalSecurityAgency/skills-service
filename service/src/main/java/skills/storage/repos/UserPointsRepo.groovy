@@ -841,6 +841,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     static interface SkillWithChildAndAchievementIndicator {
         Integer getParentId()
         Integer getChildId()
+        @Nullable
         Integer getAchievementId()
     }
     @Query(value = '''SELECT COUNT(distinct up.user_id) 
