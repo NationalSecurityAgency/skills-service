@@ -66,6 +66,7 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
         String getJustificationRequired()
         @Nullable
         String getVideoUrl()
+        @Nullable
         String getVideoType()
         Boolean getVideoHasCaptions()
         Boolean getVideoHasTranscript()
