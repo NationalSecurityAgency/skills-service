@@ -714,6 +714,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
         String getLastName()
 
+        @Nullable
         String getUserTag()
     }
 
