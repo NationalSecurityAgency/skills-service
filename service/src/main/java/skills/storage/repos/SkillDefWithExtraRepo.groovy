@@ -54,12 +54,14 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
         String getSkillId()
         String getDescription()
         String getHelpUrl()
+        @Nullable
         Date getAchievedOn()
         SelfReportingType getSelfReportingType()
         Integer getCopiedFrom()
         ContainerType getType()
         String getEnabled()
         String getJustificationRequired()
+        @Nullable
         String getVideoUrl()
         String getVideoType()
         Boolean getVideoHasCaptions()
