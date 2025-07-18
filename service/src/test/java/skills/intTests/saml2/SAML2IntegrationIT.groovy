@@ -22,6 +22,7 @@ import org.openqa.selenium.By
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
 import org.openqa.selenium.support.ui.WebDriverWait
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.http.client.ClientHttpRequestFactorySettings
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.http.HttpMethod
@@ -56,8 +57,7 @@ class SAML2IntegrationIT extends Specification{
     @Shared
     int keycloakPort = 10101
 
-    @Autowired
-    TestRestTemplate restTemplate
+    TestRestTemplate restTemplate = new TestRestTemplate().withRedirects(ClientHttpRequestFactorySettings.Redirects.DONT_FOLLOW)
 
     @Shared
     KeycloakContainer keycloak = new KeycloakContainer().withRealmImportFile("keycloak/realm-export.json")

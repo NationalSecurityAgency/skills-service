@@ -72,13 +72,19 @@ interface SkillApprovalConfRepo extends CrudRepository<SkillApprovalConf, Intege
 
         String getApproverUserId()
 
+        @Nullable
         String getUserIdForDisplay()
+        @Nullable
         String getUserId()
 
+        @Nullable
         String getUserTagKey()
+        @Nullable
         String getUserTagValue()
 
+        @Nullable
         String getSkillName()
+        @Nullable
         String getSkillId()
 
         Date getUpdated()

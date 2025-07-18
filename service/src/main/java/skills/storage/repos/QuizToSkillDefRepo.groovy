@@ -36,6 +36,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
         QuizDefParent.QuizType getQuizType()
         Integer getNumQuestions()
         Integer getNumTextInputQuestions()
+        @Nullable
         Integer getConfiguredNumQuestionsQuizLength()
     }
 

@@ -17,10 +17,8 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
-import skills.storage.model.UserQuizAnswerAttempt
+import org.springframework.lang.Nullable
 import skills.storage.model.UserQuizQuestionAttempt
-
-import javax.annotation.Nullable
 
 interface UserQuizQuestionAttemptRepo extends JpaRepository<UserQuizQuestionAttempt, Long> {
 

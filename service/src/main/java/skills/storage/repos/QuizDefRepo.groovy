@@ -51,6 +51,7 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
 
         Date getCreated();
 
+        @Nullable
         String getUserCommunityEnabled()
     }
     @Query(value="""

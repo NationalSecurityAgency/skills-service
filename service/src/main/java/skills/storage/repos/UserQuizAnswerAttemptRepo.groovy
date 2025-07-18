@@ -30,6 +30,7 @@ interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt,
     static interface AnswerIdAndAnswerText {
         Integer getAnswerAttemptId()
         Integer getAnswerId()
+        @Nullable
         String getAnswerText()
         UserQuizAnswerAttempt.QuizAnswerStatus getAnswerStatus()
     }

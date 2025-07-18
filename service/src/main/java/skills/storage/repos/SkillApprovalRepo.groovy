@@ -36,15 +36,21 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         Integer getApprovalId()
         String getUserId()
         String getUserIdForDisplay()
+        @Nullable
         String getApproverUserId()
+        @Nullable
         String getApproverUserIdForDisplay()
         String getSkillId()
         String getSubjectId()
         String getSkillName()
         Date getRequestedOn()
+        @Nullable
         Date getApproverActionTakenOn()
+        @Nullable
         String getRequestMsg()
+        @Nullable
         Date getRejectedOn()
+        @Nullable
         String getMessage()
         Integer getPoints()
     }
@@ -374,6 +380,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     List<SkillApprovalPlusSkillId> findsApprovalWithSkillIdInForSkillsDisplay(String userId, String projectId, List<String> skillIds)
 
     interface SkillReportingTypeAndCount {
+        @Nullable
         SkillDef.SelfReportingType getType()
         Integer getCount()
     }

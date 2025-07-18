@@ -35,10 +35,13 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
 
     static interface VideoSummaryAttributes {
         String getUrl()
+        @Nullable
         String getType()
         Boolean getHasCaptions()
         Boolean getHasTranscript()
+        @Nullable
         Double getWidth()
+        @Nullable
         Double getHeight()
     }
 
