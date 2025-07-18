@@ -32,10 +32,12 @@ interface UserActionsHistoryRepo extends CrudRepository<UserActionsHistory, Long
         DashboardAction getAction()
         DashboardItem getItem()
         String getItemId()
+        @Nullable
         Integer getItemRefId()
 
         String getUserId()
         String getUserIdForDisplay()
+        @Nullable
         String getProjectId()
         @Nullable
         String getQuizId()
