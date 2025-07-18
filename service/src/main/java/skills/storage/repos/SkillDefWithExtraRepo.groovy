@@ -142,6 +142,7 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
 
     static interface SkillIdAndDesc {
         String getSkillId()
+        @Nullable
         String getDescription()
     }
     @Query(value='''SELECT sdf.skillId as skillId, sdf.description as description 
