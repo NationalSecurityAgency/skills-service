@@ -280,6 +280,14 @@ class InviteOnlyProjectService {
         final List<String> couldNotBeSent = []
         final List<String> couldNotBeSentErrors = []
 
+        ccRecipients.each {String ccEmail ->
+            def isValid = PatternsUtil.isValidEmail(ccEmail)
+            if(!isValid) {
+                couldNotBeSent.add(ccEmail)
+                couldNotBeSentErrors.add("${ccEmail} is not a valid email".toString())
+            }
+        }
+
         Date created = new Date()
         emailAddresses.each {String email ->
             if (PatternsUtil.isValidEmail(email)) {
