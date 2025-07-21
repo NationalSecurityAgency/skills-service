@@ -78,9 +78,13 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
     UserQuizAttempt getByUserIdAndQuizIdAndState(String userId, String quizId, QuizAttemptStatus quizAttemptStatus)
 
     static interface UserQuizAttemptStats {
+        @Nullable
         Boolean getIsAttemptAlreadyInProgress()
+        @Nullable
         Integer getUserNumPreviousQuizAttempts()
+        @Nullable
         Boolean getUserQuizPassed()
+        @Nullable
         Date getUserLastQuizAttemptCompleted()
     }
 
@@ -276,7 +280,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
     }
     @Query('''select 
             count(*) as numAttempts,
-            sum(case when quizDef.type = 'Quiz' then 1 else 0 end) as numQuizAttempts 
+            COALESCE(sum(case when quizDef.type = 'Quiz' then 1 else 0 end), 0) as numQuizAttempts 
         from UserQuizAttempt attempt, QuizDef quizDef 
         where attempt.userId = ?1
             and attempt.status in ('PASSED', 'FAILED')

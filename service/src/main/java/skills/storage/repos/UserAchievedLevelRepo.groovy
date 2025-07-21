@@ -144,6 +144,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         String getChildProjectId()
         String getChildSkillId()
 
+        @Nullable
         String getChildAchievedSkillId()
     }
 
@@ -697,8 +698,10 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
         String getUserId()
 
+        @Nullable
         Integer getLevel()
 
+        @Nullable
         String getSkillId()
 
         String getName()
@@ -707,10 +710,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
         String getUserIdForDisplay()
 
+        @Nullable
         String getFirstName()
 
+        @Nullable
         String getLastName()
 
+        @Nullable
         String getUserTag()
     }
 
@@ -866,9 +872,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         String getSkillId()
         String getSubjectId()
         String getSkillName()
+        @Nullable
         Integer getNumUserAchieved()
+        @Nullable
         Integer getNumUsersInProgress()
+        @Nullable
         Date getLastReported()
+        @Nullable
         Date getLastAchieved()
     }
 
@@ -914,6 +924,7 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
 
     static interface SkillStatsItem {
         Integer getNumUsersAchieved()
+        @Nullable
         Date getLastAchieved()
     }
 
