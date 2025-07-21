@@ -279,12 +279,15 @@ class InviteOnlyProjectService {
         final successfullySent = []
         final List<String> couldNotBeSent = []
         final List<String> couldNotBeSentErrors = []
+        final List<String> validCcRecipients = []
 
         ccRecipients.each {String ccEmail ->
             def isValid = PatternsUtil.isValidEmail(ccEmail)
             if(!isValid) {
                 couldNotBeSent.add(ccEmail)
                 couldNotBeSentErrors.add("${ccEmail} is not a valid email".toString())
+            } else {
+                validCcRecipients.add(ccEmail)
             }
         }
 
@@ -306,7 +309,7 @@ class InviteOnlyProjectService {
                                         validTime       : invite.validFor,
                                         inviteCode      : invite.token,
                                         communityHeaderDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor,
-                                        ccRecipients    : ccRecipients.join(',')
+                                        ccRecipients    : validCcRecipients.join(',')
                                 ],
                         )
                         notifier.sendNotification(request)
