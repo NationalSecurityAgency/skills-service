@@ -336,7 +336,7 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         }
     }
 
-    def "Invalid CC addresses are logged"() {
+    def "Invalid CC addresses are logged and removed"() {
         def proj = SkillsFactory.createProject(99)
         def subj = SkillsFactory.createSubject(99)
         def skill = SkillsFactory.createSkill(99, 1)
@@ -347,16 +347,22 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
         skillsService.createSkill(skill)
         skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
 
-        def ccRecipients = ["ccRecipient1", "@email.bar"]
+        def ccRecipients = ["ccRecipient1", "testguy@test.com", "@email.bar"]
 
         when:
 
         def result = skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"], ccRecipients: ccRecipients])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
 
         then:
         result.projectId == proj.projectId
+        result.successful.size() == 1
         result.unsuccessful.size() == 2
         result.unsuccessful.sort() == ["ccRecipient1", "@email.bar"].sort()
         result.unsuccessfulErrors.sort() == ["ccRecipient1 is not a valid email", "@email.bar is not a valid email"].sort()
+        EmailUtils.getEmail(greenMail).each {
+            it.ccRecipients?.size() == 1
+            it.ccRecipients?[0] == "testguy@test.com"
+        }
     }
 }
