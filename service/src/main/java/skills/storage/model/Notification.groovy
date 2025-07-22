@@ -68,5 +68,4 @@ class Notification {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
-
 }
