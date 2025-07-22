@@ -93,17 +93,25 @@ describe('Projects Invite-Only Tests', () => {
             .should('be.disabled');
         cy.get('[data-cy="inviteEmailInput"]')
             .type('foo;@bar;abc@cba.org;Bob Smith <bsmith@fake.email>');
+        cy.get('[data-cy="ccEmailInput"]')
+            .type('asd;@vcx;def@cba.org;Bob Jones <bjones@fake.email>');
         cy.get('[data-cy=addEmails]')
             .click();
         cy.get('[data-cy=invalidEmails]')
             .should('be.visible')
-            .should('include.text', 'Unable to add the following invalid email recipients: foo, @bar');
+            .should('include.text', 'Unable to add the following invalid email recipients: foo, @bar, asd, @vcx');
         cy.get('[data-cy=inviteRecipient]')
             .eq(0)
             .should('include.text', 'abc@cba.org');
         cy.get('[data-cy=inviteRecipient]')
             .eq(1)
             .should('include.text', 'bsmith@fake.email');
+        cy.get('[data-cy=ccRecipient]')
+            .eq(0)
+            .should('include.text', 'def@cba.org');
+        cy.get('[data-cy=ccRecipient]')
+            .eq(1)
+            .should('include.text', 'bjones@fake.email');
         cy.get('[data-cy="sendInvites-btn"]')
             .should('be.enabled')
             .click();

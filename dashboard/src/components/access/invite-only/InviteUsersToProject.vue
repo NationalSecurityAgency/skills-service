@@ -68,6 +68,7 @@ const removeName = (pmail) => {
   return pmail
 }
 const addEmails = () => {
+  invalidEmails.value = ''
   inviteRecipients.value = addEmailGroup(currentEmails)
   ccRecipients.value = addEmailGroup(ccEmails)
 }
@@ -98,13 +99,14 @@ const addEmailGroup = (emails) => {
     failedEmails.value = ''
     failedEmailsErrors.value = null
 
-    invalidEmails.value = ''
-
     if (successful > 0) {
       nextTick(() => announcer.polite(`added ${successful} project invite email recipients`))
     }
     if (invalid.length > 0) {
-      invalidEmails.value = invalid.join(', ')
+      if(invalidEmails.value !== '') {
+        invalidEmails.value += ', '
+      }
+      invalidEmails.value += invalid.join(', ')
     }
     if (maxReached.length > 0 || invalid.length > 0) {
       emails.value = [...invalid, ...maxReached].join('\n')
