@@ -31,7 +31,7 @@ export const useSkillsDisplayInfo = () => {
   const skillDisplayPreviewRegex = /\/administrator\/projects\/.*\/users\/.*/i
   const regexes = [progressAndRankingsRegex, localTestRegex, clientDisplayRegex, inceptionRegex, skillDisplayPreviewRegex]
   const localTestContextAppend = SkillsDisplayPathAppendValues.LocalTest
-  const skillsDisplayNameAppendValues = [SkillsDisplayPathAppendValues.Local, SkillsDisplayPathAppendValues.SkillsClient, SkillsDisplayPathAppendValues.LocalTest, SkillsDisplayPathAppendValues.SkillsDisplayPreview]
+  const skillsDisplayNameAppendValues = [SkillsDisplayPathAppendValues.Local, SkillsDisplayPathAppendValues.SkillsClient, SkillsDisplayPathAppendValues.LocalTest, SkillsDisplayPathAppendValues.SkillsDisplayPreview, SkillsDisplayPathAppendValues.Inception]
   const isSkillsClientPath = () => {
     return SkillsClientPath.isSkillsClientPath()
   }
