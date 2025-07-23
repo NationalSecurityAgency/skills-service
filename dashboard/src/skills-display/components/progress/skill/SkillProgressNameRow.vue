@@ -128,7 +128,7 @@ const groupLabel = computed(() => attributes.groupDisplayName)
         <div class="sd-theme-primary-color font-medium flex">
           <div class="mr-1">
             <i  v-if="skill.isSkillsGroupType" class="fas fa-layer-group"></i>
-            <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType" class="fas fa-graduation-cap text-muted-color"></i>
+            <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType" :class="`${skill?.iconClass ? skill?.iconClass : 'fas fa-graduation-cap'}`"></i>
             <i v-if="skill.copiedFromProjectId" class="fas fa-book text-secondary"></i>
           </div>
           <div>

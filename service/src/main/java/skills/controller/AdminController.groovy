@@ -742,6 +742,7 @@ class AdminController {
         skillRequest.projectId = InputSanitizer.sanitize(skillRequest.projectId)
         skillRequest.skillId = InputSanitizer.sanitize(skillRequest.skillId)
         skillRequest.subjectId = InputSanitizer.sanitize(skillRequest.subjectId)
+        skillRequest.iconClass = InputSanitizer.sanitize(skillRequest.iconClass)
 
         if (isBasicSkill) {
             SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)

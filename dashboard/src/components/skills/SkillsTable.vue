@@ -642,6 +642,9 @@ const onRowExpand = () => {
           <div v-if="slotProps.field == 'name'"
                class="flex flex-wrap items-center flex-col sm:flex-row"
                :data-cy="`nameCell_${slotProps.data.skillId}`">
+            <div class="rounded-border w-16 skill-icon-container text-primary border text-center mr-4">
+              <i class="skill-icon" :class="`${slotProps.data.iconClass ? slotProps.data.iconClass : 'fas fa-graduation-cap'}`"></i>
+            </div>
             <div v-if="slotProps.data.isGroupType" class="flex-1">
               <div>
                 <i class="fas fa-layer-group" aria-hidden="true"></i> <span class="uppercase">Group</span>
@@ -935,5 +938,22 @@ const onRowExpand = () => {
 <style>
 .remove-checkbox .p-checkbox {
   visibility: hidden !important;
+}
+
+.skill-icon {
+  height: 100%;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  font-size: 30px !important;
+  line-height: 46px;
+}
+
+.skill-icon-container {
+  max-width:48px;
+  max-height:48px;
+  height:48px;
+  width: 48px;
+  padding-top: 8px;
 }
 </style>

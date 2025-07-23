@@ -194,6 +194,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.copiedFrom as copiedFrom,
         sd2.readOnly as readOnly,
         sd2.copiedFromProjectId as copiedFromProjectId,
+        sd2.iconClass as iconClass,
         pd.name as copiedFromProjectName,
         qDef.quizId as quizId,
         qDef.type as quizType,

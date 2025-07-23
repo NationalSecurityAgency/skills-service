@@ -334,6 +334,7 @@ class SkillsAdminService {
                     enabled: enabled,
                     groupId: groupId,
                     justificationRequired: justificationRequired,
+                    iconClass: skillRequest.iconClass
             )
 
             if (isSkillCatalogImport) {
@@ -782,6 +783,7 @@ class SkillsAdminService {
         SkillDefRes res = new SkillDefRes()
         Props.copy(skillDef, res)
         res.enabled = skillDef.enabled == "true" ? true : false
+        res.iconClass = skillDef.iconClass
         res.justificationRequired = Boolean.valueOf(skillDef.justificationRequired)
         res.description = InputSanitizer.unsanitizeForMarkdown(res.description)
         res.helpUrl = InputSanitizer.unsanitizeUrl(res.helpUrl)
@@ -874,6 +876,7 @@ class SkillsAdminService {
                 quizId: partial.getQuizId(),
                 quizName: partial.getQuizName(),
                 quizType: partial.getQuizType(),
+                iconClass: partial.iconClass,
         )
 
         if (partial.skillType == SkillDef.ContainerType.Skill) {

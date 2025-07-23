@@ -68,4 +68,6 @@ class SkillDefPartialRes extends SkillDefSkinnyRes{
     Integer every
     String monthlyDay
     Date nextExpirationDate
+
+    String iconClass
 }
