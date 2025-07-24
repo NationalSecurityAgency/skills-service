@@ -22,7 +22,7 @@
 
         <flywaydb.version>6.5.5</flywaydb.version>
 
-        <commons.lang.version>3.14.0</commons.lang.version>
+        <commons.lang.version>3.18.0</commons.lang.version>
         <commons.collections.version>4.4</commons.collections.version>
         <commons.io.version>2.18.0</commons.io.version>
 
