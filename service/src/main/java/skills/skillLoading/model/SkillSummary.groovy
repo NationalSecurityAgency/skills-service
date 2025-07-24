@@ -45,6 +45,7 @@ class SkillSummary extends SkillSummaryParent {
     List<SkillTag> tags = []
 
     VideoSummary videoSummary
+    SlidesSummary slidesSummary
 
     Boolean isMotivationalSkill
     int daysOfInactivityBeforeExp

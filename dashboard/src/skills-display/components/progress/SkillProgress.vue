@@ -31,6 +31,7 @@ import SkillVideo from '@/skills-display/components/progress/SkillVideo.vue';
 import dayjs from 'dayjs';
 import {useStorage} from "@vueuse/core";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import SkillSlides from "@/skills-display/components/progress/SkillSlides.vue";
 
 const props = defineProps({
   skill: Object,
@@ -241,6 +242,10 @@ watch(() => props.expandGroups, (newValue) => {
                      :video-collapsed-by-default="videoCollapsedByDefault"
                      @points-earned="pointsEarned"
                      class="mt-2" />
+        <skill-slides v-if="skill"
+                      :skill="skill"
+                      class="mt-2"
+        />
         <p class="skills-text-description text-primary mt-4" style="font-size: 0.9rem;">
           <markdown-text
             :instance-id="`skillDescription-${skill.skillId}`"

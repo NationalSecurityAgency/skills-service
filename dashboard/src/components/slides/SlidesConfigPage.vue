@@ -34,6 +34,7 @@ import {useProjConfig} from "@/stores/UseProjConfig.js";
 import {useProjectCommunityReplacement} from "@/components/customization/UseProjectCommunityReplacement.js";
 import SlidesService from "@/components/slides/SlidesService.js";
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
+import {useSkillsState} from "@/stores/UseSkillsState.js";
 
 const byteFormat = useByteFormat()
 const announcer = useSkillsAnnouncer()
@@ -45,6 +46,7 @@ const quizConfig = useQuizConfig()
 const projConfig = useProjConfig()
 const projectCommunityReplacement = useProjectCommunityReplacement()
 const layoutSize = useLayoutSizesState()
+const skillsState = useSkillsState();
 
 const container = route.params.projectId ? route.params.projectId : route.params.quizId;
 const item = route.params.skillId ? route.params.skillId : route.params.questionId;
@@ -161,8 +163,12 @@ const saveSettings = () => {
       data.append('slidesUrl', slidesConf.value.url);
     }
   }
+  if (configuredSlidesWidthValue.value) {
+    data.append('width', configuredSlidesWidthValue.value);
+  }
+
   const endpoint = `/admin/${requestEndpoint.value}/slides`;
-  FileUploadService.upload(endpoint, data, (response) => {
+  return FileUploadService.upload(endpoint, data, (response) => {
     updateSlidesSettings(response.data);
     showSavedMsg.value = true;
     loading.value.video = false;
@@ -173,6 +179,7 @@ const saveSettings = () => {
     setupPreview();
   }, (error) => {
     isSaving.value = false;
+    unsavedConfigChanges.value = false;
     upgradeInProgressErrorChecker.checkError(error)
   });
 }
@@ -186,6 +193,9 @@ const updateSlidesSettings = (settingRes) => {
     showFileUpload.value = slidesConf.value.isInternallyHosted;
   } else {
     showFileUpload.value = true;
+  }
+  if (settingRes.width) {
+    configuredSlidesWidthValue.value = settingRes.width;
   }
   setFieldValues();
   if (slidesConf.value.url) {
@@ -235,6 +245,16 @@ const isReused = computed(() => {
 const isReadOnly = computed(() => {
   return isReused.value || isImported.value;
 });
+
+const unsavedConfigChanges = ref(false)
+const configuredSlidesWidthValue = ref(null)
+const hasBeenResized = ref(false)
+const configuredSlidesWidth = computed(() => configuredSlidesWidthValue.value || 'No width configured yet')
+const onSlidesResize = (newWidth) => {
+  configuredSlidesWidthValue.value = Math.trunc(newWidth)
+  unsavedConfigChanges.value = true
+  hasBeenResized.value = true
+}
 </script>
 
 <template>
@@ -288,7 +308,7 @@ const isReadOnly = computed(() => {
             {{ overallErrMsg }}
           </Message>
 
-          <div class="flex-1 mt-3">
+          <div class="flex-1 mt-3 flex">
             <SkillsButton
                 severity="success"
                 data-cy="saveSlidesSettingsBtn"
@@ -296,8 +316,7 @@ const isReadOnly = computed(() => {
                 @click="submitSaveSettingsForm"
                 icon="fas fa-save"
                 label="Save and Preview"/>
-            <span v-if="showSavedMsg" aria-hidden="true" class="ml-2 text-success" data-cy="savedMsg"><i
-                class="fas fa-check"/> Saved</span>
+            <InlineMessage v-if="showSavedMsg" aria-hidden="true" class="ml-4" data-cy="savedMsg" severity="success" size="small" icon="fas fa-check">Saved</InlineMessage>
           </div>
 
 
@@ -308,9 +327,40 @@ const isReadOnly = computed(() => {
             <template #content>
               <slide-deck
                   class="my-5"
+                  :slides-id="`${route.params.skillId}`"
                   :pdf-url="slidesConf.url"
-                  :max-width="layoutSize.tableMaxWidth-30"
+                  :default-width="configuredSlidesWidthValue"
+                  :max-width="layoutSize.tableMaxWidth-50"
+                  @on-resize="onSlidesResize"
               />
+
+              <hr />
+              <div class="px-5 py-5">
+                <div class="grid md:grid-cols-[10rem_1fr] md:gap-4">
+                  <div>Default Slides Width:</div>
+                  <div>
+                    <span class="text-primary" data-cy="defaultVideoSize">{{ configuredSlidesWidth }}</span> <Tag v-if="unsavedConfigChanges" severity="warn" data-cy="unsavedVideoSizeChanges"><i class="fas fa-exclamation-circle mr-1" aria-hidden="true"></i>Unsaved Changes</Tag>
+                    <div class="text-sm italic">** Change the size by dragging the handle at the bottom right of the slides and click Save Changes button.</div>
+                  </div>
+                </div>
+
+                <div v-if="!isReadOnly && hasBeenResized" class="flex items-center">
+                  <SkillsButton
+                      severity="success"
+                      class="mt-2"
+                      outlined
+                      :disabled="!meta.valid || !unsavedConfigChanges"
+                      data-cy="updateVideoSettings"
+                      aria-label="Save video settings"
+                      @click="submitSaveSettingsForm"
+                      :loading="isSaving"
+                      icon="fas fa-save"
+                      label="Save Changes" />
+                  <InlineMessage v-if="showSavedMsg" aria-hidden="true" class="ml-4" data-cy="savedMsgSecondBtn" severity="success" size="small" icon="fas fa-check">Saved</InlineMessage>
+                </div>
+
+              </div>
+
             </template>
           </Card>
         </div>

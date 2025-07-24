@@ -669,11 +669,11 @@ class AdminController {
                                      @RequestParam(name = "file", required = false) MultipartFile file,
                                      @RequestParam(name = "url", required = false) String slidesUrl,
                                      @RequestParam(name = "isAlreadyHosted", required = false, defaultValue = "false") Boolean isAlreadyHosted,
-                                     @RequestParam(name = "scale", required = false) Double scale) {
-        if (scale != null && scale > 10000) {
-            throw new SkillException("Scale cannot be greater than 10000", projectId, skillId, ErrorCode.BadParam)
+                                     @RequestParam(name = "width", required = false) Double width) {
+        if (width != null && width > 100000) {
+            throw new SkillException("Width cannot be greater than 100000", projectId, skillId, ErrorCode.BadParam)
         }
-        return adminSlidesService.saveSlides(projectId, skillId, isAlreadyHosted, file, slidesUrl, scale)
+        return adminSlidesService.saveSlides(projectId, skillId, isAlreadyHosted, file, slidesUrl, width)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/slides", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
