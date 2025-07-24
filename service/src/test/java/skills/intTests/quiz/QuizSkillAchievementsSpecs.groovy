@@ -1450,7 +1450,192 @@ class QuizSkillAchievementsSpecs extends QuizSkillAchievementsBaseIntSpec {
         subjUsers_t1.data.userId == [userServices[0].userName]
         projectUsers_t1.data.userId == [userServices[0].userName]
     }
+
+    def "editing quiz-based skill should not remove achieved badge, skill or subject levels"() {
+        def quiz1 = createQuiz(1)
+        def quiz2 = createQuiz(2)
+        def quiz3 = createQuiz(3)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skills = createSkills(5, 1, 1, 100)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz1.quizId
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[1].quizId = quiz2.quizId
+        skills[2].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[2].quizId = quiz3.quizId
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        def badge = createBadge(1, 1)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        List<SkillsService> userServices = getRandomUsers(3).collect { createService(it) }
+        passQuiz(userServices[0], quiz1)
+
+        passQuiz(userServices[1], quiz1)
+        passQuiz(userServices[1], quiz2)
+
+        passQuiz(userServices[2], quiz2)
+        passQuiz(userServices[2], quiz3)
+
+        when:
+        def user1badges_t0 = skillsService.getBadgesSummary(userServices[0].userName, proj.projectId)
+
+        skills[0].pointIncrement = 200
+        skillsService.updateSkill(skills[0])
+
+        def user1badges_t1 = skillsService.getBadgesSummary(userServices[0].userName, proj.projectId)
+        List<UserAchievement> achievements = userAchievedRepo.findAll()
+        then:
+        user1badges_t0.badgeId == [badge.badgeId]
+        user1badges_t0.badgeAchieved == [true]
+
+        user1badges_t1.badgeId == [badge.badgeId]
+        user1badges_t1.badgeAchieved == [true]
+
+        // user 1
+        achievements.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == skills[0].skillId}).size() == 1
+        achievements.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == badge.badgeId}).size() == 1
+        achievements.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level > 0}).size() == 2
+        achievements.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && !it.skillId && it.level > 0}).size() == 2
+
+        achievements.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == skills[1].skillId}).size() == 0
+        achievements.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == skills[2].skillId}).size() == 0
+
+        // user 2
+        achievements.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == skills[0].skillId}).size() == 1
+        achievements.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == skills[1].skillId}).size() == 1
+        achievements.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == badge.badgeId}).size() == 1
+        achievements.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level > 0}).size() == 3
+        achievements.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && !it.skillId && it.level > 0}).size() == 3
+
+        achievements.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == skills[2].skillId}).size() == 0
+
+        // user 3
+        achievements.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == skills[0].skillId}).size() == 0
+        achievements.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == skills[1].skillId}).size() == 1
+        achievements.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == skills[2].skillId}).size() == 1
+
+        achievements.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == badge.badgeId}).size() == 0
+        achievements.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level > 0}).size() == 2
+        achievements.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && !it.skillId && it.level > 0}).size() == 2
+    }
+
+    def "change quiz-based skill to Honor should remove skill's achievements"() {
+        def quiz1 = createQuiz(1)
+        def quiz2 = createQuiz(2)
+        def quiz3 = createQuiz(3)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skills = createSkills(5, 1, 1, 100)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz1.quizId
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[1].quizId = quiz2.quizId
+        skills[2].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[2].quizId = quiz3.quizId
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        def badge = createBadge(1, 1)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        def badge2 = createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: skills[2].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        List<SkillsService> userServices = getRandomUsers(3).collect { createService(it) }
+        passQuiz(userServices[0], quiz1)
+
+        passQuiz(userServices[1], quiz1)
+        passQuiz(userServices[1], quiz2)
+
+        passQuiz(userServices[2], quiz2)
+        passQuiz(userServices[2], quiz3)
+
+        when:
+        List<UserAchievement> achievements_t0 = userAchievedRepo.findAll()
+
+        skills[0].quizId = null
+        skills[0].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skillsService.updateSkill(skills[0])
+
+        List<UserAchievement> achievements_t1 = userAchievedRepo.findAll()
+        then:
+
+        // user 1
+        achievements_t0.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == skills[0].skillId}).size() == 1
+        achievements_t0.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == badge.badgeId}).size() == 1
+        achievements_t0.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == badge2.badgeId}).size() == 0
+        achievements_t0.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level > 0}).size() == 2
+        achievements_t0.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && !it.skillId && it.level > 0}).size() == 2
+
+        achievements_t0.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == skills[1].skillId}).size() == 0
+        achievements_t0.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == skills[2].skillId}).size() == 0
+
+        // user 2
+        achievements_t0.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == skills[0].skillId}).size() == 1
+        achievements_t0.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == skills[1].skillId}).size() == 1
+        achievements_t0.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == badge.badgeId}).size() == 1
+        achievements_t0.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == badge2.badgeId}).size() == 0
+        achievements_t0.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level > 0}).size() == 3
+        achievements_t0.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && !it.skillId && it.level > 0}).size() == 3
+
+        achievements_t0.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == skills[2].skillId}).size() == 0
+
+        // user 3
+        achievements_t0.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == skills[0].skillId}).size() == 0
+        achievements_t0.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == skills[1].skillId}).size() == 1
+        achievements_t0.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == skills[2].skillId}).size() == 1
+
+        achievements_t0.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == badge.badgeId}).size() == 0
+        achievements_t0.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == badge2.badgeId}).size() == 1
+        achievements_t0.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level > 0}).size() == 2
+        achievements_t0.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && !it.skillId && it.level > 0}).size() == 2
+
+        // user 1
+        achievements_t1.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == skills[0].skillId}).size() == 0
+        achievements_t1.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == badge.badgeId}).size() == 0
+        achievements_t1.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == badge2.badgeId}).size() == 0
+        achievements_t1.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level > 0}).size() == 0
+        achievements_t1.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && !it.skillId && it.level > 0}).size() == 0
+
+        achievements_t1.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == skills[1].skillId}).size() == 0
+        achievements_t1.findAll({ it.userId == userServices[0].userName && it.projectId == proj.projectId && it.skillId == skills[2].skillId}).size() == 0
+
+        // user 2
+        achievements_t1.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == skills[0].skillId}).size() == 0
+        achievements_t1.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == skills[1].skillId}).size() == 1
+        achievements_t1.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == badge.badgeId}).size() == 0
+        achievements_t1.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == badge2.badgeId}).size() == 0
+        achievements_t1.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level > 0}).size() == 1
+        achievements_t1.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && !it.skillId && it.level > 0}).size() == 1
+
+        achievements_t1.findAll({ it.userId == userServices[1].userName && it.projectId == proj.projectId && it.skillId == skills[2].skillId}).size() == 0
+
+        // user 3
+        achievements_t1.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == skills[0].skillId}).size() == 0
+        achievements_t1.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == skills[1].skillId}).size() == 1
+        achievements_t1.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == skills[2].skillId}).size() == 1
+
+        achievements_t1.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == badge.badgeId}).size() == 0
+        achievements_t1.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == badge2.badgeId}).size() == 1
+        achievements_t1.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && it.skillId == subj.subjectId && it.level > 0}).size() == 2
+        achievements_t1.findAll({ it.userId == userServices[2].userName && it.projectId == proj.projectId && !it.skillId && it.level > 0}).size() == 2
+    }
+
 }
+
 
 
 

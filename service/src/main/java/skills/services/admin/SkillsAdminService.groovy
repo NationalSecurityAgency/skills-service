@@ -285,7 +285,7 @@ class SkillsAdminService {
                 }
             }
 
-            if (skillDefinition.selfReportingType == SelfReportingType.Quiz && skillRequest.selfReportingType != SelfReportingType.Quiz) {
+            if (skillDefinition.selfReportingType == SelfReportingType.Quiz && skillRequest.selfReportingType?.toLowerCase() != SelfReportingType.Quiz.toString().toLowerCase()) {
                 quizToSkillService.removeQuizToSkillAssignment(skillDefinition)
             }
 

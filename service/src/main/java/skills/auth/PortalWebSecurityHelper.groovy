@@ -186,7 +186,7 @@ final class MultipartRequestMatcher implements RequestMatcher {
             new AntPathRequestMatcher("/api/upload"),
             new AntPathRequestMatcher("/admin/projects/*/icons/upload"),
             new AntPathRequestMatcher("/supervisor/icons/upload"),
-            new AntPathRequestMatcher("/admin/projects/*/skills/*/video"),
+            new AntPathRequestMatcher("/admin/*/*/*/*/video"),
     )
 
     @Override

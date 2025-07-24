@@ -108,6 +108,41 @@ describe('Inception Tests', () => {
         cy.get('[data-cy="subjectTile-Projects"]')
     })
 
+    it('config state is loaded for inception', function () {
+        cy.createProject(1)
+        cy.enableProdMode(1);
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' })
+        cy.addToMyProjects(1);
+
+        cy.intercept('GET', '/public/clientDisplay/config?projectId=Inception').as('getConfig');
+
+        cy.visit('/administrator/');
+        cy.get('[data-cy="inception-button"]').click();
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains('Dashboard Skills');
+        cy.get('[data-cy="subjectTileBtn"]').should('have.length', 3)
+        cy.get('[data-cy="pointHistoryChartNoData"]')
+        cy.get('[data-cy="subjectTile-Projects"]')
+        cy.wait('@getConfig').then((interception) => {
+            // You can make additional assertions on the request or response
+            expect(interception.response.statusCode).to.eq(200)
+        })
+
+        // navigate to subject
+        cy.get('[data-cy="subjectTileBtn"]').eq(2).click();
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains('Dashboard');
+        cy.get('[data-cy="pointHistoryChartNoData"]')
+
+        // navigate to skill
+        cy.get('[data-cy="skillProgressTitle-ShareSkillTreeSuccessStory"] [data-cy="skillProgressTitle"]').click()
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains('Skill Overview');
+
+        // no description error should be visible
+        cy.get('[data-cy="requestApprovalBtn"]').click();
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible');
+        cy.get('[data-cy="selfReportMsgInput"]').type('some val');
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible');
+    })
 
 });
 
