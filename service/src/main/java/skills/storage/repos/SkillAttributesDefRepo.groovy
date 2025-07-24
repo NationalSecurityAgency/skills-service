@@ -69,7 +69,7 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
            attributes ->> 'width' as width
         from skill_attributes_definition
         where type= 'Slides' and skill_ref_id = ?1''', nativeQuery = true)
-    SlidesSummaryAttributes `(Integer skillRefId)
+    SlidesSummaryAttributes getSlidesSummary(Integer skillRefId)
 
     @Nullable
     @Query(value = '''select attributes ->> 'videoUrl' as url
