@@ -67,7 +67,7 @@ class AdminSlidesService {
 
     @Transactional
     SlidesAttrs saveSlides(String projectId, String skillId, Boolean isAlreadyHosted,
-                              MultipartFile file, String slidesUrl, Double scale) {
+                              MultipartFile file, String slidesUrl, Double width) {
 
         SlidesAttrs existingAttributes = skillAttributeService.getSlidesAttrs(projectId, skillId)
         final boolean isEdit = existingAttributes?.url
@@ -92,7 +92,7 @@ class AdminSlidesService {
             resAttributes = validateAndSave(slidesUrl, projectId, skillId, file, resAttributes)
         }
 
-        resAttributes.scale = scale
+        resAttributes.width = width
 
         boolean isReadOnly = skillDefRepo.isImportedFromCatalog(projectId, skillId)
         SkillsValidator.isTrue(!isReadOnly, "Cannot set video attributes of read-only skill", projectId, skillId)

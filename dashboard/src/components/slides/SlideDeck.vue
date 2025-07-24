@@ -18,20 +18,32 @@ import {ref, onMounted, watch, computed, shallowRef, onUnmounted} from 'vue';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import 'pdfjs-dist/web/pdf_viewer.css';
-import { useDebounceFn } from '@vueuse/core'
+import {useDebounceFn} from '@vueuse/core'
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
 const props = defineProps({
+  slidesId: {
+    type: String,
+    required: true
+  },
   pdfUrl: {
     type: String,
     required: true
+  },
+  defaultWidth: {
+    type: Number,
+    required: false,
   },
   maxWidth: {
     type: Number,
     required: false,
   },
 });
+const emit = defineEmits(['on-resize'])
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+
+const announcer = useSkillsAnnouncer()
 
 const isInitLoading = ref(true);
 const isRendingPage = ref(false);
@@ -42,30 +54,32 @@ const width = ref(0)
 const height = ref(0)
 
 onMounted(() => {
-  loadPdf();
+  loadPdf().then(() => {
+    createResizeSupport()
+  })
 });
 
 const loadPdf = () => {
   const loadingTask = pdfjsLib.getDocument(props.pdfUrl);
-  loadingTask.promise.then((pdf) => {
+  return loadingTask.promise.then((pdf) => {
     pdfDoc.value = pdf;
-    renderPage(currentPage.value).then(() => {
+    return renderPage(currentPage.value).then(() => {
       isInitLoading.value = false;
     })
   })
 }
 
-const renderWithDebounce = useDebounceFn((pageNum) => {
-  renderPage(pageNum)
+const renderWithDebounce = useDebounceFn((pageNum, newWidth) => {
+  renderPage(pageNum, newWidth)
 }, 350)
 
 watch(() => props.maxWidth, () => {
-  if(!isInitLoading.value) {
-    renderWithDebounce(currentPage.value)
+  if (!isInitLoading.value) {
+    renderWithDebounce(currentPage.value, null)
   }
 })
 
-const renderPage = (pageNum) => {
+const renderPage = (pageNum, requestedWidth = null) => {
   if (isRendingPage.value) {
     return Promise.resolve();
   }
@@ -76,6 +90,13 @@ const renderPage = (pageNum) => {
     let viewport = page.getViewport({scale: scale,});
     if (props.maxWidth && props.maxWidth < viewport.width) {
       const newScale = props.maxWidth / viewport.width;
+      viewport = page.getViewport({scale: newScale,});
+    } else if (requestedWidth != null) {
+      const newScale = requestedWidth / viewport.width;
+      viewport = page.getViewport({scale: newScale,});
+    } else if (props.defaultWidth != null) {
+      const widthToUse = Math.min(props.defaultWidth, props.maxWidth || Number.MAX_SAFE_INTEGER)
+      const newScale = widthToUse / viewport.width;
       viewport = page.getViewport({scale: newScale,});
     }
 
@@ -122,6 +143,7 @@ const renderPage = (pageNum) => {
         currentPage.value = pageNum
         isRendingPage.value = false
         page.cleanup();
+        announcer.polite(`Rendered pdf page ${pageNum} of ${pdfDoc.value.numPages}`)
       })
     });
   })
@@ -141,11 +163,57 @@ const nextPage = () => {
 }
 const progressPercent = computed(() => (currentPage.value / totalPages.value) * 100)
 
-const resizeSmaller = () => resize(-50)
-const resizeBigger = () => resize(50)
-const resize = (resizeWidth) => {
-  console.log(resizeWidth)
+const isResizing = ref(false)
+
+const getResizableElement = () => {
+  const resizableDiv = `#${props.slidesId}Container`
+  return document.querySelector(resizableDiv)
 }
+const createResizeSupport = () => {
+  function makeResizableDiv() {
+    const handle = document.querySelectorAll(`#${props.slidesId}ResizeHandle`)[0]
+
+    handle.addEventListener('mousedown', function (e) {
+      e.preventDefault()
+      window.addEventListener('mousemove', resize)
+      window.addEventListener('mouseup', stopResize)
+    })
+
+    let latestWidth = 0;
+    function resize(e) {
+      isResizing.value = true
+      const element = getResizableElement();
+      const clientRect = element.getBoundingClientRect()
+      latestWidth = e.pageX - clientRect.left
+      renderPage(currentPage.value, latestWidth)
+    }
+
+    function stopResize() {
+      window.removeEventListener('mousemove', resize)
+      isResizing.value = false
+      if (latestWidth > 0) {
+        emit('on-resize', latestWidth)
+        announcer.polite(`Resized the slides to ${latestWidth} width`)
+      }
+    }
+  }
+
+  makeResizableDiv()
+}
+
+const resizeBigger = () => {
+  const newWidth = width.value + 10
+  renderPage(currentPage.value, newWidth)
+  emit('on-resize', newWidth)
+  announcer.polite(`Resized the slides to ${newWidth} width`)
+}
+const resizeSmaller = () => {
+  const newWidth = width.value - 10
+  renderPage(currentPage.value, newWidth)
+  emit('on-resize', newWidth)
+  announcer.polite(`Resized the slides to ${newWidth} width`)
+}
+
 </script>
 
 <template>
@@ -153,25 +221,19 @@ const resize = (resizeWidth) => {
     <div>
       <skills-spinner :is-loading="isInitLoading" v-if="isInitLoading"/>
       <div class="flex justify-center">
-<!--        <i class="fas fa-expand-alt fa-rotate-90 handle border border-surface-500 dark:border-surface-300 p-1 text-primary bg-primary-contrast rounded-border"-->
-<!--           data-cy="videoResizeHandle"-->
-<!--           role="button"-->
-<!--           aria-label="Resize video dimensions control. Press right or left to resize the video player."-->
-<!--           @keyup.right="resizeBigger"-->
-<!--           @keyup.left="resizeSmaller"-->
-<!--           tabindex="0"></i>-->
-<!--        <div class="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2">-->
-<!--          <i class="fas fa-expand-alt fa-rotate-90 handle border border-surface-500 dark:border-surface-300 p-1 text-primary bg-primary-contrast rounded cursor-pointer hover:bg-surface-200 dark:hover:bg-surface-600"-->
-<!--             data-cy="videoResizeHandle"-->
-<!--             @click="resizeBigger"-->
-<!--             @keyup.enter="resizeBigger"-->
-<!--             tabindex="0"-->
-<!--             aria-label="Resize slides">-->
-<!--          </i>-->
-<!--        </div>-->
-        <div class="border-1 rounded ml-2 relative" :style="`height: ${height+5}px; width: ${width+5}px;};`">
+        <div :id="`${slidesId}Container`" class="border-1 rounded ml-2 relative hover-resize-container" :style="`height: ${height+5}px; width: ${width+5}px;};`">
           <canvas id="pdfCanvasId" class="z-0 absolute top-0 left-0"></canvas>
-          <div id="text-layer" class="textLayer absolute top-0 left-0 w-full h-full z-50" style="--total-scale-factor: 1"></div>
+          <div id="text-layer" class="textLayer absolute top-0 left-0 w-full h-full z-40"
+               style="--total-scale-factor: 1"></div>
+          <button
+              :id="`${slidesId}ResizeHandle`"
+              class="resize-handle absolute bottom-2 right-2 px-1 rounded shadow-md z-50 bg-surface-100 dark:bg-surface-700 text-primary cursor-ew-resize hover:bg-surface-200 dark:hover:bg-surface-600"
+              aria-label="Resize slides dimensions. Press right or left to resize."
+              @keyup.right="resizeBigger"
+              @keyup.left="resizeSmaller"
+          >
+            <i class="fas fa-expand-alt fa-rotate-90"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -197,5 +259,15 @@ const resize = (resizeWidth) => {
 </template>
 
 <style scoped>
+.resize-handle {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
 
+.hover-resize-container:hover .resize-handle {
+  opacity: 1;
+}
+.resize-handle:focus {
+  opacity: 1;
+}
 </style>

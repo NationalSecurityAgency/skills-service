@@ -46,6 +46,7 @@ import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.attributes.BonusAwardAttrs
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
+import skills.services.attributes.SlidesAttrs
 import skills.services.settings.ClientPrefKey
 import skills.services.settings.ClientPrefService
 import skills.services.settings.Settings
@@ -702,6 +703,7 @@ class SkillsLoader {
                 badges: badges,
                 tags: loadSkillTags(skillDef.id),
                 videoSummary: getVideoSummary(skillDef.copiedFrom ?: skillDef.id),
+                slidesSummary: getSlidesSummary(skillDef.copiedFrom ?: skillDef.id),
                 expirationDate: expirationDate,
                 isMotivationalSkill: isMotivationalSkill,
                 daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
@@ -725,6 +727,20 @@ class SkillsLoader {
                     hasTranscript: videoSummaryAttributes.hasTranscript,
                     height: videoSummaryAttributes.height,
                     width: videoSummaryAttributes.width
+            )
+        }
+        return res
+    }
+
+    @Profile
+    private SlidesSummary getSlidesSummary(Integer skillDefId) {
+        SlidesSummary res = null
+        SkillAttributesDefRepo.SlidesSummaryAttributes summaryAttributes = skillAttributesDefRepo.getSlidesSummary(skillDefId)
+        if (summaryAttributes) {
+            res = new SlidesSummary(
+                    url: summaryAttributes.url,
+                    type: summaryAttributes.type,
+                    width: summaryAttributes.width
             )
         }
         return res

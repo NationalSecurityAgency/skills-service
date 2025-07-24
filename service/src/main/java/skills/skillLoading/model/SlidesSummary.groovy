@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.services.attributes
+package skills.skillLoading.model
 
-import groovy.transform.Canonical
+class SlidesSummary {
 
-@Canonical
-class SlidesAttrs {
     String url
     String type
-    Boolean isInternallyHosted
-    String internallyHostedFileName
-    String internallyHostedAttachmentUuid
+
     Double width
 }

@@ -18,6 +18,7 @@ package skills.storage.repos
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
+import skills.services.attributes.SlidesAttrs
 import skills.storage.model.SkillAttributesDef
 
 interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long> {
@@ -45,6 +46,12 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
         Double getHeight()
     }
 
+    static interface SlidesSummaryAttributes {
+        String getUrl()
+        String getType()
+        Double getWidth()
+    }
+
     @Nullable
     @Query(value = '''select attributes ->> 'videoUrl' as url,
            attributes ->> 'videoType' as type,
@@ -54,6 +61,15 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
         from skill_attributes_definition
         where type= 'Video' and skill_ref_id = ?1''', nativeQuery = true)
     VideoSummaryAttributes getVideoSummary(Integer skillRefId)
+
+
+    @Nullable
+    @Query(value = '''select attributes ->> 'url' as url,
+           attributes ->> 'type' as type,
+           attributes ->> 'width' as width
+        from skill_attributes_definition
+        where type= 'Slides' and skill_ref_id = ?1''', nativeQuery = true)
+    SlidesSummaryAttributes `(Integer skillRefId)
 
     @Nullable
     @Query(value = '''select attributes ->> 'videoUrl' as url
