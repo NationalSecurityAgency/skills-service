@@ -24,4 +24,5 @@ class SlidesAttrs {
     Boolean isInternallyHosted
     String internallyHostedFileName
     String internallyHostedAttachmentUuid
+    Double scale
 }

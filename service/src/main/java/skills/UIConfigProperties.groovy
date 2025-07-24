@@ -38,6 +38,7 @@ class UIConfigProperties {
     List<String> allowedAttachmentFileTypes
     List<MediaType> allowedAttachmentMimeTypes;
     List<String> allowedVideoUploadMimeTypes;
+    List<String> allowedSlidesUploadMimeTypes;
 
     @PostConstruct
     void copyConfigToUi() {
@@ -47,6 +48,7 @@ class UIConfigProperties {
         ui.put("allowedAttachmentFileTypes", allowedAttachmentFileTypes)
         ui.put("allowedAttachmentMimeTypes", allowedAttachmentMimeTypes.collect {it.toString()})
         ui.put("allowedVideoUploadMimeTypes", allowedVideoUploadMimeTypes)
+        ui.put("allowedSlidesUploadMimeTypes", allowedSlidesUploadMimeTypes)
     }
 
     @PostConstruct

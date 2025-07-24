@@ -47,6 +47,7 @@ import skills.services.adminGroup.AdminGroupService
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
+import skills.services.attributes.SlidesAttrs
 import skills.services.events.BulkSkillEventResult
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.services.inception.InceptionProjectService
@@ -54,6 +55,7 @@ import skills.services.settings.ProjectSettingsValidator
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
+import skills.services.slides.AdminSlidesService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionsHistoryService
@@ -176,6 +178,9 @@ class AdminController {
 
     @Autowired
     AdminVideoService adminVideoService
+
+    @Autowired
+    AdminSlidesService adminSlidesService
 
     @Autowired
     UserAchievementExpirationService userAchievementExpirationService
@@ -659,16 +664,24 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/slides", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    SkillVideoAttrs saveSkillSkildesAttrs(@PathVariable("projectId") String projectId,
-                                        @PathVariable("skillId") String skillId,
-                                        @RequestParam(name = "file", required = false) MultipartFile file,
-                                        @RequestParam(name = "slidesUrl", required = false) String videoUrl,
-                                        @RequestParam(name = "isAlreadyHosted", required = false, defaultValue = "false") Boolean isAlreadyHosted) {
-
-        SkillVideoAttrs res = adminVideoService.saveVideo(projectId, skillId, isAlreadyHosted, file, videoUrl, captions, transcript, width, height)
-        return res
+    SlidesAttrs saveSkillSlidesAttrs(@PathVariable("projectId") String projectId,
+                                     @PathVariable("skillId") String skillId,
+                                     @RequestParam(name = "file", required = false) MultipartFile file,
+                                     @RequestParam(name = "url", required = false) String slidesUrl,
+                                     @RequestParam(name = "isAlreadyHosted", required = false, defaultValue = "false") Boolean isAlreadyHosted,
+                                     @RequestParam(name = "scale", required = false) Double scale) {
+        if (scale != null && scale > 10000) {
+            throw new SkillException("Scale cannot be greater than 10000", projectId, skillId, ErrorCode.BadParam)
+        }
+        return adminSlidesService.saveSlides(projectId, skillId, isAlreadyHosted, file, slidesUrl, scale)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/slides", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    SlidesAttrs getSlidesAttrs(@PathVariable("projectId") String projectId,
+                                       @PathVariable("skillId") String skillId) {
+        return skillAttributeService.getSlidesAttrs(projectId, skillId)
+    }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/video", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
