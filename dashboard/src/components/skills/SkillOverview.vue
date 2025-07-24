@@ -32,12 +32,7 @@ const skillsState = useSkillsState();
     <loading-container :is-loading="skillsState.loadingSkill">
       <Card>
         <template #content>
-          <slide-deck class="mb-5"
-              :pdf-url="'/api/download/30c30837-4584-4d85-88c6-60fc21693561'"
-          />
-
-
-          <child-row-skills-display 
+          <child-row-skills-display
             v-if="skillsState.skill && skillsState.skill.skillId" 
             :skill="skillsState.skill" />
         </template>
