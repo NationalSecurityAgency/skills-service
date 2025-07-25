@@ -292,14 +292,11 @@ const slidesContainerStyle = computed(() => {
           <div
               class="flex justify-end p-2 bg-surface-100 dark:bg-surface-700 border-l-1 border-r-1 border-t-1 rounded-t gap-2">
             <SkillsButton
-                icon="fa-solid fa-magnifying-glass"
-                size="small"/>
-            <SkillsButton
                 icon="fa-solid fa-expand"
                 size="small"
                 v-if="!isFullscreen"
                 :id="`${slidesId}FullscreenBtn`"
-                class="p-1 rounded shadow-md bg-surface-100 dark:bg-surface-700 text-primary hover:bg-surface-200 dark:hover:bg-surface-600"
+                class="shadow-md"
                 aria-label="Enter fullscreen mode"
                 @click="toggleFullscreen"
             />
@@ -339,6 +336,7 @@ const slidesContainerStyle = computed(() => {
               <SkillsButton
                   aria-label="Previous Slide"
                   icon="fa-solid fa-circle-chevron-left"
+                  class="shadow-md"
                   @click="prevPage"
                   :disabled="currentPage <= 1"/>
               <div>
@@ -348,12 +346,14 @@ const slidesContainerStyle = computed(() => {
               <SkillsButton
                   aria-label="Next Slide"
                   icon="fa-solid fa-circle-chevron-right"
+                  class="shadow-md"
                   @click="nextPage"
                   :disabled="currentPage >= totalPages"/>
             </div>
             <div v-if="!isFullscreen" class="flex-1 flex justify-end">
               <SkillsButton
                   icon="fa-solid fa-download"
+                  class="shadow-md"
                   size="small"/>
             </div>
           </div>
