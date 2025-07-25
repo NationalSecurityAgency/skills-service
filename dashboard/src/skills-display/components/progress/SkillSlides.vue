@@ -14,16 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed} from "vue";
+import {computed, ref} from "vue";
 import SlideDeck from "@/components/slides/SlideDeck.vue";
 import {useStorage} from "@vueuse/core";
+import {useElementSizeUtil} from "@/common-components/utilities/UseElementSizeUtil.js";
 
 const props = defineProps({
   skill: Object,
 })
 
+const slidesContainer = ref(null)
+const slidesContainerSize = useElementSizeUtil(slidesContainer)
+
 const url = computed(() => props.skill.slidesSummary?.url)
 const hasSlides = computed(() => url.value != null)
+
 const slidesId = computed(() => `${props.skill.projectId}-slides`)
 
 const widthInLocalStorageAsString = useStorage(`${slidesId.value}-slidesWidth`, null)
@@ -36,11 +41,12 @@ const onResize = (newWidth) => {
 </script>
 
 <template>
-  <div v-if="hasSlides">
+  <div ref="slidesContainer" v-if="hasSlides">
     <slide-deck
         :slides-id="slidesId"
         :pdf-url="url"
         :default-width="defaultWidth"
+        :max-width="slidesContainerSize.width.value"
         @on-resize="onResize"
     />
   </div>
