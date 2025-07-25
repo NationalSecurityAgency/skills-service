@@ -94,12 +94,6 @@ const videoConf = computed(() => {
 const isSelfReportTypeVideo = computed(() => {
   return props.skill.selfReporting.enabled && props.skill.selfReporting.type === 'Video';
 });
-const transcriptWithNewLines = computed(() => {
-  if (transcript.value.transcript) {
-    return transcript.value.transcript.replace(/(?:\r\n|\r|\n)/g, '<br>');
-  }
-  return transcript.value.transcript;
-});
 
 onMounted(() => {
   trackAchievement.value = props.skill.selfReporting.enabled && props.skill.selfReporting.type && props.skill.selfReporting.type === 'Video';
