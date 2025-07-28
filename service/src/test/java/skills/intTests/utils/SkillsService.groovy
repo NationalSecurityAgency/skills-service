@@ -586,14 +586,14 @@ class SkillsService {
     }
 
     def getAllGlobalBadges() {
-        wsHelper.globalBadgeGet("/badges")
+        wsHelper.appGet("/badges")
     }
 
     def doesGlobalBadgeNameExists(String name) {
         wsHelper.appPost("/badges/name/exists", [name:name])?.body
     }
     def doesGlobalBadgeIdExists(String id) {
-        wsHelper.globalBadgeGet("/badges/id/${id}/exists")
+        wsHelper.appGet("/badges/id/${id}/exists")
     }
 
     def deleteGlobalBadge(String badgeId) {
