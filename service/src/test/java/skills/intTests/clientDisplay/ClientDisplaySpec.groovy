@@ -75,12 +75,11 @@ class ClientDisplaySpec extends DefaultIntSpec {
         skillsService.createSkills(skills2)
 
         def globalBadge = createBadge(1, 1)
-        SkillsService supervisorService = createSupervisor()
-        supervisorService.createGlobalBadge(globalBadge)
-        supervisorService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[0].skillId])
-        supervisorService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[1].skillId])
+        skillsService.createGlobalBadge(globalBadge)
+        skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[0].skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[1].skillId])
         globalBadge.enabled = 'true'
-        supervisorService.createGlobalBadge(globalBadge)
+        skillsService.createGlobalBadge(globalBadge)
 
         def user = getRandomUsers(1)[0]
         skillsService.addSkill(skills[0], user)
@@ -152,16 +151,15 @@ class ClientDisplaySpec extends DefaultIntSpec {
         skillsService.createSubject(subj1)
         skillsService.createSkill(skill1)
 
-        def supervisorService = createSupervisor()
         def globalBadge = [badgeId: "globalBadge", name: 'Test Global Badge 1', enabled: 'false']
-        supervisorService.createGlobalBadge(globalBadge)
+        skillsService.createGlobalBadge(globalBadge)
 
         when:
         def summaryOneDisabledBadge = skillsService.getSkillSummary("user1", proj1.projectId)
 
-        supervisorService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId)
         globalBadge.enabled = 'true'
-        supervisorService.createGlobalBadge(globalBadge)
+        skillsService.createGlobalBadge(globalBadge)
         def summaryOneEnabledBadge = skillsService.getSkillSummary("user1", proj1.projectId)
 
         then:
@@ -184,14 +182,13 @@ class ClientDisplaySpec extends DefaultIntSpec {
         when:
         def summaryOneDisabledBadge = skillsService.getSkillSummary("user1", proj1.projectId)
 
-        def service = createSupervisor()
         def globalBadge = [badgeId: "globalBadge", name: 'Test Global Badge 1', enabled: 'false']
-        service.createGlobalBadge(globalBadge)
+        skillsService.createGlobalBadge(globalBadge)
 
         def summaryOneDisabledBadgeOneDisabledGlobalBadge = skillsService.getSkillSummary("user1", proj1.projectId)
-        service.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId)
         globalBadge.enabled = 'true'
-        service.createGlobalBadge(globalBadge)
+        skillsService.createGlobalBadge(globalBadge)
 
         def summaryOneDisabledBadgeOneEnabledGlobalBadge = skillsService.getSkillSummary("user1", proj1.projectId)
 

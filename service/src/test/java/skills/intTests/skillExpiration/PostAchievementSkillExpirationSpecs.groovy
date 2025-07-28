@@ -1343,7 +1343,6 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
     }
 
     def "expiring a skill event tied to a global badge will remove the global badges"() {
-        SkillsService supervisorService = createSupervisor()
         String userId = "user1"
         Date eightDaysAgo = new Date()-8
 
@@ -1369,15 +1368,15 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
         skillsService.createSkill(skill4)
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
         requiredSkillsIds.each { skillId ->
-            supervisorService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
+            skillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
         }
-        supervisorService.assignSkillToGlobalBadge(projectId: "proj2", badgeId: badge.badgeId, skillId: skill4.skillId)
-        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        skillsService.assignSkillToGlobalBadge(projectId: "proj2", badgeId: badge.badgeId, skillId: skill4.skillId)
+        badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
 
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo).body
         def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, eightDaysAgo).body
@@ -1417,7 +1416,6 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
     }
 
     def "expiring a skill event tied to a global badge that uses levels will remove the global badges"() {
-        SkillsService supervisorService = createSupervisor()
         String userId = "user1"
         Date eightDaysAgo = new Date()-8
 
@@ -1443,12 +1441,12 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
         skillsService.createSkill(skill4)
-        supervisorService.createGlobalBadge(badge)
-        supervisorService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "1")
-        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "1")
+        badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
-        supervisorService.updateGlobalBadge(badge)
-        supervisorService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo).body
         skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, eightDaysAgo).body
@@ -1482,7 +1480,6 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
     }
 
     def "expiring all skill events will remove any achieved global badges"() {
-        SkillsService supervisorService = createSupervisor()
         String userId = "user1"
         Date eightDaysAgo = new Date()-8
 
@@ -1508,15 +1505,15 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
         skillsService.createSkill(skill4)
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
         requiredSkillsIds.each { skillId ->
-            supervisorService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
+            skillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
         }
-        supervisorService.assignSkillToGlobalBadge(projectId: "proj2", badgeId: badge.badgeId, skillId: skill4.skillId)
-        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        skillsService.assignSkillToGlobalBadge(projectId: "proj2", badgeId: badge.badgeId, skillId: skill4.skillId)
+        badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
 
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo).body
         def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, eightDaysAgo).body
@@ -1557,7 +1554,6 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
     }
 
     def "expiring all skill events tied to a global badge that uses levels will remove the global badges"() {
-        SkillsService supervisorService = createSupervisor()
         String userId = "user1"
         Date eightDaysAgo = new Date()-8
 
@@ -1583,12 +1579,12 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
         skillsService.createSkill(skill4)
-        supervisorService.createGlobalBadge(badge)
-        supervisorService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "1")
-        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "1")
+        badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
-        supervisorService.updateGlobalBadge(badge)
-        supervisorService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo).body
         skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, eightDaysAgo).body

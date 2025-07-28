@@ -986,23 +986,22 @@ class QuizSkillAchievements_DisassociatingQuizSpecs extends QuizSkillAchievement
         subj2Skills[2].quizId = quiz1.quizId
         skillsService.createSkills(subj2Skills)
 
-        SkillsService supervisorUser = createSupervisor()
         def badge1 = SkillsFactory.createBadge(1, 1)
-        supervisorUser.createGlobalBadge(badge1)
-        supervisorUser.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge1.badgeId, skillId: skills.get(0).skillId])
-        supervisorUser.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge1.badgeId, skillId: subj2Skills.get(0).skillId])
-        supervisorUser.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge1.badgeId, skillId: subj2Skills.get(1).skillId])
-        supervisorUser.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge1.badgeId, skillId: subj2Skills.get(2).skillId])
+        skillsService.createGlobalBadge(badge1)
+        skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge1.badgeId, skillId: skills.get(0).skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge1.badgeId, skillId: subj2Skills.get(0).skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge1.badgeId, skillId: subj2Skills.get(1).skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge1.badgeId, skillId: subj2Skills.get(2).skillId])
         badge1.enabled = true
-        supervisorUser.createGlobalBadge(badge1)
+        skillsService.createGlobalBadge(badge1)
 
         def badge2 = SkillsFactory.createBadge(1, 2)
-        supervisorUser.createGlobalBadge(badge2)
-        supervisorUser.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: skills.get(0).skillId])
-        supervisorUser.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: subj2Skills.get(0).skillId])
-        supervisorUser.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: subj2Skills.get(2).skillId])
+        skillsService.createGlobalBadge(badge2)
+        skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: skills.get(0).skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: subj2Skills.get(0).skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: subj2Skills.get(2).skillId])
         badge2.enabled = true
-        supervisorUser.createGlobalBadge(badge2)
+        skillsService.createGlobalBadge(badge2)
 
         List<SkillsService> userServices = getRandomUsers(3).collect { createService(it) }
         [quiz1, quiz2, quiz3].each { passQuiz(userServices[0], it) }

@@ -2457,14 +2457,12 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
         skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
 
-        def supervisorService = createSupervisor()
-
         def badge = SkillsFactory.createBadge()
         badge.enabled = true
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         when:
-        def res = supervisorService.getAvailableSkillsForGlobalBadge(badge.badgeId, "Sample")
+        def res = skillsService.getAvailableSkillsForGlobalBadge(badge.badgeId, "Sample")
 
         then:
         res.totalAvailable == 1
@@ -2512,14 +2510,12 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
         skillsService.importSkillFromCatalogAndFinalize(project3.projectId, p3subj1.subjectId, project1.projectId, skill.skillId)
 
-        def supervisorService = createSupervisor()
-
         def badge = SkillsFactory.createBadge()
         badge.enabled = true
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         when:
-        supervisorService.assignSkillToGlobalBadge([badgeId: badge.badgeId, projectId: project3.projectId, skillId: skill.skillId])
+        skillsService.assignSkillToGlobalBadge([badgeId: badge.badgeId, projectId: project3.projectId, skillId: skill.skillId])
 
         then:
         def e = thrown(SkillsClientException)

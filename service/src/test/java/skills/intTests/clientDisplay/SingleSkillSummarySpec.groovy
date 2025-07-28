@@ -1388,7 +1388,6 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         proj1_subj.helpUrl = "http://foo.org"
         proj1_subj.description = "This is a description"
         List<Map> allSkills = SkillsFactory.createSkills(3, 1, 1)
-        SkillsService supervisorService = createSupervisor()
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -1396,9 +1395,9 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
 
         Map badge2 = SkillsFactory.createBadge(1, 2)
         badge2.enabled = true
-        supervisorService.createGlobalBadge(badge2)
-        supervisorService.assignSkillToGlobalBadge(proj1.projectId, badge2.badgeId, allSkills[0].skillId)
-        supervisorService.updateGlobalBadge(badge2, badge2.badgeId)
+        skillsService.createGlobalBadge(badge2)
+        skillsService.assignSkillToGlobalBadge(proj1.projectId, badge2.badgeId, allSkills[0].skillId)
+        skillsService.updateGlobalBadge(badge2, badge2.badgeId)
 
         Map badge1 = SkillsFactory.createBadge(1, 1)
         skillsService.createBadge(badge1)

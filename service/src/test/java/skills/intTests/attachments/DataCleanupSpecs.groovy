@@ -31,12 +31,6 @@ class DataCleanupSpecs extends DefaultIntSpec {
     @PersistenceContext
     EntityManager entityManager
 
-    SkillsService supervisorService
-
-    def setup() {
-        supervisorService = createSupervisor()
-    }
-
     def "make sure there are no orphan attachments in db when project is removed"() {
         Map proj = SkillsFactory.createProject()
         Map subject = SkillsFactory.createSubject()
@@ -76,11 +70,11 @@ class DataCleanupSpecs extends DefaultIntSpec {
         Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
 
         when:
-        supervisorService.createGlobalBadge(badge)
-        def result = supervisorService.uploadAttachment(resource, null, badge.badgeId)
+        skillsService.createGlobalBadge(badge)
+        def result = skillsService.uploadAttachment(resource, null, badge.badgeId)
 
         boolean attachmentExistBefore = doesAttachmentExist(result.uuid)
-        supervisorService.deleteGlobalBadge(badge.badgeId)
+        skillsService.deleteGlobalBadge(badge.badgeId)
         boolean attachmentExistAfter = doesAttachmentExist(result.uuid)
 
         then:

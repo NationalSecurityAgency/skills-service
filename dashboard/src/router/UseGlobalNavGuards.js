@@ -110,7 +110,7 @@ export const useGlobalNavGuards = () => {
             projConfig.loadProjConfigState({ projectId: to.params.projectId })
             inviteOnlyProjectState.loadInviteOnlySetting(to.params.projectId)
           }
-          IconManagerService.refreshCustomIconCss(to.params.projectId, accessState.isSupervisor)
+          IconManagerService.refreshCustomIconCss(to.params.projectId, false)
         }
         if (isActiveQuizIdChange(to, from)) {
           quizInfo.setCurrentQuizId(to.params.quizId)

@@ -21,12 +21,6 @@ import skills.intTests.utils.SkillsService
 
 class IsReferencesByGlobalBadgeSpecs extends DefaultIntSpec {
 
-    SkillsService supervisorService
-
-    def setup() {
-        supervisorService = createSupervisor()
-    }
-
     def "is skill referenced by global badge"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -37,10 +31,10 @@ class IsReferencesByGlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         when:
-        supervisorService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId)
 
         then:
         skillsService.isSkillReferencedByGlobalBadge(proj.projectId,  skills.get(0).skillId)
@@ -62,10 +56,10 @@ class IsReferencesByGlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
         skillsService.createSkills(skills1)
 
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         when:
-        supervisorService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId)
 
         then:
         skillsService.isSubjectReferencedByGlobalBadge(proj.projectId,  subj.subjectId)
@@ -89,10 +83,10 @@ class IsReferencesByGlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills1)
 
 
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         when:
-        supervisorService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId)
 
         then:
         skillsService.isProjectReferencedByGlobalBadge(proj.projectId)
@@ -107,10 +101,10 @@ class IsReferencesByGlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.createProject(proj)
         skillsService.createProject(proj1)
 
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         when:
-        supervisorService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
 
         then:
         skillsService.isProjectLevelReferencedByGlobalBadge(proj.projectId, 1)

@@ -15,11 +15,8 @@
  */
 package skills.intTests.clientDisplay
 
-import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
-import skills.storage.model.SkillDef
 
 class SkillsDescriptionSpec extends DefaultIntSpec {
 
@@ -136,7 +133,6 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
     }
 
     void "achievedOn is populated for the achieved skills under a global badge"() {
-        SkillsService supervisorService = createSupervisor()
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
         def proj1_subj2 = SkillsFactory.createSubject(1, 2)
@@ -155,9 +151,9 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_subj2_skills)
 
         Map badge1 = SkillsFactory.createBadge(1, 1)
-        supervisorService.createGlobalBadge(badge1)
+        skillsService.createGlobalBadge(badge1)
         proj1_subj1_skills.each {
-            supervisorService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badge1.badgeId, skillId: it.skillId])
+            skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badge1.badgeId, skillId: it.skillId])
         }
 
         String user = "user1"
@@ -267,8 +263,6 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
     }
 
     void "global badge has no skills - no descriptions for you!"() {
-        SkillsService supervisorService = createSupervisor()
-
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
         def proj1_subj2 = SkillsFactory.createSubject(1, 2)
@@ -280,7 +274,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_subj1_skills)
         skillsService.createSubject(proj1_subj2)
-        supervisorService.createGlobalBadge(badge1)
+        skillsService.createGlobalBadge(badge1)
 
         when:
         def res = skillsService.getBadgeDescriptions(proj1.projectId, badge1.badgeId, true)
@@ -336,8 +330,6 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
     }
 
     void "get descriptions for a global badge"(){
-        SkillsService supervisorService = createSupervisor()
-
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
         def proj1_subj2 = SkillsFactory.createSubject(1, 2)
@@ -360,15 +352,15 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj2)
         skillsService.createSkills(proj1_subj2_skills)
 
-        supervisorService.createGlobalBadge(badge1)
-        supervisorService.createGlobalBadge(badge2)
+        skillsService.createGlobalBadge(badge1)
+        skillsService.createGlobalBadge(badge2)
 
         proj1_subj1_skills.each {
-            supervisorService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badge1.badgeId, skillId: it.skillId])
+            skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badge1.badgeId, skillId: it.skillId])
         }
 
         proj1_subj2_skills.each {
-            supervisorService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badge2.badgeId, skillId: it.skillId])
+            skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badge2.badgeId, skillId: it.skillId])
         }
 
         when:

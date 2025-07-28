@@ -590,7 +590,7 @@ class SkillsService {
     }
 
     def doesGlobalBadgeNameExists(String name) {
-        wsHelper.globalBadgePost("/badges/name/exists", [name:name])?.body
+        wsHelper.appPost("/badges/name/exists", [name:name])?.body
     }
     def doesGlobalBadgeIdExists(String id) {
         wsHelper.globalBadgeGet("/badges/id/${id}/exists")
