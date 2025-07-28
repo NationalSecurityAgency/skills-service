@@ -38,7 +38,7 @@ class UpgradeSafeUrlDeciderSpec extends Specification {
         "/admin/projects/foo/subjectNameExists" | HttpMethod.POST | true
         "/admin/projects/foo/badgeNameExists" | HttpMethod.POST | true
         "/admin/projects/foo/skillNameExists" | HttpMethod.POST | true
-        "/admin/global-badge-definitions/badges/name/exists" | HttpMethod.POST | true
+        "/app/badges/name/exists" | HttpMethod.POST | true
         "/admin/projects/bar/skills/catalog/exists/rando" | HttpMethod.POST | true
         "/projects/foo/users/usera/roles/PROJECT_ADMINISTRATOR" | HttpMethod.POST | false
         "/projects/foo/subjects/newSUbject" | HttpMethod.PUT | false
