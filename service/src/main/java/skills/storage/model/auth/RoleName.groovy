@@ -23,6 +23,7 @@ enum RoleName {
     ROLE_SUPER_DUPER_USER('Root'),
     ROLE_PROJECT_APPROVER('Approver'),
     ROLE_DASHBOARD_ADMIN_ACCESS('Admin Access'),
+    ROLE_GLOBAL_BADGE_ADMIN('Admin'),
     ROLE_QUIZ_ADMIN('Admin'),
     ROLE_QUIZ_READ_ONLY('Read Only'),
     ROLE_ADMIN_GROUP_OWNER('Admin Group Owner'),

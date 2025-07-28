@@ -44,13 +44,13 @@ const items = computed(() => {
     iconClass: 'fa-solid fa-users skills-color-access',
     page: 'AdminGroups',
   });
+  res.push({
+    name: 'Global Badges',
+    iconClass: 'fa-globe-americas skills-color-badges',
+    page: 'GlobalBadges',
+  });
 
   if (isSupervisor.value || isRoot.value) {
-    res.push({
-      name: 'Global Badges',
-      iconClass: 'fa-globe-americas skills-color-badges',
-      page: 'GlobalBadges',
-    });
     res.push({
       name: 'Metrics',
       iconClass: 'fa-chart-bar skills-color-metrics',

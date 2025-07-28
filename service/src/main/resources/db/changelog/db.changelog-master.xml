@@ -2926,4 +2926,23 @@
 
     </changeSet>
 
+    <changeSet id="53" author="skills team">
+        <addColumn tableName="user_roles">
+            <!-- optional -->
+            <column name="global_badge_id" type="varchar(255)"/>
+        </addColumn>
+
+        <dropIndex tableName="user_roles" indexName="index_user_roles_user_id_role_name_project_id_quiz_id_admin_group_id" />
+        <createIndex indexName="index_user_roles_user_id_role_name_project_id_quiz_id_admin_group_id_global_badge_id"
+                     tableName="user_roles" unique="true">
+            <column name="user_id" type="varchar(255)"/>
+            <column name="role_name" type="varchar(255)"/>
+            <column name="project_id" type="varchar(255)"/>
+            <column name="quiz_id" type="varchar(255)"/>
+            <column name="admin_group_id" type="varchar(255)"/>
+            <column name="global_badge_id" type="varchar(255)"/>
+        </createIndex>
+
+    </changeSet>
+
 </databaseChangeLog>

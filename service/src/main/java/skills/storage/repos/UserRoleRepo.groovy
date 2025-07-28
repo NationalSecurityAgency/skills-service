@@ -40,6 +40,9 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     UserRole findByUserIdAndRoleNameAndQuizIdAndAdminGroupId(String userId, RoleName roleName, String quizId, @Nullable String adminGroupId)
 
     @Nullable
+    UserRole findByUserIdAndRoleNameAndGlobalBadgeIdAndAdminGroupId(String userId, RoleName roleName, String globalBadgeId, @Nullable String adminGroupId)
+
+    @Nullable
     UserRole findByUserIdAndRoleNameAndAdminGroupId(String userId, RoleName roleName, String adminGroupId)
 
     @Nullable
@@ -63,6 +66,8 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     void deleteByProjectIdAndAdminGroupIdAndRoleName(String quizId, String adminGroupId, RoleName roleName)
 
     void deleteByUserIdAndAdminGroupIdAndRoleNameIn(String userId, String adminGroupId, List<RoleName> roleName)
+
+    void deleteByGlobalBadgeIdAndRoleName(String globalBadgeId, RoleName roleName)
 
     @Nullable
     List<UserRole> findAllByUserId(String userId)

@@ -29,6 +29,8 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.AdminGroupDefExistsRequest
 import skills.controller.request.model.AdminGroupDefRequest
+import skills.controller.request.model.BadgeRequest
+import skills.controller.request.model.NameExistsRequest
 import skills.controller.request.model.ProjectExistsRequest
 import skills.controller.request.model.ProjectRequest
 import skills.controller.request.model.QuizDefExistsRequest
@@ -37,6 +39,7 @@ import skills.controller.result.model.*
 import skills.dbupgrade.DBUpgradeSafe
 import skills.icons.CustomIconFacade
 import skills.profile.EnableCallStackProf
+import skills.services.GlobalBadgesService
 import skills.services.IdFormatValidator
 import skills.services.admin.InviteOnlyProjectService
 import skills.services.admin.ProjAdminService
@@ -45,6 +48,8 @@ import skills.services.admin.SkillsAdminService
 import skills.services.adminGroup.AdminGroupService
 import skills.services.quiz.QuizDefService
 import skills.utils.InputSanitizer
+
+import java.nio.charset.StandardCharsets
 
 @RestController
 @RequestMapping("/app")
@@ -61,6 +66,9 @@ class AppController {
 
     @Autowired
     AdminGroupService adminGroupService
+
+    @Autowired
+    GlobalBadgesService globalBadgesService
 
     @Autowired
     CustomIconFacade customIconFacade
@@ -240,5 +248,56 @@ class AppController {
     ProjectDescription getProjectDescription(@PathVariable("id") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         return projAdminService.getProjectDescription(projectId)
+    }
+
+
+    @RequestMapping(value = "/badges", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    List<GlobalBadgeResult> getBadges() {
+        return globalBadgesService.getBadgesForUser()
+    }
+
+    @DBUpgradeSafe
+    @RequestMapping(value = "/badges/name/exists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    boolean doesBadgeNameExist(@RequestBody() NameExistsRequest nameExistsRequest) {
+        String badgeName = nameExistsRequest.name?.trim()
+        SkillsValidator.isNotBlank(badgeName, "Badge Name")
+        String decodedName = InputSanitizer.sanitize(badgeName)
+        return globalBadgesService.existsByBadgeName(decodedName)
+    }
+
+    @RequestMapping(value = "/badges/id/{badgeId}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    boolean doesBadgeIdExist(@PathVariable("badgeId") String badgeId) {
+        SkillsValidator.isNotBlank(badgeId, "Badge Id")
+        String decodedId = InputSanitizer.sanitize(URLDecoder.decode(badgeId,  StandardCharsets.UTF_8.toString()))
+        return globalBadgesService.existsByBadgeId(decodedId)
+    }
+
+    @RequestMapping(value = "/badges/{badgeId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult saveBadge(@PathVariable("badgeId") String badgeId,
+                            @RequestBody BadgeRequest badgeRequest) {
+        SkillsValidator.isNotBlank(badgeId, "Badge Id")
+        badgeRequest.badgeId = badgeRequest.badgeId ?: badgeId
+        SkillsValidator.isNotBlank(badgeRequest?.name, "Badge Name")
+
+        IdFormatValidator.validate(badgeRequest.badgeId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Badge Id", badgeRequest.badgeId)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Badge Id", badgeRequest.badgeId)
+
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxBadgeNameLength, "Badge Name", badgeRequest.name)
+        propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minNameLength, "Badge Name", badgeRequest.name)
+        propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Badge Description", badgeRequest.description)
+
+        badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)?.trim()
+        badgeRequest.badgeId = InputSanitizer.sanitize(badgeRequest.badgeId)
+        badgeRequest.description = InputSanitizer.sanitize(badgeRequest.description)
+        badgeRequest.helpUrl = InputSanitizer.sanitizeUrl(badgeRequest.helpUrl)
+
+        globalBadgesService.saveBadge(badgeId, badgeRequest)
+        return new RequestResult(success: true)
     }
 }

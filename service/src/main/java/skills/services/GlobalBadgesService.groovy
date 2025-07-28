@@ -35,6 +35,7 @@ import skills.controller.result.model.SkillDefPartialRes
 import skills.services.admin.BadgeAdminService
 import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.DisplayOrderService
+import skills.services.admin.ProjAdminService
 import skills.services.admin.SkillsAdminService
 import skills.services.admin.SkillsDepsService
 import skills.services.admin.UserCommunityService
@@ -122,6 +123,9 @@ class GlobalBadgesService {
 
     @Autowired
     UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    ProjAdminService projAdminService
 
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
@@ -317,7 +321,8 @@ class GlobalBadgesService {
     }
 
     @Transactional(readOnly = true)
-    List<GlobalBadgeResult> getBadges() {
+    List<GlobalBadgeResult> getBadgesForUser() {
+        // TODO - change to a query and join with user_role
         List<SkillDefWithExtra> badges = skillDefWithExtraRepo.findAllByProjectIdAndType(null, ContainerType.GlobalBadge)
         List<GlobalBadgeResult> res = badges.collect { convertToBadge(it, true) }
         return res?.sort({ it.displayOrder })
@@ -342,7 +347,8 @@ class GlobalBadgesService {
 
     @Transactional(readOnly = true)
     AvailableSkillsResult getAvailableSkillsForGlobalBadge(String badgeId, String query) {
-        List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLikeNoImportedSkills(ContainerType.Skill, query)
+        List<String> projectIds = projAdminService.getProjects()?.collect { it.projectId }
+        List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLikeNoImportedSkills(ContainerType.Skill, query, projectIds)
         Set<String> existingBadgeSkillIds = getSkillsForBadge(badgeId).collect { "${it.projectId}${it.skillId}" }
         List<SkillDefPartial> suggestedSkillDefs = allSkillDefs.findAll { !("${it.projectId}${it.skillId}" in existingBadgeSkillIds) &&  it.projectId != InceptionProjectService.inceptionProjectId }
         AvailableSkillsResult res = new AvailableSkillsResult()
@@ -368,6 +374,7 @@ class GlobalBadgesService {
 
         notThese << InceptionProjectService.inceptionProjectId
 
+        // TODO - change this to use ProjectAdminService.getProjects
         AvailableProjectResult available = new AvailableProjectResult()
         int count = projDefRepo.countAllByNameLikeAndProjectIdNotIn(query, notThese)
         if (count > 0) {

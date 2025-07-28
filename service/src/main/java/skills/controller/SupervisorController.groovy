@@ -44,7 +44,7 @@ import java.nio.charset.StandardCharsets
 import static skills.services.GlobalBadgesService.AvailableSkillsResult
 
 @RestController
-@RequestMapping("/supervisor")
+@RequestMapping("/admin/global-badge-definitions")
 @Slf4j
 @EnableCallStackProf
 class SupervisorController {
@@ -72,24 +72,6 @@ class SupervisorController {
 
     @Autowired
     MetricsService metricsService
-
-    @DBUpgradeSafe
-    @RequestMapping(value = "/badges/name/exists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    boolean doesBadgeNameExist(@RequestBody() NameExistsRequest nameExistsRequest) {
-        String badgeName = nameExistsRequest.name?.trim()
-        SkillsValidator.isNotBlank(badgeName, "Badge Name")
-        String decodedName = InputSanitizer.sanitize(badgeName)
-        return globalBadgesService.existsByBadgeName(decodedName)
-    }
-
-    @RequestMapping(value = "/badges/id/{badgeId}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    boolean doesBadgeIdExist(@PathVariable("badgeId") String badgeId) {
-        SkillsValidator.isNotBlank(badgeId, "Badge Id")
-        String decodedId = InputSanitizer.sanitize(URLDecoder.decode(badgeId,  StandardCharsets.UTF_8.toString()))
-        return globalBadgesService.existsByBadgeId(decodedId)
-    }
 
     @RequestMapping(value = "/badges/{badgeId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -148,12 +130,6 @@ class SupervisorController {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
 
         globalBadgesService.deleteBadge(badgeId)
-    }
-
-    @RequestMapping(value = "/badges", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    List<GlobalBadgeResult> getBadges() {
-        return globalBadgesService.getBadges()
     }
 
     @RequestMapping(value = "/badges/{badgeId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -240,6 +240,11 @@ class AccessSettingsStorageService {
         saveUserRoleActions(userId, RoleName.ROLE_SUPER_DUPER_USER, DashboardAction.Delete)
     }
 
+    @Transactional()
+    void deleteGlobalBadgeUserRoles(String badgeId) {
+        userRoleRepository.deleteByGlobalBadgeIdAndRoleName(badgeId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
+    }
+
     @Profile
     void saveUserRoleActions(String userId, RoleName roleName, DashboardAction action) {
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId.toLowerCase())
@@ -410,6 +415,34 @@ class AccessSettingsStorageService {
             return userRole
         } else {
             throw new SkillQuizException("User [$userIdLower] does not exist", (String) quizId ?: SkillException.NA, ErrorCode.UserNotFound)
+        }
+    }
+
+    UserRole addGlobalQuizUserRoleForUser(String userId, String globalBadgeId, RoleName roleName, String adminGroupId = null) {
+        log.debug('Creating quiz id user-role for ID [{}] and role [{}] on quiz [{}]', userId, roleName, globalBadgeId, adminGroupId)
+        String userIdLower = userId?.toLowerCase()
+        User user = userRepository.findByUserId(userIdLower)
+        if (user) {
+            UserRole userRole = new UserRole(userRefId: user.id, userId: userIdLower, roleName: roleName, globalBadgeId: globalBadgeId, adminGroupId: adminGroupId)
+            // check that the new user role does not already exist
+            UserRole existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndGlobalBadgeIdAndAdminGroupId(userId, roleName, globalBadgeId, adminGroupId)
+            if (existingUserRole) {
+                throw new SkillQuizException("CREATE FAILED -> user-role with global badge id [$globalBadgeId], userIdLower [$userIdLower] and roleName [$roleName], adming group id [${adminGroupId}] already exists", globalBadgeId, ErrorCode.BadParam)
+            }
+            if (adminGroupId && roleName == RoleName.ROLE_QUIZ_ADMIN) {
+                // need to check if the role already exists outside of the admin group (ie, local global badge admin)
+                existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndGlobalBadgeIdAndAdminGroupId(userId, roleName, globalBadgeId, null)
+                if (existingUserRole) {
+                    log.debug("Assigning admin group [{}] to existing local global badge admin [{}]", adminGroupId, userIdLower)
+                    existingUserRole.adminGroupId = adminGroupId
+                    userRole = existingUserRole
+                }
+            }
+            userRoleRepository.save(userRole)
+            log.debug("Created userRole [{}]", userRole)
+            return userRole
+        } else {
+            throw new SkillQuizException("User [$userIdLower] does not exist", (String) globalBadgeId ?: SkillException.NA, ErrorCode.UserNotFound)
         }
     }
 

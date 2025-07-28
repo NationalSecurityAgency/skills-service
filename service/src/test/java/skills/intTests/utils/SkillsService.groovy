@@ -455,11 +455,11 @@ class SkillsService {
     }
 
     def createGlobalBadge(Map props, String originalBadgeId = null) {
-        wsHelper.supervisorPut(getGlobalBadgeUrl(originalBadgeId ?: props.badgeId), props)
+        wsHelper.globalBadgePut(getGlobalBadgeUrl(originalBadgeId ?: props.badgeId), props)
     }
 
     def updateGlobalBadge(Map props, String originalBadgeId = null) {
-        wsHelper.supervisorPut(getGlobalBadgeUrl(originalBadgeId ?: props.badgeId), props)
+        wsHelper.globalBadgePut(getGlobalBadgeUrl(originalBadgeId ?: props.badgeId), props)
     }
 
     def updateBadge(Map props, String originalBadgeId = null) {
@@ -558,23 +558,23 @@ class SkillsService {
     }
 
     def getAvailableProjectsForGlobalBadge(String badgeId, String query="") {
-        wsHelper.supervisorGet("${getGlobalBadgeUrl(badgeId)}/projects/available?query=${query}")
+        wsHelper.globalBadgeGet("${getGlobalBadgeUrl(badgeId)}/projects/available?query=${query}")
     }
 
     def getAvailableSkillsForGlobalBadge(String badgeId, String query) {
-        wsHelper.supervisorGet("${getGlobalBadgeUrl(badgeId)}/skills/available?query=${query}")
+        wsHelper.globalBadgeGet("${getGlobalBadgeUrl(badgeId)}/skills/available?query=${query}")
     }
 
     def getGlobalBadge(String badgeId) {
-        wsHelper.supervisorGet(getGlobalBadgeUrl(badgeId))
+        wsHelper.globalBadgeGet(getGlobalBadgeUrl(badgeId))
     }
 
     def getGlobalBadgeSkills(String badgeId) {
-        wsHelper.supervisorGet("/badges/${badgeId}/skills")
+        wsHelper.globalBadgeGet("/badges/${badgeId}/skills")
     }
 
     def getLevelsForProject(String projectId) {
-        wsHelper.supervisorGet("/projects/${projectId}/levels")
+        wsHelper.globalBadgeGet("/projects/${projectId}/levels")
     }
 
     def getServiceStatus() {
@@ -586,18 +586,18 @@ class SkillsService {
     }
 
     def getAllGlobalBadges() {
-        wsHelper.supervisorGet("/badges")
+        wsHelper.globalBadgeGet("/badges")
     }
 
     def doesGlobalBadgeNameExists(String name) {
-        wsHelper.supervisorPost("/badges/name/exists", [name:name])?.body
+        wsHelper.globalBadgePost("/badges/name/exists", [name:name])?.body
     }
     def doesGlobalBadgeIdExists(String id) {
-        wsHelper.supervisorGet("/badges/id/${id}/exists")
+        wsHelper.globalBadgeGet("/badges/id/${id}/exists")
     }
 
     def deleteGlobalBadge(String badgeId) {
-        wsHelper.supervisorDelete(getGlobalBadgeUrl(badgeId))
+        wsHelper.globalBadgeDelete(getGlobalBadgeUrl(badgeId))
     }
 
     @Profile
@@ -735,7 +735,7 @@ class SkillsService {
         this.assignSkillToGlobalBadge(['badgeId': badgeId, 'projectId': projectId, 'skillId': skillId])
     }
     def assignSkillToGlobalBadge(Map props) {
-        wsHelper.supervisorPost(getAddSkillToGlobalBadgeUrl(props.badgeId, props.projectId, props.skillId), props)
+        wsHelper.globalBadgePost(getAddSkillToGlobalBadgeUrl(props.badgeId, props.projectId, props.skillId), props)
     }
 
     def removeSkillFromGlobalBadge(String projectId, String badgeId, String skillId) {
@@ -743,19 +743,19 @@ class SkillsService {
     }
 
     def removeSkillFromGlobalBadge(Map props) {
-        wsHelper.supervisorDelete(getAddSkillToGlobalBadgeUrl(props.badgeId, props.projectId, props.skillId), props)
+        wsHelper.globalBadgeDelete(getAddSkillToGlobalBadgeUrl(props.badgeId, props.projectId, props.skillId), props)
     }
 
     def assignProjectLevelToGlobalBadge(Map props) {
-        wsHelper.supervisorPost(getAddProjectLevelToGlobalBadgeUrl(props.badgeId, props.projectId, props.level), props)
+        wsHelper.globalBadgePost(getAddProjectLevelToGlobalBadgeUrl(props.badgeId, props.projectId, props.level), props)
     }
 
     def changeProjectLevelOnGlobalBadge(Map props) {
-        wsHelper.supervisorPost(getchangeProjectLevelOnGlobalBadgeUrl(props.badgeId, props.projectId, props.currentLevel, props.newLevel), [:])
+        wsHelper.globalBadgePost(getchangeProjectLevelOnGlobalBadgeUrl(props.badgeId, props.projectId, props.currentLevel, props.newLevel), [:])
     }
 
     def removeProjectLevelFromGlobalBadge(Map props) {
-        wsHelper.supervisorDelete(getAddProjectLevelToGlobalBadgeUrl(props.badgeId, props.projectId, props.level), props)
+        wsHelper.globalBadgeDelete(getAddProjectLevelToGlobalBadgeUrl(props.badgeId, props.projectId, props.level), props)
     }
 
     def suggestDashboardUsers(String query) {
@@ -999,7 +999,7 @@ class SkillsService {
     def uploadGlobalIcon(File icon){
         Map body = [:]
         body.put("customIcon", icon)
-        wsHelper.supervisorUpload("/icons/upload", body)
+        wsHelper.globalBadgeUpload("/icons/upload", body)
     }
     def uploadAttachment(String fileName, String fileContents, String projectId=null, String skillId=null, String quizId=null){
         Resource resource = GroovyToJavaByteUtils.toByteArrayResource(fileContents, fileName)
@@ -1046,7 +1046,7 @@ class SkillsService {
     }
 
     def deleteGlobalIcon(Map props){
-        wsHelper.supervisorDelete("/icons/${props.filename}")
+        wsHelper.globalBadgeDelete("/icons/${props.filename}")
     }
 
     def getIconCssForProject(Map props){
@@ -1054,7 +1054,7 @@ class SkillsService {
     }
 
     def getIconCssForGlobalIcons(){
-        wsHelper.supervisorGet("/icons/customIcons")
+        wsHelper.globalBadgeGet("/icons/customIcons")
     }
 
     def getPerformedSkills(String userId, String project, String query = '', String orderBy = "performedOn") {
@@ -1207,7 +1207,7 @@ class SkillsService {
 
     def getGlobalMetricsData(String metricsId, Map props=null) {
         String endpoint = "/metrics/${metricsId}"
-        wsHelper.supervisorGet(endpoint, props)
+        wsHelper.globalBadgeGet(endpoint, props)
     }
 
     def getApiGlobalMetricsData(String metricsId, Map props = null) {
