@@ -20,6 +20,8 @@ import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import 'pdfjs-dist/web/pdf_viewer.css';
 import {useDebounceFn} from '@vueuse/core'
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import PrevNextBtns from "@/components/slides/PrevNextBtns.vue";
+import { useExportUtil } from '@/components/utils/UseExportUtil.js';
 
 const props = defineProps({
   slidesId: {
@@ -61,6 +63,10 @@ const toggleFullscreen = () => {
     containerRef.value?.requestFullscreen?.().then(() => {
       isFullscreen.value = true;
       renderPage(currentPage.value)
+      showFullScreenMsg.value = true
+      setTimeout(() => {
+        showFullScreenMsg.value = false
+      }, 3000)
     });
   } else {
     document.exitFullscreen().then(() => {
@@ -217,7 +223,6 @@ const nextPage = () => {
     renderPage(currentPage.value + 1)
   }
 }
-const progressPercent = computed(() => (currentPage.value / totalPages.value) * 100)
 
 const isResizing = ref(false)
 
@@ -281,6 +286,16 @@ const slidesContainerStyle = computed(() => {
   return {}
 })
 
+const showFullScreenMsg = ref(false)
+const isLastSlideInFullscreen = computed(() => {
+  return isFullscreen.value && currentPage.value === totalPages.value
+})
+
+
+const exportUtil = useExportUtil()
+const downloadPdf = () => {
+  exportUtil.ajaxDownload(`${props.pdfUrl}?alwaysReturnContentDispositionForPdf=true`)
+}
 </script>
 
 <template>
@@ -300,15 +315,6 @@ const slidesContainerStyle = computed(() => {
                 aria-label="Enter fullscreen mode"
                 @click="toggleFullscreen"
             />
-            <button
-                v-if="isFullscreen"
-                :id="`${slidesId}ExitFullscreenBtn`"
-                class="p-1 rounded shadow-md bg-surface-100 dark:bg-surface-700 text-primary hover:bg-surface-200 dark:hover:bg-surface-600"
-                aria-label="Exit fullscreen mode"
-                @click="toggleFullscreen"
-            >
-              <i class="fas fa-compress"></i>
-            </button>
           </div>
           <div ref="containerRef" :id="`${slidesId}Container`"
                class="border-r-1 border-l-1 relative hover-resize-container"
@@ -328,31 +334,28 @@ const slidesContainerStyle = computed(() => {
             >
               <i class="fas fa-expand-alt fa-rotate-90"></i>
             </button>
+
+            <Message v-if="isFullscreen"
+                     :class="{ 'only-on-hover': !showFullScreenMsg && !isLastSlideInFullscreen }"
+                class="fixed bottom-4 left-1/2 transform -translate-x-1/2">
+              <div v-if="!isLastSlideInFullscreen">Use left/right arrow keys to navigate between slides and <Tag>Esc</Tag>to exit</div>
+              <div v-else>You've reach the last slide press <Tag>Esc</Tag> to exit</div>
+            </Message>
+
           </div>
-          <div v-if="!isInitLoading"
+          <div v-if="!isInitLoading && !isFullscreen"
                class="flex items-center justify-between bg-surface-100 dark:bg-surface-700 border-l-1 border-r-1 border-b-1 rounded-b p-2">
             <div class="flex-1"></div> <!-- Spacer for left side -->
-            <div class="flex gap-2 items-center">
+              <prev-next-btns
+                  :current-page="currentPage"
+                  :total-pages="totalPages"
+                  @prev-page="prevPage"
+                  @next-page="nextPage" />
+            <div class="flex-1 flex justify-end">
               <SkillsButton
-                  aria-label="Previous Slide"
-                  icon="fa-solid fa-circle-chevron-left"
-                  class="shadow-md"
-                  @click="prevPage"
-                  :disabled="currentPage <= 1"/>
-              <div>
-                <div>Slide {{ currentPage }} of {{ totalPages }}</div>
-                <ProgressBar :value="progressPercent" :show-value="false" style="height: 5px"></ProgressBar>
-              </div>
-              <SkillsButton
-                  aria-label="Next Slide"
-                  icon="fa-solid fa-circle-chevron-right"
-                  class="shadow-md"
-                  @click="nextPage"
-                  :disabled="currentPage >= totalPages"/>
-            </div>
-            <div v-if="!isFullscreen" class="flex-1 flex justify-end">
-              <SkillsButton
+                  aria-label="Download PDF"
                   icon="fa-solid fa-download"
+                  @click="downloadPdf"
                   class="shadow-md"
                   size="small"/>
             </div>
@@ -366,6 +369,14 @@ const slidesContainerStyle = computed(() => {
 </template>
 
 <style scoped>
+
+.only-on-hover {
+  opacity: 0;
+}
+.only-on-hover:hover {
+  opacity: 1;
+}
+
 .resize-handle {
   opacity: 0;
   transition: opacity 0.2s ease-in-out;

@@ -740,7 +740,7 @@ class SkillsLoader {
             res = new SlidesSummary(
                     url: summaryAttributes.url,
                     type: summaryAttributes.type,
-                    width: summaryAttributes.width
+                    width: summaryAttributes?.width
             )
         }
         return res

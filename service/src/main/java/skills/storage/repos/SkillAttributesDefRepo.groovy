@@ -48,7 +48,9 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
 
     static interface SlidesSummaryAttributes {
         String getUrl()
+        @Nullable
         String getType()
+        @Nullable
         Double getWidth()
     }
 

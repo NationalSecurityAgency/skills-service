@@ -551,6 +551,7 @@ class UserSkillsController {
     @RequestMapping(value = "/download/{uuid}", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @Transactional(readOnly = true)
     public void download(@PathVariable("uuid") String uuid,
+                         @RequestParam(name = "alwaysReturnContentDispositionForPdf", required = false, defaultValue = "false") Boolean alwaysReturnContentDispositionForPdf,
                          HttpServletResponse response) {
         Attachment attachment = attachmentService.getAttachment(uuid);
         if (attachment == null) {
@@ -567,7 +568,7 @@ class UserSkillsController {
         try (InputStream inputStream = attachment.getContent().getBinaryStream();
              OutputStream outputStream = response.getOutputStream()) {
             response.setContentType(attachment.getContentType());
-            if (!StringUtils.equalsIgnoreCase(attachment.getContentType(), "application/pdf")) {
+            if (alwaysReturnContentDispositionForPdf || !StringUtils.equalsIgnoreCase(attachment.getContentType(), "application/pdf")) {
                 response.setHeader("Content-Disposition", "attachment; filename=\"" + attachment.getFilename() + "\"");
             }
 
