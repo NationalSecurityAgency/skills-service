@@ -22,7 +22,7 @@ describe('Configure Skill Slides Tests', () => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/slides').as('getSlidesProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
         Cypress.Commands.add("visitSlidesConfPage", (projNum) => {
-            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-video');
+            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-slides');
             cy.wait('@getSlidesProps')
             cy.wait('@getSkillInfo')
             cy.get('.spinner-border').should('not.exist')

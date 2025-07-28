@@ -2121,6 +2121,7 @@ class SkillsService {
         if (skillAttrs.file) { body.put("file", skillAttrs.file) }
         if (skillAttrs.url) { body.put("url", skillAttrs.url)}
         if (skillAttrs.isAlreadyHosted != null) { body.put("isAlreadyHosted", skillAttrs.isAlreadyHosted)}
+        if (skillAttrs.width != null) { body.put("width", skillAttrs.width)}
 
         String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId}/slides"
         return wsHelper.adminUpload(url, body, true)

@@ -95,7 +95,7 @@ class AdminSlidesService {
         resAttributes.width = width
 
         boolean isReadOnly = skillDefRepo.isImportedFromCatalog(projectId, skillId)
-        SkillsValidator.isTrue(!isReadOnly, "Cannot set video attributes of read-only skill", projectId, skillId)
+        SkillsValidator.isTrue(!isReadOnly, "Cannot set slide attributes of read-only skill", projectId, skillId)
 
         skillAttributeService.saveSlidesAttrs(projectId, skillId, resAttributes)
 
