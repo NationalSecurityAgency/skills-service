@@ -165,6 +165,9 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         p2Skills[2].skillId = "Skill3"
         pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
 
+        rootUser.pinProject(p1.projectId)
+        rootUser.pinProject(p2.projectId)
+
         def badge1 = SkillsFactory.createBadge(1)
         def badge2 = SkillsFactory.createBadge(2)
         rootUser.createGlobalBadge(badge1)
