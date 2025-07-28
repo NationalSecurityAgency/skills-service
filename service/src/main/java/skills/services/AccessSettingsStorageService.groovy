@@ -427,7 +427,7 @@ class AccessSettingsStorageService {
             // check that the new user role does not already exist
             UserRole existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndGlobalBadgeIdAndAdminGroupId(userId, roleName, globalBadgeId, adminGroupId)
             if (existingUserRole) {
-                throw new SkillQuizException("CREATE FAILED -> user-role with global badge id [$globalBadgeId], userIdLower [$userIdLower] and roleName [$roleName], adming group id [${adminGroupId}] already exists", globalBadgeId, ErrorCode.BadParam)
+                throw new SkillException("CREATE FAILED -> user-role with global badge id [$globalBadgeId], userIdLower [$userIdLower] roleName [$roleName] and admin group id [${adminGroupId}] already exists", ErrorCode.BadParam)
             }
             if (adminGroupId && roleName == RoleName.ROLE_QUIZ_ADMIN) {
                 // need to check if the role already exists outside of the admin group (ie, local global badge admin)
@@ -442,7 +442,7 @@ class AccessSettingsStorageService {
             log.debug("Created userRole [{}]", userRole)
             return userRole
         } else {
-            throw new SkillQuizException("User [$userIdLower] does not exist", (String) globalBadgeId ?: SkillException.NA, ErrorCode.UserNotFound)
+            throw new SkillException("User [$userIdLower] does not exist", ErrorCode.UserNotFound)
         }
     }
 

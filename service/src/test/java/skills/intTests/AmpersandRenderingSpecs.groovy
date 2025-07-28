@@ -15,22 +15,14 @@
  */
 package skills.intTests
 
-import org.junit.Ignore
+
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
 import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 import skills.storage.model.SkillDef
-import spock.lang.IgnoreRest
 
 class AmpersandRenderingSpecs extends DefaultIntSpec {
-
-    SkillsService supervisorService
-
-    def setup() {
-        supervisorService = createSupervisor()
-    }
 
     def "ampersand in global badge name should be returned unescaped"() {
         def badge = SkillsFactory.createBadge()
@@ -49,16 +41,16 @@ class AmpersandRenderingSpecs extends DefaultIntSpec {
         badge4.name = "A&B"
         badge4.badgeId = "b44"
 
-        supervisorService.createGlobalBadge(badge)
-        supervisorService.createGlobalBadge(badge2)
-        supervisorService.createGlobalBadge(badge3)
-        supervisorService.createGlobalBadge(badge4)
+        skillsService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge2)
+        skillsService.createGlobalBadge(badge3)
+        skillsService.createGlobalBadge(badge4)
 
         when:
-        def b1 = supervisorService.getGlobalBadge(badge.badgeId)
-        def b2 = supervisorService.getGlobalBadge(badge2.badgeId)
-        def b3 = supervisorService.getGlobalBadge(badge3.badgeId)
-        def b4 = supervisorService.getGlobalBadge(badge4.badgeId)
+        def b1 = skillsService.getGlobalBadge(badge.badgeId)
+        def b2 = skillsService.getGlobalBadge(badge2.badgeId)
+        def b3 = skillsService.getGlobalBadge(badge3.badgeId)
+        def b4 = skillsService.getGlobalBadge(badge4.badgeId)
 
         then:
         b1.name == "A & B"
@@ -102,10 +94,10 @@ class AmpersandRenderingSpecs extends DefaultIntSpec {
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
         skillsService.createSkill(skill4)
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         when:
-        def availableSkills = supervisorService.getAvailableSkillsForGlobalBadge(badge.badgeId, "")
+        def availableSkills = skillsService.getAvailableSkillsForGlobalBadge(badge.badgeId, "")
 
         then:
         availableSkills.suggestedSkills.find { it.name == "A & B" && it.subjectName == "S & B"}
@@ -159,11 +151,11 @@ class AmpersandRenderingSpecs extends DefaultIntSpec {
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
         skillsService.createSkill(skill4)
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         when:
 
-        def availableLevels = supervisorService.getAvailableProjectsForGlobalBadge(badge.badgeId).projects
+        def availableLevels = skillsService.getAvailableProjectsForGlobalBadge(badge.badgeId).projects
 
         then:
         availableLevels.find {it.name == "P & B"}

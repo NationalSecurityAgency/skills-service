@@ -455,7 +455,7 @@ class SkillsService {
     }
 
     def createGlobalBadge(Map props, String originalBadgeId = null) {
-        wsHelper.globalBadgePut(getGlobalBadgeUrl(originalBadgeId ?: props.badgeId), props)
+        wsHelper.appPut(getGlobalBadgeUrl(originalBadgeId ?: props.badgeId), props)
     }
 
     def updateGlobalBadge(Map props, String originalBadgeId = null) {

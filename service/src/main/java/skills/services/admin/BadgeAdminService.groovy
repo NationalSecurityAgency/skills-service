@@ -191,7 +191,7 @@ class BadgeAdminService {
         DataIntegrityExceptionHandlers.badgeDataIntegrityViolationExceptionHandler.handle(projectId) {
             savedSkill = skillDefWithExtraRepo.saveAndFlush(skillDefinition)
         }
-        if (savedSkill && type == SkillDef.ContainerType.GlobalBadge) {
+        if (savedSkill && type == SkillDef.ContainerType.GlobalBadge && !isEdit) {
             String userId = userInfoService.getCurrentUserId()
             accessSettingsStorageService.addGlobalQuizUserRoleForUser(userId, savedSkill.skillId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
         }
