@@ -23,6 +23,9 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.storage.model.UserAttrs
 
 import java.nio.file.Files
 
@@ -31,6 +34,7 @@ import static skills.intTests.utils.SkillsFactory.createSkills
 import static skills.intTests.utils.SkillsFactory.createSubject
 
 class SlideDeckConfigSpecs extends DefaultIntSpec {
+
 
     def "save and get slide deck settings" () {
         def p1 = createProject(1)
@@ -161,7 +165,6 @@ class SlideDeckConfigSpecs extends DefaultIntSpec {
         ])
 
         def attributes1 = skillsService.getSlidesAttributes(p1.projectId, p1Skills[0].skillId)
-        SkillsService.FileAndHeaders downloaded2 = skillsService.downloadAttachment(attributes1.url)
 
         then:
         attributes.url.toString().startsWith('/api/download/')
@@ -185,7 +188,6 @@ class SlideDeckConfigSpecs extends DefaultIntSpec {
 
         when:
         def attributes = skillsService.getSlidesAttributes(p1.projectId, p1Skills[0].skillId)
-        SkillsService.FileAndHeaders downloaded = skillsService.downloadAttachment(attributes.url)
 
         Resource pdfSlides2 = new ClassPathResource("/testSlides/test-slides-2.pdf")
         skillsService.saveSlidesAttributes(p1.projectId, p1Skills[0].skillId, [
@@ -263,4 +265,71 @@ class SlideDeckConfigSpecs extends DefaultIntSpec {
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("Failed to find skillId")
     }
+
+    def "delete slides" () {
+        SkillsService rootService = createRootSkillService()
+
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(2, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        Resource pdfSlides = new ClassPathResource("/testSlides/test-slides-1.pdf")
+        skillsService.saveSlidesAttributes(p1.projectId, p1Skills[0].skillId, [
+                file: pdfSlides,
+        ])
+
+        Resource pdfSlides2 = new ClassPathResource("/testSlides/test-slides-2.pdf")
+        skillsService.saveSlidesAttributes(p1.projectId, p1Skills[1].skillId, [
+                file: pdfSlides2,
+        ])
+
+        UserAttrs skillsServiceUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+
+        when:
+        def attributes = skillsService.getSlidesAttributes(p1.projectId, p1Skills[0].skillId)
+        SkillsService.FileAndHeaders downloaded = skillsService.downloadAttachment(attributes.url)
+        def attributes1 = skillsService.getSlidesAttributes(p1.projectId, p1Skills[1].skillId)
+        SkillsService.FileAndHeaders downloaded2 = skillsService.downloadAttachment(attributes1.url)
+
+        def allActions = rootService.getUserActionsForEverything()
+        skillsService.deleteSlidesAttributes(p1.projectId, p1Skills[0].skillId)
+        def allActions_t1 =rootService.getUserActionsForEverything()
+
+        def attributes_t1 = skillsService.getSlidesAttributes(p1.projectId, p1Skills[0].skillId)
+        def attributes1_t1 = skillsService.getSlidesAttributes(p1.projectId, p1Skills[1].skillId)
+        SkillsService.FileAndHeaders downloaded2_t1 = skillsService.downloadAttachment(attributes1.url)
+
+        then:
+        attributes.url.toString().startsWith('/api/download/')
+        downloaded.file.bytes == Files.readAllBytes(pdfSlides.getFile().toPath())
+        downloaded.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "application/pdf"
+
+        attributes.url != attributes1.url
+
+        attributes1.url.toString().startsWith('/api/download/')
+        downloaded2.file.bytes == Files.readAllBytes(pdfSlides2.getFile().toPath())
+        downloaded2.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "application/pdf"
+
+        attributes_t1.url == null
+        attributes_t1.type == null
+        attributes_t1.isInternallyHosted == null
+        attributes_t1.internallyHostedFileName == null
+        attributes_t1.internallyHostedAttachmentUuid == null
+        attributes1_t1.url.toString().startsWith('/api/download/')
+        downloaded2_t1.file.bytes == Files.readAllBytes(pdfSlides2.getFile().toPath())
+        downloaded2_t1.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "application/pdf"
+
+        Closure findSlideDeleted = { it -> it.item == DashboardItem.SlidesSettings.toString() && it.action == DashboardAction.Delete.toString() }
+
+        !allActions.data.findAll(findSlideDeleted)
+
+        def settingsDeleted = allActions_t1.data.findAll(findSlideDeleted)
+        settingsDeleted.itemId == [p1Skills[0].skillId]
+        settingsDeleted.userId == [skillsServiceUserAttrs.userId]
+        settingsDeleted.userIdForDisplay == [skillsServiceUserAttrs.userIdForDisplay]
+        settingsDeleted.projectId == [p1.projectId]
+        settingsDeleted.quizId == [null]
+    }
+
 }

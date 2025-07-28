@@ -2130,6 +2130,10 @@ class SkillsService {
         String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId}/slides"
         return wsHelper.adminGet(url)
     }
+    def deleteSlidesAttributes(String quizOrProjectId, String questionOrSkillId, Boolean isQuiz = false) {
+        String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId}/slides"
+        return wsHelper.adminDelete(url)
+    }
 
     def saveSkillExpirationAttributes(String projectId, String skillId, Map expirationAttrs) {
         String url = "/projects/${projectId}/skills/${skillId}/expiration"

@@ -683,6 +683,15 @@ class AdminController {
         return skillAttributeService.getSlidesAttrs(projectId, skillId)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/slides", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult deleteSlidesAttrs(@PathVariable("projectId") String projectId,
+                                        @PathVariable("skillId") String skillId) {
+        skillAttributeService.deleteSlidesAttrs(projectId, skillId)
+        return new RequestResult(success: true)
+    }
+
+
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/video", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult deleteSkillVideoAttrs(@PathVariable("projectId") String projectId,

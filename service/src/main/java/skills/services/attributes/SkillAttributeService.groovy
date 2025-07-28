@@ -28,6 +28,7 @@ import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillAttributesDef
 import skills.storage.model.SkillAttributesDef.SkillAttributesType
 import skills.storage.model.SkillDef
+import skills.storage.repos.AttachmentRepo
 import skills.storage.repos.SkillAttributesDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.utils.InputSanitizer
@@ -47,6 +48,9 @@ class SkillAttributeService {
 
     @Autowired
     UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    AttachmentRepo attachmentRepo
 
     static final ObjectMapper mapper = new ObjectMapper()
 
@@ -77,6 +81,27 @@ class SkillAttributeService {
     SlidesAttrs getSlidesAttrs(String projectId, String skillId) {
         SlidesAttrs slidesAttrs = getAttrs(projectId, skillId, SkillAttributesType.Slides, SlidesAttrs.class)
         return slidesAttrs
+    }
+
+    @Transactional
+    void deleteSlidesAttrs(String projectId, String skillId) {
+        SlidesAttrs existingVideoAttributes = getSlidesAttrs(projectId, skillId)
+
+        if (existingVideoAttributes?.internallyHostedAttachmentUuid) {
+            attachmentRepo.deleteByUuid(existingVideoAttributes.internallyHostedAttachmentUuid)
+        }
+
+        int numRemoved = deleteAttrs(projectId, skillId, SkillAttributesType.Slides)
+        if (numRemoved > 1) {
+            throw new IllegalStateException("There is more than 1 Slides attributes for [${projectId}-${skillId}]")
+        }
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.SlidesSettings,
+                itemId: skillId,
+                projectId: projectId,
+        ))
     }
 
     void saveExpirationAttrs(String projectId, String skillId, ExpirationAttrs skillExpirationAttrs) {
