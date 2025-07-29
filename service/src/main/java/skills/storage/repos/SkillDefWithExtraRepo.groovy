@@ -123,7 +123,10 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
                            sad.attributes ->> 'videoUrl'                                                  as videoUrl,
                            sad.attributes ->> 'videoType'                                                 as videoType,
                            case when sad.attributes ->> 'captions' is not null then true else false end   as videoHasCaptions,
-                           case when sad.attributes ->> 'transcript' is not null then true else false end as videoHasTranscript
+                           case when sad.attributes ->> 'transcript' is not null then true else false end as videoHasTranscript,
+                           sad.attributes ->> 'url' as slidesUrl,
+                           sad.attributes ->> 'type' as slidesType,
+                           sad.attributes ->> 'width' as slidesWidth
                     from skill_definition s,
                          skill_relationship_definition r,
                          skill_definition c
@@ -131,7 +134,7 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
                              left join skill_attributes_definition sad on
                                      (case when c.copied_from_skill_ref is not null then c.copied_from_skill_ref else c.id end) =
                                      sad.skill_ref_id
-                                 and sad.type = 'Video'
+                                 and sad.type in ('Video', 'Slides')
                     where s.id = r.parent_ref_id
                       and c.id = r.child_ref_id
                       and s.project_id = ?1

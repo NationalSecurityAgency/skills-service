@@ -44,7 +44,7 @@ import skills.storage.repos.SkillDefRepo
 @Slf4j
 class AdminSlidesService {
 
-    @Value('#{"${skills.config.ui.maxVideoUploadSize:250MB}"}')
+    @Value('#{"${skills.config.ui.maxSlidesUploadSize:250MB}"}')
     DataSize maxAttachmentSize;
 
     @Value('#{"${skills.config.allowedSlidesUploadMimeTypes}"}')
