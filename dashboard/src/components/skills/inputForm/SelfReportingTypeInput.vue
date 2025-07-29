@@ -53,7 +53,7 @@ const onTypeChanged = (newType) => {
     // justificationRequired.value = false
     setFieldValue('justificationRequired', false)
   }
-  if (newType === quizKey || newType === videoKey) {
+  if (newType === quizKey) {
     setFieldValue('numPerformToCompletion', 1)
     setFieldValue('timeWindowEnabled', false)
     setFieldValue('numPointIncrementMaxOccurrences', 1)

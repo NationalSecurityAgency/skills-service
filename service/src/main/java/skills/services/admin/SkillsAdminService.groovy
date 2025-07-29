@@ -964,9 +964,6 @@ class SkillsAdminService {
                     throw new SkillException("Video URL must be configured prior to attempting to set selfReportingType=Video", existingSkillDefinition.projectId, existingSkillDefinition.skillId)
                 }
             }
-            if (skillRequest.numPerformToCompletion > 1) {
-                throw new SkillException("When selfReportingType=Video numPerformToCompletion must equal to 1 but [${skillRequest.numPerformToCompletion}] was provided", existingSkillDefinition.projectId, existingSkillDefinition.skillId)
-            }
         }
     }
 
