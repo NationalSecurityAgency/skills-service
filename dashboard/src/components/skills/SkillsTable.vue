@@ -642,7 +642,7 @@ const onRowExpand = () => {
           <div v-if="slotProps.field == 'name'"
                class="flex flex-wrap items-center flex-col sm:flex-row"
                :data-cy="`nameCell_${slotProps.data.skillId}`">
-            <div class="d-inline-block rounded-border w-16 skill-icon-container text-primary text-center border text-center mr-4">
+            <div class="d-inline-block rounded-border w-16 skill-icon-container text-primary text-center border mr-4">
               <i class="skill-icon" :class="`${slotProps.data.iconClass ? slotProps.data.iconClass : 'fas fa-graduation-cap'}`"></i>
             </div>
             <div v-if="slotProps.data.isGroupType" class="flex-1">

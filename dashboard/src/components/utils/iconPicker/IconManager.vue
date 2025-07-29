@@ -270,14 +270,7 @@ let uploader = ref();
 const isValidImageType = (type) => {
   return mimeTester.test(type);
 }
-const uploadFromInput = (event) => {
-  const target = event.target;
-  const files = target.files;
-  if( files[0] ) {
-    files[0].objectURL = URL.createObjectURL(files[0]);
-    beforeUpload({files: files});
-  }
-}
+
 const beforeUpload = (upload) => {
   const isImageTypeValid = isValidImageType(upload.files[0]?.type);
 
@@ -360,8 +353,7 @@ const closeError = () => {
                   :accept="acceptType"
                   :maxFileSize="1000000"
                   customUpload
-                  :auto="true"
-                  @uploader="beforeUpload">
+                  :auto="true">
         <template #header="{ chooseCallback, uploadCallback, clearCallback, files }">
           <div class="flex flex-wrap justify-between items-center flex-1 gap-4 pb-2 border-b-2">
             <div class="">
