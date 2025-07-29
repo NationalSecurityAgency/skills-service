@@ -59,17 +59,34 @@ class SlideDeckConfigSpecs extends DefaultIntSpec {
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
 
         Resource pdfSlides = new ClassPathResource("/testSlides/test-slides-1.pdf")
+
+        SkillsService rootService = createRootSkillService()
+        UserAttrs skillsServiceUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+        when:
+        def allActions = rootService.getUserActionsForEverything()
         skillsService.saveSlidesAttributes(p1.projectId, p1Skills[0].skillId, [
                 file: pdfSlides,
         ])
+        def allActions_t1 = rootService.getUserActionsForEverything()
 
-        when:
         def attributes = skillsService.getSlidesAttributes(p1.projectId, p1Skills[0].skillId)
         SkillsService.FileAndHeaders downloaded = skillsService.downloadAttachment(attributes.url)
         then:
         attributes.url.toString().startsWith('/api/download/')
         downloaded.file.bytes == Files.readAllBytes(pdfSlides.getFile().toPath())
         downloaded.headers.get(HttpHeaders.CONTENT_TYPE)[0] == "application/pdf"
+
+
+        Closure findSlidesCreated = { it -> it.item == DashboardItem.SlidesSettings.toString() && it.action == DashboardAction.Create.toString() }
+
+        !allActions.data.findAll(findSlidesCreated)
+
+        def settingsCreated = allActions_t1.data.findAll(findSlidesCreated)
+        settingsCreated.itemId == [p1Skills[0].skillId]
+        settingsCreated.userId == [skillsServiceUserAttrs.userId]
+        settingsCreated.userIdForDisplay == [skillsServiceUserAttrs.userIdForDisplay]
+        settingsCreated.projectId == [p1.projectId]
+        settingsCreated.quizId == [null]
     }
 
     def "override existing uploaded slides" () {

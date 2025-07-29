@@ -909,6 +909,7 @@ class SkillsLoader {
 
     private SkillDescription createSkillDescription(SkillDefWithExtraRepo.SkillDescDBRes it, SettingsResult helpUrlRootSetting, SkillApprovalRepo.SkillApprovalPlusSkillId skillApproval) {
         VideoSummary videoSummary = null
+        SlidesSummary slidesSummary = null
         if (StringUtils.isNotBlank(it.videoUrl)) {
             videoSummary = new VideoSummary(
                     videoUrl: it.videoUrl,
@@ -918,13 +919,22 @@ class SkillsLoader {
             )
         }
 
+        if (StringUtils.isNotBlank(it.slidesUrl)) {
+            slidesSummary = new SlidesSummary(
+                    url: it.slidesUrl,
+                    type: it.slidesType,
+                    width: it.slidesWidth,
+            )
+        }
+
         SkillDescription skillDescription = new SkillDescription(
                 skillId: it.getSkillId(),
                 description: InputSanitizer.unsanitizeForMarkdown(it.getDescription()),
                 href: getHelpUrl(helpUrlRootSetting, it.getHelpUrl()),
                 achievedOn: it.getAchievedOn(),
                 type: it.getType(),
-                videoSummary: videoSummary
+                videoSummary: videoSummary,
+                slidesSummary: slidesSummary
         )
         skillDescription
     }

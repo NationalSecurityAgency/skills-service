@@ -70,6 +70,12 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
         String getVideoType()
         Boolean getVideoHasCaptions()
         Boolean getVideoHasTranscript()
+        @Nullable
+        String getSlidesUrl()
+        @Nullable
+        String getSlidesType()
+        @Nullable
+        Double getSlidesWidth()
     }
 
     @Query(value='''SELECT c.skill_id               as skillId,
@@ -83,6 +89,9 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
                            c.copied_from_skill_ref            as copiedFrom,
                            sad.attributes ->> 'videoUrl' as videoUrl,
                            sad.attributes ->> 'videoType'                                                 as videoType,
+                           sad.attributes ->> 'url' as slidesUrl,
+                           sad.attributes ->> 'type' as slidesType,
+                           sad.attributes ->> 'width' as slidesWidth,
                            case when sad.attributes ->> 'captions' is not null then true else false end   as videoHasCaptions,
                            case when sad.attributes ->> 'transcript' is not null then true else false end as videoHasTranscript
                     from skill_definition s,
@@ -91,7 +100,7 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
                              left join user_achievement ua on c.skill_id = ua.skill_id and c.project_id = ua.project_id and ua.user_id = ?5
                              left join skill_attributes_definition sad on
                                (case when c.copied_from_skill_ref is not null then c.copied_from_skill_ref else c.id end) = sad.skill_ref_id 
-                               and sad.type = 'Video'
+                               and sad.type in ('Video', 'Slides')
                     where s.id = r.parent_ref_id
                       and c.id = r.child_ref_id
                       and s.project_id = ?1

@@ -27,4 +27,5 @@ class SkillDescription {
     SelfReportingInfo selfReporting
 
     VideoSummary videoSummary
+    SlidesSummary slidesSummary
 }
