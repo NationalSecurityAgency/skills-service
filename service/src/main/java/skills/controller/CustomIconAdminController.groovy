@@ -28,7 +28,7 @@ import skills.icons.CustomIconFacade
 @Slf4j
 @skills.profile.EnableCallStackProf
 class CustomIconAdminController {
-    private static final long maxIconFileSize = 1024*1024
+    public static final long maxIconFileSize = 1024*1024
 
     @Autowired
     CustomIconFacade iconFacade
