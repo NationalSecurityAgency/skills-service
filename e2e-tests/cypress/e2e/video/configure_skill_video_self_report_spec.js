@@ -86,12 +86,12 @@ describe('Configure Self Report Video Type Tests', () => {
 
         cy.get('[data-cy="selfReportTypeSelector"] [value="Video"]')
             .click({ force: true });
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 1)
-        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('be.disabled')
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('have.value', 4)
+        cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').should('not.be.disabled')
         cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
-        cy.get('[data-cy=timeWindowCheckbox] [data-pc-section="input"]').should('not.be.checked')
-        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="pcinputtext"]').should('have.value', 1)
-        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="pcinputtext"]').should('be.disabled')
+        cy.get('[data-cy=timeWindowCheckbox] [data-pc-section="input"]').should('be.checked')
+        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="pcinputtext"]').should('have.value', 2)
+        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="pcinputtext"]').should('not.be.disabled')
 
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
