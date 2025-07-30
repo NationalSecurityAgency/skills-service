@@ -277,6 +277,7 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         p1Skills[0].numPerformToCompletion = 6
         p1Skills[0].pointIncrementInterval = 520
         p1Skills[0].numMaxOccurrencesIncrementInterval = 2
+        p1Skills[0].iconClass = 'fa fa-icon-test'
 
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
         skillsService.createSubject(p1subj2)
@@ -299,6 +300,7 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         p1Skills[0].numPerformToCompletion = 10
         p1Skills[0].pointIncrementInterval = 600
         p1Skills[0].numMaxOccurrencesIncrementInterval = 1
+        p1Skills[0].iconClass = 'fa fa-icon-new-test'
         p1Skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
         skillsService.updateSkill(p1Skills[0], originalSkillId)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
@@ -337,6 +339,7 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         subjSkills_before[0].totalPoints == 6 * 33
         subjSkills_before[0].pointIncrementInterval == 520
         subjSkills_before[0].numMaxOccurrencesIncrementInterval == 2
+        subjSkills_before[0].iconClass == 'fa fa-icon-test'
 
         // after
         subj2.skills[0].skill == "New Name"
@@ -346,6 +349,7 @@ class SkillReuseManagementSpec extends CatalogIntSpec {
         subj2.skills[0].maxOccurrencesWithinIncrementInterval == 1
         subj2.skills[0].selfReporting.enabled
         subj2.skills[0].selfReporting.type == "Approval"
+        subj2.skills[0].iconClass == 'fa fa-icon-new-test'
         subj2_desc[0].description == "New Desc"
         subj2_desc[0].href == "http://sonew.com"
 
