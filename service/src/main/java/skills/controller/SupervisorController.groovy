@@ -227,7 +227,7 @@ class SupervisorController {
         }
 
         if (file.length > CustomIconAdminController.maxIconFileSize) {
-            throw new MaxIconSizeExceeded("[${file.length}] exceeds the maximum icon size of [${FileUtils.byteCountToDisplaySize(maxIconFileSize)}]")
+            throw new MaxIconSizeExceeded("[${file.length}] exceeds the maximum icon size of [${FileUtils.byteCountToDisplaySize(CustomIconAdminController.maxIconFileSize)}]")
         }
 
         UploadedIcon result = iconFacade.saveIcon(null, iconFilename, icon.contentType, file)
