@@ -115,7 +115,7 @@ class PortalWebSecurityHelper {
                 .requestMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
                 .requestMatchers('/root/**').access(hasAnyAuthorityPlus([inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager], RoleName.ROLE_SUPER_DUPER_USER.name()))
                 .requestMatchers('/supervisor/**').access(hasAnyAuthorityPlus([inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager], RoleName.ROLE_SUPERVISOR.name(), RoleName.ROLE_SUPER_DUPER_USER.name()))
-                .requestMatchers('/admin/**').access(hasAnyAuthorityPlus([userCommunityAuthorizationManager], RoleName.ROLE_GLOBAL_BADGE_ADMIN.name(), RoleName.ROLE_QUIZ_READ_ONLY.name(), RoleName.ROLE_SUPER_DUPER_USER.name()))
+                .requestMatchers('/admin/badges/**').access(hasAnyAuthorityPlus([userCommunityAuthorizationManager], RoleName.ROLE_GLOBAL_BADGE_ADMIN.name(),RoleName.ROLE_SUPER_DUPER_USER.name()))
                 .requestMatchers('/admin/quiz-definitions/**').access(hasAnyAuthorityPlus([userCommunityAuthorizationManager], RoleName.ROLE_QUIZ_ADMIN.name(), RoleName.ROLE_QUIZ_READ_ONLY.name(), RoleName.ROLE_SUPER_DUPER_USER.name()))
                 .requestMatchers('/admin/admin-group-definitions/**').access(hasAnyAuthorityPlus([userCommunityAuthorizationManager], RoleName.ROLE_ADMIN_GROUP_OWNER.name(), RoleName.ROLE_SUPER_DUPER_USER.name()))
                 .requestMatchers('/admin/**').access(hasAnyAuthorityPlus([inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager], RoleName.ROLE_PROJECT_ADMIN.name(), RoleName.ROLE_SUPER_DUPER_USER.name(), RoleName.ROLE_PROJECT_APPROVER.name()))
@@ -186,7 +186,7 @@ final class MultipartRequestMatcher implements RequestMatcher {
     private final OrRequestMatcher pathMatcher = new OrRequestMatcher(
             new AntPathRequestMatcher("/api/upload"),
             new AntPathRequestMatcher("/admin/projects/*/icons/upload"),
-            new AntPathRequestMatcher("/admin/icons/upload"),
+            new AntPathRequestMatcher("/admin/icons/upload"),  // TODO add wildcard for ID
             new AntPathRequestMatcher("/admin/*/*/*/*/video"),
             new AntPathRequestMatcher("/admin/*/*/*/*/slides"),
     )

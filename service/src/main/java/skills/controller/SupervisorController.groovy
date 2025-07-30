@@ -182,15 +182,6 @@ class SupervisorController {
         return globalBadgesService.getAvailableProjectsForBadge(badgeId, query)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/levels", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<LevelDefinitionRes> getLevelsForProject(
-            @PathVariable("projectId") String projectId) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-
-        List<LevelDefinitionRes> res = levelDefinitionStorageService.getLevels(projectId)
-        return res
-    }
-
     @RequestMapping(value = "/badges/{badgeId}/projects/{projectId}/level/{level}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult assignProjectLevelToBadge(@PathVariable("badgeId") String badgeId,
