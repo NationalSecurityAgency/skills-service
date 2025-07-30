@@ -28,9 +28,7 @@ import skills.controller.exceptions.MaxIconSizeExceeded
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
-import skills.controller.request.model.NameExistsRequest
 import skills.controller.result.model.*
-import skills.dbupgrade.DBUpgradeSafe
 import skills.icons.CustomIconFacade
 import skills.icons.UploadedIcon
 import skills.metrics.MetricsService
@@ -38,8 +36,6 @@ import skills.profile.EnableCallStackProf
 import skills.services.*
 import skills.services.admin.ProjAdminService
 import skills.utils.InputSanitizer
-
-import java.nio.charset.StandardCharsets
 
 import static skills.services.GlobalBadgesService.AvailableSkillsResult
 
@@ -209,15 +205,16 @@ class SupervisorController {
         return new RequestResult(success: true)
     }
 
-    @RequestMapping(value = "/icons/customIcons", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/badges/{badgeId}/icons/customIcons", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<CustomIconResult> getGlobalCustomIcons() {
-        return iconFacade.getGlobalCustomIcons()
+    List<CustomIconResult> getGlobalCustomIcons(@PathVariable("badgeId") String badgeId) {
+        return iconFacade.getGlobalBadgeCustomIcons(badgeId)
     }
 
-    @RequestMapping(value = "/icons/upload", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/badges/{badgeId}/icons/upload", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
-    UploadedIcon addGlobalCustomIcon(@RequestParam("customIcon") MultipartFile icon) {
+    UploadedIcon addGlobalCustomIcon(@PathVariable("badgeId") String badgeId,
+                                     @RequestParam("customIcon") MultipartFile icon) {
         String iconFilename = icon.originalFilename
         byte[] file = icon.bytes
         icon.contentType
@@ -230,14 +227,15 @@ class SupervisorController {
             throw new MaxIconSizeExceeded("[${file.length}] exceeds the maximum icon size of [${FileUtils.byteCountToDisplaySize(CustomIconAdminController.maxIconFileSize)}]")
         }
 
-        UploadedIcon result = iconFacade.saveIcon(null, iconFilename, icon.contentType, file)
+        UploadedIcon result = iconFacade.saveIcon(null, iconFilename, icon.contentType, file, badgeId)
 
         return result
     }
 
-    @RequestMapping(value = "/icons/{filename}", method = RequestMethod.DELETE)
-    ResponseEntity<Boolean> deleteGlobal(@PathVariable("filename") String filename) {
-        iconFacade.deleteGlobalIcon(filename)
+    @RequestMapping(value = "/badges/{badgeId}/icons/{filename}", method = RequestMethod.DELETE)
+    ResponseEntity<Boolean> deleteGlobalIcon(@PathVariable("badgeId") String badgeId,
+                                             @PathVariable("filename") String filename) {
+        iconFacade.deleteGlobalBadgeIcon(badgeId, filename)
         return ResponseEntity.ok(true)
     }
 

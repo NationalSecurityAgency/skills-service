@@ -38,6 +38,8 @@ class CustomIcon {
 
     String projectId;
 
+    String globalBadgeId;
+
     String filename;
 
     @Basic(fetch = FetchType.EAGER)

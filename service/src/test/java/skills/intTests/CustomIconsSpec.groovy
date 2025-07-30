@@ -19,11 +19,8 @@ package skills.intTests
 import org.springframework.core.io.ClassPathResource
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
-import spock.lang.Specification
 
 import static skills.intTests.utils.SkillsFactory.createProject
-import static skills.intTests.utils.SkillsFactory.createSkills
 import static skills.intTests.utils.SkillsFactory.createSubject
 
 class CustomIconsSpec extends DefaultIntSpec {
@@ -71,7 +68,7 @@ class CustomIconsSpec extends DefaultIntSpec {
         def file = resource.getFile()
         skillsService.uploadIcon([projectId:(projId)], file)
         def result = skillsService.getIconCssForProject([projectId:(projId)])
-        def clientDisplayRes = skillsService.getCustomClientDisplayCss(projId)
+        def clientDisplayRes = skillsService.getCustomIconCssForProject(projId)
         then:
         result == [[filename:'dot2.png', cssClassname:"${projId}-dot2png"]]
         clientDisplayRes.toString().startsWith(".TestProject1-dot2png {\tbackground-image: url(")

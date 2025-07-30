@@ -2943,6 +2943,20 @@
             <column name="global_badge_id" type="varchar(255)"/>
         </createIndex>
 
+        <addColumn tableName="custom_icons">
+            <!-- optional -->
+            <column name="global_badge_id" type="varchar(255)"/>
+        </addColumn>
+
+        <createIndex indexName="index_custom_icons_global_badge_id"
+                     tableName="custom_icons">
+            <column name="global_badge_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_custom_icons_global_badge_id_filename"
+                     tableName="custom_icons" unique="true">
+            <column name="global_badge_id" type="varchar(255)"/>
+            <column name="filename" type="varchar(255)"/>
+        </createIndex>
     </changeSet>
 
 </databaseChangeLog>

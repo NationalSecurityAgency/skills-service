@@ -30,7 +30,7 @@ interface CustomIconRepo extends CrudRepository<CustomIcon, Integer> {
     List<CustomIcon> findAllByProjectId(String projectId)
 
     @Transactional(readOnly = true)
-    List<CustomIcon> findAllByProjectIdIsNull()
+    List<CustomIcon> findAllByGlobalBadgeId(String globalBadgeId)
 
     @Nullable
     CustomIcon findByProjectIdAndFilename(String projectId, String filename)
@@ -38,5 +38,5 @@ interface CustomIconRepo extends CrudRepository<CustomIcon, Integer> {
     void delete(CustomIcon toDelete)
 
     @Transactional
-    void deleteByProjectIdAndFilename(@Nullable String projectId, String filename)
+    void deleteByProjectIdAndGlobalBadgeIdAndFilename(@Nullable String projectId, @Nullable String globalBadgeId, String filename)
 }

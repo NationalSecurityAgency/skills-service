@@ -788,8 +788,8 @@ class SkillsService {
         wsHelper.appGet(url)
     }
 
-    def getCustomClientDisplayCss(String projectId = null){
-        String url = projectId ? "/projects/${projectId}/customIconCss" : "/icons/customIconCss"
+    def getCustomIconCssForProject(String projectId){
+        String url = "/projects/${projectId}/customIconCss"
         wsHelper.get(url.toString(), "api", null, false)
     }
 
@@ -994,12 +994,12 @@ class SkillsService {
     def uploadIcon(Map props, File icon){
         Map body = [:]
         body.put("customIcon", icon)
-        wsHelper.adminUpload("/projects/${props.projectId}/icons/upload", body)
+        wsHelper.adminUpload("/projects/${props.badgeId}/icons/upload", body)
     }
-    def uploadGlobalIcon(File icon){
+    def uploadGlobalIcon(Map props, File icon){
         Map body = [:]
         body.put("customIcon", icon)
-        wsHelper.globalBadgeUpload("/icons/upload", body)
+        wsHelper.adminUpload("/badges/${props.badgeId}/icons/upload", body)
     }
     def uploadAttachment(String fileName, String fileContents, String projectId=null, String skillId=null, String quizId=null){
         Resource resource = GroovyToJavaByteUtils.toByteArrayResource(fileContents, fileName)
@@ -1046,15 +1046,20 @@ class SkillsService {
     }
 
     def deleteGlobalIcon(Map props){
-        wsHelper.globalBadgeDelete("/icons/${props.filename}")
+        wsHelper.globalBadgeDelete("/badges/${props.badgeId}/icons/${props.filename}")
     }
 
     def getIconCssForProject(Map props){
         wsHelper.appGet("/projects/${props.projectId}/customIcons")
     }
 
-    def getIconCssForGlobalIcons(){
-        wsHelper.globalBadgeGet("/icons/customIcons")
+    def getCustomIconsForBadge(Map props){
+        wsHelper.globalBadgeGet("/badges/${props.badgeId}/icons/customIcons")
+    }
+
+    def getCustomIconCssForGlobalBadge(String globalBadgeId) {
+        String url = "/badges/${globalBadgeId}/customIconCss"
+        wsHelper.get(url.toString(), "api", null, false)
     }
 
     def getPerformedSkills(String userId, String project, String query = '', String orderBy = "performedOn") {

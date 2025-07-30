@@ -57,7 +57,7 @@ class CustomIconAdminController {
 
     @RequestMapping(value = "/projects/{projectId}/icons/{filename}", method = RequestMethod.DELETE)
     ResponseEntity<Boolean> delete(@PathVariable("projectId") String projectId, @PathVariable("filename") String filename) {
-        iconFacade.deleteIcon(projectId, filename)
+        iconFacade.deleteProjectIcon(projectId, filename)
         return ResponseEntity.ok(true)
     }
 

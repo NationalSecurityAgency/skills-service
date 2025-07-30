@@ -62,14 +62,14 @@ class CustomIconFacade {
     }
 
     /**
-     * Generates a css style sheet containing all the custom icons fore the specified project id
+     * Generates a css style sheet containing all the custom icons fore the specified global badge id
      *
-     * @param projectId
+     * @param globalBadgeId
      * @return css or an empty string if no custom icons are found
      */
     @Transactional(readOnly = true)
-    String generateGlobalCss(){
-        Collection<CustomIcon> icons = iconService.getGlobalIcons()
+    String generateGlobalBadgeCss(String globalBadgeId){
+        Collection<CustomIcon> icons = iconService.getIconsForGlobalBadge(globalBadgeId)
         return cssGenerator.cssify(icons)
     }
 
@@ -114,7 +114,8 @@ class CustomIconFacade {
      * @return
      */
     @Transactional
-    UploadedIcon saveIcon(String projectId, String iconFilename, String contentType, byte[] file){
+    UploadedIcon saveIcon(String projectId, String iconFilename, String contentType, byte[] file, String globalBadgeId = null) {
+        Validate.isTrue(projectId !== null || globalBadgeId !== null, "projectId or globalBadgeId is required")
         Validate.notNull(iconFilename, "iconFilename is required")
         Validate.notNull(file, "file is required")
 
@@ -126,6 +127,7 @@ class CustomIconFacade {
 
             CustomIcon customIcon = new CustomIcon(
                 projectId: projectId,
+                globalBadgeId: globalBadgeId,
                 filename: iconFilename,
                 contentType: contentType,
                 width: imageDimensions['width'] as Integer,
@@ -150,8 +152,8 @@ class CustomIconFacade {
     }
 
     @Transactional(readOnly = true)
-    List<CustomIconResult> getGlobalCustomIcons() {
-        return iconService.getGlobalCustomIcons()
+    List<CustomIconResult> getGlobalBadgeCustomIcons(String globalBadgeId){
+        return iconService.getGlobalBadgeCustomIcons(globalBadgeId)
     }
 
     private def getImageDimensions(byte[] imageBytes) {
@@ -168,15 +170,16 @@ class CustomIconFacade {
         }
     }
 
-    void deleteIcon(String projectId, String filename){
+    void deleteProjectIcon(String projectId, String filename ){
         Validate.notNull(projectId, "projectId is required")
         Validate.notNull(filename, "filename is required")
-        iconService.deleteIcon(projectId, filename)
+        iconService.deleteProjectIcon(projectId, filename)
     }
 
-    void deleteGlobalIcon(String filename){
+    void deleteGlobalBadgeIcon(String globalBadgeId, String filename) {
+        Validate.notNull(globalBadgeId, "globalBadgeId is required")
         Validate.notNull(filename, "filename is required")
-        iconService.deleteGlobalIcon(filename)
+        iconService.deleteGlobalBadgeIcon(globalBadgeId, filename)
     }
 
     List<String> findUsages(String projectId, String iconClass) {

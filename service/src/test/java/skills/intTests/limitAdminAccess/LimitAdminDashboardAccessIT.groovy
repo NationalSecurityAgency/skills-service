@@ -216,7 +216,7 @@ class LimitAdminDashboardAccessIT extends InviteOnlyBaseSpec {
         def file = resource.getFile()
         userWithAdminRights.uploadIcon([projectId:(projId)], file)
         def result = skillsService.getIconCssForProject([projectId:(projId)])
-        def clientDisplayRes = skillsService.getCustomClientDisplayCss(projId)
+        def clientDisplayRes = skillsService.getCustomIconCssForProject(projId)
         then:
         result == [[filename:'dot2.png', cssClassname:"${projId}-dot2png"]]
         clientDisplayRes.toString().startsWith(".TestProject1-dot2png {\tbackground-image: url(")
