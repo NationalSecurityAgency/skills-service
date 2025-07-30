@@ -37,6 +37,7 @@ import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 import {useSkillsState} from "@/stores/UseSkillsState.js";
 import {useResponsiveBreakpoints} from "@/components/utils/misc/UseResponsiveBreakpoints.js";
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import ReminderMessage from "@/components/utils/misc/ReminderMessage.vue";
 
 const byteFormat = useByteFormat()
 const announcer = useSkillsAnnouncer()
@@ -220,8 +221,8 @@ const setupPreview = () => {
   }
 }
 
-const videoUploadWarningMessage = computed(() => {
-  const warningMessageValue = appConfig?.videoUploadWarningMessage;
+const slidesUploadWarningMessage = computed(() => {
+  const warningMessageValue = appConfig?.slidesUploadWarningMessage;
   try {
 
     let communityValue = null
@@ -230,7 +231,7 @@ const videoUploadWarningMessage = computed(() => {
     } else if (route.params.quizId) {
       communityValue = quizConfig.quizCommunityValue;
     }
-    return projectCommunityReplacement.populateProjectCommunity(warningMessageValue, communityValue, `projId=[${container}], skillId=[${item}] config.videoUploadWarningMessage `);
+    return projectCommunityReplacement.populateProjectCommunity(warningMessageValue, communityValue, `projId=[${container}], skillId=[${item}] config.slidesUploadWarningMessage `);
   } catch (err) {
     // eslint-disable-next-line vue/no-side-effects-in-computed-properties
     console.error(err)
@@ -315,12 +316,26 @@ const formHasAnyData = computed(() => {
       <template #content>
         <skills-spinner v-if="loading" :is-loading="loading" />
         <div v-else>
+          <Message v-if="isReadOnly" severity="info" icon="fas fa-exclamation-triangle" data-cy="readOnlyAlert" :closable="false">
+            Slide attributes of
+            <span v-if="isImported"><Tag severity="success"><i class="fas fa-book mr-1" aria-hidden="true"/> Imported</Tag></span>
+            <span v-if="isReused"><Tag severity="success"><i class="fas fa-recycle mr-1" aria-hidden="true"/> Reused</Tag></span>
+            skills are read-only.
+          </Message>
+          <reminder-message v-if="!isReadOnly"
+              icon="fas fa-lightbulb"
+              id="slideDeckCreationReminderMsg"
+              class="mb-5"
+              :expireAfterMins="20160">
+            PRO TIP: Build your slide deck in your preferred presentation tool (ex. PowerPoint), then export your finished deck as a PDF and upload it here.
+          </reminder-message>
+
           <div class="flex flex-col gap-2">
             <div class="flex flex-col md:flex-row gap-2 md:mb-2">
               <div class="flex-1 content-end">
-                <label>* Slides:</label>
+                <label>* PDF Slides:</label>
               </div>
-              <div class="flex" >
+              <div class="flex" v-if="!isReadOnly">
                 <SkillsButton
                     v-if="!showFileUpload"
                     data-cy="showFileUploadBtn"
@@ -356,6 +371,7 @@ const formHasAnyData = computed(() => {
                 :hosted-file-name="slidesConf.hostedFileName"
                 :show-file-upload="showFileUpload"
                 :isInternallyHosted="slidesConf.isInternallyHosted"
+                :disabled="isReadOnly"
                 name="slidesFile"
                 data-cy="slidesFileInput"/>
 
@@ -365,16 +381,15 @@ const formHasAnyData = computed(() => {
                 variant="simple"
                 size="small"
                 :closable="false"
-                :data-cy="`${name}Error`"
-                :id="`${name}Error`">
+                data-cy="slidesFileError"
+                id="slidesFileError">
               {{ errors['slidesFile'] }}
             </Message>
 
-            <Message v-if="slidesConf.file && videoUploadWarningMessage"
+            <Message v-if="slidesConf.file && slidesUploadWarningMessage"
                      data-cy="slidesUploadWarningMessage"
-                     severity="error"
-                     icon="fas fa-exclamation-circle" :closable="false">
-              {{ videoUploadWarningMessage }}
+                     severity="error" :closable="false">
+              {{ slidesUploadWarningMessage }}
             </Message>
 
             <div v-if="!showFileUpload && !slidesConf.isInternallyHosted">
@@ -393,7 +408,7 @@ const formHasAnyData = computed(() => {
             {{ overallErrMsg }}
           </Message>
 
-          <div class="flex-1 mt-4 flex flex-col md:flex-row gap-2">
+          <div v-if="!isReadOnly" class="flex-1 mt-4 flex flex-col md:flex-row gap-2">
             <div class="flex-1 flex gap-2">
               <SkillsButton
                   severity="success"
@@ -434,6 +449,7 @@ const formHasAnyData = computed(() => {
                   :pdf-url="slidesConf.url"
                   :default-width="configuredSlidesWidthValue"
                   :max-width="layoutSize.tableMaxWidth-50"
+                  :able-to-resize="!isReadOnly"
                   @on-resize="onSlidesResize"
               />
 

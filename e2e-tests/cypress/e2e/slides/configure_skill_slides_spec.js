@@ -281,4 +281,41 @@ describe('Configure Skill Slides Tests', () => {
         cy.get('[data-cy="showExternalUrlBtn"]').should('be.enabled')
     })
 
-});
+    it('only allow valid types for uploaded slides', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visitSlidesConfPage();
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').should('be.disabled')
+        cy.get('#pdfCanvasId').should('not.exist')
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile(`cypress/fixtures/create-quiz.mp4`,  { force: true })
+
+        cy.get('[data-cy="slidesFileError"]').contains('Unsupported [video/mp4] file type')
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').should('be.disabled')
+    })
+
+    it('validate maximum size of the video', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.maxAttachmentSize = 1024 * 3;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visitSlidesConfPage();
+        cy.wait('@loadConfig')
+
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').should('be.disabled')
+        cy.get('#pdfCanvasId').should('not.exist')
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile(`cypress/fixtures/test-slides-1.pdf`, {force: true})
+
+        cy.get('[data-cy="slidesFileError"]').contains('File exceeds maximum size of 3 KB')
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').should('be.disabled')
+    })
+})

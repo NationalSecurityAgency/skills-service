@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup lang="ts">
-import {ref, onMounted, watch, computed, shallowRef, onUnmounted} from 'vue';
+import {ref, onMounted, watch, computed, shallowRef, onUnmounted, isReadonly} from 'vue';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import 'pdfjs-dist/web/pdf_viewer.css';
@@ -40,6 +40,11 @@ const props = defineProps({
     type: Number,
     required: false,
   },
+  ableToResize: {
+    type: Boolean,
+    required: false,
+    default: true
+  }
 });
 const emit = defineEmits(['on-resize'])
 
@@ -83,7 +88,9 @@ const handleFullscreenChange = () => {
 
 onMounted(() => {
   loadPdf().then(() => {
-    createResizeSupport()
+    if (props.ableToResize) {
+      createResizeSupport()
+    }
   })
   document.addEventListener('fullscreenchange', handleFullscreenChange);
   document.addEventListener('keydown', handleKeyDown);
@@ -326,8 +333,9 @@ const downloadPdf = () => {
                  style="--total-scale-factor: 1"></div>
 
             <button
-                v-if="!isFullscreen"
+                v-if="!isFullscreen && ableToResize"
                 :id="`${slidesId}ResizeHandle`"
+                data-cy="slidesResizeHandle"
                 class="resize-handle absolute bottom-2 right-2 px-1 rounded shadow-md z-50 bg-surface-100 dark:bg-surface-700 text-primary cursor-ew-resize hover:bg-surface-200 dark:hover:bg-surface-600"
                 aria-label="Resize slides dimensions. Press right or left to resize."
                 @keyup.right="resizeBigger"
