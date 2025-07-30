@@ -313,6 +313,7 @@ const downloadPdf = () => {
                 :id="`${slidesId}FullscreenBtn`"
                 class="shadow-md"
                 aria-label="Enter fullscreen mode"
+                data-cy="slidesFullscreenBtn"
                 @click="toggleFullscreen"
             />
           </div>
@@ -356,6 +357,7 @@ const downloadPdf = () => {
                   aria-label="Download PDF"
                   icon="fa-solid fa-download"
                   @click="downloadPdf"
+                  data-cy="slidesDownloadPdfBtn"
                   class="shadow-md"
                   size="small"/>
             </div>

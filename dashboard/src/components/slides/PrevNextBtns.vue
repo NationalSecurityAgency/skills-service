@@ -38,16 +38,18 @@ const progressPercent = computed(() => (props.currentPage / props.totalPages) * 
         aria-label="Previous Slide"
         icon="fa-solid fa-circle-chevron-left"
         class="shadow-md"
+        data-cy="prevSlideBtn"
         @click="prevPage"
         :disabled="currentPage <= 1"/>
     <div>
-      <div>Slide {{ currentPage }} of {{ totalPages }}</div>
+      <div data-cy="currentSlideMsg">Slide {{ currentPage }} of {{ totalPages }}</div>
       <ProgressBar :value="progressPercent" :show-value="false" style="height: 5px"></ProgressBar>
     </div>
     <SkillsButton
         aria-label="Next Slide"
         icon="fa-solid fa-circle-chevron-right"
         class="shadow-md"
+        data-cy="nextSlideBtn"
         @click="nextPage"
         :disabled="currentPage >= totalPages"/>
   </div>

@@ -109,7 +109,7 @@ const openFileDialog = (event) => {
           <template #addOnBefore><label class="text-surface-600 dark:text-surface-200" for="videoFileInput"><i class="fas fa-server mr-1"></i>SkillTree Hosted</label></template>
           <template #addOnAfter><SkillsButton
               data-cy="resetBtn"
-              aria-label="Reset Video Upload input option"
+              aria-label="Reset Upload input option"
               @click="emit('reset')"
               icon="fa fa-broom"
               :outlined="false"

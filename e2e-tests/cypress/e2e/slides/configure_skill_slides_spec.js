@@ -18,39 +18,267 @@ describe('Configure Skill Slides Tests', () => {
 
     const testSlidesUrl = '/static/videos/test-slides-1.pdf'
     const slidesFile = 'test-slides-1.pdf';
+    const externalPdfUrl = 'http://localhost:5173/static/videos/test-slides-1.pdf'
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/slides').as('getSlidesProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
-        Cypress.Commands.add("visitSlidesConfPage", (projNum) => {
+        Cypress.Commands.add("visitSlidesConfPage", () => {
             cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-slides');
             cy.wait('@getSlidesProps')
             cy.wait('@getSkillInfo')
             cy.get('.spinner-border').should('not.exist')
         });
+
+
+        Cypress.Commands.add("navThroughSlides", (navBackToStart = false) => {
+            cy.get('#pdfCanvasId').should('be.visible')
+            cy.get('[data-cy="slidesFullscreenBtn"]').should('be.enabled')
+            cy.get('[data-cy="slidesDownloadPdfBtn"]').should('be.enabled')
+
+            cy.get('[data-cy="prevSlideBtn"]').should('be.disabled')
+            cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
+            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
+            cy.get('#skill1Container #text-layer').contains('Sample slides')
+
+            cy.get('[data-cy="nextSlideBtn"]').click()
+            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 5')
+            cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
+            cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
+            cy.get('#skill1Container #text-layer').contains('First cool slide')
+
+            cy.get('[data-cy="nextSlideBtn"]').click()
+            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 3 of 5')
+            cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
+            cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
+            cy.get('#skill1Container #text-layer').contains('Second slide')
+
+            cy.get('[data-cy="nextSlideBtn"]').click()
+            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 4 of 5')
+            cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
+            cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
+            cy.get('#skill1Container #text-layer').contains('Third Slide')
+
+            cy.get('[data-cy="nextSlideBtn"]').click()
+            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 5 of 5')
+            cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
+            cy.get('[data-cy="nextSlideBtn"]').should('be.disabled')
+            cy.get('#skill1Container #text-layer').contains('Fourth Slide')
+
+            if (navBackToStart) {
+                cy.get('[data-cy="prevSlideBtn"]').click()
+                cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 4 of 5')
+                cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
+                cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
+                cy.get('#skill1Container #text-layer').contains('Third Slide')
+
+                cy.get('[data-cy="prevSlideBtn"]').click()
+                cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 3 of 5')
+                cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
+                cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
+                cy.get('#skill1Container #text-layer').contains('Second slide')
+
+                cy.get('[data-cy="prevSlideBtn"]').click()
+                cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 5')
+                cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
+                cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
+                cy.get('#skill1Container #text-layer').contains('First cool slide')
+
+                cy.get('[data-cy="prevSlideBtn"]').click()
+                cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
+                cy.get('[data-cy="prevSlideBtn"]').should('be.disabled')
+                cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
+                cy.get('#skill1Container #text-layer').contains('Sample slides')
+            }
+        });
+
+        Cypress.Commands.add("navThroughSlides2", () => {
+            cy.get('#pdfCanvasId').should('be.visible')
+            cy.get('[data-cy="slidesFullscreenBtn"]').should('be.enabled')
+            cy.get('[data-cy="slidesDownloadPdfBtn"]').should('be.enabled')
+
+            cy.get('[data-cy="prevSlideBtn"]').should('be.disabled')
+            cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
+            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 2')
+            cy.get('#skill1Container #text-layer').contains('This will be first slide')
+
+            cy.get('[data-cy="nextSlideBtn"]').click()
+            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 2')
+            cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
+            cy.get('[data-cy="nextSlideBtn"]').should('be.disabled')
+            cy.get('#skill1Container #text-layer').contains('Second slide this is')
+        })
+
     });
 
-    it('configure slides url', () => {
+    it('configure slides external url', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
         cy.visitSlidesConfPage();
-        // cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        // cy.get('[data-cy="showExternalUrlBtn"]').click()
-        // cy.get('[data-cy="showFileUploadBtn"]').should('be.visible')
-        // cy.get('[data-cy="showExternalUrlBtn"]').should('not.exist')
-        // cy.get('[data-cy="videoUrl"]').type('http://some.vid')
-        // cy.get('[data-cy="videoCaptions"]').type(defaultCaption)
-        // cy.get('[data-cy="videoTranscript"]').type('transcript')
-        // cy.get('[data-cy="saveVideoSettingsBtn"]').click()
-        // cy.get('[data-cy="savedMsg"]')
-        //
-        // cy.visitVideoConfPage();
-        // cy.get('[data-cy="videoUrl"]').should('have.value', 'http://some.vid')
-        // cy.get('[data-cy="videoCaptions"]').should('have.value',defaultCaption)
-        // cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
-        // cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
-        // cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').should('be.disabled')
+        cy.get('#pdfCanvasId').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').click()
+
+        cy.get('[data-cy="showFileUploadBtn"]').should('be.visible')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('not.exist')
+        cy.get('[data-cy="pdfUrl"]').type(externalPdfUrl)
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+
+        cy.navThroughSlides(true)
+
+        cy.visitSlidesConfPage();
+        cy.get('[data-cy="pdfUrl"]').should('have.value', 'http://localhost:5173/static/videos/test-slides-1.pdf')
+        cy.get('#pdfCanvasId').should('be.visible')
+        cy.get('[data-cy="slidesFullscreenBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesDownloadPdfBtn"]').should('be.enabled')
+        cy.get('[data-cy="prevSlideBtn"]').should('be.disabled')
+        cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
+
+        cy.navThroughSlides()
     });
 
+    it('upload slides and preview', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visitSlidesConfPage();
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').should('be.disabled')
+        cy.get('#pdfCanvasId').should('not.exist')
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile(`cypress/fixtures/test-slides-1.pdf`,  { force: true })
+
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+
+        cy.navThroughSlides(true)
+    })
+
+    it('reset existing slides and upload new slides', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.saveSlidesAttrs(1, 1, { file: 'test-slides-1.pdf' })
+
+        cy.visitSlidesConfPage();
+
+        cy.get('[data-cy="videoFileInput"]').should('have.value', 'test-slides-1.pdf')
+        cy.navThroughSlides()
+
+        cy.get('[data-cy="resetBtn"]').click()
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').should('be.disabled')
+        cy.get('#pdfCanvasId').should('not.exist')
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile(`cypress/fixtures/test-slides-2.pdf`,  { force: true })
+
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+
+        cy.navThroughSlides2()
+    })
+
+    it('replace existing uploaded slides with an external url', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.saveSlidesAttrs(1, 1, { file: 'test-slides-2.pdf' })
+
+        cy.visitSlidesConfPage();
+
+        cy.get('[data-cy="videoFileInput"]').should('have.value', 'test-slides-2.pdf')
+        cy.navThroughSlides2()
+
+        cy.get('[data-cy="showExternalUrlBtn"]').click()
+
+        cy.get('[data-cy="showFileUploadBtn"]').should('be.visible')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('not.exist')
+        cy.get('#pdfCanvasId').should('not.exist')
+        cy.get('[data-cy="pdfUrl"]').type(externalPdfUrl)
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+
+        cy.navThroughSlides()
+
+        cy.visitSlidesConfPage()
+        cy.navThroughSlides()
+    })
+
+    it('replace existing external url with uploaded slides', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.saveSlidesAttrs(1, 1, { url: externalPdfUrl })
+
+        cy.visitSlidesConfPage();
+        cy.get('[data-cy="pdfUrl"]').should('have.value', externalPdfUrl)
+        cy.get('[data-cy="showFileUploadBtn"]').should('be.visible')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('not.exist')
+        cy.navThroughSlides()
+
+        cy.get('[data-cy="showFileUploadBtn"]').click()
+
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.visible')
+        cy.get('#pdfCanvasId').should('not.exist')
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile(`cypress/fixtures/test-slides-2.pdf`,  { force: true })
+
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+
+        cy.navThroughSlides2()
+    })
+
+    it('clear attributes when external url is configured', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.saveSlidesAttrs(1, 1, { url: externalPdfUrl })
+
+        cy.visitSlidesConfPage();
+
+        cy.get('[data-cy="pdfUrl"]').should('have.value', externalPdfUrl)
+        cy.get('#pdfCanvasId').should('be.visible')
+        cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
+        cy.get('#skill1Container #text-layer').contains('Sample slides')
+
+        cy.get('[data-cy="clearSlidesSettingsBtn"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-section="message"]').contains('Slide settings will be permanently cleared')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcacceptbutton"]').click()
+
+        cy.get('[data-cy="pdfUrl"]').should('not.exist')
+        cy.get('#pdfCanvasId').should('not.exist')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.enabled')
+    })
+
+    it('clear attributes when file was uploaded', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.saveSlidesAttrs(1, 1, { file: 'test-slides-1.pdf' })
+
+        cy.visitSlidesConfPage();
+
+        cy.get('[data-cy="videoFileInput"]').should('have.value', 'test-slides-1.pdf')
+        cy.get('[data-cy="pdfUrl"]').should('not.exist')
+        cy.get('#pdfCanvasId').should('be.visible')
+        cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
+        cy.get('#skill1Container #text-layer').contains('Sample slides')
+
+        cy.get('[data-cy="clearSlidesSettingsBtn"]').click()
+        cy.get('[data-pc-name="dialog"] [data-pc-section="message"]').contains('Slide settings will be permanently cleared')
+        cy.get('[data-pc-name="dialog"] [data-pc-name="pcacceptbutton"]').click()
+
+        cy.get('[data-cy="pdfUrl"]').should('not.exist')
+        cy.get('#pdfCanvasId').should('not.exist')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="saveSlidesSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.enabled')
+    })
 
 });

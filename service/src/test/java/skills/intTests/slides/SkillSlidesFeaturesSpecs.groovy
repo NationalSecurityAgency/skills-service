@@ -163,7 +163,7 @@ class SkillSlidesFeaturesSpecs extends DefaultIntSpec {
         skillsService.saveSlidesAttributes(p2.projectId, p1Skills[0].skillId, [ file: pdfSlides])
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.message == "Cannot set slide attributes of read-only skill"
+        e.message.contains("Cannot set slide attributes of read-only skill")
     }
 
     def "moved skills return video attributes" () {

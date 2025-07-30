@@ -35,6 +35,8 @@ import {useProjectCommunityReplacement} from "@/components/customization/UseProj
 import SlidesService from "@/components/slides/SlidesService.js";
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 import {useSkillsState} from "@/stores/UseSkillsState.js";
+import {useResponsiveBreakpoints} from "@/components/utils/misc/UseResponsiveBreakpoints.js";
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
 const byteFormat = useByteFormat()
 const announcer = useSkillsAnnouncer()
@@ -47,6 +49,8 @@ const projConfig = useProjConfig()
 const projectCommunityReplacement = useProjectCommunityReplacement()
 const layoutSize = useLayoutSizesState()
 const skillsState = useSkillsState();
+const responsive = useResponsiveBreakpoints()
+const dialogMessages = useDialogMessages()
 
 const container = route.params.projectId ? route.params.projectId : route.params.quizId;
 const item = route.params.skillId ? route.params.skillId : route.params.questionId;
@@ -55,7 +59,6 @@ const isSkill = !!route.params.skillId;
 const slidesConf = ref({
   file: null,
   url: '',
-  transcript: '',
   isInternallyHosted: false,
   hostedFileName: '',
 })
@@ -160,7 +163,7 @@ const saveSettings = () => {
     if (slidesConf.value.isInternallyHosted) {
       data.append('isAlreadyHosted', slidesConf.value.isInternallyHosted);
     } else {
-      data.append('slidesUrl', slidesConf.value.url);
+      data.append('url', slidesConf.value.url);
     }
   }
   if (configuredSlidesWidthValue.value) {
@@ -171,7 +174,7 @@ const saveSettings = () => {
   return FileUploadService.upload(endpoint, data, (response) => {
     updateSlidesSettings(response.data);
     showSavedMsg.value = true;
-    loading.value.video = false;
+    loading.value = false;
     setTimeout(() => {
       showSavedMsg.value = false;
     }, 3500);
@@ -255,6 +258,54 @@ const onSlidesResize = (newWidth) => {
   unsavedConfigChanges.value = true
   hasBeenResized.value = true
 }
+
+const switchToFileUploadOption = () => {
+  showFileUpload.value = true;
+  clearSlidesOptions();
+}
+const switchToExternalUrlOption = () => {
+  showFileUpload.value = false;
+  clearSlidesOptions();
+}
+const clearSlidesOptions = () => {
+  slidesConf.value.isInternallyHosted = false;
+  slidesConf.value.hostedFileName = '';
+  slidesConf.value.url = '';
+  slidesConf.value.file = null;
+  preview.value = false;
+  validate();
+}
+const hasSlidesUrl = computed(() => {
+  return slidesConf.value.url && slidesConf.value.url.trim().length > 0;
+});
+const confirmClearSettings = () => {
+  dialogMessages.msgConfirm({
+    message: 'Slide settings will be permanently cleared. Are you sure you want to proceed?',
+    header: 'Please Confirm!',
+    acceptLabel: 'Yes, Do clear',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      clearSettings();
+    }
+  });
+}
+const clearSettings = () => {
+  loading.value = true;
+  slidesConf.value.url = '';
+  slidesConf.value.type = '';
+  slidesConf.value.file = null;
+  preview.value = false;
+  switchToFileUploadOption();
+  SlidesService.deleteSettings(container, item, isSkill)
+      .finally(() => {
+        loading.value = false;
+        validate();
+        announcer.polite('Slides settings were cleared');
+      });
+}
+const formHasAnyData = computed(() => {
+  return slidesConf.value.url;
+});
 </script>
 
 <template>
@@ -265,11 +316,45 @@ const onSlidesResize = (newWidth) => {
         <skills-spinner v-if="loading" :is-loading="loading" />
         <div v-else>
           <div class="flex flex-col gap-2">
-            <label>* Slides:</label>
+            <div class="flex flex-col md:flex-row gap-2 md:mb-2">
+              <div class="flex-1 content-end">
+                <label>* Slides:</label>
+              </div>
+              <div class="flex" >
+                <SkillsButton
+                    v-if="!showFileUpload"
+                    data-cy="showFileUploadBtn"
+                    :disabled="isReadOnly"
+                    size="small"
+                    severity="info"
+                    outlined
+                    :class="{'w-full': responsive.md.value }"
+                    aria-label="Switch to Video Upload input option"
+                    @click="switchToFileUploadOption"
+                    icon="fas fa-arrow-circle-up"
+                    label="Switch to Upload">
+                </SkillsButton>
+                <SkillsButton
+                    v-if="showFileUpload"
+                    data-cy="showExternalUrlBtn"
+                    :disabled="isReadOnly"
+                    size="small"
+                    severity="info"
+                    outlined
+                    :class="{'w-full': responsive.md.value }"
+                    aria-label="Switch to External Link input option"
+                    @click="switchToExternalUrlOption"
+                    icon="fas fa-globe"
+                    label="Switch to External Link">
+                </SkillsButton>
+              </div>
+            </div>
             <video-file-input
+                v-if="showFileUpload"
                 @file-selected="onFileSelectedEvent"
-                :show-file-upload="true"
+                @reset="switchToFileUploadOption"
                 :hosted-file-name="slidesConf.hostedFileName"
+                :show-file-upload="showFileUpload"
                 :isInternallyHosted="slidesConf.isInternallyHosted"
                 name="slidesFile"
                 data-cy="slidesFileInput"/>
@@ -292,13 +377,13 @@ const onSlidesResize = (newWidth) => {
               {{ videoUploadWarningMessage }}
             </Message>
 
-            <div v-if="!showFileUpload && !skillsConf.isInternallyHosted">
-              <SkillsTextInput id="videoUrlInput"
-                               v-model="skillsConf.url"
-                               name="videoUrl"
-                               data-cy="videoUrl"
+            <div v-if="!showFileUpload && !slidesConf.isInternallyHosted">
+              <SkillsTextInput id="pdfUrlInput"
+                               v-model="slidesConf.url"
+                               name="pdfUrl"
+                               data-cy="pdfUrl"
                                @input="validate"
-                               placeholder="Please enter audio/video external URL"
+                               placeholder="Please enter pdf external URL"
                                :disabled="isReadOnly"
               />
             </div>
@@ -308,21 +393,39 @@ const onSlidesResize = (newWidth) => {
             {{ overallErrMsg }}
           </Message>
 
-          <div class="flex-1 mt-3 flex">
-            <SkillsButton
-                severity="success"
-                data-cy="saveSlidesSettingsBtn"
-                aria-label="Save slides settings"
-                @click="submitSaveSettingsForm"
-                icon="fas fa-save"
-                label="Save and Preview"/>
-            <InlineMessage v-if="showSavedMsg" aria-hidden="true" class="ml-4" data-cy="savedMsg" severity="success" size="small" icon="fas fa-check">Saved</InlineMessage>
+          <div class="flex-1 mt-4 flex flex-col md:flex-row gap-2">
+            <div class="flex-1 flex gap-2">
+              <SkillsButton
+                  severity="success"
+                  data-cy="saveSlidesSettingsBtn"
+                  aria-label="Save slides settings"
+                  @click="submitSaveSettingsForm"
+                  :disabled="!hasSlidesUrl || !meta.valid"
+                  icon="fas fa-save"
+                  label="Save and Preview"/>
+              <InlineMessage v-if="showSavedMsg" aria-hidden="true" data-cy="savedMsg" severity="success"
+                             size="small" icon="fas fa-check">Saved
+              </InlineMessage>
+            </div>
+            <div>
+              <SkillsButton
+                  severity="danger"
+                  outlined
+                  :disabled="!formHasAnyData"
+                  data-cy="clearSlidesSettingsBtn"
+                  id="clearSlidesSettingsBtn"
+                  :track-for-focus="true"
+                  aria-label="Clear video settings"
+                  @click="confirmClearSettings"
+                  icon="fas fa-trash-alt"
+                  label="Clear"/>
+            </div>
+
           </div>
 
-
-          <Card v-if="preview" class="mt-4" data-cy="slidesPreviewCard" :pt="{ body: { class: 'p-0!' } }">
+          <Card v-if="preview" class="mt-7" data-cy="slidesPreviewCard" :pt="{ body: { class: 'p-0!' } }">
             <template #header>
-              <div class="border border-surface rounded-t bg-surface-100 dark:bg-surface-700 p-4">Slides Preview</div>
+              <div class="border border-surface rounded-t bg-surface-100 dark:bg-surface-700 p-4 uppercase">Preview</div>
             </template>
             <template #content>
               <slide-deck
