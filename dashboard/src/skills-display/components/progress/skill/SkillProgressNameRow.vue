@@ -127,9 +127,9 @@ const groupLabel = computed(() => attributes.groupDisplayName)
       <div class="py-1 md:flex items-center">
         <div class="sd-theme-primary-color font-medium flex">
           <div class="rounded-border w-16 skill-icon-container text-primary text-center border mr-2">
-            <i v-if="skill.isSkillsGroupType" class="fas fa-layer-group"></i>
+            <i v-if="skill.isSkillsGroupType" class="skill-icon fas fa-layer-group"></i>
             <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType" class="skill-icon" :class="`${skill?.iconClass ? skill?.iconClass : 'fas fa-graduation-cap'}`"></i>
-            <i v-if="skill.copiedFromProjectId" class="fas fa-book text-secondary"></i>
+            <i v-if="skill.copiedFromProjectId" class="skill-icon text-secondary" :class="`${skill?.iconClass ? skill?.iconClass : 'fas fa-book'}`"></i>
           </div>
           <div class="flex items-center">
             <div v-if="skillDisplayInfo.isGlobalBadgePage.value">
