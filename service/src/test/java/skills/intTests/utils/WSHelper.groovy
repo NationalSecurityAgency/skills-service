@@ -127,14 +127,14 @@ class WSHelper {
     }
 
     def globalBadgeGet(String endpoint, def params = null) {
-        get(endpoint, "admin/global-badge-definitions", params)
+        get(endpoint, "admin/", params)
     }
 
     def globalBadgePut(String endpoint, def params = null) {
-        put(endpoint, "admin/global-badge-definitions", params)
+        put(endpoint, "admin/", params)
     }
     def globalBadgeDelete(String endpoint, def params = null) {
-        delete(endpoint, "admin/global-badge-definitions", params)
+        delete(endpoint, "admin/", params)
     }
 
     def adminPost(String endpoint, def params, boolean throwExceptionOnFailure = true) {
@@ -142,7 +142,7 @@ class WSHelper {
     }
 
     def globalBadgePost(String endpoint, def params, boolean throwExceptionOnFailure = true) {
-        post(endpoint, "admin/global-badge-definitions", params, HttpStatus.OK, throwExceptionOnFailure )
+        post(endpoint, "admin/", params, HttpStatus.OK, throwExceptionOnFailure )
     }
 
     def adminDelete(String endpoint, def params = null) {
@@ -172,13 +172,13 @@ class WSHelper {
     }
 
     def globalBadgeUpload(String endpoint, Map params = null) {
-        String url = "${skillsService}/admin/global-badge-definitions${endpoint}"
+        String url = "${skillsService}/admin/${endpoint}"
         log.info("MULTIPART POST: {}", url)
         return multipartPost(url, params)
     }
 
     def supervisorPatch(String endpoint, def params, boolean throwExceptionOnFailure = true, MediaType mediaType = MediaType.APPLICATION_JSON) {
-        patch(endpoint, "/admin/global-badge-definitions", params, HttpStatus.OK, throwExceptionOnFailure, mediaType)
+        patch(endpoint, "/admin/", params, HttpStatus.OK, throwExceptionOnFailure, mediaType)
     }
 
     def adminPatch(String endpoint, def params, boolean throwExceptionOnFailure = true, MediaType mediaType = MediaType.APPLICATION_JSON) {

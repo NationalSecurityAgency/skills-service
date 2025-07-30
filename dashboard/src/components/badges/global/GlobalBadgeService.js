@@ -21,13 +21,13 @@ export default {
   },
   getBadge(badgeId) {
     return axios
-      .get(`/admin/global-badge-definitions/badges/${encodeURIComponent(badgeId)}`)
+      .get(`/admin/badges/${encodeURIComponent(badgeId)}`)
       .then((response) => response.data)
   },
   saveBadge(badgeReq) {
     if (badgeReq.isEdit) {
       return axios
-        .put(`/admin/global-badge-definitions/badges/${encodeURIComponent(badgeReq.originalBadgeId)}`, badgeReq)
+        .put(`/admin/badges/${encodeURIComponent(badgeReq.originalBadgeId)}`, badgeReq)
         .then(() => this.getBadge(badgeReq.badgeId))
     }
     const req = { enabled: false, ...badgeReq }
@@ -37,11 +37,11 @@ export default {
   },
   deleteBadge(badgeId) {
     return axios
-      .delete(`/admin/global-badge-definitions/badges/${encodeURIComponent(badgeId)}`)
+      .delete(`/admin/badges/${encodeURIComponent(badgeId)}`)
       .then((response) => response.data)
   },
   updateBadgeDisplaySortOrder(badgeId, newDisplayOrderIndex) {
-    return axios.patch(`/admin/global-badge-definitions/badges/${encodeURIComponent(badgeId)}`, {
+    return axios.patch(`/admin/badges/${encodeURIComponent(badgeId)}`, {
       action: 'NewDisplayOrderIndex',
       newDisplayOrderIndex
     })
@@ -59,55 +59,55 @@ export default {
   assignSkillToBadge(badgeId, projectId, skillId) {
     return axios
       .post(
-        `/admin/global-badge-definitions/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}`
+        `/admin/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}`
       )
       .then((res) => res.data)
   },
   removeSkillFromBadge(badgeId, projectId, skillId) {
     return axios
       .delete(
-        `/admin/global-badge-definitions/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}`
+        `/admin/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}`
       )
       .then((res) => res.data)
   },
   getBadgeSkills(badgeId) {
     return axios
-      .get(`/admin/global-badge-definitions/badges/${encodeURIComponent(badgeId)}/skills`)
+      .get(`/admin/badges/${encodeURIComponent(badgeId)}/skills`)
       .then((res) => res.data)
   },
   suggestProjectSkills(badgeId, search) {
     return axios
-      .get(`/admin/global-badge-definitions/badges/${encodeURIComponent(badgeId)}/skills/available?query=${search}`)
+      .get(`/admin/badges/${encodeURIComponent(badgeId)}/skills/available?query=${search}`)
       .then((res) => res.data)
   },
   suggestProjectsForPage(badgeId, search) {
     return axios
-      .get(`/admin/global-badge-definitions/badges/${encodeURIComponent(badgeId)}/projects/available?query=${search}`)
+      .get(`/admin/badges/${encodeURIComponent(badgeId)}/projects/available?query=${search}`)
       .then((res) => res.data)
   },
   getProjectLevels(projectId) {
     return axios
-      .get(`/admin/global-badge-definitions/projects/${encodeURIComponent(projectId)}/levels`)
+      .get(`/admin/projects/${encodeURIComponent(projectId)}/levels`)
       .then((res) => res.data)
   },
   assignProjectLevelToBadge(badgeId, projectId, levelId) {
     return axios
       .post(
-        `/admin/global-badge-definitions/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/level/${encodeURIComponent(levelId)}`
+        `/admin/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/level/${encodeURIComponent(levelId)}`
       )
       .then((res) => res.data)
   },
   removeProjectLevelFromBadge(badgeId, projectId, level) {
     return axios
       .delete(
-        `/admin/global-badge-definitions/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/level/${level}`
+        `/admin/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/level/${level}`
       )
       .then((res) => res.data)
   },
   changeProjectLevel(badgeId, projectId, oldLevel, newLevel) {
     return axios
       .post(
-        `/admin/global-badge-definitions/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/level/${oldLevel}/${newLevel}`
+        `/admin/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/level/${oldLevel}/${newLevel}`
       )
       .then((res) => res.data)
   }

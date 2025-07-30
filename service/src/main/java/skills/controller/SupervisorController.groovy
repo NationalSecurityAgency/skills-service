@@ -44,7 +44,7 @@ import java.nio.charset.StandardCharsets
 import static skills.services.GlobalBadgesService.AvailableSkillsResult
 
 @RestController
-@RequestMapping("/admin/global-badge-definitions")
+@RequestMapping("/admin")
 @Slf4j
 @EnableCallStackProf
 class SupervisorController {
