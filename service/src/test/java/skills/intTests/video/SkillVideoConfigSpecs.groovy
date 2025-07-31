@@ -62,23 +62,7 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("Video URL must be configured prior to attempting to set selfReportingType=Video")
     }
-
-    def "not allowed to save self-report=video if numPerformToCompletion > 1"() {
-        def p1 = createProject(1)
-        def p1subj1 = createSubject(1, 1)
-        def p1Skills = createSkills(1, 1, 1, 100)
-        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
-
-        skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[0].skillId, [videoUrl: "http://some.url"])
-        p1Skills[0].selfReportingType = SkillDef.SelfReportingType.Video
-        p1Skills[0].numPerformToCompletion = 2
-        when:
-        skillsService.createSkill(p1Skills[0])
-        then:
-        SkillsClientException skillsClientException = thrown()
-        skillsClientException.message.contains("When selfReportingType=Video numPerformToCompletion must equal to 1 but [2] was provided")
-    }
-
+    
     def "save and get video settings" () {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)

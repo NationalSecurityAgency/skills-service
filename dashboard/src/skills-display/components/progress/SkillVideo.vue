@@ -166,7 +166,7 @@ const loadTranscript = () => {
   }
 
 };
-const totalPointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNameLower, props.skill.totalPoints))
+const pointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNameLower, props.skill.pointIncrement))
 </script>
 
 <template>
@@ -245,7 +245,7 @@ const totalPointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNa
                   v-model="transcriptReadCert"
                   data-cy="certifyTranscriptReadCheckbox"
               />
-              <label for="readTranscript" class="ml-2">I <b>certify</b> that I fully read the transcript. Please award the {{ attributes.skillDisplayNameLower }} and its <Tag>{{skill.totalPoints}}</Tag> {{ totalPointsLbl }}.</label>
+              <label for="readTranscript" class="ml-2">I <b>certify</b> that I fully read the transcript. Please award the {{ attributes.skillDisplayNameLower }} and its <Tag>{{skill.pointIncrement}}</Tag> {{ pointsLbl }}.</label>
             </div>
             <div class="flex">
               <SkillsButton
@@ -269,7 +269,7 @@ const totalPointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNa
             </div>
             <div class="flex-1 italic pt-1" data-cy="videoAlert">
               This {{ attributes.skillDisplayNameLower }}'s achievement expires <span class="font-semibold">{{ timeUtils.relativeTime(skill.expirationDate) }}</span>, but your <span class="font-size-1">
-            <Tag severity="info">{{ numFormat.pretty(skill.totalPoints) }}</Tag></span> {{ totalPointsLbl }} can be retained by {{ videoConf.isAudio ? 'listening to the audio again.' : 'watching the video again.'}}
+            <Tag severity="info">{{ numFormat.pretty(skill.pointIncrement) }}</Tag></span> {{ pointsLbl }} can be retained by {{ videoConf.isAudio ? 'listening to the audio again.' : 'watching the video again.'}}
             </div>
           </div>
         </template>
@@ -286,11 +286,11 @@ const totalPointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNa
             <div class="flex-1" data-cy="watchVideoMsg">
               <div v-if="!justAchieved">
                 <i class="fas fa-video font-size-2 mr-1 animate__bounceIn" aria-hidden="true"></i>
-                Earn <b>{{ skill.totalPoints }}</b> {{ totalPointsLbl }} for the  {{ attributes.skillDisplayNameLower }} {{ videoConf.isAudio ? 'by listening to this Audio.' : 'by watching this Video.' }}
+                Earn <b>{{ skill.pointIncrement }}</b> {{ pointsLbl }} for the  {{ attributes.skillDisplayNameLower }} {{ videoConf.isAudio ? 'by listening to this Audio.' : 'by watching this Video.' }}
               </div>
               <div v-if="justAchieved">
                 <i class="fas fa-birthday-cake text-success mr-1 animate__bounceIn" style="font-size: 1.2rem"></i> Congrats! You just earned <span
-                  class="text-success font-weight-bold">{{ skill.totalPoints }}</span> {{ totalPointsLbl }}<span> and <b>completed</b> the {{ attributes.skillDisplayNameLower }}</span>!
+                  class="text-success font-weight-bold">{{ skill.pointIncrement }}</span> {{ pointsLbl }}<span><span v-if="skill.points === skill.totalPoints"> and <b>completed</b> the {{ attributes.skillDisplayNameLower }}</span>!</span>
               </div>
             </div>
           </div>

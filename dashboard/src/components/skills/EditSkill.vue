@@ -146,7 +146,7 @@ const isQuizAssignableToSkill = (selectedQuiz, context) => {
 }
 
 const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
-  return (selfReportingType.value === 'Quiz' || selfReportingType.value === 'Video')
+  return (selfReportingType.value === 'Quiz')
 })
 const skillEnabled = ref(props.isSubjectEnabled && (!props.groupId || props.isGroupEnabled) && !props.isEdit ? true : props.isSubjectEnabled && props.skill.enabled)
 const onEnabledChanged = (event) => {
