@@ -38,56 +38,56 @@ describe('Configure Skill Slides Tests', () => {
             cy.get('[data-cy="prevSlideBtn"]').should('be.disabled')
             cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
             cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
-            cy.get('#skill1Container #text-layer').contains('Sample slides')
+            cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
 
             cy.get('[data-cy="nextSlideBtn"]').click()
             cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 5')
             cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
             cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-            cy.get('#skill1Container #text-layer').contains('First cool slide')
+            cy.get('#proj1-skill1Container #text-layer').contains('First cool slide')
 
             cy.get('[data-cy="nextSlideBtn"]').click()
             cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 3 of 5')
             cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
             cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-            cy.get('#skill1Container #text-layer').contains('Second slide')
+            cy.get('#proj1-skill1Container #text-layer').contains('Second slide')
 
             cy.get('[data-cy="nextSlideBtn"]').click()
             cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 4 of 5')
             cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
             cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-            cy.get('#skill1Container #text-layer').contains('Third Slide')
+            cy.get('#proj1-skill1Container #text-layer').contains('Third Slide')
 
             cy.get('[data-cy="nextSlideBtn"]').click()
             cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 5 of 5')
             cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
             cy.get('[data-cy="nextSlideBtn"]').should('be.disabled')
-            cy.get('#skill1Container #text-layer').contains('Fourth Slide')
+            cy.get('#proj1-skill1Container #text-layer').contains('Fourth Slide')
 
             if (navBackToStart) {
                 cy.get('[data-cy="prevSlideBtn"]').click()
                 cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 4 of 5')
                 cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
                 cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-                cy.get('#skill1Container #text-layer').contains('Third Slide')
+                cy.get('#proj1-skill1Container #text-layer').contains('Third Slide')
 
                 cy.get('[data-cy="prevSlideBtn"]').click()
                 cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 3 of 5')
                 cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
                 cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-                cy.get('#skill1Container #text-layer').contains('Second slide')
+                cy.get('#proj1-skill1Container #text-layer').contains('Second slide')
 
                 cy.get('[data-cy="prevSlideBtn"]').click()
                 cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 5')
                 cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
                 cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-                cy.get('#skill1Container #text-layer').contains('First cool slide')
+                cy.get('#proj1-skill1Container #text-layer').contains('First cool slide')
 
                 cy.get('[data-cy="prevSlideBtn"]').click()
                 cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
                 cy.get('[data-cy="prevSlideBtn"]').should('be.disabled')
                 cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-                cy.get('#skill1Container #text-layer').contains('Sample slides')
+                cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
             }
         });
 
@@ -99,13 +99,13 @@ describe('Configure Skill Slides Tests', () => {
             cy.get('[data-cy="prevSlideBtn"]').should('be.disabled')
             cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
             cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 2')
-            cy.get('#skill1Container #text-layer').contains('This will be first slide')
+            cy.get('#proj1-skill1Container #text-layer').contains('This will be first slide')
 
             cy.get('[data-cy="nextSlideBtn"]').click()
             cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 2')
             cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
             cy.get('[data-cy="nextSlideBtn"]').should('be.disabled')
-            cy.get('#skill1Container #text-layer').contains('Second slide this is')
+            cy.get('#proj1-skill1Container #text-layer').contains('Second slide this is')
         })
 
     });
@@ -243,7 +243,7 @@ describe('Configure Skill Slides Tests', () => {
         cy.get('[data-cy="pdfUrl"]').should('have.value', externalPdfUrl)
         cy.get('#pdfCanvasId').should('be.visible')
         cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
-        cy.get('#skill1Container #text-layer').contains('Sample slides')
+        cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
 
         cy.get('[data-cy="clearSlidesSettingsBtn"]').click()
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]').contains('Slide settings will be permanently cleared')
@@ -268,7 +268,7 @@ describe('Configure Skill Slides Tests', () => {
         cy.get('[data-cy="pdfUrl"]').should('not.exist')
         cy.get('#pdfCanvasId').should('be.visible')
         cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
-        cy.get('#skill1Container #text-layer').contains('Sample slides')
+        cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
 
         cy.get('[data-cy="clearSlidesSettingsBtn"]').click()
         cy.get('[data-pc-name="dialog"] [data-pc-section="message"]').contains('Slide settings will be permanently cleared')

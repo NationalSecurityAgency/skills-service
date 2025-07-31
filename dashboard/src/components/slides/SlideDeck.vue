@@ -145,7 +145,6 @@ watch(() => props.maxWidth, () => {
 })
 
 const renderPage = (pageNum, requestedWidth = null) => {
-  const uuid = Math.random().toString(36).substring(2, 9);
   if (isRendingPage.value || pageNum < 1 || pageNum > totalPages.value) {
     return Promise.resolve();
   }
@@ -157,11 +156,11 @@ const renderPage = (pageNum, requestedWidth = null) => {
     if (isFullscreen.value) {
       const newScale = window.innerWidth / viewport.width;
       viewport = page.getViewport({scale: newScale,});
-    } else if (props.maxWidth && props.maxWidth < viewport.width) {
-      const newScale = props.maxWidth / viewport.width;
-      viewport = page.getViewport({scale: newScale,});
     } else if (requestedWidth != null) {
       const newScale = requestedWidth / viewport.width;
+      viewport = page.getViewport({scale: newScale,});
+    } else if (props.maxWidth && props.maxWidth < viewport.width) {
+      const newScale = props.maxWidth / viewport.width;
       viewport = page.getViewport({scale: newScale,});
     } else if (props.defaultWidth != null) {
       const widthToUse = Math.min(props.defaultWidth, props.maxWidth || Number.MAX_SAFE_INTEGER)

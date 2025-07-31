@@ -90,7 +90,7 @@ describe('Configure slides and SkillTree Features Tests', () => {
         cy.get('[data-cy="savedMsg"]')
         cy.get('#pdfCanvasId').should('be.visible')
         cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
-        cy.get('#skill1Container #text-layer').contains('Sample slides')
+        cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
 
         // click away and return
         cy.get('[data-cy="nav-Overview"]').click()
@@ -99,7 +99,7 @@ describe('Configure slides and SkillTree Features Tests', () => {
         cy.get('[data-cy="nav-Slides"]').click()
         cy.get('#pdfCanvasId').should('be.visible')
         cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
-        cy.get('#skill1Container #text-layer').contains('Sample slides')
+        cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
         cy.get('[data-cy="slidesUploadWarningMessage"]').should('not.exist')
     });
 

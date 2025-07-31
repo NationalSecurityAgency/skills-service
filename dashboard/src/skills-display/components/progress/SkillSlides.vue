@@ -29,7 +29,7 @@ const slidesContainerSize = useElementSizeUtil(slidesContainer)
 const url = computed(() => props.skill.slidesSummary?.url)
 const hasSlides = computed(() => url.value != null)
 
-const slidesId = computed(() => `${props.skill.projectId}-slides`)
+const slidesId = computed(() => `${props.skill.projectId}-${props.skill.skillId}-slides`)
 
 const widthInLocalStorageAsString = useStorage(`${slidesId.value}-slidesWidth`, null)
 const widthInLocalStorage = computed(() => widthInLocalStorageAsString.value ? parseInt(widthInLocalStorageAsString.value) : null)

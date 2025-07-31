@@ -181,11 +181,11 @@ const saveSettings = () => {
     }, 3500);
     announcer.polite('Slides settings were saved');
     setupPreview();
-  }, (error) => {
     isSaving.value = false;
     unsavedConfigChanges.value = false;
+  }, (error) => {
     upgradeInProgressErrorChecker.checkError(error)
-  });
+  })
 }
 
 const updateSlidesSettings = (settingRes) => {
@@ -445,7 +445,7 @@ const formHasAnyData = computed(() => {
             <template #content>
               <slide-deck
                   class="my-5"
-                  :slides-id="`${route.params.skillId}`"
+                  :slides-id="`${route.params.projectId}-${route.params.skillId}`"
                   :pdf-url="slidesConf.url"
                   :default-width="configuredSlidesWidthValue"
                   :max-width="layoutSize.tableMaxWidth-50"
@@ -469,7 +469,7 @@ const formHasAnyData = computed(() => {
                       class="mt-2"
                       outlined
                       :disabled="!meta.valid || !unsavedConfigChanges"
-                      data-cy="updateVideoSettings"
+                      data-cy="updateSlidesSettingsBtn"
                       aria-label="Save video settings"
                       @click="submitSaveSettingsForm"
                       :loading="isSaving"
