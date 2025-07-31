@@ -994,7 +994,7 @@ class SkillsService {
     def uploadIcon(Map props, File icon){
         Map body = [:]
         body.put("customIcon", icon)
-        wsHelper.adminUpload("/projects/${props.badgeId}/icons/upload", body)
+        wsHelper.adminUpload("/projects/${props.projectId}/icons/upload", body)
     }
     def uploadGlobalIcon(Map props, File icon){
         Map body = [:]
