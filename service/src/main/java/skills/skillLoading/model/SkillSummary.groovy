@@ -56,4 +56,6 @@ class SkillSummary extends SkillSummaryParent {
     String groupSkillId
 
     List<ApprovalEvent> approvalHistory = []
+
+    String iconClass
 }

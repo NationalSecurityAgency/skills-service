@@ -252,7 +252,6 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz8"]').should('not.exist')
         cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz9"]').should('not.exist')
 
-        cy.get('[data-cy="quizSelector"]').click()
         cy.get('[data-pc-section="overlay"] [data-pc-name="pcfilter"]').type('2')
 
         cy.get('[data-pc-section="overlay"] [data-pc-section="option"] [data-cy="availableQuizSelection-quiz12"]')

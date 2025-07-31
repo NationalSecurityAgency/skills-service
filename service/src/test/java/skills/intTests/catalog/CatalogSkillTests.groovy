@@ -335,6 +335,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skill.helpUrl = "http://newHelpUrl"
         skill.description = "updated description"
         skill.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+        skill.iconClass = 'fa fa-icon-test'
 
         skillsService.updateSkill(skill, skill.skillId)
         def postEdit = skillsService.getCatalogSkills(project3.projectId, 10, 1, "name")
@@ -345,6 +346,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         preEdit.data[0].numPerformToCompletion == 1
         preEdit.data[0].description == skillDescriptionPreEdit
         preEdit.data[0].helpUrl == skillHelpUrlPreEdit
+        !preEdit.data[0].iconClass
         !preEdit.data[0].selfReportingType
         postEdit.data[0].name == skill.name
         postEdit.data[0].totalPoints == 12500
@@ -352,6 +354,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         postEdit.data[0].description == skill.description
         postEdit.data[0].helpUrl == skill.helpUrl
         postEdit.data[0].selfReportingType == SkillDef.SelfReportingType.Approval.toString()
+        postEdit.data[0].iconClass == 'fa fa-icon-test'
     }
 
     def "update skill that has been exported to catalog, edits should be reflected on imported copies"() {
@@ -387,6 +390,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skill.helpUrl = "http://newHelpUrl"
         skill.description = "updated description"
         skill.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+        skill.iconClass = 'fa fa-icon-test'
 
         skillsService.updateSkill(skill, skill.skillId)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
@@ -400,12 +404,14 @@ class CatalogSkillTests extends CatalogIntSpec {
         preEdit.description == skillDescriptionPreEdit
         preEdit.helpUrl == skillHelpUrlPreEdit
         !preEdit.selfReportingType
+        !preEdit.iconClass
         postEdit.name == skill.name
         postEdit.totalPoints == 12500
         postEdit.numPerformToCompletion == 50
         postEdit.description == skill.description
         postEdit.helpUrl == skill.helpUrl
         postEdit.selfReportingType == SkillDef.SelfReportingType.Approval.toString()
+        postEdit.iconClass == 'fa fa-icon-test'
     }
 
     def "update skill imported from catalog"() {
@@ -441,7 +447,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         e.getMessage().contains("errorCode:ReadOnlySkill")
     }
 
-    def "description, helpUrl, selfReportingType fields present on skill imported from catalog"() {
+    def "description, helpUrl, selfReportingType, iconClass fields present on skill imported from catalog"() {
         def project1 = createProject(1)
         def project2 = createProject(2)
         def project3 = createProject(3)
@@ -454,6 +460,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         skill.numPerformToCompletion = 50
         skill.helpUrl = "http://newHelpUrl"
         skill.description = "updated description"
+        skill.iconClass = 'fa fa-icon-test'
         skill.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
 
         skillsService.createProject(project1)
@@ -477,6 +484,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         importedSkill.helpUrl == skill.helpUrl
         importedSkill.description == skill.description
         importedSkill.selfReportingType == skill.selfReportingType
+        importedSkill.iconClass == skill.iconClass
     }
 
     def "remove skill from catalog"() {

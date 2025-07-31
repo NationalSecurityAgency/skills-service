@@ -33,6 +33,7 @@ import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import SkillsInputSwitch from '@/components/utils/inputForm/SkillsInputSwitch.vue'
 import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
+import IconPicker from "@/components/utils/iconPicker/IconPicker.vue";
 
 const show = defineModel()
 const route = useRoute()
@@ -278,7 +279,9 @@ const saveSkill = (values) => {
     quizId: values.associatedQuiz ? values.associatedQuiz.quizId : null,
     pointIncrementInterval: values.timeWindowEnabled ? values.pointIncrementIntervalHrs * 60 + values.pointIncrementIntervalMins : 0,
     selfReportingType: values.selfReportingType && values.selfReportingType !== 'Disabled' ? values.selfReportingType : null,
+    iconClass: currentIcon.value,
   }
+
   return SkillsService.saveSkill(skilltoSave)
     .then((skillRes) => {
       return {
@@ -293,6 +296,10 @@ const onSkillSaved = (skill) => {
   emit('skill-saved', skill)
 }
 
+const currentIcon = ref((props.skill.iconClass || 'fas fa-graduation-cap'));
+const onSelectedIcon = (selectedIcon) => {
+  currentIcon.value = selectedIcon.css
+}
 </script>
 
 <template>
@@ -320,7 +327,15 @@ const onSkillSaved = (skill) => {
             id-field-name="skillId"
             :is-inline="true"
             id-suffix="Skill"
-            :name-to-id-sync-enabled="!props.isEdit" />
+            :name-to-id-sync-enabled="!props.isEdit">
+            <template #beforeName>
+              <icon-picker
+                  class="mb-4"
+                  :startIcon="currentIcon"
+                  @selected-icon="onSelectedIcon"
+              />
+            </template>
+          </SkillsNameAndIdInput>
         </div>
       </div>
 
@@ -368,7 +383,15 @@ const onSkillSaved = (skill) => {
             id-field-name="skillId"
             :is-inline="true"
             id-suffix="Skill"
-            :name-to-id-sync-enabled="!props.isEdit" />
+            :name-to-id-sync-enabled="!props.isEdit">
+          <template #beforeName>
+            <icon-picker
+                class="mb-4"
+                :startIcon="currentIcon"
+                @selected-icon="onSelectedIcon"
+            />
+          </template>
+        </SkillsNameAndIdInput>
       </div>
 
       <div class="lg:max-w-40 lg:ml-4 w-full">

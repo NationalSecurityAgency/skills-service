@@ -710,6 +710,7 @@ class SkillsLoader {
                 groupName: groupName,
                 groupSkillId: skillDef.groupId,
                 approvalHistory: approvalHistory,
+                iconClass: skillDef.iconClass,
         )
     }
 
@@ -1441,6 +1442,7 @@ class SkillsLoader {
                         mostRecentlyPerformedOn: mostRecentlyPerformedOn,
                         lastExpirationDate: lastExpirationDate,
                         videoSummary: getVideoSummary(skillDef.copiedFrom ?: skillDef.id),
+                        iconClass: skillDef.iconClass,
                 )
             }
         }

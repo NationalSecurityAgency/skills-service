@@ -30,4 +30,5 @@ class SkillDefRes extends SkillDefPartialRes {
     Boolean thisSkillWasReusedElsewhere
 
     Boolean hasVideoConfigured
+    String iconClass
 }

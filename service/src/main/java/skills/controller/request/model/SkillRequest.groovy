@@ -56,4 +56,6 @@ class SkillRequest {
 
     // required when selfReportingType=quiz
     String quizId
+
+    String iconClass
 }

@@ -650,7 +650,7 @@ class ProjectCopyService {
                         skillRequest.type = fromSkill.type?.toString()
                         skillRequest.version = 0
                         skillRequest.description = handleAttachmentsInDescription(skillRequest.description, desProjectId)
-
+                        skillRequest.iconClass = fromSkill.iconClass
                         skillRequest.selfReportingType = fromSkill.selfReportingType?.toString()
                         if (skillRequest.selfReportingType && skillRequest.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()) {
                             QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(fromSkill.id)

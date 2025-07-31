@@ -124,14 +124,14 @@ const groupLabel = computed(() => attributes.groupDisplayName)
        :data-cy="`skillProgressTitle-${skillId}`"
        :id="`skillProgressTitle-${skillId}`">
     <div class=" flex-1 text-2xl w-min-12rem">
-      <div class="py-1 md:flex">
+      <div class="py-1 md:flex items-center">
         <div class="sd-theme-primary-color font-medium flex">
-          <div class="mr-1">
-            <i  v-if="skill.isSkillsGroupType" class="fas fa-layer-group"></i>
-            <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType" class="fas fa-graduation-cap text-muted-color"></i>
-            <i v-if="skill.copiedFromProjectId" class="fas fa-book text-secondary"></i>
+          <div class="rounded-border w-16 skill-icon-container text-primary text-center border mr-2">
+            <i v-if="skill.isSkillsGroupType" class="skill-icon fas fa-layer-group"></i>
+            <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType" class="skill-icon" :class="`${skill?.iconClass ? skill?.iconClass : 'fas fa-graduation-cap'}`"></i>
+            <i v-if="skill.copiedFromProjectId" class="skill-icon text-secondary" :class="`${skill?.iconClass ? skill?.iconClass : 'fas fa-book'}`"></i>
           </div>
-          <div>
+          <div class="flex items-center">
             <div v-if="skillDisplayInfo.isGlobalBadgePage.value">
               <span class="italic text-muted-color">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}
             </div>
@@ -176,7 +176,7 @@ const groupLabel = computed(() => attributes.groupDisplayName)
         </div>
 
         <Tag v-if="skill.selfReporting && skill.selfReporting.enabled"
-             class="self-report-badge ml-2 max-h-8">
+             class="self-report-badge ml-2 max-h-8 place-content-center">
           <i
             class="fas fa-user-check mr-1"></i><span class="sr-spelled-out mr-1">Self Reportable:</span>
           <span v-if="skill.selfReporting.type === 'Quiz'" data-cy="selfReportQuizTag"><span
@@ -264,4 +264,19 @@ const groupLabel = computed(() => attributes.groupDisplayName)
   display: inline-block;
 }
 
+.skill-icon {
+  height: 100% !important;
+  width: 100% !important;
+  background-size: cover;
+  background-position: center;
+  font-size: 30px !important;
+  line-height: 46px !important;
+}
+
+.skill-icon-container {
+  max-width:48px;
+  max-height:48px;
+  height:48px;
+  width: 48px;
+}
 </style>

@@ -39,12 +39,14 @@ class CopySubjectSkillsSpecs extends CopyIntSpec {
         skill1.helpUrl = "/ok/that/is/good"
         skill1.selfReportingType = SkillDef.SelfReportingType.Approval
         skill1.justificationRequired = true
+        skill1.iconClass = 'fa fa-icon-test'
 
         def skill2 = createSkill(1, 1, 23, 0, 13, 458, 55,)
         skill2.description = "something else"
         skill2.helpUrl = "http://www.djleaje.org"
         skill2.selfReportingType = SkillDef.SelfReportingType.HonorSystem
         skill2.justificationRequired = false
+        skill2.iconClass ='fa fa-icon-test2'
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [skill1, skill2])
 
         def p2 = createProject(2)
@@ -76,6 +78,8 @@ class CopySubjectSkillsSpecs extends CopyIntSpec {
         copiedSkill1.numMaxOccurrencesIncrementInterval == originalSkill1.numMaxOccurrencesIncrementInterval
         copiedSkill1.description == originalSkill1.description
         copiedSkill1.helpUrl == originalSkill1.helpUrl
+        copiedSkill1.iconClass == 'fa fa-icon-test'
+        copiedSkill1.iconClass == originalSkill1.iconClass
         !copiedSkill1.groupName
         !copiedSkill1.groupId
         !copiedSkill1.readOnly
@@ -99,6 +103,8 @@ class CopySubjectSkillsSpecs extends CopyIntSpec {
         copiedSkill2.numMaxOccurrencesIncrementInterval == originalSkill2.numMaxOccurrencesIncrementInterval
         copiedSkill2.description == originalSkill2.description
         copiedSkill2.helpUrl == originalSkill2.helpUrl
+        copiedSkill2.iconClass == 'fa fa-icon-test2'
+        copiedSkill2.iconClass == originalSkill2.iconClass
         !copiedSkill2.groupName
         !copiedSkill2.groupId
         !copiedSkill2.readOnly
@@ -114,12 +120,14 @@ class CopySubjectSkillsSpecs extends CopyIntSpec {
         skill1.helpUrl = "/ok/that/is/good"
         skill1.selfReportingType = SkillDef.SelfReportingType.Approval
         skill1.justificationRequired = true
+        skill1.iconClass = 'fa fa-icon-test'
 
         def skill2 = createSkill(1, 1, 23, 0, 13, 458, 55,)
         skill2.description = "something else"
         skill2.helpUrl = "http://www.djleaje.org"
         skill2.selfReportingType = SkillDef.SelfReportingType.HonorSystem
         skill2.justificationRequired = false
+        skill2.iconClass = 'fa fa-icon-test'
 
         def group = createSkillsGroup(1, 1, 4)
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [group])
@@ -132,6 +140,7 @@ class CopySubjectSkillsSpecs extends CopyIntSpec {
         skill3.helpUrl = "http://www.djleaje.org"
         skill3.selfReportingType = SkillDef.SelfReportingType.HonorSystem
         skill3.justificationRequired = false
+        skill3.iconClass = 'fa fa-icon-test'
         skillsService.createSkill(group2)
         skillsService.assignSkillToSkillsGroup(group2.skillId, skill3)
 
@@ -168,6 +177,7 @@ class CopySubjectSkillsSpecs extends CopyIntSpec {
         copiedSkill1.helpUrl == originalSkill1.helpUrl
         copiedSkill1.groupName == group.name
         copiedSkill1.groupId == group.skillId
+        copiedSkill1.iconClass == originalSkill1.iconClass
         !copiedSkill1.readOnly
         !copiedSkill1.reusedSkill
         !copiedSkill1.thisSkillWasReusedElsewhere
@@ -191,6 +201,7 @@ class CopySubjectSkillsSpecs extends CopyIntSpec {
         copiedSkill2.helpUrl == originalSkill2.helpUrl
         copiedSkill2.groupName == group.name
         copiedSkill2.groupId == group.skillId
+        copiedSkill2.iconClass == originalSkill2.iconClass
         !copiedSkill2.readOnly
         !copiedSkill2.reusedSkill
         !copiedSkill2.thisSkillWasReusedElsewhere
@@ -214,6 +225,7 @@ class CopySubjectSkillsSpecs extends CopyIntSpec {
         copiedSkill3.helpUrl == originalSkill3.helpUrl
         copiedSkill3.groupName == group2.name
         copiedSkill3.groupId == group2.skillId
+        copiedSkill3.iconClass == originalSkill3.iconClass
         !copiedSkill3.readOnly
         !copiedSkill3.reusedSkill
         !copiedSkill3.thisSkillWasReusedElsewhere

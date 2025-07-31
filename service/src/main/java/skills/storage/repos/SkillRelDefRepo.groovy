@@ -156,6 +156,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.copiedFrom as copiedFrom,
         sd2.readOnly as readOnly,
         sd2.copiedFromProjectId as copiedFromProjectId,
+        sd2.iconClass as iconClass,
         subj1.skillId as subjectSkillId,
         pd.name as copiedFromProjectName,
         qDef.quizId as quizId,
@@ -194,6 +195,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.copiedFrom as copiedFrom,
         sd2.readOnly as readOnly,
         sd2.copiedFromProjectId as copiedFromProjectId,
+        sd2.iconClass as iconClass,
         pd.name as copiedFromProjectName,
         qDef.quizId as quizId,
         qDef.type as quizType,
@@ -303,6 +305,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         sd2.displayOrder as displayOrder,
         sd2.created as created,
         sd2.updated as updated,
+        sd2.iconClass as iconClass,
         sd2.selfReportingType as selfReportingType
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
         where sd1 = srd.parent and sd2 = srd.child and srd.type=?2 

@@ -484,6 +484,7 @@ class GroupSkillReuseManagementSpec extends CatalogIntSpec {
         p1Skills[0].numPerformToCompletion = 6
         p1Skills[0].pointIncrementInterval = 520
         p1Skills[0].numMaxOccurrencesIncrementInterval = 2
+        p1Skills[0].iconClass = 'fa fa-icon-test'
 
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [p1subj1g1])
         p1Skills.each {
@@ -513,6 +514,7 @@ class GroupSkillReuseManagementSpec extends CatalogIntSpec {
         p1Skills[0].numPerformToCompletion = 10
         p1Skills[0].pointIncrementInterval = 600
         p1Skills[0].numMaxOccurrencesIncrementInterval = 1
+        p1Skills[0].iconClass = 'fa fa-icon-new-test'
         p1Skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
         skillsService.updateSkill(p1Skills[0], originalSkillId)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
@@ -552,6 +554,7 @@ class GroupSkillReuseManagementSpec extends CatalogIntSpec {
         groupSkills_before[0].totalPoints == 6 * 33
         groupSkills_before[0].pointIncrementInterval == 520
         groupSkills_before[0].numMaxOccurrencesIncrementInterval == 2
+        groupSkills_before[0].iconClass == 'fa fa-icon-test'
 
         // after
         subj2.skills[0].children[0].skill == "New Name"
@@ -583,6 +586,7 @@ class GroupSkillReuseManagementSpec extends CatalogIntSpec {
         groupSkills[0].totalPoints == 10 * 22
         groupSkills[0].pointIncrementInterval == 600
         groupSkills[0].numMaxOccurrencesIncrementInterval == 1
+        groupSkills[0].iconClass == 'fa fa-icon-new-test'
     }
 
     def "delete reused group skill"() {

@@ -64,6 +64,7 @@ class CopySkillsToAnotherProjGroupSpecs extends CopyIntSpec {
         p1Subj1Skills[0].numMaxOccurrencesIncrementInterval = 1
         p1Subj1Skills[0].description = 'first skill'
         p1Subj1Skills[0].helpUrl = 'https://first.com'
+        p1Subj1Skills[0].iconClass = 'fa fa-icon-test'
 
         p1Subj1Skills[1].pointIncrement = 200
         p1Subj1Skills[1].numPerformToCompletion = 4
@@ -71,7 +72,7 @@ class CopySkillsToAnotherProjGroupSpecs extends CopyIntSpec {
         p1Subj1Skills[1].numMaxOccurrencesIncrementInterval = 2
         p1Subj1Skills[1].description = 'second skill'
         p1Subj1Skills[1].helpUrl = 'https://second.com'
-
+        p1Subj1Skills[1].iconClass = 'fa fa-icon-test'
 
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
@@ -86,6 +87,7 @@ class CopySkillsToAnotherProjGroupSpecs extends CopyIntSpec {
         p1Subj1Skills[2].helpUrl = 'https://third.com'
         p1Subj1Skills[2].selfReportingType = SkillDef.SelfReportingType.Quiz
         p1Subj1Skills[2].quizId = quiz.quizId
+        p1Subj1Skills[2].iconClass = 'fa fa-icon-test'
 
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Subj1Skills)
 
@@ -113,6 +115,7 @@ class CopySkillsToAnotherProjGroupSpecs extends CopyIntSpec {
         copiedSubj1Skills[0].quizType == null
         copiedSubj1Skills[0].quizId == null
         copiedSubj1Skills[0].quizName == null
+        copiedSubj1Skills[0].iconClass == 'fa fa-icon-test'
 
         copiedSubj1Skills[1].projectId == p2.projectId
         copiedSubj1Skills[1].type == "Skill"
@@ -124,6 +127,7 @@ class CopySkillsToAnotherProjGroupSpecs extends CopyIntSpec {
         copiedSubj1Skills[1].quizType == null
         copiedSubj1Skills[1].quizId == null
         copiedSubj1Skills[1].quizName == null
+        copiedSubj1Skills[1].iconClass == 'fa fa-icon-test'
 
         copiedSubj1Skills[2].projectId == p2.projectId
         copiedSubj1Skills[2].type == "Skill"
@@ -135,6 +139,7 @@ class CopySkillsToAnotherProjGroupSpecs extends CopyIntSpec {
         copiedSubj1Skills[2].quizType == QuizDefParent.QuizType.Quiz.toString()
         copiedSubj1Skills[2].quizId == quiz.quizId
         copiedSubj1Skills[2].quizName == quiz.name
+        copiedSubj1Skills[2].iconClass == 'fa fa-icon-test'
     }
 
     def "skills from a group to subject are copied"() {
