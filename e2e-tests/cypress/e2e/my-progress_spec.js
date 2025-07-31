@@ -129,7 +129,7 @@ describe('My Progress Tests', () => {
     it('visit My Progress page', function () {
 
         cy.loginAsRootUser();
-        cy.request('PUT', `/supervisor/badges/globalBadge1`, {
+        cy.request('PUT', `/app/badges/globalBadge1`, {
             badgeId: `globalBadge1`,
             isEdit: false,
             name: `Global Badge 1`,

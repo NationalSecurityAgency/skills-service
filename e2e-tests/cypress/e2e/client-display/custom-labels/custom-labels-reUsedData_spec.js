@@ -64,7 +64,7 @@ describe('Custom Label with Reused Data Tests', () => {
 
         cy.loginAsRootUser();
         cy.createGlobalBadge(1);
-        cy.request('POST', `/supervisor/badges/globalBadge1/projects/proj1/skills/expertise1`);
+        cy.request('POST', `/admin/badges/globalBadge1/projects/proj1/skills/expertise1`);
         cy.assignProjectToGlobalBadge(1, 1);
         cy.enableGlobalBadge();
         cy.loginAsDefaultUser()

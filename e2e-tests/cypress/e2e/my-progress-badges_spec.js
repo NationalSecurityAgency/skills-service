@@ -147,11 +147,11 @@ describe('My Progress Badges Tests', () => {
       enabled: true,
       description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
     };
-    cy.request('PUT', `/supervisor/badges/globalBadge1`, globalBadge1);
+    cy.request('PUT', `/app/badges/globalBadge1`, globalBadge1);
     cy.assignSkillToGlobalBadge(1, 2);
     cy.enableGlobalBadge(1, globalBadge1);
 
-    cy.request('PUT', `/supervisor/badges/globalBadge2`, {
+    cy.request('PUT', `/app/badges/globalBadge2`, {
       badgeId: `globalBadge2`,
       isEdit: false,
       name: `Global Badge two`,
@@ -593,7 +593,7 @@ describe('My Progress Badges Tests', () => {
     cy.logout()
     cy.loginAsRootUser();
 
-    cy.uploadCustomIcon('valid_icon.png', '/supervisor/icons/upload')
+    cy.uploadCustomIcon('valid_icon.png', '/admin/badges/globalBadge1/icons/upload')
     cy.createGlobalBadge(1);
     cy.assignSkillToGlobalBadge(1, 1, 1);
     cy.assignProjectToGlobalBadge(1, 1);
@@ -601,7 +601,7 @@ describe('My Progress Badges Tests', () => {
 
     cy.logout()
     cy.loginAsProxyUser();
-    cy.intercept('/api/icons/customIconCss').as('customIcons')
+    cy.intercept('/api/badges/globalBadge1/customIconCss').as('customIcons')
 
     cy.visit('/progress-and-rankings/');
     cy.get('[data-cy="project-link-proj1"]')
