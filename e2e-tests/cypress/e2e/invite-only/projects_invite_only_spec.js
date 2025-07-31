@@ -528,4 +528,37 @@ describe('Projects Invite-Only Tests', () => {
         ];
         cy.validateTable(tableSelector, expected, 5, false);
     });
+
+    it('Can add CC recipients without e-mail recipients', () => {
+        cy.createProject(1)
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            {
+                value: 'true',
+                setting: 'invite_only',
+                projectId: 'proj1',
+            },
+        ]);
+        cy.visit('/administrator/projects/proj1/access')
+        
+        cy.get('[data-cy="ccEmailInput"]').type('def@cba.org');
+        cy.get('[data-cy="addEmails"]').should('be.enabled')
+        cy.get('[data-cy="addEmails"]').click()
+        cy.get('[data-cy="ccRecipient"]').contains('def@cba.org')
+        cy.get('[data-cy="sendInvites-btn"]').should('be.disabled')
+
+        cy.get('[data-cy="inviteEmailInput"]').type('abc@cba.org');
+        cy.get('[data-cy="addEmails"]').should('be.enabled')
+        cy.get('[data-cy="addEmails"]').click()
+        cy.get('[data-cy="inviteRecipient"]').contains('abc@cba.org')
+        cy.get('[data-cy="sendInvites-btn"]').should('be.enabled')
+
+        cy.get('[data-cy="ccEmailInput"]').type('qrs@cba.org');
+        cy.get('[data-cy="addEmails"]').should('be.enabled')
+        cy.get('[data-cy="addEmails"]').click()
+        cy.get('[data-cy="inviteRecipient"]').contains('abc@cba.org')
+        cy.get('[data-cy="ccRecipient"]').contains('def@cba.org')
+        cy.get('[data-cy="ccRecipient"]').contains('qrs@cba.org')
+        cy.get('[data-cy="sendInvites-btn"]').should('be.enabled')
+
+    });
 });
