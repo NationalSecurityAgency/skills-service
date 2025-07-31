@@ -49,7 +49,7 @@ const showSuccessMsg = ref(false)
 const inviteRecipients = ref([])
 const ccRecipients = ref([])
 
-const hasEmails = computed(() => currentEmails.value.length > 0)
+const hasEmails = computed(() => currentEmails.value.length > 0 || ccEmails.value.length > 0)
 const tooManyEmails = computed(() => inviteRecipients.value.length >= appConfig.maxProjectInviteEmails)
 const splitCurrentEmails = (emails) => {
   return emails.value.split(/;|,|\r?\n/)
@@ -69,8 +69,14 @@ const removeName = (pmail) => {
 }
 const addEmails = () => {
   invalidEmails.value = ''
-  inviteRecipients.value = addEmailGroup(currentEmails)
-  ccRecipients.value = addEmailGroup(ccEmails)
+  if(currentEmails.value.length > 0) {
+    const emailsToAdd = addEmailGroup(currentEmails)
+    inviteRecipients.value = Array.from(new Set([...emailsToAdd, ...inviteRecipients.value]))
+  }
+  if(ccEmails.value.length > 0) {
+    const emailsToAdd = addEmailGroup(ccEmails)
+    ccRecipients.value = Array.from(new Set([...emailsToAdd, ...ccRecipients.value]))
+  }
 }
 
 const addEmailGroup = (emails) => {
@@ -203,7 +209,7 @@ const ccEmailsUpdated = (newEmails) => {
           sent a one-time use invite token. Comma separated, semi-colon separated, and one email per line input formats
           are supported." field="invite" @updateAddresses="inviteEmailsUpdated" v-model="currentEmails" />
 
-        <EmailField label="CC" description="** Users to CC on the invites. Each user will receive a copy of each invite sent.
+        <EmailField label="CC" description="** Optional. Users to CC on the invites. Each user will receive a copy of each invite sent.
           Comma separated, semi-colon separated, and one email per line input formats
           are supported." field="cc" @updateAddresses="ccEmailsUpdated" v-model="ccEmails" :rows="1" />
 
@@ -214,6 +220,7 @@ const ccEmailsUpdated = (newEmails) => {
             icon="fas fa-plus-circle"
             severity="info"
             size="small"
+            class="mb-2"
             data-cy="addEmails"
             :disabled="!hasEmails"
             aria-label="Add email addresses to the list of recipients" />
@@ -258,6 +265,7 @@ const ccEmailsUpdated = (newEmails) => {
       <hr />
       <SkillsButton @click="sendInvites"
                     label="Send Invites"
+                    class="mt-2"
                     icon="fas fa-paper-plane"
                     :disabled="sendInviteDisabled"
                     variant="outline-info"
