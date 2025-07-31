@@ -67,7 +67,7 @@ const themeHelper = useThemesHelper()
 
 const addCustomIconCSSForClientDisplay = () => {
   if (skillsDisplayInfo.isSkillsClientPath()) {
-    IconManagerService.refreshCustomIconCss(skillsDisplayAttributes.projectId, false)
+    IconManagerService.refreshCustomIconCss(skillsDisplayAttributes.projectId, null)
   }
 }
 const inceptionConfigurer = useInceptionConfigurer()

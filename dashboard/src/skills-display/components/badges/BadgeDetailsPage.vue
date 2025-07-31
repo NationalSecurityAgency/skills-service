@@ -43,7 +43,7 @@ const loadBadgeInfo = () => {
   summaryAndSkillsState.loadBadgeSummary(route.params.badgeId, isGlobalBadge)
     .then((badgeSummary) => {
       if (isGlobalBadge && badgeSummary?.iconClass && badgeSummary.iconClass.startsWith('GLOBAL-')) {
-        IconManagerService.refreshCustomIconCss(null, true)
+        IconManagerService.refreshCustomIconCss(null, route.params.badgeId)
       }
     })
 

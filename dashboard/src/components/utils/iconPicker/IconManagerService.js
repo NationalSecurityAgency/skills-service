@@ -36,17 +36,17 @@ export default {
   getIconSetIndexes() {
     return axios.get('/public/iconSetIndexes').then((response) => response.data)
   },
-  getIconIndex(projectId) {
+  getIconIndex(projectId, badgeId) {
     let url = `/app/projects/${encodeURIComponent(projectId)}/customIcons`
     if (!projectId) {
-      url = '/supervisor/icons/customIcons'
+      url = `/app/badges/${encodeURIComponent(badgeId)}/customIcons`
     }
     return axios.get(url).then((response) => response.data)
   },
-  deleteIcon(iconName, projectId) {
+  deleteIcon(iconName, projectId, badgeId) {
     let url = `/admin/projects/${encodeURIComponent(projectId)}/icons/${iconName}`
     if (!projectId) {
-      url = `/supervisor/icons/${iconName}`
+      url = `/admin/badges/${encodeURIComponent(badgeId)}/icons/${iconName}`
     }
     return axios.delete(url)
   },
@@ -54,9 +54,9 @@ export default {
     const existingStyles = createCustomIconStyleElementIfNotExist()
     existingStyles.innerText += css
   },
-  refreshCustomIconCss(projectId, isGlobal) {
+  refreshCustomIconCss(projectId, globalBadgeId) {
     const existingStyles = createCustomIconStyleElementIfNotExist(projectId)
-    CustomIconService.getCustomIconCss(projectId, isGlobal).then((response) => {
+    CustomIconService.getCustomIconCss(projectId, globalBadgeId).then((response) => {
       if (response) {
         existingStyles.innerText = response
       }
