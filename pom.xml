@@ -7,7 +7,7 @@
     <groupId>skill-tree</groupId>
     <artifactId>skills-service-parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.7.3-SNAPSHOT</version>
+    <version>3.7.3</version>
     <modules>
         <module>dashboard</module>
         <module>service</module>
