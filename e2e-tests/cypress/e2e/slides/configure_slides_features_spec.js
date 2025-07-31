@@ -16,7 +16,6 @@
 
 describe('Configure slides and SkillTree Features Tests', () => {
 
-    const testVideo = '/static/videos/create-quiz.mp4'
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/slides').as('getSlidesProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')

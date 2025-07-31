@@ -16,9 +16,9 @@
 
 describe('Configure Skill Slides Tests', () => {
 
-    const testSlidesUrl = '/static/videos/test-slides-1.pdf'
     const slidesFile = 'test-slides-1.pdf';
-    const externalPdfUrl = 'http://localhost:5173/static/videos/test-slides-1.pdf'
+    const testSlidesUrl = `/static/videos/${slidesFile}`
+    const externalPdfUrl = `${Cypress.config().baseUrl}${testSlidesUrl}`
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/slides').as('getSlidesProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
@@ -130,7 +130,7 @@ describe('Configure Skill Slides Tests', () => {
         cy.navThroughSlides(true)
 
         cy.visitSlidesConfPage();
-        cy.get('[data-cy="pdfUrl"]').should('have.value', 'http://localhost:5173/static/videos/test-slides-1.pdf')
+        cy.get('[data-cy="pdfUrl"]').should('have.value', externalPdfUrl)
         cy.get('#pdfCanvasId').should('be.visible')
         cy.get('[data-cy="slidesFullscreenBtn"]').should('be.enabled')
         cy.get('[data-cy="slidesDownloadPdfBtn"]').should('be.enabled')
