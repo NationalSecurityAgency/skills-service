@@ -179,10 +179,10 @@ const saveSettings = () => {
     setTimeout(() => {
       showSavedMsg.value = false;
     }, 3500);
-    announcer.polite('Slides settings were saved');
     setupPreview();
     isSaving.value = false;
     unsavedConfigChanges.value = false;
+    announcer.polite('Slides settings were saved');
   }, (error) => {
     upgradeInProgressErrorChecker.checkError(error)
   })
@@ -344,7 +344,7 @@ const formHasAnyData = computed(() => {
                     severity="info"
                     outlined
                     :class="{'w-full': responsive.md.value }"
-                    aria-label="Switch to Video Upload input option"
+                    aria-label="Switch to Slides Upload input option"
                     @click="switchToFileUploadOption"
                     icon="fas fa-arrow-circle-up"
                     label="Switch to Upload">
@@ -431,7 +431,7 @@ const formHasAnyData = computed(() => {
                   data-cy="clearSlidesSettingsBtn"
                   id="clearSlidesSettingsBtn"
                   :track-for-focus="true"
-                  aria-label="Clear video settings"
+                  aria-label="Clear slides settings"
                   @click="confirmClearSettings"
                   icon="fas fa-trash-alt"
                   label="Clear"/>

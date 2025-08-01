@@ -144,7 +144,7 @@ watch(() => props.maxWidth, () => {
   }
 })
 
-const renderPage = (pageNum, requestedWidth = null) => {
+const renderPage = (pageNum, requestedWidth = null, announce = true) => {
   if (isRendingPage.value || pageNum < 1 || pageNum > totalPages.value) {
     return Promise.resolve();
   }
@@ -211,7 +211,9 @@ const renderPage = (pageNum, requestedWidth = null) => {
         currentPage.value = pageNum
         isRendingPage.value = false
         page.cleanup();
-        announcer.polite(`Rendered pdf page ${pageNum} of ${pdfDoc.value.numPages}`)
+        if (announce) {
+          announcer.polite(`Rendered pdf page ${pageNum} of ${pdfDoc.value.numPages}`)
+        }
       })
     });
   })
@@ -271,15 +273,18 @@ const createResizeSupport = () => {
 
 const resizeBigger = () => {
   const newWidth = width.value + 10
-  renderPage(currentPage.value, newWidth)
+  renderPage(currentPage.value, newWidth, false).then(() => {
+    announcer.assertive(`Resized the slides to ${newWidth} width`)
+  })
   emit('on-resize', newWidth)
-  announcer.polite(`Resized the slides to ${newWidth} width`)
 }
 const resizeSmaller = () => {
   const newWidth = width.value - 10
-  renderPage(currentPage.value, newWidth)
+  renderPage(currentPage.value, newWidth, false).then(() => {
+    announcer.assertive(`Resized the slides to ${newWidth} width`)
+  })
   emit('on-resize', newWidth)
-  announcer.polite(`Resized the slides to ${newWidth} width`)
+
 }
 
 const slidesContainerStyle = computed(() => {
@@ -318,7 +323,7 @@ const downloadPdf = () => {
                 v-if="!isFullscreen"
                 :id="`${slidesId}FullscreenBtn`"
                 class="shadow-md"
-                aria-label="Enter fullscreen mode"
+                aria-label="Enter fullscreen mode for slides"
                 data-cy="slidesFullscreenBtn"
                 @click="toggleFullscreen"
             />
