@@ -50,6 +50,7 @@ import UserTagMetrics from '@/components/metrics/userTags/UserTagMetrics.vue'
 import SkillsCatalog from '@/components/skills/catalog/SkillsCatalog.vue'
 import AddSkillEvent from '@/components/skills/AddSkillEvent.vue'
 import VideoConfigPage from '@/components/video/VideoConfigPage.vue'
+import SlidesConfigPage from '@/components/slides/SlidesConfigPage.vue'
 import ExpirationConfigPage from '@/components/expiration/ExpirationConfigPage.vue'
 import SkillPage from '@/components/skills/SkillPage.vue'
 import SkillOverview from '@//components/skills/SkillOverview.vue'
@@ -642,6 +643,17 @@ const routes = [
           },
         },
       }],
+    }, {
+      name: 'ConfigureSlides',
+      path: 'config-slides',
+      component: SlidesConfigPage,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Configure Slides',
+        },
+      },
+      props: true,
     }, {
       name: 'ConfigureVideo',
       path: 'config-video',

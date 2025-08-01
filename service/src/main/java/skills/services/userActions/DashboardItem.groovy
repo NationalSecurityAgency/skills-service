@@ -28,6 +28,7 @@ enum DashboardItem {
     Question,
     Tag,
     VideoSettings,
+    SlidesSettings,
     ExpirationSettings,
     Level,
     LearningPathItem,

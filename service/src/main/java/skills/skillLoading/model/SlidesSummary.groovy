@@ -15,17 +15,10 @@
  */
 package skills.skillLoading.model
 
-import skills.storage.model.SkillDef
+class SlidesSummary {
 
-class SkillDescription {
-    String skillId
-    String description
-    String href
-    Date achievedOn
-    SkillDef.ContainerType type
+    String url
+    String type
 
-    SelfReportingInfo selfReporting
-
-    VideoSummary videoSummary
-    SlidesSummary slidesSummary
+    Double width
 }

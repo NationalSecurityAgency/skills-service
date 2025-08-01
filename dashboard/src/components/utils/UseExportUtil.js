@@ -28,7 +28,7 @@ export const useExportUtil = () => {
       let filename = "";
       const disposition = response.headers['content-disposition']
       if (disposition && disposition.indexOf('attachment') !== -1) {
-        const filenameRegex = /fileName[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+        const filenameRegex = /fileName[^;=\n]*=((['"]).*?\2|[^;\n]*)/i;
         const matches = filenameRegex.exec(disposition);
         if (matches != null && matches[1]) {
           filename = matches[1].replace(/['"]/g, '');

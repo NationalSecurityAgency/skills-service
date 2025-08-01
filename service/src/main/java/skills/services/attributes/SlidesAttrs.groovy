@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.skillLoading.model
+package skills.services.attributes
 
-import skills.storage.model.SkillDef
+import groovy.transform.Canonical
 
-class SkillDescription {
-    String skillId
-    String description
-    String href
-    Date achievedOn
-    SkillDef.ContainerType type
-
-    SelfReportingInfo selfReporting
-
-    VideoSummary videoSummary
-    SlidesSummary slidesSummary
+@Canonical
+class SlidesAttrs {
+    String url
+    String type
+    Boolean isInternallyHosted
+    String internallyHostedFileName
+    String internallyHostedAttachmentUuid
+    Double width
 }

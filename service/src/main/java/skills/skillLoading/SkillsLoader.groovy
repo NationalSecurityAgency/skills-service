@@ -46,6 +46,7 @@ import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.attributes.BonusAwardAttrs
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
+import skills.services.attributes.SlidesAttrs
 import skills.services.settings.ClientPrefKey
 import skills.services.settings.ClientPrefService
 import skills.services.settings.Settings
@@ -702,6 +703,7 @@ class SkillsLoader {
                 badges: badges,
                 tags: loadSkillTags(skillDef.id),
                 videoSummary: getVideoSummary(skillDef.copiedFrom ?: skillDef.id),
+                slidesSummary: getSlidesSummary(skillDef.copiedFrom ?: skillDef.id),
                 expirationDate: expirationDate,
                 isMotivationalSkill: isMotivationalSkill,
                 daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
@@ -726,6 +728,20 @@ class SkillsLoader {
                     hasTranscript: videoSummaryAttributes.hasTranscript,
                     height: videoSummaryAttributes.height,
                     width: videoSummaryAttributes.width
+            )
+        }
+        return res
+    }
+
+    @Profile
+    private SlidesSummary getSlidesSummary(Integer skillDefId) {
+        SlidesSummary res = null
+        SkillAttributesDefRepo.SlidesSummaryAttributes summaryAttributes = skillAttributesDefRepo.getSlidesSummary(skillDefId)
+        if (summaryAttributes) {
+            res = new SlidesSummary(
+                    url: summaryAttributes.url,
+                    type: summaryAttributes.type,
+                    width: summaryAttributes?.width
             )
         }
         return res
@@ -894,6 +910,7 @@ class SkillsLoader {
 
     private SkillDescription createSkillDescription(SkillDefWithExtraRepo.SkillDescDBRes it, SettingsResult helpUrlRootSetting, SkillApprovalRepo.SkillApprovalPlusSkillId skillApproval) {
         VideoSummary videoSummary = null
+        SlidesSummary slidesSummary = null
         if (StringUtils.isNotBlank(it.videoUrl)) {
             videoSummary = new VideoSummary(
                     videoUrl: it.videoUrl,
@@ -903,13 +920,22 @@ class SkillsLoader {
             )
         }
 
+        if (StringUtils.isNotBlank(it.slidesUrl)) {
+            slidesSummary = new SlidesSummary(
+                    url: it.slidesUrl,
+                    type: it.slidesType,
+                    width: it.slidesWidth,
+            )
+        }
+
         SkillDescription skillDescription = new SkillDescription(
                 skillId: it.getSkillId(),
                 description: InputSanitizer.unsanitizeForMarkdown(it.getDescription()),
                 href: getHelpUrl(helpUrlRootSetting, it.getHelpUrl()),
                 achievedOn: it.getAchievedOn(),
                 type: it.getType(),
-                videoSummary: videoSummary
+                videoSummary: videoSummary,
+                slidesSummary: slidesSummary
         )
         skillDescription
     }

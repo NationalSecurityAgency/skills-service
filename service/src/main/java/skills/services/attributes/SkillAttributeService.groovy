@@ -28,6 +28,7 @@ import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillAttributesDef
 import skills.storage.model.SkillAttributesDef.SkillAttributesType
 import skills.storage.model.SkillDef
+import skills.storage.repos.AttachmentRepo
 import skills.storage.repos.SkillAttributesDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.utils.InputSanitizer
@@ -48,10 +49,17 @@ class SkillAttributeService {
     @Autowired
     UserActionsHistoryService userActionsHistoryService
 
+    @Autowired
+    AttachmentRepo attachmentRepo
+
     static final ObjectMapper mapper = new ObjectMapper()
 
     void saveVideoAttrs(String projectId, String skillId, SkillVideoAttrs videoAttrs) {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, videoAttrs)
+    }
+
+    void saveSlidesAttrs(String projectId, String skillId, SlidesAttrs slidesAttrs) {
+        saveAttrs(projectId, skillId, SkillAttributesType.Slides, slidesAttrs)
     }
 
     @Transactional
@@ -65,9 +73,35 @@ class SkillAttributeService {
     }
 
     SkillVideoAttrs getVideoAttrs(String projectId, String skillId) {
-        SkillVideoAttrs skillVideoAttrs = getAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, SkillVideoAttrs.class)
+        SkillVideoAttrs skillVideoAttrs = getAttrs(projectId, skillId, SkillAttributesType.Video, SkillVideoAttrs.class)
         skillVideoAttrs.captions = InputSanitizer.unSanitizeCaption(skillVideoAttrs.captions)
         return skillVideoAttrs
+    }
+
+    SlidesAttrs getSlidesAttrs(String projectId, String skillId) {
+        SlidesAttrs slidesAttrs = getAttrs(projectId, skillId, SkillAttributesType.Slides, SlidesAttrs.class)
+        return slidesAttrs
+    }
+
+    @Transactional
+    void deleteSlidesAttrs(String projectId, String skillId) {
+        SlidesAttrs existingVideoAttributes = getSlidesAttrs(projectId, skillId)
+
+        if (existingVideoAttributes?.internallyHostedAttachmentUuid) {
+            attachmentRepo.deleteByUuid(existingVideoAttributes.internallyHostedAttachmentUuid)
+        }
+
+        int numRemoved = deleteAttrs(projectId, skillId, SkillAttributesType.Slides)
+        if (numRemoved > 1) {
+            throw new IllegalStateException("There is more than 1 Slides attributes for [${projectId}-${skillId}]")
+        }
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.SlidesSettings,
+                itemId: skillId,
+                projectId: projectId,
+        ))
     }
 
     void saveExpirationAttrs(String projectId, String skillId, ExpirationAttrs skillExpirationAttrs) {

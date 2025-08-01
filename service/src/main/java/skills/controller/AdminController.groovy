@@ -47,6 +47,7 @@ import skills.services.adminGroup.AdminGroupService
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
+import skills.services.attributes.SlidesAttrs
 import skills.services.events.BulkSkillEventResult
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.services.inception.InceptionProjectService
@@ -54,6 +55,7 @@ import skills.services.settings.ProjectSettingsValidator
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
+import skills.services.slides.AdminSlidesService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionsHistoryService
@@ -176,6 +178,9 @@ class AdminController {
 
     @Autowired
     AdminVideoService adminVideoService
+
+    @Autowired
+    AdminSlidesService adminSlidesService
 
     @Autowired
     UserAchievementExpirationService userAchievementExpirationService
@@ -656,6 +661,36 @@ class AdminController {
         SkillVideoAttrs res = adminVideoService.saveVideo(projectId, skillId, isAlreadyHosted, file, videoUrl, captions, transcript, width, height)
         return res
     }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/slides", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    SlidesAttrs saveSkillSlidesAttrs(@PathVariable("projectId") String projectId,
+                                     @PathVariable("skillId") String skillId,
+                                     @RequestParam(name = "file", required = false) MultipartFile file,
+                                     @RequestParam(name = "url", required = false) String slidesUrl,
+                                     @RequestParam(name = "isAlreadyHosted", required = false, defaultValue = "false") Boolean isAlreadyHosted,
+                                     @RequestParam(name = "width", required = false) Double width) {
+        if (width != null && width > 100000) {
+            throw new SkillException("Width cannot be greater than 100000", projectId, skillId, ErrorCode.BadParam)
+        }
+        return adminSlidesService.saveSlides(projectId, skillId, isAlreadyHosted, file, slidesUrl, width)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/slides", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    SlidesAttrs getSlidesAttrs(@PathVariable("projectId") String projectId,
+                                       @PathVariable("skillId") String skillId) {
+        return skillAttributeService.getSlidesAttrs(projectId, skillId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/slides", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult deleteSlidesAttrs(@PathVariable("projectId") String projectId,
+                                        @PathVariable("skillId") String skillId) {
+        skillAttributeService.deleteSlidesAttrs(projectId, skillId)
+        return new RequestResult(success: true)
+    }
+
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/video", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody

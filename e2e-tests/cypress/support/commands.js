@@ -254,6 +254,44 @@ Cypress.Commands.add("saveVideoAttrs", (container, item, videoAttrs, quiz = fals
     });
 });
 
+
+Cypress.Commands.add("saveSlidesAttrs", (container, item, slidesAttrs, quiz = false) => {
+    const url = quiz ? `/admin/quiz-definitions/quiz${container}/questions/${item}/slides` : `/admin/projects/proj${container}/skills/skill${item}/slides`;
+
+    const formData = new FormData();
+    if (slidesAttrs.url) {
+        formData.set('url', slidesAttrs.url);
+    }
+    if (slidesAttrs.width) {
+        formData.set('width', slidesAttrs.width);
+    }
+    if (slidesAttrs.isAlreadyHosted !== null && slidesAttrs.isAlreadyHosted !== undefined) {
+        formData.set('isAlreadyHosted', slidesAttrs.isAlreadyHosted);
+    }
+    let requestDone = false;
+    cy.getCookie('XSRF-TOKEN').should('exist').then((xsrfCookie) => {
+        if (slidesAttrs.file) {
+            let fileType = 'application/pdf'
+            cy.readFile(`cypress/fixtures/${slidesAttrs.file}`, 'binary')
+                .then((binaryFile) => {
+                    const blob = Cypress.Blob.binaryStringToBlob(binaryFile, fileType);
+                    formData.set('file', blob, slidesAttrs.file);
+                    cy.request({ method: 'POST', url, body: formData, headers: {'X-XSRF-TOKEN': xsrfCookie.value} }).then(() => {
+                        requestDone = true;
+                    });
+                });
+        } else {
+            cy.request({ method: 'POST', url, body: formData, headers: {'X-XSRF-TOKEN': xsrfCookie.value} }).then(() => {
+                requestDone = true;
+            });
+        }
+
+        cy.waitUntil(() => requestDone, {
+            timeout: 30000, // waits up to 30 seconds, default is 5 seconds
+        });
+    });
+});
+
 Cypress.Commands.add("addToMyProjects", (projNum) => {
     cy.request('POST', `/api/myprojects/proj${projNum}`, {});
 });
