@@ -34,9 +34,6 @@ describe('My Progress Badges Tests', () => {
 
   beforeEach(() => {
     cy.log(`--------> ${testTime}`);
-    cy.intercept('/api/metrics/allProjectsSkillEventsOverTimeMetricsBuilder**')
-      .as('allSkillEventsForUser');
-
     cy.createProject(1);
     cy.enableProdMode(1);
 

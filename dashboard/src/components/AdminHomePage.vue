@@ -50,14 +50,6 @@ const items = computed(() => {
     page: 'GlobalBadges',
   });
 
-  if (isSupervisor.value || isRoot.value) {
-    res.push({
-      name: 'Metrics',
-      iconClass: 'fa-chart-bar skills-color-metrics',
-      page: 'MultipleProjectsMetricsPage',
-    });
-  }
-
   if (isRoot.value) {
     res.push({
       name: 'Contact Admins',
