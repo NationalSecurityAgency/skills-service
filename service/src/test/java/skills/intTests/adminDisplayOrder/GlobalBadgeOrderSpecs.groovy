@@ -23,30 +23,21 @@ import skills.intTests.utils.SkillsService
 
 class GlobalBadgeOrderSpecs extends DefaultIntSpec {
 
-    SkillsService supervisorSkillsService
     List badges
     def setup() {
-        String ultimateRoot = 'jh@dojo.com'
-        SkillsService rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-        rootSkillsService.grantRoot()
-
-        String supervisorUserId = 'foo@bar.com'
-        supervisorSkillsService = createService(supervisorUserId)
-        rootSkillsService.grantSupervisorRole(supervisorUserId)
-
         int numBadges = 5
         badges = (1..numBadges).collect {
             def badge = SkillsFactory.createBadge(1, it)
-            supervisorSkillsService.createGlobalBadge(badge)
+            skillsService.createGlobalBadge(badge)
             return badge
         }
     }
 
     def "move badge down"() {
         when:
-        def beforeMove = supervisorSkillsService.getAllGlobalBadges()
-        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.first(), 1)
-        def afterMove = supervisorSkillsService.getAllGlobalBadges()
+        def beforeMove = skillsService.getAllGlobalBadges()
+        skillsService.changeGlobalBadgeDisplayOrder(badges.first(), 1)
+        def afterMove = skillsService.getAllGlobalBadges()
         then:
         beforeMove.collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
         afterMove.collect({it.badgeId}) == ["badge2", "badge1", "badge3", "badge4", "badge5"]
@@ -54,9 +45,9 @@ class GlobalBadgeOrderSpecs extends DefaultIntSpec {
 
     def "move badge up"() {
         when:
-        def beforeMove = supervisorSkillsService.getAllGlobalBadges()
-        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(1), 0)
-        def afterMove = supervisorSkillsService.getAllGlobalBadges()
+        def beforeMove = skillsService.getAllGlobalBadges()
+        skillsService.changeGlobalBadgeDisplayOrder(badges.get(1), 0)
+        def afterMove = skillsService.getAllGlobalBadges()
         then:
         beforeMove.collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
         afterMove.collect({it.badgeId}) == ["badge2", "badge1", "badge3", "badge4", "badge5"]
@@ -64,18 +55,18 @@ class GlobalBadgeOrderSpecs extends DefaultIntSpec {
 
     def "sequence of badge display order operations"() {
         when:
-        def beforeMove = supervisorSkillsService.getAllGlobalBadges()
-        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(0), 3)
-        def move1 = supervisorSkillsService.getAllGlobalBadges()
+        def beforeMove = skillsService.getAllGlobalBadges()
+        skillsService.changeGlobalBadgeDisplayOrder(badges.get(0), 3)
+        def move1 = skillsService.getAllGlobalBadges()
 
-        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(4), 0)
-        def move2 = supervisorSkillsService.getAllGlobalBadges()
+        skillsService.changeGlobalBadgeDisplayOrder(badges.get(4), 0)
+        def move2 = skillsService.getAllGlobalBadges()
 
-        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(1), 4)
-        def move3 = supervisorSkillsService.getAllGlobalBadges()
+        skillsService.changeGlobalBadgeDisplayOrder(badges.get(1), 4)
+        def move3 = skillsService.getAllGlobalBadges()
 
-        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(2), 2)
-        def move4 = supervisorSkillsService.getAllGlobalBadges()
+        skillsService.changeGlobalBadgeDisplayOrder(badges.get(2), 2)
+        def move4 = skillsService.getAllGlobalBadges()
         then:
         beforeMove.collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
         move1.collect({it.badgeId}) == ["badge2", "badge3", "badge4", "badge1", "badge5"]
@@ -86,9 +77,9 @@ class GlobalBadgeOrderSpecs extends DefaultIntSpec {
 
     def "move badge to out of the max bound - should be placed last"() {
         when:
-        def beforeMove = supervisorSkillsService.getAllGlobalBadges()
-        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(0), 10)
-        def afterMove = supervisorSkillsService.getAllGlobalBadges()
+        def beforeMove = skillsService.getAllGlobalBadges()
+        skillsService.changeGlobalBadgeDisplayOrder(badges.get(0), 10)
+        def afterMove = skillsService.getAllGlobalBadges()
         then:
         beforeMove.collect({it.badgeId}) == ["badge1", "badge2", "badge3", "badge4", "badge5"]
         afterMove.collect({it.badgeId}) == ["badge2", "badge3", "badge4", "badge5", "badge1"]
@@ -96,9 +87,9 @@ class GlobalBadgeOrderSpecs extends DefaultIntSpec {
 
     def "new display index must be >=0 "() {
         when:
-        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(2), 0)
-        def afterMove = supervisorSkillsService.getAllGlobalBadges()
-        supervisorSkillsService.changeGlobalBadgeDisplayOrder(badges.get(2), -1)
+        skillsService.changeGlobalBadgeDisplayOrder(badges.get(2), 0)
+        def afterMove = skillsService.getAllGlobalBadges()
+        skillsService.changeGlobalBadgeDisplayOrder(badges.get(2), -1)
         then:
         SkillsClientException exception = thrown()
         exception.httpStatus == HttpStatus.BAD_REQUEST

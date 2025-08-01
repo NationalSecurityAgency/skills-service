@@ -177,7 +177,7 @@ class WSHelper {
         return multipartPost(url, params)
     }
 
-    def supervisorPatch(String endpoint, def params, boolean throwExceptionOnFailure = true, MediaType mediaType = MediaType.APPLICATION_JSON) {
+    def globalBadgePatch(String endpoint, def params, boolean throwExceptionOnFailure = true, MediaType mediaType = MediaType.APPLICATION_JSON) {
         patch(endpoint, "/admin/", params, HttpStatus.OK, throwExceptionOnFailure, mediaType)
     }
 

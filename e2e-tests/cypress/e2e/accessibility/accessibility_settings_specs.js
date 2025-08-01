@@ -211,8 +211,6 @@ describe('Accessibility Tests', () => {
             cy.visit('/settings/security');
             cy.injectAxe();
             cy.get('[data-cy="addUserBtn"]')
-            cy.get('[data-cy="supervisorrm"]')
-              .contains('There are no records to show');
             cy.customLighthouse();
             cy.customA11y();
         })

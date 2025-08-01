@@ -26,26 +26,6 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
     String projId = SkillsFactory.defaultProjId
     String badgeId = 'GlobalBadge1'
 
-    String ultimateRoot = 'jh@dojo.com'
-    SkillsService rootSkillsService
-    String nonRootUserId = 'foo@bar.com'
-    SkillsService nonSupervisorSkillsService
-
-    def setup(){
-        skillsService.deleteProjectIfExist(projId)
-        rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-        nonSupervisorSkillsService = createService(nonRootUserId)
-
-        if (!rootSkillsService.isRoot()) {
-            rootSkillsService.grantRoot()
-        }
-        rootSkillsService.grantSupervisorRole(skillsService.wsHelper.username)
-    }
-
-    def cleanup() {
-        rootSkillsService?.removeSupervisorRole(skillsService.wsHelper.username)
-    }
-
     def "give credit if all dependencies were fulfilled"(){
         String subj = "testSubj"
 

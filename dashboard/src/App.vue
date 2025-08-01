@@ -77,10 +77,9 @@ const loadUserAndDisplayInfo = () => {
   inceptionConfigurer.configure()
   pageVisitService.reportPageVisit(route.path, route.fullPath)
   const loadRoot = accessState.loadIsRoot()
-  const loadSupervisor = accessState.loadIsSupervisor()
   const loadEmailEnabled = appInfoState.loadEmailEnabled()
   const loadCustomIconCSS = addCustomIconCSSForClientDisplay()
-  const promises = [loadRoot, loadSupervisor, loadEmailEnabled, loadCustomIconCSS]
+  const promises = [loadRoot, loadEmailEnabled, loadCustomIconCSS]
   if (!skillsDisplayInfo.isSkillsClientPath()) {
     const loadUserPreferences =
         userPreferences.loadUserPreferences().then(() => {

@@ -19,22 +19,6 @@ describe('Global Badges Tests', () => {
     const levelsTableSelector = '[data-cy="simpleLevelsTable"]';
 
     beforeEach(() => {
-        cy.logout();
-        const supervisorUser = 'supervisor@skills.org';
-        cy.register(supervisorUser, 'password');
-        cy.login('root@skills.org', 'password');
-        cy.request('PUT', `/root/users/${supervisorUser}/roles/ROLE_SUPERVISOR`);
-        cy.logout();
-        cy.login(supervisorUser, 'password');
-        cy.log('completed supervisor user login');
-
-        // Cypress.Commands.add('selectSkill', (skillsSelector='[data-cy="skillsSelectionItem-proj1-skill1"]', retry=true) => {
-        //     cy.get('[data-cy="skillsSelector"] [data-pc-section="dropdownicon"]').as('getOptions')
-        //         .click();
-        //     cy.wait(500);
-        //     cy.get(skillsSelector).click();
-        // });
-
         cy.intercept('GET', '/admin/badges/*/skills/available?*')
           .as('loadAvailableSkills');
         

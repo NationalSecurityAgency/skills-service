@@ -28,7 +28,6 @@ import { useSkillsInputFallthroughAttributes } from '@/components/utils/inputFor
 const DASHBOARD = 'DASHBOARD';
 const CLIENT = 'CLIENT';
 const ROOT = 'ROOT';
-const SUPERVISOR = 'SUPERVISOR';
 
 const appConfig = useAppConfig();
 const userInfo = useUserInfo();
@@ -58,7 +57,7 @@ const props = defineProps({
   userType: {
     type: String,
     default: CLIENT,
-    validator: (value) => ([DASHBOARD, CLIENT, ROOT, SUPERVISOR].indexOf(value) >= 0),
+    validator: (value) => ([DASHBOARD, CLIENT, ROOT].indexOf(value) >= 0),
   },
   excludedSuggestions: {
     type: Array,
@@ -137,8 +136,6 @@ const suggestUrl = computed(() => {
     } else {
       suggestUrl = '/app/users/suggestClientUsers';
     }
-  } else if (props.userType === SUPERVISOR) {
-    suggestUrl = '/root/users/without/role/ROLE_SUPERVISOR';
   } else if (props.userType === ROOT) {
     suggestUrl = '/root/users/without/role/ROLE_SUPER_DUPER_USER';
   } else {

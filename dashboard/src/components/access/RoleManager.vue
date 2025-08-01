@@ -36,13 +36,12 @@ const dialogMessages = useDialogMessages()
 // role constants
 const ROLE_APP_USER = 'ROLE_APP_USER';
 const ROLE_PROJECT_ADMIN = 'ROLE_PROJECT_ADMIN';
-const ROLE_SUPERVISOR = 'ROLE_SUPERVISOR';
 const ROLE_SUPER_DUPER_USER = 'ROLE_SUPER_DUPER_USER';
 const ROLE_PROJECT_APPROVER = 'ROLE_PROJECT_APPROVER';
 const ROLE_DASHBOARD_ADMIN_ACCESS = 'ROLE_DASHBOARD_ADMIN_ACCESS'
 const ROLE_ADMIN_GROUP_MEMBER = 'ROLE_ADMIN_GROUP_MEMBER'
 const ROLE_ADMIN_GROUP_OWNER = 'ROLE_ADMIN_GROUP_OWNER'
-const ALL_ROLES = [ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPERVISOR, ROLE_SUPER_DUPER_USER, ROLE_PROJECT_APPROVER];
+const ALL_ROLES = [ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPER_DUPER_USER, ROLE_PROJECT_APPROVER];
 
 const appConfig = useAppConfig();
 const announcer = useSkillsAnnouncer();
@@ -187,9 +186,6 @@ function getRoleDisplay(roleName) {
   }
   if (roleName === ROLE_APP_USER) {
     return 'Skills Display';
-  }
-  if (roleName === ROLE_SUPERVISOR) {
-    return 'Supervisor';
   }
   if (roleName === ROLE_SUPER_DUPER_USER) {
     return 'Root';

@@ -18,14 +18,6 @@ import { defineStore } from 'pinia'
 import AccessService from '@/components/access/AccessService.js'
 
 export const useAccessState = defineStore('accessState', () => {
-  const isSupervisorState = ref(false)
-  const loadIsSupervisor = () => {
-    return AccessService.hasRole('ROLE_SUPERVISOR')
-      .then((result) => {
-        isSupervisorState.value = result
-      })
-  }
-  const isSupervisor = computed(() => isSupervisorState.value)
 
   const isRootState = ref(false)
   const loadIsRoot = () => {
@@ -37,9 +29,7 @@ export const useAccessState = defineStore('accessState', () => {
   const isRoot = computed(() => isRootState.value)
 
   return {
-    isSupervisor,
     isRoot,
-    loadIsSupervisor,
     loadIsRoot
   }
 })

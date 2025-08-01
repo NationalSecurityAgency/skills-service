@@ -265,7 +265,7 @@ class SkillsService {
 
     @Profile
     def changeGlobalBadgeDisplayOrder(Map props, Integer newDisplayOrderIndex){
-        wsHelper.supervisorPatch(getGlobalBadgeUrl(props.badgeId), [
+        wsHelper.globalBadgePatch(getGlobalBadgeUrl(props.badgeId), [
                 action: "NewDisplayOrderIndex",
                 newDisplayOrderIndex: newDisplayOrderIndex,
         ]);
@@ -1332,9 +1332,9 @@ class SkillsService {
         return wsHelper.grantRoot()
     }
 
-    def grantSupervisorRole(String userId) {
+    def grantGlobalBadgeAdminRole(String userId) {
         userId = getUserId(userId)
-        return wsHelper.rootPut("/users/${userId}/roles/${RoleName.ROLE_SUPERVISOR.toString()}")
+        return wsHelper.globalBadgePut("/users/${userId}/roles/${RoleName.ROLE_GLOBAL_BADGE_ADMIN.toString()}")
     }
 
     def grantRootRole(String userId) {
@@ -1347,8 +1347,8 @@ class SkillsService {
         return wsHelper.rootPut("/users/${userId}/roles/${RoleName.ROLE_DASHBOARD_ADMIN_ACCESS.toString()}")
     }
 
-    def removeSupervisorRole(String userId) {
-        return wsHelper.rootDelete("/users/${userId}/roles/${RoleName.ROLE_SUPERVISOR.toString()}")
+    def removeGlobalBadgeAdminRole(String userId) {
+        return wsHelper.globalBadgeDelete("/users/${userId}/roles/${RoleName.ROLE_GLOBAL_BADGE_ADMIN.toString()}")
     }
 
     def revokeInviteOnlyProjectAccess(String projectId, String userId) {

@@ -15,7 +15,7 @@
  */
 import axios from 'axios'
 
-const supportedRoles = ['ROLE_SUPER_DUPER_USER', 'ROLE_SUPERVISOR', 'ROLE_DASHBOARD_ADMIN_ACCESS']
+const supportedRoles = ['ROLE_SUPER_DUPER_USER', 'ROLE_DASHBOARD_ADMIN_ACCESS']
 const hasSupportedRole = (roles) => {
   if (roles instanceof Array) {
     return roles.some(value => supportedRoles.includes(value));

@@ -228,6 +228,14 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     @Query('''SELECT ur as role, ua as attrs
         from UserRole ur, UserAttrs ua 
         where
+            ur.userId = ua.userId and 
+            ur.globalBadgeId = ?1''')
+    List<UserRoleWithAttrs> findRoleWithAttrsByGlobalBadgeId(String badgeId)
+
+
+    @Query('''SELECT ur as role, ua as attrs
+        from UserRole ur, UserAttrs ua 
+        where
             ur.userId = ua.userId and
             ur.roleName IN (:#{#roleNames.![name()]}) and
             ur.adminGroupId = ?1''')

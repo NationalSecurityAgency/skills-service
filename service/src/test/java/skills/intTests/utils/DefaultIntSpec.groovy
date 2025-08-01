@@ -200,16 +200,6 @@ class DefaultIntSpec extends Specification {
        return skillsServiceFactory.createService(userParams, url)
     }
 
-    SkillsService createSupervisor(){
-        String ultimateRoot = 'jh@dojo.com'
-        SkillsService rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-        rootSkillsService.grantRoot()
-        String supervisorUserId = 'foo@bar.com'
-        SkillsService supervisorService = createService(supervisorUserId)
-        rootSkillsService.grantSupervisorRole(supervisorUserId)
-        return supervisorService
-    }
-
     /*
      * Returns N number of random users. NOTE - if tests are run in pki mode,
      * N must be less than or equal to the number of test p12 certificates available,

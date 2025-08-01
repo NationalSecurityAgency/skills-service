@@ -35,6 +35,7 @@ import skills.metrics.MetricsService
 import skills.profile.EnableCallStackProf
 import skills.services.*
 import skills.services.admin.ProjAdminService
+import skills.storage.model.auth.RoleName
 import skills.utils.InputSanitizer
 
 import static skills.services.GlobalBadgesService.AvailableSkillsResult
@@ -43,7 +44,7 @@ import static skills.services.GlobalBadgesService.AvailableSkillsResult
 @RequestMapping("/admin")
 @Slf4j
 @EnableCallStackProf
-class SupervisorController {
+class GlobalBadgesController {
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
@@ -53,6 +54,9 @@ class SupervisorController {
 
     @Autowired
     GlobalBadgesService globalBadgesService
+
+    @Autowired
+    GlobalBadgeRoleService globalBadgeRoleService
 
     @Autowired
     AdminUsersService adminUsersService
@@ -247,5 +251,35 @@ class SupervisorController {
         globalBadgesService.changeProjectLevelOnBadge(badgeId, projectId, currentLevel, newLevel)
         //this would need to trigger identification of users who meet new criteria if the level is lower
         return ResponseEntity.ok(true)
+    }
+
+    @RequestMapping(value = "/{badgeId}/users/{userKey}/roles/{roleName}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult addGlobalBadgeRole(@PathVariable("badgeId") String badgeId,
+                              @PathVariable("userKey") String userKey,
+                              @PathVariable("roleName") RoleName roleName) {
+        SkillsValidator.isNotBlank(badgeId, "Global Badge Id")
+        SkillsValidator.isNotNull(userKey, "userKey")
+        SkillsValidator.isNotNull(roleName, "roleName")
+
+        globalBadgeRoleService.addGlobalBadgeAdminRole(userKey, badgeId, roleName)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/{badgeId}/userRoles", method = RequestMethod.GET)
+    List<UserRoleRes> getGlobalBadgeUserRoles(@PathVariable("badgeId") String badgeId) {
+        SkillsValidator.isNotBlank(badgeId, "Global Badge Id")
+        return globalBadgeRoleService.getGlobalBadgeAdminUserRoles(badgeId)
+    }
+
+    @RequestMapping(value = "/{badgeId}/users/{userKey}/roles/{roleName}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult deleteGlobalBadgeRole(@PathVariable("badgeId") String badgeId,
+                                 @PathVariable("userKey") String userKey,
+                                 @PathVariable("roleName") RoleName roleName) {
+        SkillsValidator.isNotBlank(badgeId, "Global Badge Id")
+        SkillsValidator.isNotNull(userKey, "userKey")
+        SkillsValidator.isNotNull(roleName, "roleName")
+
+        globalBadgeRoleService.deleteGlobalBadgeAdminRole(userKey, badgeId, roleName)
+        return RequestResult.success()
     }
 }

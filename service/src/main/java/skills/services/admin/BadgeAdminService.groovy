@@ -193,7 +193,7 @@ class BadgeAdminService {
         }
         if (savedSkill && type == SkillDef.ContainerType.GlobalBadge && !isEdit) {
             String userId = userInfoService.getCurrentUserId()
-            accessSettingsStorageService.addGlobalQuizUserRoleForUser(userId, savedSkill.skillId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
+            accessSettingsStorageService.addGlobalAdminUserRoleForUser(userId, savedSkill.skillId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
         }
 
         attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(savedSkill?.description, savedSkill.projectId, null, savedSkill.skillId)
@@ -277,7 +277,6 @@ class BadgeAdminService {
         if (projectId == null) {
             attachmentService.deleteGlobalBadgeAttachments(badgeId)
 
-            // TODO: remove global badge roles (and add a test for this)
             accessSettingsStorageService.deleteGlobalBadgeUserRoles(badgeId)
         }
 

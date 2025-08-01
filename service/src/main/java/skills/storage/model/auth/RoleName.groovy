@@ -19,7 +19,6 @@ enum RoleName {
     ROLE_APP_USER('Application'),
     ROLE_PRIVATE_PROJECT_USER('Private'),
     ROLE_PROJECT_ADMIN('Admin'),
-    ROLE_SUPERVISOR('Supervisor'),
     ROLE_SUPER_DUPER_USER('Root'),
     ROLE_PROJECT_APPROVER('Approver'),
     ROLE_DASHBOARD_ADMIN_ACCESS('Admin Access'),

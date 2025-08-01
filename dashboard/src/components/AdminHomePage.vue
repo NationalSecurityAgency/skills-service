@@ -22,9 +22,6 @@ const accessState = useAccessState()
 const isRoot = computed(() => {
   return accessState.isRoot;
 });
-const isSupervisor = computed(() => {
-  return accessState.isSupervisor;
-});
 
 
 const items = computed(() => {

@@ -22,8 +22,6 @@ describe('Limit Admin Dashboard Access Tests', () => {
 
     cy.visit('/settings/security')
     cy.get('[data-cy="rootrm"]')
-    cy.get('[data-cy="supervisorrm"]')
-    cy.get(limitAdminAccessRoleManagerSelector).should('not.exist')
 
     cy.intercept('GET', '/public/config', (req) => {
       req.continue((res) => {
@@ -33,7 +31,6 @@ describe('Limit Admin Dashboard Access Tests', () => {
     cy.visit('/settings/security')
     cy.wait('@getConfig')
     cy.get('[data-cy="rootrm"]')
-    cy.get('[data-cy="supervisorrm"]')
     cy.get(limitAdminAccessRoleManagerSelector).should('exist')
   })
 
@@ -52,7 +49,6 @@ describe('Limit Admin Dashboard Access Tests', () => {
     cy.visit('/settings/security')
     cy.wait('@getConfig')
     cy.get('[data-cy="rootrm"]')
-    cy.get('[data-cy="supervisorrm"]')
     cy.get(limitAdminAccessRoleManagerSelector)
 
     const addUser = (userId) => {
@@ -108,7 +104,6 @@ describe('Limit Admin Dashboard Access Tests', () => {
     cy.visit('/settings/security')
     cy.wait('@getConfig')
     cy.get('[data-cy="rootrm"]')
-    cy.get('[data-cy="supervisorrm"]')
     cy.get(limitAdminAccessRoleManagerSelector)
     const expectedTableData = users.map((u) => [{
       colIndex: 0,

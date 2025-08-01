@@ -36,10 +36,6 @@ export default {
     const url = buildUrl(`/admin/projects/${encodeURIComponent(projectId)}/metrics/${encodeURIComponent(metricsId)}`, params);
     return axios.get(url).then((response) => response.data);
   },
-  loadGlobalMetrics(metricsId, params = {}) {
-    const url = buildUrl(`/supervisor/metrics/${encodeURIComponent(metricsId)}`, params);
-    return axios.get(url).then((response) => response.data);
-  },
   loadMyMetrics(metricsId, params = {}) {
     const url = buildUrl(`/api/metrics/${encodeURIComponent(metricsId)}`, params);
     return axios.get(url).then((response) => response.data);

@@ -203,7 +203,7 @@ class RootController {
 
         def emailBody = "Congratulations! You've been just added as a Root Administrator for the [SkillTree Dashboard](${publicUrl}administrator).\n\n" +
                 "The Root role is meant for administering the dashboard itself and not any specific project. Users with the Root role can view the Inception project." +
-                "Users with the Root role can also assign Supervisor and Root roles to other dashboard users. Thank you for being part of the SkillTree Community!\n\n" +
+                "Users with the Root role can also assign Root roles to other dashboard users. Thank you for being part of the SkillTree Community!\n\n" +
                 "Always yours,\n\n" +
                 "-SkillTree Bot"
         contactUsersService.sendEmail("SkillTree - You've been added as root", emailBody, userId, null, uiConfigProperties.ui.defaultCommunityDescriptor)
