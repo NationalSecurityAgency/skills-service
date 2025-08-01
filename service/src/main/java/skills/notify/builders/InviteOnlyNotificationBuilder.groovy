@@ -41,6 +41,8 @@ class InviteOnlyNotificationBuilder implements NotificationEmailBuilder {
     Res build(Notification notification, Formatting formatParams) {
         def parsed = jsonSlurper.parseText(notification.encodedParams)
         Context context = buildThymeleafContext(parsed, formatParams)
+        String parsedRecipients = parsed["ccRecipients"]
+        List<String> ccRecipients = parsedRecipients.size() > 0 ? parsedRecipients.split(",") : null
         try {
             String htmlBody = thymeleafTemplateEngine.process(INVITE_TEMPLATE, context)
             String plainText = buildPlainText(parsed, formatParams)
@@ -49,6 +51,7 @@ class InviteOnlyNotificationBuilder implements NotificationEmailBuilder {
                     html: htmlBody,
                     plainText: plainText,
                     userIdsAreEmailAdresses: true,
+                    ccRecipients: ccRecipients
             )
         } catch(Exception e) {
             e.printStackTrace()

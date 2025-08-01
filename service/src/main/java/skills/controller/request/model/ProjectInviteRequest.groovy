@@ -17,6 +17,7 @@ package skills.controller.request.model
 
 class ProjectInviteRequest {
     List<String> recipients = []
+    List<String> ccRecipients = []
     //iso8601 duration format
     String validityDuration
 }
