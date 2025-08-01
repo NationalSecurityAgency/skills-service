@@ -13,102 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import './slides-commands';
 
 describe('Configure Skill Slides Tests', () => {
 
     const slidesFile = 'test-slides-1.pdf';
     const testSlidesUrl = `/static/videos/${slidesFile}`
     const externalPdfUrl = `${Cypress.config().baseUrl}${testSlidesUrl}`
-    beforeEach(() => {
-        cy.intercept('GET', '/admin/projects/proj1/skills/skill1/slides').as('getSlidesProps')
-        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
-        Cypress.Commands.add("visitSlidesConfPage", () => {
-            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-slides');
-            cy.wait('@getSlidesProps')
-            cy.wait('@getSkillInfo')
-            cy.get('.spinner-border').should('not.exist')
-        });
-
-
-        Cypress.Commands.add("navThroughSlides", (navBackToStart = false) => {
-            cy.get('#pdfCanvasId').should('be.visible')
-            cy.get('[data-cy="slidesFullscreenBtn"]').should('be.enabled')
-            cy.get('[data-cy="slidesDownloadPdfBtn"]').should('be.enabled')
-
-            cy.get('[data-cy="prevSlideBtn"]').should('be.disabled')
-            cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
-            cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
-
-            cy.get('[data-cy="nextSlideBtn"]').click()
-            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 5')
-            cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
-            cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-            cy.get('#proj1-skill1Container #text-layer').contains('First cool slide')
-
-            cy.get('[data-cy="nextSlideBtn"]').click()
-            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 3 of 5')
-            cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
-            cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-            cy.get('#proj1-skill1Container #text-layer').contains('Second slide')
-
-            cy.get('[data-cy="nextSlideBtn"]').click()
-            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 4 of 5')
-            cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
-            cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-            cy.get('#proj1-skill1Container #text-layer').contains('Third Slide')
-
-            cy.get('[data-cy="nextSlideBtn"]').click()
-            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 5 of 5')
-            cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
-            cy.get('[data-cy="nextSlideBtn"]').should('be.disabled')
-            cy.get('#proj1-skill1Container #text-layer').contains('Fourth Slide')
-
-            if (navBackToStart) {
-                cy.get('[data-cy="prevSlideBtn"]').click()
-                cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 4 of 5')
-                cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
-                cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-                cy.get('#proj1-skill1Container #text-layer').contains('Third Slide')
-
-                cy.get('[data-cy="prevSlideBtn"]').click()
-                cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 3 of 5')
-                cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
-                cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-                cy.get('#proj1-skill1Container #text-layer').contains('Second slide')
-
-                cy.get('[data-cy="prevSlideBtn"]').click()
-                cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 5')
-                cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
-                cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-                cy.get('#proj1-skill1Container #text-layer').contains('First cool slide')
-
-                cy.get('[data-cy="prevSlideBtn"]').click()
-                cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
-                cy.get('[data-cy="prevSlideBtn"]').should('be.disabled')
-                cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-                cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
-            }
-        });
-
-        Cypress.Commands.add("navThroughSlides2", () => {
-            cy.get('#pdfCanvasId').should('be.visible')
-            cy.get('[data-cy="slidesFullscreenBtn"]').should('be.enabled')
-            cy.get('[data-cy="slidesDownloadPdfBtn"]').should('be.enabled')
-
-            cy.get('[data-cy="prevSlideBtn"]').should('be.disabled')
-            cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
-            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 2')
-            cy.get('#proj1-skill1Container #text-layer').contains('This will be first slide')
-
-            cy.get('[data-cy="nextSlideBtn"]').click()
-            cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 2')
-            cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
-            cy.get('[data-cy="nextSlideBtn"]').should('be.disabled')
-            cy.get('#proj1-skill1Container #text-layer').contains('Second slide this is')
-        })
-
-    });
 
     it('configure slides external url', () => {
         cy.createProject(1)

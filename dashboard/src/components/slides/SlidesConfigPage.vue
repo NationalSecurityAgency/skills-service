@@ -399,6 +399,7 @@ const formHasAnyData = computed(() => {
                                data-cy="pdfUrl"
                                @input="validate"
                                placeholder="Please enter pdf external URL"
+                               aria-label="PDF external URL"
                                :disabled="isReadOnly"
               />
             </div>

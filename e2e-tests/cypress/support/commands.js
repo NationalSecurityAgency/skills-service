@@ -262,6 +262,9 @@ Cypress.Commands.add("saveSlidesAttrs", (container, item, slidesAttrs, quiz = fa
     if (slidesAttrs.url) {
         formData.set('url', slidesAttrs.url);
     }
+    if (slidesAttrs.width) {
+        formData.set('width', slidesAttrs.width);
+    }
     if (slidesAttrs.isAlreadyHosted !== null && slidesAttrs.isAlreadyHosted !== undefined) {
         formData.set('isAlreadyHosted', slidesAttrs.isAlreadyHosted);
     }

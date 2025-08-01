@@ -13,18 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import './slides-commands';
 
 describe('Configure slides and SkillTree Features Tests', () => {
 
     beforeEach(() => {
         cy.intercept('GET', '/admin/projects/proj1/skills/skill1/slides').as('getSlidesProps')
         cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1').as('getSkillInfo')
-        Cypress.Commands.add("visitSlidesConfPage", () => {
-            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-slides');
-            cy.wait('@getSlidesProps')
-            cy.wait('@getSkillInfo')
-            cy.get('.spinner-border').should('not.exist')
-        });
 
         cy.intercept('GET', '/admin/projects/proj2/skills/skill1/slides').as('getSlidesPropsProj2')
         cy.intercept('GET', '/admin/projects/proj2/subjects/subj1/skills/skill1').as('getSkillInfoProj2')
