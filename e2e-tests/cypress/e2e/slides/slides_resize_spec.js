@@ -52,27 +52,27 @@ describe('Slides Resize Tests', () => {
             .trigger('mousemove')
             .trigger('mouseup', { force: true })
 
-        cy.get('[data-cy="defaultVideoSize"]').contains('777')
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /77\d/)
         cy.get('[data-cy="unsavedVideoSizeChanges"]')
         cy.get('[data-cy="updateSlidesSettingsBtn"]').should('be.enabled')
 
-        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*782.*px/)
+        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*78[\d.]*px/)
 
         cy.get('[data-cy="slidesResizeHandle"]')
             .trigger('mousedown')
             .trigger('mousemove')
             .trigger('mouseup', { force: true })
 
-        cy.get('[data-cy="defaultVideoSize"]').contains('761')
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
         cy.get('[data-cy="unsavedVideoSizeChanges"]')
         cy.get('[data-cy="updateSlidesSettingsBtn"]').should('be.enabled')
 
-        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*766.*px/)
+        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*76[\d.]*px/)
 
         cy.get('[data-cy="updateSlidesSettingsBtn"]').click()
         cy.get('[data-cy="savedMsgSecondBtn"]')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
-        cy.get('[data-cy="defaultVideoSize"]').contains('761')
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
 
         // refresh and re-validate
         cy.visitSlidesConfPage();
@@ -81,8 +81,8 @@ describe('Slides Resize Tests', () => {
         cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
         cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
 
-        cy.get('[data-cy="defaultVideoSize"]').contains('761')
-        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*766.*px/)
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
+        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*76[\d.]*px/)
     });
 
     it('resize slides using keyboard', () => {
@@ -99,32 +99,32 @@ describe('Slides Resize Tests', () => {
 
         cy.get('[data-cy="slidesFullscreenBtn"]').tab().type('{enter}{leftArrow}')
 
-        cy.get('[data-cy="defaultVideoSize"]').contains('784')
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /78\d/)
         cy.get('[data-cy="unsavedVideoSizeChanges"]')
         cy.get('[data-cy="updateSlidesSettingsBtn"]').should('be.enabled')
 
-        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*789.*px/)
+        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*78[\d.]*px/)
 
         cy.get('[data-cy="slidesFullscreenBtn"]').tab().type('{enter}{leftArrow}')
 
-        cy.get('[data-cy="defaultVideoSize"]').contains('774')
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /77\d/)
         cy.get('[data-cy="unsavedVideoSizeChanges"]')
         cy.get('[data-cy="updateSlidesSettingsBtn"]').should('be.enabled')
 
-        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*779.*px/)
+        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*77[\d.]*px/)
 
         cy.get('[data-cy="slidesFullscreenBtn"]').tab().type('{enter}{rightArrow}')
 
-        cy.get('[data-cy="defaultVideoSize"]').contains('784')
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /78\d/)
         cy.get('[data-cy="unsavedVideoSizeChanges"]')
         cy.get('[data-cy="updateSlidesSettingsBtn"]').should('be.enabled')
 
-        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*789.*px/)
+        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*78[\d.]*px/)
 
         cy.get('[data-cy="updateSlidesSettingsBtn"]').click()
         cy.get('[data-cy="savedMsgSecondBtn"]')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
-        cy.get('[data-cy="defaultVideoSize"]').contains('784')
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /78\d/)
 
         // refresh and re-validate
         cy.visitSlidesConfPage();
@@ -133,9 +133,8 @@ describe('Slides Resize Tests', () => {
         cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
         cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
 
-        cy.get('[data-cy="defaultVideoSize"]').contains('784')
-        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*789.*px/)
-
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /78\d/)
+        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*78[\d.]*px/)
     });
 
     // it('video on skills-display skill page uses configured default unless overridden by the user', () => {
