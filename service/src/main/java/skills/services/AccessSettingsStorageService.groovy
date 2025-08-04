@@ -121,12 +121,12 @@ class AccessSettingsStorageService {
         return userRoleRepository.countUserRolesByProjectIdAndUserRoles(projectId, roles)
     }
 
-    List<UserRoleRes> findAllQuizRoles(String quizId) {
+    List<UserRoleRes> findAllGlobalBadgeAdminRoles(String quizId) {
         List<UserRoleRepo.UserRoleWithAttrs> rolesFromDB = userRoleRepository.findRoleWithAttrsByGlobalBadgeId(quizId)
         return rolesFromDB.collect { convert(it)}
     }
 
-    List<UserRoleRes> findAllGlobalBadgeAdminRoles(String quizId) {
+    List<UserRoleRes> findAllQuizRoles(String quizId) {
         List<UserRoleRepo.UserRoleWithAttrs> rolesFromDB = userRoleRepository.findRoleWithAttrsByQuizId(quizId)
         return rolesFromDB.collect { convert(it)}
     }
