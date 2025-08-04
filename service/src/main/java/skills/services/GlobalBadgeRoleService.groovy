@@ -27,7 +27,6 @@ import skills.controller.result.model.BadgeResult
 import skills.controller.result.model.UserRoleRes
 import skills.services.admin.BadgeAdminService
 import skills.services.admin.UserCommunityService
-import skills.services.quiz.QuizRoleService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
@@ -47,9 +46,6 @@ class GlobalBadgeRoleService {
 
     @Autowired
     UserInfoService userInfoService
-
-    @Autowired
-    QuizRoleService quizRoleService
 
     @Autowired
     BadgeAdminService badgeAdminService
@@ -84,8 +80,8 @@ class GlobalBadgeRoleService {
         if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
             throw new SkillException("Cannot add roles to myself. userId=[${userId}]", ErrorCode.AccessDenied)
         }
-        Boolean addingAsLocalAdmin = adminGroupId == null && roleName == RoleName.ROLE_QUIZ_ADMIN;
-        if (addingAsLocalAdmin && userRoleRepo.isUserQuizGroupAdmin(userId, badgeId)) {
+        Boolean addingAsLocalAdmin = adminGroupId == null && roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN;
+        if (addingAsLocalAdmin && userRoleRepo.isUserGlobalBadgeAdmin(userId, badgeId)) {
             throw new SkillException("User is already part of an Admin Group and cannot be added as a local admin. userId=[${userId}]", ErrorCode.AccessDenied)
         }
         accessSettingsStorageService.addGlobalAdminUserRoleForUser(userId, badgeResult.badgeId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
@@ -94,10 +90,10 @@ class GlobalBadgeRoleService {
         String userIdForDisplay = userAttrs?.userIdForDisplay ?: userId
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: DashboardAction.Create, item: DashboardItem.UserRole,
-                itemId: userIdForDisplay, badgeId: badgeResult.badgeId,
+                itemId: userIdForDisplay,
                 actionAttributes: [
                         userRole: roleName,
-                        quizName: badgeResult.name,
+                        badgeName: badgeResult.name,
                         badgeId: badgeResult.badgeId,
                 ]
         ))
