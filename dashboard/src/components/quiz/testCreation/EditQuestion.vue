@@ -285,6 +285,9 @@ const onSavedQuestion = (savedQuestion) => {
   close()
 }
 
+const typeChanged = (newValue) => {
+  questionType.value.selectedType = newValue;
+}
 </script>
 
 <template>
@@ -302,6 +305,8 @@ const onSavedQuestion = (savedQuestion) => {
       @close="close"
       @isDirty="isDirty = !isDirty"
       @errors="answersErrorMessage = $event['answers']"
+      @watchedValueChanged="typeChanged"
+      fieldToWatch="questionType"
   >
     <template #default>
       <markdown-editor
@@ -399,6 +404,7 @@ const onSavedQuestion = (savedQuestion) => {
         </div>
         <ConfigureAnswers
             ref="answersRef"
+            name="questionType"
             v-model="props.questionDef.answers"
             :quiz-type="props.questionDef.quizType"
             :question-type="questionType.selectedType.id "
