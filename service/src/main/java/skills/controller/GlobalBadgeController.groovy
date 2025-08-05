@@ -31,10 +31,10 @@ import skills.controller.request.model.BadgeRequest
 import skills.controller.result.model.*
 import skills.icons.CustomIconFacade
 import skills.icons.UploadedIcon
-import skills.metrics.MetricsService
 import skills.profile.EnableCallStackProf
 import skills.services.*
 import skills.services.admin.ProjAdminService
+import skills.services.adminGroup.AdminGroupService
 import skills.storage.model.auth.RoleName
 import skills.utils.InputSanitizer
 
@@ -71,7 +71,7 @@ class GlobalBadgesController {
     ProjAdminService projAdminService
 
     @Autowired
-    MetricsService metricsService
+    AdminGroupService adminGroupService
 
     @RequestMapping(value = "/badges/{badgeId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -165,17 +165,6 @@ class GlobalBadgesController {
         return globalBadgesService.getAvailableSkillsForGlobalBadge(badgeId, query)
     }
 
-    @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    List<ProjectResult> getAllProjects() {
-        return projAdminService.getAllProjects()
-    }
-
-    @RequestMapping(value = "/metrics/{metricId}", method =  RequestMethod.GET, produces = "application/json")
-    def getMetricsData(@PathVariable("metricId") String metricId, @RequestParam Map<String,String> metricsProps) {
-        return metricsService.loadGlobalMetrics(metricId, metricsProps)
-    }
-
     @RequestMapping(value = "/badges/{badgeId}/projects/available", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     GlobalBadgesService.AvailableProjectResult getAllProjectsForBadgeId(@PathVariable("badgeId") String badgeId, @RequestParam String query) {
@@ -253,7 +242,7 @@ class GlobalBadgesController {
         return ResponseEntity.ok(true)
     }
 
-    @RequestMapping(value = "/{badgeId}/users/{userKey}/roles/{roleName}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/badges/{badgeId}/users/{userKey}/roles/{roleName}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult addGlobalBadgeRole(@PathVariable("badgeId") String badgeId,
                               @PathVariable("userKey") String userKey,
                               @PathVariable("roleName") RoleName roleName) {
@@ -265,13 +254,14 @@ class GlobalBadgesController {
         return RequestResult.success()
     }
 
-    @RequestMapping(value = "/{badgeId}/userRoles", method = RequestMethod.GET)
-    List<UserRoleRes> getGlobalBadgeUserRoles(@PathVariable("badgeId") String badgeId) {
+    @RequestMapping(value = "/badges/{badgeId}/userRoles", method = RequestMethod.GET)
+    TableResult getGlobalBadgeUserRoles(@PathVariable("badgeId") String badgeId) {
         SkillsValidator.isNotBlank(badgeId, "Global Badge Id")
-        return globalBadgeRoleService.getGlobalBadgeAdminUserRoles(badgeId)
+        List<UserRoleRes> result = globalBadgeRoleService.getGlobalBadgeAdminUserRoles(badgeId)
+        return new TableResult(data: result, count: result?.size(), totalCount: result?.size())
     }
 
-    @RequestMapping(value = "/{badgeId}/users/{userKey}/roles/{roleName}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/badges/{badgeId}/users/{userKey}/roles/{roleName}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult deleteGlobalBadgeRole(@PathVariable("badgeId") String badgeId,
                                  @PathVariable("userKey") String userKey,
                                  @PathVariable("roleName") RoleName roleName) {
@@ -281,5 +271,12 @@ class GlobalBadgesController {
 
         globalBadgeRoleService.deleteGlobalBadgeAdminRole(userKey, badgeId, roleName)
         return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/badges/{badgeId}/adminGroups", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    List<AdminGroupDefResult> getAdminGroupsForGlobalBadge(@PathVariable("badgeId") String badgeId) {
+        SkillsValidator.isNotBlank(badgeId, "Global Badge Id")
+        return adminGroupService.getAdminGroupsForGlobalBadge(badgeId)
     }
 }

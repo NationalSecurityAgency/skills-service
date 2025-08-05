@@ -307,7 +307,7 @@ class AccessSettingsStorageService {
 
     void deleteGlobalBadgeAdminUserRole(String userId, String badgeId, RoleName roleName, String adminGroupId = null) {
         log.debug('Deleting user-role for userId [{}] and role [{}] on global badge [{}]', userId, roleName, badgeId)
-        UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndQuizIdAndAdminGroupId(userId, roleName, badgeId, adminGroupId)
+        UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndGlobalBadgeIdAndAdminGroupId(userId, roleName, badgeId, adminGroupId)
         assert userRole, "DELETE FAILED -> no user-role with global badge id [$badgeId], userId [$userId] and roleName [$roleName]"
 
         userRoleRepository.delete(userRole)
@@ -424,7 +424,7 @@ class AccessSettingsStorageService {
         }
     }
 
-    UserRole addGlobalAdminUserRoleForUser(String userId, String globalBadgeId, RoleName roleName, String adminGroupId = null) {
+    UserRole addGlobalBadgeAdminUserRoleForUser(String userId, String globalBadgeId, RoleName roleName, String adminGroupId = null) {
         log.debug('Creating quiz id user-role for ID [{}] and role [{}] on quiz [{}]', userId, roleName, globalBadgeId, adminGroupId)
         String userIdLower = userId?.toLowerCase()
         User user = userRepository.findByUserId(userIdLower)
@@ -435,7 +435,7 @@ class AccessSettingsStorageService {
             if (existingUserRole) {
                 throw new SkillException("CREATE FAILED -> user-role with global badge id [$globalBadgeId], userIdLower [$userIdLower] roleName [$roleName] and admin group id [${adminGroupId}] already exists", ErrorCode.BadParam)
             }
-            if (adminGroupId && roleName == RoleName.ROLE_QUIZ_ADMIN) {
+            if (adminGroupId && roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN) {
                 // need to check if the role already exists outside of the admin group (ie, local global badge admin)
                 existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndGlobalBadgeIdAndAdminGroupId(userId, roleName, globalBadgeId, null)
                 if (existingUserRole) {

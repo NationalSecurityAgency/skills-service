@@ -49,6 +49,7 @@ const navItems = computed(() => {
     { name: 'Members', iconClass: 'fa-users skills-color-users', page: 'AdminGroupMembers' },
     { name: 'Projects', iconClass: 'fa-tasks skills-color-projects', page: 'AdminGroupProjects' },
     { name: 'Quizzes and Surveys', iconClass: 'fa-spell-check skills-color-subjects', page: 'AdminGroupQuizzes' },
+    { name: 'Global Badges', iconClass: 'fa-globe-americas skills-color-badges', page: 'AdminGroupGlobalBadges' },
   ];
 
   return res;
@@ -74,6 +75,10 @@ const headerOptions = computed(() => {
       label: 'Quizzes and Surveys',
       count: adminGroup.numberOfQuizzesAndSurveys,
       icon: 'fas fa-spell-check skills-color-subjects',
+    }, {
+      label: 'Global Badges',
+      count: adminGroup.numberOfGlobalBadges,
+      icon: 'fas fa-globe-americas skills-color-badges',
     }],
   };
 })

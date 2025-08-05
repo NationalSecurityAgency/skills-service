@@ -29,9 +29,11 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.AdminGroupDefRequest
 import skills.controller.result.model.AdminGroupDefResult
+import skills.controller.result.model.AdminGroupGlobalBadgeResult
 import skills.controller.result.model.AdminGroupProjectResult
 import skills.controller.result.model.AdminGroupQuizResult
 import skills.controller.result.model.EnableUserCommunityValidationRes
+import skills.controller.result.model.GlobalBadgeResult
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.QuizDefResult
 import skills.services.*
@@ -67,6 +69,9 @@ class AdminGroupService {
 
     @Autowired
     ProjAdminService projAdminService
+
+    @Autowired
+    GlobalBadgesService globalBadgesService
 
     @Autowired
     QuizDefService quizDefService
@@ -130,6 +135,17 @@ class AdminGroupService {
     List<AdminGroupDefResult> getAdminGroupsForQuiz(String quizId) {
         List<AdminGroupDefResult> res = []
         List<AdminGroupDefRepo.AdminGroupDefSummaryRes> fromDb = adminGroupDefRepo.getAdminGroupDefSummariesByQuizId(quizId)
+        if (fromDb) {
+            fromDb = fromDb.sort { a, b -> b.created <=> a.created }
+            res.addAll(fromDb.collect { convert(it, true) })
+        }
+        return res
+    }
+
+    @Transactional(readOnly = true)
+    List<AdminGroupDefResult> getAdminGroupsForGlobalBadge(String badgeId) {
+        List<AdminGroupDefResult> res = []
+        List<AdminGroupDefRepo.AdminGroupDefSummaryRes> fromDb = adminGroupDefRepo.getAdminGroupDefSummariesByGlobalBadgeId(badgeId)
         if (fromDb) {
             fromDb = fromDb.sort { a, b -> b.created <=> a.created }
             res.addAll(fromDb.collect { convert(it, true) })
@@ -238,6 +254,17 @@ class AdminGroupService {
                 availableQuizzes: userQuizzes.findAll { QuizDefResult it -> (it.quizId !in assignedQuizIds) },
                 assignedQuizzes: userQuizzes.findAll { QuizDefResult it -> (it.quizId in assignedQuizIds) }
         )
+    }
+
+    @Transactional(readOnly = true)
+    AdminGroupGlobalBadgeResult getAdminGroupGlobalBadges(String adminGroupId) {
+        List<GlobalBadgeResult> globalBadges = globalBadgesService.getBadgesForUser()
+
+        List<String> assignedBadgeIds = userRoleRepository.findGlobalBadgeIdsByAdminGroupId(adminGroupId)
+        return new AdminGroupGlobalBadgeResult(
+                adminGroupId: adminGroupId,
+                availableGlobalBadges: globalBadges.findAll { it.badgeId !in assignedBadgeIds },
+                assignedGlobalBadges: globalBadges.findAll { it.badgeId in assignedBadgeIds },)
     }
 
     @Transactional(readOnly = true)

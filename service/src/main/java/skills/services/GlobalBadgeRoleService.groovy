@@ -23,9 +23,8 @@ import skills.auth.UserInfoService
 import skills.auth.UserNameService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
-import skills.controller.result.model.BadgeResult
+import skills.controller.result.model.GlobalBadgeResult
 import skills.controller.result.model.UserRoleRes
-import skills.services.admin.BadgeAdminService
 import skills.services.admin.UserCommunityService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
@@ -48,7 +47,7 @@ class GlobalBadgeRoleService {
     UserInfoService userInfoService
 
     @Autowired
-    BadgeAdminService badgeAdminService
+    GlobalBadgesService globalBadgesService
 
     @Autowired
     UserNameService userNameService
@@ -67,13 +66,13 @@ class GlobalBadgeRoleService {
 
     @Transactional(readOnly = true)
     List<UserRoleRes> getGlobalBadgeAdminUserRoles(String badgeId) {
-        BadgeResult badgeResult = findGlobalBadgeResult(badgeId)
+        GlobalBadgeResult badgeResult = findGlobalBadgeResult(badgeId)
         return accessSettingsStorageService.findAllGlobalBadgeAdminRoles(badgeResult.badgeId)
     }
     
     @Transactional
     void addGlobalBadgeAdminRole(String userIdParam, String badgeId, RoleName roleName, String adminGroupId = null) {
-        BadgeResult badgeResult = findGlobalBadgeResult(badgeId)
+        GlobalBadgeResult badgeResult = findGlobalBadgeResult(badgeId)
         ensureValidRole(roleName, badgeResult.badgeId)
         String userId = userNameService.normalizeUserId(userIdParam)
         String currentUser = userInfoService.getCurrentUserId()
@@ -84,7 +83,7 @@ class GlobalBadgeRoleService {
         if (addingAsLocalAdmin && userRoleRepo.isUserGlobalBadgeAdmin(userId, badgeId)) {
             throw new SkillException("User is already part of an Admin Group and cannot be added as a local admin. userId=[${userId}]", ErrorCode.AccessDenied)
         }
-        accessSettingsStorageService.addGlobalAdminUserRoleForUser(userId, badgeResult.badgeId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
+        accessSettingsStorageService.addGlobalBadgeAdminUserRoleForUser(userId, badgeResult.badgeId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
 
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
         String userIdForDisplay = userAttrs?.userIdForDisplay ?: userId
@@ -101,7 +100,7 @@ class GlobalBadgeRoleService {
 
     @Transactional
     void deleteGlobalBadgeAdminRole(String userIdParam, String badgeId, RoleName roleName) {
-        BadgeResult badgeResult = findGlobalBadgeResult(badgeId)
+        GlobalBadgeResult badgeResult = findGlobalBadgeResult(badgeId)
         ensureValidRole(roleName, badgeResult.badgeId)
         String userId = userIdParam?.toLowerCase()
         String currentUser = userInfoService.getCurrentUserId()
@@ -129,8 +128,8 @@ class GlobalBadgeRoleService {
         }
     }
 
-    private BadgeResult findGlobalBadgeResult(String globalBadgeId) {
-        BadgeResult globalBadgeDef = badgeAdminService.getBadge(null, globalBadgeId)
+    private GlobalBadgeResult findGlobalBadgeResult(String globalBadgeId) {
+        GlobalBadgeResult globalBadgeDef = globalBadgesService.getBadge(globalBadgeId)
         if (!globalBadgeDef) {
             throw new SkillException("Failed to find global badge with id [${globalBadgeId}].", ErrorCode.BadParam)
         }

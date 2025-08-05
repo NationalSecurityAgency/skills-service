@@ -15,18 +15,8 @@
  */
 package skills.controller.result.model
 
-class AdminGroupDefResult {
-
+class AdminGroupGlobalBadgeResult {
     String adminGroupId
-    String name
-    Integer numberOfOwners
-    Integer numberOfMembers
-    Integer numberOfProjects
-    Integer numberOfQuizzesAndSurveys
-    Integer numberOfGlobalBadges
-    Date created
-    String userCommunity
-
-    // optional
-    List<UserRoleRes> allMembers
+    List<GlobalBadgeResult> availableGlobalBadges
+    List<GlobalBadgeResult> assignedGlobalBadges
 }

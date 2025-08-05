@@ -37,6 +37,9 @@ export default {
   getAdminGroupProjects(adminGroupId) {
     return axios.get(`/admin/admin-group-definitions/${adminGroupId}/projects`).then((response) => response.data)
   },
+  getAdminGroupGlobalBadges(adminGroupId) {
+    return axios.get(`/admin/admin-group-definitions/${adminGroupId}/badges`).then((response) => response.data)
+  },
   addQuizToAdminGroup(adminGroupId, quizId) {
     return axios
         .post(`/admin/admin-group-definitions/${adminGroupId}/quizzes/${quizId}`, null,
@@ -59,6 +62,17 @@ export default {
         .delete(`/admin/admin-group-definitions/${adminGroupId}/projects/${projectId}`)
         .then((response) => response.data)
   },
+  addGlobalBadgeToAdminGroup(adminGroupId, badgeId) {
+    return axios
+      .post(`/admin/admin-group-definitions/${adminGroupId}/badges/${badgeId}`, null,
+        { handleError: false })
+      .then((response) => response.data)
+  },
+  removeGlobalBadgeFromAdminGroup(adminGroupId, badgeId) {
+    return axios
+      .delete(`/admin/admin-group-definitions/${adminGroupId}/badges/${badgeId}`)
+      .then((response) => response.data)
+  },
   checkIfAdminGroupIdExist(adminGroupId) {
     return axios.post('/app/adminGroupDefExist', { adminGroupId }).then((response) => response.data)
   },
@@ -79,5 +93,10 @@ export default {
     return axios
         .get(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/adminGroups`)
         .then((response) => response.data)
+  },
+  getAdminGroupsForGlobalBadge(globalBadgeId) {
+    return axios
+      .get(`/admin/badges/${encodeURIComponent(globalBadgeId)}/adminGroups`)
+      .then((response) => response.data)
   },
 }
