@@ -216,7 +216,7 @@ class GlobalBadgeAccessSpecs extends DefaultIntSpec {
         e.message.contains("code=403 FORBIDDEN")
     }
 
-    def "user cannot add a skill to a global badge for a project that they do not own"() {
+    def "global badge admins cannot add a skill to a global badge for a project that they do not own"() {
         // Create first user and global badge
         def user1Service = createService("user1")
         def badge1 = createBadge(1, 1)
@@ -237,7 +237,7 @@ class GlobalBadgeAccessSpecs extends DefaultIntSpec {
         e.message.contains("code=403 FORBIDDEN")
     }
 
-    def "user cannot add a level to a global badge for a project that they do not own"() {
+    def "global badge admins cannot add a level to a global badge for a project that they do not own"() {
         // Create first user and badge
         def user1Service = createService("user1")
         def badge1 = createBadge(1, 1)
@@ -254,5 +254,48 @@ class GlobalBadgeAccessSpecs extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.message.contains("code=403 FORBIDDEN")
+    }
+
+    def "global badge admins can remove a skill to the global badge for a project that they do not own"() {
+        // Create first user and global badge
+        def user1Service = createService("user1")
+
+        // Create second user and skills
+        def user2Service = createService("user2")
+        def proj2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2Skills = createSkills(10, 2, 1, 100)
+        user2Service.createProjectAndSubjectAndSkills(proj2, p2subj1, p2Skills)
+
+        def badge1 = createBadge(1, 1)
+        user2Service.createGlobalBadge(badge1)
+        user2Service.assignSkillToGlobalBadge(projectId: proj2.projectId, badgeId: badge1.badgeId, skillId: p2Skills[0].skillId)
+        user2Service.grantGlobalBadgeAdminRole(badge1.badgeId, user1Service.wsHelper.username)
+
+        when:
+        def result = user1Service.removeSkillFromGlobalBadge(projectId: proj2.projectId, badgeId: badge1.badgeId, skillId: p2Skills[0].skillId)
+
+        then:
+        result.success
+    }
+
+    def "global badge admins can remove a level from the global badge for a project that they do not own"() {
+        // Create first user and badge
+        def user1Service = createService("user1")
+
+        // Create second user
+        def user2Service = createService("user2")
+        def proj2 = createProject(2)
+        user2Service.createProject(proj2)
+        def badge1 = createBadge(1, 1)
+        user2Service.createGlobalBadge(badge1)
+        user2Service.assignProjectLevelToGlobalBadge(projectId: proj2.projectId, badgeId: badge1.badgeId, level: "1")
+        user2Service.grantGlobalBadgeAdminRole(badge1.badgeId, user1Service.wsHelper.username)
+
+        when:
+        def result = user1Service.removeProjectLevelFromGlobalBadge(projectId: proj2.projectId, badgeId: badge1.badgeId, level: "1")
+
+        then:
+        result.success
     }
 }

@@ -1332,9 +1332,9 @@ class SkillsService {
         return wsHelper.grantRoot()
     }
 
-    def grantGlobalBadgeAdminRole(String userId) {
+    def grantGlobalBadgeAdminRole(String badgeId, String userId) {
         userId = getUserId(userId)
-        return wsHelper.globalBadgePut("/users/${userId}/roles/${RoleName.ROLE_GLOBAL_BADGE_ADMIN.toString()}")
+        return wsHelper.globalBadgePut("/badges/${badgeId}/users/${userId}/roles/${RoleName.ROLE_GLOBAL_BADGE_ADMIN.toString()}")
     }
 
     def grantRootRole(String userId) {
@@ -1347,8 +1347,8 @@ class SkillsService {
         return wsHelper.rootPut("/users/${userId}/roles/${RoleName.ROLE_DASHBOARD_ADMIN_ACCESS.toString()}")
     }
 
-    def removeGlobalBadgeAdminRole(String userId) {
-        return wsHelper.globalBadgeDelete("/users/${userId}/roles/${RoleName.ROLE_GLOBAL_BADGE_ADMIN.toString()}")
+    def removeGlobalBadgeAdminRole(String badgeId, String userId) {
+        return wsHelper.globalBadgeDelete("/badges/${badgeId}/users/${userId}/roles/${RoleName.ROLE_GLOBAL_BADGE_ADMIN.toString()}")
     }
 
     def revokeInviteOnlyProjectAccess(String projectId, String userId) {
@@ -2205,6 +2205,9 @@ class SkillsService {
     }
     def getAdminGroupsForQuiz(String quizId) {
         return wsHelper.adminGet("${getQuizDefUrl(quizId)}/adminGroups".toString())
+    }
+    def getAdminGroupsForGlobalBadge(String globalBadgeId) {
+        return wsHelper.adminGet("${getGlobalBadgeUrl(globalBadgeId)}/adminGroups".toString())
     }
     def archiveUsers(List<String> userIds, String projectId) {
         return wsHelper.adminPost("/projects/${projectId}/users/archive", [userIds: userIds])
