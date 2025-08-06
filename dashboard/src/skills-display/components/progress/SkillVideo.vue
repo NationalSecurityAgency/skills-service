@@ -69,6 +69,7 @@ const transcript = ref({
 const showPercent = ref(true);
 const isFirstTime = ref(true);
 const transcriptReadCert = ref(false);
+
 const isMotivationalSkill = computed(() => props.skill && props.skill.isMotivationalSkill)
 
 const shouldShowPercentWatched = computed(() => showPercent.value && (!isAlreadyAchieved.value || justAchieved.value) && isSelfReportTypeVideo.value);
@@ -99,15 +100,23 @@ onMounted(() => {
   trackAchievement.value = props.skill.selfReporting.enabled && props.skill.selfReporting.type && props.skill.selfReporting.type === 'Video';
 })
 
+const resetVideoProgress = () => {
+  percentWatched.value = 0
+  justAchieved.value = false
+}
+
+const videoFinished = (watchProgress) => {
+  if (trackAchievement.value && watchProgress.percentWatched > 96 && !justAchieved.value) {
+    doReportSkill();
+  }
+}
+
 const updateVideoProgress = (watchProgress) => {
   if (isFirstTime.value && watchProgress.videoDuration === Infinity) {
     showPercent.value = false;
   }
   isFirstTime.value = false;
   percentWatched.value = watchProgress.percentWatched;
-  if (trackAchievement.value && watchProgress.percentWatched > 96 && !justAchieved.value) {
-    doReportSkill();
-  }
 };
 const achieveSkillByReadingTranscript = () => {
   doReportSkill()
@@ -127,6 +136,10 @@ const doReportSkill = () => {
           justAchieved.value = true;
           emit('points-earned', res.pointsEarned);
           nextTick(() => announcer.polite(`Congratulations! You just earned ${res.pointsEarned} ${attributes.pointDisplayNamePlural} and completed ${props.skill.skill} ${attributes.skillDisplayNameLower}`));
+        } else if(res.pointsEarned === 0 && !res.skillApplied) {
+          errNotification.value.msg = res.explanation;
+          errNotification.value.enable = true;
+          nextTick(() => announcer.polite(`Sorry, ${props.skill.skill} ${attributes.skillDisplayNameLower} could not be reported because ${res.explanation}`));
         }
       }).catch((e) => {
         if (e.response.data && e.response.data.errorCode
@@ -206,6 +219,8 @@ const pointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNameLow
           <video-player :video-player-id="`skillVideoFor-${skill.projectId}-${skill.skillId}`"
                         :options="videoConf"
                         @watched-progress="updateVideoProgress"
+                        @reset-video-progress="resetVideoProgress"
+                        @video-ended="videoFinished"
                         :storeAndRecoverSizeFromStorage="true" />
         </div>
       </div>
@@ -268,7 +283,7 @@ const pointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNameLow
           </div>
         </template>
       </Message>
-      <Message v-if="isSelfReportTypeVideo && (!isAlreadyAchieved || justAchieved)"
+      <Message v-if="isSelfReportTypeVideo && (!isAlreadyAchieved || justAchieved || skill.meta.inProgress)"
            class="mt-2"
            :severity="justAchieved ? 'success' : 'info'"
            ref="watchVideoAlert"
@@ -285,6 +300,7 @@ const pointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNameLow
               <div v-if="justAchieved">
                 <i class="fas fa-birthday-cake text-success mr-1 animate__bounceIn" style="font-size: 1.2rem"></i> Congrats! You just earned <span
                   class="text-success font-weight-bold">{{ skill.pointIncrement }}</span> {{ pointsLbl }}<span><span v-if="skill.points === skill.totalPoints"> and <b>completed</b> the {{ attributes.skillDisplayNameLower }}</span>!</span>
+                <span v-if="(justAchieved && skill.points !== skill.totalPoints)"> But you can still earn more points by {{ videoConf.isAudio ? 'listening to the Audio' : 'watching the Video' }} again!</span>
               </div>
             </div>
           </div>
@@ -294,7 +310,7 @@ const pointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNameLow
     </div>
 
     <Message v-if="errNotification.enable" severity="error" :closable="false" class="mt-2" role="alert" data-cy="videoError">
-      <i class="fas fa-exclamation-triangle" /> {{ errNotification.msg }}
+      {{ errNotification.msg }}
     </Message>
   </div>
 </template>
