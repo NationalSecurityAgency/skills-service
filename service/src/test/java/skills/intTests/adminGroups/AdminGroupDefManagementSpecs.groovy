@@ -269,6 +269,7 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupRes.numberOfOwners == 1
         adminGroupRes.numberOfProjects == 1
         adminGroupRes.numberOfQuizzesAndSurveys == 0
+        adminGroupRes.numberOfGlobalBadges == 0
 
         adminGroupProjects.adminGroupId == adminGroup.adminGroupId
         adminGroupProjects.assignedProjects.size() == 1 && adminGroupProjects.assignedProjects.find { it.projectId == proj.projectId }
@@ -344,6 +345,7 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupRes.numberOfOwners == 1
         adminGroupRes.numberOfProjects == 0
         adminGroupRes.numberOfQuizzesAndSurveys == 1
+        adminGroupRes.numberOfGlobalBadges == 0
 
         adminGroupQuizzesAndSurveys.adminGroupId == adminGroup.adminGroupId
         adminGroupQuizzesAndSurveys.assignedQuizzes.size() == 1 && adminGroupQuizzesAndSurveys.assignedQuizzes.find { it.quizId == quiz.quizId }
@@ -389,6 +391,72 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         SkillsClientException e = thrown(SkillsClientException)
     }
 
+    def "owner can add badge to admin group"() {
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+
+        def badge2 = createBadge(1, 2)
+        skillsService.createGlobalBadge(badge2)
+
+        when:
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup.adminGroupId, badge.badgeId)
+        def adminGroupRes = skillsService.getAdminGroupDef(adminGroup.adminGroupId)
+        def adminGroupGlobalBadges = skillsService.getAdminGroupGlobalBadges(adminGroup.adminGroupId)
+
+        then:
+        adminGroupRes.adminGroupId == adminGroup.adminGroupId
+        adminGroupRes.numberOfOwners == 1
+        adminGroupRes.numberOfProjects == 0
+        adminGroupRes.numberOfQuizzesAndSurveys == 0
+        adminGroupRes.numberOfGlobalBadges == 1
+
+        adminGroupGlobalBadges.adminGroupId == adminGroup.adminGroupId
+        adminGroupGlobalBadges.assignedGlobalBadges.size() == 1 && adminGroupGlobalBadges.assignedGlobalBadges.find { it.badgeId == badge.badgeId }
+        adminGroupGlobalBadges.availableGlobalBadges.size() == 1 && adminGroupGlobalBadges.availableGlobalBadges.find { it.badgeId == badge2.badgeId }
+    }
+
+    def "member cannot add badge to admin group"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService memberSkillsService = createService(otherUserId)
+
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+
+        def badge2 = createBadge(1, 2)
+        skillsService.createGlobalBadge(badge2)
+
+        when:
+        memberSkillsService.addGlobalBadgeToAdminGroup(adminGroup.adminGroupId, badge.badgeId)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("code=403 FORBIDDEN")
+    }
+
+    def "cannot add same badge to same admin group more than once"() {
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+
+        def badge2 = createBadge(1, 2)
+        skillsService.createGlobalBadge(badge2)
+
+        when:
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup.adminGroupId, badge.badgeId)
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup.adminGroupId, badge.badgeId)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+    }
+
     def "owner can remove project from admin group"() {
         def adminGroup = createAdminGroup(1)
         skillsService.createAdminGroupDef(adminGroup)
@@ -416,6 +484,7 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupRes.numberOfOwners == 1
         adminGroupRes.numberOfProjects == 1
         adminGroupRes.numberOfQuizzesAndSurveys == 0
+        adminGroupRes.numberOfGlobalBadges == 0
 
         adminGroupProjectsBeforeRemove.adminGroupId == adminGroup.adminGroupId
         adminGroupProjectsBeforeRemove.assignedProjects.size() == 1 && adminGroupProjectsBeforeRemove.assignedProjects.find { it.projectId == proj.projectId }
@@ -477,6 +546,7 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupRes.numberOfOwners == 1
         adminGroupRes.numberOfProjects == 0
         adminGroupRes.numberOfQuizzesAndSurveys == 1
+        adminGroupRes.numberOfGlobalBadges == 0
 
         adminGroupQuizzesAndSurveys.adminGroupId == adminGroup.adminGroupId
         adminGroupQuizzesAndSurveys.assignedQuizzes.size() == 1 && adminGroupQuizzesAndSurveys.assignedQuizzes.find { it.quizId == quiz.quizId }
@@ -511,7 +581,65 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         e.message.contains("code=403 FORBIDDEN")
     }
 
-    def "removing an admin group removes all other members/owners from quiz/project admin roles except current user, who remains as a 'local' admin"() {
+    def "owner can remove badge from admin group"() {
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+
+        def badge2 = createBadge(1, 2)
+        skillsService.createGlobalBadge(badge2)
+
+        when:
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup.adminGroupId, badge.badgeId)
+        def adminGroupRes = skillsService.getAdminGroupDef(adminGroup.adminGroupId)
+        def adminGroupGlobalBadges = skillsService.getAdminGroupGlobalBadges(adminGroup.adminGroupId)
+
+        skillsService.deleteGlobalBadgeFromAdminGroup(adminGroup.adminGroupId, badge.badgeId)
+        def adminGroupGlobalBadgesAfterRemove = skillsService.getAdminGroupGlobalBadges(adminGroup.adminGroupId)
+
+        then:
+        adminGroupRes.adminGroupId == adminGroup.adminGroupId
+        adminGroupRes.numberOfOwners == 1
+        adminGroupRes.numberOfProjects == 0
+        adminGroupRes.numberOfQuizzesAndSurveys == 0
+        adminGroupRes.numberOfGlobalBadges == 1
+
+        adminGroupGlobalBadges.adminGroupId == adminGroup.adminGroupId
+        adminGroupGlobalBadges.assignedGlobalBadges.size() == 1 && adminGroupGlobalBadges.assignedGlobalBadges.find { it.badgeId == badge.badgeId }
+        adminGroupGlobalBadges.availableGlobalBadges.size() == 1 && adminGroupGlobalBadges.availableGlobalBadges.find { it.badgeId == badge2.badgeId }
+
+        adminGroupGlobalBadgesAfterRemove.adminGroupId == adminGroup.adminGroupId
+        adminGroupGlobalBadgesAfterRemove.assignedGlobalBadges.size() == 0
+        adminGroupGlobalBadgesAfterRemove.availableGlobalBadges.size() == 2
+                && adminGroupGlobalBadgesAfterRemove.availableGlobalBadges.find { it.badgeId == badge.badgeId }
+                && adminGroupGlobalBadgesAfterRemove.availableGlobalBadges.find { it.badgeId == badge2.badgeId }
+    }
+
+    def "member cannot remove badge from admin group"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService memberSkillsService = createService(otherUserId)
+
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+
+        def badge2 = createBadge(1, 2)
+        skillsService.createGlobalBadge(badge2)
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup.adminGroupId, badge.badgeId)
+
+        when:
+        memberSkillsService.deleteGlobalBadgeFromAdminGroup(adminGroup.adminGroupId, badge.badgeId)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("code=403 FORBIDDEN")
+    }
+
+    def "removing an admin group removes all other members/owners from quiz/project/badge admin roles except current user, who remains as a 'local' admin"() {
         def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
         createService(otherUserId)
         def adminGroup = createAdminGroup(1)
@@ -523,15 +651,20 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
 
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
+
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
         when:
 
         skillsService.createAdminGroupDef(adminGroup)
         skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
         skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
         skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup.adminGroupId, badge.badgeId)
 
         def projectAdminsBeforeRemove = userRoleRepository.findAllByProjectIdIgnoreCase(proj.projectId)
         def quizAdminsBeforeRemove = userRoleRepository.findAllByQuizIdIgnoreCase(quiz.quizId)
+        def badgeAdminsBeforeRemove = userRoleRepository.findAllByGlobalBadgeIdIgnoreCase(badge.badgeId)
         def adminGroupRolesBeforeRemove = userRoleRepository.findAllByAdminGroupIdIgnoreCase(adminGroup.adminGroupId)
         def adminGroupDefsBeforeRemove = skillsService.getAdminGroupDefs()
 
@@ -539,6 +672,7 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
 
         def projectAdminsAfterRemove = userRoleRepository.findAllByProjectIdIgnoreCase(proj.projectId)
         def quizAdminsAfterRemove = userRoleRepository.findAllByQuizIdIgnoreCase(quiz.quizId)
+        def badgeAdminsAfterRemove = userRoleRepository.findAllByGlobalBadgeIdIgnoreCase(badge.badgeId)
         def adminGroupRolesAfterRemove = userRoleRepository.findAllByAdminGroupIdIgnoreCase(adminGroup.adminGroupId)
         def adminGroupDefsAfterRemove = skillsService.getAdminGroupDefs()
 
@@ -550,15 +684,18 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         quizAdminsBeforeRemove.size() == 2
         quizAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup.adminGroupId }
         quizAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup.adminGroupId }
-        adminGroupRolesBeforeRemove.size() == 6
+        badgeAdminsBeforeRemove.size() == 2
+        badgeAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN && it.adminGroupId == adminGroup.adminGroupId }
+        badgeAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN && it.adminGroupId == adminGroup.adminGroupId }
+        adminGroupRolesBeforeRemove.size() == 8
         adminGroupRolesBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER && it.adminGroupId == adminGroup.adminGroupId }
         adminGroupRolesBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_MEMBER && it.adminGroupId == adminGroup.adminGroupId }
-
-
         projectAdminsAfterRemove.size() == 1
         projectAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_PROJECT_ADMIN && it.adminGroupId == null }
         quizAdminsAfterRemove.size() == 1
         quizAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == null }
+        badgeAdminsAfterRemove.size() == 1
+        badgeAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN && it.adminGroupId == null }
         adminGroupRolesAfterRemove.size() == 0
 
         !adminGroupDefsAfterRemove
@@ -611,7 +748,7 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         !adminGroupMembers2.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}
     }
 
-    def "remove admin group with project, members are removed from project for this group but remain if also assigned to the same project in other groups"() {
+    def "remove admin group with project/quiz/badge, members are removed from project, quizzes and badges for this group but remain if also assigned to the same project/quiz/badge in other groups"() {
         def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
         createService(otherUserId)
         def adminGroup1 = createAdminGroup(1)
@@ -625,25 +762,32 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
 
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
+
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
         when:
 
         skillsService.createAdminGroupDef(adminGroup1)
         skillsService.addAdminGroupMember(adminGroup1.adminGroupId, otherUserId)
         skillsService.addQuizToAdminGroup(adminGroup1.adminGroupId, quiz.quizId)
         skillsService.addProjectToAdminGroup(adminGroup1.adminGroupId, proj.projectId)
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup1.adminGroupId, badge.badgeId)
 
         skillsService.createAdminGroupDef(adminGroup2)
         skillsService.addAdminGroupMember(adminGroup2.adminGroupId, otherUserId)
         skillsService.addQuizToAdminGroup(adminGroup2.adminGroupId, quiz.quizId)
         skillsService.addProjectToAdminGroup(adminGroup2.adminGroupId, proj.projectId)
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup2.adminGroupId, badge.badgeId)
 
         skillsService.createAdminGroupDef(adminGroup3)
         skillsService.addAdminGroupMember(adminGroup3.adminGroupId, otherUserId)
         skillsService.addQuizToAdminGroup(adminGroup3.adminGroupId, quiz.quizId)
         skillsService.addProjectToAdminGroup(adminGroup3.adminGroupId, proj.projectId)
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup3.adminGroupId, badge.badgeId)
 
         def projectAdminsBeforeRemove = userRoleRepository.findAllByProjectIdIgnoreCase(proj.projectId)
         def quizAdminsBeforeRemove = userRoleRepository.findAllByQuizIdIgnoreCase(quiz.quizId)
+        def badgeAdminsBeforeRemove = userRoleRepository.findAllByGlobalBadgeIdIgnoreCase(badge.badgeId)
         def adminGroupRolesBeforeRemove = userRoleRepository.findAllByAdminGroupIdIgnoreCase(adminGroup1.adminGroupId)
         def adminGroupDefsBeforeRemove = skillsService.getAdminGroupDefs()
 
@@ -651,6 +795,7 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
 
         def projectAdminsAfterRemove = userRoleRepository.findAllByProjectIdIgnoreCase(proj.projectId)
         def quizAdminsAfterRemove = userRoleRepository.findAllByQuizIdIgnoreCase(quiz.quizId)
+        def badgeAdminsAfterRemove = userRoleRepository.findAllByGlobalBadgeIdIgnoreCase(badge.badgeId)
         def adminGroupRolesAfterRemove = userRoleRepository.findAllByAdminGroupIdIgnoreCase(adminGroup1.adminGroupId)
         def adminGroupDefsAfterRemove = skillsService.getAdminGroupDefs()
 
@@ -673,7 +818,16 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         quizAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
         quizAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup3.adminGroupId }
         quizAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup3.adminGroupId }
-        adminGroupRolesBeforeRemove.size() == 6
+
+        badgeAdminsBeforeRemove.size() == 6
+        badgeAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN && it.adminGroupId == adminGroup1.adminGroupId }
+        badgeAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN && it.adminGroupId == adminGroup1.adminGroupId }
+        badgeAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
+        badgeAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
+        badgeAdminsBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN && it.adminGroupId == adminGroup3.adminGroupId }
+        badgeAdminsBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN && it.adminGroupId == adminGroup3.adminGroupId }
+
+        adminGroupRolesBeforeRemove.size() == 8
         adminGroupRolesBeforeRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER && it.adminGroupId == adminGroup1.adminGroupId }
         adminGroupRolesBeforeRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_MEMBER && it.adminGroupId == adminGroup1.adminGroupId }
 
@@ -686,12 +840,17 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         quizAdminsAfterRemove.size() == 4
         quizAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
         quizAdminsAfterRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
-        adminGroupRolesAfterRemove.size() == 0
         quizAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
         quizAdminsAfterRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup2.adminGroupId }
         quizAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup3.adminGroupId }
         quizAdminsAfterRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_QUIZ_ADMIN && it.adminGroupId == adminGroup3.adminGroupId }
+        badgeAdminsAfterRemove.size() == 4
+        badgeAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN && it.adminGroupId == adminGroup2.adminGroupId  }
+        badgeAdminsAfterRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN && it.adminGroupId == adminGroup2.adminGroupId  }
+        badgeAdminsAfterRemove.find { it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN && it.adminGroupId == adminGroup3.adminGroupId  }
+        badgeAdminsAfterRemove.find { it.userId == otherUserId && it.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN && it.adminGroupId == adminGroup3.adminGroupId  }
 
+        adminGroupRolesAfterRemove.size() == 0
         adminGroupDefsAfterRemove && adminGroupDefsAfterRemove.size() == 2 && adminGroupDefsAfterRemove.find { it.adminGroupId == adminGroup2.adminGroupId } && adminGroupDefsAfterRemove.find { it.adminGroupId == adminGroup2.adminGroupId}
     }
 
@@ -759,8 +918,38 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroupsForProjectsAsMember.find { it.adminGroupId == adminGroup2.adminGroupId }
     }
 
-    def "user can be a member of multiple admin groups that are assigned to the same quiz"() {
+    def "get admin groups for global badge returns proper results"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        SkillsService memberSkillsService = createService(otherUserId)
 
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+        def adminGroup2 = createAdminGroup(2)
+        skillsService.createAdminGroupDef(adminGroup2)
+
+        def badge1 = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge1)
+
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup.adminGroupId, badge1.badgeId)
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup2.adminGroupId, badge1.badgeId)
+        skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
+
+        when:
+        def adminGroupsForProjectsAsOwner = skillsService.getAdminGroupsForGlobalBadge(badge1.badgeId)
+        def adminGroupsForProjectsAsMember = memberSkillsService.getAdminGroupsForGlobalBadge(badge1.badgeId)
+
+        then:
+
+        adminGroupsForProjectsAsOwner.size() == 2
+        adminGroupsForProjectsAsOwner.find { it.adminGroupId == adminGroup.adminGroupId }
+        adminGroupsForProjectsAsOwner.find { it.adminGroupId == adminGroup2.adminGroupId }
+
+        adminGroupsForProjectsAsMember.size() == 2
+        adminGroupsForProjectsAsMember.find { it.adminGroupId == adminGroup.adminGroupId }
+        adminGroupsForProjectsAsMember.find { it.adminGroupId == adminGroup2.adminGroupId }
+    }
+
+    def "user can be a member of multiple admin groups that are assigned to the same quiz"() {
         def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
         createService(otherUserId)
 
@@ -802,6 +991,51 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
 
         adminGroup2QuizzesAndSurveys.adminGroupId == adminGroup2.adminGroupId
         adminGroup2QuizzesAndSurveys.assignedQuizzes.size() == 1 && adminGroup1QuizzesAndSurveys.assignedQuizzes.find { it.quizId == quiz.quizId }
+    }
+
+    def "user can be a member of multiple admin groups that are assigned to the same global badge"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        createService(otherUserId)
+
+        def adminGroup1 = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup1)
+
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup1.adminGroupId, badge.badgeId)
+        skillsService.addAdminGroupMember(adminGroup1.adminGroupId, otherUserId)
+
+        def adminGroup2 = createAdminGroup(2)
+        skillsService.createAdminGroupDef(adminGroup2)
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup2.adminGroupId, badge.badgeId)
+
+        when:
+        skillsService.addAdminGroupMember(adminGroup2.adminGroupId, otherUserId)
+
+        def adminGroup1Res = skillsService.getAdminGroupDef(adminGroup1.adminGroupId)
+        def adminGroup1GlobalBadges = skillsService.getAdminGroupGlobalBadges(adminGroup1.adminGroupId)
+
+        def adminGroup2Res = skillsService.getAdminGroupDef(adminGroup2.adminGroupId)
+        def adminGroup2GlobalBadges = skillsService.getAdminGroupGlobalBadges(adminGroup2.adminGroupId)
+
+        then:
+        adminGroup1Res.adminGroupId == adminGroup1.adminGroupId
+        adminGroup1Res.numberOfOwners == 1
+        adminGroup1Res.numberOfProjects == 0
+        adminGroup1Res.numberOfGlobalBadges == 1
+
+        adminGroup1GlobalBadges.adminGroupId == adminGroup1.adminGroupId
+        adminGroup1GlobalBadges.assignedGlobalBadges.size() == 1 && adminGroup1GlobalBadges.assignedGlobalBadges.find { it.badgeId == badge.badgeId }
+
+
+        adminGroup2Res.adminGroupId == adminGroup2.adminGroupId
+        adminGroup2Res.numberOfOwners == 1
+        adminGroup2Res.numberOfProjects == 0
+        adminGroup2Res.numberOfQuizzesAndSurveys == 0
+        adminGroup2Res.numberOfGlobalBadges == 1
+
+        adminGroup2GlobalBadges.adminGroupId == adminGroup2.adminGroupId
+        adminGroup2GlobalBadges.assignedGlobalBadges.size() == 1 && adminGroup1GlobalBadges.assignedGlobalBadges.find { it.badgeId == badge.badgeId }
     }
 
 }

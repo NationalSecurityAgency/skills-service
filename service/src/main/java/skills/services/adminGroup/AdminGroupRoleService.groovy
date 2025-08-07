@@ -28,6 +28,7 @@ import skills.controller.result.model.GlobalBadgeResult
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.UserRoleRes
 import skills.services.AccessSettingsStorageService
+import skills.services.GlobalBadgeRoleService
 import skills.services.GlobalBadgesService
 import skills.services.admin.ProjAdminService
 import skills.services.admin.UserCommunityService
@@ -69,6 +70,9 @@ class AdminGroupRoleService {
 
     @Autowired
     GlobalBadgesService globalBadgesService
+
+    @Autowired
+    GlobalBadgeRoleService globalBadgeRoleService
 
     @Autowired
     UserNameService userNameService
@@ -117,6 +121,10 @@ class AdminGroupRoleService {
             List<String> projectIds = userRoleRepo.findProjectIdsByAdminGroupId(adminGroupDef.adminGroupId)
             projectIds.each { projectId ->
                 accessSettingsStorageService.addUserRole(userId, projectId, RoleName.ROLE_PROJECT_ADMIN, true, adminGroupDef.adminGroupId)
+            }
+            List<String> globalBadgeIds = userRoleRepo.findGlobalBadgeIdsByAdminGroupId(adminGroupDef.adminGroupId)
+            globalBadgeIds.each { globalBadgeId ->
+                globalBadgeRoleService.addGlobalBadgeAdminRole(userId, globalBadgeId, RoleName.ROLE_GLOBAL_BADGE_ADMIN, adminGroupDef.adminGroupId)
             }
         }
 

@@ -2191,6 +2191,15 @@ class SkillsService {
     def deleteQuizFromAdminGroup(String adminGroupId, String quizId) {
         return wsHelper.adminDelete("${getAdminGroupDefUrl(adminGroupId)}/quizzes/${quizId}")
     }
+    def getAdminGroupGlobalBadges(String adminGroupId) {
+        return wsHelper.adminGet("${getAdminGroupDefUrl(adminGroupId)}/badges")
+    }
+    def addGlobalBadgeToAdminGroup(String adminGroupId, String badgeId) {
+        return wsHelper.adminPut("${getAdminGroupDefUrl(adminGroupId)}/badges/${badgeId}")
+    }
+    def deleteGlobalBadgeFromAdminGroup(String adminGroupId, String badgeId) {
+        return wsHelper.adminDelete("${getAdminGroupDefUrl(adminGroupId)}/badges/${badgeId}")
+    }
     def getAdminGroupProjects(String adminGroupId) {
         return wsHelper.adminGet("${getAdminGroupDefUrl(adminGroupId)}/projects")
     }

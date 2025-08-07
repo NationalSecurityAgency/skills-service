@@ -92,6 +92,9 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     @Nullable
     List<UserRole> findAllByQuizIdIgnoreCase(String quizId)
 
+    @Nullable
+    List<UserRole> findAllByGlobalBadgeIdIgnoreCase(String globalBadgeId)
+
     @Query('''SELECT count(ur.id)
         from UserRole ur, UserAttrs ua 
         where

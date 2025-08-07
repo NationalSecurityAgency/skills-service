@@ -425,7 +425,7 @@ class AccessSettingsStorageService {
     }
 
     UserRole addGlobalBadgeAdminUserRoleForUser(String userId, String globalBadgeId, RoleName roleName, String adminGroupId = null) {
-        log.debug('Creating quiz id user-role for ID [{}] and role [{}] on quiz [{}]', userId, roleName, globalBadgeId, adminGroupId)
+        log.debug('Creating global badge id user-role for ID [{}] and role [{}] on global badge [{}]', userId, roleName, globalBadgeId, adminGroupId)
         String userIdLower = userId?.toLowerCase()
         User user = userRepository.findByUserId(userIdLower)
         if (user) {

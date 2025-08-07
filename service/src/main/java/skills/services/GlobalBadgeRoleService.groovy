@@ -83,7 +83,7 @@ class GlobalBadgeRoleService {
         if (addingAsLocalAdmin && userRoleRepo.isUserGlobalBadgeAdmin(userId, badgeId)) {
             throw new SkillException("User is already part of an Admin Group and cannot be added as a local admin. userId=[${userId}]", ErrorCode.AccessDenied)
         }
-        accessSettingsStorageService.addGlobalBadgeAdminUserRoleForUser(userId, badgeResult.badgeId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
+        accessSettingsStorageService.addGlobalBadgeAdminUserRoleForUser(userId, badgeResult.badgeId, RoleName.ROLE_GLOBAL_BADGE_ADMIN, adminGroupId)
 
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
         String userIdForDisplay = userAttrs?.userIdForDisplay ?: userId

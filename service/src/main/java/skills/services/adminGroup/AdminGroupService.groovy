@@ -226,6 +226,9 @@ class AdminGroupService {
         userRoleRepository.findQuizIdsByAdminGroupId(adminGroupId).each { quizId ->
             adminGroupRoleService.removeQuizFromAdminGroup(adminGroupId, quizId)
         }
+        userRoleRepository.findGlobalBadgeIdsByAdminGroupId(adminGroupId).each { badgeId ->
+            adminGroupRoleService.removeGlobalBadgeFromAdminGroup(adminGroupId, badgeId)
+        }
         adminGroupDefRepo.deleteByAdminGroupIdIgnoreCase(adminGroupDef.adminGroupId)
         log.debug("Deleted admin group with id [{}].", adminGroupId)
 
