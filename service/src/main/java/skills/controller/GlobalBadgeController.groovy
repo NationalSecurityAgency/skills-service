@@ -126,7 +126,7 @@ class GlobalBadgesController {
     }
 
     @RequestMapping(value = "/badges/{badgeId}", method = RequestMethod.DELETE)
-    void deleteBadge(@PathVariable("badgeId") String badgeId) {
+    void deleteGlobalBadge(@PathVariable("badgeId") String badgeId) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
 
         globalBadgesService.deleteBadge(badgeId)

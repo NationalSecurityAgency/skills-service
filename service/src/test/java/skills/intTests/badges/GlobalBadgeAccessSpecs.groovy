@@ -15,13 +15,18 @@
  */
 package skills.intTests.badges
 
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
+import skills.storage.repos.UserRoleRepo
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class GlobalBadgeAccessSpecs extends DefaultIntSpec {
+
+    @Autowired
+    UserRoleRepo userRoleRepo
 
     def "getAllGlobalBadges should only returns badges the current user is an admin for"() {
         // Create first user and a global badge
@@ -297,5 +302,29 @@ class GlobalBadgeAccessSpecs extends DefaultIntSpec {
 
         then:
         result.success
+    }
+
+    def "deleting a global badges also removes the user's admin role"() {
+        // Create first user and global badge
+        def user1Service = createService("user1")
+
+        // Create second user and skills
+        def user2Service = createService("user2")
+
+        def badge1 = createBadge(1, 1)
+        user2Service.createGlobalBadge(badge1)
+        user2Service.grantGlobalBadgeAdminRole(badge1.badgeId, user1Service.wsHelper.username)
+
+
+        when:
+        List<UserRoleRepo.UserRoleWithAttrs> rolesBefore = userRoleRepo.findRoleWithAttrsByGlobalBadgeId(badge1.badgeId)
+        def result = user1Service.deleteGlobalBadge(badge1.badgeId)
+        List<UserRoleRepo.UserRoleWithAttrs> rolesAfter = userRoleRepo.findRoleWithAttrsByGlobalBadgeId(badge1.badgeId)
+
+        then:
+        result.success
+        rolesBefore
+        rolesBefore.role.userId.sort() == [user1Service.wsHelper.username, user2Service.wsHelper.username].sort()
+        !rolesAfter
     }
 }
