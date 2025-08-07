@@ -302,4 +302,108 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="videoError"]').contains('Insufficient project points')
     });
 
+    it('video can require multiple watches to complete', () => {
+        cy.intercept('POST', '/api/projects/proj1/skills/skill1').as('reportSkill1')
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 4})
+        const vidAttr = { file: 'create-subject.webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion : 4, pointIncrement: 50, pointIncrementInterval: 0, selfReportingType: 'Video' });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 50 points for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 0)
+
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
+        cy.wait(8000)
+        cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 50 points! But you can still earn more points by watching the Video again')
+        cy.get('[data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('50 / 200 Points')
+        cy.wait('@reportSkill1')
+
+        cy.get('.vjs-play-control').click()
+        cy.wait(8000)
+        cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 50 points! But you can still earn more points by watching the Video again')
+        cy.get('[data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 200 Points')
+        cy.wait('@reportSkill1')
+
+        cy.get('.vjs-play-control').click()
+        cy.wait(8000)
+        cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 50 points! But you can still earn more points by watching the Video again')
+        cy.get('[data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('150 / 200 Points')
+        cy.wait('@reportSkill1')
+
+        cy.get('.vjs-play-control').click()
+        cy.wait(8000)
+        cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 50 points and completed the skill!')
+        cy.get('[data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
+        cy.wait('@reportSkill1')
+    });
+
+    it('notified if attempting to get points outside of time window', () => {
+        cy.intercept('POST', '/api/projects/proj1/skills/skill1').as('reportSkill1')
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 4})
+        const vidAttr = { file: 'create-subject.webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion : 4, pointIncrement: 50, selfReportingType: 'Video' });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 50 points for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 0)
+
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
+        cy.wait(8000)
+        cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 50 points! But you can still earn more points by watching the Video again')
+        cy.get('[data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('50 / 200 Points')
+        cy.wait('@reportSkill1')
+
+        cy.get('.vjs-play-control').click()
+        cy.wait(8000)
+        cy.get('[data-cy="videoError"]').contains('This skill was already performed within the configured time period (within the last 8 hours)')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('50 / 200 Points')
+
+    });
+
+    it('notified if video has reached max points', () => {
+        cy.intercept('POST', '/api/projects/proj1/skills/skill1').as('reportSkill1')
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        const vidAttr = { file: 'create-subject.webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, pointIncrement: 100, selfReportingType: 'Video' });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 0)
+
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
+        cy.wait(8000)
+        cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 100 points and completed the skill!')
+        cy.get('[data-cy="viewTranscriptBtn"]')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
+        cy.wait('@reportSkill1')
+
+        cy.get('.vjs-play-control').click()
+        cy.wait(8000)
+        cy.get('[data-cy="videoError"]').contains('This skill reached its maximum points')
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
+
+    });
 });
