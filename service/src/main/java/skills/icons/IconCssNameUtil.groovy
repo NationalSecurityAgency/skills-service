@@ -23,7 +23,9 @@ import java.util.regex.Pattern
 class IconCssNameUtil {
     static final Pattern CLEAN = Pattern.compile("(?i)[^a-z0-9]")
 
-    public static String getCssClass(String projectId, String filename) {
-        return "${projectId ?: 'GLOBAL'}-"+CLEAN.matcher(filename).replaceAll("")
+    static String getCssClass(String projectOrBadgeId, String filename) {
+        assert filename
+        assert projectOrBadgeId
+        return "${projectOrBadgeId}-"+CLEAN.matcher(filename).replaceAll("")
     }
 }

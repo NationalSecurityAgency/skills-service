@@ -142,7 +142,7 @@ class CustomIconFacade {
             iconService.saveIcon(customIcon)
 
             String uploadedCss = cssGenerator.cssify([customIcon])
-            String cssClassName = IconCssNameUtil.getCssClass(customIcon.projectId, customIcon.filename)
+            String cssClassName = IconCssNameUtil.getCssClass(customIcon.projectId ?: customIcon.globalBadgeId, customIcon.filename)
 
             return new UploadedIcon(cssClassName: cssClassName, cssDefinition: uploadedCss, name: iconFilename)
         }catch(Exception cve){

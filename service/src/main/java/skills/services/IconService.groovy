@@ -76,7 +76,7 @@ class IconService {
     @Transactional(readOnly = true)
     List<CustomIconResult> getGlobalBadgeCustomIcons(String globalBadgeId) {
         return iconRepo.findAllByGlobalBadgeId(globalBadgeId).collect { CustomIcon icon ->
-            String cssClassname = IconCssNameUtil.getCssClass('GLOBAL', icon.filename)
+            String cssClassname = IconCssNameUtil.getCssClass(globalBadgeId, icon.filename)
             return new CustomIconResult(filename: icon.filename, cssClassname: cssClassname)
         }
     }

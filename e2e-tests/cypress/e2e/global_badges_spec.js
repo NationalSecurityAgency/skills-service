@@ -2270,14 +2270,14 @@ describe('Global Badges Tests', () => {
         cy.uploadCustomIcon('valid_icon.png', '/admin/badges/globalBadge1/icons/upload')
         cy.createProject(1)
         cy.assignProjectToGlobalBadge(1, 1);
-        cy.enableGlobalBadge(1, { iconClass: 'GLOBAL-validiconpng' });
+        cy.enableGlobalBadge(1, { iconClass: 'globalBadge1-validiconpng' });
 
         cy.intercept('/api/badges/globalBadge1/customIconCss').as('customIcons')
         cy.visit('/administrator');
         cy.get('[data-cy="nav-Global Badges"]').click()
         cy.wait('@customIcons')
         cy.wait(1000)
-        cy.get('[data-cy="badgeCard-globalBadge1"] .GLOBAL-validiconpng')
+        cy.get('[data-cy="badgeCard-globalBadge1"] .globalBadge1-validiconpng')
           .invoke('css', 'background-image')
           .then((bgImage) => {
               expect(bgImage).to.contain('data:image/png;base64')
@@ -2286,7 +2286,7 @@ describe('Global Badges Tests', () => {
         cy.visit('/administrator/globalBadges/');
         cy.wait('@customIcons')
         cy.wait(1000)
-        cy.get('[data-cy="badgeCard-globalBadge1"] .GLOBAL-validiconpng')
+        cy.get('[data-cy="badgeCard-globalBadge1"] .globalBadge1-validiconpng')
           .invoke('css', 'background-image')
           .then((bgImage) => {
               expect(bgImage).to.contain('data:image/png;base64')
@@ -2296,7 +2296,7 @@ describe('Global Badges Tests', () => {
         cy.wait('@customIcons')
         cy.get('[data-cy="btn_edit-badge"]').click()
         cy.wait(1000)
-        cy.get('[data-cy="iconPicker"] .GLOBAL-validiconpng')
+        cy.get('[data-cy="iconPicker"] .globalBadge1-validiconpng')
           .invoke('css', 'background-image')
           .then((bgImage) => {
               expect(bgImage).to.contain('data:image/png;base64')

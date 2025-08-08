@@ -449,7 +449,7 @@ class GlobalBadgeEditSpecs extends DefaultIntSpec {
         then:
         result
         result.success
-        result.cssClassName == "GLOBAL-dot2png"
+        result.cssClassName == "${badgeId}-dot2png"
         result.name == "dot2.png"
     }
 
@@ -480,8 +480,8 @@ class GlobalBadgeEditSpecs extends DefaultIntSpec {
         def clientDisplayCssResult = skillsService.getCustomIconCssForGlobalBadge(badgeId)
 
         then:
-        result == [[filename:'dot2.png', cssClassname:"GLOBAL-dot2png"]]
-        clientDisplayCssResult.toString().startsWith(".GLOBAL-dot2png {\tbackground-image: url(")
+        result == [[filename:'dot2.png', cssClassname:"${badgeId}-dot2png"]]
+        clientDisplayCssResult.toString().startsWith(".${badgeId}-dot2png {\tbackground-image: url(")
     }
 
     def 'global badge lookups do not return inception project or skills'() {

@@ -39,7 +39,7 @@ const loadBadges = () => {
     const filterWithCustomIcons = (badge) => badge.iconClass &&
       (
         (badge.projectId && badge.iconClass.startsWith(`${badge.projectId}-`)) ||
-        (!badge.projectId && badge.iconClass.startsWith(`GLOBAL-`))
+        (!badge.projectId && badge.iconClass.startsWith(`${badge.badgeId}-`))
       )
     const projectIds = res.filter(filterWithCustomIcons).filter(badge => badge.projectId).map((badge) => badge.projectId)
     const globalBadgeIds = res.filter(filterWithCustomIcons).filter(badge => !badge.projectId).map((badge) => badge.badgeId)

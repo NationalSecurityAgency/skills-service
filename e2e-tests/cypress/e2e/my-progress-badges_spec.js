@@ -594,7 +594,7 @@ describe('My Progress Badges Tests', () => {
     cy.createGlobalBadge(1);
     cy.assignSkillToGlobalBadge(1, 1, 1);
     cy.assignProjectToGlobalBadge(1, 1);
-    cy.enableGlobalBadge(1, { iconClass: 'GLOBAL-validiconpng' });
+    cy.enableGlobalBadge(1, { iconClass: 'globalBadge1-validiconpng' });
 
     cy.logout()
     cy.loginAsProxyUser();
@@ -605,7 +605,7 @@ describe('My Progress Badges Tests', () => {
     cy.get('[data-cy="viewBadges"]').click()
     cy.wait('@customIcons')
     cy.wait(1000)
-    cy.get('[data-cy="achievedBadge-globalBadge1"] .GLOBAL-validiconpng')
+    cy.get('[data-cy="achievedBadge-globalBadge1"] .globalBadge1-validiconpng')
       .invoke('css', 'background-image')
       .then((bgImage) => {
         expect(bgImage).to.contain('data:image/png;base64')
@@ -614,7 +614,7 @@ describe('My Progress Badges Tests', () => {
     cy.visit('/progress-and-rankings/my-badges');
     cy.wait('@customIcons')
     cy.wait(1000)
-    cy.get('[data-cy="achievedBadge-globalBadge1"] .GLOBAL-validiconpng')
+    cy.get('[data-cy="achievedBadge-globalBadge1"] .globalBadge1-validiconpng')
       .invoke('css', 'background-image')
       .then((bgImage) => {
         expect(bgImage).to.contain('data:image/png;base64')
@@ -623,7 +623,7 @@ describe('My Progress Badges Tests', () => {
     cy.visit('/progress-and-rankings/projects/proj1/badges/global/globalBadge1')
     cy.wait('@customIcons')
     cy.wait(1000)
-    cy.get('[data-cy="badge_globalBadge1"] .GLOBAL-validiconpng')
+    cy.get('[data-cy="badge_globalBadge1"] .globalBadge1-validiconpng')
       .invoke('css', 'background-image')
       .then((bgImage) => {
         expect(bgImage).to.contain('data:image/png;base64')
