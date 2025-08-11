@@ -1167,7 +1167,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
 
-        skillsService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
 
         def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
         def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
@@ -1237,7 +1237,6 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
         skillsService.updateGlobalBadge(badge)
-        skillsService.createGlobalBadge(badge)
 
         skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
         skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
@@ -1304,7 +1303,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
 
-        skillsService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
 
         def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
         def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
@@ -1375,7 +1374,6 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
         skillsService.updateGlobalBadge(badge)
-        skillsService.createGlobalBadge(badge)
 
         skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
         skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body

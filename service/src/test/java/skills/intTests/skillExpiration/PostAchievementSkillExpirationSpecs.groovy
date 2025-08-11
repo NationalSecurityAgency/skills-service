@@ -1376,7 +1376,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
 
-        skillsService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
 
         def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo).body
         def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, eightDaysAgo).body
@@ -1446,7 +1446,6 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
         skillsService.updateGlobalBadge(badge)
-        skillsService.createGlobalBadge(badge)
 
         skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo).body
         skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, eightDaysAgo).body
@@ -1513,7 +1512,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
 
-        skillsService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
 
         def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo).body
         def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, eightDaysAgo).body
@@ -1584,7 +1583,6 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
         skillsService.updateGlobalBadge(badge)
-        skillsService.createGlobalBadge(badge)
 
         skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, eightDaysAgo).body
         skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, eightDaysAgo).body
