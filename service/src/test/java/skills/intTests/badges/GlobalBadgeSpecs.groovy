@@ -67,8 +67,8 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
         badge.enabled = "true"
         badge2.enabled = "true"
-        skillsService.createGlobalBadge(badge)
-        skillsService.createGlobalBadge(badge2)
+        skillsService.updateGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge2)
 
         when:
         skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user1", new Date()).body.completed
@@ -132,7 +132,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[4].skillId])
 
         badge.enabled = 'true'
-        skillsService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
 
         when:
         skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user1", new Date()).body.completed
@@ -173,7 +173,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
 
         badge.enabled = 'true'
-        skillsService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
 
         when:
         def res1 = skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user1", new Date())
@@ -210,7 +210,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.updateGlobalBadge(badge) // can only enable after initial creation
 
         badge.enabled = 'true'
-        skillsService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
 
         when:
         skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[0].skillId], "user1", new Date())
@@ -240,7 +240,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         when:
         badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'false'
-        skillsService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
 
         then:
         SkillsClientException ex = thrown()
@@ -262,7 +262,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         when:
         badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
-        skillsService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
 
         then:
         def ex = thrown(Exception)
@@ -344,7 +344,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.createGlobalBadge(badge2)
         skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge2.badgeId, level: "2")
         badge2.enabled = 'true'
-        skillsService.createGlobalBadge(badge2)
+        skillsService.updateGlobalBadge(badge2)
 
         badge.enabled = 'false'
         skillsService.createGlobalBadge(badge)
@@ -354,7 +354,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "5")
 
         badge.enabled = 'true'
-        skillsService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
         List<UserAchievement> achievementsAfter = userAchievedLevelRepo.findAll()
 
         def summary = skillsService.getBadgeSummary(user, proj.projectId,  badge.badgeId,-1, true)
@@ -395,4 +395,27 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeSkills.projectId == [project1.projectId]
         badgeSkills.skillId == [p1_skills[0].skillId]
     }
+
+    def "cannot create global badge with same name"() {
+        Map badge = [badgeId: 'global1', name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+        when:
+        Map badge2 = [badgeId: 'global2', name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge2)
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains('Badge with name [Test Global Badge 1] already exists!')
+    }
+
+    def "cannot create global badge with the same badgeId"() {
+        Map badge = [badgeId: 'global1', name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+        when:
+        Map badge2 = [badgeId: 'global1', name: 'Test Global Badge 2']
+        skillsService.createGlobalBadge(badge2)
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains('Badge with id [global1] already exists!')
+    }
+
 }

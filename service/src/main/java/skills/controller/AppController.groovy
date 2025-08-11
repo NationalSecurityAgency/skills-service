@@ -277,13 +277,17 @@ class AppController {
 
     @RequestMapping(value = "/badges/{badgeId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    RequestResult saveBadge(@PathVariable("badgeId") String badgeId,
+    RequestResult createBadge(@PathVariable("badgeId") String badgeId,
                             @RequestBody BadgeRequest badgeRequest) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
         badgeRequest.badgeId = badgeRequest.badgeId ?: badgeId
         SkillsValidator.isNotBlank(badgeRequest?.name, "Badge Name")
 
         IdFormatValidator.validate(badgeRequest.badgeId)
+
+        if (doesBadgeIdExist(badgeId)) {
+            throw new SkillException("Global Badge with id [${badgeRequest.badgeId}] already exists! Sorry!", ErrorCode.ConstraintViolation)
+        }
 
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxIdLength, "Badge Id", badgeRequest.badgeId)
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minIdLength, "Badge Id", badgeRequest.badgeId)
