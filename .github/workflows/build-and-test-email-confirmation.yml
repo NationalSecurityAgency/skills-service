@@ -22,7 +22,8 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
     services:
       postgres:
         # Docker Hub image

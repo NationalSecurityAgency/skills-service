@@ -30,7 +30,8 @@ jobs:
 
   service-against-postgresql:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
     strategy:
       # when one test fails, DO NOT cancel the other containers
       fail-fast: false

@@ -32,7 +32,8 @@ on:
 jobs:
   build-skills-service-for-ui-tests:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -76,6 +77,8 @@ jobs:
   ui-tests-against-postgres:
 #    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: [build-skills-service-for-ui-tests]
     strategy:
       fail-fast: false
@@ -182,6 +185,8 @@ jobs:
 
   combine-cypress-mochawesome-results:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: ${{ !cancelled() }}
 #    if: github.event_name == 'schedule-never'
     needs: [ui-tests-against-postgres]
@@ -224,6 +229,8 @@ jobs:
   ui-tests-against-postgres-cypress-dashboard:
     if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 #    container:
 #      image: cypress/browsers:node-22.16.0-chrome-137.0.7151.119-1-ff-139.0.4-edge-137.0.3296.62-1
     needs: [build-skills-service-for-ui-tests]
@@ -320,6 +327,8 @@ jobs:
 
   service-against-postgresql:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       # when one test fails, DO NOT cancel the other containers
       fail-fast: false
@@ -398,6 +407,8 @@ jobs:
 
   combine-surefire-reports:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: ${{ !cancelled() }}
     needs: [service-against-postgresql]
     steps:
