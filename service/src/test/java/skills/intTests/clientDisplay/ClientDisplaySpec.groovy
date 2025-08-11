@@ -79,7 +79,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
         skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[0].skillId])
         skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skills[1].skillId])
         globalBadge.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge)
+        skillsService.updateGlobalBadge(globalBadge)
 
         def user = getRandomUsers(1)[0]
         skillsService.addSkill(skills[0], user)
@@ -159,7 +159,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
 
         skillsService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId)
         globalBadge.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge)
+        skillsService.updateGlobalBadge(globalBadge)
         def summaryOneEnabledBadge = skillsService.getSkillSummary("user1", proj1.projectId)
 
         then:
@@ -188,7 +188,7 @@ class ClientDisplaySpec extends DefaultIntSpec {
         def summaryOneDisabledBadgeOneDisabledGlobalBadge = skillsService.getSkillSummary("user1", proj1.projectId)
         skillsService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId)
         globalBadge.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge)
+        skillsService.updateGlobalBadge(globalBadge)
 
         def summaryOneDisabledBadgeOneEnabledGlobalBadge = skillsService.getSkillSummary("user1", proj1.projectId)
 
