@@ -102,8 +102,7 @@ export const useSkillsDisplayInfo = () => {
       name = getContextSpecificRouteName('globalBadgeDetails')
       if (!route.params.projectId) {
         if (!globalBadgeUnderProjectId) {
-          // throw new Error(`globalBadgeUnderProjectId is required for global badges, badgeId: [${badge.badgeId}]`)
-          globalBadgeUnderProjectId = 'UNKNOWN'
+          throw new Error(`globalBadgeUnderProjectId is required for global badges, badgeId: [${badge.badgeId}]`)
         }
         params.projectId = globalBadgeUnderProjectId
       }

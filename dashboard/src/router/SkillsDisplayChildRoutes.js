@@ -22,16 +22,6 @@ import BadgesDetailsPage from '@/skills-display/components/badges/BadgesDetailsP
 import BadgeDetailsPage from '@/skills-display/components/badges/BadgeDetailsPage.vue'
 import QuizPage from '@/skills-display/components/quiz/QuizPage.vue'
 
-/* <<<<<<<<<<<<<<  ✨ Windsurf Command ⭐ >>>>>>>>>>>>>>>> */
-/**
- * Creates child routes for the skills display.
- *
- * @param {string} appendToName Appended to the name of each route.
- * @param {boolean} [startWithSlash=false] If true, the path of each route will start with a slash.
- *
- * @returns {RouteConfig[]} The child routes.
- */
-/* <<<<<<<<<<  e4cb85f8-a165-4bc0-aad3-38f7c5861575  >>>>>>>>>>> */
 const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) => {
 
   const projectPlaceholder = '##PROJECT##'
