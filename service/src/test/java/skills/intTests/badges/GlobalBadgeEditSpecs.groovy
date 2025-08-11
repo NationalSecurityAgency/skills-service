@@ -230,7 +230,7 @@ class GlobalBadgeEditSpecs extends DefaultIntSpec {
 
         when:
         badge['badgeId'] = badgeId
-        def res = skillsService.createGlobalBadge(badge, origBadgeId)
+        def res = skillsService.updateGlobalBadge(badge, origBadgeId)
         def res2 = skillsService.getGlobalBadge(badgeId)
 
         then:
@@ -248,7 +248,7 @@ class GlobalBadgeEditSpecs extends DefaultIntSpec {
         when:
         String newName = 'new name'
         badge['name'] = newName
-        def res = skillsService.createGlobalBadge(badge, badgeId)
+        def res = skillsService.updateGlobalBadge(badge, badgeId)
         def res2 = skillsService.getGlobalBadge(badgeId)
 
         then:
@@ -268,7 +268,7 @@ class GlobalBadgeEditSpecs extends DefaultIntSpec {
         String newName = 'new name'
         badge['name'] = newName
         badge['badgeId'] = badgeId
-        def res = skillsService.createGlobalBadge(badge, origBadgeId)
+        def res = skillsService.updateGlobalBadge(badge, origBadgeId)
         def res2 = skillsService.getGlobalBadge(badgeId)
 
         then:
