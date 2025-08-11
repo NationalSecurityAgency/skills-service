@@ -225,13 +225,13 @@ class MyProgressSpec extends DefaultIntSpec {
         proj3badge1.enabled = true
         skillsService.createBadge(proj3badge1)
         globalBadge.enabled = true
-        skillsService.createGlobalBadge(globalBadge)
+        skillsService.updateGlobalBadge(globalBadge)
         globalBadge2.enabled = true
-        skillsService.createGlobalBadge(globalBadge2)
+        skillsService.updateGlobalBadge(globalBadge2)
         globalBadge3.enabled = true
-        skillsService.createGlobalBadge(globalBadge3)
+        skillsService.updateGlobalBadge(globalBadge3)
         globalBadge4.enabled = true
-        skillsService.createGlobalBadge(globalBadge4)
+        skillsService.updateGlobalBadge(globalBadge4)
 
         def summaryAfterAllEnabled = skillsService.getMyProgressSummary()
         def myBadgesAfterAllEnabled = skillsService.getMyProgressBadges()
@@ -374,17 +374,17 @@ class MyProgressSpec extends DefaultIntSpec {
         def res5 = skillsService.getMyProgressSummary()
 
         globalBadge.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge)
+        skillsService.updateGlobalBadge(globalBadge)
 
         def res6 = skillsService.getMyProgressSummary()
 
         globalBadge2.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge2)
+        skillsService.updateGlobalBadge(globalBadge2)
 
         def res7 = skillsService.getMyProgressSummary()
 
         globalBadge3.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge3)
+        skillsService.updateGlobalBadge(globalBadge3)
 
         def res8 = skillsService.getMyProgressSummary()
 
@@ -874,13 +874,13 @@ class MyProgressSpec extends DefaultIntSpec {
         skillsService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge3.badgeId, skillId: skills[2].skillId)
 
         globalBadge.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge)
+        skillsService.updateGlobalBadge(globalBadge)
 
         globalBadge2.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge2)
+        skillsService.updateGlobalBadge(globalBadge2)
 
         globalBadge3.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge3)
+        skillsService.updateGlobalBadge(globalBadge3)
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: skills.get(1).skillId])
         when:
@@ -948,7 +948,7 @@ class MyProgressSpec extends DefaultIntSpec {
         skillsService.createGlobalBadge(globalBadge)
         skillsService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId)
         globalBadge.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge)
+        skillsService.updateGlobalBadge(globalBadge)
 
         // enable "production mode"
         skillsService.changeSetting(proj1.projectId, PROD_MODE, [projectId: proj1.projectId, setting: PROD_MODE, value: "true"])
@@ -997,7 +997,7 @@ class MyProgressSpec extends DefaultIntSpec {
         skillsService.createGlobalBadge(globalBadge)
         skillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: globalBadge.badgeId, skillId: skillId)
         globalBadge.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge)
+        skillsService.updateGlobalBadge(globalBadge)
 
         when:
         List<Date> dates = testUtils.getLastNDays(5).collect { it - 14}
@@ -1071,7 +1071,7 @@ class MyProgressSpec extends DefaultIntSpec {
         skillsService.createGlobalBadge(globalBadge)
         skillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: globalBadge.badgeId, skillId: skillId)
         globalBadge.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge)
+        skillsService.updateGlobalBadge(globalBadge)
 
         // create second project
         String projId2 = SkillsFactory.getDefaultProjId(2)
@@ -1093,7 +1093,7 @@ class MyProgressSpec extends DefaultIntSpec {
         skillsService.createGlobalBadge(globalBadge2)
         skillsService.assignSkillToGlobalBadge(projectId: projId2, badgeId: globalBadge2.badgeId, skillId: skillId2)
         globalBadge2.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge2)
+        skillsService.updateGlobalBadge(globalBadge2)
 
         when:
         List<Date> dates = testUtils.getLastNDays(5).collect { it - 14}
@@ -1165,7 +1165,7 @@ class MyProgressSpec extends DefaultIntSpec {
         skillsService.createGlobalBadge(globalBadge)
         skillsService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId)
         globalBadge.enabled = 'true'
-        skillsService.createGlobalBadge(globalBadge)
+        skillsService.updateGlobalBadge(globalBadge)
 
         when:
         def res = skillsService.getMyProgressSummary()

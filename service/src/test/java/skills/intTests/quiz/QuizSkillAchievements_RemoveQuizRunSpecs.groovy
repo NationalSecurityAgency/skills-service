@@ -864,7 +864,7 @@ class QuizSkillAchievements_RemoveQuizRunSpecs extends QuizSkillAchievementsBase
         skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge1.badgeId, skillId: subj2Skills.get(1).skillId])
         skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge1.badgeId, skillId: subj2Skills.get(2).skillId])
         badge1.enabled = true
-        skillsService.createGlobalBadge(badge1)
+        skillsService.updateGlobalBadge(badge1)
 
         def badge2 = SkillsFactory.createBadge(1, 2)
         skillsService.createGlobalBadge(badge2)
@@ -872,7 +872,7 @@ class QuizSkillAchievements_RemoveQuizRunSpecs extends QuizSkillAchievementsBase
         skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: subj2Skills.get(0).skillId])
         skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge2.badgeId, skillId: subj2Skills.get(2).skillId])
         badge2.enabled = true
-        skillsService.createGlobalBadge(badge2)
+        skillsService.updateGlobalBadge(badge2)
 
         List<SkillsService> userServices = getRandomUsers(3).collect { createService(it) }
         Integer u1Quiz1AttemptId = passQuiz(userServices[0], quiz1)
