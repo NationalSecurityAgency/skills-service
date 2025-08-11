@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, ref} from "vue";
-import SlideDeck from "@/components/slides/SlideDeck.vue";
+import {computed, defineAsyncComponent, ref} from "vue";
 import {useStorage} from "@vueuse/core";
 import {useElementSizeUtil} from "@/common-components/utilities/UseElementSizeUtil.js";
+const SlideDeck = defineAsyncComponent(() =>
+    import('@/components/slides/SlideDeck.vue')
+);
 
 const props = defineProps({
   skill: Object,

@@ -26,27 +26,32 @@ const proxyConf = {
 };
 
 function getChunkId(id) {
-  if (id.includes('vis-network')) {
-    return 'visNetwork';
-  } else if (id.includes('vue3-apexcharts') || id.includes('apexcharts')) {
-    return 'apexCharts';
-  } else if (id.includes('@toast-ui/editor') || id.includes('toastui-editor-viewer')) {
-    return 'toastUI';
-  } else if (id.includes('node-emoji')) {
-    return 'nodeEmoji';
-  } else if (id.includes('primevue/datatable')) {
-    return 'primevueDatatable';
-  } else if (id.includes('primevue/calendar')) {
-    return 'primevueCalendar';
-  } else if (id.includes('primevue/')) {
-    return 'primevueComponents';
-  } else if (id.includes('@skilltree/skills-client-js')) {
-    return 'skillClient';
-  } else if (id.includes('skills-display/')) {
-    return 'skillsDisplay';
-  } else if (id.includes('pdfkit')) {
-    return 'pdfkit';
-  }
+
+    if (id.includes('apex')) {
+        return 'apexCharts';
+    } else if (id.includes('@primeuix')) {
+        return 'primeuix';
+    } else if (id.includes('primevue')) {
+        return 'primevue';
+    }  else if (id.includes('@toast-ui/editor') || id.includes('toastui-editor-viewer')) {
+        return 'toastUI';
+    }else if (id.includes('@tsparticles')
+        || id.includes('axios')
+        || id.includes('yup')
+        || id.includes('@skilltree/skills-client-js')
+        || id.includes('vee-validate')
+        || id.includes('tinycolor2')
+        || id.includes('vue-router')
+        || id.includes('sortablejs')
+        || id.includes('dompurify')
+        || id.includes('webvtt-parser')
+        || id.includes('dayjs')
+        || id.includes('@vueuse')
+    ) {
+        return 'support-libs';
+    }
+
+    return null
 }
 
 // https://vitejs.dev/config/
@@ -99,7 +104,7 @@ export default defineConfig({
       },
       plugins: [
         visualizer({
-          open: false,
+          open: true,
         }),
       ]
     }

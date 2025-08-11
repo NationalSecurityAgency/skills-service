@@ -15,14 +15,14 @@ limitations under the License.
 */
 <script setup>
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
-import { computed, onMounted, watch } from 'vue'
+import {computed, defineAsyncComponent, onMounted, watch} from 'vue'
 import { useRoute } from 'vue-router'
 import BadgeCatalogItem from '@/skills-display/components/badges/BadgeCatalogItem.vue'
 import SkillsProgressList from '@/skills-display/components/progress/SkillsProgressList.vue'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import GlobalBadgeProjectLevels from '@/skills-display/components/badges/GlobalBadgeProjectLevels.vue'
-import Prerequisites from '@/skills-display/components/skill/prerequisites/Prerequisites.vue'
+const Prerequisites = defineAsyncComponent(() => import('@/skills-display/components/skill/prerequisites/Prerequisites.vue'))
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 
 const route = useRoute()

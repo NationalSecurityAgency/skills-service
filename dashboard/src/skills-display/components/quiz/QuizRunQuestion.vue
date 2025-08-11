@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, defineAsyncComponent, ref } from 'vue'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue';
 import SkillsRating from "@/components/utils/inputForm/SkillsRating.vue";
 import QuizRunAnswers from '@/skills-display/components/quiz/QuizRunAnswers.vue';
@@ -24,9 +24,11 @@ import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEdito
 import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 import {useDebounceFn} from "@vueuse/core";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
-import VideoPlayer from "@/common-components/video/VideoPlayer.vue";
 import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
-import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
+
+const VideoPlayer = defineAsyncComponent(() =>
+    import('@/common-components/video/VideoPlayer.vue')
+)
 
 const props = defineProps({
   q: Object,

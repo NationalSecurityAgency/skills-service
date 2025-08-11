@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, onMounted, ref, watch} from 'vue'
+import {computed, defineAsyncComponent, onMounted, ref, watch} from 'vue'
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
 import {useRoute} from 'vue-router'
 import {useSkillsDisplayService} from '@/skills-display/services/UseSkillsDisplayService.js'
@@ -23,7 +23,7 @@ import SkillProgress from '@/skills-display/components/progress/SkillProgress.vu
 import {useScrollSkillsIntoViewState} from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
 import {useSkillsDisplaySubjectState} from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
-import Prerequisites from '@/skills-display/components/skill/prerequisites/Prerequisites.vue'
+const Prerequisites = defineAsyncComponent(() => import('@/skills-display/components/skill/prerequisites/Prerequisites.vue'))
 import SkillAchievementMsg from "@/skills-display/components/progress/celebration/SkillAchievementMsg.vue";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import {useMagicKeys, watchDebounced} from "@vueuse/core";

@@ -18,8 +18,6 @@ import {onMounted, ref} from "vue";
 import QuizService from "@/components/quiz/QuizService.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import {useRoute} from "vue-router";
-import QuizRunQuestionCard from "@/components/quiz/runsHistory/QuizRunQuestionCard.vue";
-import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import GradeSingleQuestion from "@/components/quiz/grade/GradeSingleQuestion.vue";
 
 const props = defineProps({

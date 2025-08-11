@@ -20,7 +20,6 @@ import { useSkillsState } from '@/stores/UseSkillsState.js'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import LoadingContainer from '@/components/utils/LoadingContainer.vue';
 import ChildRowSkillsDisplay from '@/components/skills/ChildRowSkillsDisplay.vue';
-import SlideDeck from "@/components/slides/SlideDeck.vue";
 
 const route = useRoute();
 const skillsState = useSkillsState();

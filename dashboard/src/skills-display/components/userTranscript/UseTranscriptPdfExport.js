@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import PDFDocument from 'pdfkit/js/pdfkit.standalone.js'
 import { useBase64Images } from '@/skills-display/components/userTranscript/UseBase64Images.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import dayjs from '@/common-components/DayJsCustomizer.js'
 import { useTableBuilder } from '@/skills-display/components/userTranscript/UseTableBuilder.js'
 import { usePdfBuilderHelper } from '@/skills-display/components/userTranscript/UsePdfBuilderHelper.js'
+
+const loadPdfKit = async () => {
+    const pdfkit = await import('pdfkit/js/pdfkit.standalone.js');
+    return pdfkit.default || pdfkit; // Handle different module formats
+};
 
 export const useTranscriptPdfExport = () => {
 
@@ -39,8 +43,9 @@ export const useTranscriptPdfExport = () => {
     return res
   }
 
-  const generatePdf = (info) => {
-    const doc = new PDFDocument({
+  const generatePdf = async (info) => {
+      const PDFDocument = await loadPdfKit();
+      const doc = new PDFDocument({
       pdfVersion: '1.5',
       lang: 'en-US',
       tagged: true,
