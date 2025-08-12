@@ -24,6 +24,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import Badge from '@/components/badges/Badge.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 
 const dialogMessages = useDialogMessages()
 const announcer = useSkillsAnnouncer();
@@ -61,6 +62,13 @@ const loadBadges = (afterLoad) => {
           localBadges[0].isFirst = true;
           localBadges[localBadges.length - 1].isLast = true;
           badges.value = localBadges;
+          const filterWithCustomIcons = (badge) => badge.iconClass
+          const globalBadgeIds = badgesResponse.filter(filterWithCustomIcons).map((badge) => badge.badgeId)
+          const refreshGlobalBadgeIcons = [...new Set(globalBadgeIds)].map((badgeId) => {
+            return IconManagerService.refreshCustomIconCss(null, badgeId)
+          })
+
+          return Promise.all([...refreshGlobalBadgeIcons])
         } else {
           badges.value = [];
         }
@@ -156,7 +164,8 @@ const publishBadge = (badge) => {
         toSave.endDate = toDate(toSave.endDate);
 
         const requiredIds = badge.requiredSkills.map((item) => item.skillId);
-        const badgeReq = { requiredSkillsIds: requiredIds, ...badge };
+        const badgeReq = { requiredSkillsIds: requiredIds, ...toSave };
+        badgeReq.isEdit = true
         GlobalBadgeService.saveBadge(badgeReq).then(() => {
           saveBadge(toSave);
         });

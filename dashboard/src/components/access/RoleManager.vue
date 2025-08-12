@@ -36,13 +36,13 @@ const dialogMessages = useDialogMessages()
 // role constants
 const ROLE_APP_USER = 'ROLE_APP_USER';
 const ROLE_PROJECT_ADMIN = 'ROLE_PROJECT_ADMIN';
-const ROLE_SUPERVISOR = 'ROLE_SUPERVISOR';
 const ROLE_SUPER_DUPER_USER = 'ROLE_SUPER_DUPER_USER';
 const ROLE_PROJECT_APPROVER = 'ROLE_PROJECT_APPROVER';
 const ROLE_DASHBOARD_ADMIN_ACCESS = 'ROLE_DASHBOARD_ADMIN_ACCESS'
 const ROLE_ADMIN_GROUP_MEMBER = 'ROLE_ADMIN_GROUP_MEMBER'
 const ROLE_ADMIN_GROUP_OWNER = 'ROLE_ADMIN_GROUP_OWNER'
-const ALL_ROLES = [ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPERVISOR, ROLE_SUPER_DUPER_USER, ROLE_PROJECT_APPROVER];
+const ROLE_GLOBAL_BADGE_ADMIN = 'ROLE_GLOBAL_BADGE_ADMIN'
+const ALL_ROLES = [ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPER_DUPER_USER, ROLE_PROJECT_APPROVER];
 
 const appConfig = useAppConfig();
 const announcer = useSkillsAnnouncer();
@@ -93,6 +93,10 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  badgeId: {
+    type: String,
+    default: null,
+  },
 });
 
 onMounted(() => {
@@ -136,7 +140,7 @@ const data = computed(() => {
 })
 
 const adminGroupsSupported = computed(() => {
-  return !props.adminGroupId && (!!props.projectId || !!props.quizId);
+  return !props.adminGroupId && (!!props.projectId || !!props.quizId || !!props.badgeId);
 })
 const availableAdminGroups = computed(() => {
   const assignedAdminGroupIds = assignedAdminGroups.value.map((ag) => ag.adminGroupId);
@@ -182,14 +186,11 @@ const maxRolePageSize = computed(() => {
 })
 
 function getRoleDisplay(roleName) {
-  if (roleName === ROLE_PROJECT_ADMIN) {
+  if (roleName === ROLE_PROJECT_ADMIN || roleName === ROLE_GLOBAL_BADGE_ADMIN) {
     return 'Administrator';
   }
   if (roleName === ROLE_APP_USER) {
     return 'Skills Display';
-  }
-  if (roleName === ROLE_SUPERVISOR) {
-    return 'Supervisor';
   }
   if (roleName === ROLE_SUPER_DUPER_USER) {
     return 'Root';
@@ -219,7 +220,7 @@ const loadData = () => {
       QuizService.getQuizUserRoles(props.quizId).then((result) => {
         assignedLocalAdmins.value = adminGroupsSupported.value ? result.filter((u) => !u.adminGroupId) : result;
       }) :
-      AccessService.getUserRoles(props.projectId, props.roles, pageParams, props.adminGroupId).then((result) => {
+      AccessService.getUserRoles(props.projectId, props.roles, pageParams, props.adminGroupId, props.badgeId).then((result) => {
         assignedLocalAdmins.value = adminGroupsSupported.value ? result.data.filter((u) => !u.adminGroupId) : result.data
       });
   const getAdminGroupsForProject = props.projectId ? AdminGroupsService.getAdminGroupsForProject(props.projectId).then((result) => {
@@ -230,11 +231,16 @@ const loadData = () => {
     assignedAdminGroups.value = result;
   }) : Promise.resolve();
 
+  const getAdminGroupsForGlobalBadge = props.badgeId ? AdminGroupsService.getAdminGroupsForGlobalBadge(props.badgeId).then((result) => {
+    assignedAdminGroups.value = result;
+  }) : Promise.resolve();
+
+
   const getOwnedAdminGroups = adminGroupsSupported.value ? AdminGroupsService.getAdminGroupDefs().then((result) => {
     allAdminGroups.value = result;
   }) : Promise.resolve();
 
-  Promise.all([getUserRoles, getAdminGroupsForProject, getAdminGroupsForQuiz, getOwnedAdminGroups]).then(() => {
+  Promise.all([getUserRoles, getAdminGroupsForProject, getAdminGroupsForQuiz, getAdminGroupsForGlobalBadge, getOwnedAdminGroups]).then(() => {
     isLoading.value = false;
   })
 }
@@ -271,7 +277,7 @@ function doAddUserRole() {
   if (props.quizId) {
     addQuizUserRole(role);
   } else {
-    AccessService.saveUserRole(props.projectId, selectedUser.value, role, pkiAuthenticated, props.adminGroupId).then(() => {
+    AccessService.saveUserRole(props.projectId, selectedUser.value, role, pkiAuthenticated, props.adminGroupId, props.badgeId).then(() => {
       completeAddRole(role)
     }).catch((e) => {
       handleError(e);
@@ -337,7 +343,7 @@ function doDeleteUserRole() {
   if (props.quizId) {
     deleteQuizAdminUserRole(row)
   } else {
-    AccessService.deleteUserRole(row.projectId, row.userId, row.roleName, props.adminGroupId).then(() => {
+    AccessService.deleteUserRole(row.projectId, row.userId, row.roleName, props.adminGroupId, props.badgeId).then(() => {
       completeDelete(row)
     });
   }
@@ -381,7 +387,7 @@ function updateUserRole(selectedRole) {
     });
 
     const pkiAuthenticated = appConfig.isPkiAuthenticated;
-    AccessService.saveUserRole(props.projectId, userRoleToUpdate, newRole, pkiAuthenticated, props.adminGroupId)
+    AccessService.saveUserRole(props.projectId, userRoleToUpdate, newRole, pkiAuthenticated, props.adminGroupId, props.badgeId)
         .then(() => {
           assignedLocalAdmins.value = assignedLocalAdmins.value.map((user) => {
             if (user.isEdited) {
@@ -403,11 +409,20 @@ function updateUserRole(selectedRole) {
   }
 }
 
-const addProjectOrQuizToAdminGroup = (adminGroup) => {
+const addProjectOrQuizOrGlobalBadgeToAdminGroup = (adminGroup) => {
   isLoading.value = true;
   if (props.projectId) {
     AdminGroupsService.addProjectToAdminGroup(adminGroup.adminGroupId, props.projectId).then(() => {
       announcer.polite(`Admin Group ${adminGroup.name} was added to project successfully`);
+      loadData();
+    }).catch((e) => {
+      handleError(e);
+    }).finally(() => {
+      isLoading.value = false;
+    })
+  } else if (props.badgeId) {
+    AdminGroupsService.addGlobalBadgeToAdminGroup(adminGroup.adminGroupId, props.badgeId).then(() => {
+      announcer.polite(`Admin Group ${adminGroup.name} was added to badge successfully`);
       loadData();
     }).catch((e) => {
       handleError(e);
@@ -477,7 +492,7 @@ defineExpose({
                     filter
                     placeholder="Please select Admin Group"
                     optionLabel="name"
-                    @update:modelValue="addProjectOrQuizToAdminGroup"
+                    @update:modelValue="addProjectOrQuizOrGlobalBadgeToAdminGroup"
                     :emptyMessage=emptyAdminGroupsMessage
                     :options="availableAdminGroups">
                   <template #value="slotProps">

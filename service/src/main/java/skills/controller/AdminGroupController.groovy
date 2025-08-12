@@ -154,6 +154,35 @@ class AdminGroupController {
         return adminGroupService.getAdminGroupProjects(adminGroupId)
     }
 
+    @RequestMapping(value = "/{adminGroupId}/badges", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    AdminGroupGlobalBadgeResult getAdminGroupGlobalBadges(@PathVariable("adminGroupId") String adminGroupId) {
+        SkillsValidator.isNotBlank(adminGroupId, "Admin Group Id")
+        AdminGroupGlobalBadgeResult adminGroupGlobalBadgeResult = adminGroupService.getAdminGroupGlobalBadges(adminGroupId)
+
+        return adminGroupGlobalBadgeResult
+    }
+
+    @RequestMapping(value = "/{adminGroupId}/badges/{badgeId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    AdminGroupGlobalBadgeResult addGlobalBadgeToAdminGroup(@PathVariable("adminGroupId") String adminGroupId,
+                                             @PathVariable("badgeId") String badgeId) {
+        SkillsValidator.isNotBlank(adminGroupId, "Admin Group Id")
+        SkillsValidator.isNotBlank(badgeId, "Global Badge Id")
+
+        adminGroupRoleService.addGlobalBadgeToAdminGroup(adminGroupId, badgeId)
+        return adminGroupService.getAdminGroupGlobalBadges(adminGroupId)
+    }
+
+    @RequestMapping(value = "/{adminGroupId}/badges/{badgeId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    AdminGroupGlobalBadgeResult removeGlobalBadgeFromAdminGroup(@PathVariable("adminGroupId") String adminGroupId,
+                                                  @PathVariable("badgeId") String badgeId) {
+        SkillsValidator.isNotBlank(adminGroupId, "Admin Group Id")
+        SkillsValidator.isNotBlank(badgeId, "Global Badge Id")
+
+        adminGroupRoleService.removeGlobalBadgeFromAdminGroup(adminGroupId, badgeId)
+        return adminGroupService.getAdminGroupGlobalBadges(adminGroupId)
+    }
+
     @RequestMapping(value = "/{adminGroupId}/validateEnablingCommunity", method = RequestMethod.GET, produces = "application/json")
     EnableUserCommunityValidationRes validateAdminGroupForEnablingCommunity(@PathVariable("adminGroupId") String adminGroupId) {
         SkillsValidator.isNotBlank(adminGroupId, "adminGroupId")

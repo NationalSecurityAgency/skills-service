@@ -26,26 +26,6 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
     String projId = SkillsFactory.defaultProjId
     String badgeId = 'GlobalBadge1'
 
-    String ultimateRoot = 'jh@dojo.com'
-    SkillsService rootSkillsService
-    String nonRootUserId = 'foo@bar.com'
-    SkillsService nonSupervisorSkillsService
-
-    def setup(){
-        skillsService.deleteProjectIfExist(projId)
-        rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-        nonSupervisorSkillsService = createService(nonRootUserId)
-
-        if (!rootSkillsService.isRoot()) {
-            rootSkillsService.grantRoot()
-        }
-        rootSkillsService.grantSupervisorRole(skillsService.wsHelper.username)
-    }
-
-    def cleanup() {
-        rootSkillsService?.removeSupervisorRole(skillsService.wsHelper.username)
-    }
-
     def "give credit if all dependencies were fulfilled"(){
         String subj = "testSubj"
 
@@ -131,7 +111,7 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         when:
         def user1SummaryBeforeEnable = skillsService.getBadgesSummary("user1", proj.projectId)
         badge.enabled = true
-        skillsService.createGlobalBadge(badge, badge.badgeId)
+        skillsService.updateGlobalBadge(badge, badge.badgeId)
 
         def user1Summary = skillsService.getBadgesSummary("user1", proj.projectId)
         def user2Summary = skillsService.getBadgesSummary("user2", proj.projectId)
@@ -182,7 +162,7 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         when:
         def user1SummaryBeforeEnable = skillsService.getBadgesSummary("user1", proj.projectId)
         badge.enabled = true
-        skillsService.createGlobalBadge(badge, badge.badgeId)
+        skillsService.updateGlobalBadge(badge, badge.badgeId)
 
         def user1Summary = skillsService.getBadgesSummary("user1", proj.projectId)
         def user2Summary = skillsService.getBadgesSummary("user2", proj.projectId)
@@ -243,7 +223,7 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         def user1SummaryBeforeEnable = skillsService.getBadgesSummary("user1", proj.projectId)
 
         badge.enabled = true
-        skillsService.createGlobalBadge(badge, badge.badgeId)
+        skillsService.updateGlobalBadge(badge, badge.badgeId)
 
         def user1Summary = skillsService.getBadgesSummary("user1", proj.projectId)
         def user2Summary = skillsService.getBadgesSummary("user2", proj.projectId)
@@ -279,7 +259,7 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: skill1.skillId])
         skillsService.assignSkillToGlobalBadge([projectId: proj2.projectId, badgeId: badge.badgeId, skillId: skill2.skillId])
         badge.enabled = "true"
-        skillsService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
         
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], "u123", new Date())
         skillsService.addSkill([projectId: proj2.projectId, skillId: skill2.skillId], "u123", new Date())

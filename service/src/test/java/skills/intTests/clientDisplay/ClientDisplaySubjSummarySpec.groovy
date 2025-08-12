@@ -404,7 +404,6 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         proj1_subj.helpUrl = "http://foo.org"
         proj1_subj.description = "This is a description"
         List<Map> allSkills = SkillsFactory.createSkills(6, 1, 1)
-        SkillsService supervisorService = createSupervisor()
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
@@ -449,7 +448,6 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         proj1_subj.helpUrl = "http://foo.org"
         proj1_subj.description = "This is a description"
         List<Map> allSkills = SkillsFactory.createSkills(3, 1, 1)
-        SkillsService supervisorService = createSupervisor()
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)

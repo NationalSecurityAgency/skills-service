@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
@@ -39,6 +40,7 @@ import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.*
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 import skills.utils.InputSanitizer
@@ -105,6 +107,12 @@ class BadgeAdminService {
     @Autowired
     UserActionsHistoryService userActionsHistoryService
 
+    @Autowired
+    AccessSettingsStorageService accessSettingsStorageService
+
+    @Autowired
+    UserInfoService userInfoService
+
     @Transactional()
     void saveBadge(String projectId, String originalBadgeId, BadgeRequest badgeRequest, SkillDef.ContainerType type = SkillDef.ContainerType.Badge, boolean performCustomValidation=true) {
         CustomValidationResult customValidationResult = customValidator.validate(badgeRequest, projectId)
@@ -136,9 +144,9 @@ class BadgeAdminService {
         }
 
         boolean identifyEligibleUsers = false
-        boolean isEdit = true
+        final boolean isEdit = skillDefinition
 
-        if (skillDefinition) {
+        if (isEdit) {
             String existingEnabled = skillDefinition.enabled;
             // for updates, use the existing value if it is not set on the badgeRequest (null or empty String)
             if (StringUtils.isBlank(badgeRequest.enabled)) {
@@ -153,7 +161,6 @@ class BadgeAdminService {
             Props.copy(badgeRequest, skillDefinition)
             skillDefinition.skillId = badgeRequest.badgeId
         } else {
-            isEdit = false
             ProjDef projDef
             if (type == SkillDef.ContainerType.Badge) {
                 projDef = projDefAccessor.getProjDef(projectId)
@@ -183,6 +190,10 @@ class BadgeAdminService {
 
         DataIntegrityExceptionHandlers.badgeDataIntegrityViolationExceptionHandler.handle(projectId) {
             savedSkill = skillDefWithExtraRepo.saveAndFlush(skillDefinition)
+        }
+        if (savedSkill && type == SkillDef.ContainerType.GlobalBadge && !isEdit) {
+            String userId = userInfoService.getCurrentUserId()
+            accessSettingsStorageService.addGlobalBadgeAdminUserRoleForUser(userId, savedSkill.skillId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
         }
 
         attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(savedSkill?.description, savedSkill.projectId, null, savedSkill.skillId)
@@ -265,6 +276,8 @@ class BadgeAdminService {
 
         if (projectId == null) {
             attachmentService.deleteGlobalBadgeAttachments(badgeId)
+
+            accessSettingsStorageService.deleteGlobalBadgeUserRoles(badgeId)
         }
 
         // reset display order attribute - make sure the order is continuous - 0...N

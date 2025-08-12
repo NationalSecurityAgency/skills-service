@@ -28,26 +28,23 @@ import skills.controller.exceptions.MaxIconSizeExceeded
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
-import skills.controller.request.model.NameExistsRequest
 import skills.controller.result.model.*
-import skills.dbupgrade.DBUpgradeSafe
 import skills.icons.CustomIconFacade
 import skills.icons.UploadedIcon
-import skills.metrics.MetricsService
 import skills.profile.EnableCallStackProf
 import skills.services.*
 import skills.services.admin.ProjAdminService
+import skills.services.adminGroup.AdminGroupService
+import skills.storage.model.auth.RoleName
 import skills.utils.InputSanitizer
-
-import java.nio.charset.StandardCharsets
 
 import static skills.services.GlobalBadgesService.AvailableSkillsResult
 
 @RestController
-@RequestMapping("/supervisor")
+@RequestMapping("/admin")
 @Slf4j
 @EnableCallStackProf
-class SupervisorController {
+class GlobalBadgesController {
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
@@ -57,6 +54,9 @@ class SupervisorController {
 
     @Autowired
     GlobalBadgesService globalBadgesService
+
+    @Autowired
+    GlobalBadgeRoleService globalBadgeRoleService
 
     @Autowired
     AdminUsersService adminUsersService
@@ -71,25 +71,7 @@ class SupervisorController {
     ProjAdminService projAdminService
 
     @Autowired
-    MetricsService metricsService
-
-    @DBUpgradeSafe
-    @RequestMapping(value = "/badges/name/exists", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    boolean doesBadgeNameExist(@RequestBody() NameExistsRequest nameExistsRequest) {
-        String badgeName = nameExistsRequest.name?.trim()
-        SkillsValidator.isNotBlank(badgeName, "Badge Name")
-        String decodedName = InputSanitizer.sanitize(badgeName)
-        return globalBadgesService.existsByBadgeName(decodedName)
-    }
-
-    @RequestMapping(value = "/badges/id/{badgeId}/exists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    boolean doesBadgeIdExist(@PathVariable("badgeId") String badgeId) {
-        SkillsValidator.isNotBlank(badgeId, "Badge Id")
-        String decodedId = InputSanitizer.sanitize(URLDecoder.decode(badgeId,  StandardCharsets.UTF_8.toString()))
-        return globalBadgesService.existsByBadgeId(decodedId)
-    }
+    AdminGroupService adminGroupService
 
     @RequestMapping(value = "/badges/{badgeId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -144,16 +126,10 @@ class SupervisorController {
     }
 
     @RequestMapping(value = "/badges/{badgeId}", method = RequestMethod.DELETE)
-    void deleteBadge(@PathVariable("badgeId") String badgeId) {
+    void deleteGlobalBadge(@PathVariable("badgeId") String badgeId) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
 
         globalBadgesService.deleteBadge(badgeId)
-    }
-
-    @RequestMapping(value = "/badges", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    List<GlobalBadgeResult> getBadges() {
-        return globalBadgesService.getBadges()
     }
 
     @RequestMapping(value = "/badges/{badgeId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -189,30 +165,10 @@ class SupervisorController {
         return globalBadgesService.getAvailableSkillsForGlobalBadge(badgeId, query)
     }
 
-    @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    List<ProjectResult> getAllProjects() {
-        return projAdminService.getAllProjects()
-    }
-
-    @RequestMapping(value = "/metrics/{metricId}", method =  RequestMethod.GET, produces = "application/json")
-    def getMetricsData(@PathVariable("metricId") String metricId, @RequestParam Map<String,String> metricsProps) {
-        return metricsService.loadGlobalMetrics(metricId, metricsProps)
-    }
-
     @RequestMapping(value = "/badges/{badgeId}/projects/available", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     GlobalBadgesService.AvailableProjectResult getAllProjectsForBadgeId(@PathVariable("badgeId") String badgeId, @RequestParam String query) {
         return globalBadgesService.getAvailableProjectsForBadge(badgeId, query)
-    }
-
-    @RequestMapping(value = "/projects/{projectId}/levels", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<LevelDefinitionRes> getLevelsForProject(
-            @PathVariable("projectId") String projectId) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-
-        List<LevelDefinitionRes> res = levelDefinitionStorageService.getLevels(projectId)
-        return res
     }
 
     @RequestMapping(value = "/badges/{badgeId}/projects/{projectId}/level/{level}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
@@ -242,15 +198,16 @@ class SupervisorController {
         return new RequestResult(success: true)
     }
 
-    @RequestMapping(value = "/icons/customIcons", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/badges/{badgeId}/icons/customIcons", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    List<CustomIconResult> getGlobalCustomIcons() {
-        return iconFacade.getGlobalCustomIcons()
+    List<CustomIconResult> getGlobalCustomIcons(@PathVariable("badgeId") String badgeId) {
+        return iconFacade.getGlobalBadgeCustomIcons(badgeId)
     }
 
-    @RequestMapping(value = "/icons/upload", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/badges/{badgeId}/icons/upload", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
-    UploadedIcon addGlobalCustomIcon(@RequestParam("customIcon") MultipartFile icon) {
+    UploadedIcon addGlobalCustomIcon(@PathVariable("badgeId") String badgeId,
+                                     @RequestParam("customIcon") MultipartFile icon) {
         String iconFilename = icon.originalFilename
         byte[] file = icon.bytes
         icon.contentType
@@ -260,17 +217,18 @@ class SupervisorController {
         }
 
         if (file.length > CustomIconAdminController.maxIconFileSize) {
-            throw new MaxIconSizeExceeded("[${file.length}] exceeds the maximum icon size of [${FileUtils.byteCountToDisplaySize(maxIconFileSize)}]")
+            throw new MaxIconSizeExceeded("[${file.length}] exceeds the maximum icon size of [${FileUtils.byteCountToDisplaySize(CustomIconAdminController.maxIconFileSize)}]")
         }
 
-        UploadedIcon result = iconFacade.saveIcon(null, iconFilename, icon.contentType, file)
+        UploadedIcon result = iconFacade.saveIcon(null, iconFilename, icon.contentType, file, badgeId)
 
         return result
     }
 
-    @RequestMapping(value = "/icons/{filename}", method = RequestMethod.DELETE)
-    ResponseEntity<Boolean> deleteGlobal(@PathVariable("filename") String filename) {
-        iconFacade.deleteGlobalIcon(filename)
+    @RequestMapping(value = "/badges/{badgeId}/icons/{filename}", method = RequestMethod.DELETE)
+    ResponseEntity<Boolean> deleteGlobalIcon(@PathVariable("badgeId") String badgeId,
+                                             @PathVariable("filename") String filename) {
+        iconFacade.deleteGlobalBadgeIcon(badgeId, filename)
         return ResponseEntity.ok(true)
     }
 
@@ -282,5 +240,43 @@ class SupervisorController {
         globalBadgesService.changeProjectLevelOnBadge(badgeId, projectId, currentLevel, newLevel)
         //this would need to trigger identification of users who meet new criteria if the level is lower
         return ResponseEntity.ok(true)
+    }
+
+    @RequestMapping(value = "/badges/{badgeId}/users/{userKey}/roles/{roleName}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult addGlobalBadgeRole(@PathVariable("badgeId") String badgeId,
+                              @PathVariable("userKey") String userKey,
+                              @PathVariable("roleName") RoleName roleName) {
+        SkillsValidator.isNotBlank(badgeId, "Global Badge Id")
+        SkillsValidator.isNotNull(userKey, "userKey")
+        SkillsValidator.isNotNull(roleName, "roleName")
+
+        globalBadgeRoleService.addGlobalBadgeAdminRole(userKey, badgeId, roleName)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/badges/{badgeId}/userRoles", method = RequestMethod.GET)
+    TableResult getGlobalBadgeUserRoles(@PathVariable("badgeId") String badgeId) {
+        SkillsValidator.isNotBlank(badgeId, "Global Badge Id")
+        List<UserRoleRes> result = globalBadgeRoleService.getGlobalBadgeAdminUserRoles(badgeId)
+        return new TableResult(data: result, count: result?.size(), totalCount: result?.size())
+    }
+
+    @RequestMapping(value = "/badges/{badgeId}/users/{userKey}/roles/{roleName}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult deleteGlobalBadgeRole(@PathVariable("badgeId") String badgeId,
+                                 @PathVariable("userKey") String userKey,
+                                 @PathVariable("roleName") RoleName roleName) {
+        SkillsValidator.isNotBlank(badgeId, "Global Badge Id")
+        SkillsValidator.isNotNull(userKey, "userKey")
+        SkillsValidator.isNotNull(roleName, "roleName")
+
+        globalBadgeRoleService.deleteGlobalBadgeAdminRole(userKey, badgeId, roleName)
+        return RequestResult.success()
+    }
+
+    @RequestMapping(value = "/badges/{badgeId}/adminGroups", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    List<AdminGroupDefResult> getAdminGroupsForGlobalBadge(@PathVariable("badgeId") String badgeId) {
+        SkillsValidator.isNotBlank(badgeId, "Global Badge Id")
+        return adminGroupService.getAdminGroupsForGlobalBadge(badgeId)
     }
 }

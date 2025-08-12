@@ -46,12 +46,6 @@ class AttachmentSpecs extends DefaultIntSpec {
     @Autowired
     AttachmentService attachmentService
 
-    SkillsService supervisorService
-
-    def setup() {
-        supervisorService = createSupervisor()
-    }
-
     def "upload attachment"() {
         Map proj = SkillsFactory.createProject()
         skillsService.createProject(proj)
@@ -219,13 +213,13 @@ class AttachmentSpecs extends DefaultIntSpec {
     def "upload attachment with just skillId"() {
         def badge = SkillsFactory.createBadge()
         badge.enabled = false
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
         String filename = 'test-pdf.pdf'
         String contents = 'Test is a test'
         Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
 
         when:
-        def result = supervisorService.uploadAttachment(resource, null, badge.badgeId)
+        def result = skillsService.uploadAttachment(resource, null, badge.badgeId)
 
         then:
         result
@@ -234,7 +228,7 @@ class AttachmentSpecs extends DefaultIntSpec {
         result.size == contents.getBytes().length
         result.filename == filename
         result.href ==~ /^\/api\/download\/[^\/]+$/
-        result.userId == supervisorService.userName
+        result.userId == skillsService.userName
         result.projectId == null
         result.quizId == null
         result.skillId == badge.badgeId

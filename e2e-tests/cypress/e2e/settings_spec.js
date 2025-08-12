@@ -38,7 +38,6 @@ describe('Settings Tests', () => {
     });
 
     const rootUsrTableSelector = '[data-cy="rootrm"] [data-cy="roleManagerTable"]';
-    const supervisorTableSelector = '[data-cy="supervisorrm"] [data-cy="roleManagerTable"]';
 
     it('paging controls are visible if number of records are larger then smallest page size', () => {
         cy.intercept({
@@ -211,17 +210,6 @@ describe('Settings Tests', () => {
             .should('not.exist');
         cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="cannotRemoveWarning"]`).should('exist')
 
-        // must also be added to supervisor table
-        cy.get(`${supervisorTableSelector} th`)
-            .contains('Supervisor User')
-            .click();
-        cy.validateTable(supervisorTableSelector, [
-            [{
-                colIndex: 0,
-                value: '(skills@skills.org)'
-            }],
-        ], 5, true, null, false);
-
         // remove the other user now
         cy.openDialog(`${rootUsrTableSelector} [data-p-index="1"] [data-cy="removeUserBtn"]`)
         cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove skills@skills.org')
@@ -234,10 +222,6 @@ describe('Settings Tests', () => {
                 value: '(root@skills.org)'
             }],
         ], 5, true, null, false);
-
-        // make sure user was removed from supervisor table
-        cy.get(supervisorTableSelector)
-            .contains('There are no records to show');
     });
 
     it('Add Root User - forward slash character does not cause error', () => {
@@ -248,8 +232,6 @@ describe('Settings Tests', () => {
             .as('addRoot');
         cy.intercept('GET', '/app/projects')
             .as('loadProjects');
-        cy.intercept('GET', '/app/userInfo/hasRole/ROLE_SUPERVISOR')
-            .as('isSupervisor');
         cy.intercept('GET', '/app/userInfo')
             .as('loadUserInfo');
         cy.intercept('GET', '/public/config')
@@ -270,7 +252,6 @@ describe('Settings Tests', () => {
         cy.wait('@loadConfig');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-        cy.wait('@isSupervisor');
         cy.wait('@getProjects')
 
         cy.get('[data-cy=subPageHeader]')
@@ -366,251 +347,6 @@ describe('Settings Tests', () => {
                 value: '(root@skills.org)'
             }],
         ], 5, true, null, false);
-    });
-
-    it('Add Supervisor User', () => {
-        cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR')
-            .as('addSupervisor');
-        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE')
-            .as('getEligibleForSupervisor');
-        cy.intercept({
-            method: 'GET',
-            url: '/app/projects'
-        })
-            .as('loadProjects');
-        cy.intercept({
-            method: 'GET',
-            url: '/root/isRoot'
-        })
-            .as('checkRoot');
-
-        cy.visit('/administrator/');
-        // cy.get('[data-cy="inception-button"]').contains('Level');
-        cy.wait('@getProjects')
-
-        cy.get('[data-cy=subPageHeader]')
-            .contains('Projects');
-
-        // cy.get('[data-cy="nav-Global Badges"]')
-        //     .should('be.visible');
-        // cy.window()
-        //     .should('have.property', 'vm')
-        //     .then((vm) => {
-        //         cy.wrap(vm.$store)
-        //             .its('state.access.isSupervisor')
-        //             .should('equal', false);
-        //     });
-        cy.get('[data-cy="settings-button"] button')
-            .click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
-            .click();
-        cy.wait('@checkRoot');
-        cy.clickNav('Security');
-
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click();
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('root');
-
-        cy.wait('@getEligibleForSupervisor');
-        cy.get('[data-pc-section="option"]')
-            .contains('root@skills.org')
-            .click();
-        cy.get('[data-cy=supervisorrm]')
-            .contains('Add')
-            .click();
-        cy.wait('@addSupervisor');
-        cy.validateTable(supervisorTableSelector, [
-            [{
-                colIndex: 0,
-                value: '(root@skills.org)'
-            }],
-        ], 5, true, null, false);
-
-        // cy.window()
-        //     .should('have.property', 'vm')
-        //     .then((vm) => {
-        //         cy.wrap(vm.$store)
-        //             .its('state.access.isSupervisor')
-        //             .should('equal', true);
-        //     });
-        // cy.contains('Home').click();
-        cy.get('[data-cy=settings-button]')
-            .click();
-        cy.contains('Project Admin')
-            .click();
-        // cy.get('[data-cy=navigationmenu]')
-        //     .contains('Badges', { timeout: 5000 })
-        //     .should('be.visible');
-    });
-
-    it('Remove Supervisor User', () => {
-        cy.intercept('PUT', '**/roles/ROLE_SUPERVISOR')
-            .as('addSupervisor');
-        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE')
-            .as('getEligibleForSupervisor');
-
-        cy.visit('/settings/security');
-
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click();
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('root');
-
-        cy.wait('@getEligibleForSupervisor');
-        cy.get('[data-pc-section="option"]')
-            .contains('root@skills.org')
-            .click();
-        cy.get('[data-cy=supervisorrm]')
-            .contains('Add')
-            .click();
-        cy.wait('@addSupervisor');
-
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click();
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('{selectall}skills');
-
-        cy.wait('@getEligibleForSupervisor');
-        cy.get('[data-pc-section="option"]')
-            .contains('skills@skills.org')
-            .click();
-        cy.get('[data-cy=supervisorrm]')
-            .contains('Add')
-            .click();
-        cy.wait('@addSupervisor');
-
-        // attempt to remove myself - no go
-        cy.get(`${supervisorTableSelector} [data-p-index="0"] [data-cy="cannotRemoveWarning"]`).should('exist')
-        cy.get(`${supervisorTableSelector} [data-p-index="0"] [data-cy="removeUserBtn"]`).should('not.exist');
-
-        cy.validateTable(supervisorTableSelector, [
-            [{
-                colIndex: 0,
-                value: '(root@skills.org)'
-            }],
-            [{
-                colIndex: 0,
-                value: '(skills@skills.org)'
-            }],
-        ], 5, true, null, false);
-
-        // remove the other user now
-        cy.openDialog(`${supervisorTableSelector} [data-p-index="1"] [data-cy="removeUserBtn"]`)
-        cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove skills@skills.org')
-        cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
-        cy.clickSaveDialogBtn()
-        cy.validateTable(supervisorTableSelector, [
-            [{
-                colIndex: 0,
-                value: '(root@skills.org)'
-            }],
-        ], 5, true, null, false);
-
-    });
-
-    it('Add Supervisor User Not Found', () => {
-
-        // cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR').as('addSupervisor');
-        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE', [{
-            'userId': 'blah@skills.org',
-            'userIdForDisplay': 'blah@skills.org',
-            'first': 'Firstname',
-            'last': 'LastName',
-            'nickname': 'Firstname LastName',
-            'dn': null
-        }])
-            .as('getEligibleForSupervisor');
-        cy.intercept({
-            method: 'GET',
-            url: '/app/projects'
-        })
-            .as('loadProjects');
-        cy.intercept({
-            method: 'GET',
-            url: '/root/isRoot'
-        })
-            .as('checkRoot');
-
-        cy.visit('/administrator/');
-        // cy.get('[data-cy="inception-button"]').contains('Level');
-        cy.wait('@getProjects')
-
-        cy.get('[data-cy=subPageHeader]')
-            .contains('Projects');
-
-        // root user can see/manage global badges
-        // cy.get('[data-cy="nav-Global Badges"]');
-        // cy.window()
-        //     .should('have.property', 'vm')
-        //     .then((vm) => {
-        //         cy.wrap(vm.$store)
-        //             .its('state.access.isSupervisor')
-        //             .should('equal', false);
-        //     });
-        cy.get('[data-cy="settings-button"] button')
-            .click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
-            .click();
-        cy.wait('@checkRoot');
-        cy.clickNav('Security');
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click();
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('blah');
-
-        cy.wait('@getEligibleForSupervisor');
-        cy.get('[data-pc-section="option"]')
-            .contains('blah@skills.org')
-            .click();
-        cy.get('[data-cy=supervisorrm]')
-            .contains('Add')
-            .click();
-        cy.get('[data-cy=error-msg]')
-            .contains('Error! Request could not be completed! User [blah@skills.org] does not exist');
-        // cy.window()
-        //     .should('have.property', 'vm')
-        //     .then((vm) => {
-        //         cy.wrap(vm.$store)
-        //             .its('state.access.isSupervisor')
-        //             .should('equal', false);
-        //     });
-    });
-
-    it('Add Supervisor User No Query', () => {
-
-        cy.intercept('PUT', '/root/users/root@skills.org/roles/ROLE_SUPERVISOR')
-            .as('addSupervisor');
-        cy.intercept('POST', 'root/users/without/role/ROLE_SUPERVISOR?userSuggestOption=ONE')
-            .as('getEligibleForSupervisor');
-        cy.intercept({
-            method: 'GET',
-            url: '/app/projects'
-        })
-            .as('loadProjects');
-
-        cy.intercept({
-            method: 'GET',
-            url: '/root/isRoot'
-        })
-            .as('checkRoot');
-
-        cy.visit('/administrator/');
-        // cy.get('[data-cy="inception-button"]').contains('Level');
-        cy.wait('@getProjects')
-
-
-        // root user can see/manage global badges
-        // cy.get('[data-cy="nav-Global Badges"]');
-        // cy.window()
-        //     .should('have.property', 'vm')
-        //     .then((vm) => {
-        //         cy.wrap(vm.$store)
-        //             .its('state.access.isSupervisor')
-        //             .should('equal', false);
-        //     });
-        cy.get('[data-cy="settings-button"] button')
-            .click();
-        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
-            .click();
-        cy.wait('@checkRoot');
-        cy.contains('Security')
-            .click();
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]').click();
-        cy.get('[data-cy="supervisorrm"] [data-cy="existingUserInputDropdown"]').type('sk/foo');
-        cy.wait('@getEligibleForSupervisor');
     });
 
     it('Email Server Settings', () => {

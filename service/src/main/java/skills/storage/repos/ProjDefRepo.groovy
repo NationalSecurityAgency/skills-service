@@ -71,18 +71,18 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Nullable
     @Query('''select p from ProjDef p
             where lower(p.name) like lower(CONCAT('%', :query, '%'))
-            and p.projectId not in (:projectIds)
+            and p.projectId in (:projectIds)
             and not exists (select 1 from Setting s2 where p.projectId = s2.projectId and s2.setting = 'user_community' and s2.value = 'true')
     ''')
-    List<ProjDef> findAllByNameLikeAndProjectIdNotIn(@Param("query") String query, @Param("projectIds") List<String> projectIds, Pageable pageable)
+    List<ProjDef> findAllByNameLikeAndProjectIdIn(@Param("query") String query, @Param("projectIds") List<String> projectIds, Pageable pageable)
 
     @Query('''select count(p.projectId)
         from ProjDef p
         where lower(p.name) like lower(CONCAT('%', :query, '%'))
-            and p.projectId not in (:projectIds)
+            and p.projectId in (:projectIds)
             and not exists (select 1 from Setting s2 where p.projectId = s2.projectId and s2.setting = 'user_community' and s2.value = 'true')
     ''')
-    Integer countAllByNameLikeAndProjectIdNotIn(@Param("query") String query, @Param("projectIds") List<String> projectIds)
+    Integer countAllByNameLikeAndProjectIdIn(@Param("query") String query, @Param("projectIds") List<String> projectIds)
 
     @Query(value="""
                 SELECT 

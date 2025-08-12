@@ -33,7 +33,7 @@ class AccessDeniedExplanationGenerator {
 
         if (requestPath?.startsWith("/admin/projects")) {
             return new AccessDeniedExplanation(errorCode: ACCESS_DENIED_PROJECT_NOT_FOUND, explanation: "You do not have permission to view/manage this Project OR this Project does not exist")
-        } else if (requestPath?.startsWith("/supervisor/badges")) {
+        } else if (requestPath?.startsWith("/admin/badges")) {
             return new AccessDeniedExplanation(errorCode: GLOBAL_BADGE_NOT_FOUND, explanation: "You do not have permission to view/manage this Global Badge OR this Global Badge does not exist")
         } else if (requestPath?.startsWith("/admin/quiz-definitions")) {
             return new AccessDeniedExplanation(errorCode: ACCESS_DENIED_QUIZ_NOT_FOUND, explanation: "You do not have permission to view/manage this Quiz OR this Quiz does not exist")

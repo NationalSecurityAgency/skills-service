@@ -31,7 +31,7 @@ class CssGenerator {
         String css = ""
 
         customIcons?.each{
-            String cssClassName = IconCssNameUtil.getCssClass(it.projectId, it.filename)
+            String cssClassName = IconCssNameUtil.getCssClass(it.projectId ?: it.globalBadgeId, it.filename)
             List<String> lines = []
             String cssClass = ".${cssClassName} {"
             lines.add(cssClass)

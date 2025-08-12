@@ -25,18 +25,6 @@ const root = ref({
       userType: 'ROOT',
 });
 
-const supervisor = ref({
-  role: 'ROLE_SUPERVISOR',
-      roleDescription: 'Supervisor User',
-      userType: 'SUPERVISOR',
-});
-
-const supervisorRoleManager = ref();
-
-const handleRootRoleChanged = () => {
-  supervisorRoleManager.value.loadData();
-};
-
 </script>
 
 <template>
@@ -47,21 +35,9 @@ const handleRootRoleChanged = () => {
                   title="Root Users Management"
                   ref="rootUserRoleManager"
                   :roles="['ROLE_SUPER_DUPER_USER']"
-                  @role-added="handleRootRoleChanged"
-                  @role-deleted="handleRootRoleChanged"
                   data-cy="rootrm" :user-type="root.userType" :role-description="root.roleDescription" />
 
     <limit-dashboard-access class="mt-4" />
-
-    <role-manager id="add-supervisor-user"
-                  title="Supervisor Users Management"
-                  ref="supervisorRoleManager"
-                  data-cy="supervisorrm"
-                  class="mt-4"
-                  :roles="['ROLE_SUPERVISOR']"
-                  :user-type="supervisor.userType"
-                  :role-description="supervisor.roleDescription"/>
-
 
   </div>
 </template>

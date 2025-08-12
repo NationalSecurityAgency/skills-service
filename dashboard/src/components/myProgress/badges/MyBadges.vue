@@ -39,13 +39,17 @@ const loadBadges = () => {
     const filterWithCustomIcons = (badge) => badge.iconClass &&
       (
         (badge.projectId && badge.iconClass.startsWith(`${badge.projectId}-`)) ||
-        (!badge.projectId && badge.iconClass.startsWith(`GLOBAL-`))
+        (!badge.projectId && badge.iconClass.startsWith(`${badge.badgeId}-`))
       )
-    const projectIds = res.filter(filterWithCustomIcons).map((badge) => badge.projectId)
-    const refreshIcons = [...new Set(projectIds)].map((projId) => {
-      return IconManagerService.refreshCustomIconCss(projId, !projId)
+    const projectIds = res.filter(filterWithCustomIcons).filter(badge => badge.projectId).map((badge) => badge.projectId)
+    const globalBadgeIds = res.filter(filterWithCustomIcons).filter(badge => !badge.projectId).map((badge) => badge.badgeId)
+    const refreshProjectIcons = [...new Set(projectIds)].map((projId) => {
+      return IconManagerService.refreshCustomIconCss(projId, null)
     })
-    return Promise.all(refreshIcons)
+    const refreshGlobalBadgeIcons = [...new Set(globalBadgeIds)].map((badgeId) => {
+      return IconManagerService.refreshCustomIconCss(null, badgeId)
+    })
+    return Promise.all([...refreshProjectIcons, ...refreshGlobalBadgeIcons])
   }).finally(() => {
     loading.value = false
   })

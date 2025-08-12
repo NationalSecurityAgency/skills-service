@@ -15,7 +15,7 @@
  */
 import axios from 'axios'
 
-const supportedRoles = ['ROLE_SUPER_DUPER_USER', 'ROLE_SUPERVISOR', 'ROLE_DASHBOARD_ADMIN_ACCESS']
+const supportedRoles = ['ROLE_SUPER_DUPER_USER', 'ROLE_DASHBOARD_ADMIN_ACCESS']
 const hasSupportedRole = (roles) => {
   if (roles instanceof Array) {
     return roles.some(value => supportedRoles.includes(value));
@@ -30,7 +30,7 @@ export default {
           .get(`/admin/projects/${encodeURIComponent(projectId)}/countUserRoles?${strRoles}`)
           .then((response) => response.data)
   },
-  getUserRoles(projectId, roles, params, adminGroupId) {
+  getUserRoles(projectId, roles, params, adminGroupId, badgeId) {
     const strRoles = roles.map((r) => `roles=${encodeURIComponent(r)}`).join('&')
     if (projectId) {
       return axios
@@ -42,6 +42,11 @@ export default {
           .get(`/admin/admin-group-definitions/${adminGroupId}/userRoles?${strRoles}`, { params })
           .then((response) => response.data)
     }
+    if (badgeId) {
+      return axios
+        .get(`/admin/badges/${badgeId}/userRoles?${strRoles}`, { params })
+        .then((response) => response.data)
+    }
     if (roles.length === 1 && hasSupportedRole(roles)) {
       return axios
         .get(`/root/users/roles/${roles[0]}`, { params })
@@ -49,7 +54,7 @@ export default {
     }
     throw new Error(`unexpected user roles [${params.roles}]`)
   },
-  saveUserRole(projectId, userInfo, roleName, isPkiAuthenticated, adminGroupId) {
+  saveUserRole(projectId, userInfo, roleName, isPkiAuthenticated, adminGroupId, badgeId) {
     let { userId } = userInfo
     let userKey = userId
     if (isPkiAuthenticated) {
@@ -70,12 +75,19 @@ export default {
           { handleError: false }
       )
     }
+    if (badgeId) {
+      return axios.put(
+        `/admin/badges/${encodeURIComponent(badgeId)}/users/${userKey}/roles/${roleName}`,
+        null,
+        { handleError: false }
+      )
+    }
     if (hasSupportedRole(roleName)) {
       return axios.put(`/root/users/${userKey}/roles/${roleName}`, null, { handleError: false })
     }
     throw new Error(`unexpected user role [${roleName}]`)
   },
-  deleteUserRole(projectId, userId, roleName, adminGroupId) {
+  deleteUserRole(projectId, userId, roleName, adminGroupId, badgeId) {
     if (projectId) {
       return axios.delete(
         `/admin/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userId)}/roles/${encodeURIComponent(roleName)}`
@@ -84,6 +96,11 @@ export default {
     if (adminGroupId) {
       return axios.delete(
           `/admin/admin-group-definitions/${encodeURIComponent(adminGroupId)}/users/${encodeURIComponent(userId)}/roles/${encodeURIComponent(roleName)}`
+      )
+    }
+    if (badgeId) {
+      return axios.delete(
+        `/admin/badges/${encodeURIComponent(badgeId)}/users/${encodeURIComponent(userId)}/roles/${encodeURIComponent(roleName)}`
       )
     }
     if (hasSupportedRole(roleName)) {

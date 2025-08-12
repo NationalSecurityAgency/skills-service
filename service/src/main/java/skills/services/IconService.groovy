@@ -42,13 +42,13 @@ class IconService {
     }
 
     @Transactional(readOnly = true)
-    CustomIcon getIconByProjectIdAndFilename(String projectId, String filename){
-        return iconRepo.findByProjectIdAndFilename(projectId, filename)
+    Collection<CustomIcon> getIconsForGlobalBadge(String globalBadgeId){
+        return iconRepo.findAllByGlobalBadgeId(globalBadgeId)
     }
 
     @Transactional(readOnly = true)
-    Collection<CustomIcon> getGlobalIcons(){
-        return iconRepo.findAllByProjectIdIsNull()
+    CustomIcon getIconByProjectIdAndFilename(String projectId, String filename){
+        return iconRepo.findByProjectIdAndFilename(projectId, filename)
     }
 
     Iterable<CustomIcon> getAllIcons(){
@@ -66,17 +66,17 @@ class IconService {
     CustomIcon loadIcon(String filename, String projectId){
         return iconRepo.findByProjectIdAndFilename(projectId, filename)
     }
-    void deleteIcon(String projectId, String filename){
-        iconRepo.deleteByProjectIdAndFilename(projectId, filename)
+    void deleteProjectIcon(String projectId, String filename){
+        iconRepo.deleteByProjectIdAndGlobalBadgeIdAndFilename(projectId, null, filename)
     }
-    void deleteGlobalIcon(String filename){
-        iconRepo.deleteByProjectIdAndFilename(null, filename)
+    void deleteGlobalBadgeIcon(String globalBadgeId, String filename){
+        iconRepo.deleteByProjectIdAndGlobalBadgeIdAndFilename(null, globalBadgeId, filename)
     }
 
     @Transactional(readOnly = true)
-    List<CustomIconResult> getGlobalCustomIcons(){
-        return iconRepo.findAllByProjectIdIsNull().collect { CustomIcon icon ->
-            String cssClassname = IconCssNameUtil.getCssClass('GLOBAL', icon.filename)
+    List<CustomIconResult> getGlobalBadgeCustomIcons(String globalBadgeId) {
+        return iconRepo.findAllByGlobalBadgeId(globalBadgeId).collect { CustomIcon icon ->
+            String cssClassname = IconCssNameUtil.getCssClass(globalBadgeId, icon.filename)
             return new CustomIconResult(filename: icon.filename, cssClassname: cssClassname)
         }
     }

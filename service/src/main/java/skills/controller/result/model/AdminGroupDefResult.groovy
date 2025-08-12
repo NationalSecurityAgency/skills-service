@@ -23,6 +23,7 @@ class AdminGroupDefResult {
     Integer numberOfMembers
     Integer numberOfProjects
     Integer numberOfQuizzesAndSurveys
+    Integer numberOfGlobalBadges
     Date created
     String userCommunity
 

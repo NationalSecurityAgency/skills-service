@@ -19,6 +19,7 @@ import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import MyBadgesDetails from '@/skills-display/components/badges/MyBadgesDetails.vue'
 import BadgesCatalog from '@/skills-display/components/badges/BadgesCatalog.vue'
+import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 
 const skillsDisplayService = useSkillsDisplayService()
 
@@ -35,6 +36,13 @@ const loadBadges = () => {
   loading.value = true
   skillsDisplayService.getBadgeSummaries().then((res) => {
     badges.value = res
+    const filterWithCustomIcons = (badge) => badge.iconClass
+    const globalBadgeIds = res.filter(filterWithCustomIcons).map((badge) => badge.badgeId)
+    const refreshGlobalBadgeIcons = [...new Set(globalBadgeIds)].map((badgeId) => {
+      return IconManagerService.refreshCustomIconCss(null, badgeId)
+    })
+
+    return Promise.all([...refreshGlobalBadgeIcons])
   }).finally(() => {
     loading.value = false
   })

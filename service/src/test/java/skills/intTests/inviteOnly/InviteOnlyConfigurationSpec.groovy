@@ -86,7 +86,7 @@ class InviteOnlyConfigurationSpec extends DefaultIntSpec {
         def usersPerLevel = skillsService.getUsersPerLevel(proj.projectId)
         def summary = skillsService.getSkillSummary(skillsService.userName, proj.projectId)
         def otherSummary = skillsService.getSkillSummary(skillsService.userName, proj.projectId, subj.subjectId)
-        def customIconCss = skillsService.getCustomClientDisplayCss(proj.projectId)
+        def customIconCss = skillsService.getCustomIconCssForProject(proj.projectId)
 
         then:
         projectName
@@ -124,7 +124,7 @@ class InviteOnlyConfigurationSpec extends DefaultIntSpec {
         def usersPerLevel = user1Service.getUsersPerLevel(proj.projectId)
         def summary = user1Service.getSkillSummary(user1Service.userName, proj.projectId)
         def otherSummary = user1Service.getSkillSummary(user1Service.userName, proj.projectId, subj.subjectId)
-        def customIconCss = user1Service.getCustomClientDisplayCss(proj.projectId)
+        def customIconCss = user1Service.getCustomIconCssForProject(proj.projectId)
 
         then:
         projectName

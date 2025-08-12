@@ -21,8 +21,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfo
+import skills.auth.UserInfoService
+import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
@@ -32,12 +36,7 @@ import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.GlobalBadgeResult
 import skills.controller.result.model.ProjectResult
 import skills.controller.result.model.SkillDefPartialRes
-import skills.services.admin.BadgeAdminService
-import skills.services.admin.DataIntegrityExceptionHandlers
-import skills.services.admin.DisplayOrderService
-import skills.services.admin.SkillsAdminService
-import skills.services.admin.SkillsDepsService
-import skills.services.admin.UserCommunityService
+import skills.services.admin.*
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
@@ -48,10 +47,11 @@ import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.model.SkillRelDef.RelationshipType
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.*
 import skills.utils.InputSanitizer
 
-import static skills.storage.model.SkillDef.*
+import static skills.storage.model.SkillDef.ContainerType
 
 @Service
 @Slf4j
@@ -123,6 +123,15 @@ class GlobalBadgesService {
     @Autowired
     UserActionsHistoryService userActionsHistoryService
 
+    @Autowired
+    ProjAdminService projAdminService
+
+    @Autowired
+    UserInfoService userInfoService
+
+    @Autowired
+    UserRoleRepo userRoleRepo
+
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
         badgeAdminService.saveBadge(null, originalBadgeId, badgeRequest, ContainerType.GlobalBadge)
@@ -139,6 +148,7 @@ class GlobalBadgesService {
 
     @Transactional()
     void addSkillToBadge(String badgeId, String projectId, String skillId) {
+        validateUserIsAndAdminOfProj(projectId)
         SkillDef skillDef = skillDefAccessor.getSkillDef(projectId, skillId)
         SkillsValidator.isTrue(!skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
         SkillsValidator.isTrue(!skillDef.readOnly, "Imported Skills may not be added as Global Badge Dependencies", projectId, skillId)
@@ -163,6 +173,7 @@ class GlobalBadgesService {
 
     @Transactional()
     void addProjectLevelToBadge(String badgeId, String projectId, Integer level) {
+        validateUserIsAndAdminOfProj(projectId)
         SkillDefWithExtra badgeSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, ContainerType.GlobalBadge)
         if (!badgeSkillDef) {
             throw new SkillException("Failed to find global badge [${badgeId}]")
@@ -317,8 +328,10 @@ class GlobalBadgesService {
     }
 
     @Transactional(readOnly = true)
-    List<GlobalBadgeResult> getBadges() {
-        List<SkillDefWithExtra> badges = skillDefWithExtraRepo.findAllByProjectIdAndType(null, ContainerType.GlobalBadge)
+    List<GlobalBadgeResult> getBadgesForUser() {
+        UserInfo userInfo = userInfoService.currentUser
+        String userId = userInfo.username?.toLowerCase()
+        List<SkillDefWithExtra> badges = skillDefWithExtraRepo.findGlobalBadgesForAdmin(userId)
         List<GlobalBadgeResult> res = badges.collect { convertToBadge(it, true) }
         return res?.sort({ it.displayOrder })
     }
@@ -342,7 +355,8 @@ class GlobalBadgesService {
 
     @Transactional(readOnly = true)
     AvailableSkillsResult getAvailableSkillsForGlobalBadge(String badgeId, String query) {
-        List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLikeNoImportedSkills(ContainerType.Skill, query)
+        List<String> projectIds = projAdminService.getProjects()?.collect { it.projectId }
+        List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLikeNoImportedSkills(ContainerType.Skill, query, projectIds)
         Set<String> existingBadgeSkillIds = getSkillsForBadge(badgeId).collect { "${it.projectId}${it.skillId}" }
         List<SkillDefPartial> suggestedSkillDefs = allSkillDefs.findAll { !("${it.projectId}${it.skillId}" in existingBadgeSkillIds) &&  it.projectId != InceptionProjectService.inceptionProjectId }
         AvailableSkillsResult res = new AvailableSkillsResult()
@@ -361,21 +375,23 @@ class GlobalBadgesService {
 
     @Transactional(readOnly = true)
     AvailableProjectResult getAvailableProjectsForBadge(String badgeId, String query) {
+        List<String> projectIds = projAdminService.getProjects()?.collect { it.projectId }
         List<String> notThese = globalBadgeLevelDefRepo.findAllByBadgeId(badgeId).collect { it.projectId }.unique()
         if (notThese == null) {
             notThese = []
         }
 
         notThese << InceptionProjectService.inceptionProjectId
+        projectIds = projectIds - notThese
 
         AvailableProjectResult available = new AvailableProjectResult()
-        int count = projDefRepo.countAllByNameLikeAndProjectIdNotIn(query, notThese)
+        int count = projDefRepo.countAllByNameLikeAndProjectIdIn(query, projectIds)
         if (count > 0) {
             Integer pageNo = 0;
             Integer pageSize = 10;
             String sortBy = "name";
             Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-            def byNameLike = projDefRepo.findAllByNameLikeAndProjectIdNotIn(query, notThese, paging)
+            def byNameLike = projDefRepo.findAllByNameLikeAndProjectIdIn(query, projectIds, paging)
 
             def converted = byNameLike.collect { ProjDef definition ->
                 new ProjectResult(
@@ -472,6 +488,20 @@ class GlobalBadgesService {
             }
         }
         return res
+    }
+
+    @Profile
+    private void validateUserIsAndAdminOfProj(String projectId) {
+        UserInfo userInfo = userInfoService.currentUser
+        boolean isRoot = userInfo.authorities?.find() {
+            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
+        }
+        if (!isRoot) {
+            Boolean isAdminForOtherProject = userRoleRepo.isUserProjectAdmin(userInfo.username, projectId)
+            if (!isAdminForOtherProject) {
+                throw new AccessDeniedException("User [${userInfo.username}] is not an admin for project [${projectId}]")
+            }
+        }
     }
 
     static class AvailableSkillsResult {

@@ -319,15 +319,14 @@ class ConstraintViolationSpecs extends DefaultIntSpec {
 
     def "global badge name exists"() {
         Map badge = SkillsFactory.createBadge()
-        SkillsService supervisor = createSupervisor()
 
-        supervisor.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         when:
-        def lower = supervisor.doesGlobalBadgeNameExists(badge.name.toLowerCase())
-        def upper = supervisor.doesGlobalBadgeNameExists(badge.name.toUpperCase())
-        def leadingSpace = supervisor.doesGlobalBadgeNameExists(" ${badge.name}".toString())
-        def trailingSpace = supervisor.doesGlobalBadgeNameExists("${badge.name} ".toString())
+        def lower = skillsService.doesGlobalBadgeNameExists(badge.name.toLowerCase())
+        def upper = skillsService.doesGlobalBadgeNameExists(badge.name.toUpperCase())
+        def leadingSpace = skillsService.doesGlobalBadgeNameExists(" ${badge.name}".toString())
+        def trailingSpace = skillsService.doesGlobalBadgeNameExists("${badge.name} ".toString())
 
         then:
         lower

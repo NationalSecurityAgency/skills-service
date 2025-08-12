@@ -110,7 +110,7 @@ export const useGlobalNavGuards = () => {
             projConfig.loadProjConfigState({ projectId: to.params.projectId })
             inviteOnlyProjectState.loadInviteOnlySetting(to.params.projectId)
           }
-          IconManagerService.refreshCustomIconCss(to.params.projectId, accessState.isSupervisor)
+          IconManagerService.refreshCustomIconCss(to.params.projectId, null)
         }
         if (isActiveQuizIdChange(to, from)) {
           quizInfo.setCurrentQuizId(to.params.quizId)
@@ -120,7 +120,7 @@ export const useGlobalNavGuards = () => {
           }
         }
         if (isGlobalAdminPage(to)) {
-          IconManagerService.refreshCustomIconCss(null, true)
+          IconManagerService.refreshCustomIconCss(null, to.params.badgeId)
         }
 
         if (to.matched.some((record) => record.meta.requiresAuth)) {

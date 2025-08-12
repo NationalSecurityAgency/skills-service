@@ -24,6 +24,7 @@ import skills.services.LevelDefinitionStorageService
 import skills.services.LockingService
 import skills.storage.repos.AdminGroupDefRepo
 import skills.storage.repos.ClientPrefRepo
+import skills.storage.repos.CustomIconRepo
 import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.QuizDefRepo
@@ -71,6 +72,9 @@ class DataResetHelper {
     AdminGroupDefRepo adminGroupDefRepo
 
     @Autowired
+    CustomIconRepo customIconRepo
+
+    @Autowired
     WaitForAsyncTasksCompletion waitForAsyncTasksCompletion
 
     void resetData() {
@@ -95,6 +99,7 @@ class DataResetHelper {
         }
 
         deleteAllAttachments()
+        customIconRepo.deleteAll()
 
         userActionsHistoryRepo.deleteAll()
 

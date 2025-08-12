@@ -121,6 +121,11 @@ class AccessSettingsStorageService {
         return userRoleRepository.countUserRolesByProjectIdAndUserRoles(projectId, roles)
     }
 
+    List<UserRoleRes> findAllGlobalBadgeAdminRoles(String quizId) {
+        List<UserRoleRepo.UserRoleWithAttrs> rolesFromDB = userRoleRepository.findRoleWithAttrsByGlobalBadgeId(quizId)
+        return rolesFromDB.collect { convert(it)}
+    }
+
     List<UserRoleRes> findAllQuizRoles(String quizId) {
         List<UserRoleRepo.UserRoleWithAttrs> rolesFromDB = userRoleRepository.findRoleWithAttrsByQuizId(quizId)
         return rolesFromDB.collect { convert(it)}
@@ -214,10 +219,6 @@ class AccessSettingsStorageService {
     @Transactional
     UserRoleRes addRoot(String userId) {
         UserRole userRole = addUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
-        UserRole supervisorRole = userRoleRepository.findByUserIdAndRoleNameAndProjectIdAndAdminGroupId(userId, RoleName.ROLE_SUPERVISOR, null, null)
-        if (!supervisorRole) {
-            addUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
-        }
         inceptionProjectService.createInceptionAndAssignUser(userId)
 
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId.toLowerCase())
@@ -231,13 +232,14 @@ class AccessSettingsStorageService {
         userId = userId?.toLowerCase()
         deleteUserRoleInternal(userId, null, RoleName.ROLE_SUPER_DUPER_USER)
 
-        UserRole supervisorRole = userRoleRepository.findByUserIdAndRoleNameAndProjectIdAndAdminGroupId(userId, RoleName.ROLE_SUPERVISOR, null, null)
-        if (supervisorRole) {
-            deleteUserRoleInternal(userId, null, RoleName.ROLE_SUPERVISOR)
-        }
         inceptionProjectService.removeUser(userId)
 
         saveUserRoleActions(userId, RoleName.ROLE_SUPER_DUPER_USER, DashboardAction.Delete)
+    }
+
+    @Transactional()
+    void deleteGlobalBadgeUserRoles(String badgeId) {
+        userRoleRepository.deleteByGlobalBadgeIdAndRoleName(badgeId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
     }
 
     @Profile
@@ -298,6 +300,15 @@ class AccessSettingsStorageService {
         log.debug('Deleting user-role for userId [{}] and role [{}] on quiz [{}]', userId, roleName, quizId)
         UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndQuizIdAndAdminGroupId(userId, roleName, quizId, adminGroupId)
         assert userRole, "DELETE FAILED -> no user-role with quiz id [$quizId], userId [$userId] and roleName [$roleName]"
+
+        userRoleRepository.delete(userRole)
+        log.debug("Deleted userRole [{}]", userRole)
+    }
+
+    void deleteGlobalBadgeAdminUserRole(String userId, String badgeId, RoleName roleName, String adminGroupId = null) {
+        log.debug('Deleting user-role for userId [{}] and role [{}] on global badge [{}]', userId, roleName, badgeId)
+        UserRole userRole = userRoleRepository.findByUserIdAndRoleNameAndGlobalBadgeIdAndAdminGroupId(userId, roleName, badgeId, adminGroupId)
+        assert userRole, "DELETE FAILED -> no user-role with global badge id [$badgeId], userId [$userId] and roleName [$roleName]"
 
         userRoleRepository.delete(userRole)
         log.debug("Deleted userRole [{}]", userRole)
@@ -410,6 +421,34 @@ class AccessSettingsStorageService {
             return userRole
         } else {
             throw new SkillQuizException("User [$userIdLower] does not exist", (String) quizId ?: SkillException.NA, ErrorCode.UserNotFound)
+        }
+    }
+
+    UserRole addGlobalBadgeAdminUserRoleForUser(String userId, String globalBadgeId, RoleName roleName, String adminGroupId = null) {
+        log.debug('Creating global badge id user-role for ID [{}] and role [{}] on global badge [{}]', userId, roleName, globalBadgeId, adminGroupId)
+        String userIdLower = userId?.toLowerCase()
+        User user = userRepository.findByUserId(userIdLower)
+        if (user) {
+            UserRole userRole = new UserRole(userRefId: user.id, userId: userIdLower, roleName: roleName, globalBadgeId: globalBadgeId, adminGroupId: adminGroupId)
+            // check that the new user role does not already exist
+            UserRole existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndGlobalBadgeIdAndAdminGroupId(userId, roleName, globalBadgeId, adminGroupId)
+            if (existingUserRole) {
+                throw new SkillException("CREATE FAILED -> user-role with global badge id [$globalBadgeId], userIdLower [$userIdLower] roleName [$roleName] and admin group id [${adminGroupId}] already exists", ErrorCode.BadParam)
+            }
+            if (adminGroupId && roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN) {
+                // need to check if the role already exists outside of the admin group (ie, local global badge admin)
+                existingUserRole = userRoleRepository.findByUserIdAndRoleNameAndGlobalBadgeIdAndAdminGroupId(userId, roleName, globalBadgeId, null)
+                if (existingUserRole) {
+                    log.debug("Assigning admin group [{}] to existing local global badge admin [{}]", adminGroupId, userIdLower)
+                    existingUserRole.adminGroupId = adminGroupId
+                    userRole = existingUserRole
+                }
+            }
+            userRoleRepository.save(userRole)
+            log.debug("Created userRole [{}]", userRole)
+            return userRole
+        } else {
+            throw new SkillException("User [$userIdLower] does not exist", ErrorCode.UserNotFound)
         }
     }
 
@@ -586,13 +625,8 @@ class AccessSettingsStorageService {
                 userId: userId,
                 roleName: RoleName.ROLE_SUPER_DUPER_USER
         )
-        UserRole supervisorRole = new UserRole(
-                userRefId: user.id,
-                userId: userId,
-                roleName: RoleName.ROLE_SUPERVISOR
-        )
 
-        userRoleRepository.saveAll([role, supervisorRole])
+        userRoleRepository.saveAll([role])
         return convert(role)
     }
 

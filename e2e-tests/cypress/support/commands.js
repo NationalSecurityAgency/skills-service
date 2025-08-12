@@ -821,7 +821,7 @@ Cypress.Commands.add("assignSkillToBadge", (projNum = 1, badgeNum = 1, skillNum 
 });
 
 Cypress.Commands.add("createGlobalBadge", (badgeNum = 1, overrideProps = {}) => {
-    cy.request('PUT', `/supervisor/badges/globalBadge${badgeNum}`, Object.assign({
+    cy.request('PUT', `/app/badges/globalBadge${badgeNum}`, Object.assign({
         badgeId: `globalBadge${badgeNum}`,
         isEdit: false,
         name: `Global Badge ${badgeNum}`,
@@ -831,7 +831,7 @@ Cypress.Commands.add("createGlobalBadge", (badgeNum = 1, overrideProps = {}) => 
     }, overrideProps));
 });
 Cypress.Commands.add("enableGlobalBadge", (badgeNum = 1, overrideProps = {}) => {
-    cy.request('PUT', `/supervisor/badges/globalBadge${badgeNum}`, Object.assign({
+    cy.request('PUT', `/admin/badges/globalBadge${badgeNum}`, Object.assign({
         badgeId: `globalBadge${badgeNum}`,
         isEdit: false,
         name: `Global Badge ${badgeNum}`,
@@ -842,10 +842,10 @@ Cypress.Commands.add("enableGlobalBadge", (badgeNum = 1, overrideProps = {}) => 
     }, overrideProps));
 });
 Cypress.Commands.add("assignSkillToGlobalBadge", (badgeNum = 1, skillNum = 1, projNum = 1) => {
-    cy.request('POST', `/supervisor/badges/globalBadge${badgeNum}/projects/proj${projNum}/skills/skill${skillNum}`)
+    cy.request('POST', `/admin/badges/globalBadge${badgeNum}/projects/proj${projNum}/skills/skill${skillNum}`)
 });
 Cypress.Commands.add("assignProjectToGlobalBadge", (badgeNum = 1, projNum = 1, level = 1) => {
-    cy.request('POST', `/supervisor/badges/globalBadge${badgeNum}/projects/proj${projNum}/level/${level}`)
+    cy.request('POST', `/admin/badges/globalBadge${badgeNum}/projects/proj${projNum}/level/${level}`)
 });
 
 

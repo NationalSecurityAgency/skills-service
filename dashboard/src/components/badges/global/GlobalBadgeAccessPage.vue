@@ -14,14 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-defineProps(['level']);
+
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
+import RoleManager from '@/components/access/RoleManager.vue';
+
+
+const route = useRoute()
+const badgeId = computed(() => {
+  return route.params.badgeId
+});
 </script>
 
 <template>
   <div>
-    <Badge v-if="level <= 2" severity="warn">Level {{ level }}</Badge>
-    <Badge v-if="level > 2 && level <=4" severity="info">Level {{ level }}</Badge>
-    <Badge v-if="level >= 5" severity="success">Level {{ level }}</Badge>
+    <SubPageHeader title="Access" />
+
+    <role-manager id="add-group-admin-access-user"
+                  :badge-id="badgeId"
+                  title=""
+                  role-description="Global Badge Admin"
+                  data-cy="roleManager"
+                  :roles="['ROLE_GLOBAL_BADGE_ADMIN']">
+    </role-manager>
   </div>
 </template>
 

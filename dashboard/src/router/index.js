@@ -96,6 +96,8 @@ import log from 'loglevel'
 import UserArchivePage from '@/components/users/UserArchivePage.vue';
 import UsersTablePage from '@/components/users/UsersTablePage.vue';
 import SupportPage from "@/components/contact/SupportPage.vue";
+import GlobalBadgeAccessPage from '@/components/badges/global/GlobalBadgeAccessPage.vue'
+import AdminGroupGlobalBadges from '@/components/access/groups/AdminGroupGlobalBadges.vue'
 
 const routes = [
   {
@@ -846,6 +848,16 @@ const routes = [
           message: 'Global Badge Levels',
         },
       },
+    }, {
+      name: 'GlobalBadgeAccessPage',
+      path: 'access',
+      component: GlobalBadgeAccessPage,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Global Badge Access',
+        },
+      },
     }],
   },
   {
@@ -885,6 +897,16 @@ const routes = [
         requiresAuth: true,
         announcer: {
           message: 'Admin Group Quizzes and Surveys',
+        },
+      },
+    }, {
+      name: 'AdminGroupGlobalBadges',
+      path: 'group-global-badges',
+      component: AdminGroupGlobalBadges,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Admin Group Global Badges',
         },
       },
     }],

@@ -67,41 +67,6 @@ class DashboardUserActions_RootRoleSpec extends DefaultIntSpec {
         deleteAction.userRole == RoleName.ROLE_SUPER_DUPER_USER.toString()
     }
 
-    def "add/remove supervisor user role"() {
-        SkillsService otherUser = createService(getRandomUsers(1))
-
-        when:
-        rootService.grantSupervisorRole(otherUser.userName)
-        rootService.removeSupervisorRole(otherUser.userName)
-        def res = rootService.getUserActionsForEverything()
-        def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
-        def createAction = rootService.getUserActionAttributes(res.data[1].id)
-        String otherUserDisplay = userAttrsRepo.findByUserIdIgnoreCase(otherUser.userName).userIdForDisplay
-        then:
-        res.count == 2
-        res.data[0].action == DashboardAction.Delete.toString()
-        res.data[0].item == DashboardItem.UserRole.toString()
-        res.data[0].itemId == otherUserDisplay
-        res.data[0].userId == rootService.userName.toLowerCase()
-        res.data[0].userIdForDisplay == displayName
-        !res.data[0].projectId
-        !res.data[0].quizId
-
-        res.data[1].action == DashboardAction.Create.toString()
-        res.data[1].item == DashboardItem.UserRole.toString()
-        res.data[1].itemId == otherUserDisplay
-        res.data[1].userId == rootService.userName.toLowerCase()
-        res.data[1].userIdForDisplay == displayName
-        !res.data[1].projectId
-        !res.data[1].quizId
-
-        createAction.userId == otherUserDisplay
-        createAction.userRole == RoleName.ROLE_SUPERVISOR.toString()
-
-        deleteAction.userId == otherUserDisplay
-        deleteAction.userRole == RoleName.ROLE_SUPERVISOR.toString()
-    }
-
     def "save email settings"() {
         when:
         rootService.saveEmailSettings("somehost", "smtp", 1026, false, true, "fakeuser", "fakepassword")

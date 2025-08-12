@@ -42,8 +42,8 @@ const loadBadgeInfo = () => {
   const isGlobalBadge = skillsDisplayInfo.isGlobalBadgePage.value
   summaryAndSkillsState.loadBadgeSummary(route.params.badgeId, isGlobalBadge)
     .then((badgeSummary) => {
-      if (isGlobalBadge && badgeSummary?.iconClass && badgeSummary.iconClass.startsWith('GLOBAL-')) {
-        IconManagerService.refreshCustomIconCss(null, true)
+      if (isGlobalBadge && badgeSummary?.iconClass) {
+        IconManagerService.refreshCustomIconCss(null, route.params.badgeId)
       }
     })
 

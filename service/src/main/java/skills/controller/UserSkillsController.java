@@ -454,10 +454,10 @@ class UserSkillsController {
         return customIconFacade.generateCss(projectId);
     }
 
-    @RequestMapping(value = "/icons/customIconCss", method = RequestMethod.GET, produces = "text/css")
+    @RequestMapping(value = "/badges/{id}/customIconCss", method = RequestMethod.GET, produces = "text/css")
     @ResponseBody
-    public String getCustomGlogbalIconCss() {
-        return customIconFacade.generateGlobalCss();
+    public String getCustomGlobalIconCss(@PathVariable("id") String globalBadgeId) {
+        return customIconFacade.generateGlobalBadgeCss(globalBadgeId);
     }
 
     private String toDateString(Long timestamp) {

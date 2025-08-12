@@ -265,7 +265,7 @@ class SkillsService {
 
     @Profile
     def changeGlobalBadgeDisplayOrder(Map props, Integer newDisplayOrderIndex){
-        wsHelper.supervisorPatch(getGlobalBadgeUrl(props.badgeId), [
+        wsHelper.globalBadgePatch(getGlobalBadgeUrl(props.badgeId), [
                 action: "NewDisplayOrderIndex",
                 newDisplayOrderIndex: newDisplayOrderIndex,
         ]);
@@ -455,11 +455,11 @@ class SkillsService {
     }
 
     def createGlobalBadge(Map props, String originalBadgeId = null) {
-        wsHelper.supervisorPut(getGlobalBadgeUrl(originalBadgeId ?: props.badgeId), props)
+        wsHelper.appPut(getGlobalBadgeUrl(originalBadgeId ?: props.badgeId), props)
     }
 
     def updateGlobalBadge(Map props, String originalBadgeId = null) {
-        wsHelper.supervisorPut(getGlobalBadgeUrl(originalBadgeId ?: props.badgeId), props)
+        wsHelper.globalBadgePut(getGlobalBadgeUrl(originalBadgeId ?: props.badgeId), props)
     }
 
     def updateBadge(Map props, String originalBadgeId = null) {
@@ -558,23 +558,23 @@ class SkillsService {
     }
 
     def getAvailableProjectsForGlobalBadge(String badgeId, String query="") {
-        wsHelper.supervisorGet("${getGlobalBadgeUrl(badgeId)}/projects/available?query=${query}")
+        wsHelper.globalBadgeGet("${getGlobalBadgeUrl(badgeId)}/projects/available?query=${query}")
     }
 
     def getAvailableSkillsForGlobalBadge(String badgeId, String query) {
-        wsHelper.supervisorGet("${getGlobalBadgeUrl(badgeId)}/skills/available?query=${query}")
+        wsHelper.globalBadgeGet("${getGlobalBadgeUrl(badgeId)}/skills/available?query=${query}")
     }
 
     def getGlobalBadge(String badgeId) {
-        wsHelper.supervisorGet(getGlobalBadgeUrl(badgeId))
+        wsHelper.globalBadgeGet(getGlobalBadgeUrl(badgeId))
     }
 
     def getGlobalBadgeSkills(String badgeId) {
-        wsHelper.supervisorGet("/badges/${badgeId}/skills")
+        wsHelper.globalBadgeGet("/badges/${badgeId}/skills")
     }
 
     def getLevelsForProject(String projectId) {
-        wsHelper.supervisorGet("/projects/${projectId}/levels")
+        wsHelper.globalBadgeGet("/projects/${projectId}/levels")
     }
 
     def getServiceStatus() {
@@ -586,18 +586,18 @@ class SkillsService {
     }
 
     def getAllGlobalBadges() {
-        wsHelper.supervisorGet("/badges")
+        wsHelper.appGet("/badges")
     }
 
     def doesGlobalBadgeNameExists(String name) {
-        wsHelper.supervisorPost("/badges/name/exists", [name:name])?.body
+        wsHelper.appPost("/badges/name/exists", [name:name])?.body
     }
     def doesGlobalBadgeIdExists(String id) {
-        wsHelper.supervisorGet("/badges/id/${id}/exists")
+        wsHelper.appGet("/badges/id/${id}/exists")
     }
 
     def deleteGlobalBadge(String badgeId) {
-        wsHelper.supervisorDelete(getGlobalBadgeUrl(badgeId))
+        wsHelper.globalBadgeDelete(getGlobalBadgeUrl(badgeId))
     }
 
     @Profile
@@ -735,7 +735,7 @@ class SkillsService {
         this.assignSkillToGlobalBadge(['badgeId': badgeId, 'projectId': projectId, 'skillId': skillId])
     }
     def assignSkillToGlobalBadge(Map props) {
-        wsHelper.supervisorPost(getAddSkillToGlobalBadgeUrl(props.badgeId, props.projectId, props.skillId), props)
+        wsHelper.globalBadgePost(getAddSkillToGlobalBadgeUrl(props.badgeId, props.projectId, props.skillId), props)
     }
 
     def removeSkillFromGlobalBadge(String projectId, String badgeId, String skillId) {
@@ -743,19 +743,19 @@ class SkillsService {
     }
 
     def removeSkillFromGlobalBadge(Map props) {
-        wsHelper.supervisorDelete(getAddSkillToGlobalBadgeUrl(props.badgeId, props.projectId, props.skillId), props)
+        wsHelper.globalBadgeDelete(getAddSkillToGlobalBadgeUrl(props.badgeId, props.projectId, props.skillId), props)
     }
 
     def assignProjectLevelToGlobalBadge(Map props) {
-        wsHelper.supervisorPost(getAddProjectLevelToGlobalBadgeUrl(props.badgeId, props.projectId, props.level), props)
+        wsHelper.globalBadgePost(getAddProjectLevelToGlobalBadgeUrl(props.badgeId, props.projectId, props.level), props)
     }
 
     def changeProjectLevelOnGlobalBadge(Map props) {
-        wsHelper.supervisorPost(getchangeProjectLevelOnGlobalBadgeUrl(props.badgeId, props.projectId, props.currentLevel, props.newLevel), [:])
+        wsHelper.globalBadgePost(getchangeProjectLevelOnGlobalBadgeUrl(props.badgeId, props.projectId, props.currentLevel, props.newLevel), [:])
     }
 
     def removeProjectLevelFromGlobalBadge(Map props) {
-        wsHelper.supervisorDelete(getAddProjectLevelToGlobalBadgeUrl(props.badgeId, props.projectId, props.level), props)
+        wsHelper.globalBadgeDelete(getAddProjectLevelToGlobalBadgeUrl(props.badgeId, props.projectId, props.level), props)
     }
 
     def suggestDashboardUsers(String query) {
@@ -788,8 +788,8 @@ class SkillsService {
         wsHelper.appGet(url)
     }
 
-    def getCustomClientDisplayCss(String projectId = null){
-        String url = projectId ? "/projects/${projectId}/customIconCss" : "/icons/customIconCss"
+    def getCustomIconCssForProject(String projectId){
+        String url = "/projects/${projectId}/customIconCss"
         wsHelper.get(url.toString(), "api", null, false)
     }
 
@@ -996,10 +996,10 @@ class SkillsService {
         body.put("customIcon", icon)
         wsHelper.adminUpload("/projects/${props.projectId}/icons/upload", body)
     }
-    def uploadGlobalIcon(File icon){
+    def uploadGlobalIcon(Map props, File icon){
         Map body = [:]
         body.put("customIcon", icon)
-        wsHelper.supervisorUpload("/icons/upload", body)
+        wsHelper.adminUpload("/badges/${props.badgeId}/icons/upload", body)
     }
     def uploadAttachment(String fileName, String fileContents, String projectId=null, String skillId=null, String quizId=null){
         Resource resource = GroovyToJavaByteUtils.toByteArrayResource(fileContents, fileName)
@@ -1046,15 +1046,20 @@ class SkillsService {
     }
 
     def deleteGlobalIcon(Map props){
-        wsHelper.supervisorDelete("/icons/${props.filename}")
+        wsHelper.globalBadgeDelete("/badges/${props.badgeId}/icons/${props.filename}")
     }
 
     def getIconCssForProject(Map props){
         wsHelper.appGet("/projects/${props.projectId}/customIcons")
     }
 
-    def getIconCssForGlobalIcons(){
-        wsHelper.supervisorGet("/icons/customIcons")
+    def getCustomIconsForBadge(Map props){
+        wsHelper.globalBadgeGet("/badges/${props.badgeId}/icons/customIcons")
+    }
+
+    def getCustomIconCssForGlobalBadge(String globalBadgeId) {
+        String url = "/badges/${globalBadgeId}/customIconCss"
+        wsHelper.get(url.toString(), "api", null, false)
     }
 
     def getPerformedSkills(String userId, String project, String query = '', String orderBy = "performedOn") {
@@ -1207,7 +1212,7 @@ class SkillsService {
 
     def getGlobalMetricsData(String metricsId, Map props=null) {
         String endpoint = "/metrics/${metricsId}"
-        wsHelper.supervisorGet(endpoint, props)
+        wsHelper.globalBadgeGet(endpoint, props)
     }
 
     def getApiGlobalMetricsData(String metricsId, Map props = null) {
@@ -1327,9 +1332,9 @@ class SkillsService {
         return wsHelper.grantRoot()
     }
 
-    def grantSupervisorRole(String userId) {
+    def grantGlobalBadgeAdminRole(String badgeId, String userId) {
         userId = getUserId(userId)
-        return wsHelper.rootPut("/users/${userId}/roles/${RoleName.ROLE_SUPERVISOR.toString()}")
+        return wsHelper.globalBadgePut("/badges/${badgeId}/users/${userId}/roles/${RoleName.ROLE_GLOBAL_BADGE_ADMIN.toString()}")
     }
 
     def grantRootRole(String userId) {
@@ -1342,8 +1347,8 @@ class SkillsService {
         return wsHelper.rootPut("/users/${userId}/roles/${RoleName.ROLE_DASHBOARD_ADMIN_ACCESS.toString()}")
     }
 
-    def removeSupervisorRole(String userId) {
-        return wsHelper.rootDelete("/users/${userId}/roles/${RoleName.ROLE_SUPERVISOR.toString()}")
+    def removeGlobalBadgeAdminRole(String badgeId, String userId) {
+        return wsHelper.globalBadgeDelete("/badges/${badgeId}/users/${userId}/roles/${RoleName.ROLE_GLOBAL_BADGE_ADMIN.toString()}")
     }
 
     def revokeInviteOnlyProjectAccess(String projectId, String userId) {
@@ -2186,6 +2191,15 @@ class SkillsService {
     def deleteQuizFromAdminGroup(String adminGroupId, String quizId) {
         return wsHelper.adminDelete("${getAdminGroupDefUrl(adminGroupId)}/quizzes/${quizId}")
     }
+    def getAdminGroupGlobalBadges(String adminGroupId) {
+        return wsHelper.adminGet("${getAdminGroupDefUrl(adminGroupId)}/badges")
+    }
+    def addGlobalBadgeToAdminGroup(String adminGroupId, String badgeId) {
+        return wsHelper.adminPut("${getAdminGroupDefUrl(adminGroupId)}/badges/${badgeId}")
+    }
+    def deleteGlobalBadgeFromAdminGroup(String adminGroupId, String badgeId) {
+        return wsHelper.adminDelete("${getAdminGroupDefUrl(adminGroupId)}/badges/${badgeId}")
+    }
     def getAdminGroupProjects(String adminGroupId) {
         return wsHelper.adminGet("${getAdminGroupDefUrl(adminGroupId)}/projects")
     }
@@ -2200,6 +2214,9 @@ class SkillsService {
     }
     def getAdminGroupsForQuiz(String quizId) {
         return wsHelper.adminGet("${getQuizDefUrl(quizId)}/adminGroups".toString())
+    }
+    def getAdminGroupsForGlobalBadge(String globalBadgeId) {
+        return wsHelper.adminGet("${getGlobalBadgeUrl(globalBadgeId)}/adminGroups".toString())
     }
     def archiveUsers(List<String> userIds, String projectId) {
         return wsHelper.adminPost("/projects/${projectId}/users/archive", [userIds: userIds])

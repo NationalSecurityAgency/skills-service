@@ -20,8 +20,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.apache.hc.client5.http.classic.HttpClient
-import org.apache.hc.client5.http.config.RequestConfig
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
 import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
@@ -128,23 +126,23 @@ class WSHelper {
         put(endpoint, "admin", params)
     }
 
-    def supervisorGet(String endpoint, def params = null) {
-        get(endpoint, "supervisor", params)
+    def globalBadgeGet(String endpoint, def params = null) {
+        get(endpoint, "admin/", params)
     }
 
-    def supervisorPut(String endpoint, def params = null) {
-        put(endpoint, "supervisor", params)
+    def globalBadgePut(String endpoint, def params = null) {
+        put(endpoint, "admin/", params)
     }
-    def supervisorDelete(String endpoint, def params = null) {
-        delete(endpoint, "supervisor", params)
+    def globalBadgeDelete(String endpoint, def params = null) {
+        delete(endpoint, "admin/", params)
     }
 
     def adminPost(String endpoint, def params, boolean throwExceptionOnFailure = true) {
         post(endpoint, "admin", params, HttpStatus.OK, throwExceptionOnFailure )
     }
 
-    def supervisorPost(String endpoint, def params, boolean throwExceptionOnFailure = true) {
-        post(endpoint, "supervisor", params, HttpStatus.OK, throwExceptionOnFailure )
+    def globalBadgePost(String endpoint, def params, boolean throwExceptionOnFailure = true) {
+        post(endpoint, "admin/", params, HttpStatus.OK, throwExceptionOnFailure )
     }
 
     def adminDelete(String endpoint, def params = null) {
@@ -173,14 +171,14 @@ class WSHelper {
         return multipartPost(url, params)
     }
 
-    def supervisorUpload(String endpoint, Map params = null) {
-        String url = "${skillsService}/supervisor${endpoint}"
+    def globalBadgeUpload(String endpoint, Map params = null) {
+        String url = "${skillsService}/admin/${endpoint}"
         log.info("MULTIPART POST: {}", url)
         return multipartPost(url, params)
     }
 
-    def supervisorPatch(String endpoint, def params, boolean throwExceptionOnFailure = true, MediaType mediaType = MediaType.APPLICATION_JSON) {
-        patch(endpoint, "supervisor", params, HttpStatus.OK, throwExceptionOnFailure, mediaType)
+    def globalBadgePatch(String endpoint, def params, boolean throwExceptionOnFailure = true, MediaType mediaType = MediaType.APPLICATION_JSON) {
+        patch(endpoint, "/admin/", params, HttpStatus.OK, throwExceptionOnFailure, mediaType)
     }
 
     def adminPatch(String endpoint, def params, boolean throwExceptionOnFailure = true, MediaType mediaType = MediaType.APPLICATION_JSON) {

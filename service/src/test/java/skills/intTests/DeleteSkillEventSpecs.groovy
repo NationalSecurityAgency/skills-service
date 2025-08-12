@@ -1240,7 +1240,6 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
     }
 
     def "deleting a skill event tied to a global badge will remove the global badges"() {
-        SkillsService supervisorService = createSupervisor()
         String userId = "user1"
         Date date = new Date()
 
@@ -1266,15 +1265,15 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
         skillsService.createSkill(skill4)
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
         requiredSkillsIds.each { skillId ->
-            supervisorService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
+            skillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
         }
-        supervisorService.assignSkillToGlobalBadge(projectId: "proj2", badgeId: badge.badgeId, skillId: skill4.skillId)
-        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        skillsService.assignSkillToGlobalBadge(projectId: "proj2", badgeId: badge.badgeId, skillId: skill4.skillId)
+        badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
 
-        supervisorService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
 
         def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
         def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
@@ -1314,7 +1313,6 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
     }
 
     def "deleting a skill event tied to a global badge that uses levels will remove the global badges"() {
-        SkillsService supervisorService = createSupervisor()
         String userId = "user1"
         Date date = new Date()
 
@@ -1340,12 +1338,11 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
         skillsService.createSkill(skill4)
-        supervisorService.createGlobalBadge(badge)
-        supervisorService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "1")
-        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "1")
+        badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
-        supervisorService.updateGlobalBadge(badge)
-        supervisorService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
 
         skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
         skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
@@ -1381,7 +1378,6 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
     }
 
     def "deleting all skill events will remove any achieved global badges"() {
-        SkillsService supervisorService = createSupervisor()
         String userId = "user1"
         Date date = new Date()
 
@@ -1407,15 +1403,15 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
         skillsService.createSkill(skill4)
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
         requiredSkillsIds.each { skillId ->
-            supervisorService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
+            skillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: skillId)
         }
-        supervisorService.assignSkillToGlobalBadge(projectId: "proj2", badgeId: badge.badgeId, skillId: skill4.skillId)
-        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        skillsService.assignSkillToGlobalBadge(projectId: "proj2", badgeId: badge.badgeId, skillId: skill4.skillId)
+        badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
 
-        supervisorService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
 
         def resSkill1 = skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
         def resSkill3 = skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body
@@ -1455,7 +1451,6 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
     }
 
     def "deleting all skill events tied to a global badge that uses levels will remove the global badges"() {
-        SkillsService supervisorService = createSupervisor()
         String userId = "user1"
         Date date = new Date()
 
@@ -1481,12 +1476,11 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         skillsService.createSkill(skill2)
         skillsService.createSkill(skill3)
         skillsService.createSkill(skill4)
-        supervisorService.createGlobalBadge(badge)
-        supervisorService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "1")
-        badge = supervisorService.getGlobalBadge(badge.badgeId)
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "1")
+        badge = skillsService.getGlobalBadge(badge.badgeId)
         badge.enabled = 'true'
-        supervisorService.updateGlobalBadge(badge)
-        supervisorService.createGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
 
         skillsService.addSkill([projectId: projId, skillId: skill1.skillId], userId, date).body
         skillsService.addSkill([projectId: projId, skillId: skill3.skillId], userId, date).body

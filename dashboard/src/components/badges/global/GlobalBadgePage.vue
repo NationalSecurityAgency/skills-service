@@ -83,17 +83,20 @@ const loadBadge = () => {
   }
 };
 
-const badgeEdited = (editedBadge) => {
+const goLive = (editedBadge) => {
   GlobalBadgeService.saveBadge(editedBadge).then((resp) => {
-    const origId = badge.badgeId;
-    badgeState.loadGlobalBadgeDetailsState(badgeId.value).finally(() => {
-      badge.value = badgeState.badge;
-    });
-    if (origId !== resp.badgeId) {
-      router.replace({ name: route.name, params: { ...route.params, badgeId: resp.badgeId } });
-      badgeId.value = resp.badgeId;
+    badgeEdited(resp)
+  });
+
+};
+const badgeEdited = (editedBadge) => {
+  const origId = badge.value.badgeId;
+  badgeState.loadGlobalBadgeDetailsState(badgeId.value).finally(() => {
+    badge.value = badgeState.badge;
+    if (origId !== editedBadge.badgeId) {
+      badgeId.value = editedBadge.badgeId;
+      router.replace({ name: route.name, params: { ...route.params, badgeId: editedBadge.badgeId } });
     }
-  }).finally(() => {
   });
 };
 
@@ -122,7 +125,8 @@ const handlePublish = () => {
         }
         toSave.startDate = toDate(toSave.startDate);
         toSave.endDate = toDate(toSave.endDate);
-        badgeEdited(toSave);
+        toSave.isEdit = true
+        goLive(toSave);
       }
     });
   } else {
@@ -187,6 +191,7 @@ const toDate = (value) => {
     <navigation :nav-items="[
           {name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'GlobalBadgeSkills'},
           {name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'GlobalBadgeLevels'},
+          { name: 'Access', iconClass: 'fas fa-shield-alt', page: 'GlobalBadgeAccessPage' }
         ]">
     </navigation>
     <edit-badge v-if="showEdit" v-model="showEdit" :id="badge.badgeId" :badge="badge" :is-edit="true"

@@ -558,15 +558,6 @@ describe('Import skills from Catalog Tests', () => {
         cy.createSkill(2, 1, 2);
         cy.importSkillFromCatalog(2, 1, 1, 1);
 
-        cy.logout();
-        const supervisorUser = 'supervisor@skills.org';
-        cy.register(supervisorUser, 'password');
-        cy.login('root@skills.org', 'password');
-        cy.request('PUT', `/root/users/${supervisorUser}/roles/ROLE_SUPERVISOR`);
-        cy.logout();
-        cy.login(supervisorUser, 'password');
-        cy.log('completed supervisor user login');
-
         cy.createGlobalBadge(1);
 
         cy.visit('/administrator/globalBadges/globalBadge1');

@@ -13,41 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.intTests.supervisor
+package skills.intTests.badges
 
 import org.springframework.core.io.ClassPathResource
-import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 
-class SupervisorEditSpecs extends DefaultIntSpec {
+class GlobalBadgeEditSpecs extends DefaultIntSpec {
 
         String projId = SkillsFactory.defaultProjId
         String badgeId = 'GlobalBadge1'
 
         String ultimateRoot = 'jh@dojo.com'
         SkillsService rootSkillsService
-        String nonRootUserId = 'foo@bar.com'
-        SkillsService nonSupervisorSkillsService
 
         def setup(){
-            skillsService.deleteProjectIfExist(projId)
-            skillsService.deleteProjectIfExist("${projId}2")
             rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-            nonSupervisorSkillsService = createService(nonRootUserId)
 
             if (!rootSkillsService.isRoot()) {
                 rootSkillsService.grantRoot()
             }
-            rootSkillsService.grantSupervisorRole(skillsService.wsHelper.username)
-
-            skillsService.deleteGlobalIcon([filename: "dot2.png"])
         }
 
         def cleanup() {
-            rootSkillsService?.removeSupervisorRole(skillsService.wsHelper.username)
+            rootSkillsService?.deleteGlobalIcon([badgeId:(badgeId), filename: "dot2.png"])
         }
 
     def 'global badge creation'() {
@@ -156,18 +147,6 @@ class SupervisorEditSpecs extends DefaultIntSpec {
         res.collect { it.level } == [1, 2, 3, 4, 5]
     }
 
-    def 'users without SUPERVISOR role cannot create global badges'() {
-
-        Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
-
-        when:
-        nonSupervisorSkillsService.createGlobalBadge(badge)
-
-        then:
-        SkillsClientException ex = thrown()
-        ex.httpStatus == HttpStatus.FORBIDDEN
-    }
-
     def 'global badge delete'() {
 
         Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
@@ -251,7 +230,7 @@ class SupervisorEditSpecs extends DefaultIntSpec {
 
         when:
         badge['badgeId'] = badgeId
-        def res = skillsService.createGlobalBadge(badge, origBadgeId)
+        def res = skillsService.updateGlobalBadge(badge, origBadgeId)
         def res2 = skillsService.getGlobalBadge(badgeId)
 
         then:
@@ -269,7 +248,7 @@ class SupervisorEditSpecs extends DefaultIntSpec {
         when:
         String newName = 'new name'
         badge['name'] = newName
-        def res = skillsService.createGlobalBadge(badge, badgeId)
+        def res = skillsService.updateGlobalBadge(badge, badgeId)
         def res2 = skillsService.getGlobalBadge(badgeId)
 
         then:
@@ -289,7 +268,7 @@ class SupervisorEditSpecs extends DefaultIntSpec {
         String newName = 'new name'
         badge['name'] = newName
         badge['badgeId'] = badgeId
-        def res = skillsService.createGlobalBadge(badge, origBadgeId)
+        def res = skillsService.updateGlobalBadge(badge, origBadgeId)
         def res2 = skillsService.getGlobalBadge(badgeId)
 
         then:
@@ -457,45 +436,52 @@ class SupervisorEditSpecs extends DefaultIntSpec {
         cleanup:
         skillsService.deleteGlobalBadge(badgeId)
     }
+
     def "upload global icon"(){
         ClassPathResource resource = new ClassPathResource("/dot2.png")
 
+        Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
         when:
         def file = resource.getFile()
-        def result = skillsService.uploadGlobalIcon(file)
+        def result = skillsService.uploadGlobalIcon(badge, file)
 
         then:
         result
         result.success
-        result.cssClassName == "GLOBAL-dot2png"
+        result.cssClassName == "${badgeId}-dot2png"
         result.name == "dot2.png"
     }
 
     def "delete global icon"(){
         ClassPathResource resource = new ClassPathResource("/dot2.png")
 
+        Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
         when:
         def file = resource.getFile()
-        skillsService.uploadGlobalIcon(file)
-        skillsService.deleteGlobalIcon([filename: "dot2.png"])
-        def result = skillsService.getIconCssForGlobalIcons()
+        skillsService.uploadGlobalIcon(badge, file)
+        skillsService.deleteGlobalIcon([badgeId:(badgeId), filename: "dot2.png"])
+        def result = skillsService.getCustomIconsForBadge([badgeId:(badgeId)])
 
         then:
         !result
     }
 
-    def "get css for global icons"(){
+    def "get global icons css for badge"(){
         ClassPathResource resource = new ClassPathResource("/dot2.png")
 
+        Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
         when:
         def file = resource.getFile()
-        skillsService.uploadGlobalIcon(file)
-        def result = skillsService.getIconCssForGlobalIcons()
-        def clientDisplayCssResult = skillsService.getCustomClientDisplayCss()
+        skillsService.uploadGlobalIcon(badge, file)
+        def result = skillsService.getCustomIconsForBadge([badgeId:(badgeId)])
+        def clientDisplayCssResult = skillsService.getCustomIconCssForGlobalBadge(badgeId)
 
         then:
-        result == [[filename:'dot2.png', cssClassname:"GLOBAL-dot2png"]]
-        clientDisplayCssResult.toString().startsWith(".GLOBAL-dot2png {\tbackground-image: url(")
+        result == [[filename:'dot2.png', cssClassname:"${badgeId}-dot2png"]]
+        clientDisplayCssResult.toString().startsWith(".${badgeId}-dot2png {\tbackground-image: url(")
     }
 
     def 'global badge lookups do not return inception project or skills'() {

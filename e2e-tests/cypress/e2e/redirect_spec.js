@@ -20,14 +20,6 @@ describe('Redirection Tests', () => {
             return false
         })
 
-        cy.logout();
-        const supervisorUser = 'supervisor@skills.org';
-        cy.register(supervisorUser, 'password');
-        cy.login('root@skills.org', 'password');
-        cy.request('PUT', `/root/users/${supervisorUser}/roles/ROLE_SUPERVISOR`);
-        cy.logout();
-        cy.login(supervisorUser, 'password');
-
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'proj1'

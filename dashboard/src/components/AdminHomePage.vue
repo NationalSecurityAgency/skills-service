@@ -22,9 +22,6 @@ const accessState = useAccessState()
 const isRoot = computed(() => {
   return accessState.isRoot;
 });
-const isSupervisor = computed(() => {
-  return accessState.isSupervisor;
-});
 
 
 const items = computed(() => {
@@ -44,19 +41,11 @@ const items = computed(() => {
     iconClass: 'fa-solid fa-users skills-color-access',
     page: 'AdminGroups',
   });
-
-  if (isSupervisor.value || isRoot.value) {
-    res.push({
-      name: 'Global Badges',
-      iconClass: 'fa-globe-americas skills-color-badges',
-      page: 'GlobalBadges',
-    });
-    res.push({
-      name: 'Metrics',
-      iconClass: 'fa-chart-bar skills-color-metrics',
-      page: 'MultipleProjectsMetricsPage',
-    });
-  }
+  res.push({
+    name: 'Global Badges',
+    iconClass: 'fa-globe-americas skills-color-badges',
+    page: 'GlobalBadges',
+  });
 
   if (isRoot.value) {
     res.push({

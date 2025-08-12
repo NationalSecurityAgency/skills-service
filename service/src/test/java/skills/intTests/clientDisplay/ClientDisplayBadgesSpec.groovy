@@ -24,21 +24,6 @@ import skills.storage.model.UserAchievement
 
 class ClientDisplayBadgesSpec extends DefaultIntSpec {
 
-    String ultimateRoot = 'jh@dojo.com'
-    SkillsService rootSkillsService
-    String supervisorUserId = 'foo@bar.com'
-    SkillsService supervisorSkillsService
-
-    def setup(){
-        rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-        supervisorSkillsService = createService(supervisorUserId)
-
-        if (!rootSkillsService.isRoot()) {
-            rootSkillsService.grantRoot()
-        }
-        rootSkillsService.grantSupervisorRole(supervisorUserId)
-    }
-
     def "badges summary for a project - one badge"() {
         String userId = "user1"
 
@@ -867,10 +852,10 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         // global badge
         Map globalBadge = [badgeId: "globalBadge", name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon"]
         globalBadge.helpUrl = "http://foo.org"
-        supervisorSkillsService.createGlobalBadge(globalBadge)
-        supervisorSkillsService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: proj1_skills.get(0).skillId)
+        skillsService.createGlobalBadge(globalBadge)
+        skillsService.assignSkillToGlobalBadge(projectId: proj1.projectId, badgeId: globalBadge.badgeId, skillId: proj1_skills.get(0).skillId)
         globalBadge.enabled = 'true'
-        supervisorSkillsService.updateGlobalBadge(globalBadge)
+        skillsService.updateGlobalBadge(globalBadge)
         //global badge has dep on proj1 skills[0]
 
         // add skill
@@ -1299,16 +1284,16 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         def proj1_subj = SkillsFactory.createSubject(1, 1)
         List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1, 100)
 
-        supervisorSkillsService.createProject(proj1)
-        supervisorSkillsService.createSubject(proj1_subj)
-        supervisorSkillsService.createSkills(proj1_skills)
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
 
         def createBadge = { int badgeNum, int skillNum ->
             def theBadge = SkillsFactory.createBadge(1, badgeNum)
-            supervisorSkillsService.createGlobalBadge(theBadge)
-            supervisorSkillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: theBadge.badgeId, skillId: proj1_skills.get(skillNum).skillId])
+            skillsService.createGlobalBadge(theBadge)
+            skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: theBadge.badgeId, skillId: proj1_skills.get(skillNum).skillId])
             theBadge.enabled  = 'true'
-            supervisorSkillsService.updateGlobalBadge(theBadge, theBadge.badgeId)
+            skillsService.updateGlobalBadge(theBadge, theBadge.badgeId)
 
             return theBadge
         }
@@ -1323,9 +1308,9 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
             sevenDaysAgoMinus1Hour = new Date() - 7 - 1.hour
         }
 
-        supervisorSkillsService.addSkill(proj1_skills[0], users[0])
-        supervisorSkillsService.addSkill(proj1_skills[1], users[0])
-        supervisorSkillsService.addSkill(proj1_skills[2], users[0])
+        skillsService.addSkill(proj1_skills[0], users[0])
+        skillsService.addSkill(proj1_skills[1], users[0])
+        skillsService.addSkill(proj1_skills[2], users[0])
 
         // global badges are achieved on the current date no matter when the last event is
         // so have to manually update DB to simulate an older achievement
@@ -1334,7 +1319,7 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         badge2Achievement.get(0).achievedOn = sevenDaysAgoMinus1Hour
         userAchievedRepo.saveAll(badge2Achievement)
         when:
-        def user1Summary = supervisorSkillsService.getSkillSummary(users[0], proj1.projectId)
+        def user1Summary = skillsService.getSkillSummary(users[0], proj1.projectId)
         then:
         user1Summary.badges.numTotalBadges == 3
         user1Summary.badges.numBadgesCompleted == 3

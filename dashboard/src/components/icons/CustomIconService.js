@@ -16,12 +16,12 @@
 import axios from 'axios'
 
 export default {
-  getCustomIconCss(projectId, isSupervisor) {
+  getCustomIconCss(projectId, globalBadgeId) {
     let url
     if (projectId) {
       url = `/api/projects/${encodeURIComponent(projectId)}/customIconCss`
-    } else if (isSupervisor) {
-      url = '/api/icons/customIconCss'
+    } else if (globalBadgeId) {
+      url = `/api/badges/${encodeURIComponent(globalBadgeId)}/customIconCss`
     }
     if (url) {
       return axios.get(url).then((response) => response.data)

@@ -16,15 +16,10 @@
 package skills.intTests
 
 import org.springframework.http.HttpStatus
-import org.springframework.web.client.RestClientResponseException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
 import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
-import spock.lang.Requires
-import spock.lang.Specification
 
 class ValidationSpecs extends DefaultIntSpec {
 
@@ -635,11 +630,9 @@ class ValidationSpecs extends DefaultIntSpec {
     }
 
     def "leading and trailing spaces in skill names should not be considered when checking for duplicate global names"() {
-        SkillsService supervisorService = createSupervisor()
-
         def badge = SkillsFactory.createBadge(1)
         badge.name = "Badge"
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         when:
 
@@ -649,7 +642,7 @@ class ValidationSpecs extends DefaultIntSpec {
         try {
             def badge2 = SkillsFactory.createBadge(1, 2)
             badge2.name = " Badge"
-            supervisorService.createGlobalBadge(badge2)
+            skillsService.createGlobalBadge(badge2)
         } catch (SkillsClientException ske) {
             leadSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
         }
@@ -657,7 +650,7 @@ class ValidationSpecs extends DefaultIntSpec {
         try {
             def badge2 = SkillsFactory.createBadge(1, 3)
             badge2.name = "Badge "
-            supervisorService.createGlobalBadge(badge2)
+            skillsService.createGlobalBadge(badge2)
         } catch (SkillsClientException ske) {
             trailingSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
         }

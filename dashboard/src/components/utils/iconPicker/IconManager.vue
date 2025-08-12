@@ -112,7 +112,7 @@ onMounted(() => {
     iconPacks.value[0].icons = groupIntoRows(fontAwesomeIcons.icons, rowLength);
     iconPacks.value[1].icons = groupIntoRows(materialIcons.icons, rowLength);
 
-    IconManagerService.getIconIndex(route.params.projectId).then((response) => {
+    IconManagerService.getIconIndex(route.params.projectId, route.params.badgeId).then((response) => {
       if (response) {
         iconPacks.value[2].icons = response;
         iconPacks.value[2].defaultIcons = response.slice();
@@ -194,7 +194,7 @@ const selectIcon = (icon, iconCss, iconPack) => {
 const uploadUrl = computed(() => {
   let uploadUrl = `/admin/projects/${encodeURIComponent(route.params.projectId)}/icons/upload`;
   if (!route.params.projectId) {
-    uploadUrl = '/supervisor/icons/upload';
+    uploadUrl = `/admin/badges/${encodeURIComponent(route.params.badgeId)}/icons/upload`;
   }
   return uploadUrl;
 });
@@ -227,7 +227,7 @@ const handleUploadedIcon = (response) => {
   selectIcon(response.name, response.cssClassName, 'custom-icon');
 }
 
-const deleteIcon = (file, projectId) => {
+const deleteIcon = (file, projectId, badgeId) => {
   const className = file.cssClassname;
   const iconName = file.filename;
   emit('set-dismissable', false);
@@ -246,7 +246,7 @@ const deleteIcon = (file, projectId) => {
       acceptLabel: 'YES, Delete It!',
       rejectLabel: 'Cancel',
       accept: () => {
-        IconManagerService.deleteIcon(iconName, projectId).then(() => {
+        IconManagerService.deleteIcon(iconName, projectId, badgeId).then(() => {
           iconPacks.value[2].defaultIcons = iconPacks.value[2].defaultIcons.filter((element) => element.filename !== iconName);
           if (iconPacks.value[2].defaultIcons && iconPacks.value[2].defaultIcons.length > 0) {
             iconPacks.value[2].icons = [iconPacks.value[2].defaultIcons];
@@ -389,7 +389,7 @@ const closeError = () => {
                   <SkillsButton
                       severity="warn"
                       rounded
-                      @click="deleteIcon(file, route.params.projectId)"
+                      @click="deleteIcon(file, route.params.projectId, route.params.badgeId)"
                       data-cy="deleteIconBtn"
                       :aria-label="`Delete icon ${file.filename}`">
                     <i class="fas fa-trash"></i>

@@ -22,8 +22,6 @@ import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
-import skills.services.ProjectSortingService
 import skills.services.settings.SettingsDataAccessor
 import skills.storage.model.Setting
 import skills.storage.model.SkillDef
@@ -210,8 +208,6 @@ class ConcurrencySpecs extends DefaultIntSpec {
     }
 
     def "do not create duplicate global badges"() {
-        SkillsService supervisorSkillsService = createSupervisorService()
-
         int numThreads = 5
         int numberBadges = 25
 
@@ -224,7 +220,7 @@ class ConcurrencySpecs extends DefaultIntSpec {
                         badge.badgeId = uppperCaseOneChar(badge.badgeId, threadNum)
                         badge.name = uppperCaseOneChar(badge.name, threadNum)
 
-                        supervisorSkillsService.createGlobalBadge(badge)
+                        skillsService.createGlobalBadge(badge)
                     } catch (SkillsClientException e) {
                         // should throw dup projects, that's what we are trying to break
                     }
@@ -241,16 +237,6 @@ class ConcurrencySpecs extends DefaultIntSpec {
             it.skillId.toLowerCase()
         }).unique().sort()
         badges.size() == numberBadges
-    }
-
-    private SkillsService createSupervisorService() {
-        String ultimateRoot = 'jh@dojo.com'
-        SkillsService rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
-        rootSkillsService.grantRoot()
-        String supervisorUserId = 'foo@bar.com'
-        SkillsService supervisorSkillsService = createService(supervisorUserId)
-        rootSkillsService.grantSupervisorRole(supervisorUserId)
-        return supervisorSkillsService
     }
 
 

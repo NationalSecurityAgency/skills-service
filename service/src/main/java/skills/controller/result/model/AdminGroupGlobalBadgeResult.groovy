@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2020 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,15 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios from 'axios';
+package skills.controller.result.model
 
-export default {
-  getAllProjects() {
-    return axios.get('/supervisor/projects')
-      .then((remoteRes) => remoteRes.data);
-  },
-  getProjectLevels(projectId) {
-    return axios.get(`/supervisor/projects/${encodeURIComponent(projectId)}/levels`)
-      .then((remoteRes) => remoteRes.data);
-  },
-};
+class AdminGroupGlobalBadgeResult {
+    String adminGroupId
+    List<GlobalBadgeResult> availableGlobalBadges
+    List<GlobalBadgeResult> assignedGlobalBadges
+}

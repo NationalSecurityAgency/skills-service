@@ -36,30 +36,30 @@ const errorState = userErrorState()
 const upgradeInProgressErrorChecker = useUpgradeInProgressErrorChecker()
 
 const isLoading = ref(true)
-const availableQuizzes = ref([])
-const assignedQuizzes = ref([])
+const availableGlobalBadges = ref([])
+const assignedGlobalBadges = ref([])
 
-const removeQuizInfo = ref({
+const removeGlobalBadgeInfo = ref({
   showDialog: false,
-  quiz: {}
+  globalBadge: {}
 })
 
 const adminGroupId = computed(() => route.params.adminGroupId)
 
-const areQuizzesAvailable = computed(() => {
-  return availableQuizzes.value && availableQuizzes.value.length > 0;
+const areGlobalBadgesAvailable = computed(() => {
+  return availableGlobalBadges.value && availableGlobalBadges.value.length > 0;
 })
-const areQuizzesAssigned = computed(() => {
-  return assignedQuizzes.value && assignedQuizzes.value.length > 0;
+const areGlobalBadgesAssigned = computed(() => {
+  return assignedGlobalBadges.value && assignedGlobalBadges.value.length > 0;
 })
 const emptyMessage = computed(() => {
-  if (areQuizzesAvailable.value) {
+  if (areGlobalBadgesAvailable.value) {
     return 'No results. Please refine your search string.'
   } else {
-    if (areQuizzesAssigned.value) {
-      return 'All of your available quizzes and surveys have already been assigned to this admin group.'
+    if (areGlobalBadgesAssigned.value) {
+      return 'All of your available global badges have already been assigned to this admin group.'
     }
-    return 'You currently do not administer any quizzes or surveys.'
+    return 'You currently do not administer any global badges.'
   }
 })
 const errNotification = ref({
@@ -72,40 +72,42 @@ onMounted(() => {
 })
 const loadData = () => {
   isLoading.value = true
-  AdminGroupsService.getAdminGroupQuizzes(adminGroupId.value)
+  AdminGroupsService.getAdminGroupGlobalBadges(adminGroupId.value)
       .then((res) => {
-        availableQuizzes.value = res.availableQuizzes;
-        assignedQuizzes.value = res.assignedQuizzes;
+        availableGlobalBadges.value = res.availableGlobalBadges;
+        assignedGlobalBadges.value = res.assignedGlobalBadges;
       }).finally(() => {
     isLoading.value = false
   });
 }
-const addQuizToAdminGroup = (quiz) => {
+const addGlobalBadgeToAdminGroup = (globalBadge) => {
   isLoading.value = true
-  AdminGroupsService.addQuizToAdminGroup(adminGroupId.value, quiz.quizId)
+  AdminGroupsService.addGlobalBadgeToAdminGroup(adminGroupId.value, globalBadge.badgeId)
     .then((res) => {
-      availableQuizzes.value = res.availableQuizzes;
-      assignedQuizzes.value = res.assignedQuizzes;
-      adminGroupState.adminGroup.numberOfQuizzesAndSurveys++;
+      availableGlobalBadges.value = res.availableGlobalBadges;
+      assignedGlobalBadges.value = res.assignedGlobalBadges;
+      adminGroupState.adminGroup.numberOfGlobalBadges++;
     }).catch((e) => {
       handleError(e);
     }).finally(() => {
       isLoading.value = false
     });
 }
-const removeQuizFromAdminGroupConfirm = (quiz) => {
-  removeQuizInfo.value.quiz = quiz
-  removeQuizInfo.value.showDialog = true
+const removeGlobalBadgeFromAdminGroupConfirm = (globalBadge) => {
+  removeGlobalBadgeInfo.value.globalBadge = globalBadge
+  removeGlobalBadgeInfo.value.showDialog = true
 }
 
-const removeQuizFromAdminGroup = () => {
+const removeGlobalBadgeFromAdminGroup = () => {
   isLoading.value = true
-  const { quizId } = removeQuizInfo.value.quiz
-  AdminGroupsService.removeQuizFromAdminGroup(adminGroupId.value, quizId)
+  const { badgeId } = removeGlobalBadgeInfo.value.globalBadge
+  AdminGroupsService.removeGlobalBadgeFromAdminGroup(adminGroupId.value, badgeId)
       .then((res) => {
-        availableQuizzes.value = res.availableQuizzes;
-        assignedQuizzes.value = res.assignedQuizzes;
-        adminGroupState.adminGroup.numberOfQuizzesAndSurveys--;
+        availableGlobalBadges.value = res.availableGlobalBadges;
+        assignedGlobalBadges.value = res.assignedGlobalBadges;
+        console.log(`adminGroupState.adminGroup.numberOfGlobalBadges: ${adminGroupState.adminGroup.numberOfGlobalBadges}`)
+        adminGroupState.adminGroup.numberOfGlobalBadges--;
+        console.log(`done. adminGroupState.adminGroup.numberOfGlobalBadges: ${adminGroupState.adminGroup.numberOfGlobalBadges}`)
       }).finally(() => {
     isLoading.value = false
   });
@@ -118,7 +120,7 @@ const handleError = (e) => {
     upgradeInProgressErrorChecker.navToUpgradeInProgressPage()
   } else {
     const errorMessage = (e.response && e.response.data && e.response.data.message) ? e.response.data.message : undefined;
-    errorState.navToErrorPage('Failed to add Quiz to Admin Group', errorMessage)
+    errorState.navToErrorPage('Failed to add GlobalBadge to Admin Group', errorMessage)
   }
 }
 const clearErrorMessage = () => {
@@ -128,32 +130,32 @@ const clearErrorMessage = () => {
 </script>
 
 <template>
-  <sub-page-header title="Group Quizzes and Surveys" />
+  <sub-page-header title="Group Global Badges" />
 
   <Card :pt="{ body: { class: 'p-0!' } }">
     <template #content>
       <loading-container :is-loading="isLoading" class="">
         <div class="w-full px-4 py-6">
           <SkillsDropDown
-              name="associatedQuiz"
-              data-cy="quizSelector"
-              aria-label="Select Quiz/Survey to add to Admin Group"
+              name="associatedGlobalBadge"
+              data-cy="globalBadgeSelector"
+              aria-label="Select Global Badge to add to Admin Group"
               showClear
               filter
               optionLabel="name"
-              @update:modelValue="addQuizToAdminGroup"
+              @update:modelValue="addGlobalBadgeToAdminGroup"
               :emptyMessage=emptyMessage
               :isRequired="true"
-              :options="availableQuizzes">
+              :options="availableGlobalBadges">
             <template #value="slotProps">
-              <div v-if="slotProps.value" class="p-1" :data-cy="`quizSelected-${slotProps.value.quizId}`">
-                <span class="text-secondary">{{ slotProps.value.type }}:</span><span class="ml-1">{{ slotProps.value.name }}</span>
+              <div v-if="slotProps.value" class="p-1" :data-cy="`globalBadgeSelected-${slotProps.value.badgeId}`">
+                <span class="ml-1">{{ slotProps.value.name }}</span>
               </div>
-              <span v-else> Search available quizzes and surveys...</span>
+              <span v-else> Search available global badges...</span>
             </template>
             <template #option="slotProps">
-              <div :data-cy="`availableQuizSelection-${slotProps.option.quizId}`">
-                <span class="text-secondary">{{ slotProps.option.type }}:</span><span class="h6 ml-2">{{ slotProps.option.name }}</span>
+              <div :data-cy="`availableGlobalBadgeSelection-${slotProps.option.badgeId}`">
+                <span class="h6 ml-2">{{ slotProps.option.name }}</span>
               </div>
             </template>
           </SkillsDropDown>
@@ -161,50 +163,50 @@ const clearErrorMessage = () => {
         <Message v-if="errNotification.enable" @close="clearErrorMessage" severity="error" data-cy="error-msg">
           <strong>Error!</strong> Request could not be completed! {{ errNotification.msg }}
         </Message>
-        <div v-if="assignedQuizzes && assignedQuizzes.length > 0">
+        <div v-if="assignedGlobalBadges && assignedGlobalBadges.length > 0">
           <SkillsDataTable
               :loading="isLoading"
-              tableStoredStateId="adminGroupQuizzesTable"
-              aria-label="Admin Group Quizzes and Surveys"
-              :value="assignedQuizzes"
+              tableStoredStateId="adminGroupGlobalBadgesTable"
+              aria-label="Admin Group Global Badges Table"
+              :value="assignedGlobalBadges"
               paginator
               :rows="5"
-              :totalRecords="assignedQuizzes.length"
+              :totalRecords="assignedGlobalBadges.length"
               :rowsPerPageOptions="[5, 10, 15, 20]"
-              data-cy="adminGroupQuizzesTable">
+              data-cy="adminGroupGlobalBadgesTable">
             <Column header="Name" field="name" style="width: 40%;" :sortable="true">
               <template #body="slotProps">
-                <router-link :id="slotProps.data.quizId" :to="{ name:'QuizOverview',
-                    params: { quizId: slotProps.data.quizId }}"
-                             class="btn btn-sm btn-outline-hc ml-2" :data-cy="`manage_${slotProps.data.quizId}`">
+                <router-link :id="slotProps.data.badgeId" :to="{ name:'GlobalBadgeSkills',
+                    params: { badgeId: slotProps.data.badgeId }}"
+                             class="btn btn-sm btn-outline-hc ml-2" :data-cy="`manage_${slotProps.data.badgeId}`">
                   {{ slotProps.data.name }}
                 </router-link>
               </template>
             </Column>
             <Column header="Delete">
               <template #body="slotProps">
-                <SkillsButton v-on:click="removeQuizFromAdminGroupConfirm(slotProps.data)" size="small"
-                              :id="`removeQuiz_${slotProps.data.quizId}`"
+                <SkillsButton v-on:click="removeGlobalBadgeFromAdminGroupConfirm(slotProps.data)" size="small"
+                              :id="`removeGlobalBadge_${slotProps.data.badgeId}`"
                               :track-for-focus="true"
-                              :data-cy="`removeQuiz_${slotProps.data.quizId}`" icon="fas fa-trash" label="Delete"
-                              :aria-label="`remove quiz on ${slotProps.data.quizId} from admin group`">
+                              :data-cy="`removeGlobalBadge_${slotProps.data.badgeId}`" icon="fas fa-trash" label="Delete"
+                              :aria-label="`remove global badge on ${slotProps.data.badgeId} from admin group`">
                 </SkillsButton>
               </template>
             </Column>
 
             <template #paginatorstart>
-              <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ assignedQuizzes.length }}</span>
+              <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ assignedGlobalBadges.length }}</span>
             </template>
           </SkillsDataTable>
         </div>
 
-        <no-content2 v-else title="No Quizzes or Surveys Added Yet..." icon="fas fa-spell-check" class="py-8">
+        <no-content2 v-else title="No Global Badges Added Yet..." icon="fas fa-spell-check" class="py-8">
           <div>
             <p>
-              Please use the drop-down above to start adding quizzes and surveys to this admin group!
+              Please use the drop-down above to start adding global badges to this admin group!
             </p>
             <p>
-              When a quiz or survey is assigned to a group, group's members automatically gain administrative privileges of that quiz or survey, streamlining management.
+              When a global badge is assigned to a group, group's members automatically gain administrative privileges of that badge, streamlining management.
             </p>
           </div>
         </no-content2>
@@ -213,12 +215,12 @@ const clearErrorMessage = () => {
   </Card>
 
   <RemovalValidation
-      v-if="removeQuizInfo.showDialog"
-      v-model="removeQuizInfo.showDialog"
-      @do-remove="removeQuizFromAdminGroup"
-      :item-name="removeQuizInfo.quiz.name"
+      v-if="removeGlobalBadgeInfo.showDialog"
+      v-model="removeGlobalBadgeInfo.showDialog"
+      @do-remove="removeGlobalBadgeFromAdminGroup"
+      :item-name="removeGlobalBadgeInfo.globalBadge.name"
       removalTextPrefix="This will remove the "
-      :item-type="`quiz from this admin group.  All members of this admin group other than ${userInfo.userInfo.value.userIdForDisplay} will lose admin access to this quiz`"
+      :item-type="`global badge from this admin group.  All members of this admin group other than ${userInfo.userInfo.value.userIdForDisplay} will lose admin access to this global badge`"
       :enable-return-focus="true">
   </RemovalValidation>
 </template>

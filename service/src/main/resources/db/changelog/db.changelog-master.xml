@@ -2926,4 +2926,88 @@
 
     </changeSet>
 
+    <changeSet id="53" author="skills team">
+        <addColumn tableName="user_roles">
+            <!-- optional -->
+            <column name="global_badge_id" type="varchar(255)"/>
+        </addColumn>
+
+        <dropIndex tableName="user_roles" indexName="index_user_roles_user_id_role_name_project_id_quiz_id_admin_group_id" />
+        <createIndex indexName="index_user_roles_user_id_role_name_project_id_quiz_id_admin_group_id_global_badge_id"
+                     tableName="user_roles" unique="true">
+            <column name="user_id" type="varchar(255)"/>
+            <column name="role_name" type="varchar(255)"/>
+            <column name="project_id" type="varchar(255)"/>
+            <column name="quiz_id" type="varchar(255)"/>
+            <column name="admin_group_id" type="varchar(255)"/>
+            <column name="global_badge_id" type="varchar(255)"/>
+        </createIndex>
+
+        <addColumn tableName="custom_icons">
+            <!-- optional -->
+            <column name="global_badge_id" type="varchar(255)"/>
+        </addColumn>
+
+        <createIndex indexName="index_custom_icons_global_badge_id"
+                     tableName="custom_icons">
+            <column name="global_badge_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex indexName="index_custom_icons_global_badge_id_filename"
+                     tableName="custom_icons" unique="true">
+            <column name="global_badge_id" type="varchar(255)"/>
+            <column name="filename" type="varchar(255)"/>
+        </createIndex>
+
+        <!-- convert supervisors to global badge admins -->
+        <sql>
+            WITH supervisor_users AS (
+                SELECT DISTINCT user_id, user_ref_id
+                FROM user_roles
+                WHERE role_name = 'ROLE_SUPERVISOR'
+                  AND project_id IS NULL
+                  AND quiz_id IS NULL
+                  AND admin_group_id IS NULL
+            ),
+                 global_badges AS (
+                     SELECT skill_id
+                     FROM skill_definition
+                     WHERE type = 'GlobalBadge'
+                 )
+            INSERT INTO user_roles (user_id, user_ref_id, role_name, global_badge_id)
+            SELECT su.user_id, su.user_ref_id, 'ROLE_GLOBAL_BADGE_ADMIN' as role_name, gb.skill_id
+            FROM
+                supervisor_users su
+                    CROSS JOIN
+                global_badges gb
+        </sql>
+        <sql>DELETE FROM user_roles WHERE role_name = 'ROLE_SUPERVISOR' AND project_id IS NULL AND quiz_id IS NULL AND admin_group_id IS NULL AND global_badge_id IS NULL</sql>
+
+        <!-- convert global custom icons to global badges -->
+        <sql>
+            WITH global_custom_icons AS (
+                SELECT filename, content_type, data_uri, width, height
+                FROM custom_icons
+                WHERE project_id IS NULL
+            ),
+                 global_badges AS (
+                     SELECT skill_id
+                     FROM skill_definition
+                     WHERE type = 'GlobalBadge'
+                 )
+            INSERT INTO custom_icons (filename, content_type, data_uri, width, height, global_badge_id)
+            SELECT gci.filename, gci.content_type, gci.data_uri, gci.width, gci.height, gb.skill_id
+            FROM
+                global_custom_icons gci
+                    CROSS JOIN
+                global_badges gb
+        </sql>
+        <sql>
+            UPDATE skill_definition
+            SET icon_class = CONCAT(skill_id, SUBSTRING(icon_class, 7))
+            WHERE type = 'GlobalBadge'
+              AND icon_class LIKE 'GLOBAL-%';
+        </sql>
+        <sql>DELETE FROM custom_icons WHERE project_id IS NULL AND global_badge_id IS NULL</sql>
+    </changeSet>
+
 </databaseChangeLog>

@@ -76,7 +76,6 @@ export default defineConfig({
       '^/login$': proxyConf,
       '^/root/': proxyConf,
       '^/userExists': proxyConf,
-      '^/supervisor/': proxyConf,
       '^/public/': proxyConf,
       '^/metrics/' : proxyConf,
       '^/resetPassword$' : proxyConf,

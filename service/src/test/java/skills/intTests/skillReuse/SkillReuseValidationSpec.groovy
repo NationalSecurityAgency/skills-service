@@ -172,12 +172,11 @@ class SkillReuseValidationSpec extends CatalogIntSpec {
 
         skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId)
 
-        SkillsService supervisorService = createSupervisor()
         def badge = SkillsFactory.createBadge(1, 1)
-        supervisorService.createGlobalBadge(badge)
+        skillsService.createGlobalBadge(badge)
 
         when:
-        supervisorService.assignSkillToGlobalBadge(p1.projectId, badge.badgeId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
+        skillsService.assignSkillToGlobalBadge(p1.projectId, badge.badgeId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
         then:
         SkillsClientException ex = thrown(SkillsClientException)
         ex.message.contains("Skill ID must not contain reuse tag")

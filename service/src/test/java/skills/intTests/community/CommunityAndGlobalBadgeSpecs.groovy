@@ -89,8 +89,8 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         def p2Skills = createSkills(3, 2, 1, 100, 5)
         pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
 
-        def badge1 = SkillsFactory.createBadge(1)
-        def badge2 = SkillsFactory.createBadge(2)
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        def badge2 = SkillsFactory.createBadge(2, 2)
         rootUser.createGlobalBadge(badge1)
         rootUser.assignSkillToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId)
 
@@ -123,8 +123,8 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         def p2Skills = createSkills(3, 2, 1, 100, 5)
         pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
 
-        def badge1 = SkillsFactory.createBadge(1)
-        def badge2 = SkillsFactory.createBadge(2)
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        def badge2 = SkillsFactory.createBadge(2, 2)
         rootUser.createGlobalBadge(badge1)
         rootUser.assignSkillToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId)
 
@@ -164,6 +164,9 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         p2Skills[1].skillId = "Skill2"
         p2Skills[2].skillId = "Skill3"
         pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
+
+        rootUser.pinProject(p1.projectId)
+        rootUser.pinProject(p2.projectId)
 
         def badge1 = SkillsFactory.createBadge(1)
         def badge2 = SkillsFactory.createBadge(2)

@@ -165,8 +165,8 @@ class WebsocketSpecs extends DefaultIntSpec {
             skillsService.addSkill([projectId: projId, skillId: subj2.get(1).skillId], 'skills2@skills.org', new Date() - it)
         }
 
-        skillsService.createGlobalBadge([projectId: projId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
-        skillsService.createGlobalBadge([projectId: projId, badgeId: badge2.badgeId, enabled: true, name: badge2.name], badge2.badgeId)
+        skillsService.updateGlobalBadge([projectId: projId, badgeId: badge.badgeId, enabled: true, name: badge.name], badge.badgeId)
+        skillsService.updateGlobalBadge([projectId: projId, badgeId: badge2.badgeId, enabled: true, name: badge2.name], badge2.badgeId)
 
         List<SkillEventResult> wsResults = []
         List<SkillEventResult> wsResults2 = []

@@ -28,7 +28,7 @@ import skills.icons.CustomIconFacade
 @Slf4j
 @skills.profile.EnableCallStackProf
 class CustomIconAdminController {
-    private static final long maxIconFileSize = 1024*1024
+    public static final long maxIconFileSize = 1024*1024
 
     @Autowired
     CustomIconFacade iconFacade
@@ -57,7 +57,7 @@ class CustomIconAdminController {
 
     @RequestMapping(value = "/projects/{projectId}/icons/{filename}", method = RequestMethod.DELETE)
     ResponseEntity<Boolean> delete(@PathVariable("projectId") String projectId, @PathVariable("filename") String filename) {
-        iconFacade.deleteIcon(projectId, filename)
+        iconFacade.deleteProjectIcon(projectId, filename)
         return ResponseEntity.ok(true)
     }
 

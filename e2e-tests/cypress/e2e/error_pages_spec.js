@@ -177,16 +177,9 @@ describe('Error Pages Tests', () => {
     });
 
     it('Global Badge Not Found', () => {
-        const supervisorUser = 'supervisor@skills.org';
-        cy.register(supervisorUser, 'password');
-        cy.login('root@skills.org', 'password');
-        cy.request('PUT', `/root/users/${supervisorUser}/roles/ROLE_SUPERVISOR`);
-        cy.logout();
-        cy.login(supervisorUser, 'password');
-
         cy.intercept({
             method: 'GET',
-            url: '/supervisor/badges/fake'
+            url: '/admin/badges/fake'
         })
             .as('loadGlobalBadge');
         cy.visit('/administrator/globalBadges/fake');
@@ -195,17 +188,11 @@ describe('Error Pages Tests', () => {
         cy.get('[data-cy=errExplanation]')
             .should('be.visible');
         cy.get('[data-cy=errExplanation]')
-            .contains('GlobalBadge [fake] doesn\'t exist.');
+          .contains('You do not have permission to view/manage this Global Badge OR this Global Badge does not exist');
     });
 
     it('Global Badge Not Authorized', () => {
-        const supervisorUser = 'supervisor@skills.org';
-        cy.register(supervisorUser, 'password');
-        cy.login('root@skills.org', 'password');
-        cy.request('PUT', `/root/users/${supervisorUser}/roles/ROLE_SUPERVISOR`);
-        cy.logout();
-        cy.login(supervisorUser, 'password');
-        cy.request('POST', '/supervisor/badges/globalBadge1', {
+        cy.request('POST', '/app/badges/globalBadge1', {
             'enabled': false,
             'originalBadgeId': '',
             'name': 'globalBadge1',
@@ -217,7 +204,7 @@ describe('Error Pages Tests', () => {
         cy.logout();
         cy.login('user1', 'password1');
 
-        cy.intercept('GET', '/supervisor/badges/globalBadge1')
+        cy.intercept('GET', '/admin/badges/globalBadge1')
             .as('loadGlobalBadge');
         cy.visit('/administrator/globalBadges/globalBadge1');
         cy.wait('@loadGlobalBadge');

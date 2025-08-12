@@ -217,16 +217,13 @@ describe('Accessibility Badges Tests', () => {
         });
 
         it(`global badges${darkMode}`, () => {
-            cy.logout();
-            cy.login('root@skills.org', 'password');
             cy.setDarkModeIfNeeded(darkMode)
 
-            cy.intercept('POST', ' /supervisor/badges/globalbadgeBadge/projects/MyNewtestProject/level/1')
+            cy.intercept('POST', ' /admin/badges/globalbadgeBadge/projects/MyNewtestProject/level/1')
                 .as('saveGlobalBadgeLevel');
-            cy.intercept('/supervisor/badges/globalbadgeBadge/skills/available?query=').as('getAvailableSkills')
-            cy.intercept('/supervisor/badges/globalbadgeBadge/projects/available?query=').as('getAvailableProjects')
-            cy.intercept('/supervisor/projects/MyNewtestProject/levels').as('getProjectLevels')
-            cy.request('PUT', `/root/users/root@skills.org/roles/ROLE_SUPERVISOR`);
+            cy.intercept('/admin/badges/globalbadgeBadge/skills/available?query=').as('getAvailableSkills')
+            cy.intercept('/admin/badges/globalbadgeBadge/projects/available?query=').as('getAvailableProjects')
+            cy.intercept('/admin/projects/MyNewtestProject/levels').as('getProjectLevels')
             cy.visit('/administrator/globalBadges');
             cy.injectAxe();
             cy.get('[data-cy="noContent"]').contains('No Badges Yet')

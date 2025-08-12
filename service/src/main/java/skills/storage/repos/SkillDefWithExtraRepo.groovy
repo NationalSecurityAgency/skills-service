@@ -19,6 +19,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.PagingAndSortingRepository
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.skillLoading.model.SkillBadgeSummary
 import skills.storage.model.SimpleBadgeRes
@@ -210,4 +211,14 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
               and LOWER(skill_id) <> LOWER(?2)
               and LOWER(project_id) = LOWER(?1) ''', nativeQuery = true)
     Boolean otherSkillsExistInProjectWithAttachmentUUID(String projectId, String notThisSkill, String attachmentUUID)
+
+
+    @Nullable
+    @Query('''SELECT sd 
+          FROM SkillDefWithExtra sd
+          JOIN UserRole ur ON ur.globalBadgeId = sd.skillId
+          WHERE ur.userId = :userId 
+          AND ur.roleName = :#{T(skills.storage.model.auth.RoleName).ROLE_GLOBAL_BADGE_ADMIN} 
+          AND sd.type = :#{T(skills.storage.model.SkillDef.ContainerType).GlobalBadge}''')
+    List<SkillDefWithExtra> findGlobalBadgesForAdmin(@Param("userId") String userId)
 }

@@ -68,14 +68,15 @@ interface AdminGroupDefRepo extends CrudRepository<AdminGroupDef, Long> {
                     COALESCE(numberOfOwners, 0) as numberOfOwners,
                     COALESCE(numberOfMembers, 0) as numberOfMembers,
                     COALESCE(numberOfProjects, 0) as numberOfProjects,
-                    COALESCE(numberOfQuizzesAndSurveys, 0) as numberOfQuizzesAndSurveys
-                    
+                    COALESCE(numberOfQuizzesAndSurveys, 0) as numberOfQuizzesAndSurveys,
+                    COALESCE(numberOfGlobalBadges, 0) as numberOfGlobalBadges
                 FROM admin_group_definition agd
                 JOIN user_roles ur on (ur.admin_group_id = agd.admin_group_id AND ur.role_name in ('ROLE_ADMIN_GROUP_OWNER'))
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct user_id) AS numberOfOwners FROM user_roles WHERE role_name = 'ROLE_ADMIN_GROUP_OWNER' group by admin_group_id ) adminGroupOwners ON adminGroupOwners.admin_group_id = agd.admin_group_id
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct user_id) AS numberOfMembers FROM user_roles WHERE role_name = 'ROLE_ADMIN_GROUP_MEMBER' group by admin_group_id ) adminGroupMembers ON adminGroupMembers.admin_group_id = agd.admin_group_id
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct project_id) AS numberOfProjects FROM user_roles WHERE role_name = 'ROLE_PROJECT_ADMIN' group by admin_group_id ) projectAdminRoles ON projectAdminRoles.admin_group_id = agd.admin_group_id
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct quiz_id) AS numberOfQuizzesAndSurveys FROM user_roles WHERE role_name = 'ROLE_QUIZ_ADMIN' group by admin_group_id ) quizAdminRoles ON quizAdminRoles.admin_group_id = agd.admin_group_id
+                LEFT JOIN (SELECT admin_group_id, COUNT(distinct global_badge_id) AS numberOfGlobalBadges FROM user_roles WHERE role_name = 'ROLE_GLOBAL_BADGE_ADMIN' group by admin_group_id ) globalBadgeAdminRoles ON globalBadgeAdminRoles.admin_group_id = agd.admin_group_id
                 WHERE ur.user_id = ?1
             """, nativeQuery = true)
     @Nullable
@@ -90,14 +91,15 @@ interface AdminGroupDefRepo extends CrudRepository<AdminGroupDef, Long> {
                     COALESCE(numberOfOwners, 0) as numberOfOwners,
                     COALESCE(numberOfMembers, 0) as numberOfMembers,
                     COALESCE(numberOfProjects, 0) as numberOfProjects,
-                    COALESCE(numberOfQuizzesAndSurveys, 0) as numberOfQuizzesAndSurveys
-                    
+                    COALESCE(numberOfQuizzesAndSurveys, 0) as numberOfQuizzesAndSurveys,
+                    COALESCE(numberOfGlobalBadges, 0) as numberOfGlobalBadges
                 FROM admin_group_definition agd
                 JOIN user_roles ur on (ur.admin_group_id = agd.admin_group_id)
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct user_id) AS numberOfOwners FROM user_roles WHERE role_name = 'ROLE_ADMIN_GROUP_OWNER' group by admin_group_id ) adminGroupOwners ON adminGroupOwners.admin_group_id = agd.admin_group_id
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct user_id) AS numberOfMembers FROM user_roles WHERE role_name = 'ROLE_ADMIN_GROUP_MEMBER' group by admin_group_id ) adminGroupMembers ON adminGroupMembers.admin_group_id = agd.admin_group_id
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct project_id) AS numberOfProjects FROM user_roles WHERE role_name = 'ROLE_PROJECT_ADMIN' group by admin_group_id ) projectAdminRoles ON projectAdminRoles.admin_group_id = agd.admin_group_id
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct quiz_id) AS numberOfQuizzesAndSurveys FROM user_roles WHERE role_name = 'ROLE_QUIZ_ADMIN' group by admin_group_id ) quizAdminRoles ON quizAdminRoles.admin_group_id = agd.admin_group_id
+                LEFT JOIN (SELECT admin_group_id, COUNT(distinct global_badge_id) AS numberOfGlobalBadges FROM user_roles WHERE role_name = 'ROLE_GLOBAL_BADGE_ADMIN' group by admin_group_id ) globalBadgeAdminRoles ON globalBadgeAdminRoles.admin_group_id = agd.admin_group_id
                 WHERE ur.project_id = ?1
             """, nativeQuery = true)
     @Nullable
@@ -112,19 +114,42 @@ interface AdminGroupDefRepo extends CrudRepository<AdminGroupDef, Long> {
                     COALESCE(numberOfOwners, 0) as numberOfOwners,
                     COALESCE(numberOfMembers, 0) as numberOfMembers,
                     COALESCE(numberOfProjects, 0) as numberOfProjects,
-                    COALESCE(numberOfQuizzesAndSurveys, 0) as numberOfQuizzesAndSurveys
-                    
+                    COALESCE(numberOfQuizzesAndSurveys, 0) as numberOfQuizzesAndSurveys,
+                    COALESCE(numberOfGlobalBadges, 0) as numberOfGlobalBadges
                 FROM admin_group_definition agd
                 JOIN user_roles ur on (ur.admin_group_id = agd.admin_group_id)
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct user_id) AS numberOfOwners FROM user_roles WHERE role_name = 'ROLE_ADMIN_GROUP_OWNER' group by admin_group_id ) adminGroupOwners ON adminGroupOwners.admin_group_id = agd.admin_group_id
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct user_id) AS numberOfMembers FROM user_roles WHERE role_name = 'ROLE_ADMIN_GROUP_MEMBER' group by admin_group_id ) adminGroupMembers ON adminGroupMembers.admin_group_id = agd.admin_group_id
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct project_id) AS numberOfProjects FROM user_roles WHERE role_name = 'ROLE_PROJECT_ADMIN' group by admin_group_id ) projectAdminRoles ON projectAdminRoles.admin_group_id = agd.admin_group_id
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct quiz_id) AS numberOfQuizzesAndSurveys FROM user_roles WHERE role_name = 'ROLE_QUIZ_ADMIN' group by admin_group_id ) quizAdminRoles ON quizAdminRoles.admin_group_id = agd.admin_group_id
+                LEFT JOIN (SELECT admin_group_id, COUNT(distinct global_badge_id) AS numberOfGlobalBadges FROM user_roles WHERE role_name = 'ROLE_GLOBAL_BADGE_ADMIN' group by admin_group_id ) globalBadgeAdminRoles ON globalBadgeAdminRoles.admin_group_id = agd.admin_group_id
                 WHERE ur.quiz_id = ?1
             """, nativeQuery = true)
     @Nullable
     List<AdminGroupDefSummaryRes> getAdminGroupDefSummariesByQuizId(String quizId)
 
+    @Query(value="""
+                SELECT DISTINCT
+                    agd.admin_group_id AS adminGroupId,
+                    agd.name AS name,
+                    agd.created,
+                    agd.protected_community_enabled as protectedCommunityEnabled,
+                    COALESCE(numberOfOwners, 0) as numberOfOwners,
+                    COALESCE(numberOfMembers, 0) as numberOfMembers,
+                    COALESCE(numberOfProjects, 0) as numberOfProjects,
+                    COALESCE(numberOfQuizzesAndSurveys, 0) as numberOfQuizzesAndSurveys,
+                    COALESCE(numberOfGlobalBadges, 0) as numberOfGlobalBadges
+                FROM admin_group_definition agd
+                JOIN user_roles ur on (ur.admin_group_id = agd.admin_group_id)
+                LEFT JOIN (SELECT admin_group_id, COUNT(distinct user_id) AS numberOfOwners FROM user_roles WHERE role_name = 'ROLE_ADMIN_GROUP_OWNER' group by admin_group_id ) adminGroupOwners ON adminGroupOwners.admin_group_id = agd.admin_group_id
+                LEFT JOIN (SELECT admin_group_id, COUNT(distinct user_id) AS numberOfMembers FROM user_roles WHERE role_name = 'ROLE_ADMIN_GROUP_MEMBER' group by admin_group_id ) adminGroupMembers ON adminGroupMembers.admin_group_id = agd.admin_group_id
+                LEFT JOIN (SELECT admin_group_id, COUNT(distinct project_id) AS numberOfProjects FROM user_roles WHERE role_name = 'ROLE_PROJECT_ADMIN' group by admin_group_id ) projectAdminRoles ON projectAdminRoles.admin_group_id = agd.admin_group_id
+                LEFT JOIN (SELECT admin_group_id, COUNT(distinct quiz_id) AS numberOfQuizzesAndSurveys FROM user_roles WHERE role_name = 'ROLE_QUIZ_ADMIN' group by admin_group_id ) quizAdminRoles ON quizAdminRoles.admin_group_id = agd.admin_group_id
+                LEFT JOIN (SELECT admin_group_id, COUNT(distinct global_badge_id) AS numberOfGlobalBadges FROM user_roles WHERE role_name = 'ROLE_GLOBAL_BADGE_ADMIN' group by admin_group_id ) globalBadgeAdminRoles ON globalBadgeAdminRoles.admin_group_id = agd.admin_group_id
+                WHERE ur.global_badge_id = ?1
+            """, nativeQuery = true)
+    @Nullable
+    List<AdminGroupDefSummaryRes> getAdminGroupDefSummariesByGlobalBadgeId(String badgeId)
 
     static interface AdminGroupDefSummaryRes {
         String getAdminGroupId();
@@ -135,6 +160,7 @@ interface AdminGroupDefRepo extends CrudRepository<AdminGroupDef, Long> {
         Integer getNumberOfMembers()
         Integer getNumberOfProjects()
         Integer getNumberOfQuizzesAndSurveys()
+        Integer getNumberOfGlobalBadges()
     }
     @Query(value="""
                 select 
@@ -145,12 +171,14 @@ interface AdminGroupDefRepo extends CrudRepository<AdminGroupDef, Long> {
                     COALESCE(numberOfOwners, 0) as numberOfOwners,
                     COALESCE(numberOfMembers, 0) as numberOfMembers,
                     COALESCE(numberOfProjects, 0) as numberOfProjects,
-                    COALESCE(numberOfQuizzesAndSurveys, 0) as numberOfQuizzesAndSurveys
+                    COALESCE(numberOfQuizzesAndSurveys, 0) as numberOfQuizzesAndSurveys,
+                    COALESCE(numberOfGlobalBadges, 0) as numberOfGlobalBadges
                 FROM admin_group_definition agd
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct user_id) AS numberOfOwners FROM user_roles WHERE role_name = 'ROLE_ADMIN_GROUP_OWNER' group by admin_group_id ) adminGroupOwners ON adminGroupOwners.admin_group_id = agd.admin_group_id
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct user_id) AS numberOfMembers FROM user_roles WHERE role_name = 'ROLE_ADMIN_GROUP_MEMBER' group by admin_group_id ) adminGroupMembers ON adminGroupMembers.admin_group_id = agd.admin_group_id
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct project_id) AS numberOfProjects FROM user_roles WHERE role_name = 'ROLE_PROJECT_ADMIN' group by admin_group_id ) projectAdminRoles ON projectAdminRoles.admin_group_id = agd.admin_group_id
                 LEFT JOIN (SELECT admin_group_id, COUNT(distinct quiz_id) AS numberOfQuizzesAndSurveys FROM user_roles WHERE role_name = 'ROLE_QUIZ_ADMIN' group by admin_group_id ) quizAdminRoles ON quizAdminRoles.admin_group_id = agd.admin_group_id
+                LEFT JOIN (SELECT admin_group_id, COUNT(distinct global_badge_id) AS numberOfGlobalBadges FROM user_roles WHERE role_name = 'ROLE_GLOBAL_BADGE_ADMIN' group by admin_group_id ) globalBadgeAdminRoles ON globalBadgeAdminRoles.admin_group_id = agd.admin_group_id
                 WHERE agd.admin_group_id = ?1
             """, nativeQuery = true)
     AdminGroupDefSummaryRes getAdminGroupDefSummary(String adminGroupId)
