@@ -41,7 +41,7 @@ const props = defineProps({
 })
 const announcer = useSkillsAnnouncer()
 const vidPlayerId = props.videoPlayerId
-const emit = defineEmits(['player-destroyed', 'watched-progress', 'on-resize'])
+const emit = defineEmits(['player-destroyed', 'watched-progress', 'on-resize', 'reset-video-progress', 'video-ended'])
 const watchProgress = ref({
   watchSegments: [],
   currentStart: null,
@@ -93,6 +93,9 @@ onMounted(() => {
       updateProgress(player.currentTime());
     });
     player.on('play', () => {
+      if(watchProgress.value.percentWatched === 100) {
+        resetProgress()
+      }
       isPlaying.value = true
     });
     player.on('pause', () => {
@@ -101,6 +104,10 @@ onMounted(() => {
         createResizeSupport()
       })
     });
+    player.on('ended', () => {
+      isPlaying.value = false;
+      emit('video-ended', watchProgress.value);
+    })
     playerContainer.player = player
   });
 
@@ -117,6 +124,18 @@ onUnmounted(() => {
 const updateProgress = (currentTime) => {
   WatchedSegmentsUtil.updateProgress(watchProgress.value, currentTime)
   emit('watched-progress', watchProgress.value)
+}
+
+const resetProgress = () => {
+  watchProgress.value.watchSegments = []
+  watchProgress.value.currentStart = null
+  watchProgress.value.percentWatched = 0
+  watchProgress.value.currentPosition = 0
+  watchProgress.value.lastKnownStopPosition = null
+  watchProgress.value.totalWatchTime = 0
+
+  WatchedSegmentsUtil.updateProgress(watchProgress.value, 0)
+  emit('reset-video-progress', watchProgress.value)
 }
 
 const getResizableElement = () => {
