@@ -470,6 +470,8 @@ describe('Global Badges Tests', () => {
         const expectedId = 'TestBadgeBadge';
 
         cy.intercept(`/app/badges/${expectedId}`)
+          .as('createGlobalBadge');
+        cy.intercept(`/app/badges/${expectedId}`)
           .as('postGlobalBadge');
         cy.intercept('GET', `/app/badges/id/${expectedId}/exists`)
             .as('idExists');
@@ -486,7 +488,7 @@ describe('Global Badges Tests', () => {
             .type('Test Badge');
         cy.wait('@nameExists');
         cy.clickSave();
-        cy.wait('@postGlobalBadge');
+        cy.wait('@createGlobalBadge');
 
         cy.clickNav('Global Badges');
         cy.contains('Manage')
@@ -551,7 +553,7 @@ describe('Global Badges Tests', () => {
         });
 
         const expectedId = 'TestBadgeBadge';
-        
+
         cy.intercept('GET', `/app/badges/id/${expectedId}/exists`)
             .as('idExists');
         cy.intercept(`/app/badges/${expectedId}`)
@@ -609,7 +611,7 @@ describe('Global Badges Tests', () => {
     });
 
     it('Can add Skill and Level requirements to disabled Global Badge', () => {
-        
+
         cy.intercept('PUT', `/app/badges/ABadgeBadge`)
             .as('postGlobalBadge');
         cy.intercept('PUT', `/app/badges/ABadgeBadge`)
@@ -786,8 +788,6 @@ describe('Global Badges Tests', () => {
     });
 
     it('new badge button should retain focus after dialog is closed', () => {
-        
-
         cy.visit('/administrator/');
         cy.get('[data-cy="inception-button"]').contains('Level');
         cy.clickNav('Global Badges');
@@ -1476,8 +1476,6 @@ describe('Global Badges Tests', () => {
             name: 'Badge 2'
         });
 
-        
-
         cy.visit('/administrator/');
         cy.get('[data-cy="inception-button"]').contains('Level');
         cy.clickNav('Global Badges');
@@ -1538,8 +1536,6 @@ describe('Global Badges Tests', () => {
     });
 
     it('description is validated against custom validators', () => {
-        
-
         cy.visit('/administrator/globalBadges');
         cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getGlobalBadges');
@@ -2317,5 +2313,5 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="deleteSkillWarning"]').should('not.exist')
         cy.get('[data-cy="closeDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
-    })
+    });
 });
