@@ -151,7 +151,6 @@ const sendInvites = () => {
 
   AccessService.sendProjectInvites(route.params.projectId, inviteRequest).then((resp) => {
     inviteRecipients.value = []
-    ccRecipients.value = []
     if (resp.unsuccessful) {
       failedEmails.value = resp.unsuccessful.join(', ')
       failedEmailsErrors.value = resp.unsuccessfulErrors
@@ -160,6 +159,7 @@ const sendInvites = () => {
       } else {
         currentEmails.value += resp.unsuccessful.join('\n')
       }
+      ccEmails.value = ccRecipients.value
     }
     if (resp.successful.length > 0) {
       successMsg.value = `Successfully sent ${resp.successful.length} project invite(s)`
@@ -171,6 +171,7 @@ const sendInvites = () => {
     }
   }).finally(() => {
     sending.value = false
+    ccRecipients.value = []
   })
 }
 
