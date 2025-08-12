@@ -128,13 +128,20 @@ class MetricsLogger {
                     headers.setContentType(MediaType.APPLICATION_JSON);
                     HttpEntity<MetricsMessage> entity = new HttpEntity<>(message, headers);
                     try {
-                        restTemplate.put(endpointUrl, entity);
+                        if (log.isDebugEnabled()) {
+                            long startTime = System.currentTimeMillis();
+                            restTemplate.put(endpointUrl, entity);
+                            long duration = System.currentTimeMillis() - startTime;
+                            log.debug("Metrics request to [{}] completed in [{}] ms, with attributes {}", endpointUrl, duration, attributes);
+                        } else {
+                            restTemplate.put(endpointUrl, entity);
+                        }
                     } catch (Exception ex) {
                         log.error("Unable to report to external metrics service", ex)
                     }
                 }])
             } catch (RejectedExecutionException ree) {
-                log.error("Queue is full with [${queueCapacity}] items. Request was rejected for: ${attributes}")
+                log.error("Queue is full with [${queueCapacity}] items. Request was rejected for: ${attributes}, err msg: ${ree.message}")
             }
         }
     }
