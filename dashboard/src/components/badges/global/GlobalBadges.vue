@@ -164,7 +164,8 @@ const publishBadge = (badge) => {
         toSave.endDate = toDate(toSave.endDate);
 
         const requiredIds = badge.requiredSkills.map((item) => item.skillId);
-        const badgeReq = { requiredSkillsIds: requiredIds, ...badge };
+        const badgeReq = { requiredSkillsIds: requiredIds, ...toSave };
+        badgeReq.isEdit = true
         GlobalBadgeService.saveBadge(badgeReq).then(() => {
           saveBadge(toSave);
         });

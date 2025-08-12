@@ -83,17 +83,20 @@ const loadBadge = () => {
   }
 };
 
-const badgeEdited = (editedBadge) => {
+const goLive = (editedBadge) => {
   GlobalBadgeService.saveBadge(editedBadge).then((resp) => {
-    const origId = badge.badgeId;
-    badgeState.loadGlobalBadgeDetailsState(badgeId.value).finally(() => {
-      badge.value = badgeState.badge;
-    });
-    if (origId !== resp.badgeId) {
-      router.replace({ name: route.name, params: { ...route.params, badgeId: resp.badgeId } });
-      badgeId.value = resp.badgeId;
+    badgeEdited(resp)
+  });
+
+};
+const badgeEdited = (editedBadge) => {
+  const origId = badge.value.badgeId;
+  badgeState.loadGlobalBadgeDetailsState(badgeId.value).finally(() => {
+    badge.value = badgeState.badge;
+    if (origId !== editedBadge.badgeId) {
+      badgeId.value = editedBadge.badgeId;
+      router.replace({ name: route.name, params: { ...route.params, badgeId: editedBadge.badgeId } });
     }
-  }).finally(() => {
   });
 };
 
@@ -122,7 +125,8 @@ const handlePublish = () => {
         }
         toSave.startDate = toDate(toSave.startDate);
         toSave.endDate = toDate(toSave.endDate);
-        badgeEdited(toSave);
+        toSave.isEdit = true
+        goLive(toSave);
       }
     });
   } else {
