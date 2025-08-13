@@ -164,7 +164,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
         cy.get('[data-cy=newProjectButton]').click()
         cy.get('[data-cy="projectName"]').should('have.focus')
 
-        cy.get('[data-cy="markdownEditorInput"]').type('value{selectAll}{ctrl+alt+s}')
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', 'value{selectAll}{ctrl+alt+s}')
         cy.get('.toastui-editor-popup-body .size-input').should('have.focus').type('22{enter}')
         cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents [style="font-size: 22px;"]').should('have.text', 'value');
     });
@@ -174,7 +174,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
         cy.get('[data-cy=newProjectButton]').click()
         cy.get('[data-cy="projectName"]').should('have.focus')
 
-        cy.get('[data-cy="markdownEditorInput"]').type('{ctrl+alt+i}')
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{ctrl+alt+i}')
         cy.get('.toastui-editor-popup-body .toastui-editor-tabs .tab-item.active').should('have.focus');
         cy.get('.toastui-editor-popup-body .toastui-editor-tabs .tab-item.active').tab()
         cy.get('.toastui-editor-popup-body .toastui-editor-file-select-button').should('have.focus')
@@ -191,7 +191,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
         cy.get('[data-cy=newProjectButton]').click()
         cy.get('[data-cy="projectName"]').should('have.focus')
 
-        cy.get('[data-cy="markdownEditorInput"]').type('{ctrl+alt+i}')
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{ctrl+alt+i}')
         cy.get('.toastui-editor-popup-body .toastui-editor-tabs .tab-item.active').should('have.focus').should('have.text', 'File')
         cy.get('.toastui-editor-popup-body .toastui-editor-tabs .tab-item.active').tab()
         cy.get('.toastui-editor-popup-body .toastui-editor-tabs .tab-item.active').type('{rightArrow}')
@@ -216,7 +216,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
         cy.get('[data-cy=newProjectButton]').click()
         cy.get('[data-cy="projectName"]').should('have.focus')
 
-        cy.get('[data-cy="markdownEditorInput"]').type('{ctrl+alt+r}')
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{ctrl+alt+r}')
         cy.get('.toastui-editor-popup-body #toastuiLinkUrlInput').should('have.focus')
         cy.get('.toastui-editor-popup-body #toastuiLinkUrlInput').type('/static/img/skilltree_logo_v1.png')
         cy.get('.toastui-editor-popup-body #toastuiLinkUrlInput').tab()

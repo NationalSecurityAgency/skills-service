@@ -53,7 +53,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.openDialog('[data-cy="btn_Questions"]', true)
         cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '0')
 
-        cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'What is 2 + 2?')
         cy.get('[data-cy="answerHintEnableCheckbox"]').click()
         cy.get('[data-cy="answerHint"]').type('Trying counting with your fingers :)')
         cy.get('[data-cy="answerTypeSelector"]').click()
@@ -75,7 +75,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="btn_Questions"]').should('have.focus')
 
         cy.openDialog('[data-cy="newQuestionOnBottomBtn"]', true)
-        cy.get('[data-cy="questionText"]').type('What is 1 + 2?')
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'What is 1 + 2?')
         cy.get('[data-cy="answerHintEnableCheckbox"]').click()
         cy.get('[data-cy="answerHint"]').type('Trying counting with your fingers for this one too :)')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
@@ -167,11 +167,11 @@ describe('Quiz Question CRUD Tests', () => {
         cy.openDialog('[data-cy="btn_Questions"]', true)
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
-        cy.get('[data-cy="questionText"]').type('What is jabberwocky?')
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'What is jabberwocky?')
         cy.get('[data-cy="descriptionError"]').contains('Question - paragraphs may not contain jabberwocky')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="questionText"] div.toastui-editor-contents[contenteditable="true"]').clear()
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', '{selectall}{backspace}')
         cy.get('[data-cy="descriptionError"]').contains('Question is a required field')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
     });
@@ -197,7 +197,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="btn_Questions"]').click()
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
-        cy.get('[data-cy="questionText"]').type('a')
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'a')
 
         cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
@@ -233,7 +233,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.openDialog('[data-cy="btn_Questions"]', true)
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
-        cy.get('[data-cy="questionText"]').type('a')
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'a')
 
         cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
@@ -252,7 +252,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.openDialog('[data-cy="btn_Questions"]', true)
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
-        cy.get('[data-cy="questionText"]').type('a')
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'a')
 
         cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
@@ -271,7 +271,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.openDialog('[data-cy="btn_Questions"]', true)
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
-        cy.get('[data-cy="questionText"]').type('a')
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'a')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
@@ -290,7 +290,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.openDialog('[data-cy="btn_Questions"]', true)
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
-        cy.get('[data-cy="questionText"]').type('a')
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'a')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
 
@@ -361,7 +361,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.openDialog('[data-cy="btn_Questions"]', true)
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
-        cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'What is 2 + 2?')
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
 
@@ -383,12 +383,13 @@ describe('Quiz Question CRUD Tests', () => {
     });
 
     it('question and answers are changed in various ways before saved', function () {
+        cy.viewport(1000, 1400)
         cy.createQuizDef(1);
         cy.visit('/administrator/quizzes/quiz1');
         cy.openDialog('[data-cy="btn_Questions"]', true)
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
 
-        cy.get('[data-cy="questionText"]').type('What is 2 + 2?')
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'What is 2 + 2?')
         cy.get('[data-cy="answerHintEnableCheckbox"]').click()
         cy.get('[data-cy="answerHint"]').type('Trying counting with your fingers :)')
 
@@ -427,7 +428,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answer-4"] [data-cy="removeAnswer"]').click()
         cy.get('[data-cy="answer-0"] [data-cy="removeAnswer"]').click()
 
-        cy.get('[data-cy="questionText"]  div.toastui-editor-contents[contenteditable="true"]').clear().type('All diff?')
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', '{selectall}{backspace}All diff?')
         cy.get('[data-cy="answerHint"]').clear().type('This hint is totally different\nthis is a new line')
 
         cy.clickSaveDialogBtn()
@@ -593,7 +594,7 @@ describe('Quiz Question CRUD Tests', () => {
 
         // initiate via bottom btn
         cy.get('[data-cy="editQuestionButton_2"]').click();
-        cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"]').contains('This is a question # 2')
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'This is a question # 2')
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').should('exist')
         cy.get('[data-cy="closeDialogBtn"]').click()
         cy.get('[data-cy="closeDialogBtn"]').should('not.exist')
@@ -601,7 +602,7 @@ describe('Quiz Question CRUD Tests', () => {
 
         // using modal X on the top right
         cy.get('[data-cy="editQuestionButton_1"]').click();
-        cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"]').contains('This is a question # 1')
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'This is a question # 1')
         cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').should('exist')
         cy.get('.p-dialog-header [aria-label="Close"]').click()
         cy.get('.p-dialog-header [aria-label="Close"]').should('not.exist')
@@ -656,13 +657,14 @@ describe('Quiz Question CRUD Tests', () => {
     });
 
     it('creating 2nd question enables drag-and-drop', function () {
+        cy.viewport(1000, 1400)
         cy.createQuizDef(1);
         cy.visit('/administrator/quizzes/quiz1');
 
         cy.openDialog('[data-cy="newQuestionOnBottomBtn"]', true)
         cy.get('[data-cy="answerTypeSelector"]').click()
         cy.get('[data-cy="selectionItem_SingleChoice"]').click()
-        cy.get('[data-cy="questionText"]').type('question # 1', {delay: 0})
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'question # 1')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
         cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
@@ -670,7 +672,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.clickSaveDialogBtn()
 
         cy.openDialog('[data-cy="newQuestionOnBottomBtn"]', true)
-        cy.get('[data-cy="questionText"]').type('question # 2', {delay: 0})
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'question # 2')
         cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('a')
         cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('b')
         cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()

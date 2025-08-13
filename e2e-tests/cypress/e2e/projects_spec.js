@@ -293,6 +293,7 @@ describe('Projects Tests', () => {
     });
 
     it('project description is retained after editing', () => {
+        cy.viewport(1000, 1400);
         cy.createProject(1);
         cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
         cy.intercept('GET', '/app/projects/proj1/description').as('loadDescription');
