@@ -429,12 +429,17 @@ describe('Skills Tests', () => {
     // increase the points and make sure the warning is gone
     cy.get('[data-cy="editSkillButton_skill1"]').click()
     cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').type('{selectall}10')
-    cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled')
+    cy.get('[data-p="modal"]')
+    cy.get('[data-cy=saveDialogBtn]').click()
+    cy.get('[data-p="modal"]').should('not.exist')
 
     // decrease the points and make sure the warning returns
     cy.get('[data-cy="editSkillButton_skill1"]').click()
     cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').type('{selectall}5')
-    cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled')
+    cy.get('[data-cy=saveDialogBtn]').click()
+    cy.get('[data-p="modal"]').should('not.exist')
 
     cy.get('[data-cy="addSkillEventButton"]').should('not.be.enabled');
     cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should('exist');
@@ -485,12 +490,16 @@ describe('Skills Tests', () => {
     // increase the points and make sure the warning is gone
     cy.get('[data-cy="editSkillButton_skill1"]').click()
     cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').type('{selectall}10')
-    cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled')
+    cy.get('[data-cy=saveDialogBtn]').click()
+    cy.get('[data-p="modal"]').should('not.exist')
 
     // decrease the points and make sure the warning returns
     cy.get('[data-cy="editSkillButton_skill1"]').click()
     cy.get('[data-cy="numPerformToCompletion"] [data-pc-name="pcinputtext"]').type('{selectall}5')
-    cy.get('[data-cy=saveDialogBtn]').should('be.enabled').click()
+    cy.get('[data-cy=saveDialogBtn]').should('be.enabled')
+    cy.get('[data-cy=saveDialogBtn]').click()
+    cy.get('[data-p="modal"]').should('not.exist')
 
     cy.get('[data-cy="addSkillEventButton"]').should('not.be.enabled');
     cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should('exist');
@@ -955,6 +964,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=skillName]').type('{selectall}Edited Skill Name')
     cy.get('[data-cy=pointIncrement]').click()
     cy.get('[data-cy=saveDialogBtn]').click()
+    cy.get('[data-p="modal"]').should('not.exist')
     cy.wait('@saveSkill1')
     cy.get('[data-cy=editSkillButton_skill1]').should('have.focus')
     cy.contains('SKILL: Edited Skill Name').should('be.visible')
@@ -966,6 +976,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=idInputValue]').type('{selectall}entirelyNewId')
     cy.get('[data-cy=pointIncrement]').click()
     cy.get('[data-cy=saveDialogBtn]').click()
+    cy.get('[data-p="modal"]').should('not.exist')
     cy.wait('@validateDescription')
     cy.wait('@validateUrl')
     cy.wait('@afterIdEdit')
@@ -980,6 +991,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=editSkillButton_entirelyNewId]').click()
     cy.get('[data-cy=pointIncrement]').type('{selectall}20')
     cy.get('[data-cy=saveDialogBtn]').click()
+    cy.get('[data-p="modal"]').should('not.exist')
     cy.wait('@validateDescription')
     cy.wait('@validateUrl')
     cy.wait('@afterIdEdit')
@@ -989,6 +1001,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=editSkillButton_entirelyNewId]').click()
     cy.get('[data-cy=numPerformToCompletion]').type('{selectall}10')
     cy.get('[data-cy=saveDialogBtn]').click()
+    cy.get('[data-p="modal"]').should('not.exist')
     cy.wait('@validateDescription')
     cy.wait('@validateUrl')
     cy.wait('@afterIdEdit')
@@ -1000,11 +1013,13 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=timeWindowCheckbox').click()
     cy.get('[data-cy=pointIncrementIntervalMins]').type('{selectall}59')
     cy.get('[data-cy=saveDialogBtn]').click()
+    cy.get('[data-p="modal"]').should('not.exist')
     cy.wait('@afterIdEdit')
     cy.contains('8 Hours 59 Minutes').should('be.visible')
     cy.get('[data-cy=editSkillButton_entirelyNewId]').click()
     cy.get('[data-cy=selfReportEnableCheckbox]').click()
     cy.get('[data-cy=saveDialogBtn]').click()
+    cy.get('[data-p="modal"]').should('not.exist')
     cy.wait('@validateDescription')
     cy.wait('@validateUrl')
     cy.wait('@afterIdEdit')
@@ -1012,6 +1027,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=editSkillButton_entirelyNewId]').click()
     cy.get('[data-cy=markdownEditorInput]').type('{selectall}LOREM')
     cy.get('[data-cy=saveDialogBtn]').click()
+    cy.get('[data-p="modal"]').should('not.exist')
     cy.wait('@validateDescription')
     cy.wait('@validateUrl')
     cy.wait('@afterIdEdit')
@@ -1020,6 +1036,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=editSkillButton_entirelyNewId]').click()
     cy.get('[data-cy=skillHelpUrl]').type('{selectall}http://fake/fake/fake.fake')
     cy.get('[data-cy=saveDialogBtn]').click()
+    cy.get('[data-p="modal"]').should('not.exist')
     cy.wait('@validateDescription')
     cy.wait('@validateUrl')
     cy.wait('@afterIdEdit')
