@@ -28,6 +28,7 @@ import skills.controller.result.model.*
 import skills.skillLoading.RankingLoader
 import skills.skillLoading.model.UsersPerLevel
 import skills.storage.model.DayCountItem
+import skills.storage.model.MonthlyCountItem
 import skills.storage.model.SkillDef
 import skills.storage.model.UserPoints
 import skills.storage.repos.ProjDefRepo
@@ -88,6 +89,21 @@ class AdminUsersService {
         }
 
         return countsPerDay
+    }
+
+    List<TimestampCountItem> getUsagePerMonth(String projectId, String skillId, Date start) {
+        Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
+
+        List<MonthlyCountItem> res = userEventService.getDistinctUserCountsForProjectByMonth(projectId, startDate)
+//        skillId ? userEventService.getDistinctUserCountForSkillId(projectId, skillId, startDate) :
+
+
+        List<TimestampCountItem> countsPerMonth = []
+        res?.each {
+            countsPerMonth << new TimestampCountItem(value: it.month.time, count: it.count)
+        }
+
+        return countsPerMonth
     }
 
     List<TimestampCountItem> getBadgesPerDay(String projectId, String badgeId, Integer numDays) {

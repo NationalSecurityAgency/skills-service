@@ -221,6 +221,16 @@ class UserEventService {
         return results
     }
 
+    @Transactional(readOnly = true)
+    List<MonthlyCountItem> getDistinctUserCountsForProjectByMonth(String projectId, Date start) {
+        EventType eventType = determineAppropriateEventType(start)
+        List<MonthlyCountItem> results
+        Stream<MonthlyCountItem> stream = userEventsRepo.getDistinctUserCountForProjectGroupedByMonth(projectId, start)
+//        results = convertResults(stream, eventType, start, [projectId])
+
+        return results
+    }
+
     /**
      * Records a SkillEvent for the specified user. Note that these events are separate from any achievement or point tracking events and
      * are recorded regardless of whether or not the reported SkillEvent was applied.

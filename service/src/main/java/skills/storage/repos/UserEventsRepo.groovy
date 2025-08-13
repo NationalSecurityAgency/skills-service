@@ -30,6 +30,7 @@ import skills.storage.model.LabeledCount
 import skills.storage.model.UserEvent
 import skills.storage.model.UserMetrics
 import skills.storage.model.WeekCountItem
+import skills.storage.model.MonthlyCountItem
 
 import jakarta.persistence.QueryHint
 import java.util.stream.Stream
@@ -412,6 +413,13 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
         order by ue.weekNumber desc
     """)
     Stream<WeekCountItem> getDistinctUserCountForProjectGroupedByWeek(@Param("projectId") String projectId, @Param("start") Date start)
+
+    @Query(value="""
+        SELECT ue.projectId, date_trunc('month', ue.eventTime) AS month, sum(ue.count) as total
+        FROM UserEvent ue
+        GROUP BY ue.projectId, month
+    """)
+    Stream<MonthlyCountItem> getDistinctUserCountForProjectGroupedByMonth(@Param("projectId") String projectId, @Param("start") Date start)
 
     @Nullable
     Stream<UserEvent> findAllBySkillRefIdAndEventType(Integer skillRefId, EventType type)
