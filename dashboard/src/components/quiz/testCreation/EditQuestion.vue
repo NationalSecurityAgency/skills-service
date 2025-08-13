@@ -70,23 +70,25 @@ onMounted(() => {
 
 function questionTypeChanged(inputItem) {
   questionType.value.selectedType = inputItem;
-  if (isSurveyType.value
-      && inputItem.id !== QuestionType.TextInput && inputItem.id !== QuestionType.Rating
-      && (!initialQuestionData.answers || initialQuestionData.answers.length < 2)) {
-    nextTick(() => {
-      answersRef.value.replaceAnswers([{
-        id: null,
-        answer: '',
-        isCorrect: false,
-      }, {
-        id: null,
-        answer: '',
-        isCorrect: false,
-      }]);
-    })
-  } else {
-    if(answersRef.value) {
-      answersRef.value.resetAnswers();
+  if (!inputItem.isInitialLoad) {
+    if (isSurveyType.value
+        && inputItem.id !== QuestionType.TextInput && inputItem.id !== QuestionType.Rating
+        && (!initialQuestionData.answers || initialQuestionData.answers.length < 2)) {
+      nextTick(() => {
+        answersRef.value.replaceAnswers([{
+          id: null,
+          answer: '',
+          isCorrect: false,
+        }, {
+          id: null,
+          answer: '',
+          isCorrect: false,
+        }]);
+      })
+    } else {
+      if(answersRef.value) {
+        answersRef.value.resetAnswers();
+      }
     }
   }
 
@@ -285,9 +287,6 @@ const onSavedQuestion = (savedQuestion) => {
   close()
 }
 
-const typeChanged = (newValue) => {
-  questionType.value.selectedType = newValue;
-}
 </script>
 
 <template>
@@ -305,8 +304,6 @@ const typeChanged = (newValue) => {
       @close="close"
       @isDirty="isDirty = !isDirty"
       @errors="answersErrorMessage = $event['answers']"
-      @watchedValueChanged="typeChanged"
-      fieldToWatch="questionType"
   >
     <template #default>
       <markdown-editor
@@ -404,7 +401,6 @@ const typeChanged = (newValue) => {
         </div>
         <ConfigureAnswers
             ref="answersRef"
-            name="questionType"
             v-model="props.questionDef.answers"
             :quiz-type="props.questionDef.quizType"
             :question-type="questionType.selectedType.id "

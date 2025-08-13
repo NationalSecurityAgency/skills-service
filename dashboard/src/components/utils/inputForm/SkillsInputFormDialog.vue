@@ -96,13 +96,9 @@ const props = defineProps({
   shouldConfirmCancel: {
     type: Boolean,
     default: false,
-  },
-  fieldToWatch: {
-    type: String,
-    default: '',
   }
 })
-const emit = defineEmits(['saved', 'cancelled', 'isDirty', 'errors', 'watchedValueChanged'])
+const emit = defineEmits(['saved', 'cancelled', 'isDirty', 'errors'])
 
 const { values, meta, handleSubmit, isSubmitting, setFieldValue, validate, errors, resetForm } = useForm({
   validationSchema: props.validationSchema,
@@ -181,12 +177,6 @@ watch(() => meta.value.dirty, (newValue) => {
 watch(() => errors.value, (newValue) => {
   emit('errors', newValue)
 })
-
-if(props.fieldToWatch) {
-  watch(() => values[props.fieldToWatch], (newValue) => {
-    emit('watchedValueChanged', newValue);
-  })
-}
 
 const validateIfEditOrNotEmpty = () => {
   const skipAttrs = toRaw(values)['skipTheseAttrsWhenValidatingOnInit'] || []
