@@ -215,8 +215,10 @@ describe('Contact Support Specs', () => {
         cy.get('[data-pc-name="pcmaximizebutton"]').should('be.enabled')
 
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').should('be.visible')
+        cy.wait(100)
         cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').click()
-        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').type('This is a message')
+        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').type('This is a message', {force: true})
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').click()
         cy.wait('@contactProj1')
@@ -232,8 +234,10 @@ describe('Contact Support Specs', () => {
         cy.get('[data-pc-name="pcmaximizebutton"]').should('be.enabled')
 
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').should('be.visible')
+        cy.wait(100)
         cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').click()
-        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').type('This is a message')
+        cy.get('[data-p="modal"] [data-cy="contactOwnersMsgInput"]').type('This is a message', {force: true})
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-p="modal"] [data-cy="saveDialogBtn"]').click()
         cy.wait('@contactProj1')

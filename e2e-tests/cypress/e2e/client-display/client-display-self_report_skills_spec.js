@@ -146,19 +146,33 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.request('POST', `/admin/projects/proj1/skill3/prerequisite/proj1/skill2`);
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
         cy.cdVisit('/?internalBackButton=true');
+        cy.get('[data-cy="subjectTile-subj1"]')
+        cy.get('[data-cy="myRankPosition"]')
         cy.cdClickSubj(0);
+        cy.get('[data-cy="skillProgressTitle-skill1"]')
+        cy.get('[data-cy="myRankPosition"]')
         cy.cdClickSkill(0);
-
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
+        cy.get('[data-cy="prerequisitesCard"] canvas')
         cy.get('[data-cy="requestApprovalBtn"]').should('not.exist');
         cy.get('[data-cy="claimPointsBtn"]').should('not.exist');
 
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="skillProgressTitle-skill1"]')
+        cy.get('[data-cy="myRankPosition"]')
         cy.cdClickSkill(1);
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 2');
         cy.get('[data-cy="requestApprovalBtn"]').should('not.exist');
         cy.get('[data-cy="claimPointsBtn"]').should('exist');
 
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="skillProgressTitle-skill1"]')
+        cy.get('[data-cy="myRankPosition"]')
         cy.cdClickSkill(2);
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3');
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
+        cy.get('[data-cy="prerequisitesCard"] canvas')
         cy.get('[data-cy="requestApprovalBtn"]').should('not.exist');
         cy.get('[data-cy="claimPointsBtn"]').should('not.exist');
     });

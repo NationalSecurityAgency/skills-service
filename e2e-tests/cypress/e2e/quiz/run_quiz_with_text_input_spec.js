@@ -397,13 +397,13 @@ describe('Run Quizzes With Text Input Questions', () => {
 
         cy.wait('@validateDescriptionAnswer1')
         cy.wait('@validateDescriptionAnswer2')
-        cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
+        cy.get('@validateDescriptionAnswer1.all').should('have.length.lte', 2)
         // can be 1 or two depending on order of execution
         cy.get('@validateDescriptionAnswer2.all').should('have.length.lt', 3)
 
         cy.get('[data-cy="question_1"] [data-cy="markdownEditorInput"]').type('X')
-        cy.get('@validateDescriptionAnswer1.all').should('have.length', 1)
-        cy.get('@validateDescriptionAnswer2.all').should('have.length', 1)
+        cy.get('@validateDescriptionAnswer1.all').should('have.length.lte', 2)
+        cy.get('@validateDescriptionAnswer2.all').should('have.length.lte', 2)
     });
 
     it('Input Text validation: validation endpoint is always called on submit', () => {

@@ -344,6 +344,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.contains(expectedMsg);
         // should render Prerequisites section
         cy.contains('Prerequisites');
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
 
         cy.wait(4000);
         cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
@@ -354,13 +355,16 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
 
         // make sure the other locked skill doesn't contain the same message
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="skillProgressTitle-skill1"]')
         cy.cdClickSkill(1);
         cy.contains('Very Great Skill 2');
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill3"]')
         cy.contains(expectedMsg)
             .should('not.exist');
 
         // make sure the skill without deps doesn't have the message
         cy.cdBack('Subject 1');
+        cy.get('[data-cy="skillProgressTitle-skill1"]')
         cy.cdClickSkill(2);
         cy.contains('Very Great Skill 3');
         cy.contains(expectedMsg)

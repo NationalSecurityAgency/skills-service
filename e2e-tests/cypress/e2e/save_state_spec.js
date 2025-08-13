@@ -461,7 +461,7 @@ describe('Save State Tests', () => {
 
     cy.get('[data-cy="btn_Questions"]').click()
 
-    cy.get('[data-cy="questionText"]').type('My new quiz question')
+    cy.typeInMarkdownEditor('[data-cy="questionText"]','My new quiz question')
     cy.get('[data-cy="answer-0"]').type('Answer One')
     cy.get('[data-cy="answer-1"]').type('Answer Two')
 
@@ -499,8 +499,7 @@ describe('Save State Tests', () => {
     cy.visit('/administrator/quizzes/quiz1/')
 
     cy.get('[data-cy="btn_Questions"]').click()
-
-    cy.get('[data-cy="questionText"]').type('My new quiz question')
+    cy.typeInMarkdownEditor('[data-cy="questionText"]', 'My new quiz question')
     cy.get('[data-cy="answerTypeSelector"]').click()
     cy.get('[data-cy="selectionItem_SingleChoice"]').click()
     cy.get('[data-cy="answer-0"]').type('Answer One')
@@ -516,7 +515,7 @@ describe('Save State Tests', () => {
 
     cy.get('[data-cy="editQuestionButton_1"]').click()
 
-    cy.get('[data-cy="questionText"]').type(' with edit')
+    cy.typeInMarkdownEditor('[data-cy="questionText"]',' with edit')
     cy.get('[data-cy="answer-0"]').type(' with edit')
     cy.get('[data-cy="answer-2"]').type(' with edit')
     cy.get('[data-cy="addNewAnswer"]').last().click();

@@ -306,18 +306,18 @@ describe('Projects Tests', () => {
         cy.get('[data-cy="btn_edit-project"]').click();
         cy.wait('@loadDescription');
         cy.get(makdownDivSelector).invoke('text').invoke('trim').should('equal', '')
-        cy.get('[data-cy="markdownEditorInput"]').type('I am a description');
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', 'I am a description')
         cy.clickSaveDialogBtn()
         cy.wait('@saveProject');
         cy.get('[data-cy="btn_edit-project"]').click();
         cy.wait('@loadDescription');
         cy.get(makdownDivSelector).should('have.text', 'I am a description');
-        cy.get('[data-cy="markdownEditorInput"]').click().type('jabberwocky jabberwocky jabberwocky');
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', 'jabberwocky jabberwocky jabberwocky')
         cy.wait('@validateDescription');
         cy.get('[data-cy="descriptionError"]').should('be.visible');
         cy.get('[data-cy="descriptionError"]').should('contain.text', 'Project Description - paragraphs may not contain jabberwocky');
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
-        cy.get('[data-cy="markdownEditorInput"]').click().type('{selectall}I am a description sans jw');
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}I am a description sans jw')
         cy.wait('@validateDescription');
         cy.get('[data-cy="descriptionError"]').should('not.be.visible');
         cy.clickSaveDialogBtn()
@@ -327,7 +327,7 @@ describe('Projects Tests', () => {
         cy.get('[data-cy="editProjBtn"]').click();
         cy.wait('@loadDescription');
         cy.get(makdownDivSelector).should('have.text', 'I am a description sans jw');
-        cy.get('[data-cy="markdownEditorInput"]').click().type('{selectall}Am I a description?');
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}Am I a description?')
         cy.clickSaveDialogBtn()
         cy.wait('@saveProject');
         cy.contains('This is project 1');

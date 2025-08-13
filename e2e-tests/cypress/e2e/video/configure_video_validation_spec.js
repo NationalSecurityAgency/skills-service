@@ -37,11 +37,15 @@ describe('Configure Video Validation Tests', () => {
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
 
         cy.get('[data-pc-section="mask"]').should('not.exist')
+        cy.get('[data-cy="videoCaptions"]').should('be.visible')
+        cy.get('[data-cy="videoCaptions"]').click()
         cy.get('[data-cy="videoCaptions"]').type(defaultCaption)
         cy.get('[data-cy="videoCaptionsError"]').contains('Captions are not valid without a Video')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
 
+        cy.get('[data-cy="videoTranscript"]').should('be.visible')
+        cy.get('[data-cy="videoTranscript"]').click()
         cy.get('[data-cy="videoTranscript"]').type('transcript')
         cy.get('[data-cy="videoTranscriptError"]').contains('Transcript is not valid without a Video')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')

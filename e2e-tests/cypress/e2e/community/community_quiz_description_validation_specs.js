@@ -36,6 +36,7 @@ describe('Community Quiz Description Validation Tests', () => {
     });
 
     it('quiz description is validated against custom validators', () => {
+        cy.viewport(1200, 1400)
         cy.createQuizDef(1, {enableProtectedUserCommunity: true})
 
         cy.intercept('GET', '/admin/quiz-definitions/quiz1/questions').as('loadQuestions');
@@ -48,18 +49,18 @@ describe('Community Quiz Description Validation Tests', () => {
         cy.get('[data-cy="editQuizButton"]').click()
         cy.wait('@loadQuizDef');
 
-        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', 'ldkj aljdl aj\n\njabberwocky')
         cy.wait('@validateDescription');
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
-        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
-        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}')
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', 'ldkj aljdl aj\n\ndivinedragon')
         cy.wait('@validateDescription');
         cy.get('[data-cy="descriptionError"]').contains('Quiz/Survey Description - May not contain divinedragon word');
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
 
-        cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{backspace}')
         cy.wait('@validateDescription');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
     });
