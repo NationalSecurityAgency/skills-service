@@ -60,20 +60,27 @@ const calculatePercent = (projectLevel) => {
 <template>
   <Card v-if="projectSummaries && projectSummaries.length > 0" class="mt-4" data-cy="globalBadgeProjectLevels">
     <template #content>
-      <div v-for="projectSummary in projectSummaries"
-           :key="projectSummary.projectId" class="mt-1"
-           :data-cy="'gb_'+projectSummary.projectId">
+      <div class="flex flex-col gap-4">
+        <div v-for="projectSummary in projectSummaries"
+             :key="projectSummary.projectId" class="mt-1"
+             :data-cy="'gb_'+projectSummary.projectId">
 
-        <div class="text-2xl"><span class="italic text-muted-color">{{ attributes.projectDisplayName }}:</span> {{ projectSummary.projectName }}</div>
-        <div class="flex mt-2">
-          <div class="text-xl flex-1 mb-1"> Requires {{ attributes.levelDisplayName }} {{ projectSummary.projectLevel?.requiredLevel }}</div>
-          <div :class="{ 'text-green-600': projectSummary.isFullyComplete }">
-            <i v-if="projectSummary.isFullyComplete" class="fa fa-check"/> {{ projectSummary.percentComplete }}% Complete
+          <div class="flex flex-col md:flex-row mb-2">
+            <div class="text-xl flex-1 flex flex-col sm:flex-row gap-2">
+              <div data-cy="projectName"><span class="italic text-muted-color">{{ attributes.projectDisplayName }}:</span> {{ projectSummary.projectName }}</div>
+              <div class="ml-1 text-blue-200">|</div>
+              <div data-cy="projectLevel"><span class="italic text-muted-color">Requires:</span> {{ attributes.levelDisplayName }} {{ projectSummary.projectLevel?.requiredLevel }}</div>
+            </div>
+            <div class="flex mt-2">
+              <div :class="{ 'text-green-600': projectSummary.isFullyComplete }">
+                <i v-if="projectSummary.isFullyComplete" class="fa fa-check"/> <span data-cy="percentComplete">{{ projectSummary.percentComplete }}</span>% Complete
+              </div>
+            </div>
           </div>
-        </div>
 
-        <vertical-progress-bar :total-progress="projectSummary.percentComplete">
-        </vertical-progress-bar>
+          <vertical-progress-bar :total-progress="projectSummary.percentComplete">
+          </vertical-progress-bar>
+        </div>
       </div>
     </template>
   </Card>
