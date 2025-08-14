@@ -40,7 +40,7 @@ const save = (values) => {
 const afterSaved = (updatedGroup) => {
   emit('group-changed', updatedGroup);
 }
-const initialSkillData = { }
+const initialSkillData = ref({ })
 
 const options = ref([])
 const selected = ref({})
@@ -58,6 +58,8 @@ const updateNumSkillsRequired = () => {
   options.value = dropdownOptions
   selected.value = toRaw(dropdownOptions.find((item) => item.value == props.group.numSkillsRequired))
   originalSelection.value = selected.value
+
+  initialSkillData.value = { ...initialSkillData.value, numSkillsRequired: toRaw(originalSelection.value)}
 }
 onMounted(() => {
   updateNumSkillsRequired()

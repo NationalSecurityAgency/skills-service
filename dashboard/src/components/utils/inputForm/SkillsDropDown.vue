@@ -56,7 +56,7 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 
 onMounted(() => {
   const rawValue = toRaw(value.value)
-  if (value && model.value !== rawValue) {
+  if (rawValue && model.value !== rawValue) {
     model.value = {...rawValue, isInitialLoad: true}
   }
 })
