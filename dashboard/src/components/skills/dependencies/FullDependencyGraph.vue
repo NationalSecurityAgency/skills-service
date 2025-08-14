@@ -16,7 +16,6 @@ limitations under the License.
 <script setup>
 import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
-import 'vis-network/styles/vis-network.css';
 import { Network } from 'vis-network';
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import PrerequisiteSelector from '@/components/skills/dependencies/PrerequisiteSelector.vue';

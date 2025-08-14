@@ -39,11 +39,15 @@ describe('Configure Video Validation Tests', () => {
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
 
         cy.get('[data-pc-section="mask"]').should('not.exist')
+        cy.get('[data-cy="videoCaptions"]').should('be.visible')
+        cy.get('[data-cy="videoCaptions"]').click()
         cy.get('[data-cy="videoCaptions"]').type(defaultCaption)
         cy.get('[data-cy="videoCaptionsError"]').contains('Captions are not valid without a Video')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
 
+        cy.get('[data-cy="videoTranscript"]').should('be.visible')
+        cy.get('[data-cy="videoTranscript"]').click()
         cy.get('[data-cy="videoTranscript"]').type('transcript')
         cy.get('[data-cy="videoTranscriptError"]').contains('Transcript is not valid without a Video')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
@@ -69,16 +73,21 @@ describe('Configure Video Validation Tests', () => {
     });
 
     it('transcript custom description validation', () => {
+        cy.viewport(1000, 1400)
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1)
         cy.visit('/administrator/quizzes/quiz1');
 
         cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
         cy.get('[data-cy="add-video-question-1"]').click()
+        cy.get('[data-cy="videoFileUpload"]').should('be.visible')
+        cy.get('[data-cy="videoTranscript"]').should('be.visible')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.visible')
         const videoFile = 'create-subject.webm';
         cy.fixture(videoFile, null).as('videoFile');
         cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
-        cy.get('[data-cy="videoTranscript"]').type('jabberwocky', { delay: 0 })
+        cy.get('[data-cy="videoTranscript"]').click()
+        cy.get('[data-cy="videoTranscript"]').type('jabberwocky')
         cy.get('[data-cy="videoTranscriptError"]').contains('Video Transcript - paragraphs may not contain jabberwocky')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')

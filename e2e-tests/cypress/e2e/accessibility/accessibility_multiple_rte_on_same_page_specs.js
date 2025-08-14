@@ -183,7 +183,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
     it('modify font size via keyboard - use keyboard mapping', () => {
         cy.getToRte()
 
-        cy.get(`${rte2Selector}`).type('value{selectAll}{ctrl+alt+s}')
+        cy.typeInMarkdownEditor(rte2Selector, 'value{selectAll}{ctrl+alt+s}')
         cy.get(`.toastui-editor-popup-body .size-input`).should('have.focus').type('22{enter}')
         cy.get(`${rte2Selector} .toastui-editor-contents [style="font-size: 22px;"]`).should('have.text', 'value');
     });
@@ -191,7 +191,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
     it('insert link using keyboard - use keyboard mapping', () => {
         cy.getToRte()
 
-        cy.get(rte2Selector).type('{ctrl+alt+r}')
+        cy.typeInMarkdownEditor(rte2Selector, '{ctrl+alt+r}')
         cy.get(`${rte2Selector} .toastui-editor-popup-body #toastuiLinkUrlInput`).should('have.focus')
         cy.get(`${rte2Selector} .toastui-editor-popup-body #toastuiLinkUrlInput`).type('/static/img/skilltree_logo_v1.png')
         cy.get(`${rte2Selector} .toastui-editor-popup-body #toastuiLinkUrlInput`).tab()

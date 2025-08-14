@@ -193,8 +193,9 @@ describe('Skills Group Modal Tests', () => {
         cy.get('[data-cy="editSkillButton_group2"]').click();
         cy.get(makdownDivSelector).should('have.text', 'second group description');
 
-        cy.get('[data-cy="descriptionMarkdownEditor"] [data-cy="markdownEditorInput"]').clear().type('another value');
-        cy.get('[data-cy="name"]').clear().type('Updated Group Name');
+        cy.typeInMarkdownEditor('[data-cy="descriptionMarkdownEditor"] [data-cy="markdownEditorInput"]', '{selectall}another value');
+        cy.get('[data-cy="name"]').clear()
+        cy.get('[data-cy="name"]').type('Updated Group Name');
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="EditSkillGroupModal"]').should('not.exist');
 

@@ -399,16 +399,19 @@ describe('Client Display Breadcrumb Tests', () => {
             .click();
         cy.contains('This is 3');
         cy.get('[data-pc-name="progressspinner"]').should('not.exist')
+        cy.contains('You completed this skill before the prerequisites were added')
+        cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj2-skill1"]')
 
         // back to subject page
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]')
             .click();
         cy.contains('Subject 1');
         cy.get('[data-pc-name="progressspinner"]').should('not.exist')
+        cy.get('[data-cy="skillProgressTitle-skill1"]')
 
         // back to Overview page
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-Overview]')
-            .click();
+             .click();
         cy.contains('Overall Points');
         cy.get('[data-pc-name="progressspinner"]').should('not.exist')
     });

@@ -578,6 +578,8 @@ describe('Badges Tests', () => {
     });
 
     it('badge modal shows Root Help Url when configured', () => {
+        cy.viewport(1200, 1400)
+
         cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {
             projectId: 'proj1',
             setting: 'help.url.root',
@@ -596,18 +598,19 @@ describe('Badges Tests', () => {
         const textDecorationMatch = 'line-through solid color(srgb 0.0862745 0.396078 0.203922)';
 
         // strike-through when url starts with http:// or https://
-        cy.get('[data-cy="skillHelpUrl"]')
-            .type('https:/');
+        cy.get('[data-cy="skillHelpUrl"]').should('be.visible')
+        cy.get('[data-cy="skillHelpUrl"]').click()
+        cy.get('[data-cy="skillHelpUrl"]').type('https:/');
         cy.get('[data-cy="rootHelpUrlSetting"]')
             .should('not.have.css', 'text-decoration', textDecorationMatch);
-        cy.get('[data-cy="skillHelpUrl"]')
-            .type('/');
+        cy.get('[data-cy="skillHelpUrl"]').click()
+        cy.get('[data-cy="skillHelpUrl"]').type('/');
         cy.get('[data-cy="rootHelpUrlSetting"]')
             .should('have.css', 'text-decoration', textDecorationMatch);
 
-        cy.get('[data-cy="skillHelpUrl"]')
-            .clear()
-            .type('http:/');
+        cy.get('[data-cy="skillHelpUrl"]').clear()
+        cy.get('[data-cy="skillHelpUrl"]').click()
+        cy.get('[data-cy="skillHelpUrl"]').type('http:/');
         cy.get('[data-cy="rootHelpUrlSetting"]')
             .should('not.have.css', 'text-decoration', textDecorationMatch);
         cy.get('[data-cy="skillHelpUrl"]')

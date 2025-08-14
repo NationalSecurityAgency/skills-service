@@ -34,6 +34,7 @@ describe('Community Project Creation Tests', () => {
     });
 
     it('project description is validated against custom validators', () => {
+        cy.viewport(1200, 1400)
         cy.createProject(1, {enableProtectedUserCommunity: true})
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1)
@@ -48,18 +49,18 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="btn_edit-project"]').click();
         cy.wait('@loadDescription');
 
-        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', 'ldkj aljdl aj\n\njabberwocky');
         cy.wait('@validateDescription');
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
-        cy.get('[data-cy="markdownEditorInput"]').type('{selectall}{backspace}')
-        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\ndivinedragon');
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', 'ldkj aljdl aj\n\ndivinedragon');
         cy.wait('@validateDescription');
         cy.get('[data-cy="descriptionError"]').contains('Project Description - May not contain divinedragon word');
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
 
-        cy.get('[data-cy="markdownEditorInput"]').type('{backspace}');
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{backspace}');
         cy.wait('@validateDescription');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
     });

@@ -1681,9 +1681,10 @@ Cypress.Commands.add('assignUserAsAdmin', (projId, userId) => {
 })
 
 Cypress.Commands.add('typeInMarkdownEditor', (selector, text) => {
-    const fullSelector = `${selector} .toastui-editor-ww-container`
+    const fullSelector = `${selector} .toastui-editor-ww-container .toastui-editor-contents`
     cy.get(fullSelector).should('be.visible')
-    cy.get(fullSelector).type(text, {delay:0 })
+    cy.wait(100)
+    cy.get(fullSelector).type(text, { force: true })
 })
 
 Cypress.Commands.add('typeQuestion', (text) => {

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, defineAsyncComponent, onMounted, ref} from "vue";
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import VideoFileInput from "@/components/video/VideoFileInput.vue";
 import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
@@ -25,7 +25,6 @@ import {useForm} from "vee-validate";
 import {useByteFormat} from "@/common-components/filter/UseByteFormat.js";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 import {useUpgradeInProgressErrorChecker} from "@/components/utils/errors/UseUpgradeInProgressErrorChecker.js";
-import SlideDeck from "@/components/slides/SlideDeck.vue";
 import {useRoute, useRouter} from "vue-router";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import SkillsTextInput from "@/components/utils/inputForm/SkillsTextInput.vue";
@@ -38,6 +37,10 @@ import {useSkillsState} from "@/stores/UseSkillsState.js";
 import {useResponsiveBreakpoints} from "@/components/utils/misc/UseResponsiveBreakpoints.js";
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import ReminderMessage from "@/components/utils/misc/ReminderMessage.vue";
+
+const SlideDeck = defineAsyncComponent(() =>
+    import('@/components/slides/SlideDeck.vue')
+);
 
 const byteFormat = useByteFormat()
 const announcer = useSkillsAnnouncer()

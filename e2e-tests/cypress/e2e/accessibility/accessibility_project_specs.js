@@ -101,12 +101,14 @@ describe('Accessibility Tests', () => {
         });
 
         it(`Edit Project - clicking on a description label puts focus in the description input${darkMode}`, () => {
+            cy.viewport(1200, 1400)
             cy.setDarkModeIfNeeded(darkMode)
             cy.visit('/administrator');
             cy.get('[data-cy="projCard_proj1_manageBtn"]')
             cy.get('[data-cy="newProjectButton"]').click()
             cy.get('[data-cy="projectName"]').should('have.focus')
-            cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents')
+            cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents').should('be.visible')
+            cy.wait(500)
             cy.get('[data-cy="markdownEditorLabel"]').contains('Description').click()
             cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents').should('have.focus')
         });

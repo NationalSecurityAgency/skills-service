@@ -270,6 +270,7 @@ describe('Survey Question CRUD Tests', () => {
     });
 
     it('edit a multiple choice question', function () {
+        cy.viewport(1000, 1200)
         cy.createSurveyDef(1);
         cy.createTextInputQuestionDef(1, 1)
         cy.createSurveyMultipleChoiceQuestionDef(1, 2)
@@ -282,10 +283,11 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"]').should('have.value', 'Question 2 - Second Answer')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"]').should('have.value', 'Question 2 - Third Answer')
 
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').click()
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').type('-more')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').clear().type('b')
         cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').clear().type('c')
-        cy.get('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]').type('-more')
+        cy.typeInMarkdownEditor('[data-cy="editQuestionModal"] [data-cy="markdownEditorInput"]', '-more')
 
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('This is a question # 2-more')
