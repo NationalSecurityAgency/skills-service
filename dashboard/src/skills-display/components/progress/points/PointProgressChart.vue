@@ -24,6 +24,7 @@ import PointHistoryChartPlaceholder from '@/skills-display/components/progress/p
 import ChartOverlayMsg from '@/skills-display/components/utilities/ChartOverlayMsg.vue'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 const pointHistoryState = useSkillsDisplayPointHistoryState()
 const numFormat = useNumberFormat()
@@ -32,6 +33,7 @@ const themeHelper = useThemesHelper()
 const route = useRoute()
 const attributes = useSkillsDisplayAttributesState()
 
+const pluralize = usePluralize()
 const chartSeries = ref([])
 const loading = ref(true)
 const animationEnded = ref(false)
@@ -264,10 +266,9 @@ const zoomed = (chartContext, { xaxis, yaxis }) => {
               <point-history-chart-placeholder v-if="!hasData" />
             </BlockUI>
             <chart-overlay-msg  style="top: 4rem;">
-              <div class="uppercase text-red-800 dark:text-red-200"><i class="fa fa-lock"></i> Locked
+              <div class="text-blue-800 dark:text-blue-200"><i class="fas fa-chart-line"></i> Your Progress Awaits!
               </div>
-              <small class="text-green-900 dark:text-green-100">*** <b>2 days</b> of usage will unlock this chart!
-                ***</small>
+              <small class="text-green-900 dark:text-green-100">Your progress will start appearing here once <b>2 days</b> worth of {{pluralize.plural(attributes.pointDisplayNameLower, 2)}} are earned!</small>
             </chart-overlay-msg>
           </div>
           <div v-if="hasData" data-cy="pointHistoryChartWithData">
