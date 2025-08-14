@@ -70,23 +70,25 @@ onMounted(() => {
 
 function questionTypeChanged(inputItem) {
   questionType.value.selectedType = inputItem;
-  if (isSurveyType.value
-      && inputItem.id !== QuestionType.TextInput && inputItem.id !== QuestionType.Rating
-      && (!initialQuestionData.answers || initialQuestionData.answers.length < 2)) {
-    nextTick(() => {
-      answersRef.value.replaceAnswers([{
-        id: null,
-        answer: '',
-        isCorrect: false,
-      }, {
-        id: null,
-        answer: '',
-        isCorrect: false,
-      }]);
-    })
-  } else {
-    if(answersRef.value) {
-      answersRef.value.resetAnswers();
+  if (!inputItem.isInitialLoad) {
+    if (isSurveyType.value
+        && inputItem.id !== QuestionType.TextInput && inputItem.id !== QuestionType.Rating
+        && (!initialQuestionData.answers || initialQuestionData.answers.length < 2)) {
+      nextTick(() => {
+        answersRef.value.replaceAnswers([{
+          id: null,
+          answer: '',
+          isCorrect: false,
+        }, {
+          id: null,
+          answer: '',
+          isCorrect: false,
+        }]);
+      })
+    } else {
+      if(answersRef.value) {
+        answersRef.value.resetAnswers();
+      }
     }
   }
 

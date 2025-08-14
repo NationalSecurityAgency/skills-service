@@ -945,4 +945,43 @@ describe('Quiz Question CRUD Tests', () => {
         cy.visit('/administrator/quizzes/quiz1');
         cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
     });
+
+    it('modal state: state of the question modal is correctly restored', function () {
+        cy.createQuizDef(1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.openDialog('[data-cy="btn_Questions"]', true)
+
+        cy.get('[data-cy="questionText"]').type('a')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('2')
+        cy.get('[data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
+        cy.get('[data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
+        cy.get('[data-cy="answer-2"] [data-cy="answerText"]').type('3')
+        cy.get('[data-cy="answer-3"] [data-cy="answerText"]').type('4')
+
+        cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.openDialog('[data-cy="btn_Questions"]', true)
+
+        cy.get('[data-cy="contentRestoredMessage"]').should('exist')
+        cy.get('[data-cy="questionText"]').contains('a')
+        cy.get('[data-cy="answerTypeSelector"]').contains('Multiple Choice')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"]  [data-cy="answerText"]').should('have.value', '1')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"]  [data-cy="answerText"]').should('have.value', '2')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="answerText"]').should('have.value', '3')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-3"]  [data-cy="answerText"]').should('have.value', '4')
+
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"]  [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('exist');
+
+        cy.clickSaveDialogBtn()
+        cy.get('[data-cy="questionDisplayCard-1"]').should('exist')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('a')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-0_displayText"]').should('have.text', '1')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-1_displayText"]').should('have.text', '2')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-2_displayText"]').should('have.text', '3')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-3_displayText"]').should('have.text', '4')
+    });
 });

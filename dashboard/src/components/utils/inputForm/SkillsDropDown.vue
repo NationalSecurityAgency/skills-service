@@ -18,6 +18,7 @@ import { useField } from 'vee-validate'
 import {
   useSkillsInputFallthroughAttributes
 } from '@/components/utils/inputForm/UseSkillsInputFallthroughAttributes.js'
+import {onMounted, toRaw, watch} from "vue";
 
 defineOptions({
   inheritAttrs: false
@@ -48,8 +49,23 @@ const props = defineProps({
     default: false
   },
 })
+const model = defineModel()
+
 const { value, errorMessage } = useField(() => props.name);
 const fallthroughAttributes = useSkillsInputFallthroughAttributes()
+
+onMounted(() => {
+  const rawValue = toRaw(value.value)
+  if (rawValue && model.value !== rawValue) {
+    model.value = {...rawValue, isInitialLoad: true}
+  }
+})
+watch(value, (newValue) => {
+  const rawValue = toRaw(newValue)
+  if (model.value !== rawValue) {
+    model.value = rawValue
+  }
+})
 </script>
 
 <template>
