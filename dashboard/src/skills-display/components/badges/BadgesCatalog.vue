@@ -83,7 +83,10 @@ const setFilterId = (newFilterId) => {
 const buildBadgeLink = (badge) => {
   let globalBadgeUnderProjectId = null
   if (!route.params.projectId) {
-    globalBadgeUnderProjectId = badgesWithTypes.value.find((b) => b.projectId).projectId
+    const hasData = badge.projectLevelsAndSkillsSummaries && badge.projectLevelsAndSkillsSummaries.length > 0
+    if (hasData) {
+      globalBadgeUnderProjectId = badge.projectLevelsAndSkillsSummaries[0].projectId
+    }
   }
   return skillsDisplayInfo.createToBadgeLink(badge, globalBadgeUnderProjectId)
 }

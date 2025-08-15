@@ -132,20 +132,23 @@ const groupLabel = computed(() => attributes.groupDisplayName)
             <i v-if="skill.copiedFromProjectId" class="skill-icon text-secondary" :class="`${skill?.iconClass ? skill?.iconClass : 'fas fa-book'}`"></i>
           </div>
           <div class="flex items-center">
-            <div v-if="skillDisplayInfo.isGlobalBadgePage.value">
-              <span class="italic text-muted-color">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}
+            <div class="flex flex-col">
+              <router-link
+                :id="`skillProgressTitleLink-${skillId}`"
+                v-if="toRoute"
+                :to="toRoute"
+                data-cy="skillProgressTitle"
+                :aria-label="`${skill.isSkillType ? `Navigate to ${skill.skill}` : skill.skill }`">
+                <component :is="titleComponent"><highlighted-value :value="skill.skill" :filter="childSkillHighlightString" /></component>
+              </router-link>
+              <component :is="titleComponent" v-else class="inline-block" data-cy="skillProgressTitle">
+                <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
+              </component>
+              <div v-if="skillDisplayInfo.isGlobalBadgePage.value" class="text-sm" data-cy="skillProjectName">
+                <span class="italic text-muted-color">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}
+              </div>
             </div>
-            <router-link
-              :id="`skillProgressTitleLink-${skillId}`"
-              v-if="toRoute"
-              :to="toRoute"
-              data-cy="skillProgressTitle"
-              :aria-label="`${skill.isSkillType ? `Navigate to ${skill.skill}` : skill.skill }`">
-              <component :is="titleComponent"><highlighted-value :value="skill.skill" :filter="childSkillHighlightString" /></component>
-            </router-link>
-            <component :is="titleComponent" v-else class="inline-block" data-cy="skillProgressTitle">
-              <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
-            </component>
+
             <SkillsButton :icon="!isExpanded ? 'fas fa-plus' : 'fas fa-minus'"
                     v-if="skill.isSkillsGroupType"
                     outlined
@@ -214,7 +217,7 @@ const groupLabel = computed(() => attributes.groupDisplayName)
           {{ someSkillsAreOptional ? 'Required' : '' }}
         </span>
         <span v-else class="content-end">
-          <animated-number :num="skill.points" />
+          <animated-number :num="skill.points" data-cy="skillPoints"/>
           / {{ numFormat.pretty(skill.totalPoints) }} {{ pluralize.plural(attributes.pointDisplayName, skill.totalPoints) }}
         </span>
       </div>
