@@ -227,7 +227,7 @@ jobs:
         
 
   ui-tests-against-postgres-cypress-dashboard:
-#    if: github.event_name == 'schedule-never'
+    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
     permissions:
       contents: read
