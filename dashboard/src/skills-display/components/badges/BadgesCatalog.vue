@@ -84,10 +84,9 @@ const buildBadgeLink = (badge) => {
   let globalBadgeUnderProjectId = null
   if (!route.params.projectId) {
     const hasData = badge.projectLevelsAndSkillsSummaries && badge.projectLevelsAndSkillsSummaries.length > 0
-    if (!hasData) {
-      throw new Error(`Expected [${badge.badgeId}] to be a global badge with data in projectLevelsAndSkillsSummaries variable`)
+    if (hasData) {
+      globalBadgeUnderProjectId = badge.projectLevelsAndSkillsSummaries[0].projectId
     }
-    globalBadgeUnderProjectId = badge.projectLevelsAndSkillsSummaries[0].projectId
   }
   return skillsDisplayInfo.createToBadgeLink(badge, globalBadgeUnderProjectId)
 }
