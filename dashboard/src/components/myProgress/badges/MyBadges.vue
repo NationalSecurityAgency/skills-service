@@ -60,16 +60,19 @@ const loadBadges = () => {
 <div>
   <my-progress-title title="My Badges" />
 
-  <my-badges-details
-    data-cy="achievedBadges"
-    :badges="achievedBadges"
-    class="mt-4"
-  />
+  <skills-spinner v-if="loading" :is-loading="loading" class="mt-20" />
+  <div v-else>
+    <my-badges-details
+      data-cy="achievedBadges"
+      :badges="achievedBadges"
+      class="mt-4"
+    />
 
-  <badges-catalog class="mt-4"
-                  :badges="unachievedBadges"
-                  data-cy="availableBadges">
-  </badges-catalog>
+    <badges-catalog class="mt-4"
+                    :badges="unachievedBadges"
+                    data-cy="availableBadges">
+    </badges-catalog>
+  </div>
 </div>
 </template>
 
