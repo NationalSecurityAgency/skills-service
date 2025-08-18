@@ -59,6 +59,7 @@
         <!-- TODO: remove after spring boot upgrades to at least these versions -->
         <netty.version>4.1.124.Final</netty.version>
         <angus-mail.version>2.0.4</angus-mail.version>
+        <tomcat.version>10.1.44</tomcat.version>
     </properties>
 
     <parent>
