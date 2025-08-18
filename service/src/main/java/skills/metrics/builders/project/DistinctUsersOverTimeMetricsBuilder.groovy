@@ -41,6 +41,8 @@ class DistinctUsersOverTimeMetricsBuilder implements ProjectMetricsBuilder {
         List<CountItem> dataItems = adminUsersService.getUsage(projectId, skillId, start)
         dataItems.sort() {it.value }
 
+        def results = adminUsersService.getUsagePerMonth(projectId, skillId, start)
+
         return dataItems;
     }
 }

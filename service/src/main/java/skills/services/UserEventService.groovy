@@ -226,7 +226,7 @@ class UserEventService {
         EventType eventType = determineAppropriateEventType(start)
         List<MonthlyCountItem> results
         Stream<MonthlyCountItem> stream = userEventsRepo.getDistinctUserCountForProjectGroupedByMonth(projectId, start)
-//        results = convertResults(stream, eventType, start, [projectId])
+        results = convertResults(stream, start)
 
         return results
     }
@@ -325,6 +325,17 @@ class UserEventService {
             userEventsRepo.delete(event)
         } else {
             userEventsRepo.save(event)
+        }
+    }
+
+    @CompileStatic
+    private List<MonthlyCountItem> convertResults(Stream<MonthlyCountItem> stream, Date startOfQueryRange) {
+        try {
+            stream.forEach({
+                it = new MonthlyCount(it.projectId, it.month, it.count)
+            })
+        } finally {
+            stream.close()
         }
     }
 

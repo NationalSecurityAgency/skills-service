@@ -16,7 +16,7 @@
 package skills.storage.model
 
 interface MonthlyCountItem {
-    Integer getMonth()
+    Date getMonth()
     Long getCount()
     String getProjectId() // optional, used when counting items for multiple projects in the same query
 }
