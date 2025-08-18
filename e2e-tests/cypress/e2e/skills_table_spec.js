@@ -814,5 +814,40 @@ describe('Skills Table Tests', () => {
     cy.get('[data-cy="exportSkillsTableBtn"]').should('have.focus')
   })
 
+  it('sort by last updated', () => {
+
+    const numSkills = 3
+    const expected = []
+    for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+      const skillName = `Skill # ${skillsCounter}`
+      expected.push([{ colIndex: 2, value: skillName }, { colIndex: 3, value: skillsCounter }])
+      cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+        projectId: 'proj1',
+        subjectId: 'subj1',
+        skillId: `skill${skillsCounter}`,
+        name: skillName,
+        pointIncrement: '150',
+        numPerformToCompletion: skillsCounter,
+        version: skillsCounter
+      })
+    }
+
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1')
+
+    // test points column
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+    cy.get('[data-pc-section="overlay"] [aria-label="Last Updated"]').click()
+    cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+
+    cy.get(`${tableSelector} th`).contains('Last Updated').click()
+    cy.validateTable(tableSelector, expected, 10, false, null, false)
+    cy.get(`${tableSelector} tbody tr`).should('have.length', 3)
+
+    cy.get(`${tableSelector} th`).contains('Last Updated').click()
+    cy.validateTable(tableSelector, expected.map((item) => item).reverse(), 10, false, null, false)
+    cy.get(`${tableSelector} tbody tr`).should('have.length', 3)
+
+  })
 })
 
