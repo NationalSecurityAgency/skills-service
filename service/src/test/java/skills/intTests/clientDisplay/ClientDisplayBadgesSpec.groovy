@@ -1094,7 +1094,9 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         def expirationDate = currentDate.clone()
         expirationDate.minutes += 120
         skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[0], currentDate)
+        Thread.sleep(1000)
         skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[1], currentDate)
+        Thread.sleep(1000)
         skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[2], currentDate)
 
         when:
