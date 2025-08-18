@@ -73,6 +73,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
     required: false
+  },
+  index: {
+    type: Number,
+    default: -1
   }
 })
 const emit = defineEmits(['add-tag-filter', 'points-earned', 'reset-group-expansion'])
@@ -176,6 +180,7 @@ watch(() => props.expandGroups, (newValue) => {
       :to-route="toRoute"
       :is-expanded="expanded"
       @toggle-row="toggleRow"
+      :index="index"
       :child-skill-highlight-string="childSkillHighlightString"
       :type="type" />
     <div class="mt-1">
@@ -278,6 +283,7 @@ watch(() => props.expandGroups, (newValue) => {
           :child-skill-highlight-string="childSkillHighlightString"
           :data-cy="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
           @add-tag-filter="addTagFilter"
+          :index="index"
         ></skill-progress>
       </div>
     </div>

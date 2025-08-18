@@ -350,8 +350,6 @@ const toggle = (event) => {
       </div>
     </template>
     <template #content>
-      <!--      <skills-spinner :loading="loading"/>-->
-      <!--      <div v-if="!loading">-->
       <div v-if="skillsToShow.length > 0" class="skills-theme-progress-rows">
         <div v-for="(skill, index) in skillsToShow"
              :key="`skill-${skill.skillId}`"
@@ -359,13 +357,6 @@ const toggle = (event) => {
              class="skills-theme-bottom-border-with-background-color"
         >
           <div class="p-4 pt-6">
-            <!--            :show-group-descriptions="showGroupDescriptions"-->
-            <!--            @points-earned="onPointsEarned"-->
-            <!--            @add-tag-filter="addTagFilter"-->
-            <!--            :subjectId="subject.subjectId"-->
-            <!--            :badgeId="subject.badgeId"-->
-
-
             <skill-progress
               :id="`skill-${skill.skillId}`"
               :ref="`skillProgress${skill.skillId}`"
@@ -380,6 +371,7 @@ const toggle = (event) => {
               :child-skill-highlight-string="searchString"
               :video-collapsed-by-default="true"
               @add-tag-filter="addTagFilter"
+              :index="index"
             />
           </div>
         </div>
