@@ -55,6 +55,10 @@
 
         <bouncycastle.version>1.80</bouncycastle.version>
         <velocity.version>2.4.1</velocity.version>
+
+        <!-- TODO: remove after spring boot upgrades to at least these versions -->
+        <netty.version>4.1.124.Final</netty.version>
+        <angus-mail.version>2.0.4</angus-mail.version>
     </properties>
 
     <parent>
