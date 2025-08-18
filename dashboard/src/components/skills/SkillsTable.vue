@@ -145,6 +145,12 @@ const options = ref({
       label: 'Version',
       sortable: true,
       imageClass: 'fas fa-code-branch'
+    },
+    {
+      key: 'updated',
+      label: 'Last Updated',
+      sortable: true,
+      imageClass: 'fas fa-clock'
     }
   ]
 })
@@ -781,7 +787,7 @@ const onRowExpand = () => {
               </ButtonGroup>
             </div>
           </div>
-          <div v-else-if="slotProps.field === 'created'">
+          <div v-else-if="slotProps.field === 'created' || slotProps.field === 'updated'">
             <DateCell :value="slotProps.data[col.key]" />
           </div>
           <div v-else-if="slotProps.field === 'expiration'">
