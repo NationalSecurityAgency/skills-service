@@ -159,7 +159,10 @@ const sendInvites = () => {
       } else {
         currentEmails.value += resp.unsuccessful.join('\n')
       }
-      ccEmails.value = ccRecipients.value
+      if(ccEmails.value.length > 0) {
+        ccEmails.value += ', '
+      }
+      ccEmails.value += ccRecipients.value.join(', ')
     }
     if (resp.successful.length > 0) {
       successMsg.value = `Successfully sent ${resp.successful.length} project invite(s)`
