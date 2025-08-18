@@ -65,6 +65,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
             assert originalQuestion.question == copiedQuestion.question
             assert originalQuestion.questionType == copiedQuestion.questionType
             assert originalQuestion.answers.size() == copiedQuestion.answers.size()
+            assert originalQuestion.answerHint == copiedQuestion.answerHint
             for(def answerIndex = 0; answerIndex < originalQuestion.answers.size(); answerIndex++) {
                 def originalAnswer = originalQuestion.answers[answerIndex]
                 def copiedAnswer = copiedQuestion.answers[answerIndex]
