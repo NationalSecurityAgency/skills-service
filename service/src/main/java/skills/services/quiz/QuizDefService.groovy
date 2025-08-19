@@ -261,6 +261,7 @@ class QuizDefService {
             })
             newQuestion.answers = newAnswers
             newQuestion.attributes = question.attributes
+            newQuestion.answerHint = question.answerHint
             newQuestions.add(newQuestion)
         })
 
