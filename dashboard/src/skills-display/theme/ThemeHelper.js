@@ -118,7 +118,8 @@ export default {
         '.p-popover.p-component .p-panelmenu-panel .p-panelmenu-header-content,' +
         'body .sd-theme-home a, body .sd-theme-home .skills-theme-skills-progress a,' +
         '.sd-theme-home .editor-help-footer,' +
-        '.sd-theme-home .editor-help-footer i',
+        '.sd-theme-home .editor-help-footer i,' +
+        '.sd-theme-home .sd-theme-icon',
       styleName: 'color'
     }, {
       selector: '.toastui-editor-popup [data-type="Heading"]:hover,' +

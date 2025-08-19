@@ -26,6 +26,7 @@ import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useScrollSkillsIntoViewState } from '@/skills-display/stores/UseScrollSkillsIntoViewState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
+import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 
 const props = defineProps({
   skill: Object,
@@ -41,6 +42,10 @@ const props = defineProps({
   isExpanded: {
     type: Boolean,
     default: true
+  },
+  index: {
+    type: Number,
+    default: -1
   }
 })
 const emit = defineEmits(['toggle-row']);
@@ -51,6 +56,7 @@ const attributes = useSkillsDisplayAttributesState()
 const pluralize = usePluralize()
 const route = useRoute()
 const skillDisplayInfo = useSkillsDisplayInfo()
+const colors = useColors()
 
 const isSkillsGroupWithChildren = computed(() => props.skill?.isSkillsGroupType && props.skill?.children && props.skill?.children.length > 0)
 const numSkillsRequired = computed(() => {
@@ -117,6 +123,23 @@ const isAudio = computed(() => {
 })
 const titleComponent = computed(() => route.params.skillId ? 'h2' : 'h3')
 const groupLabel = computed(() => attributes.groupDisplayName)
+const iconClass = computed(() => {
+  const color = props.index >= 0 ? colors.getTextClass(props.index): ''
+  const commonCss = 'skill-icon sd-theme-icon'
+  if (props.skill.isSkillsGroupType) {
+    return `${commonCss} fas fa-layer-group`
+  }
+  if (!props.skill.copiedFromProjectId && !props.skill.isSkillsGroupType) {
+    const icon =  props.skill?.iconClass ? props.skill?.iconClass : 'fas fa-graduation-cap'
+    return `${commonCss} ${icon} ${color}`
+  }
+  if (props.skill.copiedFromProjectId) {
+    const icon = props.skill?.iconClass ? props.skill?.iconClass : 'fas fa-book'
+    return `${commonCss} text-secondary ${icon} ${color}`
+  }
+
+  return null
+})
 </script>
 
 <template>
@@ -127,9 +150,7 @@ const groupLabel = computed(() => attributes.groupDisplayName)
       <div class="py-1 md:flex items-center">
         <div class="sd-theme-primary-color font-medium flex">
           <div class="rounded-border w-16 skill-icon-container text-primary text-center border mr-2">
-            <i v-if="skill.isSkillsGroupType" class="skill-icon fas fa-layer-group"></i>
-            <i v-if="!skill.copiedFromProjectId && !skill.isSkillsGroupType" class="skill-icon" :class="`${skill?.iconClass ? skill?.iconClass : 'fas fa-graduation-cap'}`"></i>
-            <i v-if="skill.copiedFromProjectId" class="skill-icon text-secondary" :class="`${skill?.iconClass ? skill?.iconClass : 'fas fa-book'}`"></i>
+            <i v-if="iconClass" :class="iconClass" />
           </div>
           <div class="flex items-center">
             <div class="flex flex-col">

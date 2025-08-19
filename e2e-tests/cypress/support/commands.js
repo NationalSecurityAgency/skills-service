@@ -118,7 +118,7 @@ Cypress.Commands.add("doMatchSnapshotImage", (options) => {
     const visualRegressionOptions = {
         errorThreshold: 0.05 // in percent
     }
-    if (options && options.errorThreshold) {
+    if (options && (typeof options.errorThreshold === 'number' && Number.isFinite(options.errorThreshold))) {
         visualRegressionOptions.errorThreshold = options.errorThreshold
     }
     if (options && options.blackout) {

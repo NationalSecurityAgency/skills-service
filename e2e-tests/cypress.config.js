@@ -43,13 +43,13 @@ module.exports = defineConfig({
     },
     baseUrl: 'http://localhost:8080',
     specPattern: 'cypress/e2e/**/*.{js,jsx,ts,tsx}',
-  },
-  env: {
-    "visualRegressionType": "regression",
-    "visualRegressionBaseDirectory": "cypress/visualRegression/base",
-    "visualRegressionDiffDirectory": "cypress/visualRegression/diff",
-    "visualRegressionGenerateDiff": "fail",
-    "defaultCaptions": "WEBVTT\n\n1\n00:00:00.500 --> 00:00:04.000\nThis is the very first caption!"
+    env: {
+      visualRegressionType: 'regression',
+      visualRegressionBaseDirectory: 'cypress/visualRegression/base',
+      visualRegressionDiffDirectory: 'cypress/visualRegression/diff',
+      visualRegressionGenerateDiff: 'fail',
+      defaultCaptions: 'WEBVTT\n\n1\n00:00:00.500 --> 00:00:04.000\nThis is the very first caption!'
+    },
   },
   reporter: 'mochawesome',
   reporterOptions: {
