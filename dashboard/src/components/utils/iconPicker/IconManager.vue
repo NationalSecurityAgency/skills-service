@@ -52,8 +52,21 @@ const props = defineProps(
           };
         },
       },
+      projectId: {
+        type: String,
+        default: null,
+      },
+      badgeId: {
+        type: String,
+        default: null,
+      },
     },
 )
+
+const isNew = computed(() => {
+  return !props.badgeId && !props.projectId
+});
+
 
 const minDimensionsString = computed(() => {
   return `${props.minCustomIconDimensions.width}px x ${props.minCustomIconDimensions.width}px`
@@ -112,7 +125,7 @@ onMounted(() => {
     iconPacks.value[0].icons = groupIntoRows(fontAwesomeIcons.icons, rowLength);
     iconPacks.value[1].icons = groupIntoRows(materialIcons.icons, rowLength);
 
-    IconManagerService.getIconIndex(route.params.projectId, route.params.badgeId).then((response) => {
+    IconManagerService.getIconIndex(props.projectId, props.badgeId).then((response) => {
       if (response) {
         iconPacks.value[2].icons = response;
         iconPacks.value[2].defaultIcons = response.slice();
@@ -192,9 +205,9 @@ const selectIcon = (icon, iconCss, iconPack) => {
 };
 
 const uploadUrl = computed(() => {
-  let uploadUrl = `/admin/projects/${encodeURIComponent(route.params.projectId)}/icons/upload`;
-  if (!route.params.projectId) {
-    uploadUrl = `/admin/badges/${encodeURIComponent(route.params.badgeId)}/icons/upload`;
+  let uploadUrl = `/admin/projects/${encodeURIComponent(props.projectId)}/icons/upload`;
+  if (!props.projectId) {
+    uploadUrl = `/admin/badges/${encodeURIComponent(props.badgeId)}/icons/upload`;
   }
   return uploadUrl;
 });
@@ -348,7 +361,7 @@ const closeError = () => {
       </VirtualScroller>
       <FileUpload ref="uploader"
                   @select="beforeUpload"
-                  v-if="activePack === 'Custom'"
+                  v-if="activePack === 'Custom' && !isNew"
                   name="customIcon"
                   :accept="acceptType"
                   :maxFileSize="1000000"
@@ -389,7 +402,7 @@ const closeError = () => {
                   <SkillsButton
                       severity="warn"
                       rounded
-                      @click="deleteIcon(file, route.params.projectId, route.params.badgeId)"
+                      @click="deleteIcon(file, props.projectId, props.badgeId)"
                       data-cy="deleteIconBtn"
                       :aria-label="`Delete icon ${file.filename}`">
                     <i class="fas fa-trash"></i>
@@ -407,6 +420,11 @@ const closeError = () => {
           </div>
         </template>
       </FileUpload>
+      <Card v-if="activePack === 'Custom' && isNew" data-cy="customIconDisabledOnCreation">
+        <template #content>
+          <Message :closable="false" severity="warn">Custom icons can be uploaded here after initially saving the badge</Message>
+        </template>
+      </Card>
 
       <span v-if="iconPacks[active]?.icons?.length === 0 && activePack === iconPacks[active]?.packName && filterCriteria?.length > 0">No icons matched your search</span>
     </div>

@@ -37,11 +37,15 @@ export default {
     return axios.get('/public/iconSetIndexes').then((response) => response.data)
   },
   getIconIndex(projectId, badgeId) {
-    let url = `/app/projects/${encodeURIComponent(projectId)}/customIcons`
-    if (!projectId) {
-      url = `/app/badges/${encodeURIComponent(badgeId)}/customIcons`
+    if (projectId || badgeId) {
+      let url = `/app/projects/${encodeURIComponent(projectId)}/customIcons`
+      if (!projectId) {
+        url = `/admin/badges/${encodeURIComponent(badgeId)}/icons/customIcons`
+      }
+      return axios.get(url).then((response) => response.data)
+    } else {
+      return new Promise((resolve) => resolve([]))
     }
-    return axios.get(url).then((response) => response.data)
   },
   deleteIcon(iconName, projectId, badgeId) {
     let url = `/admin/projects/${encodeURIComponent(projectId)}/icons/${iconName}`
@@ -63,7 +67,11 @@ export default {
     })
   },
   findUsages(projectId, iconClass) {
-    let url = `/admin/projects/${encodeURIComponent(projectId)}/icons/${iconClass}/usage`
-    return axios.get(url).then((response) => response.data)
+    if (projectId) {
+      const url = `/admin/projects/${encodeURIComponent(projectId)}/icons/${iconClass}/usage`
+      return axios.get(url).then((response) => response.data)
+    } else {
+      return new Promise((resolve) => resolve([]))
+    }
   }
 }
