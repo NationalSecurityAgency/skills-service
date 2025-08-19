@@ -125,16 +125,17 @@ const titleComponent = computed(() => route.params.skillId ? 'h2' : 'h3')
 const groupLabel = computed(() => attributes.groupDisplayName)
 const iconClass = computed(() => {
   const color = props.index >= 0 ? colors.getTextClass(props.index): ''
+  const commonCss = 'skill-icon sd-theme-icon'
   if (props.skill.isSkillsGroupType) {
-    return `skill-icon fas fa-layer-group`
+    return `${commonCss} fas fa-layer-group`
   }
   if (!props.skill.copiedFromProjectId && !props.skill.isSkillsGroupType) {
     const icon =  props.skill?.iconClass ? props.skill?.iconClass : 'fas fa-graduation-cap'
-    return `skill-icon ${icon} ${color}`
+    return `${commonCss} ${icon} ${color}`
   }
   if (props.skill.copiedFromProjectId) {
     const icon = props.skill?.iconClass ? props.skill?.iconClass : 'fas fa-book'
-    return `skill-icon text-secondary ${icon} ${color}`
+    return `${commonCss} text-secondary ${icon} ${color}`
   }
 
   return null
