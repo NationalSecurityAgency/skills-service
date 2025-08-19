@@ -36,7 +36,15 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
-  }
+  },
+  projectId: {
+    type: String,
+    default: null,
+  },
+  badgeId: {
+    type: String,
+    default: null,
+  },
 })
 
 const iconManagerOverlayPanel = ref()
@@ -98,6 +106,8 @@ const themeHelper = useThemesHelper()
           class="pb-2 px-2"
           @selected-icon="onSelectedIcon"
           name="iconClass"
+          :projectId="projectId"
+          :badgeId="badgeId"
           @set-dismissable="setDismissable"></icon-manager>
     </Popover>
   </div>

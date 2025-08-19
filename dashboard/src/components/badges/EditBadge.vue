@@ -319,6 +319,8 @@ const onBadgeSaved = () => {
           <icon-picker
             class="mb-4"
             :startIcon="currentIcon"
+            :badge-id="global ? props.badge.badgeId : null"
+            :project-id="global ? null : route.params.projectId"
             @selected-icon="onSelectedIcon"
           />
         </template>

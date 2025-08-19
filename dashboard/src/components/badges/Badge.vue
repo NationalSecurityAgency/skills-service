@@ -178,7 +178,7 @@ defineExpose({
         </div>
 
         <edit-badge v-if="showEditBadge" v-model="showEditBadge" :id="badge.badgeId" :badge="badge" :is-edit="true"
-                    :global="global" @badge-updated="badgeEdited" @hidden="handleFocus"></edit-badge>
+                    :global="global" @badge-updated="badgeEdited"></edit-badge>
       </template>
     </nav-card-with-stats-and-controls>
     <removal-validation

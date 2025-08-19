@@ -2259,9 +2259,6 @@ describe('Global Badges Tests', () => {
     });
 
     it('custom icons are loaded', function () {
-        cy.logout()
-        cy.loginAsRootUser();
-
         cy.createGlobalBadge(1);
         cy.uploadCustomIcon('valid_icon.png', '/admin/badges/globalBadge1/icons/upload')
         cy.createProject(1)
@@ -2313,5 +2310,113 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="deleteSkillWarning"]').should('not.exist')
         cy.get('[data-cy="closeDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
+    });
+
+    it('cannot upload a custom icon when creating a global badge', function () {
+        const expectedId = 'CustomIconBadge';
+        const providedName = 'Custom Icon';
+
+        cy.intercept(`/app/badges/${expectedId}`)
+          .as('postGlobalBadge');
+        cy.intercept('GET', `/app/badges/id/${expectedId}/exists`)
+          .as('idExists');
+        cy.intercept({
+            method: 'POST',
+            url: `/admin/badges/${expectedId}/icons/upload`,
+        }).as('uploadIcon');
+        cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.wait('@getGlobalBadges');
+
+        cy.get('[data-cy="btn_Global Badges"]').click();
+
+        cy.get('[data-cy="name"]')
+          .type(providedName);
+        cy.wait('@nameExists');
+
+        cy.get('[data-cy="iconPicker"]').click();
+
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Custom')
+
+        cy.get('[data-cy="customIconDisabledOnCreation"]').should('be.visible');
+    });
+
+    it('Edit global badge and upload a custom icon from the global badges page', () => {
+        const expectedId = 'CustomIconBadge';
+        const providedName = 'Custom Icon';
+
+        cy.intercept(`/app/badges/${expectedId}`)
+          .as('postGlobalBadge');
+        cy.intercept('GET', `/app/badges/id/${expectedId}/exists`)
+          .as('idExists');
+        cy.intercept({
+            method: 'POST',
+            url: `/admin/badges/${expectedId}/icons/upload`,
+        }).as('uploadIcon');
+        cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.wait('@getGlobalBadges');
+
+        cy.get('[data-cy="btn_Global Badges"]').click();
+
+        cy.get('[data-cy="name"]')
+          .type(providedName);
+        cy.wait('@nameExists');
+
+        cy.clickSave();
+        cy.wait('@idExists');
+        cy.wait('@postGlobalBadge');
+        cy.contains(`ID: ${expectedId}`);
+
+        cy.get(`[data-cy="badgeCard-${expectedId}"] [data-cy=editBtn]`)
+          .click();
+
+        cy.get('[data-cy="iconPicker"]').click();
+
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Custom')
+
+        const filename = 'valid_icon.png';
+        cy.get('[data-pc-name="fileupload"] input').selectFile(`cypress/fixtures/${filename}`,  { force: true })
+        cy.wait('@uploadIcon')
+
+        cy.get(`i.${expectedId}-validiconpng`);
+
+        cy.get('[data-cy=saveDialogBtn]').click();
+        cy.wait('@getGlobalBadges');
+
+        cy.get(`i.${expectedId}-validiconpng`);
+    });
+
+    it('Edit global badge and upload a custom icon from the global badge details page', () => {
+        const expectedId = 'globalBadge1';
+        cy.intercept('GET', `/admin/badges/${expectedId}`)
+          .as('getGlobalBadge');
+        cy.intercept({
+            method: 'POST',
+            url: `/admin/badges/${expectedId}/icons/upload`,
+        }).as('uploadIcon');
+
+        cy.createGlobalBadge(1);
+        cy.visit('/administrator/globalBadges/globalBadge1')
+        cy.wait('@getGlobalBadge');
+
+        cy.get(`i.${expectedId}-validiconpng`).should('not.exist');
+        cy.get('button[data-cy=btn_edit-badge]').click();
+
+        cy.get('[data-cy="iconPicker"]').click();
+
+        cy.get('[data-pc-section="tablist"] [data-p-active="false"] [data-pc-section="itemlink"]').contains('Custom').click();
+        cy.get('[data-pc-section="tablist"] [data-p-active="true"] [data-pc-section="itemlink"]').contains('Custom')
+
+        const filename = 'valid_icon.png';
+        cy.get('[data-pc-name="fileupload"] input').selectFile(`cypress/fixtures/${filename}`,  { force: true })
+        cy.wait('@uploadIcon')
+
+        cy.get(`i.${expectedId}-validiconpng`);
+
+        cy.get('[data-cy=saveDialogBtn]').click();
+        cy.wait('@getGlobalBadge');
     });
 });
