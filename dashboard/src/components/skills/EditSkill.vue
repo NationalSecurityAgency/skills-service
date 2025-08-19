@@ -389,6 +389,7 @@ const onSelectedIcon = (selectedIcon) => {
             <icon-picker
                 class="mb-4"
                 :startIcon="currentIcon"
+                :project-id="route.params.projectId"
                 @selected-icon="onSelectedIcon"
             />
           </template>
