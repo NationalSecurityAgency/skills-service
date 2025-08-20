@@ -17,10 +17,6 @@ import './slides-commands';
 
 describe('Slides Resize Tests', () => {
 
-    beforeEach(() => {
-
-    });
-
     it('display slides on skill page', () => {
         cy.viewport(1500, 1600);
         cy.createProject(1)
@@ -30,6 +26,142 @@ describe('Slides Resize Tests', () => {
 
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
         cy.navThroughSlides(true, '#proj1-skill1-slidesContainer')
+    });
+
+    it('display slides on skill page and navigate in full screen mode', () => {
+        cy.viewport(1500, 1600);
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.saveSlidesAttrs(1, 1, { file: 'test-slides-1.pdf' })
+
+        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
+
+        const containerId = '#proj1-skill1-slidesContainer'
+        cy.get('#pdfCanvasId').should('be.visible')
+        cy.get('[data-cy="slidesFullscreenBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesDownloadPdfBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="slidesFullscreenBtn"]').realClick()
+        cy.wait(2000)
+        cy.get('[data-cy="slidesFullscreenMsg"]')
+
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').should('be.disabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
+        cy.get(`${containerId}  #text-layer`).contains('Sample slides')
+
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').realHover()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').click()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 5')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get(`${containerId}  #text-layer`).contains('First cool slide')
+
+        cy.get('[data-cy="slidesFullscreenMsg"]').realHover()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').click()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="currentSlideMsg"]').should('have.text', 'Slide 3 of 5')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get(`${containerId}  #text-layer`).contains('Second slide')
+
+        cy.get('[data-cy="slidesFullscreenMsg"]').realHover()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').click()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="currentSlideMsg"]').should('have.text', 'Slide 4 of 5')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get(`${containerId}  #text-layer`).contains('Third Slide')
+
+        cy.get('[data-cy="slidesFullscreenMsg"]').realHover()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').click()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="currentSlideMsg"]').should('have.text', 'Slide 5 of 5')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').should('be.disabled')
+        cy.get(`${containerId}  #text-layer`).contains('Fourth Slide')
+
+        cy.get('[data-cy="slidesFullscreenMsg"]').realHover()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').click()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="currentSlideMsg"]').should('have.text', 'Slide 4 of 5')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get(`${containerId}  #text-layer`).contains('Third Slide')
+
+        cy.get('[data-cy="slidesFullscreenMsg"]').realHover()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').click()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="currentSlideMsg"]').should('have.text', 'Slide 3 of 5')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get(`${containerId}  #text-layer`).contains('Second slide')
+
+        cy.get('[data-cy="slidesFullscreenMsg"]').realHover()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').click()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 5')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get(`${containerId}  #text-layer`).contains('First cool slide')
+
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').click()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').should('be.disabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get(`${containerId}  #text-layer`).contains('Sample slides')
+
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="slidesExitFullscreenBtn"]').realPress('Escape')
+        cy.get('[data-cy="slidesFullscreenMsg"]').should('not.exist')
+    });
+
+    it('enter and exit fullscreen', () => {
+        cy.viewport(1500, 1600);
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.saveSlidesAttrs(1, 1, { file: 'test-slides-1.pdf' })
+
+        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
+
+        const containerId = '#proj1-skill1-slidesContainer'
+        cy.get('#pdfCanvasId').should('be.visible')
+        cy.get('[data-cy="slidesFullscreenBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesDownloadPdfBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="slidesFullscreenBtn"]').realClick()
+        cy.wait(2000)
+        cy.get('[data-cy="slidesFullscreenMsg"]')
+
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').should('be.disabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
+        cy.get(`${containerId}  #text-layer`).contains('Sample slides')
+
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').realHover()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').click()
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 5')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get(`${containerId}  #text-layer`).contains('First cool slide')
+
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="slidesExitFullscreenBtn"]').realPress('Escape')
+        cy.get('[data-cy="slidesFullscreenMsg"]').should('not.exist')
+        cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 5')
+        cy.get(`${containerId}  #text-layer`).contains('First cool slide')
+
+        cy.get('[data-cy="slidesFullscreenBtn"]').realClick()
+        cy.wait(2000)
+        cy.get('[data-cy="slidesFullscreenMsg"]')
+
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 5')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="prevSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get(`${containerId}  #text-layer`).contains('First cool slide')
+
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="slidesExitFullscreenBtn"]').click()
+        cy.get('[data-cy="slidesFullscreenMsg"]').should('not.exist')
+        cy.get('[data-cy="prevSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="nextSlideBtn"]').should('be.enabled')
+        cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 5')
+        cy.get(`${containerId}  #text-layer`).contains('First cool slide')
     });
 
     it('download slides', () => {
@@ -55,7 +187,5 @@ describe('Slides Resize Tests', () => {
         })
 
     });
-
-
 
 });

@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup lang="ts">
-import {ref, onMounted, watch, computed, shallowRef, onUnmounted, isReadonly} from 'vue';
+import {ref, onMounted, watch, computed, shallowRef, onUnmounted, isReadonly, useTemplateRef} from 'vue';
+import { useFullscreen } from '@vueuse/core'
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import 'pdfjs-dist/web/pdf_viewer.css';
@@ -22,6 +23,7 @@ import {useDebounceFn} from '@vueuse/core'
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 import PrevNextBtns from "@/components/slides/PrevNextBtns.vue";
 import { useExportUtil } from '@/components/utils/UseExportUtil.js';
+import { useResizeSupport } from '@/components/slides/UseResizeSupport.js';
 
 const props = defineProps({
   slidesId: {
@@ -60,31 +62,26 @@ const currentPage = ref(1)
 const width = ref(0)
 const height = ref(0)
 
-const isFullscreen = ref(false);
 const containerRef = ref(null);
+const { isFullscreen, enter, exit, toggle } = useFullscreen(containerRef)
 
-const toggleFullscreen = () => {
-  if (!document.fullscreenElement) {
-    containerRef.value?.requestFullscreen?.().then(() => {
-      isFullscreen.value = true;
-      renderPage(currentPage.value)
+
+const resizeSupport = useResizeSupport()
+watch(isFullscreen, (newValue) => {
+  renderPage(currentPage.value).then(() => {
+    if (newValue) {
       showFullScreenMsg.value = true
       setTimeout(() => {
         showFullScreenMsg.value = false
       }, 3000)
-    });
-  } else {
-    document.exitFullscreen().then(() => {
-      isFullscreen.value = false;
-      renderPage(currentPage.value)
-    })
-  }
-}
-
-// Handle fullscreen change events
-const handleFullscreenChange = () => {
-  isFullscreen.value = !!document.fullscreenElement;
-};
+      resizeSupport.removeResizeSupport()
+    } else {
+      if (props.ableToResize) {
+        createResizeSupport()
+      }
+    }
+  })
+})
 
 onMounted(() => {
   loadPdf().then(() => {
@@ -92,12 +89,10 @@ onMounted(() => {
       createResizeSupport()
     }
   })
-  document.addEventListener('fullscreenchange', handleFullscreenChange);
   document.addEventListener('keydown', handleKeyDown);
 });
 
 onUnmounted(() => {
-  document.removeEventListener('fullscreenchange', handleFullscreenChange);
   document.removeEventListener('keydown', handleKeyDown);
 });
 
@@ -232,43 +227,16 @@ const nextPage = () => {
   }
 }
 
-const isResizing = ref(false)
-
-const getResizableElement = () => {
-  const resizableDiv = `#${props.slidesId}Container`
-  return document.querySelector(resizableDiv)
-}
 const createResizeSupport = () => {
-  function makeResizableDiv() {
-    const handle = document.querySelectorAll(`#${props.slidesId}ResizeHandle`)[0]
-
-    handle.addEventListener('mousedown', function (e) {
-      e.preventDefault()
-      window.addEventListener('mousemove', resize)
-      window.addEventListener('mouseup', stopResize)
-    })
-
-    let latestWidth = 0;
-
-    function resize(e) {
-      isResizing.value = true
-      const element = getResizableElement();
-      const clientRect = element.getBoundingClientRect()
-      latestWidth = e.pageX - clientRect.left
-      renderPage(currentPage.value, latestWidth)
-    }
-
-    function stopResize() {
-      window.removeEventListener('mousemove', resize)
-      isResizing.value = false
-      if (latestWidth > 0) {
+  resizeSupport.initResizeSupport(
+      `#${props.slidesId}Container`,
+      `#${props.slidesId}ResizeHandle`,
+      (latestWidth) => {
+        renderPage(currentPage.value, latestWidth)
+      }, (latestWidth) => {
         emit('on-resize', latestWidth)
-        announcer.polite(`Resized the slides to ${latestWidth} width`)
       }
-    }
-  }
-
-  makeResizableDiv()
+  )
 }
 
 const resizeBigger = () => {
@@ -320,12 +288,12 @@ const downloadPdf = () => {
             <SkillsButton
                 icon="fa-solid fa-expand"
                 size="small"
-                v-if="!isFullscreen"
+                v-if="!isFullscreen && !isInitLoading"
                 :id="`${slidesId}FullscreenBtn`"
                 class="shadow-md"
                 aria-label="Enter fullscreen mode for slides"
                 data-cy="slidesFullscreenBtn"
-                @click="toggleFullscreen"
+                @click="enter"
             />
           </div>
           <div ref="containerRef" :id="`${slidesId}Container`"
@@ -348,12 +316,36 @@ const downloadPdf = () => {
               <i class="fas fa-expand-alt fa-rotate-90"></i>
             </button>
 
-            <Message v-if="isFullscreen"
-                     :class="{ 'only-on-hover': !showFullScreenMsg && !isLastSlideInFullscreen }"
-                class="fixed bottom-4 left-1/2 transform -translate-x-1/2">
-              <div v-if="!isLastSlideInFullscreen">Use left/right arrow keys to navigate between slides and <Tag>Esc</Tag>to exit</div>
-              <div v-else>You've reach the last slide press <Tag>Esc</Tag> to exit</div>
-            </Message>
+            <div v-if="isFullscreen"
+                 :class="{ 'only-on-hover': !showFullScreenMsg && !isLastSlideInFullscreen }"
+                 class="fixed bottom-4 left-1/2 transform -translate-x-1/2">
+              <Message data-cy="slidesFullscreenMsg" :closable="false">
+                <div class="flex flex-col gap-2 min-w-[40rem] text-center">
+                  <div v-if="!isLastSlideInFullscreen">Use left/right arrow keys to navigate between slides and <Tag>Esc</Tag>to exit or use the</div>
+                  <div v-else>You've reach the last slide press <Tag>Esc</Tag> to exit</div>
+
+                  <div class="flex justify-center align-center gap-2">
+                    <div class="w-1/4"></div>
+                    <div class="flex justify-center flex-1">
+                      <prev-next-btns
+                          :current-page="currentPage"
+                          :total-pages="totalPages"
+                          @prev-page="prevPage"
+                          @next-page="nextPage"/>
+                    </div>
+                    <div class="w-1/4 flex justify-end">
+                      <SkillsButton label="Exit"
+                                    @click="exit"
+                                    data-cy="slidesExitFullscreenBtn"
+                                    icon="fa-solid fa-minimize"
+                                    aria-label="Exit fullscreen mode"
+                                    size="small"/>
+                    </div>
+
+                  </div>
+                </div>
+              </Message>
+            </div>
 
           </div>
           <div v-if="!isInitLoading && !isFullscreen"

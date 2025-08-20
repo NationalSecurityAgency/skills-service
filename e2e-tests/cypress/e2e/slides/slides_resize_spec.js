@@ -78,6 +78,55 @@ describe('Slides Resize Tests', () => {
         cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*76[\d.]*px/)
     });
 
+    it('resize slides setting after exciting fullscreen mode', () => {
+        cy.viewport(1500, 1600);
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.saveSlidesAttrs(1, 1, { file: 'test-slides-1.pdf' })
+        cy.visitSlidesConfPage();
+
+        cy.wait(1000)
+        cy.get('#pdfCanvasId').should('be.visible')
+        cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
+        cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
+
+        cy.get('[data-cy="slidesFullscreenBtn"]').realClick()
+
+        cy.wait(2000)
+        cy.get('[data-cy="slidesFullscreenMsg"]')
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="slidesExitFullscreenBtn"]').realPress('Escape')
+
+        cy.wait(1000)
+        cy.get('[data-cy="slidesResizeHandle"]')
+            .trigger('mousedown')
+            .trigger('mousemove')
+            .trigger('mouseup', { force: true })
+
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /77\d/)
+        cy.get('[data-cy="unsavedVideoSizeChanges"]')
+        cy.get('[data-cy="updateSlidesSettingsBtn"]').should('be.enabled')
+
+        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*78[\d.]*px/)
+
+        cy.get('[data-cy="slidesResizeHandle"]')
+            .trigger('mousedown')
+            .trigger('mousemove')
+            .trigger('mouseup', { force: true })
+
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
+        cy.get('[data-cy="unsavedVideoSizeChanges"]')
+        cy.get('[data-cy="updateSlidesSettingsBtn"]').should('be.enabled')
+
+        cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*76[\d.]*px/)
+
+        cy.get('[data-cy="updateSlidesSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsgSecondBtn"]')
+        cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
+
+    });
+
     it('resize slides using keyboard', () => {
         cy.viewport(1500, 1600);
         cy.createProject(1)
@@ -175,5 +224,29 @@ describe('Slides Resize Tests', () => {
         cy.get('#proj1-skill1-slidesContainer').should('have.attr', 'style').and('match', /width:\s*76[\d.]*px/)
     });
 
+    it('slides on skills-display still resize after exciting fullscreen mode', () => {
+        cy.viewport(1500, 1600);
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.saveSlidesAttrs(1, 1, { file: 'test-slides-1.pdf' })
+
+        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('#pdfCanvasId').should('be.visible')
+        cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
+        cy.get('#proj1-skill1-slidesContainer #text-layer').contains('Sample slides')
+        cy.get('#proj1-skill1-slidesContainer').should('have.attr', 'style').and('match', /width:\s*79[\d.]*px/)
+
+        cy.get('[data-cy="slidesFullscreenBtn"]').realClick()
+
+        cy.get('[data-cy="slidesFullscreenMsg"]')
+        cy.wait(500)
+        cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="slidesExitFullscreenBtn"]').realPress('Escape')
+
+        cy.get('[data-cy="slidesFullscreenBtn"]').tab().type('{leftArrow}')
+        cy.get('[data-cy="slidesFullscreenBtn"]').tab().type('{leftArrow}')
+        cy.get('[data-cy="slidesFullscreenBtn"]').tab().type('{leftArrow}')
+        cy.get('#proj1-skill1-slidesContainer').should('have.attr', 'style').and('match', /width:\s*76[\d.]*px/)
+    });
 
 });
