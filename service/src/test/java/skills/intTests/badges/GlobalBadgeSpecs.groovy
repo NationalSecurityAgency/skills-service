@@ -18,8 +18,6 @@ package skills.intTests.badges
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
-import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
 import skills.storage.model.UserAchievement
 import skills.storage.repos.UserAchievedLevelRepo
 
@@ -32,21 +30,21 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
     def "removing level satisfies global badge for some of the existing users"() {
 
-        def proj = SkillsFactory.createProject()
-        def subj2 = SkillsFactory.createSubject(1, 2)
-        def subj3 = SkillsFactory.createSubject(1, 3)
-        def subj = SkillsFactory.createSubject()
-        def badge = SkillsFactory.createBadge()
-        def badge2 = SkillsFactory.createBadge(1, 2)
+        def proj = createProject()
+        def subj2 = createSubject(1, 2)
+        def subj3 = createSubject(1, 3)
+        def subj = createSubject()
+        def badge = createBadge()
+        def badge2 = createBadge(1, 2)
 
 
         //subj1 skills
         // 1500 total points
         // 150 for level 1
         // 375 for level 2
-        List<Map> skills = SkillsFactory.createSkills(5, 1, 1, 100)
-        List<Map> subj2Skills = SkillsFactory.createSkills(5, 1, 2, 100)
-        List<Map> subj3Skills = SkillsFactory.createSkills(5, 1, 3, 100)
+        List<Map> skills = createSkills(5, 1, 1, 100)
+        List<Map> subj2Skills = createSkills(5, 1, 2, 100)
+        List<Map> subj3Skills = createSkills(5, 1, 3, 100)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -104,20 +102,20 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
     def "removing skill requirement from badge where level achievement is met should award badge"() {
 
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def subj2 = SkillsFactory.createSubject(1, 2)
-        def subj3 = SkillsFactory.createSubject(1, 3)
-        def badge = SkillsFactory.createBadge()
+        def proj = createProject()
+        def subj = createSubject()
+        def subj2 = createSubject(1, 2)
+        def subj3 = createSubject(1, 3)
+        def badge = createBadge()
 
 
         //subj1 skills
         // 1500 total points
         // 150 for level 1
         // 375 for level 2
-        List<Map> skills = SkillsFactory.createSkills(5, 1, 1, 100)
-        List<Map> subj2Skills = SkillsFactory.createSkills(5, 1, 2, 100)
-        List<Map> subj3Skills = SkillsFactory.createSkills(5, 1, 3, 100)
+        List<Map> skills = createSkills(5, 1, 1, 100)
+        List<Map> subj2Skills = createSkills(5, 1, 2, 100)
+        List<Map> subj3Skills = createSkills(5, 1, 3, 100)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -153,15 +151,15 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
 
     def "achieving subject level does not satisfy global badge level dependency"(){
-        def proj = SkillsFactory.createProject()
+        def proj = createProject()
 
-        def subj = SkillsFactory.createSubject()
-        def subj2 = SkillsFactory.createSubject(1, 2)
-        def badge = SkillsFactory.createBadge()
+        def subj = createSubject()
+        def subj2 = createSubject(1, 2)
+        def badge = createBadge()
 
         //subj1 skills
-        List<Map> skills = SkillsFactory.createSkills(3, 1, 1, 40)
-        List<Map> subj2Skills = SkillsFactory.createSkills(20, 1, 2, 200)
+        List<Map> skills = createSkills(3, 1, 1, 40)
+        List<Map> subj2Skills = createSkills(20, 1, 2, 200)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -189,15 +187,15 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
     }
 
     def "achieving project level satisfies global badge level dependency"(){
-        def proj = SkillsFactory.createProject()
+        def proj = createProject()
 
-        def subj = SkillsFactory.createSubject()
-        def subj2 = SkillsFactory.createSubject(1, 2)
-        def badge = SkillsFactory.createBadge()
+        def subj = createSubject()
+        def subj2 = createSubject(1, 2)
+        def badge = createBadge()
 
         //subj1 skills
-        List<Map> skills = SkillsFactory.createSkills(3, 1, 1, 40)
-        List<Map> subj2Skills = SkillsFactory.createSkills(20, 1, 2, 200)
+        List<Map> skills = createSkills(3, 1, 1, 40)
+        List<Map> subj2Skills = createSkills(20, 1, 2, 200)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -223,10 +221,10 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
     }
 
     def "cannot disable a badge after it has been enabled"(){
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(4)
-        def badge = SkillsFactory.createBadge()
+        def proj = createProject()
+        def subj = createSubject()
+        def skills = createSkills(4)
+        def badge = createBadge()
         badge.enabled = 'true'
 
         skillsService.createProject(proj)
@@ -248,10 +246,10 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
     }
 
     def "cannot enable global badge with no skills and no levels"() {
-        def proj = SkillsFactory.createProject()
-        def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(4)
-        def badge = SkillsFactory.createBadge()
+        def proj = createProject()
+        def subj = createSubject()
+        def skills = createSkills(4)
+        def badge = createBadge()
         badge.enabled = 'false'
 
         skillsService.createProject(proj)
@@ -269,21 +267,21 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
     }
 
     def "enabling badge with only level requirements should only award badge to users who have the requisite level(s)"() {
-        def proj = SkillsFactory.createProject()
+        def proj = createProject()
 
-        def subj = SkillsFactory.createSubject()
-        def subj2 = SkillsFactory.createSubject(1, 2)
-        def badge = SkillsFactory.createBadge()
+        def subj = createSubject()
+        def subj2 = createSubject(1, 2)
+        def badge = createBadge()
 
-        def badge2 = SkillsFactory.createBadge()
+        def badge2 = createBadge()
 
-        def proj2 = SkillsFactory.createProject(2)
-        def proj2subj1 = SkillsFactory.createSubject(2)
-        List<Map> proj2skills = SkillsFactory.createSkills(4, 2, 1, 50)
+        def proj2 = createProject(2)
+        def proj2subj1 = createSubject(2)
+        List<Map> proj2skills = createSkills(4, 2, 1, 50)
 
         //subj1 skills
-        List<Map> skills = SkillsFactory.createSkills(3, 1, 1, 40)
-        List<Map> subj2Skills = SkillsFactory.createSkills(20, 1, 2, 200)
+        List<Map> skills = createSkills(3, 1, 1, 40)
+        List<Map> subj2Skills = createSkills(20, 1, 2, 200)
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -376,7 +374,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
             skillsService.exportSkillToCatalog(project1.projectId, it.skillId)
         }
 
-        def badge = SkillsFactory.createBadge()
+        def badge = createBadge()
         badge.enabled = 'true'
         skillsService.createGlobalBadge(badge)
         skillsService.assignSkillToGlobalBadge(projectId: project1.projectId, badgeId: badge.badgeId, skillId: p1_skills[0].skillId)
@@ -418,4 +416,73 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         ex.message.contains('Badge with id [global1] already exists!')
     }
 
+    def "cannot add a level of a private project to a global badge"() {
+        Map badge = [badgeId: 'global1', name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+
+        def proj = createProject()
+        skillsService.createProject(proj)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        when:
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains("Projects with the private invitation only setting are not allowed to be added to a Global Badge")
+    }
+
+    def "cannot add a change a project to private invite only when the project has a level that participates in a global badge"() {
+        Map badge = [badgeId: 'global1', name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+
+        def proj = createProject()
+        skillsService.createProject(proj)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "1")
+
+        when:
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains("Projects that participate in global badges cannot enable invite_only setting")
+    }
+
+    def "cannot add a skill of a private project to a global badge"() {
+        Map badge = [badgeId: 'global1', name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+
+        def proj = createProject()
+        def subj = createSubject()
+        def skill = createSkill()
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        when:
+        skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains("Projects with the private invitation only setting are not allowed to be added to a Global Badge")
+    }
+
+    def "cannot add a change a project to private invite only when the project has a skill that participates in a global badge"() {
+        Map badge = [badgeId: 'global1', name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+
+        def proj = createProject()
+        def subj = createSubject()
+        def skill = createSkill()
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skill)
+        skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
+
+        when:
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains("Projects that participate in global badges cannot enable invite_only setting")
+    }
 }

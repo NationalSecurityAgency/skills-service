@@ -31,6 +31,7 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import SkillsSettingTextInput from '@/components/settings/SkillsSettingTextInput.vue'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import SettingsItem from "@/components/settings/SettingsItem.vue";
+import ProjectService from '@/components/projects/ProjectService.js'
 
 const dialogMessages = useDialogMessages()
 const announcer = useSkillsAnnouncer();
@@ -368,12 +369,26 @@ const projectVisibilityChanged = ((value) => {
       settings.value.inviteOnlyProject.value = 'false';
       settings.value.productionModeEnabled.value = 'false';
     } else if (value.value === privateInviteOnly) {
-      settings.value.inviteOnlyProject.value = 'true';
-      settings.value.productionModeEnabled.value = 'false';
-      dialogMessages.msgOk({
-        message: 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users.',
-        header: 'Changing to Invite Only',
-      })
+      ProjectService.checkIfProjectBelongsToGlobalBadge(route.params.projectId)
+          .then((belongsToGlobal) => {
+            if (belongsToGlobal) {
+              settings.value.projectVisibility.value = settings.value.projectVisibility.lastLoadedValue
+              settings.value.projectVisibility.dirty = false;
+              dialogMessages.msgOk({
+                message: 'This projects participates in one or more global badges.  All project levels and skills must be removed from all global badges before this project can be made invite only.',
+                header: 'Unable to change to Invite Only',
+              });
+            } else {
+              settings.value.inviteOnlyProject.value = 'true';
+              settings.value.productionModeEnabled.value = 'false';
+              dialogMessages.msgOk({
+                message: 'Changing this Project to Invite Only will restrict access to the training profile and skill reporting to only invited users.',
+                header: 'Changing to Invite Only',
+              })
+              inviteOnlyProjectChanged(settings.value.inviteOnlyProject.value);
+              productionModeEnabledChanged(settings.value.productionModeEnabled.value);
+            }
+          });
     } else if (value.value === discoverableProgressAndRanking) {
       settings.value.inviteOnlyProject.value = 'false';
       settings.value.productionModeEnabled.value = 'true';
