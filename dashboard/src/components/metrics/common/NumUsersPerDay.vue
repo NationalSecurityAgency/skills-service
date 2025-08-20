@@ -62,7 +62,8 @@ const distinctUsersOverTime = ref([]);
 const hasDataEnoughData = ref(false);
 const mutableTitle = ref(props.title);
 const localProps = ref({
-  start: dayjs().subtract(30, 'day').valueOf()
+  start: dayjs().subtract(30, 'day').valueOf(),
+  byMonth: false,
 });
 const timeSelectorOptions = ref([
   {
@@ -141,13 +142,20 @@ const chartOptions = ref({
   },
 });
 
+const byMonth = ref(false);
+const dateOptions = [{ label: 'Day/Week', value: false}, { label: 'Month', value: true }]
+
 const updateTimeRange = (timeEvent) => {
   if (appConfig) {
     const oldestDaily = dayjs().subtract(appConfig.maxDailyUserEvents, 'day');
-    if (timeEvent.startTime < oldestDaily) {
-      mutableTitle.value = 'Users per week';
+    if (!byMonth.value) {
+      if (timeEvent.startTime < oldestDaily) {
+        mutableTitle.value = 'Users per week';
+      } else {
+        mutableTitle.value = props.title;
+      }
     } else {
-      mutableTitle.value = props.title;
+      mutableTitle.value = 'Users per month';
     }
   }
   localProps.value.start = timeEvent.startTime.valueOf();
@@ -162,11 +170,15 @@ const loadData = () => {
   loading.value = true;
   MetricsService.loadChart(route.params.projectId, 'distinctUsersOverTimeForProject', localProps.value)
       .then((response) => {
-        if (response && response.length > 1 && !allZeros(response)) {
+
+        if (response && response.users.length > 1 && !allZeros(response.users)) {
           hasDataEnoughData.value = true;
           distinctUsersOverTime.value = [{
-            data: response.map((item) => [item.value, item.count]),
+            data: response.users.map((item) => [item.value, item.count]),
             name: 'Users',
+          }, {
+            data: response.newUsers.map((item) => [item.value, item.count]),
+            name: 'New Users',
           }];
         } else {
           distinctUsersOverTime.value = [];
@@ -175,6 +187,17 @@ const loadData = () => {
         loading.value = false;
       });
 };
+
+const dateOptionChanged = (option) => {
+  byMonth.value = option
+  localProps.value.byMonth = option
+  if(byMonth.value) {
+    mutableTitle.value = 'Users per month';
+  } else {
+    mutableTitle.value = 'Users per week';
+  }
+  loadData()
+}
 </script>
 
 <template>
@@ -182,6 +205,8 @@ const loadData = () => {
     <template #header>
       <SkillsCardHeader :title="mutableTitle">
         <template #headerContent>
+          <SelectButton :allowEmpty="false" size="small" :defaultValue="false" :options="dateOptions" v-model="byMonth" @update:modelValue="dateOptionChanged" optionLabel="label" optionValue="value"></SelectButton>
+          |
           <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
         </template>
       </SkillsCardHeader>

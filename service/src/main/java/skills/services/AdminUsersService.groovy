@@ -76,12 +76,15 @@ class AdminUsersService {
     @Value('${skills.config.ui.usersTableAdditionalUserTagKey:}')
     String usersTableAdditionalUserTagKey
 
-    List<TimestampCountItem> getUsage(String projectId, String skillId, Date start) {
+    List<TimestampCountItem> getUsage(String projectId, String skillId, Date start, Boolean newUsersOnly = false) {
         Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
+        List<DayCountItem> res
 
-        List<DayCountItem> res = skillId ?
-                userEventService.getDistinctUserCountForSkillId(projectId, skillId, startDate) :
-                userEventService.getDistinctUserCountsForProject(projectId, startDate)
+        if(skillId) {
+            res = userEventService.getDistinctUserCountForSkillId(projectId, skillId, startDate, newUsersOnly)
+        } else {
+            res = userEventService.getDistinctUserCountsForProject(projectId, startDate, newUsersOnly)
+        }
 
         List<TimestampCountItem> countsPerDay = []
         res?.each {
@@ -91,15 +94,15 @@ class AdminUsersService {
         return countsPerDay
     }
 
-    List<TimestampCountItem> getUsagePerMonth(String projectId, String skillId, Date start) {
+    List<TimestampCountItem> getUsagePerMonth(String projectId, String skillId, Date start, Boolean newUsersOnly = false) {
         Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
 
-        List<MonthlyCountItem> res = userEventService.getDistinctUserCountsForProjectByMonth(projectId, startDate)
+        List<MonthlyCountItem> users = userEventService.getDistinctUserCountsForProjectByMonth(projectId, startDate, newUsersOnly)
+
 //        skillId ? userEventService.getDistinctUserCountForSkillId(projectId, skillId, startDate) :
 
-
         List<TimestampCountItem> countsPerMonth = []
-        res?.each {
+        users?.each {
             countsPerMonth << new TimestampCountItem(value: it.month.time, count: it.count)
         }
 

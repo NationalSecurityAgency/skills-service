@@ -41,9 +41,14 @@ class MetricsParams {
     public static final String P_TO_DAY_FILTER = "toDayFilter"
     public static final String P_TAG_KEY = "tagKey"
     public static final String P_TAG_FILTER = "tagFilter"
+    public static final String P_BY_MONTH = "byMonth"
     public static final DateFormat DAY_FORMAT = new SimpleDateFormat("yyyy-MM-dd")
 
     static String ACHIEVEMENT_TYPE_OVERALL = "Overall"
+
+    static Boolean getByMonth(Map<String, String> props) {
+        return props[P_BY_MONTH] == "true"
+    }
 
     static String getSkillId(String projectId, String chartId, Map<String, String> props) {
         return getParam(props, P_SKILL_ID, chartId, projectId)
