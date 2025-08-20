@@ -132,6 +132,9 @@ class GlobalBadgesService {
     @Autowired
     UserRoleRepo userRoleRepo
 
+    @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
+
     @Transactional()
     void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
         badgeAdminService.saveBadge(null, originalBadgeId, badgeRequest, ContainerType.GlobalBadge)
@@ -155,6 +158,10 @@ class GlobalBadgesService {
 
         if (userCommunityService.isUserCommunityOnlyProject(projectId)) {
             throw new SkillException("Projects with the community protection are not allowed to be added to a Global Badge", projectId, skillId, ErrorCode.AccessDenied)
+        }
+
+        if (inviteOnlyProjectService.isInviteOnlyProject(projectId)) {
+            throw new SkillException("Projects with the private invitation only setting are not allowed to be added to a Global Badge", projectId, skillId, ErrorCode.AccessDenied)
         }
 
         assignGraphRelationship(badgeId, ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
@@ -184,6 +191,9 @@ class GlobalBadgesService {
         }
         if (userCommunityService.isUserCommunityOnlyProject(projectId)) {
             throw new SkillException("Projects with the community protection are not allowed to be added to a Global Badge", projectId, null, ErrorCode.AccessDenied)
+        }
+        if (inviteOnlyProjectService.isInviteOnlyProject(projectId)) {
+            throw new SkillException("Projects with the private invitation only setting are not allowed to be added to a Global Badge", projectId, null, ErrorCode.AccessDenied)
         }
 
         List<LevelDef> projectLevels = levelDefinitionRepository.findAllByProjectRefId(projDef.id)
@@ -356,7 +366,7 @@ class GlobalBadgesService {
     @Transactional(readOnly = true)
     AvailableSkillsResult getAvailableSkillsForGlobalBadge(String badgeId, String query) {
         List<String> projectIds = projAdminService.getProjects()?.collect { it.projectId }
-        List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLikeNoImportedSkills(ContainerType.Skill, query, projectIds)
+        List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLikeNoImportedUCOrInviteOnlySkills(ContainerType.Skill, query, projectIds)
         Set<String> existingBadgeSkillIds = getSkillsForBadge(badgeId).collect { "${it.projectId}${it.skillId}" }
         List<SkillDefPartial> suggestedSkillDefs = allSkillDefs.findAll { !("${it.projectId}${it.skillId}" in existingBadgeSkillIds) &&  it.projectId != InceptionProjectService.inceptionProjectId }
         AvailableSkillsResult res = new AvailableSkillsResult()
@@ -375,11 +385,8 @@ class GlobalBadgesService {
 
     @Transactional(readOnly = true)
     AvailableProjectResult getAvailableProjectsForBadge(String badgeId, String query) {
-        List<String> projectIds = projAdminService.getProjects()?.collect { it.projectId }
-        List<String> notThese = globalBadgeLevelDefRepo.findAllByBadgeId(badgeId).collect { it.projectId }.unique()
-        if (notThese == null) {
-            notThese = []
-        }
+        List<String> projectIds = projAdminService.getProjects()?.collect { it.projectId }?.findAll { !inviteOnlyProjectService.isInviteOnlyProject(it) } ?: []
+        List<String> notThese = globalBadgeLevelDefRepo.findAllByBadgeId(badgeId)?.collect { it.projectId }?.unique() ?: []
 
         notThese << InceptionProjectService.inceptionProjectId
         projectIds = projectIds - notThese

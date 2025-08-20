@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ProjectSettingsRequest
-import skills.controller.request.model.SettingsRequest
+import skills.services.GlobalBadgesService
 import skills.storage.model.Setting
 
 @Component
@@ -28,7 +28,10 @@ class ProjectSettingsValidator {
     @Autowired
     SettingsDataAccessor settingsDataAccessor
 
-    public void validate(ProjectSettingsRequest settingsRequest) {
+    @Autowired
+    GlobalBadgesService globalBadgesService
+
+    void validate(ProjectSettingsRequest settingsRequest) {
         if (settingsRequest.setting == Settings.PRODUCTION_MODE.settingName && settingsRequest.isEnabled()) {
             Setting setting = settingsDataAccessor.getProjectSetting(settingsRequest.projectId, Settings.INVITE_ONLY_PROJECT.settingName)
             if (setting?.isEnabled()) {
@@ -39,10 +42,13 @@ class ProjectSettingsValidator {
             if (setting?.isEnabled()) {
                 throw new SkillException("${Settings.INVITE_ONLY_PROJECT.settingName} can only be enabled if ${Settings.PRODUCTION_MODE.settingName} is false")
             }
+            if (globalBadgesService.isProjectUsedInGlobalBadge(settingsRequest.projectId)) {
+                throw new SkillException("Projects that participate in global badges cannot enable ${Settings.INVITE_ONLY_PROJECT.settingName} setting", settingsRequest.projectId, null, ErrorCode.AccessDenied)
+            }
         }
     }
 
-    public void validate(List<ProjectSettingsRequest> settings) {
+    void validate(List<ProjectSettingsRequest> settings) {
         ProjectSettingsRequest discoverable = settings.find {it.setting == Settings.PRODUCTION_MODE.settingName }
         ProjectSettingsRequest inviteOnly = settings.find { it.setting == Settings.INVITE_ONLY_PROJECT.settingName }
 

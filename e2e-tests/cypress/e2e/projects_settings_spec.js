@@ -618,5 +618,38 @@ describe('Project Settings Tests', () => {
         cy.get('#deleteProjBtnproj2').should('exist');
         cy.get('#deleteProjBtnproj3').should('not.exist');
     });
+
+    it('project-level settings: project visibility cannot be change to invite-only if project participates in a global badge', () => {
+
+        cy.createGlobalBadge(1);
+        cy.createProject(1);
+        cy.assignProjectToGlobalBadge(1, 1);
+        cy.intercept('GET', '/admin/projects/proj1/settings')
+          .as('getSettings');
+        cy.intercept('POST', '/admin/projects/proj1/settings')
+          .as('saveSettings');
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.wait('@getSettings');
+        cy.get('[data-cy="pageHeaderStat"]')
+          .eq(0)
+          .should('include.text', 'Project Catalog');
+        cy.get('[data-cy="pageHeaderStat"]')
+          .eq(0)
+          .should('include.text', 'Hidden');
+
+        cy.selectItem('[data-cy="projectVisibilitySelector"]', 'Private Invite Only');
+        cy.get('[data-pc-name="dialog"]')
+          .should('be.visible')
+          .should('include.text', 'Unable to change to Invite Only')
+          .should('include.text', 'This project participates in one or more global badges.  All project levels and skills must be removed from all global badges before this project can be made invite only.');
+        cy.clickButton('Ok');
+
+        cy.get('[data-cy="pageHeaderStat"]')
+          .eq(0)
+          .should('include.text', 'Project Catalog');
+        cy.get('[data-cy="pageHeaderStat"]')
+          .eq(0)
+          .should('include.text', 'Hidden');
+    });
 });
 

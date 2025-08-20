@@ -88,6 +88,30 @@ class GlobalBadgeAccessSpecs extends DefaultIntSpec {
         !availableProjectsBadge2.badges.any { it.badgeId == badge1.badgeId }
     }
 
+    def "getAvailableProjectsForGlobalBadge should not return private invite-only projects"() {
+        // Create first user and project
+        def proj1 = createProject(1)
+        skillsService.createProject(proj1)
+
+        def badge1 = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge1)
+
+        // Create second user and project
+        def proj2 = createProject(2)
+        skillsService.createProject(proj2)
+        skillsService.changeSetting(proj2.projectId, "invite_only", [projectId: proj2.projectId, setting: "invite_only", value: "true"])
+
+        when:
+        def availableProjectsBadge1 = skillsService.getAvailableProjectsForGlobalBadge(badge1.badgeId)
+
+        then:
+        availableProjectsBadge1.projects.size() == 1
+        availableProjectsBadge1.projects[0].projectId == proj1.projectId
+
+        // Verify the private project is not returned
+        !availableProjectsBadge1.projects.any { it.projectId == proj2.projectId }
+    }
+
     def "getAvailableProjectsForGlobalBadge should return projects root pinned or project where they are an admin of"() {
         // Create first user and project
         def user1Service = createService("user1")
@@ -149,6 +173,31 @@ class GlobalBadgeAccessSpecs extends DefaultIntSpec {
 
         availableSkillsBadge2.suggestedSkills.size() == 10
         availableSkillsBadge2.suggestedSkills.findAll { it.projectId == proj2.projectId }.size() == 10
+    }
+
+    def "getAvailableSkillsForGlobalBadge should not return skills of private invite-only projects"() {
+        // Create first user and skills
+        def proj1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(10, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(proj1, p1subj1, p1Skills)
+
+        def badge1 = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge1)
+
+        // Create second project and skills, and make it invite-only
+        def proj2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2Skills = createSkills(10, 2, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(proj2, p2subj1, p2Skills)
+        skillsService.changeSetting(proj2.projectId, "invite_only", [projectId: proj2.projectId, setting: "invite_only", value: "true"])
+
+        when:
+        def availableSkillsBadge1 = skillsService.getAvailableSkillsForGlobalBadge(badge1.badgeId, "")
+
+        then:
+        availableSkillsBadge1.suggestedSkills.size() == 10
+        availableSkillsBadge1.suggestedSkills.findAll { it.projectId == proj1.projectId }.size() == 10
     }
 
     def "user cannot update a global badge that they do not own"() {
