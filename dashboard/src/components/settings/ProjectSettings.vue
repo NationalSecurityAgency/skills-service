@@ -375,7 +375,7 @@ const projectVisibilityChanged = ((value) => {
               settings.value.projectVisibility.value = settings.value.projectVisibility.lastLoadedValue
               settings.value.projectVisibility.dirty = false;
               dialogMessages.msgOk({
-                message: 'This projects participates in one or more global badges.  All project levels and skills must be removed from all global badges before this project can be made invite only.',
+                message: 'This project participates in one or more global badges.  All project levels and skills must be removed from all global badges before this project can be made invite only.',
                 header: 'Unable to change to Invite Only',
               });
             } else {
