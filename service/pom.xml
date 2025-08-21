@@ -85,13 +85,6 @@
             <version>10.0.2</version>
             <scope>compile</scope>
         </dependency>
-        <!-- TODO : remove this dependency when spring-boot upgrades to 3.5.5 -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>6.2.10</version>
-            <scope>compile</scope>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
