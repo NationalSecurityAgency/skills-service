@@ -103,28 +103,47 @@ export const useMatomoSupport = defineStore('matomoSupport', () => {
     }
 
     const trackPageView = (toPath) => {
-        const _paq = window._paq = window._paq || [];
-        const customUrl = isSkillsClient.value ? buildLink(toPath.path) : window.location
-        const documentTitle = toPath.name || 'SkillTree'
+        if (isEnabled.value && initialized.value) {
+            const _paq = window._paq = window._paq || [];
+            const customUrl = isSkillsClient.value ? buildLink(toPath.path) : window.location
+            const documentTitle = toPath.name || 'SkillTree'
 
-        if (log.isTraceEnabled()) {
-            log.trace(`UseMatomoSupport.trackPageView: customUrl=${customUrl}, documentTitle=${documentTitle}`)
+            if (log.isTraceEnabled()) {
+                log.trace(`UseMatomoSupport.trackPageView: customUrl=${customUrl}, documentTitle=${documentTitle}`)
+            }
+
+            _paq.push(['setCustomUrl', customUrl]);
+            _paq.push(['setDocumentTitle', documentTitle]);
+            _paq.push(['trackPageView']);
         }
-
-        _paq.push(['setCustomUrl', customUrl]);
-        _paq.push(['setDocumentTitle', documentTitle]);
-        _paq.push(['trackPageView']);
     }
 
-    const trackLink = (path) => {
-        const linkToReport = buildLink(path)
-        if (log.isTraceEnabled()) {
-            log.trace(`UseMatomoSupport.js.router.afterEach: Navigated to ${path}, linkToReport=${linkToReport}`)
+    const trackLink = (link) => {
+        if (isEnabled.value && initialized.value) {
+            if (log.isTraceEnabled()) {
+                log.trace(`UseMatomoSupport.trackLink: linkToReport=${link}`)
+            }
+            const _paq = window._paq = window._paq || [];
+            _paq.push(['trackLink', link, 'link']);
         }
-        const _paq = window._paq = window._paq || [];
-        _paq.push(['trackLink', linkToReport, 'link']);
+    }
+
+    const trackEvent = (category, action, name = null) => {
+        if (isEnabled.value && initialized.value) {
+            if (log.isTraceEnabled()) {
+                log.trace(`UseMatomoSupport.trackEvent: category=${category}, action=${action}`)
+            }
+            const _paq = window._paq = window._paq || [];
+            if (name) {
+                _paq.push(['trackEvent', category, action, name]);
+            } else {
+                _paq.push(['trackEvent', category, action]);
+            }
+        }
     }
     return {
         init,
+        trackLink,
+        trackEvent
     }
 })

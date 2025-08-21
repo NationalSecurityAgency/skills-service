@@ -20,11 +20,14 @@ import {usePagePath} from "@/components/utils/UsePageLocation.js";
 import ContactProjectAdminsDialog from "@/components/contact/ContactProjectAdminsDialog.vue";
 import {useRouter} from "vue-router";
 import {useSupportLinksUtil} from "@/components/contact/UseSupportLinksUtil.js";
+import {useMatomoSupport} from "@/stores/UseMatomoSupport.js";
+import MatomoEvents from "@/utils/MatomoEvents.js";
 
 const appConfig = useAppConfig()
 const pagePath = usePagePath()
 const router = useRouter()
 const supportLinksUtil = useSupportLinksUtil()
+const matomo = useMatomoSupport()
 
 const menu = ref()
 
@@ -80,6 +83,11 @@ const items = computed(() => {
 })
 const toggle = (event) => {
   menu.value.toggle(event)
+  matomo.trackEvent(MatomoEvents.category.Menu, MatomoEvents.action.Open, 'Help')
+}
+
+const clickLink = (link) => {
+  matomo.trackLink(link)
 }
 </script>
 
@@ -98,7 +106,7 @@ const toggle = (event) => {
     <div id="help_settings_menu">
       <Menu ref="menu" :model="items" :popup="true" role="navigation">
         <template #item="{ item, props }">
-          <a :href="item.url" target="_blank" v-bind="props.action">
+          <a :href="item.url" target="_blank" v-bind="props.action" @click="clickLink(item.url)">
             <span class="w-7 border text-center rounded-sm text-green-800 bg-green-50 dark:bg-gray-900 dark:text-green-500 dark:border-green-700"><i :class="item.icon"/></span>
             <span class="">{{ item.label }}</span>
           </a>

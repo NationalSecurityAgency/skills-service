@@ -26,6 +26,8 @@ import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useRoute } from 'vue-router'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
+import {useMatomoSupport} from "@/stores/UseMatomoSupport.js";
+import MatomoEvents from "@/utils/MatomoEvents.js";
 
 const props = defineProps({
   showDescriptions: {
@@ -60,6 +62,7 @@ const subjectAndSkillsState = useSkillsDisplaySubjectState()
 const parentFrame = useSkillsDisplayParentFrameState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const route = useRoute()
+const matomo = useMatomoSupport()
 const themeHelper = useThemesHelper()
 const searchString = ref('')
 
@@ -127,6 +130,7 @@ const onDetailsToggle = () => {
         loading.value = false
       })
   }
+  matomo.trackEvent(MatomoEvents.category.ToggleSwitch, MatomoEvents.action.Toggle, 'Skill Details')
 }
 
 const selectedTagFilters = ref([])
