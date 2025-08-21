@@ -163,6 +163,9 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const contactSupportExternalEmail = computed(() => config.value.contactSupportExternalEmail)
   const contactSupportExternalEmailDescription = computed(() => config.value.contactSupportExternalEmailDescription)
   const maxRolePageSize = computed(() => config.value.maxRolePageSize)
+  const matomoUrl = computed(() => config.value.matomoUrl)
+  const matomoSiteId = computed(() => config.value.matomoSiteId)
+  const matomoProcessUserIdRegex = computed(() => config.value.matomoProcessUserIdRegex)
 
   return {
     loadConfigState,
@@ -267,6 +270,9 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     contactSupportExternalDescription,
     contactSupportExternalEmail,
     contactSupportExternalEmailDescription,
-    maxRolePageSize
+    maxRolePageSize,
+    matomoUrl,
+    matomoSiteId,
+    matomoProcessUserIdRegex
   }
 })

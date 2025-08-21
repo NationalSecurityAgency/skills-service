@@ -214,6 +214,7 @@ export const useAuthState = defineStore('authState', () => {
         restoringSession,
         clearAuthData,
         currentUserCommunity,
-        showUserCommunityInfo
+        showUserCommunityInfo,
+        fetchUser
     }
 })
