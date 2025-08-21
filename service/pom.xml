@@ -18,7 +18,7 @@
            clientLibVersion: @maven.build.timestamp@
            -->
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
-        <mojo.maven.license.plugin.version>2.5.0</mojo.maven.license.plugin.version>
+        <mojo.maven.license.plugin.version>2.6.0</mojo.maven.license.plugin.version>
         <mycila.maven.license.plugin.version>4.6</mycila.maven.license.plugin.version>
     </properties>
     <dependencyManagement>

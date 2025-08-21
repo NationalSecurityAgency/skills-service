@@ -25,6 +25,8 @@ import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 import {useStorage} from '@vueuse/core'
 import {useConfirm} from "primevue";
 import { useDialogMessages } from '@/components/utils/modal/UseDialogMessages.js'
+import {useMatomoSupport} from "@/stores/UseMatomoSupport.js";
+import MatomoEvents from "@/utils/MatomoEvents.js";
 
 const timeUtils = useTimeUtils()
 const colors = useColors()
@@ -33,6 +35,7 @@ const dialogMessages = useDialogMessages()
 const lastViewedNotificationDate = useStorage('lastViewedNotificationDate', null)
 
 const confirm = useConfirm()
+const matomo = useMatomoSupport()
 
 const notificationsPopover = ref();
 const toggle = (event=null) => {
@@ -41,6 +44,7 @@ const toggle = (event=null) => {
     if (latestNotification.value) {
       lastViewedNotificationDate.value = latestNotification.value.notifiedOn
     }
+    matomo.trackEvent(MatomoEvents.category.Menu, MatomoEvents.action.Open, 'Notifications')
   })
 }
 

@@ -16,6 +16,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import SettingsService from '@/components/settings/SettingsService.js'
+import log from 'loglevel';
 
 export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const loadingConfig = ref(true)
@@ -26,6 +27,10 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     return SettingsService.getConfig()
       .then((response) => {
         config.value = response
+        if (config.value.logLevel) {
+            console.log(`UPDATING LOG LEVEL TO ${config.value.logLevel}`)
+            log.setLevel(config.value.logLevel)
+        }
       })
       .finally(() => {
         loadingConfig.value = false
@@ -163,6 +168,9 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const contactSupportExternalEmail = computed(() => config.value.contactSupportExternalEmail)
   const contactSupportExternalEmailDescription = computed(() => config.value.contactSupportExternalEmailDescription)
   const maxRolePageSize = computed(() => config.value.maxRolePageSize)
+  const matomoUrl = computed(() => config.value.matomoUrl)
+  const matomoSiteId = computed(() => config.value.matomoSiteId)
+  const matomoProcessUserIdRegex = computed(() => config.value.matomoProcessUserIdRegex)
 
   return {
     loadConfigState,
@@ -267,6 +275,9 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     contactSupportExternalDescription,
     contactSupportExternalEmail,
     contactSupportExternalEmailDescription,
-    maxRolePageSize
+    maxRolePageSize,
+    matomoUrl,
+    matomoSiteId,
+    matomoProcessUserIdRegex
   }
 })

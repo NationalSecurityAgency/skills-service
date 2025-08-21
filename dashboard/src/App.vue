@@ -43,6 +43,7 @@ import ScrollToTop from '@/common-components/utilities/ScrollToTop.vue'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import log from 'loglevel';
 import {useUserPreferences} from "@/stores/UseUserPreferences.js";
+import {useMatomoSupport} from "@/stores/UseMatomoSupport.js";
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -52,6 +53,7 @@ const accessState = useAccessState()
 const errorHandling = useErrorHandling()
 const userAgreementInterceptor = useUserAgreementInterceptor()
 const route = useRoute()
+const matomo = useMatomoSupport()
 
 const customGlobalValidators = useCustomGlobalValidators()
 const globalNavGuards = useGlobalNavGuards()
@@ -94,6 +96,7 @@ const loadUserAndDisplayInfo = () => {
 watch(() => authState.userInfo, async (newUserInfo) => {
   if (newUserInfo) {
     await loadUserAndDisplayInfo()
+    initMatomo()
   } else {
     isAppLoaded.value = true
   }
@@ -128,7 +131,7 @@ onMounted(() => {
 const restoreSessionIfAvailable = () => {
   if (skillsDisplayInfo.isSkillsClientPath()) {
     authState.setRestoringSession(false)
-    return Promise.resolve()
+    return authState.fetchUser()
   }
   return authState.restoreSessionIfAvailable()
 }
@@ -151,9 +154,19 @@ const loadConfigs = () => {
           // do not need to set isAppLoaded to true here because it will be handled
           // by the watch of authState.userInfo
         }
+
+        initMatomo()
       })
     })
   })
+}
+
+const initMatomo = () => {
+  if (skillsDisplayInfo.isSkillsClientPath()){
+    matomo.init({ isSkillsClient: true, projectId: skillsDisplayAttributes.projectId })
+  } else if (authState.isAuthenticated) {
+    matomo.init()
+  }
 }
 
 const notSkillsClient = computed(() => !skillsDisplayInfo.isSkillsClientPath())

@@ -18,9 +18,12 @@ import { computed } from 'vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import ListFilterMenu from '@/skills-display/components/utilities/ListFilterMenu.vue'
+import {useMatomoSupport} from "@/stores/UseMatomoSupport.js";
+import MatomoEvents from "@/utils/MatomoEvents.js";
 
 const attributes = useSkillsDisplayAttributesState()
 const skillDisplayInfo = useSkillsDisplayInfo()
+const matomo = useMatomoSupport()
 const props = defineProps({
   skills: {
     type: Array,
@@ -205,7 +208,10 @@ const updateFiltersWithMeta = (filters, meta) => {
 }
 
 
-const onSelected = (id) => { emit('filter-selected', id) }
+const onSelected = (id) => {
+  emit('filter-selected', id)
+  matomo.trackEvent(MatomoEvents.category.MenuItem, MatomoEvents.action.Select, id)
+}
 const clearSelection = () => { emit('clear-filter') }
 
 </script>

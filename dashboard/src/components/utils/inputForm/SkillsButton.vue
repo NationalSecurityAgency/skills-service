@@ -16,6 +16,8 @@ limitations under the License.
 <script setup>
 import { useAttrs } from 'vue'
 import { useFocusState } from '@/stores/UseFocusState.js'
+import {useMatomoSupport} from "@/stores/UseMatomoSupport.js";
+import MatomoEvents from "@/utils/MatomoEvents.js";
 
 const props = defineProps({
   label: String,
@@ -40,6 +42,7 @@ const props = defineProps({
 const emit = defineEmits(['click'])
 const attrs = useAttrs()
 const focusState = useFocusState()
+const matomo = useMatomoSupport()
 const onClick = (event) =>{
   if (props.trackForFocus) {
     if (!attrs.id) {
@@ -47,7 +50,12 @@ const onClick = (event) =>{
     }
     focusState.setElementId(attrs.id)
   }
+
   emit('click', event)
+  const matomoEventCategory = props.label || props.icon
+  if (matomoEventCategory) {
+    matomo.trackEvent(MatomoEvents.category.Button, MatomoEvents.action.Click, matomoEventCategory)
+  }
 }
 
 </script>
