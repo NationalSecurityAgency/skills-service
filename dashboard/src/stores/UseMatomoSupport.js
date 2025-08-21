@@ -26,10 +26,9 @@ import {useSkillsDisplayInfo} from "@/skills-display/UseSkillsDisplayInfo.js";
 export const useMatomoSupport = defineStore('matomoSupport', () => {
 
     const router = useRouter()
+    const route = useRoute()
     const authState = useAuthState()
     const appConfig = useAppConfig()
-    const skillsDisplayAttributesState = useSkillsDisplayAttributesState()
-    const skillDisplayInfo = useSkillsDisplayInfo()
     const log = useLog()
 
     const isEnabled = computed(() => appConfig.matomoUrl && appConfig.matomoUrl.length > 0)
@@ -81,8 +80,6 @@ export const useMatomoSupport = defineStore('matomoSupport', () => {
                 log.trace(`Matomo support enabled with matomoUrl=${appConfig.matomoUrl} and matomoSiteId=${appConfig.matomoSiteId}, conf=${JSON.stringify(conf)}`)
             }
             const _paq = window._paq = window._paq || [];
-            _paq.push(['trackPageView']);
-            _paq.push(['enableLinkTracking']);
             (function () {
                 const url = appConfig.matomoUrl
                 _paq.push(['setTrackerUrl', `${url}/matomo.php`]);
@@ -97,18 +94,36 @@ export const useMatomoSupport = defineStore('matomoSupport', () => {
             })();
 
             router.afterEach((to, from) => {
-                const linkToReport = buildLink(to.path)
-                if (log.isTraceEnabled()) {
-                    log.trace(`UseMatomoSupport.js.router.afterEach: Navigated from ${from.path} to ${to.path}, linkToReport=${linkToReport}`)
-                }
-                const _paq = window._paq = window._paq || [];
-                _paq.push(['trackLink', linkToReport, 'link']);
+                trackPageView(to)
             })
+            trackPageView(route)
         } else {
             log.debug('Matomo support disabled')
         }
     }
 
+    const trackPageView = (toPath) => {
+        const _paq = window._paq = window._paq || [];
+        const customUrl = isSkillsClient.value ? buildLink(toPath.path) : window.location
+        const documentTitle = toPath.name || 'SkillTree'
+
+        if (log.isTraceEnabled()) {
+            log.trace(`UseMatomoSupport.trackPageView: customUrl=${customUrl}, documentTitle=${documentTitle}`)
+        }
+
+        _paq.push(['setCustomUrl', customUrl]);
+        _paq.push(['setDocumentTitle', documentTitle]);
+        _paq.push(['trackPageView']);
+    }
+
+    const trackLink = (path) => {
+        const linkToReport = buildLink(path)
+        if (log.isTraceEnabled()) {
+            log.trace(`UseMatomoSupport.js.router.afterEach: Navigated to ${path}, linkToReport=${linkToReport}`)
+        }
+        const _paq = window._paq = window._paq || [];
+        _paq.push(['trackLink', linkToReport, 'link']);
+    }
     return {
         init,
     }
