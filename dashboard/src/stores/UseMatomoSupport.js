@@ -38,16 +38,22 @@ export const useMatomoSupport = defineStore('matomoSupport', () => {
     const skillsClientProjectId = ref(null)
 
     const userId = computed(() => {
+        if (log.isTraceEnabled()) {
+            log.trace(`UseMatomoSupport.userId: appConfig.isPkiAuthenticated: ${appConfig.isPkiAuthenticated}, authState.userInfo: ${JSON.stringify(authState.userInfo)}`)
+        }
         const userId = appConfig.isPkiAuthenticated ? authState.userInfo.dn : authState.userInfo.userId
         if (appConfig.matomoProcessUserIdRegex) {
             const regex = new RegExp(appConfig.matomoProcessUserIdRegex)
-            log.info(`Matomo support: processing userId [${userId}] with regex [${regex}]`)
+            log.debug(`Matomo support: processing userId [${userId}] with regex [${regex}]`)
             const match = userId.match(regex);
             if (match && match[1]) {
                 return match[1]; // Return the first capture group
             } else if (match) {
                 return match[0]; // If no capture groups, return the full match
             }
+        }
+        if (log.isTraceEnabled()) {
+            log.trace(`UseMatomoSupport.userId: returning userId: ${userId}`)
         }
         return userId
     })
@@ -77,7 +83,7 @@ export const useMatomoSupport = defineStore('matomoSupport', () => {
                 skillsClientProjectId.value = conf.projectId
             }
             if (log.isTraceEnabled()) {
-                log.trace(`Matomo support enabled with matomoUrl=${appConfig.matomoUrl} and matomoSiteId=${appConfig.matomoSiteId}, conf=${JSON.stringify(conf)}`)
+                log.trace(`UseMatomoSupport.init: matomoUrl=${appConfig.matomoUrl} and matomoSiteId=${appConfig.matomoSiteId}, conf=${JSON.stringify(conf)}`)
             }
             const _paq = window._paq = window._paq || [];
             (function () {
@@ -98,7 +104,7 @@ export const useMatomoSupport = defineStore('matomoSupport', () => {
             })
             trackPageView(route)
         } else {
-            log.debug('Matomo support disabled')
+            log.debug('UseMatomoSupport.init: Matomo support disabled')
         }
     }
 

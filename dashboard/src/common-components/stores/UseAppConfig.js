@@ -16,6 +16,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import SettingsService from '@/components/settings/SettingsService.js'
+import log from 'loglevel';
 
 export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const loadingConfig = ref(true)
@@ -26,6 +27,10 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     return SettingsService.getConfig()
       .then((response) => {
         config.value = response
+        if (config.value.logLevel) {
+            console.log(`UPDATING LOG LEVEL TO ${config.value.logLevel}`)
+            log.setLevel(config.value.logLevel)
+        }
       })
       .finally(() => {
         loadingConfig.value = false

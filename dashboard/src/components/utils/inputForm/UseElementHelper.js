@@ -33,7 +33,9 @@ export const useElementHelper = (timeoutInterval = 200, numAttempts = 20) => {
         console.warn(`Failed to obtain [${elementId.value}] after trying for [${timeoutInterval*numAttempts}] ms`)
       }
     } else {
-      log.trace(`obtained [${elementId.value}]`)
+      if (log.isTraceEnabled()) {
+        log.trace(`obtained [${elementId.value}]`)
+      }
       resolve.value(element);
     }
   }
