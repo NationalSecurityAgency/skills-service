@@ -16,6 +16,7 @@
 package skills.storage.repos
 
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -270,4 +271,9 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     ''')
     List<String> findGlobalBadgeIdsByAdminGroupId(String adminGroupId)
 
+    @Modifying
+    @Query(value='''
+        update UserRole ur set ur.globalBadgeId = ?2 where ur.globalBadgeId = ?1 and ur.roleName=skills.storage.model.auth.RoleName.ROLE_GLOBAL_BADGE_ADMIN
+    ''')
+    void updateGlobalBadgeIdForBadgeAdmins(String s1, String s2)
 }

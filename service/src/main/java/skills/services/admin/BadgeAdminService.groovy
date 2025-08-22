@@ -145,6 +145,7 @@ class BadgeAdminService {
 
         boolean identifyEligibleUsers = false
         final boolean isEdit = skillDefinition
+        final boolean isIdUpdate = skillDefinition && !skillDefinition.skillId.equalsIgnoreCase(badgeRequest.badgeId)
 
         if (isEdit) {
             String existingEnabled = skillDefinition.enabled;
@@ -194,6 +195,9 @@ class BadgeAdminService {
         if (savedSkill && type == SkillDef.ContainerType.GlobalBadge && !isEdit) {
             String userId = userInfoService.getCurrentUserId()
             accessSettingsStorageService.addGlobalBadgeAdminUserRoleForUser(userId, savedSkill.skillId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
+        }
+        if (savedSkill && type == SkillDef.ContainerType.GlobalBadge && isEdit && isIdUpdate) {
+            accessSettingsStorageService.updateGlobalBadgeIdForBadgeAdmins(originalBadgeId, savedSkill.skillId)
         }
 
         attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(savedSkill?.description, savedSkill.projectId, null, savedSkill.skillId)
