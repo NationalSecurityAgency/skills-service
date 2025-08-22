@@ -416,6 +416,20 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         ex.message.contains('Badge with id [global1] already exists!')
     }
 
+    def "cannot update an existing global badge to have the same badgeId"() {
+        Map badge = [badgeId: 'global1', name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+        Map badge2 = [badgeId: 'global2', name: 'Test Global Badge 2']
+        skillsService.createGlobalBadge(badge2)
+
+        when:
+        badge2.badgeId = 'global1'
+        skillsService.updateGlobalBadge(badge2, 'global2')
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains('Badge with id [global1] already exists!')
+    }
+
     def "cannot add a level of a private project to a global badge"() {
         Map badge = [badgeId: 'global1', name: 'Test Global Badge 1']
         skillsService.createGlobalBadge(badge)

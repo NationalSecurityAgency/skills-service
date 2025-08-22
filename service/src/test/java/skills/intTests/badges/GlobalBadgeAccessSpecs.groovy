@@ -376,4 +376,25 @@ class GlobalBadgeAccessSpecs extends DefaultIntSpec {
         rolesBefore.role.userId.sort() == [user1Service.wsHelper.username, user2Service.wsHelper.username].sort()
         !rolesAfter
     }
+
+    def "getAllGlobalBadges should only returns badges the current user is an admin for after updating the badge id"() {
+        // Create first user and a global badge
+        def user1Service = createService("user1")
+        def badge1 = createBadge(1, 1)
+        user1Service.createGlobalBadge(badge1)
+        def badge2 = createBadge(1, 2)
+        user1Service.createGlobalBadge(badge2)
+
+        String originalBadgeId = badge1.badgeId
+        badge1.badgeId = 'newBadgeId'
+
+        user1Service.updateGlobalBadge(badge1, originalBadgeId)
+        when:
+        def user1Badges = user1Service.getAllGlobalBadges()
+
+        then:
+        user1Badges.size() == 2
+        user1Badges.badgeId.sort() == [badge1.badgeId, badge2.badgeId].sort()
+    }
+
 }

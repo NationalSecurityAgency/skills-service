@@ -424,6 +424,10 @@ class AccessSettingsStorageService {
         }
     }
 
+    void updateGlobalBadgeIdForBadgeAdmins(String originalGlobalBadgeId, String newGlobalBadgeId) {
+        userRoleRepository.updateGlobalBadgeIdForBadgeAdmins(originalGlobalBadgeId, newGlobalBadgeId)
+    }
+
     UserRole addGlobalBadgeAdminUserRoleForUser(String userId, String globalBadgeId, RoleName roleName, String adminGroupId = null) {
         log.debug('Creating global badge id user-role for ID [{}] and role [{}] on global badge [{}]', userId, roleName, globalBadgeId, adminGroupId)
         String userIdLower = userId?.toLowerCase()
