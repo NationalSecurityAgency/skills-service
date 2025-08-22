@@ -386,15 +386,21 @@ class GlobalBadgeAccessSpecs extends DefaultIntSpec {
         user1Service.createGlobalBadge(badge2)
 
         String originalBadgeId = badge1.badgeId
-        badge1.badgeId = 'newBadgeId'
+        String newBadgeId = 'newBadgeId'
+        badge1.badgeId = newBadgeId
 
-        user1Service.updateGlobalBadge(badge1, originalBadgeId)
         when:
+        user1Service.updateGlobalBadge(badge1, originalBadgeId)
         def user1Badges = user1Service.getAllGlobalBadges()
+        def updatedBadge = user1Service.getGlobalBadge(newBadgeId)
 
         then:
         user1Badges.size() == 2
+        user1Badges.badgeId.contains(newBadgeId)
         user1Badges.badgeId.sort() == [badge1.badgeId, badge2.badgeId].sort()
+
+        updatedBadge
+        updatedBadge.badgeId == newBadgeId
     }
 
 }
