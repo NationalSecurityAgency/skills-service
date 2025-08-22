@@ -42,6 +42,18 @@ class NewVersionsNotifCreator {
 
     private final List<WebNotifWrapper> newVersionsNotifications = [
             new WebNotifWrapper(
+                    releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-09-12'),
+                    notif: new WebNotification(
+                            notifiedOn: new Date(),
+                            showUntil: Date.parse('yyyy-MM-dd', '2025-10-01'),
+                            lookupId: "new-versions-3",
+                            title: "Version 3.8 Released",
+                            notification: """- Upload PDF slide decks for skills to enhance training
+- Create Global Badges with skills/levels from any admin-accessible project
+- Customize skill icons, just like subjects and badges
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
+            ),
+            new WebNotifWrapper(
                     releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-07-12'),
                     notif: new WebNotification(
                             notifiedOn: new Date(),
