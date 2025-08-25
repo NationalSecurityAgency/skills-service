@@ -10,7 +10,7 @@ Copy the URL and share it with your trainees. When the link is visited, two thin
 - The project is automatically added to My Projects.
 
 > **TIP**
-> Please note that once users click on the shared links, this project will appear in that user's [Project Catalog](/dashboard/user-guide/progress-and-ranking.html#projects-catalog) even if the project's [Discoverability](/dashboard/user-guide/projects.html#setting-project-discoverability) settings are set to "Not in the Project Catalog".
+> Please note that once users click on the shared links, this project will appear in that user's Project Catalog even if the project's Discoverability settings are set to "Not in the Project Catalog".
 
 > **Important**
 > The **Share** capability is only available if the project was **not** configured to use the "Private Invite Only" authorization mechanism.
