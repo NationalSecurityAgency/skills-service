@@ -598,7 +598,7 @@ describe('Inception Skills Tests', () => {
         cy.assertInceptionPoints('Dashboard', 'CreateGlobalBadge', 20)
     });
 
-    it.only('create initially hidden skill', () => {
+    it('create initially hidden skill', () => {
         cy.createProject(1);
         cy.createSubject(1, 1)
         cy.visit('/administrator/projects/proj1/subjects/subj1');
@@ -615,5 +615,31 @@ describe('Inception Skills Tests', () => {
         cy.get('[data-cy="manageSkillLink_SkillSkill"]')
 
         cy.assertInceptionPoints('Skills', 'CreateSkillInitiallyHidden', 5)
+    });
+
+    it('create initially hidden subject', () => {
+        const expectedId = 'InitiallyDisabledSkillSubject';
+        const providedName = 'Initially Disabled Skill';
+        cy.intercept('POST', `/admin/projects/proj1/subjects/${expectedId}`).as('postNewSubject');
+        cy.intercept('GET', '/admin/projects/proj1/subjects').as('loadSubjects');
+        cy.intercept('POST', '/admin/projects/proj1/subjectNameExists').as('nameExists');
+        cy.createProject(1);
+
+        cy.visit('/administrator/projects/proj1');
+        cy.wait('@loadSubjects');
+        cy.get('[data-cy="btn_Subjects"]').click();
+
+        cy.get('[data-cy="subjectName"]').type(providedName);
+        cy.wait('@nameExists');
+        cy.getIdField().should('have.value', expectedId);
+
+        cy.get('[data-cy="visibilitySwitch"]').click()
+
+        cy.assertInceptionPoints('Projects', 'CreateSubjectInitiallyHidden', 0, false)
+
+        cy.clickSaveDialogBtn()
+        cy.wait('@postNewSubject');
+
+        cy.assertInceptionPoints('Projects', 'CreateSubjectInitiallyHidden', 20)
     });
 });

@@ -155,6 +155,9 @@ const subjectAdded = (subject) => {
   } else {
     subjectsState.subjects.push(subject)
     SkillsReporter.reportSkill('CreateSubject');
+    if (!subject.enabled) {
+      SkillsReporter.reportSkill('CreateSubjectInitiallyHidden')
+    }
   }
   announcer.polite(`Subject ${subject.name} has been saved`);
   enableDropAndDrop()
