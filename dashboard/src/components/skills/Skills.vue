@@ -134,6 +134,9 @@ const skillCreatedOrUpdated = (skill) => {
   } else {
     skills.push(createdSkill)
     SkillsReporter.reportSkill('CreateSkill')
+    if (!skill.enabled) {
+      SkillsReporter.reportSkill('CreateSkillInitiallyHidden')
+    }
   }
   if (skill.groupId) {
     skillsState.setGroupSkills(skill.groupId, skills)

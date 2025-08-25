@@ -597,4 +597,23 @@ describe('Inception Skills Tests', () => {
 
         cy.assertInceptionPoints('Dashboard', 'CreateGlobalBadge', 20)
     });
+
+    it.only('create initially hidden skill', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.openNewSkillDialog()
+
+        cy.get('[data-cy="skillName"]')
+          .type('Skill');
+        cy.get('[data-cy="visibilitySwitch"]').click()
+
+        cy.assertInceptionPoints('Skills', 'CreateSkillInitiallyHidden', 0, false)
+
+        cy.clickSaveDialogBtn()
+        cy.get('[data-cy="manageSkillLink_SkillSkill"]')
+
+        cy.assertInceptionPoints('Skills', 'CreateSkillInitiallyHidden', 5)
+    });
 });
