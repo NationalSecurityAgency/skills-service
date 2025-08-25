@@ -441,6 +441,14 @@ Badges add another facet to the overall gamification profile and allows you to f
 ''',
                         iconClass: "fa-solid fa-plane-up"
                 ),
+                new SkillRequest(name: "Create Global Badge", skillId: "CreateGlobalBadge", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                        pointIncrement: 20,
+                        pointIncrementInterval: 0, // disable Time Window
+                        numPerformToCompletion: 5,
+                        description: "Lookup:Desc_CreateGlobalBadge.md",
+                        helpUrl: "/dashboard/user-guide/global-badges.html",
+                        iconClass: "fa-solid fa-award"
+                ),
                 new SkillRequest(name: "Export to Catalog", skillId: "ExporttoCatalog", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 50,
                         numPerformToCompletion: 1,

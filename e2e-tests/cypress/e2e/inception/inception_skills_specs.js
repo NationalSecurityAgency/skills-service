@@ -573,4 +573,28 @@ describe('Inception Skills Tests', () => {
 
         cy.assertInceptionPoints('Skills', 'ExpandSkillDetailsSkillsPage', 5, false)
     })
+
+    it('create global badge', () => {
+        const expectedId = 'TestGlobalBadgeBadge';
+        const providedName = 'Test Global Badge';
+        cy.intercept('GET', `/app/badges`).as('getGlobalBadges');
+        cy.intercept('POST', '/app/badges/name/exists').as('nameExists');
+        cy.intercept(`/app/badges/${expectedId}`) .as('postGlobalBadge');
+        cy.intercept('GET', `/app/badges/id/${expectedId}/exists`) .as('idExists');
+        cy.visit('/administrator/globalBadges');
+        cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.wait('@getGlobalBadges');
+
+        cy.get('[data-cy="btn_Global Badges"]').click();
+        cy.get('[data-cy="name"]') .type(providedName);
+        cy.wait('@nameExists');
+
+        cy.assertInceptionPoints('Dashboard', 'CreateGlobalBadge', 0, false)
+
+        cy.clickSave();
+        cy.wait('@idExists');
+        cy.wait('@postGlobalBadge');
+
+        cy.assertInceptionPoints('Dashboard', 'CreateGlobalBadge', 20)
+    });
 });
