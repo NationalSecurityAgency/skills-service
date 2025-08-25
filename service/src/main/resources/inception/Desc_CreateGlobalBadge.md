@@ -15,7 +15,7 @@ Creating a Global Badge is simple:
 ### Step 1: Create a New Badge
 1. Navigate to `Home -> Global Badges`
 2. Click the `Badge +` button
-3. **Recommended**: Add a descriptive [Icon](/dashboard/user-guide/icons.html) for better visual recognition
+3. **Recommended**: Add a descriptive Icon for better visual recognition
 
 ### Step 2: Configure Badge Requirements
 After creation, set up the badge criteria:
