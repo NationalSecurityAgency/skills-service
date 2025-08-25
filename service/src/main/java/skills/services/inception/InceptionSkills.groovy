@@ -96,7 +96,7 @@ class InceptionSkills {
                         iconClass: "fa-solid fa-cubes"
                 ),
 
-                new SkillRequest(name: "Create Skill that is initially Hidden", skillId: "CreateSubjectInitiallyHidden", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                new SkillRequest(name: "Create Subject that is initially Hidden", skillId: "CreateSubjectInitiallyHidden", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 20,
                         numPerformToCompletion: 3,
                         description: "Lookup:Desc_CreateSubjectInitiallyHidden.md",
