@@ -24,7 +24,7 @@ const createCustomIconStyleElementIfNotExist = (projectId) => {
   let existingStyles = document.getElementById(lookupId)
   if (!existingStyles) {
     existingStyles = document.createElement('style')
-    existingStyles.id = 'skill-custom-icons'
+    existingStyles.id = lookupId
     existingStyles.type = 'text/css'
     head.appendChild(existingStyles)
   }
@@ -59,7 +59,7 @@ export default {
     existingStyles.innerText += css
   },
   refreshCustomIconCss(projectId, globalBadgeId) {
-    const existingStyles = createCustomIconStyleElementIfNotExist(projectId)
+    const existingStyles = createCustomIconStyleElementIfNotExist(projectId || globalBadgeId)
     CustomIconService.getCustomIconCss(projectId, globalBadgeId).then((response) => {
       if (response) {
         existingStyles.innerText = response
