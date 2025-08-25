@@ -2990,6 +2990,7 @@
                 SELECT filename, max(content_type) as content_type, max(data_uri) as data_uri, max(width) as width, max(height) as height
                 FROM custom_icons
                 WHERE project_id IS NULL
+                AND global_badge_id IS NULL
                 group by filename
             ),
                  global_badges AS (
