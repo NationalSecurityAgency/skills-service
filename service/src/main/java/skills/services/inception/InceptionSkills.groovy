@@ -95,6 +95,14 @@ class InceptionSkills {
                         helpUrl: "/dashboard/user-guide/subjects.html",
                         iconClass: "fa-solid fa-cubes"
                 ),
+
+                new SkillRequest(name: "Create Skill that is initially Hidden", skillId: "CreateSubjectInitiallyHidden", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 20,
+                        numPerformToCompletion: 3,
+                        description: "Lookup:Desc_CreateSubjectInitiallyHidden.md",
+                        helpUrl: "/dashboard/user-guide/subjects.html#subject-creation-lifecycle",
+                        iconClass: "fa-solid fa-eye-slash"
+                ),
                 new SkillRequest(name: "Configure Root Help Url", skillId: "ConfigureProjectRootHelpUrl", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 50, pointIncrementInterval: 8, numPerformToCompletion: 1,
                         description: "Lookup:Desc_ConfigureProjectRootHelpUrl.md",
@@ -477,6 +485,13 @@ Badges add another facet to the overall gamification profile and allows you to f
                         description: "Lookup:Desc_CreateSkill.md",
                         helpUrl: "/dashboard/user-guide/skills.html",
                         iconClass: "fa-solid fa-graduation-cap"
+                ),
+                new SkillRequest(name: "Create Skill that is initially Hidden", skillId: "CreateSkillInitiallyHidden", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        numPerformToCompletion: 5,
+                        description: "Lookup:Desc_CreateSkillInitiallyHidden.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#skill-creation-lifecycle",
+                        iconClass: "fa-solid fa-eye-slash"
                 ),
                 new SkillRequest(name: "Create Skill with disabled Time Window", skillId: "CreateSkillDisabledTimeWindow", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
