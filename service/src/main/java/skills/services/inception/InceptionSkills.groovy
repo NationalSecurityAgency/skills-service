@@ -97,8 +97,8 @@ class InceptionSkills {
                 ),
 
                 new SkillRequest(name: "Create Subject that is initially Hidden", skillId: "CreateSubjectInitiallyHidden", subjectId: subjectProjectId, projectId: inceptionProjectId,
-                        pointIncrement: 20,
-                        numPerformToCompletion: 3,
+                        pointIncrement: 50,
+                        numPerformToCompletion: 1,
                         description: "Lookup:Desc_CreateSubjectInitiallyHidden.md",
                         helpUrl: "/dashboard/user-guide/subjects.html#subject-creation-lifecycle",
                         iconClass: "fa-solid fa-eye-slash"
@@ -687,6 +687,38 @@ Badges add another facet to the overall gamification profile and allows you to f
                         description: "Lookup:Desc_ConfigureSelfApprovalWorkload.md",
                         helpUrl: "/dashboard/user-guide/self-reporting.html#split-approval-workload",
                         iconClass: "fa-solid fa-arrows-split-up-and-left"
+                ),
+                new SkillRequest(name: "Add Slide Deck to Skill", skillId: "AddSkillSlides", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 2,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        description: "Lookup:Desc_Slides.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#slide-deck",
+                        iconClass: "fa-solid fa-file-powerpoint"
+                ),
+                new SkillRequest(name: "Configure Skill's Icon", skillId: "ConfigureSkillIcon", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        numPerformToCompletion: 10,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        description: "Lookup:Desc_ConfSkillIcon.md",
+                        helpUrl: "/dashboard/user-guide/icons.html",
+                        iconClass: "fa-solid fa-gears"
+                ),
+                new SkillRequest(name: "Skill's Audio/Video", skillId: "SkillAudioVideo", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 2,
+                        description: "Lookup:Desc_SkillAudioAndVideo.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#audio-video",
+                        iconClass: "fa-solid fa-circle-play"
+                ),
+                new SkillRequest(name: "Quiz or Survey Association", skillId: "SkillQuizOrSurvey", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 2,
+                        description: "Lookup:Desc_SkillQuizOrSurvey.md",
+                        helpUrl: "/dashboard/user-guide/quizzes-and-surveys.html",
+                        iconClass: "fa-solid fa-clipboard-question"
                 ),
         ]
     }
