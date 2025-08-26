@@ -27,14 +27,7 @@ import skills.auth.aop.LimitDashboardAccess
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
-import skills.controller.request.model.AdminGroupDefExistsRequest
-import skills.controller.request.model.AdminGroupDefRequest
-import skills.controller.request.model.BadgeRequest
-import skills.controller.request.model.NameExistsRequest
-import skills.controller.request.model.ProjectExistsRequest
-import skills.controller.request.model.ProjectRequest
-import skills.controller.request.model.QuizDefExistsRequest
-import skills.controller.request.model.QuizDefRequest
+import skills.controller.request.model.*
 import skills.controller.result.model.*
 import skills.dbupgrade.DBUpgradeSafe
 import skills.icons.CustomIconFacade
@@ -278,7 +271,7 @@ class AppController {
     @RequestMapping(value = "/badges/{badgeId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult createBadge(@PathVariable("badgeId") String badgeId,
-                            @RequestBody BadgeRequest badgeRequest) {
+                            @RequestBody GlobalBadgeRequest badgeRequest) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id")
         badgeRequest.badgeId = badgeRequest.badgeId ?: badgeId
         SkillsValidator.isNotBlank(badgeRequest?.name, "Badge Name")

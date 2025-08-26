@@ -178,6 +178,8 @@ class SettingsService {
             lockingService.lockGlobalSettings()
         }else if(request instanceof ProjectSettingsRequest){
             lockingService.lockProject(request.projectId)
+        }else if(request instanceof SkillSettingsRequest){
+            lockingService.lockGlobalSettings() // lock global settings for skill settings since it us used for global badges
         } else{
             log.error("unable SettingRequest [${request.getClass()}]")
             throw new SkillException("Unrecognized Setting type")
