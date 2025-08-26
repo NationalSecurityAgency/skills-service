@@ -450,9 +450,8 @@ Badges add another facet to the overall gamification profile and allows you to f
                         iconClass: "fa-solid fa-plane-up"
                 ),
                 new SkillRequest(name: "Create Global Badge", skillId: "CreateGlobalBadge", subjectId: subjectDashboardId, projectId: inceptionProjectId,
-                        pointIncrement: 20,
-                        pointIncrementInterval: 0, // disable Time Window
-                        numPerformToCompletion: 5,
+                        pointIncrement: 50,
+                        numPerformToCompletion: 1,
                         description: "Lookup:Desc_CreateGlobalBadge.md",
                         helpUrl: "/dashboard/user-guide/global-badges.html",
                         iconClass: "fa-solid fa-award"
@@ -472,6 +471,13 @@ Badges add another facet to the overall gamification profile and allows you to f
                         helpUrl: "/dashboard/user-guide/projects.html#access",
                         iconClass: "fa-solid fa-user-shield"
                 ),
+                new SkillRequest(name: "Create Admin Group", skillId: "CreateAdminGroup", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                        pointIncrement: 50,
+                        numPerformToCompletion: 1,
+                        description: "Lookup:Desc_AdminGroups.md",
+                        helpUrl: "/dashboard/user-guide/admin-groups.html",
+                        iconClass: "fa-solid fa-user-shield"
+                ),
         ]
     }
 
@@ -489,6 +495,7 @@ Badges add another facet to the overall gamification profile and allows you to f
                 new SkillRequest(name: "Create Skill that is initially Hidden", skillId: "CreateSkillInitiallyHidden", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         numPerformToCompletion: 5,
+                        pointIncrementInterval: 0, // disable Time Window
                         description: "Lookup:Desc_CreateSkillInitiallyHidden.md",
                         helpUrl: "/dashboard/user-guide/skills.html#skill-creation-lifecycle",
                         iconClass: "fa-solid fa-eye-slash"
@@ -701,7 +708,7 @@ Badges add another facet to the overall gamification profile and allows you to f
                         pointIncrement: 5,
                         numPerformToCompletion: 10,
                         pointIncrementInterval: 60 * 12, // 1 work day
-                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        numMaxOccurrencesIncrementInterval: 5, // up-to 5 per day
                         description: "Lookup:Desc_ConfSkillIcon.md",
                         helpUrl: "/dashboard/user-guide/icons.html",
                         iconClass: "fa-solid fa-gears"
