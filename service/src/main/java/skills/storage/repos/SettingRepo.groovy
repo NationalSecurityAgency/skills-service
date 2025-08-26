@@ -45,6 +45,9 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     Setting findAllByTypeAndSettingGroupAndSettingAndProjectId(Setting.SettingType type, String settingGroup, String setting, String projectId)
 
     @Nullable
+    Setting findByTypeAndSkillRefIdAndSettingGroupAndSetting(Setting.SettingType type, Integer skillRefId, @Nullable String settingGroup, String setting)
+
+    @Nullable
     @Query('''select s from Setting s 
             where 
                 s.setting=?1 and 

@@ -79,9 +79,9 @@ export default {
   checkIfAdminGroupNameExist(name) {
     return axios.post('/app/adminGroupDefExist', { name }).then((response) => response.data)
   },
-  validateAdminGroupForEnablingCommunity(projectId) {
+  validateAdminGroupForEnablingCommunity(adminGroupId) {
     return axios
-        .get(`/admin/admin-group-definitions/${encodeURIComponent(projectId)}/validateEnablingCommunity`)
+        .get(`/admin/admin-group-definitions/${encodeURIComponent(adminGroupId)}/validateEnablingCommunity`)
         .then((response) => response.data)
   },
   getAdminGroupsForProject(projectId) {

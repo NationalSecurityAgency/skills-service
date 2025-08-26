@@ -33,6 +33,8 @@ import skills.services.settings.SettingsDataAccessor
 import skills.storage.model.AdminGroupDef
 import skills.storage.model.ProjDef
 import skills.storage.model.QuizDef
+import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.UserTag
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.*
@@ -85,6 +87,9 @@ class UserCommunityService {
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
 
+    @Autowired
+    SkillDefWithExtraRepo skillDefWithExtraRepo
+
     String userCommunityUserTagKey
     String userCommunityUserTagValue
     String defaultUserCommunityName
@@ -124,6 +129,9 @@ class UserCommunityService {
         }
         userRoleRepo.findQuizIdsByAdminGroupId(adminGroupId).each { quizId ->
             res = validateQuizForCommunity(quizId, res, true)
+        }
+        userRoleRepo.findGlobalBadgeIdsByAdminGroupId(adminGroupId).each { badgeId ->
+            res = validateGlobalBadgeForCommunity(badgeId, res, true)
         }
         List<UserRoleRes> allAdminGroupMembers = accessSettingsStorageService.findAllAdminGroupMembers(adminGroupId)
         if (allAdminGroupMembers) {
@@ -210,6 +218,34 @@ class UserCommunityService {
         return res;
     }
 
+    @Transactional(readOnly = true)
+    EnableUserCommunityValidationRes validateGlobalBadgeForCommunity(String badgeId, EnableUserCommunityValidationRes existingValidationRes = null, adminGroupView = false) {
+        EnableUserCommunityValidationRes res = existingValidationRes ? existingValidationRes : new EnableUserCommunityValidationRes(isAllowed: true, unmetRequirements: [])
+
+        // only applicable if the global badge already exists; also normalizes badge ids case
+        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, SkillDef.ContainerType.GlobalBadge)
+        if (skillDef) {
+            List<UserRole> allRoles = userRoleRepo.findAllByGlobalBadgeIdIgnoreCase(skillDef.skillId)
+            checkAllUsersAreUCMembers(allRoles, res, "global badge")
+            if(adminGroupDefRepo.doesAdminGroupContainNonUserCommunityQuiz(skillDef.skillId)) {
+                res.isAllowed = false
+                if(!adminGroupView) {
+                    res.unmetRequirements.add("This global badge is part of one or more Admin Groups that do no have ${getCommunityNameBasedOnConfAndItemStatus(true)} permission".toString())
+                }
+                else {
+                    res.unmetRequirements.add("This Admin Group is connected to a global badge that is not compatible with user community protection")
+                }
+            }
+
+            List<String> nonCommunityProjects = skillRelDefRepo.getNonCommunityProjectsThatThisGlobalBadgeIsLinkedTo(skillDef.id)?.sort()
+            if (nonCommunityProjects) {
+                res.isAllowed = false
+                res.unmetRequirements.add("This global badge is linked to the following project(s) that do not have ${getCommunityNameBasedOnConfAndItemStatus(true)} permission: ${nonCommunityProjects.join(", ")}".toString())
+            }
+        }
+        return res;
+    }
+
     private void checkAllUsersAreUCMembers(List<UserRole> roles, EnableUserCommunityValidationRes res, String type = "project") {
         if (roles) {
             List<UserRole> unique = roles.unique { it.userId }
@@ -270,6 +306,17 @@ class UserCommunityService {
         return quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.UserCommunityOnlyQuiz.setting, quizRefId)?.isEnabled()
     }
 
+    /**
+     * Checks if the specified projectId is configured as a user community only project
+     * @param projectId - not null
+     * @return true if the project exists and has been configured as a user community only project
+     */
+    @Transactional(readOnly = true)
+    boolean isUserCommunityOnlyGlobalBadge(Integer skillRefId) {
+        SkillsValidator.isNotNull(skillRefId, "skillRefId")
+        return settingsDataAccessor.getSkillSetting(skillRefId, Settings.USER_COMMUNITY_ONLY_PROJECT.settingName, null)?.isEnabled()
+    }
+
     @Transactional(readOnly = true)
     String getProjectUserCommunity(String projectId) {
        return getCommunityNameBasedOnConfAndItemStatus(isUserCommunityOnlyProject(projectId))
@@ -279,6 +326,12 @@ class UserCommunityService {
     String getQuizUserCommunity(String quizId) {
         return getCommunityNameBasedOnConfAndItemStatus(isUserCommunityOnlyQuiz(quizId))
     }
+
+    @Transactional(readOnly = true)
+    String getGlobalBadgeUserCommunity(Integer skillRefId) {
+        return getCommunityNameBasedOnConfAndItemStatus(isUserCommunityOnlyGlobalBadge(skillRefId))
+    }
+
 
     String getCommunityNameBasedOnConfAndItemStatus(Boolean isUserCommunityOnlyItem) {
         if (!restrictedUserCommunityName || isUserCommunityOnlyItem == null) {

@@ -20,6 +20,8 @@ import CardNavigateAndEditControls from '@/components/utils/cards/CardNavigateAn
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import EditBadge from "@/components/badges/EditBadge.vue";
 import { useProjConfig } from '@/stores/UseProjConfig.js'
+import Avatar from 'primevue/avatar'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 const projConfig = useProjConfig();
 const props = defineProps({
@@ -39,6 +41,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['sort-changed-requested', 'badge-updated', 'badge-deleted', 'publish-badge']);
+
+const appConfig = useAppConfig()
 
 let isLoading = ref(false);
 // let cardOptions = ref({ controls: {} });
@@ -146,6 +150,14 @@ defineExpose({
                                       ref="navCardWithStatsAndControls" @sort-changed-requested="sortRequested"
                                       :data-cy="`badgeCard-${badge.badgeId}`">
       <template #underTitle>
+
+        <div v-if="badge.userCommunity" class="mb-4" data-cy="userCommunity">
+          <Avatar icon="fas fa-shield-alt" class="text-red-500"></Avatar>
+          <span
+              class="text-secondary italic ml-1">{{ appConfig.userCommunityBeforeLabel }}</span> <span
+            class="text-primary">{{ badge.userCommunity }}</span> <span
+            class="text-secondary italic">{{ appConfig.userCommunityAfterLabel }}</span>
+        </div>
         <card-navigate-and-edit-controls ref="cardNavControls" class="mt-2"
                                          :to="buildManageLink()"
                                          :options="cardOptions.controls"

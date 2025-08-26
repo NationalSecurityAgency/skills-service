@@ -31,11 +31,8 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
-import skills.controller.request.model.BadgeRequest
-import skills.controller.result.model.GlobalBadgeLevelRes
-import skills.controller.result.model.GlobalBadgeResult
-import skills.controller.result.model.ProjectResult
-import skills.controller.result.model.SkillDefPartialRes
+import skills.controller.request.model.GlobalBadgeRequest
+import skills.controller.result.model.*
 import skills.services.admin.*
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.inception.InceptionProjectService
@@ -136,7 +133,8 @@ class GlobalBadgesService {
     InviteOnlyProjectService inviteOnlyProjectService
 
     @Transactional()
-    void saveBadge(String originalBadgeId, BadgeRequest badgeRequest) {
+    void saveBadge(String originalBadgeId, GlobalBadgeRequest badgeRequest) {
+        validateUserCommunityProps(badgeRequest, originalBadgeId)
         badgeAdminService.saveBadge(null, originalBadgeId, badgeRequest, ContainerType.GlobalBadge)
     }
     @Transactional(readOnly = true)
@@ -462,6 +460,11 @@ class GlobalBadgesService {
         return numProjectSkillsUsedInGlobalBadge > 0
     }
 
+    @Transactional(readOnly = true)
+    EnableUserCommunityValidationRes validateGlobalBadgeForEnablingCommunity(String badgeId) {
+        return userCommunityService.validateGlobalBadgeForCommunity(badgeId)
+    }
+
     @Profile
     private GlobalBadgeResult convertToBadge(SkillDefWithExtra skillDef, boolean loadRequiredSkills = false) {
         GlobalBadgeResult res = new GlobalBadgeResult(
@@ -475,6 +478,10 @@ class GlobalBadgesService {
                 helpUrl: skillDef.helpUrl,
                 enabled: skillDef.enabled
         )
+
+        UserInfo userInfo = userInfoService.currentUser
+        Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
+        res.userCommunity = isCommunityMember ? userCommunityService.getGlobalBadgeUserCommunity(skillDef.id) : null
 
         if (loadRequiredSkills) {
             Set<String> uniqueProjectIds = []
@@ -507,6 +514,27 @@ class GlobalBadgesService {
             Boolean isAdminForOtherProject = userRoleRepo.isUserProjectAdmin(userInfo.username, projectId)
             if (!isAdminForOtherProject) {
                 throw new AccessDeniedException("User [${userInfo.username}] is not an admin for project [${projectId}]")
+            }
+        }
+    }
+
+    @Profile
+    private void validateUserCommunityProps(GlobalBadgeRequest globalBadgeRequest, String originalBadgeId) {
+        String badgeId = originalBadgeId ?: globalBadgeRequest.badgeId
+        if (globalBadgeRequest.enableProtectedUserCommunity != null) {
+            if (globalBadgeRequest.enableProtectedUserCommunity) {
+                String userId = userInfoService.currentUserId
+                if (!userCommunityService.isUserCommunityMember(userId)) {
+                    throw new SkillException("User [${userId}] is not allowed to set [enableProtectedUserCommunity] to true", badgeId, null, ErrorCode.AccessDenied)
+                }
+
+                EnableUserCommunityValidationRes enableProjValidationRes = userCommunityService.validateGlobalBadgeForCommunity(badgeId)
+                if (!enableProjValidationRes.isAllowed) {
+                    String reasons = enableProjValidationRes.unmetRequirements.join("\n")
+                    throw new SkillException("Not Allowed to set [enableProtectedUserCommunity] to true. Reasons are:\n${reasons}", badgeId, null, ErrorCode.AccessDenied)
+                }
+            } else {
+                SkillsValidator.isTrue(!userCommunityService.isUserCommunityOnlyProject(badgeId), "Once gloal badge [enableProtectedUserCommunity=true] it cannot be flipped to false", badgeId)
             }
         }
     }

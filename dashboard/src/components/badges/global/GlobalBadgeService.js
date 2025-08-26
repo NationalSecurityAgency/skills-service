@@ -110,5 +110,10 @@ export default {
         `/admin/badges/${encodeURIComponent(badgeId)}/projects/${encodeURIComponent(projectId)}/level/${oldLevel}/${newLevel}`
       )
       .then((res) => res.data)
-  }
+  },
+  validateAdminGroupForEnablingCommunity(badgeId) {
+    return axios
+      .get(`/admin/badges/${encodeURIComponent(badgeId)}/validateEnablingCommunity`)
+      .then((response) => response.data)
+  },
 }
