@@ -151,7 +151,7 @@ describe('Inception Skills Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1)
 
-        cy.assertInceptionPoints('Skills', 'CopySkill', 0, false)
+        cy.assertInceptionPoints('Skills', 'CopySkill', 0)
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="copySkillButton_skill1"]').click()
@@ -251,7 +251,7 @@ describe('Inception Skills Tests', () => {
         // enable reorder should add buttons and sort by display order
         cy.get('[data-cy="enableDisplayOrderSort"]').click()
 
-        cy.assertInceptionPoints('Skills', 'ChangeSkillDisplayOrder', 0, false)
+        cy.assertInceptionPoints('Skills', 'ChangeSkillDisplayOrder', 0)
 
         cy.get('[data-cy="orderMoveDown_skill1"]').click();
 
@@ -273,7 +273,7 @@ describe('Inception Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
-        cy.assertInceptionPoints('Skills', 'SkillsTableAdditionalColumns', 0, false)
+        cy.assertInceptionPoints('Skills', 'SkillsTableAdditionalColumns', 0)
         // cy.get('[data-cy="skillsTable-additionalColumns"]').contains('Time Window').click();
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Time Window"]').click()
@@ -531,7 +531,7 @@ describe('Inception Skills Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).should('be.disabled')
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userTagValueInput"]`).type('First');
 
-        cy.assertInceptionPoints('Skills', 'ConfigureSelfApprovalWorkload', 0, false)
+        cy.assertInceptionPoints('Skills', 'ConfigureSelfApprovalWorkload', 0)
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addTagKeyConfBtn"]`).click()
         cy.wait('@reportSkill')
         cy.assertInceptionPoints('Skills', 'ConfigureSelfApprovalWorkload', 25)
@@ -625,13 +625,13 @@ describe('Inception Skills Tests', () => {
         cy.get('[data-cy="name"]') .type(providedName);
         cy.wait('@nameExists');
 
-        cy.assertInceptionPoints('Dashboard', 'CreateGlobalBadge', 0, false)
+        cy.assertInceptionPoints('Dashboard', 'CreateGlobalBadge', 0)
 
         cy.clickSave();
         cy.wait('@idExists');
         cy.wait('@postGlobalBadge');
         cy.wait('@reportSkill');
-        cy.assertInceptionPoints('Dashboard', 'CreateGlobalBadge', 20)
+        cy.assertInceptionPoints('Dashboard', 'CreateGlobalBadge', 50)
     });
 
     it('create initially hidden skill', () => {
@@ -703,7 +703,7 @@ describe('Inception Skills Tests', () => {
             iconClass = iconClass.replace(/-link$/, '')
             cy.get(`i.${iconClass}`).should('be.visible');
             cy.wait('@reportSkill')
-            cy.assertInceptionPoints('Skills', 'ConfigureSkillIcon', 5, false)
+            cy.assertInceptionPoints('Skills', 'ConfigureSkillIcon', 5)
         })
     });
 
@@ -798,4 +798,34 @@ describe('Inception Skills Tests', () => {
 
         cy.assertInceptionPoints('Skills', 'AddSkillSlides', 25)
     });
+
+    it('create a an admin group', function () {
+        cy.intercept('POST', '/api/projects/Inception/skills/CreateAdminGroup').as('reportSkill');
+        cy.visit('/administrator/adminGroups/')
+        cy.get('[data-cy="noAdminGroupsYet"]')
+
+        cy.get('[data-cy="btn_Admin Groups"]').click()
+        cy.get('.p-dialog-header').contains('New Admin Group')
+
+        cy.get('[data-cy="adminGroupName"]').type('My First Admin Group')
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'MyFirstAdminGroup')
+
+        cy.assertInceptionPoints('Dashboard', 'CreateAdminGroup', 0)
+
+        cy.clickSaveDialogBtn()
+        cy.get('[data-cy="adminGroupName"]').should('not.exist')
+        cy.get('[data-cy="btn_Admin Groups"]').should('have.focus')
+        const adminGroupTableSelector = '[data-cy="adminGroupDefinitionsTable"]';
+        cy.validateTable(adminGroupTableSelector, [
+            [{
+                colIndex: 0,
+                value: 'My First Admin Group'
+            }],
+        ], 5);
+
+        cy.wait('@reportSkill')
+
+        cy.assertInceptionPoints('Dashboard', 'CreateAdminGroup', 50)
+    });
+
 });
