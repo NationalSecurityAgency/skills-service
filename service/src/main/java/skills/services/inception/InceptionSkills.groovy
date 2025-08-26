@@ -95,6 +95,14 @@ class InceptionSkills {
                         helpUrl: "/dashboard/user-guide/subjects.html",
                         iconClass: "fa-solid fa-cubes"
                 ),
+
+                new SkillRequest(name: "Create Subject that is initially Hidden", skillId: "CreateSubjectInitiallyHidden", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 50,
+                        numPerformToCompletion: 1,
+                        description: "Lookup:Desc_CreateSubjectInitiallyHidden.md",
+                        helpUrl: "/dashboard/user-guide/subjects.html#subject-creation-lifecycle",
+                        iconClass: "fa-solid fa-eye-slash"
+                ),
                 new SkillRequest(name: "Configure Root Help Url", skillId: "ConfigureProjectRootHelpUrl", subjectId: subjectProjectId, projectId: inceptionProjectId,
                         pointIncrement: 50, pointIncrementInterval: 8, numPerformToCompletion: 1,
                         description: "Lookup:Desc_ConfigureProjectRootHelpUrl.md",
@@ -441,6 +449,13 @@ Badges add another facet to the overall gamification profile and allows you to f
 ''',
                         iconClass: "fa-solid fa-plane-up"
                 ),
+                new SkillRequest(name: "Create Global Badge", skillId: "CreateGlobalBadge", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                        pointIncrement: 50,
+                        numPerformToCompletion: 1,
+                        description: "Lookup:Desc_CreateGlobalBadge.md",
+                        helpUrl: "/dashboard/user-guide/global-badges.html",
+                        iconClass: "fa-solid fa-award"
+                ),
                 new SkillRequest(name: "Export to Catalog", skillId: "ExporttoCatalog", subjectId: subjectDashboardId, projectId: inceptionProjectId,
                         pointIncrement: 50,
                         numPerformToCompletion: 1,
@@ -456,6 +471,13 @@ Badges add another facet to the overall gamification profile and allows you to f
                         helpUrl: "/dashboard/user-guide/projects.html#access",
                         iconClass: "fa-solid fa-user-shield"
                 ),
+                new SkillRequest(name: "Create Admin Group", skillId: "CreateAdminGroup", subjectId: subjectDashboardId, projectId: inceptionProjectId,
+                        pointIncrement: 50,
+                        numPerformToCompletion: 1,
+                        description: "Lookup:Desc_AdminGroups.md",
+                        helpUrl: "/dashboard/user-guide/admin-groups.html",
+                        iconClass: "fa-solid fa-user-shield"
+                ),
         ]
     }
 
@@ -469,6 +491,14 @@ Badges add another facet to the overall gamification profile and allows you to f
                         description: "Lookup:Desc_CreateSkill.md",
                         helpUrl: "/dashboard/user-guide/skills.html",
                         iconClass: "fa-solid fa-graduation-cap"
+                ),
+                new SkillRequest(name: "Create Skill that is initially Hidden", skillId: "CreateSkillInitiallyHidden", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        numPerformToCompletion: 5,
+                        pointIncrementInterval: 0, // disable Time Window
+                        description: "Lookup:Desc_CreateSkillInitiallyHidden.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#skill-creation-lifecycle",
+                        iconClass: "fa-solid fa-eye-slash"
                 ),
                 new SkillRequest(name: "Create Skill with disabled Time Window", skillId: "CreateSkillDisabledTimeWindow", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
@@ -664,6 +694,38 @@ Badges add another facet to the overall gamification profile and allows you to f
                         description: "Lookup:Desc_ConfigureSelfApprovalWorkload.md",
                         helpUrl: "/dashboard/user-guide/self-reporting.html#split-approval-workload",
                         iconClass: "fa-solid fa-arrows-split-up-and-left"
+                ),
+                new SkillRequest(name: "Add Slide Deck to Skill", skillId: "AddSkillSlides", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 2,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 1, // up-to 1 per day
+                        description: "Lookup:Desc_Slides.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#slide-deck",
+                        iconClass: "fa-solid fa-file-powerpoint"
+                ),
+                new SkillRequest(name: "Configure Skill's Icon", skillId: "ConfigureSkillIcon", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        numPerformToCompletion: 10,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 5, // up-to 5 per day
+                        description: "Lookup:Desc_ConfSkillIcon.md",
+                        helpUrl: "/dashboard/user-guide/icons.html",
+                        iconClass: "fa-solid fa-gears"
+                ),
+                new SkillRequest(name: "Skill's Audio/Video", skillId: "SkillAudioVideo", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 2,
+                        description: "Lookup:Desc_SkillAudioAndVideo.md",
+                        helpUrl: "/dashboard/user-guide/skills.html#audio-video",
+                        iconClass: "fa-solid fa-circle-play"
+                ),
+                new SkillRequest(name: "Quiz or Survey Association", skillId: "SkillQuizOrSurvey", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 25,
+                        numPerformToCompletion: 2,
+                        description: "Lookup:Desc_SkillQuizOrSurvey.md",
+                        helpUrl: "/dashboard/user-guide/quizzes-and-surveys.html",
+                        iconClass: "fa-solid fa-clipboard-question"
                 ),
         ]
     }

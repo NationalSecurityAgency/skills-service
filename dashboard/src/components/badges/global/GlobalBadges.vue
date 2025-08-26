@@ -25,6 +25,7 @@ import Badge from '@/components/badges/Badge.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
+import { SkillsReporter } from '@skilltree/skills-client-js'
 
 const dialogMessages = useDialogMessages()
 const announcer = useSkillsAnnouncer();
@@ -101,6 +102,9 @@ const saveBadge = (updatedBadge) => {
   isLoading.value = true;
 
   const { isEdit } = updatedBadge;
+  if (!isEdit) {
+    SkillsReporter.reportSkill('CreateGlobalBadge');
+  }
 
   loadBadges().then(() => {
     nextTick(() => announcer.polite(`a global badge has been ${isEdit ? 'saved' : 'created'}`));
