@@ -232,7 +232,7 @@ class GlobalBadgesController {
         return ResponseEntity.ok(true)
     }
 
-    @RequestMapping(value="/badges/{badgeId}/projects/{projectId}/level/{currentLevel}/{newLevel}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value="/{badgeId}/projects/{projectId}/level/{currentLevel}/{newLevel}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Boolean> editProjectLevelForBadge(@PathVariable("badgeId") String badgeId,
                                                         @PathVariable("projectId") String projectId,
                                                         @PathVariable("currentLevel") Integer currentLevel,
