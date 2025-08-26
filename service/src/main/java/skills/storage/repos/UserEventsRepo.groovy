@@ -174,11 +174,15 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                 uue.event_time >= :start AND
                 uue.event_type = :#{#type.name()} AND
                 not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
+                and (
+                    :newUsersOnly = false or 
+                    not exists (select 1 from user_events ue2 where uue.skill_ref_id = ue2.skill_ref_id and ue2.user_id = uue.user_id and ue2.project_id = uue.project_id and (ue2.event_time <= :start or ue2.event_time < uue.event_time) order by ue2.event_time)
+                )                
         ) event_join
         GROUP BY event_join.event_time
         ORDER BY event_join.event_time DESC
     """, nativeQuery = true)
-    Stream<DayCountItem> getDistinctUserCountForSkill(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") EventType type)
+    Stream<DayCountItem> getDistinctUserCountForSkill(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") EventType type, @Param("newUsersOnly") Boolean newUsersOnly)
 
     @Nullable
     @Query(value="""SELECT min(event_join.project_id) as projectId, event_join.week_number as weekNumber, count(distinct event_join.user_id) as count FROM
@@ -200,11 +204,15 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             WHERE
                 uue.event_time >= :start AND
                 not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
+                and (
+                    :newUsersOnly = false or 
+                    not exists (select 1 from user_events ue2 where ue2.skill_ref_id = uue.skill_ref_id and ue2.user_id = uue.user_id and ue2.project_id = uue.project_id and (ue2.event_time <= :start or ue2.event_time < uue.event_time) order by ue2.event_time)
+                )                
         ) event_join
         GROUP BY event_join.week_number
         ORDER BY event_join.week_number DESC
     """, nativeQuery = true)
-    Stream<WeekCountItem> getDistinctUserCountForSkillGroupedByWeek(@Param("skillRefId") Integer skillRefId, @Param("start") Date start)
+    Stream<WeekCountItem> getDistinctUserCountForSkillGroupedByWeek(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("newUsersOnly") Boolean newUsersOnly)
 
     @Query(value="""select min(all_events.project_id) as projectId, all_events.event_time as day, sum(all_events.count) as count from
          (
@@ -280,11 +288,23 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             WHERE
                 uue.event_time >= :start AND
                 not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
+                and (
+                    :newUsersOnly = false or 
+                    not exists (
+                        select 1 from user_events ue2
+                        where ue2.user_id = uue.user_id
+                              and ue2.skill_ref_id = uue.skill_ref_id
+                              and ue2.skill_ref_id in (select rel2.child_ref_id from skill_relationship_definition rel2 where rel2.parent_ref_id = :skillRefId)                                                                                                                                  
+                              and ue2.project_id = uue.project_id
+                              and (ue2.event_time <= :start or ue2.event_time < uue.event_time)
+                        order by ue2.event_time
+                    )
+                )                
         ) all_events
         group by all_events.week_number 
         order by all_events.week_number desc
     """, nativeQuery = true)
-    Stream<WeekCountItem> getDistinctUserCountForSubjectGroupedByWeek(@Param("skillRefId") Integer skillRefId, @Param("start") Date start)
+    Stream<WeekCountItem> getDistinctUserCountForSubjectGroupedByWeek(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("newUsersOnly") Boolean newUsersOnly)
 
     @Query(value="""select min(all_events.project_id) as projectId, all_events.event_time as day, count(distinct all_events.user_id) as count from
          (
@@ -307,12 +327,24 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                 uue.event_time > :start AND
                 uue.event_type = :#{#type.name()} AND
                 not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
+                and (
+                    :newUsersOnly = false or 
+                    not exists (
+                        select 1 from user_events ue2
+                        where uue.skill_ref_id = ue2.skill_ref_id 
+                              and ue2.user_id = uue.user_id
+                              and ue2.skill_ref_id in (select rel2.child_ref_id from skill_relationship_definition rel2 where rel2.parent_ref_id = :skillRefId)
+                              and ue2.project_id = uue.project_id 
+                              and (ue2.event_time <= :start or ue2.event_time < uue.event_time)
+                        order by ue2.event_time
+                    )
+                )                
         ) all_events
         group by all_events.event_time 
         order by all_events.event_time desc
         
     """, nativeQuery = true)
-    Stream<DayCountItem> getDistinctUserCountForSubject(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") EventType type)
+    Stream<DayCountItem> getDistinctUserCountForSubject(@Param("skillRefId") Integer skillRefId, @Param("start") Date start, @Param("type") EventType type, @Param("newUsersOnly") Boolean newUsersOnly)
 
     @Query(value="""
         SELECT min(uee.project_id) as projectId, uee.event_time as day, sum(uee.count) as count FROM
@@ -390,12 +422,16 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             WHERE
                 uue.event_time >= :start AND
                 uue.event_type = :#{#type.name()} AND
-                not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = :projectId)
+                not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = :projectId) and 
+                (
+                    :newUsersOnly = false or 
+                    not exists (select 1 from UserEvent ue2 where ue2.userId = ue.userId and ue2.projectId = ue.projectId and (ue2.eventTime <= :start or ue2.eventTime < ue.eventTime) order by ue2.eventTime)
+                )
         ) all_events
         group by all_events.event_time 
         order by all_events.event_time desc
     """, nativeQuery = true)
-    Stream<DayCountItem> getDistinctUserCountForProject(@Param("projectId") String projectId, @Param("start") Date start, @Param("type") EventType type)
+    Stream<DayCountItem> getDistinctUserCountForProject(@Param("projectId") String projectId, @Param("start") Date start, @Param("type") EventType type, @Param("newUsersOnly") Boolean newUsersOnly)
 
     @Query(value="""
         select min(ue.projectId) as projectId, ue.weekNumber as weekNumber, count(distinct ue.userId) as count 
@@ -409,46 +445,48 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             AND sd.enabled = 'true'
         )   
         AND not exists (select 1 from ArchivedUser au where au.userId = ue.userId and au.projectId = :projectId)
+        AND (
+            :newUsersOnly = false or 
+            not exists (select 1 from UserEvent ue2 where ue2.userId = ue.userId and ue2.projectId = ue.projectId and (ue2.eventTime <= :start or ue2.eventTime < ue.eventTime) order by ue2.eventTime)
+        )        
         group by ue.weekNumber
         order by ue.weekNumber desc
     """)
-    Stream<WeekCountItem> getDistinctUserCountForProjectGroupedByWeek(@Param("projectId") String projectId, @Param("start") Date start)
-
-    @Query(value="""
-        select min(ue.projectId) as projectId, ue.weekNumber as weekNumber, count(distinct ue.userId) as count 
-        from UserEvent ue
-        where ue.eventTime >= :start AND
-        ue.skillRefId in (
-            select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
-            from SkillDef sd 
-            WHERE sd.projectId = :projectId 
-            AND sd.type = 'Skill'
-            AND sd.enabled = 'true'
-        )   
-        AND not exists (select 1 from ArchivedUser au where au.userId = ue.userId and au.projectId = :projectId)
-        group by ue.weekNumber
-        order by ue.weekNumber desc
-    """)
-    Stream<WeekCountItem> getDistinctNewUserCountForProjectGroupedByWeek(@Param("projectId") String projectId, @Param("start") Date start)
+    Stream<WeekCountItem> getDistinctUserCountForProjectGroupedByWeek(@Param("projectId") String projectId, @Param("start") Date start, @Param("newUsersOnly") Boolean newUsersOnly)
 
     @Query(value="""
         SELECT ue.projectId as projectId, date_trunc('month', ue.eventTime) AS month,  count(distinct ue.userId) as count
         FROM UserEvent ue WHERE ue.projectId = :projectId and ue.eventTime >= :start
         AND not exists (select 1 from ArchivedUser au where au.userId = ue.userId and au.projectId = :projectId)
+        AND (
+            :newUsersOnly = false or 
+            not exists (select 1 from UserEvent ue2 where ue2.userId = ue.userId and ue2.projectId = ue.projectId and (ue2.eventTime <= :start or ue2.eventTime < ue.eventTime) order by ue2.eventTime)
+        )                
         GROUP BY ue.projectId, month
     """)
-    Stream<MonthlyCountItem> getDistinctUserCountForProjectGroupedByMonth(@Param("projectId") String projectId, @Param("start") Date start)
+    Stream<MonthlyCountItem> getDistinctUserCountForProjectGroupedByMonth(@Param("projectId") String projectId, @Param("start") Date start,  @Param("newUsersOnly") Boolean newUsersOnly)
 
     @Query(value="""
-        WITH UserAppearances As (
-            SELECT distinct ue.user_id, ue.project_id, date_trunc('month', ue.event_time) AS month, row_number() over (partition by ue.user_id order by ue.event_time) as rn
-            FROM user_events ue WHERE ue.project_id = :projectId and ue.event_time >= :start
-                                AND not exists (select 1 from archived_users au where au.user_id = ue.user_id and au.project_id = :projectId)
-                                AND not exists (select 1 from user_events ue2 where ue2.user_id = ue.user_id and ue2.project_id = ue.project_id and ue2.event_time <= :start order by ue2.event_time)
+        WITH SkillsForSubject AS (
+            SELECT sd.id FROM skill_definition sd WHERE sd.id = (select sr.child_ref_id from skill_relationship_definition sr where sr.parent_ref_id = :skillRefId) 
         )
-        SELECT project_id, month, count(distinct user_id) FROM UserAppearances WHERE rn = 1 GROUP BY project_id, month
+        SELECT ue.project_id as projectId, date_trunc('month', ue.event_time) AS month, count(distinct ue.user_id) as count
+        FROM user_events ue WHERE ue.project_id = :projectId and ue.event_time >= :start
+        AND not exists (select 1 from archived_users au where au.user_id = ue.user_id and au.project_id = :projectId)
+        AND (
+            :newUsersOnly = false or 
+            not exists (
+                select 1 from user_events ue2
+                where ue2.user_id = ue.user_id
+                      and ue2.project_id = ue.project_id 
+                      and (ue2.event_time <= :start or ue2.event_time < ue.event_time)
+                      and ue.skill_ref_id = ue2.skill_ref_id and ue.skill_ref_id in (select * from SkillsForSubject)
+                order by ue2.event_time
+            )
+        ) AND ue.skill_ref_id in (select * from SkillsForSubject) 
+        GROUP BY ue.project_id, month
     """, nativeQuery = true)
-    Stream<MonthlyCountItem> getDistinctNewUserCountForProjectGroupedByMonth(@Param("projectId") String projectId, @Param("start") Date start)
+    Stream<MonthlyCountItem> getDistinctUserCountForSubjectGroupedByMonth(@Param("projectId") String projectId, @Param("skillRefId") Integer skillRefId, @Param("start") Date start,  @Param("newUsersOnly") Boolean newUsersOnly)
 
     @Nullable
     Stream<UserEvent> findAllBySkillRefIdAndEventType(Integer skillRefId, EventType type)

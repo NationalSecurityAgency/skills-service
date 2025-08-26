@@ -142,21 +142,37 @@ class UserEventService {
         if (EventType.DAILY == eventType) {
             Stream<DayCountItem> stream
             if (ContainerType.Skill == skillDef.type) {
-                stream = userEventsRepo.getDistinctUserCountForSkill(rawId, start, eventType)
+                stream = userEventsRepo.getDistinctUserCountForSkill(rawId, start, eventType, newUsersOnly)
             } else {
-                stream = userEventsRepo.getDistinctUserCountForSubject(rawId, start, eventType)
+                stream = userEventsRepo.getDistinctUserCountForSubject(rawId, start, eventType, newUsersOnly)
             }
             results = convertResults(stream, eventType, start)
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
             Stream<WeekCountItem> stream
             if (ContainerType.Skill == skillDef.type) {
-                stream = userEventsRepo.getDistinctUserCountForSkillGroupedByWeek(rawId, start)
+                stream = userEventsRepo.getDistinctUserCountForSkillGroupedByWeek(rawId, start, newUsersOnly)
             } else {
-                stream = userEventsRepo.getDistinctUserCountForSubjectGroupedByWeek(rawId, start)
+                stream = userEventsRepo.getDistinctUserCountForSubjectGroupedByWeek(rawId, start, newUsersOnly)
             }
             results = convertResults(stream, start)
         }
+        return results
+    }
+
+    @Transactional(readOnly = true)
+    List<MonthlyCountItem> getDistinctUserCountForSubjectByMonth(String projectId, String skillId, Date start, Boolean newUsersOnly = false) {
+
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
+        if (!skillDef) {
+            throw new SkillException("Skill does not exist", projectId, skillId, ErrorCode.SkillNotFound)
+        }
+
+        Validate.isTrue(ALLOWABLE_CONTAINER_TYPES.contains(skillDef.type), "Unsupported ContainerType [${skillDef.type}]")
+
+        Stream<MonthlyCountItem> stream = userEventsRepo.getDistinctUserCountForSubjectGroupedByMonth(projectId, skillDef.id, start, newUsersOnly)
+        List<MonthlyCountItem> results = convertMonthlyResults(stream, start)
+
         return results
     }
 
@@ -207,11 +223,11 @@ class UserEventService {
         EventType eventType = determineAppropriateEventType(start)
         List<DayCountItem> results
         if (EventType.DAILY == eventType) {
-            Stream<DayCountItem> stream = userEventsRepo.getDistinctUserCountForProject(projectId, start, eventType)
+            Stream<DayCountItem> stream = userEventsRepo.getDistinctUserCountForProject(projectId, start, eventType, newUsersOnly)
             results = convertResults(stream, eventType, start, [projectId])
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
-            Stream<WeekCountItem> stream = userEventsRepo.getDistinctUserCountForProjectGroupedByWeek(projectId, start)
+            Stream<WeekCountItem> stream = userEventsRepo.getDistinctUserCountForProjectGroupedByWeek(projectId, start, newUsersOnly)
 
             results = convertResults(stream, start)
         }
@@ -221,12 +237,7 @@ class UserEventService {
     @Transactional(readOnly = true)
     List<MonthlyCountItem> getDistinctUserCountsForProjectByMonth(String projectId, Date start, Boolean newUsersOnly = false) {
         List<MonthlyCountItem> results
-        Stream<MonthlyCountItem> stream
-        if(newUsersOnly) {
-            stream = userEventsRepo.getDistinctNewUserCountForProjectGroupedByMonth(projectId, start)
-        } else {
-            stream = userEventsRepo.getDistinctUserCountForProjectGroupedByMonth(projectId, start)
-        }
+        Stream<MonthlyCountItem> stream = userEventsRepo.getDistinctUserCountForProjectGroupedByMonth(projectId, start, newUsersOnly)
         results = convertMonthlyResults(stream, start)
 
         return results

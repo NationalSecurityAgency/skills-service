@@ -94,12 +94,15 @@ class AdminUsersService {
         return countsPerDay
     }
 
-    List<TimestampCountItem> getUsagePerMonth(String projectId, String skillId, Date start, Boolean newUsersOnly = false) {
+    List<TimestampCountItem> getUsagePerMonth(String projectId, String subjectId, Date start, Boolean newUsersOnly = false) {
         Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
+        List<MonthlyCountItem> users
 
-        List<MonthlyCountItem> users = userEventService.getDistinctUserCountsForProjectByMonth(projectId, startDate, newUsersOnly)
-
-//        skillId ? userEventService.getDistinctUserCountForSkillId(projectId, skillId, startDate) :
+        if(subjectId) {
+            users = userEventService.getDistinctUserCountForSubjectByMonth(projectId, subjectId, startDate, newUsersOnly)
+        } else {
+            users = userEventService.getDistinctUserCountsForProjectByMonth(projectId, startDate, newUsersOnly)
+        }
 
         List<TimestampCountItem> countsPerMonth = []
         users?.each {
