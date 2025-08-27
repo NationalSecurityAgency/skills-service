@@ -73,7 +73,8 @@
     "print-env": "print-env",
     "fake-smtp:start": "docker run -p 1080:1080 -p 1025:1025 --restart unless-stopped maildev/maildev:2.2.1",
     "fake-smtp:start:ci": "mkdir -p ./logs && nohup npm run fake-smtp:start > ./logs/fake-smtp.log &",
-    "fake-smtp:stop": "fuser -k 1081/tcp"
+    "fake-smtp:stop": "fuser -k 1081/tcp",
+    "wiremock:start": "docker run -it --rm   -p 8280:8080 --name wiremock -v $PWD/serverConfigs/wiremock:/home/wiremock wiremock/wiremock:3x-alpine"
   },
   "devDependencies": {
     "@bahmutov/print-env": "2.1.2",
