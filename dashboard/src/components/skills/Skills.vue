@@ -102,7 +102,7 @@ const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId
 }
 provide('createOrUpdateSkill', createOrUpdateSkill)
 
-const reportSkills = (createdSkill) => {
+const reportSkills = (origExistingSkill, createdSkill) => {
   if (createdSkill.pointIncrementInterval <= 0) {
     SkillsReporter.reportSkill('CreateSkillDisabledTimeWindow')
   }
@@ -115,9 +115,20 @@ const reportSkills = (createdSkill) => {
   if (createdSkill.groupId) {
     SkillsReporter.reportSkill('CreateSkillGroup')
   }
+  if (
+      (!origExistingSkill && !createdSkill?.iconClass?.toLowerCase()?.includes('fa-graduation-cap')) ||
+      (origExistingSkill && createdSkill?.iconClass?.toLowerCase() !== origExistingSkill?.iconClass?.toLowerCase())
+  ) {
+    SkillsReporter.reportSkill('ConfigureSkillIcon')
+  }
+  if (createdSkill.quizId && (!origExistingSkill?.quizId || origExistingSkill?.quizId !== createdSkill.quizId)) {
+    SkillsReporter.reportSkill('SkillQuizOrSurvey')
+  }
+
 }
 
 const skillCreatedOrUpdated = (skill) => {
+  let origExistingSkill = null
   const skills = skill.groupId ? skillsState.getGroupSkills(skill.groupId) : skillsState.subjectSkills
   const existingIndex = skills.findIndex((item) => item.skillId === skill.originalSkillId)
   const createdSkill = ({
@@ -126,6 +137,7 @@ const skillCreatedOrUpdated = (skill) => {
   })
   if (existingIndex >= 0) {
     const existingSkill = skills[existingIndex]
+    origExistingSkill = ({...existingSkill})
     if (skill.isGroupType && skill.enabled !== existingSkill.enabled) {
       skillsState.loadGroupSkills(skill.projectId, skill.skillId)
       finalizeInfoState.loadInfo()
@@ -134,6 +146,9 @@ const skillCreatedOrUpdated = (skill) => {
   } else {
     skills.push(createdSkill)
     SkillsReporter.reportSkill('CreateSkill')
+    if (!skill.enabled) {
+      SkillsReporter.reportSkill('CreateSkillInitiallyHidden')
+    }
   }
   if (skill.groupId) {
     skillsState.setGroupSkills(skill.groupId, skills)
@@ -149,7 +164,7 @@ const skillCreatedOrUpdated = (skill) => {
     parentGroup.numSkillsInGroup = groupSkills.length
   }
   // attribute based skills should report on new or update operation
-  reportSkills(createdSkill)
+  reportSkills(origExistingSkill, createdSkill)
 
   subjectState.loadSubjectDetailsState()
 
