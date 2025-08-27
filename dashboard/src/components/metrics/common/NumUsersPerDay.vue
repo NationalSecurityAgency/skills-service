@@ -163,6 +163,7 @@ const updateTimeRange = (timeEvent) => {
 };
 
 const allZeros = (data) => {
+  console.log(data)
   return data.filter((item) => item.count > 0).length === 0;
 };
 
@@ -171,7 +172,7 @@ const loadData = () => {
   MetricsService.loadChart(route.params.projectId, 'distinctUsersOverTimeForProject', localProps.value)
       .then((response) => {
 
-        if (response && response.users.length > 1 && !allZeros(response.users)) {
+        if (response && response.users?.length > 1 && !allZeros(response.users)) {
           hasDataEnoughData.value = true;
           distinctUsersOverTime.value = [{
             data: response.users.map((item) => [item.value, item.count]),
