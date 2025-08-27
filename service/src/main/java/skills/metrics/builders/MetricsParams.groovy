@@ -86,6 +86,16 @@ class MetricsParams {
         return res
     }
 
+    static String getFromDayFilterAsString(String projectId, String chartId, Map<String, String> props) {
+        String fromStr = getParam(props, P_FROM_DAY_FILTER, chartId, projectId, true)
+        return fromStr
+    }
+
+    static String getToDayFilterAsString(String projectId, String chartId, Map<String, String> props) {
+        String toStr = getParam(props, P_TO_DAY_FILTER, chartId, projectId, true)
+        return toStr
+    }
+
     static String getNameFilter(String projectId, String chartId, Map<String, String> props) {
         return getParam(props, P_NAME_FILTER, chartId, projectId, true) ?: "ALL"
     }

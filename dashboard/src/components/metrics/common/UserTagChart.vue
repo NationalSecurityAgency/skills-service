@@ -20,10 +20,15 @@ import MetricsService from "@/components/metrics/MetricsService.js";
 import { useUserTagChartConfig } from '@/components/metrics/common/UserTagChartConfig.js';
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
+import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 
 const route = useRoute();
 const userTagChartConfig = useUserTagChartConfig();
 const layoutSizes = useLayoutSizesState()
+const announcer = useSkillsAnnouncer()
+const timeUtils = useTimeUtils();
 
 const props = defineProps({
   tagKey: {
@@ -58,9 +63,11 @@ const series = ref([]);
 const chartOptions = ref({});
 const heightInPx = ref(350);
 const titleInternal = ref(props.title);
+const filterRange = ref([]);
 
 const loadData = () => {
   isLoading.value = true;
+  const dateRange = timeUtils.prepareDateRange(filterRange.value)
 
   const params = {
     tagKey: props.tagKey,
@@ -68,6 +75,8 @@ const loadData = () => {
     pageSize: 20,
     sortDesc: true,
     tagFilter: '',
+    fromDayFilter: dateRange.startDate,
+    toDayFilter: dateRange.endDate,
   };
 
   MetricsService.loadChart(route.params.projectId, 'numUsersPerTagBuilder', params)
@@ -102,6 +111,17 @@ const loadData = () => {
         isLoading.value = false;
       });
 };
+
+const applyDateFilter = () => {
+  announcer.polite(`Results have been filtered by date, from ${filterRange.value[0]}` + filterRange.value.length > 1 ? ` to ${filterRange.value[1]}` : '')
+  loadData()
+};
+
+const clearDateFilter = () => {
+  announcer.polite("Clearing the date range filter")
+  filterRange.value = [];
+  loadData()
+};
 </script>
 
 <template>
@@ -111,6 +131,16 @@ const loadData = () => {
     </template>
     <template #content>
       <skills-spinner :is-loading="isLoading" v-if="isLoading" />
+      <div class="flex flex-wrap gap-2 items-center mb-2">
+        <div>
+          Filter by Date(s):
+        </div>
+        <div class="flex gap-2">
+          <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" placeholder="Select a date range" data-cy="metricsDateFilter" />
+          <SkillsButton label="Filter" icon="fa-solid fa-search"  @click="applyDateFilter" data-cy="applyDateFilterButton" />
+          <SkillsButton label="Clear" severity="danger" icon="fa-solid fa-eraser" @click="clearDateFilter" data-cy="clearDateFilterButton" />
+        </div>
+      </div>
       <div v-if="!isLoading">
         <metrics-overlay :loading="isLoading" :has-data="!isEmpty" no-data-msg="No data yet...">
           <apexchart :type="chartType" width="100%" :height="`${heightInPx}px`"  :options="chartOptions" :series="series"></apexchart>
