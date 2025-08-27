@@ -425,7 +425,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                 not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = :projectId) and 
                 (
                     :newUsersOnly = false or 
-                    not exists (select 1 from UserEvent ue2 where ue2.userId = ue.userId and ue2.projectId = ue.projectId and (ue2.eventTime <= :start or ue2.eventTime < ue.eventTime) order by ue2.eventTime)
+                    not exists (select 1 from user_events ue2 where ue2.user_id = uue.user_id and ue2.project_id = uue.project_id and (ue2.event_time <= :start or ue2.event_time < uue.event_time) order by ue2.event_time)
                 )
         ) all_events
         group by all_events.event_time 
