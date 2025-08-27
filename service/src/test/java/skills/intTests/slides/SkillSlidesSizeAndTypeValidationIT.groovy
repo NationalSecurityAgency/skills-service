@@ -27,7 +27,7 @@ import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
 @SpringBootTest(properties = ['skills.config.ui.maxSlidesUploadSize=125KB'], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
-class SlidesSizeAndTypeValidationIT extends DefaultIntSpec {
+class SkillSlidesSizeAndTypeValidationIT extends DefaultIntSpec {
 
     def "cannot exceed max slide size" () {
         def p1 = createProject(1)

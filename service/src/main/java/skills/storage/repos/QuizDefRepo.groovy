@@ -18,6 +18,7 @@ package skills.storage.repos
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.QuizDef
 
@@ -93,4 +94,17 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
               and id <> ?2
               and LOWER(quiz_id) = LOWER(?1) ''', nativeQuery = true)
     Boolean otherQuestionsExistInQuizWithAttachmentUUID(String quizId, Integer notQuestionRefId, String attachmentUUID)
+
+    @Nullable
+    @Query('''select attributes from QuizDefWithAttributes where quizId = ?1''')
+    String getQuizAttributes(String quizId)
+
+    @Nullable
+    @Query(value = '''select attributes ->> 'slidesAttrs' as slidesAttrs from quiz_definition where quiz_id = :quizId''', nativeQuery = true)
+    String getSlidesAttributes(@Param("quizId") String quizId)
+
+    @Modifying
+    @Query(value="update quiz_definition set attributes = CAST(:attrs AS JSONB) where quiz_id = :quizId", nativeQuery = true)
+    void saveAttributes(@Param("quizId") String quizId, @Param("attrs") String attrs)
+
 }

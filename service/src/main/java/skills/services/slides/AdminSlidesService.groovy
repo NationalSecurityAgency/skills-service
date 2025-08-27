@@ -17,7 +17,6 @@ package skills.services.slides
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
-import org.hibernate.engine.jdbc.BlobProxy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
@@ -26,11 +25,9 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.unit.DataSize
 import org.springframework.web.multipart.MultipartFile
 import skills.auth.UserInfoService
-import skills.controller.exceptions.AttachmentValidator
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.services.attributes.SkillAttributeService
-import skills.services.attributes.SkillVideoAttrs
 import skills.services.attributes.SlidesAttrs
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
@@ -65,6 +62,9 @@ class AdminSlidesService {
     @Autowired
     SkillDefRepo skillDefRepo
 
+    @Autowired
+    SlidesHelper slidesHelper
+
     @Transactional
     SlidesAttrs saveSlides(String projectId, String skillId, Boolean isAlreadyHosted,
                               MultipartFile file, String slidesUrl, Double width) {
@@ -74,12 +74,7 @@ class AdminSlidesService {
 
         SlidesAttrs resAttributes = new SlidesAttrs()
         if (isAlreadyHosted) {
-            SkillsValidator.isTrue(existingAttributes?.isInternallyHosted, "Expected slides to already be internally hosted but it was not present.", projectId, skillId)
-            resAttributes.url = existingAttributes.url
-            resAttributes.type = existingAttributes.type
-            resAttributes.isInternallyHosted = existingAttributes.isInternallyHosted
-            resAttributes.internallyHostedFileName = existingAttributes.internallyHostedFileName
-            resAttributes.internallyHostedAttachmentUuid = existingAttributes.internallyHostedAttachmentUuid
+            slidesHelper.updateSlideAttrsWhenAlreadyHosted(resAttributes, existingAttributes)
         } else  {
             if (StringUtils.isBlank(slidesUrl) && !file) {
                 throw new SkillException("Either url or file must be supplied", projectId, skillId)
@@ -110,44 +105,21 @@ class AdminSlidesService {
         return resAttributes
     }
 
-    SlidesAttrs validateAndSave(String slidesUrl, String projectOrQuizId, String skillId, MultipartFile file, SlidesAttrs slidesAttrs, boolean isQuiz = false) {
+    SlidesAttrs validateAndSave(String slidesUrl, String projId, String skillId, MultipartFile file, SlidesAttrs slidesAttrs) {
         if (file) {
-            SkillsValidator.isTrue(StringUtils.isBlank(slidesUrl), "If file param is provided then slidesUrl must be null/blank. Provided url=[${slidesUrl}]", projectOrQuizId, skillId)
-            AttachmentValidator.isWithinMaxAttachmentSize(file.getSize(), maxAttachmentSize);
-            AttachmentValidator.isAllowedAttachmentMimeType(file.getContentType(), allowedSlidesUploadMimeTypes);
-            saveVideoFileAndUpdateAttributes(projectOrQuizId, skillId, file, slidesAttrs, isQuiz)
+            slidesHelper.validate(slidesUrl, file)
+            Attachment attachment = slidesHelper.constructAttachment(file)
+            attachment.projectId = projId
+            attachment.skillId = skillId
+            attachmentRepo.save(attachment)
+
+            slidesHelper.updateSlideAttrsWithAttachment(attachment, slidesAttrs)
         } else {
             slidesAttrs.isInternallyHosted = false
             slidesAttrs.url = slidesUrl
         }
 
         return slidesAttrs
-    }
-
-    void saveVideoFileAndUpdateAttributes(String projectOrQuizId, String skillId, MultipartFile file, SlidesAttrs slidesAttrs, boolean isQuiz = false) {
-        String userId = userInfoService.getCurrentUserId();
-        String uuid = UUID.randomUUID().toString()
-
-        Attachment attachment = new Attachment(
-                filename: file.originalFilename,
-                contentType: file.contentType,
-                uuid: uuid,
-                size: file.size,
-                userId: userId)
-        if(isQuiz) {
-            attachment.quizId = projectOrQuizId
-        } else {
-            attachment.projectId = projectOrQuizId
-            attachment.skillId = skillId
-        }
-        attachment.setContent(BlobProxy.generateProxy(file.inputStream, file.size))
-        attachmentRepo.save(attachment)
-
-        slidesAttrs.type = attachment.contentType
-        slidesAttrs.url = "/api/download/${uuid}"
-        slidesAttrs.isInternallyHosted = true
-        slidesAttrs.internallyHostedFileName = attachment.filename
-        slidesAttrs.internallyHostedAttachmentUuid = attachment.uuid
     }
 
 }
