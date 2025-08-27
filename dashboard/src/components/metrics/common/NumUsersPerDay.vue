@@ -206,7 +206,15 @@ const dateOptionChanged = (option) => {
     <template #header>
       <SkillsCardHeader :title="mutableTitle">
         <template #headerContent>
-          <SelectButton :allowEmpty="false" size="small" :defaultValue="false" :options="dateOptions" v-model="byMonth" @update:modelValue="dateOptionChanged" optionLabel="label" optionValue="value"></SelectButton>
+          <span class="mr-3">
+            <Badge v-for="option in dateOptions" class="ml-2"
+                   :class="{'can-select': byMonth !== option.value }"
+                   :severity="byMonth === option.value ? 'success' : 'secondary'"
+                   :key="option.label"
+                   @click="dateOptionChanged(option.value)">
+              {{option.label}}
+            </Badge>
+          </span>
           |
           <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
         </template>
@@ -221,5 +229,7 @@ const dateOptionChanged = (option) => {
 </template>
 
 <style scoped>
-
+.can-select {
+  cursor: pointer;
+}
 </style>
