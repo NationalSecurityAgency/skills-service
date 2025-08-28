@@ -22,7 +22,6 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.UserInfoService
-import skills.auth.ai.OpenAIService
 import skills.auth.aop.ExcludeFromLimitDashboardAccess
 import skills.auth.aop.LimitDashboardAccess
 import skills.controller.exceptions.ErrorCode
@@ -79,16 +78,7 @@ class AppController {
     @Autowired
     InviteOnlyProjectService inviteOnlyProjectService
 
-    @Autowired
-    OpenAIService openAIService
-
     static final RESERVERED_PROJECT_ID = ShareSkillsService.ALL_SKILLS_PROJECTS
-
-    @RequestMapping(value = "/openai/chat", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    String testOpenAi( @RequestParam String model, @RequestParam String userRole, @RequestParam String msg) {
-        return openAIService.callCompletions(model, userRole, msg)
-    }
 
     @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
