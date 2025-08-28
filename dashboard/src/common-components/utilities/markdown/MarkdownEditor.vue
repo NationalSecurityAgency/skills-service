@@ -29,6 +29,7 @@ import FileUploadService from '@/common-components/utilities/FileUploadService.j
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 import { useDebounceFn } from '@vueuse/core'
 import {useLog} from "@/components/utils/misc/useLog.js";
+import GenerateDescriptionDialog from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionDialog.vue";
 
 const appConfig = useAppConfig()
 const log = useLog()
@@ -172,11 +173,13 @@ function onLoad() {
 }
 
 const updateValue = () => {
+  value.value = fetchValue()
+}
+const fetchValue = () => {
   if (props.useHtml) {
-    value.value = htmlText()
-  } else {
-    value.value = markdownText()
+    return htmlText()
   }
+  return markdownText()
 }
 const imgMatch = /^\!\[.*\]\(.*\)/
 
@@ -323,14 +326,40 @@ const editorStyle = computed(() => {
     'min-height': '285px'
   }
 })
+const showGenerateDescriptionDialog = ref(false)
+const updateDescription = (newDesc) => {
+  console.log(`newDesc: ${newDesc}`)
+  // value.value = newDesc
+  setMarkdownText(newDesc)
+}
+
+const generateDescriptionDialogRef = ref(null)
+const onDialogShow = () => {
+  const newValue = fetchValue()
+  generateDescriptionDialogRef.value.updateDescription(newValue)
+}
 </script>
 
 <template>
   <div id="markdown-editor" @drop="attachFile" class="flex flex-col gap-2 text-left" :data-cy="`${name}MarkdownEditor`">
-    <label v-if="showLabel"
-           data-cy="markdownEditorLabel"
-           :class="`${labelClass}`"
-           :for="name" @click="focusOnMarkdownEditor">{{ label }}</label>
+    <div class="flex">
+      <div class="flex-1">
+        <label v-if="showLabel"
+             data-cy="markdownEditorLabel"
+             :class="`${labelClass}`"
+             :for="name" @click="focusOnMarkdownEditor">{{ label }}</label>
+      </div>
+      <SkillsButton icon="fa-solid fa-wand-magic-sparkles"
+                    label="Assitant"
+                    size="small"
+                    @click="showGenerateDescriptionDialog = true"/>
+    </div>
+    <generate-description-dialog
+        v-if="showGenerateDescriptionDialog"
+        ref="generateDescriptionDialogRef"
+        v-model="showGenerateDescriptionDialog"
+        @generated-desc="updateDescription"
+        @show="onDialogShow" />
     <BlockUI :blocked="disabled">
 
       <toast-ui-editor :id="idForToastUIEditor"

@@ -30,6 +30,9 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 import skills.PublicProps
 import skills.auth.UserInfoService
+import skills.auth.openai.GenDescRequest
+import skills.auth.openai.GenDescResponse
+import skills.auth.openai.LearningContentGenerator
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
@@ -103,6 +106,9 @@ class AdminController {
 
     @Autowired
     ProjAdminService projAdminService
+
+    @Autowired
+    LearningContentGenerator learningContentGenerator
 
     @Autowired
     SubjAdminService subjAdminService
@@ -1946,5 +1952,15 @@ class AdminController {
 
         return new RequestResult(success: projAdminService.isUserArchived(projectId, userKey))
     }
+
+
+    @RequestMapping(value = "/projects/{projectId}/generateDescription", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    GenDescResponse generateDescription(@PathVariable("projectId") String projectId, @RequestBody GenDescRequest genDescRequest) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(genDescRequest.instructions, "genDescRequest.instructions")
+
+        return learningContentGenerator.generateDescription(genDescRequest)
+    }
+
 }
 
