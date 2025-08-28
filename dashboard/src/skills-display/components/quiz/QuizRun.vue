@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import {computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref} from 'vue'
 import { object, string, number, array } from 'yup';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
@@ -35,8 +35,12 @@ import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
-import {useDebounceFn} from "@vueuse/core";
+import {useDebounceFn, useStorage} from "@vueuse/core";
 import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
+import {useElementSizeUtil} from "@/common-components/utilities/UseElementSizeUtil.js";
+const SlideDeck = defineAsyncComponent(() =>
+    import('@/components/slides/SlideDeck.vue')
+);
 
 const props = defineProps({
   quizId: String,
@@ -447,6 +451,21 @@ const saveAndCloseThisRun = () => {
 const doneWithThisRun = () => {
   emit('testWasTaken', quizResult.value);
 }
+
+const slidesContainer = ref(null)
+const slidesContainerSize = useElementSizeUtil(slidesContainer)
+
+const url = computed(() => quizInfo.value.slidesSummary?.url)
+const hasSlides = computed(() => url.value != null)
+const slidesId = computed(() => `${props.quizId}-slides`)
+
+const widthInLocalStorageAsString = useStorage(`${slidesId.value}-slidesWidth`, null)
+const widthInLocalStorage = computed(() => widthInLocalStorageAsString.value ? parseInt(widthInLocalStorageAsString.value) : null)
+const defaultWidth = computed(() => widthInLocalStorage.value || quizInfo.value.slidesSummary?.width)
+const onResize = (newWidth) => {
+  widthInLocalStorageAsString.value = newWidth
+}
+
 </script>
 
 <template>
@@ -512,6 +531,16 @@ const doneWithThisRun = () => {
                   data-cy="quizDescription" />
             </template>
           </Card>
+
+          <div ref="slidesContainer" v-if="hasSlides">
+            <slide-deck
+                :slides-id="slidesId"
+                :pdf-url="url"
+                :default-width="defaultWidth"
+                :max-width="slidesContainerSize.width.value"
+                @on-resize="onResize"
+            />
+          </div>
 
           <SkillsOverlay :show="isCompleting" opacity="0.2">
             <div v-for="(q, index) in quizInfo.questions" :key="q.id">

@@ -53,6 +53,7 @@ const isLoading = computed(() => quizSummaryState.loadingQuizSummary || quizConf
 const navItems = computed(() => {
   const res = [
     { name: 'Questions', iconClass: 'fa-graduation-cap', page: 'Questions' },
+    { name: 'Slides', iconClass: 'fa-solid fa-file-pdf', page: 'QuizConfigureSlides' },
     { name: 'Results', iconClass: 'fa-chart-bar', page: 'QuizMetrics' },
     { name: 'Runs', iconClass: 'fa-users', page: 'QuizRunsHistoryPage' },
     { name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'QuizSkillsPage' },

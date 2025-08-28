@@ -16,19 +16,20 @@
 import axios from 'axios';
 
 export default {
-  saveSettings(container, item, slideSettings, isSkill = true) {
-    const url = isSkill ? `/admin/projects/${container}/skills/${item}/slides` : `/admin/quiz-definitions/${container}/questions/${item}/slides`
-    return axios.post(url, slideSettings)
-      .then((response) => response.data);
-  },
-  getSettings(container, item, isSkill = true) {
-    const url = isSkill ? `/admin/projects/${container}/skills/${item}/slides` : `/admin/quiz-definitions/${container}/questions/${item}/slides`
-    return axios.get(url)
-      .then((response) => response.data);
-  },
-  deleteSettings(container, item, isSkill = true) {
-    const url = isSkill ? `/admin/projects/${container}/skills/${item}/slides` : `/admin/quiz-definitions/${container}/questions/${item}/slides`
-    return axios.delete(url)
-        .then((response) => response.data);
-  },
+    getSkillSettings(projId, skillId) {
+        return axios.get(`/admin/projects/${projId}/skills/${skillId}/slides`)
+            .then((response) => response.data);
+    },
+    getQuizSettings(quizId) {
+        return axios.get(`/admin/quiz-definitions/${quizId}/slides`)
+            .then((response) => response.data);
+    },
+    deleteSkillSettings(projId, skillId) {
+        return axios.delete(`/admin/projects/${projId}/skills/${skillId}/slides` )
+            .then((response) => response.data);
+    },
+    deleteQuizSettings(quizId) {
+        return axios.delete(`/admin/quiz-definitions/${quizId}/slides`)
+            .then((response) => response.data);
+    },
 };

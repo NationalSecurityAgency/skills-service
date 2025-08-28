@@ -15,7 +15,7 @@
  */
 package skills.services.slides
 
-import com.fasterxml.jackson.databind.ObjectMapper
+
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import skills.controller.exceptions.SkillQuizException
 import skills.services.attributes.QuizAttrs
-import skills.services.attributes.SkillVideoAttrs
 import skills.services.attributes.SlidesAttrs
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
@@ -42,6 +41,9 @@ class QuizSlidesService {
     QuizDefRepo quizDefRepo
 
     @Autowired
+    QuizAttrsStore quizAttrsStore
+
+    @Autowired
     AttachmentRepo attachmentRepo
 
     @Autowired
@@ -50,24 +52,12 @@ class QuizSlidesService {
     @Autowired
     UserActionsHistoryService userActionsHistoryService
 
-    static final ObjectMapper mapper = new ObjectMapper()
-
     QuizAttrs getQuizAttrs(String quizId) {
-        String quizAttributes = quizDefRepo.getQuizAttributes(quizId)
-        if (quizAttributes) {
-            QuizAttrs res = mapper.readValue(quizAttributes, QuizAttrs.class)
-            return res
-        }
-        return new QuizAttrs()
+        return quizAttrsStore.getQuizAttrs(quizId) ?:new QuizAttrs()
     }
 
     SlidesAttrs getSlidesAttrs(String quizId) {
-        String slidesAttributes = quizDefRepo.getSlidesAttributes(quizId)
-        if (slidesAttributes) {
-            SlidesAttrs res = mapper.readValue(slidesAttributes, SlidesAttrs.class)
-            return res
-        }
-        return new SlidesAttrs()
+        return quizAttrsStore.getSlidesAttrs(quizId) ?: new SlidesAttrs()
     }
 
     @Transactional
@@ -94,7 +84,7 @@ class QuizSlidesService {
         resAttributes.width = width
 
         existingQuizAttrs.slidesAttrs = resAttributes
-        quizDefRepo.saveAttributes(quizId, mapper.writeValueAsString(existingQuizAttrs))
+        quizAttrsStore.saveQuizAttrs(quizId, existingQuizAttrs)
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
@@ -125,8 +115,7 @@ class QuizSlidesService {
 
     @Transactional
     boolean deleteSlidesAttrs(String quizId) {
-        String quizAttributesStr = quizDefRepo.getQuizAttributes(quizId)
-        QuizAttrs quizAttrs = quizAttributesStr ? mapper.readValue(quizAttributesStr, QuizAttrs.class) : null
+        QuizAttrs quizAttrs = quizAttrsStore.getQuizAttrs(quizId)
 
         String internallyHostedUuid = quizAttrs?.slidesAttrs?.internallyHostedAttachmentUuid
         if (internallyHostedUuid) {
@@ -135,7 +124,7 @@ class QuizSlidesService {
 
         if (quizAttrs) {
             quizAttrs.slidesAttrs = null
-            quizDefRepo.saveAttributes(quizId, mapper.writeValueAsString(quizAttrs))
+            quizAttrsStore.saveQuizAttrs(quizId, quizAttrs)
         }
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
