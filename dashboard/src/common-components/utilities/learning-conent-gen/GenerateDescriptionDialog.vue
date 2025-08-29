@@ -14,31 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {onMounted, ref, watch} from 'vue'
+import {nextTick, onMounted, ref, watch} from 'vue'
 import SkillsDialog from "@/components/utils/inputForm/SkillsDialog.vue";
 import LearningGenService from "@/common-components/utilities/learning-conent-gen/LearningGenService.js";
 import {useRoute} from "vue-router";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import AssistantMsg from "@/common-components/utilities/learning-conent-gen/AssistantMsg.vue";
+import UserMsg from "@/common-components/utilities/learning-conent-gen/UserMsg.vue";
+import {useLog} from "@/components/utils/misc/useLog.js";
 
 const model = defineModel()
 const emit = defineEmits(['generated-desc'])
 const route = useRoute()
+const log = useLog()
 const chatCounter = ref(0)
 const updateDescription = (newDesc) => {
   generatedDescription.value = newDesc
-  console.log(`updateDescription: ${newDesc}`)
   if (newDesc) {
     chatHistory.value.push({
       id: `${chatCounter.value++}`,
       role: 'assistant',
-      content: 'Looks like you already started on a description. Would you like me to proofread or expand on it?'
+      content: 'Hope your I am sorry but I took way today is going well! Looks like you already started on a description. Would you like me to proofread or expand on it?'
     })
   } else {
     chatHistory.value.push({
       id: `${chatCounter.value++}`,
       role: 'assistant',
-      content: 'Describe what this skill involves, and I\'ll help generate a description for you.'
+      content: 'Hi! I am here to help. Describe the skill, and I\'ll help generate a description'
     })
   }
 }
@@ -52,15 +54,15 @@ const close = () => {
 
 const instructions = ref('')
 const generatedDescription = ref('')
-const responseComments = ref('')
 const isGenerating = ref(false)
+const failedGenerating = ref(false)
 
 const chatHistory = ref([])
 
 
 
 const coreInstructions = 'Generate a detailed description for a skill that\'s will be part of a larger training. Do no provide introduction. Use Markdown. User the word "skill" and not training. Do not put word skill in titles. How are the instructions of how to achieved this skill:'
-
+const reviewDescMsg = 'Review the description and let me know if you need any changes.'
 function parseResponse(text) {
   const [newTextPart, comments] = text.split('---COMMENTS---');
   const newText = newTextPart.replace('---New Text---', '').trim();
@@ -70,9 +72,13 @@ function parseResponse(text) {
   };
 }
 
-
+const instructionsInput = ref(null)
 const generateDescription = () => {
-  console.log(instructions.value)
+  failedGenerating.value = false
+
+  if (log.isTraceEnabled()) {
+    log.trace(`Generating based on instructions: [${instructions.value}]`)
+  }
   isGenerating.value = true
 
   chatHistory.value.push({
@@ -91,38 +97,53 @@ const generateDescription = () => {
 
   LearningGenService.generateDescription(route.params.projectId, instructionsToSend)
       .then((response) => {
-        console.log(response)
         const {newText, comments} = parseResponse(response.description);
-        console.log(newText)
-        console.log(comments)
+        if (log.isDebugEnabled()) {
+          log.debug(`Sent instructions: [${instructionsToSend}]\nResponse: [${response.description}]\nNew Text: [${newText}]\nComments: [${comments}]`)
+        }
         if (!generatedDescription.value || !comments) {
           chatHistory.value.push({
             id: `${chatCounter.value++}`,
             role: 'assistant',
-            content: 'I generated a description for you below. Please review it and let me know if you need any changes.'
+            content: `I've prepared a description based on your input. ${reviewDescMsg}`
           })
         } else if (comments) {
           chatHistory.value.push({
             id: `${chatCounter.value++}`,
             role: 'assistant',
-            content: `Here are my comments: \n${comments}`
+            content: `Here are my comments: \n${comments}\n\n${reviewDescMsg}`
           })
         }
         generatedDescription.value = newText
 
       }).finally(() => {
-    isGenerating.value = false
-  })
+        isGenerating.value = false
+        nextTick(() => {
+          document.getElementById('instructionsInput')?.focus()
+        })
+      }).catch((err) => {
+        failedGenerating.value = true
+        isGenerating.value = false
+        log.error(JSON.stringify(err))
+        console.log('Failed to generate description')
+        chatHistory.value.push({
+          id: `${chatCounter.value++}`,
+          role: 'assistant',
+          content: 'I apologize, but I was unable to generate a description at this time. Please try again in a few moments.'
+        })
+      })
 }
 
 const useGeneratedDescription = () => {
   emit('generated-desc', generatedDescription.value)
   close()
 }
+
 </script>
 
 <template>
   <SkillsDialog
+      ref="generateDescriptionDialog"
       :maximizable="true"
       :maximized="true"
       v-model="model"
@@ -135,18 +156,13 @@ const useGeneratedDescription = () => {
       @on-cancel="close"
       :enable-return-focus="true">
 
-    <div class="py-5">
+    <div class="py-5" style="min-height: 70vh">
       <div id="chatHistory" class="flex flex-col gap-3 mb-2">
         <div v-for="(historyItem) in chatHistory" :key="historyItem.id">
           <div v-if="historyItem.role === 'user'" class="relative flex justify-end">
-            <div class="p-2 bg-gray-200 rounded-2xl relative pr-8 pl-4">
+            <user-msg>
               <markdown-text :text="historyItem.content" :instanceId="historyItem.id"/>
-              <i
-                  shape="circle"
-                  size="small"
-                  class="fa-solid fa-user absolute -right-2 -top-2 border-2 border-gray-500 bg-gray-200 text-gray-900 p-2 rounded-full text-lg"
-              />
-            </div>
+            </user-msg>
           </div>
           <assistant-msg v-else>
             <markdown-text :text="historyItem.content" :instanceId="historyItem.id"/>
@@ -160,7 +176,15 @@ const useGeneratedDescription = () => {
 
       <div class="flex justify-end mt-6">
         <div class="flex gap-2 w-10/12">
-          <InputText v-model="instructions" class="w-full" placeholder="Describe it here" :disabled="isGenerating"/>
+          <InputText
+              id="instructionsInput"
+              ref="instructionsInput"
+              v-model="instructions"
+              class="w-full"
+              placeholder="Type Instructions Here"
+              :disabled="isGenerating"
+              @keydown.enter="generateDescription"
+              autofocus/>
           <div class="flex justify-end">
             <SkillsButton icon="fa-solid fa-play" label="Send" @click="generateDescription" :disabled="isGenerating"/>
           </div>
