@@ -18,6 +18,9 @@ package skills.auth.openai
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.web.client.ResourceAccessException
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 
 @Service
 @Slf4j
@@ -27,8 +30,13 @@ class LearningContentGenerator {
     OpenAIService openAIService
 
     GenDescResponse generateDescription(GenDescRequest request) {
-        OpenAIService.CompletionsResponse response = openAIService.callCompletions(request.instructions)
-        return new GenDescResponse(description: response.choices[0].message.content)
+        try {
+            OpenAIService.CompletionsResponse response = openAIService.callCompletions(request.instructions)
+            return new GenDescResponse(description: response.choices[0].message.content)
+        } catch (ResourceAccessException rae) {
+            log.error("Failed to call OpenAI api", rae)
+            throw new SkillException("Learning Content Generator is not available", rae, null,null, ErrorCode.LearningContentGeneratorNotAvailable)
+        }
     }
 
 }
