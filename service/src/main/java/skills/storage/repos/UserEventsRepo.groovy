@@ -460,7 +460,12 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
         AND not exists (select 1 from ArchivedUser au where au.userId = ue.userId and au.projectId = :projectId)
         AND (
             :newUsersOnly = false or 
-            not exists (select 1 from UserEvent ue2 where ue2.userId = ue.userId and ue2.projectId = ue.projectId and (ue2.eventTime <= :start or ue2.eventTime < ue.eventTime) order by ue2.eventTime)
+            not exists (
+                select 1 from UserEvent ue2
+                where ue2.userId = ue.userId
+                      and ue2.projectId = ue.projectId
+                      and (ue2.eventTime < :start or ue2.eventTime < ue.eventTime)
+                order by ue2.eventTime)
         )                
         GROUP BY ue.projectId, month
     """)
