@@ -17,7 +17,7 @@ import axios from 'axios';
 
 export default {
     generateDescription(projectId, instructions) {
-        return axios.post(`/admin/projects/${projectId}/generateDescription`, { instructions})
+        return axios.post(`/admin/projects/${projectId}/generateDescription`, { instructions}, { handleError: false })
             .then((response) => response.data);
     },
 };
