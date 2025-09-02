@@ -52,7 +52,7 @@ class OpenAIService {
         }
 
         String url = String.join("/", openAiHost, completionsEndpoint)
-        log.info("Calling [{}]", url)
+        log.info("Calling [{}] with message [{}]", url, message)
 
         CompletionsRequest completionsRequest = new CompletionsRequest(
                 messages: [
