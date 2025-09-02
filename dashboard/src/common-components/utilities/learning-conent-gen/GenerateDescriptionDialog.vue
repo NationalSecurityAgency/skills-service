@@ -22,11 +22,13 @@ import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vu
 import AssistantMsg from "@/common-components/utilities/learning-conent-gen/AssistantMsg.vue";
 import UserMsg from "@/common-components/utilities/learning-conent-gen/UserMsg.vue";
 import {useLog} from "@/components/utils/misc/useLog.js";
+import {useImgHandler} from "@/common-components/utilities/learning-conent-gen/UseImgHandler.js";
 
 const model = defineModel()
 const emit = defineEmits(['generated-desc'])
 const route = useRoute()
 const log = useLog()
+const imgHandler = useImgHandler()
 const chatCounter = ref(0)
 const updateDescription = (newDesc) => {
   generatedDescription.value = newDesc
@@ -65,12 +67,13 @@ const coreInstructions = 'Generate a detailed description for a skill that\'s wi
 const reviewDescMsg = 'Review the description and let me know if you need any changes.'
 function parseResponse(text) {
   const [newTextPart, comments] = text.split('---COMMENTS---');
-  const newText = newTextPart.replace('---New Text---', '').trim();
+  const newText = newTextPart.replace(/---New Text---/i, '').trim();
   return {
     newText,
     comments
   };
 }
+
 
 const instructionsInput = ref(null)
 const generateDescription = () => {
@@ -88,10 +91,19 @@ const generateDescription = () => {
   })
 
   let instructionsToSend = null
+  const userInstructions = instructions.value
+  const extractedImageState = { hasImages: false, extractedImages: null, }
   if (generatedDescription.value) {
-    instructionsToSend = `Here is the current description:\n ${generatedDescription.value}\n\nPlease modify it based on the following instructions:\n ${instructions.value}\n\n Provide the new text after ---New Text--- in its raw form first without any comments or fields (such as "corrected text"), then use "---COMMENTS---" as a separator, and finally list any comments or suggestions.`
+    const extractedImagesRes = imgHandler.extractImages(generatedDescription.value)
+    const currentDescription = extractedImagesRes.hasImages ? extractedImagesRes.processedText : generatedDescription.value
+    const instructionsToKeepPlaceholders = extractedImagesRes.hasImages? imgHandler.instructionsToKeepPlaceholders() : ''
+    instructionsToSend = `Here is the current description:\n ${currentDescription}\n\n${instructionsToKeepPlaceholders}\n\nPlease modify it based on the following instructions:\n ${userInstructions}\n\n Provide the new text after ---New Text--- in its raw form first without any comments or fields (such as "corrected text"), then use "---COMMENTS---" as a separator, and finally list any comments or suggestions.`
+    if (extractedImagesRes.hasImages) {
+      extractedImageState.hasImages = true
+      extractedImageState.extractedImages = extractedImagesRes.extractedImages
+    }
   } else {
-    instructionsToSend = `${coreInstructions}\n\n${instructions.value}`
+    instructionsToSend = `${coreInstructions}\n\n${userInstructions}`
   }
   instructions.value = ''
 
@@ -114,7 +126,12 @@ const generateDescription = () => {
             content: `Here are my comments: \n${comments}\n\n${reviewDescMsg}`
           })
         }
-        generatedDescription.value = newText
+
+        let textToInsert = newText
+        if (extractedImageState.hasImages) {
+          textToInsert = imgHandler.reinsertImages(textToInsert, extractedImageState.extractedImages)
+        }
+        generatedDescription.value = textToInsert
 
       }).finally(() => {
         isGenerating.value = false
@@ -124,8 +141,7 @@ const generateDescription = () => {
       }).catch((err) => {
         failedGenerating.value = true
         isGenerating.value = false
-        log.error(JSON.stringify(err))
-        console.log('Failed to generate description')
+        log.error(err)
         chatHistory.value.push({
           id: `${chatCounter.value++}`,
           role: 'assistant',
