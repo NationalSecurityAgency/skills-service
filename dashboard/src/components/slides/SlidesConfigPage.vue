@@ -316,6 +316,9 @@ const clearSettings = () => {
 const formHasAnyData = computed(() => {
   return slidesConf.value.url;
 });
+const slidesId = computed(() => {
+  return isSkill ? `${projId}-${skillId}` : quizId
+})
 </script>
 
 <template>
@@ -455,7 +458,7 @@ const formHasAnyData = computed(() => {
             <template #content>
               <slide-deck
                   class="my-5"
-                  :slides-id="`${route.params.projectId}-${route.params.skillId}`"
+                  :slides-id="slidesId"
                   :pdf-url="slidesConf.url"
                   :default-width="configuredSlidesWidthValue"
                   :max-width="layoutSize.tableMaxWidth-50"

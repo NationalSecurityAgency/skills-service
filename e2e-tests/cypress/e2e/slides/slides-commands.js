@@ -24,6 +24,13 @@ Cypress.Commands.add("visitSlidesConfPage", (projNum = 1, subjNum = 1, skillNum 
     cy.get('.spinner-border').should('not.exist')
 });
 
+Cypress.Commands.add("visitQuizSlidesConfPage", (quizNum = 1) => {
+    cy.intercept('GET', `/admin/quiz-definitions/quiz${quizNum}/slides`).as('getSlidesProps')
+    cy.visit(`/administrator/quizzes/quiz${quizNum}/config-slides`);
+    cy.wait('@getSlidesProps')
+    cy.get('.spinner-border').should('not.exist')
+});
+
 Cypress.Commands.add("navThroughSlides", (navBackToStart = false, containerId = '#proj1-skill1Container') => {
     cy.get('#pdfCanvasId').should('be.visible')
     cy.get('[data-cy="slidesFullscreenBtn"]').should('be.enabled')

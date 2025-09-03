@@ -124,6 +124,7 @@ function updateQuizDef(quizDef) {
   quizSummaryState.quizSummary.name = quizDef.name
   quizSummaryState.quizSummary.quizId = quizDef.quizId
   quizSummaryState.quizSummary.userCommunity = quizDef.userCommunity
+  quizConfig.loadQuizConfigState({quizId: quizDef.quizId})
   announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`)
 }
 </script>

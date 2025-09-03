@@ -256,7 +256,7 @@ Cypress.Commands.add("saveVideoAttrs", (container, item, videoAttrs, quiz = fals
 
 
 Cypress.Commands.add("saveSlidesAttrs", (container, item, slidesAttrs, quiz = false) => {
-    const url = quiz ? `/admin/quiz-definitions/quiz${container}/questions/${item}/slides` : `/admin/projects/proj${container}/skills/skill${item}/slides`;
+    const url = quiz ? `/admin/quiz-definitions/quiz${container}/slides` : `/admin/projects/proj${container}/skills/skill${item}/slides`;
 
     const formData = new FormData();
     if (slidesAttrs.url) {

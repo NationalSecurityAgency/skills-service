@@ -317,14 +317,14 @@ class QuizDefService {
         return quizDefWithDescription
     }
 
-    QuizDefWithDescAndAttrs validateQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest, QuizDefParent quizDefWithDescription) {
-        if (!quizDefWithDescription || !quizDefWithDescription.quizId.equalsIgnoreCase(originalQuizId)) {
+    QuizDefParent validateQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest, QuizDefParent quizDef) {
+        if (!quizDef || !quizDef.quizId.equalsIgnoreCase(originalQuizId)) {
             serviceValidatorHelper.validateQuizIdDoesNotExist(newQuizId)
         }
-        if (!quizDefWithDescription || !quizDefWithDescription.name.equalsIgnoreCase(quizDefWithDescription.name)) {
+        if (!quizDef || !quizDef.name.equalsIgnoreCase(quizDef.name)) {
             serviceValidatorHelper.validateQuizNameDoesNotExist(quizDefRequest.name, newQuizId)
         }
-        return quizDefWithDescription
+        return quizDef
     }
 
     @Transactional()
