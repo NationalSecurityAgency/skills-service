@@ -163,7 +163,6 @@ const updateTimeRange = (timeEvent) => {
 };
 
 const allZeros = (data) => {
-  console.log(data)
   return data.filter((item) => item.count > 0).length === 0;
 };
 
