@@ -46,6 +46,9 @@ const isTextInputType = computed(() => {
 const isRatingType = computed(() => {
   return props.question.questionType === QuestionType.Rating;
 })
+const isMatchingType = computed(() => {
+  return props.question.questionType === QuestionType.Matching;
+})
 const isDragAndDropControlsVisible = computed(() => {
   return !quizConfig.isReadOnlyQuiz && props.showDragAndDropControls;
 })
