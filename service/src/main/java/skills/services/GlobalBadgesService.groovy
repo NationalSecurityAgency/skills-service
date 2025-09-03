@@ -151,6 +151,9 @@ class GlobalBadgesService {
     void addSkillToBadge(String badgeId, String projectId, String skillId) {
         validateUserIsAndAdminOfProj(projectId)
         validateProjectForGlobalBadge(projectId, badgeId)
+        SkillsValidator.isTrue(!skillId.toUpperCase().contains(SkillReuseIdUtil.REUSE_TAG.toUpperCase()), "Skill ID must not contain reuse tag", projectId, skillId)
+        SkillsValidator.isTrue(!skillDef.readOnly, "Imported Skills may not be added as Global Badge Dependencies", projectId, skillId)
+
         assignGraphRelationship(badgeId, ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
