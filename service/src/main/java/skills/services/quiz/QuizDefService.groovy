@@ -41,7 +41,10 @@ import skills.services.*
 import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.ServiceValidatorHelper
 import skills.services.admin.UserCommunityService
+import skills.services.attributes.QuizAttrs
 import skills.services.attributes.SkillVideoAttrs
+import skills.services.attributes.SlidesAttrs
+import skills.services.slides.QuizAttrsStore
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
@@ -52,8 +55,6 @@ import skills.storage.model.auth.RoleName
 import skills.storage.repos.*
 import skills.utils.InputSanitizer
 import skills.utils.Props
-
-import java.text.SimpleDateFormat
 
 import static org.springframework.data.domain.Sort.Direction.DESC
 
@@ -104,6 +105,9 @@ class QuizDefService {
     QuizDefWithDescRepo quizDefWithDescRepo
 
     @Autowired
+    QuizDefWithDescAndAttrsRepo quizDefWithDescAndAttrsRepo
+
+    @Autowired
     ServiceValidatorHelper serviceValidatorHelper
 
     @Autowired
@@ -132,6 +136,9 @@ class QuizDefService {
 
     @Autowired
     AttachmentService attachmentService
+
+    @Autowired
+    QuizAttrsStore quizAttrsStore
 
     @Autowired
     UserActionsHistoryService userActionsHistoryService
@@ -205,7 +212,7 @@ class QuizDefService {
         lockingService.lockQuizDefs()
 
         String userId = userIdParam ?: userInfoService.getCurrentUserId()
-        QuizDefWithDescription quizDefWithDescription = copyQuizDef(originalQuizId, newQuizId, quizDefRequest, userId)
+        QuizDefWithDescAndAttrs quizDefWithDescription = copyQuizDef(originalQuizId, newQuizId, quizDefRequest, userId)
         validateUserCommunityProps(quizDefRequest, quizDefWithDescription)
 
         log.debug("Copied [{}]", quizDefWithDescription)
@@ -231,19 +238,49 @@ class QuizDefService {
         return convert(updatedDef)
     }
 
-    QuizDefWithDescription copyQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest, String userId) {
-        QuizDefWithDescription quizDefWithDescription = retrieveAndValidateQuizDef(originalQuizId, newQuizId, quizDefRequest)
+    QuizDefWithDescAndAttrs copyQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest, String userId) {
+        QuizDefWithDescAndAttrs quizDefWithDescription = retrieveAndValidateQuizDefWithAttrs(originalQuizId, newQuizId, quizDefRequest)
 
         String description = attachmentService.copyAttachmentsForIncomingDescription(quizDefRequest.description, null, null, null)
-        quizDefWithDescription = new QuizDefWithDescription(quizId: newQuizId, name: quizDefRequest.name,
-                description: description, type: QuizDefParent.QuizType.valueOf(quizDefRequest.type))
+        Map slidesAttachmentRes = handleSlideAttachment(quizDefWithDescription)
+
+        quizDefWithDescription = new QuizDefWithDescAndAttrs(quizId: newQuizId, name: quizDefRequest.name,
+                description: description, type: QuizDefParent.QuizType.valueOf(quizDefRequest.type), attributes: slidesAttachmentRes.quizAttributesAsStr)
         log.debug("Created quiz [{}]", quizDefWithDescription)
 
         DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null, null, quizDefWithDescription.quizId) {
-            quizDefWithDescription = quizDefWithDescRepo.save(quizDefWithDescription)
+            quizDefWithDescription = quizDefWithDescAndAttrsRepo.save(quizDefWithDescription)
         }
         attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(quizDefWithDescription.description, null, quizDefWithDescription.quizId, null)
+        if (slidesAttachmentRes.attachment) {
+            Attachment slidesAttachment = slidesAttachmentRes.attachment
+            slidesAttachment.quizId = quizDefWithDescription.quizId
+            attachmentService.persistAttachment(slidesAttachment)
+        }
+
         return quizDefWithDescription
+    }
+
+    Map handleSlideAttachment(QuizDefWithDescAndAttrs quizDefWithDescription) {
+        String quizAttributesAsStr = quizDefWithDescription.attributes
+        Attachment slidesAttachment = null
+        if (quizAttributesAsStr) {
+            QuizAttrs quizAttrs = quizAttrsStore.getQuizAttrsFromString(quizAttributesAsStr)
+            SlidesAttrs slidesAttrs = quizAttrs.slidesAttrs
+            if (slidesAttrs && slidesAttrs.internallyHostedAttachmentUuid) {
+                Attachment attachment = attachmentService.getAttachment(slidesAttrs.internallyHostedAttachmentUuid)
+                Attachment newAttachment = attachmentService.constructNewAttachmentWithNewUuid(attachment)
+                slidesAttrs.url = slidesAttrs.url.replaceAll(attachment.uuid, newAttachment.uuid)
+                slidesAttrs.internallyHostedAttachmentUuid = newAttachment.uuid
+
+                quizAttrs.slidesAttrs = slidesAttrs
+                quizAttributesAsStr = quizAttrsStore.convertQuizAttrsToString(quizAttrs)
+
+                slidesAttachment = newAttachment
+            }
+        }
+
+        return [quizAttributesAsStr: quizAttributesAsStr, attachment: slidesAttachment]
     }
 
     void copyQuestions(String originalQuizId, String newQuizId) {
@@ -270,6 +307,17 @@ class QuizDefService {
 
     QuizDefWithDescription retrieveAndValidateQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest) {
         QuizDefWithDescription quizDefWithDescription = originalQuizId ? quizDefWithDescRepo.findByQuizIdIgnoreCase(originalQuizId) : null
+        validateQuizDef(originalQuizId, newQuizId, quizDefRequest, quizDefWithDescription)
+        return quizDefWithDescription
+    }
+
+    QuizDefWithDescAndAttrs retrieveAndValidateQuizDefWithAttrs(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest) {
+        QuizDefWithDescAndAttrs quizDefWithDescription = originalQuizId ? quizDefWithDescAndAttrsRepo.findByQuizIdIgnoreCase(originalQuizId) : null
+        validateQuizDef(originalQuizId, newQuizId, quizDefRequest, quizDefWithDescription)
+        return quizDefWithDescription
+    }
+
+    QuizDefWithDescAndAttrs validateQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest, QuizDefParent quizDefWithDescription) {
         if (!quizDefWithDescription || !quizDefWithDescription.quizId.equalsIgnoreCase(originalQuizId)) {
             serviceValidatorHelper.validateQuizIdDoesNotExist(newQuizId)
         }
@@ -1154,8 +1202,8 @@ class QuizDefService {
 
 
     @Profile
-    private void validateUserCommunityProps(QuizDefRequest quizDefRequest, QuizDefWithDescription quizDefWithDescription) {
-        String quizId = quizDefWithDescription?.quizId ?: quizDefRequest.quizId
+    private void validateUserCommunityProps(QuizDefRequest quizDefRequest, QuizDefParent quizDef) {
+        String quizId = quizDef?.quizId ?: quizDefRequest.quizId
         if (quizDefRequest.enableProtectedUserCommunity != null) {
             if (quizDefRequest.enableProtectedUserCommunity) {
                 String userId = userInfoService.currentUserId
@@ -1168,8 +1216,8 @@ class QuizDefService {
                     String reasons = enableProjValidationRes.unmetRequirements.join("\n")
                     throw new SkillQuizException("Not Allowed to set [enableProtectedUserCommunity] to true. Reasons are:\n${reasons}", quizId, ErrorCode.AccessDenied)
                 }
-            } else if (quizDefWithDescription){
-                QuizValidator.isTrue(!userCommunityService.isUserCommunityOnlyQuiz(quizDefWithDescription.id), "Once quiz [enableProtectedUserCommunity=true] it cannot be flipped to false", quizId)
+            } else if (quizDef){
+                QuizValidator.isTrue(!userCommunityService.isUserCommunityOnlyQuiz(quizDef.id), "Once quiz [enableProtectedUserCommunity=true] it cannot be flipped to false", quizId)
             }
         }
     }

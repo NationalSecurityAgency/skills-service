@@ -35,8 +35,7 @@ class QuizAttrsStore {
     QuizAttrs getQuizAttrs(String quizId) {
         String quizAttributes = quizDefRepo.getQuizAttributes(quizId)
         if (quizAttributes) {
-            QuizAttrs res = mapper.readValue(quizAttributes, QuizAttrs.class)
-            return res
+            return getQuizAttrsFromString(quizAttributes)
         }
         return null
     }
@@ -44,13 +43,27 @@ class QuizAttrsStore {
     SlidesAttrs getSlidesAttrs(String quizId) {
         String slidesAttributes = quizDefRepo.getSlidesAttributes(quizId)
         if (slidesAttributes) {
-            SlidesAttrs res = mapper.readValue(slidesAttributes, SlidesAttrs.class)
-            return res
+            return getSlideAttrsFromString(slidesAttributes)
         }
         return null
     }
 
+    static QuizAttrs getQuizAttrsFromString(String quizAttributes) {
+        QuizAttrs res = mapper.readValue(quizAttributes, QuizAttrs.class)
+        return res
+    }
+
+    static SlidesAttrs getSlideAttrsFromString(String slidesAttributes) {
+        SlidesAttrs res = mapper.readValue(slidesAttributes, SlidesAttrs.class)
+        return res
+    }
+
+    static String convertQuizAttrsToString(QuizAttrs quizAttrs) {
+        String res = mapper.writeValueAsString(quizAttrs)
+        return res
+    }
+
     void saveQuizAttrs(String quizId, QuizAttrs quizAttrs) {
-        quizDefRepo.saveAttributes(quizId, mapper.writeValueAsString(quizAttrs))
+        quizDefRepo.saveAttributes(quizId, convertQuizAttrsToString(quizAttrs))
     }
 }
