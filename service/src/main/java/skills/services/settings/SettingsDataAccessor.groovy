@@ -129,6 +129,10 @@ class SettingsDataAccessor {
         settingRepo.findByTypeAndSkillRefIdAndSettingGroupAndSetting(SettingType.Skill, skillRefId, settingGroup, setting)
     }
 
+    Setting getSkillSetting(String projectId, String skillId, String setting, String settingGroup){
+        settingRepo.findSkillSettingByProjectIdAndSkillId(projectId, skillId, settingGroup, setting)
+    }
+
     void save(Setting setting){
         settingRepo.save(setting)
     }

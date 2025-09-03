@@ -172,9 +172,9 @@ class UserCommunityService {
                 res.unmetRequirements.add("Has skill(s) that have been shared for cross-project dependencies")
             }
 
-            if (skillRelDefRepo.belongsToGlobalBadge(projDef.projectId)) {
+            if (skillRelDefRepo.getNonCommunityGlobalBadgesThatThisProjectIsLinkedTo(projDef.projectId)) {
                 res.isAllowed = false
-                res.unmetRequirements.add("This project is part of one or more Global Badges")
+                res.unmetRequirements.add("This project is part of one or more Global Badges that has not enabled user community protection")
             }
 
             if(adminGroupDefRepo.doesAdminGroupContainNonUserCommunityProject(projDef.projectId)) {
@@ -227,7 +227,7 @@ class UserCommunityService {
         if (skillDef) {
             List<UserRole> allRoles = userRoleRepo.findAllByGlobalBadgeIdIgnoreCase(skillDef.skillId)
             checkAllUsersAreUCMembers(allRoles, res, "global badge")
-            if(adminGroupDefRepo.doesAdminGroupContainNonUserCommunityQuiz(skillDef.skillId)) {
+            if(adminGroupDefRepo.doesAdminGroupContainNonUserCommunityGlobalBadge(skillDef.skillId)) {
                 res.isAllowed = false
                 if(!adminGroupView) {
                     res.unmetRequirements.add("This global badge is part of one or more Admin Groups that do no have ${getCommunityNameBasedOnConfAndItemStatus(true)} permission".toString())
@@ -306,15 +306,16 @@ class UserCommunityService {
         return quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.UserCommunityOnlyQuiz.setting, quizRefId)?.isEnabled()
     }
 
-    /**
-     * Checks if the specified projectId is configured as a user community only project
-     * @param projectId - not null
-     * @return true if the project exists and has been configured as a user community only project
-     */
     @Transactional(readOnly = true)
     boolean isUserCommunityOnlyGlobalBadge(Integer skillRefId) {
         SkillsValidator.isNotNull(skillRefId, "skillRefId")
         return settingsDataAccessor.getSkillSetting(skillRefId, Settings.USER_COMMUNITY_ONLY_PROJECT.settingName, null)?.isEnabled()
+    }
+
+    @Transactional(readOnly = true)
+    boolean isUserCommunityOnlyGlobalBadge(String skillId) {
+        SkillsValidator.isNotBlank(skillId, "skillId")
+        return settingsDataAccessor.getSkillSetting(null, skillId, Settings.USER_COMMUNITY_ONLY_PROJECT.settingName, null)?.isEnabled()
     }
 
     @Transactional(readOnly = true)
