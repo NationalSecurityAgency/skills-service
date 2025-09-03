@@ -149,6 +149,7 @@ class GlobalBadgesService {
 
     @Transactional()
     void addSkillToBadge(String badgeId, String projectId, String skillId) {
+        validateUserIsAndAdminOfProj(projectId)
         validateProjectForGlobalBadge(projectId, badgeId)
         assignGraphRelationship(badgeId, ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
 
@@ -166,6 +167,7 @@ class GlobalBadgesService {
 
     @Transactional()
     void addProjectLevelToBadge(String badgeId, String projectId, Integer level) {
+        validateUserIsAndAdminOfProj(projectId)
         validateProjectForGlobalBadge(projectId, badgeId)
         ProjDef projDef = projDefRepo.findByProjectId(projectId)
         if (!projDef) {
@@ -492,7 +494,6 @@ class GlobalBadgesService {
 
     @Profile
     private void validateProjectForGlobalBadge(String projectId, String badgeId) {
-        validateUserIsAndAdminOfProj(projectId)
         SkillDefWithExtra badgeSkillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(null, badgeId, ContainerType.GlobalBadge)
         if (!badgeSkillDef) {
             throw new SkillException("Failed to find global badge [${badgeId}]")
