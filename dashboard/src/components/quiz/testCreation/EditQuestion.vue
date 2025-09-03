@@ -25,6 +25,8 @@ import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormD
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
 import ConfigureAnswers from '@/components/quiz/testCreation/ConfigureAnswers.vue';
 import QuizType from "@/skills-display/components/quiz/QuizType.js";
+import InputText from "primevue/inputtext";
+import MatchingQuestion from "@/components/quiz/testCreation/MatchingQuestion.vue";
 
 const model = defineModel()
 const props = defineProps({
@@ -118,6 +120,13 @@ if (QuizType.isSurvey(props.questionDef.quizType)) {
     id: QuestionType.Rating,
     icon: 'fa fa-star',
   })
+} else {
+  questionTypes.push({
+    label: 'Matching',
+    description: 'Match terms',
+    id: QuestionType.Matching,
+    icon: 'fas fa-diagram-project',
+  })
 }
 
 const questionType = ref({
@@ -139,6 +148,9 @@ const isQuestionTypeTextInput = computed(() => {
 })
 const isQuestionTypeRatingInput = computed(() => {
   return questionType.value.selectedType && questionType.value.selectedType.id === QuestionType.Rating;
+})
+const isQuestionTypeMatching = computed(() => {
+  return questionType.value.selectedType && questionType.value.selectedType.id === QuestionType.Matching;
 })
 const isQuestionTypeMultipleChoice = computed(() => {
   return questionType.value.selectedType && questionType.value.selectedType.id === QuestionType.MultipleChoice;
@@ -165,14 +177,14 @@ const quizId = computed(() => {
 const isDirty = ref(false)
 const answersErrorMessage = ref('')
 const atLeastOneCorrectAnswer = (value) => {
-  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value) {
+  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
     return true;
   }
   const numCorrect = value.filter((a) => a.isCorrect).length;
   return numCorrect >= 1;
 }
 const atLeastTwoAnswersFilledIn = (value) => {
-  if (!isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value) {
+  if (!isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
     return true;
   }
   const numWithContent = value.filter((a) => (a.answer && a.answer.trim().length > 0)).length;
@@ -252,6 +264,14 @@ const saveQuiz = (values) => {
   const removeEmptyQuestions = answers.filter((a) => (a.answer && a.answer.trim().length > 0));
   const numCorrect = answers.filter((a) => a.isCorrect).length;
   let { questionType : { id : questionType } } = values
+
+  if(questionType === 'Matching') {
+    answers.forEach((answer) => {
+      answer.isCorrect = true
+      answer.answer = JSON.stringify({answer: answer.answer, term: answer.term})
+    })
+  }
+
   const quizToSave = {
     id: props.questionDef.id,
     quizId: quizId.value,
@@ -392,7 +412,11 @@ const onSavedQuestion = (savedQuestion) => {
             :options="currentScaleOptions" />
       </div>
 
-      <div v-if="!isQuestionTypeTextInput && !isQuestionTypeRatingInput" class="pl-4">
+      <div v-if="isQuestionTypeMatching">
+        <matching-question v-model="props.questionDef.answers" />
+      </div>
+
+      <div v-if="!isQuestionTypeTextInput && !isQuestionTypeRatingInput && !isQuestionTypeMatching" class="pl-4">
         <div class="mb-2" v-if="isQuizType">
           <span
               v-if="isQuestionTypeMultipleChoice"
