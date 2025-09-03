@@ -16,6 +16,7 @@
 package skills.intTests.community
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
@@ -24,7 +25,7 @@ import static skills.intTests.utils.SkillsFactory.*
 
 class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
 
-    def "projects with a protected community are not allowed to be added to a Global Badge - skill assigned"() {
+    def "UC projects are not allowed to be added to a non UC Global Badge - skill assigned"() {
         List<String> users = getRandomUsers(2)
 
         SkillsService pristineDragonsUser = createService(users[1])
@@ -38,17 +39,18 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         def p1Skills = createSkills(3, 1, 1, 100, 5)
         pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
 
-        def badge1 = SkillsFactory.createBadge(1)
+        def badge1 = createBadge(1)
+        badge1.enableProtectedUserCommunity = false
         rootUser.createGlobalBadge(badge1)
 
         when:
         rootUser.assignSkillToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId)
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.message.contains("Projects with the community protection are not allowed to be added to a Global Badge")
+        e.message.contains("Projects with community protection can only be added to a Global Badge with community protection")
     }
 
-    def "projects with a protected community are not allowed to be added to a Global Badge - level assigned"() {
+    def "UC projects are not allowed to be added to a non UC Global Badge - level assigned"() {
         List<String> users = getRandomUsers(2)
 
         SkillsService pristineDragonsUser = createService(users[1])
@@ -62,17 +64,74 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         def p1Skills = createSkills(3, 1, 1, 100, 5)
         pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
 
-        def badge1 = SkillsFactory.createBadge(1)
+        def badge1 = createBadge(1)
+        badge1.enableProtectedUserCommunity = false
         rootUser.createGlobalBadge(badge1)
 
         when:
         rootUser.assignProjectLevelToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, level: "1")
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.message.contains("Projects with the community protection are not allowed to be added to a Global Badge")
+        e.message.contains("Projects with community protection can only be added to a Global Badge with community protection")
     }
 
-    def "cannot enable community for a project if it belongs to a badge - skill assigned"() {
+    def "non UC projects are not allowed to be added to a UC Global Badge - skill assigned"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootUser.saveUserTag(rootUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = false
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = createBadge(1)
+        badge1.enableProtectedUserCommunity = true
+        rootUser.createGlobalBadge(badge1)
+
+        when:
+        rootUser.assignSkillToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Projects without community protection can not be added to a Global Badge with community protection")
+    }
+
+    def "non UC projects are not allowed to be added to a UC Global Badge - level assigned"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootUser.saveUserTag(rootUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = false
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = createBadge(1)
+        badge1.enableProtectedUserCommunity = true
+        rootUser.createGlobalBadge(badge1)
+
+        when:
+        rootUser.assignProjectLevelToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, level: "1")
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Projects without community protection can not be added to a Global Badge with community protection")
+    }
+
+    // TODO
+//    def "non UC projects are allowed to be added to a non UC Global Badge - skill assigned"() {
+
+    // TODO
+//    def "non UC projects are allowed to be added to a non UC Global Badge - level assigned"() {
+
+    def "cannot enable community for a project if it belongs to a non UC Global badge - skill assigned"() {
         List<String> users = getRandomUsers(2)
 
         SkillsService pristineDragonsUser = createService(users[1])
@@ -89,8 +148,8 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         def p2Skills = createSkills(3, 2, 1, 100, 5)
         pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
 
-        def badge1 = SkillsFactory.createBadge(1, 1)
-        def badge2 = SkillsFactory.createBadge(2, 2)
+        def badge1 = createBadge(1, 1)
+        def badge2 = createBadge(2, 2)
         rootUser.createGlobalBadge(badge1)
         rootUser.assignSkillToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId)
 
@@ -123,8 +182,8 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         def p2Skills = createSkills(3, 2, 1, 100, 5)
         pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
 
-        def badge1 = SkillsFactory.createBadge(1, 1)
-        def badge2 = SkillsFactory.createBadge(2, 2)
+        def badge1 = createBadge(1, 1)
+        def badge2 = createBadge(2, 2)
         rootUser.createGlobalBadge(badge1)
         rootUser.assignSkillToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId)
 
@@ -168,8 +227,8 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         rootUser.pinProject(p1.projectId)
         rootUser.pinProject(p2.projectId)
 
-        def badge1 = SkillsFactory.createBadge(1)
-        def badge2 = SkillsFactory.createBadge(2)
+        def badge1 = createBadge(1)
+        def badge2 = createBadge(2)
         rootUser.createGlobalBadge(badge1)
 
         when:
@@ -192,4 +251,22 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         res3.totalAvailable == 0
     }
 
+    def "once community is enabled it cannot be disabled"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def b1 = createBadge(1)
+        b1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createGlobalBadge(b1)
+        when:
+        b1.enableProtectedUserCommunity = false
+        pristineDragonsUser.updateGlobalBadge(b1, b1.badgeId)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Once global badge [enableProtectedUserCommunity=true] it cannot be flipped to false. badgeId [${b1.badgeId}]")
+        e.getMessage().contains("badgeId:${b1.badgeId}")
+    }
 }

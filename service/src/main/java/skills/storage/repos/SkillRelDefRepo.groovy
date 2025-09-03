@@ -484,4 +484,33 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
           AND cp.project_id IS NULL
 ''', nativeQuery = true)
     List<String> getNonCommunityProjectsThatThisGlobalBadgeIsLinkedTo(Integer skillRefId)
+
+    @Query(value = '''
+        WITH community_badges AS (
+            SELECT skill_ref_id 
+            FROM settings 
+            WHERE setting = 'user_community' 
+            AND value = 'true'
+        )
+        
+        SELECT DISTINCT gbld.skill_ref_id 
+        FROM global_badge_level_definition gbld
+        LEFT JOIN community_badges cb ON gbld.skill_ref_id = cb.skill_ref_id
+        WHERE gbld.project_id = :projectId
+          AND cb.skill_ref_id IS NULL
+        
+        UNION
+        
+        SELECT DISTINCT badge.id 
+        FROM skill_relationship_definition rel
+        JOIN skill_definition badge ON rel.parent_ref_id = badge.id
+        JOIN skill_definition skill ON rel.child_ref_id = skill.id
+        LEFT JOIN community_badges cb ON badge.id = cb.skill_ref_id
+        WHERE rel.type = 'BadgeRequirement'
+          AND badge.type = 'GlobalBadge'
+          AND skill.project_id = :projectId
+          AND cb.skill_ref_id IS NULL
+''', nativeQuery = true)
+    List<Integer> getNonCommunityGlobalBadgesThatThisProjectIsLinkedTo(String projectId)
+
 }
