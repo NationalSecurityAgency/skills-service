@@ -111,21 +111,23 @@ function updateEditQuizInfo(quizSummary) {
 
 function updateQuizDef(quizDef) {
   const origId = route.params.quizId
-  if (quizDef.quizId !== origId) {
-    editQuizInfo.value.quizDef.quizId = quizDef.quizId
-    router.replace({ name: route.name, params: { ...route.params, quizId: quizDef.quizId } })
-      .then(() =>{
-        focusState.focusOnLastElement()
-      })
-  } else {
-    focusState.focusOnLastElement()
-  }
-  updateEditQuizInfo(quizDef)
-  quizSummaryState.quizSummary.name = quizDef.name
-  quizSummaryState.quizSummary.quizId = quizDef.quizId
-  quizSummaryState.quizSummary.userCommunity = quizDef.userCommunity
-  quizConfig.loadQuizConfigState({quizId: quizDef.quizId})
-  announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`)
+  quizConfig.loadQuizConfigState({quizId: quizDef.quizId}).then(() => {
+    if (quizDef.quizId !== origId) {
+      editQuizInfo.value.quizDef.quizId = quizDef.quizId
+      router.replace({ name: route.name, params: { ...route.params, quizId: quizDef.quizId } })
+          .then(() =>{
+            focusState.focusOnLastElement()
+          })
+    } else {
+      focusState.focusOnLastElement()
+    }
+
+    updateEditQuizInfo(quizDef)
+    quizSummaryState.quizSummary.name = quizDef.name
+    quizSummaryState.quizSummary.quizId = quizDef.quizId
+    quizSummaryState.quizSummary.userCommunity = quizDef.userCommunity
+    announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`)
+  })
 }
 </script>
 
