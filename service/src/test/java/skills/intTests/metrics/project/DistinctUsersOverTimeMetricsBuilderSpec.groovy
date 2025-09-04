@@ -533,12 +533,12 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         TestDates testDates = new TestDates()
 
         days = [
-                testDates.getDateInPreviousWeek().minusDays(28).toDate(),
-                testDates.getDateInPreviousWeek().minusDays(21).toDate(),
-                testDates.getDateInPreviousWeek().minusDays(14).toDate(),
-                testDates.getDateInPreviousWeek().minusDays(7).toDate(),
-                testDates.getDateInPreviousWeek().toDate(),
-                testDates.getDateWithinCurrentWeek().toDate(),
+                testDates.getFirstOfMonth(1).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(7).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(14).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(21).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(28).toDate(),
+                testDates.getFirstOfMonth().toDate(),
         ]
 
         use(TimeCategory) {
@@ -554,7 +554,7 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         assert maxDailyDays == 3, "test data constructed with the assumption that skills.config.compactDailyEventsOlderThan is set to 3"
         userEventService.compactDailyEvents()
 
-        Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
+        Duration duration = Duration.between(testDates.getFirstOfMonth(1), LocalDateTime.now())
 
         when:
         def res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger(), null, true))
@@ -568,24 +568,24 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         then:
 
         res30days.users.size() == 2
-        res30days.users.collect {it.count} == [1, 5]
+        res30days.users.collect {it.count} == [4, 5]
         res30days.newUsers.size() == 2
-        res30days.newUsers.collect {it.count} == [1, 4]
+        res30days.newUsers.collect {it.count} == [4, 1]
 
-        resOver30days.users.size() == 2
-        resOver30days.users.collect {it.count} == [1, 5]
-        resOver30days.newUsers.size() == 2
-        resOver30days.newUsers.collect {it.count} == [1, 4]
+        resOver30days.users.size() == 3
+        resOver30days.users.collect {it.count} == [0, 4, 5]
+        resOver30days.newUsers.size() == 3
+        resOver30days.newUsers.collect {it.count} == [0, 4, 1]
 
         res30daysAfterArchive.users.size() == 2
-        res30daysAfterArchive.users.collect {it.count} == [1, 4]
+        res30daysAfterArchive.users.collect {it.count} == [3, 4]
         res30daysAfterArchive.newUsers.size() == 2
-        res30daysAfterArchive.newUsers.collect {it.count} == [1, 3]
+        res30daysAfterArchive.newUsers.collect {it.count} == [3, 1]
 
-        resOver30daysAfterArchive.users.size() == 2
-        resOver30daysAfterArchive.users.collect {it.count} == [1, 4]
-        resOver30daysAfterArchive.newUsers.size() == 2
-        resOver30daysAfterArchive.newUsers.collect {it.count} == [1, 3]
+        resOver30daysAfterArchive.users.size() == 3
+        resOver30daysAfterArchive.users.collect {it.count} == [0, 3, 4]
+        resOver30daysAfterArchive.newUsers.size() == 3
+        resOver30daysAfterArchive.newUsers.collect {it.count} == [0, 3, 1]
     }
 
     def "number of users growing over few days - include skills imported from catalog - grouped by month"() {
@@ -651,25 +651,25 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
 
         then:
 
-        res30days.users.size() == 2
-        res30days.users.collect {it.count} == [1, 5]
-        res30days.newUsers.size() == 2
-        res30days.newUsers.collect {it.count} == [1, 4]
+        res30days.users.size() == 3
+        res30days.users.collect {it.count} == [0, 4, 5]
+        res30days.newUsers.size() == 3
+        res30days.newUsers.collect {it.count} == [0, 4, 1]
 
-        resOver30days.users.size() == 2
-        resOver30days.users.collect {it.count} == [1, 5]
-        resOver30days.newUsers.size() == 2
-        resOver30days.newUsers.collect {it.count} == [1, 4]
+        resOver30days.users.size() == 3
+        resOver30days.users.collect {it.count} == [0, 4, 5]
+        resOver30days.newUsers.size() == 3
+        resOver30days.newUsers.collect {it.count} == [0, 4, 1]
 
-        res30daysAfterArchive.users.size() == 2
-        res30daysAfterArchive.users.collect {it.count} == [1, 4]
-        res30daysAfterArchive.newUsers.size() == 2
-        res30daysAfterArchive.newUsers.collect {it.count} == [1, 3]
+        res30daysAfterArchive.users.size() == 3
+        res30daysAfterArchive.users.collect {it.count} == [0, 3, 4]
+        res30daysAfterArchive.newUsers.size() == 3
+        res30daysAfterArchive.newUsers.collect {it.count} == [0, 3, 1]
 
-        resOver30daysAfterArchive.users.size() == 2
-        resOver30daysAfterArchive.users.collect {it.count} == [1, 4]
-        resOver30daysAfterArchive.newUsers.size() == 2
-        resOver30daysAfterArchive.newUsers.collect {it.count} == [1, 3]
+        resOver30daysAfterArchive.users.size() == 3
+        resOver30daysAfterArchive.users.collect {it.count} == [0, 3, 4]
+        resOver30daysAfterArchive.newUsers.size() == 3
+        resOver30daysAfterArchive.newUsers.collect {it.count} == [0, 3, 1]
     }
 
     def "number of users growing over a few months - grouped by month"() {
@@ -719,19 +719,19 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         then:
 
         res90days.users.size() == 4
-        res90days.users.collect {it.count} == [0, 3, 4, 0]
+        res90days.users.collect {it.count} == [1, 2, 3, 4]
         res90days.newUsers.size() == 4
-        res90days.newUsers.collect {it.count} == [0, 2, 1, 0]
+        res90days.newUsers.collect {it.count} == [1, 1, 1, 1]
 
         res60days.users.size() == 3
-        res60days.users.collect {it.count} == [3, 4, 0]
+        res60days.users.collect {it.count} == [2, 3, 4]
         res60days.newUsers.size() == 3
-        res60days.newUsers.collect {it.count} == [2, 1, 0]
+        res60days.newUsers.collect {it.count} == [1, 1, 1]
 
         res30days.users.size() == 2
-        res30days.users.collect {it.count} == [4, 0]
+        res30days.users.collect {it.count} == [3, 4]
         res30days.newUsers.size() == 2
-        res30days.newUsers.collect {it.count} == [1, 0]
+        res30days.newUsers.collect {it.count} == [1, 1]
 
     }
 
