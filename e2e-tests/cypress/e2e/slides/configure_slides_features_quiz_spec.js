@@ -15,7 +15,7 @@
  */
 import './slides-commands';
 
-describe('Configure slides and SkillTree Features Tests', () => {
+describe('Configure slides for quizzes and SkillTree Features Tests', () => {
 
     beforeEach(() => {
         cy.intercept('GET', '/admin/quiz-definitions/quiz1/slides').as('getSlidesProps')
