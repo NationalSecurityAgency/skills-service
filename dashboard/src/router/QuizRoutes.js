@@ -24,6 +24,7 @@ import QuizAccessPage from '@/components/quiz/access/QuizAccessPage.vue';
 import UserActionsPage from "@/components/userActions/UserActionsPage.vue";
 import GradeQuizzesPage  from "@/components/quiz/grade/GradeQuizzesPage.vue";
 import VideoConfigPage from "@/components/video/VideoConfigPage.vue";
+import SlidesConfigPage from "@/components/slides/SlidesConfigPage.vue";
 
 const createQuizRoutes = () => {
   return {
@@ -47,6 +48,17 @@ const createQuizRoutes = () => {
         },
       },
       alias: 'questions'
+    }, {
+        name: 'QuizConfigureSlides',
+        path: 'config-slides',
+        component: SlidesConfigPage,
+        meta: {
+            requiresAuth: true,
+            announcer: {
+                message: 'Configure Slides',
+            },
+        },
+        props: true,
     }, {
       name: 'QuizMetrics',
       path: 'results',

@@ -62,7 +62,7 @@ class AttachmentService {
                 quizId: quizId,
                 skillId: skillId)
         attachment.setContent(BlobProxy.generateProxy(file.inputStream, file.size))
-        attachmentRepo.save(attachment);
+        persistAttachment(attachment);
         return new UploadAttachmentResult(
                 filename: file.originalFilename,
                 contentType: file.contentType,
@@ -78,6 +78,12 @@ class AttachmentService {
 
     @Transactional
     Attachment copyAttachmentWithNewUuid(Attachment attachment, String newProjectId = null, String newQuizId = null, String skillId = null) {
+        Attachment res = constructNewAttachmentWithNewUuid(attachment, newProjectId, newQuizId, skillId)
+        persistAttachment(res)
+        return res
+    }
+
+    static Attachment constructNewAttachmentWithNewUuid(Attachment attachment, String newProjectId = null, String newQuizId = null, String skillId = null) {
         String uuid = UUID.randomUUID().toString()
         Attachment res = new Attachment(
                 filename: attachment.filename,
@@ -90,9 +96,9 @@ class AttachmentService {
                 skillId: skillId ?: (newProjectId ? null : attachment.skillId), // if a new project then skillId may not exist
                 content: attachment.content
         )
-        attachmentRepo.save(res)
         return res
     }
+
 
     @Transactional(readOnly = true)
     Attachment getAttachment(String uuid) {
@@ -155,7 +161,7 @@ class AttachmentService {
                     changed = true
                 }
                 if (changed) {
-                    attachmentRepo.save(attachment)
+                    persistAttachment(attachment)
                 }
             }
         }
@@ -166,6 +172,10 @@ class AttachmentService {
             return UUID_PATTERN.matcher(description).findAll().collect { it[1] }
         }
         return []
+    }
+
+    void persistAttachment(Attachment attachment) {
+        attachmentRepo.save(attachment)
     }
 
 }

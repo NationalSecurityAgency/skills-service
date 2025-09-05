@@ -3014,4 +3014,10 @@
         <sql>DELETE FROM custom_icons WHERE project_id IS NULL AND global_badge_id IS NULL</sql>
     </changeSet>
 
+    <changeSet id="55" author="skills team">
+        <addColumn tableName="quiz_definition">
+            <column name="attributes" type="jsonb" />
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

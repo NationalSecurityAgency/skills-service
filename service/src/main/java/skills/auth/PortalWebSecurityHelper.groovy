@@ -188,6 +188,7 @@ final class MultipartRequestMatcher implements RequestMatcher {
             new AntPathRequestMatcher("/admin/icons/upload"),  // TODO add wildcard for ID
             new AntPathRequestMatcher("/admin/*/*/*/*/video"),
             new AntPathRequestMatcher("/admin/*/*/*/*/slides"),
+            new AntPathRequestMatcher("/admin/*/*/slides"),
     )
 
     @Override

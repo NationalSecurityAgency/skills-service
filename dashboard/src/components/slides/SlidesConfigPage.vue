@@ -57,9 +57,10 @@ const skillsState = useSkillsState();
 const responsive = useResponsiveBreakpoints()
 const dialogMessages = useDialogMessages()
 
-const container = route.params.projectId ? route.params.projectId : route.params.quizId;
-const item = route.params.skillId ? route.params.skillId : route.params.questionId;
-const isSkill = !!route.params.skillId;
+const projId = route.params.projectId
+const skillId = route.params.skillId
+const quizId = route.params.quizId
+const isSkill = !!skillId
 
 const slidesConf = ref({
   file: null,
@@ -126,7 +127,8 @@ onMounted(() => {
 
 const loadSettings = () => {
   loading.value = true;
-  return SlidesService.getSettings(container, item, isSkill)
+  const getSettingsF = () => isSkill ? SlidesService.getSkillSettings(projId, skillId) : SlidesService.getQuizSettings(quizId)
+  return getSettingsF()
       .then((settingRes) => {
         updateSlidesSettings(settingRes);
       }).finally(() => {
@@ -156,7 +158,7 @@ const submitSaveSettingsForm = () => {
 }
 
 const requestEndpoint = computed(() => {
-  return isSkill ? `projects/${container}/skills/${item}` : `quiz-definitions/${container}/questions/${item}`;
+  return isSkill ? `projects/${projId}/skills/${skillId}` : `quiz-definitions/${quizId}`;
 })
 const saveSettings = () => {
   isSaving.value = true;
@@ -236,7 +238,8 @@ const slidesUploadWarningMessage = computed(() => {
     } else if (route.params.quizId) {
       communityValue = quizConfig.quizCommunityValue;
     }
-    return projectCommunityReplacement.populateProjectCommunity(warningMessageValue, communityValue, `projId=[${container}], skillId=[${item}] config.slidesUploadWarningMessage `);
+    const errorMsg = isSkill ? `projId=[${projId}], skillId=[${skillId}] ${warningMessageValue} ` : `quizId=[${quizId}] ${warningMessageValue} `
+    return projectCommunityReplacement.populateProjectCommunity(warningMessageValue, communityValue, errorMsg);
   } catch (err) {
     // eslint-disable-next-line vue/no-side-effects-in-computed-properties
     console.error(err)
@@ -302,7 +305,8 @@ const clearSettings = () => {
   slidesConf.value.file = null;
   preview.value = false;
   switchToFileUploadOption();
-  SlidesService.deleteSettings(container, item, isSkill)
+  const deleteSettingsF = () => isSkill ? SlidesService.deleteSkillSettings(projId, skillId) : SlidesService.deleteQuizSettings(quizId)
+  deleteSettingsF()
       .finally(() => {
         loading.value = false;
         validate();
@@ -312,6 +316,9 @@ const clearSettings = () => {
 const formHasAnyData = computed(() => {
   return slidesConf.value.url;
 });
+const slidesId = computed(() => {
+  return isSkill ? `${projId}-${skillId}` : quizId
+})
 </script>
 
 <template>
@@ -451,7 +458,7 @@ const formHasAnyData = computed(() => {
             <template #content>
               <slide-deck
                   class="my-5"
-                  :slides-id="`${route.params.projectId}-${route.params.skillId}`"
+                  :slides-id="slidesId"
                   :pdf-url="slidesConf.url"
                   :default-width="configuredSlidesWidthValue"
                   :max-width="layoutSize.tableMaxWidth-50"

@@ -17,6 +17,8 @@ package skills.intTests.quiz
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.Resource
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsService
@@ -26,6 +28,8 @@ import skills.storage.model.Attachment
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.AttachmentRepo
+
+import java.nio.file.Files
 
 import static skills.intTests.utils.SkillsFactory.createProject
 import static skills.intTests.utils.SkillsFactory.createSkill
@@ -916,6 +920,37 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         then:
         copiedQuizVideo == copiedQuizVideoAfter
+    }
+
+    def "copy quiz - slides are copied"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def quiz2 = QuizDefFactory.createQuiz(3, "Fancy Description")
+        skillsService.createQuizDef(quiz2)
+
+        Resource pdfSlides = new ClassPathResource("/testSlides/test-slides-1.pdf")
+        skillsService.saveQuizSlidesAttributes(quiz.quizId, [file: pdfSlides, width: 111])
+
+        skillsService.saveQuizSlidesAttributes(quiz2.quizId, [ url: "http://some.url", width: 333])
+
+        when:
+        def quizInfo_t0 =  skillsService.getQuizInfo(quiz.quizId)
+        def quizInfo2_t0 =  skillsService.getQuizInfo(quiz2.quizId)
+        def copyResult = skillsService.copyQuiz(quiz.quizId, [quizId: 'newQuizId', name: 'Copy of Quiz', description: '', type: quiz.type]).body
+        def copyResult2 = skillsService.copyQuiz(quiz2.quizId, [quizId: 'newQuizId2', name: 'Copy of Quiz2', description: '', type: quiz.type]).body
+        def quizInfo =  skillsService.getQuizInfo(copyResult.quizId)
+        def quizInfo2 =  skillsService.getQuizInfo(copyResult2.quizId)
+        then:
+        skillsService.downloadAttachment(quizInfo.slidesSummary.url).file.bytes == Files.readAllBytes(pdfSlides.getFile().toPath())
+        quizInfo.slidesSummary.width == 111.0
+        quizInfo.slidesSummary.type == "application/pdf"
+
+        quizInfo2.slidesSummary.url == "http://some.url"
+        quizInfo2.slidesSummary.width == 333.0
+
+
+        quizInfo_t0.slidesSummary.url != quizInfo.slidesSummary.url
+        quizInfo2_t0.slidesSummary.url == quizInfo2.slidesSummary.url
     }
 
     void runQuiz(String userId, def quiz, def quizInfo, boolean pass) {

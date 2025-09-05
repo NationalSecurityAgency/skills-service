@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile
 import skills.PublicProps
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
+import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
@@ -41,9 +42,11 @@ import skills.services.VideoCaptionsService
 import skills.services.adminGroup.AdminGroupService
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
+import skills.services.attributes.SlidesAttrs
 import skills.services.quiz.QuizDefService
 import skills.services.quiz.QuizRoleService
 import skills.services.quiz.QuizSettingsService
+import skills.services.slides.QuizSlidesService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionsHistoryService
@@ -95,6 +98,9 @@ class QuizController {
     @Autowired
     VideoCaptionsService videoCaptionsService;
 
+    @Autowired
+    QuizSlidesService quizSlidesService
+
     @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     QuizDefResult saveQuizDef(@PathVariable("quizId") String quizId, @RequestBody QuizDefRequest quizDefRequest) {
@@ -141,6 +147,32 @@ class QuizController {
     @ResponseBody
     QuizDefSummaryResult getQuizSummary(@PathVariable("quizId") String quizId) {
         return quizDefService.getQuizDefSummary(quizId)
+    }
+
+    @RequestMapping(value = "/{quizId}/slides", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    SlidesAttrs saveQuizSlidesAttrs(@PathVariable("quizId") String quizId,
+                                    @RequestParam(name = "file", required = false) MultipartFile file,
+                                    @RequestParam(name = "url", required = false) String slidesUrl,
+                                    @RequestParam(name = "isAlreadyHosted", required = false, defaultValue = "false") Boolean isAlreadyHosted,
+                                    @RequestParam(name = "width", required = false) Double width) {
+        if (width != null && width > 100000) {
+            throw new SkillQuizException("Width cannot be greater than 100000", quizId, ErrorCode.BadParam)
+        }
+        return quizSlidesService.saveSlides(quizId, isAlreadyHosted, file, slidesUrl, width)
+    }
+
+    @RequestMapping(value = "/{quizId}/slides", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    SlidesAttrs getSlidesAttrs(@PathVariable("quizId") String quizId) {
+        return quizSlidesService.getSlidesAttrs(quizId)
+    }
+
+    @RequestMapping(value = "/{quizId}/slides", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult deleteSlidesAttrs(@PathVariable("quizId") String quizId) {
+        quizSlidesService.deleteSlidesAttrs(quizId)
+        return RequestResult.success()
     }
 
     @RequestMapping(value = "/{quizId}/create-question", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")

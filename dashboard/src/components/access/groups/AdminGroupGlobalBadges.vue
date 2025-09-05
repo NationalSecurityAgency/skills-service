@@ -105,9 +105,7 @@ const removeGlobalBadgeFromAdminGroup = () => {
       .then((res) => {
         availableGlobalBadges.value = res.availableGlobalBadges;
         assignedGlobalBadges.value = res.assignedGlobalBadges;
-        console.log(`adminGroupState.adminGroup.numberOfGlobalBadges: ${adminGroupState.adminGroup.numberOfGlobalBadges}`)
         adminGroupState.adminGroup.numberOfGlobalBadges--;
-        console.log(`done. adminGroupState.adminGroup.numberOfGlobalBadges: ${adminGroupState.adminGroup.numberOfGlobalBadges}`)
       }).finally(() => {
     isLoading.value = false
   });

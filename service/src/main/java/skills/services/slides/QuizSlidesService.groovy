@@ -15,19 +15,15 @@
  */
 package skills.services.slides
 
+
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.util.unit.DataSize
 import org.springframework.web.multipart.MultipartFile
-import skills.auth.UserInfoService
-import skills.controller.exceptions.SkillException
-import skills.controller.exceptions.SkillsValidator
-import skills.services.attributes.SkillAttributeService
+import skills.controller.exceptions.SkillQuizException
+import skills.services.attributes.QuizAttrs
 import skills.services.attributes.SlidesAttrs
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
@@ -35,84 +31,79 @@ import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.Attachment
 import skills.storage.repos.AttachmentRepo
-import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.QuizDefRepo
 
 @Service
 @Slf4j
-class AdminSlidesService {
+class QuizSlidesService {
 
-    @Value('#{"${skills.config.ui.maxSlidesUploadSize:250MB}"}')
-    DataSize maxAttachmentSize;
+    @Autowired
+    QuizDefRepo quizDefRepo
 
-    @Value('#{"${skills.config.allowedSlidesUploadMimeTypes}"}')
-    List<MediaType> allowedSlidesUploadMimeTypes;
+    @Autowired
+    QuizAttrsStore quizAttrsStore
 
     @Autowired
     AttachmentRepo attachmentRepo
 
     @Autowired
-    SkillAttributeService skillAttributeService
+    SlidesHelper slidesHelper
 
     @Autowired
     UserActionsHistoryService userActionsHistoryService
 
-    @Autowired
-    UserInfoService userInfoService
+    QuizAttrs getQuizAttrs(String quizId) {
+        return quizAttrsStore.getQuizAttrs(quizId) ?:new QuizAttrs()
+    }
 
-    @Autowired
-    SkillDefRepo skillDefRepo
-
-    @Autowired
-    SlidesHelper slidesHelper
+    SlidesAttrs getSlidesAttrs(String quizId) {
+        return quizAttrsStore.getSlidesAttrs(quizId) ?: new SlidesAttrs()
+    }
 
     @Transactional
-    SlidesAttrs saveSlides(String projectId, String skillId, Boolean isAlreadyHosted,
-                              MultipartFile file, String slidesUrl, Double width) {
-
-        SlidesAttrs existingAttributes = skillAttributeService.getSlidesAttrs(projectId, skillId)
-        final boolean isEdit = existingAttributes?.url
+    SlidesAttrs saveSlides(String quizId, Boolean isAlreadyHosted, MultipartFile file, String slidesUrl, Double width) {
+        QuizAttrs existingQuizAttrs = getQuizAttrs(quizId)
+        SlidesAttrs existingSlidesAttrs = existingQuizAttrs?.slidesAttrs ?: null
+        final boolean isEdit = existingSlidesAttrs?.url
 
         SlidesAttrs resAttributes = new SlidesAttrs()
         if (isAlreadyHosted) {
-            slidesHelper.updateSlideAttrsWhenAlreadyHosted(resAttributes, existingAttributes)
+            slidesHelper.updateSlideAttrsWhenAlreadyHosted(resAttributes, existingSlidesAttrs)
         } else  {
             if (StringUtils.isBlank(slidesUrl) && !file) {
-                throw new SkillException("Either url or file must be supplied", projectId, skillId)
+                throw new SkillQuizException("Either url or file must be supplied", quizId)
             }
 
-            if (existingAttributes?.internallyHostedAttachmentUuid) {
-                attachmentRepo.deleteByUuid(existingAttributes.internallyHostedAttachmentUuid)
+            if (existingSlidesAttrs?.internallyHostedAttachmentUuid) {
+                attachmentRepo.deleteByUuid(existingSlidesAttrs.internallyHostedAttachmentUuid)
             }
 
-            resAttributes = validateAndSave(slidesUrl, projectId, skillId, file, resAttributes)
+            resAttributes = validateAndSave(slidesUrl, quizId, file, resAttributes)
         }
 
         resAttributes.width = width
 
-        boolean isReadOnly = skillDefRepo.isImportedFromCatalog(projectId, skillId)
-        SkillsValidator.isTrue(!isReadOnly, "Cannot set slide attributes of read-only skill", projectId, skillId)
-
-        skillAttributeService.saveSlidesAttrs(projectId, skillId, resAttributes)
+        existingQuizAttrs.slidesAttrs = resAttributes
+        quizAttrsStore.saveQuizAttrs(quizId, existingQuizAttrs)
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
                 item: DashboardItem.SlidesSettings,
-                itemId: skillId,
-                projectId: projectId,
+                itemId: quizId,
+                quizId: quizId,
                 actionAttributes: resAttributes
         ))
 
         return resAttributes
     }
 
-    SlidesAttrs validateAndSave(String slidesUrl, String projId, String skillId, MultipartFile file, SlidesAttrs slidesAttrs) {
+
+    SlidesAttrs validateAndSave(String slidesUrl, String quizId, MultipartFile file, SlidesAttrs slidesAttrs) {
         if (file) {
             slidesHelper.validate(slidesUrl, file)
             Attachment attachment = slidesHelper.constructAttachment(file)
-            attachment.projectId = projId
-            attachment.skillId = skillId
+            attachment.quizId = quizId
             attachmentRepo.save(attachment)
-
             slidesHelper.updateSlideAttrsWithAttachment(attachment, slidesAttrs)
         } else {
             slidesAttrs.isInternallyHosted = false
@@ -122,4 +113,25 @@ class AdminSlidesService {
         return slidesAttrs
     }
 
+    @Transactional
+    boolean deleteSlidesAttrs(String quizId) {
+        QuizAttrs quizAttrs = quizAttrsStore.getQuizAttrs(quizId)
+
+        String internallyHostedUuid = quizAttrs?.slidesAttrs?.internallyHostedAttachmentUuid
+        if (internallyHostedUuid) {
+            attachmentRepo.deleteByUuid(internallyHostedUuid)
+        }
+
+        if (quizAttrs) {
+            quizAttrs.slidesAttrs = null
+            quizAttrsStore.saveQuizAttrs(quizId, quizAttrs)
+        }
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: DashboardItem.SlidesSettings,
+                itemId: quizId,
+                quizId: quizId,
+        ))
+    }
 }

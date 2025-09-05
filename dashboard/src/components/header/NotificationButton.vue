@@ -140,7 +140,6 @@ const dismissAllNotifications = () => {
       }).finally(() => {
     loadingNotifications.value = false
     nextTick(() => {
-      console.log('focus')
       document.getElementById('viewNotifBtn').focus()
     })
   })

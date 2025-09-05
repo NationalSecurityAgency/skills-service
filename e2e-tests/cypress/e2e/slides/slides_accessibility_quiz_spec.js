@@ -15,23 +15,24 @@
  */
 import './slides-commands';
 
-describe('Slides Accessibility Tests', () => {
-
+describe('Slides Quiz Accessibility Tests', () => {
 
     const runWithDarkMode = ['', ' - dark mode']
     runWithDarkMode.forEach((darkMode) => {
         it(`skill page${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
             cy.viewport(1500, 1600);
-            cy.createProject(1)
-            cy.createSubject(1, 1);
-            cy.createSkill(1, 1, 1)
-            cy.saveSlidesAttrs(1, 1, {file: 'test-slides-1.pdf'})
+            cy.createQuizDef(1);
+            cy.createQuizQuestionDef(1, 1);
+            cy.saveSlidesAttrs(1, null, { file: 'test-slides-1.pdf' }, true)
 
-            cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
+            cy.visit('/progress-and-rankings/quizzes/quiz1');
+            cy.get('[data-cy="quizSplashScreen"]').contains('This is quiz 1')
+
+            cy.get('[data-cy="startQuizAttempt"]').click()
             cy.get('#pdfCanvasId').should('be.visible')
             cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
-            cy.get('#proj1-skill1-slidesContainer #text-layer').contains('Sample slides')
+            cy.get('#quiz1-slidesContainer #text-layer').contains('Sample slides')
 
             cy.customLighthouse();
             cy.injectAxe();
@@ -43,16 +44,15 @@ describe('Slides Accessibility Tests', () => {
         const externalPdfUrl = `${Cypress.config().baseUrl}${testSlidesUrl}`
 
         it(`admin config page with uploaded file ${darkMode}`, () => {
-            cy.createProject(1)
-            cy.createSubject(1, 1);
-            cy.createSkill(1, 1, 1)
-            cy.saveSlidesAttrs(1, 1, { file: 'test-slides-1.pdf', width: 700 })
+            cy.viewport(1500, 1600);
+            cy.createQuizDef(1)
+            cy.saveSlidesAttrs(1, null, { file: 'test-slides-1.pdf', width: 700 }, true)
 
-            cy.visitSlidesConfPage();
+            cy.visitQuizSlidesConfPage();
 
             cy.get('#pdfCanvasId').should('be.visible')
             cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
-            cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
+            cy.get('#quiz1Container #text-layer').contains('Sample slides')
 
             cy.customLighthouse();
             cy.injectAxe();
@@ -60,17 +60,16 @@ describe('Slides Accessibility Tests', () => {
         })
 
         it(`admin config page with external url ${darkMode}`, () => {
-            cy.createProject(1)
-            cy.createSubject(1, 1);
-            cy.createSkill(1, 1, 1)
-            cy.saveSlidesAttrs(1, 1, { url: externalPdfUrl })
+            cy.viewport(1500, 1600);
+            cy.createQuizDef(1)
+            cy.saveSlidesAttrs(1, null, { url: externalPdfUrl }, true)
 
-            cy.visitSlidesConfPage();
+            cy.visitQuizSlidesConfPage();
 
             cy.get('[data-cy="pdfUrl"]').should('have.value', externalPdfUrl)
             cy.get('#pdfCanvasId').should('be.visible')
             cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
-            cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
+            cy.get('#quiz1Container #text-layer').contains('Sample slides')
 
             cy.customLighthouse();
             cy.injectAxe();

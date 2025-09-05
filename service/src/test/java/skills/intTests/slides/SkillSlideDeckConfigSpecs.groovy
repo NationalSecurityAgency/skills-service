@@ -33,7 +33,7 @@ import static skills.intTests.utils.SkillsFactory.createProject
 import static skills.intTests.utils.SkillsFactory.createSkills
 import static skills.intTests.utils.SkillsFactory.createSubject
 
-class SlideDeckConfigSpecs extends DefaultIntSpec {
+class SkillSlideDeckConfigSpecs extends DefaultIntSpec {
 
 
     def "save and get slide deck settings" () {
@@ -315,7 +315,7 @@ class SlideDeckConfigSpecs extends DefaultIntSpec {
 
         def attributes_t1 = skillsService.getSlidesAttributes(p1.projectId, p1Skills[0].skillId)
         def attributes1_t1 = skillsService.getSlidesAttributes(p1.projectId, p1Skills[1].skillId)
-        SkillsService.FileAndHeaders downloaded2_t1 = skillsService.downloadAttachment(attributes1.url)
+        SkillsService.FileAndHeaders downloaded2_t1 = skillsService.downloadAttachment(attributes1_t1.url)
 
         then:
         attributes.url.toString().startsWith('/api/download/')

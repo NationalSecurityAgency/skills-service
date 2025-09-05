@@ -43,9 +43,12 @@ import skills.services.LockingService
 import skills.services.admin.UserCommunityService
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
+import skills.services.attributes.SlidesAttrs
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.services.quiz.QuizQuestionType
+import skills.services.slides.QuizAttrsStore
+import skills.skillLoading.model.SlidesSummary
 import skills.storage.model.*
 import skills.storage.repos.*
 import skills.utils.InputSanitizer
@@ -62,6 +65,9 @@ class QuizRunService {
 
     @Autowired
     QuizDefRepo quizDefRepo
+
+    @Autowired
+    QuizAttrsStore quizAttrsStore
 
     @Autowired
     QuizQuestionDefRepo quizQuestionRepo
@@ -217,8 +223,24 @@ class QuizRunService {
                 needsGradingAttemptDate: needsGradingAttemptDate,
                 onlyIncorrectQuestions: onlyIncorrectQuestions,
                 numIncorrectQuestions: numIncorrectQuestions,
-                showDescriptionOnQuizPage: showDescription
+                showDescriptionOnQuizPage: showDescription,
+                slidesSummary: getSlidesSummary(quizDefWithDesc.quizId)
         )
+    }
+
+    @Profile
+    private SlidesSummary getSlidesSummary(String quizId) {
+        SlidesAttrs slidesAttrs = quizAttrsStore.getSlidesAttrs(quizId)
+
+        SlidesSummary res = null
+        if (slidesAttrs) {
+            res = new SlidesSummary(
+                    url: slidesAttrs.url,
+                    type: slidesAttrs.type,
+                    width: slidesAttrs.width
+            )
+        }
+        return res
     }
 
     private List<QuizQuestionDef> selectOnlyIncorrectQuestions(Integer quizId, String userId, List<QuizQuestionDef> questions) {
@@ -233,9 +255,9 @@ class QuizRunService {
         return questions
     }
 
-    private List<QuizQuestionInfo> loadQuizQuestionInfo(QuizDefWithDescription quizDefWithDescription, List<QuizSetting> quizSettings, String userId) {
-        List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizDefWithDescription.quizId)
-        List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizDefWithDescription.quizId)
+    private List<QuizQuestionInfo> loadQuizQuestionInfo(QuizDef quizDef, List<QuizSetting> quizSettings, String userId) {
+        List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizDef.quizId)
+        List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizDef.quizId)
         Map<Integer, List<QuizAnswerDef>> byQuizId = dbAnswersDef.groupBy { it.questionRefId }
 
         QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
@@ -245,10 +267,10 @@ class QuizRunService {
         QuizSetting onlyIncorrect = quizSettings?.find({it.setting == QuizSettings.RetakeIncorrectQuestionsOnly.setting})
         boolean onlyIncorrectQuestions = onlyIncorrect?.value?.toBoolean()
         Boolean showAnswerHintsOnRetakesOnly = quizSettings?.find( { it.setting == QuizSettings.ShowAnswerHintsOnRetakeAttemptsOnly.setting })?.value?.toBoolean()
-        Boolean includeAnswerHints = !showAnswerHintsOnRetakesOnly || isRetakeAttempt(quizDefWithDescription, userId)
+        Boolean includeAnswerHints = !showAnswerHintsOnRetakesOnly || isRetakeAttempt(quizDef, userId)
 
         if(onlyIncorrectQuestions) {
-            dbQuestionDefs = selectOnlyIncorrectQuestions(quizDefWithDescription.id, userId, dbQuestionDefs)
+            dbQuestionDefs = selectOnlyIncorrectQuestions(quizDef.id, userId, dbQuestionDefs)
         }
 
         if(randomizeQuestions || forceRandomizationOfQuestions) {
@@ -278,8 +300,8 @@ class QuizRunService {
         }
         return questions
     }
-    private Boolean isRetakeAttempt(QuizDefWithDescription quizDefWithDescription, String userId) {
-        Boolean isRetakeAttempt = quizDefWithDescription.type == QuizDef.QuizType.Quiz && quizAttemptRepo.getUserAttemptsStats(userId, quizDefWithDescription.id,
+    private Boolean isRetakeAttempt(QuizDef quizDef, String userId) {
+        Boolean isRetakeAttempt = quizDef.type == QuizDef.QuizType.Quiz && quizAttemptRepo.getUserAttemptsStats(userId, quizDef.id,
                 UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED).userNumPreviousQuizAttempts > 0
         return isRetakeAttempt
     }
@@ -300,12 +322,12 @@ class QuizRunService {
 
     @Transactional
     QuizAttemptStartResult startQuizAttempt(String userId, String quizId, String skillId = null, String projectId = null) {
-        QuizDefWithDescription quizDefWithDesc = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizId)
-        List<QuizSetting> quizSettings = loadQuizSettings(quizDefWithDesc.id)
+        QuizDef quizDef = getQuizDef(quizId)
+        List<QuizSetting> quizSettings = loadQuizSettings(quizDef.id)
         Integer quizTimeLimit = quizSettings?.find( { it.setting == QuizSettings.QuizTimeLimit.setting })?.value?.toInteger()
         QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
 
-        List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizDefWithDesc, quizSettings, userId)
+        List<QuizQuestionInfo> questions = loadQuizQuestionInfo(quizDef, quizSettings, userId)
         List<QuizQuestionInfo> questionsForQuiz = []
         Integer quizLengthAsInteger = quizLength ? Integer.valueOf(quizLength.value) : 0
         Integer lengthSetting = quizLengthAsInteger > 0 ? quizLengthAsInteger : questions.size()
@@ -337,8 +359,8 @@ class QuizRunService {
 
             List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = quizAttemptAnswerRepo.getSelectedAnswerIdsAndText(inProgressAttempt.id)
 
-            List<Integer> selectedAnswerIds = alreadySelected?.findAll({!it.getAnswerText()}).collect { it.getAnswerId()}
-            List<QuizAttemptStartResult.AnswerIdAndEnteredText> enteredText = alreadySelected?.findAll({it.getAnswerText()}).collect {
+            List<Integer> selectedAnswerIds = alreadySelected?.findAll({!it.getAnswerText()})?.collect { it.getAnswerId()}
+            List<QuizAttemptStartResult.AnswerIdAndEnteredText> enteredText = alreadySelected?.findAll({it.getAnswerText()})?.collect {
                 new QuizAttemptStartResult.AnswerIdAndEnteredText(answerId: it.getAnswerId(), answerText: it.getAnswerText())
             }
 
@@ -368,7 +390,7 @@ class QuizRunService {
             it.displayOrder = index + 1
         }
 
-        QuizDef quizDef = getQuizDef(quizId)
+
         validateQuizAttempts(quizDef, userId, quizId, skillId, projectId)
         int numQuestions = quizQuestionRepo.countByQuizId(quizDef.quizId)
         QuizValidator.isTrue(numQuestions > 0, "Must have at least 1 question declared in order to start.", quizDef.quizId)

@@ -53,6 +53,7 @@ const isLoading = computed(() => quizSummaryState.loadingQuizSummary || quizConf
 const navItems = computed(() => {
   const res = [
     { name: 'Questions', iconClass: 'fa-graduation-cap', page: 'Questions' },
+    { name: 'Slides', iconClass: 'fa-solid fa-file-pdf', page: 'QuizConfigureSlides' },
     { name: 'Results', iconClass: 'fa-chart-bar', page: 'QuizMetrics' },
     { name: 'Runs', iconClass: 'fa-users', page: 'QuizRunsHistoryPage' },
     { name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'QuizSkillsPage' },
@@ -110,20 +111,23 @@ function updateEditQuizInfo(quizSummary) {
 
 function updateQuizDef(quizDef) {
   const origId = route.params.quizId
-  if (quizDef.quizId !== origId) {
-    editQuizInfo.value.quizDef.quizId = quizDef.quizId
-    router.replace({ name: route.name, params: { ...route.params, quizId: quizDef.quizId } })
-      .then(() =>{
-        focusState.focusOnLastElement()
-      })
-  } else {
-    focusState.focusOnLastElement()
-  }
-  updateEditQuizInfo(quizDef)
-  quizSummaryState.quizSummary.name = quizDef.name
-  quizSummaryState.quizSummary.quizId = quizDef.quizId
-  quizSummaryState.quizSummary.userCommunity = quizDef.userCommunity
-  announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`)
+  quizConfig.loadQuizConfigState({quizId: quizDef.quizId}).then(() => {
+    if (quizDef.quizId !== origId) {
+      editQuizInfo.value.quizDef.quizId = quizDef.quizId
+      router.replace({ name: route.name, params: { ...route.params, quizId: quizDef.quizId } })
+          .then(() =>{
+            focusState.focusOnLastElement()
+          })
+    } else {
+      focusState.focusOnLastElement()
+    }
+
+    updateEditQuizInfo(quizDef)
+    quizSummaryState.quizSummary.name = quizDef.name
+    quizSummaryState.quizSummary.quizId = quizDef.quizId
+    quizSummaryState.quizSummary.userCommunity = quizDef.userCommunity
+    announcer.polite(`${quizDef.type} named ${quizDef.name} was saved`)
+  })
 }
 </script>
 

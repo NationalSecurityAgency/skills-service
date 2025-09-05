@@ -15,6 +15,8 @@
  */
 package skills.quizLoading.model
 
+import skills.skillLoading.model.SlidesSummary
+
 
 class QuizInfo {
     String name
@@ -41,4 +43,6 @@ class QuizInfo {
     Integer numIncorrectQuestions
 
     Boolean showDescriptionOnQuizPage
+
+    SlidesSummary slidesSummary
 }

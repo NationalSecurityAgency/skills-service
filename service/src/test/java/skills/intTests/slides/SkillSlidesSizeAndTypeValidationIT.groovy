@@ -21,15 +21,16 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
 import skills.SpringBootApp
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 
 import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
 @SpringBootTest(properties = ['skills.config.ui.maxSlidesUploadSize=125KB'], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
-class SlidesSizeAndTypeValidationIT extends DefaultIntSpec {
+class SkillSlidesSizeAndTypeValidationIT extends DefaultIntSpec {
 
-    def "cannot exceed max slide size" () {
+    def "cannot exceed max slide size for a skill" () {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def p1Skills = createSkills(1, 1, 1, 100)
@@ -47,7 +48,23 @@ class SlidesSizeAndTypeValidationIT extends DefaultIntSpec {
         skillsClientException.message.contains("File size [157 KB] exceeds maximum file size [125 KB]")
     }
 
-    def "validate supported mime types" () {
+    def "cannot exceed max slide size for a quiz" () {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+
+        Resource slides44k = new ClassPathResource("/testSlides/test-slides-1.pdf")
+        Resource slides160k = new ClassPathResource("/testSlides/test-slides-2.pdf")
+        skillsService.saveQuizSlidesAttributes(quiz.quizId, [file: slides44k])
+
+        when:
+        skillsService.saveQuizSlidesAttributes(quiz.quizId, [file: slides160k])
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("File size [157 KB] exceeds maximum file size [125 KB]")
+    }
+
+    def "validate supported mime types for skill" () {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def p1Skills = createSkills(1, 1, 1, 100)
@@ -59,6 +76,22 @@ class SlidesSizeAndTypeValidationIT extends DefaultIntSpec {
 
         when:
         skillsService.saveSlidesAttributes(p1.projectId, p1Skills[0].skillId, [ file: mp4Type])
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Invalid media type [video/mp4]")
+    }
+
+    def "validate supported mime types for quiz" () {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+
+        Resource mp4Type = new ClassPathResource("/testVideos/empty-quiz.mp4")
+        Resource pdfType = new ClassPathResource("/testSlides/test-slides-1.pdf")
+        skillsService.saveQuizSlidesAttributes(quiz.quizId, [file: pdfType])
+
+        when:
+        skillsService.saveQuizSlidesAttributes(quiz.quizId, [file: mp4Type])
 
         then:
         SkillsClientException skillsClientException = thrown()

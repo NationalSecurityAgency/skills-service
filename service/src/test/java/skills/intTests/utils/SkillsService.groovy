@@ -2140,6 +2140,25 @@ class SkillsService {
         return wsHelper.adminDelete(url)
     }
 
+    def saveQuizSlidesAttributes(String quizId, Map skillAttrs) {
+        Map body = [:]
+        if (skillAttrs.file) { body.put("file", skillAttrs.file) }
+        if (skillAttrs.url) { body.put("url", skillAttrs.url)}
+        if (skillAttrs.isAlreadyHosted != null) { body.put("isAlreadyHosted", skillAttrs.isAlreadyHosted)}
+        if (skillAttrs.width != null) { body.put("width", skillAttrs.width)}
+
+        String url = "/quiz-definitions/${quizId}/slides"
+        return wsHelper.adminUpload(url, body, true)
+    }
+    def getQuizSlidesAttributes(String quizId) {
+        String url = "/quiz-definitions/${quizId}/slides"
+        return wsHelper.adminGet(url)
+    }
+    def deleteQuizSlidesAttributes(String quizId) {
+        String url = "/quiz-definitions/${quizId}/slides"
+        return wsHelper.adminDelete(url)
+    }
+
     def saveSkillExpirationAttributes(String projectId, String skillId, Map expirationAttrs) {
         String url = "/projects/${projectId}/skills/${skillId}/expiration"
         return wsHelper.adminPost(url, expirationAttrs)
