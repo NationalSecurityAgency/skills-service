@@ -275,6 +275,7 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         skillsService.createSkills(proj1_subj1_skills)
         skillsService.createSubject(proj1_subj2)
         skillsService.createGlobalBadge(badge1)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj1.projectId, badgeId: badge1.badgeId, level: "1")
 
         when:
         def res = skillsService.getBadgeDescriptions(proj1.projectId, badge1.badgeId, true)
