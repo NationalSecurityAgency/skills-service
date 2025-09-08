@@ -42,6 +42,7 @@ class UserCommunityGlobalBadgeAuthSpecs extends DefaultIntSpec {
         when:
         rootSkillsService.saveUserTag(skillsService.userName, 'dragons', ['DivineDragon'])
         def proj1 = createProject(1)
+        proj1.enableProtectedUserCommunity = true
         def proj1_subj = createSubject(1, 1)
         List<Map> proj1_skills = createSkills(3, 1, 1)
 
