@@ -428,8 +428,9 @@ class WSHelper {
 
         log.info("  Result:\n {}", JsonOutput.prettyPrint(resBody))
 
-        def res = jsonSlurper.parseText(resBody)
+        def res = [:]
         if(responseEntity.statusCode == HttpStatus.OK) {
+            res = jsonSlurper.parseText(resBody)
             res['success' ] = true
         } else {
             res['success' ] = false
