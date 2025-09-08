@@ -29,6 +29,7 @@ class AuthUtils {
     static final Pattern QUIZ_ID_PATTERN = Pattern.compile("^/admin/quiz-definitions/([^/]+).*\$")
     static final Pattern ADMIN_GROUP_ID_PATTERN = Pattern.compile("^/admin/admin-group-definitions/([^/]+).*\$")
     static final Pattern QUIZ_ID_PATTERN_API = Pattern.compile("^/api/quizzes/([^/]+).*\$")
+    static final Pattern GLOBAL_BADGE_ID_PATTERN = Pattern.compile("^/admin/badges/([^/]+).*\$")
 
     // Example: /admin/projects/{projectId}/approvals/approve
     // Example: /admin/projects/{projectId}/approvals/reject
@@ -62,6 +63,10 @@ class AuthUtils {
 
     static String getAdminGroupIdFromRequest(HttpServletRequest servletRequest) {
         return this.getIdFromRequest(servletRequest, ADMIN_GROUP_ID_PATTERN, "adminGroupId")
+    }
+
+    static String getGlobalBadgeIdFromRequest(HttpServletRequest servletRequest) {
+        return this.getIdFromRequest(servletRequest, GLOBAL_BADGE_ID_PATTERN, "globalBadgeId")
     }
 
     private static String getIdFromRequest(HttpServletRequest servletRequest, Pattern pattern, String label) {
