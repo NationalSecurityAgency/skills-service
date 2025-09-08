@@ -210,6 +210,8 @@ class GlobalBadgeAccessSpecs extends DefaultIntSpec {
         def user2Service = createService("user2")
 
         when:
+        def badge2 = createBadge(2, 2)
+        user2Service.createGlobalBadge(badge2)
         user2Service.updateGlobalBadge(badge1)
 
         then:
