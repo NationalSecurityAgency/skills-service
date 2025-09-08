@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.intTests.community
+package skills.intTests.community.globalBadge
 
 import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
-import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -125,11 +123,105 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         e.message.contains("Projects without community protection can not be added to a Global Badge with community protection")
     }
 
-    // TODO
-//    def "non UC projects are allowed to be added to a non UC Global Badge - skill assigned"() {
+    def "non UC projects are allowed to be added to a non UC Global Badge - skill assigned"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
 
-    // TODO
-//    def "non UC projects are allowed to be added to a non UC Global Badge - level assigned"() {
+        def badge1 = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge1)
+
+        when:
+        skillsService.assignSkillToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId)
+
+        def res = skillsService.getGlobalBadge(badgeId)
+
+        then:
+        res
+        res.numSkills == 1
+        res.requiredSkills.size() == 1
+        res.requiredProjectLevels.size() == 0
+    }
+
+    def "non UC projects are allowed to be added to a non UC Global Badge - level assigned"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge1)
+
+        when:
+        skillsService.assignProjectLevelToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, level: "1")
+
+        def res = skillsService.getGlobalBadge(badgeId)
+
+        then:
+        res
+        res.numSkills == 0
+        res.requiredSkills.size() == 0
+        res.requiredProjectLevels.size() == 1
+    }
+
+    def "UC projects are allowed to be added to a UC Global Badge - skill assigned"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = createBadge(1, 1)
+        badge1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createGlobalBadge(badge1)
+
+        when:
+        pristineDragonsUser.assignSkillToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId)
+
+        def res = pristineDragonsUser.getGlobalBadge(badgeId)
+
+        then:
+        res
+        res.numSkills == 1
+        res.requiredSkills.size() == 1
+        res.requiredProjectLevels.size() == 0
+    }
+
+    def "UC projects are allowed to be added to a UC Global Badge - level assigned"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = createBadge(1, 1)
+        badge1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createGlobalBadge(badge1)
+
+        when:
+        pristineDragonsUser.assignProjectLevelToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, level: "1")
+
+        def res = pristineDragonsUser.getGlobalBadge(badgeId)
+
+        then:
+        res
+        res.numSkills == 0
+        res.requiredSkills.size() == 0
+        res.requiredProjectLevels.size() == 1
+    }
 
     def "cannot enable community for a project if it belongs to a non UC Global badge - skill assigned"() {
         List<String> users = getRandomUsers(2)
@@ -162,10 +254,10 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.getMessage().contains("Not Allowed to set [enableProtectedUserCommunity] to true")
-        e.message.contains("This project is part of one or more Global Badges")
+        e.message.contains("This project is part of one or more Global Badges that has not enabled user community protection")
     }
 
-    def "cannot enable community for a project if it belongs to a badge - level assigned"() {
+    def "cannot enable community for a project if it belongs to a non UC Global badge - level assigned"() {
         List<String> users = getRandomUsers(2)
 
         SkillsService pristineDragonsUser = createService(users[1])
@@ -196,7 +288,7 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.getMessage().contains("Not Allowed to set [enableProtectedUserCommunity] to true")
-        e.message.contains("This project is part of one or more Global Badges")
+        e.message.contains("This project is part of one or more Global Badges that has not enabled user community protection")
     }
 
     def "available skills for global badges endpoint does NOT return skills from UC protected projects"() {
