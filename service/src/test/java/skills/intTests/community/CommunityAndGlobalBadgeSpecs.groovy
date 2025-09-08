@@ -266,7 +266,7 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         pristineDragonsUser.updateGlobalBadge(b1, b1.badgeId)
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.getMessage().contains("Once global badge [enableProtectedUserCommunity=true] it cannot be flipped to false. badgeId [${b1.badgeId}]")
-        e.getMessage().contains("badgeId:${b1.badgeId}")
+        e.getMessage().contains("Once global badge [enableProtectedUserCommunity=true] it cannot be flipped to false. badgeId: [${b1.badgeId}]")
+        e.getMessage().contains("badgeId: [${b1.badgeId}]")
     }
 }
