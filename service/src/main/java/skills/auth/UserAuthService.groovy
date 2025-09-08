@@ -263,6 +263,13 @@ class UserAuthService {
                 shouldAddRole = true
             }
         }
+        if (userRole.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN) {
+            shouldAddRole = false
+            String globalBadgeId = AuthUtils.getGlobalBadgeIdFromRequest(servletRequest)
+            if (globalBadgeId && userRole.globalBadgeId && globalBadgeId.equalsIgnoreCase(userRole.globalBadgeId)) {
+                shouldAddRole = true
+            }
+        }
         return shouldAddRole
     }
 

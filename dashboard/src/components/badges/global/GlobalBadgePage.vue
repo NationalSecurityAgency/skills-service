@@ -91,7 +91,7 @@ const goLive = (editedBadge) => {
 };
 const badgeEdited = (editedBadge) => {
   const origId = badge.value.badgeId;
-  badgeState.loadGlobalBadgeDetailsState(badgeId.value).finally(() => {
+  badgeState.loadGlobalBadgeDetailsState(editedBadge.badgeId).finally(() => {
     badge.value = badgeState.badge;
     if (origId !== editedBadge.badgeId) {
       badgeId.value = editedBadge.badgeId;
