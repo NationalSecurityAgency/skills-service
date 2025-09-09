@@ -39,6 +39,7 @@ import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.*
 import skills.tasks.TaskSchedulerService
+import skills.utils.MatomoReporter
 import skills.utils.MetricsLogger
 
 import java.util.concurrent.Callable
@@ -85,6 +86,9 @@ class SkillEventAdminService {
 
     @Autowired
     MetricsLogger metricsLogger
+
+    @Autowired
+    MatomoReporter matomoReporter;
 
     @Autowired
     SkillEventsTransactionalService skillEventsTransactionalService
@@ -545,6 +549,7 @@ class SkillEventAdminService {
                 skillEventPublisher.publishSkillUpdate(result, userId)
             }
             metricsLogger.logSkillReported(userId, result)
+            matomoReporter.reportSkill(userId, result.projectId, result.skillId)
         }
     }
 
