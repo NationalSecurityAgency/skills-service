@@ -124,6 +124,9 @@ class MatomoReporter {
 
     @Profile
     void reportSkill(String userId, String projectId, String skillId) {
+        if (!isEnabled()) {
+            return
+        }
         HttpServletRequest request = getServletRequest()
 
         if (log.isTraceEnabled()) {
@@ -152,9 +155,7 @@ class MatomoReporter {
     }
 
     private void sendToMatomo(LocalRequestInfo requestInfo) {
-        if (!isEnabled()) {
-            return
-        }
+
         if (InceptionProjectService.inceptionProjectId.equalsIgnoreCase(requestInfo.projectId)) {
             log.trace("Skipping Matomo tracking for Inception project")
             return
