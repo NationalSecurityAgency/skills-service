@@ -30,7 +30,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_TYPE
 @Slf4j
 @SpringBootTest(properties = [
         'skills.matomo.enableSkillApiUsage=true',
-        'skills.config.ui.matomoUrl=http://localhost:8082/matomo',
+        'skills.config.ui.matomoUrl=http://localhost:8082',
         'skills.config.ui.matomoSiteId=1',
         'skills.matomo.minNumOfThreads=1',
         'skills.matomo.maxNumOfThreads=2',
@@ -63,7 +63,7 @@ class MatomoReporterIT extends DefaultIntSpec {
         List<String> users = getRandomUsers(1)
 
         // Stub for Matomo endpoint
-        mockServer.stubFor(post(urlPathMatching("/matomo"))
+        mockServer.stubFor(post(urlPathMatching("/matomo.php"))
                 .withHeader("Content-Type", containing("application/x-www-form-urlencoded"))
                 .willReturn(ok()))
 
@@ -73,10 +73,10 @@ class MatomoReporterIT extends DefaultIntSpec {
         Thread.sleep(6000)
         
         // Verify the request was made
-        mockServer.verify(exactly(1), postRequestedFor(urlEqualTo("/matomo")));
+        mockServer.verify(exactly(1), postRequestedFor(urlEqualTo("/matomo.php")));
         
         // Get all requests to the matomo endpoint
-        def requests = mockServer.findAll(postRequestedFor(urlEqualTo("/matomo")))
+        def requests = mockServer.findAll(postRequestedFor(urlEqualTo("/matomo.php")))
         def request = requests[0]
         
         // Verify the request content type
@@ -109,7 +109,7 @@ class MatomoReporterIT extends DefaultIntSpec {
         skillsService.createProjectAndSubjectAndSkills(proj, subject, skills)
 
         // Stub for Matomo endpoint with logging
-        mockServer.stubFor(post("/matomo")
+        mockServer.stubFor(post("/matomo.php")
                 .withHeader("Content-Type", containing("application/x-www-form-urlencoded"))
                 .willReturn(ok()
                     .withFixedDelay(1500)
@@ -127,7 +127,7 @@ class MatomoReporterIT extends DefaultIntSpec {
 
         Thread.sleep(6000)
         // pool accepts 2 threads + queue is 2, the rest of the request are rejected
-        mockServer.verify(exactly(4), postRequestedFor(urlEqualTo("/matomo")));
+        mockServer.verify(exactly(4), postRequestedFor(urlEqualTo("/matomo.php")));
         then:
         true
     }

@@ -88,14 +88,20 @@ class MatomoReporter {
 
     private RestTemplate restTemplate
     private CachedThreadPool pool
+    private String matomoUrlWithEndpoint
 
     @PostConstruct
     void init() {
         if (isEnabled()) {
-            log.info("MatomoReporter is enabled, endpoint=[${matomoEndpoint}], siteId=[${matomoSiteId}], url=[${matomoUrl}], minNumOfThreads=[${minNumOfThreads}], maxNumOfThreads=[${maxNumOfThreads}], queueCapacity=[${queueCapacity}], maxNumOfThreads=[${maxNumOfThreads}], queueCapacity=[${queueCapacity}]")
-
             restTemplate = new RestTemplate();
             pool = new CachedThreadPool('matomo-reporter', minNumOfThreads, maxNumOfThreads, queueCapacity)
+            matomoUrlWithEndpoint = matomoUrl.replaceAll('/+$', '') + '/' + matomoEndpoint.replaceAll('^/+', '')
+            log.info("MatomoReporter is enabled: " +
+                    "endpoint=[${matomoUrlWithEndpoint}], " +
+                    "site id=[${matomoSiteId}], " +
+                    "min threads=[${minNumOfThreads}], " +
+                    "max threads=[${maxNumOfThreads}], " +
+                    "queue capacity=[${queueCapacity}]")
         }
     }
 
@@ -168,7 +174,6 @@ class MatomoReporter {
             log.trace("Skipping Matomo tracking for Inception project")
             return
         }
-        String url = String.join(matomoEndpoint, matomoUrl)
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>()
         formData.add("idsite", matomoSiteId?.toString())
@@ -189,12 +194,12 @@ class MatomoReporter {
         try {
             if (log.isDebugEnabled()) {
                 long startTime = System.currentTimeMillis();
-                restTemplate.exchange(url, HttpMethod.POST, entity, Void.class)
+                restTemplate.exchange(matomoUrlWithEndpoint, HttpMethod.POST, entity, Void.class)
                 long duration = System.currentTimeMillis() - startTime;
-                log.debug("Matomo request to [{}] completed in [{}] ms, with formData {}", url, duration, formData);
+                log.debug("Matomo request to [{}] completed in [{}] ms, with formData {}", matomoUrlWithEndpoint, duration, formData);
             } else {
-                restTemplate.exchange(url, HttpMethod.POST, entity, Void.class)
-                log.debug("Matomo request to [{}] with formData {}", url, formData);
+                restTemplate.exchange(matomoUrlWithEndpoint, HttpMethod.POST, entity, Void.class)
+                log.debug("Matomo request to [{}] with formData {}", matomoUrlWithEndpoint, formData);
             }
         } catch (Exception ex) {
             log.error("Unable to report to Matomo", ex)
