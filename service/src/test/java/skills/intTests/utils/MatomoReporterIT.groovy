@@ -20,12 +20,8 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import groovy.util.logging.Slf4j
 import org.springframework.boot.test.context.SpringBootTest
 import skills.SpringBootApp
-import skills.controller.request.model.PageVisitRequest
-import spock.lang.IgnoreIf
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import static com.google.common.net.HttpHeaders.CONTENT_TYPE
 
 @Slf4j
 @SpringBootTest(properties = [
