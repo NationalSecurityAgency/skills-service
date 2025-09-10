@@ -36,7 +36,6 @@ import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.*
 import skills.storage.repos.*
 import skills.tasks.TaskSchedulerService
-import skills.utils.MetricsLogger
 
 import static skills.services.events.CompletionItem.CompletionItemType
 import static skills.services.events.SkillEventsService.AppliedCheckRes
@@ -85,9 +84,6 @@ class SkillEventsTransactionalService {
 
     @Autowired
     UserPointsRepo userPointsRepo
-
-    @Autowired
-    MetricsLogger metricsLogger;
 
     @Autowired
     UserEventService userEventService
