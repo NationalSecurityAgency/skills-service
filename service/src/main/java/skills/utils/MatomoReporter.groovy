@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import callStack.utils.CachedThreadPool
 import callStack.utils.ThreadPoolUtils
 import groovy.transform.Canonical
+import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import jakarta.servlet.http.HttpServletRequest
@@ -39,6 +40,8 @@ import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
 import skills.services.inception.InceptionProjectService
 import skills.storage.repos.UserAttrsRepo
+
+import java.util.concurrent.RejectedExecutionException
 
 @Component
 @Slf4j
@@ -101,6 +104,7 @@ class MatomoReporter {
     }
 
     @Canonical
+    @ToString(includeNames = true)
     static class LocalRequestInfo {
         String scheme
         String localName
@@ -149,9 +153,13 @@ class MatomoReporter {
                 skillId: skillId
         )
 
-        pool.submit([ThreadPoolUtils.callable {
-            sendToMatomo(requestInfo)
-        }])
+        try {
+            pool.submit([ThreadPoolUtils.callable {
+                sendToMatomo(requestInfo)
+            }])
+        } catch (RejectedExecutionException ree) {
+            log.error("Queue is full with [${queueCapacity}] items. Request was rejected for: ${requestInfo.toString()}, err msg: ${ree.message}")
+        }
     }
 
     private void sendToMatomo(LocalRequestInfo requestInfo) {
