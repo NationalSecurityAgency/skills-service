@@ -31,6 +31,8 @@ import CommunityProtectionControls from '@/components/projects/CommunityProtecti
 import dayjs from 'dayjs'
 import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import AdminGroupsService from '@/components/access/groups/AdminGroupsService.js'
+import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
+import { useDebounceFn } from '@vueuse/core'
 
 const model = defineModel()
 const props = defineProps({
@@ -67,6 +69,24 @@ if (props.isEdit) {
 const maximumDays = computed(() => {
   return appConfig.maxBadgeBonusInMinutes / (60 * 24)
 });
+const descriptionValidatorService = useDescriptionValidatorService()
+const checkDescription = useDebounceFn((value, testContext) => {
+  if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
+    return true
+  }
+  return descriptionValidatorService.validateDescription(value, false, enableProtectedUserCommunity.value, false).then((result) => {
+    if (result.valid) {
+      return true
+    }
+    let fieldNameToUse = 'Badge Description'
+    if (result.msg) {
+      return testContext.createError({ message: `${fieldNameToUse ? `${fieldNameToUse} - ` : ''}${result.msg}` })
+    }
+    return testContext.createError({ message: `${fieldNameToUse || 'Field'} is invalid` })
+  })
+
+}, appConfig.formFieldDebounceInMs)
+
 
 const checkUserCommunityRequirements = (value, testContext) => {
   if (!value || !props.isEdit) {
@@ -107,7 +127,7 @@ const schema = object({
       .label('Badge ID'),
   'description': string()
       .max(appConfig.descriptionMaxLength)
-      .customDescriptionValidator('Badge Description')
+      .test('descriptionValidation', 'Description is invalid', (value, testContext) => checkDescription(value, testContext))
       .label('Badge Description'),
   'helpUrl': string()
       .urlValidator()
@@ -360,7 +380,10 @@ const onBadgeSaved = () => {
           :is-edit="isEdit"
           :is-copy="false" />
 
-      <markdown-editor class="mt-8" name="description" />
+      <markdown-editor
+          :allow-attachments="isEdit || !communityLabels.showManageUserCommunity.value"
+          class="mt-8"
+          name="description" />
 
       <Card v-if="!global" data-cy="bonusAwardCard">
         <template #content>
