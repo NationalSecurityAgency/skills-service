@@ -104,7 +104,7 @@ const moveQuestion = (changeIndexBy) => {
         <div v-if="mediaAttributes" class="mb-3">
           <i :class="`far ${mediaAttributes.isAudio ? 'fa-file-audio' : 'fa-file-video'} fa-lg text-primary`"></i> <span class="font-bold">{{ mediaAttributes.internallyHostedFileName }}</span> is configured
         </div>
-        <div v-if="!isTextInputType && !isRatingType">
+        <div v-if="!isTextInputType && !isRatingType && !isMatchingType">
           <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
             <div class="flex items-center justify-center pb-1" :data-cy="`answerDisplay-${index}`">
               <SelectCorrectAnswer v-model="a.isCorrect"
@@ -133,6 +133,21 @@ const moveQuestion = (changeIndexBy) => {
               aria-hidden="true"
               data-cy="textAreaPlaceHolder"
               rows="2"/>
+        </div>
+        <div v-if="isMatchingType">
+          <div v-for="answer in question.answers">
+            <div v-if="answer.multiPartAnswer" class="flex gap-4 w-md">
+              <div class="flex-1">
+                {{ answer.multiPartAnswer.term }}
+              </div>
+              <div>
+                <i class="fas fa-arrow-right"></i>
+              </div>
+              <div class="flex-1">
+                {{ answer.multiPartAnswer.value }}
+              </div>
+            </div>
+          </div>
         </div>
         <div class="flex" v-if="question.answerHint">
           <Message size="small" severity="warn" icon="fas fa-lightbulb" :closable="false" class="mt-2" data-cy="answerHintMsg">

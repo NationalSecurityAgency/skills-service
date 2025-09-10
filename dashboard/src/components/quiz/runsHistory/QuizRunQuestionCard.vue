@@ -40,6 +40,9 @@ const isTextInputType = computed(() => {
 const isRatingType = computed(() => {
   return props.question.questionType === QuestionType.Rating;
 })
+const isMatchingType = computed(() => {
+  return props.question.questionType === QuestionType.Matching;
+})
 const hasAnswer = computed(() => {
   return props.question.answers.find((a) => a.isSelected === true) !== undefined;
 })
@@ -93,7 +96,7 @@ const manuallyGradedInfo = computed(() => {
                 :instance-id="`question_${question.id}`"
                 data-cy="questionDisplayText"/>
           </div>
-          <div v-if="!isTextInputType && !isRatingType">
+          <div v-if="!isTextInputType && !isRatingType && !isMatchingType">
             <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
               <div class="flex items-center justify-center pb-1" :data-cy="`answerDisplay-${index}`">
                 <SelectCorrectAnswer v-model="a.isSelected"
@@ -115,6 +118,21 @@ const manuallyGradedInfo = computed(() => {
             <MarkdownText
                 :text="answerText"
                 :instance-id="`${question.id}_answer`"/>
+          </div>
+          <div v-if="isMatchingType">
+            <div v-for="answer in question.answers">
+              <div v-if="answer.answer" class="flex gap-4 w-md">
+                <div class="flex-1">
+                  {{ answer.answer.term }}
+                </div>
+                <div>
+                  <i class="fas fa-arrow-right"></i>
+                </div>
+                <div class="flex-1">
+                  {{ answer.answer.value }}
+                </div>
+              </div>
+            </div>
           </div>
           <div v-if="manuallyGradedInfo" class="mt-4 w-full border p-4 rounded-border border-surface" data-cy="manuallyGradedInfo">
             <div class="text-xl mb-4 font-semibold">Manually Graded</div>

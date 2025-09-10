@@ -40,6 +40,7 @@ interface QuizAnswerDefRepo extends JpaRepository<QuizAnswerDef, Long> {
         String getIsCorrectAnswer()
         String getQuizId()
         Integer getQuestionRefId()
+        String getMultiPartAnswer()
 
         QuizQuestionType getQuestionType()
     }
@@ -47,7 +48,8 @@ interface QuizAnswerDefRepo extends JpaRepository<QuizAnswerDef, Long> {
     @Query(value = '''select answer.isCorrectAnswer as isCorrectAnswer, 
                 answer.quizId as quizId, 
                 question.type as questionType,
-                question.id as questionRefId
+                question.id as questionRefId,
+                answer.multiPartAnswer as multiPartAnswer
             from QuizAnswerDef answer, QuizQuestionDef question 
             where answer.id = ?1
                 and question.id=answer.questionRefId''')
