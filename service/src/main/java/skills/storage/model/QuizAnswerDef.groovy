@@ -17,6 +17,8 @@ package skills.storage.model
 
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
+import io.hypersistence.utils.hibernate.type.json.JsonType
+import org.hibernate.annotations.Type
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
@@ -55,5 +57,9 @@ class QuizAnswerDef {
     @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
+
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb")
+    String multiPartAnswer
 
 }
