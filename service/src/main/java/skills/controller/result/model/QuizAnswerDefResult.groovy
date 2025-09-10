@@ -20,4 +20,5 @@ class QuizAnswerDefResult {
     String answer
     Boolean isCorrect
     int displayOrder
+    String multiPartAnswer
 }

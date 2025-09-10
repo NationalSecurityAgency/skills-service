@@ -64,6 +64,13 @@ function loadQuestions(quizId) {
       .then((res) => {
         quizType.value = res.quizType;
         questions.value = res.questions;
+        questions.value.forEach((q) => {
+          q.answers.forEach((answer) => {
+            if(answer.multiPartAnswer) {
+              answer.multiPartAnswer = JSON.parse(answer.multiPartAnswer)
+            }
+          })
+        })
       })
       .finally(() => {
         loadingQuestions.value = false;
@@ -113,10 +120,16 @@ function openNewQuestionModal() {
       id: null,
       answer: '',
       isCorrect: false,
+      multiPartAnswer: {
+        term: '', value: ''
+      },
     }, {
       id: null,
       answer: '',
       isCorrect: false,
+      multiPartAnswer: {
+        term: '', value: ''
+      },
     }],
   };
   editQuestionInfo.value.isEdit = false;
