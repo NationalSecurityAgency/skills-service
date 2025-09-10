@@ -27,6 +27,7 @@ import skills.storage.model.SkillDefMin
 import skills.storage.model.UserAchievement
 import skills.storage.repos.*
 import skills.utils.LoggerHelper
+import skills.utils.MatomoReporter
 import skills.utils.MetricsLogger
 import spock.lang.Specification
 
@@ -48,6 +49,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         AchievedBadgeHandler mockAchievedBadgeHandler = Mock()
         AchievedGlobalBadgeHandler mockAchievedGlobalBadgeHandler = Mock()
         MetricsLogger mockMetricsLogger = Mock()
+        MatomoReporter mockMatomoReporter = Mock()
         UserEventService mockUserEventService = Mock()
         AchievedSkillsGroupHandler mockAchievedSkillsGroupHandler = Mock()
         SkillCatalogService mockCatalogService = Mock()
@@ -76,6 +78,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
                 metricsLogger: mockMetricsLogger,
+                matomoReporter: mockMatomoReporter,
                 skillEventsTransactionalService: skillEventsTransactionalService,
         )
 
@@ -110,6 +113,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         SkillEventsSupportRepo mockSkillEventsSupportRepo = Mock()
         UserPerformedSkillRepo mockPerformedSkillRepository = Mock()
         MetricsLogger mockMetricsLogger = Mock()
+        MatomoReporter mockMatomoReporter = Mock()
         UserEventService mockUserEventService = Mock()
         SkillCatalogService mockCatalogService = Mock()
         SkillAttributeService mockSkillAttributeService = Mock()
@@ -125,6 +129,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
                 metricsLogger: mockMetricsLogger,
+                matomoReporter: mockMatomoReporter,
                 skillEventsTransactionalService: skillEventsTransactionalService,
         )
 
@@ -155,6 +160,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         SkillEventsSupportRepo mockSkillEventsSupportRepo = Mock()
         UserPerformedSkillRepo mockPerformedSkillRepository = Mock()
         MetricsLogger mockMetricsLogger = Mock()
+        MatomoReporter mockMatomoReporter = Mock()
         UserEventService mockUserEventService = Mock()
         SkillCatalogService mockCatalogService = Mock()
         SkillAttributeService mockSkillAttributeService = Mock()
@@ -170,6 +176,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         SkillEventsService skillEventsService = new SkillEventsService(
                 skillEventPublisher: mockSkillEventPublisher,
                 metricsLogger: mockMetricsLogger,
+                matomoReporter: mockMatomoReporter,
                 skillEventsTransactionalService: skillEventsTransactionalService,
         )
 
@@ -281,6 +288,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         SkillEventsSupportRepo mockSkillEventsSupportRepo = Mock()
         UserPerformedSkillRepo mockPerformedSkillRepository = Mock()
         MetricsLogger mockMetricsLogger = Mock()
+        MatomoReporter mockMatomoReporter = Mock()
         UserEventService mockUserEventService = Mock()
         UserAchievedLevelRepo userAchievedLevelRepo = Mock()
         UserPointsRepo userPointsRepo = Mock()
@@ -295,6 +303,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         )
         SkillEventsService skillEventsService = new SkillEventsService(
                 metricsLogger: mockMetricsLogger,
+                matomoReporter: mockMatomoReporter,
                 skillEventsTransactionalService: skillEventsTransactionalService,
         )
 
