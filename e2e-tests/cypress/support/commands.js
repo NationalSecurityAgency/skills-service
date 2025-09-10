@@ -663,6 +663,10 @@ Cypress.Commands.add("addProjectToAdminGroupDef", (adminGroupNum = 1, projNum = 
 Cypress.Commands.add("addQuizToAdminGroupDef", (adminGroupNum = 1, quizNum = 1) => {
     cy.request('POST', `/admin/admin-group-definitions/adminGroup${adminGroupNum}/quizzes/quiz${quizNum}`, {});
 });
+Cypress.Commands.add("addGlobalBadgeToAdminGroupDef", (adminGroupNum = 1, globalBadgeNum = 1) => {
+    cy.request('POST', `/admin/admin-group-definitions/adminGroup${adminGroupNum}/badges/globalBadge${globalBadgeNum}`, {});
+});
+
 
 
 Cypress.Commands.add("createProject", (projNum = 1, overrideProps = {}) => {
