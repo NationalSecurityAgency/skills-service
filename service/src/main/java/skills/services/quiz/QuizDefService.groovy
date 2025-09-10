@@ -534,6 +534,7 @@ class QuizDefService {
         List<QuizAnswerDef> answerDefs
         boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
         boolean isRatingsQuestion = questionDefRequest.questionType == QuizQuestionType.Rating
+        boolean isMatchingQuestion = questionDefRequest.questionType == QuizQuestionType.Matching
         if (isTextInputQuestion) {
             answerDefs = [
                     new QuizAnswerDef(
@@ -542,6 +543,7 @@ class QuizDefService {
                             answer: null,
                             isCorrectAnswer: false,
                             displayOrder: 1,
+                            multiPartAnswer: null,
                     )
             ]
         } else if (isRatingsQuestion) {
@@ -551,7 +553,19 @@ class QuizDefService {
                         questionRefId: savedQuestion.id,
                         answer: it,
                         isCorrectAnswer: false,
-                        displayOrder: it
+                        displayOrder: it,
+                        multiPartAnswer: null
+                )
+            }
+        } else if (isMatchingQuestion) {
+            answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
+                new QuizAnswerDef(
+                        quizId: savedQuestion.quizId,
+                        questionRefId: savedQuestion.id,
+                        answer: null,
+                        isCorrectAnswer: true,
+                        displayOrder: index + 1,
+                        multiPartAnswer: answerDefRequest.multiPartAnswer,
                 )
             }
         } else {
@@ -562,6 +576,7 @@ class QuizDefService {
                         answer: InputSanitizer.sanitize(answerDefRequest.answer),
                         isCorrectAnswer: answerDefRequest.isCorrect,
                         displayOrder: index + 1,
+                        multiPartAnswer: null,
                 )
             }
         }
@@ -886,7 +901,7 @@ class QuizDefService {
                 questionType: savedQuestion.type,
                 answers: savedAnswers.collect { convert (it)}.sort { it.displayOrder},
                 displayOrder: savedQuestion.displayOrder,
-                attributes: savedQuestion.attributes
+                attributes: savedQuestion.attributes,
         )
     }
 
@@ -896,6 +911,7 @@ class QuizDefService {
                 answer: savedAnswer.answer,
                 isCorrect: Boolean.valueOf(savedAnswer.isCorrectAnswer),
                 displayOrder: savedAnswer.displayOrder,
+                multiPartAnswer: savedAnswer.multiPartAnswer
         )
     }
 
@@ -944,6 +960,7 @@ class QuizDefService {
 
                     boolean isTextInput = questionDef.type == QuizQuestionType.TextInput
                     boolean isRating = questionDef.type == QuizQuestionType.Rating
+                    boolean isMatching = questionDef.type == QuizQuestionType.Matching
                     List<UserGradedQuizAnswerResult> answers = quizAnswerDefs.collect { QuizAnswerDef answerDef ->
                         UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText foundSelected = alreadySelected.find { it.answerId == answerDef.id }
 
@@ -961,9 +978,10 @@ class QuizDefService {
                                 )
                             }
                         }
+                        def answer = isTextInput ? foundSelected?.answerText : (isMatching ? answerDef.multiPartAnswer : answerDef.answer)
                         return new UserGradedQuizAnswerResult(
                                 id: answerDef.id,
-                                answer: isTextInput ? foundSelected?.answerText : answerDef.answer,
+                                answer: answer,
                                 isConfiguredCorrect: Boolean.valueOf(answerDef.isCorrectAnswer),
                                 isSelected: foundSelected != null,
                                 needsGrading: foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING,
@@ -1073,8 +1091,10 @@ class QuizDefService {
             QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)
             QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least 2 answers", quizId)
             questionDefRequest.answers.each {
-                QuizValidator.isNotBlank(it.answer, "answers.answer", quizId, true)
-                propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "Answer", it.answer, quizDef.quizId)
+                if(questionDefRequest.questionType !== QuizQuestionType.Matching) {
+                    QuizValidator.isNotBlank(it.answer, "answers.answer", quizId, true)
+                    propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "Answer", it.answer, quizDef.quizId)
+                }
             }
         }
         if (quizDef.type == QuizDefParent.QuizType.Quiz) {

@@ -261,14 +261,18 @@ const close = () => { model.value = false }
 
 const saveQuiz = (values) => {
   const { question, answerHint, answers, currentScaleValue } = values
-  const removeEmptyQuestions = answers.filter((a) => (a.answer && a.answer.trim().length > 0));
+  const removeEmptyQuestions = answers.filter((a) => ((a.answer && a.answer.trim().length > 0)) || a.multiPartAnswer);
   const numCorrect = answers.filter((a) => a.isCorrect).length;
   let { questionType : { id : questionType } } = values
 
   if(questionType === 'Matching') {
     answers.forEach((answer) => {
       answer.isCorrect = true
-      answer.answer = JSON.stringify({answer: answer.answer, term: answer.term})
+      answer.multiPartAnswer = JSON.stringify(answer.multiPartAnswer)
+    })
+  } else {
+    answers.forEach((answer) => {
+      delete answer.multiPartAnswer
     })
   }
 

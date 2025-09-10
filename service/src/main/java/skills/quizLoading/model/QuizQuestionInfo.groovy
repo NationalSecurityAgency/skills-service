@@ -24,4 +24,5 @@ class QuizQuestionInfo {
     String answerHint
     Integer displayOrder
     String mediaAttributes
+    List<String> matchingTerms
 }

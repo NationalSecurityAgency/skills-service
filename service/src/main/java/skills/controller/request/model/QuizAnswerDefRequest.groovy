@@ -24,4 +24,5 @@ class QuizAnswerDefRequest {
     Integer id
     String answer
     Boolean isCorrect
+    String multiPartAnswer
 }

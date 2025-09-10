@@ -16,6 +16,7 @@
 package skills.quizLoading
 
 import callStack.profiler.Profile
+import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
@@ -137,6 +138,8 @@ class QuizRunService {
 
     @Value('#{"${skills.config.ui.minimumProjectPoints}"}')
     int minimumProjectPoints
+
+    JsonSlurper jsonSlurper = new JsonSlurper()
 
     private boolean skillExpiringSoon(String skillId, String projectId) {
         ExpirationAttrs attrs = skillAttributeService.getExpirationAttrs( projectId, skillId )
@@ -285,19 +288,45 @@ class QuizRunService {
             if(randomizeAnswers) {
                 quizAnswerDefs?.shuffle()
             }
+
+            def answerOptions
+            List<String> matchingTerms = []
+
+            if(it.type == QuizQuestionType.Matching) {
+                JsonSlurper slurper = new JsonSlurper()
+                def values = []
+                quizAnswerDefs.collect{ answer ->
+                    def parsedAnswer = slurper.parseText(answer.multiPartAnswer)
+                    parsedAnswer.id = answer.id
+                    matchingTerms.push(parsedAnswer.value)
+                    values.push([value: parsedAnswer.term, id: parsedAnswer.id])
+                }
+                matchingTerms.shuffle()
+                values.shuffle()
+
+                answerOptions = values.collect { answer ->
+                    new QuizAnswerOptionsInfo(
+                            id: answer.id,
+                            answerOption: answer.value
+                    )
+                }
+            } else {
+                answerOptions = quizAnswerDefs.collect {
+                    new QuizAnswerOptionsInfo(
+                            id: it.id,
+                            answerOption: it.answer ? it.answer : it.multiPartAnswer
+                    )
+                }
+            }
             new QuizQuestionInfo(
                     id: it.id,
                     question: InputSanitizer.unsanitizeForMarkdown(it.question),
                     questionType: it.type.toString(),
                     canSelectMoreThanOne: quizAnswerDefs?.count({ Boolean.valueOf(it.isCorrectAnswer) }) > 1,
-                    answerOptions: quizAnswerDefs.collect {
-                        new QuizAnswerOptionsInfo(
-                                id: it.id,
-                                answerOption: it.answer
-                        )
-                    },
+                    answerOptions: answerOptions,
                     answerHint: includeAnswerHints ? it.answerHint : null,
-                    mediaAttributes: it.attributes
+                    mediaAttributes: it.attributes,
+                    matchingTerms: matchingTerms
             )
         }
         return questions
@@ -569,8 +598,33 @@ class QuizRunService {
             }
             QuizDef quizDef = getQuizDef(quizId)
             handleReportingTextInputQuestion(quizDef, userId, quizAttemptId, answerDefId, quizReportAnswerReq)
+        } else if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.Matching) {
+            handleReportingMatchingQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq, answerDefPartialInfo)
         } else {
             handleReportingAChoiceBasedQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq, answerDefPartialInfo)
+        }
+    }
+
+    private void handleReportingMatchingQuestion(String userId, Integer quizAttemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq, QuizAnswerDefRepo.AnswerDefPartialInfo answerDefPartialInfo) {
+        UserQuizAnswerAttempt existingAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
+        def parsed = jsonSlurper.parseText(answerDefPartialInfo.multiPartAnswer)
+        if (existingAnswerAttempt) {
+            if (quizReportAnswerReq.isSelected) {
+                existingAnswerAttempt.answer = quizReportAnswerReq.getAnswerText()
+                existingAnswerAttempt.status = quizReportAnswerReq.getAnswerText() == parsed.value ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT : UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
+                quizAttemptAnswerRepo.save(existingAnswerAttempt)
+            } else {
+                quizAttemptAnswerRepo.delete(existingAnswerAttempt)
+            }
+        } else if (quizReportAnswerReq.isSelected) {
+            UserQuizAnswerAttempt newAnswerAttempt = new UserQuizAnswerAttempt(
+                    userQuizAttemptRefId: quizAttemptId,
+                    quizAnswerDefinitionRefId: answerDefId,
+                    userId: userId,
+                    status: quizReportAnswerReq.getAnswerText() == parsed.value ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT : UserQuizAnswerAttempt.QuizAnswerStatus.WRONG,
+                    answer: quizReportAnswerReq.getAnswerText(),
+            )
+            quizAttemptAnswerRepo.save(newAnswerAttempt)
         }
     }
 

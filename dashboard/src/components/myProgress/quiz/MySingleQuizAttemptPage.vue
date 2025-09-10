@@ -31,6 +31,13 @@ const loadQuizAttempt = () => {
   loadingAttempt.value = true
   QuizRunService.getSingleQuizAttempt(route.params.attemptId).then((res) => {
     attempt.value = res
+    attempt.value.questions.forEach((question) => {
+      if(question.questionType === 'Matching') {
+        question.answers.forEach((answer) => {
+          answer.answer = JSON.parse(answer.answer)
+        })
+      }
+    })
   }).finally(() => {
     loadingAttempt.value = false
   })
