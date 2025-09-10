@@ -18,9 +18,11 @@ package skills.intTests.community.globalBadge
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.*
 import skills.storage.repos.UserPerformedSkillRepo
+import skills.utils.GroovyToJavaByteUtils
 
 import static skills.intTests.utils.AdminGroupDefFactory.createAdminGroup
 import static skills.intTests.utils.SkillsFactory.*
@@ -452,6 +454,30 @@ class UserCommunityGlobalBadgeAuthSpecs extends DefaultIntSpec {
         SkillsClientException e = thrown(SkillsClientException)
         e.message.contains("Not Allowed to set [enableProtectedUserCommunity] to true")
         e.message.contains("This project is part of one or more Global Badges that has not enabled user community protection")
+    }
+
+    def "cannot download attachments associated with a UC protected global badge if the user does not belong to the user community"() {
+        when:
+        List<String> users = getRandomUsers(2)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        rootSkillsService.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def badge1 = createBadge(1)
+        badge1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createGlobalBadge(badge1)
+
+        String filename = 'test-pdf.pdf'
+        String contents = 'Test is a test'
+        Resource resource = (Resource) GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
+
+        def gbAttachment = skillsService.uploadAttachment(resource, (String)null, badge1.badgeId, (String)null)
+
+        then:
+        pristineDragonsUser.downloadAttachmentAsText(gbAttachment.href) == "Test is a test"
+        println gbAttachment.href
+        validateForbidden { allDragonsUser.downloadAttachment(gbAttachment.href) }
     }
 
     private static boolean validateForbidden(Closure c) {
