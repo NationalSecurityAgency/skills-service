@@ -27,6 +27,13 @@ import skills.intTests.utils.SkillsClientException
 import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
+@SpringBootTest(properties = [
+        'skills.config.ui.maxSlidesUploadSize=125KB',
+        'skills.authorization.userInfoHealthCheckUri=https://localhost:8202/status',
+        'skills.authorization.userInfoUri=https://localhost:8202/userInfo?dn={dn}',
+        'skills.authorization.userQueryUri=https://localhost:8202/userQuery?query={query}',
+], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
+class SlidesSizeAndTypeValidationIT extends DefaultIntSpec {
 @SpringBootTest(properties = ['skills.config.ui.maxSlidesUploadSize=125KB'], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class SkillSlidesSizeAndTypeValidationIT extends DefaultIntSpec {
 

@@ -35,7 +35,9 @@ import static com.google.common.net.HttpHeaders.CONTENT_TYPE
         'skills.matomo.minNumOfThreads=1',
         'skills.matomo.maxNumOfThreads=2',
         'skills.matomo.queueCapacity=2',
-
+        'skills.authorization.userInfoHealthCheckUri=https://localhost:8201/status',
+        'skills.authorization.userInfoUri=https://localhost:8201/userInfo?dn={dn}',
+        'skills.authorization.userQueryUri=https://localhost:8201/userQuery?query={query}',
 ], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class MatomoReporterIT extends DefaultIntSpec {
 
