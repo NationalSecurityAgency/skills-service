@@ -37,6 +37,10 @@ function addNewAnswer(index) {
     id: null,
     answer: '',
     isCorrect: false,
+    multiPartAnswer: {
+      term: '',
+      answer: '',
+    },
   };
   insert(index + 1, initialValue)
 }
@@ -51,22 +55,22 @@ function removeAnswer(index) {
       <SkillsTextInput
           class="flex flex-1"
           placeholder="Enter a term"
-          v-model="answer.value.term"
-          :initialValue="answer.value.term"
+          v-model="answer.value.multiPartAnswer.term"
+          :initialValue="answer.value.multiPartAnswer.term"
           :aria-label="`Enter term number ${index+1}`"
           data-cy="termText"
           :id="`term_${index}`"
-          :name="`answers[${index}].term`"/>
+          :name="`answers[${index}].multiPartAnswer.term`"/>
 
       <SkillsTextInput
           class="flex flex-1"
           placeholder="Enter an answer"
-          v-model="answer.value.answer"
-          :initialValue="answer.value.answer"
+          v-model="answer.value.multiPartAnswer.value"
+          :initialValue="answer.value.multiPartAnswer.value"
           :aria-label="`Enter answer number ${index+1}`"
           data-cy="answerText"
           :id="`answer_${index}`"
-          :name="`answers[${index}].answer`"/>
+          :name="`answers[${index}].multiPartAnswer.value`"/>
       <ButtonGroup class="ml-1">
         <SkillsButton
             :disabled="noMoreAnswers"
