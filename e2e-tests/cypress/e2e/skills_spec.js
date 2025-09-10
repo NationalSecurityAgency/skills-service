@@ -1166,7 +1166,7 @@ describe('Skills Tests', () => {
     cy.openNewSkillDialog()
     cy.get('[data-cy="rootHelpUrlSetting"]').contains('https://SomeArticleRepo.com')
 
-    const textDecorationMatch = 'line-through solid color(srgb 0.0862745 0.396078 0.203922)'
+    const textDecorationMatch = 'line-through color(srgb 0.0862745 0.396078 0.203922)'
 
     // strike-through when url starts with http:// or https://
     cy.get('[data-cy="skillHelpUrl"]').type('https:/')
