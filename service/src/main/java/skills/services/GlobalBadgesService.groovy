@@ -354,8 +354,8 @@ class GlobalBadgesService {
 
     @Transactional(readOnly = true)
     AvailableSkillsResult getAvailableSkillsForGlobalBadge(String badgeId, String query) {
-        List<String> projectIds = projAdminService.getProjects()?.collect { it.projectId }
-        List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLikeNoImportedUCOrInviteOnlySkills(ContainerType.Skill, query, projectIds)
+        List<String> projectIds = getProjectIdsAvailableForGlobalBadge(badgeId)
+        List<SkillDefPartial> allSkillDefs = skillDefRepo.findAllByTypeAndNameLikeNoImportedOrInviteOnlySkills(ContainerType.Skill, query, projectIds)
         Set<String> existingBadgeSkillIds = getSkillsForBadge(badgeId).collect { "${it.projectId}${it.skillId}" }
         List<SkillDefPartial> suggestedSkillDefs = allSkillDefs.findAll { !("${it.projectId}${it.skillId}" in existingBadgeSkillIds) &&  it.projectId != InceptionProjectService.inceptionProjectId }
         AvailableSkillsResult res = new AvailableSkillsResult()
@@ -374,7 +374,7 @@ class GlobalBadgesService {
 
     @Transactional(readOnly = true)
     AvailableProjectResult getAvailableProjectsForBadge(String badgeId, String query) {
-        List<String> projectIds = projAdminService.getProjects()?.collect { it.projectId }?.findAll { !inviteOnlyProjectService.isInviteOnlyProject(it) } ?: []
+        List<String> projectIds = getProjectIdsAvailableForGlobalBadge(badgeId)
         List<String> notThese = globalBadgeLevelDefRepo.findAllByBadgeId(badgeId)?.collect { it.projectId }?.unique() ?: []
 
         notThese << InceptionProjectService.inceptionProjectId
@@ -399,6 +399,11 @@ class GlobalBadgesService {
             available.projects = converted
         }
         return available
+    }
+
+    private List<String> getProjectIdsAvailableForGlobalBadge(String badgeId) {
+        Boolean allowUserCommunityProjects = userCommunityService.isUserCommunityOnlyGlobalBadge(badgeId) && userCommunityService.isUserCommunityMember(userInfoService.currentUserId)
+        return projAdminService.getProjects()?.collect { it.projectId }?.findAll { !inviteOnlyProjectService.isInviteOnlyProject(it) && (allowUserCommunityProjects || !userCommunityService.isUserCommunityOnlyProject(it)) } ?: []
     }
 
     @Transactional(readOnly = true)
@@ -470,8 +475,7 @@ class GlobalBadgesService {
                 enabled: skillDef.enabled
         )
 
-        UserInfo userInfo = userInfoService.currentUser
-        Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
+        Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfoService.currentUserId)
         res.userCommunity = isCommunityMember ? userCommunityService.getGlobalBadgeUserCommunity(skillDef.id) : null
 
         if (loadRequiredSkills) {
