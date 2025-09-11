@@ -23,6 +23,7 @@ import AssistantMsg from "@/common-components/utilities/learning-conent-gen/Assi
 import UserMsg from "@/common-components/utilities/learning-conent-gen/UserMsg.vue";
 import {useLog} from "@/components/utils/misc/useLog.js";
 import {useImgHandler} from "@/common-components/utilities/learning-conent-gen/UseImgHandler.js";
+import {useInstructionGenerator} from "@/common-components/utilities/learning-conent-gen/UseInstructionGenerator.js";
 
 const model = defineModel()
 const emit = defineEmits(['generated-desc'])
@@ -63,7 +64,7 @@ const chatHistory = ref([])
 
 
 
-const coreInstructions = 'Generate a detailed description for a skill that\'s will be part of a larger training. Do no provide introduction. Use Markdown. User the word "skill" and not training. Do not put word skill in titles. How are the instructions of how to achieved this skill:'
+const instructionsGenerator = useInstructionGenerator()
 const reviewDescMsg = 'Review the description and let me know if you need any changes.'
 function parseResponse(text) {
   const [newTextPart, comments] = text.split('---COMMENTS---');
@@ -97,13 +98,13 @@ const generateDescription = () => {
     const extractedImagesRes = imgHandler.extractImages(generatedDescription.value)
     const currentDescription = extractedImagesRes.hasImages ? extractedImagesRes.processedText : generatedDescription.value
     const instructionsToKeepPlaceholders = extractedImagesRes.hasImages? imgHandler.instructionsToKeepPlaceholders() : ''
-    instructionsToSend = `Here is the current description:\n ${currentDescription}\n\n${instructionsToKeepPlaceholders}\n\nPlease modify it based on the following instructions:\n ${userInstructions}\n\n Provide the new text after ---New Text--- in its raw form first without any comments or fields (such as "corrected text"), then use "---COMMENTS---" as a separator, and finally list any comments or suggestions.`
+    instructionsToSend = instructionsGenerator.existingDescriptionInstructions(currentDescription, userInstructions, instructionsToKeepPlaceholders)
     if (extractedImagesRes.hasImages) {
       extractedImageState.hasImages = true
       extractedImageState.extractedImages = extractedImagesRes.extractedImages
     }
   } else {
-    instructionsToSend = `${coreInstructions}\n\n${userInstructions}`
+    instructionsToSend = instructionsGenerator.newDescriptionInstructions(userInstructions)
   }
   instructions.value = ''
 

@@ -18,6 +18,8 @@ package skills.auth.openai
 import groovy.transform.Canonical
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -28,8 +30,6 @@ import org.springframework.web.client.RestTemplate
 @Service
 @Slf4j
 class OpenAIService {
-
-    RestTemplate restTemplate = new RestTemplate();
 
     @Value('#{"${skills.openai.host:null}"}')
     String openAiHost
@@ -44,6 +44,13 @@ class OpenAIService {
     String model
 
     String role = "user"
+
+    private final RestTemplate restTemplate
+
+    @Autowired
+    OpenAIService(@Qualifier('openAIRestTemplate') RestTemplate restTemplate) {
+        this.restTemplate = restTemplate
+    }
 
     CompletionsResponse callCompletions(String message) {
         if (!openAiHost) {
