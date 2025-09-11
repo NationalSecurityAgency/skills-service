@@ -402,8 +402,8 @@ class GlobalBadgesService {
     }
 
     private List<String> getProjectIdsAvailableForGlobalBadge(String badgeId) {
-        Boolean allowUserCommunityProjects = userCommunityService.isUserCommunityOnlyGlobalBadge(badgeId) && userCommunityService.isUserCommunityMember(userInfoService.currentUserId)
-        return projAdminService.getProjects()?.collect { it.projectId }?.findAll { !inviteOnlyProjectService.isInviteOnlyProject(it) && (allowUserCommunityProjects || !userCommunityService.isUserCommunityOnlyProject(it)) } ?: []
+        Boolean userCommunityProjects = userCommunityService.isUserCommunityOnlyGlobalBadge(badgeId) && userCommunityService.isUserCommunityMember(userInfoService.currentUserId)
+        return projAdminService.getProjects()?.collect { it.projectId }?.findAll { !inviteOnlyProjectService.isInviteOnlyProject(it) && userCommunityService.isUserCommunityOnlyProject(it) == userCommunityProjects } ?: []
     }
 
     @Transactional(readOnly = true)
