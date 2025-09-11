@@ -537,7 +537,7 @@ const toggleCustomLabelConfig = () => {
                       data-cy="showProjectDescriptionSelector" />
           </settings-item>
 
-          <settings-item label="Use Points For Levels" input-id="levelPointsEnabled">
+          <settings-item label="Point-Based Level Management" input-id="levelPointsEnabled">
             <ToggleSwitch v-model="settings.levelPointsEnabled.value"
                          inputId="levelPointsEnabled"
                          v-on:update:modelValue="levelPointsEnabledChanged"
@@ -546,6 +546,9 @@ const toggleCustomLabelConfig = () => {
                          data-cy="usePointsForLevelsSwitch" />
             <span class="ml-1">{{ usePointsForLevelsLabel }}</span>
           </settings-item>
+          <Message v-if="settings.levelPointsEnabled.value === 'true' || settings.levelPointsEnabled.value === true" class="ml-3" severity="error" :closable="false">
+            <div>You now responsible for defining point ranges for each level. As new skills increase the total available points, update <router-link class="underline" :to="{ name:'ProjectLevels', params: { quizId: route.params.projectId }}">level thresholds</router-link> to prevent users from reaching max level prematurely.</div>
+          </Message>
 
           <SkillsSettingTextInput name="helpUrlHost"
                                   label="Root Help Url"
