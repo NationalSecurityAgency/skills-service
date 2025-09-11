@@ -335,7 +335,8 @@ describe('Client Display Tests', () => {
         cy.get('[title="Menu"]')
             .click();
         cy.contains('Download SVG');
-        cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]');
+        cy.wait(1000)
+        cy.matchSnapshotImageForElement('.apexcharts-menu.apexcharts-menu-open');
     });
 
     it('skills search and skills filter selected', () => {
