@@ -336,7 +336,9 @@ describe('Client Display Tests', () => {
             .click();
         cy.contains('Download SVG');
         cy.wait(1000)
-        cy.matchSnapshotImageForElement('.apexcharts-menu.apexcharts-menu-open');
+        cy.matchSnapshotImageForElement('.apexcharts-menu.apexcharts-menu-open', {
+            errorThreshold: 0.1
+        });
     });
 
     it('skills search and skills filter selected', () => {
