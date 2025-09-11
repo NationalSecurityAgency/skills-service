@@ -783,16 +783,6 @@ class QuizRunService {
         boolean quizPassed = numCorrect >= minNumQuestionsToPass
 
         boolean shouldReturnGradedRes = (quizPassed || showCorrectAnswers) && quizDef.type == QuizDefParent.QuizType.Quiz;
-        if (!quizPassed && quizDef.type == QuizDefParent.QuizType.Quiz) {
-            UserQuizAttemptRepo.UserQuizAttemptStats userAttemptsStats = quizAttemptRepo.getUserAttemptsStats(userId, quizDef.id,
-                    UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED)
-            Integer numCurrentAttempts = (userAttemptsStats?.getUserNumPreviousQuizAttempts() ?: 0) + 1
-            int numConfiguredAttempts = getMaxQuizAttemptsSetting(quizDef.id)
-            // anything 0 or below is considered to be unlimited attempts
-            // only return graded results if there are no more attempts available
-            shouldReturnGradedRes = showCorrectAnswers || (numConfiguredAttempts > 0 && numCurrentAttempts >= numConfiguredAttempts);
-        }
-
         QuizGradedResult gradedResult = new QuizGradedResult(passed: quizPassed, numQuestionsGotWrong: quizLength - numCorrect - numQuestionsNeedGrading,
                 gradedQuestions: shouldReturnGradedRes ? gradedQuestions : [])
 

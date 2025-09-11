@@ -135,6 +135,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.createQuizQuestionDef(1, 1);
         cy.createQuizMultipleChoiceQuestionDef(1, 3);
         cy.setQuizMaxNumAttempts(1, 1)
+        cy.setQuizShowCorrectAnswers(1, true)
 
         cy.createProject(1)
         cy.createSubject(1,1)
