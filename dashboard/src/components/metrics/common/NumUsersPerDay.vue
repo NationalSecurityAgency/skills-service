@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted } from 'vue';
+import {ref, onMounted, computed} from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import dayjs from 'dayjs';
@@ -61,6 +61,7 @@ const loading = ref(true);
 const distinctUsersOverTime = ref([]);
 const hasDataEnoughData = ref(false);
 const mutableTitle = ref(props.title);
+const byMonth = ref(false);
 const localProps = ref({
   start: dayjs().subtract(30, 'day').valueOf(),
   byMonth: false,
@@ -142,8 +143,11 @@ const chartOptions = ref({
   },
 });
 
-const byMonth = ref(false);
 const dateOptions = [{ label: 'Day/Week', value: false}, { label: 'Month', value: true }]
+const currentDateOption = ref('days');
+const isUsingDays = computed(() => {
+  return currentDateOption.value === 'days';
+})
 
 const updateTimeRange = (timeEvent) => {
   if (appConfig) {
@@ -159,6 +163,7 @@ const updateTimeRange = (timeEvent) => {
     }
   }
   localProps.value.start = timeEvent.startTime.valueOf();
+  currentDateOption.value = timeEvent.durationUnit;
   loadData();
 };
 
@@ -188,15 +193,23 @@ const loadData = () => {
       });
 };
 
+const timeRangeSelector = ref(null);
+
 const dateOptionChanged = (option) => {
   byMonth.value = option
   localProps.value.byMonth = option
+
   if(byMonth.value) {
     mutableTitle.value = 'Users per month';
   } else {
     mutableTitle.value = 'Users per week';
   }
-  loadData()
+
+  if(isUsingDays.value && byMonth.value) {
+    timeRangeSelector.value.handleClick(1);
+  } else {
+    loadData()
+  }
 }
 </script>
 
@@ -215,7 +228,7 @@ const dateOptionChanged = (option) => {
             </Badge>
           </span>
           |
-          <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
+          <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange" ref="timeRangeSelector" :disable-days="byMonth" />
         </template>
       </SkillsCardHeader>
     </template>

@@ -112,7 +112,7 @@ describe('Metrics Using User Tags Tests', () => {
             }
 
             // test values and paging
-            // cy.validateTable(userTagsTableSelector, expected, 10);
+            cy.validateTable(userTagsTableSelector, expected, 10);
         });
 
         it('user tag table - ability to sort by tag', () => {

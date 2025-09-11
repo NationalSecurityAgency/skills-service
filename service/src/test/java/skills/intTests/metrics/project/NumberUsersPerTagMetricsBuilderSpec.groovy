@@ -21,6 +21,8 @@ import skills.intTests.utils.SkillsFactory
 import skills.storage.model.UserTag
 import skills.storage.repos.UserTagRepo
 
+import java.text.SimpleDateFormat
+
 class NumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
 
     String metricsId = "numUsersPerTagBuilder"
@@ -476,5 +478,96 @@ class NumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
 
         res_proj2.totalNumItems == 0
         !res_proj2.items
+    }
+
+    def "count users for each tag value - filter by date"() {
+
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(1)
+        skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        def subj = SkillsFactory.createSubject()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(20)
+
+        users.eachWithIndex { it, index ->
+            skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], it, new Date() - index)
+        }
+
+        String key = "someCoolKey"
+        users.eachWithIndex{ String entry, int i ->
+            i.times {
+                userTagRepo.save(new UserTag(userId: entry, key: key, value: "blah${it}" ))
+            }
+        }
+
+        def format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        String today = format.format(new Date())
+        String fiveDaysAgo = format.format(new Date() - 5)
+        String tenDaysAgo = format.format(new Date() - 10)
+        String twentyDaysAgo = format.format(new Date() - 20)
+        def resAll = skillsService.getMetricsData(proj.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true])
+
+        when:
+        def res_5days = skillsService.getMetricsData(proj.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: fiveDaysAgo, toDayFilter: today])
+        def res_10days = skillsService.getMetricsData(proj.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: tenDaysAgo, toDayFilter: today])
+        def res_20days = skillsService.getMetricsData(proj.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: twentyDaysAgo, toDayFilter: today])
+
+        then:
+        resAll.items.size() == 19
+        res_5days.items.size() == 4
+        res_10days.items.size() == 9
+        res_20days.items.size() == 19
+    }
+
+    def "count users for each tag value - filter by date and tag"() {
+
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(1)
+        skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        def subj = SkillsFactory.createSubject()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> users = getRandomUsers(20)
+
+        users.eachWithIndex { it, index ->
+            skillsService.addSkill([projectId: proj.projectId, skillId: skills.get(0).skillId], it, new Date() - index)
+        }
+
+        String key = "someCoolKey"
+        users.eachWithIndex{ String entry, int i ->
+            i.times {
+                userTagRepo.save(new UserTag(userId: entry, key: key, value: "blah${it}" ))
+            }
+        }
+
+        def format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        String today = format.format(new Date())
+        String fiveDaysAgo = format.format(new Date() - 5)
+        String tenDaysAgo = format.format(new Date() - 10)
+        String tagFilter = 'blah1'
+        def resAll = skillsService.getMetricsData(proj.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true])
+
+        when:
+        def res_5days = skillsService.getMetricsData(proj.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: fiveDaysAgo, toDayFilter: today])
+        def res_10days = skillsService.getMetricsData(proj.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: tenDaysAgo, toDayFilter: today])
+        def res_5days_filter = skillsService.getMetricsData(proj.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: fiveDaysAgo, toDayFilter: today, tagFilter: tagFilter])
+        def res_10days_filter = skillsService.getMetricsData(proj.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: tenDaysAgo, toDayFilter: today, tagFilter: tagFilter])
+
+        then:
+        resAll.items.size() == 19
+        res_5days.items.size() == 4
+        res_10days.items.size() == 9
+        res_5days_filter.items.size() == 1
+        res_10days_filter.items.size() == 1
+
     }
 }
