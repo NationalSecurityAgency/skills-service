@@ -286,10 +286,10 @@ const isFlex = computed(() => responsive.sm.value)
       </div>
     </sub-page-header>
 
-    <Message v-if="levelsAsPoints" :closable="false">
-      <div><b>Point-Based Level Management</b>: You are responsible for defining point ranges for each level. As new skills increase the total available points, update level thresholds to prevent users from reaching the maximum level prematurely. To disable, navigate to the <router-link class="underline" :to="{ name:'ProjectSettings', params: { projectId: route.params.projectId }}">Project Settings</router-link> page.</div>
+    <Message v-if="levelsAsPoints" :closable="false" data-cy="pointBasedLevelManagementWarning">
+      <div><b>Point-Based Level Management</b>: You are responsible for defining point ranges for each level. As new skills increase the total available points, update level thresholds to prevent users from reaching the maximum level prematurely. To disable, navigate to the <router-link class="underline" :to="{ name:'ProjectSettings', params: { projectId: route.params.projectId }}" data-cy="settingsPageLink">Project Settings</router-link> page.</div>
     </Message>
-    <Message v-if="!levelsAsPoints" :closable="false">
+    <Message v-if="!levelsAsPoints" :closable="false" data-cy="percentageBasedLevelManagementWarning">
       <div><b>Percentage-Based Level Management</b>: Each level is defined as a percentage of the total available points, with the actual point ranges automatically calculated based on these percentages.</div>
     </Message>
 

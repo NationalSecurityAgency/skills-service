@@ -94,10 +94,12 @@ describe('Levels Management Tests', () => {
             }],
         ];
         cy.validateTable(tableSelector, expected, 5, true, null, false);
+        cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('be.visible')
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Levels');
         cy.validateTable(tableSelector, expected, 5, true, null, false);
+        cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('be.visible')
     });
 
     it('once max levels are reached add level button should be disabled', () => {
@@ -1036,4 +1038,65 @@ describe('Levels Management Tests', () => {
         cy.contains('YES, Delete It').click();
         cy.get('[data-cy=removeLevel]').should('have.focus');
     });
+
+    it('shows warning when Point-Based Levels Management setting is enabled', () => {
+        cy.createSubject()
+        cy.createSkill()
+        cy.visit('/administrator/projects/proj1/settings');
+
+        cy.get('[data-cy="usePointsForLevelsSwitch"]').should('not.be.checked')
+        cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('not.exist')
+        cy.get('[data-cy="usePointsForLevelsSwitch"]').click();
+
+        cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
+        cy.get('[data-cy="unsavedChangesAlert"]')
+        cy.get('[data-cy="projLevelPointBasedLevelWarning"]').should('not.exist')
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.get('[data-cy="settingsSavedAlert"]')
+        cy.get('[data-cy="projLevelPointBasedLevelWarning"]').should('be.visible')
+
+        cy.get('[data-cy="pointBasedLevelManagementWarning"] [data-cy="levelsPageLink"]').click()
+        cy.get('[data-cy="levelsTable"]')
+        cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
+        cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('not.exist')
+
+        cy.get('[data-cy="pointBasedLevelManagementWarning"] [data-cy="settingsPageLink"]').click()
+        cy.get('[data-cy="usePointsForLevelsSwitch"] input').should('be.checked')
+        cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
+
+    })
+    it('shows point-based levels warning on project page and allows navigation to settings and levels', () => {
+        cy.createSubject()
+        cy.createSkill()
+        cy.enablePointBasedLevelsManagement()
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="manageBtn_subj1"]')
+        cy.get('[data-cy="projLevelPointBasedLevelWarning"]').should('be.visible')
+        cy.get('[data-cy="projLevelPointBasedLevelWarning"] [data-cy="settingsPageLink"]').click()
+        cy.get('[data-cy="usePointsForLevelsSwitch"] input').should('be.checked')
+        cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
+
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="manageBtn_subj1"]')
+        cy.get('[data-cy="projLevelPointBasedLevelWarning"]').should('be.visible')
+        cy.get('[data-cy="projLevelPointBasedLevelWarning"] [data-cy="levelsPageLink"]').click()
+        cy.get('[data-cy="levelsTable"]')
+        cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
+        cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('not.exist')
+
+    })
+    it('shows point-based levels warning on subject\'s level page and allows navigation to settings', () => {
+        cy.createSubject()
+        cy.createSkill()
+        cy.enablePointBasedLevelsManagement()
+        cy.visit('/administrator/projects/proj1/subjects/subj1/levels');
+        cy.get('[data-cy="levelsTable"]')
+        cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
+        cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('not.exist')
+        cy.get('[data-cy="projLevelPointBasedLevelWarning"]').should('not.exist')
+        cy.get('[data-cy="pointBasedLevelManagementWarning"] [data-cy="settingsPageLink"]').click()
+        cy.get('[data-cy="usePointsForLevelsSwitch"] input').should('be.checked')
+        cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
+    })
+
 });

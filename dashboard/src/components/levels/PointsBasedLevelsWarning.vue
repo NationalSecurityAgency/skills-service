@@ -25,11 +25,15 @@ const expireAfter30Days = 60 * 24 * 30
 </script>
 
 <template>
-<reminder-message id="pointsBasedLevelsWarning" v-if="projConfig.isPointsLevelManagementEnabled" severity="warn" :expireAfterMins="expireAfter30Days">
+<reminder-message id="pointsBasedLevelsWarning"
+                  v-if="projConfig.isPointsLevelManagementEnabled"
+                  severity="warn"
+                  data-cy="projLevelPointBasedLevelWarning"
+                  :expireAfterMins="expireAfter30Days">
   <div>A friendly reminder that this project uses <b>Point-Based Level Management</b>. You are responsible for defining point ranges for each level.
     <ul class="list-disc ml-8">
-      <li class="leading-relaxed">As new skills increase the total available points, update <router-link class="underline" :to="{ name:'ProjectLevels', params: { projectId: route.params.projectId }}">level thresholds</router-link> to prevent users from reaching the maximum level prematurely.</li>
-      <li class="leading-relaxed">To disable this feature, go to <router-link class="underline" :to="{ name:'ProjectSettings', params: { projectId: route.params.projectId }}">Project Settings</router-link>.</li>
+      <li class="leading-relaxed">As new skills increase the total available points, update <router-link class="underline" :to="{ name:'ProjectLevels', params: { projectId: route.params.projectId }}" data-cy="levelsPageLink">level thresholds</router-link> to prevent users from reaching the maximum level prematurely.</li>
+      <li class="leading-relaxed">To disable this feature, go to <router-link class="underline" :to="{ name:'ProjectSettings', params: { projectId: route.params.projectId }}" data-cy="settingsPageLink">Project Settings</router-link>.</li>
     </ul>
   </div>
 </reminder-message>
