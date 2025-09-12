@@ -84,6 +84,11 @@ class UserInfoService {
         return hasRole(RoleName.ROLE_PRIVATE_PROJECT_USER)
     }
 
+    @Profile
+    boolean isCurrentUserAProjectAdmin() {
+        return hasRole(RoleName.ROLE_PROJECT_ADMIN)
+    }
+
     private boolean hasRole(RoleName role) {
         boolean isRootUser = this.currentUser?.authorities?.find() {
             it instanceof UserSkillsGrantedAuthority && role == it.role?.roleName

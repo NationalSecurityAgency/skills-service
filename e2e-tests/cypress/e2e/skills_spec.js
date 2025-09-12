@@ -684,6 +684,18 @@ describe('Skills Tests', () => {
     cy.contains('user@#$&*')
   })
 
+  it('Admin bypass approval when adding skill events', () => {
+      cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' })
+      cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/addSkillEvent')
+      cy.get('[data-cy="addSkillEventButton"]').should('be.disabled')
+      cy.get('[data-cy=userIdInput]').type('user1{enter}')
+      cy.get('[data-cy="addSkillEventButton"]').should('be.enabled')
+      cy.get('[data-cy="addSkillEventButton"]').click()
+      cy.get('[data-cy="addedUserEventsInfo"]').contains('Added points for')
+      cy.clickNav('Users')
+      cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+  })
+
   it('create skill and then update skillId', () => {
     const initialId = 'myid1Skill'
     const newId = 'MyId1Skill'

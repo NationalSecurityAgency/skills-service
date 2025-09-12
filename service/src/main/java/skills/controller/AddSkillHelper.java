@@ -74,6 +74,11 @@ public class AddSkillHelper {
 
         SkillEventResult result;
         String currentUser = userInfoService.getCurrentUserId();
+        if (skillEventRequest != null && skillEventRequest.getDoNotRequireApproval()) {
+            if (!userInfoService.isCurrentUserAProjectAdmin()) {
+                throw new SkillException("Only project admins can apply approval-based skills without approval", projectId, skillId, ErrorCode.AccessDenied);
+            }
+        }
         boolean forAnotherUser = requestedUserId != null && currentUser != null && !requestedUserId.equalsIgnoreCase(currentUser);
         String idType = (skillEventRequest != null && StringUtils.isNotBlank(skillEventRequest.getUserId())) ? skillEventRequest.getIdType() : null;
         String userId = userInfoService.getUserName(requestedUserId, false, idType);
@@ -92,6 +97,7 @@ public class AddSkillHelper {
                     SkillEventsService.SkillApprovalParams skillApprovalParams = (skillEventRequest !=null && skillEventRequest.getApprovalRequestedMsg() != null) ?
                             new SkillEventsService.SkillApprovalParams(skillEventRequest.getApprovalRequestedMsg()) : SkillEventsService.getDefaultSkillApprovalParams();
                     skillApprovalParams.setForAnotherUser(forAnotherUser);
+                    skillApprovalParams.setDoNotRequireApproval(skillEventRequest != null && skillEventRequest.getDoNotRequireApproval() != null ? skillEventRequest.getDoNotRequireApproval() : false);
                     return skillsManagementFacade.reportSkill(projectId, skillId, userId, notifyIfSkillNotApplied, dataParam, skillApprovalParams);
                 }
             };

@@ -32,6 +32,9 @@ import skills.storage.model.auth.RoleName
 import skills.storage.repos.*
 import skills.utils.WaitFor
 
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSubject
+
 @Slf4j
 class ReportSkills_SelfReportingSpecs extends DefaultIntSpec {
 
@@ -1008,5 +1011,114 @@ Always yours, <br/> -SkillTree Bot
         SkillsClientException skillsClientException = thrown(SkillsClientException)
         skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed, errorCode:InsufficientSubjectPoints, success:false, projectId:${subj.projectId}, skillId:${subj.subjectId}")
         skillsClientException.message.contains(userId)
+    }
+
+    def "project admin can skip approval step and report for another user"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1, 1, 1, 100)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+
+        Date date = new Date()
+        String userId = getRandomUsers(1)[0]
+
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userId, date, null, true).body
+
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        def userSkillInfo = skillsService.getSingleSkillSummary(userId, proj.projectId, skills[0].skillId)
+        then:
+        !approvalsEndpointRes?.data
+
+        res.pointsEarned == skills[0].pointIncrement
+        res.skillApplied
+
+        userSkillInfo.points == skills[0].pointIncrement
+    }
+
+    def "project admin cannot skip approval for other projects"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1, 1, 1, 100)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        Date date = new Date()
+        String userId = getRandomUsers(1)[0]
+        SkillsService otherUser = createService(getRandomUsers(1)[0])
+
+        def proj2 = SkillsFactory.createProject(2)
+        def subj2 = SkillsFactory.createSubject(2)
+        def skills2 = SkillsFactory.createSkills(1, 2, 1, 100)
+        skills2[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        otherUser.createProjectAndSubjectAndSkills(proj2, subj2, skills2)
+
+        when:
+        skillsService.addSkill([projectId: proj2.projectId, skillId: skills2[0].skillId], userId, date, null, true)
+
+        then:
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.message.contains("Access Denied")
+    }
+
+    def "project admin can skip approval step and report for yourself"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1, 1, 1, 100)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        when:
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], null, null, null, true).body
+
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        def userSkillInfo = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skills[0].skillId)
+        then:
+        !approvalsEndpointRes?.data
+
+        res.pointsEarned == skills[0].pointIncrement
+        res.skillApplied
+
+        userSkillInfo.points == skills[0].pointIncrement
+    }
+
+    def "must have admin role in order to skip approval step"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1, 1, 1, 100)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        SkillsService otherUser = createService(getRandomUsers(1)[0])
+
+        when:
+        otherUser.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], null, null, null, true)
+        then:
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.message.contains("Only project admins can apply approval-based skills without approval")
+    }
+
+    def "cannot skip approval for an imported skill"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def p1Skills = SkillsFactory.createSkills(1, 1, 1, 100)
+        p1Skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, p1Skills)
+        skillsService.bulkExportSkillsToCatalog(proj.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
+        skillsService.bulkImportSkillsFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p1Skills.collect {
+            [projectId: it.projectId, skillId: it.skillId]
+        })
+
+        when:
+        skillsService.addSkill([projectId: p2.projectId, skillId: p1Skills[0].skillId], null, null, null, true)
+        then:
+        SkillsClientException skillsClientException = thrown(SkillsClientException)
+        skillsClientException.message.contains("doNotRequireApproval property is not allowed for imported skills")
     }
 }
