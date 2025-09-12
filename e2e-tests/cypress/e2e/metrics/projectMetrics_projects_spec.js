@@ -30,7 +30,7 @@ describe('Metrics Tests', () => {
         cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
             {
                 statusCode: 200,
-                body: [{
+                body: { newUsers: [], users: [{
                     'value': 1600128000000,
                     'count': 2
                 }, {
@@ -105,7 +105,7 @@ describe('Metrics Tests', () => {
                 }, {
                     'value': 1602201600000,
                     'count': 72
-                }],
+                }]},
             })
             .as('distinctUsersOverTimeForProject');
 
@@ -194,13 +194,13 @@ describe('Metrics Tests', () => {
         cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
             {
                 statusCode: 200,
-                body: [{
+                body: { newUsers: [], users: [{
                     'value': 1602115200000,
                     'count': 52
                 }, {
                     'value': 1602201600000,
                     'count': 82
-                }],
+                }]},
             })
             .as('distinctUsersOverTimeForProject');
 

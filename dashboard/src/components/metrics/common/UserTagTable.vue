@@ -20,6 +20,9 @@ import MetricsService from "@/components/metrics/MetricsService.js";
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
+import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
 const props = defineProps({
   tagChart: Object
@@ -31,6 +34,8 @@ onMounted(() => {
   loadData();
 });
 
+const announcer = useSkillsAnnouncer()
+const timeUtils = useTimeUtils();
 const isLoading = ref(true);
 const titleInternal = ref(props.tagChart.title);
 const filters = ref({
@@ -81,11 +86,13 @@ const filter = () => {
 
 const clearFilter = () => {
   filters.value.tag = '';
+  filterRange.value = [];
   loadData();
 };
 
 const loadData = (shouldHighlight = false) => {
   table.value.options.busy = true;
+  const dateRange = timeUtils.prepareDateRange(filterRange.value)
   const params = {
     tagKey: props.tagChart.key,
     currentPage: table.value.options.pagination.currentPage,
@@ -93,6 +100,8 @@ const loadData = (shouldHighlight = false) => {
     sortDesc: table.value.options.sortOrder === -1,
     tagFilter: filters.value.tag,
     sortBy: table.value.options.sortBy === 'count' ? 'numUsers' : 'tag',
+    fromDayFilter: dateRange.startDate,
+    toDayFilter: dateRange.endDate,
   };
   MetricsService.loadChart(route.params.projectId, 'numUsersPerTagBuilder', params)
       .then((dataFromServer) => {
@@ -111,6 +120,8 @@ const loadData = (shouldHighlight = false) => {
         table.value.options.busy = false;
       });
 };
+
+const filterRange = ref([]);
 </script>
 
 <template>
@@ -121,11 +132,17 @@ const loadData = (shouldHighlight = false) => {
     <template #content>
       <skills-spinner :is-loading="isLoading" class="mb-8"/>
       <div v-if="!isLoading">
-        <div class="flex flex-col mb-3">
-          <SkillsTextInput label="Filter" v-model="filters.tag" v-on:keydown.enter="filter" id="userTagTable-tagFilter" name="userTagTable-tagFilter"/>
-          <div class="flex gap-2">
-            <SkillsButton @click="filter" icon="fa-solid fa-search" label="Filter" data-cy="userTagTable-filterBtn" />
-            <SkillsButton severity="danger" icon="fa-solid fa-eraser" label="Clear" @click="clearFilter" data-cy="userTagTable-clearBtn" />
+        <div class="flex mb-3 gap-4">
+          <div class="flex flex-3 flex-col">
+            <SkillsTextInput label="Filter by Tag" v-model="filters.tag" v-on:keydown.enter="filter" id="userTagTable-tagFilter" name="userTagTable-tagFilter"/>
+            <div class="flex gap-2">
+              <SkillsButton @click="filter" icon="fa-solid fa-search" label="Filter" data-cy="userTagTable-filterBtn" />
+              <SkillsButton severity="danger" icon="fa-solid fa-eraser" label="Clear" @click="clearFilter" data-cy="userTagTable-clearBtn" />
+            </div>
+          </div>
+          <div class="flex flex-wrap flex-col gap-2">
+            Filter by Date(s):
+            <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" placeholder="Select a date range" data-cy="metricsDateFilter" />
           </div>
         </div>
         <SkillsDataTable :value="table.items"

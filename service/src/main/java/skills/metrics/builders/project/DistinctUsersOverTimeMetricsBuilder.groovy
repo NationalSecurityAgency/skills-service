@@ -38,9 +38,22 @@ class DistinctUsersOverTimeMetricsBuilder implements ProjectMetricsBuilder {
     def build(String projectId, String chartId, Map<String, String> props) {
         Date start = MetricsParams.getStart(projectId, chartId, props)
         String skillId = props.containsKey(MetricsParams.P_SKILL_ID) ? MetricsParams.getSkillId(projectId, chartId, props) : null
-        List<CountItem> dataItems = adminUsersService.getUsage(projectId, skillId, start)
-        dataItems.sort() {it.value }
+        Boolean byMonth = props.containsKey(MetricsParams.P_BY_MONTH) ? MetricsParams.getByMonth(props) : false
 
-        return dataItems;
+        List<CountItem> users
+        List<CountItem> newUsers
+
+        if(byMonth) {
+            users = adminUsersService.getUsagePerMonth(projectId, skillId, start)
+            newUsers = adminUsersService.getUsagePerMonth(projectId, skillId, start, true)
+        }
+        else {
+            users = adminUsersService.getUsage(projectId, skillId, start)
+            newUsers = adminUsersService.getUsage(projectId, skillId, start, true)
+        }
+        users.sort() {it.value }
+        newUsers.sort() { it.value }
+
+        return [ users: users, newUsers: newUsers ];
     }
 }

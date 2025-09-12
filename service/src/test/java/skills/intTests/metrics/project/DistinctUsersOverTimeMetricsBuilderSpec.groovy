@@ -124,7 +124,7 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         when:
         def res5Days = skillsService.getMetricsData(proj.projectId, metricsId, props)
         then:
-        !res5Days
+        res5Days == [users: [], newUsers:[]]
     }
 
     def "number of users growing over few days"() {
@@ -177,21 +177,33 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
 
         then:
 
-        res30days.size() == 5
-        res30days.collect {it.count} == [1, 2, 3, 4, 5]
-        res30days.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30days.users.size() == 5
+        res30days.users.collect {it.count} == [1, 2, 3, 4, 5]
+        res30days.users.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30days.newUsers.size() == 5
+        res30days.newUsers.collect {it.count} == [1, 1, 1, 1, 1]
+        res30days.newUsers.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
-        resOver30days.size() == 7
-        resOver30days.collect {it.count} == [0, 0, 1, 2, 3, 4, 5]
-        resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30days.users.size() == 7
+        resOver30days.users.collect {it.count} == [0, 0, 1, 2, 3, 4, 5]
+        resOver30days.users.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30days.newUsers.size() == 7
+        resOver30days.newUsers.collect {it.count} == [0, 0, 1, 1, 1, 1, 1]
+        resOver30days.newUsers.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
-        res30daysAfterArchive.size() == 5
-        res30daysAfterArchive.collect {it.count} == [1, 2, 2, 3, 4]
-        res30daysAfterArchive.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30daysAfterArchive.users.size() == 5
+        res30daysAfterArchive.users.collect {it.count} == [1, 2, 2, 3, 4]
+        res30daysAfterArchive.users.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30daysAfterArchive.newUsers.size() == 5
+        res30daysAfterArchive.newUsers.collect {it.count} == [1, 1, 0, 1, 1]
+        res30daysAfterArchive.newUsers.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
-        resOver30daysAfterArchive.size() == 7
-        resOver30daysAfterArchive.collect {it.count} == [0, 0, 1, 2, 2, 3, 4]
-        resOver30daysAfterArchive.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30daysAfterArchive.users.size() == 7
+        resOver30daysAfterArchive.users.collect {it.count} == [0, 0, 1, 2, 2, 3, 4]
+        resOver30daysAfterArchive.users.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30daysAfterArchive.newUsers.size() == 7
+        resOver30daysAfterArchive.newUsers.collect {it.count} == [0, 0, 1, 1, 0, 1, 1]
+        resOver30daysAfterArchive.newUsers.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
     }
 
     def "number of users growing over few days - include skills imported from catalog"() {
@@ -257,21 +269,33 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
 
         then:
 
-        res30days.size() == 5
-        res30days.collect {it.count} == [1, 2, 3, 4, 5]
-        res30days.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30days.users.size() == 5
+        res30days.users.collect {it.count} == [1, 2, 3, 4, 5]
+        res30days.users.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30days.newUsers.size() == 5
+        res30days.newUsers.collect {it.count} == [1, 1, 1, 1, 1]
+        res30days.newUsers.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
-        resOver30days.size() == 7
-        resOver30days.collect {it.count} == [0, 0, 1, 2, 3, 4, 5]
-        resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30days.users.size() == 7
+        resOver30days.users.collect {it.count} == [0, 0, 1, 2, 3, 4, 5]
+        resOver30days.users.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30days.newUsers.size() == 7
+        resOver30days.newUsers.collect {it.count} == [0, 0, 1, 1, 1, 1, 1]
+        resOver30days.newUsers.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
-        res30daysAfterArchive.size() == 5
-        res30daysAfterArchive.collect {it.count} == [1, 2, 2, 3, 4]
-        res30daysAfterArchive.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30daysAfterArchive.users.size() == 5
+        res30daysAfterArchive.users.collect {it.count} == [1, 2, 2, 3, 4]
+        res30daysAfterArchive.users.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30daysAfterArchive.newUsers.size() == 5
+        res30daysAfterArchive.newUsers.collect {it.count} == [1, 1, 0, 1, 1]
+        res30daysAfterArchive.newUsers.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
-        resOver30daysAfterArchive.size() == 7
-        resOver30daysAfterArchive.collect {it.count} == [0, 0, 1, 2, 2, 3, 4]
-        resOver30daysAfterArchive.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30daysAfterArchive.users.size() == 7
+        resOver30daysAfterArchive.users.collect {it.count} == [0, 0, 1, 2, 2, 3, 4]
+        resOver30daysAfterArchive.users.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30daysAfterArchive.newUsers.size() == 7
+        resOver30daysAfterArchive.newUsers.collect {it.count} == [0, 0, 1, 1, 0, 1, 1]
+        resOver30daysAfterArchive.newUsers.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
     }
 
     def "number of users growing over few days - specific skill"() {
@@ -324,29 +348,47 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         def skill3res30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger(), skills[2].skillId))
 
         then:
-        res30days.size() == 5
-        res30days.collect {it.count} == [0, 2, 3, 4, 5]
-        res30days.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30days.users.size() == 5
+        res30days.users.collect {it.count} == [0, 2, 3, 4, 5]
+        res30days.users.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30days.newUsers.size() == 5
+        res30days.newUsers.collect {it.count} == [0, 2, 1, 1, 1]
+        res30days.newUsers.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
-        resOver30days.size() == 7
-        resOver30days.collect {it.count} == [0, 0, 0, 2, 3, 4, 5]
-        resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30days.users.size() == 7
+        resOver30days.users.collect {it.count} == [0, 0, 0, 2, 3, 4, 5]
+        resOver30days.users.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30days.newUsers.size() == 7
+        resOver30days.newUsers.collect {it.count} == [0, 0, 0, 2, 1, 1, 1]
+        resOver30days.newUsers.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
-        skill3res30days.size() == 5
-        skill3res30days.collect {it.count} == [0, 0, 3, 4, 5]
-        skill3res30days.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        skill3res30days.users.size() == 5
+        skill3res30days.users.collect {it.count} == [0, 0, 3, 4, 5]
+        skill3res30days.users.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        skill3res30days.newUsers.size() == 5
+        skill3res30days.newUsers.collect {it.count} == [0, 0, 3, 1, 1]
+        skill3res30days.newUsers.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
-        res30daysAfterArchive.size() == 5
-        res30daysAfterArchive.collect {it.count} ==[0, 2, 2, 3, 4]
-        res30daysAfterArchive.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30daysAfterArchive.users.size() == 5
+        res30daysAfterArchive.users.collect {it.count} ==[0, 2, 2, 3, 4]
+        res30daysAfterArchive.users.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30daysAfterArchive.newUsers.size() == 5
+        res30daysAfterArchive.newUsers.collect {it.count} ==[0, 2, 0, 1, 1]
+        res30daysAfterArchive.newUsers.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
-        resOver30daysAfterArchive.size() == 7
-        resOver30daysAfterArchive.collect {it.count} == [0, 0, 0, 2, 2, 3, 4]
-        resOver30daysAfterArchive.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30daysAfterArchive.users.size() == 7
+        resOver30daysAfterArchive.users.collect {it.count} == [0, 0, 0, 2, 2, 3, 4]
+        resOver30daysAfterArchive.users.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30daysAfterArchive.newUsers.size() == 7
+        resOver30daysAfterArchive.newUsers.collect {it.count} == [0, 0, 0, 2, 0, 1, 1]
+        resOver30daysAfterArchive.newUsers.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
-        skill3res30daysAfterArchive.size() == 5
-        skill3res30daysAfterArchive.collect {it.count} == [0, 0, 2, 3, 4]
-        skill3res30daysAfterArchive.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        skill3res30daysAfterArchive.users.size() == 5
+        skill3res30daysAfterArchive.users.collect {it.count} == [0, 0, 2, 3, 4]
+        skill3res30daysAfterArchive.users.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        skill3res30daysAfterArchive.newUsers.size() == 5
+        skill3res30daysAfterArchive.newUsers.collect {it.count} == [0, 0, 2, 1, 1]
+        skill3res30daysAfterArchive.newUsers.collect {it.value} == days.subList(1, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
     }
 
     def "number of users growing over few days - specific skill, include metrics for skills imported from catalog"() {
@@ -436,38 +478,273 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         def skill3res30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger(), skills[0].skillId))
 
         then:
-        res30days.size() == 6
-        res30days.collect {it.count} == [10, 10, 10, 10, 10, 10]
-        res30days.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30days.users.size() == 6
+        res30days.users.collect {it.count} == [10, 10, 10, 10, 10, 10]
+        res30days.users.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30days.newUsers.size() == 0
+        res30days.newUsers == []
 
-        resOver30days.size() == 7
-        resOver30days.collect {it.count} == [0, 10, 10, 10, 10, 10, 10]
-        resOver30days.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30days.users.size() == 7
+        resOver30days.users.collect {it.count} == [0, 10, 10, 10, 10, 10, 10]
+        resOver30days.users.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30days.newUsers.size() == 7
+        resOver30days.newUsers.collect {it.count} == [0, 10, 0, 0, 0, 0, 0]
+        resOver30days.newUsers.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
-        skill3res30days.size() == 6
-        skill3res30days.collect {it.count} == [4, 4, 4, 4, 4, 4]
-        skill3res30days.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        skill3res30days.users.size() == 6
+        skill3res30days.users.collect {it.count} == [4, 4, 4, 4, 4, 4]
+        skill3res30days.users.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        skill3res30days.newUsers.size() == 0
+        skill3res30days.newUsers == []
 
-        res30daysAfterArchive.size() == 6
-        res30daysAfterArchive.collect {it.count} == [9, 9, 9, 9, 9, 9]
-        res30daysAfterArchive.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30daysAfterArchive.users.size() == 6
+        res30daysAfterArchive.users.collect {it.count} == [9, 9, 9, 9, 9, 9]
+        res30daysAfterArchive.users.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        res30daysAfterArchive.newUsers.size() == 0
+        res30daysAfterArchive.newUsers == []
 
-        resOver30daysAfterArchive.size() == 7
-        resOver30daysAfterArchive.collect {it.count} == [0, 9, 9, 9, 9, 9, 9]
-        resOver30daysAfterArchive.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30daysAfterArchive.users.size() == 7
+        resOver30daysAfterArchive.users.collect {it.count} == [0, 9, 9, 9, 9, 9, 9]
+        resOver30daysAfterArchive.users.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        resOver30daysAfterArchive.newUsers.size() == 7
+        resOver30daysAfterArchive.newUsers.collect {it.count} == [0, 9, 0, 0, 0, 0, 0]
+        resOver30daysAfterArchive.newUsers.collect {it.value} == [days[0].minus(7), *days].collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
-        skill3res30daysAfterArchive.size() == 6
-        skill3res30daysAfterArchive.collect {it.count} == [4, 4, 4, 4, 4, 4]
-        skill3res30daysAfterArchive.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        skill3res30daysAfterArchive.users.size() == 6
+        skill3res30daysAfterArchive.users.collect {it.count} == [4, 4, 4, 4, 4, 4]
+        skill3res30daysAfterArchive.users.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+        skill3res30daysAfterArchive.newUsers.size() == 0
+        skill3res30daysAfterArchive.newUsers == []
     }
 
-    private Map getProps(int numDaysAgo, String skillId = null) {
+    def "number of users growing over few days - grouped by month"() {
+        List<String> users = getRandomUsers(10)
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(10)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 10 }
+
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkills(skills)
+
+        List<Date> days
+
+        TestDates testDates = new TestDates()
+
+        days = [
+                testDates.getFirstOfMonth(1).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(7).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(14).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(21).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(28).toDate(),
+                testDates.getFirstOfMonth().toDate(),
+        ]
+
+        use(TimeCategory) {
+            days.eachWithIndex { Date date, int index ->
+                users.subList(0, index).each { String user ->
+                    skills.subList(0, index).each { skill ->
+                        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                    }
+                }
+            }
+        }
+
+        assert maxDailyDays == 3, "test data constructed with the assumption that skills.config.compactDailyEventsOlderThan is set to 3"
+        userEventService.compactDailyEvents()
+
+        Duration duration = Duration.between(testDates.getFirstOfMonth(1), LocalDateTime.now())
+
+        when:
+        def res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger(), null, true))
+        def resOver30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()+14, null, true))
+
+        skillsService.archiveUsers([users[2]], proj.projectId)
+
+        def res30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger(), null, true))
+        def resOver30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()+14, null, true))
+
+        then:
+
+        res30days.users.size() == 2
+        res30days.users.collect {it.count} == [4, 5]
+        res30days.newUsers.size() == 2
+        res30days.newUsers.collect {it.count} == [4, 1]
+
+        resOver30days.users.size() == 3
+        resOver30days.users.collect {it.count} == [0, 4, 5]
+        resOver30days.newUsers.size() == 3
+        resOver30days.newUsers.collect {it.count} == [0, 4, 1]
+
+        res30daysAfterArchive.users.size() == 2
+        res30daysAfterArchive.users.collect {it.count} == [3, 4]
+        res30daysAfterArchive.newUsers.size() == 2
+        res30daysAfterArchive.newUsers.collect {it.count} == [3, 1]
+
+        resOver30daysAfterArchive.users.size() == 3
+        resOver30daysAfterArchive.users.collect {it.count} == [0, 3, 4]
+        resOver30daysAfterArchive.newUsers.size() == 3
+        resOver30daysAfterArchive.newUsers.collect {it.count} == [0, 3, 1]
+    }
+
+    def "number of users growing over few days - include skills imported from catalog - grouped by month"() {
+        List<String> users = getRandomUsers(10)
+        def proj = SkillsFactory.createProject()
+        def proj2 = SkillsFactory.createProject(2)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(9)
+        def proj2_subj1 = SkillsFactory.createSubject(2, 1)
+        def proj2_skill1 = SkillsFactory.createSkill(2, 1, 99)
+        proj2_skill1.pointIncrement = 100
+        proj2_skill1.numPerformToCompletion = 10
+
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 10 }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(skills)
+
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2_subj1)
+        skillsService.createSkill(proj2_skill1)
+        skillsService.exportSkillToCatalog(proj2.projectId, proj2_skill1.skillId)
+        skillsService.importSkillFromCatalog(proj.projectId, proj1_subj1.subjectId, proj2.projectId, proj2_skill1.skillId)
+        skills.add([skillId: proj2_skill1.skillId])
+
+        List<Date> days
+
+        TestDates testDates = new TestDates()
+
+        days = [
+                testDates.getFirstOfMonth(1).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(7).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(14).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(21).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(28).toDate(),
+                testDates.getFirstOfMonth().toDate(),
+        ]
+
+        use(TimeCategory) {
+            days.eachWithIndex { Date date, int index ->
+                users.subList(0, index).each { String user ->
+                    skills.subList(0, index).each { skill ->
+                        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                    }
+                }
+            }
+        }
+
+        assert maxDailyDays == 3, "test data constructed with the assumption that skills.config.compactDailyEventsOlderThan is set to 3"
+        userEventService.compactDailyEvents()
+
+        Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
+        Duration monthAgo = Duration.between(testDates.getFirstOfMonth(1), LocalDateTime.now())
+        Duration thisMonth = Duration.between(testDates.getFirstOfMonth(), LocalDateTime.now())
+
+        when:
+        def res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(thisMonth.toDays().toInteger(), null, true))
+        def resOver30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(monthAgo.toDays().toInteger(), null, true))
+
+        skillsService.archiveUsers([users[2]], proj.projectId)
+
+        def res30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(thisMonth.toDays().toInteger(), null, true))
+        def resOver30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(monthAgo.toDays().toInteger(), null, true))
+
+        then:
+
+        res30days.users.size() == 1
+        res30days.users.collect {it.count} == [5]
+        res30days.newUsers.size() == 1
+        res30days.newUsers.collect {it.count} == [1]
+
+        resOver30days.users.size() == 2
+        resOver30days.users.collect {it.count} == [4, 5]
+        resOver30days.newUsers.size() == 2
+        resOver30days.newUsers.collect {it.count} == [4, 1]
+
+        res30daysAfterArchive.users.size() == 1
+        res30daysAfterArchive.users.collect {it.count} == [4]
+        res30daysAfterArchive.newUsers.size() == 1
+        res30daysAfterArchive.newUsers.collect {it.count} == [1]
+
+        resOver30daysAfterArchive.users.size() == 2
+        resOver30daysAfterArchive.users.collect {it.count} == [3, 4]
+        resOver30daysAfterArchive.newUsers.size() == 2
+        resOver30daysAfterArchive.newUsers.collect {it.count} == [3, 1]
+    }
+
+    def "number of users growing over a few months - grouped by month"() {
+        List<String> users = getRandomUsers(10)
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(10)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 10 }
+
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkills(skills)
+
+        List<Date> days
+
+        TestDates testDates = new TestDates()
+
+        days = [
+                testDates.getFirstOfMonth(4).toDate(),
+                testDates.getFirstOfMonth(3).toDate(),
+                testDates.getFirstOfMonth(2).toDate(),
+                testDates.getFirstOfMonth(1).toDate(),
+                testDates.getFirstOfMonth().toDate(),
+        ]
+
+        use(TimeCategory) {
+            days.eachWithIndex { Date date, int index ->
+                users.subList(0, index).each { String user ->
+                    skills.subList(0, index).each { skill ->
+                        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                    }
+                }
+            }
+        }
+
+        userEventService.compactDailyEvents()
+
+        Duration monthAgo = Duration.between(testDates.getFirstOfMonth(1), LocalDateTime.now())
+        Duration twoMonthsAgo = Duration.between(testDates.getFirstOfMonth(2), LocalDateTime.now())
+        Duration threeMonthsAgo = Duration.between(testDates.getFirstOfMonth(3), LocalDateTime.now())
+
+        when:
+        def res90days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(threeMonthsAgo.toDays().toInteger(), null, true))
+        def res60days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(twoMonthsAgo.toDays().toInteger(), null, true))
+        def res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(monthAgo.toDays().toInteger(), null, true))
+
+        then:
+
+        res90days.users.size() == 4
+        res90days.users.collect {it.count} == [1, 2, 3, 4]
+        res90days.newUsers.size() == 4
+        res90days.newUsers.collect {it.count} == [1, 1, 1, 1]
+
+        res60days.users.size() == 3
+        res60days.users.collect {it.count} == [2, 3, 4]
+        res60days.newUsers.size() == 3
+        res60days.newUsers.collect {it.count} == [1, 1, 1]
+
+        res30days.users.size() == 2
+        res30days.users.collect {it.count} == [3, 4]
+        res30days.newUsers.size() == 2
+        res30days.newUsers.collect {it.count} == [1, 1]
+
+    }
+
+    private Map getProps(int numDaysAgo, String skillId = null, Boolean byMonth = false) {
         Map props = [:]
         use(TimeCategory) {
             props[MetricsParams.P_START_TIMESTAMP] = numDaysAgo.days.ago.time
             if (skillId) {
                 props[MetricsParams.P_SKILL_ID] = skillId
             }
+            props[MetricsParams.P_BY_MONTH] = byMonth
         }
         return props
     }
@@ -481,6 +758,15 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
             now = LocalDateTime.now()
             startOfCurrentWeek = LocalDateTime.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
             startOfTwoWeeksAgo = startOfCurrentWeek.minusWeeks(1)
+        }
+
+        LocalDateTime getFirstOfMonth(Integer monthsAgo = 0) {
+            if(now.month.value > monthsAgo) {
+                return now.withMonth(now.month.value - monthsAgo).withDayOfMonth(1)
+            } else {
+                def monthDifference = (now.month.value - monthsAgo) + 12
+                return now.withYear(now.getYear() - 1).withMonth(monthDifference).withDayOfMonth(1)
+            }
         }
 
         LocalDateTime getDateWithinCurrentWeek(boolean allowFutureDate=false) {

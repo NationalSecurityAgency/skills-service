@@ -17,7 +17,7 @@ limitations under the License.
 import { ref } from 'vue';
 import dayjs from 'dayjs';
 
-const props = defineProps(['options']);
+const props = defineProps(['options', 'disableDays']);
 const emit = defineEmits(['time-selected']);
 
 const selectedIndex = ref(0);
@@ -27,6 +27,9 @@ const getVariant = (index) => {
 };
 
 const handleClick = (index) => {
+  if(props.disableDays && props.options[index].unit === 'days') {
+    return;
+  }
   selectedIndex.value = index;
   const selectedItem = props.options[index];
   const start = dayjs().subtract(selectedItem.length, selectedItem.unit);
@@ -37,12 +40,16 @@ const handleClick = (index) => {
   };
   emit('time-selected', event);
 };
+
+defineExpose({
+  handleClick
+})
 </script>
 
 <template>
   <span data-cy="timeLengthSelector" class="time-length-selector">
     <Badge v-for="(item, index) in options" :key="`${item.length}${item.unit}`"
-             class="ml-2" :class="{'can-select' : (index !== selectedIndex) }"
+             class="ml-2" :class="{'can-select' : (index !== selectedIndex && !(item.unit === 'days' && disableDays)), 'disabled': item.unit === 'days' && disableDays }"
              :aria-label="`show data for the last ${item.length} ${item.unit}`"
              :severity="getVariant(index)" @click="handleClick(index)" @keyup.enter="handleClick(index)" tabindex="0">
       {{ item.length }} {{ item.unit }}
@@ -53,5 +60,10 @@ const handleClick = (index) => {
 <style scoped>
 .can-select {
   cursor: pointer;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

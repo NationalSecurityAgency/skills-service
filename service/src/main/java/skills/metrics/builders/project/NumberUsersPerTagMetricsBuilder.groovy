@@ -25,6 +25,7 @@ import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.repos.UserTagRepo
+import skills.utils.TimeRangeFormatterUtil
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
@@ -55,14 +56,17 @@ class NumberUsersPerTagMetricsBuilder implements ProjectMetricsBuilder {
 
         String tagKey = MetricsParams.getTagKey(projectId, chartId, props)
         String tagFilter = MetricsParams.getTagFilter(projectId, chartId, props)
+        String startDate = MetricsParams.getFromDayFilterAsString(projectId, chartId, props)
+        String endDate = MetricsParams.getToDayFilterAsString(projectId, chartId, props)
+        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate)
 
-        return getUserCountsForTag(projectId, tagKey, currentPage, pageSize, sortDesc, sortBy, tagFilter)
+        return getUserCountsForTag(projectId, tagKey, dates[0], dates[1], currentPage, pageSize, sortDesc, sortBy, tagFilter)
     }
 
     @Profile
-    private UsersPerTagRes getUserCountsForTag(String projectId, String tagKey, int currentPage, int pageSize, Boolean sortDesc,  String sortBy, String tagFilter) {
+    private UsersPerTagRes getUserCountsForTag(String projectId, String tagKey, Date startDate, Date endDate, int currentPage, int pageSize, Boolean sortDesc,  String sortBy, String tagFilter) {
         PageRequest pageRequest = PageRequest.of(currentPage, pageSize, sortDesc ? DESC : ASC, sortBy)
-        List<UserTagRepo.UserTagCount> userTagCounts = findDistinctUserIdByProjectIdAndUserTag(projectId, tagKey, tagFilter, pageRequest)
+        List<UserTagRepo.UserTagCount> userTagCounts = findDistinctUserIdByProjectIdAndUserTag(projectId, tagKey, tagFilter, startDate, endDate, pageRequest)
 
         Integer numDistinctTags = (pageSize > userTagCounts.size() && currentPage == 1) ? userTagCounts.size() : countDistinctUserTag(projectId, tagKey, tagFilter)
 
@@ -74,8 +78,8 @@ class NumberUsersPerTagMetricsBuilder implements ProjectMetricsBuilder {
     }
 
     @Profile
-    private List<UserTagRepo.UserTagCount> findDistinctUserIdByProjectIdAndUserTag(String projectId, String tagKey, String tagFilter, Pageable pageable) {
-        List<UserTagRepo.UserTagCount> userTagCounts = userTagRepo.findDistinctUserIdByProjectIdAndUserTag(projectId, tagKey, tagFilter, pageable)
+    private List<UserTagRepo.UserTagCount> findDistinctUserIdByProjectIdAndUserTag(String projectId, String tagKey, String tagFilter, Date startDate, Date endDate, Pageable pageable) {
+        List<UserTagRepo.UserTagCount> userTagCounts = userTagRepo.findDistinctUserIdByProjectIdAndUserTag(projectId, tagKey, tagFilter, startDate, endDate, pageable)
         return userTagCounts
     }
 

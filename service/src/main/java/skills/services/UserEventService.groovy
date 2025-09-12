@@ -17,6 +17,8 @@ package skills.services
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
 import org.apache.commons.lang3.Validate
 import org.apache.commons.lang3.time.StopWatch
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,16 +32,11 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 
-import jakarta.persistence.EntityManager
-import jakarta.persistence.PersistenceContext
-import java.time.DayOfWeek
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.*
 import java.time.temporal.ChronoUnit
 import java.util.stream.Stream
 
-import static skills.storage.model.SkillDef.*
+import static skills.storage.model.SkillDef.ContainerType
 
 @Component
 @Slf4j
@@ -128,7 +125,7 @@ class UserEventService {
      * @return
      */
     @Transactional(readOnly = true)
-    List<DayCountItem> getDistinctUserCountForSkillId(String projectId, String skillId, Date start) {
+    List<DayCountItem> getDistinctUserCountForSkillId(String projectId, String skillId, Date start, Boolean newUsersOnly = false) {
         EventType eventType = determineAppropriateEventType(start)
 
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
@@ -145,21 +142,37 @@ class UserEventService {
         if (EventType.DAILY == eventType) {
             Stream<DayCountItem> stream
             if (ContainerType.Skill == skillDef.type) {
-                stream = userEventsRepo.getDistinctUserCountForSkill(rawId, start, eventType)
+                stream = userEventsRepo.getDistinctUserCountForSkill(rawId, start, eventType, newUsersOnly)
             } else {
-                stream = userEventsRepo.getDistinctUserCountForSubject(rawId, start, eventType)
+                stream = userEventsRepo.getDistinctUserCountForSubject(rawId, start, eventType, newUsersOnly)
             }
             results = convertResults(stream, eventType, start)
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
             Stream<WeekCountItem> stream
             if (ContainerType.Skill == skillDef.type) {
-                stream = userEventsRepo.getDistinctUserCountForSkillGroupedByWeek(rawId, start)
+                stream = userEventsRepo.getDistinctUserCountForSkillGroupedByWeek(rawId, start, newUsersOnly)
             } else {
-                stream = userEventsRepo.getDistinctUserCountForSubjectGroupedByWeek(rawId, start)
+                stream = userEventsRepo.getDistinctUserCountForSubjectGroupedByWeek(rawId, start, newUsersOnly)
             }
             results = convertResults(stream, start)
         }
+        return results
+    }
+
+    @Transactional(readOnly = true)
+    List<MonthlyCountItem> getDistinctUserCountForSubjectByMonth(String projectId, String skillId, Date start, Boolean newUsersOnly = false) {
+
+        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
+        if (!skillDef) {
+            throw new SkillException("Skill does not exist", projectId, skillId, ErrorCode.SkillNotFound)
+        }
+
+        Validate.isTrue(ALLOWABLE_CONTAINER_TYPES.contains(skillDef.type), "Unsupported ContainerType [${skillDef.type}]")
+
+        Stream<MonthlyCountItem> stream = userEventsRepo.getDistinctUserCountForSubjectGroupedByMonth(projectId, skillDef.id, start, newUsersOnly)
+        List<MonthlyCountItem> results = convertMonthlyResults(stream, start)
+
         return results
     }
 
@@ -206,18 +219,27 @@ class UserEventService {
      * @return
      */
     @Transactional(readOnly = true)
-    List<DayCountItem> getDistinctUserCountsForProject(String projectId, Date start) {
+    List<DayCountItem> getDistinctUserCountsForProject(String projectId, Date start, Boolean newUsersOnly = false) {
         EventType eventType = determineAppropriateEventType(start)
         List<DayCountItem> results
         if (EventType.DAILY == eventType) {
-            Stream<DayCountItem> stream = userEventsRepo.getDistinctUserCountForProject(projectId, start, eventType)
+            Stream<DayCountItem> stream = userEventsRepo.getDistinctUserCountForProject(projectId, start, eventType, newUsersOnly)
             results = convertResults(stream, eventType, start, [projectId])
         } else {
             start = StartDateUtil.computeStartDate(start, EventType.WEEKLY)
-            Stream<WeekCountItem> stream = userEventsRepo.getDistinctUserCountForProjectGroupedByWeek(projectId, start)
+            Stream<WeekCountItem> stream = userEventsRepo.getDistinctUserCountForProjectGroupedByWeek(projectId, start, newUsersOnly)
 
             results = convertResults(stream, start)
         }
+        return results
+    }
+
+    @Transactional(readOnly = true)
+    List<MonthlyCountItem> getDistinctUserCountsForProjectByMonth(String projectId, Date start, Boolean newUsersOnly = false) {
+        List<MonthlyCountItem> results
+        Stream<MonthlyCountItem> stream = userEventsRepo.getDistinctUserCountForProjectGroupedByMonth(projectId, start, newUsersOnly)
+        results = convertMonthlyResults(stream, start)
+
         return results
     }
 
@@ -316,6 +338,30 @@ class UserEventService {
         } else {
             userEventsRepo.save(event)
         }
+    }
+
+    @CompileStatic
+    private List<MonthlyCountItem> convertMonthlyResults(Stream<MonthlyCountItem> stream, Date startOfQueryRange) {
+        List<MonthlyCountItem> items = new ArrayList<MonthlyCountItem>()
+
+        LocalDate start = startOfQueryRange.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+        LocalDate end = LocalDate.now()
+        def monthsBetween = ChronoUnit.MONTHS.between(start.withDayOfMonth(1), end.withDayOfMonth(1))
+        def months = (0..monthsBetween).collect { i -> start.plusMonths(i as long).withDayOfMonth(1)}
+
+        List<MonthlyCountItem> monthlyCounts = stream.toList()
+        stream.close()
+
+        for(month in months) {
+            def foundMonth = monthlyCounts.find(it -> it.month.toInstant().atZone(ZoneId.systemDefault()).toLocalDate() == month)
+            if(foundMonth) {
+                items.push(new MonthlyCount(foundMonth.projectId, month.toDate(), foundMonth.count))
+            } else {
+                items.push(new MonthlyCount('', month.toDate(), 0))
+            }
+        }
+
+        return items
     }
 
     @CompileStatic
