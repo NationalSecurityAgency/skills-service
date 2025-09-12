@@ -617,12 +617,12 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         TestDates testDates = new TestDates()
 
         days = [
-                testDates.getDateInPreviousWeek().minusDays(28).toDate(),
-                testDates.getDateInPreviousWeek().minusDays(21).toDate(),
-                testDates.getDateInPreviousWeek().minusDays(14).toDate(),
-                testDates.getDateInPreviousWeek().minusDays(7).toDate(),
-                testDates.getDateInPreviousWeek().toDate(),
-                testDates.getDateWithinCurrentWeek().toDate(),
+                testDates.getFirstOfMonth(1).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(7).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(14).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(21).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(28).toDate(),
+                testDates.getFirstOfMonth().toDate(),
         ]
 
         use(TimeCategory) {
@@ -639,37 +639,39 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         userEventService.compactDailyEvents()
 
         Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
+        Duration monthAgo = Duration.between(testDates.getFirstOfMonth(1), LocalDateTime.now())
+        Duration thisMonth = Duration.between(testDates.getFirstOfMonth(), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger(), null, true))
-        def resOver30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()+14, null, true))
+        def res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(thisMonth.toDays().toInteger(), null, true))
+        def resOver30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(monthAgo.toDays().toInteger(), null, true))
 
         skillsService.archiveUsers([users[2]], proj.projectId)
 
-        def res30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger(), null, true))
-        def resOver30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger()+14, null, true))
+        def res30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(thisMonth.toDays().toInteger(), null, true))
+        def resOver30daysAfterArchive = skillsService.getMetricsData(proj.projectId, metricsId, getProps(monthAgo.toDays().toInteger(), null, true))
 
         then:
 
-        res30days.users.size() == 3
-        res30days.users.collect {it.count} == [0, 4, 5]
-        res30days.newUsers.size() == 3
-        res30days.newUsers.collect {it.count} == [0, 4, 1]
+        res30days.users.size() == 1
+        res30days.users.collect {it.count} == [5]
+        res30days.newUsers.size() == 1
+        res30days.newUsers.collect {it.count} == [1]
 
-        resOver30days.users.size() == 3
-        resOver30days.users.collect {it.count} == [0, 4, 5]
-        resOver30days.newUsers.size() == 3
-        resOver30days.newUsers.collect {it.count} == [0, 4, 1]
+        resOver30days.users.size() == 2
+        resOver30days.users.collect {it.count} == [4, 5]
+        resOver30days.newUsers.size() == 2
+        resOver30days.newUsers.collect {it.count} == [4, 1]
 
-        res30daysAfterArchive.users.size() == 3
-        res30daysAfterArchive.users.collect {it.count} == [0, 3, 4]
-        res30daysAfterArchive.newUsers.size() == 3
-        res30daysAfterArchive.newUsers.collect {it.count} == [0, 3, 1]
+        res30daysAfterArchive.users.size() == 1
+        res30daysAfterArchive.users.collect {it.count} == [4]
+        res30daysAfterArchive.newUsers.size() == 1
+        res30daysAfterArchive.newUsers.collect {it.count} == [1]
 
-        resOver30daysAfterArchive.users.size() == 3
-        resOver30daysAfterArchive.users.collect {it.count} == [0, 3, 4]
-        resOver30daysAfterArchive.newUsers.size() == 3
-        resOver30daysAfterArchive.newUsers.collect {it.count} == [0, 3, 1]
+        resOver30daysAfterArchive.users.size() == 2
+        resOver30daysAfterArchive.users.collect {it.count} == [3, 4]
+        resOver30daysAfterArchive.newUsers.size() == 2
+        resOver30daysAfterArchive.newUsers.collect {it.count} == [3, 1]
     }
 
     def "number of users growing over a few months - grouped by month"() {

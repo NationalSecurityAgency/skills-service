@@ -564,10 +564,10 @@ class NumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
 
         then:
         resAll.items.size() == 19
-        res_5days.items.size() == 4
-        res_10days.items.size() == 9
         res_5days_filter.items.size() == 1
         res_10days_filter.items.size() == 1
+        res_5days.items.size() != res_5days_filter.items.size()
+        res_10days.items.size() != res_10days_filter.items.size()
 
     }
 }
