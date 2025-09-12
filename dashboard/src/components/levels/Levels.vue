@@ -76,14 +76,14 @@ onMounted(() => {
   loadLevels();
 })
 
-let loading = ref(true);
-let currentlyFocusedLevelId = ref('');
-let displayLevelModal = ref(false);
-let isEdit = ref(false);
-let levelsAsPoints = ref(false);
+const loading = ref(true);
+const currentlyFocusedLevelId = ref('');
+const displayLevelModal = ref(false);
+const isEdit = ref(false);
+const levelsAsPoints = ref(false);
 let levelToEdit = { iconClass: 'fas fa-user-ninja' };
-let levels = ref([]);
-let table = ref({
+const levels = ref([]);
+const table = ref({
   options: {
     busy: true,
     bordered: false,
@@ -285,6 +285,13 @@ const isFlex = computed(() => responsive.sm.value)
         </div>
       </div>
     </sub-page-header>
+
+    <Message v-if="levelsAsPoints" :closable="false" data-cy="pointBasedLevelManagementWarning">
+      <div><b>Point-Based Level Management</b>: You are responsible for defining point ranges for each level. As new skills increase the total available points, update level thresholds to prevent users from reaching the maximum level prematurely. To disable, navigate to the <router-link class="underline" :to="{ name:'ProjectSettings', params: { projectId: route.params.projectId }}" data-cy="settingsPageLink">Project Settings</router-link> page.</div>
+    </Message>
+    <Message v-if="!levelsAsPoints" :closable="false" data-cy="percentageBasedLevelManagementWarning">
+      <div><b>Percentage-Based Level Management</b>: Each level is defined as a percentage of the total available points, with the actual point ranges automatically calculated based on these percentages.</div>
+    </Message>
 
     <Card :pt="{ body: { class: 'p-0!' } }">
       <template #content>

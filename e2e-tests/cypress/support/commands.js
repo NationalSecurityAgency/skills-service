@@ -188,6 +188,14 @@ Cypress.Commands.add("enableProdMode", (projNum) => {
     });
 });
 
+Cypress.Commands.add("enablePointBasedLevelsManagement", (projNum=1) => {
+    cy.request('POST', `/admin/projects/proj${projNum}/settings/level.points.enabled`, {
+        projectId: `proj${projNum}`,
+        setting: 'level.points.enabled',
+        value: 'true'
+    });
+});
+
 Cypress.Commands.add("setProjToInviteOnly", (projNum) => {
     const inviteOnlySetting = 'invite_only'
     cy.request('POST', `/admin/projects/proj${projNum}/settings/${inviteOnlySetting}`, {

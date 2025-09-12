@@ -72,6 +72,10 @@ export const useProjConfig = defineStore('projConfig', () => {
     return projConfig.value && projConfig.value['production.mode.enabled'] === 'true';
   });
 
+  const isPointsLevelManagementEnabled = computed(() => {
+    return projConfig.value && (projConfig.value['level.points.enabled'] === 'true' || projConfig.value['level.points.enabled'] === true);
+  });
+
   const projConfigRootHelpUrl = computed(() => {
     return projConfig.value && projConfig.value['help.url.root'];
   });
@@ -99,6 +103,7 @@ export const useProjConfig = defineStore('projConfig', () => {
     isProjectProtected,
     projConfigRootHelpUrl,
     isReadOnlyProj,
-    userProjRole
+    userProjRole,
+    isPointsLevelManagementEnabled
   }
 })

@@ -31,6 +31,7 @@ import UserRolesUtil from '@/components/utils/UserRolesUtil'
 import Avatar from 'primevue/avatar'
 import ProjectShareDialog from '@/components/projects/ProjectShareDialog.vue'
 import ProjectExpirationWarning from '@/components/projects/ProjectExpirationWarning.vue'
+import PointsBasedLevelsWarning from "@/components/levels/PointsBasedLevelsWarning.vue";
 
 // const props = defineProps(['project'])
 const router = useRouter()
@@ -289,6 +290,8 @@ const isProjectExpiring = computed(() => {
     <Message v-if="isInsufficientPoints" :closable="false" data-cy="projectInsufficientPoints">
       Project has insufficient points assigned. Skills cannot be achieved until project has at least <Tag>{{ appConfig.minimumProjectPoints }}</Tag> points.
     </Message>
+
+    <points-based-levels-warning />
 
     <import-finalize-alert />
 
