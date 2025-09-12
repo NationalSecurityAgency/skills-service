@@ -51,6 +51,7 @@ class SkillEventsService {
         boolean isFromPassingQuiz = false
         String approvalRequestedMsg
         boolean forAnotherUser = false
+        boolean doNotRequireApproval = false
 
         SkillApprovalParams(){}
 
@@ -59,6 +60,9 @@ class SkillEventsService {
         }
         void setForAnotherUser(boolean forAnotherUser) {
             this.forAnotherUser = forAnotherUser
+        }
+        void setDoNotRequireApproval(boolean doNotRequireApproval) {
+            this.doNotRequireApproval = doNotRequireApproval
         }
     }
     static SkillApprovalParams defaultSkillApprovalParams = new SkillApprovalParams()

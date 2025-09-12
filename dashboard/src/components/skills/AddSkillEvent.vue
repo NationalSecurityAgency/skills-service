@@ -155,7 +155,7 @@ const loadProject = (reloadSubject = false) => {
 }
 const addSkill = () => {
   isSaving.value = true;
-  SkillsService.saveSkillEvent(route.params.projectId, route.params.skillId, currentSelectedUser.value, dateAdded.value.getTime(), appConfig.isPkiAuthenticated)
+  SkillsService.saveSkillEvent(route.params.projectId, route.params.skillId, currentSelectedUser.value, dateAdded.value.getTime(), true)
       .then((data) => {
         isSaving.value = false;
         const historyObj = {

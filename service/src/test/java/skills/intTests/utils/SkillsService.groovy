@@ -601,14 +601,22 @@ class SkillsService {
     }
 
     @Profile
-    def addSkill(Map props, String userId = null, Date date = new Date(), String approvalRequestedMsg = null) {
+    def addSkill(Map props, String userId = null, Date date = new Date(), String approvalRequestedMsg = null, Boolean doNotRequireApproval = null) {
+        Map params = [:]
+
         if (userId) {
             userId = getUserId(userId)
             assert date
-            return wsHelper.apiPost("/projects/${props.projectId}/skills/${props.skillId}", [ userId : userId, timestamp:date.time, approvalRequestedMsg: approvalRequestedMsg])
-        } else {
-            return wsHelper.apiPut("/projects/${props.projectId}/skills/${props.skillId}", null)
+
+            params.userId = userId
+            params.timestamp = date.time
+            params.approvalRequestedMsg = approvalRequestedMsg
         }
+        if (doNotRequireApproval) {
+            params.doNotRequireApproval = doNotRequireApproval
+        }
+
+        return wsHelper.apiPut("/projects/${props.projectId}/skills/${props.skillId}", params ?: null)
     }
 
     @Profile

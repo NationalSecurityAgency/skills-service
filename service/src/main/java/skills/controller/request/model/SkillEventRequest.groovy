@@ -25,4 +25,7 @@ class SkillEventRequest {
     // this is an optional approval message
     // Note: only applicable in case of self reporting with approval
     String approvalRequestedMsg
+
+    // users with admin role will be able to apply approval-based skills without approval
+    Boolean doNotRequireApproval = false
 }

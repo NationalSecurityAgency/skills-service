@@ -288,12 +288,12 @@ export default {
       .get(`/admin/projects/${encodeURIComponent(projectId)}/latestVersion`)
       .then((remoteRes) => remoteRes.data)
   },
-  saveSkillEvent(projectId, skillId, user, timestamp) {
+  saveSkillEvent(projectId, skillId, user, timestamp, doNotRequireApproval) {
     const userId = user.dn ? user.dn : user.userId
     return axios
       .put(
         `/api/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}`,
-        { userId, timestamp },
+        { userId, timestamp, doNotRequireApproval },
         { handleError: false }
       )
       .then((remoteRes) => remoteRes.data)

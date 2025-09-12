@@ -192,6 +192,9 @@ class SkillEventsTransactionalService {
             throw e;
         }
         if (skillDefinition.selfReportingType && skillDefinition.copiedFromProjectId) {
+            if (approvalParams?.doNotRequireApproval) {
+                throw new SkillException("doNotRequireApproval property is not allowed for imported skills", projectId, skillId, ErrorCode.AccessDenied);
+            }
             projectId = skillDefinition.copiedFromProjectId
             skillDefinition = getCopiedFromSkillDef(skillDefinition, userId)
             // override it as reused skill's id will not match
@@ -222,7 +225,7 @@ class SkillEventsTransactionalService {
         final boolean isApprovalRequest = approvalParams && !approvalParams.disableChecks &&
                 skillDefinition.getSelfReportingType() == SkillDef.SelfReportingType.Approval
 
-        if (!isApprovalRequest) {
+        if (!isApprovalRequest || approvalParams?.doNotRequireApproval) {
             // record event should happen AFTER the lock OR if it does not need the lock;
             // otherwise there is a chance of a deadlock (although unlikely); this can happen because record event
             // mutates the row - so that row is locked in addition to the explicit lock
@@ -242,10 +245,13 @@ class SkillEventsTransactionalService {
             if (skillDefinition.copiedFrom) {
                 skillDefinition = skillDefRepo.findSkillDefMinById(skillDefinition.copiedFrom)
             }
-            checkRes = selfReportingService.requestApproval(userId, skillDefinition, skillDate.date, approvalParams?.approvalRequestedMsg)
-            res.skillApplied = checkRes.skillApplied
-            res.explanation = checkRes.explanation
-            return res
+
+            if (!approvalParams?.doNotRequireApproval) {
+                checkRes = selfReportingService.requestApproval(userId, skillDefinition, skillDate.date, approvalParams?.approvalRequestedMsg)
+                res.skillApplied = checkRes.skillApplied
+                res.explanation = checkRes.explanation
+                return res
+            }
         }
 
         if (isMotivationalSkill && hasReachedMaxPoints(numExistingSkills, skillDefinition)) {
