@@ -74,7 +74,7 @@ const checkDescription = useDebounceFn((value, testContext) => {
   if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
     return true
   }
-  return descriptionValidatorService.validateDescription(value, false, enableProtectedUserCommunity.value, false).then((result) => {
+  return descriptionValidatorService.validateDescription(value, !props.global, props.global ? enableProtectedUserCommunity.value : null, false).then((result) => {
     if (result.valid) {
       return true
     }
