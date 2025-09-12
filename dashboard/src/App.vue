@@ -179,9 +179,9 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
 </script>
 
 <template>
-<!--  :class="{ 'st-dark-theme': themeHelper.isDarkTheme, 'st-light-theme': !themeHelper.isDarkTheme }"-->
   <div role="presentation"
-       class="m-0 bg-surface-50 dark:bg-surface-950">
+       class="m-0 bg-surface-50 dark:bg-surface-950"
+       :class="{ 'h-screen in-skills-client': skillsDisplayInfo.isSkillsClientPath() }">
     <VueAnnouncer class="sr-only" />
 
     <customizable-header v-if="isCustomizableHeader" role="region" aria-label="dynamic customizable header"></customizable-header>

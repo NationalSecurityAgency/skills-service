@@ -24,7 +24,7 @@ export default {
       styleName: 'max-width'
     },
     backgroundColor: [{
-      selector: 'body #app .sd-theme-home, .p-overlaypanel.p-component,' +
+      selector: 'body #app .in-skills-client, body #app .sd-theme-home, .p-overlaypanel.p-component,' +
         'body #app .sd-theme-background-color',
       styleName: 'background-color'
     }, {
@@ -222,7 +222,8 @@ export default {
           'body #app .sd-theme-home .fa-stack .fa-stack-1x.fa-inverse,' +
           'body #app .sd-theme-home .toastui-editor-contents pre code,' +
           'body #app .sd-theme-home .toastui-editor-popup [data-type="Heading"]:hover,' +
-          'body #app .sd-theme-home .toastui-editor-popup .drop-down .drop-down-item:hover',
+          'body #app .sd-theme-home .toastui-editor-popup .drop-down .drop-down-item:hover,' +
+          'body #app .sd-theme-home .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover',
         styleName: 'color'
       }],
       borderColor: [{

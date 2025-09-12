@@ -94,7 +94,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         !gradedQuizAttempt.gradedQuestions
     }
 
-    def "run quiz - fail quiz - graded questions are returned if there are no more attempts available"() {
+    def "run quiz - fail quiz - graded questions are not returned"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
@@ -122,10 +122,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         //  more more attempts left
         gradedQuizAttempt2.passed == false
         gradedQuizAttempt2.numQuestionsGotWrong == 1
-        gradedQuizAttempt2.gradedQuestions.questionId == quizAttempt.questions.id
-        gradedQuizAttempt2.gradedQuestions.isCorrect == [true, false]
-        gradedQuizAttempt2.gradedQuestions[0].selectedAnswerIds == [quizAttempt.questions[0].answerOptions[0].id]
-        gradedQuizAttempt2.gradedQuestions[1].selectedAnswerIds == [quizAttempt.questions[1].answerOptions[1].id]
+        !gradedQuizAttempt2.gradedQuestions
     }
 
     def "answer is updated when reporting a different answer for a single-choice answer"() {
