@@ -18,7 +18,7 @@ import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
-import { date, number, object, string, tuple } from 'yup'
+import { boolean, date, number, object, string, tuple, ValidationError } from 'yup'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import HelpUrlInput from '@/components/utils/HelpUrlInput.vue'
@@ -27,7 +27,12 @@ import BadgesService from '@/components/badges/BadgesService'
 import GlobalBadgeService from '@/components/badges/global/GlobalBadgeService.js'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import IconPicker from '@/components/utils/iconPicker/IconPicker.vue'
+import CommunityProtectionControls from '@/components/projects/CommunityProtectionControls.vue';
 import dayjs from 'dayjs'
+import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
+import AdminGroupsService from '@/components/access/groups/AdminGroupsService.js'
+import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
+import { useDebounceFn } from '@vueuse/core'
 
 const model = defineModel()
 const props = defineProps({
@@ -46,6 +51,10 @@ const appConfig = useAppConfig()
 const emit = defineEmits(['hidden', 'badge-updated', 'keydown-enter']);
 const route = useRoute()
 
+const communityLabels = useCommunityLabels()
+const initialValueForEnableProtectedUserCommunity = communityLabels.isRestrictedUserCommunity(props.badge.userCommunity)
+const enableProtectedUserCommunity = ref(initialValueForEnableProtectedUserCommunity)
+
 onMounted(() => {
   document.addEventListener('focusin', trackFocus);
 });
@@ -60,7 +69,42 @@ if (props.isEdit) {
 const maximumDays = computed(() => {
   return appConfig.maxBadgeBonusInMinutes / (60 * 24)
 });
+const descriptionValidatorService = useDescriptionValidatorService()
+const checkDescription = useDebounceFn((value, testContext) => {
+  if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
+    return true
+  }
+  return descriptionValidatorService.validateDescription(value, !props.global, props.global ? enableProtectedUserCommunity.value : null, false).then((result) => {
+    if (result.valid) {
+      return true
+    }
+    let fieldNameToUse = 'Badge Description'
+    if (result.msg) {
+      return testContext.createError({ message: `${fieldNameToUse ? `${fieldNameToUse} - ` : ''}${result.msg}` })
+    }
+    return testContext.createError({ message: `${fieldNameToUse || 'Field'} is invalid` })
+  })
 
+}, appConfig.formFieldDebounceInMs)
+
+
+const checkUserCommunityRequirements = (value, testContext) => {
+  if (!value || !props.isEdit) {
+    return true;
+  }
+  return GlobalBadgeService.validateAdminGroupForEnablingCommunity(props.badge.badgeId).then((result) => {
+    if (result.isAllowed) {
+      return true;
+    }
+    if (result.unmetRequirements) {
+      const errors = result.unmetRequirements.map((req) => {
+        return testContext.createError({ message: `${req}` })
+      })
+      return new ValidationError(errors)
+    }
+    return true
+  });
+}
 
 const schema = object({
   'name': string()
@@ -83,7 +127,7 @@ const schema = object({
       .label('Badge ID'),
   'description': string()
       .max(appConfig.descriptionMaxLength)
-      .customDescriptionValidator('Badge Description')
+      .test('descriptionValidation', 'Description is invalid', (value, testContext) => checkDescription(value, testContext))
       .label('Badge Description'),
   'helpUrl': string()
       .urlValidator()
@@ -121,8 +165,10 @@ const schema = object({
       }
     }
     return valid;
-  })
-
+  }),
+  'enableProtectedUserCommunity': boolean()
+      .test('communityReqValidation', 'Unmet community requirements', (value, testContext) => checkUserCommunityRequirements(value, testContext))
+      .label('Enable Protected User Community'),
 });
 
 let awardAttrs = {
@@ -155,7 +201,8 @@ const initialBadgeData = {
   timeLimitEnabled: timeLimitEnabled,
   awardAttrs: awardAttrs,
   iconClass: props.badge.iconClass || 'fas fa-book',
-  projectId: route.params.projectId
+  projectId: route.params.projectId,
+  enableProtectedUserCommunity: false,
 };
 
 let badgeInternal = ref({
@@ -326,7 +373,17 @@ const onBadgeSaved = () => {
         </template>
       </SkillsNameAndIdInput>
 
-      <markdown-editor class="mt-8" name="description" />
+      <community-protection-controls
+          v-if="global"
+          v-model:enable-protected-user-community="enableProtectedUserCommunity"
+          :global-badge="badge"
+          :is-edit="isEdit"
+          :is-copy="false" />
+
+      <markdown-editor
+          :allow-attachments="isEdit || !communityLabels.showManageUserCommunity.value"
+          class="mt-8"
+          name="description" />
 
       <Card v-if="!global" data-cy="bonusAwardCard">
         <template #content>

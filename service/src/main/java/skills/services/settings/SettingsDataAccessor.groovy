@@ -125,6 +125,14 @@ class SettingsDataAccessor {
         return settingRepo.findUserSettingValueByUserIdAndSettingAndProjectIdIsNull(userId, setting)
     }
 
+    Setting getSkillSetting(Integer skillRefId, String setting, String settingGroup){
+        settingRepo.findByTypeAndSkillRefIdAndSettingGroupAndSetting(SettingType.Skill, skillRefId, settingGroup, setting)
+    }
+
+    Setting getSkillSetting(String projectId, String skillId, String setting, String settingGroup){
+        settingRepo.findSkillSettingByProjectIdAndSkillId(projectId, skillId, settingGroup, setting)
+    }
+
     void save(Setting setting){
         settingRepo.save(setting)
     }
@@ -174,6 +182,8 @@ class SettingsDataAccessor {
             return getRootUserProjectSetting(request.settingGroup, request.setting, request.projectId)
         } else if(request instanceof ProjectSettingsRequest){
             return getProjectSetting(request.projectId, request.setting, request.settingGroup)
+        } else if(request instanceof SkillSettingsRequest){
+            return getSkillSetting(request.skillRefId, request.setting, request.settingGroup)
         } else {
             log.error("unable SettingRequest [${request.getClass()}]")
             throw new SkillException("Unrecognized Setting type")

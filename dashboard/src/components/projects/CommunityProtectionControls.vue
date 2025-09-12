@@ -44,9 +44,13 @@ const props = defineProps({
     type: Object,
     default: null
   },
+  globalBadge: {
+    type: Object,
+    default: null
+  },
 })
-if (!props.project && !props.adminGroup && !props.quiz) {
-  throw new Error('Either project, adminGroup or quiz must be provided')
+if (!props.project && !props.adminGroup && !props.quiz && !props.globalBadge) {
+  throw new Error('Either project, adminGroup, uiz  or globalBadge must be provided')
 }
 const authState = useAuthState()
 const appConfig = useAppConfig()
@@ -65,6 +69,8 @@ const typeLabel = computed(() => {
     return 'a quiz'
   } else if (props.adminGroup) {
     return 'an admin group'
+  } else if (props.globalBadge) {
+    return 'a global badge'
   }
 })
 
@@ -72,6 +78,7 @@ onMounted(() => {
   initialValueForEnableProtectedUserCommunity.value = communityLabels.isRestrictedUserCommunity(props.project?.userCommunity)
       || communityLabels.isRestrictedUserCommunity(props.adminGroup?.userCommunity)
       || communityLabels.isRestrictedUserCommunity(props.quiz?.userCommunity)
+      || communityLabels.isRestrictedUserCommunity(props.globalBadge?.userCommunity)
   enableProtectedUserCommunitySynced.value = initialValueForEnableProtectedUserCommunity.value
 
   // enableProtectedUserCommunity.value = this.isRestrictedUserCommunity(this.project.userCommunity);

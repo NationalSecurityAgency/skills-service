@@ -126,6 +126,9 @@ class UserSkillsController {
     @Autowired
     VideoCaptionsService videoCaptionsService;
 
+    @Autowired
+    GlobalBadgesService globalBadgeService;
+
     @Value("${skills.config.allowedAttachmentMimeTypes}")
     List<MediaType> allowedAttachmentMimeTypes;
 
@@ -333,6 +336,9 @@ class UserSkillsController {
                                                              @RequestParam(name = "global", required = false) Boolean isGlobal) {
         String userId = userInfoService.getUserName(userIdParam, true);
         if (isGlobal != null && isGlobal) {
+            if (!globalBadgeService.isProjectUsedInGlobalBadge(projectId)) {
+                throw new SkillException("Project ID [" + projectId + "] does not participate in this global badge [" + badgeId + "]");
+            }
             return skillsLoader.loadGlobalBadgeDescriptions(badgeId, userId, getProvidedVersionOrReturnDefault(version));
         } else {
             return skillsLoader.loadBadgeDescriptions(projectId, badgeId, userId, getProvidedVersionOrReturnDefault(version));
@@ -350,6 +356,9 @@ class UserSkillsController {
                                              @RequestParam(name = "includeSkills", required = false, defaultValue = "true") String includeSkills) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
         if (isGlobal != null && isGlobal) {
+            if (!globalBadgeService.isProjectUsedInGlobalBadge(projectId)) {
+                throw new SkillException("Project ID [" + projectId + "] does not participate in this global badge [" + badgeId + "]");
+            }
             return skillsLoader.loadGlobalBadge(userId, projectId, badgeId, getProvidedVersionOrReturnDefault(version), Boolean.valueOf(includeSkills));
         } else {
             return skillsLoader.loadBadge(projectId, userId, badgeId, getProvidedVersionOrReturnDefault(version), Boolean.valueOf(includeSkills));

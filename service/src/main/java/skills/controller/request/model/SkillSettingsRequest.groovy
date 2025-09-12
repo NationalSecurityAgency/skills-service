@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
-
+package skills.controller.request.model
 
 import groovy.transform.Canonical
+import groovy.transform.ToString
 
 @Canonical
-class GlobalBadgeResult extends BadgeResult {
-
-    List<GlobalBadgeLevelRes> requiredProjectLevels = []
-    int uniqueProjectCount = 0
-
-    String userCommunity
+@ToString(includeSuper = true)
+class SkillSettingsRequest extends SettingsRequest{
+    Integer skillRefId
 }

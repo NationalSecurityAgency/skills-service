@@ -185,7 +185,7 @@ final class MultipartRequestMatcher implements RequestMatcher {
     private final OrRequestMatcher pathMatcher = new OrRequestMatcher(
             new AntPathRequestMatcher("/api/upload"),
             new AntPathRequestMatcher("/admin/projects/*/icons/upload"),
-            new AntPathRequestMatcher("/admin/icons/upload"),  // TODO add wildcard for ID
+            new AntPathRequestMatcher("/admin/badges/*/icons/upload"),
             new AntPathRequestMatcher("/admin/*/*/*/*/video"),
             new AntPathRequestMatcher("/admin/*/*/*/*/slides"),
             new AntPathRequestMatcher("/admin/*/*/slides"),

@@ -22,6 +22,7 @@ import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.request.model.RootUserProjectSettingsRequest
 import skills.controller.request.model.SettingsRequest
+import skills.controller.request.model.SkillSettingsRequest
 import skills.controller.request.model.UserProjectSettingsRequest
 import skills.controller.request.model.UserSettingsRequest
 import skills.storage.model.Setting.SettingType
@@ -41,6 +42,8 @@ class SettingTypeUtil {
             return SettingType.RootUser
         } else if(request instanceof ProjectSettingsRequest){
             return SettingType.Project
+        } else if(request instanceof SkillSettingsRequest){
+            return SettingType.Skill
         } else {
             log.error("unable SettingRequest [${request.getClass()}]")
             throw new SkillException("Unrecognized Setting type")

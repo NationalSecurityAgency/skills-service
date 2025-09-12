@@ -3020,4 +3020,25 @@
         </addColumn>
     </changeSet>
 
+
+    <changeSet id="56" author="skills team">
+        <addColumn tableName="settings">
+            <!-- optional -->
+            <column name="skill_ref_id" type="int"/>
+        </addColumn>
+
+        <createIndex indexName="index_settings_skill_ref_id"
+                     tableName="settings">
+            <column name="skill_ref_id" type="int"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="skill_ref_id"
+                                 baseTableName="settings"
+                                 constraintName="fk_settings_skill_ref_id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"
+                                 referencedColumnNames="id"
+                                 referencedTableName="skill_definition"/>
+    </changeSet>
+
 </databaseChangeLog>

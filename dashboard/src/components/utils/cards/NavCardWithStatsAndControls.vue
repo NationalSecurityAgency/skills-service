@@ -128,7 +128,7 @@ defineExpose({
         </div>
       </div>
 
-      <div class="mt-6 px-6">
+      <div class="mt-3 px-6">
         <slot name="underTitle"></slot>
       </div>
 

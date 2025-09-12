@@ -212,8 +212,8 @@ class AdminGroupRoleService {
         AdminGroupDef adminGroupDef = findAdminGroupDef(adminGroupId)
         GlobalBadgeResult globalBadgeDef = findGlobalBadgeResult(globalBadgeId)
 
-        if (userCommunityService.isUserCommunityOnlyAdminGroup(adminGroupId)) {
-            throw new SkillException("GlobalBadge [${globalBadgeDef.name}] is not allowed to be assigned [${adminGroupDef.name}] Admin Group", ErrorCode.AccessDenied)
+        if (userCommunityService.isUserCommunityOnlyGlobalBadge(globalBadgeId) && !userCommunityService.isUserCommunityOnlyAdminGroup(adminGroupId)) {
+            throw new SkillException("Global Badge [${globalBadgeDef.name}] is not allowed to be assigned [${adminGroupDef.name}] Admin Group", ErrorCode.AccessDenied)
         }
 
         accessSettingsStorageService.findAllAdminGroupMembers(adminGroupDef.adminGroupId).each { UserRoleRes userRoleRes ->
