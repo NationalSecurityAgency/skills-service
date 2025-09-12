@@ -20,6 +20,15 @@ describe('Metrics Using User Tags Tests', () => {
     const userTagsTableSelector = '[data-cy="userTagsTable"]';
     const usersTableSelector = '[data-cy=usersTable]'
 
+    Cypress.Commands.add('prevMonth', () => {
+        cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-name="pcprevbutton"]').click()
+        cy.wait(150);
+    });
+    Cypress.Commands.add('setDay', (dayNum) => {
+        let re = new RegExp(String.raw`^${dayNum}$`)
+        cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="day"]').contains(re).click()
+    });
+
     after(() => {
         Cypress.env('disableResetDb', false);
     });
@@ -264,6 +273,42 @@ describe('Metrics Using User Tags Tests', () => {
                 }],
             ];
             cy.validateTable(userTagsTableSelector, expected2, 10);
+        });
+
+        it('user tag table - filter by date', () => {
+            cy.visit('/administrator/projects/proj1/');
+            cy.wait('@getConfig');
+
+            cy.clickNav('Metrics');
+            cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]').contains('Many Values');
+
+            cy.get('[data-cy="metricsDateFilter"]').click()
+            cy.prevMonth()
+            cy.setDay(1)
+            cy.setDay(1)
+
+            cy.get('[ data-cy="userTagTable-filterBtn"]').click();
+
+            cy.get('[data-cy="userTagsTable"]').contains('There are no records to show');
+
+            cy.get('[data-cy="userTagTable-clearBtn"]').click();
+
+            const expected = [];
+            for (let i = 0; i < 25; i += 1) {
+                expected.push([
+                    {
+                        colIndex: 0,
+                        value: `tag${i}`
+                    },
+                    {
+                        colIndex: 1,
+                        value: `${25 - i}`
+                    }
+                ]);
+            }
+
+            // test values and paging
+            cy.validateTable(userTagsTableSelector, expected, 10);
         });
 
         it('user tag table - clear filter', () => {
