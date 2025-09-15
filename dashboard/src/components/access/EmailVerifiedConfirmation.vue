@@ -87,7 +87,7 @@ watch(() => timer.value, (newValue) => {
         <Card>
           <template #content>
             <p>Your email address has been confirmed! You will be forwarded to the login page in {{ timer }} seconds.</p>
-            <div class="text-center">
+            <div class="text-center mt-4">
               <router-link to="/skills-login" tabindex="-1">
                 <SkillsButton class="p-2" data-cy="loginPage" icon="fas fa-sign-in-alt" label="Return to Login Page"></SkillsButton>
               </router-link>
