@@ -201,9 +201,9 @@ describe('Verify Email Tests', () => {
       Cypress.Commands.add('navToSettings', () => {
         cy.get('[data-cy="settings-button"] button')
           .click();
-        cy.get('[data-pc-section="menuitem"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
           .should('not.be.disabled');
-        cy.get('[data-pc-section="menuitem"]').contains('Settings')
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings')
           .click();
       });
       cy.intercept({
