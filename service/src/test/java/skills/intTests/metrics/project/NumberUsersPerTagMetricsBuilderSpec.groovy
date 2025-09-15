@@ -637,4 +637,90 @@ class NumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
         res_10days_filter.items.size() == 1
 
     }
+
+    def "count users for each tag value - multiple projects and subjects"() {
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def proj1subj1 = SkillsFactory.createSubject(1, 1)
+        def proj1subj2 = SkillsFactory.createSubject(1, 2)
+        def proj2subj1 = SkillsFactory.createSubject(2, 1)
+        def proj2subj2 = SkillsFactory.createSubject(2, 2)
+        List<Map> proj1subj1skills = SkillsFactory.createSkills(3, 1, 1)
+        List<Map> proj1subj2skills = SkillsFactory.createSkills(3, 1, 2)
+        List<Map> proj2subj1skills = SkillsFactory.createSkills(3, 2, 1)
+        List<Map> proj2subj2skills = SkillsFactory.createSkills(3, 2, 2)
+
+        proj1subj1skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+        proj1subj2skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+        proj2subj1skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+        proj2subj2skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj1subj1)
+        skillsService.createSubject(proj1subj2)
+        skillsService.createSubject(proj2subj1)
+        skillsService.createSubject(proj2subj2)
+        skillsService.createSkills(proj1subj1skills)
+        skillsService.createSkills(proj1subj2skills)
+        skillsService.createSkills(proj2subj1skills)
+        skillsService.createSkills(proj2subj2skills)
+
+        def format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        List<String> users = getRandomUsers(20)
+        List<Date> dates = (1..20).collect{ Date.parse("yyyy-MM-dd HH:mm:ss", '2020-08-01 00:00:00').plus(it).toLocalDateTime().toDate()}
+
+        users.eachWithIndex { it, index ->
+            skillsService.addSkill([projectId: proj1.projectId, skillId: proj1subj1skills.get(0).skillId], it, dates[index])
+            skillsService.addSkill([projectId: proj1.projectId, skillId: proj1subj1skills.get(1).skillId], it, dates[index])
+            skillsService.addSkill([projectId: proj1.projectId, skillId: proj1subj1skills.get(2).skillId], it, dates[index])
+        }
+        users[0..4].eachWithIndex { it, index ->
+            skillsService.addSkill([projectId: proj1.projectId, skillId: proj1subj2skills.get(0).skillId], it, dates[index])
+            skillsService.addSkill([projectId: proj1.projectId, skillId: proj1subj2skills.get(1).skillId], it, dates[index])
+            skillsService.addSkill([projectId: proj1.projectId, skillId: proj1subj2skills.get(2).skillId], it, dates[index])
+        }
+        users[5..9].eachWithIndex { it, index ->
+            skillsService.addSkill([projectId: proj2.projectId, skillId: proj2subj1skills.get(0).skillId], it, dates[index])
+            skillsService.addSkill([projectId: proj2.projectId, skillId: proj2subj1skills.get(1).skillId], it, dates[index])
+            skillsService.addSkill([projectId: proj2.projectId, skillId: proj2subj1skills.get(2).skillId], it, dates[index])
+        }
+        users[10..14].eachWithIndex { it, index ->
+            skillsService.addSkill([projectId: proj2.projectId, skillId: proj2subj2skills.get(0).skillId], it, dates[index])
+            skillsService.addSkill([projectId: proj2.projectId, skillId: proj2subj2skills.get(1).skillId], it, dates[index])
+            skillsService.addSkill([projectId: proj2.projectId, skillId: proj2subj2skills.get(2).skillId], it, dates[index])
+        }
+
+        String key = "someCoolKey"
+        users.eachWithIndex{ String entry, int i ->
+            i.times {
+                userTagRepo.save(new UserTag(userId: entry, key: key, value: "blah${it}" ))
+            }
+        }
+
+        String today = format.format(format.parse('2020-08-21 00:00:00'))
+        String fiveDaysAgo = format.format(format.parse('2020-08-16 00:00:00'))
+        String tenDaysAgo = format.format(format.parse('2020-08-11 00:00:00'))
+        String twentyDaysAgo = format.format(format.parse('2020-08-01 00:00:00'))
+        def proj1_resAll = skillsService.getMetricsData(proj1.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true])
+        def proj2_resAll = skillsService.getMetricsData(proj2.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true])
+
+        when:
+        def proj1_res_5days = skillsService.getMetricsData(proj1.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: fiveDaysAgo, toDayFilter: today])
+        def proj1_res_10days = skillsService.getMetricsData(proj1.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: tenDaysAgo, toDayFilter: today])
+        def proj2_res_10days = skillsService.getMetricsData(proj2.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: tenDaysAgo, toDayFilter: today])
+        def proj2_res_20days = skillsService.getMetricsData(proj2.projectId, metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: twentyDaysAgo, toDayFilter: tenDaysAgo])
+
+        then:
+        proj1_resAll.items.size() == 19
+        proj1_res_5days.items.size() == 19
+        proj1_res_10days.items.size() == 19
+        proj2_resAll.items.size() == 14
+        proj2_res_10days.items.size() == 0
+        proj2_res_20days.items.size() == 14
+        proj1_resAll.items.collect { it.count }.max() == 19
+        proj2_resAll.items.collect{ it.count }.max() == 10
+
+    }
 }
