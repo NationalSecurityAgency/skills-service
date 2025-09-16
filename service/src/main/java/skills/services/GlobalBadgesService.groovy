@@ -132,10 +132,17 @@ class GlobalBadgesService {
     @Autowired
     InviteOnlyProjectService inviteOnlyProjectService
 
+    @Autowired
+    CustomValidator customValidator
+
     @Transactional()
-    void saveBadge(String originalBadgeId, GlobalBadgeRequest badgeRequest) {
-        validateUserCommunityProps(badgeRequest, originalBadgeId)
-        badgeAdminService.saveBadge(null, originalBadgeId, badgeRequest, ContainerType.GlobalBadge)
+    void saveBadge(String originalBadgeId, GlobalBadgeRequest globalBadgeRequest) {
+        validateUserCommunityProps(globalBadgeRequest, originalBadgeId)
+        badgeAdminService.saveBadge(null, originalBadgeId, globalBadgeRequest, ContainerType.GlobalBadge)
+        CustomValidationResult customValidationResult = customValidator.validate(globalBadgeRequest)
+        if (!customValidationResult.valid) {
+            throw new SkillException(customValidationResult.msg, ErrorCode.BadParam)
+        }
     }
     @Transactional(readOnly = true)
     boolean existsByBadgeName(String subjectName) {
