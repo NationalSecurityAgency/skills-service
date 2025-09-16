@@ -38,7 +38,6 @@ import skills.auth.UserInfo
 import skills.services.AttachmentService
 import skills.services.admin.UserCommunityService
 import skills.storage.model.Attachment
-import skills.storage.repos.SkillDefRepo
 
 import java.util.function.Supplier
 import java.util.regex.Matcher
@@ -55,7 +54,6 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     private static final Pattern ATTACHMENT_UUID = ~/(?i)\/api\/download\/(.+)/
     private static final Pattern ADMIN_GROUP_ID = ~/(?i)\/.*\/admin-group-definitions\/([^\/]+).*/
     private static final Pattern BADGE_ID = ~/(?i)\/.*\/badge(?:s)?\/([^\/]+).*/
-    private static final Pattern SKILL_ID = ~/(?i)\/.*\/skills\/([^\/]+).*/
 
     private RequestMatcher projectsRequestMatcher
     private RequestMatcher quizzesAdminRequestMatcher
@@ -63,7 +61,6 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     private RequestMatcher attachmentsRequestMatcher
     private RequestMatcher adminGroupRequestMatcher
     private RequestMatcher badgeRequestMatcher
-    private RequestMatcher skillRequestMatcher
 
     @Autowired
     @Lazy
@@ -77,10 +74,6 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     @Lazy
     AttachmentService attachmentService
 
-    @Autowired
-    @Lazy
-    SkillDefRepo skillDefRepo
-
     AuthenticatedAuthorizationManager authenticatedAuthorizationManager
 
     @PostConstruct
@@ -92,7 +85,6 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         attachmentsRequestMatcher = new AntPathRequestMatcher("/api/download/**")
         adminGroupRequestMatcher = new AntPathRequestMatcher("/**/admin-group-definitions/**")
         badgeRequestMatcher = new AntPathRequestMatcher("/**/badge*/**")
-        skillRequestMatcher = new AntPathRequestMatcher("/**/skills/**")
     }
 
     @Override
@@ -129,9 +121,6 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         }
         if (badgeRequestMatcher.matches(request)) {
             badgeId = extractBadgeId(request)
-        }
-        if (skillRequestMatcher.matches(request)) {
-            badgeId = extractSkillId(request) // only global badges support UC protection currently
         }
         if (projectId || adminGroupId || quizId || badgeId) {
             log.debug("evaluating request [{}] for user community protection", request.getRequestURI())
@@ -213,19 +202,6 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         String res = StringUtils.EMPTY
         String url = getRequestUrl(request)
         Matcher bid = BADGE_ID.matcher(url)
-        if (bid.matches()) {
-            res = bid.group(1)
-            if (res?.equalsIgnoreCase("null") ) {
-                res = StringUtils.EMPTY
-            }
-        }
-        return res
-    }
-
-    private String extractSkillId(HttpServletRequest request) {
-        String res = StringUtils.EMPTY
-        String url = getRequestUrl(request)
-        Matcher bid = SKILL_ID.matcher(url)
         if (bid.matches()) {
             res = bid.group(1)
             if (res?.equalsIgnoreCase("null") ) {
