@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted } from 'vue';
+import {ref, onMounted, computed} from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import dayjs from 'dayjs';
@@ -61,8 +61,10 @@ const loading = ref(true);
 const distinctUsersOverTime = ref([]);
 const hasDataEnoughData = ref(false);
 const mutableTitle = ref(props.title);
+const byMonth = ref(false);
 const localProps = ref({
-  start: dayjs().subtract(30, 'day').valueOf()
+  start: dayjs().subtract(30, 'day').valueOf(),
+  byMonth: false,
 });
 const timeSelectorOptions = ref([
   {
@@ -141,16 +143,27 @@ const chartOptions = ref({
   },
 });
 
+const dateOptions = [{ label: 'Day/Week', value: false}, { label: 'Month', value: true }]
+const currentDateOption = ref('days');
+const isUsingDays = computed(() => {
+  return currentDateOption.value === 'days';
+})
+
 const updateTimeRange = (timeEvent) => {
   if (appConfig) {
     const oldestDaily = dayjs().subtract(appConfig.maxDailyUserEvents, 'day');
-    if (timeEvent.startTime < oldestDaily) {
-      mutableTitle.value = 'Users per week';
+    if (!byMonth.value) {
+      if (timeEvent.startTime < oldestDaily) {
+        mutableTitle.value = 'Users per week';
+      } else {
+        mutableTitle.value = props.title;
+      }
     } else {
-      mutableTitle.value = props.title;
+      mutableTitle.value = 'Users per month';
     }
   }
   localProps.value.start = timeEvent.startTime.valueOf();
+  currentDateOption.value = timeEvent.durationUnit;
   loadData();
 };
 
@@ -162,11 +175,15 @@ const loadData = () => {
   loading.value = true;
   MetricsService.loadChart(route.params.projectId, 'distinctUsersOverTimeForProject', localProps.value)
       .then((response) => {
-        if (response && response.length > 1 && !allZeros(response)) {
+
+        if (response && response.users?.length > 1 && !allZeros(response.users)) {
           hasDataEnoughData.value = true;
           distinctUsersOverTime.value = [{
-            data: response.map((item) => [item.value, item.count]),
+            data: response.users.map((item) => [item.value, item.count]),
             name: 'Users',
+          }, {
+            data: response.newUsers.map((item) => [item.value, item.count]),
+            name: 'New Users',
           }];
         } else {
           distinctUsersOverTime.value = [];
@@ -175,6 +192,25 @@ const loadData = () => {
         loading.value = false;
       });
 };
+
+const timeRangeSelector = ref(null);
+
+const dateOptionChanged = (option) => {
+  byMonth.value = option
+  localProps.value.byMonth = option
+
+  if(byMonth.value) {
+    mutableTitle.value = 'Users per month';
+  } else {
+    mutableTitle.value = 'Users per week';
+  }
+
+  if(isUsingDays.value && byMonth.value) {
+    timeRangeSelector.value.handleClick(1);
+  } else {
+    loadData()
+  }
+}
 </script>
 
 <template>
@@ -182,7 +218,17 @@ const loadData = () => {
     <template #header>
       <SkillsCardHeader :title="mutableTitle">
         <template #headerContent>
-          <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
+          <span class="mr-3">
+            <Badge v-for="option in dateOptions" class="ml-2"
+                   :class="{'can-select': byMonth !== option.value }"
+                   :severity="byMonth === option.value ? 'success' : 'secondary'"
+                   :key="option.label"
+                   @click="dateOptionChanged(option.value)">
+              {{option.label}}
+            </Badge>
+          </span>
+          |
+          <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange" ref="timeRangeSelector" :disable-days="byMonth" />
         </template>
       </SkillsCardHeader>
     </template>
@@ -195,5 +241,7 @@ const loadData = () => {
 </template>
 
 <style scoped>
-
+.can-select {
+  cursor: pointer;
+}
 </style>

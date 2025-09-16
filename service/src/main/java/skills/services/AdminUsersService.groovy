@@ -28,6 +28,7 @@ import skills.controller.result.model.*
 import skills.skillLoading.RankingLoader
 import skills.skillLoading.model.UsersPerLevel
 import skills.storage.model.DayCountItem
+import skills.storage.model.MonthlyCountItem
 import skills.storage.model.SkillDef
 import skills.storage.model.UserPoints
 import skills.storage.repos.ProjDefRepo
@@ -75,12 +76,15 @@ class AdminUsersService {
     @Value('${skills.config.ui.usersTableAdditionalUserTagKey:}')
     String usersTableAdditionalUserTagKey
 
-    List<TimestampCountItem> getUsage(String projectId, String skillId, Date start) {
+    List<TimestampCountItem> getUsage(String projectId, String skillId, Date start, Boolean newUsersOnly = false) {
         Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
+        List<DayCountItem> res
 
-        List<DayCountItem> res = skillId ?
-                userEventService.getDistinctUserCountForSkillId(projectId, skillId, startDate) :
-                userEventService.getDistinctUserCountsForProject(projectId, startDate)
+        if(skillId) {
+            res = userEventService.getDistinctUserCountForSkillId(projectId, skillId, startDate, newUsersOnly)
+        } else {
+            res = userEventService.getDistinctUserCountsForProject(projectId, startDate, newUsersOnly)
+        }
 
         List<TimestampCountItem> countsPerDay = []
         res?.each {
@@ -88,6 +92,24 @@ class AdminUsersService {
         }
 
         return countsPerDay
+    }
+
+    List<TimestampCountItem> getUsagePerMonth(String projectId, String subjectId, Date start, Boolean newUsersOnly = false) {
+        Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
+        List<MonthlyCountItem> users
+
+        if(subjectId) {
+            users = userEventService.getDistinctUserCountForSubjectByMonth(projectId, subjectId, startDate, newUsersOnly)
+        } else {
+            users = userEventService.getDistinctUserCountsForProjectByMonth(projectId, startDate, newUsersOnly)
+        }
+
+        List<TimestampCountItem> countsPerMonth = []
+        users?.each {
+            countsPerMonth << new TimestampCountItem(value: it.month.time, count: it.count)
+        }
+
+        return countsPerMonth
     }
 
     List<TimestampCountItem> getBadgesPerDay(String projectId, String badgeId, Integer numDays) {

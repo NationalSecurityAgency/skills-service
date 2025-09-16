@@ -212,7 +212,7 @@ describe('Metrics Tests - Subject', () => {
         cy
             .intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
                 {
-                    body: [{
+                    body: { users: [{
                         'value': 1600819200000,
                         'count': 35
                     }, {
@@ -305,7 +305,7 @@ describe('Metrics Tests - Subject', () => {
                     }, {
                         'value': 1603411200000,
                         'count': 6253
-                    }]
+                    }], newUsers: []}
                 })
             .as('distinctUsersOverTimeForProject');
 

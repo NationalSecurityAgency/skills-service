@@ -45,7 +45,7 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
 
     @Nullable
     @Query('''SELECT COUNT(DISTINCT up.userId) as numUsers, ut.value as tag
-        from UserPoints up
+        from UserPerformedSkill up
         join UserTag ut on ut.userId = up.userId 
         where up.skillRefId in (
                 select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
@@ -55,9 +55,10 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
             and up.skillRefId is not null 
             and ut.key = ?2 
             and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))
-            and not exists (select 1 from ArchivedUser au where au.userId = up.userId and au.projectId = ?1)   
+            and not exists (select 1 from ArchivedUser au where au.userId = up.userId and au.projectId = ?1)
+            and up.performedOn >= ?4 and up.performedOn <= ?5
         group by ut.value''')
-    List<UserTagCount> findDistinctUserIdByProjectIdAndUserTag(String projectId, String tagKey, String tagFilter, Pageable pageable)
+    List<UserTagCount> findDistinctUserIdByProjectIdAndUserTag(String projectId, String tagKey, String tagFilter, Date startDate, Date endDate, Pageable pageable)
 
 
     @Query('''SELECT COUNT(DISTINCT ut.value)
