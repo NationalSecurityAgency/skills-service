@@ -33,7 +33,7 @@ import static skills.intTests.utils.SkillsFactory.*
         'skills.authorization.userInfoUri=https://localhost:8202/userInfo?dn={dn}',
         'skills.authorization.userQueryUri=https://localhost:8202/userQuery?query={query}'
 ], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
-class SlidesSizeAndTypeValidationIT extends DefaultIntSpec {
+class SkillSlidesSizeAndTypeValidationIT extends DefaultIntSpec {
     def "cannot exceed max slide size for a skill"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
