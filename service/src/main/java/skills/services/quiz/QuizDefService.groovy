@@ -18,6 +18,7 @@ package skills.services.quiz
 import callStack.profiler.Profile
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -978,12 +979,25 @@ class QuizDefService {
                                 )
                             }
                         }
-                        def answer = isTextInput ? foundSelected?.answerText : (isMatching ? answerDef.multiPartAnswer : answerDef.answer)
+
+                        def answer
+                        def isSelected = foundSelected != null
+                        if(isTextInput) {
+                            answer = foundSelected?.answerText
+                        } else if(isMatching) {
+                            def originalAnswer = jsonSlurper.parseText(answerDef.multiPartAnswer)
+                            originalAnswer.answer = originalAnswer.value
+                            originalAnswer.value = foundSelected?.answerText
+                            isSelected = originalAnswer.value == originalAnswer.answer
+                            answer = JsonOutput.toJson(originalAnswer)
+                        } else {
+                            answer = answerDef.answer
+                        }
                         return new UserGradedQuizAnswerResult(
                                 id: answerDef.id,
                                 answer: answer,
                                 isConfiguredCorrect: Boolean.valueOf(answerDef.isCorrectAnswer),
-                                isSelected: foundSelected != null,
+                                isSelected: isSelected,
                                 needsGrading: foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING,
                                 gradingResult: gradingResult
                         )
@@ -994,7 +1008,7 @@ class QuizDefService {
                     if (isSurvey ) {
                         isCorrect = true
                     } else {
-                        if (questionDef.type == QuizQuestionType.TextInput) {
+                        if (questionDef.type == QuizQuestionType.TextInput || questionDef.type == QuizQuestionType.Matching) {
                             isCorrect = userQuizQuestionAttempt?.status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
                         } else {
                             isCorrect = !answers.find { it.isConfiguredCorrect != it.isSelected }

@@ -119,17 +119,24 @@ const manuallyGradedInfo = computed(() => {
                 :text="answerText"
                 :instance-id="`${question.id}_answer`"/>
           </div>
+
           <div v-if="isMatchingType">
             <div v-for="answer in question.answers">
               <div v-if="answer.answer" class="flex gap-4 w-md">
-                <div class="flex-1">
+                <div>
                   {{ answer.answer.term }}
                 </div>
                 <div>
                   <i class="fas fa-arrow-right"></i>
                 </div>
-                <div class="flex-1">
-                  {{ answer.answer.value }}
+                <div>
+                  <SkillsOverlay :show="!answer.isSelected && isWrong" opacity="0">
+                    <template #overlay>
+                      <i class="fa fa-ban text-red-500" style="font-size: 1.5rem; opacity: 0.8"
+                         data-cy="wrongAnswer"></i>
+                    </template>
+                    {{ answer.answer.value }}
+                  </SkillsOverlay>
                 </div>
               </div>
             </div>

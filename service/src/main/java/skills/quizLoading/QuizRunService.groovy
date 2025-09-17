@@ -609,13 +609,13 @@ class QuizRunService {
         UserQuizAnswerAttempt existingAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
         def parsed = jsonSlurper.parseText(answerDefPartialInfo.multiPartAnswer)
         if (existingAnswerAttempt) {
-            if (quizReportAnswerReq.isSelected) {
+//            if (quizReportAnswerReq.isSelected) {
                 existingAnswerAttempt.answer = quizReportAnswerReq.getAnswerText()
                 existingAnswerAttempt.status = quizReportAnswerReq.getAnswerText() == parsed.value ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT : UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
                 quizAttemptAnswerRepo.save(existingAnswerAttempt)
-            } else {
-                quizAttemptAnswerRepo.delete(existingAnswerAttempt)
-            }
+//            } else {
+//                quizAttemptAnswerRepo.delete(existingAnswerAttempt)
+//            }
         } else if (quizReportAnswerReq.isSelected) {
             UserQuizAnswerAttempt newAnswerAttempt = new UserQuizAnswerAttempt(
                     userQuizAttemptRefId: quizAttemptId,
@@ -814,6 +814,10 @@ class QuizRunService {
             if (!isSurvey && quizQuestionDef.type == QuizQuestionType.TextInput) {
                 status = UserQuizQuestionAttempt.QuizQuestionStatus.NEEDS_GRADING
                 isCorrect = false
+            } else if (quizQuestionDef.type == QuizQuestionType.Matching) {
+                def attempt = quizAttemptAnswerRepo.findAllByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefIdIn(quizAttemptId, selectedAnswerIds)
+                status = attempt.find{answer -> answer.status == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG } ? UserQuizQuestionAttempt.QuizQuestionStatus.WRONG : UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
+                isCorrect = status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
             } else {
                 if (!selectedIds) {
                     status = UserQuizQuestionAttempt.QuizQuestionStatus.INCOMPLETE
