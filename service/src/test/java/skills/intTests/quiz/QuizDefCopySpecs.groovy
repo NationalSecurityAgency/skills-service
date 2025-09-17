@@ -693,10 +693,13 @@ class QuizDefCopySpecs extends DefaultIntSpec {
     }
 
     def "copy quiz - attachments in quiz description are duplicated"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null, null, quiz.quizId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null, null, quiz.quizId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -706,9 +709,8 @@ class QuizDefCopySpecs extends DefaultIntSpec {
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
 
-        def quiz = QuizDefFactory.createQuiz(1)
         quiz.description = descriptionWithAttachments
-        skillsService.createQuizDef(quiz)
+        skillsService.createQuizDef(quiz, quiz.quizId)
         skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice))
 
         when:
@@ -740,10 +742,13 @@ class QuizDefCopySpecs extends DefaultIntSpec {
     }
 
     def "copy quiz - attachments in question description are duplicated"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null, null, quiz.quizId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null, null, quiz.quizId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -753,8 +758,6 @@ class QuizDefCopySpecs extends DefaultIntSpec {
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
 
-        def quiz = QuizDefFactory.createQuiz(1)
-        skillsService.createQuizDef(quiz)
         def question = QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice)
         question.question = descriptionWithAttachments
         skillsService.createQuizQuestionDef(question)
@@ -788,10 +791,13 @@ class QuizDefCopySpecs extends DefaultIntSpec {
     }
 
     def "a single question is copied via UI - attachments in question description are duplicated"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null, null, quiz.quizId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2,null, null,  quiz.quizId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -801,8 +807,6 @@ class QuizDefCopySpecs extends DefaultIntSpec {
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
 
-        def quiz = QuizDefFactory.createQuiz(1)
-        skillsService.createQuizDef(quiz)
         def question = QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice)
         question.question = descriptionWithAttachments
         skillsService.createQuizQuestionDef(question)

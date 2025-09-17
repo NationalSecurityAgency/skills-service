@@ -166,8 +166,8 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
 
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, project1.projectId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, project1.projectId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -196,7 +196,7 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
         then:
         fileContent_t1 == fileContent1
         file2Content_t1 == fileContent2
-        attachments_t1.projectId == [null, null]
+        attachments_t1.projectId == [project1.projectId, project1.projectId]
         attachments_t1.skillId == [null, null]
         skillRes_t1.description == descriptionWithoutAttachments
 
@@ -215,11 +215,12 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
         def p1subj1 = createSubject(1, 1)
         def p1subj2 = createSubject(1, 2)
         def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
-
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+        skillsService.createSubject(p1subj2)
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, project1.projectId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, project1.projectId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -230,7 +231,7 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
                 "[File2.pdf](${attachment2Href})").toString()
         skill.description = descriptionWithAttachments
 
-        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+        skillsService.updateSkill(skill)
         skillsService.createSubject(p1subj2)
 
         when:
@@ -241,7 +242,7 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
         def skill2Res = skillsService.getSkill([skillId: SkillReuseIdUtil.addTag(skill.skillId, 0), projectId: project1.projectId, subjectId: p1subj2.subjectId])
 
         String fileContent3= 'Text in a file3'
-        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, null)
+        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, project1.projectId)
         String attachment3Href = uploadedAttachment3Res.href
         String description2WithAttachment = "Just one: [File3.pdf](${attachment3Href})".toString()
         skill.description = description2WithAttachment
@@ -268,11 +269,12 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
         def project1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
 
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, project1.projectId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, project1.projectId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -282,8 +284,8 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
         skill.description = descriptionWithAttachments
+        skillsService.updateSkill(skill)
 
-        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
 
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         def project2 = createProject(2)
@@ -298,7 +300,7 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
         def skill2Res = skillsService.getSkill([skillId: skill.skillId, projectId: project2.projectId, subjectId: p2subj1.subjectId])
 
         String fileContent3= 'Text in a file3'
-        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, null)
+        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, project1.projectId)
         String attachment3Href = uploadedAttachment3Res.href
         String description2WithAttachment = "Just one: [File3.pdf](${attachment3Href})".toString()
         skill.description = description2WithAttachment
@@ -322,10 +324,15 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
     }
 
     def "when project is edited with the same description no new attachments are created"() {
+        def project1 = createProject(1)
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        def p1subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, project1.projectId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, project1.projectId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -334,12 +341,8 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
                 "## some more\n" +
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
-
-        def project1 = createProject(1)
         project1.description = descriptionWithAttachments
-        def p1subj1 = createSubject(1, 1)
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
-        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+        skillsService.updateProject(project1)
 
         when:
         List<Attachment> attachments_t1 = attachmentRepo.findAll().toList()
@@ -363,10 +366,15 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
     }
 
     def "when project is edited and description's one attachment was replaced by another attachment"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, project1.projectId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, project1.projectId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -376,18 +384,15 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
 
-        def project1 = createProject(1)
         project1.description = descriptionWithAttachments
-        def p1subj1 = createSubject(1, 1)
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
-        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+        skillsService.updateProject(project1)
 
         when:
         List<Attachment> attachments_t1 = attachmentRepo.findAll().toList()
         def projectRes_t1 = skillsService.getProjectDescription(project1.projectId)
 
         String fileContent3 = 'Text in a file3'
-        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, null)
+        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, project1.projectId)
         String attachment3Href = uploadedAttachment3Res.href
         String descriptionWithAttachments1 =("[File1.pdf](${attachmentHref})\n" +
                 "\n" +
@@ -417,10 +422,15 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
     }
 
     def "when a subject is edited with the same description no new attachments are created"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, project1.projectId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, project1.projectId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -430,11 +440,8 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
 
-        def project1 = createProject(1)
-        def p1subj1 = createSubject(1, 1)
         p1subj1.description = descriptionWithAttachments
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
-        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+        skillsService.updateSubject(p1subj1)
 
         when:
         List<Attachment> attachments_t1 = attachmentRepo.findAll().toList()
@@ -460,10 +467,15 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
     }
 
     def "when a subject is edited and description's one attachment was replaced by another attachment"() {
+        def project1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, project1.projectId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, project1.projectId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -472,19 +484,15 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
                 "## some more\n" +
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
-
-        def project1 = createProject(1)
-        def p1subj1 = createSubject(1, 1)
         p1subj1.description = descriptionWithAttachments
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
-        skillsService.createProjectAndSubjectAndSkills(project1, p1subj1, [skill])
+        skillsService.updateSubject(p1subj1)
 
         when:
         List<Attachment> attachments_t1 = attachmentRepo.findAll().toList()
         def res_t1 = skillsService.getSubject(p1subj1)
 
         String fileContent3 = 'Text in a file3'
-        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, null)
+        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, project1.projectId)
         String attachment3Href = uploadedAttachment3Res.href
         String descriptionWithAttachments1 =("[File1.pdf](${attachmentHref})\n" +
                 "\n" +
@@ -517,10 +525,13 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
     }
 
     def "when a badge is edited with the same description no new attachments are created"() {
+        def proj = createProject(1)
+        skillsService.createProject(proj)
+
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, proj.projectId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, proj.projectId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -530,8 +541,6 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
 
-        def proj = createProject(1)
-        skillsService.createProject(proj)
         def badge = createBadge(1, 1)
         badge.description = descriptionWithAttachments
         skillsService.createBadge(badge)
@@ -560,10 +569,13 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
     }
 
     def "when a badge is edited and description's one attachment was replaced by another attachment"() {
+        def proj = createProject(1)
+        skillsService.createProject(proj)
+
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, proj.projectId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, proj.projectId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -573,8 +585,6 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
 
-        def proj = createProject(1)
-        skillsService.createProject(proj)
         def badge = createBadge(1, 1)
         badge.description = descriptionWithAttachments
         skillsService.createBadge(badge)
@@ -584,7 +594,7 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
         def res_t1 = skillsService.getBadge(badge)
 
         String fileContent3 = 'Text in a file3'
-        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, null)
+        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, proj.projectId)
         String attachment3Href = uploadedAttachment3Res.href
         String descriptionWithAttachments1 =("[File1.pdf](${attachmentHref})\n" +
                 "\n" +
@@ -616,10 +626,15 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
     }
 
     def "when a skill is edited with the same description no new attachments are created"() {
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, proj.projectId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, proj.projectId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -629,11 +644,9 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
 
-        def proj = createProject(1)
-        def subj = createSubject(1, 1)
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+
         skill.description = descriptionWithAttachments
-        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+        skillsService.createSkill(skill)
         when:
         List<Attachment> attachments_t1 = attachmentRepo.findAll().toList()
         def res_t1 = skillsService.getSkill([skillId: skill.skillId, projectId: proj.projectId, subjectId: subj.subjectId])
@@ -658,10 +671,15 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
     }
 
     def "when a skill is edited and description's one attachment was replaced by another attachment"() {
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, proj.projectId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, proj.projectId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -671,17 +689,14 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
 
-        def proj = createProject(1)
-        def subj = createSubject(1, 1)
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
         skill.description = descriptionWithAttachments
-        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+        skillsService.updateSkill(skill, skill.skillId)
         when:
         List<Attachment> attachments_t1 = attachmentRepo.findAll().toList()
         def res_t1 = skillsService.getSkill([skillId: skill.skillId, projectId: proj.projectId, subjectId: subj.subjectId])
 
         String fileContent3 = 'Text in a file3'
-        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, null)
+        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, proj.projectId)
         String attachment3Href = uploadedAttachment3Res.href
         String descriptionWithAttachments1 =("[File1.pdf](${attachmentHref})\n" +
                 "\n" +
@@ -713,10 +728,16 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
     }
 
     def "approval request justification attachments properly get project id and skill id assigned"() {
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
+        skill.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, proj.projectId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test1-pdf.pdf', fileContent2, proj.projectId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -726,11 +747,6 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
 
-        def proj = createProject(1)
-        def subj = createSubject(1, 1)
-        def skill = createSkill(1, 1, 1, 0, 1, 0, 250)
-        skill.selfReportingType = SkillDef.SelfReportingType.Approval.toString()
-        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
         when:
         skillsService.addSkill([skillId: skill.skillId, projectId: proj.projectId, subjectId: subj.subjectId], "user1", new Date(), descriptionWithAttachments)
 
@@ -743,10 +759,13 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
     }
 
     def "quiz updated and description with attachments stayed the same - no new attachments are created"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null, null, quiz.quizId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null, null, quiz.quizId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -756,9 +775,9 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
 
-        def quiz = QuizDefFactory.createQuiz(1)
+
         quiz.description = descriptionWithAttachments
-        skillsService.createQuizDef(quiz)
+        skillsService.createQuizDef(quiz, quiz.quizId)
         skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice))
 
         when:
@@ -786,11 +805,14 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
     }
 
     def "quiz updated and description's one attachment was replaced by another attachment"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
 
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null, null, quiz.quizId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null, null, quiz.quizId)
 
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
@@ -802,9 +824,9 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
                 "\n" +
                 "[File2.pdf](${attachment2Href})").toString()
 
-        def quiz = QuizDefFactory.createQuiz(1)
+
         quiz.description = descriptionWithAttachments
-        skillsService.createQuizDef(quiz)
+        skillsService.createQuizDef(quiz, quiz.quizId)
         skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice))
 
         when:
@@ -812,7 +834,7 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
         def quizInfo_t1 = skillsService.getQuizDef(quiz.quizId)
 
         String fileContent3 = 'Text in a file3'
-        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, null)
+        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, null, null, quiz.quizId)
         String attachment3Href = uploadedAttachment3Res.href
         String descriptionWithAttachments1 =("[File1.pdf](${attachmentHref})\n" +
                 "\n" +
@@ -851,8 +873,8 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
 
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null, null, quiz.quizId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null, null, quiz.quizId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -898,8 +920,8 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
 
         String fileContent1 = 'Text in a file1'
         String fileContent2 = 'Text in a file2'
-        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null)
-        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null)
+        def uploadedAttachmentRes = skillsService.uploadAttachment('test1-pdf.pdf', fileContent1, null, null, quiz.quizId)
+        def uploadedAttachment2Res = skillsService.uploadAttachment('test2-pdf.pdf', fileContent2, null, null, quiz.quizId)
         String attachmentHref = uploadedAttachmentRes.href
         String attachment2Href = uploadedAttachment2Res.href
 
@@ -918,7 +940,7 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
         def quizInfo_t1 = skillsService.getQuizQuestionDef(quiz.quizId, question.id)
 
         String fileContent3 = 'Text in a file3'
-        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, null)
+        def uploadedAttachment3Res = skillsService.uploadAttachment('test3-pdf.pdf', fileContent3, null, null, quiz.quizId)
         String attachment3Href = uploadedAttachment3Res.href
         String questionWithAttachments1 =("[File1.pdf](${attachmentHref})\n" +
                 "\n" +
@@ -952,5 +974,6 @@ class AttachmentsManagementSpecs extends DefaultIntSpec {
         newAttachments.quizId == [quiz.quizId]
         quizInfo_t2.question.contains(newAttachments[0].uuid)
     }
+
 }
 

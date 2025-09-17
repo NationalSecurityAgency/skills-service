@@ -490,51 +490,6 @@ describe('Community Quiz Creation Tests', () => {
         cy.wait('@saveSkill')
     });
 
-    it('attachments are not enabled on project creation when UC protection is available', () => {
-        cy.visit('/administrator/quizzes/')
-        cy.get('[data-cy="noQuizzesYet"]')
-        cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
-        cy.get('.p-dialog-header').contains('New Quiz/Survey')
-        cy.get('[data-cy="quizName"]').type('My First Quiz')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-
-        cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
-        cy.get('[data-cy="userCommunityDocsLink"]').should('not.exist')
-        const warningMsg = 'Please note that once the restriction is enabled it cannot be lifted/disabled';
-        cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg).should('not.exist')
-        cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
-        cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
-
-        cy.get(`button.attachment-button`).should('not.exist');
-
-        cy.clickSaveDialogBtn()
-        cy.validateTable(quizTableSelector, [
-            [{
-                colIndex: 0,
-                value: 'My First Quiz'
-            }, {
-                colIndex: 0,
-                value: 'For Divine Dragon Nation'
-            }, {
-                colIndex: 1,
-                value: 'Quiz'
-            }],
-        ], 5);
-
-        cy.get('[data-cy="editQuizButton_MyFirstQuiz"]').click()
-        cy.get(`button.attachment-button`).should('exist');
-
-        cy.fixture('vars.json').then((vars) => {
-            cy.logout();
-            cy.login(allDragonsUser, vars.defaultPass);
-            cy.visit('/administrator/quizzes/')
-            cy.get('[data-cy="inception-button"]').contains('Level')
-            cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
-            cy.get('[data-cy="restrictCommunityControls"]').should('not.exist');
-            cy.get(`button.attachment-button`).should('exist');
-        })
-    });
-
     it('copy a quiz with restricted community', () => {
         cy.createQuizDef(1, {enableProtectedUserCommunity: true})
 
