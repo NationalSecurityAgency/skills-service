@@ -16,12 +16,18 @@
 package skills.services
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.hibernate.engine.jdbc.BlobProxy
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.util.unit.DataSize
 import org.springframework.web.multipart.MultipartFile
 import skills.auth.UserInfoService
+import skills.controller.exceptions.AttachmentValidator
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.UploadAttachmentResult
 import skills.storage.model.Attachment
 import skills.storage.repos.AttachmentRepo
@@ -44,11 +50,24 @@ class AttachmentService {
     @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
 
+    @Value('${skills.config.allowedAttachmentMimeTypes}')
+    List<MediaType> allowedAttachmentMimeTypes;
+
+    @Value('${skills.config.maxAttachmentSize:10MB}')
+    DataSize maxAttachmentSize;
+
     @Transactional
     UploadAttachmentResult saveAttachment(MultipartFile file,
                                           String projectId,
                                           String quizId,
                                           String skillId) {
+        boolean isAtLeastOneIdPresent = !StringUtils.isBlank(projectId) || !StringUtils.isBlank(quizId) || !StringUtils.isBlank(skillId);
+        SkillsValidator.isTrue(isAtLeastOneIdPresent,
+                "Attachment must be associated to either a projectId or a quizId or a skillId");
+
+        AttachmentValidator.isWithinMaxAttachmentSize(file.getSize(), maxAttachmentSize);
+        AttachmentValidator.isAllowedAttachmentMimeType(file.getContentType(), allowedAttachmentMimeTypes);
+
         String userId = userInfoService.getCurrentUserId();
         String uuid = UUID.randomUUID().toString()
 

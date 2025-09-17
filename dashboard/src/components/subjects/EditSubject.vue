@@ -221,7 +221,9 @@ const onSubjectSaved = (subject) => {
         </div>
       </div>
 
-      <markdown-editor class="" name="description" />
+      <markdown-editor
+          :upload-url="`/admin/projects/${route.params.projectId}/upload`"
+          name="description" />
       <help-url-input class="mt-4"
                       :next-focus-el="previousFocus"
                       name="helpUrl"

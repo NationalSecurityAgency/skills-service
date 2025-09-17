@@ -831,13 +831,15 @@ class CopyProjectSpecs extends CopyIntSpec {
     }
 
     def "copy a project that has attachments in project's description - attachments should be copied"() {
-        String contents = 'Test is a test'
-        String attachmentHref = attachFileAndReturnHref(null, contents)
-        
-        String desc = "Here is a [Link](${attachmentHref})".toString()
         def p1 = createProject(1)
-        p1.description = desc
         skillsService.createProject(p1)
+
+        String contents = 'Test is a test'
+        String attachmentHref = attachFileAndReturnHref(p1.projectId, contents)
+
+        String desc = "Here is a [Link](${attachmentHref})".toString()
+        p1.description = desc
+        skillsService.updateProject(p1)
 
         def p1subj1 = createSubject(1, 1)
         skillsService.createSubject(p1subj1)

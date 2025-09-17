@@ -26,6 +26,7 @@ import org.springframework.util.unit.DataSize
 import skills.intTests.utils.*
 import skills.services.AttachmentService
 import skills.storage.model.Attachment
+import skills.storage.model.SkillDef
 import skills.utils.GroovyToJavaByteUtils
 
 @Slf4j
@@ -119,14 +120,11 @@ class AttachmentSpecs extends DefaultIntSpec {
         Resource resource = GroovyToJavaByteUtils.toByteArrayResource('Test is a test', filename)
 
         when:
-        def result = skillsService.uploadAttachment(resource, proj.projectId)
-
+        skillsService.uploadAttachment(resource, proj.projectId)
         then:
-
-        result
-        !result.success
-        result.errorCode == 'BadParam'
-        result.explanation.contains('Invalid media type [application/zip]')
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("BadParam")
+        e.message.contains("Invalid media type [application/zip]")
     }
 
     def "attempt to upload attachment with size greater than max allowed"() {
@@ -137,31 +135,12 @@ class AttachmentSpecs extends DefaultIntSpec {
         Resource resource = GroovyToJavaByteUtils.toByteArrayResource(fileSize, filename)
 
         when:
-        def result = skillsService.uploadAttachment(resource, proj.projectId)
+        skillsService.uploadAttachment(resource, proj.projectId)
 
         then:
-
-        result
-        !result.success
-        result.errorCode == 'BadParam'
-        result.explanation.contains('File size [1 MB] exceeds maximum file size [1 MB]')
-    }
-
-    def "attempt to upload attachment that is a associated to both a projectId and a quizId"() {
-        Map proj = SkillsFactory.createProject()
-        skillsService.createProject(proj)
-        String filename = 'test-pdf.pdf'
-        String contents = 'Test is a test'
-        Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
-
-        when:
-        def result = skillsService.uploadAttachment(resource, "projectId", null, "quizId")
-
-        then:
-        result
-        !result.success
-        result.errorCode == 'BadParam'
-        result.explanation.equals('Attachment cannot be associated to both a projectId and a quizId')
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("BadParam")
+        e.message.contains("File size [1 MB] exceeds maximum file size [1 MB]")
     }
 
     def "upload attachment with just projectId"() {
@@ -234,31 +213,6 @@ class AttachmentSpecs extends DefaultIntSpec {
         result.skillId == badge.badgeId
     }
 
-    def "upload attachment with projectId and skillId"() {
-        Map proj = SkillsFactory.createProject()
-        Map subject = SkillsFactory.createSubject()
-        skillsService.createProject(proj)
-        skillsService.createSubject(subject)
-        String filename = 'test-pdf.pdf'
-        String contents = 'Test is a test'
-        Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
-
-        when:
-        def result = skillsService.uploadAttachment(resource, proj.projectId, subject.subjectId)
-
-        then:
-        result
-        result.success
-        result.contentType == "application/pdf"
-        result.size == contents.getBytes().length
-        result.filename == filename
-        result.href ==~ /^\/api\/download\/[^\/]+$/
-        result.userId == skillsService.userName
-        result.projectId == proj.projectId
-        result.quizId == null
-        result.skillId == subject.subjectId
-    }
-
     def "do not allow uploading multiple files at once"() {
         setup:
         Map proj = SkillsFactory.createProject()
@@ -298,30 +252,36 @@ class AttachmentSpecs extends DefaultIntSpec {
         String contents = 'Test is a test'
         Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
 
-        when:
-        def projAttachRes = skillsService.uploadAttachment(resource)
-        proj.description = "description with [${filename}](/api/download/${projAttachRes.uuid})".toString()
         skillsService.createProject(proj)
+        when:
+        def projAttachRes = skillsService.uploadAttachment(resource, proj.projectId)
 
-        def subjAttachRes = skillsService.uploadAttachment(resource)
+        def subjAttachRes = skillsService.uploadAttachment(resource, proj.projectId)
         subject.description = "description with [${filename}](/api/download/${subjAttachRes.uuid})".toString()
         skillsService.createSubject(subject)
 
-        def skillAttachRes = skillsService.uploadAttachment(resource)
+        def skillAttachRes = skillsService.uploadAttachment(resource, proj.projectId)
         skill.description = "description with [${filename}](/api/download/${skillAttachRes.uuid})".toString()
         skillsService.createSkill(skill)
 
-        def skillsGroupAttachRes = skillsService.uploadAttachment(resource)
+        def skillsGroupAttachRes = skillsService.uploadAttachment(resource, proj.projectId)
         skillsGroup.description = "description with [${filename}](/api/download/${skillsGroupAttachRes.uuid})".toString()
         skillsService.createSkill(skillsGroup)
 
-        def badgeAttachRes = skillsService.uploadAttachment(resource)
+        def badgeAttachRes = skillsService.uploadAttachment(resource, proj.projectId)
         badge.description = "description with [${filename}](/api/download/${badgeAttachRes.uuid})".toString()
         skillsService.createBadge(badge)
 
-        def quizAttachRes = skillsService.uploadAttachment(resource)
-        quiz.description = "description with [${filename}](/api/download/${quizAttachRes.uuid})".toString()
         skillsService.createQuizDef(quiz)
+        def quizAttachRes = skillsService.uploadAttachment(resource, null, null, quiz.quizId)
+
+        // self report skill
+        Map selfReportSkill = SkillsFactory.createSkill(1, 1,3 , 0, 1, 480, 100)
+        selfReportSkill.selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createSkill(selfReportSkill)
+        def selfReportSkillAttachRes = skillsService.uploadAttachment(resource, proj.projectId)
+        String userId = getRandomUsers(1).first()
+        skillsService.addSkill([projectId: proj.projectId, skillId: selfReportSkill.skillId], userId, new Date(),  "description with [${filename}](/api/download/${selfReportSkillAttachRes.uuid})".toString())
 
         Attachment projAttach = attachmentService.getAttachment(projAttachRes.uuid)
         Attachment subjAttach = attachmentService.getAttachment(subjAttachRes.uuid)
@@ -329,6 +289,7 @@ class AttachmentSpecs extends DefaultIntSpec {
         Attachment skillsGroupAttach = attachmentService.getAttachment(skillsGroupAttachRes.uuid)
         Attachment badgeAttach = attachmentService.getAttachment(badgeAttachRes.uuid)
         Attachment quizAttach = attachmentService.getAttachment(quizAttachRes.uuid)
+        Attachment justificationAttach = attachmentService.getAttachment(selfReportSkillAttachRes.uuid)
 
         then:
         projAttach.projectId == proj.projectId
@@ -354,6 +315,10 @@ class AttachmentSpecs extends DefaultIntSpec {
         quizAttach.projectId == null
         quizAttach.quizId == quiz.quizId
         quizAttach.skillId == null
+
+        justificationAttach.projectId == proj.projectId
+        justificationAttach.skillId == selfReportSkill.skillId
+        justificationAttach.quizId == null
     }
 
     private List<Attachment> findAll() {

@@ -1026,7 +1026,20 @@ class SkillsService {
         if (projectId) { body.put("projectId", projectId)}
         if (skillId) { body.put("skillId", skillId)}
         if (quizId) { body.put("quizId", quizId)}
-        wsHelper.apiUpload("/upload", body)
+
+        assert !(projectId && quizId)
+        assert projectId || skillId || quizId
+
+        String url
+        if (projectId) {
+            url = "/projects/${projectId}/upload"
+        } else if (quizId) {
+            url = "/quiz-definitions/${quizId}/upload"
+        } else {
+            // assume global badge if proj and skill ids are null
+            url = "/badges/${skillId}/upload"
+        }
+        wsHelper.adminUpload(url, body, true)
     }
     // note - not supported, used for testing purposes only
     def uploadAttachments(List<Resource> attachments, String projectId='TestProject1'){
@@ -1035,7 +1048,7 @@ class SkillsService {
             body.put("file", attachment)
             body.put("projectId", projectId)
         }
-        wsHelper.apiUpload("/upload", body)
+        wsHelper.adminUpload("/projects/${projectId}/upload", body)
     }
 
     static class FileAndHeaders {

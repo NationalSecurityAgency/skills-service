@@ -73,6 +73,9 @@ class GlobalBadgesController {
     @Autowired
     AdminGroupService adminGroupService
 
+    @Autowired
+    AttachmentService attachmentService
+
     @RequestMapping(value = "/{badgeId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult saveBadge(@PathVariable("badgeId") String badgeId,
@@ -284,5 +287,12 @@ class GlobalBadgesController {
     EnableUserCommunityValidationRes validateAdminGroupForEnablingCommunity(@PathVariable("badgeId") String badgeId) {
         SkillsValidator.isNotBlank(badgeId, "badgeId")
         return globalBadgesService.validateGlobalBadgeForEnablingCommunity(badgeId)
+    }
+
+    @RequestMapping(value = "/{badgeId}/upload", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    UploadAttachmentResult uploadFileGlobalBAdge(@RequestParam("file") MultipartFile file,
+                                            @PathVariable("badgeId") String badgeId) {
+        return attachmentService.saveAttachment(file, null, null, badgeId);
     }
 }

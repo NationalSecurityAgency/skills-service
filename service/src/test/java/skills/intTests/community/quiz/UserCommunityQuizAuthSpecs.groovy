@@ -521,7 +521,7 @@ class UserCommunityQuizAuthSpecs extends DefaultIntSpec {
         String contents = 'Test is a test'
         Resource resource = (Resource)GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
 
-        def quizAttachment = skillsService.uploadAttachment(resource, (String)null, (String)null, q1.quizId)
+        def quizAttachment = pristineDragonsUser.uploadAttachment(resource, (String)null, (String)null, q1.quizId)
 
         then:
         pristineDragonsUser.downloadAttachmentAsText(quizAttachment.href) == "Test is a test"

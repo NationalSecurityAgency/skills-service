@@ -129,14 +129,8 @@ class UserSkillsController {
     @Autowired
     GlobalBadgesService globalBadgeService;
 
-    @Value("${skills.config.allowedAttachmentMimeTypes}")
-    List<MediaType> allowedAttachmentMimeTypes;
-
     @Value("${skills.config.allowedVideoUploadMimeTypes}")
     List<MediaType> allowedMediaUploadTypes;
-
-    @Value("${skills.config.maxAttachmentSize:10MB}")
-    DataSize maxAttachmentSize;
 
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {
         if (versionParam != null) {
@@ -528,19 +522,13 @@ class UserSkillsController {
         return RequestResult.success();
     }
 
-    @RequestMapping(value = "/upload", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/upload", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
     @ResponseBody
     @Profile
-    public UploadAttachmentResult uploadFile(@RequestParam("file") MultipartFile file,
-                                             @RequestParam(name = "projectId", required = false) String projectId,
-                                             @RequestParam(name = "quizId", required = false) String quizId,
-                                             @RequestParam(name = "skillId", required = false) String skillId) {
-        log.info("Project ID ["+projectId+"], quizId ["+quizId+"], skillId ["+skillId+"]");
-        SkillsValidator.isTrue(StringUtils.isBlank(projectId) || StringUtils.isBlank(quizId),
-                "Attachment cannot be associated to both a projectId and a quizId");
-        AttachmentValidator.isWithinMaxAttachmentSize(file.getSize(), maxAttachmentSize);
-        AttachmentValidator.isAllowedAttachmentMimeType(file.getContentType(), allowedAttachmentMimeTypes);
-        return attachmentService.saveAttachment(file, projectId, quizId, skillId);
+    public UploadAttachmentResult uploadFileForSkill(@RequestParam("file") MultipartFile file,
+                                             @PathVariable("projectId") String projectId,
+                                             @PathVariable("skillId") String skillId) {
+        return attachmentService.saveAttachment(file, projectId, null, skillId);
     }
 
     @GetMapping(value = "/projects/{projectId}/skills/{skillId}/videoCaptions", produces = MediaType.TEXT_PLAIN_VALUE)

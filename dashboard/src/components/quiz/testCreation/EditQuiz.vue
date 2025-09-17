@@ -247,7 +247,8 @@ const onSavedQuiz = (savedQuiz) => {
       <markdown-editor
           id="quizDescription"
           :quiz-id="isEdit ? quiz.quizId : null"
-          :allow-attachments="isEdit || !communityLabels.showManageUserCommunity.value"
+          :upload-url="isEdit   ? `/admin/quiz-definitions/${props.quiz.quizId}/upload` : null"
+          :allow-attachments="isEdit"
           data-cy="quizDescription"
           class="mt-8"
           name="description" />
