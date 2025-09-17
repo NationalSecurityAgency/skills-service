@@ -261,19 +261,19 @@ const close = () => { model.value = false }
 
 const saveQuiz = (values) => {
   const { question, answerHint, answers, currentScaleValue } = values
-  const removeEmptyQuestions = answers.filter((a) => ((a.answer && a.answer.trim().length > 0)) || a.multiPartAnswer);
-  const numCorrect = answers.filter((a) => a.isCorrect).length;
+  let processedAnswers = answers
   let { questionType : { id : questionType } } = values
 
   if(questionType === 'Matching') {
-    answers.forEach((answer) => {
+    processedAnswers.forEach((answer) => {
       answer.isCorrect = true
       answer.multiPartAnswer = JSON.stringify(answer.multiPartAnswer)
     })
   } else {
-    answers.forEach((answer) => {
+    processedAnswers.forEach((answer) => {
       delete answer.multiPartAnswer
     })
+    processedAnswers = answers.filter((a) => a.answer && a.answer.trim().length > 0)
   }
 
   const quizToSave = {
@@ -282,7 +282,7 @@ const saveQuiz = (values) => {
     question,
     answerHint,
     questionType,
-    answers: (questionType === QuestionType.TextInput || questionType === QuestionType.Rating) ? [] : removeEmptyQuestions,
+    answers: (questionType === QuestionType.TextInput || questionType === QuestionType.Rating) ? [] : processedAnswers,
   };
   if (questionType === QuestionType.Rating) {
     quizToSave.questionScale = currentScaleValue;
