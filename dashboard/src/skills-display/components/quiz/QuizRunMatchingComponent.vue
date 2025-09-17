@@ -70,9 +70,7 @@ const moveElementUp = (index) => {
   if(index > 0) {
     const newIndex = index - 1;
     [answers.value[index], answers.value[newIndex]] = [answers.value[newIndex], answers.value[index]]
-    const newId = `answer-${props.q.id}-${newIndex}`
-    focusState.setElementId(newId)
-    focusState.focusOnLastElement()
+    // const newId = `answer-${props.q.id}-${newIndex}`
     answerOrderChanged()
   }
 }
@@ -81,9 +79,7 @@ const moveElementDown = (index) => {
   if(index + 1 < answers.value.length) {
     const newIndex = index + 1;
     [answers.value[index], answers.value[newIndex]] = [answers.value[newIndex], answers.value[index]]
-    const newId = `answer-${props.q.id}-${newIndex}`
-    focusState.setElementId(newId)
-    focusState.focusOnLastElement()
+    // const newId = `answer-${props.q.id}-${newIndex}`
     answerOrderChanged()
   }
 }
@@ -97,7 +93,7 @@ const moveElementDown = (index) => {
       </div>
     </div>
     <div class="flex flex-col border-l-1" :id="`answers-${q.id}`" style="min-width: 100px;">
-      <div v-for="(answer, index) in answers" class="border-1 ml-2 mb-2 p-1" style="min-height: 34px;" tabindex="0">
+      <div v-for="(answer, index) in answers" class="border-1 ml-2 mb-2 p-1" style="min-height: 34px;">
         <draggable :list="answers[index]"
                    itemKey=""
                    :id="`answer-${q.id}-${index}`"
@@ -107,6 +103,7 @@ const moveElementDown = (index) => {
                    :group="{ name: 'answers', put: answers[index].length === 0, pull: true }">
           <template #item="{element}">
             <div style="cursor: pointer;"
+                 tabindex="0"
                  @keyup.up="moveElementUp(index)"
                  @keyup.down="moveElementDown(index)"
                  @keyup.right="removeElement(index)">
