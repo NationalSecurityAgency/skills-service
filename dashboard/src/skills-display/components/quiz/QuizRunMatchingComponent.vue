@@ -14,56 +14,79 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import Sortable from 'sortablejs/modular/sortable.complete.esm.js';
 import { onMounted, ref } from 'vue';
+import draggable from 'vuedraggable';
+import {useFocusState} from "@/stores/UseFocusState.js";
 
 const props = defineProps(['q', 'answerOptions'])
 const emit = defineEmits(['updateAnswerOrder'])
 
-const answerOrder = ref([])
+const focusState = useFocusState()
+const answerBank = ref([])
+const answers = ref([])
 
 onMounted(() => {
-  let answers = document.getElementById(`answers-${props.q.id}`)
-  let answerBank = document.getElementById(`answer-bank-${props.q.id}`)
-  answerOrder.value = props.answerOptions;
-
-  Sortable.create(answers, {
-    animation: 150,
-    swap: true,
-    ghostClass: 'skills-sort-order-ghost-class',
-    group: {
-      name: 'answers',
-      put: ['bank'],
-    },
-    onUpdate() {
-      answerOrderChanged();
-    },
-    onAdd() {
-      answerOrderChanged();
-    }
-  });
-  Sortable.create(answerBank, {
-    animation: 150,
-    ghostClass: 'skills-sort-order-ghost-class',
-    group: {
-      name: 'bank',
-      put: false
-    },
+  answerBank.value = props.q.matchingTerms;
+  props.q.matchingTerms.forEach((term) => {
+    answers.value.push([ ])
   });
 })
 
 const answerOrderChanged = () => {
-  let answers = document.getElementById(`answers-${props.q.id}`).children
   let termCounter = 0
   let pairs = []
-  for(const answer of answers) {
-    let answerPair = {term: props.answerOptions[termCounter]?.answerOption, value: answer.innerHTML}
+  for(const answer of answers.value) {
+    let answerPair = {term: props.answerOptions[termCounter]?.answerOption, value: answer[0]}
     pairs.push(answerPair)
     termCounter++
   }
   emit('updateAnswerOrder', pairs);
 }
 
+const removeElement = (element) => {
+  answerBank.value.push(answers.value[element][0])
+  answers.value[element] = []
+  answerOrderChanged()
+}
+
+const addElement = (element) => {
+  let spaceFound = false
+  let index = 0
+
+  while(index !== answers.value.length && !spaceFound) {
+    if(answers.value[index].length === 0) {
+      answers.value[index] = [element]
+      spaceFound = true
+    }
+    index++;
+  }
+
+  const elementAt = answerBank.value.indexOf(element)
+  answerBank.value.splice(elementAt, 1);
+  answerOrderChanged()
+}
+
+const moveElementUp = (index) => {
+  if(index > 0) {
+    const newIndex = index - 1;
+    [answers.value[index], answers.value[newIndex]] = [answers.value[newIndex], answers.value[index]]
+    const newId = `answer-${props.q.id}-${newIndex}`
+    focusState.setElementId(newId)
+    focusState.focusOnLastElement()
+    answerOrderChanged()
+  }
+}
+
+const moveElementDown = (index) => {
+  if(index + 1 < answers.value.length) {
+    const newIndex = index + 1;
+    [answers.value[index], answers.value[newIndex]] = [answers.value[newIndex], answers.value[index]]
+    const newId = `answer-${props.q.id}-${newIndex}`
+    focusState.setElementId(newId)
+    focusState.focusOnLastElement()
+    answerOrderChanged()
+  }
+}
 </script>
 
 <template>
@@ -73,17 +96,43 @@ const answerOrderChanged = () => {
         {{answer.answerOption}}
       </div>
     </div>
-    <div class="flex flex-col matching-question border-l-1" :id="`answers-${q.id}`" style="min-width: 100px;">
-
-    </div>
-    <div class="flex flex-col matching-question border-l-1" :id="`answer-bank-${q.id}`">
-      <div v-for="term in q.matchingTerms" class="border-1 ml-2 mb-2 p-1 answer" style="cursor: pointer">
-        {{ term }}
+    <div class="flex flex-col border-l-1" :id="`answers-${q.id}`" style="min-width: 100px;">
+      <div v-for="(answer, index) in answers" class="border-1 ml-2 mb-2 p-1" style="min-height: 34px;" tabindex="0">
+        <draggable :list="answers[index]"
+                   itemKey=""
+                   :id="`answer-${q.id}-${index}`"
+                   class="answer-section"
+                   @add="answerOrderChanged"
+                   @end="answerOrderChanged"
+                   :group="{ name: 'answers', put: answers[index].length === 0, pull: true }">
+          <template #item="{element}">
+            <div style="cursor: pointer;"
+                 @keyup.up="moveElementUp(index)"
+                 @keyup.down="moveElementDown(index)"
+                 @keyup.right="removeElement(index)">
+              {{element}}
+            </div>
+          </template>
+        </draggable>
       </div>
     </div>
+    <draggable :list="answerBank" itemKey="" class="flex flex-col matching-question border-l-1" :group="{ name: 'bank', put: true }">
+      <template #item="{element}">
+        <div class="ml-2 answer" style="cursor: pointer" tabindex="0" @keyup.left="addElement(element)"> {{element}} </div>
+      </template>
+    </draggable>
+
   </div>
 </template>
 
 <style scoped>
+.matching-question > .answer {
+  margin-bottom: 2px;
+  padding: 2px;
+  border: 1px solid #c0c0c0;
+}
 
+.answer-section {
+  min-height: 100%;
+}
 </style>

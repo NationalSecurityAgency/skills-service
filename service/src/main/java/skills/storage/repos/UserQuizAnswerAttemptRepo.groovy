@@ -55,6 +55,8 @@ interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt,
     @Nullable
     UserQuizAnswerAttempt findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(Integer attemptId, Integer quizAnswerDefinitionRefId)
 
+    List<UserQuizAnswerAttempt> findAllByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefIdIn(Integer attemptId, Set<Integer> quizAnswerDefinitionRefId)
+
     boolean existsByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(Integer attemptId, Integer quizAnswerDefinitionRefId)
 
     void deleteByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(Integer attemptId, Integer quizAnswerDefinitionRefId)
