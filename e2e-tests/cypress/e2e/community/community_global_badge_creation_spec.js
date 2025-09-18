@@ -52,6 +52,55 @@ describe('Community Global Badge Creation Tests', () => {
         cy.get('[data-cy="badgeCard-MyFirstGlobalBadgeBadge"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
     });
 
+    it('Enable (Go Live) a UC protected global badge from the global badge details page', () => {
+        cy.intercept('POST', '/admin/badges/globalBadge1/projects/proj1/skills/skill1').as('saveSkill')
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1)
+        cy.createGlobalBadge(1, {enableProtectedUserCommunity: true})
+        cy.assignSkillToGlobalBadge(1, 1, 1);
+
+        cy.visit('/administrator/globalBadges/globalBadge1')
+
+        cy.get('[data-cy=statPreformatted]')
+          .contains('Disabled')
+          .should('exist');
+        cy.get('[data-cy=goLive]')
+          .click();
+        cy.contains('Please Confirm!')
+          .should('exist');
+        cy.contains('Yes, Go Live!')
+          .click();
+
+        cy.get('[data-cy=statPreformatted]')
+          .contains('Live')
+          .should('exist');
+    });
+
+    it('Enable (Go Live) a UC protected global badge from the global badges page', () => {
+        cy.intercept('POST', '/admin/badges/globalBadge1/projects/proj1/skills/skill1').as('saveSkill')
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1)
+        cy.createGlobalBadge(1, {enableProtectedUserCommunity: true})
+        cy.assignSkillToGlobalBadge(1, 1, 1);
+
+        cy.visit('/administrator/globalBadges')
+
+        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy=badgeStatus]')
+          .contains('Status: Disabled')
+          .should('exist');
+        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy=goLive]').click()
+        cy.contains('Please Confirm!')
+          .should('exist');
+        cy.contains('Yes, Go Live!')
+          .click();
+
+        cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy=badgeStatus]')
+          .contains('Status: Live')
+          .should('exist');
+    });
+
     it('show docs links if configured', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {

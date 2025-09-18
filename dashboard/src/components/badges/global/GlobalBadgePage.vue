@@ -25,10 +25,12 @@ import {storeToRefs} from "pinia";
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import Avatar from 'primevue/avatar'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 
 const dialogMessages = useDialogMessages()
 const route = useRoute();
 const router = useRouter();
+const communityLabels = useCommunityLabels()
 
 const isLoading = ref(true);
 const badgeId = ref(route.params.badgeId);
@@ -129,6 +131,7 @@ const handlePublish = () => {
         toSave.startDate = toDate(toSave.startDate);
         toSave.endDate = toDate(toSave.endDate);
         toSave.isEdit = true
+        toSave.enableProtectedUserCommunity = communityLabels.isRestrictedUserCommunity(toSave.userCommunity)
         goLive(toSave);
       }
     });
