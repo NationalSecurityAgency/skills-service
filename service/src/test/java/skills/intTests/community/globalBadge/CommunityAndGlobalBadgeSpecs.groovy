@@ -291,7 +291,7 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         e.message.contains("This project is part of one or more Global Badges that has not enabled user community protection")
     }
 
-    def "available skills endpoint for non UC badge does NOT return skills from UC protected projects"() {
+    def "available skills and available projects endpoints for non UC badge does NOT return skills from UC protected projects"() {
         List<String> users = getRandomUsers(2)
 
         SkillsService pristineDragonsUser = createService(users[1])
@@ -341,7 +341,7 @@ class CommunityAndGlobalBadgeSpecs extends DefaultIntSpec {
         res3.totalAvailable == 0
     }
 
-    def "available skills endpoint for UC badge does NOT return skills from non UC protected projects"() {
+    def "available skills and available projects endpoints for UC badge does NOT return skills from non UC protected projects"() {
         List<String> users = getRandomUsers(2)
 
         SkillsService pristineDragonsUser = createService(users[1])
