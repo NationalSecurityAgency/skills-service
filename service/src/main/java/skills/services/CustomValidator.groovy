@@ -135,6 +135,17 @@ class CustomValidator {
         return validationResult
     }
 
+    CustomValidationResult validate(GlobalBadgeRequest globalBadgeRequest) {
+        Boolean isUserCommunityOnlyGlobalBadge = userCommunityService.isUserCommunityOnlyGlobalBadge(globalBadgeRequest.badgeId)
+        CustomValidationResult validationResult = validateDescription(globalBadgeRequest.description, null, isUserCommunityOnlyGlobalBadge)
+        if (!validationResult.valid) {
+            return validationResult
+        }
+
+        validationResult = validateName(globalBadgeRequest.name)
+        return validationResult
+    }
+
     CustomValidationResult validate(AdminGroupDefRequest adminGroupDefRequest) {
         return validateName(adminGroupDefRequest.name)
     }

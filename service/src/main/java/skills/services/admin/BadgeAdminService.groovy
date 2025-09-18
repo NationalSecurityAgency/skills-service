@@ -27,12 +27,15 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.BadgeRequest
+import skills.controller.request.model.SkillSettingsRequest
 import skills.controller.result.model.BadgeResult
 import skills.controller.result.model.DependencyCheckResult
 import skills.controller.result.model.SkillDefGraphRes
 import skills.controller.result.model.SkillsGraphRes
 import skills.services.*
 import skills.services.attributes.SkillAttributeService
+import skills.services.settings.Settings
+import skills.services.settings.SettingsService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
@@ -113,12 +116,17 @@ class BadgeAdminService {
     @Autowired
     UserInfoService userInfoService
 
+    @Autowired
+    SettingsService settingsService
+
     @Transactional()
     void saveBadge(String projectId, String originalBadgeId, BadgeRequest badgeRequest, SkillDef.ContainerType type = SkillDef.ContainerType.Badge, boolean performCustomValidation=true) {
-        CustomValidationResult customValidationResult = customValidator.validate(badgeRequest, projectId)
-        if(performCustomValidation && !customValidationResult.valid){
-            String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[badge], badgeId=[${badgeRequest.badgeId}], badgeName=[${badgeRequest.name}], description=[${badgeRequest.description}]"
-            throw new SkillException(msg)
+        if (performCustomValidation && projectId) {
+            CustomValidationResult customValidationResult = customValidator.validate(badgeRequest, projectId)
+            if (!customValidationResult.valid) {
+                String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[badge], badgeId=[${badgeRequest.badgeId}], badgeName=[${badgeRequest.name}], description=[${badgeRequest.description}]"
+                throw new SkillException(msg)
+            }
         }
 
         // project id will be null for global badges
@@ -198,6 +206,10 @@ class BadgeAdminService {
         }
         if (savedSkill && type == SkillDef.ContainerType.GlobalBadge && isEdit && isIdUpdate) {
             accessSettingsStorageService.updateGlobalBadgeIdForBadgeAdmins(originalBadgeId, savedSkill.skillId)
+        }
+
+        if (savedSkill && type == SkillDef.ContainerType.GlobalBadge && badgeRequest.enableProtectedUserCommunity) {
+            settingsService.saveSetting(new SkillSettingsRequest(skillRefId: savedSkill.id, setting: Settings.USER_COMMUNITY_ONLY_PROJECT.settingName, value: Boolean.TRUE.toString()))
         }
 
         attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(savedSkill?.description, savedSkill.projectId, null, savedSkill.skillId)

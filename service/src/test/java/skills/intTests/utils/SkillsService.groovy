@@ -139,6 +139,10 @@ class SkillsService {
     def validateAdminGroupForEnablingCommunity(String adminGroupId) {
         wsHelper.adminGet("/admin-group-definitions/${adminGroupId}/validateEnablingCommunity")
     }
+    @Profile
+    def validateGlobalBadgeForEnablingCommunity(String badgeId) {
+        wsHelper.adminGet("/badges/${badgeId}/validateEnablingCommunity")
+    }
 
     @Profile
     def copyProject(String fromProjId, Map toProjProps) {
@@ -553,6 +557,9 @@ class SkillsService {
         wsHelper.adminGet("/projects/${props.projectId}/badges/${props.badgeId}")
     }
 
+    def getBadgeSkills(String projectId, String badgeId) {
+        wsHelper.adminGet("/projects/${projectId}/badges/${badgeId}/skills")
+    }
     def removeBadge(Map props) {
         wsHelper.adminDelete("/projects/${props.projectId}/badges/${props.badgeId}")
     }
@@ -999,15 +1006,15 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projId}/icons/${cssClass}/usage")
     }
 
-    def uploadIcon(Map props, File icon){
+    def uploadIcon(Map props, File icon, boolean throwException = false){
         Map body = [:]
         body.put("customIcon", icon)
-        wsHelper.adminUpload("/projects/${props.projectId}/icons/upload", body)
+        wsHelper.adminUpload("/projects/${props.projectId}/icons/upload", body, throwException)
     }
-    def uploadGlobalIcon(Map props, File icon){
+    def uploadGlobalIcon(Map props, File icon, boolean throwException = false){
         Map body = [:]
         body.put("customIcon", icon)
-        wsHelper.adminUpload("/badges/${props.badgeId}/icons/upload", body)
+        wsHelper.adminUpload("/badges/${props.badgeId}/icons/upload", body, throwException)
     }
     def uploadAttachment(String fileName, String fileContents, String projectId=null, String skillId=null, String quizId=null){
         Resource resource = GroovyToJavaByteUtils.toByteArrayResource(fileContents, fileName)
@@ -1357,6 +1364,10 @@ class SkillsService {
 
     def removeGlobalBadgeAdminRole(String badgeId, String userId) {
         return wsHelper.globalBadgeDelete("/badges/${badgeId}/users/${userId}/roles/${RoleName.ROLE_GLOBAL_BADGE_ADMIN.toString()}")
+    }
+
+    def getUserRolesForGlobalBadge(String badgeId){
+        wsHelper.globalBadgeGet("${getGlobalBadgeUrl(badgeId)}/userRoles")
     }
 
     def revokeInviteOnlyProjectAccess(String projectId, String userId) {

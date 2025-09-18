@@ -169,7 +169,7 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         res.unmetRequirements == ["Has skill(s) that have been shared for cross-project dependencies"]
     }
 
-    def "validation endpoint - projects with a protected community are not allowed to be part of the global badge"() {
+    def "validation endpoint - projects with a protected community are not allowed to be part of the global badge without UC protection"() {
         List<String> users = getRandomUsers(2)
 
         SkillsService pristineDragonsUser = createService(users[1])
@@ -186,8 +186,8 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         def p2Skills = createSkills(3, 2, 1, 100, 5)
         pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
 
-        def badge1 = SkillsFactory.createBadge(1, 1)
-        def badge2 = SkillsFactory.createBadge(2, 2)
+        def badge1 = createBadge(1, 1)
+        def badge2 = createBadge(2, 2)
         rootUser.createGlobalBadge(badge1)
         rootUser.assignSkillToGlobalBadge(projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId)
 
@@ -199,10 +199,10 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
         def res1 = pristineDragonsUser.validateProjectForEnablingCommunity(p2.projectId)
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["This project is part of one or more Global Badges"]
+        res.unmetRequirements == ["This project is part of one or more Global Badges that has not enabled user community protection"]
 
         res1.isAllowed == false
-        res1.unmetRequirements == ["This project is part of one or more Global Badges"]
+        res1.unmetRequirements == ["This project is part of one or more Global Badges that has not enabled user community protection"]
     }
 
     def "cannot enable UC protection on admin group if it contains a non-UC owner"() {

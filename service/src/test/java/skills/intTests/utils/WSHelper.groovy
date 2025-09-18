@@ -428,7 +428,7 @@ class WSHelper {
 
         log.info("  Result:\n {}", JsonOutput.prettyPrint(resBody))
 
-        def res = jsonSlurper.parseText(resBody)
+        def res = parseJson(resBody)
         if(responseEntity.statusCode == HttpStatus.OK) {
             res['success' ] = true
         } else {
@@ -437,8 +437,17 @@ class WSHelper {
                 throw new SkillsClientException(resBody, endpoint, responseEntity.statusCode)
             }
         }
-
         return res
+    }
+
+    private def parseJson(String json) {
+        try {
+            return jsonSlurper.parseText(json)
+        } catch (Exception e) {
+            log.error("Failed to parse response body as JSON: [${json}]", e)
+            return [:]
+        }
+
     }
 
     private String getUrlFromParams(Map params) {

@@ -26,9 +26,11 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 
 const dialogMessages = useDialogMessages()
 const announcer = useSkillsAnnouncer();
+const communityLabels = useCommunityLabels()
 const emit = defineEmits(['badge-deleted', 'badge-changed', 'global-badges-changed']);
 
 const isLoading = ref(true);
@@ -170,6 +172,7 @@ const publishBadge = (badge) => {
         const requiredIds = badge.requiredSkills.map((item) => item.skillId);
         const badgeReq = { requiredSkillsIds: requiredIds, ...toSave };
         badgeReq.isEdit = true
+        badgeReq.enableProtectedUserCommunity = communityLabels.isRestrictedUserCommunity(badgeReq.userCommunity)
         GlobalBadgeService.saveBadge(badgeReq).then(() => {
           saveBadge(toSave);
         });

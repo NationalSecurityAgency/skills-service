@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2025 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
-
+package skills.controller.request.model
 
 import groovy.transform.Canonical
 
 @Canonical
-class GlobalBadgeResult extends BadgeResult {
+class GlobalBadgeRequest extends BadgeRequest {
 
-    List<GlobalBadgeLevelRes> requiredProjectLevels = []
-    int uniqueProjectCount = 0
-
-    String userCommunity
+    Boolean enableProtectedUserCommunity = false
 }

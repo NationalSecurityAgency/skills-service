@@ -15,7 +15,6 @@
  */
 package skills.auth.userCommunity
 
-
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
@@ -54,12 +53,14 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     private static final Pattern QUIZ_ID = ~/(?i)\/.*\/(?:quizzes|quiz-definitions)\/([^\/]+).*/
     private static final Pattern ATTACHMENT_UUID = ~/(?i)\/api\/download\/(.+)/
     private static final Pattern ADMIN_GROUP_ID = ~/(?i)\/.*\/admin-group-definitions\/([^\/]+).*/
+    private static final Pattern BADGE_ID = ~/(?i)\/.*\/badge(?:s)?\/([^\/]+).*/
 
     private RequestMatcher projectsRequestMatcher
     private RequestMatcher quizzesAdminRequestMatcher
     private RequestMatcher quizzesApiRequestMatcher
     private RequestMatcher attachmentsRequestMatcher
     private RequestMatcher adminGroupRequestMatcher
+    private RequestMatcher badgeRequestMatcher
 
     @Autowired
     @Lazy
@@ -83,6 +84,7 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         quizzesApiRequestMatcher = new AntPathRequestMatcher("/**/quizzes/**")
         attachmentsRequestMatcher = new AntPathRequestMatcher("/api/download/**")
         adminGroupRequestMatcher = new AntPathRequestMatcher("/**/admin-group-definitions/**")
+        badgeRequestMatcher = new AntPathRequestMatcher("/**/badge*/**")
     }
 
     @Override
@@ -98,6 +100,7 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         String projectId = null
         String quizId = null
         String adminGroupId = null
+        String badgeId = null
         if (projectsRequestMatcher.matches(request)) {
             projectId = extractProjectId(request)
         } else if (attachmentsRequestMatcher.matches(request)) {
@@ -108,23 +111,30 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
             if (extractRes?.quizId) {
                 quizId = extractRes.quizId
             }
+            if (extractRes?.skillId) {
+                badgeId = extractRes.skillId
+            }
         } else if (adminGroupRequestMatcher.matches(request)) {
             adminGroupId = extractAdminGroupId(request)
         } else if (quizzesApiRequestMatcher.matches(request) || quizzesAdminRequestMatcher.matches(request)) {
             quizId = extractQuizId(request)
         }
-        if (projectId || adminGroupId || quizId) {
+        if (badgeRequestMatcher.matches(request)) {
+            badgeId = extractBadgeId(request)
+        }
+        if (projectId || adminGroupId || quizId || badgeId) {
             log.debug("evaluating request [{}] for user community protection", request.getRequestURI())
             Boolean isUserCommunityOnlyProject = projectId && userCommunityService.isUserCommunityOnlyProject(projectId)
             Boolean isUserCommunityOnlyAdminGroup = adminGroupId && userCommunityService.isUserCommunityOnlyAdminGroup(adminGroupId)
             Boolean isUserCommunityOnlyQuiz = quizId && userCommunityService.isUserCommunityOnlyQuiz(quizId)
-            if (isUserCommunityOnlyProject || isUserCommunityOnlyAdminGroup || isUserCommunityOnlyQuiz) {
-                log.debug("project id [{}] or admin group id [{}] requires user community only access", projectId, adminGroupId)
+            Boolean isUserCommunityOnlyBadge = badgeId && userCommunityService.isUserCommunityOnlyGlobalBadge(badgeId)
+            if (isUserCommunityOnlyProject || isUserCommunityOnlyAdminGroup || isUserCommunityOnlyQuiz || isUserCommunityOnlyBadge) {
+                log.debug("project id [{}], admin group [{}], quiz [{}], or badge [{}] requires user community only access", projectId, adminGroupId, quizId, badgeId)
                 Boolean belongsToUserCommunity = userCommunityService.isUserCommunityMember(getUsername(authentication.get()))
                 if (belongsToUserCommunity) {
                     return new AuthorizationDecision(true) // ACCESS_GRANTED;
                 } else {
-                    log.debug("user [{}] is not permitted to access project [{}] or admin group [{}]", authentication.get().getPrincipal(), projectId, adminGroupId)
+                    log.debug("user [{}] is not permitted to access project [{}], admin group [{}], quiz [{}], or badge [{}]", authentication.get().getPrincipal(), projectId, adminGroupId, quizId, badgeId)
                     throw new AccessDeniedException("Access is denied")
                 }
             }
@@ -149,6 +159,7 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     static class AttachmentExtractRes {
         String projectId
         String quizId
+        String skillId
     }
     private AttachmentExtractRes extractProjectIdForAttachment(HttpServletRequest request) {
         String url = getRequestUrl(request)
@@ -156,7 +167,7 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         if (pid.matches()) {
             String uuid = pid.group(1)
             Attachment attachment = attachmentService.getAttachment(uuid);
-            return new AttachmentExtractRes(projectId: attachment?.projectId, quizId: attachment?.quizId)
+            return new AttachmentExtractRes(projectId: attachment?.projectId, quizId: attachment?.quizId, skillId: attachment?.skillId)
         }
         return null
     }
@@ -180,6 +191,19 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         Matcher gid = QUIZ_ID.matcher(url)
         if (gid.matches()) {
             res = gid.group(1)
+            if (res?.equalsIgnoreCase("null") ) {
+                res = StringUtils.EMPTY
+            }
+        }
+        return res
+    }
+
+    private String extractBadgeId(HttpServletRequest request) {
+        String res = StringUtils.EMPTY
+        String url = getRequestUrl(request)
+        Matcher bid = BADGE_ID.matcher(url)
+        if (bid.matches()) {
+            res = bid.group(1)
             if (res?.equalsIgnoreCase("null") ) {
                 res = StringUtils.EMPTY
             }

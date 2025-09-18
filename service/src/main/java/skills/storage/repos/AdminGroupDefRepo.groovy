@@ -59,6 +59,11 @@ interface AdminGroupDefRepo extends CrudRepository<AdminGroupDef, Long> {
     @Query('''select DISTINCT 'true' from AdminGroupDef agd JOIN UserRole ur on agd.adminGroupId = ur.adminGroupId where ur.quizId = ?1 AND agd.protectedCommunityEnabled = false''')
     Boolean doesAdminGroupContainNonUserCommunityQuiz(String quizId)
 
+
+    @Nullable
+    @Query('''select DISTINCT 'true' from AdminGroupDef agd JOIN UserRole ur on agd.adminGroupId = ur.adminGroupId where ur.globalBadgeId = ?1 AND agd.protectedCommunityEnabled = false''')
+    Boolean doesAdminGroupContainNonUserCommunityGlobalBadge(String badgeId)
+
     @Query(value="""
                 SELECT 
                     agd.admin_group_id AS adminGroupId,

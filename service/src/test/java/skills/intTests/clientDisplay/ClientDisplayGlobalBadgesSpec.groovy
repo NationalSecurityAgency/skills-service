@@ -17,11 +17,11 @@ package skills.intTests.clientDisplay
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
 import skills.storage.model.QuizDefParent
 import skills.storage.model.SkillDef
 
@@ -802,5 +802,57 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         then:
         summary.skills.size() == 1
         summary.skills[0].selfReporting.requestedOn == requestedDate.time
+    }
+
+    def "cannot load global badge summary for non participating or otherwise bogus project id"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        Map badge = [badgeId: globalBadgeId, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon"]
+        badge.helpUrl = "http://foo.org"
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "3")
+        skillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: proj1_skills.get(0).skillId)
+        badge.enabled  = 'true'
+        skillsService.updateGlobalBadge(badge, badge.badgeId)
+
+        when:
+        skillsService.getBadgeSummary(null, "InvalidProjectId",  badge.badgeId,-1, true)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.resBody.contains("Project ID [InvalidProjectId] does not participate in this global badge [${badge.badgeId}]")
+    }
+
+    def "cannot load global badge descriptions for non participating or otherwise bogus project id"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        Map badge = [badgeId: globalBadgeId, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon"]
+        badge.helpUrl = "http://foo.org"
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: projId, badgeId: badge.badgeId, level: "3")
+        skillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: proj1_skills.get(0).skillId)
+        badge.enabled  = 'true'
+        skillsService.updateGlobalBadge(badge, badge.badgeId)
+
+        when:
+        skillsService.getBadgeDescriptions("InvalidProjectId", badge.badgeId, true)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.resBody.contains("Project ID [InvalidProjectId] does not participate in this global badge [${badge.badgeId}]")
     }
 }
