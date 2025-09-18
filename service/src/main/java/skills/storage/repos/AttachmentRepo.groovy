@@ -27,9 +27,9 @@ interface AttachmentRepo extends CrudRepository<Attachment, Integer> {
     Attachment findByUuid(String uuid)
 
     @Modifying
-    int deleteByUuid(String uuid)
+    Integer deleteByUuid(String uuid)
 
     @Modifying
-    int deleteBySkillIdAndProjectIdIsNull(String skillId)
+    Integer deleteBySkillIdAndProjectIdIsNull(String skillId)
 
 }

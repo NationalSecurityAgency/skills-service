@@ -31,7 +31,7 @@ interface AdminGroupDefRepo extends CrudRepository<AdminGroupDef, Long> {
     Integer getAdminGroupRefIdByAdminGroupIdIgnoreCase(String adminGroupId)
 
     @Modifying
-    int deleteByAdminGroupIdIgnoreCase(String adminGroupId)
+    Integer deleteByAdminGroupIdIgnoreCase(String adminGroupId)
 
     @Nullable
     AdminGroupDef findByNameIgnoreCase(String adminGroupName)

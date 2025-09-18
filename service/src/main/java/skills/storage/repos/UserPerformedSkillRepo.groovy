@@ -77,7 +77,7 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     Date findFirstPerformedSkill(String projectId, String userId, List<String> skillIds)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
-    long deleteBySkillRefId(Integer skillRefId)
+    Long deleteBySkillRefId(Integer skillRefId)
     void deleteAllByUserIdAndProjectId(String userId, String projectId)
     void deleteAllByUserIdAndSkillRefIdIn(String userId, List<Integer> skillRefIds)
 

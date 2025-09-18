@@ -290,7 +290,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
                                @Param("approverUserIdFilter") String approverUserIdFilter,
                                @Param("optionalApproverUserIdOrKeywordAll") String optionalApproverUserIdOrKeywordAll)
 
-    long deleteByProjectIdAndSkillRefId(String projectId, Integer skillRefId)
+    Long deleteByProjectIdAndSkillRefId(String projectId, Integer skillRefId)
     void deleteAllByProjectIdAndUserId(String projectId, String userId)
 
     Stream<SkillApproval> findAllBySkillRefIdAndRejectedOnIsNull(Integer skillRefId)
