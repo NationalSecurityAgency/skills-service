@@ -54,6 +54,7 @@
     "backend:setupInviteOnly": "export PGPASSWORD=skillsPassword && psql -U postgres -h $(node getDbHost.js) -d $(node getDbName.js) -f ./cypress/db/createInviteOnlyProject.sql",
     "backend:countScheduledTasks": "export PGPASSWORD=skillsPassword && psql -U postgres -h $(node getDbHost.js) -d $(node getDbName.js) -f ./cypress/db/countScheduledTasks.sql",
     "backend:dropAllDBTables": "export PGPASSWORD=skillsPassword && psql -U postgres -h $(node getDbHost.js) -d $(node getDbName.js) -f ./cypress/db/dropTables.sql",
+    "backend:execSql": "export PGPASSWORD=skillsPassword && psql -U postgres -h $(node getDbHost.js) -d $(node getDbName.js) -t -A -c",
     "client-display:serve": "cd ../client-display && npm prune && npm install && npm run serve",
     "client-display:serve:ci": "mkdir -p ./logs && npm run client-display:serve > ./logs/client-display.out &",
     "client-display:serve:ci:oauth": "mkdir -p ./logs && VUE_APP_AUTHENTICATION_URL=hydra npm run client-display:serve > ./logs/client-display.out &",
