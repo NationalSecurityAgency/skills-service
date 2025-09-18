@@ -581,7 +581,8 @@ class SkillCatalogService {
                 copy.skillId = SkillReuseIdUtil.addTag(og.skillId, reuseCounter)
                 copy.name = SkillReuseIdUtil.addTag(og.name, reuseCounter)
             }
-            skillsAdminService.saveSkill(imported.skillId, copy)
+            boolean isReusedSkill = SkillReuseIdUtil.isTagged(copy.skillId) && og.projectId == copy.projectId
+            skillsAdminService.saveSkill(imported.skillId, copy, !isReusedSkill)
         }
     }
 
