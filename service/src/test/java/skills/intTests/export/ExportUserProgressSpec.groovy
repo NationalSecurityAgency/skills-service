@@ -265,4 +265,48 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
         validateExport(excelExportQueryFilter.file, expectedDataForQuery)
         validateExport(excelExportMinPointsFilter.file, expectedDataForMinPointsFilter)
     }
+
+    def "export users progress where some users achieved 100%"() {
+        def project = createProject()
+        def subject = createSubject()
+        def skill1 = createSkill(1, 1, 1, 0, 5)
+        skill1.pointIncrement = 50
+        def skill2 = createSkill(1, 1, 2, 0, 5)
+
+        skillsService.createProject(project)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+
+        def users = getRandomUsers(4)
+        def user1 = users[0]
+        def user2 = users[1]
+        def user3 = users[2]
+
+        skillsService.addSkill(skill1, user1, fiveDaysAgo)
+        skillsService.addSkill(skill1, user1, oneDayAgo)
+        skillsService.addSkill(skill1, user2, today)
+        skillsService.addSkill(skill2, user2, today)
+
+
+        List<Date> days = [fiveDaysAgo, fourDayAgo, threeDayAgo, twoDayAgo, oneDayAgo]
+        days.each {
+            skillsService.addSkill(skill1, user3, it)
+            skillsService.addSkill(skill2, user3, it)
+        }
+
+        when:
+        def excelExport = skillsService.getUserProgressExcelExport(project.projectId)
+
+        then:
+        validateExport(excelExport.file, [
+                ["For All Dragons Only"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "60.0", "0.2", formatDate(today), formatDate(today)],
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "2.0", "100.0", "0.3333333333", formatDate(fiveDaysAgo), formatDate(oneDayAgo)],
+                [getUserIdForDisplay(user3), getName(user3, false), getName(user3), "", "5.0", "300.0", "1.0", formatDate(fiveDaysAgo), formatDate(oneDayAgo)],
+                ["For All Dragons Only"],
+        ])
+
+    }
 }

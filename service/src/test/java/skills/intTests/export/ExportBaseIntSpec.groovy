@@ -38,6 +38,9 @@ class ExportBaseIntSpec extends DefaultIntSpec {
 
     Date today = new Date()
     Date oneDayAgo = new Date()-1
+    Date twoDayAgo = new Date()-2
+    Date threeDayAgo = new Date()-3
+    Date fourDayAgo = new Date()-4
     Date fiveDaysAgo = new Date()-5
     Date tenDaysAgo = new Date()-10
 
