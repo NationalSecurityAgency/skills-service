@@ -433,38 +433,4 @@ describe('Community Global Badge Creation Tests', () => {
         cy.wait('@saveSkill')
     });
 
-    it('attachments are not enabled on global badge creation when UC protection is available', () => {
-        cy.visit('/administrator/globalBadges/')
-        cy.get('[data-cy="noContent"]').contains('No Badges Yet')
-        cy.get('[data-cy="btn_Global Badges"]').click()
-        cy.get('.p-dialog-header').contains('New Badge')
-        cy.get('[data-cy="name"]').type('My First Global Badge')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-
-        cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
-        cy.get('[data-cy="userCommunityDocsLink"]').should('not.exist')
-        const warningMsg = 'Please note that once the restriction is enabled it cannot be lifted/disabled';
-        cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg).should('not.exist')
-        cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
-        cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
-
-        cy.get(`button.attachment-button`).should('not.exist');
-
-        cy.clickSaveDialogBtn()
-        cy.get('[data-cy="badgeCard-MyFirstGlobalBadgeBadge"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
-
-        cy.get('[data-cy="badgeCard-MyFirstGlobalBadgeBadge"] [data-cy=editBtn]').click()
-        cy.get(`button.attachment-button`).should('exist');
-
-        cy.fixture('vars.json').then((vars) => {
-            cy.logout();
-            cy.login(allDragonsUser, vars.defaultPass);
-            cy.visit('/administrator/globalBadges/')
-            cy.get('[data-cy="inception-button"]').contains('Level')
-            cy.get('[data-cy="btn_Global Badges"]').click()
-            cy.get('[data-cy="restrictCommunityControls"]').should('not.exist');
-            cy.get(`button.attachment-button`).should('exist');
-        })
-    });
-
 });

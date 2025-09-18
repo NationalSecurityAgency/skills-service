@@ -472,7 +472,7 @@ class UserCommunityGlobalBadgeAuthSpecs extends DefaultIntSpec {
         String contents = 'Test is a test'
         Resource resource = (Resource) GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
 
-        def gbAttachment = skillsService.uploadAttachment(resource, (String)null, badge1.badgeId, (String)null)
+        def gbAttachment = pristineDragonsUser.uploadAttachment(resource, (String)null, badge1.badgeId, (String)null)
 
         then:
         pristineDragonsUser.downloadAttachmentAsText(gbAttachment.href) == "Test is a test"

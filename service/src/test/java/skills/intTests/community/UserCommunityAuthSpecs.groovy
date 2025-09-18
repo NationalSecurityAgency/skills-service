@@ -216,6 +216,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         pristineDragonsUser.createQuizDef(quiz)
 
         def globalBadge = createBadge(1, 1)
+        globalBadge.enableProtectedUserCommunity = true
         pristineDragonsUser.createGlobalBadge(globalBadge)
 
         String filename = 'test-pdf.pdf'
@@ -229,7 +230,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         then:
         validateForbidden { allDragonsUser.downloadAttachment(projAttachment.href) }
         validateForbidden { allDragonsUser.downloadAttachment(quizAttachment.href) }
-//        validateForbidden { allDragonsUser.downloadAttachment(globalBadgeAttachment.href) }
+        validateForbidden { allDragonsUser.downloadAttachment(globalBadgeAttachment.href) }
     }
 
     def "cannot access group admin endpoints with UC protection enabled if the user does not belong to the user community"() {
