@@ -24,6 +24,7 @@ import skills.utils.GroovyToJavaByteUtils
 import skills.utils.WaitFor
 
 import static skills.intTests.utils.AdminGroupDefFactory.createAdminGroup
+import static skills.intTests.utils.SkillsFactory.createBadge
 import static skills.intTests.utils.SkillsFactory.createProject
 import static skills.intTests.utils.SkillsFactory.createSubject
 
@@ -205,33 +206,31 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         SkillsService allDragonsUser = createService(users[0])
         SkillsService pristineDragonsUser = createService(users[1])
         rootSkillsService.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
         Map proj = createProject()
         proj.enableProtectedUserCommunity = true
-        Map subject = createSubject()
-        Map skill = SkillsFactory.createSkill()
-        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 2)
-        def badge = SkillsFactory.createBadge()
+        pristineDragonsUser.createProject(proj)
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        quiz.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(quiz)
+
+        def globalBadge = createBadge(1, 1)
+        globalBadge.enableProtectedUserCommunity = true
+        pristineDragonsUser.createGlobalBadge(globalBadge)
+
         String filename = 'test-pdf.pdf'
         String contents = 'Test is a test'
         Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
 
-        pristineDragonsUser.createProject(proj)
-        pristineDragonsUser.createSubject(subject)
-        pristineDragonsUser.createSkill(skill)
-        pristineDragonsUser.createSkill(skillsGroup)
-        pristineDragonsUser.createBadge(badge)
-        def projAttachment = skillsService.uploadAttachment(resource, proj.projectId)
-        def subjAttachment = skillsService.uploadAttachment(resource, proj.projectId, subject.subjectId)
-        def skillAttachment = skillsService.uploadAttachment(resource, proj.projectId, skill.skillId)
-        def skillsGroupAttachment = skillsService.uploadAttachment(resource, proj.projectId, skillsGroup.skillId)
-        def badgeAttachment = skillsService.uploadAttachment(resource, proj.projectId, badge.badgeId)
+        def projAttachment = pristineDragonsUser.uploadAttachment(resource, proj.projectId)
+        def quizAttachment = pristineDragonsUser.uploadAttachment(resource, null, null, quiz.quizId)
+        def globalBadgeAttachment = pristineDragonsUser.uploadAttachment(resource, null, globalBadge.badgeId)
 
         then:
         validateForbidden { allDragonsUser.downloadAttachment(projAttachment.href) }
-        validateForbidden { allDragonsUser.downloadAttachment(subjAttachment.href) }
-        validateForbidden { allDragonsUser.downloadAttachment(skillAttachment.href) }
-        validateForbidden { allDragonsUser.downloadAttachment(skillsGroupAttachment.href) }
-        validateForbidden { allDragonsUser.downloadAttachment(badgeAttachment.href) }
+        validateForbidden { allDragonsUser.downloadAttachment(quizAttachment.href) }
+        validateForbidden { allDragonsUser.downloadAttachment(globalBadgeAttachment.href) }
     }
 
     def "cannot access group admin endpoints with UC protection enabled if the user does not belong to the user community"() {

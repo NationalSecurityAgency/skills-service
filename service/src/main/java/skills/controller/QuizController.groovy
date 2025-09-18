@@ -38,6 +38,7 @@ import skills.controller.result.model.*
 import skills.quizLoading.QuizRunService
 import skills.quizLoading.QuizSettings
 import skills.quizLoading.model.*
+import skills.services.AttachmentService
 import skills.services.VideoCaptionsService
 import skills.services.adminGroup.AdminGroupService
 import skills.services.attributes.SkillAttributeService
@@ -85,6 +86,9 @@ class QuizController {
 
     @Autowired
     AdminGroupService adminGroupService
+
+    @Autowired
+    AttachmentService attachmentService
 
     @Autowired
     SkillAttributeService skillAttributeService
@@ -484,4 +488,12 @@ class QuizController {
         SkillsValidator.isNotBlank(quizId, "Quiz Id")
         return adminGroupService.getAdminGroupsForQuiz(quizId)
     }
+
+    @RequestMapping(value = "/{quizId}/upload", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    UploadAttachmentResult uploadFileToQuiz(@RequestParam("file") MultipartFile file,
+                                               @PathVariable("quizId") String quizId) {
+        return attachmentService.saveAttachment(file, null, quizId, null);
+    }
+
 }

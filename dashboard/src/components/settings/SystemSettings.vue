@@ -119,7 +119,7 @@ function loadSystemSettings() {
       </SkillsTextInput>
       <SkillsTextarea name="customHeader" label="Custom Header" />
       <SkillsTextarea name="customFooter" label="Custom Footer" />
-      <markdown-editor class="mt-8" name="userAgreement" label="User Agreement" />
+      <markdown-editor class="mt-8" name="userAgreement" label="User Agreement" :allow-attachments="false"/>
 
       <SkillsButton label="Save" :icon="isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right'"
                     data-cy="saveSystemSettings" @click="saveSystemSettings" :disabled="!meta.valid || !meta.dirty" />

@@ -1195,6 +1195,16 @@ Cypress.Commands.add('waitForBackendAsyncTasksToComplete', () => {
     cy.waitUntil(() => cy.exec('npm run backend:countScheduledTasks').then((result) => result.stdout.match(/.*------\s+(\d+)\s+\(/)[1] === '0'), waitConf);
 });
 
+Cypress.Commands.add('execSql', (sql) => {
+    // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
+    cy.exec('npm version', {failOnNonZeroExit: false})
+    const sqlToExecute = `SELECT json_agg(t) FROM (${sql}) t`
+    const command = `npm run backend:execSql "${sqlToExecute}"`
+    return cy.exec(command).then((result) => {
+        const cleanJsonString = result.stdout.split(sqlToExecute)[1];
+        return JSON.parse(cleanJsonString)
+    });
+});
 
 Cypress.Commands.add('clickNav', (navName) => {
     cy.get(`[data-cy="nav-${navName}"]`).click()

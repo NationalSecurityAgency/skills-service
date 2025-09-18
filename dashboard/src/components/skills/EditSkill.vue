@@ -429,6 +429,7 @@ const onSelectedIcon = (selectedIcon) => {
     <self-reporting-type-input @self-reporting-type-changed="selfReportingType = $event" :initial-skill-data="initialSkillData" :is-edit="isEdit" class="mt-1"/>
 
     <markdown-editor
+      :upload-url="`/admin/projects/${route.params.projectId}/upload`"
       class="mt-8"
       name="description" />
 

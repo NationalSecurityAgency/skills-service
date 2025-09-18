@@ -14,20 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useField } from 'vee-validate'
+import {computed, onMounted, ref} from 'vue'
+import {useField} from 'vee-validate'
 import ToastUiEditor from '@/common-components/utilities/markdown/ToastUiEditor.vue'
 
 import fontSize from 'tui-editor-plugin-font-size'
 import "tui-editor-plugin-font-size/dist/tui-editor-plugin-font-size.css";
-import { useCommonMarkdownOptions } from '@/common-components/utilities/markdown/UseCommonMarkdownOptions.js'
-import { useMarkdownAccessibilityFixes } from '@/common-components/utilities/markdown/UseMarkdownAccessibilityFixes.js'
-import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import { useByteFormat } from '@/common-components/filter/UseByteFormat.js'
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import {useCommonMarkdownOptions} from '@/common-components/utilities/markdown/UseCommonMarkdownOptions.js'
+import {useMarkdownAccessibilityFixes} from '@/common-components/utilities/markdown/UseMarkdownAccessibilityFixes.js'
+import {useSkillsAnnouncer} from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import {useByteFormat} from '@/common-components/filter/UseByteFormat.js'
+import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
 import FileUploadService from '@/common-components/utilities/FileUploadService.js'
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
-import { useDebounceFn } from '@vueuse/core'
+import {useThemesHelper} from '@/components/header/UseThemesHelper.js'
+import {useDebounceFn} from '@vueuse/core'
 import {useLog} from "@/components/utils/misc/useLog.js";
 
 const appConfig = useAppConfig()
@@ -79,21 +79,13 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  projectId: {
-    type: String,
-    default: null
-  },
-  quizId: {
-    type: String,
-    default: null
-  },
-  skillId: {
-    type: String,
-    default: null
-  },
   disabled: {
     type: Boolean,
     default: false
+  },
+  uploadUrl: {
+    type: String,
+    default: null
   },
 })
 const emit = defineEmits(['value-changed'])
@@ -285,16 +277,7 @@ function attachFile(event) {
       if (file.size <= maxAttachmentSize) {
         const data = new FormData()
         data.append('file', file)
-        if (props.projectId) {
-          data.append('projectId', props.projectId)
-        }
-        if (props.quizId) {
-          data.append('quizId', props.quizId)
-        }
-        if (props.skillId) {
-          data.append('skillId', props.skillId)
-        }
-        FileUploadService.upload('/api/upload', data, (response) => {
+        FileUploadService.upload(props.uploadUrl, data, (response) => {
           addFileLink(response.data.href, response.data.filename)
           fileInputRef.value.value = ''
         }, (err) => {

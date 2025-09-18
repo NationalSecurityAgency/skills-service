@@ -310,37 +310,5 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="communityRestrictionWarning"]').should('not.exist')
     });
 
-    it('attachments are not enabled on project creation when UC protection is available', () => {
-        cy.visit('/administrator')
-        cy.get('[data-cy="inception-button"]').contains('Level');
-        cy.get('[data-cy="newProjectButton"]').click()
-        cy.get('[data-cy="projectName"]').type('one')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
-
-        cy.get('[data-cy="restrictCommunityControls"]').contains('Access to Divine Dragon users only')
-        cy.get('[data-cy="userCommunityDocsLink"]').should('not.exist')
-        const warningMsg = 'Please note that once the restriction is enabled it cannot be lifted/disabled';
-        cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg).should('not.exist')
-        cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
-        cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
-
-        cy.get(`button.attachment-button`).should('not.exist');
-
-        cy.get('[data-cy="saveDialogBtn"]').click()
-        cy.get('[data-cy="projectCard_one"] [data-cy="userCommunity"]').contains('For Divine Dragon Nation')
-
-        cy.get('[data-cy="projectCard_one"] [data-cy="editProjBtn"]').click()
-        cy.get(`button.attachment-button`).should('exist');
-
-        cy.fixture('vars.json').then((vars) => {
-            cy.logout();
-            cy.login(allDragonsUser, vars.defaultPass);
-            cy.visit('/administrator')
-            cy.get('[data-cy="inception-button"]').contains('Level');
-            cy.get('[data-cy="newProjectButton"]').click()
-            cy.get('[data-cy="restrictCommunityControls"]').should('not.exist');
-            cy.get(`button.attachment-button`).should('exist');
-        })
-    });
 
 });

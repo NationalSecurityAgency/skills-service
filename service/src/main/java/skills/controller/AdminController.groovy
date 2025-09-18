@@ -15,6 +15,7 @@
  */
 package skills.controller
 
+
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
@@ -103,6 +104,9 @@ class AdminController {
 
     @Autowired
     ProjAdminService projAdminService
+
+    @Autowired
+    AttachmentService attachmentService
 
     @Autowired
     SubjAdminService subjAdminService
@@ -1946,5 +1950,13 @@ class AdminController {
 
         return new RequestResult(success: projAdminService.isUserArchived(projectId, userKey))
     }
+
+    @RequestMapping(value = "/projects/{projectId}/upload", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    UploadAttachmentResult uploadFileToProject(@RequestParam("file") MultipartFile file,
+                                             @PathVariable("projectId") String projectId) {
+        return attachmentService.saveAttachment(file, projectId, null, null);
+    }
+
 }
 

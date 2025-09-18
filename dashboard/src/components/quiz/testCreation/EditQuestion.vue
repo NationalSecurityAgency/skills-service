@@ -309,6 +309,7 @@ const onSavedQuestion = (savedQuestion) => {
       <markdown-editor
           id="quizDescription"
           :quiz-id="quizId"
+          :upload-url="`/admin/quiz-definitions/${route.params.quizId}/upload`"
           data-cy="questionText"
           label="Question"
           label-class="text-primary font-bold"
