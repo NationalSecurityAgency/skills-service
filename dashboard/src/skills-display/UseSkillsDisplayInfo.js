@@ -91,6 +91,7 @@ export const useSkillsDisplayInfo = () => {
   })
   const isGlobalBadgePage = computed(() => {
     return route.name === getContextSpecificRouteName('globalBadgeDetails') ||
+      route.name === getContextSpecificRouteName('globalBadgeSkillDetails') ||
       route.name === 'globalBadgeDetails'
   })
 
