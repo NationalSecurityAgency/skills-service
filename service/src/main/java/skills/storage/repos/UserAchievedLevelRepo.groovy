@@ -685,13 +685,13 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
             @Param('fromPoints') Integer fromPointsExclusive)
 
     @Modifying
-    int deleteAllBySkillRefId(Integer skillRefId)
+    Integer deleteAllBySkillRefId(Integer skillRefId)
 
     @Modifying
-    int deleteAllBySkillRefIdAndUserId(Integer skillRefId, String userId)
+    Integer deleteAllBySkillRefIdAndUserId(Integer skillRefId, String userId)
 
     @Modifying
-    int deleteAllBySkillRefIdInAndUserId(List<Integer> skillRefId, String userId)
+    Integer deleteAllBySkillRefIdInAndUserId(List<Integer> skillRefId, String userId)
 
     static interface AchievementItem {
         Date getAchievedOn()

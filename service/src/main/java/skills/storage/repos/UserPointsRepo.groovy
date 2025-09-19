@@ -684,7 +684,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     long countNonArchivedUsersByProjectIdAndSkillId(String projectId, String skillId)
 
     void deleteByProjectIdAndSkillId(String projectId, String skillId)
-    long deleteBySkillRefId(Integer skillRefId)
+    Long deleteBySkillRefId(Integer skillRefId)
     void deleteAllByProjectIdAndUserId(String projectId, String userId)
     void deleteAllByUserIdAndSkillRefIdIn(String userId, List<Integer> skillRefId)
 

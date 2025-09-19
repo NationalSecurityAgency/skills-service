@@ -32,7 +32,7 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
     Integer getQuizRefIdByQuizIdIgnoreCase(String quizId)
 
     @Modifying
-    int deleteByQuizIdIgnoreCase(String quizId)
+    Integer deleteByQuizIdIgnoreCase(String quizId)
 
     @Nullable
     QuizDef findByNameIgnoreCase(String quizName)
