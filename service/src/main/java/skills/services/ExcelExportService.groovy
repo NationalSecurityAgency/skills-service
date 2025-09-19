@@ -221,7 +221,7 @@ class ExcelExportService {
 
         String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getProjectUserCommunity(projectId))
         Sheet sheet = workbook.createSheet()
-        List<String> headers = ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)", "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version"]
+        List<String> headers = ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)",  "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version", "Date Last Updated (UTC)",]
         Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
 
         CellStyle dateStyle = workbook.createCellStyle()
@@ -264,6 +264,10 @@ class ExcelExportService {
             row.createCell(columnNumber++).setCellValue(getExpiration(skillDef))
             row.createCell(columnNumber++).setCellValue(getTimeWindow(skillDef))
             row.createCell(columnNumber++).setCellValue(skillDef.version)
+
+            Cell lastUpdatedCell = row.createCell(columnNumber++)
+            lastUpdatedCell.setCellStyle(dateStyle)
+            lastUpdatedCell.setCellValue(skillDef.updated)
         }
 
         return rowNum
