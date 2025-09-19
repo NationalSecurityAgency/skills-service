@@ -95,6 +95,11 @@ class ExcelExportService {
         Integer projectPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
         int minimumPoints = Math.floor((minimumPointsPercent / 100) * projectPoints)
         int maximumPoints = Math.ceil((maximumPointsPercent / 100) * projectPoints)
+        // need to artificially increase the maximum points to include users who have reached 100% completion
+        // because the database query uses "less than" logic
+        if (maximumPointsPercent == 100) {
+            maximumPoints = maximumPoints + 1
+        }
         Stream<ProjectUser> projectUsers = adminUsersService.streamAllDistinctUsersForProject(projectId, query, pageRequest, minimumPoints, maximumPoints)
         try {
             projectUsers.each { ProjectUser user ->
