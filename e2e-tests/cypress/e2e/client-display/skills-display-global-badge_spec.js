@@ -417,4 +417,51 @@ describe('Skills Display Global Badges Tests', () => {
     cy.get('[data-cy="globalBadgeProjectLevels"] [data-cy="gb_proj1"]').should('contain.text', '100% Complete')
     cy.get('[data-cy="globalBadgeProjectLevels"] [data-cy="gb_proj2"]').should('contain.text', '50% Complete')
   });
+
+  it('view global badge with skills from two projects assigned from proj1, navigate to skill from proj2', () => {
+    cy.resetDb();
+    cy.fixture('vars.json')
+      .then((vars) => {
+        if (!Cypress.env('oauthMode')) {
+          cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+        }
+      });
+    cy.loginAsProxyUser();
+    cy.createProject(1);
+    cy.createProject(2);
+    cy.createSubject(1, 1);
+    cy.createSubject(2, 1);
+    cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
+    cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
+    cy.createSkill(1, 1, 3, { name: 'find Blah other skill 3' });
+    cy.createSkill(1, 1, 4, { name: 'Search nothing skill 4' });
+
+    cy.createSkill(2, 1, 5, { name: 'blah1' });
+    cy.createSkill(2, 1, 6, { name: 'blah2' });
+    cy.createSkill(2, 1, 7, { name: 'blah3' });
+    cy.createSkill(2, 1, 8, { name: 'blah4' });
+
+    cy.loginAsRootUser();
+
+    cy.createGlobalBadge(1);
+    cy.assignSkillToGlobalBadge(1, 1, 1);
+    cy.assignSkillToGlobalBadge(1, 5, 2);
+    cy.enableGlobalBadge();
+
+    cy.loginAsProxyUser();
+
+    cy.cdVisit('/');
+    cy.cdClickBadges();
+    cy.contains('Global Badge 1');
+    cy.get('[data-cy=badgeDetailsLink_globalBadge1]')
+      .click();
+    cy.get('[data-cy="badge_globalBadge1"]').contains('Global Badge 1')
+      .should('be.visible');
+    cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"]')
+      .contains('Search blah skill 1')
+    cy.get('[data-cy="skillProgressTitle-skill5=globalBadge1"]')
+      .contains('blah1')
+
+    cy.get('[data-cy="skillProgressTitle-skill5=globalBadge1"] [data-cy="skillProgressTitle"]').eq(0).click();
+  });
 })
