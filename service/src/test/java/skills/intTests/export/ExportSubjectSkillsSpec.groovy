@@ -15,6 +15,8 @@
  */
 package skills.intTests.export
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
 import skills.intTests.utils.SkillsService
 import skills.services.ExcelExportService
 import skills.services.attributes.ExpirationAttrs
@@ -25,6 +27,9 @@ import java.time.LocalDateTime
 import static skills.intTests.utils.SkillsFactory.*
 
 class ExportSubjectSkillsSpec extends ExportBaseIntSpec {
+
+    @Autowired
+    JdbcTemplate jdbcTemplate
 
     def "export subject skills"() {
 
@@ -53,6 +58,10 @@ class ExportSubjectSkillsSpec extends ExportBaseIntSpec {
         skillsService.assignSkillToSkillsGroup(group.skillId, proj1_skills[4])
         skillsService.createSkills(proj2_skills_subj2)
 
+        Date yesterday = new Date() - 1
+        Date twoDaysAgo = new Date() - 2
+        jdbcTemplate.update("update skill_definition set created='${twoDaysAgo.format("yyyy-MM-dd HH:mm:ss")}', updated='${yesterday.format("yyyy-MM-dd HH:mm:ss")}' where project_id='${proj1.projectId}' and skill_id='${proj1_skills[1].skillId}'")
+
         List<String> skillIds = proj1_skills.collect {it.skillId}
         String tagValue = "New Tag"
         skillsService.addTagToSkills(proj1.projectId, skillIds, tagValue)
@@ -77,13 +86,13 @@ class ExportSubjectSkillsSpec extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)", "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version"],
-                ["Test Skill 1", "skill1", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Approval", "Exported", "", "", "0.0"],
-                ["Test Skill 2", "skill2", "", "New Tag",  formatDate(today), "200.0", "50.0", "4.0", "Approval", "", "Every year on ${expirationDate.format("MM/dd")}", "8 Hours 7 Minutes, Up to 2 Occurrences", "1.0"],
-                ["Test Skill 3", "skill3", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Honor System", "", "", "", "0.0"],
-                ["Test Skill 4", "skill4", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
-                ["Test Skill 5", "skill5", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
-                ["Test Skill 1 Subject2", "skill1subj2", "", "",  formatDate(today), "50.0", "50.0", "1.0", "", "Imported", "", "", "1.0"],
+                ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)", "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version", "Date Last Updated (UTC)"],
+                ["Test Skill 1", "skill1", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Approval", "Exported", "", "", "0.0", formatDate(today)],
+                ["Test Skill 2", "skill2", "", "New Tag",  formatDate(twoDaysAgo), "200.0", "50.0", "4.0", "Approval", "", "Every year on ${expirationDate.format("MM/dd")}", "8 Hours 7 Minutes, Up to 2 Occurrences", "1.0", formatDate(yesterday)],
+                ["Test Skill 3", "skill3", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Honor System", "", "", "", "0.0", formatDate(today)],
+                ["Test Skill 4", "skill4", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0", formatDate(today)],
+                ["Test Skill 5", "skill5", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0", formatDate(today)],
+                ["Test Skill 1 Subject2", "skill1subj2", "", "",  formatDate(today), "50.0", "50.0", "1.0", "", "Imported", "", "", "1.0", formatDate(today)],
                 ["For All Dragons Only"],
         ])
     }
@@ -142,13 +151,13 @@ class ExportSubjectSkillsSpec extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["For Divine Dragon Only"],
-                ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)", "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version"],
-                ["Test Skill 1", "skill1", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Approval", "", "", "", "0.0"],
-                ["Test Skill 2", "skill2", "", "New Tag",  formatDate(today), "200.0", "50.0", "4.0", "Approval", "", "Every year on ${expirationDate.format("MM/dd")}", "8 Hours 7 Minutes, Up to 2 Occurrences", "1.0"],
-                ["Test Skill 3", "skill3", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Honor System", "", "", "", "0.0"],
-                ["Test Skill 4", "skill4", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
-                ["Test Skill 5", "skill5", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
-                ["Test Skill 1 Subject2", "skill1subj2", "", "",  formatDate(today), "50.0", "50.0", "1.0", "", "Imported", "", "", "1.0"],
+                ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)", "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version", "Date Last Updated (UTC)"],
+                ["Test Skill 1", "skill1", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Approval", "", "", "", "0.0", formatDate(today)],
+                ["Test Skill 2", "skill2", "", "New Tag",  formatDate(today), "200.0", "50.0", "4.0", "Approval", "", "Every year on ${expirationDate.format("MM/dd")}", "8 Hours 7 Minutes, Up to 2 Occurrences", "1.0", formatDate(today)],
+                ["Test Skill 3", "skill3", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Honor System", "", "", "", "0.0", formatDate(today)],
+                ["Test Skill 4", "skill4", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0", formatDate(today)],
+                ["Test Skill 5", "skill5", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0", formatDate(today)],
+                ["Test Skill 1 Subject2", "skill1subj2", "", "",  formatDate(today), "50.0", "50.0", "1.0", "", "Imported", "", "", "1.0", formatDate(today)],
                 ["For Divine Dragon Only"],
         ])
     }

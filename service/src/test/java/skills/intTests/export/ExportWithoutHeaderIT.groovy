@@ -208,13 +208,13 @@ class ExportWithoutHeaderIT extends ExportBaseIntSpec {
 
         then:
         validateExport(excelExport.file, [
-                ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)", "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version"],
-                ["Test Skill 1", "skill1", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Approval", "Exported", "", "", "0.0"],
-                ["Test Skill 2", "skill2", "", "New Tag",  formatDate(today), "200.0", "50.0", "4.0", "Approval", "", "Every year on ${expirationDate.format("MM/dd")}", "8 Hours 7 Minutes, Up to 2 Occurrences", "1.0"],
-                ["Test Skill 3", "skill3", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Honor System", "", "", "", "0.0"],
-                ["Test Skill 4", "skill4", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
-                ["Test Skill 5", "skill5", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0"],
-                ["Test Skill 1 Subject2", "skill1subj2", "", "",  formatDate(today), "50.0", "50.0", "1.0", "", "Imported", "", "", "1.0"],
+                ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)", "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version", "Date Last Updated (UTC)"],
+                ["Test Skill 1", "skill1", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Approval", "Exported", "", "", "0.0", formatDate(today)],
+                ["Test Skill 2", "skill2", "", "New Tag",  formatDate(today), "200.0", "50.0", "4.0", "Approval", "", "Every year on ${expirationDate.format("MM/dd")}", "8 Hours 7 Minutes, Up to 2 Occurrences", "1.0", formatDate(today)],
+                ["Test Skill 3", "skill3", "", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "Honor System", "", "", "", "0.0", formatDate(today)],
+                ["Test Skill 4", "skill4", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0", formatDate(today)],
+                ["Test Skill 5", "skill5", "Test Skill 10", "New Tag",  formatDate(today), "50.0", "50.0", "1.0", "", "", "", "", "0.0", formatDate(today)],
+                ["Test Skill 1 Subject2", "skill1subj2", "", "",  formatDate(today), "50.0", "50.0", "1.0", "", "Imported", "", "", "1.0", formatDate(today)],
         ])
     }
 }
