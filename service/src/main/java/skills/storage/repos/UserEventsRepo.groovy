@@ -473,7 +473,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
 
     @Query(value="""
         WITH SkillsForSubject AS (
-            SELECT sd.id FROM skill_definition sd WHERE sd.id = (select sr.child_ref_id from skill_relationship_definition sr where sr.parent_ref_id = :skillRefId) 
+            SELECT sd.id FROM skill_definition sd WHERE sd.id in (select sr.child_ref_id from skill_relationship_definition sr where sr.parent_ref_id = :skillRefId) 
         )
         SELECT ue.project_id as projectId, date_trunc('month', ue.event_time) AS month, count(distinct ue.user_id) as count
         FROM user_events ue WHERE ue.project_id = :projectId and ue.event_time >= :start

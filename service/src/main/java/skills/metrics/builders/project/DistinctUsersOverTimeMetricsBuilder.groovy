@@ -19,6 +19,7 @@ package skills.metrics.builders.project
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.result.model.CountItem
+import skills.controller.result.model.TimestampCountItem
 import skills.metrics.builders.MetricsParams
 import skills.metrics.builders.ProjectMetricsBuilder
 import skills.services.AdminUsersService
@@ -50,6 +51,13 @@ class DistinctUsersOverTimeMetricsBuilder implements ProjectMetricsBuilder {
         else {
             users = adminUsersService.getUsage(projectId, skillId, start)
             newUsers = adminUsersService.getUsage(projectId, skillId, start, true)
+        }
+        if(users.size() > 0 && newUsers.size() == 0) {
+            newUsers
+            users.each{ it ->
+                def count = new TimestampCountItem(value: it.value, count: 0)
+                newUsers.push(count)
+            }
         }
         users.sort() {it.value }
         newUsers.sort() { it.value }
