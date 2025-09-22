@@ -92,17 +92,21 @@ const buildToRoute = () => {
     return null
   }
   let name = 'skillDetails'
+  const query = {}
   const params = { skillId: props.skill.skillId }
   if (route.params.subjectId) {
     params.subjectId = route.params.subjectId
   } else if (route.params.badgeId) {
     params.badgeId = route.params.badgeId
     name = (skillsDisplayInfo.isGlobalBadgePage.value) ? 'globalBadgeSkillDetails' : 'badgeSkillDetails'
+    if (skillsDisplayInfo.isGlobalBadgePage.value && props.skill.projectId !== route.params.projectId) {
+      query.externalProjectId = props.skill.projectId
+    }
   } else if (props.skill.crossProject && props.skill.projectId) {
     params.crossProjectId = props.skill.projectId
   }
   name = skillsDisplayInfo.getContextSpecificRouteName(name)
-  return { name, params }
+  return { name, params, query }
 }
 const toRoute = buildToRoute()
 

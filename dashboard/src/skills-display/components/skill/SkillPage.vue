@@ -57,7 +57,7 @@ watch(() => skill.value.groupSkillId, () => {
 })
 const loadSkillSummary = () => {
   const skillId = skillsDisplayInfo.isDependency() ? route.params.dependentSkillId : route.params.skillId
-  skillState.loadSkillSummary(skillId, route.params.crossProjectId, route.params.subjectId)
+  skillState.loadSkillSummary(skillId, route.params.crossProjectId || route.query.externalProjectId, route.params.subjectId)
     .then(() => {
       loadingSkill.value = false
       if (skillId && skill.value.projectId && !skillsDisplayInfo.isCrossProject()) {
@@ -98,8 +98,6 @@ userPreferences.afterUserPreferencesLoaded().then((options) => {
       debounceOptions
   )
 })
-
-
 
 const prevButtonClicked = () => {
   const params = { skillId: skillState.skillSummary.prevSkillId, projectId: route.params.projectId }
