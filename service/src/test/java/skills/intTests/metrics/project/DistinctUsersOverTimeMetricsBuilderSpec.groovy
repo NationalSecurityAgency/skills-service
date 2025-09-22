@@ -481,8 +481,9 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         res30days.users.size() == 6
         res30days.users.collect {it.count} == [10, 10, 10, 10, 10, 10]
         res30days.users.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
-        res30days.newUsers.size() == 0
-        res30days.newUsers == []
+        res30days.newUsers.size() == 6
+        res30days.newUsers.collect {it.count} == [0, 0, 0, 0, 0, 0]
+        res30days.newUsers.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
         resOver30days.users.size() == 7
         resOver30days.users.collect {it.count} == [0, 10, 10, 10, 10, 10, 10]
@@ -494,14 +495,16 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         skill3res30days.users.size() == 6
         skill3res30days.users.collect {it.count} == [4, 4, 4, 4, 4, 4]
         skill3res30days.users.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
-        skill3res30days.newUsers.size() == 0
-        skill3res30days.newUsers == []
+        skill3res30days.newUsers.size() == 6
+        skill3res30days.newUsers.collect {it.count} == [0, 0, 0, 0, 0, 0]
+        skill3res30days.newUsers.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
         res30daysAfterArchive.users.size() == 6
         res30daysAfterArchive.users.collect {it.count} == [9, 9, 9, 9, 9, 9]
         res30daysAfterArchive.users.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
-        res30daysAfterArchive.newUsers.size() == 0
-        res30daysAfterArchive.newUsers == []
+        res30daysAfterArchive.newUsers.size() == 6
+        res30daysAfterArchive.newUsers.collect {it.count} == [0, 0, 0, 0, 0, 0]
+        res30daysAfterArchive.newUsers.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
         resOver30daysAfterArchive.users.size() == 7
         resOver30daysAfterArchive.users.collect {it.count} == [0, 9, 9, 9, 9, 9, 9]
@@ -513,8 +516,9 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         skill3res30daysAfterArchive.users.size() == 6
         skill3res30daysAfterArchive.users.collect {it.count} == [4, 4, 4, 4, 4, 4]
         skill3res30daysAfterArchive.users.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
-        skill3res30daysAfterArchive.newUsers.size() == 0
-        skill3res30daysAfterArchive.newUsers == []
+        skill3res30daysAfterArchive.newUsers.size() == 6
+        skill3res30daysAfterArchive.newUsers.collect {it.count} == [0, 0, 0, 0, 0, 0]
+        skill3res30daysAfterArchive.newUsers.collect {it.value} == days.subList(0, days.size()).collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
     }
 
     def "number of users growing over few days - grouped by month"() {
