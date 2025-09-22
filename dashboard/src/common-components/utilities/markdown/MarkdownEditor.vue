@@ -29,8 +29,21 @@ import FileUploadService from '@/common-components/utilities/FileUploadService.j
 import {useThemesHelper} from '@/components/header/UseThemesHelper.js'
 import {useDebounceFn} from '@vueuse/core'
 import {useLog} from "@/components/utils/misc/useLog.js";
+import {useRoute, useRouter} from "vue-router";
+import {useProjectCommunityReplacement} from "@/components/customization/UseProjectCommunityReplacement.js";
+import {useProjConfig} from "@/stores/UseProjConfig.js";
+import {useQuizConfig} from "@/stores/UseQuizConfig.js";
+import {useSkillsDisplayInfo} from "@/skills-display/UseSkillsDisplayInfo.js";
+import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
 
 const appConfig = useAppConfig()
+const quizConfig = useQuizConfig()
+const projConfig = useProjConfig()
+const skillsDisplayInfo = useSkillsDisplayInfo()
+const skillDisplayAttributes = useSkillsDisplayAttributesState()
+const router = useRouter()
+const route = useRoute()
+const projectCommunityReplacement = useProjectCommunityReplacement()
 const log = useLog()
 
 const props = defineProps({
@@ -84,6 +97,10 @@ const props = defineProps({
     default: false
   },
   uploadUrl: {
+    type: String,
+    default: null
+  },
+  userCommunity: {
     type: String,
     default: null
   },
@@ -257,7 +274,31 @@ function handleFocus() {
 
 const allowedAttachmentFileTypes = appConfig.allowedAttachmentFileTypes
 const maxAttachmentSize = appConfig.maxAttachmentSize
-const attachmentWarningMessage = appConfig.attachmentWarningMessage
+const attachmentWarningMessage = computed(() => {
+  const warningMessageValue = appConfig?.attachmentWarningMessage;
+  const errMsg = ''
+  try {
+    let communityValue = props.userCommunity
+    if (!communityValue) {
+      if (route.params.projectId) {
+        if (skillsDisplayInfo.isSkillsDisplayPath()) {
+          communityValue = skillDisplayAttributes.projectUserCommunityDescriptor
+        } else {
+          communityValue = projConfig.getProjectCommunityValue();
+        }
+      } else if (route.params.quizId) {
+        communityValue = quizConfig.quizCommunityValue;
+      }
+    }
+    return projectCommunityReplacement.populateProjectCommunity(warningMessageValue, communityValue, `${errMsg} config.allowedAttachmentFileTypes`);
+  } catch(err) {
+    console.error(err)
+    // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+    router.push({ name: 'ErrorPage', query: { err } });
+  }
+  return warningMessageValue
+});
+
 const allowedAttachmentMimeTypes = appConfig.allowedAttachmentMimeTypes
 
 const hasNewAttachment = ref(false)

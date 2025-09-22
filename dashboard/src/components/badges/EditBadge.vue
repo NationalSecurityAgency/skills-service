@@ -384,6 +384,7 @@ const onBadgeSaved = () => {
           class="mt-8"
           :allow-attachments="!global || isEdit"
           :upload-url="global ? `/admin/badges/${props.badge.badgeId}/upload` : `/admin/projects/${route.params.projectId}/upload`"
+          :user-community="global && isEdit ? props.badge.userCommunity : null"
           name="description" />
 
       <Card v-if="!global" data-cy="bonusAwardCard">

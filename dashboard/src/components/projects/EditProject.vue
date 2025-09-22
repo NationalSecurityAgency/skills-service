@@ -218,6 +218,7 @@ const onSavedProject = () => {
         class="mt-8"
         :upload-url="isEdit   ? `/admin/projects/${props.project.projectId}/upload` : null"
         :allow-attachments="isEdit"
+        :user-community="isEdit ? props.project.userCommunity : null"
         name="description" />
 
     </template>

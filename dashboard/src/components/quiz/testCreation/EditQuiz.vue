@@ -248,6 +248,7 @@ const onSavedQuiz = (savedQuiz) => {
           id="quizDescription"
           :quiz-id="isEdit ? quiz.quizId : null"
           :upload-url="isEdit   ? `/admin/quiz-definitions/${props.quiz.quizId}/upload` : null"
+          :user-community="isEdit ? props.quiz.userCommunity : null"
           :allow-attachments="isEdit"
           data-cy="quizDescription"
           class="mt-8"
