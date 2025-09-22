@@ -101,6 +101,15 @@ class SkillsDepsService {
         SkillDef skillDef = loadSkillDefForLearningPath(projectId, id)
         SkillDef prereqSkillDef = loadSkillDefForLearningPath(prereqFromProjectId ?: projectId, prereqFromId)
 
+        // handle a special case where copied project has a badge with no skills and that badge is part of a learning path
+        // if all the skills are removed from one of those live badges then it will be copied as disabled and cannot be
+        // added to the learning path
+        boolean isToBadgeDisabled = skillDef.type == SkillDef.ContainerType.Badge && (!skillDef.enabled || !Boolean.parseBoolean(skillDef.enabled))
+        boolean isFromBadgeDisabled = prereqSkillDef.type == SkillDef.ContainerType.Badge && (!prereqSkillDef.enabled || !Boolean.parseBoolean(prereqSkillDef.enabled))
+        if (isToBadgeDisabled || isFromBadgeDisabled) {
+            return
+        }
+
         validateLearningPathItemAndThrowException(skillDef, prereqSkillDef)
         skillRelDefRepo.save(new SkillRelDef(parent: skillDef, child: prereqSkillDef, type: SkillRelDef.RelationshipType.Dependence))
 
