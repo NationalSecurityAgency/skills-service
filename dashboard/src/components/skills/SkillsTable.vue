@@ -236,7 +236,7 @@ const onColumnSort = () => {
 
 
 const addSkillDisabled = computed(() => {
-  return subjectState.subject.numSkills >= appConfig.maxSkillsPerSubject;
+  return (subjectState.subject?.numSkills || 0) + (subjectState.subject?.numSkillsReused || 0) >= appConfig.maxSkillsPerSubject;
 })
 const createOrUpdateSkill = inject('createOrUpdateSkill')
 const handleEditBtnClick = (skill) => {
