@@ -146,10 +146,11 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         s.displayOrder as displayOrder,
         s.created as created,
         s.updated as updated
-        from SkillDef s, SkillDef subjectDef, SkillRelDef srd 
+        from SkillRelDef srd 
+            join SkillDef subjectDef on subjectDef.id = srd.parent.id
+            join SkillDef s on s.id = srd.child.id
         where
-        subjectDef = srd.parent and s = srd.child and 
-        srd.type = 'RuleSetDefinition' and subjectDef.type = 'Subject' and  
+        srd.type IN ('RuleSetDefinition', 'GroupSkillToSubject') and subjectDef.type = 'Subject' and  
         s.type = ?1 and lower(s.name) like lower(CONCAT('%', ?2, '%')) and s.projectId in (:projectIds) and
         not exists (select 1 from Setting s2 where s.projectId = s2.projectId and s2.setting = 'invite_only' and s2.value = 'true') and
         s.readOnly != true''')

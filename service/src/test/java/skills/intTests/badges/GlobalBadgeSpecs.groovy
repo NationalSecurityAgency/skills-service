@@ -499,4 +499,34 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         SkillsClientException ex = thrown()
         ex.message.contains("Projects that participate in global badges cannot enable invite_only setting")
     }
+
+    def 'global badge available skills includes regular skills and group skills'() {
+        def proj = createProject()
+        def subj = createSubject()
+        def skills = createSkills(3)
+        def skillsGroup = createSkillsGroup(1, 1, 4)
+        def regularSkill = createSkill(1, 1, 5)
+        Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createGlobalBadge(badge)
+        skillsService.createSkill(regularSkill)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        when:
+        def availableSkills = skillsService.getAvailableSkillsForGlobalBadge(badgeId, "")
+
+        then:
+        availableSkills
+        availableSkills.suggestedSkills.size() == 4
+        availableSkills.suggestedSkills.find { it.skillId == skills[0].skillId }
+        availableSkills.suggestedSkills.find { it.skillId == skills[1].skillId }
+        availableSkills.suggestedSkills.find { it.skillId == skills[2].skillId }
+        availableSkills.suggestedSkills.find { it.skillId == regularSkill.skillId }
+    }
 }
