@@ -191,7 +191,7 @@ const atLeastTwoAnswersFilledIn = (value) => {
   return numWithContent >= 2;
 }
 const correctAnswersMustHaveText = (value) => {
-  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value) {
+  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
     return true;
   }
   const correctWithoutText = value.filter((a) => (a.isCorrect && (!a.answer || a.answer.trim().length === 0))).length;
@@ -234,6 +234,7 @@ const schema = object({
       .max(appConfig.maxQuizAnswerHintLength)
       .customDescriptionValidator('Answer Hint', false)
       .label('Answer Hint'),
+  'multiPartAnswer': string(),
   'answers': array()
       .of(
           object({
@@ -307,6 +308,13 @@ const saveQuiz = (values) => {
   }
 }
 const onSavedQuestion = (savedQuestion) => {
+  if(savedQuestion.questionType === 'Matching') {
+    savedQuestion.answers.forEach((answer) => {
+      if (answer.multiPartAnswer) {
+        answer.multiPartAnswer = JSON.parse(answer.multiPartAnswer)
+      }
+    })
+  }
   emit('question-saved', savedQuestion)
   close()
 }

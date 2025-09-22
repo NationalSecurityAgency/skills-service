@@ -137,13 +137,13 @@ const moveQuestion = (changeIndexBy) => {
         <div v-if="isMatchingType">
           <div v-for="answer in question.answers">
             <div v-if="answer.multiPartAnswer" class="flex gap-4 w-md">
-              <div class="flex-1">
+              <div>
                 {{ answer.multiPartAnswer.term }}
               </div>
               <div>
                 <i class="fas fa-arrow-right"></i>
               </div>
-              <div class="flex-1">
+              <div>
                 {{ answer.multiPartAnswer.value }}
               </div>
             </div>
