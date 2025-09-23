@@ -258,7 +258,6 @@ const schema = object({
           object({
             'answer': string().nullable().label('Answer'),
             'isCorrect': boolean().label('Is Correct'),
-            'multiPartAnswer': object().label('Multi Part Answer'),
           })
       )
       .test('atLeastOneCorrectAnswer', 'Must have at least 1 correct answer selected', (value) => atLeastOneCorrectAnswer(value))
