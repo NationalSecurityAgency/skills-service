@@ -158,6 +158,32 @@ class GetQuizzesCommunitySpecs extends DefaultIntSpec {
         q1UpdatedRes.body.name == 'new name'
     }
 
+    def "user community is returned in a quiz info"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        def q1CreatedRes = pristineDragonsUser.createQuizDef(q1)
+
+        def q2 = QuizDefFactory.createQuiz(2)
+        def q2CreatedRes = pristineDragonsUser.createQuizDef(q2)
+
+        pristineDragonsUser.addQuizUserRole(q2.quizId, allDragonsUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+
+        when:
+        def q1Info = pristineDragonsUser.getQuizInfo(q1.quizId)
+        def q2Info = pristineDragonsUser.getQuizInfo(q2.quizId)
+
+        then:
+        q1Info.userCommunity == 'Divine Dragon'
+        q2Info.userCommunity == 'All Dragons'
+    }
+
     private static boolean validateForbidden(Closure c) {
         try {
             def res = c.call()

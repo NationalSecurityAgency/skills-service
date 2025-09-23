@@ -548,6 +548,7 @@ const onResize = (newWidth) => {
                   :q="q"
                   :quiz-id="quizId"
                   :quiz-attempt-id="quizAttemptId"
+                  :user-community="quizInfo.userCommunity"
                   :num="index+1"
                   :validate="validateTextAnswer"
                   @selected-answer="updateSelectedAnswers"

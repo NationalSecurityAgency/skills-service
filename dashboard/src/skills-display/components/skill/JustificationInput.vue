@@ -73,6 +73,7 @@ const submit = handleSubmit(formValues => {
                        :id="`approvalRequiredMsg-${skill.skillId}`"
                        ref="approvalRequiredMsg"
                        :upload-url="`/api/projects/${skill.projectId}/skills/${skill.skillId}/upload`"
+                       :allow-community-elevation="true"
                        data-cy="selfReportMsgInput"
                        :aria-describedby="`reportSkillMsg-${skill.skillId}`"
                        markdownHeight="250px"

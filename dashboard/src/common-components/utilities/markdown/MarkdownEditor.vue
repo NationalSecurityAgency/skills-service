@@ -29,8 +29,21 @@ import FileUploadService from '@/common-components/utilities/FileUploadService.j
 import {useThemesHelper} from '@/components/header/UseThemesHelper.js'
 import {useDebounceFn} from '@vueuse/core'
 import {useLog} from "@/components/utils/misc/useLog.js";
+import {useRoute, useRouter} from "vue-router";
+import {useProjectCommunityReplacement} from "@/components/customization/UseProjectCommunityReplacement.js";
+import {useProjConfig} from "@/stores/UseProjConfig.js";
+import {useQuizConfig} from "@/stores/UseQuizConfig.js";
+import {useSkillsDisplayInfo} from "@/skills-display/UseSkillsDisplayInfo.js";
+import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
 
 const appConfig = useAppConfig()
+const quizConfig = useQuizConfig()
+const projConfig = useProjConfig()
+const skillsDisplayInfo = useSkillsDisplayInfo()
+const skillDisplayAttributes = useSkillsDisplayAttributesState()
+const router = useRouter()
+const route = useRoute()
+const projectCommunityReplacement = useProjectCommunityReplacement()
 const log = useLog()
 
 const props = defineProps({
@@ -86,6 +99,14 @@ const props = defineProps({
   uploadUrl: {
     type: String,
     default: null
+  },
+  userCommunity: {
+    type: String,
+    default: null
+  },
+  allowCommunityElevation: {
+    type: Boolean,
+    default: false
   },
 })
 const emit = defineEmits(['value-changed'])
@@ -254,10 +275,46 @@ function handleFocus() {
     announcer.polite(props.label)
   }
 }
-
+const descriptionWarningMsg = computed(() => {
+  return substituteCommunityValue(appConfig?.descriptionWarningMessage, 'descriptionWarningMessage')
+})
 const allowedAttachmentFileTypes = appConfig.allowedAttachmentFileTypes
 const maxAttachmentSize = appConfig.maxAttachmentSize
-const attachmentWarningMessage = appConfig.attachmentWarningMessage
+const substituteCommunityValue = (warningMsg, configName) => {
+  let communityValue = appConfig.defaultCommunityDescriptor
+  let errMsg = ''
+
+  if (props.allowCommunityElevation) {
+    if (props.userCommunity) {
+      communityValue = props.userCommunity
+    } else {
+      if (route.params.projectId) {
+        if (skillsDisplayInfo.isSkillsDisplayPath()) {
+          communityValue = skillDisplayAttributes.projectUserCommunityDescriptor
+        } else {
+          communityValue = projConfig.getProjectCommunityValue();
+        }
+        errMsg = `projId=[${route.params.projectId}] `
+      } else if (route.params.quizId) {
+        communityValue = quizConfig.quizCommunityValue;
+        errMsg = `quizId=[${route.params.quizId}] `
+      }
+    }
+  }
+  try {
+    return projectCommunityReplacement.populateProjectCommunity(warningMsg, communityValue, `${errMsg} config.${configName}`);
+  } catch(err) {
+    console.error(err)
+    // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+    router.push({ name: 'ErrorPage', query: { err } });
+  }
+
+  return communityValue
+}
+const attachmentWarningMessage = computed(() => {
+  return substituteCommunityValue(appConfig?.attachmentWarningMessage, 'attachmentWarningMessage')
+});
+
 const allowedAttachmentMimeTypes = appConfig.allowedAttachmentMimeTypes
 
 const hasNewAttachment = ref(false)
@@ -313,13 +370,21 @@ const editorStyle = computed(() => {
     <label v-if="showLabel"
            data-cy="markdownEditorLabel"
            :class="`${labelClass}`"
-           :for="name" @click="focusOnMarkdownEditor">{{ label }}</label>
+           :for="name" @click="focusOnMarkdownEditor">{{ label }}:</label>
+
     <BlockUI :blocked="disabled">
 
+
+      <div v-if="descriptionWarningMsg"
+           data-cy="descriptionWarningMessage"
+           class="border border-surface bg-sky-50 text-blue-800 dark:bg-surface-700 rounded-t px-3 py-2 sd-theme-tile-background flex gap-2 items-center"
+      >
+        <i class="fa-solid fa-circle-exclamation text-lg" aria-hidden="true"></i> {{ descriptionWarningMsg }}
+      </div>
       <toast-ui-editor :id="idForToastUIEditor"
                        :style="editorStyle"
                        class="no-bottom-border"
-                       :class="{'editor-theme-dark' : themeHelper.isDarkTheme, 'is-resizable': resizable }"
+                       :class="{'editor-theme-dark' : themeHelper.isDarkTheme, 'is-resizable': resizable, 'no-top-border' : descriptionWarningMsg }"
                        data-cy="markdownEditorInput"
                        ref="toastuiEditor"
                        initialEditType="wysiwyg"
@@ -454,6 +519,12 @@ const editorStyle = computed(() => {
   border-bottom: none !important;
   border-bottom-left-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
+}
+
+.no-top-border .toastui-editor-defaultUI {
+  border-top: none !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
 }
 
 div.toastui-editor-ww-code-block:after {

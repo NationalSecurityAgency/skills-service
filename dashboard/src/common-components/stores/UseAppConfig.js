@@ -101,6 +101,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const enablePageVisitReporting = computed(() => config.value.enablePageVisitReporting === true || config.value.enablePageVisitReporting === 'true')
   const allowedAttachmentFileTypes = computed(() => config.value.allowedAttachmentFileTypes)
   const maxAttachmentSize = computed(() => config.value.maxAttachmentSize ? Number(config.value.maxAttachmentSize) : 0)
+  const descriptionWarningMessage = computed(() => config.value.descriptionWarningMessage)
   const attachmentWarningMessage = computed(() => config.value.attachmentWarningMessage)
   const allowedAttachmentMimeTypes = computed(() => config.value.allowedAttachmentMimeTypes)
   const docsHost = computed(() => config.value.docsHost)
@@ -114,6 +115,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxProjectsPerAdmin = computed(() => config.value.maxProjectsPerAdmin)
   const minimumSubjectPoints = computed(() => config.value.minimumSubjectPoints)
   const maxSubjectsPerProject = computed(() => config.value.maxSubjectsPerProject)
+  const defaultCommunityDescriptor = computed(() => config.value.defaultCommunityDescriptor || '')
   const userCommunityBeforeLabel = computed(() => config.value.userCommunityBeforeLabel || '')
   const userCommunityAfterLabel = computed(() => config.value.userCommunityAfterLabel || '')
   const userCommunityRestrictedDescriptor = computed(() => config.value.userCommunityRestrictedDescriptor || '')
@@ -209,6 +211,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     enablePageVisitReporting,
     allowedAttachmentFileTypes,
     maxAttachmentSize,
+    descriptionWarningMessage,
     attachmentWarningMessage,
     allowedAttachmentMimeTypes,
     maxBadgesPerProject,
@@ -223,6 +226,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxSubjectsPerProject,
     userCommunityBeforeLabel,
     userCommunityAfterLabel,
+    defaultCommunityDescriptor,
     userCommunityRestrictedDescriptor,
     userCommunityDocsLabel,
     userCommunityDocsLink,
