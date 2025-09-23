@@ -42,6 +42,17 @@ class NewVersionsNotifCreator {
 
     private final List<WebNotifWrapper> newVersionsNotifications = [
             new WebNotifWrapper(
+                    releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-10-12'),
+                    notif: new WebNotification(
+                            notifiedOn: new Date(),
+                            showUntil: Date.parse('yyyy-MM-dd', '2025-11-01'),
+                            lookupId: "new-versions-4",
+                            title: "Version 3.9 Released",
+                            notification: """- Support for PDF slide decks in quizzes and surveys
+- Enhanced Metric Page with time range filters
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
+            ),
+            new WebNotifWrapper(
                     releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-09-12'),
                     notif: new WebNotification(
                             notifiedOn: new Date(),
