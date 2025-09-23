@@ -80,6 +80,42 @@ describe('Quiz - Community Attachment Warning Tests', () => {
         cy.validateDivineDragonWarning()
     })
 
+    it('edit quiz and elevate UC', () => {
+        cy.visit('/administrator/quizzes/')
+        cy.wait('@loadConfig')
+        cy.openDescModalAndAttachFile('[data-cy="editQuizButton_quiz1"]', 'Editing Existing Quiz/Survey')
+        cy.validateAllDragonsWarning()
+
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+    })
+
+    it('edit quiz and elevate UC - from quiz page', () => {
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.wait('@loadConfig')
+        cy.openDescModalAndAttachFile('[data-cy="editQuizButton"]', 'Editing Existing Quiz/Survey')
+        cy.validateAllDragonsWarning()
+
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+    })
+
     it('edit quiz - from quiz page', () => {
         cy.visit('/administrator/quizzes/quiz1')
         cy.wait('@loadConfig')

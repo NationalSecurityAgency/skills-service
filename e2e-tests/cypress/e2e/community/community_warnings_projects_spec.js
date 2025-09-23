@@ -85,6 +85,43 @@ describe('Project - Community Attachment Warning Tests', () => {
         cy.validateDivineDragonWarning()
     })
 
+    it('edit project and elevate UC', () => {
+        cy.visit('/administrator/')
+        cy.wait('@loadConfig')
+        cy.openDescModalAndAttachFile('[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]', 'Editing Existing Project')
+        cy.validateAllDragonsWarning()
+
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+    })
+
+    it('edit project and elevate UC - from project page', () => {
+        cy.visit('/administrator/projects/proj1')
+        cy.wait('@loadConfig')
+        cy.openDescModalAndAttachFile('[data-cy="btn_edit-project"]', 'Editing Existing Project')
+        cy.validateAllDragonsWarning()
+
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+    })
+
+
     it('edit project - from project page', () => {
         cy.visit('/administrator/projects/proj1')
         cy.wait('@loadConfig')

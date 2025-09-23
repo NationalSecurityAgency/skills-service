@@ -50,6 +50,12 @@ const enableProtectedUserCommunity = ref(initialValueForEnableProtectedUserCommu
 const userCommunityDescriptor = computed(() => {
   return enableProtectedUserCommunity.value ? appConfig.userCommunityRestrictedDescriptor : appConfig.defaultCommunityDescriptor
 })
+const userCommunityVal = computed(() => {
+    if (props.isEdit) {
+      return enableProtectedUserCommunity.value ? userCommunityDescriptor.value : props.project.userCommunity
+    }
+    return userCommunityDescriptor.value
+})
 
 const checkProjNameUnique = useDebounceFn((value) => {
   if (!value || value.length === 0) {
@@ -218,7 +224,7 @@ const onSavedProject = () => {
         class="mt-8"
         :upload-url="isEdit   ? `/admin/projects/${props.project.projectId}/upload` : null"
         :allow-attachments="isEdit"
-        :user-community="isEdit ? props.project.userCommunity : userCommunityDescriptor"
+        :user-community="userCommunityVal"
         :allow-community-elevation="true"
         name="description" />
 
