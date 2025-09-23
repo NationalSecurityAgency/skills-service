@@ -130,20 +130,22 @@ describe('Quiz - Community Attachment Warning Tests', () => {
         cy.get('[data-cy="question_1"] [data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for Divine Dragon')
     })
 
-    it('questions grading input', () => {
-        cy.createTextInputQuestionDef(1, 1)
-        cy.createTextInputQuestionDef(2, 1)
+    if (!Cypress.env('oauthMode')) {
+        it('questions grading input', () => {
+            cy.createTextInputQuestionDef(1, 1)
+            cy.createTextInputQuestionDef(2, 1)
 
-        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}], true, '**My Answer**')
-        cy.runQuizForUser(2, 1, [{selectedIndex: [0]}], true, '**My Answer**')
+            cy.runQuizForUser(1, 1, [{selectedIndex: [0]}], true, '**My Answer**')
+            cy.runQuizForUser(2, 1, [{selectedIndex: [0]}], true, '**My Answer**')
 
-        cy.visit('/administrator/quizzes/quiz1/grading');
-        cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled').click()
-        cy.get('[data-cy="feedbackTxtMarkdownEditor"] [data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for All Dragons')
+            cy.visit('/administrator/quizzes/quiz1/grading');
+            cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled').click()
+            cy.get('[data-cy="feedbackTxtMarkdownEditor"] [data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for All Dragons')
 
-        cy.visit('/administrator/quizzes/quiz2/grading');
-        cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled').click()
-        cy.get('[data-cy="feedbackTxtMarkdownEditor"] [data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for Divine Dragon')
-    })
+            cy.visit('/administrator/quizzes/quiz2/grading');
+            cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled').click()
+            cy.get('[data-cy="feedbackTxtMarkdownEditor"] [data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for Divine Dragon')
+        })
+    }
 
 });
