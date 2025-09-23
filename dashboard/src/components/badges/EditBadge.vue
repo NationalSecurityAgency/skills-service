@@ -54,6 +54,9 @@ const route = useRoute()
 const communityLabels = useCommunityLabels()
 const initialValueForEnableProtectedUserCommunity = communityLabels.isRestrictedUserCommunity(props.badge.userCommunity)
 const enableProtectedUserCommunity = ref(initialValueForEnableProtectedUserCommunity)
+const userCommunityDescriptor = computed(() => {
+  return enableProtectedUserCommunity.value ? appConfig.userCommunityRestrictedDescriptor : appConfig.defaultCommunityDescriptor
+})
 
 onMounted(() => {
   document.addEventListener('focusin', trackFocus);
@@ -384,7 +387,8 @@ const onBadgeSaved = () => {
           class="mt-8"
           :allow-attachments="!global || isEdit"
           :upload-url="global ? `/admin/badges/${props.badge.badgeId}/upload` : `/admin/projects/${route.params.projectId}/upload`"
-          :user-community="global && isEdit ? props.badge.userCommunity : null"
+          :user-community="global && isEdit ? props.badge.userCommunity : (global ? userCommunityDescriptor : null)"
+          :allow-community-elevation="true"
           name="description" />
 
       <Card v-if="!global" data-cy="bonusAwardCard">

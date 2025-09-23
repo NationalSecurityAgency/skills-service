@@ -204,6 +204,7 @@ class QuizRunService {
             needsGradingAttemptDate = needsGradingAttempt.updated
         }
 
+        String userCommunity = userCommunityService.getQuizUserCommunity(quizDefWithDesc.quizId)
         return new QuizInfo(
                 name: quizDefWithDesc.name,
                 description: InputSanitizer.unsanitizeForMarkdown(quizDefWithDesc.description),
@@ -224,7 +225,8 @@ class QuizRunService {
                 onlyIncorrectQuestions: onlyIncorrectQuestions,
                 numIncorrectQuestions: numIncorrectQuestions,
                 showDescriptionOnQuizPage: showDescription,
-                slidesSummary: getSlidesSummary(quizDefWithDesc.quizId)
+                slidesSummary: getSlidesSummary(quizDefWithDesc.quizId),
+                userCommunity: userCommunity
         )
     }
 

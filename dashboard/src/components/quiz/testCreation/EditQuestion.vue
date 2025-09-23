@@ -310,6 +310,7 @@ const onSavedQuestion = (savedQuestion) => {
           id="quizDescription"
           :quiz-id="quizId"
           :upload-url="`/admin/quiz-definitions/${route.params.quizId}/upload`"
+          :allow-community-elevation="true"
           data-cy="questionText"
           label="Question"
           label-class="text-primary font-bold"

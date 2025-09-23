@@ -18,11 +18,22 @@ import '../desc-attachments/desc-attachment-commands.js'
 const attachmentBtnSelector = '[data-cy="markdownEditorInput"] button.attachment-button'
 const markdownEditorToolbarIconsSelector = '[data-cy="markdownEditorInput"] button.toastui-editor-toolbar-icons'
 
-Cypress.Commands.add('validateAllDragonsWarning', () => {
-    cy.get('[data-cy="attachmentWarningMessage"]').contains('Friendly Reminder: Only safe files please for All Dragons')
+Cypress.Commands.add('validateAllDragonsWarning', (attachmentWarning = true, descWarning = true) => {
+    if (descWarning) {
+        cy.get('[data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for All Dragons')
+    }
+    if (attachmentWarning) {
+        cy.get('[data-cy="attachmentWarningMessage"]').contains('Friendly Reminder: Only safe files please for All Dragons')
+    }
 });
-Cypress.Commands.add('validateDivineDragonWarning', () => {
-    cy.get('[data-cy="attachmentWarningMessage"]').contains('Friendly Reminder: Only safe files please for Divine Dragon')
+Cypress.Commands.add('validateDivineDragonWarning', (attachmentWarning = true, descWarning = true) => {
+    if (descWarning) {
+        cy.get('[data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for Divine Dragon')
+    }
+    if (attachmentWarning) {
+        cy.get('[data-cy="attachmentWarningMessage"]').contains('Friendly Reminder: Only safe files please for Divine Dragon')
+    }
+
 });
 Cypress.Commands.add('openDescModalAndAttachFile', (btnSelector, expectedTitle) => {
     cy.get(btnSelector).click()

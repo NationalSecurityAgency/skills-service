@@ -430,6 +430,7 @@ const onSelectedIcon = (selectedIcon) => {
 
     <markdown-editor
       :upload-url="`/admin/projects/${route.params.projectId}/upload`"
+      :allow-community-elevation="true"
       class="mt-8"
       name="description" />
 

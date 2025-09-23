@@ -197,7 +197,7 @@ const onSubjectSaved = (subject) => {
         </template>
       </SkillsNameAndIdInput>
 
-      <div v-if="showVisibilityControl" data-cy="visibility" class="flex-1 min-w-[8rem] mb-2">
+      <div v-if="showVisibilityControl" data-cy="visibility" class="flex-1 min-w-[8rem] mb-2 mt-3">
         <div class="flex flex-col gap-2">
           <label for="visibilitySwitch">
             <span id="visibilityLabel">Initial Visibility:</span>
@@ -223,6 +223,8 @@ const onSubjectSaved = (subject) => {
 
       <markdown-editor
           :upload-url="`/admin/projects/${route.params.projectId}/upload`"
+          class="mt-4"
+          :allow-community-elevation="true"
           name="description" />
       <help-url-input class="mt-4"
                       :next-focus-el="previousFocus"

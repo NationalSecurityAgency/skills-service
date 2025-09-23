@@ -33,11 +33,13 @@ describe('Quiz - Community Attachment Warning Tests', () => {
             cy.login(vars.defaultUser, vars.defaultPass);
         });
 
-        const msg = 'Friendly Reminder: Only safe files please for {{community.project.descriptor}}'
+        const fileMsg = 'Friendly Reminder: Only safe files please for {{community.project.descriptor}}'
+        const descMsg = 'Friendly Reminder: Only safe descriptions for {{community.project.descriptor}}'
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
-                conf.attachmentWarningMessage = msg;
+                conf.attachmentWarningMessage = fileMsg;
+                conf.descriptionWarningMessage = descMsg;
                 res.send(conf);
             });
         }).as('loadConfig');
@@ -47,6 +49,23 @@ describe('Quiz - Community Attachment Warning Tests', () => {
 
         cy.createQuizDef(2, {enableProtectedUserCommunity: true});
     });
+
+    it('create quiz', () => {
+        cy.visit('/administrator/quizzes/')
+        cy.wait('@loadConfig')
+        cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
+        cy.get('[data-p="modal"] [data-pc-section="title"]').contains('New Quiz/Survey')
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+    })
 
     it('edit quiz', () => {
         cy.visit('/administrator/quizzes/')
@@ -97,6 +116,34 @@ describe('Quiz - Community Attachment Warning Tests', () => {
         cy.wait('@loadConfig')
         cy.openDescModalAndAttachFile('[data-cy="editQuestionButton_1"]', 'Editing Existing Question')
         cy.validateDivineDragonWarning()
+    })
+
+    it('text answers', () => {
+        cy.createTextInputQuestionDef(1, 1)
+        cy.visit('/progress-and-rankings/quizzes/quiz1')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for All Dragons')
+
+        cy.createTextInputQuestionDef(2, 1)
+        cy.visit('/progress-and-rankings/quizzes/quiz2')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for Divine Dragon')
+    })
+
+    it('questions grading input', () => {
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createTextInputQuestionDef(2, 1)
+
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}], true, '**My Answer**')
+        cy.runQuizForUser(2, 1, [{selectedIndex: [0]}], true, '**My Answer**')
+
+        cy.visit('/administrator/quizzes/quiz1/grading');
+        cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled').click()
+        cy.get('[data-cy="feedbackTxtMarkdownEditor"] [data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for All Dragons')
+
+        cy.visit('/administrator/quizzes/quiz2/grading');
+        cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled').click()
+        cy.get('[data-cy="feedbackTxtMarkdownEditor"] [data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for Divine Dragon')
     })
 
 });

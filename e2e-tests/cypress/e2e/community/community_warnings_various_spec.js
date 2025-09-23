@@ -15,7 +15,7 @@
  */
 import './community_warnings_help_commands.js'
 
-describe('Quiz - Community Attachment Warning Tests', () => {
+describe('Community Attachment Warning Tests', () => {
 
     const allDragonsUser = 'allDragons@email.org'
 
@@ -50,45 +50,19 @@ describe('Quiz - Community Attachment Warning Tests', () => {
         cy.createGlobalBadge(2, {enableProtectedUserCommunity: true});
     });
 
-    it('new global badge', () => {
-        cy.visit('/administrator/globalBadges')
+    it('contact project admins', () => {
+        cy.loginAsRoot()
+        cy.viewport(1400, 1000)
+        cy.visit('/administrator/contactAdmins')
         cy.wait('@loadConfig')
-        cy.get('[data-cy="btn_Global Badges"]').click()
-        cy.get('[data-p="modal"] [data-pc-section="title"]').contains('New Badge')
         cy.validateAllDragonsWarning(false)
+    })
 
-        cy.get('[data-cy="restrictCommunity"]').click()
-        cy.validateDivineDragonWarning(false)
-
-        cy.get('[data-cy="restrictCommunity"]').click()
+    it('user agreement after logging in', () => {
+        cy.loginAsRoot()
+        cy.visit('/settings/system');
+        cy.wait('@loadConfig')
         cy.validateAllDragonsWarning(false)
-
-        cy.get('[data-cy="restrictCommunity"]').click()
-        cy.validateDivineDragonWarning(false)
-    })
-
-    it('edit global badge', () => {
-        cy.visit('/administrator/globalBadges')
-        cy.wait('@loadConfig')
-        cy.openDescModalAndAttachFile('[data-cy="badgeCard-globalBadge1"] [data-cy="editBtn"]', 'Editing Existing Badge')
-        cy.validateAllDragonsWarning()
-
-        cy.get('[data-cy="closeDialogBtn"]').click()
-        cy.get('[data-p="modal"]').should('not.exist')
-
-        cy.openDescModalAndAttachFile('[data-cy="badgeCard-globalBadge2"] [data-cy="editBtn"]', 'Editing Existing Badge')
-        cy.validateDivineDragonWarning()
-    })
-
-    it('edit global badge - from badge page', () => {
-        cy.visit('/administrator/globalBadges/globalBadge1')
-        cy.wait('@loadConfig')
-        cy.openDescModalAndAttachFile('[data-cy="btn_edit-badge"]', 'Editing Existing Badge')
-        cy.validateAllDragonsWarning()
-
-        cy.visit('/administrator/globalBadges/globalBadge2')
-        cy.openDescModalAndAttachFile('[data-cy="btn_edit-badge"]', 'Editing Existing Badge')
-        cy.validateDivineDragonWarning()
-    })
+    });
 
 });

@@ -33,11 +33,13 @@ describe('Project - Community Attachment Warning Tests', () => {
             cy.login(vars.defaultUser, vars.defaultPass);
         });
 
-        const msg = 'Friendly Reminder: Only safe files please for {{community.project.descriptor}}'
+        const fileMsg = 'Friendly Reminder: Only safe files please for {{community.project.descriptor}}'
+        const descMsg = 'Friendly Reminder: Only safe descriptions for {{community.project.descriptor}}'
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
-                conf.attachmentWarningMessage = msg;
+                conf.attachmentWarningMessage = fileMsg;
+                conf.descriptionWarningMessage = descMsg;
                 res.send(conf);
             });
         }).as('loadConfig');
@@ -52,6 +54,23 @@ describe('Project - Community Attachment Warning Tests', () => {
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
     });
+
+    it('new project', () => {
+        cy.visit('/administrator/')
+        cy.wait('@loadConfig')
+        cy.get('[data-cy="newProjectButton"]').click()
+        cy.get('[data-p="modal"] [data-pc-section="title"]').contains('New Project')
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+    })
 
     it('edit project', () => {
         cy.visit('/administrator/')
@@ -188,6 +207,14 @@ describe('Project - Community Attachment Warning Tests', () => {
         cy.wait('@loadConfig')
         cy.openDescModalAndAttachFile('[data-cy="btn_edit-badge"]', 'Editing Existing Badge')
         cy.validateDivineDragonWarning()
+    });
+
+    it('project email users', () => {
+        cy.visit('/administrator/projects/proj1/contact-users')
+        cy.validateAllDragonsWarning(false)
+
+        cy.visit('/administrator/projects/proj2/contact-users')
+        cy.validateAllDragonsWarning(false)
     });
 
     it('skill group creation', () => {

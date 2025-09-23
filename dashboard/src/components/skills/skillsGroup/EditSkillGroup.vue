@@ -171,6 +171,7 @@ const onSkillSaved = (skill) => {
     <markdown-editor
       class="mt-8"
       :upload-url="`/admin/projects/${route.params.projectId}/upload`"
+      :allow-community-elevation="true"
       name="description" />
 
   </SkillsInputFormDialog>

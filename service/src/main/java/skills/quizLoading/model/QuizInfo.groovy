@@ -45,4 +45,6 @@ class QuizInfo {
     Boolean showDescriptionOnQuizPage
 
     SlidesSummary slidesSummary
+
+    String userCommunity
 }

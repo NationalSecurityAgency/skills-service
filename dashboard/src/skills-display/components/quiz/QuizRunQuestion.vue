@@ -36,6 +36,7 @@ const props = defineProps({
   quizAttemptId: Number,
   num: Number,
   validate: Function,
+  userCommunity: String,
 })
 
 const isLoading = ref(true);
@@ -259,6 +260,8 @@ const toggleTranscript = () => {
                              @value-changed="textAnswerChangedDebounced"
                              :show-label="false"
                              :name="fieldName"
+                             :user-community="userCommunity"
+                             :allow-community-elevation="true"
                              :allow-attachments="false"
                              :allow-insert-images="false"
                              :aria-label="`Please enter text to answer question number ${num}`"

@@ -102,6 +102,7 @@ const grade = (isCorrect, feedback) => {
       </div>
       <markdown-editor class="form-text mt-4"
                        :id="`qFeedback-${quizAttemptId}_${question.questionNumber}`"
+                       :allow-community-elevation="true"
                        markdownHeight="120px"
                        label="Your Feedback (optional):"
                        name="feedbackTxt"
