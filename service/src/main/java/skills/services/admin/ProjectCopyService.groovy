@@ -565,7 +565,7 @@ class ProjectCopyService {
             graphSkillDefEdge.to.projectId == fromProject.projectId && graphSkillDefEdge.from.projectId == fromProject.projectId
         }
         localOnlyEdges.each {
-            skillsDepsService.addLearningPathItem(toProj.projectId, it.from.skillId, it.to.skillId)
+            skillsDepsService.addLearningPathItem(toProj.projectId, it.from.skillId, it.to.skillId, null, true)
         }
     }
 
