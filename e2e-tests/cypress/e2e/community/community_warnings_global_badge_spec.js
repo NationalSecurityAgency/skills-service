@@ -80,6 +80,36 @@ describe('Quiz - Community Attachment Warning Tests', () => {
         cy.validateDivineDragonWarning()
     })
 
+    it('edit global badge and elevate UC', () => {
+        cy.visit('/administrator/globalBadges')
+        cy.wait('@loadConfig')
+        cy.openDescModalAndAttachFile('[data-cy="badgeCard-globalBadge1"] [data-cy="editBtn"]', 'Editing Existing Badge')
+        cy.validateAllDragonsWarning()
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+
+        cy.visit('/administrator/globalBadges/globalBadge1')
+        cy.wait('@loadConfig')
+        cy.openDescModalAndAttachFile('[data-cy="btn_edit-badge"]', 'Editing Existing Badge')
+        cy.validateAllDragonsWarning()
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateAllDragonsWarning(false)
+
+        cy.get('[data-cy="restrictCommunity"]').click()
+        cy.validateDivineDragonWarning(false)
+    })
+
     it('edit global badge - from badge page', () => {
         cy.visit('/administrator/globalBadges/globalBadge1')
         cy.wait('@loadConfig')

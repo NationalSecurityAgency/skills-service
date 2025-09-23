@@ -57,7 +57,16 @@ const enableProtectedUserCommunity = ref(initialValueForEnableProtectedUserCommu
 const userCommunityDescriptor = computed(() => {
   return enableProtectedUserCommunity.value ? appConfig.userCommunityRestrictedDescriptor : appConfig.defaultCommunityDescriptor
 })
+const userCommunityVal = computed(() => {
+  if (props.global) {
+    if (props.isEdit) {
+      return enableProtectedUserCommunity.value ? userCommunityDescriptor.value : props.badge.userCommunity
+    }
+    return userCommunityDescriptor.value
+  }
 
+  return null
+})
 onMounted(() => {
   document.addEventListener('focusin', trackFocus);
 });
@@ -387,7 +396,7 @@ const onBadgeSaved = () => {
           class="mt-8"
           :allow-attachments="!global || isEdit"
           :upload-url="global ? `/admin/badges/${props.badge.badgeId}/upload` : `/admin/projects/${route.params.projectId}/upload`"
-          :user-community="global && isEdit ? props.badge.userCommunity : (global ? userCommunityDescriptor : null)"
+          :user-community="userCommunityVal"
           :allow-community-elevation="true"
           name="description" />
 

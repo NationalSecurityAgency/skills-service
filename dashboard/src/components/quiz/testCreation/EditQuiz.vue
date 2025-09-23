@@ -61,6 +61,12 @@ const enableProtectedUserCommunity = ref(initialValueForEnableProtectedUserCommu
 const userCommunityDescriptor = computed(() => {
   return enableProtectedUserCommunity.value ? appConfig.userCommunityRestrictedDescriptor : appConfig.defaultCommunityDescriptor
 })
+const userCommunityVal = computed(() => {
+  if (props.isEdit) {
+    return enableProtectedUserCommunity.value ? userCommunityDescriptor.value : props.quiz.userCommunity
+  }
+  return userCommunityDescriptor.value
+})
 
 const checkQuizNameUnique = useDebounceFn((value) => {
   if (!value || value.length === 0) {
@@ -251,7 +257,7 @@ const onSavedQuiz = (savedQuiz) => {
           id="quizDescription"
           :quiz-id="isEdit ? quiz.quizId : null"
           :upload-url="isEdit   ? `/admin/quiz-definitions/${props.quiz.quizId}/upload` : null"
-          :user-community="isEdit ? props.quiz.userCommunity : userCommunityDescriptor"
+          :user-community="userCommunityVal"
           :allow-community-elevation="true"
           :allow-attachments="isEdit"
           data-cy="quizDescription"
