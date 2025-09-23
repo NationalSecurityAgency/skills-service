@@ -217,7 +217,26 @@ const multipleChoiceQuestionsMustHaveAtLeast2Answer = (value) => {
   const numCorrect = value.filter((a) => (a.isCorrect)).length;
   return numCorrect >= 2;
 }
+const matchesMustNotBeBlank = (value) => {
+  if(!isQuestionTypeMatching.value) {
+    return true;
+  }
+  const emptyAnswers = value.filter((term) => {
+    return term.multiPartAnswer?.term?.trim() === '' || term.multiPartAnswer?.value?.trim() === '';
+  })
+  return emptyAnswers.length === 0;
+}
+const noRepeatAnswers = (value) => {
+  if(!isQuestionTypeMatching.value) {
+    return true;
+  }
+  const terms = value.map((term) => term.multiPartAnswer?.term)
+  const values = value.map((term) => term.multiPartAnswer?.value)
+  const hasDuplicateTerms = (new Set(terms)).size !== terms.length
+  const hasDuplicateValues = (new Set(values)).size !== values.length
 
+  return !hasDuplicateTerms && !hasDuplicateValues;
+}
 
 const schema = object({
   'questionType': object()
@@ -234,12 +253,12 @@ const schema = object({
       .max(appConfig.maxQuizAnswerHintLength)
       .customDescriptionValidator('Answer Hint', false)
       .label('Answer Hint'),
-  'multiPartAnswer': string(),
   'answers': array()
       .of(
           object({
             'answer': string().nullable().label('Answer'),
-            'isCorrect': boolean().label('Is Correct')
+            'isCorrect': boolean().label('Is Correct'),
+            'multiPartAnswer': object().label('Multi Part Answer'),
           })
       )
       .test('atLeastOneCorrectAnswer', 'Must have at least 1 correct answer selected', (value) => atLeastOneCorrectAnswer(value))
@@ -248,6 +267,8 @@ const schema = object({
       .test('maxNumAnswers', `Exceeded maximum number of [${appConfig.maxAnswersPerQuizQuestion}] answers`, (value) => maxNumAnswers(value))
       .test('singleChoiceQuestionsMustHave1Answer', 'Multiple Choice Question must have 1 correct answer', (value) => singleChoiceQuestionsMustHave1Answer(value))
       .test('multipleChoiceQuestionsMustHaveAtLeast2Answer', 'Multiple Answers Question must have at least 2 correct answers', (value) => multipleChoiceQuestionsMustHaveAtLeast2Answer(value))
+      .test('matchesMustNotBeBlank', 'Answers must include both a term and a value', (value) => matchesMustNotBeBlank(value))
+      .test('noRepeatAnswers', 'Answers can not contain duplicate terms or values', (value) => noRepeatAnswers(value))
   ,
 })
 const initialQuestionData = {
@@ -424,11 +445,7 @@ const onSavedQuestion = (savedQuestion) => {
             :options="currentScaleOptions" />
       </div>
 
-      <div v-if="isQuestionTypeMatching">
-        <matching-question v-model="props.questionDef.answers" />
-      </div>
-
-      <div v-if="!isQuestionTypeTextInput && !isQuestionTypeRatingInput && !isQuestionTypeMatching" class="pl-4">
+      <div v-if="!isQuestionTypeTextInput && !isQuestionTypeRatingInput" class="pl-4">
         <div class="mb-2" v-if="isQuizType">
           <span
               v-if="isQuestionTypeMultipleChoice"
@@ -436,8 +453,11 @@ const onSavedQuestion = (savedQuestion) => {
           <span
               v-if="isQuestionTypeSingleChoice"
               class="text-secondary">Check one correct answer on the left:</span>
+          <span
+            v-if="isQuestionTypeMatching" class="text-secondary">Add pairs of terms and their matching values:</span>
         </div>
         <ConfigureAnswers
+            v-if="!isQuestionTypeMatching"
             ref="answersRef"
             v-model="props.questionDef.answers"
             :quiz-type="props.questionDef.quizType"
@@ -446,6 +466,9 @@ const onSavedQuestion = (savedQuestion) => {
             :aria-invalid="!!answersErrorMessage"
             aria-errormessage="answersError"
               aria-describedby="answersError" />
+
+        <matching-question v-model="props.questionDef.answers" v-if="isQuestionTypeMatching" />
+
         <Message severity="error"
                  variant="simple"
                  size="small"

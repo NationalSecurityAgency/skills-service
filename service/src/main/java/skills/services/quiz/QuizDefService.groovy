@@ -589,6 +589,7 @@ class QuizDefService {
     private  List<QuizAnswerDef> updateQuizQuestionAnswerDefs(QuizQuestionDef savedQuestion, QuizQuestionDefRequest questionDefRequest) {
         boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
         boolean isRating = questionDefRequest.questionType == QuizQuestionType.Rating
+        boolean isMatchingQuestion = questionDefRequest.questionType == QuizQuestionType.Matching
         List<QuizAnswerDef> savedAnswers
         List<QuizAnswerDef> existingAnswerDefs = quizAnswerRepo.findAllByQuestionRefId(savedQuestion.id).sort { it.displayOrder }
         if (isTextInputQuestion) {
@@ -613,6 +614,16 @@ class QuizDefService {
                         isCorrectAnswer: false,
                         displayOrder: it
                 )
+            }
+            savedAnswers = quizAnswerRepo.saveAllAndFlush(answerDefs)
+        } else if (isMatchingQuestion) {
+            List<QuizAnswerDef> answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
+                QuizAnswerDef answerDef = existingAnswerDefs.find { it.id == answerDefRequest.id }
+                if(answerDef) {
+                    answerDef.multiPartAnswer = answerDefRequest.multiPartAnswer
+                    answerDef.displayOrder = index + 1
+                    return answerDef
+                }
             }
             savedAnswers = quizAnswerRepo.saveAllAndFlush(answerDefs)
         } else {
