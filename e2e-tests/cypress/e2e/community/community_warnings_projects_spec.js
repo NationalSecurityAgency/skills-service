@@ -237,47 +237,61 @@ describe('Project - Community Attachment Warning Tests', () => {
         cy.validateDivineDragonWarning()
     });
 
-    // it.only('skill justification from subject page', () => {
-    //     const attachmentBtnSelector = '[data-cy="markdownEditorInput"] button.attachment-button'
-    //     const markdownEditorToolbarIconsSelector = '[data-cy="markdownEditorInput"] button.toastui-editor-toolbar-icons'
-    //
-    //     cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
-    //     cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
-    //     cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' });
-    //
-    //     cy.createSkill(2, 1, 2, { selfReportingType: 'Approval' });
-    //     cy.createSkill(2, 1, 3, { selfReportingType: 'Approval' });
-    //     cy.createSkill(2, 1, 4, { selfReportingType: 'Approval' });
-    //     cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1')
-    //     cy.wait('@loadConfig')
-    //     cy.get('[data-cy="toggleSkillDetails"]').click();
-    //     cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').contains('Great Skill 1')
-    //     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressTitle"]').contains('Great Skill 2')
-    //     cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgressTitle"]').contains('Great Skill 3')
-    //     cy.get('[data-cy="skillProgress_index-3"] [data-cy="skillProgressTitle"]').contains('Great Skill 4')
-    //
-    //     cy.get('[data-cy="skillProgress_index-1"] [data-cy="requestApprovalBtn"]').click()
-    //     cy.get(`[data-cy="skillProgress_index-1"] ${markdownEditorToolbarIconsSelector}`).should('be.visible')
-    //     cy.get(`[data-cy="skillProgress_index-1"] ${attachmentBtnSelector}`).should('be.visible');
-    //     cy.addAttachment(`[data-cy="skillProgress_index-1"] ${attachmentBtnSelector}`)
-    //
-    //     cy.get('[data-cy="skillProgress_index-1"]  [data-cy="attachmentWarningMessage"]').contains('Friendly Reminder: Only safe files please for All Dragons')
-    //
-    //     cy.get('[data-cy="skillProgress_index-2"] [data-cy="requestApprovalBtn"]').click()
-    //     cy.get(`[data-cy="skillProgress_index-2"] ${markdownEditorToolbarIconsSelector}`).should('be.visible')
-    //     cy.get(`[data-cy="skillProgress_index-2"] ${attachmentBtnSelector}`).should('be.visible');
-    //     cy.addAttachment(`[data-cy="skillProgress_index-2"] ${attachmentBtnSelector}`)
-    //
-    //     cy.get('[data-cy="skillProgress_index-2"]  [data-cy="attachmentWarningMessage"]').contains('Friendly Reminder: Only safe files please for All Dragons')
-    //
-    //
-    //     // cy.visit('/progress-and-rankings/projects/proj2/subjects/subj1/skills/skill2')
-    //     // cy.wait('@loadConfig')
-    //     // cy.get('[data-cy="requestApprovalBtn"]').click()
-    //     // cy.get(markdownEditorToolbarIconsSelector).should('be.visible')
-    //     // cy.get(attachmentBtnSelector).should('be.visible');
-    //     // cy.addAttachment(attachmentBtnSelector)
-    //     // cy.validateDivineDragonWarning()
-    // });
+    it('skill justification from subject page', () => {
+        const attachmentBtnSelector = '[data-cy="markdownEditorInput"] button.attachment-button'
+        const markdownEditorToolbarIconsSelector = '[data-cy="markdownEditorInput"] button.toastui-editor-toolbar-icons'
+
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' });
+
+        cy.createSkill(2, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(2, 1, 3, { selfReportingType: 'Approval' });
+        cy.createSkill(2, 1, 4, { selfReportingType: 'Approval' });
+        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1')
+        cy.wait('@loadConfig')
+        cy.get('[data-cy="toggleSkillDetails"]').click();
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').contains('Great Skill 1')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressTitle"]').contains('Great Skill 2')
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgressTitle"]').contains('Great Skill 3')
+        cy.get('[data-cy="skillProgress_index-3"] [data-cy="skillProgressTitle"]').contains('Great Skill 4')
+
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="requestApprovalBtn"]').click()
+        cy.get(`[data-cy="skillProgress_index-1"] ${markdownEditorToolbarIconsSelector}`).should('be.visible')
+        cy.get(`[data-cy="skillProgress_index-1"] ${attachmentBtnSelector}`).should('be.visible');
+        cy.addAttachment(`[data-cy="skillProgress_index-1"] ${attachmentBtnSelector}`)
+
+        cy.get('[data-cy="skillProgress_index-1"]  [data-cy="attachmentWarningMessage"]').contains('Friendly Reminder: Only safe files please for All Dragons')
+
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="requestApprovalBtn"]').click()
+        cy.get(`[data-cy="skillProgress_index-2"] ${markdownEditorToolbarIconsSelector}`).should('be.visible')
+        cy.get(`[data-cy="skillProgress_index-2"] ${attachmentBtnSelector}`).should('be.visible');
+        cy.addAttachment(`[data-cy="skillProgress_index-2"] ${attachmentBtnSelector}`, `[data-cy="skillProgress_index-2"] `)
+
+        cy.get('[data-cy="skillProgress_index-2"]  [data-cy="attachmentWarningMessage"]').contains('Friendly Reminder: Only safe files please for All Dragons')
+
+        cy.visit('/progress-and-rankings/projects/proj2/subjects/subj1')
+        cy.wait('@loadConfig')
+        cy.get('[data-cy="toggleSkillDetails"]').click();
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').contains('Great Skill 1')
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressTitle"]').contains('Great Skill 2')
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgressTitle"]').contains('Great Skill 3')
+        cy.get('[data-cy="skillProgress_index-3"] [data-cy="skillProgressTitle"]').contains('Great Skill 4')
+
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="requestApprovalBtn"]').click()
+        cy.get(`[data-cy="skillProgress_index-1"] ${markdownEditorToolbarIconsSelector}`).should('be.visible')
+        cy.get(`[data-cy="skillProgress_index-1"] ${attachmentBtnSelector}`).should('be.visible');
+        cy.addAttachment(`[data-cy="skillProgress_index-1"] ${attachmentBtnSelector}`)
+
+        cy.get('[data-cy="skillProgress_index-1"]  [data-cy="attachmentWarningMessage"]').contains('Friendly Reminder: Only safe files please for Divine Dragon')
+
+        cy.get('[data-cy="skillProgress_index-2"] [data-cy="requestApprovalBtn"]').click()
+        cy.get(`[data-cy="skillProgress_index-2"] ${markdownEditorToolbarIconsSelector}`).should('be.visible')
+        cy.get(`[data-cy="skillProgress_index-2"] ${attachmentBtnSelector}`).should('be.visible');
+        cy.addAttachment(`[data-cy="skillProgress_index-2"] ${attachmentBtnSelector}`, `[data-cy="skillProgress_index-2"] `)
+
+        cy.get('[data-cy="skillProgress_index-2"]  [data-cy="attachmentWarningMessage"]').contains('Friendly Reminder: Only safe files please for Divine Dragon')
+
+    });
 
 });
