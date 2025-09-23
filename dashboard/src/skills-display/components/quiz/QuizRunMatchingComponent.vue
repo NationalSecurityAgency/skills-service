@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import draggable from 'vuedraggable';
 import {useFocusState} from "@/stores/UseFocusState.js";
 
@@ -83,6 +83,19 @@ const moveElementDown = (index) => {
     answerOrderChanged()
   }
 }
+
+const answerSections = computed(() => {
+  let sections = []
+  for(let i = 0; i < answers.value.length; i++) {
+    sections.push(`answers-${props.q.id}-${i}`)
+  }
+  sections.push(`bank-${props.q.id}`)
+  return sections;
+})
+
+const computedName = computed(() => {
+  return 'bank-' + props.q.id;
+})
 </script>
 
 <template>
@@ -100,7 +113,7 @@ const moveElementDown = (index) => {
                    class="answer-section"
                    @add="answerOrderChanged"
                    @end="answerOrderChanged"
-                   :group="{ name: 'answers', put: answers[index].length === 0, pull: true }">
+                   :group="{ name: computedName, put: answers[index].length === 0 ? answerSections : false, pull: answerSections }">
           <template #item="{element}">
             <div style="cursor: pointer;"
                  tabindex="0"
@@ -113,7 +126,7 @@ const moveElementDown = (index) => {
         </draggable>
       </div>
     </div>
-    <draggable :list="answerBank" itemKey="" class="flex flex-col matching-question border-l-1" :group="{ name: 'bank', put: true }">
+    <draggable :list="answerBank" :id="`bank-${q.id}`" itemKey="" class="flex flex-col matching-question border-l-1" :group="{ name: computedName, put: answerSections, pull: answerSections }">
       <template #item="{element}">
         <div class="ml-2 answer" style="cursor: pointer" tabindex="0" @keyup.left="addElement(element)"> {{element}} </div>
       </template>
