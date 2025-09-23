@@ -35,6 +35,9 @@ class DependencyValidator {
     @Autowired
     SkillRelDefRepo skillRelDefRepo
 
+    @Autowired
+    GlobalBadgesService globalBadgesService
+
     void validateDependencyEligibility(String projectId, SkillDefParent skill) {
         if ( projectId?.equalsIgnoreCase(skill.projectId)){
             // can dependent on skills from your project without any restrictions
@@ -48,8 +51,7 @@ class DependencyValidator {
         }
 
         if (!skillShareDef){
-            SkillDef globalBadge = skillRelDefRepo.findGlobalBadgeByChildSkillId(skill.skillId)
-            if(globalBadge) {
+            if(globalBadgesService.isSkillUsedInGlobalBadge(skill.id)) {
                 //if the skillId is a child of a global badge, then we expect there not to be an explicit
                 //SkillShareDef
                 return

@@ -635,6 +635,57 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         proj2Skills.get(0).crossProject
     }
 
+    def "badge skill summaries from within a different project, skill in multiple global badges"() {
+
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        def proj2_subj = SkillsFactory.createSubject(2, 2)
+        List<Map> proj1_skills = SkillsFactory.createSkills(2, 1, 1, 50)
+        List<Map> proj2_skills = SkillsFactory.createSkills(2, 2, 2, 50)
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj1_skills)
+        skillsService.createSkills(proj2_skills)
+
+        Map badge = [badgeId: "bid1", name: "global badge", description: "gbadge".toString(), iconClass: "fa fa-foo".toString(),]
+        skillsService.createGlobalBadge(badge)
+
+        skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: "bid1", skillId: proj1_skills.get(0).skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: proj2.projectId, badgeId: "bid1", skillId: proj2_skills.get(0).skillId])
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
+        badge.enabled = "true"
+        skillsService.updateGlobalBadge(badge)
+
+        Map badge2 = [badgeId: "bid2", name: "global badge 2", description: "gbadge".toString(), iconClass: "fa fa-foo".toString(),]
+        skillsService.createGlobalBadge(badge2)
+        skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: "bid2", skillId: proj1_skills.get(0).skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: proj2.projectId, badgeId: "bid2", skillId: proj2_skills.get(0).skillId])
+        badge.enabled = "true"
+        skillsService.updateGlobalBadge(badge)
+
+        when:
+        def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+        def skillSummary = skillsService.getCrossProjectSkillSummary(userId, proj1.projectId, proj2.projectId, proj2_skills.get(0).skillId)
+        def globalBadge = skillsService.getBadgeSummary(userId, proj1.projectId, badge.badgeId, -1, true)
+
+        then:
+        summaries
+        skillSummary
+        List proj1Skills = globalBadge.skills.findAll { it.projectId == proj1.projectId }
+        proj1Skills.size() == 1
+        !proj1Skills.get(0).crossProject
+
+        List proj2Skills = globalBadge.skills.findAll { it.projectId == proj2.projectId }
+        proj2Skills.size() == 1
+        proj2Skills.get(0).crossProject
+    }
+
     def "quiz info is returned for global badge skills"() {
         String userId = getRandomUsers(1).first()
 
