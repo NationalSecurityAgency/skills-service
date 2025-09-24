@@ -75,8 +75,9 @@ function parseResponse(text) {
   };
 }
 
-
+const shouldStream = ref(true)
 const instructionsInput = ref(null)
+let latestStreamCleanup = null
 const generateDescription = () => {
   failedGenerating.value = false
 
@@ -108,12 +109,36 @@ const generateDescription = () => {
   }
   instructions.value = ''
 
-  LearningGenService.generateDescription(route.params.projectId, instructionsToSend)
+  generatedDescription.value = ''
+  if (shouldStream.value) {
+    generateDescriptionWithStreaming(instructionsToSend, extractedImageState)
+  } else {
+    generateDescriptionWithoutStreaming(instructionsToSend, extractedImageState)
+  }
+}
+
+const generateDescriptionWithStreaming = (instructionsToSend, extractedImageState) => {
+  return LearningGenService.generateDescriptionStreamWithFetch(route.params.projectId, instructionsToSend,
+      (chunk) => {
+        // console.log(`Received chunk: [${chunk}]`);
+        // Update your UI with the new chunk
+        // this.description = chunk;
+        generatedDescription.value += chunk
+      },
+      // onComplete callback
+      (completeData) => {
+        console.log('Stream completed:', completeData);
+      },
+      // onError callback
+      (error) => {
+        console.error('Error in stream:', error);
+      })
+}
+
+const generateDescriptionWithoutStreaming = (instructionsToSend, extractedImageState) => {
+  return LearningGenService.generateDescription(route.params.projectId, instructionsToSend)
       .then((response) => {
         const {newText, comments} = parseResponse(response.description);
-        if (log.isDebugEnabled()) {
-          log.debug(`Sent instructions: [${instructionsToSend}]\nResponse: [${response.description}]\nNew Text: [${newText}]\nComments: [${comments}]`)
-        }
         if (!generatedDescription.value || !comments) {
           chatHistory.value.push({
             id: `${chatCounter.value++}`,
@@ -135,20 +160,20 @@ const generateDescription = () => {
         generatedDescription.value = textToInsert
 
       }).finally(() => {
-        isGenerating.value = false
-        nextTick(() => {
-          document.getElementById('instructionsInput')?.focus()
-        })
-      }).catch((err) => {
-        failedGenerating.value = true
-        isGenerating.value = false
-        log.error(err)
-        chatHistory.value.push({
-          id: `${chatCounter.value++}`,
-          role: 'assistant',
-          content: 'I apologize, but I was unable to generate a description at this time. Please try again in a few moments.'
-        })
-      })
+    isGenerating.value = false
+    nextTick(() => {
+      document.getElementById('instructionsInput')?.focus()
+    })
+  }).catch((err) => {
+    failedGenerating.value = true
+    isGenerating.value = false
+    log.error(err)
+    chatHistory.value.push({
+      id: `${chatCounter.value++}`,
+      role: 'assistant',
+      content: 'I apologize, but I was unable to generate a description at this time. Please try again in a few moments.'
+    })
+  })
 }
 
 const useGeneratedDescription = () => {
@@ -173,6 +198,9 @@ const useGeneratedDescription = () => {
       @on-cancel="close"
       :enable-return-focus="true">
 
+    <div class="flex justify-end gap-2">
+      Streaming: <ToggleSwitch v-model="shouldStream" />
+    </div>
     <div class="py-5" style="min-height: 70vh">
       <div id="chatHistory" class="flex flex-col gap-3 mb-2">
         <div v-for="(historyItem) in chatHistory" :key="historyItem.id">
@@ -215,6 +243,9 @@ const useGeneratedDescription = () => {
           </div>
         </template>
         <template #content>
+<!--          <pre>-->
+<!--            {{ generatedDescription }}-->
+<!--          </pre>-->
           <markdown-text v-if="generatedDescription" :text="generatedDescription" instanceId="workingCopy"/>
         </template>
       </Card>
