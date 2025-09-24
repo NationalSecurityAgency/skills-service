@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.client.ResourceAccessException
+import reactor.core.publisher.Flux
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 
@@ -33,6 +34,15 @@ class LearningContentGenerator {
         try {
             OpenAIService.CompletionsResponse response = openAIService.callCompletions(request.instructions)
             return new GenDescResponse(description: response.choices[0].message.content)
+        } catch (ResourceAccessException rae) {
+            log.error("Failed to call OpenAI api", rae)
+            throw new SkillException("Learning Content Generator is not available", rae, null,null, ErrorCode.LearningContentGeneratorNotAvailable)
+        }
+    }
+
+    Flux<String> streamGenerateDescription(GenDescRequest request) {
+        try {
+            return openAIService.streamCompletions(request.instructions)
         } catch (ResourceAccessException rae) {
             log.error("Failed to call OpenAI api", rae)
             throw new SkillException("Learning Content Generator is not available", rae, null,null, ErrorCode.LearningContentGeneratorNotAvailable)
