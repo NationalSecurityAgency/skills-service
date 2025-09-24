@@ -15,17 +15,25 @@
  */
 package skills.auth.openai
 
+import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Flux
+import reactor.netty.http.client.HttpClient
+import reactor.netty.resources.ConnectionProvider
+import java.time.Duration
 
 @Service
 @Slf4j
@@ -45,12 +53,12 @@ class OpenAIService {
 
     String role = "user"
 
-    private final RestTemplate restTemplate
+    @Autowired
+    @Qualifier('openAIRestTemplate')
+    RestTemplate restTemplate
 
     @Autowired
-    OpenAIService(@Qualifier('openAIRestTemplate') RestTemplate restTemplate) {
-        this.restTemplate = restTemplate
-    }
+    WebClient.Builder webClientBuilder
 
     CompletionsResponse callCompletions(String message) {
         if (!openAiHost) {
@@ -83,12 +91,56 @@ class OpenAIService {
         return res
     }
 
+    Flux<String> streamCompletions(String message) {
+        JsonSlurper jsonSlurper = new JsonSlurper()
+        String url = String.join("/", openAiHost, completionsEndpoint)
+        log.info("Streaming from [{}] with message [{}]", url, message)
+
+        CompletionsRequest request = new CompletionsRequest(
+                messages: [
+                        new CompletionMessage(role: role, content: message)
+                ],
+                model: model,
+                stream: true
+        )
+
+        HttpClient httpClient = HttpClient.create(ConnectionProvider.builder("custom")
+                .maxConnections(500)
+                .maxIdleTime(Duration.ofSeconds(20))
+                .maxLifeTime(Duration.ofSeconds(60))
+                .build())
+                .responseTimeout(Duration.ofSeconds(60))
+//                .wiretap(true)
+
+        WebClient client = webClientBuilder
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer ${openAiKey}")
+                .build()
+
+
+        return client
+                .post()
+                .uri(url)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToFlux(String.class)
+                .mapNotNull { String json ->
+                    def result = jsonSlurper.parseText(json)
+                    String res = result?.choices?.first()?.delta?.content ?: ""
+                    res = res.replaceAll('\\n', '<<newline>>')
+                    log.info("Response: [{}] from json=[{}]", res, json)
+                    return res
+                }
+    }
+
     @Canonical
     @ToString(includeNames = true)
     static class CompletionsRequest {
         String model
         List<CompletionMessage> messages
         Usage usage
+        boolean stream = false
     }
 
     @Canonical
