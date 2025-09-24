@@ -17,7 +17,55 @@ import axios from 'axios';
 
 export default {
     generateDescription(projectId, instructions) {
-        return axios.post(`/admin/projects/${projectId}/generateDescription`, { instructions}, { handleError: false })
+        return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/generateDescription`, { instructions}, { handleError: false })
             .then((response) => response.data);
     },
+    async generateDescriptionStreamWithFetch(projectId, instructions, onChunk, onComplete, onError) {
+        try {
+            const response = await fetch(`/admin/projects/${encodeURIComponent(projectId)}/generateDescriptionAndStream`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'text/event-stream'
+                },
+                body: JSON.stringify({ instructions })
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const {done, value} = await reader.read();
+                if (done) {
+                    if (onComplete) onComplete();
+                    break;
+                }
+
+                const receivedValue = decoder.decode(value, {stream: true});
+                console.log(`receivedValue: ${receivedValue}`)
+                const lines = receivedValue.split(/\n/);
+
+                const processedLines = []
+                for (const line of lines) {
+                    if (line.startsWith('data:')) {
+                        const content = line.substring(5)
+                        if (content === '[DONE]') {
+                            if (onComplete) onComplete();
+                            return;
+                        }
+                        if (content) {
+                            const toPush = content.replace(/<<newline>>/g, '\n');
+                            processedLines.push(toPush)
+                        }
+                    }
+                }
+
+                const processed = processedLines.join('')
+                console.log(`processed: ${processed}`)
+                onChunk(processed)
+            }
+        } catch (error) {
+            if (onError) onError(error);
+        }
+    }
 };
