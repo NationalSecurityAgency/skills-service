@@ -23,6 +23,7 @@ Here are the requirements:
 - Use Markdown. 
 - Use the word "skill" instead of "training". 
 - Do not include the word "skill" in any titles.
+- Do not wrap sections with \`\`\`
 `
     }
 

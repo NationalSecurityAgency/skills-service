@@ -60,6 +60,9 @@ class OpenAIService {
     @Autowired
     WebClient.Builder webClientBuilder
 
+    @Autowired
+    SslWebClientConfig sslWebClientConfig
+
     CompletionsResponse callCompletions(String message) {
         if (!openAiHost) {
             log.debug("skills.openai.host is not configured")
@@ -104,20 +107,7 @@ class OpenAIService {
                 stream: true
         )
 
-        HttpClient httpClient = HttpClient.create(ConnectionProvider.builder("custom")
-                .maxConnections(500)
-                .maxIdleTime(Duration.ofSeconds(20))
-                .maxLifeTime(Duration.ofSeconds(60))
-                .build())
-                .responseTimeout(Duration.ofSeconds(60))
-//                .wiretap(true)
-
-        WebClient client = webClientBuilder
-                .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer ${openAiKey}")
-                .build()
-
+        WebClient client = sslWebClientConfig.createWebClient()
 
         return client
                 .post()
