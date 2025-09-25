@@ -22,18 +22,13 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
-import reactor.netty.http.client.HttpClient
-import reactor.netty.resources.ConnectionProvider
-import java.time.Duration
 
 @Service
 @Slf4j
@@ -116,6 +111,9 @@ class OpenAIService {
                 .retrieve()
                 .bodyToFlux(String.class)
                 .mapNotNull { String json ->
+                    if (json.equalsIgnoreCase('[DONE]')) {
+                        return json
+                    }
                     def result = jsonSlurper.parseText(json)
                     String res = result?.choices?.first()?.delta?.content ?: ""
                     res = res.replaceAll('\\n', '<<newline>>')
