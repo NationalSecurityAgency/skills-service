@@ -22,7 +22,7 @@ export default {
     },
     async generateDescriptionStreamWithFetch(projectId, instructions, onChunk, onComplete, onError) {
         try {
-            const response = await fetch(`/admin/projects/${encodeURIComponent(projectId)}/generateDescriptionAndStream`, {
+            const response = await fetch(`/openai/stream/description`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
