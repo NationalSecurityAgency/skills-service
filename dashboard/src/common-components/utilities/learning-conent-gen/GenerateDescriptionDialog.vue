@@ -37,13 +37,13 @@ const updateDescription = (newDesc) => {
     chatHistory.value.push({
       id: `${chatCounter.value++}`,
       role: 'assistant',
-      content: 'Hope your I am sorry but I took way today is going well! Looks like you already started on a description. Would you like me to proofread or expand on it?'
+      origMessage: 'Hope your I am sorry but I took way today is going well! Looks like you already started on a description. Would you like me to proofread or expand on it?'
     })
   } else {
     chatHistory.value.push({
       id: `${chatCounter.value++}`,
       role: 'assistant',
-      content: 'Hi! I am here to help. Describe the skill, and I\'ll help generate a description'
+      origMessage: 'Hi! I am here to help. Describe the skill, and I\'ll help generate a description'
     })
   }
 }
@@ -84,12 +84,12 @@ const generateDescription = () => {
   if (log.isTraceEnabled()) {
     log.trace(`Generating based on instructions: [${instructions.value}]`)
   }
-  isGenerating.value = true
+
 
   chatHistory.value.push({
     id: `${chatCounter.value++}`,
     role: 'user',
-    content: instructions.value
+    origMessage: instructions.value
   })
 
   let instructionsToSend = null
@@ -111,8 +111,15 @@ const generateDescription = () => {
 
   generatedDescription.value = ''
   if (shouldStream.value) {
+    chatHistory.value.push({
+      id: `${chatCounter.value++}`,
+      role: 'assistant',
+      origMessage: `I am on it!`,
+      generatedValue: ''
+    })
     generateDescriptionWithStreaming(instructionsToSend, extractedImageState)
   } else {
+    isGenerating.value = true
     generateDescriptionWithoutStreaming(instructionsToSend, extractedImageState)
   }
 }
@@ -120,16 +127,20 @@ const generateDescription = () => {
 const generateDescriptionWithStreaming = (instructionsToSend, extractedImageState) => {
   return LearningGenService.generateDescriptionStreamWithFetch(route.params.projectId, instructionsToSend,
       (chunk) => {
-        // console.log(`Received chunk: [${chunk}]`);
-        // Update your UI with the new chunk
-        // this.description = chunk;
         generatedDescription.value += chunk
+        chatHistory.value[chatHistory.value.length - 1].generatedValue += chunk
       },
-      // onComplete callback
       (completeData) => {
-        console.log('Stream completed:', completeData);
+        chatHistory.value.push({
+          id: `${chatCounter.value++}`,
+          role: 'assistant',
+          origMessage: `I've prepared a description based on your input. ${reviewDescMsg}`
+        })
+        isGenerating.value = false
+        nextTick(() => {
+          document.getElementById('instructionsInput')?.focus()
+        })
       },
-      // onError callback
       (error) => {
         console.error('Error in stream:', error);
       })
@@ -143,13 +154,13 @@ const generateDescriptionWithoutStreaming = (instructionsToSend, extractedImageS
           chatHistory.value.push({
             id: `${chatCounter.value++}`,
             role: 'assistant',
-            content: `I've prepared a description based on your input. ${reviewDescMsg}`
+            origMessage: `I've prepared a description based on your input. ${reviewDescMsg}`
           })
         } else if (comments) {
           chatHistory.value.push({
             id: `${chatCounter.value++}`,
             role: 'assistant',
-            content: `Here are my comments: \n${comments}\n\n${reviewDescMsg}`
+            origMessage: `Here are my comments: \n${comments}\n\n${reviewDescMsg}`
           })
         }
 
@@ -171,7 +182,7 @@ const generateDescriptionWithoutStreaming = (instructionsToSend, extractedImageS
     chatHistory.value.push({
       id: `${chatCounter.value++}`,
       role: 'assistant',
-      content: 'I apologize, but I was unable to generate a description at this time. Please try again in a few moments.'
+      origMessage: 'I apologize, but I was unable to generate a description at this time. Please try again in a few moments.'
     })
   })
 }
@@ -206,16 +217,19 @@ const useGeneratedDescription = () => {
         <div v-for="(historyItem) in chatHistory" :key="historyItem.id">
           <div v-if="historyItem.role === 'user'" class="relative flex justify-end">
             <user-msg>
-              <markdown-text :text="historyItem.content" :instanceId="historyItem.id"/>
+              <markdown-text :text="historyItem.origMessage" :instanceId="historyItem.id"/>
             </user-msg>
           </div>
           <assistant-msg v-else>
-            <markdown-text :text="historyItem.content" :instanceId="historyItem.id"/>
+            <markdown-text :text="historyItem.origMessage" :instanceId="`${historyItem.id}-content`"/>
+            <div v-if="historyItem.generatedValue" class="pl-5">
+              <markdown-text :text="historyItem.generatedValue" :instanceId="`${historyItem.id}-desc`"/>
+            </div>
           </assistant-msg>
         </div>
 
         <assistant-msg v-if="isGenerating">
-          <div class="flex gap-2"><skills-spinner :is-loading="isGenerating" :size-in-rem="0.8"/> Thinking...</div>
+          <div class="flex gap-2"><skills-spinner :is-loading="isGenerating" :size-in-rem="0.8"/> Generating...</div>
         </assistant-msg>
       </div>
 
