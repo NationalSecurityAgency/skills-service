@@ -243,9 +243,6 @@ const useGeneratedDescription = () => {
           </div>
         </template>
         <template #content>
-<!--          <pre>-->
-<!--            {{ generatedDescription }}-->
-<!--          </pre>-->
           <markdown-text v-if="generatedDescription" :text="generatedDescription" instanceId="workingCopy"/>
         </template>
       </Card>

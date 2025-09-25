@@ -35,14 +35,15 @@ export default {
             const decoder = new TextDecoder();
 
             while (true) {
+                console.log('reading')
                 const {done, value} = await reader.read();
+                console.log('done reading')
                 if (done) {
                     if (onComplete) onComplete();
                     break;
                 }
 
                 const receivedValue = decoder.decode(value, {stream: true});
-                console.log(`receivedValue: ${receivedValue}`)
                 const lines = receivedValue.split(/\n/);
 
                 const processedLines = []
@@ -65,6 +66,7 @@ export default {
                 onChunk(processed)
             }
         } catch (error) {
+            console.error('ERROR')
             if (onError) onError(error);
         }
     }
