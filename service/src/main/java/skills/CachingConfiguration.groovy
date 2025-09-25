@@ -15,8 +15,11 @@
  */
 package skills
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.CacheControl
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
@@ -27,6 +30,26 @@ import java.time.temporal.ChronoUnit
 class CachingConfiguration implements WebMvcConfigurer {
 
     public static final Duration MAX_AGE = Duration.of(14, ChronoUnit.DAYS)
+
+    @Value('#{"${skills.async.executor.corePoolSize:10}"}')
+    Integer corePoolSize
+
+    @Value('#{"${skills.async.executor.maxPoolSize:50}"}')
+    Integer maxPoolSize
+
+    @Value('#{"${skills.async.executor.queueCapacity:100}"}')
+    Integer queueCapacity
+
+    @Override
+    void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(corePoolSize)
+        executor.setMaxPoolSize(maxPoolSize)
+        executor.setQueueCapacity(queueCapacity)
+        executor.setThreadNamePrefix("Async-Executor-");
+        executor.initialize();
+        configurer.setTaskExecutor(executor);
+    }
 
     @Override
     void addResourceHandlers(ResourceHandlerRegistry registry) {

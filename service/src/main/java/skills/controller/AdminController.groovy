@@ -1975,13 +1975,6 @@ class AdminController {
         return learningContentGenerator.generateDescription(genDescRequest)
     }
 
-    @PostMapping(value = "/projects/{projectId}/generateDescriptionAndStream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    Flux<String> generateDescriptionAndStream(@PathVariable("projectId") String projectId, @RequestBody GenDescRequest genDescRequest) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(genDescRequest.instructions, "genDescRequest.instructions")
-
-        return learningContentGenerator.streamGenerateDescription(genDescRequest)
-    }
 
 }
 

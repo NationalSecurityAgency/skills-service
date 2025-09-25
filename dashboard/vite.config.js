@@ -68,6 +68,7 @@ export default defineConfig({
   server: {
     proxy: {
       '^/admin/': proxyConf,
+      '^/openai/': proxyConf,
       '^/app/': proxyConf,
       '^/api/': proxyConf,
       '^/server$': proxyConf,

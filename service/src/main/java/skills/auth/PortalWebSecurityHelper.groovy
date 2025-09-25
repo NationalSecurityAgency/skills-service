@@ -44,6 +44,7 @@ import org.springframework.stereotype.Component
 import org.springframework.util.StringUtils
 import org.springframework.web.filter.OncePerRequestFilter
 import skills.auth.inviteOnly.InviteOnlyProjectAuthorizationManager
+import skills.auth.openai.OpenAIAuthorizationManager
 import skills.auth.userCommunity.UserCommunityAuthorizationManager
 import skills.storage.model.auth.RoleName
 
@@ -70,6 +71,9 @@ class PortalWebSecurityHelper {
 
     @Autowired
     InviteOnlyProjectAuthorizationManager inviteOnlyProjectAuthorizationManager
+
+    @Autowired
+    OpenAIAuthorizationManager openAIAuthorizationManager
 
     @Autowired
     CookieCsrfTokenRepository cookieCsrfTokenRepository
@@ -121,6 +125,7 @@ class PortalWebSecurityHelper {
                 .requestMatchers('/app/**').access(AuthorizationManagers.allOf(inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager))
                 .requestMatchers('/api/**').access(AuthorizationManagers.allOf(inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager))
                 .requestMatchers("/${managementPath}/**").hasAuthority(RoleName.ROLE_SUPER_DUPER_USER.name())
+                .requestMatchers("/openai/**").access(AuthorizationManagers.allOf(openAIAuthorizationManager))
                 .anyRequest().authenticated()
         )
         http.headers().frameOptions().disable()
