@@ -863,7 +863,7 @@ class QuizDefService {
 
         Map<Integer, List<UserQuizQuestionAttemptRepo.IdAndStatusCount>> byQuestionId = questionIdAndStatusCounts.groupBy { it.getId()}
         Map<Integer, List<UserQuizQuestionAttemptRepo.IdAndStatusCount>> byAnswerId = answerIdAndStatusCounts.groupBy { it.getId()}
-
+        
         List<QuizQuestionMetricsResult> questions = questionDefResults.collect { QuizQuestionDefResult questionDefResult ->
             List<UserQuizQuestionAttemptRepo.IdAndStatusCount> questionStatusCounts = byQuestionId[questionDefResult.id]
             UserQuizQuestionAttemptRepo.IdAndStatusCount questionCorrectCounts = questionStatusCounts?.find { it.getStatus() == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT.toString() }
@@ -883,6 +883,7 @@ class QuizDefService {
                         new QuizAnswerMetricsResult(
                                 id: quizAnswerDefResult.id,
                                 answer: quizAnswerDefResult.answer,
+                                multiPartAnswer: quizAnswerDefResult.multiPartAnswer,
                                 isCorrect: isSurvey ? true : quizAnswerDefResult.isCorrect,
                                 numAnswered: numAnswered,
                                 numAnsweredCorrect: isSurvey ? numAnswered : (answerCorrectCount?.getCount() ?: 0),

@@ -32,7 +32,7 @@ onMounted(() => {
   });
 })
 
-const answerOrderChanged = () => {
+const answerOrderChanged = (elementToFocus) => {
   let termCounter = 0
   let pairs = []
   for(const answer of answers.value) {
@@ -41,12 +41,24 @@ const answerOrderChanged = () => {
     termCounter++
   }
   emit('updateAnswerOrder', pairs);
+
+  if(elementToFocus) {
+    focusState.waitForElement(elementToFocus).then((el) => {
+      const child = el?.children[0]
+      focusState.setElementId(child.id)
+      focusState.focusOnLastElement()
+    })
+  }
 }
 
 const removeElement = (element) => {
   answerBank.value.push(answers.value[element][0])
   answers.value[element] = []
+  const newIndex = answerBank.value.length - 1
+  const newId = `bank-${props.q.id}-${newIndex}`
   answerOrderChanged()
+  focusState.setElementId(newId);
+  focusState.focusOnLastElement()
 }
 
 const addElement = (element) => {
@@ -58,20 +70,23 @@ const addElement = (element) => {
       answers.value[index] = [element]
       spaceFound = true
     }
-    index++;
+    if(!spaceFound) {
+      index++;
+    }
   }
 
   const elementAt = answerBank.value.indexOf(element)
   answerBank.value.splice(elementAt, 1);
-  answerOrderChanged()
+  const newId = `answer-${props.q.id}-${index}`
+  answerOrderChanged(newId)
 }
 
 const moveElementUp = (index) => {
   if(index > 0) {
     const newIndex = index - 1;
     [answers.value[index], answers.value[newIndex]] = [answers.value[newIndex], answers.value[index]]
-    // const newId = `answer-${props.q.id}-${newIndex}`
-    answerOrderChanged()
+    const newId = `answer-${props.q.id}-${newIndex}`
+    answerOrderChanged(newId)
   }
 }
 
@@ -79,8 +94,8 @@ const moveElementDown = (index) => {
   if(index + 1 < answers.value.length) {
     const newIndex = index + 1;
     [answers.value[index], answers.value[newIndex]] = [answers.value[newIndex], answers.value[index]]
-    // const newId = `answer-${props.q.id}-${newIndex}`
-    answerOrderChanged()
+    const newId = `answer-${props.q.id}-${newIndex}`
+    answerOrderChanged(newId)
   }
 }
 
@@ -96,6 +111,7 @@ const answerSections = computed(() => {
 const computedName = computed(() => {
   return 'bank-' + props.q.id;
 })
+
 </script>
 
 <template>
@@ -109,14 +125,15 @@ const computedName = computed(() => {
       <div v-for="(answer, index) in answers" class="border-1 ml-2 mb-2 p-1" style="min-height: 34px;">
         <draggable :list="answers[index]"
                    itemKey=""
-                   :id="`answer-${q.id}-${index}`"
                    class="answer-section"
+                   :id="`answer-${q.id}-${index}`"
                    @add="answerOrderChanged"
                    @end="answerOrderChanged"
                    :group="{ name: computedName, put: answers[index].length === 0 ? answerSections : false, pull: answerSections }">
           <template #item="{element}">
             <div style="cursor: pointer;"
                  tabindex="0"
+                 :id="element"
                  @keyup.up="moveElementUp(index)"
                  @keyup.down="moveElementDown(index)"
                  @keyup.right="removeElement(index)">
@@ -127,8 +144,8 @@ const computedName = computed(() => {
       </div>
     </div>
     <draggable :list="answerBank" :id="`bank-${q.id}`" itemKey="" class="flex flex-col matching-question border-l-1" :group="{ name: computedName, put: answerSections, pull: answerSections }">
-      <template #item="{element}">
-        <div class="ml-2 answer" style="cursor: pointer" tabindex="0" @keyup.left="addElement(element)"> {{element}} </div>
+      <template #item="{element, index}">
+        <div class="ml-2 answer" style="cursor: pointer" :id="`bank-${q.id}-${index}`" tabindex="0" @keyup.left="addElement(element)"> {{element}} </div>
       </template>
     </draggable>
 
