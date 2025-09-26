@@ -30,14 +30,13 @@ const emit = defineEmits(['generated-desc'])
 const route = useRoute()
 const log = useLog()
 const imgHandler = useImgHandler()
-const chatCounter = ref(0)
 const updateDescription = (newDesc) => {
   generatedDescription.value = newDesc
   if (newDesc) {
     chatHistory.value.push({
       id: `${chatCounter.value++}`,
       role: 'assistant',
-      origMessage: 'Hope your I am sorry but I took way today is going well! Looks like you already started on a description. Would you like me to proofread or expand on it?'
+      origMessage: 'Hope your day is going well! Looks like you already started on a description. Would you like me to proofread or expand on it?'
     })
   } else {
     chatHistory.value.push({
@@ -60,12 +59,36 @@ const generatedDescription = ref('')
 const isGenerating = ref(false)
 const failedGenerating = ref(false)
 
+const chatCounter = ref(0)
 const chatHistory = ref([])
+const ChatRole = {
+  USER: 'user',
+  ASSISTANT: 'assistant',
+}
+const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false) => {
+  const res = {
+    id: `${chatCounter.value++}`,
+    role,
+    origMessage: origMsg,
+    isGenerating: false,
+    generatedValue: '',
+    finalMsg: '',
+  }
+  chatHistory.value.push(res)
+  return res
+}
+const appendGeneratedToLastChatItem = (toAppend) => {
+  chatHistory.value[chatHistory.value.length - 1].generatedValue += toAppend
+}
+const setFinalMsgToLastChatItem = (finalMsg) => {
+  chatHistory.value[chatHistory.value.length - 1].finalMsg = finalMsg
+}
 
 
 
 const instructionsGenerator = useInstructionGenerator()
 const reviewDescMsg = 'Review the description and let me know if you need any changes.'
+const failedToGenerateMsg = 'I apologize, but I was unable to generate a description at this time. Please try again in a few moments.'
 function parseResponse(text) {
   const [newTextPart, comments] = text.split('---COMMENTS---');
   const newText = newTextPart.replace(/---New Text---/i, '').trim();
@@ -77,7 +100,6 @@ function parseResponse(text) {
 
 const shouldStream = ref(true)
 const instructionsInput = ref(null)
-let latestStreamCleanup = null
 const generateDescription = () => {
   failedGenerating.value = false
 
@@ -85,12 +107,7 @@ const generateDescription = () => {
     log.trace(`Generating based on instructions: [${instructions.value}]`)
   }
 
-
-  chatHistory.value.push({
-    id: `${chatCounter.value++}`,
-    role: 'user',
-    origMessage: instructions.value
-  })
+  addChatItem(instructions.value, ChatRole.USER)
 
   let instructionsToSend = null
   const userInstructions = instructions.value
@@ -111,12 +128,7 @@ const generateDescription = () => {
 
   generatedDescription.value = ''
   if (shouldStream.value) {
-    chatHistory.value.push({
-      id: `${chatCounter.value++}`,
-      role: 'assistant',
-      origMessage: `I am on it!`,
-      generatedValue: ''
-    })
+    addChatItem('Got it! I\'ll get started right away!', ChatRole.ASSISTANT, true)
     generateDescriptionWithStreaming(instructionsToSend, extractedImageState)
   } else {
     isGenerating.value = true
@@ -128,21 +140,19 @@ const generateDescriptionWithStreaming = (instructionsToSend, extractedImageStat
   return LearningGenService.generateDescriptionStreamWithFetch(route.params.projectId, instructionsToSend,
       (chunk) => {
         generatedDescription.value += chunk
-        chatHistory.value[chatHistory.value.length - 1].generatedValue += chunk
+        appendGeneratedToLastChatItem(chunk)
+        document.getElementById('instructionsInput')?.scrollIntoView()
       },
       (completeData) => {
-        chatHistory.value.push({
-          id: `${chatCounter.value++}`,
-          role: 'assistant',
-          origMessage: `I've prepared a description based on your input. ${reviewDescMsg}`
-        })
+        setFinalMsgToLastChatItem(`I've prepared a description based on your input. ${reviewDescMsg}`)
         isGenerating.value = false
         nextTick(() => {
           document.getElementById('instructionsInput')?.focus()
         })
       },
       (error) => {
-        console.error('Error in stream:', error);
+        log.error(`Failed to generate description via streaming: ${error}`)
+        setFinalMsgToLastChatItem(failedToGenerateMsg)
       })
 }
 
@@ -151,17 +161,9 @@ const generateDescriptionWithoutStreaming = (instructionsToSend, extractedImageS
       .then((response) => {
         const {newText, comments} = parseResponse(response.description);
         if (!generatedDescription.value || !comments) {
-          chatHistory.value.push({
-            id: `${chatCounter.value++}`,
-            role: 'assistant',
-            origMessage: `I've prepared a description based on your input. ${reviewDescMsg}`
-          })
+          addChatItem(`I've prepared a description based on your input. ${reviewDescMsg}`)
         } else if (comments) {
-          chatHistory.value.push({
-            id: `${chatCounter.value++}`,
-            role: 'assistant',
-            origMessage: `Here are my comments: \n${comments}\n\n${reviewDescMsg}`
-          })
+          addChatItem(`Here are my comments: \n${comments}\n\n${reviewDescMsg}`)
         }
 
         let textToInsert = newText
@@ -179,16 +181,13 @@ const generateDescriptionWithoutStreaming = (instructionsToSend, extractedImageS
     failedGenerating.value = true
     isGenerating.value = false
     log.error(err)
-    chatHistory.value.push({
-      id: `${chatCounter.value++}`,
-      role: 'assistant',
-      origMessage: 'I apologize, but I was unable to generate a description at this time. Please try again in a few moments.'
-    })
+    addChatItem(failedToGenerateMsg)
   })
 }
 
-const useGeneratedDescription = () => {
-  emit('generated-desc', generatedDescription.value)
+const useGeneratedDescription = (historyId) => {
+  const historyItem = chatHistory.value.find(item => item.id === historyId)
+  emit('generated-desc', historyItem.generatedValue)
   close()
 }
 
@@ -201,12 +200,8 @@ const useGeneratedDescription = () => {
       :maximized="true"
       v-model="model"
       header="Description Assistant"
-      cancel-button-severity="secondary"
-      ok-button-icon="fas fa-check-double"
-      ok-button-label="Use"
-      :ok-button-disabled="!generatedDescription"
-      @on-ok="useGeneratedDescription"
-      @on-cancel="close"
+      :show-ok-button="false"
+      :show-cancel-button="false"
       :enable-return-focus="true">
 
     <div class="flex justify-end gap-2">
@@ -215,15 +210,28 @@ const useGeneratedDescription = () => {
     <div class="py-5" style="min-height: 70vh">
       <div id="chatHistory" class="flex flex-col gap-3 mb-2">
         <div v-for="(historyItem) in chatHistory" :key="historyItem.id">
-          <div v-if="historyItem.role === 'user'" class="relative flex justify-end">
+          <div v-if="historyItem.role === ChatRole.USER" class="relative flex justify-end">
             <user-msg>
               <markdown-text :text="historyItem.origMessage" :instanceId="historyItem.id"/>
             </user-msg>
           </div>
-          <assistant-msg v-else>
-            <markdown-text :text="historyItem.origMessage" :instanceId="`${historyItem.id}-content`"/>
-            <div v-if="historyItem.generatedValue" class="pl-5">
+          <assistant-msg v-if="historyItem.role === ChatRole.ASSISTANT" class="flex flex-col gap-2">
+            <div class="flex gap-2 items-center">
+              <markdown-text :text="historyItem.origMessage" :instanceId="`${historyItem.id}-content`"/>
+              <skills-spinner v-if="historyItem.isGenerating" :id="`${historyItem.id}-spinner`" :is-loading="true" :size-in-rem="0.8"/>
+            </div>
+            <div v-if="historyItem.generatedValue" class="px-5 border rounded-lg bg-blue-50 ml-4">
               <markdown-text :text="historyItem.generatedValue" :instanceId="`${historyItem.id}-desc`"/>
+            </div>
+            <div v-if="historyItem.finalMsg">
+              <markdown-text :text="historyItem.finalMsg" :instanceId="`${historyItem.id}-finalMsg`"/>
+              <div class="flex justify-start mt-2">
+                <SkillsButton
+                    icon="fa-solid fa-check-double"
+                    severity="info" :outlined="false"
+                    label="Use Generated Value"
+                    @click="useGeneratedDescription(historyItem.id)"/>
+              </div>
             </div>
           </assistant-msg>
         </div>
@@ -250,16 +258,16 @@ const useGeneratedDescription = () => {
         </div>
       </div>
 
-      <Card class="mt-6 bg-gray-200" v-if="generatedDescription">
-        <template #header>
-          <div class="px-3 pt-4 text-xl font-bold flex gap-2 text-green-700">
-            <i class="fa-solid fa-file-circle-check" aria-hidden="true"></i> Working Copy
-          </div>
-        </template>
-        <template #content>
-          <markdown-text v-if="generatedDescription" :text="generatedDescription" instanceId="workingCopy"/>
-        </template>
-      </Card>
+<!--      <Card class="mt-6 bg-gray-200" v-if="generatedDescription">-->
+<!--        <template #header>-->
+<!--          <div class="px-3 pt-4 text-xl font-bold flex gap-2 text-green-700">-->
+<!--            <i class="fa-solid fa-file-circle-check" aria-hidden="true"></i> Working Copy-->
+<!--          </div>-->
+<!--        </template>-->
+<!--        <template #content>-->
+<!--          <markdown-text v-if="generatedDescription" :text="generatedDescription" instanceId="workingCopy"/>-->
+<!--        </template>-->
+<!--      </Card>-->
     </div>
   </SkillsDialog>
 </template>
