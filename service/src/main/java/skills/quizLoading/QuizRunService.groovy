@@ -815,7 +815,7 @@ class QuizRunService {
                 status = UserQuizQuestionAttempt.QuizQuestionStatus.NEEDS_GRADING
                 isCorrect = false
             } else if (quizQuestionDef.type == QuizQuestionType.Matching) {
-                def attempt = quizAttemptAnswerRepo.findAllByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefIdIn(quizAttemptId, selectedAnswerIds)
+                def attempt = quizAttemptAnswerRepo.findAllByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefIdIn(quizAttemptId, selectedIds.toSet())
                 status = attempt.find{answer -> answer.status == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG } ? UserQuizQuestionAttempt.QuizQuestionStatus.WRONG : UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
                 isCorrect = status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
             } else {
