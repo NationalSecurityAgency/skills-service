@@ -24,7 +24,7 @@ export const useImgHandler = () => {
      * A unique, random string prefix for our placeholders to prevent collisions.
      * The use of a symbol in the prefix further reduces the risk of accidental matches.
      */
-    const PLACEHOLDER_PREFIX = '---IMG_PLACEHOLDER-';
+    const PLACEHOLDER_PREFIX = '---IMG-';
 
     /**
      * A regular expression to match standard Markdown image syntax: `![alt text](data:image)` with base64 encoded image.
@@ -73,15 +73,27 @@ export const useImgHandler = () => {
 
     const reinsertImages = (processedText, extractedImages) => {
         let restoredText = processedText;
+        const unusedImages = [];
 
         if (extractedImages) {
+            const images = [...extractedImages];
             // Process in reverse to handle multiple occurrences correctly
-            [...extractedImages].reverse().forEach(image => {
+            images.reverse().forEach(image => {
                 const placeholderRegex = new RegExp(image.placeholder, 'gi');
-                restoredText = restoredText.replace(placeholderRegex, image.markdown);
+                const newText = restoredText.replace(placeholderRegex, image.markdown);
+                
+                if (newText === restoredText) {
+                    // No replacement was made, add to unused images
+                    unusedImages.push(image);
+                } else {
+                    restoredText = newText;
+                }
             });
         }
-        return restoredText;
+        return {
+            text: restoredText,
+            unusedImages: unusedImages.reverse() // Return in original order
+        };
     }
 
     const instructionsToKeepPlaceholders = () => {
