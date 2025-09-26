@@ -1426,4 +1426,24 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         subjectUsers.data[0].userId == user
         subjectUsers.data[0].lastUpdated == DTF.print(date.time)
     }
+
+    void "get subject for SkillsGroup" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+
+        when:
+
+        def subject = skillsService.getSubject([subjectId: subj.subjectId, projectId: proj.projectId])
+        def subjectForGround = skillsService.getSubjectForGroup(proj.projectId, skillsGroup.skillId)
+
+        then:
+        subject
+        subject.skillId == subj.skillId
+        subject.name == subj.name
+    }
 }

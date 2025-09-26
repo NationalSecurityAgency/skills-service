@@ -620,6 +620,14 @@ class AdminController {
         return skillsAdminService.getSkillsByProjectSkillAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup, SkillRelDef.RelationshipType.SkillsGroupRequirement)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/subject", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    SubjectResult getSubjectForGroup(@PathVariable("projectId") String projectId, @PathVariable("groupId") String groupId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(groupId, "Group Id", projectId)
+        return subjAdminService.getSubjectForGroup(projectId, groupId)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SkillDefRes getSkill(

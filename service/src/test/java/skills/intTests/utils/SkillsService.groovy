@@ -545,6 +545,10 @@ class SkillsService {
         wsHelper.adminGet("/projects/${props.projectId}/subjects/${props.subjectId}")
     }
 
+    def getSubjectForGroup(String projectId, String groupId) {
+        wsHelper.adminGet("/projects/${projectId}/groups/${groupId}/subject")
+    }
+
     def getBadge(String projectId, String badgeId) {
         this.getBadge([projectId: projectId, badgeId: badgeId])
     }
