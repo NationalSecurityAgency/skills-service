@@ -31,7 +31,7 @@ const route = useRoute()
 const log = useLog()
 const imgHandler = useImgHandler()
 const updateDescription = (newDesc) => {
-  generatedDescription.value = newDesc
+  currentDescription.value = newDesc
   if (newDesc) {
     chatHistory.value.push({
       id: `${chatCounter.value++}`,
@@ -55,10 +55,11 @@ const close = () => {
 }
 
 const instructions = ref('')
-const generatedDescription = ref('')
+const currentDescription = ref('')
 const isGenerating = ref(false)
 const failedGenerating = ref(false)
 
+const extractedImageState = { hasImages: false, extractedImages: null, }
 const chatCounter = ref(0)
 const chatHistory = ref([])
 const ChatRole = {
@@ -70,7 +71,7 @@ const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false) =
     id: `${chatCounter.value++}`,
     role,
     origMessage: origMsg,
-    isGenerating: false,
+    isGenerating,
     generatedValue: '',
     finalMsg: '',
   }
@@ -78,22 +79,37 @@ const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false) =
   return res
 }
 const appendGeneratedToLastChatItem = (toAppend) => {
-  chatHistory.value[chatHistory.value.length - 1].generatedValue += toAppend
+  const historyItem = chatHistory.value[chatHistory.value.length - 1]
+  historyItem.generatedValue += toAppend
+  if (extractedImageState.extractedImages) {
+    const {
+      text,
+      unusedImages
+    } = imgHandler.reinsertImages(historyItem.generatedValue, extractedImageState.extractedImages)
+    historyItem.generatedValue = text
+    extractedImageState.extractedImages = unusedImages
+  }
+  currentDescription.value = historyItem.generatedValue
 }
 const setFinalMsgToLastChatItem = (finalMsg) => {
-  chatHistory.value[chatHistory.value.length - 1].finalMsg = finalMsg
+  const historyItem = chatHistory.value[chatHistory.value.length - 1]
+  historyItem.finalMsg = finalMsg
+  historyItem.isGenerating = false
 }
 
-
-
 const instructionsGenerator = useInstructionGenerator()
-const reviewDescMsg = 'Review the description and let me know if you need any changes.'
+const reviewDescMsg = 'I\'ve prepared a description based on your input. Review the description and let me know if you need any changes.'
 const failedToGenerateMsg = 'I apologize, but I was unable to generate a description at this time. Please try again in a few moments.'
 function parseResponse(text) {
-  const [newTextPart, comments] = text.split('---COMMENTS---');
-  const newText = newTextPart.replace(/---New Text---/i, '').trim();
+  const [newText, comments] = text.split('Here is what was changed');
+  
+  // Clean up the newText by removing training ### and extra spaces
+  const cleanedText = newText
+    .replace(/\s*###+\s*$/gm, '') // Remove ### at end of lines
+    .trim();
+    
   return {
-    newText,
+    newText: cleanedText,
     comments
   };
 }
@@ -111,14 +127,13 @@ const generateDescription = () => {
 
   let instructionsToSend = null
   const userInstructions = instructions.value
-  const extractedImageState = { hasImages: false, extractedImages: null, }
-  if (generatedDescription.value) {
-    const extractedImagesRes = imgHandler.extractImages(generatedDescription.value)
-    const currentDescription = extractedImagesRes.hasImages ? extractedImagesRes.processedText : generatedDescription.value
+
+  if (currentDescription.value) {
+    const extractedImagesRes = imgHandler.extractImages(currentDescription.value)
+    const descriptionText = extractedImagesRes.hasImages ? extractedImagesRes.processedText : currentDescription.value
     const instructionsToKeepPlaceholders = extractedImagesRes.hasImages? imgHandler.instructionsToKeepPlaceholders() : ''
-    instructionsToSend = instructionsGenerator.existingDescriptionInstructions(currentDescription, userInstructions, instructionsToKeepPlaceholders)
+    instructionsToSend = instructionsGenerator.existingDescriptionInstructions(descriptionText, userInstructions, instructionsToKeepPlaceholders)
     if (extractedImagesRes.hasImages) {
-      extractedImageState.hasImages = true
       extractedImageState.extractedImages = extractedImagesRes.extractedImages
     }
   } else {
@@ -126,68 +141,67 @@ const generateDescription = () => {
   }
   instructions.value = ''
 
-  generatedDescription.value = ''
   if (shouldStream.value) {
+    isGenerating.value = true
     addChatItem('Got it! I\'ll get started right away!', ChatRole.ASSISTANT, true)
     generateDescriptionWithStreaming(instructionsToSend, extractedImageState)
   } else {
     isGenerating.value = true
+    addChatItem('Got it! I am now working on it...', ChatRole.ASSISTANT, true)
+    scrollInstructionsIntoView()
     generateDescriptionWithoutStreaming(instructionsToSend, extractedImageState)
   }
 }
 
-const generateDescriptionWithStreaming = (instructionsToSend, extractedImageState) => {
+const generateDescriptionWithStreaming = (instructionsToSend) => {
   return LearningGenService.generateDescriptionStreamWithFetch(route.params.projectId, instructionsToSend,
       (chunk) => {
-        generatedDescription.value += chunk
         appendGeneratedToLastChatItem(chunk)
-        document.getElementById('instructionsInput')?.scrollIntoView()
+        scrollInstructionsIntoView()
       },
       (completeData) => {
-        setFinalMsgToLastChatItem(`I've prepared a description based on your input. ${reviewDescMsg}`)
+        setFinalMsgToLastChatItem(reviewDescMsg)
         isGenerating.value = false
-        nextTick(() => {
-          document.getElementById('instructionsInput')?.focus()
-        })
+        focusOnInstructionsInput()
       },
       (error) => {
         log.error(`Failed to generate description via streaming: ${error}`)
+        isGenerating.value = false
         setFinalMsgToLastChatItem(failedToGenerateMsg)
       })
 }
 
-const generateDescriptionWithoutStreaming = (instructionsToSend, extractedImageState) => {
+const scrollInstructionsIntoView = () => {
+  document.getElementById('instructionsInput')?.scrollIntoView()
+}
+const generateDescriptionWithoutStreaming = (instructionsToSend) => {
   return LearningGenService.generateDescription(route.params.projectId, instructionsToSend)
       .then((response) => {
-        const {newText, comments} = parseResponse(response.description);
-        if (!generatedDescription.value || !comments) {
-          addChatItem(`I've prepared a description based on your input. ${reviewDescMsg}`)
-        } else if (comments) {
-          addChatItem(`Here are my comments: \n${comments}\n\n${reviewDescMsg}`)
-        }
-
-        let textToInsert = newText
-        if (extractedImageState.hasImages) {
-          textToInsert = imgHandler.reinsertImages(textToInsert, extractedImageState.extractedImages)
-        }
-        generatedDescription.value = textToInsert
-
+        appendGeneratedToLastChatItem(response.description)
+        setFinalMsgToLastChatItem(reviewDescMsg)
       }).finally(() => {
-    isGenerating.value = false
-    nextTick(() => {
-      document.getElementById('instructionsInput')?.focus()
-    })
-  }).catch((err) => {
-    failedGenerating.value = true
-    isGenerating.value = false
-    log.error(err)
-    addChatItem(failedToGenerateMsg)
+        isGenerating.value = false
+        focusOnInstructionsInput()
+      }).catch((err) => {
+        failedGenerating.value = true
+        isGenerating.value = false
+        log.error(err)
+        addChatItem(failedToGenerateMsg)
+      })
+}
+
+const focusOnInstructionsInput = () => {
+  nextTick(() => {
+    document.getElementById('instructionsInput')?.focus()
   })
 }
 
 const useGeneratedDescription = (historyId) => {
   const historyItem = chatHistory.value.find(item => item.id === historyId)
-  emit('generated-desc', historyItem.generatedValue)
+  if (historyItem?.generatedValue) {
+    const { newText } = parseResponse(historyItem.generatedValue)
+    emit('generated-desc', newText || historyItem.generatedValue)
+  }
   close()
 }
 
@@ -235,10 +249,6 @@ const useGeneratedDescription = (historyId) => {
             </div>
           </assistant-msg>
         </div>
-
-        <assistant-msg v-if="isGenerating">
-          <div class="flex gap-2"><skills-spinner :is-loading="isGenerating" :size-in-rem="0.8"/> Generating...</div>
-        </assistant-msg>
       </div>
 
       <div class="flex justify-end mt-6">
@@ -257,17 +267,6 @@ const useGeneratedDescription = (historyId) => {
           </div>
         </div>
       </div>
-
-<!--      <Card class="mt-6 bg-gray-200" v-if="generatedDescription">-->
-<!--        <template #header>-->
-<!--          <div class="px-3 pt-4 text-xl font-bold flex gap-2 text-green-700">-->
-<!--            <i class="fa-solid fa-file-circle-check" aria-hidden="true"></i> Working Copy-->
-<!--          </div>-->
-<!--        </template>-->
-<!--        <template #content>-->
-<!--          <markdown-text v-if="generatedDescription" :text="generatedDescription" instanceId="workingCopy"/>-->
-<!--        </template>-->
-<!--      </Card>-->
     </div>
   </SkillsDialog>
 </template>
