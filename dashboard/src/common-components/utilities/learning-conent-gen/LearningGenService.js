@@ -44,6 +44,7 @@ export default {
                 }
 
                 const receivedValue = decoder.decode(value, {stream: true});
+                console.log(`receivedValue: ${receivedValue}`)
                 const lines = receivedValue.split(/\n/);
 
                 const processedLines = []
