@@ -36,7 +36,7 @@ Please modify it based on the following instructions: "${userEnteredText}"
 Here are the requirements:
 - First provide the new text without any comments or fields (such as "corrected text")
 - At the end create a new section with the title of "Here is what was changed" - then list any comments or suggestions.
-- Place a horizontal line between the new text and the "Here is what was changed" section.
+- Insert 2 new lines above "Here is what was changed" title.
 ${instructionsToKeepPlaceholders ? `-${instructionsToKeepPlaceholders}` : ''}
 `
     }
