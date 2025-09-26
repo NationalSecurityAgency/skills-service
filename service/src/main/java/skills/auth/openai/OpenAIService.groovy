@@ -92,7 +92,7 @@ class OpenAIService {
     Flux<String> streamCompletions(String message) {
         JsonSlurper jsonSlurper = new JsonSlurper()
         String url = String.join("/", openAiHost, completionsEndpoint)
-        log.info("Streaming from [{}] with message [{}]", url, message)
+        log.info("${Thread.currentThread().name} - streaming from [{}] with message [{}]", url, message)
 
         CompletionsRequest request = new CompletionsRequest(
                 messages: [
