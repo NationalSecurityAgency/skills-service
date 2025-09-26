@@ -229,7 +229,8 @@ const showOkButton = computed(() => !copied.value && (hasProjects.value || loadi
         <div class="text-center text-secondary" role="alert">Validating if copy is possible...</div>
       </div>
       <Message v-if="hasValidationErrors" :closable="false" severity="error" data-cy="validationFailedMsg">
-        <div>Subject cannot be copied:</div>
+        <div v-if="isSubjectCopy">Subject cannot be copied:</div>
+        <div v-if="isSelectedSkillsCopy">Skills cannot be copied:</div>
         <ul>
           <li v-for="error in validationErrors" :key="error"><span v-html="error"></span></li>
         </ul>

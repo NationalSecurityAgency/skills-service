@@ -250,6 +250,15 @@ class SubjAdminService {
     }
 
     @Transactional(readOnly = true)
+    SubjectResult getSubjectForGroup(String projectId, String groupId) {
+        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findSubjectForGroup(projectId, groupId)
+        if (!skillDef) {
+            throw new SkillException("Subject not found for group [${groupId}] in project [${projectId}]", projectId, null, ErrorCode.SubjectNotFound)
+        }
+        convertToSubject(skillDef)
+    }
+
+    @Transactional(readOnly = true)
     List<SubjectResult> getSubjects(String projectId) {
         List<SkillDefWithExtra> subjects = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
         List<SubjectResult> res = subjects.collect { convertToSubject(it) }

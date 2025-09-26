@@ -476,4 +476,176 @@ describe('Skill Reuse Modal Tests', () => {
           .should('have.focus');
     });
 
+    it('skills cannot be reused on another subject if they will exceed the max skills per subject', () => {
+        cy.intercept('/public/config', {
+            body: {
+                artifactBuildTimestamp: '2022-01-17T14:39:38Z',
+                authMode: 'FORM',
+                buildTimestamp: '2022-01-17T14:39:38Z',
+                dashboardVersion: '1.9.0-SNAPSHOT',
+                defaultLandingPage: 'progress',
+                descriptionMaxLength: '2000',
+                docsHost: 'https://code.nsa.gov/skills-docs',
+                expirationGracePeriod: 7,
+                expireUnusedProjectsOlderThan: 180,
+                maxBadgeNameLength: '50',
+                maxBadgesPerProject: '25',
+                maxDailyUserEvents: '30',
+                maxFirstNameLength: '30',
+                maxIdLength: '50',
+                maxLastNameLength: '30',
+                maxLevelNameLength: '50',
+                maxNicknameLength: '70',
+                maxNumPerformToCompletion: '10000',
+                maxNumPointIncrementMaxOccurrences: '999',
+                maxPasswordLength: '40',
+                maxPointIncrement: '10000',
+                maxProjectNameLength: '50',
+                maxProjectsPerAdmin: '25',
+                maxSelfReportMessageLength: '250',
+                maxSelfReportRejectionMessageLength: '250',
+                maxSkillNameLength: '100',
+                maxSkillVersion: '999',
+                maxSkillsPerSubject: '5',
+                maxSubjectNameLength: '50',
+                maxSubjectsPerProject: '25',
+                maxTimeWindowInMinutes: '43200',
+                maxBadgeBonusInMinutes: '525600',
+                minIdLength: '3',
+                minNameLength: '3',
+                minPasswordLength: '8',
+                minUsernameLength: '5',
+                minimumProjectPoints: '100',
+                minimumSubjectPoints: '100',
+                nameValidationMessage: '',
+                nameValidationRegex: '',
+                needToBootstrap: false,
+                numProjectsForTableView: '10',
+                oAuthOnly: false,
+                paragraphValidationMessage: 'paragraphs may not contain jabberwocky',
+                paragraphValidationRegex: '^(?i)(?s)((?!jabberwocky).)*$',
+                pointHistoryInDays: '1825',
+                projectMetricsTagCharts: '[{"key":"dutyOrganization","type":"pie","title":"Users by Org"},{"key":"adminOrganization","type":"bar","title":"Users by Agency"}]',
+                rankingAndProgressViewsEnabled: 'true',
+                userSuggestOptions: 'ONE,TWO,THREE',
+                verifyEmailAddresses: false
+            }
+        })
+
+        cy.createSubject(1, 2);
+        cy.createSkill(1, 2, 2);
+        cy.createSkill(1, 2, 3);
+        cy.createSkill(1, 2, 4);
+        cy.createSkill(1, 2, 5);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
+
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+          .click();
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
+          .contains('Selected skills can NOT be reused in the Subject 2 subject');
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
+          .contains('1 selected skill will exceed the maximum number of skills allowed in the destination subject!');
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
+          .should('not.enabled');
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
+          .should('be.enabled');
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="okButton"]')
+          .should('not.exist');
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
+          .click();
+        cy.get('[data-cy="reuseSkillsModalStep3"]')
+          .should('not.exist');
+    });
+
+    it('skills cannot be reused on another group if they will exceed the max skills per subject', () => {
+        cy.intercept('/public/config', {
+            body: {
+                artifactBuildTimestamp: '2022-01-17T14:39:38Z',
+                authMode: 'FORM',
+                buildTimestamp: '2022-01-17T14:39:38Z',
+                dashboardVersion: '1.9.0-SNAPSHOT',
+                defaultLandingPage: 'progress',
+                descriptionMaxLength: '2000',
+                docsHost: 'https://code.nsa.gov/skills-docs',
+                expirationGracePeriod: 7,
+                expireUnusedProjectsOlderThan: 180,
+                maxBadgeNameLength: '50',
+                maxBadgesPerProject: '25',
+                maxDailyUserEvents: '30',
+                maxFirstNameLength: '30',
+                maxIdLength: '50',
+                maxLastNameLength: '30',
+                maxLevelNameLength: '50',
+                maxNicknameLength: '70',
+                maxNumPerformToCompletion: '10000',
+                maxNumPointIncrementMaxOccurrences: '999',
+                maxPasswordLength: '40',
+                maxPointIncrement: '10000',
+                maxProjectNameLength: '50',
+                maxProjectsPerAdmin: '25',
+                maxSelfReportMessageLength: '250',
+                maxSelfReportRejectionMessageLength: '250',
+                maxSkillNameLength: '100',
+                maxSkillVersion: '999',
+                maxSkillsPerSubject: '5',
+                maxSubjectNameLength: '50',
+                maxSubjectsPerProject: '25',
+                maxTimeWindowInMinutes: '43200',
+                maxBadgeBonusInMinutes: '525600',
+                minIdLength: '3',
+                minNameLength: '3',
+                minPasswordLength: '8',
+                minUsernameLength: '5',
+                minimumProjectPoints: '100',
+                minimumSubjectPoints: '100',
+                nameValidationMessage: '',
+                nameValidationRegex: '',
+                needToBootstrap: false,
+                numProjectsForTableView: '10',
+                oAuthOnly: false,
+                paragraphValidationMessage: 'paragraphs may not contain jabberwocky',
+                paragraphValidationRegex: '^(?i)(?s)((?!jabberwocky).)*$',
+                pointHistoryInDays: '1825',
+                projectMetricsTagCharts: '[{"key":"dutyOrganization","type":"pie","title":"Users by Org"},{"key":"adminOrganization","type":"bar","title":"Users by Agency"}]',
+                rankingAndProgressViewsEnabled: 'true',
+                userSuggestOptions: 'ONE,TWO,THREE',
+                verifyEmailAddresses: false
+            }
+        })
+
+        cy.createSubject(1, 2);
+        cy.createSkill(1, 2, 2);
+        cy.createSkill(1, 2, 3);
+        cy.createSkill(1, 2, 4);
+        cy.createSkill(1, 2, 5);
+        cy.createSkillsGroup(1, 2, 12);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
+
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2group12Subj2"]')
+          .click();
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
+          .contains('Selected skills can NOT be reused in the Awesome Group 12 Subj2 group');
+        cy.get('[data-cy="reuseSkillsModalStep2"]')
+          .contains('1 selected skill will exceed the maximum number of skills allowed in the destination subject!');
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
+          .should('not.enabled');
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
+          .should('be.enabled');
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="okButton"]')
+          .should('not.exist');
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
+          .click();
+        cy.get('[data-cy="reuseSkillsModalStep3"]')
+          .should('not.exist');
+    });
 });
