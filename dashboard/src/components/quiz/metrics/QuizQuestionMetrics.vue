@@ -164,7 +164,7 @@ onMounted(() => {
   answers.value = props.q.answers.map((a) => ({
     ...a,
     selected: a.selected ? a.selected : false,
-    percent: (totalNumUsers > 0 ? Math.trunc((a.numAnsweredCorrect / totalNumUsers) * 100) : 0),
+    percent: (totalNumUsers > 0 ? Math.trunc(((isMatching.value ? a.numAnsweredCorrect : a.numAnswered) / totalNumUsers) * 100) : 0),
     multiPartAnswer: a.multiPartAnswer?.length > 0 ? JSON.parse(a.multiPartAnswer) : null
   }))
   if (isRating.value) {
