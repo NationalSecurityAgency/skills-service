@@ -57,7 +57,6 @@ const close = () => {
 const instructions = ref('')
 const currentDescription = ref('')
 const isGenerating = ref(false)
-const failedGenerating = ref(false)
 
 const extractedImageState = { hasImages: false, extractedImages: null, }
 const chatCounter = ref(0)
@@ -74,6 +73,7 @@ const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false) =
     isGenerating,
     generatedValue: '',
     finalMsg: '',
+    failedToGenerate: false
   }
   chatHistory.value.push(res)
   return res
@@ -91,10 +91,11 @@ const appendGeneratedToLastChatItem = (toAppend) => {
   }
   currentDescription.value = historyItem.generatedValue
 }
-const setFinalMsgToLastChatItem = (finalMsg) => {
+const setFinalMsgToLastChatItem = (finalMsg, failedToGenerate = false) => {
   const historyItem = chatHistory.value[chatHistory.value.length - 1]
   historyItem.finalMsg = finalMsg
   historyItem.isGenerating = false
+  historyItem.failedToGenerate = failedToGenerate
 }
 
 const instructionsGenerator = useInstructionGenerator()
@@ -117,7 +118,6 @@ function parseResponse(text) {
 const shouldStream = ref(true)
 const instructionsInput = ref(null)
 const generateDescription = () => {
-  failedGenerating.value = false
 
   if (log.isTraceEnabled()) {
     log.trace(`Generating based on instructions: [${instructions.value}]`)
@@ -153,7 +153,30 @@ const generateDescription = () => {
   }
 }
 
+const checkThatProgressWasMade = () => {
+  const TIMEOUT_MS = 5000;
+  const MAX_ATTEMPTS = 6; // Max 30 seconds (5s * 6)
+  let numAttempts = 0;
+  const statusMessages = [
+    "This is taking longer than expected but I am still working on it...",
+    "Still working on generating the best response for you...",
+    "Hang tight! Still processing your request...",
+    "I am trying but unfortunately it is still taking way longer than expected...",
+    "I am still trying, sorry for the delay!",
+    "I may not be able to generate a description at this time. But I'll try my best to get it done."
+  ];
+  const lastItem = chatHistory.value[chatHistory.value.length - 1];
+  const initialLength = lastItem.generatedValue.length;
+
+  setTimeout(() => {
+    if (numAttempts < MAX_ATTEMPTS && lastItem.generatedValue.length === initialLength) {
+      lastItem.origMessage += ` \n${statusMessages[numAttempts]}`
+      numAttempts += 1
+    }
+  }, TIMEOUT_MS)
+}
 const generateDescriptionWithStreaming = (instructionsToSend) => {
+  checkThatProgressWasMade()
   return LearningGenService.generateDescriptionStreamWithFetch(route.params.projectId, instructionsToSend,
       (chunk) => {
         appendGeneratedToLastChatItem(chunk)
@@ -167,7 +190,7 @@ const generateDescriptionWithStreaming = (instructionsToSend) => {
       (error) => {
         log.error(`Failed to generate description via streaming: ${error}`)
         isGenerating.value = false
-        setFinalMsgToLastChatItem(failedToGenerateMsg)
+        setFinalMsgToLastChatItem(failedToGenerateMsg, true)
       })
 }
 
@@ -183,7 +206,6 @@ const generateDescriptionWithoutStreaming = (instructionsToSend) => {
         isGenerating.value = false
         focusOnInstructionsInput()
       }).catch((err) => {
-        failedGenerating.value = true
         isGenerating.value = false
         log.error(err)
         addChatItem(failedToGenerateMsg)
@@ -241,6 +263,7 @@ const useGeneratedDescription = (historyId) => {
               <markdown-text :text="historyItem.finalMsg" :instanceId="`${historyItem.id}-finalMsg`"/>
               <div class="flex justify-start mt-2">
                 <SkillsButton
+                    v-if="!historyItem.failedToGenerate"
                     icon="fa-solid fa-check-double"
                     severity="info" :outlined="false"
                     label="Use Generated Value"
