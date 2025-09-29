@@ -29,7 +29,21 @@ export default {
                     'Accept': 'text/event-stream'
                 },
                 body: JSON.stringify({ instructions })
-            });
+            })
+
+            // Check if the response is not OK (status code 200-299)
+            if (!response.ok) {
+                let errorMessage = `Server responded with status ${response.status}`;
+                // Try to get error details from response if available
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    // If we can't parse JSON, use the status text
+                    errorMessage = response.statusText || errorMessage;
+                }
+                throw new Error(`Failed to generate description: ${errorMessage}`);
+            }
 
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
@@ -49,26 +63,27 @@ export default {
 
                 const processedLines = []
                 for (const line of lines) {
-                    if (line.startsWith('data:')) {
-                        const content = line.substring(5)
-                        if (content === '[DONE]') {
-                            if (onComplete) onComplete();
-                            return;
-                        }
-                        if (content) {
-                            const toPush = content.replace(/<<newline>>/g, '\n');
-                            processedLines.push(toPush)
-                        }
+                    const content = line.startsWith('data:') ? line.substring(5) : line
+                    if (content === '[DONE]') {
+                        if (onComplete) onComplete();
+                        return;
+                    }
+                    if (content) {
+                        const toPush = content.replace(/<<newline>>/g, '\n');
+                        processedLines.push(toPush)
                     }
                 }
 
                 const processed = processedLines.join('')
-                console.log(`processed: ${processed}`)
+                console.log(`processed: ${processed} from lines: ${JSON.stringify(lines)}`)
                 onChunk(processed)
             }
         } catch (error) {
-            console.error('ERROR')
-            if (onError) onError(error);
+            if (onError) {
+                onError(error);
+            } else {
+                throw error; // Re-throw if no error handler is provided
+            }
         }
     }
 };

@@ -72,28 +72,36 @@ export const useImgHandler = () => {
     }
 
     const reinsertImages = (processedText, extractedImages) => {
+        if (!extractedImages?.length) {
+            return { text: processedText, unusedImages: [] };
+        }
+
         let restoredText = processedText;
         const unusedImages = [];
+        const processedImages = [...extractedImages];
 
-        if (extractedImages) {
-            const images = [...extractedImages];
-            // Process in reverse to handle multiple occurrences correctly
-            images.reverse().forEach(image => {
-                const placeholderRegex = new RegExp(image.placeholder, 'gi');
-                const newText = restoredText.replace(placeholderRegex, image.markdown);
-                
-                if (newText === restoredText) {
-                    // No replacement was made, add to unused images
-                    unusedImages.push(image);
-                } else {
-                    restoredText = newText;
-                }
-            });
+        // Process in reverse order to handle multiple occurrences correctly
+        for (let i = processedImages.length - 1; i >= 0; i--) {
+            const image = processedImages[i];
+            const placeholder = escapeRegExp(image.placeholder);
+            const placeholderRegex = new RegExp(placeholder, 'g'); // Removed 'i' flag for case-sensitive matching
+            const newText = restoredText.replace(placeholderRegex, image.markdown);
+
+            if (newText === restoredText) {
+                unusedImages.unshift(image); // Add to beginning to maintain order
+            } else {
+                restoredText = newText;
+            }
         }
+
         return {
             text: restoredText,
-            unusedImages: unusedImages.reverse() // Return in original order
+            unusedImages
         };
+    }
+    // Helper function to escape special regex characters
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     const instructionsToKeepPlaceholders = () => {
