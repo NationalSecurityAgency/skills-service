@@ -537,6 +537,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.createSkill(1, 2, 3);
         cy.createSkill(1, 2, 4);
         cy.createSkill(1, 2, 5);
+        cy.createSkill(1, 2, 6);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
@@ -623,6 +624,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.createSkill(1, 2, 3);
         cy.createSkill(1, 2, 4);
         cy.createSkill(1, 2, 5);
+        cy.createSkill(1, 2, 6);
         cy.createSkillsGroup(1, 2, 12);
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');

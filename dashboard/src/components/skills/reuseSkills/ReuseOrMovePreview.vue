@@ -149,7 +149,7 @@ const actionName = computed(() => props.actionName.toLocaleLowerCase())
 const actionNameInPast = computed(() => `${actionName.value}d`)
 const destinationSubjectTotalSkills = computed(() => (destinationSubject.value?.numSkills || 0) + (destinationSubject.value?.numSkillsReused || 0))
 const exceedsMaxDestinationSkills = computed(() => {
-  return (destinationSubjectTotalSkills.value + skillsForReuse.value.available?.length) >= appConfig.maxSkillsPerSubject
+  return (destinationSubjectTotalSkills.value + skillsForReuse.value.available?.length) > appConfig.maxSkillsPerSubject
 })
 const isReuseBtnDisabled = computed(() => {
   return reuseInProgress.value || (skillsForReuse.value.available && skillsForReuse.value.available.length === 0) || exceedsMaxDestinationSkills.value
