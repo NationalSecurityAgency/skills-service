@@ -230,7 +230,7 @@ const schema = yup.object().shape({
       }),
 })
 
-const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ validationSchema: schema, })
+const { values, meta, handleSubmit, resetForm, setFieldValue, validate, errors } = useForm({ validationSchema: schema, })
 const saveSettings = handleSubmit((values) => {
   saving.value = true;
   loading.value = true;
@@ -307,6 +307,11 @@ const saveSettings = handleSubmit((values) => {
         });
   }
 });
+
+const resetYearlyDayOfMonth = () => {
+  yearlyDayOfMonth.value=1;
+  setFieldValue('yearlyDayOfMonth', 1);
+}
 </script>
 
 <template>
@@ -383,7 +388,7 @@ const saveSettings = handleSubmit((values) => {
                                   name="yearlyMonth"
                                   optionLabel="text"
                                   optionValue="value"
-                                  @change="yearlyDayOfMonth=1"
+                                  @change="resetYearlyDayOfMonth"
                                   aria-label="Month of year"
                                   data-cy="yearlyMonth"/>
                   <SkillsDropDown v-model="yearlyDayOfMonth"
