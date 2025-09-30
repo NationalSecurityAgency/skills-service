@@ -68,7 +68,6 @@ const handleOnInput = (event) => {
               @input="handleOnInput"
               :inputId="`input${name}`"
               :id="name"
-              class="w-full"
               :data-cy="$attrs['data-cy'] || name" />
     <Message v-if="errorMessage"
              severity="error"
