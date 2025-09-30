@@ -455,6 +455,7 @@ describe('Metrics Tests - Achievements', () => {
     });
 
     it('achievements table - filtering', () => {
+        cy.viewport(1200, 1400)
         cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
             .as('userAchievementsChartBuilder');
 
@@ -564,26 +565,26 @@ describe('Metrics Tests - Achievements', () => {
             .should('be.enabled');
 
         cy.wait(2000);
-        cy.get('[data-cy=achievementsNavigator-fromDateInput]')
+        cy.get('[data-cy=achievementsNavigator-fromDateInput] > input')
             .click();
         cy.wait(200);
         cy.filterNextMonth();
         cy.wait(100);
         cy.filterSetDay(15);
         cy.wait(500);
-        cy.get('[data-cy=achievementsNavigator-toDateInput]')
+        cy.get('[data-cy=achievementsNavigator-toDateInput] > input')
             .click();
         cy.wait(200);
         cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="day"]').contains('14').should('have.class', 'p-disabled')
         cy.wait(100);
 
-        cy.get('[data-cy=achievementsNavigator-fromDateInput]').click();
+        cy.get('[data-cy=achievementsNavigator-fromDateInput] > input').click();
         cy.wait(200);
 
         cy.filterPrevMonth();
         cy.filterSetDay(15);
         cy.wait(100);
-        cy.get('[data-cy=achievementsNavigator-toDateInput]').click();
+        cy.get('[data-cy=achievementsNavigator-toDateInput] > input').click();
         cy.wait(200);
         cy.filterNextMonth();
         cy.filterSetDay(15);
@@ -830,7 +831,7 @@ describe('Metrics Tests - Achievements', () => {
             .click();
         cy.wait('@userAchievementsChartBuilder');
 
-        cy.get('[data-cy=achievementsNavigator-fromDateInput]').click()
+        cy.get('[data-cy=achievementsNavigator-fromDateInput] > input').click()
         cy.filterSetYear(2020);
         cy.filterSetMonth('Sep');
         cy.filterSetDay(18);
@@ -877,7 +878,7 @@ describe('Metrics Tests - Achievements', () => {
             }],
         ]);
 
-        cy.get('[data-cy=achievementsNavigator-toDateInput]').click()
+        cy.get('[data-cy=achievementsNavigator-toDateInput] > input').click()
         cy.filterSetYear(2020);
         cy.filterSetMonth('Sep');
         cy.filterSetDay(19);
