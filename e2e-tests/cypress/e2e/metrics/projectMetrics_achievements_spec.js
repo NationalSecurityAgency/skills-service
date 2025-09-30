@@ -563,7 +563,7 @@ describe('Metrics Tests - Achievements', () => {
         cy.get('[data-cy=achievementsNavigator-filterBtn]')
             .should('be.enabled');
 
-        cy.wait(500);
+        cy.wait(2000);
         cy.get('[data-cy=achievementsNavigator-fromDateInput]')
             .click();
         cy.wait(200);
