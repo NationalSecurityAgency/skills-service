@@ -227,7 +227,7 @@ jobs:
         
 
   ui-tests-against-postgres-cypress-dashboard:
-#    if: github.event_name == 'schedule-never'
+    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -304,7 +304,6 @@ jobs:
           group: 'skills-service tests'
           tag: "${{ github.workflow }}"
           browser: chrome
-          spec: cypress/e2e/metrics/projectMetrics_achievements_spec.js
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
