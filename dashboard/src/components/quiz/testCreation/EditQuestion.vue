@@ -221,8 +221,15 @@ const matchesMustNotBeBlank = (value) => {
   if(!isQuestionTypeMatching.value) {
     return true;
   }
-  const emptyAnswers = value.filter((term) => {
-    return term.multiPartAnswer?.term?.trim() === '' || term.multiPartAnswer?.value?.trim() === '';
+
+  let emptyAnswers = []
+  value.forEach((term) => {
+    let answer = term.multiPartAnswer
+    if(answer) {
+      if(!answer.term || !answer.value || answer.term.trim() === '' || answer.value.trim() === '') {
+        emptyAnswers.push(term);
+      }
+    }
   })
   return emptyAnswers.length === 0;
 }
@@ -466,7 +473,7 @@ const onSavedQuestion = (savedQuestion) => {
             aria-errormessage="answersError"
               aria-describedby="answersError" />
 
-        <matching-question v-model="props.questionDef.answers" v-if="isQuestionTypeMatching" />
+        <matching-question ref="answersRef" v-model="props.questionDef.answers" v-if="isQuestionTypeMatching" />
 
         <Message severity="error"
                  variant="simple"

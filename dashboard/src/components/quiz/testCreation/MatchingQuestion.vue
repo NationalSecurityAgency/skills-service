@@ -47,6 +47,28 @@ function addNewAnswer(index) {
 function removeAnswer(index) {
   remove(index)
 }
+
+const resetAnswers = () => {
+  const replacementAnswers = []
+  for(let answerValue in fields.value) {
+    const answerValueAsInt = parseInt(answerValue);
+    if(fields.value[answerValueAsInt].value) {
+      const replacementValue = {
+        ...fields.value[answerValueAsInt].value,
+        multiPartAnswer: {
+          term: '',
+          answer: '',
+        },
+      };
+      replacementAnswers.push(replacementValue)
+    }
+  }
+  replace(replacementAnswers)
+}
+
+defineExpose( {
+  resetAnswers
+})
 </script>
 
 <template>

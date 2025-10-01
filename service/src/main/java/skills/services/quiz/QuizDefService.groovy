@@ -617,12 +617,27 @@ class QuizDefService {
             }
             savedAnswers = quizAnswerRepo.saveAllAndFlush(answerDefs)
         } else if (isMatchingQuestion) {
+            if(existingAnswerDefs.size() > 0) {
+                List<Integer> requestedIds = questionDefRequest.answers.collect{ it.id }
+                List<Integer> existingIds = existingAnswerDefs.collect { it.id }
+                List<Integer> idsToRemove = existingIds - requestedIds
+                quizAnswerRepo.deleteAllById(idsToRemove)
+            }
             List<QuizAnswerDef> answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
                 QuizAnswerDef answerDef = existingAnswerDefs.find { it.id == answerDefRequest.id }
                 if(answerDef) {
                     answerDef.multiPartAnswer = answerDefRequest.multiPartAnswer
                     answerDef.displayOrder = index + 1
                     return answerDef
+                } else {
+                    return new QuizAnswerDef(
+                            quizId: savedQuestion.quizId,
+                            questionRefId: savedQuestion.id,
+                            answer: null,
+                            isCorrectAnswer: true,
+                            displayOrder: index + 1,
+                            multiPartAnswer: answerDefRequest.multiPartAnswer,
+                    )
                 }
             }
             savedAnswers = quizAnswerRepo.saveAllAndFlush(answerDefs)

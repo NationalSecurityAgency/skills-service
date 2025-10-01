@@ -130,7 +130,7 @@ const manuallyGradedInfo = computed(() => {
                   <i class="fas fa-arrow-right"></i>
                 </div>
                 <div>
-                  <SkillsOverlay :show="!answer.isSelected && isWrong" opacity="0">
+                  <SkillsOverlay :show="!answer.isSelected && isWrong" opacity="0"  style="min-height: 26px">
                     <template #overlay>
                       <i class="fa fa-ban text-red-500" style="font-size: 1.5rem; opacity: 0.8"
                          data-cy="wrongAnswer"></i>
