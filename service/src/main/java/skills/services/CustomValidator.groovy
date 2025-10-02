@@ -19,6 +19,17 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import org.apache.commons.lang3.StringUtils
+import org.commonmark.Extension
+import org.commonmark.ext.gfm.tables.TableBlock
+import org.commonmark.ext.gfm.tables.TableHead
+import org.commonmark.ext.gfm.tables.TablesExtension
+import org.commonmark.node.*
+import org.commonmark.parser.IncludeSourceSpans
+import org.commonmark.parser.Parser
+import org.commonmark.renderer.markdown.MarkdownRenderer
+import org.commonmark.renderer.text.TextContentRenderer
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -26,9 +37,10 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.*
+import skills.controller.result.model.ModifiedDescription
 import skills.services.admin.UserCommunityService
-import skills.utils.InputSanitizer
 
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -186,8 +198,12 @@ class CustomValidator {
         return (boolean)utilizeUserCommunityParagraphPatternByDefault
     }
 
+    private static class ValidationPattern {
+        Pattern pattern
+        String message
+    }
 
-    CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
+    private ValidationPattern getValidationPattern(String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
         Pattern paragraphPatternToUse = this.paragraphPattern
         String paragraphValidationMsgToUse = this.paragraphValidationMsg
 
@@ -200,36 +216,264 @@ class CustomValidator {
                 throw new SkillException("User [${userId}] is not allowed to validate using user community validation", projectId, null, ErrorCode.AccessDenied)
             }
         }
-        if (!paragraphPatternToUse || StringUtils.isBlank(description)) {
-            return new CustomValidationResult(valid: true)
+
+        return new ValidationPattern(pattern: paragraphPatternToUse, message: paragraphValidationMsgToUse)
+    }
+
+
+    static String NEW_LINE_PLACEHOLDER = '-----newline-----'
+    static String processMarkdownTables(String markdown) {
+        // This pattern matches markdown tables and captures them
+        Pattern tablePattern = Pattern.compile('(\\|.*\\|(?:\\s*\\|.*\\|)*)(?=\\s*(?:\\||$))', Pattern.MULTILINE)
+        Matcher matcher = tablePattern.matcher(markdown)
+        StringBuffer result = new StringBuffer()
+
+        while (matcher.find()) {
+            // For each table found, replace newlines within it with a special placeholder
+            String table = matcher.group(0).replaceAll('\\n', NEW_LINE_PLACEHOLDER)
+            matcher.appendReplacement(result, table)
         }
-        log.debug("Validating description:\n[{}]", description)
+        matcher.appendTail(result)
 
-        description = InputSanitizer.unsanitizeForMarkdown(description)
+        return result.toString()
+    }
 
-        // split if
-        // - there is at least 2 new lines
-        // - markdown separator (3 underscores, 3 dashes, 3 stars)
-        description = preProcessForMarkdownSupport(description)
-        if (StringUtils.isBlank(description)) {
-            return new CustomValidationResult(valid: true)
+    static String restoreNewLines(String markdown) {
+        return markdown.replaceAll(NEW_LINE_PLACEHOLDER, '\n')
+    }
+
+    private static boolean isMarkdownTable(String text) {
+        return text.replaceAll(/\r\n?/, "\n") // Normalize line endings
+                .replaceAll(/(?<=\S)[ \t]*(?=\n)/, "") // Remove spaces before newlines
+                .replaceAll(/(?<=\n)[ \t]+(?=\n)/, "") // Remove spaces between newlines
+    }
+
+
+    CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
+        InternalValidationResult result = validateMarkdown(new InternalValidationRequest(
+                description: description,
+                projectId: projectId,
+                utilizeUserCommunityParagraphPatternByDefault: utilizeUserCommunityParagraphPatternByDefault,
+                quizId: quizId))
+        return new CustomValidationResult(valid: result.isValid, msg: result.validationMsg)
+    }
+
+    private static class InternalValidationRequest {
+        String description
+        String prefix // if provided description will be regenerated and prefix will be added to invalid paragraphs
+        String projectId=null
+        Boolean utilizeUserCommunityParagraphPatternByDefault = false
+        String quizId = null
+    }
+
+    private static class InternalValidationResult {
+        Boolean isValid
+        String newDescription // if prefix is provided
+        String validationMsg
+    }
+
+    static String normalizeNewlines(String input) {
+        return input
+                .replaceAll(/\r\n?/, "\n")  // Normalize line endings
+                .replaceAll(/(?<=\S)[ \t]*(?=\n)/, "")  // Remove spaces before newlines
+                .replaceAll(/(?<=\n)[ \t]*(?=\n)/, "")  // Remove spaces between newlines
+    }
+    InternalValidationResult validateMarkdown(InternalValidationRequest request) {
+        String description = request.description
+        ValidationPattern validationPattern = getValidationPattern(request.projectId, request.utilizeUserCommunityParagraphPatternByDefault, request.quizId)
+        if (!validationPattern.pattern || StringUtils.isBlank(description)) {
+            return new InternalValidationResult(isValid: true)
         }
 
-        CustomValidationResult validationResult = null
+        List<Extension> extensions = List.of(TablesExtension.create());
+        Parser parser = Parser.builder()
+                .includeSourceSpans(IncludeSourceSpans.BLOCKS)
+                .extensions(extensions)
+                .build();
+        String descriptionNormalized = normalizeNewlines(description)
+        Node document = parser.parse(descriptionNormalized);
+        MarkdownRenderer markdownRenderer = MarkdownRenderer.builder().extensions(extensions).build();
+        TextContentRenderer textContentRenderer = TextContentRenderer.builder().extensions(extensions).build()
+        AtomicBoolean isValid = new AtomicBoolean(true)
+        Map<String,String> customReplacements = [:]
 
-        String[] paragraphs = description.split("([\n]{2,})|(\n[\\s]*[-_*]{3,})")
-        if (paragraphs) {
-            validationResult = validateParagraphs(paragraphPatternToUse, paragraphValidationMsgToUse, paragraphs.toList())
-            if (validationResult && !validationResult.valid) {
-                return validationResult
+        Closure<Boolean> validateParagraph = { Node node ->
+            if (!node) {
+                return false
+            }
+            String toValidate = textContentRenderer.render(node)
+            toValidate = Jsoup.parse(toValidate).text()
+            boolean isValidParagraph = validationPattern.pattern.matcher(toValidate).matches()
+            if (isValidParagraph && forceValidationPattern) {
+                String markdown = markdownRenderer.render(node)
+                String[] lines = markdown.split('\n')
+                for (String line : lines) {
+                    String lineToValidate = Jsoup.parse(line).text()
+                    boolean forceValidate = forceValidationPattern.matcher(lineToValidate).matches()
+                    if (forceValidate) {
+                        boolean isValidLine = validationPattern.pattern.matcher(lineToValidate).matches()
+                        if (!isValidLine) {
+                            return false
+                        }
+                    }
+                }
+            }
+            return isValidParagraph
+        }
+        Closure<Integer> linesToPreviousNode = { Node node ->
+            Node previousNode = node.previous
+            if (!previousNode) {
+                return -1
+            }
+            int previousEndLine = previousNode.sourceSpans.last().lineIndex
+            int currentStartLine = node.sourceSpans.first().lineIndex
+             return currentStartLine - previousEndLine
+        }
+        Closure<Void> blockHandlerValidator = { Node node, int minLinesToPreviousNode = 2 ->
+            Node previousNode = node.previous
+            if (!previousNode) {
+                isValid.set(false)
+            } else if (linesToPreviousNode(node) > minLinesToPreviousNode) {
+                isValid.set(false)
+            } else if (!validateParagraph(previousNode)) {
+                isValid.set(false)
+                if (request.prefix) {
+                    if (previousNode instanceof HtmlBlock) {
+                        String currentHtml = previousNode.getLiteral()
+                        String newHtml = request.prefix + (currentHtml ?: "")
+                        customReplacements.put(markdownRenderer.render(previousNode), newHtml)
+                    } else {
+                        previousNode.prependChild(new Text(request.prefix))
+                    }
+                }
             }
         }
 
-        List<String> htmlParagraphs = extractHtmlParagraphs(description)
-        if (htmlParagraphs) {
-            validationResult = validateParagraphs(paragraphPatternToUse, paragraphValidationMsgToUse, htmlParagraphs)
+        def visitor = new AbstractVisitor() {
+            @Override
+            void visit(HtmlBlock htmlBlock) {
+                String html = htmlBlock.getLiteral()
+                org.jsoup.nodes.Document doc = Jsoup.parse(html)
+
+                // Process paragraphs
+                org.jsoup.select.Elements paragraphs = doc.select("p")
+                paragraphs.each { Element p ->
+                    String text = p.text().trim()
+                    if (text && !validationPattern.pattern.matcher(text).matches()) {
+                        isValid.set(false)
+                        if (request.prefix) {
+                            p.prependText(request.prefix)
+                        }
+                    }
+                }
+            }
+            @Override
+            void visit(IndentedCodeBlock indentedCodeBlock) {
+                blockHandlerValidator(indentedCodeBlock)
+            }
+
+            @Override
+            void visit(BulletList bulletList) {
+                handleList(bulletList)
+            }
+
+            @Override
+            void visit(OrderedList bulletList) {
+                handleList(bulletList)
+            }
+
+            void handleList(ListBlock bulletList) {
+                Node previousNode = bulletList.previous
+
+                boolean previousNodeValidates = previousNode
+                        && previousNode instanceof Paragraph
+                        && linesToPreviousNode(bulletList) < 3
+                        && validateParagraph(previousNode)
+
+                if(!previousNodeValidates) {
+                    ListItem firstBullet = (ListItem)bulletList.firstChild
+                    Paragraph firstBulletContent = (Paragraph)firstBullet.firstChild
+
+                    if (!validateParagraph(firstBulletContent)) {
+                        isValid.set(false)
+                        if (request.prefix) {
+                            firstBulletContent.prependChild(new Text(request.prefix))
+                        }
+                    }
+                }
+
+                if (forceValidationPattern) {
+                    ListItem currentBullet = (ListItem) bulletList.firstChild
+                    while (currentBullet) {
+                        Paragraph bulletParagraph = (Paragraph) currentBullet.firstChild
+                        String toValidate = textContentRenderer.render(bulletParagraph)
+                        toValidate = Jsoup.parse(toValidate).text()
+                        boolean shouldForceValidation = forceValidationPattern.matcher(toValidate).matches()
+                        if (shouldForceValidation && !validateParagraph(bulletParagraph)) {
+                            isValid.set(false)
+                        }
+                        currentBullet = (ListItem) currentBullet.next
+                    }
+                }
+            }
+
+            @Override
+            void visit(Paragraph paragraph) {
+                if (!validateParagraph(paragraph)) {
+                    isValid.set(false)
+                    if (request.prefix) {
+                        paragraph.prependChild(new Text(request.prefix))
+                    }
+                }
+            }
+            @Override
+            void visit(Heading heading) {
+                if (!validateParagraph(heading)) {
+                    isValid.set(false)
+                    if (request.prefix) {
+                        heading.prependChild(new Text(request.prefix))
+                    }
+                }
+            }
+
+            @Override
+            void visit(CustomNode customNode) {
+                if (customNode instanceof TableHead) {
+                    TableHead tableHead = (TableHead) customNode
+                    TableBlock tableBlock = (TableBlock)tableHead.parent
+                    blockHandlerValidator(tableBlock)
+                } else {
+                    visitChildren(customNode)
+                }
+            }
+
+            @Override
+            void visit(FencedCodeBlock fencedCodeBlock) {
+                blockHandlerValidator(fencedCodeBlock)
+            }
         }
-        return validationResult
+        document.accept(visitor)
+
+        String newDescription = request.prefix ? markdownRenderer.render(document) : description
+        customReplacements.each { key, value ->
+            newDescription = newDescription.replace(key, value)
+        }
+        return new InternalValidationResult(
+                isValid: isValid.get(),
+                newDescription: newDescription,
+                validationMsg: validationPattern.message
+        )
+
+    }
+
+    ModifiedDescription addPrefixToInvalidParagraphs(String description, String prefix, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
+        assert prefix
+        InternalValidationResult result = validateMarkdown(new InternalValidationRequest(
+                description: description,
+                prefix: prefix, projectId: projectId,
+                utilizeUserCommunityParagraphPatternByDefault: utilizeUserCommunityParagraphPatternByDefault,
+                quizId: quizId))
+        return new ModifiedDescription(newDescription: result.newDescription)
     }
 
     CustomValidationResult validateEmailBodyAndSubject(ContactUsersRequest contactUsersRequest) {
@@ -247,23 +491,26 @@ class CustomValidator {
     }
 
     private CustomValidationResult validateParagraphs(Pattern paragraphPatternToUse, String paragraphValidationMsgToUse, List<String> paragraphs){
-        CustomValidationResult validationResult = null
+        CustomValidationResult validationResult = CustomValidationResult.valid()
         for (String s : paragraphs) {
             if (!s){
                 continue
             }
-            String toValidate = adjustForMarkdownSupport(s)
-            if (StringUtils.isNotBlank(toValidate)) {
-                validationResult = validateInternal(paragraphPatternToUse, toValidate, paragraphValidationMsgToUse)
-                if (!validationResult.valid) {
-                    break
-                }
-            } else if(!validationResult) {
-                validationResult = new CustomValidationResult(valid: true)
+            CustomValidationResult singleParagraphValidationResult = validateSingleParagraph(s, paragraphPatternToUse, paragraphValidationMsgToUse)
+            if (!singleParagraphValidationResult.valid) {
+                return singleParagraphValidationResult
             }
         }
-
         return validationResult
+    }
+
+    private CustomValidationResult validateSingleParagraph(String paragraph, Pattern paragraphPatternToUse, String paragraphValidationMsgToUse) {
+        String toValidate = adjustForMarkdownSupport(paragraph)
+        if (StringUtils.isNotBlank(toValidate)) {
+            CustomValidationResult validationResult = validateInternal(paragraphPatternToUse, toValidate, paragraphValidationMsgToUse)
+            return validationResult
+        }
+        return CustomValidationResult.valid()
     }
 
     final static Pattern HTML_PARAGRAPHS_PATTERN = Pattern.compile("<p>(.+?)</p>", Pattern.DOTALL);
@@ -274,29 +521,6 @@ class CustomValidator {
             htmlParagraphs.add(matcher.group(1));
         }
         return htmlParagraphs
-    }
-
-    private String preProcessForMarkdownSupport(String toValidate) {
-//        String toValidate = s.trim()
-
-        // treat all linebreaks and separators as newlines
-        toValidate = toValidate.replaceAll(/(?m)(^\s*[-_*]{3,}\s*$)|(^\s*<br>\s*$)/, '\n')
-
-        // remove a single new line above a table and/or codeblock
-        toValidate = TABLE_FIX.matcher(toValidate).replaceAll('$2')
-        toValidate = CODEBLOCK_FIX.matcher(toValidate).replaceAll('$2')
-        toValidate = LIST_FIX.matcher(toValidate).replaceAll('$2')
-
-        // remove two+ newlines from codeblocks so we do not split
-        StringBuilder out = new StringBuilder()
-        Matcher matcher = CODEBLOCK.matcher(toValidate)
-        while(matcher.find()) {
-            matcher.appendReplacement(out, matcher.group(1).replaceAll(/[\n]{2,}+/, '\n'))
-        }
-        matcher.appendTail(out)
-        toValidate = out.toString()
-
-        return toValidate.trim()
     }
 
     private String adjustForMarkdownSupport(String s) {
