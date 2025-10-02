@@ -36,6 +36,7 @@ import {useQuizConfig} from "@/stores/UseQuizConfig.js";
 import {useSkillsDisplayInfo} from "@/skills-display/UseSkillsDisplayInfo.js";
 import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
 import GenerateDescriptionDialog from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionDialog.vue";
+import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
 
 const appConfig = useAppConfig()
 const quizConfig = useQuizConfig()
@@ -368,8 +369,6 @@ const editorStyle = computed(() => {
 })
 const showGenerateDescriptionDialog = ref(false)
 const updateDescription = (newDesc) => {
-  console.log(`newDesc: ${newDesc}`)
-  // value.value = newDesc
   setMarkdownText(newDesc)
 }
 
@@ -377,6 +376,14 @@ const generateDescriptionDialogRef = ref(null)
 const onDialogShow = () => {
   const newValue = fetchValue()
   generateDescriptionDialogRef.value.updateDescription(newValue)
+}
+
+const validationService = useDescriptionValidatorService()
+const prefix = ref('')
+const addPrefixToInvalidParagraphs = () => {
+  return validationService.addPrefixToInvalidParagraphs(value.value, prefix.value, true, true).then((result) => {
+    updateDescription(result.newDescription)
+  })
 }
 </script>
 
@@ -409,6 +416,15 @@ const onDialogShow = () => {
       >
         <i class="fa-solid fa-circle-exclamation text-lg" aria-hidden="true"></i> {{ descriptionWarningMsg }}
       </div>
+
+      <div class="flex gap-2 mb-2">
+        <InputText v-model="prefix"/>
+        <SkillsButton icon="fa-solid fa-plus"
+                      label="Add Prefix"
+                      size="small"
+                      @click="addPrefixToInvalidParagraphs"/>
+      </div>
+
       <toast-ui-editor :id="idForToastUIEditor"
                        :style="editorStyle"
                        class="no-bottom-border"

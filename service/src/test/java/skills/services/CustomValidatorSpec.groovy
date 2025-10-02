@@ -93,12 +93,27 @@ Paragraph three
 
 (A) paragraph four
 """
+
+        String paragraphs3 = """(A) Paragraph one
+
+(A) Paragraph two
+Paragraph three
+
+(A) paragraph four
+still part of it
+noe more
+
+(A) now new
+"""
+
         CustomValidationResult result = validator.validateDescription(paragraphs)
         CustomValidationResult result2 = validator.validateDescription(paragraphs2)
+        CustomValidationResult result3 = validator.validateDescription(paragraphs3)
 
         then:
         !result.valid
         result2.valid
+        result3.valid
     }
 
     def "test custom paragraph validation, no regex configured"(){
@@ -203,6 +218,37 @@ Paragraph three
 - item 1
 - item 2
 """).valid
+
+        validator.validateDescription("""(A) one
+* item 1
+* item 2
+""").valid
+        validator.validateDescription("""(A) one
+- item 1
+- item 2
+""").valid
+        validator.validateDescription("""(A) one
+1. item 1
+1. item 2
+""").valid
+        !validator.validateDescription("""- item 1
+- item 2
+""").valid
+        !validator.validateDescription("""* item 1
+* item 2
+""").valid
+        !validator.validateDescription("""1. item 1
+1. item 2
+""").valid
+        validator.validateDescription("""- (A) item 1
+- item 2
+""").valid
+        validator.validateDescription("""* (A) item 1
+* item 2
+""").valid
+        validator.validateDescription("""1. (A) item 1
+1. item 2
+""").valid
     }
 
     def "support markdown tables"() {
@@ -283,6 +329,13 @@ Paragraph three
 
 <br>
 """).valid
+
+        !validator.validateDescription("""| header 1 | header 2 | header 3 |
+| ---      |  ------  |---------:|
+| cell 1   | cell 2   | cell 3   |
+| cell 4 | cell 5 is longer | cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size. |
+| cell 7   |          | cell <br> 9 |
+""").valid
     }
 
     def "support markdown codeblocks"() {
@@ -306,15 +359,6 @@ if (a == true) {
 (A) paragraph two
 """).valid
 
-        !validator.validateDescription("""(A) Paragraph one
-```
-if (a == true) {
-  (B) println 'Hello <br> <br /> World'
-}
-```
-
-(A) paragraph two
-""").valid
 
         validator.validateDescription("""(A) Paragraph one
 ```
@@ -392,21 +436,39 @@ line two
 
 """).valid
 
-        !validator.validateDescription("""(A)
-
-```
-line one
-
-(B)
-line two
-```
-
-""").valid
-
         validator.validateDescription("""(A) empty
 ```
 
 ```""").valid
+
+        !validator.validateDescription("""(A) Paragraph one
+
+
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+(A) paragraph two
+""").valid
+
+        !validator.validateDescription("""(A) Paragraph one
+
+
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+""").valid
+
+        !validator.validateDescription("""```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+""").valid
     }
 
     def "support markdown headers"() {
@@ -440,47 +502,67 @@ line two
 
         then:
         validator.validateDescription("""(A) Separate me
-        ___
-        (A) Separate me
-        ---
-        (A) Separate me
-        ***""").valid
+
+___
+
+(A) Separate me
+
+---
+
+(A) Separate me
+
+***""").valid
 
         !validator.validateDescription("""(A) Separate me
-        ___
-        Separate me
-        ---
-        (A) Separate me
-        ***""").valid
+
+___
+
+Separate me
+
+---
+
+(A) Separate me
+***""").valid
 
         !validator.validateDescription("""(A) Separate me
-        ___
-        (A) Separate me
-        ---
-        (A) Separate me
-        ***
-        no go""").valid
+
+___
+
+(A) Separate me
+
+---
+
+(A) Separate me
+
+***
+
+no go""").valid
 
         validator.validateDescription("""(A) Separate me
+
 ___
-        (A) Separate me
+
+(A) Separate me
+
 ---
-        (A) Separate me
+
+(A) Separate me
+
 ***
-        
-        
-        ___
-        
-        (A) Separate me
-        
-        
+  
+
+___
+
+(A) Separate me
+
+
 ---
-        
-        
-        (A) Separate me
-        
-        
-        ***
+
+
+(A) Separate me
+
+
+***
 (A)
 
 ```
@@ -523,21 +605,21 @@ if (a == true) {
 
     def "apply paragraph validator to bulleted/numbered lists"() {
         String text = """
-        (A) fish
-        (A) fish
+(A) one
+(A) two
 
-        * (A) fish
-        * Not a fish 
+* (A) three
+* four 
 
-        - (A) fish
-        - Not a fish
+- (A) five
+- six
 
-        1. (A) fish
-        1. Not a fish
+1. (A) seven
+1. eight
 
-        2. (A) fish
-        3. Not a fish
-            - (A) fish
+2. (A) nine
+3. ten
+    - (A) eleven
         """
 
         CustomValidator validator = new CustomValidator();
@@ -546,29 +628,30 @@ if (a == true) {
         validator.forceValidationRegex = '^\\(.+\\).*$'
 
         String shouldFail = """
-        (A) fish
-        (A) fish
+(A) fish
+(A) fish
 
-        * Not (A) fish
-        * Not a fish 
+
+* Not (A) fish
+* Not a fish 
         """
 
         String invalidListItem = """
-        (A) fish
-        (A) fish
+(A) fish
+(A) fish
 
-        * (A) fish
-        * (B) Not a fish 
+* (A) fish
+* (B) Not a fish 
 
-        - (A) fish
-        - Not a fish
+- (A) fish
+- Not a fish
 
-        1. (A) fish
-        1. (B) Not a fish
+1. (A) fish
+1. (B) Not a fish
 
-        2. (A) fish
-        3. Not a fish
-            - (A) fish
+2. (A) fish
+3. Not a fish
+    - (A) fish
         """
 
         when:
@@ -585,6 +668,16 @@ if (a == true) {
         !shouldBeInvalid
         !shouldBeInvalid2
         !shouldBeInvalid3
+
+        !validator.validateDescription("""- (A) item 1
+- (B) item 2
+""").valid
+        !validator.validateDescription("""* (A) item 1
+* (B) item 2
+""").valid
+        !validator.validateDescription("""1. (A) item 1
+1. (B) item 2
+""").valid
     }
 
     def "force single newline paragraph validation" () {
@@ -595,14 +688,14 @@ if (a == true) {
         when:
         validator.init()
         boolean shouldBeValid = validator.validateDescription("""
-                (A) fish
-                (B) fish""").valid
+(A) fish
+(B) fish""").valid
 
         validator.forceValidationRegex = '^\\(.+\\).*$'
         validator.init()
         boolean shouldBeInvalid = validator.validateDescription("""
-                (A) fish
-                (B) fish""").valid
+(A) fish
+(B) fish""").valid
         then:
         shouldBeValid
         !shouldBeInvalid
@@ -627,7 +720,7 @@ if (a == true) {
 
 **(A) bold words** not preceded by spaces
 
-***(A) bold and italic words** sentence not preceded by spaces
+***(A) bold and italic words*** sentence not preceded by spaces
 
         *(A)* an italic at the beginning of a line preceded by spaces
         
@@ -802,5 +895,23 @@ line-height:107%">(A) fancy formatting</span>""").valid
         then:
         !result.valid
     }
+
+    def "test list validation with html items"(){
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.init()
+
+        when:
+
+        String validList = "* <span class=\"SomeFancyText\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) One</span><span class=\"SomeFont\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"FancyFont\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Two</span><span class=\"someclass\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"Text\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(U) Three</span><span class=\"Some\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\""
+        String notValidList = "* <span class=\"SomeFancyText\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">One</span><span class=\"SomeFont\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"FancyFont\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Two</span><span class=\"someclass\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"Text\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(U) Three</span><span class=\"Some\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\""
+
+        then:
+        validator.validateDescription(validList)
+        validator.validateDescription(notValidList)
+    }
+
+
 }
 
