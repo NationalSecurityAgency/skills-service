@@ -798,4 +798,33 @@ class LearningPathValidationEndpointSpecs extends DefaultIntSpec {
         then:
         result.possible == true
     }
+
+    def "badges that are not on LP should not be considered for circular checks"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(2, 1, 1, 100)
+
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def badge1 = createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: p1Skills[0].skillId])
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+
+        def badge2 = createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: p1.projectId, badgeId: badge2.badgeId, skillId: p1Skills[1].skillId])
+        badge2.enabled = true
+        skillsService.createBadge(badge2)
+
+        when:
+        def result = skillsService.vadlidateLearningPathPrerequisite(p1.projectId, badge1.badgeId, p1.projectId, p1Skills[1].skillId, true)
+        then:
+        result.possible == true
+        !result.failureType
+        !result.violatingSkillInBadgeId
+        !result.violatingSkillInBadgeName
+    }
 }
