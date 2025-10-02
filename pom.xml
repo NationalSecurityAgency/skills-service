@@ -55,6 +55,8 @@
 
         <bouncycastle.version>1.80</bouncycastle.version>
         <velocity.version>2.4.1</velocity.version>
+
+        <commonmark.version>0.26.0</commonmark.version>
     </properties>
 
     <parent>

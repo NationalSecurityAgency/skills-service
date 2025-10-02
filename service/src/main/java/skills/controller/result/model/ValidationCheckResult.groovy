@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2025 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.services
+package skills.controller.result.model
 
 import groovy.transform.Canonical
-import groovy.transform.EqualsAndHashCode
 
 @Canonical
-class CustomValidationResult {
-    boolean valid
-    String msg
+class ValidationCheckResult {
+    @Canonical
+    static class ValidationCheckParagraph {
+        boolean valid
+        String msg
+        String paragraph
+    }
 
-    private final static CustomValidationResult VALID = new CustomValidationResult(valid: true)
+    List<ValidationCheckParagraph> paragraphs
 
-    static CustomValidationResult valid() {
-        return VALID
+    private final static ValidationCheckResult EMPTY = new ValidationCheckResult(paragraphs: [])
+
+    static ValidationCheckResult empty() {
+        return EMPTY
     }
 }
