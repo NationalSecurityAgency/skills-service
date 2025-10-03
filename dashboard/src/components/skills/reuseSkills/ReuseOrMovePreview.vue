@@ -16,10 +16,12 @@ limitations under the License.
 <script setup>
 import { computed, onMounted, ref, toRaw } from 'vue'
 import SkillsService from '@/components/skills/SkillsService.js'
+import SubjectsService from '@/components/subjects/SubjectsService.js'
 import { useRoute } from 'vue-router'
 import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 const props = defineProps({
   skills: {
@@ -50,6 +52,7 @@ const props = defineProps({
 const emits = defineEmits(['on-cancel', 'on-changed'])
 const route = useRoute()
 const pluralSupport = useLanguagePluralSupport()
+const appConfig = useAppConfig()
 
 const loadingReusedSkills = ref(true)
 const skillsForReuse = ref({
@@ -60,6 +63,7 @@ const skillsForReuse = ref({
 })
 
 const buildSummaryInfo = () => {
+  loadDestinationSubject()
   const parentId = props.destination.groupId || props.destination.subjectId
   SkillsService.getReusedSkills(route.params.projectId, parentId)
     .then((res) => {
@@ -71,6 +75,19 @@ const buildSummaryInfo = () => {
     .finally(() => {
       loadingReusedSkills.value = false
     })
+}
+
+const destinationSubject = ref(null)
+const loadDestinationSubject = () => {
+  if (props.destination.groupId) {
+    SubjectsService.getSubjectDetailsForGroup(route.params.projectId, props.destination.groupId).then((res) => {
+      destinationSubject.value = res
+    });
+  } else {
+    destinationSubject.value = SubjectsService.getSubjectDetails(route.params.projectId, props.destination.subjectId).then((res) => {
+      destinationSubject.value = res
+    });
+  }
 }
 
 const loadingDependencyInfo = ref(true)
@@ -130,8 +147,12 @@ const textCustomization = props.isReuseType ?
 
 const actionName = computed(() => props.actionName.toLocaleLowerCase())
 const actionNameInPast = computed(() => `${actionName.value}d`)
+const destinationSubjectTotalSkills = computed(() => (destinationSubject.value?.numSkills || 0) + (destinationSubject.value?.numSkillsReused || 0))
+const exceedsMaxDestinationSkills = computed(() => {
+  return (destinationSubjectTotalSkills.value + skillsForReuse.value.available?.length) > appConfig.maxSkillsPerSubject
+})
 const isReuseBtnDisabled = computed(() => {
-  return reuseInProgress.value || (skillsForReuse.value.available && skillsForReuse.value.available.length === 0)
+  return reuseInProgress.value || (skillsForReuse.value.available && skillsForReuse.value.available.length === 0) || exceedsMaxDestinationSkills.value
 })
 </script>
 
@@ -150,7 +171,7 @@ const isReuseBtnDisabled = computed(() => {
         <div
           class="p-6 border-2 border-dashed border-surface rounded-border bg-surface-50 dark:bg-surface-950 flex-auto flex flex-col gap-2 justify-center items-center font-medium">
 
-          <div v-if="skillsForReuse.available.length > 0">
+          <div v-if="skillsForReuse.available.length > 0 && !exceedsMaxDestinationSkills">
             <Tag severity="info">{{ skillsForReuse.available.length }}</Tag>
             skill{{ pluralSupport.plural(skillsForReuse.available) }} will be {{ actionNameInPast }}
             {{ actionDirection }} the
@@ -188,7 +209,10 @@ const isReuseBtnDisabled = computed(() => {
             selected skill{{ pluralSupport.pluralWithHave(skillsForReuse.skillsWithDeps) }} other skill
             dependencies, reusing skills with dependencies is not allowed!
           </div>
-
+          <div v-if="exceedsMaxDestinationSkills">
+            <Tag severity="warn">{{ skillsForReuse.available.length }}</Tag>
+            selected skill{{ pluralSupport.plural(skillsForReuse.available) }} will exceed the maximum number of skills allowed in the destination subject!
+          </div>
         </div>
       </div>
 

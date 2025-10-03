@@ -221,4 +221,13 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
           AND ur.roleName = :#{T(skills.storage.model.auth.RoleName).ROLE_GLOBAL_BADGE_ADMIN} 
           AND sd.type = :#{T(skills.storage.model.SkillDef.ContainerType).GlobalBadge}''')
     List<SkillDefWithExtra> findGlobalBadgesForAdmin(@Param("userId") String userId)
+
+    @Nullable
+    @Query('''SELECT subjectDef
+          FROM SkillRelDef srd
+          JOIN SkillDefWithExtra subjectDef ON subjectDef.id = srd.parent.id AND srd.type = 'RuleSetDefinition'
+          JOIN SkillDefWithExtra groupDef ON groupDef.id = srd.child.id AND groupDef.type = 'SkillsGroup'
+          WHERE subjectDef.projectId = :projectId AND subjectDef.type = 'Subject'
+          AND groupDef.skillId = :groupId AND groupDef.type = 'SkillsGroup' AND groupDef.projectId = :projectId''')
+    SkillDefWithExtra findSubjectForGroup(@Param("projectId") String projectId, @Param("groupId") String groupId)
 }

@@ -37,6 +37,13 @@ export default {
       )
       .then((res) => res.data)
   },
+  getSubjectDetailsForGroup(projectId, groupId) {
+    return axios
+      .get(
+        `/admin/projects/${encodeURIComponent(projectId)}/groups/${encodeURIComponent(groupId)}/subject`
+      )
+      .then((res) => res.data)
+  },
   getSubjects(projectId) {
     return axios
       .get(`/admin/projects/${encodeURIComponent(projectId)}/subjects`)

@@ -21,6 +21,7 @@ import groovy.util.logging.Slf4j
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -134,6 +135,9 @@ class ProjectCopyService {
     @Autowired
     SkillAttributeService skillAttributeService
 
+    @Value('#{"${skills.config.ui.maxSkillsPerSubject}"}')
+    int maxSkillsPerSubject
+
     @Transactional
     @Profile
     void copyItemsToAnotherProject(String fromProjectId, String toProjectId, CopyToAnotherProjectRequest copyRequest) {
@@ -167,6 +171,7 @@ class ProjectCopyService {
                 if (!otherGroupId) {
                     throw new SkillException("otherGroupId is required when otherSubjectId is not provided", projectId, null, ErrorCode.BadParam)
                 }
+                otherSubject = skillDefWithExtraRepo.findSubjectForGroup(otherProject.projectId, otherGroupId)
             }
             loadSkillGroup(otherProject.projectId, otherGroupId)
             itemsToCopy = getSkillsToCopy(projectId, skillIds)
@@ -180,6 +185,12 @@ class ProjectCopyService {
             if (enabledSkillIds) {
                 validationErrors.add("The following Skills are enabled and cannot be added to the destination subject because it is currently disabled: ${enabledSkillIds.sort().subList(0, Math.min(enabledSkillIds.size(), 10)).join(", ")}.".toString())
             }
+        }
+        int currentSubjectSkillCount = skillRelDefRepo.countSubjectSkillsIncDisabled(otherSubject.projectId, otherSubject.skillId)
+        if (currentSubjectSkillCount + itemsToCopy?.size() > maxSkillsPerSubject) {
+            validationErrors.add(("Each Subject is limited to [${maxSkillsPerSubject}] Skills, " +
+                    "currently [${otherSubject.skillId}] has [${currentSubjectSkillCount}] Skills, " +
+                    "copying [${itemsToCopy?.size()}] would exceed the maximum").toString())
         }
         CopyValidationRes res = new CopyValidationRes(isAllowed: validationErrors?.isEmpty(), validationErrors: validationErrors)
         return res
