@@ -278,6 +278,24 @@ class CustomValidator {
                 .replaceAll(/(?<=\S)[ \t]*(?=\n)/, "")  // Remove spaces before newlines
                 .replaceAll(/(?<=\n)[ \t]*(?=\n)/, "")  // Remove spaces between newlines
     }
+
+    static Node lookForPreviousParagraph(Node node) {
+        Node previousNode = node.previous
+
+        if (!previousNode && node instanceof Image) {
+            if (node.parent instanceof Paragraph && node.parent.firstChild == node) {
+                previousNode = node.parent.previous
+            }
+        }
+        while (previousNode && previousNode instanceof SoftLineBreak) {
+            previousNode = previousNode.previous
+        }
+        while (previousNode && previousNode instanceof Text) {
+            previousNode = previousNode.parent
+        }
+        return previousNode
+    }
+
     InternalValidationResult validateMarkdown(InternalValidationRequest request) {
         String description = request.description
         ValidationPattern validationPattern = getValidationPattern(request.projectId, request.utilizeUserCommunityParagraphPatternByDefault, request.quizId)
@@ -287,7 +305,7 @@ class CustomValidator {
 
         List<Extension> extensions = List.of(TablesExtension.create());
         Parser parser = Parser.builder()
-                .includeSourceSpans(IncludeSourceSpans.BLOCKS)
+                .includeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
                 .extensions(extensions)
                 .build();
         String descriptionNormalized = normalizeNewlines(description)
@@ -321,8 +339,11 @@ class CustomValidator {
             return isValidParagraph
         }
         Closure<Integer> linesToPreviousNode = { Node node ->
-            Node previousNode = node.previous
-            if (!previousNode) {
+            Node previousNode = lookForPreviousParagraph(node)
+            if (!previousNode || !node.sourceSpans) {
+                return -1
+            }
+            if (!previousNode || !previousNode.sourceSpans) {
                 return -1
             }
             int previousEndLine = previousNode.sourceSpans.last().lineIndex
@@ -330,11 +351,16 @@ class CustomValidator {
              return currentStartLine - previousEndLine
         }
         Closure<Void> blockHandlerValidator = { Node node, int minLinesToPreviousNode = 2 ->
-            Node previousNode = node.previous
-            if (!previousNode) {
+            Node previousNode = lookForPreviousParagraph(node)
+            boolean isPrevParagraph = previousNode instanceof Paragraph
+            if (!previousNode || linesToPreviousNode(node) > minLinesToPreviousNode || !isPrevParagraph) {
                 isValid.set(false)
-            } else if (linesToPreviousNode(node) > minLinesToPreviousNode) {
-                isValid.set(false)
+
+                if (request.prefix) {
+                    Paragraph paragraph = new Paragraph()
+                    paragraph.prependChild(new Text(request.prefix))
+                    node.insertBefore(paragraph)
+                }
             } else if (!validateParagraph(previousNode)) {
                 isValid.set(false)
                 if (request.prefix) {
@@ -419,12 +445,13 @@ class CustomValidator {
 
             @Override
             void visit(Paragraph paragraph) {
-                if (!validateParagraph(paragraph)) {
+                if (!validateParagraph(paragraph) && !(paragraph.firstChild instanceof Image)) {
                     isValid.set(false)
                     if (request.prefix) {
                         paragraph.prependChild(new Text(request.prefix))
                     }
                 }
+                visitChildren(paragraph)
             }
             @Override
             void visit(Heading heading) {
@@ -450,6 +477,11 @@ class CustomValidator {
             @Override
             void visit(FencedCodeBlock fencedCodeBlock) {
                 blockHandlerValidator(fencedCodeBlock)
+            }
+
+            @Override
+            void visit(Image image) {
+                blockHandlerValidator(image)
             }
         }
         document.accept(visitor)
