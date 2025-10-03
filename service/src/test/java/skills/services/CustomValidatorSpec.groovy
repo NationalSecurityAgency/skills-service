@@ -15,6 +15,7 @@
  */
 package skills.services
 
+
 import spock.lang.Specification
 
 class CustomValidatorSpec extends Specification {
@@ -908,10 +909,50 @@ line-height:107%">(A) fancy formatting</span>""").valid
         String notValidList = "* <span class=\"SomeFancyText\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">One</span><span class=\"SomeFont\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"FancyFont\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Two</span><span class=\"someclass\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"Text\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(U) Three</span><span class=\"Some\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\""
 
         then:
-        validator.validateDescription(validList)
-        validator.validateDescription(notValidList)
+        validator.validateDescription(validList).valid
+        !validator.validateDescription(notValidList).valid
     }
 
+    def "support images" () {
+        String table = """|First|Second|\n|---|---|\n|Third|Fourth|"""
+        String imgStr =
+                "![This is Image](data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAD0pRVz/2Q==)"
+
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        when:
+        validator.init()
+
+        then:
+        !validator.validateDescription(imgStr).valid
+        validator.validateDescription("(A) ok\n${imgStr}").valid
+        validator.validateDescription("(A) ok\n\n${imgStr}").valid
+        !validator.validateDescription("(A) not\n\n\n${imgStr}").valid
+
+        validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${imgStr}\n\n(A) ok\n\n${imgStr}").valid
+        !validator.validateDescription("(A) ok\n\n${imgStr}\n\n Negative\n\n${imgStr}\n\n(A) ok\n\n${imgStr}").valid
+        validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}").valid
+        !validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A NOT\n\n${imgStr}").valid
+        validator.validateDescription("(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}").valid
+        !validator.validateDescription("(A) ok\n\n${table}\n\n(A notok\n\n${imgStr}\n\n(A) ok\n\n${table}").valid
+    }
+
+    def "support links" () {
+        String url = "https://www.some.com"
+
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        when:
+        validator.init()
+
+        then:
+        validator.validateDescription("(A) ${url}").valid
+        !validator.validateDescription("${url}").valid
+    }
 
 }
 
