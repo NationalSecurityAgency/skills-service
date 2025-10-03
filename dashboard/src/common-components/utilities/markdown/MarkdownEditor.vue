@@ -17,7 +17,7 @@ limitations under the License.
 import {computed, onMounted, ref} from 'vue'
 import {useField} from 'vee-validate'
 import ToastUiEditor from '@/common-components/utilities/markdown/ToastUiEditor.vue'
-
+import Select from 'primevue/select';
 import fontSize from 'tui-editor-plugin-font-size'
 import "tui-editor-plugin-font-size/dist/tui-editor-plugin-font-size.css";
 import {useCommonMarkdownOptions} from '@/common-components/utilities/markdown/UseCommonMarkdownOptions.js'
@@ -180,6 +180,14 @@ onMounted(() => {
     toastuiEditor.value.invoke('addCommand', 'wysiwyg', 'attachFile', () => {
       fileInputRef.value.click();
     });
+  }
+
+  if (appConfig.addPrefixToInvalidParagraphsOptions && appConfig.addPrefixToInvalidParagraphsOptions.length > 0 ) {
+    const pOptions = appConfig.addPrefixToInvalidParagraphsOptions.split(',')
+    if (pOptions.length > 0) {
+      prefixOptions.value = pOptions
+      prefix.value = pOptions[0]
+    }
   }
 })
 function onLoad() {
@@ -379,6 +387,8 @@ const onDialogShow = () => {
 }
 
 const validationService = useDescriptionValidatorService()
+const supportPrefix = computed(() => appConfig.paragraphValidationRegex && prefixOptions.value.length > 0 )
+const prefixOptions = ref ([])
 const prefix = ref('')
 const addPrefixToInvalidParagraphs = () => {
   return validationService.addPrefixToInvalidParagraphs(value.value, prefix.value, true, true).then((result) => {
@@ -417,14 +427,6 @@ const addPrefixToInvalidParagraphs = () => {
         <i class="fa-solid fa-circle-exclamation text-lg" aria-hidden="true"></i> {{ descriptionWarningMsg }}
       </div>
 
-      <div class="flex gap-2 mb-2">
-        <InputText v-model="prefix"/>
-        <SkillsButton icon="fa-solid fa-plus"
-                      label="Add Prefix"
-                      size="small"
-                      @click="addPrefixToInvalidParagraphs"/>
-      </div>
-
       <toast-ui-editor :id="idForToastUIEditor"
                        :style="editorStyle"
                        class="no-bottom-border"
@@ -455,21 +457,30 @@ const addPrefixToInvalidParagraphs = () => {
           </a>
         </div>
       </div>
-      <Message
-        v-if="attachmentWarningMessage && hasNewAttachment"
-        severity="error"
-        data-cy="attachmentWarningMessage"
-        class="m-0 mt-2">
-        {{ attachmentWarningMessage }}
-      </Message>
+        <Message
+          v-if="attachmentWarningMessage && hasNewAttachment"
+          severity="error"
+          data-cy="attachmentWarningMessage"
+          class="m-0 mt-2">
+          {{ attachmentWarningMessage }}
+        </Message>
     </div>
     </BlockUI>
-    <Message severity="error"
+    <div class="flex gap-2">
+      <Message severity="error"
              variant="simple"
              size="small"
              :closable="false"
              data-cy="descriptionError"
              :id="`${name}Error`">{{ errorMessage || '' }}</Message>
+      <div v-if="errorMessage && supportPrefix" class="flex gap-2 mb-2">
+        <Select v-model="prefix" :options="prefixOptions" name="prefix" size="small"/>
+        <SkillsButton icon="fa-solid fa-plus"
+                      label="Add Prefix"
+                      size="small"
+                      @click="addPrefixToInvalidParagraphs"/>
+      </div>
+    </div>
 
     <input @change="attachFile"
            type="file"

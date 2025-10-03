@@ -106,12 +106,10 @@ noe more
 """
     }
 
-
     def "support markdown lists"() {
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
         validator.paragraphValidationMessage = 'fail'
-
 
         when:
         validator.init()
@@ -171,5 +169,429 @@ noe more
 """, prefix).newDescription == """1. (A) item 1
 2. item 2
 """
+    }
+
+    def "support markdown tables"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        when:
+        validator.init()
+        String prefix = "(A) "
+
+        then:
+        validator.addPrefixToInvalidParagraphs("""(A) Paragraph one
+
+
+|header 1|header 2|header 3|
+|---|---|---:|
+|cell 1|cell 2|cell 3|
+|cell 4|cell 5 is longer|cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size.|
+|cell 7||cell <br> 9|
+
+(A) paragraph two
+""", prefix).newDescription == """(A) Paragraph one
+
+(A) 
+
+|header 1|header 2|header 3|
+|---|---|---:|
+|cell 1|cell 2|cell 3|
+|cell 4|cell 5 is longer|cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size.|
+|cell 7||cell <br> 9|
+
+(A) paragraph two
+"""
+
+
+        validator.addPrefixToInvalidParagraphs("""|header 1|header 2|header 3|
+|---|---|---:|
+|cell 1|cell 2|cell 3|
+|cell 4|cell 5 is longer|cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size.|
+|cell 7||cell <br> 9|
+""", prefix).newDescription == """(A) 
+
+|header 1|header 2|header 3|
+|---|---|---:|
+|cell 1|cell 2|cell 3|
+|cell 4|cell 5 is longer|cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size.|
+|cell 7||cell <br> 9|
+"""
+
+        validator.addPrefixToInvalidParagraphs("""ok
+|header 1|header 2|header 3|
+|---|---|---:|
+|cell 1|cell 2|cell 3|
+|cell 4|cell 5 is longer|cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size.|
+|cell 7||cell <br> 9|
+""", prefix).newDescription == """(A) ok
+
+|header 1|header 2|header 3|
+|---|---|---:|
+|cell 1|cell 2|cell 3|
+|cell 4|cell 5 is longer|cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size.|
+|cell 7||cell <br> 9|
+"""
+
+        validator.addPrefixToInvalidParagraphs("""(A) Paragraph one
+
+ok
+|header 1|header 2|header 3|
+|---|---|---:|
+|cell 1|cell 2|cell 3|
+|cell 4|cell 5 is longer|cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size.|
+|cell 7||cell <br> 9|
+
+(A) paragraph two
+""", prefix).newDescription == """(A) Paragraph one
+
+(A) ok
+
+|header 1|header 2|header 3|
+|---|---|---:|
+|cell 1|cell 2|cell 3|
+|cell 4|cell 5 is longer|cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size.|
+|cell 7||cell <br> 9|
+
+(A) paragraph two
+"""
+    }
+
+    def "multiple tables markdown"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String prefix = "(A) "
+        when:
+        validator.init()
+
+        then:
+        validator.addPrefixToInvalidParagraphs("""| First | Second |
+| ----- | ------ |
+| Third | Fourth |
+
+| Fifth | Sixth |
+| ----- | ------ |
+| Seventh | Eighth |
+
+| <br> | <br> |
+| --- | --- |
+| <br> | <br> |
+
+""", prefix).newDescription == """(A) 
+
+|First|Second|
+|---|---|
+|Third|Fourth|
+
+(A) 
+
+|Fifth|Sixth|
+|---|---|
+|Seventh|Eighth|
+
+(A) 
+
+|<br>|<br>|
+|---|---|
+|<br>|<br>|
+"""
+    }
+
+    def "support markdown codeblocks"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String prefix = "(A) "
+        when:
+        validator.init()
+
+        then:
+        validator.addPrefixToInvalidParagraphs("""```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+""", prefix).newDescription == """(A) 
+
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+"""
+
+        validator.addPrefixToInvalidParagraphs("""(A) Paragraph one
+
+
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+(A) paragraph two
+""", prefix).newDescription == """(A) Paragraph one
+
+(A) 
+
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+(A) paragraph two
+"""
+
+
+        validator.addPrefixToInvalidParagraphs("""(A) Paragraph one
+
+ok
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+(A) paragraph two
+""", prefix).newDescription == """(A) Paragraph one
+
+(A) ok
+
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+(A) paragraph two
+"""
+    }
+
+    def "support headings"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String prefix = "(A) "
+        when:
+        validator.init()
+
+        then:
+        validator.addPrefixToInvalidParagraphs("""# one""", prefix).newDescription == """# (A) one
+"""
+        validator.addPrefixToInvalidParagraphs("""## one""", prefix).newDescription == """## (A) one
+"""
+        validator.addPrefixToInvalidParagraphs("""### one""", prefix).newDescription == """### (A) one
+"""
+        validator.addPrefixToInvalidParagraphs("""#### one""", prefix).newDescription == """#### (A) one
+"""
+
+
+        validator.addPrefixToInvalidParagraphs("""# one
+
+(A) some text 1
+
+(A) some text 2
+
+## two
+
+(A) some text 3
+
+(A) some text 4
+
+### three
+
+(A) some text 5
+
+(A) some text 6
+
+# four
+
+(A) some text 7
+
+(A) some text 8
+
+## five
+
+(A) some text 9
+
+(A) some text 10
+
+#### six
+
+(A) some text 11
+
+(A) some text 12
+
+""", prefix).newDescription == """# (A) one
+
+(A) some text 1
+
+(A) some text 2
+
+## (A) two
+
+(A) some text 3
+
+(A) some text 4
+
+### (A) three
+
+(A) some text 5
+
+(A) some text 6
+
+# (A) four
+
+(A) some text 7
+
+(A) some text 8
+
+## (A) five
+
+(A) some text 9
+
+(A) some text 10
+
+#### (A) six
+
+(A) some text 11
+
+(A) some text 12
+"""
+
+    }
+
+    def "ignore markdown separators"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String prefix = "(A) "
+        when:
+        validator.init()
+
+        then:
+        validator.addPrefixToInvalidParagraphs("""Separate me
+
+___
+
+Separate me
+
+---
+
+(A) Separate me
+        
+***
+""", prefix).newDescription == """(A) Separate me
+
+___
+
+(A) Separate me
+
+---
+
+(A) Separate me
+
+***
+"""
+    }
+
+    def "handle blockquotes"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String prefix = "(A) "
+        when:
+        validator.init()
+
+        then:
+        validator.addPrefixToInvalidParagraphs("""> This is a block quote""", prefix).newDescription == """> (A) This is a block quote
+"""
+
+        validator.addPrefixToInvalidParagraphs("""> This is a block quote
+
+(A) some text 
+
+> another one
+
+***
+
+""", prefix).newDescription == """> (A) This is a block quote
+
+(A) some text
+
+> (A) another one
+
+***
+"""
+    }
+
+    def "ignore bold/italics at the beginning of a line"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String prefix = "(A) "
+        when:
+        validator.init()
+
+        then:
+        validator.addPrefixToInvalidParagraphs("""*(A)* an italic at the beginning of a line""", prefix).newDescription == """*(A)* an italic at the beginning of a line
+"""
+        validator.addPrefixToInvalidParagraphs("""*italic* at the beginning of a line""", prefix).newDescription == """(A) *italic* at the beginning of a line
+"""
+        validator.addPrefixToInvalidParagraphs("""***bold and italic at the  beginning*** of a line""", prefix).newDescription == """(A) ***bold and italic at the  beginning*** of a line
+"""
+
+    }
+
+    def "support images" () {
+        String table = """|First|Second|\n|---|---|\n|Third|Fourth|"""
+        String imgStr =
+                "![This is Image](data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAD0pRVz/2Q==)"
+
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        String prefix = "(A) "
+        when:
+        validator.init()
+
+        then:
+        validator.addPrefixToInvalidParagraphs("ok\n${imgStr}", prefix).newDescription == "(A) ok\n${imgStr}\n"
+        validator.addPrefixToInvalidParagraphs("ok\n\n${imgStr}", prefix).newDescription == "(A) ok\n\n${imgStr}\n"
+        validator.addPrefixToInvalidParagraphs("(A) ok\n\n${imgStr}\n\nok\n\n${imgStr}\n\n(A) ok\n\n${imgStr}", prefix)
+                .newDescription == "(A) ok\n\n${imgStr}\n\n(A) ok\n\n${imgStr}\n\n(A) ok\n\n${imgStr}\n"
+        validator.addPrefixToInvalidParagraphs("ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}", prefix)
+                .newDescription == "(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}\n"
+        validator.addPrefixToInvalidParagraphs("(A) ok\n\n${table}\n\nok\n\n${imgStr}\n\n(A) ok\n\n${table}", prefix)
+                .newDescription == "(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n"
+    }
+
+    def "support url" () {
+        String url = "https://www.some.com"
+
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        String prefix = "(A) "
+        when:
+        validator.init()
+
+        then:
+        validator.addPrefixToInvalidParagraphs("${url}", prefix).newDescription == "(A) ${url}\n"
     }
 }
