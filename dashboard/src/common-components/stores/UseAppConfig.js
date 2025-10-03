@@ -79,6 +79,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxIdLength = computed(() => config.value.maxIdLength)
   const descriptionMaxLength = computed(() => config.value.descriptionMaxLength)
   const paragraphValidationRegex = computed(() => config.value.paragraphValidationRegex)
+  const addPrefixToInvalidParagraphsOptions = computed(() => config.value.addPrefixToInvalidParagraphsOptions)
   const formFieldDebounceInMs = computed(() => config.value.formFieldDebounceInMs || 400)
   const maxSubjectNameLength = computed(() => config.value.maxSubjectNameLength)
   const maxBadgeNameLength = computed(() => config.value.maxBadgeNameLength)
@@ -173,6 +174,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const matomoSiteId = computed(() => config.value.matomoSiteId)
   const matomoProcessUserIdRegex = computed(() => config.value.matomoProcessUserIdRegex)
 
+
   return {
     loadConfigState,
     refreshConfig,
@@ -192,6 +194,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     descriptionMaxLength,
     formFieldDebounceInMs,
     paragraphValidationRegex,
+    addPrefixToInvalidParagraphsOptions,
     maxSubjectNameLength,
     maxBadgeNameLength,
     maxCustomLabelLength,
