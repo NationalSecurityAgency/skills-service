@@ -18,7 +18,7 @@ import {useFieldArray} from "vee-validate";
 import {computed} from "vue";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
-const { remove, insert, push, replace, fields } = useFieldArray('answers');
+const { remove, insert, push, replace, update, fields } = useFieldArray('answers');
 const appConfig = useAppConfig()
 const model = defineModel()
 
@@ -49,21 +49,19 @@ function removeAnswer(index) {
 }
 
 const resetAnswers = () => {
-  const replacementAnswers = []
-  for(let answerValue in fields.value) {
-    const answerValueAsInt = parseInt(answerValue);
-    if(fields.value[answerValueAsInt].value) {
-      const replacementValue = {
-        ...fields.value[answerValueAsInt].value,
-        multiPartAnswer: {
-          term: '',
-          answer: '',
-        },
-      };
-      replacementAnswers.push(replacementValue)
+  replace([{
+      id: null,
+      answer: '',
+      isCorrect: false,
+      multiPartAnswer: { term: '', answer: ''}
+    },
+    {
+      id: null,
+      answer: '',
+      isCorrect: false,
+      multiPartAnswer: { term: '', answer: ''}
     }
-  }
-  replace(replacementAnswers)
+  ])
 }
 
 defineExpose( {

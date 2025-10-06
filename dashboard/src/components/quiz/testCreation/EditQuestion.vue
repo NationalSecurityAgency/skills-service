@@ -74,7 +74,7 @@ function questionTypeChanged(inputItem) {
   questionType.value.selectedType = inputItem;
   if (!inputItem.isInitialLoad) {
     if (isSurveyType.value
-        && inputItem.id !== QuestionType.TextInput && inputItem.id !== QuestionType.Rating
+        && inputItem.id !== QuestionType.TextInput && inputItem.id !== QuestionType.Rating && inputItem.id !== QuestionType.Matching
         && (!initialQuestionData.answers || initialQuestionData.answers.length < 2)) {
       nextTick(() => {
         answersRef.value.replaceAnswers([{
