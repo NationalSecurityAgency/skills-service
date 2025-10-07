@@ -17,6 +17,7 @@ limitations under the License.
 import {computed, onMounted, ref} from 'vue'
 import {useField} from 'vee-validate'
 import ToastUiEditor from '@/common-components/utilities/markdown/ToastUiEditor.vue'
+import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import Select from 'primevue/select';
 import fontSize from 'tui-editor-plugin-font-size'
 import "tui-editor-plugin-font-size/dist/tui-editor-plugin-font-size.css";
@@ -391,9 +392,23 @@ const supportPrefix = computed(() => appConfig.paragraphValidationRegex && prefi
 const prefixOptions = ref ([])
 const prefix = ref('')
 const addPrefixToInvalidParagraphs = () => {
-  return validationService.addPrefixToInvalidParagraphs(value.value, prefix.value, true, true).then((result) => {
+  return validationService.addPrefixToInvalidParagraphs(value.value, prefix.value).then((result) => {
     updateDescription(result.newDescription)
   })
+}
+
+const valueWithMissingPrefix = ref('')
+const previewingMissing = computed(() => valueWithMissingPrefix.value && valueWithMissingPrefix.value.length > 0)
+const showWherePrefixWouldBeAdded = () => {
+  const originalValue = value.value
+  const missingPrefix = 'mmmmmissinggggg'
+  return validationService.addPrefixToInvalidParagraphs(originalValue, missingPrefix).then((result) => {
+    const descWithMissingIndicators = result.newDescription.replaceAll(missingPrefix, `<span class="p-1 border border-red-500 rounded">${prefix.value}</span> `)
+    valueWithMissingPrefix.value = descWithMissingIndicators
+  })
+}
+const closeMissingPrefixView = () => {
+  valueWithMissingPrefix.value = ''
 }
 </script>
 
@@ -406,8 +421,8 @@ const addPrefixToInvalidParagraphs = () => {
                :class="`${labelClass}`"
                :for="name" @click="focusOnMarkdownEditor">{{ label }}:</label>
       </div>
-      <SkillsButton icon="fa-solid fa-wand-magic-sparkles"
-                    label="Assitant"
+      <SkillsButton v-if="!previewingMissing" icon="fa-solid fa-wand-magic-sparkles"
+                    label="Assistant"
                     size="small"
                     @click="showGenerateDescriptionDialog = true"/>
     </div>
@@ -427,7 +442,22 @@ const addPrefixToInvalidParagraphs = () => {
         <i class="fa-solid fa-circle-exclamation text-lg" aria-hidden="true"></i> {{ descriptionWarningMsg }}
       </div>
 
-      <toast-ui-editor :id="idForToastUIEditor"
+      <Card v-if="previewingMissing">
+        <template #content>
+          <div class="w-full flex justify-end sticky top-2 right-2 !z-10">
+            <SkillsButton  icon="fa-solid fa-x"
+                          label="Close Missing Preview"
+                          size="small"
+                          severity="warn"
+                          :outlined="false"
+                          @click="closeMissingPrefixView"/>
+          </div>
+          <MarkdownText :text="valueWithMissingPrefix"
+                        :instance-id="`${idForToastUIEditor}-missing`"/>
+        </template>
+      </Card>
+      <toast-ui-editor v-show="!previewingMissing"
+                       :id="idForToastUIEditor"
                        :style="editorStyle"
                        class="no-bottom-border"
                        :class="{'editor-theme-dark' : themeHelper.isDarkTheme, 'is-resizable': resizable, 'no-top-border' : descriptionWarningMsg }"
@@ -443,7 +473,8 @@ const addPrefixToInvalidParagraphs = () => {
                        @keydown="onKeydown"
                        @focus="handleFocus"
                        @load="onLoad" />
-      <div class="border border-surface bg-surface-100 dark:bg-surface-700 rounded-b px-2 py-2 sd-theme-tile-background">
+
+      <div v-if="!previewingMissing" class="border border-surface bg-surface-100 dark:bg-surface-700 rounded-b px-2 py-2 sd-theme-tile-background">
       <div  class="flex text-xs">
         <div v-if="allowInsertImages" class="">
           Insert images and attach files by pasting, dragging & dropping, or selecting from toolbar.
@@ -466,7 +497,7 @@ const addPrefixToInvalidParagraphs = () => {
         </Message>
     </div>
     </BlockUI>
-    <div class="flex gap-2">
+    <div v-if="!previewingMissing" class="flex gap-2">
       <Message severity="error"
              variant="simple"
              size="small"
@@ -475,10 +506,15 @@ const addPrefixToInvalidParagraphs = () => {
              :id="`${name}Error`">{{ errorMessage || '' }}</Message>
       <div v-if="errorMessage && supportPrefix" class="flex gap-2 mb-2">
         <Select v-model="prefix" :options="prefixOptions" name="prefix" size="small"/>
-        <SkillsButton icon="fa-solid fa-plus"
-                      label="Add Prefix"
+        <SkillsButton icon="fa-solid fa-hammer"
+                      :label="appConfig.addPrefixToInvalidParagraphsBtnLabel"
                       size="small"
                       @click="addPrefixToInvalidParagraphs"/>
+        <SkillsButton icon="fa-solid fa-magnifying-glass"
+                      :label="appConfig.showMissingPrefixBtnLabel"
+                      size="small"
+                      @click="showWherePrefixWouldBeAdded"/>
+
       </div>
     </div>
 

@@ -80,6 +80,9 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const descriptionMaxLength = computed(() => config.value.descriptionMaxLength)
   const paragraphValidationRegex = computed(() => config.value.paragraphValidationRegex)
   const addPrefixToInvalidParagraphsOptions = computed(() => config.value.addPrefixToInvalidParagraphsOptions)
+  const addPrefixToInvalidParagraphsBtnLabel  = computed(() => config.value.addPrefixToInvalidParagraphsBtnLabel || 'Add Prefix')
+  const showMissingPrefixBtnLabel  = computed(() => config.value.showMissingPrefixBtnLabel || 'View Missing Preview')
+  const closeMissingPrefixPreview  = computed(() => config.value.closeMissingPrefixPreview || 'Close Preview')
   const formFieldDebounceInMs = computed(() => config.value.formFieldDebounceInMs || 400)
   const maxSubjectNameLength = computed(() => config.value.maxSubjectNameLength)
   const maxBadgeNameLength = computed(() => config.value.maxBadgeNameLength)
@@ -196,6 +199,9 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     formFieldDebounceInMs,
     paragraphValidationRegex,
     addPrefixToInvalidParagraphsOptions,
+    addPrefixToInvalidParagraphsBtnLabel,
+    showMissingPrefixBtnLabel,
+    closeMissingPrefixPreview,
     maxSubjectNameLength,
     maxBadgeNameLength,
     maxCustomLabelLength,
