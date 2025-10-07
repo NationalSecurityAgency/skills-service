@@ -38,6 +38,7 @@ import {useSkillsDisplayInfo} from "@/skills-display/UseSkillsDisplayInfo.js";
 import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
 import GenerateDescriptionDialog from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionDialog.vue";
 import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
+import PrefixControls from "@/common-components/utilities/markdown/PrefixControls.vue";
 
 const appConfig = useAppConfig()
 const quizConfig = useQuizConfig()
@@ -399,12 +400,16 @@ const addPrefixToInvalidParagraphs = () => {
 
 const valueWithMissingPrefix = ref('')
 const previewingMissing = computed(() => valueWithMissingPrefix.value && valueWithMissingPrefix.value.length > 0)
+const loadingMissingPreview = ref(false)
 const showWherePrefixWouldBeAdded = () => {
+  loadingMissingPreview.value = true
   const originalValue = value.value
   const missingPrefix = 'mmmmmissinggggg'
   return validationService.addPrefixToInvalidParagraphs(originalValue, missingPrefix).then((result) => {
     const descWithMissingIndicators = result.newDescription.replaceAll(missingPrefix, `<span class="p-1 border border-red-500 rounded">${prefix.value}</span> `)
     valueWithMissingPrefix.value = descWithMissingIndicators
+  }).finally(() => {
+    loadingMissingPreview.value = false
   })
 }
 const closeMissingPrefixView = () => {
@@ -504,18 +509,12 @@ const closeMissingPrefixView = () => {
              :closable="false"
              data-cy="descriptionError"
              :id="`${name}Error`">{{ errorMessage || '' }}</Message>
-      <div v-if="errorMessage && supportPrefix" class="flex gap-2 mb-2">
-        <Select v-model="prefix" :options="prefixOptions" name="prefix" size="small"/>
-        <SkillsButton icon="fa-solid fa-hammer"
-                      :label="appConfig.addPrefixToInvalidParagraphsBtnLabel"
-                      size="small"
-                      @click="addPrefixToInvalidParagraphs"/>
-        <SkillsButton icon="fa-solid fa-magnifying-glass"
-                      :label="appConfig.showMissingPrefixBtnLabel"
-                      size="small"
-                      @click="showWherePrefixWouldBeAdded"/>
-
-      </div>
+      <prefix-controls v-if="errorMessage"
+                       :id="`${id}PrefixControls`"
+                       :is-loading="loadingMissingPreview"
+                       :show-preview-control="true"
+                       @preview-prefix="showWherePrefixWouldBeAdded"
+                       @add-prefix="addPrefixToInvalidParagraphs" />
     </div>
 
     <input @change="attachFile"

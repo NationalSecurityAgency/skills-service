@@ -81,6 +81,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const paragraphValidationRegex = computed(() => config.value.paragraphValidationRegex)
   const addPrefixToInvalidParagraphsOptions = computed(() => config.value.addPrefixToInvalidParagraphsOptions)
   const addPrefixToInvalidParagraphsBtnLabel  = computed(() => config.value.addPrefixToInvalidParagraphsBtnLabel || 'Add Prefix')
+  const addPrefixToGeneratedValueBtnLabel =  computed(() => config.value.addPrefixToGeneratedValueBtnLabel || 'Add Prefix Then Use')
   const showMissingPrefixBtnLabel  = computed(() => config.value.showMissingPrefixBtnLabel || 'View Missing Preview')
   const closeMissingPrefixPreview  = computed(() => config.value.closeMissingPrefixPreview || 'Close Preview')
   const formFieldDebounceInMs = computed(() => config.value.formFieldDebounceInMs || 400)
@@ -200,6 +201,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     paragraphValidationRegex,
     addPrefixToInvalidParagraphsOptions,
     addPrefixToInvalidParagraphsBtnLabel,
+    addPrefixToGeneratedValueBtnLabel,
     showMissingPrefixBtnLabel,
     closeMissingPrefixPreview,
     maxSubjectNameLength,

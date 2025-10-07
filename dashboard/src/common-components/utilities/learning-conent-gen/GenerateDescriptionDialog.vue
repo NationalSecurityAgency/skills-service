@@ -24,6 +24,8 @@ import UserMsg from "@/common-components/utilities/learning-conent-gen/UserMsg.v
 import {useLog} from "@/components/utils/misc/useLog.js";
 import {useImgHandler} from "@/common-components/utilities/learning-conent-gen/UseImgHandler.js";
 import {useInstructionGenerator} from "@/common-components/utilities/learning-conent-gen/UseInstructionGenerator.js";
+import PrefixControls from "@/common-components/utilities/markdown/PrefixControls.vue";
+import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
 
 const model = defineModel()
 const emit = defineEmits(['generated-desc'])
@@ -227,6 +229,25 @@ const useGeneratedDescription = (historyId) => {
   close()
 }
 
+const validationService = useDescriptionValidatorService()
+const isAddingPrefix = ref(false)
+const addPrefixThenUseDesc = (info) => {
+  isAddingPrefix.value = true
+  const historyId = info.id
+  const missingPrefix = info.prefix
+  console.log(`prefixThenUseGeneratedDescription: ${historyId}, ${missingPrefix}`)
+  const historyItem = chatHistory.value.find(item => item.id === historyId)
+  if (historyItem?.generatedValue) {
+    return validationService.addPrefixToInvalidParagraphs(historyItem?.generatedValue, missingPrefix).then((result) => {
+      const { newText } = parseResponse(result.newDescription)
+      emit('generated-desc', newText || result.newDescription)
+      close()
+    }).finally(() => {
+      isAddingPrefix.value = false
+    })
+  }
+}
+
 </script>
 
 <template>
@@ -261,13 +282,25 @@ const useGeneratedDescription = (historyId) => {
             </div>
             <div v-if="historyItem.finalMsg">
               <markdown-text :text="historyItem.finalMsg" :instanceId="`${historyItem.id}-finalMsg`"/>
-              <div class="flex justify-start mt-2">
+              <div class="flex justify-start items-center gap-3 mt-2">
                 <SkillsButton
                     v-if="!historyItem.failedToGenerate"
                     icon="fa-solid fa-check-double"
                     severity="info" :outlined="false"
                     label="Use Generated Value"
+                    :loading="isAddingPrefix"
                     @click="useGeneratedDescription(historyItem.id)"/>
+
+                OR
+
+                <prefix-controls
+                    @add-prefix="addPrefixThenUseDesc"
+                    :is-loading="isAddingPrefix"
+                    :id="historyItem.id"
+                    size="normal"
+                    :outlined-buttons="false"
+                    buttons-severity="info"
+                    add-button-label-conf-prop="addPrefixToGeneratedValueBtnLabel"/>
               </div>
             </div>
           </assistant-msg>
