@@ -221,34 +221,6 @@ class CustomValidator {
     }
 
 
-    static String NEW_LINE_PLACEHOLDER = '-----newline-----'
-    static String processMarkdownTables(String markdown) {
-        // This pattern matches markdown tables and captures them
-        Pattern tablePattern = Pattern.compile('(\\|.*\\|(?:\\s*\\|.*\\|)*)(?=\\s*(?:\\||$))', Pattern.MULTILINE)
-        Matcher matcher = tablePattern.matcher(markdown)
-        StringBuffer result = new StringBuffer()
-
-        while (matcher.find()) {
-            // For each table found, replace newlines within it with a special placeholder
-            String table = matcher.group(0).replaceAll('\\n', NEW_LINE_PLACEHOLDER)
-            matcher.appendReplacement(result, table)
-        }
-        matcher.appendTail(result)
-
-        return result.toString()
-    }
-
-    static String restoreNewLines(String markdown) {
-        return markdown.replaceAll(NEW_LINE_PLACEHOLDER, '\n')
-    }
-
-    private static boolean isMarkdownTable(String text) {
-        return text.replaceAll(/\r\n?/, "\n") // Normalize line endings
-                .replaceAll(/(?<=\S)[ \t]*(?=\n)/, "") // Remove spaces before newlines
-                .replaceAll(/(?<=\n)[ \t]+(?=\n)/, "") // Remove spaces between newlines
-    }
-
-
     CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
         InternalValidationResult result = validateMarkdown(new InternalValidationRequest(
                 description: description,
@@ -315,6 +287,14 @@ class CustomValidator {
         AtomicBoolean isValid = new AtomicBoolean(true)
         Map<String,String> customReplacements = [:]
 
+        Closure<Boolean> shouldAddPrefix = { Node nodeToAddTo ->
+            return request.prefix && !textContentRenderer.render(nodeToAddTo)?.startsWith(request.prefix)
+        }
+        Closure<Boolean> shouldAddPrefixToElement = { Element e ->
+            return request.prefix && !e.text()?.startsWith(request.prefix)
+        }
+
+
         Closure<Boolean> validateParagraph = { Node node ->
             if (!node) {
                 return false
@@ -356,14 +336,14 @@ class CustomValidator {
             if (!previousNode || linesToPreviousNode(node) > minLinesToPreviousNode || !isPrevParagraph) {
                 isValid.set(false)
 
-                if (request.prefix) {
+                if (shouldAddPrefix(node)) {
                     Paragraph paragraph = new Paragraph()
                     paragraph.prependChild(new Text(request.prefix))
                     node.insertBefore(paragraph)
                 }
             } else if (!validateParagraph(previousNode)) {
                 isValid.set(false)
-                if (request.prefix) {
+                if (shouldAddPrefix(previousNode)) {
                     if (previousNode instanceof HtmlBlock) {
                         String currentHtml = previousNode.getLiteral()
                         String newHtml = request.prefix + (currentHtml ?: "")
@@ -383,12 +363,12 @@ class CustomValidator {
 
                 // Process paragraphs
                 org.jsoup.select.Elements paragraphs = doc.select("p")
-                paragraphs.each { Element p ->
-                    String text = p.text().trim()
+                paragraphs.each { Element element ->
+                    String text = element.text().trim()
                     if (text && !validationPattern.pattern.matcher(text).matches()) {
                         isValid.set(false)
-                        if (request.prefix) {
-                            p.prependText(request.prefix)
+                        if (shouldAddPrefixToElement(element)) {
+                            element.prependText(request.prefix)
                         }
                     }
                 }
@@ -422,7 +402,7 @@ class CustomValidator {
 
                     if (!validateParagraph(firstBulletContent)) {
                         isValid.set(false)
-                        if (request.prefix) {
+                        if (shouldAddPrefix(firstBulletContent)) {
                             firstBulletContent.prependChild(new Text(request.prefix))
                         }
                     }
@@ -447,7 +427,7 @@ class CustomValidator {
             void visit(Paragraph paragraph) {
                 if (!validateParagraph(paragraph) && !(paragraph.firstChild instanceof Image)) {
                     isValid.set(false)
-                    if (request.prefix) {
+                    if (shouldAddPrefix(paragraph)) {
                         paragraph.prependChild(new Text(request.prefix))
                     }
                 }
@@ -457,7 +437,7 @@ class CustomValidator {
             void visit(Heading heading) {
                 if (!validateParagraph(heading)) {
                     isValid.set(false)
-                    if (request.prefix) {
+                    if (shouldAddPrefix(heading)) {
                         heading.prependChild(new Text(request.prefix))
                     }
                 }
