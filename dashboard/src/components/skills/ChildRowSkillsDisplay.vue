@@ -30,7 +30,11 @@ import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vu
 import LinkToSkillPage from '@/components/utils/LinkToSkillPage.vue'
 import { useRoute } from 'vue-router'
 import SelfReportType from "@/components/skills/selfReport/SelfReportType.js";
+import GenerateQuizDialog from '@/common-components/utilities/learning-conent-gen/GenerateQuizDialog.vue'
+import QuizService from '@/components/quiz/QuizService.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
+const appConfig = useAppConfig()
 const config = useProjConfig()
 const timeWindowFormatter = useTimeWindowFormatter()
 const numberFormat = useNumberFormat()
@@ -145,6 +149,40 @@ const loadSkill = () => {
 }
 
 const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skillInfo.value.skillId))
+const showGenerateQuizDialog = ref(false)
+const saveQuizForSkill = async (generatedQuiz) => {
+  const quizDef = await createQuizDef()
+  await QuizService.updateQuizDef(quizDef);
+  const savePromises = generatedQuiz.map(question =>
+      QuizService.saveQuizQuestionDef(quizDef.quizId, question)
+  );
+  await Promise.all(savePromises);
+  skillInfo.value.quizId = quizDef.quizId;
+  skillInfo.value.quizName = quizDef.name;
+  skillInfo.value.quizType = quizDef.type;
+  skillInfo.value.selfReportingType = quizDef.type;
+  skillInfo.value.selfReportEnabled = true
+  SkillsService.saveSkill( {
+    ...skillInfo.value
+  })
+}
+const createQuizDef = async () => {
+  const randomId = Date.now().toString(36) + Math.random().toString(36).substring(2);
+  const quizId = `${skillInfo.value.skillId}Quiz`;
+  const name = `${skillInfo.value.name} Quiz`
+  const type = 'Quiz'
+  const quizIdExists = await QuizService.checkIfQuizIdExist(quizId)
+  const quizNameExists = await QuizService.checkIfQuizNameExist(name)
+  return {
+    quizId: quizIdExists ? `${quizId}${randomId}` : quizId,
+    name: quizNameExists ? `${name}${randomId}` : name,
+    type
+  }
+}
+const generateQuizDialogRef = ref(null)
+const onDialogShow = () => {
+  generateQuizDialogRef.value.generateQuizFromDescription(description.value)
+}
 </script>
 
 <template>
@@ -242,7 +280,20 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
           </div>
           <div v-else>
             Self reporting is <b class="text-primary">disabled</b> for this skill.
+            <div v-if="description && appConfig.enableOpenAIIntegration" class="mt-2">
+              <span class="mr-2">Generate a Quiz for this skill using AI </span>
+              <SkillsButton icon="fa-solid fa-wand-magic-sparkles"
+                            label="AI"
+                            size="small"
+                            @click="showGenerateQuizDialog = true"/>
+            </div>
           </div>
+          <generate-quiz-dialog
+              v-if="showGenerateQuizDialog"
+              ref="generateQuizDialogRef"
+              v-model="showGenerateQuizDialog"
+              @generated-quiz="saveQuizForSkill"
+              @show="onDialogShow" />
         </media-info-card>
       </div>
     </div>
