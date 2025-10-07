@@ -30,7 +30,11 @@ const props = defineProps({
   quizType: String,
   question: Object,
   questionNum: Number,
-  showDragAndDropControls: Boolean
+  showDragAndDropControls: Boolean,
+  showEditControls: {
+    type: Boolean,
+    default: true
+  }
 })
 
 const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested', 'copyQuestion'])
@@ -157,7 +161,7 @@ const moveQuestion = (changeIndexBy) => {
           </Message>
         </div>
       </div>
-      <div v-if="!quizConfig.isReadOnlyQuiz" class="flex flex-col gap-4">
+      <div v-if="!quizConfig.isReadOnlyQuiz && showEditControls" class="flex flex-col gap-4">
         <div>
           <ButtonGroup class="ml-1 mt-2 mr-4">
             <SkillsButton @click="editQuestion"
