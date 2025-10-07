@@ -44,12 +44,15 @@ ${instructionsToKeepPlaceholders ? `-${instructionsToKeepPlaceholders}` : ''}
     const quizRules = `
     ### Question Types
 1. **SingleChoice**
+   - Must NOT provide less than 1 correct answer
+   - Must NOT provide more than 1 correct answer
    - Must provide exactly 1 correct answer
    - 2-3 incorrect answers
    - Mark correct answer with \`"isCorrect": true\`
 
 2. **MultipleChoice**
    - Must provide no less than 2 correct answers
+   - Must provide 2 or more correct answers
    - 3-5 total options
    - Mark all correct answers with \`"isCorrect": true\`
 
