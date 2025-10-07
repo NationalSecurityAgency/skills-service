@@ -178,7 +178,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const matomoUrl = computed(() => config.value.matomoUrl)
   const matomoSiteId = computed(() => config.value.matomoSiteId)
   const matomoProcessUserIdRegex = computed(() => config.value.matomoProcessUserIdRegex)
-
+  const enableOpenAIIntegration = computed(() => config.value.enableOpenAIIntegration)
 
   return {
     loadConfigState,
@@ -293,6 +293,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxRolePageSize,
     matomoUrl,
     matomoSiteId,
-    matomoProcessUserIdRegex
+    matomoProcessUserIdRegex,
+    enableOpenAIIntegration
   }
 })

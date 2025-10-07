@@ -243,7 +243,7 @@ class CustomValidator {
         return new ModifiedDescription(newDescription: result.newDescription)
     }
 
-    static CustomValidationResult validateEmailBodyAndSubject(ContactUsersRequest contactUsersRequest) {
+    CustomValidationResult validateEmailBodyAndSubject(ContactUsersRequest contactUsersRequest) {
         CustomValidationResult res = validateDescription(contactUsersRequest.emailBody, null)
         if (!res.valid) {
             res.msg = "Custom validation failed: msg=[${res.msg}] for email's body"

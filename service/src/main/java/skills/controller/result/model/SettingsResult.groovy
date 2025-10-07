@@ -34,6 +34,6 @@ class SettingsResult {
     Date updated
 
     boolean isEnabled(){
-        return Boolean.valueOf(value) || value.toLowerCase() == "enabled" || value.toLowerCase() == "enable" || value.toLowerCase() == "on"
+        return Boolean.valueOf(value) || value?.toLowerCase() == "enabled" || value?.toLowerCase() == "enable" || value?.toLowerCase() == "on"
     }
 }
