@@ -177,7 +177,7 @@ class ParagraphValidator {
 
             @Override
             void visit(FencedCodeBlock fencedCodeBlock) {
-                blockHandlerValidator(fencedCodeBlock)
+                blockHandlerValidator(fencedCodeBlock, 3)
             }
 
             @Override
@@ -291,7 +291,7 @@ class ParagraphValidator {
 
     private void blockHandlerValidator(Node node, int minLinesToPreviousNode = 2) {
         Node previousNode = lookForPreviousParagraph(node)
-        boolean isPrevParagraph = previousNode instanceof Paragraph
+        boolean isPrevParagraph = previousNode instanceof Paragraph || previousNode instanceof Heading
         if (!previousNode || linesToPreviousNode(node) > minLinesToPreviousNode || !isPrevParagraph) {
             isValid.set(false)
 

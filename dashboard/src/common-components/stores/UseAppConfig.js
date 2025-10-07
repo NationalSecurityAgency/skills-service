@@ -177,6 +177,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const matomoUrl = computed(() => config.value.matomoUrl)
   const matomoSiteId = computed(() => config.value.matomoSiteId)
   const matomoProcessUserIdRegex = computed(() => config.value.matomoProcessUserIdRegex)
+  const enableOpenAIIntegration = computed(() => config.value.enableOpenAIIntegration)
   const sdPointHistoryChartAchievementsCombinePct = computed(() => config.value.sdPointHistoryChartAchievementsCombinePct || 0.05)
 
 
@@ -294,6 +295,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     matomoUrl,
     matomoSiteId,
     matomoProcessUserIdRegex,
+    enableOpenAIIntegration,
     sdPointHistoryChartAchievementsCombinePct
   }
 })
