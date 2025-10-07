@@ -26,12 +26,14 @@ import {useImgHandler} from "@/common-components/utilities/learning-conent-gen/U
 import {useInstructionGenerator} from "@/common-components/utilities/learning-conent-gen/UseInstructionGenerator.js";
 import PrefixControls from "@/common-components/utilities/markdown/PrefixControls.vue";
 import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
 const model = defineModel()
 const emit = defineEmits(['generated-desc'])
 const route = useRoute()
 const log = useLog()
 const imgHandler = useImgHandler()
+const appConfig = useAppConfig()
 const updateDescription = (newDesc) => {
   currentDescription.value = newDesc
   if (newDesc) {
@@ -291,7 +293,7 @@ const addPrefixThenUseDesc = (info) => {
                     :loading="isAddingPrefix"
                     @click="useGeneratedDescription(historyItem.id)"/>
 
-                OR
+                <span v-if="appConfig.addPrefixToInvalidParagraphsOptions">OR</span>
 
                 <prefix-controls
                     @add-prefix="addPrefixThenUseDesc"
