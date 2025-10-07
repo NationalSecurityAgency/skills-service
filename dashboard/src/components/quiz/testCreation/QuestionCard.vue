@@ -135,8 +135,8 @@ const moveQuestion = (changeIndexBy) => {
               rows="2"/>
         </div>
         <div v-if="isMatchingType">
-          <div v-for="answer in question.answers">
-            <div v-if="answer.multiPartAnswer" class="flex gap-4 w-md">
+          <div v-for="(answer, index) in question.answers">
+            <div v-if="answer.multiPartAnswer" class="flex gap-4 w-md" :data-cy="`question-${questionNum}-answer-${index}`">
               <div>
                 {{ answer.multiPartAnswer.term }}
               </div>

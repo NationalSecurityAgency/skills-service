@@ -39,7 +39,7 @@ function addNewAnswer(index) {
     isCorrect: false,
     multiPartAnswer: {
       term: '',
-      answer: '',
+      value: '',
     },
   };
   insert(index + 1, initialValue)
@@ -53,13 +53,13 @@ const resetAnswers = () => {
       id: null,
       answer: '',
       isCorrect: false,
-      multiPartAnswer: { term: '', answer: ''}
+      multiPartAnswer: { term: '', value: ''}
     },
     {
       id: null,
       answer: '',
       isCorrect: false,
-      multiPartAnswer: { term: '', answer: ''}
+      multiPartAnswer: { term: '', value: ''}
     }
   ])
 }
@@ -71,14 +71,14 @@ defineExpose( {
 
 <template>
   <div v-if="model && model.length > 0" class="mt-2">
-    <div class="flex flex-1 gap-4 mb-2" v-for="(answer, index) in fields" :key="answer.key">
+    <div class="flex flex-1 gap-4 mb-2" v-for="(answer, index) in fields" :key="answer.key" :data-cy="`answer-${index}`">
       <SkillsTextInput
           class="flex flex-1"
           placeholder="Enter a term"
           v-model="answer.value.multiPartAnswer.term"
           :initialValue="answer.value.multiPartAnswer.term"
           :aria-label="`Enter term number ${index+1}`"
-          data-cy="termText"
+          :data-cy="`termText-${index}`"
           :id="`term_${index}`"
           :name="`answers[${index}].multiPartAnswer.term`"/>
 
@@ -88,7 +88,7 @@ defineExpose( {
           v-model="answer.value.multiPartAnswer.value"
           :initialValue="answer.value.multiPartAnswer.value"
           :aria-label="`Enter answer number ${index+1}`"
-          data-cy="answerText"
+          :data-cy="`answerText-${index}`"
           :id="`answer_${index}`"
           :name="`answers[${index}].multiPartAnswer.value`"/>
       <ButtonGroup class="ml-1">

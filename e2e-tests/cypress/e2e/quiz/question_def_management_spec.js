@@ -986,4 +986,111 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-2_displayText"]').should('have.text', '3')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-3_displayText"]').should('have.text', '4')
     });
+
+    it('matching type question', function () {
+        cy.createQuizDef(1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.openDialog('[data-cy="btn_Questions"]', true)
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+
+        cy.get('[data-cy="questionText"]').type('a')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_Matching"]').click()
+
+        cy.get('[data-cy="termText-0"]').type('term1')
+        cy.get('[data-cy="answerText-0"]').type('answer1')
+        cy.get('[data-cy="termText-1"]').type('term2')
+        cy.get('[data-cy="answerText-1"]').type('answer2')
+
+        cy.get('[data-cy="answer-0"] [data-cy="removeAnswer"]').should('be.disabled')
+        cy.get('[data-cy="answer-1"] [data-cy="removeAnswer"]').should('be.disabled')
+        cy.get('[data-cy="answer-0"] [data-cy="addNewAnswer"]').should('be.enabled')
+        cy.get('[data-cy="answer-1"] [data-cy="addNewAnswer"]').should('be.enabled')
+
+        cy.get('[data-cy="answer-0"] [data-cy="addNewAnswer"]').click()
+        cy.get('[data-cy="termText-1"]').type('new-term')
+        cy.get('[data-cy="answerText-1"]').type('new-answer')
+        cy.get('[data-cy="termText-2"]').should('have.value', 'term2')
+        cy.get('[data-cy="answerText-2"]').should('have.value', 'answer2')
+
+        cy.clickSaveDialogBtn()
+
+        cy.get('[data-cy="question-1-answer-0"]').should('contain.text', 'term1')
+        cy.get('[data-cy="question-1-answer-0"]').should('contain.text', 'answer1')
+        cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'new-term')
+        cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'new-answer')
+        cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'term2')
+        cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'answer2')
+
+    });
+
+    it('Edit a matching question', function () {
+        cy.createQuizDef(1);
+        cy.createQuizMatchingQuestionDef(1, 1)
+
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="editQuestionButton_1"]').click()
+        cy.get('[data-cy="question-1-answer-0"]').should('contain.text', 'First Term')
+        cy.get('[data-cy="question-1-answer-0"]').should('contain.text', 'First Answer')
+        cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'Second Term')
+        cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'Second Answer')
+        cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Term')
+        cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Answer')
+
+        cy.get('[data-cy="termText-0"]').type('{selectall}term1')
+        cy.get('[data-cy="answerText-0"]').type('{selectall}answer1')
+        cy.get('[data-cy="termText-1"]').type('{selectall}term2')
+        cy.get('[data-cy="answerText-1"]').type('{selectall}answer2')
+
+        cy.clickSaveDialogBtn()
+
+        cy.get('[data-cy="question-1-answer-0"]').should('contain.text', 'term1')
+        cy.get('[data-cy="question-1-answer-0"]').should('contain.text', 'answer1')
+        cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'term2')
+        cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'answer2')
+        cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Term')
+        cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Answer')
+    })
+
+    it('Copy a matching question', function () {
+        cy.createQuizDef(1);
+        cy.createQuizMatchingQuestionDef(1, 1)
+
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="copyQuestionButton_1"]').click()
+        cy.get('[data-cy="question-1-answer-0"]').should('contain.text', 'First Term')
+        cy.get('[data-cy="question-1-answer-0"]').should('contain.text', 'First Answer')
+        cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'Second Term')
+        cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'Second Answer')
+        cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Term')
+        cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Answer')
+
+        cy.get('[data-cy="termText-0"]').type('{selectall}term1')
+        cy.get('[data-cy="answerText-0"]').type('{selectall}answer1')
+        cy.get('[data-cy="termText-1"]').type('{selectall}term2')
+        cy.get('[data-cy="answerText-1"]').type('{selectall}answer2')
+        cy.get('[data-cy="answer-0"] [data-cy="addNewAnswer"]').click()
+        cy.get('[data-cy="termText-1"]').type('new-term')
+        cy.get('[data-cy="answerText-1"]').type('new-answer')
+
+        cy.clickSaveDialogBtn()
+
+        cy.get('[data-cy="question-1-answer-0"]').should('contain.text', 'First Term')
+        cy.get('[data-cy="question-1-answer-0"]').should('contain.text', 'First Answer')
+        cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'Second Term')
+        cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'Second Answer')
+        cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Term')
+        cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Answer')
+
+        cy.get('[data-cy="question-2-answer-0"]').should('contain.text', 'term1')
+        cy.get('[data-cy="question-2-answer-0"]').should('contain.text', 'answer1')
+        cy.get('[data-cy="question-2-answer-1"]').should('contain.text', 'new-term')
+        cy.get('[data-cy="question-2-answer-1"]').should('contain.text', 'new-answer')
+        cy.get('[data-cy="question-2-answer-2"]').should('contain.text', 'term2')
+        cy.get('[data-cy="question-2-answer-2"]').should('contain.text', 'answer2')
+        cy.get('[data-cy="question-2-answer-3"]').should('contain.text', 'Third Term')
+        cy.get('[data-cy="question-2-answer-3"]').should('contain.text', 'Third Answer')
+    })
 });

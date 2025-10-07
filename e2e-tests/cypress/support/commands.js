@@ -614,6 +614,39 @@ Cypress.Commands.add("createQuizMultipleChoiceQuestionDef", (quizNum = 1, questi
     }, overrideProps));
 });
 
+Cypress.Commands.add("createQuizMatchingQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
+    const answer1 = JSON.stringify({
+        'term': 'First Term',
+        'value': 'First Answer'
+    })
+    const answer2 = JSON.stringify({
+        'term': 'Second Term',
+        'value': 'Second Answer'
+    })
+    const answer3 = JSON.stringify({
+        'term': 'Third Term',
+        'value': 'Third Answer'
+    })
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
+        quizId: `quizId${quizNum}`,
+        question: `This is a question # ${questionNum}`,
+        questionType: 'Matching',
+        answers: [{
+            answer: '',
+            isCorrect: true,
+            multiPartAnswer: answer1
+        }, {
+            answer: '',
+            isCorrect: true,
+            multiPartAnswer: answer2
+        }, {
+            answer: '',
+            isCorrect: true,
+            multiPartAnswer: answer3
+        }],
+    }, overrideProps));
+});
+
 Cypress.Commands.add("createSurveyMultipleChoiceQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
     cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
         quizId: `quizId${quizNum}`,
