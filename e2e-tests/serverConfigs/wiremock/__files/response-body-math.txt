@@ -1,0 +1,23 @@
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"role":"assistant","content":"Mat"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"h is"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" t"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"rick"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"y!"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" But"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" I"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" can"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" help"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" you!"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
