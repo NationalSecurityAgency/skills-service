@@ -222,6 +222,30 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         newQuestion.body.answers.isCorrect == [true, false]
     }
 
+
+    def "add Matching question to quiz"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        def newQuiz = skillsService.createQuizDef(quiz)
+
+        def question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+
+        when:
+        def newQuestion = skillsService.createQuizQuestionDef(question)
+
+        then:
+        newQuestion.body.id
+        newQuestion.body.question == question.question
+        newQuestion.body.answerHint == question.answerHint
+        newQuestion.body.questionType == QuizQuestionType.Matching.toString()
+        newQuestion.body.answers.size() == 2
+        newQuestion.body.answers[0].id
+        newQuestion.body.answers[1].id
+        newQuestion.body.answers.answer == [null, null]
+        newQuestion.body.answers.isCorrect == [true, true]
+        newQuestion.body.answers[0].multiPartAnswer == '{"term":"term1","value":"value1"}'
+        newQuestion.body.answers[1].multiPartAnswer == '{"term":"term2","value":"value2"}'
+    }
+
     def "get quiz questions"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)

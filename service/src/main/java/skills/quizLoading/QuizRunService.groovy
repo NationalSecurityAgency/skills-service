@@ -302,14 +302,13 @@ class QuizRunService {
                     values.push([value: parsedAnswer.term, id: parsedAnswer.id])
                 }
                 matchingTerms.shuffle()
-                values.shuffle()
 
                 answerOptions = values.collect { answer ->
                     new QuizAnswerOptionsInfo(
                             id: answer.id,
                             answerOption: answer.value
                     )
-                }
+                }.sort{ it.id }
             } else {
                 answerOptions = quizAnswerDefs.collect {
                     new QuizAnswerOptionsInfo(

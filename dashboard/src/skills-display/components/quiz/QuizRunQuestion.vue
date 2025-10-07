@@ -38,6 +38,7 @@ const props = defineProps({
   num: Number,
   validate: Function,
   userCommunity: String,
+  quizComplete: Boolean,
 })
 
 const isLoading = ref(true);
@@ -289,7 +290,7 @@ const updateAnswerOrder = (newOrder) => {
             <SkillsRating @update:modelValue="ratingChanged" class="flex-initial rounded-border py-4 px-6" v-model="answerRating" :stars="numberOfStars" :cancel="false" :name="fieldName"/>
           </div>
           <div v-else-if="isMatchingType">
-            <QuizRunMatchingComponent :q="q" :answerOptions="answerOptions" @updateAnswerOrder="updateAnswerOrder" />
+            <QuizRunMatchingComponent :q="q" :answerOptions="answerOptions" @updateAnswerOrder="updateAnswerOrder" :questionNumber="num" :quizComplete="quizComplete" />
           </div>
           <div v-else>
             <div v-if="isMultipleChoice" class="text-secondary italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>

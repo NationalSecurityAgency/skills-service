@@ -552,6 +552,7 @@ const onResize = (newWidth) => {
                   :num="index+1"
                   :validate="validateTextAnswer"
                   @selected-answer="updateSelectedAnswers"
+                  :quizComplete="!!quizResult"
                   @answer-text-changed="updateSelectedAnswers"/>
             </div>
           </SkillsOverlay>

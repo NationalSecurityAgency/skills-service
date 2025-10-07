@@ -15,6 +15,7 @@
  */
 package skills.intTests.utils
 
+import groovy.json.JsonOutput
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.QuizDefParent
 import skills.storage.model.QuizDefParent.QuizType
@@ -44,6 +45,28 @@ class QuizDefFactory {
         return (1..numberOfQuestions).collect {
             createChoiceQuestion(quizNumber, it, numberOfAnswers, questionType, quizType)
         }
+    }
+
+    static createMatchingQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2) {
+        String question = "This is questions #${questionsNumber}".toString()
+        String answerHint = "This is a hint for question #${questionsNumber}".toString()
+        List answers = numberOfAnswers > 0 ? (1..numberOfAnswers).collect {
+            return [
+                    answer: "",
+                    isCorrect: true,
+                    multiPartAnswer: JsonOutput.toJson([
+                        term: 'term' + it,
+                        value: 'value' + it
+                    ])
+            ]
+        } : []
+        return [
+                quizId  : getDefaultQuizId(quizNumber),
+                question: question,
+                answerHint: answerHint,
+                questionType: QuizQuestionType.Matching.toString(),
+                answers: answers,
+        ]
     }
 
     static createChoiceQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2, QuizQuestionType questionType = QuizQuestionType.SingleChoice, QuizType quizType = QuizType.Quiz) {
@@ -83,4 +106,5 @@ class QuizDefFactory {
     static createRatingSurveyQuestion(int quizNumber = 1, int questionsNumber = 1) {
         return this.createChoiceQuestion(quizNumber, questionsNumber, 0, QuizQuestionType.Rating, QuizType.Survey)
     }
+
 }

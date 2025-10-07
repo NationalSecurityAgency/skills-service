@@ -1885,6 +1885,51 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
     });
+
+    it('run quiz with matching questions', () => {
+        cy.createQuizDef(1);
+        cy.createQuizMatchingQuestionDef(1, 1);
+        cy.createQuizMatchingQuestionDef(1, 2);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('[data-cy="bank-1"]').contains('First Answer').click().type('{leftArrow}')
+        cy.get('[data-cy="bank-1"]').contains('Second Answer').click().type('{leftArrow}')
+        cy.get('[data-cy="bank-1"]').contains('Third Answer').click().type('{leftArrow}')
+
+        cy.get('[data-cy="bank-2"]').contains('First Answer').click().type('{leftArrow}')
+        cy.get('[data-cy="bank-2"]').contains('Second Answer').click().type('{leftArrow}')
+        cy.get('[data-cy="bank-2"]').contains('Third Answer').click().type('{leftArrow}')
+
+
+        cy.clickCompleteQuizBtn()
+
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+
+        cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
+        cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('150')
+    });
 });
 
 
