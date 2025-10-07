@@ -198,12 +198,12 @@ class CustomValidator {
         return (boolean)utilizeUserCommunityParagraphPatternByDefault
     }
 
-    private static class ValidationPattern {
+    static class ValidationPattern {
         Pattern pattern
         String message
     }
 
-    private ValidationPattern getValidationPattern(String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
+    private ValidationPattern getValidationPattern(String projectId = null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
         Pattern paragraphPatternToUse = this.paragraphPattern
         String paragraphValidationMsgToUse = this.paragraphValidationMsg
 
@@ -220,275 +220,30 @@ class CustomValidator {
         return new ValidationPattern(pattern: paragraphPatternToUse, message: paragraphValidationMsgToUse)
     }
 
-
     CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
-        InternalValidationResult result = validateMarkdown(new InternalValidationRequest(
+        ParagraphValidator.InternalValidationResult result = new ParagraphValidator(new ParagraphValidator.InternalValidationRequest(
                 description: description,
                 projectId: projectId,
+                validationPattern: getValidationPattern(projectId, utilizeUserCommunityParagraphPatternByDefault, quizId),
+                forceValidationPattern: forceValidationPattern,
                 utilizeUserCommunityParagraphPatternByDefault: utilizeUserCommunityParagraphPatternByDefault,
-                quizId: quizId))
+                quizId: quizId)).validateMarkdown()
         return new CustomValidationResult(valid: result.isValid, msg: result.validationMsg)
-    }
-
-    private static class InternalValidationRequest {
-        String description
-        String prefix // if provided description will be regenerated and prefix will be added to invalid paragraphs
-        String projectId=null
-        Boolean utilizeUserCommunityParagraphPatternByDefault = false
-        String quizId = null
-    }
-
-    private static class InternalValidationResult {
-        Boolean isValid
-        String newDescription // if prefix is provided
-        String validationMsg
-    }
-
-    static String normalizeNewlines(String input) {
-        return input
-                .replaceAll(/\r\n?/, "\n")  // Normalize line endings
-                .replaceAll(/(?<=\S)[ \t]*(?=\n)/, "")  // Remove spaces before newlines
-                .replaceAll(/(?<=\n)[ \t]*(?=\n)/, "")  // Remove spaces between newlines
-    }
-
-    static Node lookForPreviousParagraph(Node node) {
-        Node previousNode = node.previous
-
-        if (!previousNode && node instanceof Image) {
-            if (node.parent instanceof Paragraph && node.parent.firstChild == node) {
-                previousNode = node.parent.previous
-            }
-        }
-        while (previousNode && previousNode instanceof SoftLineBreak) {
-            previousNode = previousNode.previous
-        }
-        while (previousNode && previousNode instanceof Text) {
-            previousNode = previousNode.parent
-        }
-        return previousNode
-    }
-
-    InternalValidationResult validateMarkdown(InternalValidationRequest request) {
-        String description = request.description
-        ValidationPattern validationPattern = getValidationPattern(request.projectId, request.utilizeUserCommunityParagraphPatternByDefault, request.quizId)
-        if (!validationPattern.pattern || StringUtils.isBlank(description)) {
-            return new InternalValidationResult(isValid: true)
-        }
-
-        List<Extension> extensions = List.of(TablesExtension.create());
-        Parser parser = Parser.builder()
-                .includeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
-                .extensions(extensions)
-                .build();
-        String descriptionNormalized = normalizeNewlines(description)
-        Node document = parser.parse(descriptionNormalized);
-        MarkdownRenderer markdownRenderer = MarkdownRenderer.builder().extensions(extensions).build();
-        TextContentRenderer textContentRenderer = TextContentRenderer.builder().extensions(extensions).build()
-        AtomicBoolean isValid = new AtomicBoolean(true)
-        Map<String,String> customReplacements = [:]
-
-        Closure<Boolean> shouldAddPrefix = { Node nodeToAddTo ->
-            return request.prefix && !textContentRenderer.render(nodeToAddTo)?.startsWith(request.prefix)
-        }
-        Closure<Boolean> shouldAddPrefixToElement = { Element e ->
-            return request.prefix && !e.text()?.startsWith(request.prefix)
-        }
-
-
-        Closure<Boolean> validateParagraph = { Node node ->
-            if (!node) {
-                return false
-            }
-            String toValidate = textContentRenderer.render(node)
-            toValidate = Jsoup.parse(toValidate).text()
-            boolean isValidParagraph = validationPattern.pattern.matcher(toValidate).matches()
-            if (isValidParagraph && forceValidationPattern) {
-                String markdown = markdownRenderer.render(node)
-                String[] lines = markdown.split('\n')
-                for (String line : lines) {
-                    String lineToValidate = Jsoup.parse(line).text()
-                    boolean forceValidate = forceValidationPattern.matcher(lineToValidate).matches()
-                    if (forceValidate) {
-                        boolean isValidLine = validationPattern.pattern.matcher(lineToValidate).matches()
-                        if (!isValidLine) {
-                            return false
-                        }
-                    }
-                }
-            }
-            return isValidParagraph
-        }
-        Closure<Integer> linesToPreviousNode = { Node node ->
-            Node previousNode = lookForPreviousParagraph(node)
-            if (!previousNode || !node.sourceSpans) {
-                return -1
-            }
-            if (!previousNode || !previousNode.sourceSpans) {
-                return -1
-            }
-            int previousEndLine = previousNode.sourceSpans.last().lineIndex
-            int currentStartLine = node.sourceSpans.first().lineIndex
-             return currentStartLine - previousEndLine
-        }
-        Closure<Void> blockHandlerValidator = { Node node, int minLinesToPreviousNode = 2 ->
-            Node previousNode = lookForPreviousParagraph(node)
-            boolean isPrevParagraph = previousNode instanceof Paragraph
-            if (!previousNode || linesToPreviousNode(node) > minLinesToPreviousNode || !isPrevParagraph) {
-                isValid.set(false)
-
-                if (shouldAddPrefix(node)) {
-                    Paragraph paragraph = new Paragraph()
-                    paragraph.prependChild(new Text(request.prefix))
-                    node.insertBefore(paragraph)
-                }
-            } else if (!validateParagraph(previousNode)) {
-                isValid.set(false)
-                if (shouldAddPrefix(previousNode)) {
-                    if (previousNode instanceof HtmlBlock) {
-                        String currentHtml = previousNode.getLiteral()
-                        String newHtml = request.prefix + (currentHtml ?: "")
-                        customReplacements.put(markdownRenderer.render(previousNode), newHtml)
-                    } else {
-                        previousNode.prependChild(new Text(request.prefix))
-                    }
-                }
-            }
-        }
-
-        def visitor = new AbstractVisitor() {
-            @Override
-            void visit(HtmlBlock htmlBlock) {
-                String html = htmlBlock.getLiteral()
-                org.jsoup.nodes.Document doc = Jsoup.parse(html)
-
-                // Process paragraphs
-                org.jsoup.select.Elements paragraphs = doc.select("p")
-                paragraphs.each { Element element ->
-                    String text = element.text().trim()
-                    if (text && !validationPattern.pattern.matcher(text).matches()) {
-                        isValid.set(false)
-                        if (shouldAddPrefixToElement(element)) {
-                            element.prependText(request.prefix)
-                        }
-                    }
-                }
-            }
-            @Override
-            void visit(IndentedCodeBlock indentedCodeBlock) {
-                blockHandlerValidator(indentedCodeBlock)
-            }
-
-            @Override
-            void visit(BulletList bulletList) {
-                handleList(bulletList)
-            }
-
-            @Override
-            void visit(OrderedList bulletList) {
-                handleList(bulletList)
-            }
-
-            void handleList(ListBlock bulletList) {
-                Node previousNode = bulletList.previous
-
-                boolean previousNodeValidates = previousNode
-                        && previousNode instanceof Paragraph
-                        && linesToPreviousNode(bulletList) < 3
-                        && validateParagraph(previousNode)
-
-                if(!previousNodeValidates) {
-                    ListItem firstBullet = (ListItem)bulletList.firstChild
-                    Paragraph firstBulletContent = (Paragraph)firstBullet.firstChild
-
-                    if (!validateParagraph(firstBulletContent)) {
-                        isValid.set(false)
-                        if (shouldAddPrefix(firstBulletContent)) {
-                            firstBulletContent.prependChild(new Text(request.prefix))
-                        }
-                    }
-                }
-
-                if (forceValidationPattern) {
-                    ListItem currentBullet = (ListItem) bulletList.firstChild
-                    while (currentBullet) {
-                        Paragraph bulletParagraph = (Paragraph) currentBullet.firstChild
-                        String toValidate = textContentRenderer.render(bulletParagraph)
-                        toValidate = Jsoup.parse(toValidate).text()
-                        boolean shouldForceValidation = forceValidationPattern.matcher(toValidate).matches()
-                        if (shouldForceValidation && !validateParagraph(bulletParagraph)) {
-                            isValid.set(false)
-                        }
-                        currentBullet = (ListItem) currentBullet.next
-                    }
-                }
-            }
-
-            @Override
-            void visit(Paragraph paragraph) {
-                if (!validateParagraph(paragraph) && !(paragraph.firstChild instanceof Image)) {
-                    isValid.set(false)
-                    if (shouldAddPrefix(paragraph)) {
-                        paragraph.prependChild(new Text(request.prefix))
-                    }
-                }
-                visitChildren(paragraph)
-            }
-            @Override
-            void visit(Heading heading) {
-                if (!validateParagraph(heading)) {
-                    isValid.set(false)
-                    if (shouldAddPrefix(heading)) {
-                        heading.prependChild(new Text(request.prefix))
-                    }
-                }
-            }
-
-            @Override
-            void visit(CustomNode customNode) {
-                if (customNode instanceof TableHead) {
-                    TableHead tableHead = (TableHead) customNode
-                    TableBlock tableBlock = (TableBlock)tableHead.parent
-                    blockHandlerValidator(tableBlock)
-                } else {
-                    visitChildren(customNode)
-                }
-            }
-
-            @Override
-            void visit(FencedCodeBlock fencedCodeBlock) {
-                blockHandlerValidator(fencedCodeBlock)
-            }
-
-            @Override
-            void visit(Image image) {
-                blockHandlerValidator(image)
-            }
-        }
-        document.accept(visitor)
-
-        String newDescription = request.prefix ? markdownRenderer.render(document) : description
-        customReplacements.each { key, value ->
-            newDescription = newDescription.replace(key, value)
-        }
-        return new InternalValidationResult(
-                isValid: isValid.get(),
-                newDescription: newDescription,
-                validationMsg: validationPattern.message
-        )
-
     }
 
     ModifiedDescription addPrefixToInvalidParagraphs(String description, String prefix, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
         assert prefix
-        InternalValidationResult result = validateMarkdown(new InternalValidationRequest(
+        ParagraphValidator.InternalValidationResult result = new ParagraphValidator(new ParagraphValidator.InternalValidationRequest(
                 description: description,
                 prefix: prefix, projectId: projectId,
+                validationPattern: getValidationPattern(projectId, utilizeUserCommunityParagraphPatternByDefault, quizId),
+                forceValidationPattern: forceValidationPattern,
                 utilizeUserCommunityParagraphPatternByDefault: utilizeUserCommunityParagraphPatternByDefault,
-                quizId: quizId))
+                quizId: quizId)).validateMarkdown()
         return new ModifiedDescription(newDescription: result.newDescription)
     }
 
-    CustomValidationResult validateEmailBodyAndSubject(ContactUsersRequest contactUsersRequest) {
+    static CustomValidationResult validateEmailBodyAndSubject(ContactUsersRequest contactUsersRequest) {
         CustomValidationResult res = validateDescription(contactUsersRequest.emailBody, null)
         if (!res.valid) {
             res.msg = "Custom validation failed: msg=[${res.msg}] for email's body"
