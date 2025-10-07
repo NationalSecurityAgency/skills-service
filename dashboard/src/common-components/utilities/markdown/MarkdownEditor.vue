@@ -400,6 +400,7 @@ const addPrefixToInvalidParagraphs = () => {
 
 const valueWithMissingPrefix = ref('')
 const previewingMissing = computed(() => valueWithMissingPrefix.value && valueWithMissingPrefix.value.length > 0)
+const showAiButton = computed(() => appConfig.enableOpenAIIntegration && !previewingMissing.value)
 const loadingMissingPreview = ref(false)
 const showWherePrefixWouldBeAdded = () => {
   loadingMissingPreview.value = true
@@ -426,7 +427,7 @@ const closeMissingPrefixView = () => {
                :class="`${labelClass}`"
                :for="name" @click="focusOnMarkdownEditor">{{ label }}:</label>
       </div>
-      <SkillsButton v-if="!previewingMissing" icon="fa-solid fa-wand-magic-sparkles"
+      <SkillsButton v-if="showAiButton" icon="fa-solid fa-wand-magic-sparkles"
                     label="Assistant"
                     size="small"
                     @click="showGenerateDescriptionDialog = true"/>
