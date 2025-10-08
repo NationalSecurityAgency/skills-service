@@ -211,7 +211,7 @@ class ParagraphValidator {
                 .includeSourceSpans(IncludeSourceSpans.BLOCKS_AND_INLINES)
                 .extensions(extensions)
                 .build();
-        String descriptionNormalized = normalizeNewlines(description)
+        String descriptionNormalized = normalizeInput(description)
         document = parser.parse(descriptionNormalized);
         markdownRenderer = MarkdownRenderer.builder().extensions(extensions).build();
         textContentRenderer = TextContentRenderer.builder().extensions(extensions).build()
@@ -244,11 +244,12 @@ class ParagraphValidator {
         return isValidParagraph
     }
 
-    private static String normalizeNewlines(String input) {
+    private static String normalizeInput(String input) {
         return input
                 .replaceAll(/\r\n?/, "\n")  // Normalize line endings
                 .replaceAll(/(?<=\S)[ \t]*(?=\n)/, "")  // Remove spaces before newlines
                 .replaceAll(/(?<=\n)[ \t]*(?=\n)/, "")  // Remove spaces between newlines
+                .replaceAll("&gt;", ">")  // Replace greater than encoding so Block Quotes are handled properly by the parser
     }
 
     private boolean shouldAddPrefix(Node nodeToAddTo) {
