@@ -21,6 +21,8 @@ import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 class ClientDisplayBadgesSpec extends DefaultIntSpec {
 
@@ -1090,14 +1092,13 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         skillsService.updateBadge(badge, badge.badgeId)
 
         List<String> users = getRandomUsers(3)
-        def currentDate = new Date()
-        def expirationDate = currentDate.clone()
-        expirationDate.minutes += 120
-        skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[0], currentDate)
-        Thread.sleep(1000)
-        skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[1], currentDate)
-        Thread.sleep(1000)
-        skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[2], currentDate)
+        def currentDate = LocalDateTime.now().minusMinutes(60)
+        def currentDatePlus30 = currentDate.plusMinutes(30)
+        def currentDatePlus60 = currentDate.plusMinutes(60)
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[0], currentDate.toDate())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[1], currentDatePlus30.toDate())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: allSkills.get(0).skillId], users[2], currentDatePlus60.toDate())
 
         when:
         def summary = skillsService.getBadgeSummary(users[0], proj1.projectId, badge1)
