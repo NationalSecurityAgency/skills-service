@@ -384,7 +384,20 @@ if (a == true) {
 (A) paragraph two
 """).valid
 
+        validator.validateDescription("""(A) Paragraph one
+
+
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+(A) paragraph two
+""").valid
+
         !validator.validateDescription("""(A) Paragraph one
+
 
 
 ```
@@ -446,7 +459,7 @@ line two
 
 ```""").valid
 
-        !validator.validateDescription("""(A) Paragraph one
+        validator.validateDescription("""(A) Paragraph one
 
 
 ```
@@ -459,6 +472,7 @@ if (a == true) {
 """).valid
 
         !validator.validateDescription("""(A) Paragraph one
+
 
 
 ```

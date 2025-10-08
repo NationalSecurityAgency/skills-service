@@ -280,7 +280,8 @@ describe('Accessibility forProgress and Rankings Pages Tests', () => {
       cy.setDarkModeIfNeeded(darkMode)
       cy.createSubject(1, 1)
       cy.createSkill(1, 1, 1, {
-        description: '| Function | Explanation                                                                                                                                                       |\n' +
+        description: 'Her eis a table:\n' +
+          '| Function | Explanation                                                                                                                                                       |\n' +
           '| -------- |-------------------------------------------------------------------------------------------------------------------------------------------------------------------|\n' +
           '| Subjects | Add, edit or remove Subjects                                                                                                                                      |\n' +
           '| Skills | Add, edit or remove Skill definitions                                                                                                                             |'
