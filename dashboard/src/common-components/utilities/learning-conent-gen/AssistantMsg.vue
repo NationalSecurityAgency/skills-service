@@ -14,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+defineProps({
+  id: String,
+})
 </script>
 
 <template>
-  <div class="flex justify-start relative">
+  <div class="flex justify-start relative" :data-cy="`aiMsg-${id}`">
     <div class="p-2 bg-blue-100 rounded-2xl pr-4 pl-8">
       <slot />
       <i

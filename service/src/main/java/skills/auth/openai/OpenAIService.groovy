@@ -65,7 +65,7 @@ class OpenAIService {
         }
 
         String url = String.join("/", openAiHost, completionsEndpoint)
-        log.info("Calling [{}] with message [{}]", url, message)
+        log.debug("Calling [{}] with message [{}]", url, message)
 
         CompletionsRequest completionsRequest = new CompletionsRequest(
                 messages: [
@@ -84,7 +84,9 @@ class OpenAIService {
 
         CompletionsResponse res = restTemplate.postForObject(url, entity, CompletionsResponse.class)
 
-        log.info("Response: [{}]", res.toString())
+        if (log.isDebugEnabled()) {
+            log.debug("Response: [{}]", res.toString())
+        }
 
         return res
     }
@@ -92,7 +94,9 @@ class OpenAIService {
     Flux<String> streamCompletions(String message) {
         JsonSlurper jsonSlurper = new JsonSlurper()
         String url = String.join("/", openAiHost, completionsEndpoint)
-        log.info("${Thread.currentThread().name} - streaming from [{}] with message [{}]", url, message)
+        if (log.isDebugEnabled()) {
+            log.debug("${Thread.currentThread().name} - streaming from [{}] with message [{}]", url, message)
+        }
 
         CompletionsRequest request = new CompletionsRequest(
                 messages: [
@@ -117,7 +121,7 @@ class OpenAIService {
                     def result = jsonSlurper.parseText(json)
                     String res = result?.choices?.first()?.delta?.content ?: ""
                     res = res.replaceAll('\\n', '<<newline>>')
-                    log.info("Response: [{}] from json=[{}]", res, json)
+                    log.debug("Response: [{}] from json=[{}]", res, json)
                     return res
                 }
     }

@@ -13,12 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-<script setup lang="ts">
-
+<script setup>
+defineProps({
+  id: String,
+})
 </script>
 
 <template>
-  <div class="p-2 bg-green-100 rounded-2xl relative pr-8 pl-4">
+  <div class="p-2 bg-green-100 rounded-2xl relative pr-8 pl-4" :data-cy="`userMsg-${id}`">
     <slot />
     <i
         shape="circle"
