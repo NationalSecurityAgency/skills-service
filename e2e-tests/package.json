@@ -65,7 +65,7 @@
     "cyServices:start:skills-service:rabbitmq": "npm run fake-smtp:start:ci &&  npm run backend:start:rabbitmq:ci && npm run backend:waitToStart",
     "cyServices:start:client-display": "npm run client-display:serve:ci && npm run client-display:waitToStart",
     "cyServices:start:client-display:oauth": "npm run client-display:serve:ci:oauth && npm run client-display:waitToStart",
-    "cyServices:start": "npm run cyServices:start:skills-service && npm run fake-smtp:start:ci",
+    "cyServices:start": "npm run cyServices:start:skills-service && npm run fake-smtp:start:ci && npm run wiremock:start:ci",
     "cyServices:kill:skills-service": "for procid in $(ps -aux | grep \"serverConfigs/.*properties\" | grep \"jar$\" | awk '{print $2}'); do echo \"killing skills-service ${procid}\"; kill -9 $procid; done",
     "cyServices:kill:client-display": "for procid in $(ps -aux | grep \"client-display\" | grep \"serve\" | grep -v \"grep\" | awk '{print $2}'); do echo \"killing skills-display ${procid}\"; kill -9 $procid; done",
     "cyServices:kill:client-display:1": "for procid in $(ps -aux | grep \"client-display\" | grep \"vue-cli-service serve\" | grep -v \"grep\" | awk '{print $2}'); do echo \"killing skills-display  ${procid}\"; kill -9 $procid; done",
@@ -74,7 +74,8 @@
     "fake-smtp:start": "docker run -p 1080:1080 -p 1025:1025 --restart unless-stopped maildev/maildev:2.2.1",
     "fake-smtp:start:ci": "mkdir -p ./logs && nohup npm run fake-smtp:start > ./logs/fake-smtp.log &",
     "fake-smtp:stop": "fuser -k 1081/tcp",
-    "wiremock:start": "docker run -it --rm   -p 8280:8080 --name wiremock -v $PWD/serverConfigs/wiremock:/home/wiremock wiremock/wiremock:3x-alpine --verbose"
+    "wiremock:start": "docker run -p 8280:8080 -v $PWD/serverConfigs/wiremock:/home/wiremock --restart unless-stopped wiremock/wiremock:3x-alpine --verbose",
+    "wiremock:start:ci": "mkdir -p ./logs && nohup npm run wiremock:start > ./logs/wiremock.log &"
   },
   "devDependencies": {
     "@bahmutov/print-env": "2.1.2",

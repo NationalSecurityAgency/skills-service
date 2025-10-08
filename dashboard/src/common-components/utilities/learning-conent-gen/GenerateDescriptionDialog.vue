@@ -270,19 +270,19 @@ const addPrefixThenUseDesc = (info) => {
       <div id="chatHistory" class="flex flex-col gap-3 mb-2">
         <div v-for="(historyItem) in chatHistory" :key="historyItem.id">
           <div v-if="historyItem.role === ChatRole.USER" class="relative flex justify-end">
-            <user-msg>
+            <user-msg :id="historyItem.id">
               <markdown-text :text="historyItem.origMessage" :instanceId="historyItem.id"/>
             </user-msg>
           </div>
-          <assistant-msg v-if="historyItem.role === ChatRole.ASSISTANT" class="flex flex-col gap-2">
-            <div class="flex gap-2 items-center">
+          <assistant-msg v-if="historyItem.role === ChatRole.ASSISTANT" class="flex flex-col gap-2" :id="historyItem.id">
+            <div class="flex gap-2 items-center" data-cy="origSegment">
               <markdown-text :text="historyItem.origMessage" :instanceId="`${historyItem.id}-content`"/>
               <skills-spinner v-if="historyItem.isGenerating" :id="`${historyItem.id}-spinner`" :is-loading="true" :size-in-rem="0.8"/>
             </div>
-            <div v-if="historyItem.generatedValue" class="px-5 border rounded-lg bg-blue-50 ml-4">
+            <div v-if="historyItem.generatedValue" class="px-5 border rounded-lg bg-blue-50 ml-4" data-cy="generatedSegment">
               <markdown-text :text="historyItem.generatedValue" :instanceId="`${historyItem.id}-desc`"/>
             </div>
-            <div v-if="historyItem.finalMsg">
+            <div v-if="historyItem.finalMsg" data-cy="finalSegment">
               <markdown-text :text="historyItem.finalMsg" :instanceId="`${historyItem.id}-finalMsg`"/>
               <div class="flex justify-start items-center gap-3 mt-2">
                 <SkillsButton
@@ -290,6 +290,7 @@ const addPrefixThenUseDesc = (info) => {
                     icon="fa-solid fa-check-double"
                     severity="info" :outlined="false"
                     label="Use Generated Value"
+                    :data-cy="`useGenValueBtn-${historyItem.id}`"
                     :loading="isAddingPrefix"
                     @click="useGeneratedDescription(historyItem.id)"/>
 
@@ -319,6 +320,7 @@ const addPrefixThenUseDesc = (info) => {
               placeholder="Type Instructions Here"
               :disabled="isGenerating"
               @keydown.enter="generateDescription"
+              data-cy="instructionsInput"
               autofocus/>
           <div class="flex justify-end">
             <SkillsButton icon="fa-solid fa-play" label="Send" @click="generateDescription" :disabled="isGenerating"/>

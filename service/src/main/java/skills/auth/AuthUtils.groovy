@@ -72,7 +72,9 @@ class AuthUtils {
     private static String getIdFromRequest(HttpServletRequest servletRequest, Pattern pattern, String label) {
         String res
         if (servletRequest) {
-            log.info("${Thread.currentThread().name} - getIdFromRequest")
+            if (log.isTraceEnabled()) {
+                log.trace("${Thread.currentThread().name} - getIdFromRequest")
+            }
             String servletPath = servletRequest.getServletPath()
             Matcher matcher = pattern.matcher(servletPath)
             if (matcher.matches()) {
