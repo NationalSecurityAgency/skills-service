@@ -428,8 +428,9 @@ const closeMissingPrefixView = () => {
                :for="name" @click="focusOnMarkdownEditor">{{ label }}:</label>
       </div>
       <SkillsButton v-if="showAiButton" icon="fa-solid fa-wand-magic-sparkles"
-                    label="Assistant"
+                    label="AI"
                     size="small"
+                    data-cy="aiButton"
                     @click="showGenerateDescriptionDialog = true"/>
     </div>
     <generate-description-dialog

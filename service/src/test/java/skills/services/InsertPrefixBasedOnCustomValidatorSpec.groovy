@@ -329,6 +329,7 @@ if (a == true) {
         validator.addPrefixToInvalidParagraphs("""(A) Paragraph one
 
 
+
 ```
 if (a == true) {
   println 'Hello <br> <br /> World'
