@@ -30,6 +30,13 @@ onMounted(() => {
   props.q.matchingTerms.forEach((term) => {
     answers.value.push([ ])
   });
+  props.q.answerOptions.forEach((option) => {
+    if(option.currentAnswer) {
+      answers.value[option.id - 1] = [option.currentAnswer]
+      const positionInBank = answerBank.value.indexOf(option.currentAnswer)
+      answerBank.value.splice(positionInBank, 1)
+    }
+  })
 })
 
 const answerOrderChanged = (elementToFocus) => {

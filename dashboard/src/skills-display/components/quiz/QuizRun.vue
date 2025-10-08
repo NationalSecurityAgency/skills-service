@@ -339,6 +339,12 @@ const startQuizAttempt = () => {
               // eslint-disable-next-line no-param-reassign
               answerOptions[0].answerText = enteredTextObj.answerText;
             }
+          } else if (enteredText && q.questionType === QuestionType.Matching) {
+            enteredText.map((existingAnswer) => {
+              let selectedAnswer = answerOptions.find((it) => it.id === existingAnswer.answerId)
+              selectedAnswer.currentAnswer = existingAnswer.answerText
+            })
+
           }
           return ({ ...q, answerOptions });
         });

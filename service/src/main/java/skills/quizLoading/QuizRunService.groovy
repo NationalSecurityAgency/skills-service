@@ -608,13 +608,9 @@ class QuizRunService {
         UserQuizAnswerAttempt existingAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
         def parsed = jsonSlurper.parseText(answerDefPartialInfo.multiPartAnswer)
         if (existingAnswerAttempt) {
-//            if (quizReportAnswerReq.isSelected) {
-                existingAnswerAttempt.answer = quizReportAnswerReq.getAnswerText()
-                existingAnswerAttempt.status = quizReportAnswerReq.getAnswerText() == parsed.value ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT : UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
-                quizAttemptAnswerRepo.save(existingAnswerAttempt)
-//            } else {
-//                quizAttemptAnswerRepo.delete(existingAnswerAttempt)
-//            }
+            existingAnswerAttempt.answer = quizReportAnswerReq.getAnswerText()
+            existingAnswerAttempt.status = quizReportAnswerReq.getAnswerText() == parsed.value ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT : UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
+            quizAttemptAnswerRepo.save(existingAnswerAttempt)
         } else if (quizReportAnswerReq.isSelected) {
             UserQuizAnswerAttempt newAnswerAttempt = new UserQuizAnswerAttempt(
                     userQuizAttemptRefId: quizAttemptId,
@@ -815,7 +811,11 @@ class QuizRunService {
                 isCorrect = false
             } else if (quizQuestionDef.type == QuizQuestionType.Matching) {
                 def attempt = quizAttemptAnswerRepo.findAllByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefIdIn(quizAttemptId, selectedIds.toSet())
-                status = attempt.find{answer -> answer.status == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG } ? UserQuizQuestionAttempt.QuizQuestionStatus.WRONG : UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
+                if(attempt) {
+                    status = attempt.find{answer -> answer.status == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG } ? UserQuizQuestionAttempt.QuizQuestionStatus.WRONG : UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
+                } else {
+                    status = UserQuizQuestionAttempt.QuizQuestionStatus.WRONG
+                }
                 isCorrect = status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
             } else {
                 if (!selectedIds) {
