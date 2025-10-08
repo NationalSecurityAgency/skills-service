@@ -30,9 +30,9 @@ onMounted(() => {
   props.q.matchingTerms.forEach((term) => {
     answers.value.push([ ])
   });
-  props.q.answerOptions.forEach((option) => {
+  props.q.answerOptions.forEach((option, index) => {
     if(option.currentAnswer) {
-      answers.value[option.id - 1] = [option.currentAnswer]
+      answers.value[index] = [option.currentAnswer]
       const positionInBank = answerBank.value.indexOf(option.currentAnswer)
       answerBank.value.splice(positionInBank, 1)
     }
@@ -139,7 +139,7 @@ const computedName = computed(() => {
                    :id="`answer-${questionNumber}-${index}`"
                    @add="answerOrderChanged"
                    @end="answerOrderChanged"
-                   :group="{ name: computedName, put: answers[index].length === 0 ? answerSections : false, pull: answerSections }">
+                   :group="{ name: computedName, put: answers[index]?.length === 0 ? answerSections : false, pull: answerSections }">
           <template #item="{element}">
             <div style="cursor: pointer;"
                  tabindex="0"

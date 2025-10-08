@@ -342,7 +342,9 @@ const startQuizAttempt = () => {
           } else if (enteredText && q.questionType === QuestionType.Matching) {
             enteredText.map((existingAnswer) => {
               let selectedAnswer = answerOptions.find((it) => it.id === existingAnswer.answerId)
-              selectedAnswer.currentAnswer = existingAnswer.answerText
+              if(selectedAnswer) {
+                selectedAnswer.currentAnswer = existingAnswer.answerText
+              }
             })
 
           }
