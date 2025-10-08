@@ -611,6 +611,7 @@ if (a == true) {
         validator.init()
 
         then:
+        validator.validateDescription("&gt; (A) This is a test quote").valid
         validator.validateDescription("""> (A) This is a block quote""").valid
         validator.validateDescription("""(A) hello world\n" +
                 "\n" +
