@@ -184,13 +184,6 @@ onMounted(() => {
     });
   }
 
-  if (appConfig.addPrefixToInvalidParagraphsOptions && appConfig.addPrefixToInvalidParagraphsOptions.length > 0 ) {
-    const pOptions = appConfig.addPrefixToInvalidParagraphsOptions.split(',')
-    if (pOptions.length > 0) {
-      prefixOptions.value = pOptions
-      prefix.value = pOptions[0]
-    }
-  }
 })
 function onLoad() {
   markdownAccessibilityFixes.fixAccessibilityIssues(idForToastUIEditor, props.allowInsertImages)
@@ -292,31 +285,38 @@ function handleFocus() {
 const descriptionWarningMsg = computed(() => {
   return substituteCommunityValue(appConfig?.descriptionWarningMessage, 'descriptionWarningMessage')
 })
-const allowedAttachmentFileTypes = appConfig.allowedAttachmentFileTypes
-const maxAttachmentSize = appConfig.maxAttachmentSize
-const substituteCommunityValue = (warningMsg, configName) => {
-  let communityValue = appConfig.defaultCommunityDescriptor
-  let errMsg = ''
-
+const communityValue = computed(() => {
+  let res = appConfig.defaultCommunityDescriptor
   if (props.allowCommunityElevation) {
     if (props.userCommunity) {
-      communityValue = props.userCommunity
+      res = props.userCommunity
     } else {
       if (route.params.projectId) {
         if (skillsDisplayInfo.isSkillsDisplayPath()) {
-          communityValue = skillDisplayAttributes.projectUserCommunityDescriptor
+          res = skillDisplayAttributes.projectUserCommunityDescriptor
         } else {
-          communityValue = projConfig.getProjectCommunityValue();
+          res = projConfig.getProjectCommunityValue();
         }
-        errMsg = `projId=[${route.params.projectId}] `
       } else if (route.params.quizId) {
-        communityValue = quizConfig.quizCommunityValue;
-        errMsg = `quizId=[${route.params.quizId}] `
+        res = quizConfig.quizCommunityValue;
       }
     }
   }
+  return res
+})
+const allowedAttachmentFileTypes = appConfig.allowedAttachmentFileTypes
+const maxAttachmentSize = appConfig.maxAttachmentSize
+const substituteCommunityValue = (warningMsg, configName) => {
+  let errMsg = ''
+  if (props.allowCommunityElevation && !props.userCommunity) {
+    if (route.params.projectId) {
+      errMsg = `projId=[${route.params.projectId}] `
+    } else if (route.params.quizId) {
+      errMsg = `quizId=[${route.params.quizId}] `
+    }
+  }
   try {
-    return projectCommunityReplacement.populateProjectCommunity(warningMsg, communityValue, `${errMsg} config.${configName}`);
+    return projectCommunityReplacement.populateProjectCommunity(warningMsg, communityValue.value, `${errMsg} config.${configName}`);
   } catch(err) {
     console.error(err)
     // eslint-disable-next-line vue/no-side-effects-in-computed-properties
@@ -387,13 +387,9 @@ const onDialogShow = () => {
   const newValue = fetchValue()
   generateDescriptionDialogRef.value.updateDescription(newValue)
 }
-
 const validationService = useDescriptionValidatorService()
-const supportPrefix = computed(() => appConfig.paragraphValidationRegex && prefixOptions.value.length > 0 )
-const prefixOptions = ref ([])
-const prefix = ref('')
-const addPrefixToInvalidParagraphs = () => {
-  return validationService.addPrefixToInvalidParagraphs(value.value, prefix.value).then((result) => {
+const addPrefixToInvalidParagraphs = (prefixInfo) => {
+  return validationService.addPrefixToInvalidParagraphs(value.value, prefixInfo.prefix).then((result) => {
     updateDescription(result.newDescription)
   })
 }
@@ -402,13 +398,12 @@ const valueWithMissingPrefix = ref('')
 const previewingMissing = computed(() => valueWithMissingPrefix.value && valueWithMissingPrefix.value.length > 0)
 const showAiButton = computed(() => appConfig.enableOpenAIIntegration && !previewingMissing.value)
 const loadingMissingPreview = ref(false)
-const showWherePrefixWouldBeAdded = () => {
+const showWherePrefixWouldBeAdded = (prefixInfo) => {
   loadingMissingPreview.value = true
   const originalValue = value.value
   const missingPrefix = 'mmmmmissinggggg'
   return validationService.addPrefixToInvalidParagraphs(originalValue, missingPrefix).then((result) => {
-    const descWithMissingIndicators = result.newDescription.replaceAll(missingPrefix, `<span class="p-1 border border-red-500 rounded">${prefix.value}</span> `)
-    valueWithMissingPrefix.value = descWithMissingIndicators
+    valueWithMissingPrefix.value = result.newDescription.replaceAll(missingPrefix, `<span class="p-1 border border-red-500 rounded">${prefixInfo.prefix}</span> `)
   }).finally(() => {
     loadingMissingPreview.value = false
   })
@@ -515,6 +510,7 @@ const closeMissingPrefixView = () => {
                        :id="`${id}PrefixControls`"
                        :is-loading="loadingMissingPreview"
                        :show-preview-control="true"
+                       :community-value="communityValue"
                        @preview-prefix="showWherePrefixWouldBeAdded"
                        @add-prefix="addPrefixToInvalidParagraphs" />
     </div>
