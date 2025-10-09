@@ -349,7 +349,7 @@ Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = nu
     cy.log(`Completed user registration for [${user}]`);
 });
 
-Cypress.Commands.add("login", (user, pass) => {
+Cypress.Commands.add("login", (user, pass = 'password') => {
     cy.log(`Logging in as [${user}] with [${pass}]`);
 
     let requestStatus = 0;

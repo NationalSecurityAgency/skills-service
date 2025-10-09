@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 
 import Select from "primevue/select";
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
 const emits = defineEmits(['add-prefix', 'preview-prefix'])
@@ -48,7 +48,11 @@ const props  = defineProps({
   isLoading: {
     type: Boolean,
     default: false
-  }
+  },
+  communityValue: {
+    type: String,
+    default: null
+  },
 })
 const appConfig = useAppConfig()
 
@@ -57,31 +61,73 @@ const prefixOptions = ref ([])
 const prefix = ref('')
 
 onMounted(() => {
-  if (appConfig.addPrefixToInvalidParagraphsOptions && appConfig.addPrefixToInvalidParagraphsOptions.length > 0 ) {
-    const pOptions = appConfig.addPrefixToInvalidParagraphsOptions.split(',')
-    if (pOptions.length > 0) {
+  updatedPrefixOptions()
+})
+
+watch(() => props.communityValue, () => {
+  updatedPrefixOptions()
+})
+
+const updatedPrefixOptions = () => {
+  const prefixOptionsPropVal = appConfig.addPrefixToInvalidParagraphsOptions
+  if (prefixOptionsPropVal && prefixOptionsPropVal.length > 0) {
+    let pOptions
+    if (prefixOptionsPropVal.includes(':')) {
+      const parsedOptionsLookup = parseAddPrefixToInvalidParagraphsOptions(prefixOptionsPropVal)
+      console.log(`parsedOptionsLookup: ${JSON.stringify(parsedOptionsLookup)}, communityValue: ${props.communityValue}`)
+      pOptions = parsedOptionsLookup[props.communityValue]
+    } else {
+      pOptions = prefixOptionsPropVal.split(',');
+    }
+    if (pOptions && pOptions.length > 0) {
       prefixOptions.value = pOptions
       prefix.value = pOptions[0]
     }
   }
-})
+}
+
+
+const parseAddPrefixToInvalidParagraphsOptions = (str) => {
+  const result = {};
+  // Split by '|' to separate different sections
+  const sections = str.split('|');
+
+  sections.forEach(section => {
+    // Split each section into key and values
+    const [key, valuesStr] = section.split(':');
+    if (key && valuesStr) {
+      // Trim whitespace and split values by comma
+      const values = valuesStr.split(',')
+      result[key.trim()] = valuesStr.split(',');
+    }
+  });
+
+  return result;
+}
+
 const addPrefix = () => {
   emits('add-prefix', {id: props.id, prefix: prefix.value})
 }
 const previewPrefix = () => {
-  emits('preview-prefix', {id: props.id})
+  emits('preview-prefix', {id: props.id, prefix: prefix.value})
 }
 </script>
 
 <template>
   <div v-if="supportPrefix" class="flex gap-2">
-    <Select v-model="prefix" :options="prefixOptions" name="prefix" :size="size" :disabled="isLoading"/>
+    <Select v-model="prefix"
+            :options="prefixOptions"
+            name="prefix"
+            data-cy="prefixSelect"
+            :size="size"
+            :disabled="isLoading"/>
     <SkillsButton icon="fa-solid fa-hammer"
                   :label="appConfig[addButtonLabelConfProp]"
                   :size="size"
                   :outlined="outlinedButtons"
                   :severity="buttonsSeverity"
                   :loading="isLoading"
+                  data-cy="addPrefixBtn"
                   @click="addPrefix"/>
     <SkillsButton v-if="showPreviewControl"
                   icon="fa-solid fa-magnifying-glass"
@@ -90,6 +136,7 @@ const previewPrefix = () => {
                   :outlined="outlinedButtons"
                   :severity="buttonsSeverity"
                   :loading="isLoading"
+                  data-cy="previewPrefixBtn"
                   @click="previewPrefix"/>
 
   </div>
