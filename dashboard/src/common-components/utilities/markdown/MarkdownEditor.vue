@@ -112,6 +112,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  requestCommunityElevation: {
+    type: Boolean,
+    default: false
+  },
 })
 const emit = defineEmits(['value-changed'])
 const themeHelper = useThemesHelper()
@@ -389,7 +393,8 @@ const onDialogShow = () => {
 }
 const validationService = useDescriptionValidatorService()
 const addPrefixToInvalidParagraphs = (prefixInfo) => {
-  return validationService.addPrefixToInvalidParagraphs(value.value, prefixInfo.prefix).then((result) => {
+  const enabledIdParams = !props.requestCommunityElevation ? props.allowCommunityElevation : false
+  return validationService.addPrefixToInvalidParagraphs(markdownText(), prefixInfo.prefix, enabledIdParams, props.requestCommunityElevation, enabledIdParams).then((result) => {
     updateDescription(result.newDescription)
   })
 }
@@ -400,10 +405,11 @@ const showAiButton = computed(() => appConfig.enableOpenAIIntegration && !previe
 const loadingMissingPreview = ref(false)
 const showWherePrefixWouldBeAdded = (prefixInfo) => {
   loadingMissingPreview.value = true
-  const originalValue = value.value
+  const originalValue = markdownText()
   const missingPrefix = 'mmmmmissinggggg'
-  return validationService.addPrefixToInvalidParagraphs(originalValue, missingPrefix).then((result) => {
-    valueWithMissingPrefix.value = result.newDescription.replaceAll(missingPrefix, `<span class="p-1 border border-red-500 rounded">${prefixInfo.prefix}</span> `)
+  const enabledIdParams = !props.requestCommunityElevation ? props.allowCommunityElevation : false
+  return validationService.addPrefixToInvalidParagraphs(originalValue, missingPrefix, enabledIdParams, props.requestCommunityElevation, enabledIdParams).then((result) => {
+    valueWithMissingPrefix.value = result.newDescription.replaceAll(missingPrefix, `<span class="p-1 border border-red-500 rounded">${prefixInfo.prefix}</span>`)
   }).finally(() => {
     loadingMissingPreview.value = false
   })
@@ -452,9 +458,11 @@ const closeMissingPrefixView = () => {
                           size="small"
                           severity="warn"
                           :outlined="false"
+                          data-cy="closeMissingPreviewBtn"
                           @click="closeMissingPrefixView"/>
           </div>
           <MarkdownText :text="valueWithMissingPrefix"
+                        data-cy="missingPreviewText"
                         :instance-id="`${idForToastUIEditor}-missing`"/>
         </template>
       </Card>
@@ -499,7 +507,7 @@ const closeMissingPrefixView = () => {
         </Message>
     </div>
     </BlockUI>
-    <div v-if="!previewingMissing" class="flex gap-2">
+    <div v-show="!previewingMissing" class="flex gap-2">
       <Message severity="error"
              variant="simple"
              size="small"

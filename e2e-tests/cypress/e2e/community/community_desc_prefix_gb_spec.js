@@ -58,28 +58,16 @@ describe('Community and Desc Prefix Global Badge Tests', () => {
         cy.validateAllDragonOptions(null)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.validateDivineDragonOptions(null)
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`).should("not.exist")
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`).should("not.exist")
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`)
-
-        cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`).should("not.exist")
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`).should("not.exist")
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
     })
 
     it('edit a global badge - all dragons', () => {
@@ -88,24 +76,19 @@ describe('Community and Desc Prefix Global Badge Tests', () => {
         cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="editBtn"]').click()
         cy.get(`[data-pc-name="dialog"] [data-cy="markdownEditorInput"]`).should('be.visible')
 
-        cy.validateAllDragonOptions(null)
+        cy.validateAllDragonOptions(null, '', true)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.validateDivineDragonOptions(null)
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`).should("not.exist")
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`).should("not.exist")
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`)
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
     })
 
     it('edit a global badge - all dragons - gb page', () => {
@@ -114,36 +97,31 @@ describe('Community and Desc Prefix Global Badge Tests', () => {
         cy.get('[data-cy="btn_edit-badge"]').click()
         cy.get(`[data-pc-name="dialog"] [data-cy="markdownEditorInput"]`).should('be.visible')
 
-        cy.validateAllDragonOptions(null)
+        cy.validateAllDragonOptions(null, '', true)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.validateDivineDragonOptions(null)
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`).should("not.exist")
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`).should("not.exist")
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`)
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
     })
 
     it('edit a global badge - divine dragons', () => {
         cy.visit('/administrator/globalBadges')
         cy.get('@getConfig')
-        cy.validateDivineDragonOptions('[data-cy="badgeCard-globalBadge2"] [data-cy="editBtn"]')
+        cy.validateDivineDragonOptions('[data-cy="badgeCard-globalBadge2"] [data-cy="editBtn"]', '', true)
     })
 
     it('edit a global badge - divine dragons - gb page', () => {
         cy.visit('/administrator/globalBadges/globalBadge2')
         cy.get('@getConfig')
-        cy.validateDivineDragonOptions('[data-cy="btn_edit-badge"]')
+        cy.validateDivineDragonOptions('[data-cy="btn_edit-badge"]', '', true)
     })
 });
 

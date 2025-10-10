@@ -237,7 +237,6 @@ const addPrefixThenUseDesc = (info) => {
   isAddingPrefix.value = true
   const historyId = info.id
   const missingPrefix = info.prefix
-  console.log(`prefixThenUseGeneratedDescription: ${historyId}, ${missingPrefix}`)
   const historyItem = chatHistory.value.find(item => item.id === historyId)
   if (historyItem?.generatedValue) {
     return validationService.addPrefixToInvalidParagraphs(historyItem?.generatedValue, missingPrefix).then((result) => {
