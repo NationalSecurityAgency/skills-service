@@ -63,19 +63,19 @@ describe('Community and Desc Prefix Project Tests', () => {
         cy.wait('@getConfig')
         cy.get('[data-cy="newProjectButton"]').click()
         cy.get('[data-p="modal"] [data-pc-section="title"]').contains('New Project')
-        cy.validateAllDragonOptions(null)
+        cy.validateAllDragonPrefixOps(null)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
+        cy.validatePrefixOps(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
+        cy.validatePrefixOps(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
+        cy.validatePrefixOps(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
     })
 
     it('edit a project - all dragons', () => {
@@ -84,15 +84,15 @@ describe('Community and Desc Prefix Project Tests', () => {
         cy.get('[data-cy="projectCard_proj1"] [data-cy="editProjBtn"]').click()
         cy.get(`[data-pc-name="dialog"] [data-cy="markdownEditorInput"]`).should('be.visible')
 
-        cy.validateAllDragonOptions(null)
+        cy.validateAllDragonPrefixOps(null)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
+        cy.validatePrefixOps(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
+        cy.validatePrefixOps(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
     })
 
     it.only('edit a project - all dragons - project page', () => {
@@ -101,27 +101,27 @@ describe('Community and Desc Prefix Project Tests', () => {
         cy.get('[data-cy="btn_edit-project"]').click()
         cy.get(`[data-pc-name="dialog"] [data-cy="markdownEditorInput"]`).should('be.visible')
 
-        cy.validateAllDragonOptions(null)
+        cy.validateAllDragonPrefixOps(null)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
+        cy.validatePrefixOps(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
+        cy.validatePrefixOps(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
     })
 
     it('edit a project - divine dragons', () => {
         cy.visit('/administrator')
         cy.get('@getConfig')
-        cy.validateDivineDragonOptions('[data-cy="projectCard_proj2"] [data-cy="editProjBtn"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="projectCard_proj2"] [data-cy="editProjBtn"]')
     })
 
     it('edit a project - divine dragons - project page', () => {
         cy.visit('/administrator/projects/proj2')
         cy.get('@getConfig')
-        cy.validateDivineDragonOptions('[data-cy="btn_edit-project"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="btn_edit-project"]')
     })
 
 });
