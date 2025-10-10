@@ -62,68 +62,68 @@ describe('Community and Desc Prefix Project Pages Tests', () => {
         cy.visit('/administrator/projects/proj2/subjects/subj1/skills/skill1')
         cy.get('@getConfig')
 
-        cy.validateDivineDragonOptions('[data-cy="pageHeader"] [data-cy="editSkillButton_skill1"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="pageHeader"] [data-cy="editSkillButton_skill1"]')
 
         cy.get('[data-cy="breadcrumb-subj1"]').click()
-        cy.validateDivineDragonOptions('[data-cy="skillsTable"] [data-cy="editSkillButton_skill1"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="skillsTable"] [data-cy="editSkillButton_skill1"]')
 
         cy.get('[data-cy="breadcrumb-proj2"]').click()
-        cy.validateDivineDragonOptions('[data-cy="btn_Subjects"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="btn_Subjects"]')
 
         // Project 1
         cy.get('[data-cy="breadcrumb-Projects"]').click()
         cy.get('[data-cy="projCard_proj1_manageBtn"]').click()
-        cy.validateAllDragonOptions('[data-cy="btn_Subjects"]')
+        cy.validateAllDragonPrefixOps('[data-cy="btn_Subjects"]')
         cy.get('[data-cy="manageBtn_subj1"]').click()
-        cy.validateAllDragonOptions('[data-cy="skillsTable"] [data-cy="editSkillButton_skill1"]')
+        cy.validateAllDragonPrefixOps('[data-cy="skillsTable"] [data-cy="editSkillButton_skill1"]')
         cy.get('[data-cy="manageSkillLink_skill1"]').click()
-        cy.validateAllDragonOptions('[data-cy="pageHeader"] [data-cy="editSkillButton_skill1"]')
+        cy.validateAllDragonPrefixOps('[data-cy="pageHeader"] [data-cy="editSkillButton_skill1"]')
     });
 
     it('project pages - divine dragon - skill page', () => {
         cy.visit('/administrator/projects/proj2/subjects/subj1/skills/skill1')
         cy.get('@getConfig')
 
-        cy.validateDivineDragonOptions('[data-cy="pageHeader"] [data-cy="editSkillButton_skill1"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="pageHeader"] [data-cy="editSkillButton_skill1"]')
     })
 
     it('project pages - divine dragon - subject page', () => {
         cy.visit('/administrator/projects/proj2/subjects/subj1')
         cy.get('@getConfig')
-        cy.validateDivineDragonOptions('[data-cy="pageHeader"] [data-cy="btn_edit-subject"]')
-        cy.validateDivineDragonOptions('[data-cy="skillsTable"] [data-cy="editSkillButton_skill1"]')
-        cy.validateDivineDragonOptions('[data-cy="newSkillButton"]')
-        cy.validateDivineDragonOptions('[data-cy="skillsTable"] [data-cy="editSkillButton_group2"]')
-        cy.validateDivineDragonOptions('[data-cy="newGroupButton"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="pageHeader"] [data-cy="btn_edit-subject"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="skillsTable"] [data-cy="editSkillButton_skill1"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="newSkillButton"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="skillsTable"] [data-cy="editSkillButton_group2"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="newGroupButton"]')
     })
 
     it('project pages - divine dragon - project page', () => {
         cy.visit('/administrator/projects/proj2')
         cy.get('@getConfig')
-        cy.validateDivineDragonOptions('[data-cy="btn_Subjects"]')
-        cy.validateDivineDragonOptions('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="btn_Subjects"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]')
     })
 
     it('project pages - divine dragon - contact page', () => {
         cy.visit('/administrator/projects/proj2/contact-users')
         cy.get('@getConfig')
         cy.get('[data-cy="nav-Contact Users"]').click()
-        cy.validateAllDragonOptions(null)
+        cy.validateAllDragonPrefixOps(null)
     })
 
     it('project pages - divine dragon - badges page', () => {
         cy.visit('/administrator/projects/proj2/badges')
         cy.get('@getConfig')
-        cy.validateDivineDragonOptions('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]')
-        cy.validateDivineDragonOptions('[data-cy="btn_Badges"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="btn_Badges"]')
         cy.get('[data-cy="manageBtn_badge1"]').click()
-        cy.validateDivineDragonOptions('[data-cy="pageHeader"] [data-cy="btn_edit-badge"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="pageHeader"] [data-cy="btn_edit-badge"]')
     });
 
     it('project pages - all dragons - skill page', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
         cy.get('@getConfig')
-        cy.validateAllDragonOptions('[data-cy="pageHeader"] [data-cy="editSkillButton_skill1"]')
+        cy.validateAllDragonPrefixOps('[data-cy="pageHeader"] [data-cy="editSkillButton_skill1"]')
     })
 
     it('project pages - all dragons - subject page', () => {
@@ -131,34 +131,34 @@ describe('Community and Desc Prefix Project Pages Tests', () => {
         cy.get('@getConfig')
 
         cy.get('[data-cy="breadcrumb-subj1"]').click()
-        cy.validateAllDragonOptions('[data-cy="pageHeader"] [data-cy="btn_edit-subject"]')
-        cy.validateAllDragonOptions('[data-cy="skillsTable"] [data-cy="editSkillButton_skill1"]')
-        cy.validateAllDragonOptions('[data-cy="newSkillButton"]')
-        cy.validateAllDragonOptions('[data-cy="skillsTable"] [data-cy="editSkillButton_group2"]')
-        cy.validateAllDragonOptions('[data-cy="newGroupButton"]')
+        cy.validateAllDragonPrefixOps('[data-cy="pageHeader"] [data-cy="btn_edit-subject"]')
+        cy.validateAllDragonPrefixOps('[data-cy="skillsTable"] [data-cy="editSkillButton_skill1"]')
+        cy.validateAllDragonPrefixOps('[data-cy="newSkillButton"]')
+        cy.validateAllDragonPrefixOps('[data-cy="skillsTable"] [data-cy="editSkillButton_group2"]')
+        cy.validateAllDragonPrefixOps('[data-cy="newGroupButton"]')
     })
 
     it('project pages - all dragons - project page', () => {
         cy.visit('/administrator/projects/proj1')
         cy.get('@getConfig')
-        cy.validateAllDragonOptions('[data-cy="btn_Subjects"]')
-        cy.validateAllDragonOptions('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]')
+        cy.validateAllDragonPrefixOps('[data-cy="btn_Subjects"]')
+        cy.validateAllDragonPrefixOps('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]')
     })
 
     it('project pages - all dragons - contact page', () => {
         cy.visit('/administrator/projects/proj1/contact-users')
         cy.get('@getConfig')
-        cy.validateAllDragonOptions(null)
+        cy.validateAllDragonPrefixOps(null)
     })
 
     it('project pages - all dragons - badges', () => {
         cy.visit('/administrator/projects/proj1/badges')
         cy.get('@getConfig')
         cy.get('[data-cy="nav-Badges"]').click()
-        cy.validateAllDragonOptions('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]')
-        cy.validateAllDragonOptions('[data-cy="btn_Badges"]')
+        cy.validateAllDragonPrefixOps('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]')
+        cy.validateAllDragonPrefixOps('[data-cy="btn_Badges"]')
         cy.get('[data-cy="manageBtn_badge1"]').click()
-        cy.validateAllDragonOptions('[data-cy="pageHeader"] [data-cy="btn_edit-badge"]')
+        cy.validateAllDragonPrefixOps('[data-cy="pageHeader"] [data-cy="btn_edit-badge"]')
     });
 
     it('project pages - all dragons proj as all dragons user - skill page', () => {
@@ -168,7 +168,7 @@ describe('Community and Desc Prefix Project Pages Tests', () => {
         cy.login(allDragonsUser)
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
         cy.get('@getConfig')
-        cy.validateAllDragonOptions('[data-cy="pageHeader"] [data-cy="editSkillButton_skill1"]')
+        cy.validateAllDragonPrefixOps('[data-cy="pageHeader"] [data-cy="editSkillButton_skill1"]')
     })
 
     it('project pages - all dragons proj as all dragons user - subject page', () => {
@@ -180,11 +180,11 @@ describe('Community and Desc Prefix Project Pages Tests', () => {
         cy.get('@getConfig')
 
         cy.get('[data-cy="breadcrumb-subj1"]').click()
-        cy.validateAllDragonOptions('[data-cy="pageHeader"] [data-cy="btn_edit-subject"]')
-        cy.validateAllDragonOptions('[data-cy="skillsTable"] [data-cy="editSkillButton_skill1"]')
-        cy.validateAllDragonOptions('[data-cy="newSkillButton"]')
-        cy.validateAllDragonOptions('[data-cy="skillsTable"] [data-cy="editSkillButton_group2"]')
-        cy.validateAllDragonOptions('[data-cy="newGroupButton"]')
+        cy.validateAllDragonPrefixOps('[data-cy="pageHeader"] [data-cy="btn_edit-subject"]')
+        cy.validateAllDragonPrefixOps('[data-cy="skillsTable"] [data-cy="editSkillButton_skill1"]')
+        cy.validateAllDragonPrefixOps('[data-cy="newSkillButton"]')
+        cy.validateAllDragonPrefixOps('[data-cy="skillsTable"] [data-cy="editSkillButton_group2"]')
+        cy.validateAllDragonPrefixOps('[data-cy="newGroupButton"]')
     })
 
     it('project pages - all dragons proj as all dragons user - project page', () => {
@@ -194,8 +194,8 @@ describe('Community and Desc Prefix Project Pages Tests', () => {
         cy.login(allDragonsUser)
         cy.visit('/administrator/projects/proj1')
         cy.get('@getConfig')
-        cy.validateAllDragonOptions('[data-cy="btn_Subjects"]')
-        cy.validateAllDragonOptions('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]')
+        cy.validateAllDragonPrefixOps('[data-cy="btn_Subjects"]')
+        cy.validateAllDragonPrefixOps('[data-cy="subjectCard-subj1"] [data-cy="editBtn"]')
     })
 
     it('project pages - all dragons proj as all dragons user - contact page', () => {
@@ -205,7 +205,7 @@ describe('Community and Desc Prefix Project Pages Tests', () => {
         cy.login(allDragonsUser)
         cy.visit('/administrator/projects/proj1/contact-users')
         cy.get('@getConfig')
-        cy.validateAllDragonOptions(null)
+        cy.validateAllDragonPrefixOps(null)
     })
 
     it('project pages - all dragons proj as all dragons user - badges', () => {
@@ -216,9 +216,9 @@ describe('Community and Desc Prefix Project Pages Tests', () => {
         cy.visit('/administrator/projects/proj1/badges')
         cy.get('@getConfig')
         cy.get('[data-cy="nav-Badges"]').click()
-        cy.validateAllDragonOptions('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]')
-        cy.validateAllDragonOptions('[data-cy="btn_Badges"]')
+        cy.validateAllDragonPrefixOps('[data-cy="badgeCard-badge1"] [data-cy="editBtn"]')
+        cy.validateAllDragonPrefixOps('[data-cy="btn_Badges"]')
         cy.get('[data-cy="manageBtn_badge1"]').click()
-        cy.validateAllDragonOptions('[data-cy="pageHeader"] [data-cy="btn_edit-badge"]')
+        cy.validateAllDragonPrefixOps('[data-cy="pageHeader"] [data-cy="btn_edit-badge"]')
     });
 });

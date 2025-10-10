@@ -55,19 +55,19 @@ describe('Community and Desc Prefix Global Badge Tests', () => {
         cy.get('[data-cy="btn_Global Badges"]').click()
         cy.get('[data-p="modal"] [data-pc-section="title"]').contains('New Badge')
 
-        cy.validateAllDragonOptions(null)
+        cy.validateAllDragonPrefixOps(null)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
+        cy.validatePrefixOps(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
+        cy.validatePrefixOps(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
+        cy.validatePrefixOps(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
     })
 
     it('edit a global badge - all dragons', () => {
@@ -76,19 +76,19 @@ describe('Community and Desc Prefix Global Badge Tests', () => {
         cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="editBtn"]').click()
         cy.get(`[data-pc-name="dialog"] [data-cy="markdownEditorInput"]`).should('be.visible')
 
-        cy.validateAllDragonOptions(null, '', true)
+        cy.validateAllDragonPrefixOps(null, '', true)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
+        cy.validatePrefixOps(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
+        cy.validatePrefixOps(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
+        cy.validatePrefixOps(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
     })
 
     it('edit a global badge - all dragons - gb page', () => {
@@ -97,31 +97,31 @@ describe('Community and Desc Prefix Global Badge Tests', () => {
         cy.get('[data-cy="btn_edit-badge"]').click()
         cy.get(`[data-pc-name="dialog"] [data-cy="markdownEditorInput"]`).should('be.visible')
 
-        cy.validateAllDragonOptions(null, '', true)
+        cy.validateAllDragonPrefixOps(null, '', true)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
+        cy.validatePrefixOps(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
+        cy.validatePrefixOps(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
-        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
+        cy.validatePrefixOps(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
     })
 
     it('edit a global badge - divine dragons', () => {
         cy.visit('/administrator/globalBadges')
         cy.get('@getConfig')
-        cy.validateDivineDragonOptions('[data-cy="badgeCard-globalBadge2"] [data-cy="editBtn"]', '', true)
+        cy.validateDivineDragonPrefixOps('[data-cy="badgeCard-globalBadge2"] [data-cy="editBtn"]', '', true)
     })
 
     it('edit a global badge - divine dragons - gb page', () => {
         cy.visit('/administrator/globalBadges/globalBadge2')
         cy.get('@getConfig')
-        cy.validateDivineDragonOptions('[data-cy="btn_edit-badge"]', '', true)
+        cy.validateDivineDragonPrefixOps('[data-cy="btn_edit-badge"]', '', true)
     })
 });
 
