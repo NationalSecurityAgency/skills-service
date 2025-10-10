@@ -64,12 +64,12 @@ describe('Community and Desc Prefix Project Tests', () => {
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill3')
         cy.wait('@getConfig')
         cy.get('[data-cy="requestApprovalBtn"]').click()
-        cy.validateAllDragonOptions(null)
+        cy.validateAllDragonPrefixOps(null)
 
         cy.visit('/progress-and-rankings/projects/proj2/subjects/subj1/skills/skill3')
         cy.wait('@getConfig')
         cy.get('[data-cy="requestApprovalBtn"]').click()
-        cy.validateDivineDragonOptions(null)
+        cy.validateDivineDragonPrefixOps(null)
     })
 
     it('skill justification as all dragons user', () => {
@@ -82,7 +82,7 @@ describe('Community and Desc Prefix Project Tests', () => {
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill3')
         cy.wait('@getConfig')
         cy.get('[data-cy="requestApprovalBtn"]').click()
-        cy.validateAllDragonOptions(null)
+        cy.validateAllDragonPrefixOps(null)
     })
 
     it('skill justification from subject page', () => {
@@ -102,10 +102,10 @@ describe('Community and Desc Prefix Project Tests', () => {
         cy.get('[data-cy="skillProgress_index-3"] [data-cy="skillProgressTitle"]').contains('Great Skill 5')
 
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="requestApprovalBtn"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="skillProgress_index-1"]')
+        cy.validateAllDragonPrefixOps(null, '[data-cy="skillProgress_index-1"]')
 
         cy.get('[data-cy="skillProgress_index-2"] [data-cy="requestApprovalBtn"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="skillProgress_index-2"]')
+        cy.validateAllDragonPrefixOps(null, '[data-cy="skillProgress_index-2"]')
 
 
         cy.visit('/progress-and-rankings/projects/proj2/subjects/subj1')
@@ -117,10 +117,10 @@ describe('Community and Desc Prefix Project Tests', () => {
         cy.get('[data-cy="skillProgress_index-3"] [data-cy="skillProgressTitle"]').contains('Great Skill 5')
 
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="requestApprovalBtn"]').click()
-        cy.validateDivineDragonOptions(null, '[data-cy="skillProgress_index-1"]')
+        cy.validateDivineDragonPrefixOps(null, '[data-cy="skillProgress_index-1"]')
 
         cy.get('[data-cy="skillProgress_index-2"] [data-cy="requestApprovalBtn"]').click()
-        cy.validateDivineDragonOptions(null, '[data-cy="skillProgress_index-2"]')
+        cy.validateDivineDragonPrefixOps(null, '[data-cy="skillProgress_index-2"]')
     });
 
 });
