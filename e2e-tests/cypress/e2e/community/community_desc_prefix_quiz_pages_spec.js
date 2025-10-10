@@ -62,13 +62,13 @@ describe('Community and Desc Prefix Quiz Pages Tests', () => {
     it('questions - switching between quizzes', () => {
         cy.visit('/administrator/quizzes/quiz1')
         cy.wait('@getConfig')
-        cy.validateAllDragonOptions('[data-cy="btn_Questions"]')
-        cy.validateAllDragonOptions('[data-cy="editQuestionButton_1"]', '', true)
+        cy.validateAllDragonPrefixOps('[data-cy="btn_Questions"]')
+        cy.validateAllDragonPrefixOps('[data-cy="editQuestionButton_1"]', '', true)
 
         cy.get('[data-cy="breadcrumb-Quizzes"]').click()
         cy.get('[data-cy="managesQuizBtn_quiz2"]').click()
-        cy.validateDivineDragonOptions('[data-cy="btn_Questions"]')
-        cy.validateDivineDragonOptions('[data-cy="editQuestionButton_1"]', '', true)
+        cy.validateDivineDragonPrefixOps('[data-cy="btn_Questions"]')
+        cy.validateDivineDragonPrefixOps('[data-cy="editQuestionButton_1"]', '', true)
     })
 
     it('grading - all dragons', () => {
@@ -78,9 +78,9 @@ describe('Community and Desc Prefix Quiz Pages Tests', () => {
         cy.get('[data-cy="navLine-Grading"]').click()
         cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled')
         cy.get('[data-cy="gradeBtn_user1"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="gradeAttemptFor_user1"]')
+        cy.validateAllDragonPrefixOps(null, '[data-cy="gradeAttemptFor_user1"]')
         cy.get('[data-cy="gradeBtn_user2"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="gradeAttemptFor_user2"]')
+        cy.validateAllDragonPrefixOps(null, '[data-cy="gradeAttemptFor_user2"]')
     })
 
     it('grading - divine dragon', () => {
@@ -89,9 +89,9 @@ describe('Community and Desc Prefix Quiz Pages Tests', () => {
 
         cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled')
         cy.get('[data-cy="gradeBtn_user1"]').click()
-        cy.validateDivineDragonOptions(null, '[data-cy="gradeAttemptFor_user1"]')
+        cy.validateDivineDragonPrefixOps(null, '[data-cy="gradeAttemptFor_user1"]')
         cy.get('[data-cy="gradeBtn_user2"]').click()
-        cy.validateDivineDragonOptions(null, '[data-cy="gradeAttemptFor_user2"]')
+        cy.validateDivineDragonPrefixOps(null, '[data-cy="gradeAttemptFor_user2"]')
     })
 
     it('questions - all dragons - as all dragons user', () => {
@@ -100,8 +100,8 @@ describe('Community and Desc Prefix Quiz Pages Tests', () => {
         cy.login(allDragonsUser)
         cy.visit('/administrator/quizzes/quiz1')
         cy.wait('@getConfig')
-        cy.validateAllDragonOptions('[data-cy="btn_Questions"]')
-        cy.validateAllDragonOptions('[data-cy="editQuestionButton_1"]', '', true, false)
+        cy.validateAllDragonPrefixOps('[data-cy="btn_Questions"]')
+        cy.validateAllDragonPrefixOps('[data-cy="editQuestionButton_1"]', '', true, false)
 
     })
 
@@ -113,9 +113,9 @@ describe('Community and Desc Prefix Quiz Pages Tests', () => {
         cy.wait('@getConfig')
         cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled')
         cy.get('[data-cy="gradeBtn_user1"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="gradeAttemptFor_user1"]')
+        cy.validateAllDragonPrefixOps(null, '[data-cy="gradeAttemptFor_user1"]')
         cy.get('[data-cy="gradeBtn_user2"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="gradeAttemptFor_user2"]')
+        cy.validateAllDragonPrefixOps(null, '[data-cy="gradeAttemptFor_user2"]')
     })
 
 });

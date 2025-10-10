@@ -22,8 +22,8 @@ const inputLines = [
     'paragraph 5 - divinedragon',
 ]
 
-Cypress.Commands.add("validatePrefixOptions", (modalSelector, validationVal, expected, notExpected, itemQualifierSelector = '', checkPrefixDoesntExist = true, clearExistingInput= false) => {
-    cy.log(`validatePrefixOptions: modalSelector=${modalSelector}, validationVal=${validationVal}, expected=${expected}, notExpected=${notExpected}, itemQualifierSelector=${itemQualifierSelector}`);
+Cypress.Commands.add("validatePrefixOps", (modalSelector, validationVal, expected, notExpected, itemQualifierSelector = '', checkPrefixDoesntExist = true, clearExistingInput= false) => {
+    cy.log(`validatePrefixOps: modalSelector=${modalSelector}, validationVal=${validationVal}, expected=${expected}, notExpected=${notExpected}, itemQualifierSelector=${itemQualifierSelector}`);
     if (modalSelector) {
         cy.get(modalSelector).click()
         cy.get(`[data-pc-name="dialog"] [data-cy="markdownEditorInput"]`).should('be.visible')
@@ -79,11 +79,11 @@ Cypress.Commands.add("validatePrefixOptions", (modalSelector, validationVal, exp
         cy.get('[data-cy="markdownEditorInput"]').should('not.exist')
     }
 });
-Cypress.Commands.add("validateAllDragonOptions", (modalSelector, itemQualifierSelector = '', clearExistingInput = false) => {
-    cy.validatePrefixOptions(modalSelector, 'jabberwocky', ['A', 'B'], ['C', 'D'], itemQualifierSelector, true, clearExistingInput)
+Cypress.Commands.add("validateAllDragonPrefixOps", (modalSelector, itemQualifierSelector = '', clearExistingInput = false) => {
+    cy.validatePrefixOps(modalSelector, 'jabberwocky', ['A', 'B'], ['C', 'D'], itemQualifierSelector, true, clearExistingInput)
 });
-Cypress.Commands.add("validateDivineDragonOptions", (modalSelector, itemQualifierSelector= '', clearExistingInput = false) => {
-    cy.validatePrefixOptions(modalSelector, 'divinedragon', ['A', 'B', 'C', 'D'], [], itemQualifierSelector, true, clearExistingInput)
+Cypress.Commands.add("validateDivineDragonPrefixOps", (modalSelector, itemQualifierSelector= '', clearExistingInput = false) => {
+    cy.validatePrefixOps(modalSelector, 'divinedragon', ['A', 'B', 'C', 'D'], [], itemQualifierSelector, true, clearExistingInput)
 });
 
 

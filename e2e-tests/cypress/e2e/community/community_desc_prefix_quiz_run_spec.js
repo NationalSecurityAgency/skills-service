@@ -63,16 +63,16 @@ describe('Community and Desc Prefix Take Quiz Tests', () => {
         cy.visit('/progress-and-rankings/quizzes/quiz1')
         cy.wait('@getConfig')
         cy.get('[data-cy="startQuizAttempt"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="question_2"]')
-        cy.validateAllDragonOptions(null, '[data-cy="question_3"]')
+        cy.validateAllDragonPrefixOps(null, '[data-cy="question_2"]')
+        cy.validateAllDragonPrefixOps(null, '[data-cy="question_3"]')
     })
 
     it('take a quiz - divine dragon', () => {
         cy.visit('/progress-and-rankings/quizzes/quiz2')
         cy.wait('@getConfig')
         cy.get('[data-cy="startQuizAttempt"]').click()
-        cy.validateDivineDragonOptions(null, '[data-cy="question_2"]')
-        cy.validateDivineDragonOptions(null, '[data-cy="question_3"]')
+        cy.validateDivineDragonPrefixOps(null, '[data-cy="question_2"]')
+        cy.validateDivineDragonPrefixOps(null, '[data-cy="question_3"]')
     })
 
     it('take a quiz - as all dragons user', () => {
@@ -82,8 +82,8 @@ describe('Community and Desc Prefix Take Quiz Tests', () => {
         cy.visit('/progress-and-rankings/quizzes/quiz1')
         cy.wait('@getConfig')
         cy.get('[data-cy="startQuizAttempt"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="question_2"]')
-        cy.validateAllDragonOptions(null, '[data-cy="question_3"]')
+        cy.validateAllDragonPrefixOps(null, '[data-cy="question_2"]')
+        cy.validateAllDragonPrefixOps(null, '[data-cy="question_3"]')
     })
 });
 
