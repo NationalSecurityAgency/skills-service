@@ -74,7 +74,6 @@ const updatedPrefixOptions = () => {
     let pOptions
     if (prefixOptionsPropVal.includes(':')) {
       const parsedOptionsLookup = parseAddPrefixToInvalidParagraphsOptions(prefixOptionsPropVal)
-      console.log(`parsedOptionsLookup: ${JSON.stringify(parsedOptionsLookup)}, communityValue: ${props.communityValue}`)
       pOptions = parsedOptionsLookup[props.communityValue]
     } else {
       pOptions = prefixOptionsPropVal.split(',');

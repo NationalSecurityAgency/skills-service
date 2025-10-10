@@ -398,6 +398,7 @@ const onBadgeSaved = () => {
           :upload-url="global ? `/admin/badges/${props.badge.badgeId}/upload` : `/admin/projects/${route.params.projectId}/upload`"
           :user-community="userCommunityVal"
           :allow-community-elevation="true"
+          :request-community-elevation="enableProtectedUserCommunity && global"
           name="description" />
 
       <Card v-if="!global" data-cy="bonusAwardCard">

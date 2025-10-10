@@ -595,4 +595,31 @@ ___
         then:
         validator.addPrefixToInvalidParagraphs("${url}", prefix).newDescription == "(A) ${url}\n"
     }
+
+    def "support html paragraphs" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        when:
+        validator.init()
+
+        String prefix = "(B) "
+        String text = "<p>paragraph 1</p><p><br></p><p>(A) paragraph 2 </p><p><br></p><p>paragraph 3</p><p><br></p><p>(A) paragraph 4</p><p><br></p><p>paragraph 5</p>"
+        String expect = '''<p>(B) paragraph 1</p>
+<p><br></p>
+<p>(A) paragraph 2</p>
+<p><br></p>
+<p>(B) paragraph 3</p>
+<p><br></p>
+<p>(A) paragraph 4</p>
+<p><br></p>
+<p>(B) paragraph 5</p>
+'''
+        then:
+        validator.addPrefixToInvalidParagraphs(text, prefix).newDescription == expect
+    }
+
+
+
 }
