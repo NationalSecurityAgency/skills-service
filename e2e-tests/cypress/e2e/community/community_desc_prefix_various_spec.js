@@ -50,7 +50,7 @@ describe('Community and Desc Prefix Global Badge Tests', () => {
         cy.viewport(1400, 1000)
         cy.visit('/administrator/contactAdmins')
         cy.wait('@getConfig')
-        cy.validateAllDragonOptions(null)
+        cy.validateAllDragonPrefixOps(null)
     })
 
 });
