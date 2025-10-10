@@ -226,6 +226,7 @@ const onSavedProject = () => {
         :allow-attachments="isEdit"
         :user-community="userCommunityVal"
         :allow-community-elevation="true"
+        :request-community-elevation="enableProtectedUserCommunity"
         name="description" />
 
     </template>

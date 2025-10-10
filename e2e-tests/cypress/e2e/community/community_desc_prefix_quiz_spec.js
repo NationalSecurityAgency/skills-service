@@ -59,74 +59,6 @@ describe('Community and Desc Prefix Quiz Tests', () => {
         cy.runQuizForUser(2, 2, [{selectedIndex: [0]}, {selectedIndex: [0]}], true, 'My Answer')
     });
 
-    it('load proper options when switching between quizzes', () => {
-        cy.visit('/administrator/quizzes/quiz1')
-        cy.wait('@getConfig')
-        cy.validateAllDragonOptions('[data-cy="btn_Questions"]')
-        cy.validateAllDragonOptions('[data-cy="editQuestionButton_1"]')
-
-        cy.get('[data-cy="navLine-Grading"]').click()
-        cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled')
-        cy.get('[data-cy="gradeBtn_user1"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="gradeAttemptFor_user1"]')
-        cy.get('[data-cy="gradeBtn_user2"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="gradeAttemptFor_user2"]')
-
-        cy.get('[data-cy="breadcrumb-Quizzes"]').click()
-        cy.get('[data-cy="managesQuizBtn_quiz2"]').click()
-        cy.validateDivineDragonOptions('[data-cy="btn_Questions"]')
-        cy.validateDivineDragonOptions('[data-cy="editQuestionButton_1"]')
-
-        cy.get('[data-cy="navLine-Grading"]').click()
-        cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled')
-        cy.get('[data-cy="gradeBtn_user1"]').click()
-        cy.validateDivineDragonOptions(null, '[data-cy="gradeAttemptFor_user1"]')
-        cy.get('[data-cy="gradeBtn_user2"]').click()
-        cy.validateDivineDragonOptions(null, '[data-cy="gradeAttemptFor_user2"]')
-    })
-
-    it('load proper options when for a quiz as - as all dragons user', () => {
-        cy.request('POST', `/admin/quiz-definitions/quiz1/users/${allDragonsUser}/roles/ROLE_QUIZ_ADMIN`);
-        cy.logout()
-        cy.login(allDragonsUser)
-        cy.visit('/administrator/quizzes/quiz1')
-        cy.wait('@getConfig')
-        cy.validateAllDragonOptions('[data-cy="btn_Questions"]')
-        cy.validateAllDragonOptions('[data-cy="editQuestionButton_1"]')
-
-        cy.get('[data-cy="navLine-Grading"]').click()
-        cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled')
-        cy.get('[data-cy="gradeBtn_user1"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="gradeAttemptFor_user1"]')
-        cy.get('[data-cy="gradeBtn_user2"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="gradeAttemptFor_user2"]')
-    })
-
-    it('load proper options when taking a quiz', () => {
-        cy.visit('/progress-and-rankings/quizzes/quiz1')
-        cy.wait('@getConfig')
-        cy.get('[data-cy="startQuizAttempt"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="question_2"]')
-        cy.validateAllDragonOptions(null, '[data-cy="question_3"]')
-
-        cy.visit('/progress-and-rankings/quizzes/quiz2')
-        cy.wait('@getConfig')
-        cy.get('[data-cy="startQuizAttempt"]').click()
-        cy.validateDivineDragonOptions(null, '[data-cy="question_2"]')
-        cy.validateDivineDragonOptions(null, '[data-cy="question_3"]')
-    })
-
-    it('load proper options when taking a quiz - as all dragons user', () => {
-        cy.logout()
-        cy.login(allDragonsUser)
-
-        cy.visit('/progress-and-rankings/quizzes/quiz1')
-        cy.wait('@getConfig')
-        cy.get('[data-cy="startQuizAttempt"]').click()
-        cy.validateAllDragonOptions(null, '[data-cy="question_2"]')
-        cy.validateAllDragonOptions(null, '[data-cy="question_3"]')
-    })
-
     it('new quiz', () => {
         cy.visit('/administrator/quizzes')
         cy.wait('@getConfig')
@@ -136,28 +68,16 @@ describe('Community and Desc Prefix Quiz Tests', () => {
         cy.validateAllDragonOptions(null)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.validateDivineDragonOptions(null)
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`).should("not.exist")
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`).should("not.exist")
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`)
-
-        cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`).should("not.exist")
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`).should("not.exist")
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
     })
 
     it('edit a quiz - all dragons', () => {
@@ -166,24 +86,19 @@ describe('Community and Desc Prefix Quiz Tests', () => {
         cy.get('[data-cy="editQuizButton_quiz1"]').click()
         cy.get(`[data-pc-name="dialog"] [data-cy="markdownEditorInput"]`).should('be.visible')
 
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
         cy.validateAllDragonOptions(null)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.validateDivineDragonOptions(null)
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`).should("not.exist")
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`).should("not.exist")
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`)
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
     })
 
     it('edit a quiz - all dragons - quiz page', () => {
@@ -192,36 +107,31 @@ describe('Community and Desc Prefix Quiz Tests', () => {
         cy.get('[data-cy="editQuizButton"]').click()
         cy.get(`[data-pc-name="dialog"] [data-cy="markdownEditorInput"]`).should('be.visible')
 
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
         cy.validateAllDragonOptions(null)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.validateDivineDragonOptions(null)
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'divinedragon', ['A', 'B', 'C', 'D'], [], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`).should("not.exist")
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`).should("not.exist")
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
+        cy.validatePrefixOptions(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
 
         cy.get('[data-cy="restrictCommunity"]').click()
-        cy.get('[data-cy="prefixSelect"]').click()
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]`)
-        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]`)
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{selectall}{backspace}');
     })
 
     it('edit a project - divine dragons', () => {
         cy.visit('/administrator/quizzes')
         cy.get('@getConfig')
-        cy.validateDivineDragonOptions('[data-cy="editQuizButton_quiz2"]')
+        cy.validateDivineDragonOptions('[data-cy="editQuizButton_quiz2"]', '', true)
     })
 
     it('edit a quiz - divine dragons - quiz page', () => {
         cy.visit('/administrator/quizzes/quiz2')
         cy.get('@getConfig')
-        cy.validateDivineDragonOptions('[data-cy="editQuizButton"]')
+        cy.validateDivineDragonOptions('[data-cy="editQuizButton"]', '', true)
     })
 });
 

@@ -258,6 +258,7 @@ const onSavedQuiz = (savedQuiz) => {
           :quiz-id="isEdit ? quiz.quizId : null"
           :upload-url="isEdit   ? `/admin/quiz-definitions/${props.quiz.quizId}/upload` : null"
           :user-community="userCommunityVal"
+          :request-community-elevation="enableProtectedUserCommunity"
           :allow-community-elevation="true"
           :allow-attachments="isEdit"
           data-cy="quizDescription"
