@@ -14,14 +14,31 @@
  * limitations under the License.
  */
 
-Cypress.Commands.add("validatePrefixOptions", (modalSelector, validationVal, expected, notExpected, itemQualifierSelector = '' ) => {
+const inputLines = [
+    'paragraph 1 - divinedragon',
+    'paragraph 2 - jabberwocky',
+    'paragraph 3',
+    'paragraph 4 - jabberwocky',
+    'paragraph 5 - divinedragon',
+]
+
+Cypress.Commands.add("validatePrefixOptions", (modalSelector, validationVal, expected, notExpected, itemQualifierSelector = '', checkPrefixDoesntExist = true, clearExistingInput= false) => {
+    cy.log(`validatePrefixOptions: modalSelector=${modalSelector}, validationVal=${validationVal}, expected=${expected}, notExpected=${notExpected}, itemQualifierSelector=${itemQualifierSelector}`);
     if (modalSelector) {
         cy.get(modalSelector).click()
         cy.get(`[data-pc-name="dialog"] [data-cy="markdownEditorInput"]`).should('be.visible')
     }
 
-    cy.get(`${itemQualifierSelector} [data-cy="prefixSelect"]`).should('not.exist')
-    cy.get(`${itemQualifierSelector} [data-cy="markdownEditorInput"]`).type(validationVal);
+    if (checkPrefixDoesntExist) {
+        cy.get(`${itemQualifierSelector} [data-cy="prefixSelect"]`).should('not.exist')
+    }
+
+    const inputTxt = inputLines.join('\n\n')
+    if (clearExistingInput) {
+        cy.typeInMarkdownEditor(`${itemQualifierSelector} [data-cy="markdownEditorInput"]`, '{selectall}{backspace}');
+    }
+    cy.typeInMarkdownEditor(`${itemQualifierSelector} [data-cy="markdownEditorInput"]`, inputTxt);
+
     cy.get(`${itemQualifierSelector} [data-cy="descriptionError"]`).contains(`not contain ${validationVal}`);
     cy.get(`${itemQualifierSelector} [data-cy="prefixSelect"]`).click()
 
@@ -32,16 +49,41 @@ Cypress.Commands.add("validatePrefixOptions", (modalSelector, validationVal, exp
         cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(${val}) "]`).should("not.exist")
     })
 
+    const selectedVal = expected[1]
+    cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(${selectedVal}) "]`).click()
+    cy.get(`${itemQualifierSelector} [data-cy="missingPreviewText"]`).should('not.exist')
+    cy.get(`${itemQualifierSelector} [data-cy="previewPrefixBtn"]`).click()
+    cy.get(`${itemQualifierSelector} [data-cy="descriptionError"]`).should('not.be.visible')
+    cy.get(`${itemQualifierSelector} [data-cy="previewPrefixBtn"]`).should('not.be.visible')
+    cy.get(`${itemQualifierSelector} [data-cy="addPrefixBtn"]`).should('not.be.visible')
+    cy.get(`${itemQualifierSelector} [data-cy="closeMissingPreviewBtn"]`).should('be.enabled')
+    cy.get(`${itemQualifierSelector} [data-cy="markdownEditorInput"]`).should('not.be.visible')
+
+    const expectedLines = inputLines.map((line) => line.includes(validationVal) ? `(${selectedVal}) ${line}` : line)
+    cy.validateMarkdownViewerText(`${itemQualifierSelector} [data-cy="missingPreviewText"]`, expectedLines)
+
+    cy.get(`${itemQualifierSelector} [data-cy="closeMissingPreviewBtn"]`).click()
+    cy.get(`${itemQualifierSelector} [data-cy="descriptionError"]`).contains(`not contain ${validationVal}`);
+    cy.get(`${itemQualifierSelector} [data-cy="prefixSelect"] [aria-label="(${selectedVal}) "]`)
+    cy.get(`${itemQualifierSelector} [data-cy="previewPrefixBtn"]`).should('be.enabled')
+    cy.get(`${itemQualifierSelector} [data-cy="addPrefixBtn"]`).should('be.enabled')
+    cy.get(`${itemQualifierSelector} [data-cy="closeMissingPreviewBtn"]`).should('not.exist')
+
+    cy.validateMarkdownEditorText(`${itemQualifierSelector} [data-cy="markdownEditorInput"]`, inputLines)
+
+    cy.get(`${itemQualifierSelector} [data-cy="addPrefixBtn"]`).click()
+    cy.validateMarkdownEditorText(`${itemQualifierSelector} [data-cy="markdownEditorInput"]`, expectedLines)
+
     if (modalSelector) {
         cy.get('[data-cy="closeDialogBtn"]').click()
         cy.get('[data-cy="markdownEditorInput"]').should('not.exist')
     }
 });
-Cypress.Commands.add("validateAllDragonOptions", (modalSelector, itemQualifierSelector = '') => {
-    cy.validatePrefixOptions(modalSelector, 'jabberwocky', ['A', 'B'], ['C', 'D'], itemQualifierSelector)
+Cypress.Commands.add("validateAllDragonOptions", (modalSelector, itemQualifierSelector = '', clearExistingInput = false) => {
+    cy.validatePrefixOptions(modalSelector, 'jabberwocky', ['A', 'B'], ['C', 'D'], itemQualifierSelector, true, clearExistingInput)
 });
-Cypress.Commands.add("validateDivineDragonOptions", (modalSelector, itemQualifierSelector= '') => {
-    cy.validatePrefixOptions(modalSelector, 'divinedragon', ['A', 'B', 'C', 'D'], [], itemQualifierSelector)
+Cypress.Commands.add("validateDivineDragonOptions", (modalSelector, itemQualifierSelector= '', clearExistingInput = false) => {
+    cy.validatePrefixOptions(modalSelector, 'divinedragon', ['A', 'B', 'C', 'D'], [], itemQualifierSelector, true, clearExistingInput)
 });
 
 

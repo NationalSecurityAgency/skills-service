@@ -15,7 +15,7 @@
  */
 
 describe('Desc Prefix Tests', () => {
-
+    const letters = ['A', 'B', 'C', 'D'];
     beforeEach( () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
@@ -40,18 +40,69 @@ describe('Desc Prefix Tests', () => {
         cy.get('[data-cy="editSkillButton_skill1"]').click()
 
         cy.get('[data-cy="prefixSelect"]').should('not.exist')
-        cy.get('[data-cy="markdownEditorInput"]').type('jabberwocky');
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', 'paragraph 1\n\nparagraph 2 - jabberwocky\n\nparagraph 3\n\nparagraph 4 - jabberwocky\n\nparagraph 5');
         cy.get('[data-cy="descriptionError"]').contains('not contain jabberwocky');
         cy.get('[data-cy="prefixSelect"]').click()
-        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(A) "]')
-        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]')
-        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]')
-        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(D) "]')
+        for (const letter of letters) {
+            cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(${letter}) "]`);
+        }
 
         cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]').click()
 
         cy.get('[data-cy="addPrefixBtn"]').click()
-        cy.get('[data-cy="markdownEditorInput"]').contains('(B) jabberwocky')
+        cy.validateMarkdownEditorText('[data-cy="markdownEditorInput"]', [
+            'paragraph 1',
+            '(B) paragraph 2 - jabberwocky',
+            'paragraph 3',
+            '(B) paragraph 4 - jabberwocky',
+            'paragraph 5',
+        ])
+    });
+
+    it('preview prefix', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click()
+
+        cy.get('[data-cy="prefixSelect"]').should('not.exist')
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', 'paragraph 1\n\nparagraph 2 - jabberwocky\n\nparagraph 3\n\nparagraph 4 - jabberwocky\n\nparagraph 5');
+        cy.get('[data-cy="descriptionError"]').contains('not contain jabberwocky');
+        cy.get('[data-cy="prefixSelect"]').click()
+        for (const letter of letters) {
+            cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(${letter}) "]`);
+        }
+
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(C) "]').click()
+
+        cy.get('[data-cy="missingPreviewText"]').should('not.exist')
+        cy.get('[data-cy="previewPrefixBtn"]').click()
+        cy.get('[data-cy="descriptionError"]').should('not.exist')
+        cy.get('[data-cy="previewPrefixBtn"]').should('not.exist')
+        cy.get('[data-cy="addPrefixBtn"]').should('not.exist')
+        cy.get('[data-cy="closeMissingPreviewBtn"]').should('be.enabled')
+        cy.get('[data-cy="markdownEditorInput"]').should('not.be.visible')
+        cy.validateMarkdownViewerText('[data-cy="missingPreviewText"]', [
+            'paragraph 1',
+            '(C) paragraph 2 - jabberwocky',
+            'paragraph 3',
+            '(C) paragraph 4 - jabberwocky',
+            'paragraph 5',
+        ])
+
+        cy.get('[data-cy="closeMissingPreviewBtn"]').click()
+        cy.get('[data-cy="descriptionError"]').contains('not contain jabberwocky');
+        cy.get('[data-cy="previewPrefixBtn"]').should('be.enabled')
+        cy.get('[data-cy="addPrefixBtn"]').should('be.enabled')
+        cy.get('[data-cy="closeMissingPreviewBtn"]').should('not.exist')
+
+        cy.validateMarkdownEditorText('[data-cy="markdownEditorInput"]', [
+            'paragraph 1',
+            'paragraph 2 - jabberwocky',
+            'paragraph 3',
+            'paragraph 4 - jabberwocky',
+            'paragraph 5',
+        ])
     });
 
 
