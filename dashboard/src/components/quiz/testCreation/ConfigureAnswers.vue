@@ -58,6 +58,10 @@ function removeAnswer(index) {
   remove(index)
 }
 const replaceAnswers = (answers) => {
+  const fieldSize = fields.value.length
+  for(let x = 0; x < fieldSize; x++) {
+    remove(0)
+  }
   replace(answers)
 }
 const answerSelected = (answerNumber) => {

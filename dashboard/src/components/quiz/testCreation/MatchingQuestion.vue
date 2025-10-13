@@ -49,6 +49,11 @@ function removeAnswer(index) {
 }
 
 const resetAnswers = () => {
+  const fieldSize = fields.value.length
+  for(let x = 0; x < fieldSize; x++) {
+    remove(0)
+  }
+
   replace([{
       id: null,
       answer: '',
@@ -64,8 +69,13 @@ const resetAnswers = () => {
   ])
 }
 
+const replaceAnswers = () => {
+  resetAnswers()
+}
+
 defineExpose( {
-  resetAnswers
+  resetAnswers,
+  replaceAnswers
 })
 </script>
 
@@ -75,6 +85,7 @@ defineExpose( {
       <SkillsTextInput
           class="flex flex-1"
           placeholder="Enter a term"
+          v-if="answer.value.multiPartAnswer"
           v-model="answer.value.multiPartAnswer.term"
           :initialValue="answer.value.multiPartAnswer.term"
           :aria-label="`Enter term number ${index+1}`"
@@ -85,6 +96,7 @@ defineExpose( {
       <SkillsTextInput
           class="flex flex-1"
           placeholder="Enter an answer"
+          v-if="answer.value.multiPartAnswer"
           v-model="answer.value.multiPartAnswer.value"
           :initialValue="answer.value.multiPartAnswer.value"
           :aria-label="`Enter answer number ${index+1}`"

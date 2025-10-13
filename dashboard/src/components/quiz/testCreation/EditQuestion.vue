@@ -77,24 +77,27 @@ function questionTypeChanged(inputItem) {
         && inputItem.id !== QuestionType.TextInput && inputItem.id !== QuestionType.Rating && inputItem.id !== QuestionType.Matching
         && (!initialQuestionData.answers || initialQuestionData.answers.length < 2)) {
       nextTick(() => {
-        answersRef.value.replaceAnswers([{
-          id: null,
-          answer: '',
-          isCorrect: false,
-        }, {
-          id: null,
-          answer: '',
-          isCorrect: false,
-        }]);
+        answersRef.value.replaceAnswers(defaultAnswers);
       })
     } else {
       if(answersRef.value) {
-        answersRef.value.resetAnswers();
+        answersRef.value.replaceAnswers(defaultAnswers);
       }
     }
   }
-
 }
+
+const defaultAnswers = [{
+  id: null,
+  answer: '',
+  isCorrect: false,
+  multiPartAnswer: { term: '', value: '' }
+}, {
+  id: null,
+  answer: '',
+  isCorrect: false,
+  multiPartAnswer: { term: '', value: '' }
+}];
 
 const questionTypes = [{
   label: 'Multiple Answers',
