@@ -78,6 +78,10 @@ class CircularLearningPathChecker {
         }
     }
 
+    private static String getMapKey(String projectId, String skillId) {
+        return "${projectId}-${skillId}".toString()
+    }
+
     static class PrerequisiteNodeLookup {
         Map<String, List<SkillInfo>> prerequisiteNodeLookup = [:]
         Map<String, List<SkillInfo>> prerequisiteParentNodeLookup = [:]
@@ -99,9 +103,6 @@ class CircularLearningPathChecker {
         }
         private String getMapKey(SkillInfo s) {
             return getMapKey(s.projectId, s.skillId)
-        }
-        private String getMapKey(String projectId, String skillId) {
-            return "${projectId}-${skillId}".toString()
         }
     }
 
@@ -294,8 +295,10 @@ class CircularLearningPathChecker {
                     if (current.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId) {
                         badgesIBelongTo = badgesIBelongTo.findAll( { it.skillId != current.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId })
                     }
-                    for (SkillInfo badgeIBelongTo : badgesIBelongTo) {
-                        SkillInfo myBadge = badgeIBelongTo.clone()
+                    // only consider bages that are on the path already
+                    List<SkillInfo> badgesToConsider = badgesIBelongTo.findAll { getMapKey(it.projectId, it.skillId) in allItemIdsOnFinalLearningPath }
+                    for (SkillInfo badgeIBelongTo : badgesToConsider) {
+                        SkillInfo myBadge = (SkillInfo)badgeIBelongTo.clone()
                         myBadge.circularCheckBadgeLoadedDueToPreviousSkill = true
                         myBadge.circularCheckBadgeLoadedDueToPreviousSkillFollowingRouteOfBadgeId = myBadge.skillId
                         List<SkillInfo> pathCopy = new ArrayList<>(path)
