@@ -42,7 +42,7 @@ ${instructionsToKeepPlaceholders ? `-${instructionsToKeepPlaceholders}` : ''}
     }
 
     const quizRules = `
-    ### Question Types
+### Question Types
 1. **SingleChoice**
    - Must NOT provide less than 1 correct answer
    - Must NOT provide more than 1 correct answer
@@ -77,15 +77,16 @@ ${instructionsToKeepPlaceholders ? `-${instructionsToKeepPlaceholders}` : ''}
   - Clear question text (Markdown formatted)
   - Question type
   - Array of answer objects
+- When streaming, send questions as complete json objects in a chunk
 - All Questions should be returned in a single JSON array
-- Provide a property called numQuestions with the number of questions generated beofre the array
-- The entire response should be a valid JSON array with no additional text.
+- Provide a property called numQuestions with the number of questions generated before the array
+- The entire response should be a single JSON object, with one property called 'numQuestions' and one property called 'questions' that is an array of question objects.
 - Do not provide an introduction. 
 - Do not provide any additional text.
 - Do not provide any comments.
 - Do not provide any explanations.
 
-### Example Question Format
+### Example Response Format
 \`\`\`json
 {
    "numQuestions": 5,
