@@ -95,7 +95,7 @@ describe('Community and Desc Prefix Project Tests', () => {
         cy.validatePrefixOps(null, 'jabberwocky', ['A', 'B'], ['C', 'D'], '', false)
     })
 
-    it.only('edit a project - all dragons - project page', () => {
+    it('edit a project - all dragons - project page', () => {
         cy.visit('/administrator/projects/proj1')
         cy.get('@getConfig')
         cy.get('[data-cy="btn_edit-project"]').click()
