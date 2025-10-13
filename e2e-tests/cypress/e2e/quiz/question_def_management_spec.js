@@ -1093,4 +1093,35 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="question-2-answer-3"]').should('contain.text', 'Third Term')
         cy.get('[data-cy="question-2-answer-3"]').should('contain.text', 'Third Answer')
     })
+
+    it('Can change question type from matching question to another and back', function () {
+        cy.createQuizDef(1);
+        cy.createQuizMatchingQuestionDef(1, 1)
+
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="editQuestionButton_1"]').click()
+        cy.get('[data-cy="question-1-answer-0"]').should('contain.text', 'First Term')
+        cy.get('[data-cy="question-1-answer-0"]').should('contain.text', 'First Answer')
+        cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'Second Term')
+        cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'Second Answer')
+        cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Term')
+        cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Answer')
+
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_MultipleChoice"]').click()
+
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="selected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="selected"]').should('not.exist')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').should('be.empty')
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').should('be.empty')
+
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_Matching"]').click()
+
+        cy.get('[data-cy="termText-0"]').should('be.empty')
+        cy.get('[data-cy="answerText-0"]').should('be.empty')
+        cy.get('[data-cy="termText-1"]').should('be.empty')
+        cy.get('[data-cy="answerText-1"]').should('be.empty')
+
+    })
 });
