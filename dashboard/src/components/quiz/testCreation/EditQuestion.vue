@@ -81,7 +81,10 @@ function questionTypeChanged(inputItem) {
       })
     } else {
       if(answersRef.value) {
-        answersRef.value.replaceAnswers(defaultAnswers);
+        if(inputItem.id === QuestionType.Matching) {
+          answersRef.value.replaceAnswers(defaultAnswers);
+        }
+        answersRef.value.resetAnswers()
       }
     }
   }
