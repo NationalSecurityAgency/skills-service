@@ -61,14 +61,15 @@ const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false) =
   chatHistory.value.push(res)
   return res
 }
-const appendGeneratedToLastChatItem = (response) => {
+const appendGeneratedToLastChatItem = (toAppend) => {
   const historyItem = chatHistory.value[chatHistory.value.length - 1]
-  historyItem.generatedValue = response
+  historyItem.generatedValue += toAppend
   try {
-    currentQuizData.value = extractJsonArray(response);
-    historyItem.generatedQuiz = currentQuizData.value
+    if (currentQuizData.value) {
+      historyItem.generatedQuiz = currentQuizData.value
+    }
   } catch (e) {
-    console.error(`Failed to parse json respond due to: ${e.message}`, response);
+    console.error(`Failed to parse json respond due to: ${e.message}`, toAppend);
   }
 }
 const setFinalMsgToLastChatItem = (finalMsg, failedToGenerate = false) => {
@@ -95,7 +96,7 @@ function parseResponse(text) {
   };
 }
 
-const shouldStream = ref(false)
+const shouldStream = ref(true)
 const instructionsInput = ref(null)
 const generateQuiz = () => {
 
@@ -134,6 +135,18 @@ const generateQuiz = () => {
   }
 }
 
+const generateQuizFromDescription = (skillDescription) => {
+  currentDescription.value = skillDescription
+  generateQuiz()
+}
+defineExpose({
+  generateQuizFromDescription
+});
+
+const scrollInstructionsIntoView = () => {
+  document.getElementById('instructionsInput')?.scrollIntoView()
+}
+const currentQuizData = ref(null)
 const checkThatProgressWasMade = () => {
   const TIMEOUT_MS = 5000;
   const MAX_ATTEMPTS = 6; // Max 30 seconds (5s * 6)
@@ -156,40 +169,145 @@ const checkThatProgressWasMade = () => {
     }
   }, TIMEOUT_MS)
 }
+
 const generateQuizWithStreaming = (instructionsToSend) => {
-  checkThatProgressWasMade()
-  return LearningGenService.generateDescriptionStreamWithFetch(route.params.projectId, instructionsToSend,
+  checkThatProgressWasMade();
+  let buffer = '';
+  let fullBuffer = '';
+
+  return LearningGenService.generateDescriptionStreamWithFetch(
+      route.params.projectId,
+      instructionsToSend,
       (chunk) => {
-        appendGeneratedToLastChatItem(chunk)
-        scrollInstructionsIntoView()
+        buffer = parseQuizStream(
+            chunk,
+            buffer,
+            // onProgress
+            (question) => {
+              if (question) {
+                // Add to chat or update UI
+                const lastHistoryItem = chatHistory.value[chatHistory.value.length - 1]
+                if (lastHistoryItem && lastHistoryItem.generatedQuiz && lastHistoryItem.generatedQuiz.length > 0) {
+                  lastHistoryItem.generatedQuiz.push(question)
+                } else {
+                  lastHistoryItem.generatedQuiz = [question]
+                }
+              }
+            },
+            // onComplete
+            (completeData) => {
+            }
+        );
+        fullBuffer += chunk;
+        scrollInstructionsIntoView();
       },
-      (completeData) => {
-        setFinalMsgToLastChatItem(reviewDescMsg)
-        isGenerating.value = false
-        focusOnInstructionsInput()
+      // onComplete
+      () => {
+        setFinalMsgToLastChatItem(reviewDescMsg);
+        isGenerating.value = false;
+        focusOnInstructionsInput();
+        // Store complete quiz data
+        const lastHistoryItem = chatHistory.value[chatHistory.value.length - 1]
+        if (lastHistoryItem) {
+          lastHistoryItem.generatedValue = fullBuffer;
+          if (lastHistoryItem.generatedQuiz && lastHistoryItem.generatedQuiz.length > 0) {
+            currentQuizData.value = lastHistoryItem.generatedQuiz;
+          }
+        }
       },
+      // onError
       (error) => {
-        log.error(`Failed to generate description via streaming: ${error}`)
-        isGenerating.value = false
-        setFinalMsgToLastChatItem(failedToGenerateMsg, true)
-      })
+        log.error(`Failed to generate quiz: ${error}`);
+        isGenerating.value = false;
+        setFinalMsgToLastChatItem(failedToGenerateMsg, true);
+      }
+  );
+};
+
+function parseQuizStream(chunk, buffer, onProgress, onComplete) {
+  let newBuffer = buffer + chunk;
+  let currentPosition = 0;
+  let inString = false;
+  let inArray = false;
+  let braceDepth = 0;
+  let bracketDepth = 0;
+  let startIndex = -1;
+  let questionsStartIndex = -1;
+
+  // Process the buffer to find complete objects
+  for (let i = 0; i < newBuffer.length; i++) {
+    const char = newBuffer[i];
+    const prevChar = i > 0 ? newBuffer[i - 1] : '';
+
+    // Track if we're inside a string (accounting for escaped quotes)
+    if (char === '"' && prevChar !== '\\') {
+      inString = !inString;
+    }
+
+    // Only process structure when not in a string
+    if (!inString) {
+      if (char === '{') {
+        if (braceDepth === 0) {
+          startIndex = i; // Start of a new object
+        }
+        braceDepth++;
+      } else if (char === '}') {
+        braceDepth--;
+        const lastHistoryItem = chatHistory.value[chatHistory.value.length - 1]
+        const partialQuestionsExist = lastHistoryItem && lastHistoryItem.generatedQuiz && lastHistoryItem.generatedQuiz.length > 0;
+        const isFirstQuestion = !partialQuestionsExist && inArray && bracketDepth === 1
+        const isAdditionalQuestion = partialQuestionsExist && bracketDepth === 0 && !inArray
+
+        if (isFirstQuestion || isAdditionalQuestion) {
+          const questionStr = newBuffer.substring(isFirstQuestion ? questionsStartIndex + 1 : startIndex, i + 1);
+          try {
+            const question = JSON.parse(questionStr);
+            onProgress(question);
+          } catch (e) {
+            // Continue with partial parsing
+            console.error('Error parsing questions array:', e);
+          }
+          currentPosition = i + 1;
+        } else if (braceDepth < 0) {
+          braceDepth = 0; // Reset on error
+        }
+      } else if (char === '[') {
+        if (bracketDepth === 0) {
+          inArray = true;
+          questionsStartIndex = i;
+        }
+        bracketDepth++;
+      } else if (char === ']') {
+        bracketDepth--;
+
+        if (bracketDepth === 0) {
+          inArray = false;
+        }
+      }
+    }
+  }
+  //
+  // // Try to parse the entire buffer as complete JSON
+  // if (currentPosition === 0) {
+  //   try {
+  //     const completeData = JSON.parse(newBuffer);
+  //     if (completeData.questions && Array.isArray(completeData.questions)) {
+  //       onComplete(completeData);
+  //       return ''; // Clear buffer
+  //     }
+  //   } catch (e) {
+  //     // Not a complete JSON, continue with partial processing
+  //   }
+  // }
+
+  // Return remaining buffer that couldn't be processed yet
+  return newBuffer.substring(currentPosition);
 }
 
-const generateQuizFromDescription = (skillDescription) => {
-  currentDescription.value = skillDescription
-  generateQuiz()
-}
-defineExpose({
-  generateQuizFromDescription
-});
-
-const scrollInstructionsIntoView = () => {
-  document.getElementById('instructionsInput')?.scrollIntoView()
-}
-const currentQuizData = ref(null)
 const generateQuizWithoutStreaming = (instructionsToSend) => {
   return LearningGenService.generateDescription(route.params.projectId, instructionsToSend)
       .then((response) => {
+        currentQuizData.value = extractJsonArray(response.description);
         appendGeneratedToLastChatItem(response.description)
         setFinalMsgToLastChatItem(reviewDescMsg)
       }).finally(() => {
@@ -242,7 +360,6 @@ const extractJsonArray = (text) => {
   try {
     return JSON.parse(jsonString);
   } catch (e) {
-    console.error('Failed to parse JSON: ', jsonString);
     throw new Error('Failed to parse JSON: ' + e.message);
   }
 }
