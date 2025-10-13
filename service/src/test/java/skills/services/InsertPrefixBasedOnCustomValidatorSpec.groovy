@@ -616,8 +616,10 @@ ___
 <p><br></p>
 <p>(B) paragraph 5</p>
 '''
+
+        String newDesc = validator.addPrefixToInvalidParagraphs(text, prefix).newDescription
         then:
-        validator.addPrefixToInvalidParagraphs(text, prefix).newDescription == expect
+        newDesc == expect
     }
 
 
