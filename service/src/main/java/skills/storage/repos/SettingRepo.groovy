@@ -21,6 +21,8 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.Setting
 
+import java.util.stream.Stream
+
 interface SettingRepo extends CrudRepository<Setting, Integer> {
 
     @Nullable
@@ -117,4 +119,6 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     @Modifying
     void deleteBySettingAndSettingGroupAndProjectIdAndTypeAndUserRefId(String setting, String settingGroup, String projectId, Setting.SettingType type, Integer userRefId)
 
+    @Query('''select s from Setting s where s.settingGroup=?1''')
+    Stream<Setting> scanSettingsByGroup(String settingsGroup)
 }
