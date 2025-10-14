@@ -77,27 +77,63 @@ class ParagraphValidator {
         String description = request.description
 
         AbstractVisitor visitor = new AbstractVisitor() {
+
+            @Override
+            void visit(ThematicBreak thematicBreak) {
+                 // ignore
+            }
+
             @Override
             void visit(HtmlBlock htmlBlock) {
                 String html = htmlBlock.getLiteral()
                 Document doc = Jsoup.parse(html)
 
+                AtomicBoolean prefixAdded = new AtomicBoolean(false)
+                Closure<Boolean> documentValidationFailure = (Element el, String text) -> {
+                    invalidate()
+                    Integer lineNum = htmlBlock.sourceSpans ? htmlBlock.sourceSpans?.first()?.lineIndex : null
+                    appendToValidationFailedDetails("Failed within an html element for text [${text.substring(0,Math.min(20,text.length()))}] ${lineNum != null ? "after line[${lineNum}]" : ""}")
+                    if (shouldAddPrefixToElement(el)) {
+                        el.prependText(request.prefix)
+                        prefixAdded.set(true)
+                    }
+                }
+
                 // Process paragraphs
-                boolean prefixAdded = false
                 Elements paragraphs = doc.select("p")
                 paragraphs.each { Element element ->
                     String text = element.text().trim()
                     if (text && !validationPattern.pattern.matcher(text).matches()) {
-                        invalidate()
-                        Integer lineNum = htmlBlock.sourceSpans ? htmlBlock.sourceSpans?.first()?.lineIndex : null
-                        appendToValidationFailedDetails("Failed within an html element for text [${text.substring(0,Math.min(20,text.length()))}] ${lineNum != null ? "after line[${lineNum}]" : ""}")
-                        if (shouldAddPrefixToElement(element)) {
-                            element.prependText(request.prefix)
-                            prefixAdded = true
+                        documentValidationFailure(element, text)
+                    }
+                }
+
+
+                // process lists
+                Elements lists = doc.select("ul, ol")
+                lists.each { Element list ->
+                    Elements items = list.select("li")
+                    if (items) {
+                        Element firstItem = items.first()
+                        if (firstItem) {
+                            String text = items.text().trim()
+                            if (text && !validationPattern.pattern.matcher(text).matches()) {
+                                boolean validatedViaPrevious = false
+                                Element previousNonEmptyElement = list.previousElementSiblings().find({ it.text().trim().size() > 0 })
+                                if (previousNonEmptyElement) {
+                                    String prevElementText = previousNonEmptyElement.text()
+                                    validatedViaPrevious = validationPattern.pattern.matcher(prevElementText).matches()
+                                }
+
+                                if (!validatedViaPrevious) {
+                                    documentValidationFailure(firstItem, text)
+                                }
+                            }
                         }
                     }
                 }
-                if (prefixAdded) {
+
+                if (prefixAdded.get()) {
                     htmlBlock.setLiteral(doc.body().html())
                 }
             }
@@ -121,13 +157,12 @@ class ParagraphValidator {
                 Node previousNode = bulletList.previous
 
                 boolean previousNodeValidates = previousNode
-                        && previousNode instanceof Paragraph
                         && linesToPreviousNode(bulletList) < 3
                         && validateParagraph(previousNode)
 
                 if (!previousNodeValidates) {
                     ListItem firstBullet = (ListItem) bulletList.firstChild
-                    Paragraph firstBulletContent = (Paragraph) firstBullet.firstChild
+                    Node firstBulletContent = firstBullet.firstChild
 
                     if (!validateParagraph(firstBulletContent)) {
                         if (firstBulletContent == null) {
@@ -143,12 +178,12 @@ class ParagraphValidator {
                 if (request.forceValidationPattern) {
                     ListItem currentBullet = (ListItem) bulletList.firstChild
                     while (currentBullet) {
-                        Paragraph bulletParagraph = (Paragraph) currentBullet.firstChild
-                        if (bulletParagraph) {
-                            String toValidate = textContentRenderer.render(bulletParagraph)
+                        Node firstBulletValue = currentBullet.firstChild
+                        if (firstBulletValue) {
+                            String toValidate = textContentRenderer.render(firstBulletValue)
                             toValidate = Jsoup.parse(toValidate).text()
                             boolean shouldForceValidation = request.forceValidationPattern.matcher(toValidate).matches()
-                            if (shouldForceValidation && !validateParagraph(bulletParagraph)) {
+                            if (shouldForceValidation && !validateParagraph(firstBulletValue)) {
                                 invalidate()
                             }
                         }
@@ -245,12 +280,33 @@ class ParagraphValidator {
         return null
     }
 
+    private String removeLeadingSeparators(String text) {
+        if (text == null || text.isEmpty()) {
+            return text
+        }
+        return text.replaceFirst('^[\\s\\-*_=~`#]+', '')
+    }
+
+    private boolean isOnlySeparatorsOrWhitespace(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return true
+        }
+
+        // Check if the text contains only whitespace, newlines, or markdown separators
+        return text.matches('^[\\s\\-*_=~`#]*$')
+    }
+
     private boolean validateParagraph(Node node) {
         if (!node) {
             return false
         }
         String toValidate = textContentRenderer.render(node)
         toValidate = Jsoup.parse(toValidate).text()
+        if (isOnlySeparatorsOrWhitespace(toValidate)) {
+            return true
+        }
+        toValidate = removeLeadingSeparators(toValidate)
+
         boolean isValidParagraph = validationPattern.pattern.matcher(toValidate).matches()
         if (isValidParagraph) {
             if (request.forceValidationPattern) {
@@ -333,8 +389,9 @@ class ParagraphValidator {
 
     private void blockHandlerValidator(Node node, int minLinesToPreviousNode = 2) {
         Node previousNode = lookForPreviousParagraph(node)
-        boolean isPrevParagraph = previousNode instanceof Paragraph || previousNode instanceof Heading
-        if (!previousNode || linesToPreviousNode(node) > minLinesToPreviousNode || !isPrevParagraph) {
+
+        boolean prevNodeIsATable = previousNode instanceof TableBlock && node instanceof TableBlock
+        if (!previousNode || linesToPreviousNode(node) > minLinesToPreviousNode || prevNodeIsATable) {
             invalidate()
 
             if (shouldAddPrefix(node)) {

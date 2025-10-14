@@ -230,4 +230,8 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
           WHERE subjectDef.projectId = :projectId AND subjectDef.type = 'Subject'
           AND groupDef.skillId = :groupId AND groupDef.type = 'SkillsGroup' AND groupDef.projectId = :projectId''')
     SkillDefWithExtra findSubjectForGroup(@Param("projectId") String projectId, @Param("groupId") String groupId)
+
+
+    @Query('''SELECT s FROM SkillDefWithExtra s WHERE s.type not in (?1)''')
+    Stream<SkillDefWithExtra> findAllExcludingTypes(List<ContainerType> types)
 }
