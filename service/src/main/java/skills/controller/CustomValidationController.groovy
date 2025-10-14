@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.controller.result.model.ModifiedDescription
+import skills.controller.result.model.RequestResult
 import skills.controller.result.model.ValidationCheckResult
 import skills.controller.result.model.ValidationResult
 import skills.dbupgrade.DBUpgradeSafe
@@ -37,12 +38,23 @@ class CustomValidationController {
     @Autowired
     CustomValidator customValidator
 
+    @Autowired
+    ValidateAllDesc validateAllDesc
+
+    @DBUpgradeSafe
+    @RequestMapping(value = "/validateAllDescriptions", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    RequestResult validateAllDescriptions(){
+        validateAllDesc.validateAllDesc()
+        return RequestResult.success()
+    }
+
     @DBUpgradeSafe
     @RequestMapping(value = "/description", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     ValidationResult validateDescription(@RequestBody Map<String,String> body){
         CustomValidationResult vr = customValidator.validateDescription(body.value, body.projectId, shouldUseProtectedCommunityValidator(body), body.quizId)
-        ValidationResult validationResult = new ValidationResult(vr.valid, vr.msg)
+        ValidationResult validationResult = new ValidationResult(vr.valid, vr.msg, vr.validationFailedDetails)
         return validationResult
     }
 

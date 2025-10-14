@@ -228,7 +228,7 @@ class CustomValidator {
                 forceValidationPattern: forceValidationPattern,
                 utilizeUserCommunityParagraphPatternByDefault: utilizeUserCommunityParagraphPatternByDefault,
                 quizId: quizId)).validateMarkdown()
-        return new CustomValidationResult(valid: result.isValid, msg: result.validationMsg)
+        return new CustomValidationResult(valid: result.isValid, msg: result.validationMsg, validationFailedDetails: result.validationFailedDetails ?: null)
     }
 
     ModifiedDescription addPrefixToInvalidParagraphs(String description, String prefix, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {

@@ -22,6 +22,7 @@ import groovy.transform.EqualsAndHashCode
 class CustomValidationResult {
     boolean valid
     String msg
+    String validationFailedDetails
 
     private final static CustomValidationResult VALID = new CustomValidationResult(valid: true)
 
