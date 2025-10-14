@@ -532,7 +532,7 @@ ___
 
 ***""").valid
 
-        !validator.validateDescription("""(A) Separate me
+        def sepRes = validator.validateDescription("""(A) Separate me
 
 ___
 
@@ -541,7 +541,9 @@ Separate me
 ---
 
 (A) Separate me
-***""").valid
+***""")
+        !sepRes.valid
+        sepRes.validationFailedDetails == "Line[4] [Separate me]\n\n"
 
         !validator.validateDescription("""(A) Separate me
 
@@ -613,13 +615,13 @@ if (a == true) {
         then:
         validator.validateDescription("&gt; (A) This is a test quote").valid
         validator.validateDescription("""> (A) This is a block quote""").valid
-        validator.validateDescription("""(A) hello world\n" +
+        validator.validateDescription("(A) hello world\n" +
                 "\n" +
                 "\n" +
                 "<br>\n" +
                 "> \n" +
                 "> \n" +
-                "> (A) quote<em>s</em>""").valid
+                "> (A) quote<em>s</em>").valid
         !validator.validateDescription("""> This is a block quote""").valid
     }
 
@@ -775,11 +777,12 @@ if (a == true) {
         validator.init()
 
         boolean success = validator.validateDescription(text).valid
-        boolean fail = validator.validateDescription(invalidText).valid
+        def failRes = validator.validateDescription(invalidText)
         then:
 
         success
-        !fail
+        !failRes.valid
+        failRes.validationFailedDetails == "Line[2] [another]\n\n"
         validator.validateDescription(styledBlockQuote).valid
     }
 
@@ -914,6 +917,7 @@ line-height:107%">(A) fancy formatting</span>""").valid
 
         then:
         !result.valid
+        result.validationFailedDetails == "Failed within an html element for text [Paragraph2] after line[0]\n"
     }
 
     def "test list validation with html items"(){
@@ -926,10 +930,17 @@ line-height:107%">(A) fancy formatting</span>""").valid
 
         String validList = "* <span class=\"SomeFancyText\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) One</span><span class=\"SomeFont\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"FancyFont\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Two</span><span class=\"someclass\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"Text\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Three</span><span class=\"Some\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\""
         String notValidList = "* <span class=\"SomeFancyText\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">One</span><span class=\"SomeFont\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"FancyFont\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Two</span><span class=\"someclass\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"Text\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Three</span><span class=\"Some\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\""
+        String notValidList1 = "(A) one\n\n(A) two\n\n\n\n* <span class=\"SomeFancyText\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">One</span><span class=\"SomeFont\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"FancyFont\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Two</span><span class=\"someclass\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"Text\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Three</span><span class=\"Some\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\""
 
         then:
         validator.validateDescription(validList).valid
-        !validator.validateDescription(notValidList).valid
+        def res = validator.validateDescription(notValidList)
+        !res.valid
+        res.validationFailedDetails == "Line[0] [<span class=\"SomeFan]\n\n"
+
+        def res1 = validator.validateDescription(notValidList1)
+        !res1.valid
+        res1.validationFailedDetails == "Line[6] [<span class=\"SomeFan]\n\n"
     }
 
     def "support images" () {
@@ -953,9 +964,18 @@ line-height:107%">(A) fancy formatting</span>""").valid
         validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${imgStr}\n\n(A) ok\n\n${imgStr}").valid
         !validator.validateDescription("(A) ok\n\n${imgStr}\n\n Negative\n\n${imgStr}\n\n(A) ok\n\n${imgStr}").valid
         validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}").valid
-        !validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A NOT\n\n${imgStr}").valid
+        def imageRes = validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A NOT\n\n${imgStr}")
+        !imageRes.valid
+        imageRes.validationFailedDetails == "Line[2] [\"This is Image\" (dat]\n" +
+                "\n" +
+                "Line[10] [(A NOT]\n" +
+                "\n" +
+                "Line[12] [\"This is Image\" (dat]\n\n"
         validator.validateDescription("(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}").valid
         !validator.validateDescription("(A) ok\n\n${table}\n\n(A notok\n\n${imgStr}\n\n(A) ok\n\n${table}").valid
+
+        validator.validateDescription("""** (A) This is the title:**
+![image.png](data:image/png;base64,XXXXXXXXXXXX)""").valid
     }
 
     def "support links" () {
@@ -970,8 +990,121 @@ line-height:107%">(A) fancy formatting</span>""").valid
 
         then:
         validator.validateDescription("(A) ${url}").valid
-        !validator.validateDescription("${url}").valid
+        def invalidLink = validator.validateDescription("(A)somet\n\n${url}")
+        !invalidLink.valid
+        invalidLink.validationFailedDetails == "Line[2] [https://www.some.com]\n\n"
+
+
     }
+
+    def "support mixed html br and newline chars" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        String p1 = "**(A) First W's:**\n\n* [okd](http://ljelaj.com/dljl/dljl\n* [some (doje)](http://dlj.com/dlj)\n* [another](http://dlj.com/dlj.pdf)'\n* [eafeafe](http://dljel.com/dljld/dljdlj.pdf)"
+        String p2 = "<strong>(A) Something &nbsp; &nbsp; very st'rong:</strong>\n\n* [dlaj (dljdl)](http://dlj.com/dlj/)\n"
+        when:
+        validator.init()
+        then:
+        validator.validateDescription("<strong>(A) one <br/>two<br>three </strong>").valid
+        validator.validateDescription("${p1}\n\n\n<br>\n${p2}").valid
+    }
+
+    def "bad list" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String input = "*\n\n* \n* \n* one"
+        when:
+        validator.init()
+        def res = validator.validateDescription(input)
+        then:
+        !res.valid
+        res.validationFailedDetails == "First bullet is empty\n"
+    }
+
+    def "list under a heading" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String input = """### (A) This is a list
+
+* first
+* second
+* third"""
+        when:
+        validator.init()
+        def res = validator.validateDescription(input)
+        then:
+        res.valid
+    }
+
+    def "first bullet point in the list has html" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String input = "* <div>blah<span>ok</span></div>\n* two"
+        String input2 = "* <div>(A) blah<span>ok</span></div>\n* two"
+        when:
+        validator.init()
+        def res = validator.validateDescription(input)
+        def res2 = validator.validateDescription(input2)
+        then:
+        !res.valid
+        res.validationFailedDetails == "Line[0] [<div>blah<span>ok</s]\n\n"
+
+        res2.valid
+    }
+
+    def "html list" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String input = """<ol>
+    <li>(A) First item with <strong>bold text</strong></li>
+    <li>Second item with <strong>another bold text</strong></li>
+    <li>Third item with <strong>final bold text</strong></li>
+    </ol>"""
+        String input1 = """<ol>
+    <li>First item with <strong>bold text</strong></li>
+    <li>Second item with <strong>another bold text</strong></li>
+    <li>Third item with <strong>final bold text</strong></li>
+    </ol>"""
+        String input2 = """<p></p><p><ol>
+    <li>First item with <strong>bold text</strong></li>
+    <li>Second item with <strong>another bold text</strong></li>
+    <li>Third item with <strong>final bold text</strong></li>
+    </ol></p>"""
+        String input3 = """<p>(A) some</p><p><ol>
+    <li>First item with <strong>bold text</strong></li>
+    <li>Second item with <strong>another bold text</strong></li>
+    <li>Third item with <strong>final bold text</strong></li>
+    </ol></p>"""
+        when:
+        validator.init()
+        def res = validator.validateDescription(input)
+        def res1 = validator.validateDescription(input1)
+        def res2 = validator.validateDescription(input2)
+        def res3 = validator.validateDescription(input3)
+        then:
+        res.valid
+        !res1.valid
+        res1.validationFailedDetails == "Failed within an html element for text [First item with bold] after line[0]\n"
+        !res2.valid
+        res2.validationFailedDetails == "Failed within an html element for text [First item with bold] after line[0]\n"
+        res3.valid
+    }
+
+
 
     def "support text with multiple paragraphs and lists - test concurrency"() {
         CustomValidator validator = new CustomValidator()
@@ -1008,5 +1141,7 @@ line-height:107%">(A) fancy formatting</span>""").valid
         results.every { it.endsWith('PASSED') }
 
     }
+
+
 }
 
