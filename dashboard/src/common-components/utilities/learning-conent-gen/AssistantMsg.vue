@@ -16,13 +16,22 @@ limitations under the License.
 <script setup>
 defineProps({
   id: String,
+  isGenerating: Boolean,
 })
 </script>
 
 <template>
   <div class="flex justify-start relative" :data-cy="`aiMsg-${id}`">
     <div class="p-2 bg-blue-100 rounded-2xl pr-4 pl-8">
-      <slot />
+      <div class="flex gap-2 items-end">
+        <div class="flex-1">
+         <slot />
+        </div>
+        <div v-if="isGenerating">
+          <skills-spinner v-if="true" :id="`${id}-spinner`" :is-loading="true" :size-in-rem="1.5"/>
+        </div>
+      </div>
+
       <i
           shape="circle"
           size="small"
