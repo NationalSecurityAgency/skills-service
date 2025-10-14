@@ -60,8 +60,8 @@ const learningPathViolationErr = ref({
 const nameQuery = ref(null);
 const hideManageButton = ref(false);
 const isReadOnly = ref(false);
-const rows = ref(5);
-const rowsPerPage = [5, 10, 15, 20];
+const rows = ref(10);
+const rowsPerPage = [10, 25, 50, 100];
 
 onMounted(() => {
   projectId.value = route.params.projectId;
