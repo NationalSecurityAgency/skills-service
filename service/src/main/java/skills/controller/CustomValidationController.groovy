@@ -48,6 +48,27 @@ class CustomValidationController {
         validateAllDesc.validateAllDesc()
         return RequestResult.success()
     }
+    @DBUpgradeSafe
+    @RequestMapping(value = "/validateProjDescriptions", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    RequestResult validateProjDescriptions(){
+        validateAllDesc.validateProjDesc()
+        return RequestResult.success()
+    }
+    @DBUpgradeSafe
+    @RequestMapping(value = "/validateQuizDescriptions", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    RequestResult validateQuizDesc(){
+        validateAllDesc.validateQuizDesc()
+        return RequestResult.success()
+    }
+    @DBUpgradeSafe
+    @RequestMapping(value = "/validateQuestionDescriptions", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    RequestResult validateQuizQuestions(){
+        validateAllDesc.validateQuizQuestions()
+        return RequestResult.success()
+    }
 
     @DBUpgradeSafe
     @RequestMapping(value = "/description", method = RequestMethod.POST, produces = "application/json")
