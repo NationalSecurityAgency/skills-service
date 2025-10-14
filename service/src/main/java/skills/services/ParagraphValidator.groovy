@@ -50,6 +50,7 @@ class ParagraphValidator {
         Boolean isValid
         String newDescription // if prefix is provided
         String validationMsg
+        String validationFailedDetails
     }
 
     private final InternalValidationRequest request
@@ -61,6 +62,7 @@ class ParagraphValidator {
 
     private CustomValidator.ValidationPattern validationPattern
     private final AtomicBoolean isValid = new AtomicBoolean(true)
+    private final StringBuilder validationFailedDetails = new StringBuilder()
     private MarkdownRenderer markdownRenderer
     private TextContentRenderer textContentRenderer
     private Node document
@@ -81,15 +83,22 @@ class ParagraphValidator {
                 Document doc = Jsoup.parse(html)
 
                 // Process paragraphs
+                boolean prefixAdded = false
                 Elements paragraphs = doc.select("p")
                 paragraphs.each { Element element ->
                     String text = element.text().trim()
                     if (text && !validationPattern.pattern.matcher(text).matches()) {
-                        isValid.set(false)
+                        invalidate()
+                        Integer lineNum = htmlBlock.sourceSpans ? htmlBlock.sourceSpans?.first()?.lineIndex : null
+                        appendToValidationFailedDetails("Failed within an html element for text [${text.substring(0,Math.min(20,text.length()))}] ${lineNum != null ? "after line[${lineNum}]" : ""}")
                         if (shouldAddPrefixToElement(element)) {
                             element.prependText(request.prefix)
+                            prefixAdded = true
                         }
                     }
+                }
+                if (prefixAdded) {
+                    htmlBlock.setLiteral(doc.body().html())
                 }
             }
 
@@ -121,7 +130,10 @@ class ParagraphValidator {
                     Paragraph firstBulletContent = (Paragraph) firstBullet.firstChild
 
                     if (!validateParagraph(firstBulletContent)) {
-                        isValid.set(false)
+                        if (firstBulletContent == null) {
+                            appendToValidationFailedDetails("First bullet is empty")
+                        }
+                        invalidate()
                         if (shouldAddPrefix(firstBulletContent)) {
                             firstBulletContent.prependChild(new Text(request.prefix))
                         }
@@ -132,11 +144,13 @@ class ParagraphValidator {
                     ListItem currentBullet = (ListItem) bulletList.firstChild
                     while (currentBullet) {
                         Paragraph bulletParagraph = (Paragraph) currentBullet.firstChild
-                        String toValidate = textContentRenderer.render(bulletParagraph)
-                        toValidate = Jsoup.parse(toValidate).text()
-                        boolean shouldForceValidation = request.forceValidationPattern.matcher(toValidate).matches()
-                        if (shouldForceValidation && !validateParagraph(bulletParagraph)) {
-                            isValid.set(false)
+                        if (bulletParagraph) {
+                            String toValidate = textContentRenderer.render(bulletParagraph)
+                            toValidate = Jsoup.parse(toValidate).text()
+                            boolean shouldForceValidation = request.forceValidationPattern.matcher(toValidate).matches()
+                            if (shouldForceValidation && !validateParagraph(bulletParagraph)) {
+                                invalidate()
+                            }
                         }
                         currentBullet = (ListItem) currentBullet.next
                     }
@@ -146,7 +160,7 @@ class ParagraphValidator {
             @Override
             void visit(Paragraph paragraph) {
                 if (!validateParagraph(paragraph) && !(paragraph.firstChild instanceof Image)) {
-                    isValid.set(false)
+                    invalidate()
                     if (shouldAddPrefix(paragraph)) {
                         paragraph.prependChild(new Text(request.prefix))
                     }
@@ -157,7 +171,7 @@ class ParagraphValidator {
             @Override
             void visit(Heading heading) {
                 if (!validateParagraph(heading)) {
-                    isValid.set(false)
+                    invalidate()
                     if (shouldAddPrefix(heading)) {
                         heading.prependChild(new Text(request.prefix))
                     }
@@ -194,9 +208,20 @@ class ParagraphValidator {
         return new InternalValidationResult(
                 isValid: isValid.get(),
                 newDescription: newDescription,
-                validationMsg: validationPattern.message
+                validationMsg: validationPattern.message,
+                validationFailedDetails: validationFailedDetails?.toString()
         )
 
+    }
+
+    private void invalidate() {
+        isValid.set(false)
+    }
+    private void appendToValidationFailedDetails(String msg) {
+        if (!validationFailedDetails.toString().contains(msg)) {
+            validationFailedDetails.append(msg)
+            validationFailedDetails.append("\n")
+        }
     }
 
     private InternalValidationResult init() {
@@ -227,29 +252,45 @@ class ParagraphValidator {
         String toValidate = textContentRenderer.render(node)
         toValidate = Jsoup.parse(toValidate).text()
         boolean isValidParagraph = validationPattern.pattern.matcher(toValidate).matches()
-        if (isValidParagraph && request.forceValidationPattern) {
-            String markdown = markdownRenderer.render(node)
-            String[] lines = markdown.split('\n')
-            for (String line : lines) {
-                String lineToValidate = Jsoup.parse(line).text()
-                boolean forceValidate = request.forceValidationPattern.matcher(lineToValidate).matches()
-                if (forceValidate) {
-                    boolean isValidLine = validationPattern.pattern.matcher(lineToValidate).matches()
-                    if (!isValidLine) {
-                        return false
+        if (isValidParagraph) {
+            if (request.forceValidationPattern) {
+                String markdown = markdownRenderer.render(node)
+                String[] lines = markdown.split('\n')
+                for (String line : lines) {
+                    String lineToValidate = Jsoup.parse(line).text()
+                    boolean forceValidate = request.forceValidationPattern.matcher(lineToValidate).matches()
+                    if (forceValidate) {
+                        boolean isValidLine = validationPattern.pattern.matcher(lineToValidate).matches()
+                        if (!isValidLine) {
+                            Integer lineNum = node.sourceSpans ? node.sourceSpans?.first()?.lineIndex : null
+                            String msg = "Via forced validation${lineNum != null ? ", after line[${lineNum}] " : " "}[${line?.substring(0, Math.min(20, line?.length()))}]\n"
+                            appendToValidationFailedDetails("${msg}")
+                            return false
+                        }
                     }
                 }
             }
+        } else {
+            appendValidationMsg(node)
         }
         return isValidParagraph
     }
 
+    private void appendValidationMsg(Node node) {
+        String asText = textContentRenderer.render(node)
+        Integer lineNum = node.sourceSpans ? node.sourceSpans?.first()?.lineIndex : null
+        String msg = "${lineNum != null ? "Line[${lineNum}] " : ""}[${asText?.substring(0, Math.min(20, asText?.length()))}]\n"
+        appendToValidationFailedDetails("${msg}")
+    }
+
     private static String normalizeInput(String input) {
         return input
+                .replaceAll(/(?<=\n)\s*<br\s*\/?>\s*|\s*<br\s*\/?>\s*(?=\n)/, "\n")  // Replace <br> or <br/> when next to newlines
                 .replaceAll(/\r\n?/, "\n")  // Normalize line endings
                 .replaceAll(/(?<=\S)[ \t]*(?=\n)/, "")  // Remove spaces before newlines
                 .replaceAll(/(?<=\n)[ \t]*(?=\n)/, "")  // Remove spaces between newlines
                 .replaceAll("&gt;", ">")  // Replace greater than encoding so Block Quotes are handled properly by the parser
+
     }
 
     private boolean shouldAddPrefix(Node nodeToAddTo) {
@@ -294,7 +335,7 @@ class ParagraphValidator {
         Node previousNode = lookForPreviousParagraph(node)
         boolean isPrevParagraph = previousNode instanceof Paragraph || previousNode instanceof Heading
         if (!previousNode || linesToPreviousNode(node) > minLinesToPreviousNode || !isPrevParagraph) {
-            isValid.set(false)
+            invalidate()
 
             if (shouldAddPrefix(node)) {
                 Paragraph paragraph = new Paragraph()
@@ -302,7 +343,7 @@ class ParagraphValidator {
                 node.insertBefore(paragraph)
             }
         } else if (!validateParagraph(previousNode)) {
-            isValid.set(false)
+            invalidate()
             if (shouldAddPrefix(previousNode)) {
                 if (previousNode instanceof HtmlBlock) {
                     String currentHtml = previousNode.getLiteral()
