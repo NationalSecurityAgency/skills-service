@@ -49,7 +49,7 @@ describe('Badges Tests', () => {
           .as('loadSkills');
     });
 
-    it('removing last skill from enabled badge does not disable badge', () => {
+    it('can not remove last skill from enabled badge', () => {
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
             projectId: 'proj1',
             subjectId: 'subj1',
@@ -108,19 +108,8 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=manageBtn_TestBadgeBadge]')
           .click();
         cy.wait(500);
-        cy.get('[data-cy=deleteSkill_skill1]')
-          .click();
-        cy.contains('YES, Delete It!')
-          .click();
-        cy.contains('No Skills Selected Yet');
+        cy.get('[data-cy=deleteSkill_skill1]').should('be.disabled')
 
-        cy.contains('[data-cy="breadcrumbItemValue"]', 'Badges')
-          .click();
-        cy.contains('Test Badge')
-          .should('exist');
-        cy.get('[data-cy=badgeStatus]')
-          .contains('Status: Live')
-          .should('exist');
     });
 
     it('remove skill after navigating to the link directly', () => {
