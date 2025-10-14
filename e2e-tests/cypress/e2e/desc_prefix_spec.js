@@ -77,9 +77,9 @@ describe('Desc Prefix Tests', () => {
 
         cy.get('[data-cy="missingPreviewText"]').should('not.exist')
         cy.get('[data-cy="previewPrefixBtn"]').click()
-        cy.get('[data-cy="descriptionError"]').should('not.exist')
-        cy.get('[data-cy="previewPrefixBtn"]').should('not.exist')
-        cy.get('[data-cy="addPrefixBtn"]').should('not.exist')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="previewPrefixBtn"]').should('not.be.visible')
+        cy.get('[data-cy="addPrefixBtn"]').should('not.be.visible')
         cy.get('[data-cy="closeMissingPreviewBtn"]').should('be.enabled')
         cy.get('[data-cy="markdownEditorInput"]').should('not.be.visible')
         cy.validateMarkdownViewerText('[data-cy="missingPreviewText"]', [
