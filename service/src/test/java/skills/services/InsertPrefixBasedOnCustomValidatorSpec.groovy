@@ -622,6 +622,53 @@ ___
         newDesc == expect
     }
 
+    def "support mixed html br and newline chars" () {
+        String prefix = "(A) "
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        when:
+        validator.init()
+        then:
+        validator.addPrefixToInvalidParagraphs("<strong>one <br/>two<br>three </strong>", prefix).newDescription == "(A) <strong>one <br/>two<br>three </strong>\n"
+        validator.addPrefixToInvalidParagraphs("One\n\n<br/>\ntwo", prefix).newDescription == "(A) One\n\n(A) two\n"
+    }
 
+    def "html list" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
 
+        String prefix = "(B) "
+
+        String input1 = """<ol>
+    <li>First item with <strong>bold text</strong></li>
+    <li>Second item with <strong>another bold text</strong></li>
+    <li>Third item with <strong>final bold text</strong></li>
+    </ol>"""
+        String input2 = """<p></p><p><ol>
+    <li>First item with <strong>bold text</strong></li>
+    <li>Second item with <strong>another bold text</strong></li>
+    <li>Third item with <strong>final bold text</strong></li>
+    </ol></p>"""
+        when:
+        validator.init()
+        def res1 = validator.addPrefixToInvalidParagraphs(input1, prefix)
+        def res2 = validator.addPrefixToInvalidParagraphs(input2, prefix)
+        then:
+        res1.newDescription == """<ol>
+ <li>(B) First item with <strong>bold text</strong></li>
+ <li>Second item with <strong>another bold text</strong></li>
+ <li>Third item with <strong>final bold text</strong></li>
+</ol>\n"""
+        res2.newDescription == """<p></p>
+<p></p>
+<ol>
+ <li>(B) First item with <strong>bold text</strong></li>
+ <li>Second item with <strong>another bold text</strong></li>
+ <li>Third item with <strong>final bold text</strong></li>
+</ol>
+<p></p>\n"""
+    }
 }
