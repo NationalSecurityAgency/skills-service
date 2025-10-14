@@ -158,7 +158,7 @@ const generateDescription = () => {
 }
 
 const checkThatProgressWasMade = () => {
-  const TIMEOUT_MS = 5000;
+  const TIMEOUT_MS = 7000;
   const MAX_ATTEMPTS = 6; // Max 30 seconds (5s * 6)
   let numAttempts = 0;
   const statusMessages = [
@@ -172,12 +172,17 @@ const checkThatProgressWasMade = () => {
   const lastItem = chatHistory.value[chatHistory.value.length - 1];
   const initialLength = lastItem.generatedValue.length;
 
-  setTimeout(() => {
-    if (numAttempts < MAX_ATTEMPTS && lastItem.generatedValue.length === initialLength) {
-      lastItem.origMessage += ` \n${statusMessages[numAttempts]}`
-      numAttempts += 1
-    }
-  }, TIMEOUT_MS)
+  const checkProgress = () => {
+    setTimeout(() => {
+      if (isGenerating.value && numAttempts < MAX_ATTEMPTS && lastItem.generatedValue.length === initialLength) {
+        lastItem.origMessage += ` \n${statusMessages[numAttempts]}`
+        numAttempts += 1
+        log.info(`GenerateDescriptionDialog: Checking progress attempt=[${numAttempts}]`)
+        checkProgress()
+      }
+    }, TIMEOUT_MS)
+  }
+  checkProgress()
 }
 const generateDescriptionWithStreaming = (instructionsToSend) => {
   checkThatProgressWasMade()
@@ -273,16 +278,17 @@ const addPrefixThenUseDesc = (info) => {
               <markdown-text :text="historyItem.origMessage" :instanceId="historyItem.id"/>
             </user-msg>
           </div>
-          <assistant-msg v-if="historyItem.role === ChatRole.ASSISTANT" class="flex flex-col gap-2" :id="historyItem.id">
+          <assistant-msg v-if="historyItem.role === ChatRole.ASSISTANT" class="flex flex-col gap-2" :id="historyItem.id" :is-generating="historyItem.isGenerating">
             <div class="flex gap-2 items-center" data-cy="origSegment">
               <markdown-text :text="historyItem.origMessage" :instanceId="`${historyItem.id}-content`"/>
-              <skills-spinner v-if="historyItem.isGenerating" :id="`${historyItem.id}-spinner`" :is-loading="true" :size-in-rem="0.8"/>
             </div>
-            <div v-if="historyItem.generatedValue" class="px-5 border rounded-lg bg-blue-50 ml-4" data-cy="generatedSegment">
+            <div v-if="historyItem.generatedValue" class="px-5 border rounded-lg bg-blue-50" data-cy="generatedSegment">
               <markdown-text :text="historyItem.generatedValue" :instanceId="`${historyItem.id}-desc`"/>
             </div>
             <div v-if="historyItem.finalMsg" data-cy="finalSegment">
-              <markdown-text :text="historyItem.finalMsg" :instanceId="`${historyItem.id}-finalMsg`"/>
+              <Message :closable="false" :severity="historyItem.failedToGenerate ? 'error' : 'info'">
+                <markdown-text :text="historyItem.finalMsg" :instanceId="`${historyItem.id}-finalMsg`"/>
+              </Message>
               <div class="flex justify-start items-center gap-3 mt-2">
                 <SkillsButton
                     v-if="!historyItem.failedToGenerate"
