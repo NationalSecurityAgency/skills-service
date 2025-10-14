@@ -20,6 +20,8 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
 import skills.storage.model.ProjDefWithDescription
 
+import java.util.stream.Stream
+
 interface ProjDefWithDescriptionRepo extends CrudRepository<ProjDefWithDescription, Long> {
 
     @Nullable
@@ -28,4 +30,7 @@ interface ProjDefWithDescriptionRepo extends CrudRepository<ProjDefWithDescripti
     @Nullable
     @Query("select p.description from ProjDefWithDescription p where p.projectId = ?1" )
     String getDescriptionByProjectId(String projectId)
+
+    @Query('''SELECT s FROM ProjDefWithDescription s''')
+    Stream<ProjDefWithDescription> streamAll()
 }
