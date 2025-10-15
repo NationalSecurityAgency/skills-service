@@ -141,8 +141,10 @@ const skillEdited = (editedSkill) => {
 
 const buildHeaderOptions = () => {
   const skillId = skillsState.skill?.skillId ? SkillReuseIdUtil.removeTag(skillsState.skill.skillId) : ''
+  const iconClass = skillsState.skill.iconClass ? skillsState.skill.iconClass : 'fas fa-graduation-cap'
+
   return {
-    icon: 'fas fa-graduation-cap skills-color-skills',
+    icon: `${iconClass} skills-color-skills`,
     title: `SKILL: ${skillsState.skill?.name}`,
     subTitle: `ID: ${skillId} | GROUP ID: ${skillsState.skill?.groupId}`,
     stats: [{
