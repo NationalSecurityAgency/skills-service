@@ -288,7 +288,7 @@ describe('Badges Tests', () => {
                 colIndex: 2,
                 value: '350'
             }],
-        ], 5);
+        ], 10);
 
         cy.get(`${tableSelector} th`)
           .contains('Skill ID')
@@ -364,7 +364,7 @@ describe('Badges Tests', () => {
                 colIndex: 2,
                 value: '50'
             }],
-        ], 5);
+        ], 10);
 
         cy.get(`${tableSelector} th`)
           .contains('Skill Name')
@@ -440,7 +440,7 @@ describe('Badges Tests', () => {
                 colIndex: 2,
                 value: '50'
             }],
-        ], 5);
+        ], 10);
 
         cy.get(`${tableSelector} th`)
           .contains('Skill Name')
@@ -516,7 +516,7 @@ describe('Badges Tests', () => {
                 colIndex: 2,
                 value: '350'
             }],
-        ], 5);
+        ], 10);
 
         cy.get(`${tableSelector} th`)
           .contains('Total Points')
@@ -592,7 +592,7 @@ describe('Badges Tests', () => {
                 colIndex: 2,
                 value: '350'
             }],
-        ], 5);
+        ], 10);
 
         cy.get(`${tableSelector} th`)
           .contains('Total Points')
@@ -668,7 +668,7 @@ describe('Badges Tests', () => {
                 colIndex: 2,
                 value: '50'
             }],
-        ], 5);
+        ], 10);
     });
 
     it('rows per page control is enabled once # of skills is greater than page size', () => {
@@ -727,7 +727,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill4'
             }],
-        ], 5, false, null, false);
+        ], 10, false, null, false);
         cy.get('[data-pc-name="pcrowperpagedropdown"]').should('not.exist');
 
         // add one more skill to the badge to make 6 skills total
@@ -761,7 +761,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill5'
             }],
-        ], 5, true, null, false);
+        ], 10, true, null, false);
         cy.get('[data-pc-name="pcrowperpagedropdown"]').should('exist');
 
         // now delete a skill to go back to 5 skills total
@@ -791,7 +791,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill5'
             }],
-        ], 5, false, null, false);
+        ], 10, false, null, false);
         cy.get('[data-pc-name="pcrowperpagedropdown"]').should('not.exist');
     });
 
