@@ -1,0 +1,26 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      {
+        "contains": "paragraphs"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive"
+    },
+    "bodyFileName": "response-body-paragraphs.txt",
+    "transformers": ["response-template"],
+    "chunkedDribbleDelay": {
+      "numberOfChunks": 4,
+      "totalDuration": 8000
+    }
+  }
+}
