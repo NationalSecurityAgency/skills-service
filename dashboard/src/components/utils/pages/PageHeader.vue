@@ -50,7 +50,9 @@ onUnmounted(() => {
             <div class="flex w-full flex-wrap">
               <div class="mt-2 text-center lg:text-left w-full lg:w-auto">
                 <div class="text-2xl flex">
-                  <Avatar v-if="options.icon" class="mr-2" :icon="options.icon"/>
+                  <div v-if="options.icon" class="d-inline-block rounded-border w-16 skill-icon-container text-primary text-center border mr-2">
+                    <i class="skill-icon" :class="`${options.icon}`"></i>
+                  </div>
                   <h1 class="text-2xl my-0 font-normal" data-cy="title" style="overflow-wrap: anywhere;">
                     {{ options.title }}</h1>
                   <slot name="right-of-header"></slot>
@@ -112,5 +114,19 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.skill-icon {
+  height: 100% !important;
+  width: 100% !important;
+  background-size: cover;
+  background-position: center;
+  font-size: 24px !important;
+  line-height: 30px !important;
+}
 
+.skill-icon-container {
+  max-width:32px;
+  max-height:32px;
+  height:32px;
+  width: 32px;
+}
 </style>
