@@ -1,0 +1,63 @@
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"# Paragraph 1\n\n"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"Lorem ipsum dolor sit amet, "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"consectetur adipiscing elit, "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"Ut enim ad minim veniam, "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"Duis aute irure dolor in reprehenderit in voluptate "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"velit esse cillum dolore eu fugiat nulla pariatur. "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"Excepteur sint occaecat cupidatat non proident, "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"sunt in culpa qui officia deserunt mollit anim id est laborum.\n\n"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"# Paragraph 2\n\n"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"Lorem ipsum dolor sit amet, "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"consectetur adipiscing elit, "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"Ut enim ad minim veniam, "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"Duis aute irure dolor in reprehenderit in voluptate "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"velit esse cillum dolore eu fugiat nulla pariatur. "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"Excepteur sint occaecat cupidatat non proident, "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"sunt in culpa qui officia deserunt mollit anim id est laborum.\n\n"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"# Paragraph 3\n\n"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"Lorem ipsum dolor sit amet, "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"consectetur adipiscing elit, "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"Ut enim ad minim veniam, "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"Duis aute irure dolor in reprehenderit in voluptate "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"velit esse cillum dolore eu fugiat nulla pariatur. "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"Excepteur sint occaecat cupidatat non proident, "},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"sunt in culpa qui officia deserunt mollit anim id est laborum.\n\n"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
