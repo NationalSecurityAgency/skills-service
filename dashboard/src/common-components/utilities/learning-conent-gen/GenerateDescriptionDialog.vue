@@ -134,7 +134,7 @@ const generateDescription = () => {
 
   if (currentDescription.value) {
     const extractedImagesRes = imgHandler.extractImages(currentDescription.value)
-    const descriptionText = extractedImagesRes.hasImages ? extractedImagesRes.processedText : currentDescription.value
+    const descriptionText = currentDescription.value // extractedImagesRes.hasImages ? extractedImagesRes.processedText : currentDescription.value
     const instructionsToKeepPlaceholders = extractedImagesRes.hasImages? imgHandler.instructionsToKeepPlaceholders() : ''
     instructionsToSend = instructionsGenerator.existingDescriptionInstructions(descriptionText, userInstructions, instructionsToKeepPlaceholders)
     if (extractedImagesRes.hasImages) {
@@ -158,7 +158,7 @@ const generateDescription = () => {
 }
 
 const checkThatProgressWasMade = () => {
-  const TIMEOUT_MS = 7000;
+  const TIMEOUT_MS = 5000;
   const MAX_ATTEMPTS = 6; // Max 30 seconds (5s * 6)
   let numAttempts = 0;
   const statusMessages = [
@@ -186,6 +186,7 @@ const checkThatProgressWasMade = () => {
 }
 const generateDescriptionWithStreaming = (instructionsToSend) => {
   checkThatProgressWasMade()
+  scrollInstructionsIntoView()
   return LearningGenService.generateDescriptionStreamWithFetch(route.params.projectId, instructionsToSend,
       (chunk) => {
         appendGeneratedToLastChatItem(chunk)
@@ -200,11 +201,14 @@ const generateDescriptionWithStreaming = (instructionsToSend) => {
         log.error(`Failed to generate description via streaming: ${error}`)
         isGenerating.value = false
         setFinalMsgToLastChatItem(failedToGenerateMsg, true)
+        focusOnInstructionsInput()
       })
 }
 
 const scrollInstructionsIntoView = () => {
-  document.getElementById('instructionsInput')?.scrollIntoView()
+  nextTick(() => {
+    document.getElementById('instructionsInput')?.scrollIntoView()
+  })
 }
 const generateDescriptionWithoutStreaming = (instructionsToSend) => {
   return LearningGenService.generateDescription(route.params.projectId, instructionsToSend)
@@ -289,9 +293,9 @@ const addPrefixThenUseDesc = (info) => {
               <Message :closable="false" :severity="historyItem.failedToGenerate ? 'error' : 'info'">
                 <markdown-text :text="historyItem.finalMsg" :instanceId="`${historyItem.id}-finalMsg`"/>
               </Message>
-              <div class="flex justify-start items-center gap-3 mt-2">
+              <div v-if="!historyItem.failedToGenerate"
+                   class="flex justify-start items-center gap-3 mt-2">
                 <SkillsButton
-                    v-if="!historyItem.failedToGenerate"
                     icon="fa-solid fa-check-double"
                     severity="info" :outlined="false"
                     label="Use Generated Value"
@@ -328,6 +332,7 @@ const addPrefixThenUseDesc = (info) => {
               data-cy="instructionsInput"
               autofocus/>
           <div class="flex justify-end">
+            <SkillsButton id="stopGenBtn" icon="fa-solid fa-play" label="Send" @click="generateDescription" :disabled="!isGenerating"/>
             <SkillsButton icon="fa-solid fa-play" label="Send" @click="generateDescription" :disabled="isGenerating"/>
           </div>
         </div>

@@ -41,12 +41,7 @@ class LearningContentGenerator {
     }
 
     Flux<String> streamGenerateDescription(GenDescRequest request) {
-        try {
-            return openAIService.streamCompletions(request.instructions)
-        } catch (ResourceAccessException rae) {
-            log.error("Failed to call OpenAI api", rae)
-            throw new SkillException("Learning Content Generator is not available", rae, null,null, ErrorCode.LearningContentGeneratorNotAvailable)
-        }
+        return openAIService.streamCompletions(request.instructions)
     }
 
 }
