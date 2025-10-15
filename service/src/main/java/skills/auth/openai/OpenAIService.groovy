@@ -24,11 +24,14 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 @Service
 @Slf4j
@@ -111,9 +114,32 @@ class OpenAIService {
         return client
                 .post()
                 .uri(url)
+                .headers(headers -> {
+                    headers.setBearerAuth(openAiKey);
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                    headers.setAccept(Collections.singletonList(MediaType.TEXT_EVENT_STREAM));
+                })
                 .bodyValue(request)
                 .retrieve()
+                .onStatus(HttpStatus::isError, response -> {
+                    // Extract and log the response body for debugging
+                    return response.bodyToMono(String.class)
+                            .defaultIfEmpty("No error details provided")
+                            .flatMap(errorBody -> {
+                                return Mono.error(new RuntimeException(
+                                        String.format("OpenAI API error: %s - %s", response.statusCode(), errorBody)
+                                ));
+                            });
+                })
                 .bodyToFlux(String.class)
+                .onErrorResume(WebClientResponseException.class, ex -> {
+                    log.error("WebClient error: Status={}, Body={}", ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
+                    return Flux.error(new RuntimeException("Failed to process OpenAI streaming response", ex));
+                })
+                .onErrorResume(Throwable.class, ex -> {
+                    log.error("Unexpected error during OpenAI streaming", ex);
+                    return Flux.error(new RuntimeException("Unexpected error during streaming", ex));
+                })
                 .mapNotNull { String json ->
                     if (json.equalsIgnoreCase('[DONE]')) {
                         return json

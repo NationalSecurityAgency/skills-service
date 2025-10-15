@@ -62,6 +62,9 @@ export default {
                 for (const line of lines) {
                     const content = line.startsWith('data:') ? line.substring(5) : line
                     if (content === '[DONE]') {
+                        if (processedLines.length > 0) {
+                            onChunk(processedLines.join(''))
+                        }
                         if (onComplete) onComplete();
                         return;
                     }
@@ -71,8 +74,7 @@ export default {
                     }
                 }
 
-                const processed = processedLines.join('')
-                onChunk(processed)
+                onChunk(processedLines.join(''))
             }
         } catch (error) {
             if (onError) {
