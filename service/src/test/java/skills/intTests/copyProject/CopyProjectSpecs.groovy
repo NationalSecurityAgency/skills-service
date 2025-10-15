@@ -434,6 +434,105 @@ class CopyProjectSpecs extends CopyIntSpec {
         copied1.displayOrder == [1, 2, 3]
     }
 
+    def "copy live badge with no skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skills = createSkills(6, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, skills)
+
+        def badge1 = createBadge(1, 1)
+        badge1.description = "blah 1"
+        badge1.helpUrl = "http://www.greatlink.com"
+        badge1.iconClass = "fas fa-adjust"
+        skillsService.createBadge(badge1)
+        skills[0..2].each {
+            skillsService.assignSkillToBadge(p1.projectId, badge1.badgeId, it.skillId)
+        }
+        badge1.enabled = true
+        skillsService.createBadge(badge1)
+        skills[0..2].each {
+            skillsService.deleteSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: it.skillId])
+        }
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+        def copied1 = skillsService.getBadge([projectId: projToCopy.projectId, badgeId: badge1.badgeId])
+
+        then:
+        copied1.description == badge1.description
+        copied1.badgeId == badge1.badgeId
+        copied1.name == badge1.name
+        copied1.helpUrl == badge1.helpUrl
+        copied1.numSkills == 0
+        copied1.totalPoints == 0
+        copied1.enabled == "false"
+        copied1.iconClass == badge1.iconClass
+        !copied1.startDate
+        !copied1.endDate
+    }
+
+    def "copy live badge with no skills - badge is in a learning path"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def skills = createSkills(15, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, skills)
+
+        def createBadge = { int badgeIdNum, def skillsToAdd ->
+            def theBadge = createBadge(1, badgeIdNum)
+            skillsService.createBadge(theBadge)
+            skillsToAdd.each {
+                skillsService.assignSkillToBadge(p1.projectId, theBadge.badgeId, it.skillId)
+            }
+            theBadge.enabled = true
+            skillsService.createBadge(theBadge)
+            return theBadge
+        }
+
+        def badge1Skills = skills[0..2]
+        def badge1 = createBadge(1, badge1Skills)
+        def badge2 = createBadge(2, skills[3..5])
+        def badge4Skills = skills[6..7]
+        def badge3 = createBadge(3, badge4Skills)
+        def badge4 = createBadge(4, skills[8..9])
+        def badge5 = createBadge(5, skills[10..11])
+        def badge6 = createBadge(6, skills[12..13])
+
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge2.badgeId, badge1.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge3.badgeId, badge4.badgeId)
+        skillsService.addLearningPathPrerequisite(p1.projectId, badge5.badgeId, badge6.badgeId)
+
+        badge1Skills.each {
+            skillsService.deleteSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: it.skillId])
+        }
+        badge4Skills.each {
+            skillsService.deleteSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: it.skillId])
+        }
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+        def copiedBadge1 = skillsService.getBadge([projectId: projToCopy.projectId, badgeId: badge1.badgeId])
+        def copiedBadge2 = skillsService.getBadge([projectId: projToCopy.projectId, badgeId: badge2.badgeId])
+        def copiedBadge3 = skillsService.getBadge([projectId: projToCopy.projectId, badgeId: badge3.badgeId])
+        def copiedBadge4 = skillsService.getBadge([projectId: projToCopy.projectId, badgeId: badge4.badgeId])
+        def copiedBadge5 = skillsService.getBadge([projectId: projToCopy.projectId, badgeId: badge5.badgeId])
+        def copiedBadge6 = skillsService.getBadge([projectId: projToCopy.projectId, badgeId: badge6.badgeId])
+
+        def copiedDeps = skillsService.getDependencyGraph(projToCopy.projectId)
+        then:
+        copiedBadge1.enabled == "false"
+        copiedBadge2.enabled == "true"
+        copiedBadge3.enabled == "false"
+        copiedBadge4.enabled == "true"
+        copiedBadge5.enabled == "true"
+        copiedBadge6.enabled == "true"
+
+        validateGraph(copiedDeps, [
+                new Edge(from: badge5.badgeId, to: badge6.badgeId),
+        ])
+    }
+
     def "validate dependencies were copied"() {
         def p1 = createProject(1)
         skillsService.createProject(p1)
