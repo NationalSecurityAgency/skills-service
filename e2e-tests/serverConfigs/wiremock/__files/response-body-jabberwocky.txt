@@ -1,0 +1,25 @@
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"role":"assistant","content":"H"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"as jabb"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"erwocky"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"\n\n"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"clean line"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"\n\n"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"jabber"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"wocky again"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"\n\n"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"and noth"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"ing here"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
