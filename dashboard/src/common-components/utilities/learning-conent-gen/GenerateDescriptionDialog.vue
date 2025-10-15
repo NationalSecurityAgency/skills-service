@@ -27,6 +27,7 @@ import {useInstructionGenerator} from "@/common-components/utilities/learning-co
 import PrefixControls from "@/common-components/utilities/markdown/PrefixControls.vue";
 import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import {useOpenaiService} from "@/common-components/utilities/learning-conent-gen/UseOpenaiService.js";
 
 const model = defineModel()
 const emit = defineEmits(['generated-desc'])
@@ -77,7 +78,8 @@ const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false) =
     isGenerating,
     generatedValue: '',
     finalMsg: '',
-    failedToGenerate: false
+    failedToGenerate: false,
+    cancelled: false,
   }
   chatHistory.value.push(res)
   return res
@@ -95,16 +97,18 @@ const appendGeneratedToLastChatItem = (toAppend) => {
   }
   currentDescription.value = historyItem.generatedValue
 }
-const setFinalMsgToLastChatItem = (finalMsg, failedToGenerate = false) => {
+const setFinalMsgToLastChatItem = (finalMsg, failedToGenerate = false, cancelled = false) => {
   const historyItem = chatHistory.value[chatHistory.value.length - 1]
   historyItem.finalMsg = finalMsg
   historyItem.isGenerating = false
   historyItem.failedToGenerate = failedToGenerate
+  historyItem.cancelled = cancelled
 }
 
 const instructionsGenerator = useInstructionGenerator()
 const reviewDescMsg = 'I\'ve prepared a description based on your input. Review the description and let me know if you need any changes.'
 const failedToGenerateMsg = 'I apologize, but I was unable to generate a description at this time. Please try again in a few moments.'
+const cancelledMsg = 'Generation stopped. Feel free to try again whenever you\'re ready!'
 function parseResponse(text) {
   const [newText, comments] = text.split('Here is what was changed');
   
@@ -121,6 +125,13 @@ function parseResponse(text) {
 
 const shouldStream = ref(true)
 const instructionsInput = ref(null)
+const onStartStopBtn = () => {
+  if (isGenerating.value) {
+    cancelCurrentPrompt()
+  } else {
+    generateDescription()
+  }
+}
 const generateDescription = () => {
 
   if (log.isTraceEnabled()) {
@@ -184,10 +195,13 @@ const checkThatProgressWasMade = () => {
   }
   checkProgress()
 }
+
+const openaiService = useOpenaiService()
 const generateDescriptionWithStreaming = (instructionsToSend) => {
+  lastPromptCancelled.value = false
   checkThatProgressWasMade()
   scrollInstructionsIntoView()
-  return LearningGenService.generateDescriptionStreamWithFetch(route.params.projectId, instructionsToSend,
+  return openaiService.prompt(instructionsToSend,
       (chunk) => {
         appendGeneratedToLastChatItem(chunk)
         scrollInstructionsIntoView()
@@ -198,12 +212,22 @@ const generateDescriptionWithStreaming = (instructionsToSend) => {
         focusOnInstructionsInput()
       },
       (error) => {
-        log.error(`Failed to generate description via streaming: ${error}`)
         isGenerating.value = false
-        setFinalMsgToLastChatItem(failedToGenerateMsg, true)
+        if (lastPromptCancelled.value) {
+          setFinalMsgToLastChatItem(cancelledMsg, false, true)
+        } else {
+          log.error(`Failed to generate description via streaming: ${error}`)
+          setFinalMsgToLastChatItem(failedToGenerateMsg, true)
+        }
         focusOnInstructionsInput()
       })
 }
+const lastPromptCancelled = ref(false)
+const cancelCurrentPrompt = () => {
+  lastPromptCancelled.value = true
+  openaiService.cancelCurrentPrompt()
+}
+
 
 const scrollInstructionsIntoView = () => {
   nextTick(() => {
@@ -258,6 +282,16 @@ const addPrefixThenUseDesc = (info) => {
   }
 }
 
+const finalMsgSeverity = (historyItem) => {
+  if (historyItem.failedToGenerate) {
+    return 'error'
+  }
+  if (historyItem.cancelled) {
+    return 'warn'
+  }
+  return 'info'
+}
+
 </script>
 
 <template>
@@ -274,8 +308,10 @@ const addPrefixThenUseDesc = (info) => {
     <div class="flex justify-end gap-2">
       Streaming: <ToggleSwitch v-model="shouldStream" />
     </div>
-    <div class="py-5" style="min-height: 70vh">
-      <div id="chatHistory" class="flex flex-col gap-3 mb-2">
+    <div class="py-5 flex flex-col" style="min-height: 70vh">
+      <div id="chatHistory"
+           :class="{ 'flex-1': chatHistory.length > 1 }"
+           class="flex flex-col gap-3 mb-2">
         <div v-for="(historyItem) in chatHistory" :key="historyItem.id">
           <div v-if="historyItem.role === ChatRole.USER" class="relative flex justify-end">
             <user-msg :id="historyItem.id">
@@ -290,10 +326,10 @@ const addPrefixThenUseDesc = (info) => {
               <markdown-text :text="historyItem.generatedValue" :instanceId="`${historyItem.id}-desc`"/>
             </div>
             <div v-if="historyItem.finalMsg" data-cy="finalSegment">
-              <Message :closable="false" :severity="historyItem.failedToGenerate ? 'error' : 'info'">
+              <Message :closable="false" :severity="finalMsgSeverity(historyItem)">
                 <markdown-text :text="historyItem.finalMsg" :instanceId="`${historyItem.id}-finalMsg`"/>
               </Message>
-              <div v-if="!historyItem.failedToGenerate"
+              <div v-if="!historyItem.failedToGenerate && !historyItem.cancelled"
                    class="flex justify-start items-center gap-3 mt-2">
                 <SkillsButton
                     icon="fa-solid fa-check-double"
@@ -332,8 +368,12 @@ const addPrefixThenUseDesc = (info) => {
               data-cy="instructionsInput"
               autofocus/>
           <div class="flex justify-end">
-            <SkillsButton id="stopGenBtn" icon="fa-solid fa-play" label="Send" @click="generateDescription" :disabled="!isGenerating"/>
-            <SkillsButton icon="fa-solid fa-play" label="Send" @click="generateDescription" :disabled="isGenerating"/>
+            <SkillsButton
+                :icon="`fa-solid ${isGenerating ? 'fa-stop': 'fa-play'}`"
+                :label="isGenerating ? 'Stop' : 'Send'"
+                :severity="isGenerating ? 'warn' : 'success'"
+                data-cy="sendAndStopBtn"
+                @click="onStartStopBtn" />
           </div>
         </div>
       </div>
