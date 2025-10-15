@@ -451,7 +451,7 @@ class CopyProjectSpecs extends CopyIntSpec {
         badge1.enabled = true
         skillsService.createBadge(badge1)
         skills[0..2].each {
-            skillsService.removeSkillFromBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: it.skillId])
+            skillsService.deleteSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: it.skillId])
         }
 
         when:
@@ -503,10 +503,10 @@ class CopyProjectSpecs extends CopyIntSpec {
         skillsService.addLearningPathPrerequisite(p1.projectId, badge5.badgeId, badge6.badgeId)
 
         badge1Skills.each {
-            skillsService.removeSkillFromBadge([projectId: p1.projectId, badgeId: badge1.badgeId, skillId: it.skillId])
+            skillsService.deleteSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: it.skillId])
         }
         badge4Skills.each {
-            skillsService.removeSkillFromBadge([projectId: p1.projectId, badgeId: badge3.badgeId, skillId: it.skillId])
+            skillsService.deleteSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: it.skillId])
         }
 
         when:

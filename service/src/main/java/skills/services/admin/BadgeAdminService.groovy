@@ -417,6 +417,12 @@ class BadgeAdminService {
             throw new SkillException("Badge [${badgeId}] does not exist", projectId, badgeId, ErrorCode.BadgeNotFound)
         }
 
+        long numSkills = skillDefRepo.countChildSkillsByIdAndRelationshipTypeAndEnabled(badge.id, SkillRelDef.RelationshipType.BadgeRequirement, "true")
+
+        if(badge.enabled == 'true' && numSkills == 1) {
+            throw new SkillException("Can not remove skill from badge [${badgeId}] as it is live with only a single skill")
+        }
+
         ruleSetDefGraphService.removeGraphRelationship(projectId, badgeId, SkillDef.ContainerType.Badge,
                 projectId, skillid, SkillRelDef.RelationshipType.BadgeRequirement)
 

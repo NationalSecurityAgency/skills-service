@@ -17,6 +17,7 @@ package skills.intTests
 
 import groovy.json.JsonOutput
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 
 import static skills.intTests.utils.SkillsFactory.createProject
@@ -530,5 +531,53 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         def ex = thrown(Exception)
         ex.message.contains("numMinutes must be <= 525600")
 
+    }
+
+    void "can not remove last skill from an active badge"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(4)
+        def badge = SkillsFactory.createBadge()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        when:
+        skillsService.removeSkillFromBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains("Can not remove skill from badge [badge1] as it is live with only a single skill")
+    }
+
+    void "can remove last skill from an inactive badge"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(4)
+        def badge = SkillsFactory.createBadge()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        badge.enabled = false
+        skillsService.createBadge(badge)
+
+        when:
+        def res = skillsService.getBadge(badge)
+        skillsService.removeSkillFromBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        def resAfterRemoval = skillsService.getBadge(badge)
+
+        then:
+        res.numSkills == 1
+        resAfterRemoval.numSkills == 0
     }
 }
