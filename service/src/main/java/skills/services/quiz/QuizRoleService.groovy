@@ -98,7 +98,7 @@ class QuizRoleService {
     void deleteQuizRole(String userIdParam, String quizId, RoleName roleName) {
         QuizDef quizDef = findQuizDef(quizId)
         ensureValidRole(roleName, quizDef.quizId)
-        String userId = userNameService.normalizeUserId(userIdParam)
+        String userId = userIdParam?.toLowerCase()
         String currentUser = userInfoService.getCurrentUserId()
         if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
             throw new SkillQuizException("Cannot remove roles from myself. userId=[${userId}]", quizId, ErrorCode.AccessDenied)
