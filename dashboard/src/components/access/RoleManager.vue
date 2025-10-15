@@ -349,7 +349,7 @@ function doDeleteUserRole() {
   }
 }
 const deleteQuizAdminUserRole = (row) => {
-  QuizService.deleteQuizAdmin(props.quizId, appConfig.isPkiAuthenticated ? row.dn : row.userId)
+  QuizService.deleteQuizAdmin(props.quizId, row.userId)
       .then(() => {
         completeDelete(row)
       })
