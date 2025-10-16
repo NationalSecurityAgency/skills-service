@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-describe('Generate Desc Tests', () => {
+import {
+    newDescWelcomeMsg,
+    chessGenValue,
+    existingDescWelcomeMsg}
+    from './openai_helper_commands'
 
-    const chessGenValue = 'In order to learn chess you will need to get a chess board!'
+describe('Generate Desc Tests', () => {
 
     it('generate a new description for a skill', () => {
         cy.intercept('GET', '/public/config', (req) => {
@@ -35,7 +39,7 @@ describe('Generate Desc Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill1"]').click()
         cy.get('[data-cy="aiButton"]').click()
-        cy.get('[data-cy="aiMsg-0"]').contains('Describe the skill, and I\'ll help')
+        cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg)
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
         cy.get('[data-cy="userMsg-1"]').contains('Learn chess')
@@ -52,6 +56,44 @@ describe('Generate Desc Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
         cy.get('[data-cy="skillOverviewDescription"]').contains(chessGenValue)
     });
+
+    it('generate a new description for an existing skill', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, { description: 'existing description' })
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(existingDescWelcomeMsg)
+        cy.get('[data-cy="userMsg-1"]').should('not.exist')
+        cy.get('[data-cy="generatedSegmentNotes"]').should('not.exist')
+        cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
+        cy.get('[data-cy="userMsg-1"]').contains('Learn chess')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains('Got it')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').contains(chessGenValue)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains('I\'ve prepared a description based on your input')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegmentNotes"]').contains('Modified chess board!')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="useGenValueBtn-2"]').should('be.enabled')
+
+        cy.get('[data-cy="instructionsInput"]').should('have.focus')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="useGenValueBtn-2"]').click()
+        cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
+        cy.validateMarkdownEditorText('[data-cy="markdownEditorInput"]', [chessGenValue])
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
+        cy.get('[data-cy="skillOverviewDescription"]').contains(chessGenValue)
+    });
+
 
     it('apply prefix after generating a new description for a skill', () => {
         cy.intercept('GET', '/public/config', (req) => {
@@ -71,7 +113,7 @@ describe('Generate Desc Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill1"]').click()
         cy.get('[data-cy="aiButton"]').click()
-        cy.get('[data-cy="aiMsg-0"]').contains('Describe the skill, and I\'ll help')
+        cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg)
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('jabberwocky{enter}')
         cy.get('[data-cy="userMsg-1"]').contains('jabberwocky')
@@ -127,7 +169,7 @@ describe('Generate Desc Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill1"]').click()
         cy.get('[data-cy="aiButton"]').click()
-        cy.get('[data-cy="aiMsg-0"]').contains('Describe the skill, and I\'ll help')
+        cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg)
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
         cy.get('[data-cy="userMsg-1"]').contains('Learn chess')
@@ -163,7 +205,7 @@ describe('Generate Desc Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill1"]').click()
         cy.get('[data-cy="aiButton"]').click()
-        cy.get('[data-cy="aiMsg-0"]').contains('Describe the skill, and I\'ll help')
+        cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg)
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('paragraphs{enter}')
         cy.get('[data-cy="userMsg-1"]').contains('paragraphs')
