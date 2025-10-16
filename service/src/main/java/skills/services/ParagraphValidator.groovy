@@ -99,34 +99,76 @@ class ParagraphValidator {
                     }
                 }
 
+                Closure<Boolean> checkIfPreviousParagraphCloseAndValid = {
+                    Node previous = htmlBlock.previous
+                    if (previous && previous instanceof Paragraph) {
+                        int prevLine = previous.sourceSpans.first().lineIndex
+                        int currentLine = previous.sourceSpans.first().lineIndex
+                        if ( currentLine - prevLine <= 1) {
+                            if (validateParagraph (previous)) {
+                                return true
+                            }
+                        }
+                    }
+                    return false
+                }
+                Closure<Boolean> shouldForceValidation = { String text ->
+                    return request.forceValidationPattern && request.forceValidationPattern?.matcher(text)?.matches()
+                }
+                Closure<Boolean> doValidate = { String text ->
+                    return validationPattern.pattern.matcher(text).matches()
+                }
+                Closure<Boolean> isPrevElementValid = { Element list ->
+                    boolean validatedViaPrevious = false
+                    if (list) {
+                        Element previousNonEmptyElement = list.previousElementSiblings().find({ it.text().trim().size() > 0 })
+                        if (previousNonEmptyElement) {
+                            String prevElementText = previousNonEmptyElement.text()
+                            validatedViaPrevious = validationPattern.pattern.matcher(prevElementText).matches()
+                            if (!validatedViaPrevious) {
+                                validatedViaPrevious = true
+                            }
+                        }
+                    }
+
+                    return validatedViaPrevious
+                }
+                boolean isPrevParagraphValid = checkIfPreviousParagraphCloseAndValid()
+
                 // Process paragraphs
                 Elements paragraphs = doc.select("p")
-                paragraphs.each { Element element ->
+                pLoop: for (int i = 0; i < paragraphs.size(); i++) {
+                    Element element = paragraphs.get(i);
                     String text = element.text().trim()
-                    if (text && !validationPattern.pattern.matcher(text).matches()) {
-                        documentValidationFailure(element, text)
+                    if (text && (!isPrevParagraphValid || shouldForceValidation(text))) {
+                        if (!doValidate(text)) {
+                            documentValidationFailure(element, text)
+                        }
                     }
                 }
 
-
                 // process lists
                 Elements lists = doc.select("ul, ol")
-                lists.each { Element list ->
+                listLoop:
+                for (int i = 0; i < lists.size(); i++) {
+                    Element list = lists.get(i)
                     Elements items = list.select("li")
                     if (items) {
                         Element firstItem = items.first()
                         if (firstItem) {
                             String text = items.text().trim()
-                            if (text && !validationPattern.pattern.matcher(text).matches()) {
-                                boolean validatedViaPrevious = false
-                                Element previousNonEmptyElement = list.previousElementSiblings().find({ it.text().trim().size() > 0 })
-                                if (previousNonEmptyElement) {
-                                    String prevElementText = previousNonEmptyElement.text()
-                                    validatedViaPrevious = validationPattern.pattern.matcher(prevElementText).matches()
-                                }
-
-                                if (!validatedViaPrevious) {
+                            if (text && !isPrevParagraphValid && !isPrevElementValid(list)) {
+                                if (!doValidate(text)) {
                                     documentValidationFailure(firstItem, text)
+                                }
+                            }
+                        }
+
+                        for (Element litItem : items) {
+                            String text = litItem.text().trim()
+                            if (text && shouldForceValidation(text)) {
+                                if (!doValidate(text)) {
+                                    documentValidationFailure(litItem, text)
                                 }
                             }
                         }
@@ -231,7 +273,20 @@ class ParagraphValidator {
 
             @Override
             void visit(Image image) {
-                blockHandlerValidator(image)
+                // in case there is more than 1 image in a row, find the very first one
+                Node previousNode = image.previous
+                Node lastLocatedImage = null
+                while (previousNode && (previousNode instanceof SoftLineBreak || previousNode instanceof Image)) {
+                    if (previousNode instanceof Image) {
+                        lastLocatedImage = previousNode
+                    }
+                    previousNode = previousNode.previous
+                }
+                if (lastLocatedImage && lastLocatedImage instanceof Image) {
+                    blockHandlerValidator(lastLocatedImage)
+                } else {
+                    blockHandlerValidator(image)
+                }
             }
         }
         document.accept(visitor)
@@ -280,20 +335,24 @@ class ParagraphValidator {
         return null
     }
 
-    private String removeLeadingSeparators(String text) {
+    private static  String removeLeadingSeparators(String text) {
         if (text == null || text.isEmpty()) {
             return text
         }
         return text.replaceFirst('^[\\s\\-*_=~`#]+', '')
     }
 
-    private boolean isOnlySeparatorsOrWhitespace(String text) {
+    private static  boolean isOnlySeparatorsOrWhitespace(String text) {
         if (text == null || text.trim().isEmpty()) {
             return true
         }
 
         // Check if the text contains only whitespace, newlines, or markdown separators
         return text.matches('^[\\s\\-*_=~`#]*$')
+    }
+
+    private static boolean isOnlySpecialChars(String str) {
+        return str && str.trim().matches(/^[^a-zA-Z0-9]+$/)
     }
 
     private boolean validateParagraph(Node node) {
@@ -306,6 +365,9 @@ class ParagraphValidator {
             return true
         }
         toValidate = removeLeadingSeparators(toValidate)
+        if (isOnlySpecialChars(toValidate)) {
+            return true
+        }
 
         boolean isValidParagraph = validationPattern.pattern.matcher(toValidate).matches()
         if (isValidParagraph) {
@@ -357,13 +419,19 @@ class ParagraphValidator {
         return request.prefix && !e.text()?.startsWith(request.prefix)
     }
 
+    private static Node getPreviousForImage(Node currentNode, Node previousNode) {
+        Node res = previousNode
+        if (currentNode.parent instanceof Paragraph && currentNode.parent.firstChild == currentNode) {
+            res = currentNode.parent.previous
+        }
+        return res
+    }
+
     private static Node lookForPreviousParagraph(Node node) {
         Node previousNode = node.previous
 
         if (!previousNode && node instanceof Image) {
-            if (node.parent instanceof Paragraph && node.parent.firstChild == node) {
-                previousNode = node.parent.previous
-            }
+            previousNode = getPreviousForImage(node, previousNode)
         }
         while (previousNode && previousNode instanceof SoftLineBreak) {
             previousNode = previousNode.previous
