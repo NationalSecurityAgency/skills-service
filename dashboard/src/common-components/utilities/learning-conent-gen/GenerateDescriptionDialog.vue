@@ -41,13 +41,13 @@ const updateDescription = (newDesc) => {
     chatHistory.value.push({
       id: `${chatCounter.value++}`,
       role: 'assistant',
-      origMessage: 'Hope your day is going well! Looks like you already started on a description. Would you like me to proofread or expand on it?'
+      origMessage: 'I noticed you\'ve already started a *description*. I can help you refine and enhance it. \n\nFor example, you could type `proofread` or `rewrite with more detail`. The more **specific** you are, the better I can assist you!'
     })
   } else {
     chatHistory.value.push({
       id: `${chatCounter.value++}`,
       role: 'assistant',
-      origMessage: 'Hi! I am here to help. Describe the skill, and I\'ll help generate a description'
+      origMessage: 'Welcome! I can help you craft a **description**. Please share some `details` about what you have in mind.'
     })
   }
 }
@@ -77,6 +77,7 @@ const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false) =
     origMessage: origMsg,
     isGenerating,
     generatedValue: '',
+    generateValueChangedNotes: '',
     finalMsg: '',
     failedToGenerate: false,
     cancelled: false,
@@ -103,6 +104,15 @@ const setFinalMsgToLastChatItem = (finalMsg, failedToGenerate = false, cancelled
   historyItem.isGenerating = false
   historyItem.failedToGenerate = failedToGenerate
   historyItem.cancelled = cancelled
+}
+const extractWhatChangedFromLastHistoryItem = () => {
+  const historyItem = chatHistory.value[chatHistory.value.length - 1]
+  const [newText, comments] = historyItem.generatedValue.split('Here is what was changed');
+  if (newText && comments) {
+    const cleanedComments = comments.replace(/^[\s:]+/, '').trim()
+    historyItem.generateValueChangedNotes = `### Here is what was changed\n\n${cleanedComments}`
+    historyItem.generatedValue = newText.replace(/#+\s*$/, '').trim()
+  }
 }
 
 const instructionsGenerator = useInstructionGenerator()
@@ -208,6 +218,7 @@ const generateDescriptionWithStreaming = (instructionsToSend) => {
       },
       (completeData) => {
         setFinalMsgToLastChatItem(reviewDescMsg)
+        extractWhatChangedFromLastHistoryItem()
         isGenerating.value = false
         focusOnInstructionsInput()
       },
@@ -300,7 +311,7 @@ const finalMsgSeverity = (historyItem) => {
       :maximizable="true"
       :maximized="true"
       v-model="model"
-      header="Description Assistant"
+      header="AI Assistant"
       :show-ok-button="false"
       :show-cancel-button="false"
       :enable-return-focus="true">
@@ -322,8 +333,16 @@ const finalMsgSeverity = (historyItem) => {
             <div class="flex gap-2 items-center" data-cy="origSegment">
               <markdown-text :text="historyItem.origMessage" :instanceId="`${historyItem.id}-content`"/>
             </div>
-            <div v-if="historyItem.generatedValue" class="px-5 border rounded-lg bg-blue-50" data-cy="generatedSegment">
-              <markdown-text :text="historyItem.generatedValue" :instanceId="`${historyItem.id}-desc`"/>
+            <div v-if="historyItem.generatedValue" class="px-5 border rounded-lg bg-blue-50">
+              <markdown-text :text="historyItem.generatedValue"
+                             data-cy="generatedSegment"
+                             :instanceId="`${historyItem.id}-desc`"/>
+              <div v-if="historyItem.generateValueChangedNotes"
+                   data-cy="generatedSegmentNotes"
+                   class="border-t-2 border-dotted border-blue-200 p-0 mt-5">
+               <markdown-text :text="historyItem.generateValueChangedNotes"
+                             :instanceId="`${historyItem.id}-generateValueChangedNotes`"/>
+              </div>
             </div>
             <div v-if="historyItem.finalMsg" data-cy="finalSegment">
               <Message :closable="false" :severity="finalMsgSeverity(historyItem)">

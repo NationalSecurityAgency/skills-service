@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {
+    newDescWelcomeMsg,
+}
+    from './openai_helper_commands'
+
 describe('Generate Desc Fail And Cancel Tests', () => {
 
     it('handle if generation never starts and eventually times out', () => {
@@ -51,7 +56,7 @@ describe('Generate Desc Fail And Cancel Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill1"]').click()
         cy.get('[data-cy="aiButton"]').click()
-        cy.get('[data-cy="aiMsg-0"]').contains('Describe the skill, and I\'ll help')
+        cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg)
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
         cy.get('[data-cy="userMsg-1"]').contains('Learn chess')
@@ -104,7 +109,7 @@ describe('Generate Desc Fail And Cancel Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill1"]').click()
         cy.get('[data-cy="aiButton"]').click()
-        cy.get('[data-cy="aiMsg-0"]').contains('Describe the skill, and I\'ll help')
+        cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg)
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
         cy.get('[data-cy="userMsg-1"]').contains('Learn chess')
@@ -136,7 +141,7 @@ describe('Generate Desc Fail And Cancel Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill1"]').click()
         cy.get('[data-cy="aiButton"]').click()
-        cy.get('[data-cy="aiMsg-0"]').contains('Describe the skill, and I\'ll help')
+        cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg)
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('paragraphs')
         cy.get('[data-cy="sendAndStopBtn"]').click()
