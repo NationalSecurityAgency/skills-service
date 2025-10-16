@@ -618,7 +618,7 @@ const previewEmail = () => {
           <div class="mt-2">
             <SkillsTextInput name="subjectLine" label="Subject Line" data-cy="emailUsers_subject" class="w-full" :disabled="!emailFeatureConfigured" />
           </div>
-          <div class="flex w-full">
+          <div class="flex w-full mt-2">
             <markdown-editor class="w-full"
                              data-cy="emailUsers_body"
                              label="Email Body"
@@ -626,6 +626,7 @@ const previewEmail = () => {
                              v-if="emailFeatureConfigured"
                              :resizable="false"
                              :allow-attachments="false"
+                             :disable-ai-prompt="true"
                              :use-html="true"/>
             <SkillsTextarea v-else data-cy="emailUsers_body"
                             label="Email Body"

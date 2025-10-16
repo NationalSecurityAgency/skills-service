@@ -30,6 +30,12 @@ import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {useOpenaiService} from "@/common-components/utilities/learning-conent-gen/UseOpenaiService.js";
 
 const model = defineModel()
+const props = defineProps({
+  communityValue: {
+    type: String,
+    default: null
+  },
+})
 const emit = defineEmits(['generated-desc'])
 const route = useRoute()
 const log = useLog()
@@ -41,13 +47,13 @@ const updateDescription = (newDesc) => {
     chatHistory.value.push({
       id: `${chatCounter.value++}`,
       role: 'assistant',
-      origMessage: 'I noticed you\'ve already started a *description*. I can help you refine and enhance it. \n\nFor example, you could type `proofread` or `rewrite with more detail`. The more **specific** you are, the better I can assist you!'
+      origMessage: 'I noticed you\'ve already started and can help you refine and enhance! \n\nFor example, you could type `proofread` or `rewrite with more detail`. The more **specific** you are, the better I can assist you!'
     })
   } else {
     chatHistory.value.push({
       id: `${chatCounter.value++}`,
       role: 'assistant',
-      origMessage: 'Welcome! I can help you craft a **description**. Please share some `details` about what you have in mind.'
+      origMessage: 'Hi there! I\'m excited to help you craft something **amazing**. Please share some `details` about what you have in mind.'
     })
   }
 }
@@ -367,6 +373,7 @@ const finalMsgSeverity = (historyItem) => {
                     size="normal"
                     :outlined-buttons="false"
                     buttons-severity="info"
+                    :community-value="communityValue"
                     add-button-label-conf-prop="addPrefixToGeneratedValueBtnLabel"/>
               </div>
             </div>

@@ -124,6 +124,7 @@ const emailUsers = () => {
                              name="emailBody"
                              :resizable="true"
                              :allow-attachments="false"
+                             :disable-ai-prompt="true"
                              :use-html="true"/>
           </div>
           <div class="mt-2 flex gap-2">
