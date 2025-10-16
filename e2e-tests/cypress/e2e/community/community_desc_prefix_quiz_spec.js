@@ -34,7 +34,7 @@ describe('Community and Desc Prefix Quiz Tests', () => {
             cy.logout();
             cy.login(vars.rootUser, vars.defaultPass, true);
             cy.request('POST', `/root/users/${vars.rootUser}/tags/dragons`, { tags: ['DivineDragon'] });
-            cy.request('POST', `/root/users/${vars.defaultUser}/tags/dragons`, { tags: ['DivineDragon'] });
+            cy.request('POST', `/root/users/${Cypress.env('proxyUser')}/tags/dragons`, { tags: ['DivineDragon'] });
             cy.logout();
 
             cy.register(allDragonsUser, vars.defaultPass);
