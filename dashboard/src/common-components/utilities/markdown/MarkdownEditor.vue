@@ -116,6 +116,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  disableAiPrompt: {
+    type: Boolean,
+    default: false
+  },
 })
 const emit = defineEmits(['value-changed'])
 const themeHelper = useThemesHelper()
@@ -401,7 +405,7 @@ const addPrefixToInvalidParagraphs = (prefixInfo) => {
 
 const valueWithMissingPrefix = ref('')
 const previewingMissing = computed(() => valueWithMissingPrefix.value && valueWithMissingPrefix.value.length > 0)
-const showAiButton = computed(() => appConfig.enableOpenAIIntegration && !previewingMissing.value)
+const showAiButton = computed(() => !props.disableAiPrompt && appConfig.enableOpenAIIntegration && !previewingMissing.value)
 const loadingMissingPreview = ref(false)
 const showWherePrefixWouldBeAdded = (prefixInfo) => {
   loadingMissingPreview.value = true
@@ -428,7 +432,8 @@ const closeMissingPrefixView = () => {
                :class="`${labelClass}`"
                :for="name" @click="focusOnMarkdownEditor">{{ label }}:</label>
       </div>
-      <SkillsButton v-if="showAiButton" icon="fa-solid fa-wand-magic-sparkles"
+      <SkillsButton v-if="showAiButton"
+                    icon="fa-solid fa-wand-magic-sparkles"
                     label="AI"
                     size="small"
                     data-cy="aiButton"
@@ -438,6 +443,7 @@ const closeMissingPrefixView = () => {
         v-if="showGenerateDescriptionDialog"
         ref="generateDescriptionDialogRef"
         v-model="showGenerateDescriptionDialog"
+        :community-value="communityValue"
         @generated-desc="updateDescription"
         @show="onDialogShow" />
     <BlockUI :blocked="disabled">
