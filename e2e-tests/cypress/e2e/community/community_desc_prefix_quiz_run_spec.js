@@ -40,7 +40,7 @@ describe('Community and Desc Prefix Take Quiz Tests', () => {
             cy.register(allDragonsUser, vars.defaultPass);
             cy.logout();
 
-            cy.login(vars.defaultUser, vars.defaultPass);
+            cy.loginAsAdminUser()
         });
 
         cy.viewport(1400, 1000)
