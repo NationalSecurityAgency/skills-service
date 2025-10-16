@@ -260,6 +260,7 @@ Paragraph three
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
         validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
 
 
         when:
@@ -341,6 +342,9 @@ Paragraph three
 | cell 4 | cell 5 is longer | cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size. |
 | cell 7   |          | cell <br> 9 |
 """).valid
+
+        validator.validateDescription("""(A) \n\n| (A) Locate and explain the Skills. |\n| -------------------------------------------------------------- |\n|\n""").valid
+
     }
 
     def "support markdown codeblocks"() {
@@ -976,6 +980,8 @@ line-height:107%">(A) fancy formatting</span>""").valid
 
         validator.validateDescription("""** (A) This is the title:**
 ![image.png](data:image/png;base64,XXXXXXXXXXXX)""").valid
+
+        validator.validateDescription("(A) val 1\n\n${imgStr}\n${imgStr}").valid
     }
 
     def "support links" () {
@@ -994,7 +1000,7 @@ line-height:107%">(A) fancy formatting</span>""").valid
         !invalidLink.valid
         invalidLink.validationFailedDetails == "Line[2] [https://www.some.com]\n\n"
 
-
+        validator.validateDescription("(A) <p>value</p>\n<p><a href=\"${url}\">${url}</a></p>").valid
     }
 
     def "support mixed html br and newline chars" () {
@@ -1104,7 +1110,91 @@ line-height:107%">(A) fancy formatting</span>""").valid
         res3.valid
     }
 
+    def "html sub lists" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
 
+        String input = """(A) <p><span>Title</span></p>
+<ul>
+<li><span>Level 1</span>
+<ul>
+<li><span>Sub List Item 1</span></li>
+<li><span>Sub List Item 2</span></li>
+<li><span>Sub List Item 3</span>
+<ul>
+<li><span>Sub-sub List Item 1</span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>"""
+
+        when:
+        validator.init()
+        def res = validator.validateDescription(input)
+        println res.validationFailedDetails
+        then:
+        res.valid
+    }
+
+
+    def "lists and its parent" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String input = '''(A)\n<strong>Fake Heading</strong>
+<li>one</li>
+<li>two</li>
+<strong>Fake Heading</strong>
+<ol>\n<li>three</li></ol>
+<strong>Fake Heading</strong>\\n<p>four</p> 
+<ol> \n<li>Five</li> \n
+<li>Six</li>\n
+<li>Seven</li>\n
+</ol>'''
+
+        String inputB = '''(A)\n<strong>Fake Heading</strong>
+<li>one</li>
+<li>two</li>
+<strong>Fake Heading</strong>
+<ol>\n<li>(B) three</li></ol>
+<strong>Fake Heading</strong>\\n<p>four</p> 
+<ol> \n<li>Five</li> \n
+<li>Six</li>\n
+<li>Seven</li>\n
+</ol>'''
+
+        String inputC = '''(A)\n<strong>Fake Heading</strong>
+<li>one</li>
+<li>two</li>
+<strong>Fake Heading</strong>
+<ol>
+    <li>three</li>
+</ol>
+<strong>Fake Heading</strong>\\n<p>four</p> 
+<ol>
+  <li>Five</li>
+  <li>Six</li>
+  <li>(B) Seven</li>
+</ol>'''
+
+        when:
+        validator.init()
+        def res = validator.validateDescription(input)
+        def res1 = validator.validateDescription(inputB)
+        def res2 = validator.validateDescription(inputC)
+        println res1.validationFailedDetails
+        then:
+        res.valid
+        !res1.valid
+        res1.validationFailedDetails == "Failed within an html element for text [(B) three] after line[2]\n"
+        !res2.valid
+        res2.validationFailedDetails == "Failed within an html element for text [(B) Seven] after line[2]\n"
+    }
 
     def "support text with multiple paragraphs and lists - test concurrency"() {
         CustomValidator validator = new CustomValidator()
