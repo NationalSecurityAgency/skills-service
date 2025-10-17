@@ -19,6 +19,7 @@ class QuizAnswerMetricsResult {
     Integer id
     String answer
     Boolean isCorrect
+    String multiPartAnswer
 
     int numAnswered
     int numAnsweredCorrect

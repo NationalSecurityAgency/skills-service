@@ -339,6 +339,14 @@ const startQuizAttempt = () => {
               // eslint-disable-next-line no-param-reassign
               answerOptions[0].answerText = enteredTextObj.answerText;
             }
+          } else if (enteredText && q.questionType === QuestionType.Matching) {
+            enteredText.map((existingAnswer) => {
+              let selectedAnswer = answerOptions.find((it) => it.id === existingAnswer.answerId)
+              if(selectedAnswer) {
+                selectedAnswer.currentAnswer = existingAnswer.answerText
+              }
+            })
+
           }
           return ({ ...q, answerOptions });
         });
@@ -552,6 +560,7 @@ const onResize = (newWidth) => {
                   :num="index+1"
                   :validate="validateTextAnswer"
                   @selected-answer="updateSelectedAnswers"
+                  :quizComplete="!!quizResult"
                   @answer-text-changed="updateSelectedAnswers"/>
             </div>
           </SkillsOverlay>
