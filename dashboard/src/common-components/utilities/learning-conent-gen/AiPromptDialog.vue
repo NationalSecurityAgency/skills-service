@@ -14,67 +14,90 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {nextTick, onMounted, ref, watch} from 'vue'
+import {nextTick, ref} from 'vue'
 import SkillsDialog from "@/components/utils/inputForm/SkillsDialog.vue";
-import LearningGenService from "@/common-components/utilities/learning-conent-gen/LearningGenService.js";
 import {useRoute} from "vue-router";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import AssistantMsg from "@/common-components/utilities/learning-conent-gen/AssistantMsg.vue";
 import UserMsg from "@/common-components/utilities/learning-conent-gen/UserMsg.vue";
 import {useLog} from "@/components/utils/misc/useLog.js";
-import {useImgHandler} from "@/common-components/utilities/learning-conent-gen/UseImgHandler.js";
-import {useInstructionGenerator} from "@/common-components/utilities/learning-conent-gen/UseInstructionGenerator.js";
 import PrefixControls from "@/common-components/utilities/markdown/PrefixControls.vue";
-import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {useOpenaiService} from "@/common-components/utilities/learning-conent-gen/UseOpenaiService.js";
 
 const model = defineModel()
 const props = defineProps({
+  createInstructionsFn: {
+    type: Function,
+    required: true
+  },
+  chunkHandlerFn: {
+    type: Function,
+    required: true
+  },
+  generationCompletedFn: {
+    type: Function,
+    required: true
+  },
+  addPrefixFn: {
+    type: Function,
+    default: null,
+  },
   communityValue: {
     type: String,
     default: null
   },
+  generationCompletedMsg: {
+    type: String,
+    default: 'Take a look at what I came up with! Please review it and let me know if you need any changes.'
+  },
+  failedToGenerateMsg: {
+    type: String,
+    default: 'I apologize, but I couldn\'t process your request at this time. Please try again shortly.'
+  },
+  generateCancelledMsg: {
+    type: String,
+    default: 'Successfully stopped. Feel free to try again when you\'re ready.'
+  },
+  generationStartedMsg: {
+    type: String,
+    default: 'Got it! I\'ll get started right away!'
+  },
 })
-const emit = defineEmits(['generated-desc'])
+
+const emit = defineEmits(['use-generated'])
 const route = useRoute()
 const log = useLog()
-const imgHandler = useImgHandler()
 const appConfig = useAppConfig()
-const updateDescription = (newDesc) => {
-  currentDescription.value = newDesc
-  if (newDesc) {
-    chatHistory.value.push({
-      id: `${chatCounter.value++}`,
-      role: 'assistant',
-      origMessage: 'I noticed you\'ve already started and can help you refine and enhance! \n\nFor example, you could type `proofread` or `rewrite with more detail`. The more **specific** you are, the better I can assist you!'
-    })
-  } else {
-    chatHistory.value.push({
-      id: `${chatCounter.value++}`,
-      role: 'assistant',
-      origMessage: 'Hi there! I\'m excited to help you craft something **amazing**. Please share some `details` about what you have in mind.'
-    })
-  }
+const openaiService = useOpenaiService()
+
+const addWelcomeMsg = (welcomeMsg) => {
+  chatHistory.value.push({
+    id: `${chatCounter.value++}`,
+    role: 'assistant',
+    origMessage: welcomeMsg
+  })
 }
 defineExpose({
-  updateDescription
+  addWelcomeMsg
 });
 
 const close = () => {
   model.value = false
 }
 
+const isAddingPrefix = ref(false)
 const instructions = ref('')
-const currentDescription = ref('')
 const isGenerating = ref(false)
-
-const extractedImageState = { hasImages: false, extractedImages: null, }
 const chatCounter = ref(0)
 const chatHistory = ref([])
+
 const ChatRole = {
   USER: 'user',
   ASSISTANT: 'assistant',
+}
+const getLastChatItem = () => {
+  return chatHistory.value[chatHistory.value.length - 1]
 }
 const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false) => {
   const res = {
@@ -92,96 +115,41 @@ const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false) =
   return res
 }
 const appendGeneratedToLastChatItem = (toAppend) => {
-  const historyItem = chatHistory.value[chatHistory.value.length - 1]
+  const historyItem = getLastChatItem()
   historyItem.generatedValue += toAppend
-  if (extractedImageState.extractedImages) {
-    const {
-      text,
-      unusedImages
-    } = imgHandler.reinsertImages(historyItem.generatedValue, extractedImageState.extractedImages)
-    historyItem.generatedValue = text
-    extractedImageState.extractedImages = unusedImages
-  }
-  currentDescription.value = historyItem.generatedValue
 }
 const setFinalMsgToLastChatItem = (finalMsg, failedToGenerate = false, cancelled = false) => {
-  const historyItem = chatHistory.value[chatHistory.value.length - 1]
+  const historyItem = getLastChatItem()
   historyItem.finalMsg = finalMsg
   historyItem.isGenerating = false
   historyItem.failedToGenerate = failedToGenerate
   historyItem.cancelled = cancelled
 }
-const extractWhatChangedFromLastHistoryItem = () => {
-  const historyItem = chatHistory.value[chatHistory.value.length - 1]
-  const [newText, comments] = historyItem.generatedValue.split('Here is what was changed');
-  if (newText && comments) {
-    const cleanedComments = comments.replace(/^[\s:]+/, '').trim()
-    historyItem.generateValueChangedNotes = `### Here is what was changed\n\n${cleanedComments}`
-    historyItem.generatedValue = newText.replace(/#+\s*$/, '').trim()
-  }
+const updateLastChatItemGeneratedValue = (item) => {
+  const toUpdate = getLastChatItem()
+  toUpdate.generatedValue = item.generatedValue
+  toUpdate.generateValueChangedNotes = item.generateValueChangedNotes
 }
 
-const instructionsGenerator = useInstructionGenerator()
-const reviewDescMsg = 'I\'ve prepared a description based on your input. Review the description and let me know if you need any changes.'
-const failedToGenerateMsg = 'I apologize, but I was unable to generate a description at this time. Please try again in a few moments.'
-const cancelledMsg = 'Generation stopped. Feel free to try again whenever you\'re ready!'
-function parseResponse(text) {
-  const [newText, comments] = text.split('Here is what was changed');
-  
-  // Clean up the newText by removing training ### and extra spaces
-  const cleanedText = newText
-    .replace(/\s*###+\s*$/gm, '') // Remove ### at end of lines
-    .trim();
-    
-  return {
-    newText: cleanedText,
-    comments
-  };
-}
-
-const shouldStream = ref(true)
-const instructionsInput = ref(null)
 const onStartStopBtn = () => {
   if (isGenerating.value) {
     cancelCurrentPrompt()
   } else {
-    generateDescription()
+    startGeneration()
   }
 }
-const generateDescription = () => {
-
+const startGeneration = () => {
   if (log.isTraceEnabled()) {
     log.trace(`Generating based on instructions: [${instructions.value}]`)
   }
-
   addChatItem(instructions.value, ChatRole.USER)
 
-  let instructionsToSend = null
-  const userInstructions = instructions.value
-
-  if (currentDescription.value) {
-    const extractedImagesRes = imgHandler.extractImages(currentDescription.value)
-    const descriptionText = extractedImagesRes.hasImages ? extractedImagesRes.processedText : currentDescription.value
-    const instructionsToKeepPlaceholders = extractedImagesRes.hasImages? imgHandler.instructionsToKeepPlaceholders() : ''
-    instructionsToSend = instructionsGenerator.existingDescriptionInstructions(descriptionText, userInstructions, instructionsToKeepPlaceholders)
-    if (extractedImagesRes.hasImages) {
-      extractedImageState.extractedImages = extractedImagesRes.extractedImages
-    }
-  } else {
-    instructionsToSend = instructionsGenerator.newDescriptionInstructions(userInstructions)
-  }
+  const promptInstructions = props.createInstructionsFn(instructions.value)
   instructions.value = ''
 
-  if (shouldStream.value) {
-    isGenerating.value = true
-    addChatItem('Got it! I\'ll get started right away!', ChatRole.ASSISTANT, true)
-    generateDescriptionWithStreaming(instructionsToSend, extractedImageState)
-  } else {
-    isGenerating.value = true
-    addChatItem('Got it! I am now working on it...', ChatRole.ASSISTANT, true)
-    scrollInstructionsIntoView()
-    generateDescriptionWithoutStreaming(instructionsToSend, extractedImageState)
-  }
+  isGenerating.value = true
+  addChatItem(props.generationStartedMsg, ChatRole.ASSISTANT, true)
+  genWithStreaming(promptInstructions)
 }
 
 const checkThatProgressWasMade = () => {
@@ -196,7 +164,7 @@ const checkThatProgressWasMade = () => {
     "I am still trying, sorry for the delay!",
     "I may not be able to generate a description at this time. But I'll try my best to get it done."
   ];
-  const lastItem = chatHistory.value[chatHistory.value.length - 1];
+  const lastItem = getLastChatItem()
   const initialLength = lastItem.generatedValue.length;
 
   const checkProgress = () => {
@@ -212,29 +180,32 @@ const checkThatProgressWasMade = () => {
   checkProgress()
 }
 
-const openaiService = useOpenaiService()
-const generateDescriptionWithStreaming = (instructionsToSend) => {
+const genWithStreaming = (instructionsToSend) => {
   lastPromptCancelled.value = false
   checkThatProgressWasMade()
   scrollInstructionsIntoView()
   return openaiService.prompt(instructionsToSend,
       (chunk) => {
-        appendGeneratedToLastChatItem(chunk)
+        const chunkRes = props.chunkHandlerFn(chunk)
+        if (chunkRes.append) {
+          appendGeneratedToLastChatItem(chunkRes.chunk)
+        }
         scrollInstructionsIntoView()
       },
-      (completeData) => {
-        setFinalMsgToLastChatItem(reviewDescMsg)
-        extractWhatChangedFromLastHistoryItem()
+      () => {
+        const updatedHistoryItem = props.generationCompletedFn(getLastChatItem())
+        updateLastChatItemGeneratedValue(updatedHistoryItem)
+        setFinalMsgToLastChatItem(props.generationCompletedMsg)
         isGenerating.value = false
         focusOnInstructionsInput()
       },
       (error) => {
         isGenerating.value = false
         if (lastPromptCancelled.value) {
-          setFinalMsgToLastChatItem(cancelledMsg, false, true)
+          setFinalMsgToLastChatItem(props.generateCancelledMsg, false, true)
         } else {
           log.error(`Failed to generate description via streaming: ${error}`)
-          setFinalMsgToLastChatItem(failedToGenerateMsg, true)
+          setFinalMsgToLastChatItem(props.failedToGenerateMsg, true)
         }
         focusOnInstructionsInput()
       })
@@ -245,70 +216,34 @@ const cancelCurrentPrompt = () => {
   openaiService.cancelCurrentPrompt()
 }
 
-
 const scrollInstructionsIntoView = () => {
-  nextTick(() => {
-    document.getElementById('instructionsInput')?.scrollIntoView()
-  })
+  nextTick(() => document.getElementById('instructionsInputId')?.scrollIntoView())
 }
-const generateDescriptionWithoutStreaming = (instructionsToSend) => {
-  return LearningGenService.generateDescription(route.params.projectId, instructionsToSend)
-      .then((response) => {
-        appendGeneratedToLastChatItem(response.description)
-        setFinalMsgToLastChatItem(reviewDescMsg)
-      }).finally(() => {
-        isGenerating.value = false
-        focusOnInstructionsInput()
-      }).catch((err) => {
-        isGenerating.value = false
-        log.error(err)
-        addChatItem(failedToGenerateMsg)
-      })
-}
-
 const focusOnInstructionsInput = () => {
-  nextTick(() => {
-    document.getElementById('instructionsInput')?.focus()
-  })
+  nextTick(() => document.getElementById('instructionsInputId')?.focus())
 }
 
-const useGeneratedDescription = (historyId) => {
+const useGenerated = (historyId) => {
   const historyItem = chatHistory.value.find(item => item.id === historyId)
-  if (historyItem?.generatedValue) {
-    const { newText } = parseResponse(historyItem.generatedValue)
-    emit('generated-desc', newText || historyItem.generatedValue)
-  }
+  emit('use-generated', historyItem)
   close()
 }
 
-const validationService = useDescriptionValidatorService()
-const isAddingPrefix = ref(false)
-const addPrefixThenUseDesc = (info) => {
+const addPrefix = (info) => {
   isAddingPrefix.value = true
   const historyId = info.id
   const missingPrefix = info.prefix
   const historyItem = chatHistory.value.find(item => item.id === historyId)
   if (historyItem?.generatedValue) {
-    return validationService.addPrefixToInvalidParagraphs(historyItem?.generatedValue, missingPrefix).then((result) => {
-      const { newText } = parseResponse(result.newDescription)
-      emit('generated-desc', newText || result.newDescription)
-      close()
-    }).finally(() => {
+    return props.addPrefixFn(historyItem, missingPrefix).then((result) => {
+      historyItem.generatedValue = result.generatedValue
+      useGenerated(historyItem.id)
       isAddingPrefix.value = false
     })
   }
 }
 
-const finalMsgSeverity = (historyItem) => {
-  if (historyItem.failedToGenerate) {
-    return 'error'
-  }
-  if (historyItem.cancelled) {
-    return 'warn'
-  }
-  return 'info'
-}
-
+const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error' : historyItem.cancelled ? 'warn' : 'info'
 </script>
 
 <template>
@@ -322,9 +257,6 @@ const finalMsgSeverity = (historyItem) => {
       :show-cancel-button="false"
       :enable-return-focus="true">
 
-    <div class="flex justify-end gap-2">
-      Streaming: <ToggleSwitch v-model="shouldStream" />
-    </div>
     <div class="py-5 flex flex-col" style="min-height: 70vh">
       <div id="chatHistory"
            :class="{ 'flex-1': chatHistory.length > 1 }"
@@ -340,9 +272,7 @@ const finalMsgSeverity = (historyItem) => {
               <markdown-text :text="historyItem.origMessage" :instanceId="`${historyItem.id}-content`"/>
             </div>
             <div v-if="historyItem.generatedValue" class="px-5 border rounded-lg bg-blue-50">
-              <markdown-text :text="historyItem.generatedValue"
-                             data-cy="generatedSegment"
-                             :instanceId="`${historyItem.id}-desc`"/>
+              <slot name="generatedValue" :historyItem="historyItem" data-cy="generatedSegment"/>
               <div v-if="historyItem.generateValueChangedNotes"
                    data-cy="generatedSegmentNotes"
                    class="border-t-2 border-dotted border-blue-200 p-0 mt-5">
@@ -362,12 +292,13 @@ const finalMsgSeverity = (historyItem) => {
                     label="Use Generated Value"
                     :data-cy="`useGenValueBtn-${historyItem.id}`"
                     :loading="isAddingPrefix"
-                    @click="useGeneratedDescription(historyItem.id)"/>
+                    @click="useGenerated(historyItem.id)"/>
 
-                <span v-if="appConfig.addPrefixToInvalidParagraphsOptions">OR</span>
+                <span v-if="appConfig.addPrefixToInvalidParagraphsOptions && props.addPrefixFn !== null">OR</span>
 
                 <prefix-controls
-                    @add-prefix="addPrefixThenUseDesc"
+                    v-if="props.addPrefixFn !== null"
+                    @add-prefix="addPrefix"
                     :is-loading="isAddingPrefix"
                     :id="historyItem.id"
                     size="normal"
@@ -384,13 +315,12 @@ const finalMsgSeverity = (historyItem) => {
       <div class="flex justify-end mt-6">
         <div class="flex gap-2 w-10/12">
           <InputText
-              id="instructionsInput"
-              ref="instructionsInput"
+              id="instructionsInputId"
               v-model="instructions"
               class="w-full"
               placeholder="Type Instructions Here"
               :disabled="isGenerating"
-              @keydown.enter="generateDescription"
+              @keydown.enter="startGeneration"
               data-cy="instructionsInput"
               autofocus/>
           <div class="flex justify-end">

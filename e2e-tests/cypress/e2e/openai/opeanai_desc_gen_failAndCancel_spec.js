@@ -16,6 +16,9 @@
 
 import {
     newDescWelcomeMsg,
+    errMsg,
+    stopMsg,
+    gotStartedMsg
 }
     from './openai_helper_commands'
 
@@ -60,7 +63,7 @@ describe('Generate Desc Fail And Cancel Tests', () => {
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
         cy.get('[data-cy="userMsg-1"]').contains('Learn chess')
-        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains('Got it')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
         // cy.wait('@openaiStream', { timeout: 40000 })
 
         const messageToWaitFor = [
@@ -75,7 +78,7 @@ describe('Generate Desc Fail And Cancel Tests', () => {
             cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(message)
         })
         cy.wait('@openaiStream', { timeout: 40000 })
-        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains('I apologize, but I was unable to generate a description at this time.')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(errMsg)
         cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
         cy.get(`[data-cy="addPrefixBtn"]`).should('not.exist')
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
@@ -113,9 +116,9 @@ describe('Generate Desc Fail And Cancel Tests', () => {
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
         cy.get('[data-cy="userMsg-1"]').contains('Learn chess')
-        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains('Got it')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
         cy.wait('@openaiStream')
-        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains('I apologize, but I was unable to generate a description at this time.')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(errMsg)
         cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
         cy.get(`[data-cy="addPrefixBtn"]`).should('not.exist')
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
@@ -146,11 +149,11 @@ describe('Generate Desc Fail And Cancel Tests', () => {
         cy.get('[data-cy="instructionsInput"]').type('paragraphs')
         cy.get('[data-cy="sendAndStopBtn"]').click()
         cy.get('[data-cy="userMsg-1"]').contains('paragraphs')
-        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains('Got it')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
 
         cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').contains('Paragraph 1')
         cy.get('[data-cy="sendAndStopBtn"]').click()
-        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains('Generation stopped.')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(stopMsg)
 
         cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
         cy.get(`[data-cy="addPrefixBtn"]`).should('not.exist')
