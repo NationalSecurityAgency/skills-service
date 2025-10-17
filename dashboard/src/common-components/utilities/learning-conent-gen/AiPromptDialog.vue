@@ -107,6 +107,7 @@ const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false) =
     isGenerating,
     generatedValue: '',
     generateValueChangedNotes: '',
+    generatedInfo: {}, // arbitrary object for clients of this component
     finalMsg: '',
     failedToGenerate: false,
     cancelled: false,
@@ -129,6 +130,7 @@ const updateLastChatItemGeneratedValue = (item) => {
   const toUpdate = getLastChatItem()
   toUpdate.generatedValue = item.generatedValue
   toUpdate.generateValueChangedNotes = item.generateValueChangedNotes
+  toUpdate.generatedInfo = item.generatedInfo
 }
 
 const onStartStopBtn = () => {

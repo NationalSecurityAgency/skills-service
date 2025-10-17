@@ -155,10 +155,55 @@ ${quizRules}
 `
     }
 
+    const newQuestionInstructions = (userInput) => {
+        return `# Task: Generate a multiple-choice question with answers based on the user's description.
+
+## User's Request:
+"${userInput}"
+
+## Instructions:
+1. First, generate a clear and concise question based on the user's description.
+2. Then, provide 3-5 answer choices in JSON format.
+3. Mark 1-3 answers as correct (must have at least 1 correct answer).
+4. Ensure answers are plausible and relevant to the question.
+
+## Required Response Format:
+### Question:
+[Your generated question here]
+
+### Answers:
+[Your JSON array of answers here]
+
+## Example Response:
+### Question:
+What are some popular chess openings?
+
+### Answers:
+[
+  {"answer": "The Ruy Lopez", "isCorrect": true},
+  {"answer": "The Sicilian Defense", "isCorrect": true},
+  {"answer": "The King's Gambit", "isCorrect": false},
+  {"answer": "The Italian Game", "isCorrect": true},
+  {"answer": "The Caro-Kann Defense", "isCorrect": false}
+]
+
+## Important Notes:
+- Start with "### Question:" on its own line
+- Follow with the question text
+- Add a blank line
+- Then "### Answers:" on its own line
+- Follow with the JSON array
+- The JSON must be valid and properly formatted
+- Include explanations in the answers if the question is complex
+- Do not include any other text outside these sections
+- Do not number answers`
+    }
+
     return {
         newDescriptionInstructions,
         existingDescriptionInstructions,
         newQuizInstructions,
-        updateQuizInstructions
+        updateQuizInstructions,
+        newQuestionInstructions
     }
 }
