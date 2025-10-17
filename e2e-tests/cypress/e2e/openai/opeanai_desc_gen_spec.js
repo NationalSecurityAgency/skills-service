@@ -17,7 +17,10 @@
 import {
     newDescWelcomeMsg,
     chessGenValue,
-    existingDescWelcomeMsg}
+    existingDescWelcomeMsg,
+    completedMsg,
+    gotStartedMsg
+}
     from './openai_helper_commands'
 
 describe('Generate Desc Tests', () => {
@@ -43,9 +46,9 @@ describe('Generate Desc Tests', () => {
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
         cy.get('[data-cy="userMsg-1"]').contains('Learn chess')
-        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains('Got it')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
         cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').contains(chessGenValue)
-        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains('I\'ve prepared a description based on your input')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
         cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled')
 
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
@@ -79,9 +82,9 @@ describe('Generate Desc Tests', () => {
         cy.get('[data-cy="generatedSegmentNotes"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
         cy.get('[data-cy="userMsg-1"]').contains('Learn chess')
-        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains('Got it')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
         cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').contains(chessGenValue)
-        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains('I\'ve prepared a description based on your input')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
         cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegmentNotes"]').contains('Modified chess board!')
         cy.get('[data-cy="aiMsg-2"] [data-cy="useGenValueBtn-2"]').should('be.enabled')
 
@@ -117,8 +120,8 @@ describe('Generate Desc Tests', () => {
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('jabberwocky{enter}')
         cy.get('[data-cy="userMsg-1"]').contains('jabberwocky')
-        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains('Got it')
-        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains('I\'ve prepared a description based on your input')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
         cy.validateMarkdownViewerText('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]', [
             'Has jabberwocky',
             'clean line',
@@ -173,9 +176,9 @@ describe('Generate Desc Tests', () => {
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
         cy.get('[data-cy="userMsg-1"]').contains('Learn chess')
-        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains('Got it')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
         cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').contains(chessGenValue)
-        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains('I\'ve prepared a description based on your input')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
         cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled')
         cy.get(`[data-cy="aiMsg-2"] [data-cy="addPrefixBtn"]`).should('be.enabled')
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
@@ -209,12 +212,12 @@ describe('Generate Desc Tests', () => {
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="instructionsInput"]').type('paragraphs{enter}')
         cy.get('[data-cy="userMsg-1"]').contains('paragraphs')
-        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains('Got it')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
 
         cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').contains('Paragraph 1')
         cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').contains('Paragraph 2')
         cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').contains('Paragraph 3')
-        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains('I\'ve prepared a description based on your input')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
 
         const expectedLines = [
             'Paragraph 1',

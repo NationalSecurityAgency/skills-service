@@ -18,7 +18,6 @@ import {computed, onMounted, ref} from 'vue'
 import {useField} from 'vee-validate'
 import ToastUiEditor from '@/common-components/utilities/markdown/ToastUiEditor.vue'
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
-import Select from 'primevue/select';
 import fontSize from 'tui-editor-plugin-font-size'
 import "tui-editor-plugin-font-size/dist/tui-editor-plugin-font-size.css";
 import {useCommonMarkdownOptions} from '@/common-components/utilities/markdown/UseCommonMarkdownOptions.js'
@@ -36,9 +35,10 @@ import {useProjConfig} from "@/stores/UseProjConfig.js";
 import {useQuizConfig} from "@/stores/UseQuizConfig.js";
 import {useSkillsDisplayInfo} from "@/skills-display/UseSkillsDisplayInfo.js";
 import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
-import GenerateDescriptionDialog from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionDialog.vue";
 import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
 import PrefixControls from "@/common-components/utilities/markdown/PrefixControls.vue";
+import GenerateDescriptionDialog1
+  from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionDialog1.vue";
 
 const appConfig = useAppConfig()
 const quizConfig = useQuizConfig()
@@ -439,7 +439,7 @@ const closeMissingPrefixView = () => {
                     data-cy="aiButton"
                     @click="showGenerateDescriptionDialog = true"/>
     </div>
-    <generate-description-dialog
+    <generate-description-dialog1
         v-if="showGenerateDescriptionDialog"
         ref="generateDescriptionDialogRef"
         v-model="showGenerateDescriptionDialog"
