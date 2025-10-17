@@ -25,6 +25,10 @@ import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormD
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
 import ConfigureAnswers from '@/components/quiz/testCreation/ConfigureAnswers.vue';
 import QuizType from "@/skills-display/components/quiz/QuizType.js";
+import GenerateDescriptionDialog1
+  from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionDialog1.vue";
+import GenerateSingleQuestionDialog
+  from "@/common-components/utilities/learning-conent-gen/GenerateSingleQuestionDialog.vue";
 
 const model = defineModel()
 const props = defineProps({
@@ -287,6 +291,8 @@ const onSavedQuestion = (savedQuestion) => {
   close()
 }
 
+const showAiButton = computed(() => !props.disableAiPrompt && appConfig.enableOpenAIIntegration)
+const showGenQDialog = ref(false)
 </script>
 
 <template>
@@ -306,11 +312,26 @@ const onSavedQuestion = (savedQuestion) => {
       @errors="answersErrorMessage = $event['answers']"
   >
     <template #default>
+      <div class="flex justify-end">
+        <SkillsButton v-if="showAiButton"
+                      icon="fa-solid fa-wand-magic-sparkles"
+                      label="AI"
+                      size="small"
+                      data-cy="aiButton"
+                      @click="showGenQDialog = true"/>
+      </div>
+      <generate-single-question-dialog
+          v-if="showGenQDialog"
+          ref="generateDescriptionDialogRef"
+          v-model="showGenQDialog"
+      />
+
       <markdown-editor
           id="quizDescription"
           :quiz-id="quizId"
           :upload-url="`/admin/quiz-definitions/${route.params.quizId}/upload`"
           :allow-community-elevation="true"
+          :disable-ai-prompt="true"
           data-cy="questionText"
           label="Question"
           label-class="text-primary font-bold"
