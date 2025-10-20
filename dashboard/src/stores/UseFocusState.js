@@ -60,24 +60,6 @@ export const useFocusState = defineStore('focusState', () => {
     return setElementId('')
   }
 
-  function waitForElement(elementId) {
-    return new Promise(resolve => {
-      if(document.getElementById(elementId)) {
-        return resolve(document.getElementById(elementId));
-      }
-      const observer = new MutationObserver(mutations => {
-        if(document.getElementById(elementId)) {
-          observer.disconnect()
-          resolve(document.getElementById(elementId));
-        }
-      })
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      })
-    })
-  }
-
-  return { elementId, setElementId, focusOnLastElement, isElementIdPresent, resetElementId, waitForElement }
+  return { elementId, setElementId, focusOnLastElement, isElementIdPresent, resetElementId }
 
 })

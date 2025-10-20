@@ -141,7 +141,7 @@ const moveQuestion = (changeIndexBy) => {
                 {{ answer.multiPartAnswer.term }}
               </div>
               <div>
-                <i class="fas fa-arrow-right"></i>
+                <i class="fas fa-arrow-right" aria-hidden="true"></i>
               </div>
               <div>
                 {{ answer.multiPartAnswer.value }}

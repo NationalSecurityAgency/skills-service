@@ -83,7 +83,19 @@ const dateTimer = ref(null);
 const scrollDistance = ref(0);
 const isAttemptAlreadyInProgress = ref(false);
 
-
+const allChoicesMatched = (value, context) => {
+  // const index = context.options.index;
+  // const currentQuestion = values.questions[index]
+  // if(currentQuestion) {
+  //   const totalQuestions = currentQuestion.quizAnswers.length
+  //   const answeredQuestions = currentQuestion.quizAnswers.filter((q) => q.currentAnswer).length
+  //   console.log(totalQuestions);
+  //   console.log(answeredQuestions);
+  //   console.log(totalQuestions === answeredQuestions)
+  //   return totalQuestions === answeredQuestions
+  // }
+  return true;
+}
 const atLeastOneSelected = (value) => {
   return !isAttemptAlreadyInProgress.value || value && (value.findIndex((a) => a.selected) >= 0);
 }
@@ -180,6 +192,13 @@ const schema = object({
                       .required()
                       .test('atLeastOneSelected', 'At least 1 choice must be selected', (value) => atLeastOneSelected(value))
                       .label('Answers'),
+                })
+                .when('questionType', {
+                  is: (questionType) => questionType === QuestionType.Matching,
+                  then: (sch) => sch
+                      .required()
+                      .test('mustBeCompleted', 'All choices must be matched', (value, context) => allChoicesMatched(value, context))
+                      .label('Answers')
                 })
           })
       ),
@@ -376,6 +395,12 @@ const updateSelectedAnswers = (questionSelectedAnswer) => {
     reportAnswerPromises.value.push(questionSelectedAnswer.reportAnswerPromise);
   }
 }
+const updateMatchedAnswer = (matchedAnswer) => {
+  isAttemptAlreadyInProgress.value = true;
+  if (matchedAnswer.reportAnswerPromise) {
+    reportAnswerPromises.value.push(matchedAnswer.reportAnswerPromise);
+  }
+}
 const completeTestRun = () => {
   isAttemptAlreadyInProgress.value = true;
   submitTestRun()
@@ -560,6 +585,7 @@ const onResize = (newWidth) => {
                   :num="index+1"
                   :validate="validateTextAnswer"
                   @selected-answer="updateSelectedAnswers"
+                  @answer-matched="updateMatchedAnswer"
                   :quizComplete="!!quizResult"
                   @answer-text-changed="updateSelectedAnswers"/>
             </div>

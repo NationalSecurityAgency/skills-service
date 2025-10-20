@@ -16,12 +16,10 @@ limitations under the License.
 <script setup>
 import { onMounted, ref, computed } from 'vue';
 import draggable from 'vuedraggable';
-import {useFocusState} from "@/stores/UseFocusState.js";
 
 const props = defineProps(['q', 'answerOptions', 'questionNumber', 'quizComplete'])
 const emit = defineEmits(['updateAnswerOrder'])
 
-const focusState = useFocusState()
 const answerBank = ref([])
 const answers = ref([])
 
@@ -50,10 +48,13 @@ const answerOrderChanged = (elementToFocus) => {
   emit('updateAnswerOrder', pairs);
 
   if(elementToFocus) {
-    focusState.waitForElement(elementToFocus).then((el) => {
+    waitForElement(elementToFocus).then((el) => {
       const child = el?.children[0]
-      focusState.setElementId(child.id)
-      focusState.focusOnLastElement()
+      if(child) {
+        child.focus()
+      } else {
+        el.focus()
+      }
     })
   }
 }
@@ -63,9 +64,7 @@ const removeElement = (element) => {
   answers.value[element] = []
   const newIndex = answerBank.value.length - 1
   const newId = `bank-${props.questionNumber}-${newIndex}`
-  answerOrderChanged()
-  focusState.setElementId(newId);
-  focusState.focusOnLastElement()
+  answerOrderChanged(newId)
 }
 
 const addElement = (element) => {
@@ -119,6 +118,23 @@ const computedName = computed(() => {
   return 'bank-' + props.questionNumber;
 })
 
+const waitForElement = (elementId) => {
+  return new Promise(resolve => {
+    if(document.getElementById(elementId)) {
+      return resolve(document.getElementById(elementId));
+    }
+    const observer = new MutationObserver(mutations => {
+      if(document.getElementById(elementId)) {
+        observer.disconnect()
+        resolve(document.getElementById(elementId));
+      }
+    })
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    })
+  })
+}
 </script>
 
 <template>

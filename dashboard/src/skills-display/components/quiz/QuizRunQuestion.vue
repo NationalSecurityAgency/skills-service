@@ -42,7 +42,7 @@ const props = defineProps({
 })
 
 const isLoading = ref(true);
-const emit = defineEmits(['answer-text-changed', 'selected-answer'])
+const emit = defineEmits(['answer-text-changed', 'selected-answer', 'answer-matched'])
 
 const appConfig = useAppConfig()
 
@@ -211,7 +211,12 @@ const updateAnswerOrder = (newOrder) => {
       answerText: pair.value,
       changedAnswerId: answerItem.id
     };
-    reportAnswer(currentAnswer)
+    reportAnswer(currentAnswer).then((reportAnswerPromise) => {
+      emit('answer-matched', {
+        ...currentAnswer,
+        reportAnswerPromise,
+      });
+    })
   })
 }
 </script>
