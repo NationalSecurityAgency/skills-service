@@ -83,18 +83,9 @@ const dateTimer = ref(null);
 const scrollDistance = ref(0);
 const isAttemptAlreadyInProgress = ref(false);
 
-const allChoicesMatched = (value, context) => {
-  // const index = context.options.index;
-  // const currentQuestion = values.questions[index]
-  // if(currentQuestion) {
-  //   const totalQuestions = currentQuestion.quizAnswers.length
-  //   const answeredQuestions = currentQuestion.quizAnswers.filter((q) => q.currentAnswer).length
-  //   console.log(totalQuestions);
-  //   console.log(answeredQuestions);
-  //   console.log(totalQuestions === answeredQuestions)
-  //   return totalQuestions === answeredQuestions
-  // }
-  return true;
+const allChoicesMatched = (value) => {
+  const unansweredQuestions = value.filter((q) => !q.currentAnswer)
+  return unansweredQuestions.length === 0;
 }
 const atLeastOneSelected = (value) => {
   return !isAttemptAlreadyInProgress.value || value && (value.findIndex((a) => a.selected) >= 0);
@@ -197,7 +188,7 @@ const schema = object({
                   is: (questionType) => questionType === QuestionType.Matching,
                   then: (sch) => sch
                       .required()
-                      .test('mustBeCompleted', 'All choices must be matched', (value, context) => allChoicesMatched(value, context))
+                      .test('mustBeCompleted', 'All choices must be matched', (value) => allChoicesMatched(value))
                       .label('Answers')
                 })
           })

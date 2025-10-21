@@ -2070,9 +2070,6 @@
             <column name="updated" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-            <column name="multi_part_answer" type="jsonb">
-                <constraints nullable="true"/>
-            </column>
         </createTable>
 
         <createIndex indexName="fk_quiz_answer_definition_question_ref_id"
@@ -3044,4 +3041,11 @@
                                  referencedTableName="skill_definition"/>
     </changeSet>
 
+    <changeSet id="57" author="skills team">
+        <addColumn tableName="quiz_answer_definition">
+            <column name="multi_part_answer" type="jsonb">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

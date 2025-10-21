@@ -16,8 +16,19 @@ limitations under the License.
 <script setup>
 import { onMounted, ref, computed } from 'vue';
 import draggable from 'vuedraggable';
+import {useField} from "vee-validate";
 
-const props = defineProps(['q', 'answerOptions', 'questionNumber', 'quizComplete'])
+const props = defineProps({
+  value: Array,
+  q: Object,
+  questionNumber: Number,
+  quizComplete: Boolean,
+  name: {
+    type: String,
+    required: true
+  },
+})
+
 const emit = defineEmits(['updateAnswerOrder'])
 
 const answerBank = ref([])
@@ -41,7 +52,8 @@ const answerOrderChanged = (elementToFocus) => {
   let termCounter = 0
   let pairs = []
   for(const answer of answers.value) {
-    let answerPair = {term: props.answerOptions[termCounter]?.answerOption, value: answer[0]}
+    value.value[termCounter].currentAnswer = answer[0];
+    let answerPair = {term: props.value[termCounter]?.answerOption, value: answer[0]}
     pairs.push(answerPair)
     termCounter++
   }
@@ -135,47 +147,58 @@ const waitForElement = (elementId) => {
     })
   })
 }
+
+const { value, errorMessage } = useField(() => props.name, undefined, {syncVModel: true});
 </script>
 
 <template>
-  <div class="flex gap-4">
-    <div class="flex flex-col">
-      <div v-for="answer in answerOptions" class="mb-2 p-1" style="border: 1px solid transparent">
-        {{answer.answerOption}}
+  <div>
+    <div class="flex gap-4">
+      <div class="flex flex-col">
+        <div v-for="answer in value" class="mb-2 p-1" style="border: 1px solid transparent">
+          {{answer.answerOption}}
+        </div>
       </div>
-    </div>
-    <div class="flex flex-col border-l-1" :id="`answers-${questionNumber}`" style="min-width: 100px;">
-      <div v-for="answer in answers" class="ml-2 mb-2 p-1" style="min-height: 34px;" v-if="quizComplete">
-        {{ answer[0] }}
+      <div class="flex flex-col border-l-1" :id="`answers-${questionNumber}`" style="min-width: 100px;">
+        <div v-for="answer in answers" class="ml-2 mb-2 p-1" style="min-height: 34px;" v-if="quizComplete">
+          {{ answer[0] }}
+        </div>
+        <div v-for="(answer, index) in answers" class="border-1 ml-2 mb-2 p-1" style="min-height: 34px;" v-if="!quizComplete">
+          <draggable :list="answers[index]"
+                     itemKey=""
+                     class="answer-section"
+                     :id="`answer-${questionNumber}-${index}`"
+                     @add="answerOrderChanged"
+                     @end="answerOrderChanged"
+                     :group="{ name: computedName, put: answers[index]?.length === 0 ? answerSections : false, pull: answerSections }">
+            <template #item="{element}">
+              <div style="cursor: pointer;"
+                   tabindex="0"
+                   :id="`answers-${questionNumber}-${index}`"
+                   :data-cy="`answers-${questionNumber}-${index}`"
+                   @keyup.up="moveElementUp(index)"
+                   @keyup.down="moveElementDown(index)"
+                   @keyup.right="removeElement(index)">
+                {{element}}
+              </div>
+            </template>
+          </draggable>
+        </div>
       </div>
-      <div v-for="(answer, index) in answers" class="border-1 ml-2 mb-2 p-1" style="min-height: 34px;" v-if="!quizComplete">
-        <draggable :list="answers[index]"
-                   itemKey=""
-                   class="answer-section"
-                   :id="`answer-${questionNumber}-${index}`"
-                   @add="answerOrderChanged"
-                   @end="answerOrderChanged"
-                   :group="{ name: computedName, put: answers[index]?.length === 0 ? answerSections : false, pull: answerSections }">
-          <template #item="{element}">
-            <div style="cursor: pointer;"
-                 tabindex="0"
-                 :id="`answers-${questionNumber}-${index}`"
-                 :data-cy="`answers-${questionNumber}-${index}`"
-                 @keyup.up="moveElementUp(index)"
-                 @keyup.down="moveElementDown(index)"
-                 @keyup.right="removeElement(index)">
-              {{element}}
-            </div>
-          </template>
-        </draggable>
-      </div>
-    </div>
-    <draggable v-if="!quizComplete" :list="answerBank" :id="`bank-${questionNumber}`" itemKey="" :data-cy="`bank-${questionNumber}`" class="flex flex-col matching-question border-l-1" :group="{ name: computedName, put: answerSections, pull: answerSections }">
-      <template #item="{element, index}">
-        <div class="ml-2 answer" style="cursor: pointer" :id="`bank-${questionNumber}-${index}`" :data-cy="`bank-${questionNumber}-${index}`" tabindex="0" @keyup.left="addElement(element)"> {{element}} </div>
-      </template>
-    </draggable>
+      <draggable v-if="!quizComplete" :list="answerBank" :id="`bank-${questionNumber}`" itemKey="" :data-cy="`bank-${questionNumber}`" class="flex flex-col matching-question border-l-1" :group="{ name: computedName, put: answerSections, pull: answerSections }">
+        <template #item="{element, index}">
+          <div class="ml-2 answer" style="cursor: pointer" :id="`bank-${questionNumber}-${index}`" :data-cy="`bank-${questionNumber}-${index}`" tabindex="0" @keyup.left="addElement(element)"> {{element}} </div>
+        </template>
+      </draggable>
 
+    </div>
+    <Message v-if="errorMessage"
+             severity="error"
+             variant="simple"
+             size="small"
+             :closable="false"
+             :data-cy="`${name}Error`"
+             :id="`${name}Error`">{{ errorMessage || '' }}</Message>
   </div>
 </template>
 

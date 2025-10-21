@@ -301,7 +301,6 @@ const saveQuiz = (values) => {
   if(questionType === 'Matching') {
     processedAnswers.forEach((answer) => {
       answer.isCorrect = true
-      answer.multiPartAnswer = JSON.stringify(answer.multiPartAnswer)
     })
   } else {
     processedAnswers.forEach((answer) => {
@@ -341,13 +340,6 @@ const saveQuiz = (values) => {
   }
 }
 const onSavedQuestion = (savedQuestion) => {
-  if(savedQuestion.questionType === 'Matching') {
-    savedQuestion.answers.forEach((answer) => {
-      if (answer.multiPartAnswer) {
-        answer.multiPartAnswer = JSON.parse(answer.multiPartAnswer)
-      }
-    })
-  }
   emit('question-saved', savedQuestion)
   close()
 }

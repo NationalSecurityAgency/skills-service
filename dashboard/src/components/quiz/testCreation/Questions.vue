@@ -64,13 +64,6 @@ function loadQuestions(quizId) {
       .then((res) => {
         quizType.value = res.quizType;
         questions.value = res.questions;
-        questions.value.forEach((q) => {
-          q.answers.forEach((answer) => {
-            if(answer.multiPartAnswer) {
-              answer.multiPartAnswer = JSON.parse(answer.multiPartAnswer)
-            }
-          })
-        })
       })
       .finally(() => {
         loadingQuestions.value = false;

@@ -165,7 +165,7 @@ onMounted(() => {
     ...a,
     selected: a.selected ? a.selected : false,
     percent: (totalNumUsers > 0 ? Math.trunc(((isMatching.value ? a.numAnsweredCorrect : a.numAnswered) / totalNumUsers) * 100) : 0),
-    multiPartAnswer: a.multiPartAnswer?.length > 0 ? JSON.parse(a.multiPartAnswer) : null
+    multiPartAnswer: a.multiPartAnswer?.length > 0 ? a.multiPartAnswer : null
   }))
   if (isRating.value) {
     let totalScore = 0

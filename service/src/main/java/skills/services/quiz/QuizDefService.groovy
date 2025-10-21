@@ -566,7 +566,7 @@ class QuizDefService {
                         answer: null,
                         isCorrectAnswer: true,
                         displayOrder: index + 1,
-                        multiPartAnswer: answerDefRequest.multiPartAnswer,
+                        multiPartAnswer: JsonOutput.toJson(answerDefRequest.multiPartAnswer),
                 )
             }
         } else {
@@ -626,7 +626,7 @@ class QuizDefService {
             List<QuizAnswerDef> answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
                 QuizAnswerDef answerDef = existingAnswerDefs.find { it.id == answerDefRequest.id }
                 if(answerDef) {
-                    answerDef.multiPartAnswer = answerDefRequest.multiPartAnswer
+                    answerDef.multiPartAnswer = JsonOutput.toJson(answerDefRequest.multiPartAnswer)
                     answerDef.displayOrder = index + 1
                     return answerDef
                 } else {
@@ -636,7 +636,7 @@ class QuizDefService {
                             answer: null,
                             isCorrectAnswer: true,
                             displayOrder: index + 1,
-                            multiPartAnswer: answerDefRequest.multiPartAnswer,
+                            multiPartAnswer: JsonOutput.toJson(answerDefRequest.multiPartAnswer),
                     )
                 }
             }
@@ -934,12 +934,14 @@ class QuizDefService {
     }
 
     private QuizAnswerDefResult convert(QuizAnswerDef savedAnswer) {
+        JsonSlurper jsonSlurper = new JsonSlurper()
+        def multiPartAnswer = savedAnswer.multiPartAnswer ? jsonSlurper.parseText(savedAnswer.multiPartAnswer) : null
         new QuizAnswerDefResult(
                 id: savedAnswer.id,
                 answer: savedAnswer.answer,
                 isCorrect: Boolean.valueOf(savedAnswer.isCorrectAnswer),
                 displayOrder: savedAnswer.displayOrder,
-                multiPartAnswer: savedAnswer.multiPartAnswer
+                multiPartAnswer: new QuizMultiPartAnswer(term: multiPartAnswer?.term, value: multiPartAnswer?.value)
         )
     }
 
