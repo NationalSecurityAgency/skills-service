@@ -54,10 +54,10 @@ class QuizDefFactory {
             return [
                     answer: "",
                     isCorrect: true,
-                    multiPartAnswer: JsonOutput.toJson([
+                    multiPartAnswer: [
                         term: 'term' + it,
                         value: 'value' + it
-                    ])
+                    ]
             ]
         } : []
         return [

@@ -242,8 +242,8 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         newQuestion.body.answers[1].id
         newQuestion.body.answers.answer == [null, null]
         newQuestion.body.answers.isCorrect == [true, true]
-        newQuestion.body.answers[0].multiPartAnswer == '{"term":"term1","value":"value1"}'
-        newQuestion.body.answers[1].multiPartAnswer == '{"term":"term2","value":"value2"}'
+        newQuestion.body.answers[0].multiPartAnswer == ["term":"term1", "value":"value1"]
+        newQuestion.body.answers[1].multiPartAnswer == ["term":"term2", "value":"value2"]
     }
 
     def "get quiz questions"() {

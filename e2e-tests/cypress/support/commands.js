@@ -615,18 +615,18 @@ Cypress.Commands.add("createQuizMultipleChoiceQuestionDef", (quizNum = 1, questi
 });
 
 Cypress.Commands.add("createQuizMatchingQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
-    const answer1 = JSON.stringify({
+    const answer1 = {
         'term': 'First Term',
         'value': 'First Answer'
-    })
-    const answer2 = JSON.stringify({
+    }
+    const answer2 = {
         'term': 'Second Term',
         'value': 'Second Answer'
-    })
-    const answer3 = JSON.stringify({
+    }
+    const answer3 = {
         'term': 'Third Term',
         'value': 'Third Answer'
-    })
+    }
     cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
         quizId: `quizId${quizNum}`,
         question: `This is a question # ${questionNum}`,
