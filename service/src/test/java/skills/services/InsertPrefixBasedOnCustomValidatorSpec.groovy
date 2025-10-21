@@ -169,6 +169,33 @@ noe more
 """, prefix).newDescription == """1. (A) item 1
 2. item 2
 """
+
+        validator.addPrefixToInvalidParagraphs("""(A) some text
+1. item
+2. item
+
+
+- some text
+""", prefix).newDescription == """(A) some text
+
+1. item
+2. item
+
+- (A) some text
+"""
+
+        validator.addPrefixToInvalidParagraphs("""(A some text
+1. item
+2. item
+- some text
+""", prefix).newDescription == """(A) (A some text
+
+1. item
+2. item
+
+- some text
+"""
+
     }
 
     def "support markdown tables"() {
@@ -671,4 +698,18 @@ ___
 </ol>
 <p></p>\n"""
     }
+
+//    def "force validation"() {
+//        CustomValidator validator = new CustomValidator();
+//        validator.paragraphValidationRegex = '^\\(A\\).*$'
+//        validator.paragraphValidationMessage = 'fail'
+//        validator.forceValidationRegex = '^\\(.+\\).*$'
+//
+//        String prefix = "(B) "
+//        when:
+//        validator.init()
+//
+//        then:
+//        validator.addPrefixToInvalidParagraphs("""(A) some\n(some text)""", prefix).newDescription == """(A) some\n(B) (some text)"""
+//    }
 }

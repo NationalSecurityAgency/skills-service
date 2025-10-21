@@ -982,6 +982,16 @@ line-height:107%">(A) fancy formatting</span>""").valid
 ![image.png](data:image/png;base64,XXXXXXXXXXXX)""").valid
 
         validator.validateDescription("(A) val 1\n\n${imgStr}\n${imgStr}").valid
+
+        validator.validateDescription("(A) **some text - image: cool image:**\n${imgStr}").valid
+        validator.validateDescription("(A) great\n\n\n\n**(A) some **<span sytle=\"color: 'blue'\"> - </span>**image:**\n${imgStr}").valid
+
+        // image via external link
+        validator.validateDescription("(A)\n![This is Image](https://some.path.some.png)").valid
+        // image via external link wrapped with a link
+        validator.validateDescription("(A)\n[![This is Image](https://some.path.some.png)](https://some.url.com)").valid
+
+        validator.validateDescription("(A) SOME - (Ok 'OK') / [ https://some.web.com/some/page](https://some.web.com/some/page)\n${imgStr}").valid
     }
 
     def "support links" () {
@@ -1187,13 +1197,87 @@ line-height:107%">(A) fancy formatting</span>""").valid
         def res = validator.validateDescription(input)
         def res1 = validator.validateDescription(inputB)
         def res2 = validator.validateDescription(inputC)
-        println res1.validationFailedDetails
         then:
         res.valid
         !res1.valid
         res1.validationFailedDetails == "Failed within an html element for text [(B) three] after line[2]\n"
         !res2.valid
         res2.validationFailedDetails == "Failed within an html element for text [(B) Seven] after line[2]\n"
+
+
+        validator.validateDescription('''(A) some text
+1. item
+2. item
+''').valid
+
+        validator.validateDescription('''(A) some text
+1. item
+2. item
+- some text
+''').valid
+
+        validator.validateDescription('''(A) some text
+
+1. item
+2. item
+- some text
+''').valid
+
+        validator.validateDescription('''(A) some text
+
+1. item
+2. item
+
+- some text
+''').valid
+
+        def res4 = validator.validateDescription('''(A some text
+1. item
+2. item
+- some text
+''')
+        !res4.valid
+        res4.validationFailedDetails == "Line[0] [(A some text]\n" +
+                "\n" +
+                "Line[1] [item]\n" +
+                "\n" +
+                "Line[3] [some text]\n\n"
+
+        validator.validateDescription('''(A)
+some text
+1. item
+2. item
+3. item
+*some text*
+- one
+-two''').valid
+
+        def res5 = validator.validateDescription('''(A)
+some text
+1. item
+2. item
+3. item
+
+*some text*
+- one
+-two''')
+        !res5.valid
+        res5.validationFailedDetails == """Line[6] [some text]
+
+Line[7] [one
+-two]
+
+"""
+
+        validator.validateDescription('''(A) some text:
+1.\t (A) item
+2.\t (A) item
+1.\t (A) item
+2.\t (A) item
+(A) some text
+-\tone
+-\ttwo''').valid
+
     }
 
     def "support text with multiple paragraphs and lists - test concurrency"() {
@@ -1231,6 +1315,21 @@ line-height:107%">(A) fancy formatting</span>""").valid
         results.every { it.endsWith('PASSED') }
 
     }
+
+
+    def "Test force validation"(){
+        CustomValidator validator = new CustomValidator();
+        validator.nameValidationRegex = '^\\(A\\).*$'
+        validator.nameValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+
+        when:
+        validator.init()
+        then:
+        validator.validateName("(A) some value This Cool Acronym (ACA) some parans (\"keep hydrated\"). More interesting info (but more stuff could happen)").valid
+    }
+
 
 
 }
