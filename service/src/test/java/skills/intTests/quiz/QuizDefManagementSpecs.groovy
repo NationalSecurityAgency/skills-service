@@ -246,6 +246,28 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         newQuestion.body.answers[1].multiPartAnswer == ["term":"term2", "value":"value2"]
     }
 
+
+    def "copy quiz with a Matching question"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+
+        when:
+        skillsService.createQuizQuestionDef(question)
+        def copy = [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: '', type: quiz.type ]
+        def copiedQuiz = skillsService.copyQuiz(quiz.quizId, copy)
+        assert copiedQuiz.statusCode == HttpStatus.OK
+        def newQuestions = skillsService.getQuizQuestionDefs('newQuizCopy')
+
+        then:
+        newQuestions.questions.size() == 1
+        newQuestions.questions[0].question == question.question
+        newQuestions.questions[0].questionType == question.questionType
+        newQuestions.questions[0].answers.size() == question.answers.size()
+        newQuestions.questions[0].answers[0].multiPartAnswer == question.answers[0].multiPartAnswer
+
+    }
+
     def "get quiz questions"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)

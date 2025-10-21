@@ -155,7 +155,7 @@ const { value, errorMessage } = useField(() => props.name, undefined, {syncVMode
   <div>
     <div class="flex gap-4">
       <div class="flex flex-col">
-        <div v-for="answer in value" class="mb-2 p-1" style="border: 1px solid transparent">
+        <div v-for="answer in value" class="mb-4 p-1" style="border: 1px solid transparent">
           {{answer.answerOption}}
         </div>
       </div>
@@ -163,7 +163,7 @@ const { value, errorMessage } = useField(() => props.name, undefined, {syncVMode
         <div v-for="answer in answers" class="ml-2 mb-2 p-1" style="min-height: 34px;" v-if="quizComplete">
           {{ answer[0] }}
         </div>
-        <div v-for="(answer, index) in answers" class="border-1 ml-2 mb-2 p-1" style="min-height: 34px;" v-if="!quizComplete">
+        <div v-for="(answer, index) in answers" class="border-1 rounded-border ml-2 mb-2 p-2" style="min-height: 42px;" v-if="!quizComplete">
           <draggable :list="answers[index]"
                      itemKey=""
                      class="answer-section"
@@ -205,8 +205,9 @@ const { value, errorMessage } = useField(() => props.name, undefined, {syncVMode
 <style scoped>
 .matching-question > .answer {
   margin-bottom: 2px;
-  padding: 2px;
+  padding: 6px;
   border: 1px solid #c0c0c0;
+  border-radius: 4px;
 }
 
 .answer-section {

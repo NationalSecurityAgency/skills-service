@@ -295,7 +295,7 @@ class QuizDefService {
             newQuestion.questionType = question.questionType
 
             List<QuizAnswerDefRequest> newAnswers = answers.collect( it -> {
-                return new QuizAnswerDefRequest(answer: it.answer, isCorrect: it.isCorrect)
+                return new QuizAnswerDefRequest(answer: it.answer, isCorrect: it.isCorrect, multiPartAnswer: it.multiPartAnswer)
             })
             newQuestion.answers = newAnswers
             newQuestion.attributes = question.attributes
