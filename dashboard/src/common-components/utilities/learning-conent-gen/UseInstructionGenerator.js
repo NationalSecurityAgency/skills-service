@@ -41,87 +41,58 @@ ${instructionsToKeepPlaceholders ? `-${instructionsToKeepPlaceholders}` : ''}
     }
 
     const quizRules = `
-### Question Types
-1. **SingleChoice**
-   - Must NOT provide less than 1 correct answer
-   - Must NOT provide more than 1 correct answer
-   - Must provide exactly 1 correct answer
-   - 2-3 incorrect answers
-   - Mark correct answer with \`"isCorrect": true\`
+# Quiz Generation Instructions
 
-2. **MultipleChoice**
-   - Must provide no less than 2 correct answers
-   - Must provide 2 or more correct answers
-   - 3-5 total options
-   - Mark all correct answers with \`"isCorrect": true\`
+## Output Format
+Return a JSON object with exactly two properties:
+1. \`numQuestions\`: Number of questions generated
+2. \`questions\`: Array of question objects
 
-3. **TextInput **
-   - The user will provide the answer in the form of a text input
-   - the answers will always be an empty array
-   
-### Question Content
-- Ensure the question is clear and concise
+## Question Requirements
+### 1. SingleChoice Questions
+- **Requirements**:
+  - Exactly 1 correct answer
+  - 2-3 incorrect answers
+  - Mark correct answer with \`"isCorrect": true\`
+  - All other answers must have \`"isCorrect": false\`
+
+### 2. MultipleChoice Questions
+- **Requirements**:
+  - Minimum 2 correct answers
+  - 3-5 total options
+  - All correct answers must have \`"isCorrect": true\`
+  - All incorrect answers must have \`"isCorrect": false\`
+
+### 3. TextInput Questions
+- **Requirements**:
+  - Always return empty answers array: \`"answers": []\`
+  - No need to provide answer options
+
+## Content Guidelines
 - Include at least one question of each type
-- Make incorrect answers plausible
-- Avoid trick questions
-- Avoid questions that are too easy or too hard
-- Avoid questions that are too long or too short
-- Avoid questions that are too complex or too simple
-- Avoid questions that are too similar to each other
-        
-### Technical Requirements
-- Format questions in JSON
-- Each question should include:
-  - Quiz ID (same quizId for all questions)
-  - Clear question text (Markdown formatted)
-  - Question type
-  - Array of answer objects
-- When streaming, send questions as complete json objects in a chunk
-- All Questions should be returned in a single JSON array
-- Provide a property called numQuestions with the number of questions generated before the array
-- The entire response should be a single JSON object, with one property called 'numQuestions' and one property called 'questions' that is an array of question objects.
-- Do not provide an introduction. 
-- Do not provide any additional text.
-- Do not provide any comments.
-- Do not provide any explanations.
+- Ensure questions are clear, concise, and appropriate difficulty
+- Make incorrect answers plausible but clearly wrong
+- Avoid:
+  - Trick questions
+  - Ambiguous phrasing
+  - Questions that are too easy/hard
+  - Questions that are too similar to each other
 
-### Example Response Format
-\`\`\`json
-{
-   "numQuestions": 5,
-   questions: [
-       {
-           "quizId": "chess-fundamentals-quiz",
-           "question": "How many unique pieces are there in a standard chess set?",
-           "questionType": "SingleChoice",
-           "answers": [
-               {"answer": "6", "isCorrect": true},
-               {"answer": "8", "isCorrect": false},
-               {"answer": "7", "isCorrect": false},
-               {"answer": "5", "isCorrect": false}
-           ]
-       },
-       {
-           "quizId": "chess-fundamentals-quiz",
-           "question": "What opening strategies are listed in the training material?",
-           "questionType": "MultipleChoice",
-           "answers": [
-               {"answer": "The Ruy Lopez", "isCorrect": true},
-               {"answer": "The Sicilian Defense", "isCorrect": true},
-               {"answer": "The King's Gambit", "isCorrect": false},
-               {"answer": "The Italian Game", "isCorrect": true},
-               {"answer": "The Caro-Kann Defense", "isCorrect": false}
-           ]
-       },
-       {
-           "quizId": "chess-fundamentals-quiz",
-           "question": "Identify a common endgame position involving a king, a rook, and two pawns.",
-           "questionType": "TextInput",
-           "answers": []
-       }
-   ]
-}
-\`\`\`
+## Technical Specifications
+- Format: Strict JSON
+- Each question must include:
+  \`\`\`json
+  {
+    "quizId": "string",  // Same for all questions
+    "question": "string", // Markdown supported
+    "questionType": "SingleChoice|MultipleChoice|TextInput",
+    "answers": [
+      {
+        "answer": "string",
+        "isCorrect": boolean
+      }
+    ]
+  }    
     `
 
     const newQuizInstructions = (existingDescription, numQuestions) => {
