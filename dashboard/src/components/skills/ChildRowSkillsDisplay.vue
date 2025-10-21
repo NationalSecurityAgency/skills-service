@@ -31,6 +31,7 @@ import LinkToSkillPage from '@/components/utils/LinkToSkillPage.vue'
 import { useRoute } from 'vue-router'
 import SelfReportType from "@/components/skills/selfReport/SelfReportType.js";
 import GenerateQuizDialog from '@/common-components/utilities/learning-conent-gen/GenerateQuizDialog.vue'
+import GenerateQuizDialog2 from '@/common-components/utilities/learning-conent-gen/GenerateQuizDialog2.vue'
 import QuizService from '@/components/quiz/QuizService.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
@@ -288,7 +289,7 @@ const onDialogShow = () => {
                             @click="showGenerateQuizDialog = true"/>
             </div>
           </div>
-          <generate-quiz-dialog
+          <generate-quiz-dialog2
               v-if="showGenerateQuizDialog"
               ref="generateQuizDialogRef"
               v-model="showGenerateQuizDialog"
