@@ -67,6 +67,7 @@ class ParagraphValidator {
     private TextContentRenderer textContentRenderer
     private Node document
     private final Map<String, String> customReplacements = [:]
+    private final Set<Node> validatedNodes = new HashSet<>()
 
     InternalValidationResult validateMarkdown() {
         InternalValidationResult res = init()
@@ -196,11 +197,24 @@ class ParagraphValidator {
             }
 
             void handleList(ListBlock bulletList) {
+                boolean isValidList = true
                 Node previousNode = bulletList.previous
 
-                boolean previousNodeValidates = previousNode
-                        && linesToPreviousNode(bulletList) < 3
-                        && validateParagraph(previousNode)
+                boolean previousNodeValidates = false
+                if (previousNode) {
+                    Integer linesToPrevNode = linesToPreviousNode(bulletList)
+                    boolean prevNodeCloseEnough = linesToPrevNode > -1 && linesToPrevNode < 3
+
+                    boolean isPreviousNodeListBlock = previousNode instanceof ListBlock
+                    boolean amIPartOfAnotherList = prevNodeCloseEnough && isPreviousNodeListBlock
+                    boolean isPrevNodeAlreadyValidated = validatedNodes.contains(previousNode)
+
+                    if (amIPartOfAnotherList && isPrevNodeAlreadyValidated) {
+                        previousNodeValidates = true
+                    } else if (prevNodeCloseEnough && !isPreviousNodeListBlock && validateParagraph(previousNode)) {
+                        previousNodeValidates = true
+                    }
+                }
 
                 if (!previousNodeValidates) {
                     ListItem firstBullet = (ListItem) bulletList.firstChild
@@ -211,6 +225,7 @@ class ParagraphValidator {
                             appendToValidationFailedDetails("First bullet is empty")
                         }
                         invalidate()
+                        isValidList = false
                         if (shouldAddPrefix(firstBulletContent)) {
                             firstBulletContent.prependChild(new Text(request.prefix))
                         }
@@ -227,10 +242,15 @@ class ParagraphValidator {
                             boolean shouldForceValidation = request.forceValidationPattern.matcher(toValidate).matches()
                             if (shouldForceValidation && !validateParagraph(firstBulletValue)) {
                                 invalidate()
+                                isValidList = false
                             }
                         }
                         currentBullet = (ListItem) currentBullet.next
                     }
+                }
+
+                if (isValidList) {
+                    validatedNodes.add(bulletList)
                 }
             }
 
@@ -355,11 +375,26 @@ class ParagraphValidator {
         return str && str.trim().matches(/^[^a-zA-Z0-9]+$/)
     }
 
+    private String allNodesOnSameLineToString(Node node) {
+        StringBuilder res = new StringBuilder()
+        int nodeCurrentLine = node.sourceSpans.first().lineIndex
+        List<Node> prevNodesOnSameLine = [node]
+        Node currentNode = node.previous
+        while (currentNode && currentNode.sourceSpans.first().lineIndex == nodeCurrentLine) {
+            prevNodesOnSameLine.add(currentNode)
+            currentNode = currentNode.previous
+        }
+        prevNodesOnSameLine.reverse().each { Node resNode ->
+            res.append(textContentRenderer.render(resNode))
+        }
+        return res.toString()
+    }
+
     private boolean validateParagraph(Node node) {
         if (!node) {
             return false
         }
-        String toValidate = textContentRenderer.render(node)
+        String toValidate = allNodesOnSameLineToString(node)
         toValidate = Jsoup.parse(toValidate).text()
         if (isOnlySeparatorsOrWhitespace(toValidate)) {
             return true
@@ -421,7 +456,8 @@ class ParagraphValidator {
 
     private static Node getPreviousForImage(Node currentNode, Node previousNode) {
         Node res = previousNode
-        if (currentNode.parent instanceof Paragraph && currentNode.parent.firstChild == currentNode) {
+        if ((currentNode.parent instanceof Paragraph || currentNode.parent instanceof Link)
+                && currentNode.parent.firstChild == currentNode) {
             res = currentNode.parent.previous
         }
         return res
