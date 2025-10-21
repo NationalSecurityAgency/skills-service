@@ -78,8 +78,22 @@ const addWelcomeMsg = (welcomeMsg) => {
     origMessage: welcomeMsg
   })
 }
+const startGeneration = () => {
+  if (log.isTraceEnabled()) {
+    log.trace(`Generating based on instructions: [${instructions.value}]`)
+  }
+  addChatItem(instructions.value, ChatRole.USER)
+
+  const promptInstructions = props.createInstructionsFn(instructions.value)
+  instructions.value = ''
+
+  isGenerating.value = true
+  addChatItem(props.generationStartedMsg, ChatRole.ASSISTANT, true)
+  genWithStreaming(promptInstructions)
+}
 defineExpose({
-  addWelcomeMsg
+  addWelcomeMsg,
+  startGeneration
 });
 
 const close = () => {
@@ -140,19 +154,6 @@ const onStartStopBtn = () => {
     startGeneration()
   }
 }
-const startGeneration = () => {
-  if (log.isTraceEnabled()) {
-    log.trace(`Generating based on instructions: [${instructions.value}]`)
-  }
-  addChatItem(instructions.value, ChatRole.USER)
-
-  const promptInstructions = props.createInstructionsFn(instructions.value)
-  instructions.value = ''
-
-  isGenerating.value = true
-  addChatItem(props.generationStartedMsg, ChatRole.ASSISTANT, true)
-  genWithStreaming(promptInstructions)
-}
 
 const checkThatProgressWasMade = () => {
   const TIMEOUT_MS = 5000;
@@ -191,6 +192,10 @@ const genWithStreaming = (instructionsToSend) => {
         const chunkRes = props.chunkHandlerFn(chunk)
         if (chunkRes.append) {
           appendGeneratedToLastChatItem(chunkRes.chunk)
+        }
+        if (chunkRes.generatedInfo) {
+          const toUpdate = getLastChatItem()
+          toUpdate.generatedInfo = chunkRes.generatedInfo
         }
         scrollInstructionsIntoView()
       },
