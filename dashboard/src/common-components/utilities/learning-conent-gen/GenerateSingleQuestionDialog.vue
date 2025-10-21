@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {onMounted, ref} from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import {useRoute} from "vue-router";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import {useLog} from "@/components/utils/misc/useLog.js";
@@ -25,6 +25,7 @@ import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import AiPromptDialog from "@/common-components/utilities/learning-conent-gen/AiPromptDialog.vue";
 import SelectCorrectAnswer from "@/components/quiz/testCreation/SelectCorrectAnswer.vue";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
+import { useQuizConfig } from '@/stores/UseQuizConfig.js'
 
 const model = defineModel()
 const props = defineProps({
@@ -39,6 +40,7 @@ const route = useRoute()
 const log = useLog()
 const imgHandler = useImgHandler()
 const appConfig = useAppConfig()
+const quizConfig = useQuizConfig()
 const instructionsGenerator = useInstructionGenerator()
 
 const currentDescription = ref('')
@@ -145,6 +147,20 @@ const handleAddPrefix = (historyItem, missingPrefix) => {
 
   return historyItem
 }
+
+const communityValue = computed(() => {
+  let res = appConfig.defaultCommunityDescriptor
+  if (props.allowCommunityElevation) {
+    if (props.userCommunity) {
+      res = props.userCommunity
+    } else {
+      if (route.params.quizId) {
+        res = quizConfig.quizCommunityValue;
+      }
+    }
+  }
+  return res
+})
 </script>
 
 <template>
@@ -156,6 +172,7 @@ const handleAddPrefix = (historyItem, missingPrefix) => {
       :generation-completed-fn="handleGenerationCompleted"
       :add-prefix-fn="handleAddPrefix"
       @use-generated="useGenerated"
+      :community-value="communityValue"
   >
     <template #generatedValue="{ historyItem }">
       <markdown-text :text="historyItem.generatedValue"
