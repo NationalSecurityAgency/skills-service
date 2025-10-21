@@ -254,7 +254,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         skillsClientException.message.contains("Must have at least 1 question declared in order to start.")
     }
 
-    def "configured question sort oder is respected"() {
+    def "configured question sort order is respected"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createChoiceQuestions(1, 5, 2)
@@ -517,5 +517,40 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         quizInfo
         quizInfo.canStartQuiz == false
         quizInfo.errorMessage == "This Quiz is assigned to a Skill (skill1) that does not have enough points to be completed. The Subject (TestSubject1) that contains this skill must have at least 100 points."
+    }
+
+    def "run quiz with matching question - pass"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createMatchingQuestion(1, 2, 2)
+        skillsService.createQuizQuestionDef(question)
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'value1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: 'value2'])
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        then:
+        gradedQuizAttempt.passed == true
+        gradedQuizAttempt.numQuestionsGotWrong == 0
+        gradedQuizAttempt.gradedQuestions.questionId == quizAttempt.questions.id
+        gradedQuizAttempt.gradedQuestions.isCorrect == [true]
+        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizAttempt.questions[0].answerOptions[0].id, quizAttempt.questions[0].answerOptions[1].id]
+    }
+
+    def "run quiz with matching question - fail"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createMatchingQuestion(1, 2, 2)
+        skillsService.createQuizQuestionDef(question)
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'value2'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: 'value1'])
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        then:
+        gradedQuizAttempt.passed == false
+        gradedQuizAttempt.numQuestionsGotWrong == 1
     }
 }
