@@ -607,6 +607,17 @@ ___
                 .newDescription == "(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}\n"
         validator.addPrefixToInvalidParagraphs("(A) ok\n\n${table}\n\nok\n\n${imgStr}\n\n(A) ok\n\n${table}", prefix)
                 .newDescription == "(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n"
+
+        validator.addPrefixToInvalidParagraphs("(A **some text - image: cool image:**\n${imgStr}", prefix)
+                .newDescription == "(A) (A **some text - image: cool image:**\n${imgStr}\n"
+        validator.addPrefixToInvalidParagraphs("(A) great\n\n\n\n**(A some **<span sytle=\"color: 'blue'\"> - </span>**image:**\n${imgStr}", prefix)
+                .newDescription == "(A) great\n\n(A) \\*\\*(A some \\*\\*<span sytle=\"color: 'blue'\"> - </span>**image:**\n${imgStr}\n"
+        validator.addPrefixToInvalidParagraphs("(A\n![This is Image](https://some.path.some.png)", prefix)
+                .newDescription == "(A) (A\n![This is Image](https://some.path.some.png)\n"
+        validator.addPrefixToInvalidParagraphs("(A\n[![This is Image](https://some.path.some.png)](https://some.url.com)", prefix)
+                .newDescription == "(A) (A\n[![This is Image](https://some.path.some.png)](https://some.url.com)\n"
+        validator.addPrefixToInvalidParagraphs("(A SOME - (Ok 'OK') / [ https://some.web.com/some/page](https://some.web.com/some/page)\n${imgStr}", prefix)
+                .newDescription == "(A) (A SOME - (Ok 'OK') / [ https://some.web.com/some/page](https://some.web.com/some/page)\n${imgStr}\n"
     }
 
     def "support url" () {
@@ -699,17 +710,17 @@ ___
 <p></p>\n"""
     }
 
-//    def "force validation"() {
-//        CustomValidator validator = new CustomValidator();
-//        validator.paragraphValidationRegex = '^\\(A\\).*$'
-//        validator.paragraphValidationMessage = 'fail'
-//        validator.forceValidationRegex = '^\\(.+\\).*$'
-//
-//        String prefix = "(B) "
-//        when:
-//        validator.init()
-//
-//        then:
-//        validator.addPrefixToInvalidParagraphs("""(A) some\n(some text)""", prefix).newDescription == """(A) some\n(B) (some text)"""
-//    }
+    def "force validation"() {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String prefix = "(B) "
+        when:
+        validator.init()
+
+        then:
+        validator.addPrefixToInvalidParagraphs("""(A) some\n(some text)""", prefix).newDescription == """(A) some\n(B) (some text)\n"""
+    }
 }
