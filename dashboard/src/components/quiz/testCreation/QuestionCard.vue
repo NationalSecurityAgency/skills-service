@@ -22,6 +22,7 @@ import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
 import {useRoute} from "vue-router";
+import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 
 const route = useRoute()
 const quizConfig = useQuizConfig()
@@ -34,6 +35,10 @@ const props = defineProps({
   showEditControls: {
     type: Boolean,
     default: true
+  },
+  editQuestionInline: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -100,10 +105,22 @@ const moveQuestion = (changeIndexBy) => {
       </div>
       <div :class="{ 'ml-3' : !isDragAndDropControlsVisible }" class="flex-col flex-1 items-start px-2 py-1">
         <div class="flex flex-1">
-          <markdown-text
-              :text="question.question"
-              :instance-id="`${question.id}`"
-              data-cy="questionDisplayText"/>
+          <markdown-editor v-if="editQuestionInline"
+                           :value="question.question"
+                           :id="`question-${questionNum}`"
+                           :instance-id="`${question.id}`"
+                           :disable-ai-prompt="true"
+                           :allow-attachments="false"
+                           :allow-insert-images="false"
+                           label="Question"
+                           markdownHeight="150px"
+                           data-cy="questionDisplayText"
+                           :name="`questions[${props.questionNum-1}].question`"/>
+
+          <markdown-text v-else
+            :text="question.question"
+            :instance-id="`${question.id}`"
+            data-cy="questionDisplayText"/>
         </div>
         <div v-if="mediaAttributes" class="mb-3">
           <i :class="`far ${mediaAttributes.isAudio ? 'fa-file-audio' : 'fa-file-video'} fa-lg text-primary`"></i> <span class="font-bold">{{ mediaAttributes.internallyHostedFileName }}</span> is configured
