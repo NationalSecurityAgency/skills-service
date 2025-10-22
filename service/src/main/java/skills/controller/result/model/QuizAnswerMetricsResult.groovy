@@ -15,11 +15,13 @@
  */
 package skills.controller.result.model
 
+import skills.controller.request.model.QuizMultiPartAnswer
+
 class QuizAnswerMetricsResult {
     Integer id
     String answer
     Boolean isCorrect
-    String multiPartAnswer
+    QuizMultiPartAnswer multiPartAnswer
 
     int numAnswered
     int numAnsweredCorrect
