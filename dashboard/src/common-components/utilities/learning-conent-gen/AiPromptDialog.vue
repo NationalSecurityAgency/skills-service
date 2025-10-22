@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {nextTick, ref} from 'vue'
+import {nextTick, onMounted, ref} from 'vue'
+import Fieldset from 'primevue/fieldset';
 import SkillsDialog from "@/components/utils/inputForm/SkillsDialog.vue";
 import {useRoute} from "vue-router";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
@@ -24,6 +25,8 @@ import {useLog} from "@/components/utils/misc/useLog.js";
 import PrefixControls from "@/common-components/utilities/markdown/PrefixControls.vue";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {useOpenaiService} from "@/common-components/utilities/learning-conent-gen/UseOpenaiService.js";
+import SkillsDropDown from "@/components/utils/inputForm/SkillsDropDown.vue";
+import Slider from "primevue/slider";
 
 const model = defineModel()
 const props = defineProps({
@@ -105,6 +108,21 @@ const instructions = ref('')
 const isGenerating = ref(false)
 const chatCounter = ref(0)
 const chatHistory = ref([])
+const loadingModels = ref(true)
+
+const models = ref([])
+const selectedModel = ref(null)
+const showModelSettings = ref(false)
+const modelTemperature = ref(70)
+onMounted(() => {
+  openaiService.getAvailableModels().then((data) => {
+    selectedModel.value = data.models[0]
+    models.value = data.models
+  }).finally(() => {
+    loadingModels.value = false
+  })
+})
+
 
 const ChatRole = {
   USER: 'user',
@@ -264,7 +282,38 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
       :show-cancel-button="false"
       :enable-return-focus="true">
 
-    <div class="py-5 flex flex-col" style="min-height: 70vh">
+    <skills-spinner v-if="loadingModels" :is-loading="loadingModels" />
+    <div v-if="!loadingModels" class="py-5 flex flex-col" style="min-height: 70vh">
+      <div>
+        <div class="flex gap-2 items-center justify-end mb-3">
+          <label class="italic">Model:</label>
+          <div class="font-semibold">{{ selectedModel.model }}</div>
+          <skills-button icon="fa-solid fa-gear" size="small" @click="showModelSettings = !showModelSettings" />
+        </div>
+        <div v-if="showModelSettings" class="mb-5">
+          <Fieldset legend="Settings">
+            <div class="flex flex-col gap-5">
+              <div class="flex flex-col gap-2">
+                <label>Model:</label>
+                <Select v-model="selectedModel" :options="models" optionLabel="model" class="w-full"/>
+              </div>
+              <div class="flex flex-col">
+                <label>Temperature:</label>
+                <div class="flex items-center gap-3">
+                  <div class="flex-1">
+                    <Slider v-model="modelTemperature"
+                            :style="{ height: '5px' }"
+                            data-cy="modelTempSlider" aria-label="configure model's temperature"/>
+                  </div>
+                  <div class="w-16">
+                    <InputNumber v-model="modelTemperature" data-cy="modelTempInput" fluid/>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Fieldset>
+        </div>
+      </div>
       <div id="chatHistory"
            :class="{ 'flex-1': chatHistory.length > 1 }"
            class="flex flex-col gap-3 mb-2">

@@ -19,6 +19,7 @@ package skills.controller
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import skills.auth.openai.GenDescRequest
 import skills.auth.openai.LearningContentGenerator
+import skills.auth.openai.OpenAIService
 import skills.controller.exceptions.SkillsValidator
 
 @RestController
@@ -34,13 +36,17 @@ import skills.controller.exceptions.SkillsValidator
 class OpenAiController {
 
     @Autowired
-    LearningContentGenerator learningContentGenerator
+    OpenAIService openAIService
 
     @PostMapping(value = "/stream/description", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     Flux<String> generateDescriptionAndStream(@RequestBody GenDescRequest genDescRequest) {
         SkillsValidator.isNotBlank(genDescRequest.instructions, "genDescRequest.instructions")
+        return openAIService.streamCompletions(genDescRequest.instructions)
+    }
 
-        return learningContentGenerator.streamGenerateDescription(genDescRequest)
+    @GetMapping("/models")
+    OpenAIService.AvailableModels getModels() {
+        return openAIService.getAvailableModels()
     }
 }
 
