@@ -24,6 +24,9 @@ import AiPromptDialog from '@/common-components/utilities/learning-conent-gen/Ai
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
+import { array, number, object, string } from 'yup'
+import QuestionType from '@/skills-display/components/quiz/QuestionType.js'
+import { useForm } from 'vee-validate'
 
 const model = defineModel()
 const props = defineProps({
@@ -45,6 +48,22 @@ const isGenerating = ref(true)
 const currentQuizData = ref(null)
 
 const instructionsGenerator = useInstructionGenerator()
+const schema = object({
+  'questions': array()
+      .of(
+          object({
+            'question': string()
+                .required()
+                // .nullValueNotAllowed()
+                .max(appConfig.descriptionMaxLength)
+                .customDescriptionValidator('Question', false)
+                .label('Question'),
+          })
+      ),
+})
+const { values, meta, handleSubmit, isSubmitting, resetForm, setFieldValue, validate, validateField, errors, errorBag, setErrors } = useForm({
+  validationSchema: schema,
+})
 
 const generateQuizFromDescription = (skillDescription) => {
   currentDescription.value = skillDescription
@@ -130,6 +149,7 @@ const handleGeneratedChunk = (chunk) => {
               lastHistoryItem.generatedQuiz = [question]
             }
             currentQuizData.value = lastHistoryItem.generatedQuiz
+            setFieldValue(`questions[${currentQuizData.value.length-1}].question`, question.question)
             currentJsonString.value = ''
           } catch (e) {
             // Continue with partial parsing
@@ -171,6 +191,8 @@ const handleGenerationCompleted = (generated) => {
   currentJsonString.value = ''
   currentQuizData.value = null
   isGenerating.value = false
+  // resetForm({ values: { questions: generated.generatedInfo.generatedQuiz } });
+  // validate()
   return generated
 }
 
@@ -229,7 +251,7 @@ const createPromptInstructions = (userEnterInstructions) => {
       <div v-if="historyItem.generatedInfo" class="px-5 border rounded-lg bg-blue-50 ml-4">
         <div v-for="(q, index) in getQuizDataForDisplay(historyItem.generatedInfo, historyItem.id)" :key="q.id">
           <div class="my-4">
-            <QuestionCard :question="q" :question-num="index+1" quiz-type="Quiz" :show-edit-controls="false"/>
+            <QuestionCard :question="q" :question-num="index+1" quiz-type="Quiz" :show-edit-controls="false" :edit-question-inline="true"/>
           </div>
         </div>
       </div>
