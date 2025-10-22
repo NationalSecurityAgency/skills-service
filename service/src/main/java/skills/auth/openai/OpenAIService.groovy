@@ -22,10 +22,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
+import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
@@ -42,6 +39,9 @@ class OpenAIService {
 
     @Value('#{"${skills.openai.completionsEndpoint:/v1/chat/completions}"}')
     String completionsEndpoint
+
+    @Value('#{"${skills.openai.modelsEndpoint:/v1/models}"}')
+    String modelsEndpoint
 
     @Value('#{"${skills.openai.key:null}"}')
     String openAiKey
@@ -93,6 +93,51 @@ class OpenAIService {
 
         return res
     }
+
+
+    static class AvailableModels {
+        List<AvailableModel> models
+    }
+    static class AvailableModel {
+        String model
+        Date created
+    }
+
+
+    AvailableModels getAvailableModels() {
+        if (!openAiHost) {
+            log.debug("skills.openai.host is not configured")
+            return null
+        }
+
+        String url = String.join("/", openAiHost, modelsEndpoint)
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        if (openAiKey) {
+            headers.set("Authorization", "Bearer " + openAiKey)
+        }
+        HttpEntity<CompletionsRequest> entity = new HttpEntity<>(headers);
+
+        JsonSlurper jsonSlurper = new JsonSlurper()
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class)
+            String bodyAsStr = response.body
+            def parsed = jsonSlurper.parseText(bodyAsStr)
+            List<AvailableModel> models = parsed?.data?.collect { parsedModel ->
+                new AvailableModel(
+                        model: parsedModel.id,
+                        created: parsedModel.created ? new Date(parsedModel.created) : null
+                )
+            }
+
+            return new AvailableModels(models: models)
+        } catch (Exception e) {
+            log.error("Failed to call external service", e)
+            throw new RuntimeException("Failed to fetch data from external service", e)
+        }
+    }
+
 
     Flux<String> streamCompletions(String message) {
         JsonSlurper jsonSlurper = new JsonSlurper()
