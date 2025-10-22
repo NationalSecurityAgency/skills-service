@@ -67,7 +67,8 @@ class ParagraphValidator {
     private TextContentRenderer textContentRenderer
     private Node document
     private final Map<String, String> customReplacements = [:]
-    private final Set<Node> validatedNodes = new HashSet<>()
+    private final Set<Node> validNodes = new HashSet<>()
+    private final Set<Node> invalidNodes = new HashSet<>()
 
     InternalValidationResult validateMarkdown() {
         InternalValidationResult res = init()
@@ -106,7 +107,7 @@ class ParagraphValidator {
                         int prevLine = previous.sourceSpans.first().lineIndex
                         int currentLine = previous.sourceSpans.first().lineIndex
                         if ( currentLine - prevLine <= 1) {
-                            if (validateParagraph (previous)) {
+                            if (validateNode (previous).isValid) {
                                 return true
                             }
                         }
@@ -207,11 +208,11 @@ class ParagraphValidator {
 
                     boolean isPreviousNodeListBlock = previousNode instanceof ListBlock
                     boolean amIPartOfAnotherList = prevNodeCloseEnough && isPreviousNodeListBlock
-                    boolean isPrevNodeAlreadyValidated = validatedNodes.contains(previousNode)
+                    boolean isPrevNodeAlreadyValidated = validNodes.contains(previousNode)
 
                     if (amIPartOfAnotherList && isPrevNodeAlreadyValidated) {
                         previousNodeValidates = true
-                    } else if (prevNodeCloseEnough && !isPreviousNodeListBlock && validateParagraph(previousNode)) {
+                    } else if (prevNodeCloseEnough && !isPreviousNodeListBlock && validateNode(previousNode).isValid) {
                         previousNodeValidates = true
                     }
                 }
@@ -220,15 +221,14 @@ class ParagraphValidator {
                     ListItem firstBullet = (ListItem) bulletList.firstChild
                     Node firstBulletContent = firstBullet.firstChild
 
-                    if (!validateParagraph(firstBulletContent)) {
+                    ValidateNodeRes validationRes = validateNode(firstBulletContent)
+                    if (!validationRes.isValid) {
                         if (firstBulletContent == null) {
                             appendToValidationFailedDetails("First bullet is empty")
                         }
                         invalidate()
                         isValidList = false
-                        if (shouldAddPrefix(firstBulletContent)) {
-                            firstBulletContent.prependChild(new Text(request.prefix))
-                        }
+                        addPrefixIfNeeded(validationRes)
                     }
                 }
 
@@ -240,7 +240,7 @@ class ParagraphValidator {
                             String toValidate = textContentRenderer.render(firstBulletValue)
                             toValidate = Jsoup.parse(toValidate).text()
                             boolean shouldForceValidation = request.forceValidationPattern.matcher(toValidate).matches()
-                            if (shouldForceValidation && !validateParagraph(firstBulletValue)) {
+                            if (shouldForceValidation && !validateNode(firstBulletValue).isValid) {
                                 invalidate()
                                 isValidList = false
                             }
@@ -250,16 +250,18 @@ class ParagraphValidator {
                 }
 
                 if (isValidList) {
-                    validatedNodes.add(bulletList)
+                    validNodes.add(bulletList)
                 }
             }
 
             @Override
             void visit(Paragraph paragraph) {
-                if (!validateParagraph(paragraph) && !(paragraph.firstChild instanceof Image)) {
-                    invalidate()
-                    if (shouldAddPrefix(paragraph)) {
-                        paragraph.prependChild(new Text(request.prefix))
+                boolean isImage = paragraph.firstChild instanceof Image
+                if (!isImage) {
+                    ValidateNodeRes validateRes = validateNode(paragraph)
+                    if (!validateRes.isValid) {
+                        invalidate()
+                        addPrefixIfNeeded(validateRes)
                     }
                 }
                 visitChildren(paragraph)
@@ -267,11 +269,10 @@ class ParagraphValidator {
 
             @Override
             void visit(Heading heading) {
-                if (!validateParagraph(heading)) {
+                ValidateNodeRes validateRes = validateNode(heading)
+                if (!validateRes.isValid) {
                     invalidate()
-                    if (shouldAddPrefix(heading)) {
-                        heading.prependChild(new Text(request.prefix))
-                    }
+                    addPrefixIfNeeded(validateRes)
                 }
             }
 
@@ -390,18 +391,32 @@ class ParagraphValidator {
         return res.toString()
     }
 
-    private boolean validateParagraph(Node node) {
+    private String nodeToText(Node node) {
+        String res = textContentRenderer.render(node)
+        return Jsoup.parse(res).text()
+    }
+
+    static class ValidateNodeRes {
+        Node closestNode = null
+        boolean isValid = false
+
+        static final ValidateNodeRes VALID = new ValidateNodeRes(isValid: true)
+    }
+    private ValidateNodeRes validateNode(Node node) {
         if (!node) {
-            return false
+            invalidNodes.add(node)
+            return new ValidateNodeRes(isValid: false, closestNode: node)
         }
         String toValidate = allNodesOnSameLineToString(node)
         toValidate = Jsoup.parse(toValidate).text()
         if (isOnlySeparatorsOrWhitespace(toValidate)) {
-            return true
+            validNodes.add(node)
+            return ValidateNodeRes.VALID
         }
         toValidate = removeLeadingSeparators(toValidate)
         if (isOnlySpecialChars(toValidate)) {
-            return true
+            validNodes.add(node)
+            return ValidateNodeRes.VALID
         }
 
         boolean isValidParagraph = validationPattern.pattern.matcher(toValidate).matches()
@@ -415,10 +430,21 @@ class ParagraphValidator {
                     if (forceValidate) {
                         boolean isValidLine = validationPattern.pattern.matcher(lineToValidate).matches()
                         if (!isValidLine) {
-                            Integer lineNum = node.sourceSpans ? node.sourceSpans?.first()?.lineIndex : null
+                            Node closestNode = node
+                            Node currentNodeToCheck = node.firstChild
+                            while (currentNodeToCheck) {
+                                if (nodeToText (currentNodeToCheck).contains(line)) {
+                                    closestNode = currentNodeToCheck
+                                    break
+                                }
+                                currentNodeToCheck = currentNodeToCheck.next
+                            }
+
+                            Integer lineNum = closestNode.sourceSpans ? closestNode.sourceSpans?.first()?.lineIndex : null
                             String msg = "Via forced validation${lineNum != null ? ", after line[${lineNum}] " : " "}[${line?.substring(0, Math.min(20, line?.length()))}]\n"
                             appendToValidationFailedDetails("${msg}")
-                            return false
+                            invalidNodes.add(closestNode)
+                            return new ValidateNodeRes(isValid: false, closestNode: closestNode)
                         }
                     }
                 }
@@ -426,7 +452,12 @@ class ParagraphValidator {
         } else {
             appendValidationMsg(node)
         }
-        return isValidParagraph
+        if (!isValidParagraph) {
+            invalidNodes.add(node)
+        } else {
+            validNodes.add(node)
+        }
+        return new ValidateNodeRes(isValid: isValidParagraph, closestNode: node)
     }
 
     private void appendValidationMsg(Node node) {
@@ -450,6 +481,23 @@ class ParagraphValidator {
         return request.prefix && !textContentRenderer.render(nodeToAddTo)?.startsWith(request.prefix)
     }
 
+    private boolean addPrefixIfNeeded(ValidateNodeRes validateNodeRes) {
+        return addPrefixIfNeeded ((Node)validateNodeRes.closestNode)
+    }
+
+    private boolean addPrefixIfNeeded(Node nodeToAddTo) {
+        boolean shouldAdd = shouldAddPrefix(nodeToAddTo)
+        if (shouldAdd) {
+            if (nodeToAddTo instanceof Text) {
+                Text text = (Text)nodeToAddTo
+                text.setLiteral("${request.prefix}${text.literal}".toString())
+            } else {
+                nodeToAddTo.prependChild(new Text(request.prefix))
+            }
+        }
+        return shouldAdd
+    }
+
     private boolean shouldAddPrefixToElement(Element e) {
         return request.prefix && !e.text()?.startsWith(request.prefix)
     }
@@ -463,15 +511,34 @@ class ParagraphValidator {
         return res
     }
 
+    private static boolean isSoftLine(Node node) {
+        return node && node instanceof SoftLineBreak
+    }
+
+    private static boolean isNodeOnThisLine(Node node, Integer lineNum) {
+        return lineNum != null && node.sourceSpans && node.sourceSpans.first().lineIndex == lineNum
+    }
+
     private static Node lookForPreviousParagraph(Node node) {
         Node previousNode = node.previous
 
         if (!previousNode && node instanceof Image) {
             previousNode = getPreviousForImage(node, previousNode)
         }
-        while (previousNode && previousNode instanceof SoftLineBreak) {
+
+        // find first non-softline node
+        while (previousNode && isSoftLine(previousNode)) {
             previousNode = previousNode.previous
         }
+
+        // find first node on the same line
+        Integer lineToStayOn = previousNode?.sourceSpans ? previousNode.sourceSpans.first().lineIndex : null
+        Node currentNode = previousNode?.previous
+        while (currentNode && (isSoftLine(currentNode) || isNodeOnThisLine(currentNode, lineToStayOn))) {
+            previousNode = currentNode
+            currentNode = currentNode.previous
+        }
+
         while (previousNode && previousNode instanceof Text) {
             previousNode = previousNode.parent
         }
@@ -503,15 +570,19 @@ class ParagraphValidator {
                 paragraph.prependChild(new Text(request.prefix))
                 node.insertBefore(paragraph)
             }
-        } else if (!validateParagraph(previousNode)) {
-            invalidate()
-            if (shouldAddPrefix(previousNode)) {
-                if (previousNode instanceof HtmlBlock) {
-                    String currentHtml = previousNode.getLiteral()
-                    String newHtml = request.prefix + (currentHtml ?: "")
-                    customReplacements.put(markdownRenderer.render(previousNode), newHtml)
-                } else {
-                    previousNode.prependChild(new Text(request.prefix))
+        } else {
+            ValidateNodeRes validRes = validateNode(previousNode)
+            if (!validRes.isValid) {
+                invalidate()
+                if (shouldAddPrefix(validRes.closestNode)) {
+                    if (validRes.closestNode instanceof HtmlBlock) {
+                        HtmlBlock htmlBlock = (HtmlBlock)validRes.closestNode
+                        String currentHtml = htmlBlock.getLiteral()
+                        String newHtml = request.prefix + (currentHtml ?: "")
+                        customReplacements.put(markdownRenderer.render(previousNode), newHtml)
+                    } else {
+                        addPrefixIfNeeded(validRes)
+                    }
                 }
             }
         }
