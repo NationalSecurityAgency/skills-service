@@ -111,13 +111,14 @@ noe more
 (A) now new
 """
 
-        CustomValidationResult result = validator.validateDescription(paragraphs)
-        CustomValidationResult result2 = validator.validateDescription(paragraphs2)
-        CustomValidationResult result3 = validator.validateDescription(paragraphs3)
+
 
         then:
+        CustomValidationResult result = validator.validateDescription(paragraphs)
         !result.valid
+        CustomValidationResult result2 = validator.validateDescription(paragraphs2)
         result2.valid
+        CustomValidationResult result3 = validator.validateDescription(paragraphs3)
         result3.valid
     }
 
@@ -513,6 +514,12 @@ if (a == true) {
         !validator.validateDescription("""## Paragraph one""").valid
         !validator.validateDescription("""### Paragraph one""").valid
         !validator.validateDescription("""#### Paragraph one""").valid
+
+        validator.validateDescription("## **(**A) ok").valid
+        validator.validateDescription("## **(**A)&nbsp;**S**some&nbsp;").valid
+        validator.validateDescription("## \\*\\*(\\*\\*A) **S**ome").valid
+        validator.validateDescription("## *(*A) great").valid
+        validator.validateDescription('## *~~(~~*A) great').valid
     }
 
     def "ignore markdown separators"() {
@@ -1011,6 +1018,9 @@ line-height:107%">(A) fancy formatting</span>""").valid
         invalidLink.validationFailedDetails == "Line[2] [https://www.some.com]\n\n"
 
         validator.validateDescription("(A) <p>value</p>\n<p><a href=\"${url}\">${url}</a></p>").valid
+
+        validator.validateDescription("(A)&nbsp;[A link] (http://linky.com").valid
+        validator.validateDescription("(A) [A link] (http://linky.com").valid
     }
 
     def "support mixed html br and newline chars" () {

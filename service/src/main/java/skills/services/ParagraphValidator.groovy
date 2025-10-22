@@ -376,6 +376,28 @@ class ParagraphValidator {
         return str && str.trim().matches(/^[^a-zA-Z0-9]+$/)
     }
 
+    private static String stripStyleMarkerPairs(String input) {
+        if (!input) {
+            return input
+        }
+
+        String res = input
+
+        if (res.contains("~~")) {
+            // Handle double tildes (strikethrough)
+            res = res.replaceAll(/(?<!\~)\~\~([^~]+)\~\~(?!\~)/, '$1')
+        }
+        if (res.contains("**")) {
+            // Handle double asterisks (bold)
+            res = res.replaceAll(/(?<!\*)\*\*([^*]+)\*\*(?!\*)/, '$1')
+        }
+        if (res.contains("*")) {
+            // Handle single asterisks (italic)
+            res = res.replaceAll(/(?<!\*)\*([^*]+)\*(?!\*)/, '$1')
+        }
+        return res
+    }
+
     private String allNodesOnSameLineToString(Node node) {
         StringBuilder res = new StringBuilder()
         int nodeCurrentLine = node.sourceSpans.first().lineIndex
@@ -413,6 +435,7 @@ class ParagraphValidator {
             validNodes.add(node)
             return ValidateNodeRes.VALID
         }
+        toValidate = stripStyleMarkerPairs(toValidate)
         toValidate = removeLeadingSeparators(toValidate)
         if (isOnlySpecialChars(toValidate)) {
             validNodes.add(node)
