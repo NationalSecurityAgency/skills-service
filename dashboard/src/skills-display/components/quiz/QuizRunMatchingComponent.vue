@@ -17,6 +17,7 @@ limitations under the License.
 import { onMounted, ref, computed } from 'vue';
 import draggable from 'vuedraggable';
 import {useField} from "vee-validate";
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
 const props = defineProps({
   value: Array,
@@ -30,7 +31,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['updateAnswerOrder'])
-
+const announcer = useSkillsAnnouncer();
 const answerBank = ref([])
 const answers = ref([])
 
@@ -55,6 +56,9 @@ const answerOrderChanged = (elementToFocus) => {
     value.value[termCounter].currentAnswer = answer[0];
     let answerPair = {term: props.value[termCounter]?.answerOption, value: answer[0]}
     pairs.push(answerPair)
+    if(answerPair.value) {
+      announcer.polite(`${answerPair.value} has been matched to ${answerPair.term}`)
+    }
     termCounter++
   }
   emit('updateAnswerOrder', pairs);
@@ -72,6 +76,8 @@ const answerOrderChanged = (elementToFocus) => {
 }
 
 const removeElement = (element) => {
+  const currentElement = answers.value[element][0]
+  announcer.polite(`${currentElement} has been returned to the answer bank`)
   answerBank.value.push(answers.value[element][0])
   answers.value[element] = []
   const newIndex = answerBank.value.length - 1
@@ -94,6 +100,7 @@ const addElement = (element) => {
   }
 
   const elementAt = answerBank.value.indexOf(element)
+  announcer.polite(`${element} has been picked from the answer bank`)
   answerBank.value.splice(elementAt, 1);
   const newId = `answer-${props.questionNumber}-${index}`
   answerOrderChanged(newId)

@@ -987,7 +987,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-3_displayText"]').should('have.text', '4')
     });
 
-    it('matching type question', function () {
+    it('Create a matching type question', function () {
         cy.createQuizDef(1);
         cy.visit('/administrator/quizzes/quiz1');
         cy.openDialog('[data-cy="btn_Questions"]', true)
@@ -1009,7 +1009,17 @@ describe('Quiz Question CRUD Tests', () => {
 
         cy.get('[data-cy="answer-0"] [data-cy="addNewAnswer"]').click()
         cy.get('[data-cy="termText-1"]').type('new-term')
-        cy.get('[data-cy="answerText-1"]').type('new-answer')
+
+        cy.get('[data-cy="answersError"]').should('be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="answersError"]').contains('Answers must include both a term and a value')
+        cy.get('[data-cy="answerText-1"]').type('answer2')
+        cy.get('[data-cy="answersError"]').contains('Answers can not contain duplicate terms or values')
+
+        cy.get('[data-cy="answerText-1"]').type('{selectall}new-answer')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('not.be.disabled')
+
         cy.get('[data-cy="termText-2"]').should('have.value', 'term2')
         cy.get('[data-cy="answerText-2"]').should('have.value', 'answer2')
 
@@ -1041,7 +1051,17 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="termText-0"]').type('{selectall}term1')
         cy.get('[data-cy="answerText-0"]').type('{selectall}answer1')
         cy.get('[data-cy="termText-1"]').type('{selectall}term2')
+        cy.get('[data-cy="answerText-1"]').type('{selectall}{backspace}')
+
+        cy.get('[data-cy="answersError"]').should('be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="answersError"]').contains('Answers must include both a term and a value')
+        cy.get('[data-cy="answerText-1"]').type('answer1')
+        cy.get('[data-cy="answersError"]').contains('Answers can not contain duplicate terms or values')
+
         cy.get('[data-cy="answerText-1"]').type('{selectall}answer2')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('not.be.disabled')
 
         cy.clickSaveDialogBtn()
 
