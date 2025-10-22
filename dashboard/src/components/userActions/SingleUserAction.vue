@@ -33,8 +33,8 @@ const loading = ref(true)
 const attributes = ref([])
 
 const propsLookupByItem = new Map();
-propsLookupByItem.set('Skill', ['name', 'description', 'groupId', 'helpUrl', 'pointIncrement', 'numMaxOccurrencesIncrementInterval', 'pointIncrementInterval', 'selfReportingType', 'version', 'justificationRequired', 'totalPoints', 'skillId']);
-propsLookupByItem.set('Subject', ['name', 'description', 'helpUrl', 'iconClass']);
+propsLookupByItem.set('Skill', ['name', 'description', 'groupId', 'helpUrl', 'pointIncrement', 'numMaxOccurrencesIncrementInterval', 'pointIncrementInterval', 'selfReportingType', 'version', 'justificationRequired', 'totalPoints', 'skillId', 'enabled']);
+propsLookupByItem.set('Subject', ['name', 'description', 'helpUrl', 'iconClass', 'enabled']);
 propsLookupByItem.set('SkillsGroup', ['name', 'description', 'helpUrl']);
 propsLookupByItem.set('Project', ['name', 'projectId', 'description']);
 propsLookupByItem.set('Level', ['level', 'percent', 'pointsTo', 'pointsFrom']);
@@ -59,6 +59,11 @@ valuesMap.set('quizNumberOfAttempts', 'Maximum Number of Attempts');
 valuesMap.set('quizPassingReq', 'Passing Requirement');
 valuesMap.set('rank_and_leaderboard_optOut', 'Ranking and Leaderboard Opt-Out');
 valuesMap.set('home_page', 'Default Home Page');
+const customLabelByItem = new Map()
+customLabelByItem.set('Skill', {'enabled': 'Initial Visibility'});
+customLabelByItem.set('Subject', {'enabled': 'Initial Visibility'});
+const booleanLabels = new Map()
+booleanLabels.set('Initial Visibility', {'true': 'Visible', 'false': 'Hidden'})
 
 onMounted(() => {
   loadData();
@@ -75,11 +80,17 @@ const loadData = () => {
               .filter(([key]) => propsToShow.includes(key)));
         }
         attributes.value = Object.entries(loadedObj).map((entry) => {
+          let label = formatLabel(entry[0]);
           const replacement = valuesMap.get(entry[1]);
-          const value = replacement || entry[1];
-          const label = entry[0];
+          let value = replacement || entry[1];
+          const customLabel = customLabelByItem.get(props.item)
+          if(customLabel && customLabel[entry[0]]) {
+            label = customLabel[entry[0]]
+            const customValue = booleanLabels.get(label)
+            value = customValue[entry[1]] ? customValue[entry[1]] : value
+          }
           return {
-            label: formatLabel(label),
+            label: label,
             value,
             isDescription: label === 'description' || label === 'question' || label === 'userAgreement',
             isTextAreaProp: label === 'transcript' || label === 'captions',
