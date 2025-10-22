@@ -545,7 +545,11 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldCom
                 if (isTextInputQuestion) {
                     answerText = userAnswerTxt ? userAnswerTxt : `This is answer for question # ${questionIndex}`;
                 }
-                return { answerIds: selectedAnswerIds, isTextInputQuestion , answerText };
+                const isMatchingQuestion = qDef.questionType === 'Matching'
+                if (isMatchingQuestion) {
+                    answerText = answers.map((answ) => { return answ.multiPartAnswer.value })
+                }
+                return { answerIds: selectedAnswerIds, isTextInputQuestion, answerText, isMatchingQuestion };
             }).flat();
 
             // cy.log(JSON.stringify(questionAnswers, null, 2));
@@ -555,8 +559,18 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldCom
                     const attemptId = response.body.id;
 
                     questionAnswers.forEach((answer) => {
-                            answer.answerIds.forEach((answerId) => {
-                                cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, { isSelected: true, answerText: answer.answerText });
+                            answer.answerIds.forEach((answerId, index) => {
+                                if(answer.isMatchingQuestion) {
+                                    cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, {
+                                        isSelected: true,
+                                        answerText: answer.answerText[index]
+                                    });
+                                } else {
+                                    cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, {
+                                        isSelected: true,
+                                        answerText: answer.answerText
+                                    });
+                                }
                             });
                         })
                     if (shouldComplete) {
