@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import axios from "axios";
+
 export const useOpenaiService = () => {
 
     let currentRequestController = null;
@@ -94,8 +96,13 @@ export const useOpenaiService = () => {
         }
     }
 
+    const getAvailableModels = () => {
+      return axios.get(`/openai/models`).then((response) => response.data);
+    }
+
     return {
         prompt,
-        cancelCurrentPrompt
+        cancelCurrentPrompt,
+        getAvailableModels
     }
 }
