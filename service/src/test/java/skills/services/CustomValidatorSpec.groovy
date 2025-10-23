@@ -111,6 +111,15 @@ noe more
 (A) now new
 """
 
+        String paragraphs4 = """(A) Paragraph one **bold** then *italic* then ~~crossed out~~ and we are done
+
+(A) Paragraph two **bold** then *italic* then ~~crossed out~~ and we are done
+
+Paragraph three **bold** then *italic* then ~~crossed out~~ and we are done
+
+(A) paragraph four **bold** then *italic* then ~~crossed out~~ and we are done
+"""
+
 
 
         then:
@@ -120,6 +129,9 @@ noe more
         result2.valid
         CustomValidationResult result3 = validator.validateDescription(paragraphs3)
         result3.valid
+        CustomValidationResult result4 = validator.validateDescription(paragraphs4)
+        !result4.valid
+        result4.validationFailedDetails == "Line[4] [Paragraph three bold]\n\n"
     }
 
     def "test custom paragraph validation, no regex configured"(){

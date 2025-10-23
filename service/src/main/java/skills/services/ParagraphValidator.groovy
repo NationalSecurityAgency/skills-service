@@ -399,14 +399,17 @@ class ParagraphValidator {
     }
 
     private String allNodesOnSameLineToString(Node node) {
-        StringBuilder res = new StringBuilder()
-        int nodeCurrentLine = node.sourceSpans.first().lineIndex
         List<Node> prevNodesOnSameLine = [node]
-        Node currentNode = node.previous
-        while (currentNode && currentNode.sourceSpans.first().lineIndex == nodeCurrentLine) {
-            prevNodesOnSameLine.add(currentNode)
-            currentNode = currentNode.previous
+        if (node.sourceSpans) {
+            Integer nodeCurrentLine = node.sourceSpans?.first()?.lineIndex
+            Node currentNode = node.previous
+            while (isNodeOnThisLine(currentNode, nodeCurrentLine)) {
+                prevNodesOnSameLine.add(currentNode)
+                currentNode = currentNode.previous
+            }
         }
+
+        StringBuilder res = new StringBuilder()
         prevNodesOnSameLine.reverse().each { Node resNode ->
             res.append(textContentRenderer.render(resNode))
         }
@@ -539,7 +542,7 @@ class ParagraphValidator {
     }
 
     private static boolean isNodeOnThisLine(Node node, Integer lineNum) {
-        return lineNum != null && node.sourceSpans && node.sourceSpans.first().lineIndex == lineNum
+        return lineNum != null && node?.sourceSpans && node.sourceSpans.first().lineIndex == lineNum
     }
 
     private static Node lookForPreviousParagraph(Node node) {
