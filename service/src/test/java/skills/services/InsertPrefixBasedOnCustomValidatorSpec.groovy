@@ -110,6 +110,7 @@ noe more
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
         validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
 
         when:
         validator.init()
@@ -196,6 +197,12 @@ noe more
 - some text
 """
 
+        validator.addPrefixToInvalidParagraphs("""(A) some text:
+
+* ((BLAH))""", prefix).newDescription == """(A) some text:
+
+* (A) ((BLAH))
+"""
     }
 
     def "support markdown tables"() {
@@ -283,6 +290,7 @@ ok
 
 (A) paragraph two
 """
+
     }
 
     def "multiple tables markdown"() {
@@ -638,6 +646,7 @@ ___
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
         validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
 
         when:
         validator.init()
@@ -655,9 +664,17 @@ ___
 <p>(B) paragraph 5</p>
 '''
 
-        String newDesc = validator.addPrefixToInvalidParagraphs(text, prefix).newDescription
         then:
+        String newDesc = validator.addPrefixToInvalidParagraphs(text, prefix).newDescription
         newDesc == expect
+
+        String input2 = """<span style="box-sizing: border-box; font-style: normal;">(A) Items:</span>
+<span style="box-sizing: border-box; font-style: normal;">          (t) (A) Item 1</span>
+<span style="box-sizing: border-box; font-style: normal;">          (f) (A) Item 2</span>""".toString()
+        String expected2 = """<span style="box-sizing: border-box; font-style: normal;">(A) Items:</span>
+<span style="box-sizing: border-box; font-style: normal;">(B)           (t) (A) Item 1</span>
+<span style="box-sizing: border-box; font-style: normal;">(B)           (f) (A) Item 2</span>\n""".toString()
+        validator.addPrefixToInvalidParagraphs(input2, prefix).newDescription == expected2
     }
 
     def "support mixed html br and newline chars" () {

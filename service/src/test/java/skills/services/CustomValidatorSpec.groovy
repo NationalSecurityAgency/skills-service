@@ -931,16 +931,24 @@ line-height:107%">(A) fancy formatting</span>""").valid
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
         validator.paragraphValidationMessage = 'fail'
-        validator.init()
+        validator.forceValidationRegex = '^\\(.+\\).*$'
 
         when:
-
-        String paragraphs = "<p>(A) Paragraph 1</p><p><br></p><p>Paragraph2</p>"
-        CustomValidationResult result = validator.validateDescription(paragraphs)
+        validator.init()
 
         then:
-        !result.valid
-        result.validationFailedDetails == "Failed within an html element for text [Paragraph2] after line[0]\n"
+        String paragraphs = "<p>(A) Paragraph 1</p><p><br></p><p>Paragraph2</p>"
+        CustomValidationResult res1 = validator.validateDescription(paragraphs)
+        !res1.valid
+        res1.validationFailedDetails == "Failed within an html element for text [Paragraph2] after line[0]\n"
+
+        validator.validateDescription("<span style=\\\"box-sizing: border-box; font-style: normal;\\\">(A) Very Cool Message (VCM)</span>\n<span style=\\\"box-sizing: border-box; font-style: normal;\\\">(A) message 2</span>").valid
+        def res2 = validator.validateDescription("""<span style="box-sizing: border-box; font-style: normal;">(A) Items:</span>
+<span style="box-sizing: border-box; font-style: normal;">          (t) (A) Item 1</span>
+<span style="box-sizing: border-box; font-style: normal;">          (f) (A) Item 2</span>""")
+        !res2.valid
+        res2.validationFailedDetails == "Via forced validation, after line[1] [          (t) (A) It]\n\n" +
+                "Via forced validation, after line[2] [          (f) (A) It]\n\n"
     }
 
     def "test list validation with html items"(){
@@ -979,26 +987,26 @@ line-height:107%">(A) fancy formatting</span>""").valid
         validator.init()
 
         then:
-//        !validator.validateDescription(imgStr).valid
-//        validator.validateDescription("(A) ok\n${imgStr}").valid
-//        validator.validateDescription("(A) ok\n\n${imgStr}").valid
-//        !validator.validateDescription("(A) not\n\n\n${imgStr}").valid
-//
-//        validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${imgStr}\n\n(A) ok\n\n${imgStr}").valid
-//        !validator.validateDescription("(A) ok\n\n${imgStr}\n\n Negative\n\n${imgStr}\n\n(A) ok\n\n${imgStr}").valid
-//        validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}").valid
-//        def imageRes = validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A NOT\n\n${imgStr}")
-//        !imageRes.valid
-//        imageRes.validationFailedDetails == "Line[10] [(A NOT]\n\n"
-//        validator.validateDescription("(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}").valid
-//        !validator.validateDescription("(A) ok\n\n${table}\n\n(A notok\n\n${imgStr}\n\n(A) ok\n\n${table}").valid
-//
-//        validator.validateDescription("""** (A) This is the title:**
-//![image.png](data:image/png;base64,XXXXXXXXXXXX)""").valid
-//
-//        validator.validateDescription("(A) val 1\n\n${imgStr}\n${imgStr}").valid
-//
-//        validator.validateDescription("(A) **some text - image: cool image:**\n${imgStr}").valid
+        !validator.validateDescription(imgStr).valid
+        validator.validateDescription("(A) ok\n${imgStr}").valid
+        validator.validateDescription("(A) ok\n\n${imgStr}").valid
+        !validator.validateDescription("(A) not\n\n\n${imgStr}").valid
+
+        validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${imgStr}\n\n(A) ok\n\n${imgStr}").valid
+        !validator.validateDescription("(A) ok\n\n${imgStr}\n\n Negative\n\n${imgStr}\n\n(A) ok\n\n${imgStr}").valid
+        validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}").valid
+        def imageRes = validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A NOT\n\n${imgStr}")
+        !imageRes.valid
+        imageRes.validationFailedDetails == "Line[10] [(A NOT]\n\n"
+        validator.validateDescription("(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}").valid
+        !validator.validateDescription("(A) ok\n\n${table}\n\n(A notok\n\n${imgStr}\n\n(A) ok\n\n${table}").valid
+
+        validator.validateDescription("""** (A) This is the title:**
+![image.png](data:image/png;base64,XXXXXXXXXXXX)""").valid
+
+        validator.validateDescription("(A) val 1\n\n${imgStr}\n${imgStr}").valid
+
+        validator.validateDescription("(A) **some text - image: cool image:**\n${imgStr}").valid
         def imageRes2= validator.validateDescription("(A **some text - image: cool image:**\n${imgStr}")
         !imageRes2.valid
         imageRes2.validationFailedDetails == "Line[0] [(A some text - image]\n\n"
@@ -1011,6 +1019,8 @@ line-height:107%">(A) fancy formatting</span>""").valid
         validator.validateDescription("(A)\n[![This is Image](https://some.path.some.png)](https://some.url.com)").valid
 
         validator.validateDescription("(A) SOME - (Ok 'OK') / [ https://some.web.com/some/page](https://some.web.com/some/page)\n${imgStr}").valid
+
+        validator.validateDescription("(A) one**\n**(A) two**\n**${imgStr}(A) four**\n**(A)five").valid
     }
 
     def "support links" () {
@@ -1216,10 +1226,10 @@ line-height:107%">(A) fancy formatting</span>""").valid
 
         when:
         validator.init()
+        then:
         def res = validator.validateDescription(input)
         def res1 = validator.validateDescription(inputB)
         def res2 = validator.validateDescription(inputC)
-        then:
         res.valid
         !res1.valid
         res1.validationFailedDetails == "Failed within an html element for text [(B) three] after line[2]\n"
@@ -1300,6 +1310,9 @@ Line[7] [one
 -\tone
 -\ttwo''').valid
 
+        def res6 = validator.validateDescription('''(A) some text:\n\n* ((BLAH: DLJD-LDJD))''')
+        !res6.valid
+        res6.validationFailedDetails == "Line[2] [((BLAH: DLJD-LDJD))]\n\n"
     }
 
     def "support text with multiple paragraphs and lists - test concurrency"() {
