@@ -242,6 +242,7 @@ class ParagraphValidator {
                             boolean shouldForceValidation = request.forceValidationPattern.matcher(toValidate).matches()
                             if (shouldForceValidation && !validateNode(firstBulletValue).isValid) {
                                 invalidate()
+                                addPrefixIfNeeded(firstBulletValue)
                                 isValidList = false
                             }
                         }
@@ -424,9 +425,50 @@ class ParagraphValidator {
     static class ValidateNodeRes {
         Node closestNode = null
         boolean isValid = false
+        boolean alreadyHandledInvalidationProcess = false
 
         static final ValidateNodeRes VALID = new ValidateNodeRes(isValid: true)
     }
+
+    static int maxIteration = 900000
+    private void checkChildForForceValidation(Node node, int iteration) {
+        if (iteration > maxIteration) {
+            throw new IllegalArgumentException("Too many iterations")
+        }
+        if (node?.firstChild) {
+            checkSiblingsForForceValidation(node.firstChild, iteration + 1)
+        }
+    }
+    private void checkSiblingsForForceValidation(Node node, int iteration) {
+        if (iteration > maxIteration) {
+            throw new IllegalArgumentException("Too many iterations")
+        }
+        Node currentNode = node.next
+        while (currentNode) {
+            if (currentNode instanceof Text) {
+                Text textNode = currentNode
+                String textToCheck = textNode.literal?.trim()
+                if (textToCheck) {
+                    boolean forceValidate = request.forceValidationPattern.matcher(textToCheck).matches()
+                    if (forceValidate) {
+                        boolean isValidLine = validationPattern.pattern.matcher(textToCheck).matches()
+                        if (!isValidLine) {
+                            invalidate()
+                            if (request.prefix) {
+                                textNode.setLiteral("${request.prefix}${textNode.literal}".toString())
+                            }
+                            Integer lineNum = textNode.sourceSpans ? textNode.sourceSpans?.first()?.lineIndex : null
+                            String msg = "Via forced validation${lineNum != null ? ", after line[${lineNum}] " : " "}[${textNode.literal?.substring(0, Math.min(20, textNode.literal?.length()))}]\n"
+                            appendToValidationFailedDetails("${msg}")
+                        }
+                    }
+                }
+            }
+            checkChildForForceValidation(currentNode, iteration + 1)
+            currentNode = currentNode.next
+        }
+    }
+
     private ValidateNodeRes validateNode(Node node) {
         if (!node) {
             invalidNodes.add(node)
@@ -448,32 +490,7 @@ class ParagraphValidator {
         boolean isValidParagraph = validationPattern.pattern.matcher(toValidate).matches()
         if (isValidParagraph) {
             if (request.forceValidationPattern) {
-                String markdown = markdownRenderer.render(node)
-                String[] lines = markdown.split('\n')
-                for (String line : lines) {
-                    String lineToValidate = Jsoup.parse(line).text()
-                    boolean forceValidate = request.forceValidationPattern.matcher(lineToValidate).matches()
-                    if (forceValidate) {
-                        boolean isValidLine = validationPattern.pattern.matcher(lineToValidate).matches()
-                        if (!isValidLine) {
-                            Node closestNode = node
-                            Node currentNodeToCheck = node.firstChild
-                            while (currentNodeToCheck) {
-                                if (nodeToText (currentNodeToCheck).contains(line)) {
-                                    closestNode = currentNodeToCheck
-                                    break
-                                }
-                                currentNodeToCheck = currentNodeToCheck.next
-                            }
-
-                            Integer lineNum = closestNode.sourceSpans ? closestNode.sourceSpans?.first()?.lineIndex : null
-                            String msg = "Via forced validation${lineNum != null ? ", after line[${lineNum}] " : " "}[${line?.substring(0, Math.min(20, line?.length()))}]\n"
-                            appendToValidationFailedDetails("${msg}")
-                            invalidNodes.add(closestNode)
-                            return new ValidateNodeRes(isValid: false, closestNode: closestNode)
-                        }
-                    }
-                }
+                checkChildForForceValidation(node, 0)
             }
         } else {
             appendValidationMsg(node)
@@ -500,7 +517,9 @@ class ParagraphValidator {
                 .replaceAll(/(?<=\S)[ \t]*(?=\n)/, "")  // Remove spaces before newlines
                 .replaceAll(/(?<=\n)[ \t]*(?=\n)/, "")  // Remove spaces between newlines
                 .replaceAll("&gt;", ">")  // Replace greater than encoding so Block Quotes are handled properly by the parser
-
+                .replaceAll("\\*\\*\n\\*\\*", "\n")
+                .replaceAll("\\*\n\\*", "\n")
+                .replaceAll("~~\n~~", "\n")
     }
 
     private boolean shouldAddPrefix(Node nodeToAddTo) {
@@ -508,6 +527,9 @@ class ParagraphValidator {
     }
 
     private boolean addPrefixIfNeeded(ValidateNodeRes validateNodeRes) {
+        if (validateNodeRes.alreadyHandledInvalidationProcess) {
+            return false
+        }
         return addPrefixIfNeeded ((Node)validateNodeRes.closestNode)
     }
 
