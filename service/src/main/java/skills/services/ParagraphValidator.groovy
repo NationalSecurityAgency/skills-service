@@ -18,6 +18,7 @@ package skills.services
 import org.apache.commons.lang3.StringUtils
 import org.commonmark.Extension
 import org.commonmark.ext.gfm.tables.TableBlock
+import org.commonmark.ext.gfm.tables.TableCell
 import org.commonmark.ext.gfm.tables.TableHead
 import org.commonmark.ext.gfm.tables.TablesExtension
 import org.commonmark.node.*
@@ -184,6 +185,42 @@ class ParagraphValidator {
 
             @Override
             void visit(IndentedCodeBlock indentedCodeBlock) {
+                if (!indentedCodeBlock.firstChild && indentedCodeBlock.literal) {
+                    ValidateNodeRes validateNodeRes = validateNode (indentedCodeBlock)
+                    if (validateNodeRes.isValid) {
+                        if (request.forceValidationPattern) {
+                            String textToCheck = textContentRenderer.render(indentedCodeBlock)
+                            List<String> modifiedLInes = []
+                            boolean failedForceValidation = false
+                            textToCheck?.split("\n")?.each { String line ->
+                                String toCheck = line?.trim()
+                                boolean shouldForceValidation = request.forceValidationPattern.matcher(toCheck).matches()
+                                if (shouldForceValidation) {
+                                    StringValidationRes validationRes = validateString(line)
+                                    if (!validationRes.isValid) {
+                                        invalidate()
+                                        // insert prefix before the first non space character
+                                        int firstNonSpace = line.findIndexOf { it != ' ' && it != '\t' }
+                                        if (firstNonSpace >= 0) {
+                                            String newLine = line.substring(0, firstNonSpace) + request.prefix + line.substring(firstNonSpace)
+                                            modifiedLInes.add(newLine)
+                                        }
+                                        failedForceValidation = true
+                                    } else {
+                                        modifiedLInes.add(line)
+                                    }
+                                } else {
+                                    modifiedLInes.add(line)
+                                }
+                            }
+                            if (failedForceValidation) {
+                                indentedCodeBlock.setLiteral(modifiedLInes.join("\n"))
+                            }
+                        }
+
+                        return
+                    }
+                }
                 blockHandlerValidator(indentedCodeBlock)
             }
 
@@ -257,7 +294,7 @@ class ParagraphValidator {
 
             @Override
             void visit(Paragraph paragraph) {
-                boolean isImage = paragraph.firstChild instanceof Image
+                boolean isImage = paragraph.firstChild instanceof Image || (paragraph.firstChild instanceof StrongEmphasis && paragraph.firstChild?.firstChild instanceof Image)
                 if (!isImage) {
                     ValidateNodeRes validateRes = validateNode(paragraph)
                     if (!validateRes.isValid) {
@@ -307,7 +344,10 @@ class ParagraphValidator {
                 if (lastLocatedImage && lastLocatedImage instanceof Image) {
                     blockHandlerValidator(lastLocatedImage)
                 } else {
-                    blockHandlerValidator(image)
+                    boolean isWithinTable = image.parent instanceof TableCell
+                    if (!isWithinTable) {
+                        blockHandlerValidator(image)
+                    }
                 }
             }
         }
@@ -443,10 +483,30 @@ class ParagraphValidator {
         if (iteration > maxIteration) {
             throw new IllegalArgumentException("Too many iterations")
         }
+        int originalNodeLine = -1
+        int lastValidatedLineNum = -1
+        if (node?.sourceSpans) {
+            originalNodeLine = node.sourceSpans.first().lineIndex
+        }
+
+        Closure<Boolean> isTextOnAnotherLine = { Node nodeToCheck ->
+            if (!(nodeToCheck instanceof Text)) {
+                return false
+            }
+            if (nodeToCheck.sourceSpans) {
+                int currentLine = nodeToCheck.sourceSpans.first().lineIndex
+                if (originalNodeLine == currentLine || lastValidatedLineNum == currentLine) {
+                    return false
+                }
+            }
+            return true
+        }
+
         Node currentNode = node.next
-        while (currentNode) {
-            if (currentNode instanceof Text) {
-                Text textNode = currentNode
+
+        siblingsCheckLoop: while (currentNode) {
+            if (isTextOnAnotherLine(currentNode)) {
+                Text textNode = (Text)currentNode
                 String textToCheck = textNode.literal?.trim()
                 if (textToCheck) {
                     boolean forceValidate = request.forceValidationPattern.matcher(textToCheck).matches()
@@ -460,6 +520,10 @@ class ParagraphValidator {
                             Integer lineNum = textNode.sourceSpans ? textNode.sourceSpans?.first()?.lineIndex : null
                             String msg = "Via forced validation${lineNum != null ? ", after line[${lineNum}] " : " "}[${textNode.literal?.substring(0, Math.min(20, textNode.literal?.length()))}]\n"
                             appendToValidationFailedDetails("${msg}")
+                        } else {
+                            if (textNode?.sourceSpans) {
+                                lastValidatedLineNum = textNode?.sourceSpans?.first()?.lineIndex
+                            }
                         }
                     }
                 }
@@ -475,19 +539,11 @@ class ParagraphValidator {
             return new ValidateNodeRes(isValid: false, closestNode: node)
         }
         String toValidate = allNodesOnSameLineToString(node)
-        toValidate = Jsoup.parse(toValidate).text()
-        if (isOnlySeparatorsOrWhitespace(toValidate)) {
-            validNodes.add(node)
+        StringValidationRes stringValidationRes = validateString(toValidate)
+        if (stringValidationRes.isValid && !stringValidationRes.shouldContinueValidation) {
             return ValidateNodeRes.VALID
         }
-        toValidate = stripStyleMarkerPairs(toValidate)
-        toValidate = removeLeadingSeparators(toValidate)
-        if (isOnlySpecialChars(toValidate)) {
-            validNodes.add(node)
-            return ValidateNodeRes.VALID
-        }
-
-        boolean isValidParagraph = validationPattern.pattern.matcher(toValidate).matches()
+        boolean isValidParagraph = stringValidationRes.isValid
         if (isValidParagraph) {
             if (request.forceValidationPattern) {
                 checkChildForForceValidation(node, 0)
@@ -501,6 +557,24 @@ class ParagraphValidator {
             validNodes.add(node)
         }
         return new ValidateNodeRes(isValid: isValidParagraph, closestNode: node)
+    }
+
+    static class StringValidationRes {
+        boolean isValid = false
+        boolean shouldContinueValidation = true
+    }
+    private StringValidationRes validateString(String toValidate) {
+        toValidate = Jsoup.parse(toValidate).text()
+        if (isOnlySeparatorsOrWhitespace(toValidate)) {
+            return new StringValidationRes(isValid: true, shouldContinueValidation: false)
+        }
+        toValidate = stripStyleMarkerPairs(toValidate)
+        toValidate = removeLeadingSeparators(toValidate)
+        if (isOnlySpecialChars(toValidate)) {
+            return new StringValidationRes(isValid: true, shouldContinueValidation: false)
+        }
+        boolean isValid = validationPattern.pattern.matcher(toValidate).matches()
+        new StringValidationRes(isValid: isValid, shouldContinueValidation: true)
     }
 
     private void appendValidationMsg(Node node) {
@@ -552,9 +626,15 @@ class ParagraphValidator {
 
     private static Node getPreviousForImage(Node currentNode, Node previousNode) {
         Node res = previousNode
-        if ((currentNode.parent instanceof Paragraph || currentNode.parent instanceof Link)
-                && currentNode.parent.firstChild == currentNode) {
-            res = currentNode.parent.previous
+        Node parent = currentNode.parent
+        if ((parent instanceof Paragraph || parent instanceof Link) && parent.firstChild == currentNode) {
+            res = parent.previous
+        } else if (parent instanceof StrongEmphasis) {
+            if (parent?.parent instanceof Paragraph && parent?.parent?.firstChild instanceof Text) {
+                res = parent.parent
+            } else if (parent?.parent?.previous instanceof Paragraph && parent?.parent?.previous?.firstChild instanceof Text) {
+                res = parent.parent.previous
+            }
         }
         return res
     }
@@ -606,11 +686,15 @@ class ParagraphValidator {
         return currentStartLine - previousEndLine
     }
 
+    private static List<Class<? extends Node>> chainableNodeClasses = [TableBlock.class, Image.class, BulletList.class]
     private void blockHandlerValidator(Node node, int minLinesToPreviousNode = 2) {
         Node previousNode = lookForPreviousParagraph(node)
 
-        boolean prevNodeIsATable = previousNode instanceof TableBlock && node instanceof TableBlock
-        if (!previousNode || linesToPreviousNode(node) > minLinesToPreviousNode || prevNodeIsATable) {
+        boolean isNodeChainableBlock = chainableNodeClasses.find { it.isInstance(node) }
+        boolean isPrevNodeChainableBlock = chainableNodeClasses.find { it.isInstance(previousNode) }
+        if (isNodeChainableBlock && isPrevNodeChainableBlock && linesToPreviousNode(node) <= minLinesToPreviousNode) {
+            // validation is delegated to the previous table
+        } else if (!previousNode || linesToPreviousNode(node) > minLinesToPreviousNode) {
             invalidate()
 
             if (shouldAddPrefix(node)) {
