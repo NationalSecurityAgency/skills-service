@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { onMounted, ref, computed } from 'vue';
+import {onMounted, ref, computed, onBeforeMount, nextTick} from 'vue';
 import Sortable from 'sortablejs';
 import {useField} from "vee-validate";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import {useElementHelper} from "@/components/utils/inputForm/UseElementHelper.js";
 
 const props = defineProps({
   value: Array,
@@ -32,21 +33,32 @@ const props = defineProps({
 
 const emit = defineEmits(['updateAnswerOrder'])
 const announcer = useSkillsAnnouncer();
+const elementHelper = useElementHelper(250, 40)
 
-const answerBank = ref([])
-const matchedAnswers = ref([])
-const matchedAnswersNotReactive = props.q.answerOptions.map((opt) => ({id: opt.id, answerOption: opt.answerOption, matchedAnswer: opt.currentAnswer || ''}))
-const answerBankNotReactive =  props.q.matchingTerms
-    .filter(term => !matchedAnswersNotReactive.some(matched => matched.matchedAnswer === term))
-    .map((term, index) => ({id: index, answerOption: term}))
+const matchedAnswersOrig = ref([])
+const matchedAnswersCurrent = ref([])
+
+const answerBankOrig =  ref([])
+const answerBankCurrent = ref([])
 
 const matchedListId = `matchedList-q${props.q.id}`
 const availableAnswersListId = `availableAnswersList-q${props.q.id}`
 const answerOptionsList = `answerOptionsList-q${props.q.id}`
-
+let sortableInstances = []
+onBeforeMount(() => {
+  matchedAnswersOrig.value = props.q.answerOptions
+      .map((opt) => ({id: opt.id, answerOption: opt.answerOption, matchedAnswer: opt.currentAnswer || ''}))
+  answerBankOrig.value =  props.q.matchingTerms
+      .filter(term => !matchedAnswersOrig.value.some(matched => matched.matchedAnswer === term))
+      .map((term, index) => ({id: index, answerOption: term}))
+})
 onMounted(() => {
-  matchedAnswers.value = matchedAnswersNotReactive.map((opt) => ({...opt}))
-  answerBank.value = answerBankNotReactive.map((opt) => ({...opt}))
+  initSortableJsInstances()
+})
+
+const initSortableJsInstances = () => {
+  matchedAnswersCurrent.value = matchedAnswersOrig.value.map((opt) => ({...opt}))
+  answerBankCurrent.value = answerBankOrig.value.map((opt) => ({...opt}))
 
   const commonOptions = {
     group: 'shared',
@@ -67,18 +79,20 @@ onMounted(() => {
   const matchedList = document.getElementById(matchedListId);
   const availableAnswersList = document.getElementById(availableAnswersListId);
 
-  new Sortable(matchedList, commonOptions);
-  new Sortable(availableAnswersList, {...commonOptions, group: {
+  const matchedSortable = new Sortable(matchedList, commonOptions);
+  const availableSortable = new Sortable(availableAnswersList, {...commonOptions, group: {
       name: 'shared',
       put: false // Do not allow items to be put into this list
     }});
-})
+  sortableInstances = [matchedSortable, availableSortable]
+}
 
-const recordMatchedAnswer = (index, newValue) => {
-  matchedAnswers.value[index].matchedAnswer = newValue
+const recordMatchedAnswer = (index, newValue, newId) => {
+  matchedAnswersCurrent.value[index].matchedAnswer = newValue
+  matchedAnswersCurrent.value[index].id = newId
   value.value[index].currentAnswer = newValue;
-  const answerPair = {term: value.value[index].answerOption, value: value.value[index].currentAnswer}
-  emit('updateAnswerOrder', [answerPair]);
+  value.value[index].id = newId
+  const answerPair = emitAnswerUpdate(index)
   if (answerPair.value) {
     announcer.polite(`${answerPair.value} has been matched to ${answerPair.term}`)
   } else {
@@ -90,30 +104,91 @@ const itemAddedToList = (evt) => {
   const isMatchedListTo = evt.to.id === matchedListId
   const isMatchedListFrom = evt.from.id === matchedListId
 
-  const fromVal = isMatchedListFrom ? matchedAnswers.value[evt.oldIndex].matchedAnswer : answerBank.value[evt.oldIndex].answerOption
-  const existingToVal = isMatchedListTo ? matchedAnswers.value[evt.newIndex].matchedAnswer : answerBank.value[evt.newIndex].answerOption
+  const fromVal = isMatchedListFrom ? matchedAnswersCurrent.value[evt.oldIndex].matchedAnswer : answerBankCurrent.value[evt.oldIndex].answerOption
+  const fromId = isMatchedListFrom ? matchedAnswersCurrent.value[evt.oldIndex].id : answerBankCurrent.value[evt.oldIndex].id
+  const existingToVal = isMatchedListTo ? matchedAnswersCurrent.value[evt.newIndex].matchedAnswer : answerBankCurrent.value[evt.newIndex].answerOption
+  const existingToId = isMatchedListTo ? matchedAnswersCurrent.value[evt.newIndex].id : answerBankCurrent.value[evt.newIndex].id
 
   if (isMatchedListTo) {
-    recordMatchedAnswer(evt.newIndex, fromVal)
+    recordMatchedAnswer(evt.newIndex, fromVal, fromId)
   } else {
-    answerBank.value[evt.newIndex].answerOption = fromVal
+    answerBankCurrent.value[evt.newIndex].answerOption = fromVal
+    answerBankCurrent.value[evt.newIndex].id = fromId
   }
   if (isMatchedListFrom) {
-    recordMatchedAnswer(evt.oldIndex, existingToVal)
+    recordMatchedAnswer(evt.oldIndex, existingToVal, existingToId)
   } else {
-    answerBank.value[evt.oldIndex].answerOption = existingToVal
+    answerBankCurrent.value[evt.oldIndex].answerOption = existingToVal
+    answerBankCurrent.value[evt.oldIndex].id = existingToId
   }
 
   // Check if ALL answers are filled (none are empty)
-  if (matchedAnswers.value.every(a => a.matchedAnswer !== '')) {
+  if (matchedAnswersCurrent.value.every(a => a.matchedAnswer !== '')) {
     validate()
   }
 
   return true
 }
 
+const prepKeyboardMove = () => {
+  sortableInstances.forEach((sortable) => sortable.destroy())
 
+  // sync orig to current
+  answerBankOrig.value = answerBankCurrent.value.map((i) => ({...i}))
+  matchedAnswersOrig.value = matchedAnswersCurrent.value.map((i) => ({...i}))
+}
 
+const insertElementIntoNextSlot = (availableId) => {
+  const availableItemIndex = answerBankOrig.value.findIndex((item) => item.id === availableId)
+  if (availableItemIndex >= 0) {
+    prepKeyboardMove()
+
+    const availableItem = answerBankOrig.value[availableItemIndex]
+    answerBankOrig.value = answerBankOrig.value.filter((item) => item.id !== availableId)
+    // find next available matched item after the current index
+    let nextAvailableIndex = matchedAnswersOrig.value.findIndex((item, index) => index >= availableItemIndex && item.matchedAnswer === '')
+    if (nextAvailableIndex === -1) {
+      nextAvailableIndex = matchedAnswersOrig.value.findIndex((item) => item.matchedAnswer === '')
+    }
+    matchedAnswersOrig.value[nextAvailableIndex].matchedAnswer = availableItem.answerOption
+    matchedAnswersOrig.value[nextAvailableIndex].id = availableItem.id
+    initSortableJsInstances()
+    recordMatchedAnswer(nextAvailableIndex, availableItem.answerOption, availableItem.id)
+
+    focusOnItem(availableItem.id)
+  }
+}
+const moveItem = (itemId, adjustByIndex) => {
+  const index1 = matchedAnswersCurrent.value.findIndex((item) => item.id === itemId)
+  const index2 = index1 + adjustByIndex
+  if (index2 >= 0 && index2 < matchedAnswersCurrent.value.length) {
+    prepKeyboardMove()
+    const item1 = {...matchedAnswersOrig.value[index1]}
+    const item2 = {...matchedAnswersOrig.value[index2]}
+    matchedAnswersOrig.value[index1] = item2
+    matchedAnswersOrig.value[index2] = item1
+    initSortableJsInstances()
+    recordMatchedAnswer(index1, item2.matchedAnswer, item2.id)
+    recordMatchedAnswer(index2, item1.matchedAnswer, item1.id)
+    focusOnItem(item1.id)
+  }
+}
+
+const focusOnItem = (itemId) => {
+  nextTick(() => {
+    elementHelper.getElementById(`matchValBtn-${props.q.id}-${itemId}`).then((focusOn) => {
+      if (focusOn) {
+        focusOn.focus()
+      }
+    })
+  })
+}
+
+const emitAnswerUpdate = (index) => {
+  const answerPair = {term: value.value[index].answerOption, value: value.value[index].currentAnswer}
+  emit('updateAnswerOrder', [answerPair]);
+  return answerPair
+}
 const { value, errorMessage, validate } = useField(() => props.name, undefined, {syncVModel: true});
 
 </script>
@@ -123,36 +198,52 @@ const { value, errorMessage, validate } = useField(() => props.name, undefined, 
     <div class="flex gap-4 wrap">
       <Fieldset legend="Matched">
         <div class="flex gap-2">
-          <ul :id="answerOptionsList" class="min-w-[3rem]">
-            <li v-for="answer in matchedAnswersNotReactive"
+          <ul :id="answerOptionsList" class="">
+            <li v-for="answer in matchedAnswersOrig"
                 :key="answer.id"
                 class="min-h-[3rem] px-3 py-1 flex items-center mb-2 bg-white"
             >{{ answer.answerOption }}:
             </li>
           </ul>
-          <ul :id="matchedListId" class="min-w-[10rem]">
-            <li v-for="answer in matchedAnswersNotReactive"
+          <ul :id="matchedListId" class="min-w-[10rem]" data-cy="matchedList">
+            <li v-for="(answer, index) in matchedAnswersOrig"
                 :key="answer.id"
-                :class="{'bg-neutral-100 border-dotted': answer.matchedAnswer === '', 'border-blue-100': answer.matchedAnswer !== ''}"
-                class="min-h-[3rem] border-2 rounded px-3 py-1 flex items-center mb-2 "
-            >{{ answer.matchedAnswer }}
+                :class="{'bg-neutral-100 border-dotted border-2 rounded px-3 py-1': answer.matchedAnswer === '', }"
+                class="min-h-[3rem] flex items-center mb-2 "
+                :data-cy="`matchedNum-${index}`"
+            >
+             <Button v-if="answer.matchedAnswer"
+                     :id="`matchValBtn-${q.id}-${answer.id}`"
+                     outlined
+                     @keyup.up="moveItem(answer.id, -1)"
+                     @keyup.down="moveItem(answer.id, 1)"
+                     class="w-full p-0"><div class="w-full text-left" data-cy="matchedAnswer">{{ answer.matchedAnswer }}</div></Button>
+             <div v-else data-cy="matchedAnswer">{{ answer.matchedAnswer }}</div>
             </li>
           </ul>
         </div>
       </Fieldset>
       <Fieldset legend="Available">
-        <div v-if="!answerBankNotReactive || answerBankNotReactive.length === 0"
-             class="max-w-[15rem] text-center">
+        <div v-if="!answerBankOrig || answerBankOrig.length === 0"
+             class="max-w-[15rem] text-center" data-cy="allAnswersPlaced">
           <div class="text-surface-700">
             <i class="fas fa-check text-green-700" aria-hidden="true"></i> All Answers Placed
           </div>
           <div class="text-sm mt-2">You can still rearrange your answers in the matched list</div>
         </div>
-        <ul :id="availableAnswersListId" class="min-w-[10rem]">
-          <li v-for="available in answerBankNotReactive"
+        <ul :id="availableAnswersListId" class="min-w-[10rem]" data-cy="availableItems">
+          <li v-for="available in answerBankOrig"
+              :id="`matchVal-${q.id}-${available.id}`"
               :key="available.id"
-              class="min-h-[3rem] border-2 border-blue-100 rounded px-3 py-1 flex items-center mb-2"
-          >{{ available.answerOption }}
+              class="min-h-[3rem] flex items-center mb-2 cursor-move"
+              :class="{'bg-neutral-100 border-dotted border-2 rounded px-3 py-1': available.answerOption === '', }"
+              :data-cy="`bank-${available.id}`"
+          ><Button v-if="available.answerOption"
+                   :id="`matchValBtn-${q.id}-${available.id}`"
+                   outlined
+                   @keyup.left="insertElementIntoNextSlot(available.id)"
+                   class="w-full p-0"><div class="w-full text-left">{{ available.answerOption }}</div></Button>
+            <div v-else>{{ available.answerOption }}</div>
           </li>
         </ul>
       </Fieldset>
