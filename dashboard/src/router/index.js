@@ -65,7 +65,7 @@ import createSkillsDisplayChildRoutes from '@/router/SkillsDisplayChildRoutes.js
 import TestSkillsClient from '@/skills-display/components/test/TestSkillsClient.vue'
 import TestSkillsDisplay from '@/skills-display/components/test/TestSkillsDisplay.vue'
 import PathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
-import InceptionSkills from '@/components/inception /InceptionSkills.vue'
+import InceptionSkills from '@/components/inception/InceptionSkills.vue'
 import UserPage from '@/components/users/UserPage.vue'
 import SkillsDisplayPreview from '@/components/users/SkillsDisplayPreview.vue'
 import UserSkillsPerformed from '@/components/users/UserSkillsPerformed.vue'
