@@ -203,6 +203,29 @@ noe more
 
 * (A) ((BLAH))
 """
+
+        validator.addPrefixToInvalidParagraphs("""> (A) this is not ok:
+>
+> **List 1**
+>
+> * one
+> * two
+>
+> **List 2**
+>
+> * three
+> * four""", prefix).newDescription == """> (A) this is not ok:
+> 
+> (A) **List 1**
+> 
+> * one
+> * two
+> 
+> (A) **List 2**
+> 
+> * three
+> * four\n"""
+
     }
 
     def "support markdown tables"() {
@@ -304,6 +327,7 @@ ok
         validator.init()
 
         then:
+
         validator.addPrefixToInvalidParagraphs("""| First | Second |
 | ----- | ------ |
 | Third | Fourth |
@@ -311,6 +335,35 @@ ok
 | Fifth | Sixth |
 | ----- | ------ |
 | Seventh | Eighth |
+
+| <br> | <br> |
+| --- | --- |
+| <br> | <br> |
+
+""", prefix).newDescription == """(A) 
+
+|First|Second|
+|---|---|
+|Third|Fourth|
+
+|Fifth|Sixth|
+|---|---|
+|Seventh|Eighth|
+
+|<br>|<br>|
+|---|---|
+|<br>|<br>|
+"""
+
+        validator.addPrefixToInvalidParagraphs("""| First | Second |
+| ----- | ------ |
+| Third | Fourth |
+
+
+| Fifth | Sixth |
+| ----- | ------ |
+| Seventh | Eighth |
+
 
 | <br> | <br> |
 | --- | --- |
@@ -725,6 +778,8 @@ ___
  <li>Third item with <strong>final bold text</strong></li>
 </ol>
 <p></p>\n"""
+
+
     }
 
     def "force validation"() {
@@ -739,5 +794,31 @@ ___
 
         then:
         validator.addPrefixToInvalidParagraphs("""(A) some\n(some text)""", prefix).newDescription == """(A) some\n(B) (some text)\n"""
+    }
+
+    def "test indented block"(){
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String prefix = "(B) "
+        when:
+        validator.init()
+        then:
+        validator.addPrefixToInvalidParagraphs("\t(A ok", prefix).newDescription == """(B) \n\n    (A ok\n"""
+        validator.addPrefixToInvalidParagraphs("(A) ok\n\n\n\t indented", prefix).newDescription == """(A) ok\n\n(B) \n\n     indented\n"""
+        validator.addPrefixToInvalidParagraphs("""
+                (A) fish
+                (D) fish""", prefix).newDescription == """                (A) fish
+                (B) (D) fish\n"""
+        validator.addPrefixToInvalidParagraphs("""
+                (A) fish
+                blah
+                (D) fish
+                clap""", prefix).newDescription == """                (A) fish
+                blah
+                (B) (D) fish
+                clap\n"""
     }
 }
