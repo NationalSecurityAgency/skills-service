@@ -217,7 +217,8 @@ const { value, errorMessage, validate } = useField(() => props.name, undefined, 
                      outlined
                      @keyup.up="moveItem(answer.id, -1)"
                      @keyup.down="moveItem(answer.id, 1)"
-                     class="w-full p-0"><div class="w-full text-left" data-cy="matchedAnswer">{{ answer.matchedAnswer }}</div></Button>
+                     class="w-full p-0"><div class="w-full text-left"
+                     data-cy="matchedAnswer">{{ answer.matchedAnswer }}</div></Button>
              <div v-else data-cy="matchedAnswer">{{ answer.matchedAnswer }}</div>
             </li>
           </ul>
@@ -242,6 +243,7 @@ const { value, errorMessage, validate } = useField(() => props.name, undefined, 
                    :id="`matchValBtn-${q.id}-${available.id}`"
                    outlined
                    @keyup.left="insertElementIntoNextSlot(available.id)"
+                   :data-cy="`available-${available.id}`"
                    class="w-full p-0"><div class="w-full text-left">{{ available.answerOption }}</div></Button>
             <div v-else>{{ available.answerOption }}</div>
           </li>

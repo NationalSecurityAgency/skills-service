@@ -1502,12 +1502,12 @@ Cypress.Commands.add('closeToasts', (retry=true) => {
 Cypress.Commands.add('dragAndDrop', { prevSubject: 'element' }, (sourceElement, destSelector) => {
     const dataTransfer = new DataTransfer()
 
-    cy.get(destSelector).then((destProject) => {
-        cy.wrap(sourceElement.get(0))
+    return cy.get(destSelector).then((destProject) => {
+        return cy.wrap(sourceElement.get(0))
             .trigger('pointerdown', { eventConstructor: 'PointerEvent' })
             .trigger('dragstart', { dataTransfer, eventConstructor: 'DragEvent' })
             .then(() => {
-                cy.wrap(destProject.get(0))
+                return cy.wrap(destProject.get(0))
                     .trigger('dragover', { dataTransfer, eventConstructor: 'DragEvent' })
                     .wait(1000)
                     .trigger('drop', {
