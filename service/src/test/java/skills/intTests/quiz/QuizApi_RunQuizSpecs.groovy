@@ -15,7 +15,7 @@
  */
 package skills.intTests.quiz
 
-
+import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
@@ -549,8 +549,48 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'value2'])
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: 'value1'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
         then:
         gradedQuizAttempt.passed == false
         gradedQuizAttempt.numQuestionsGotWrong == 1
+        !gradedQuizAttempt.gradedQuestions
+    }
+
+    def "run quiz with matching question - fail - return graded question"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createMatchingQuestion(1, 2, 5)
+        skillsService.createQuizQuestionDef(question)
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.AlwaysShowCorrectAnswers.setting, value: Boolean.TRUE.toString()],
+        ])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'value2'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: 'value1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[2].id, [answerText: 'value3'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[3].id, [answerText: 'value4'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[4].id, [answerText: 'value5'])
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        println JsonOutput.prettyPrint(JsonOutput.toJson(gradedQuizAttempt))
+
+        then:
+        gradedQuizAttempt.passed == false
+        gradedQuizAttempt.numQuestionsGotWrong == 1
+        gradedQuizAttempt.gradedQuestions.size() == 1
+        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [
+                quizAttempt.questions[0].answerOptions[0].id,
+                quizAttempt.questions[0].answerOptions[1].id,
+                quizAttempt.questions[0].answerOptions[2].id,
+                quizAttempt.questions[0].answerOptions[3].id,
+                quizAttempt.questions[0].answerOptions[4].id,]
+        gradedQuizAttempt.gradedQuestions[0].isCorrect == false
+        gradedQuizAttempt.gradedQuestions[0].correctAnswerIds == [
+                quizAttempt.questions[0].answerOptions[2].id,
+                quizAttempt.questions[0].answerOptions[3].id,
+                quizAttempt.questions[0].answerOptions[4].id
+        ]
     }
 }

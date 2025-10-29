@@ -120,23 +120,26 @@ const manuallyGradedInfo = computed(() => {
                 :instance-id="`${question.id}_answer`"/>
           </div>
 
-          <div v-if="isMatchingType">
-            <div v-for="answer in question.answers">
-              <div v-if="answer.answer" class="flex gap-4 w-md">
+          <div v-if="isMatchingType" class="flex flex-col gap-1">
+            <div v-for="answer in question.answers" :key="answer.id">
+
+              <div v-if="answer.answer" class="flex gap-4 w-md items-center">
                 <div>
                   {{ answer.answer.term }}
                 </div>
                 <div>
-                  <i class="fas fa-arrow-right"></i>
+                  <i class="fas fa-arrow-right" aria-hidden="true"></i>
                 </div>
                 <div>
-                  <SkillsOverlay :show="!answer.isSelected && isWrong" opacity="0"  style="min-height: 26px">
-                    <template #overlay>
-                      <i class="fa fa-ban text-red-500" style="font-size: 1.5rem; opacity: 0.8"
-                         data-cy="wrongAnswer"></i>
-                    </template>
-                    {{ answer.answer.value }}
-                  </SkillsOverlay>
+                  <div class="relative">
+                    <div :class="{'border-red-500 border rounded': !answer.isSelected && isWrong }"
+                         class="p-2 flex gap-2 items-center"
+                         :aria-label="`Answer ${answer.answer.selectedMatch} is ${!answer.isSelected && isWrong ? 'wrong' : 'correct'}`"
+                    >
+                      <i v-if="!answer.isSelected && isWrong" class="fas fa-ban text-red-500" aria-hidden="true"></i>
+                      {{ answer.answer.selectedMatch }}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

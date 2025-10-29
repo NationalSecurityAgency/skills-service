@@ -21,7 +21,7 @@ import moment from "moment-timezone";
 dayjs.extend(relativeTimePlugin);
 dayjs.extend(advancedFormatPlugin);
 
-describe('Client Display Quiz Tests', () => {
+describe('Client Display Quiz Matching Question Tests', () => {
 
     beforeEach(() => {
         Cypress.Commands.add("dragAndDropAnswerMatch", (qNum, availableStr, toIndex) => {
@@ -39,6 +39,26 @@ describe('Client Display Quiz Tests', () => {
             })
         });
 
+        Cypress.Commands.add("rearangeAnswerMatchViaDragAndDrop", (qNum, strValueToMove, destValue, isDestValueASelector = false) => {
+            const getLocSelector = (dataCyVal) => {
+                return `[data-cy="question_${qNum}"] [data-cy="matchedList"] [data-cy="${dataCyVal}"]`
+            }
+
+            const selectorToSearch = `[data-cy="question_${qNum}"] [data-cy="matchedList"] [data-cy^="available-"]`
+            return cy.get(selectorToSearch).contains(strValueToMove).then((itemToMove) => {
+                const dragHandle = itemToMove[0].parentElement.getAttribute('data-cy')
+                cy.log(`dragHandle = ${dragHandle}`)
+
+                if (isDestValueASelector) {
+                    return cy.get(getLocSelector(dragHandle)).dragAndDrop(destValue)
+                }
+                return cy.get(selectorToSearch).contains(destValue).then((moveToItem) => {
+                    const destLocation = moveToItem[0].parentElement.getAttribute('data-cy')
+                    return cy.get(getLocSelector(dragHandle)).dragAndDrop(getLocSelector(destLocation))
+                })
+            })
+        });
+
         Cypress.Commands.add("validateMatchedSelection", (qNum, movedToMatches) => {
             const allItems = ['First Answer', 'Second Answer', 'Third Answer']
             const expectedAvailable = allItems.filter(item => !movedToMatches.includes(item));
@@ -53,7 +73,6 @@ describe('Client Display Quiz Tests', () => {
                 cy.get(`[data-cy="question_${qNum}"] [data-cy="matchedList"]`).should('not.contain', item);
             });
         });
-
     });
 
     it('pass quiz with matching questions', () => {
@@ -95,6 +114,113 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
+        cy.get('[data-cy="quizRunQuestions"]').should('not.exist')
+        cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('150')
+    });
+
+    it('fail quiz with matching questions', () => {
+        cy.createQuizDef(1);
+        cy.createQuizMatchingQuestionDef(1, 1);
+        cy.createQuizMatchingQuestionDef(1, 2);
+        cy.setQuizShowCorrectAnswers(1, true)
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.dragAndDropAnswerMatch(1, 'First Answer', 0)
+        cy.dragAndDropAnswerMatch(1, 'Second Answer', 1)
+        cy.dragAndDropAnswerMatch(1, 'Third Answer', 2)
+
+        cy.dragAndDropAnswerMatch(2, 'First Answer', 2)
+        cy.dragAndDropAnswerMatch(2, 'Second Answer', 1)
+        cy.dragAndDropAnswerMatch(2, 'Third Answer', 0)
+
+        cy.clickCompleteQuizBtn()
+
+        cy.get('[data-cy="quizCompletion"] [data-cy="quizFailed"]')
+        cy.get('[data-cy="numCorrect"]').contains('1 out of 2')
+
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="questionAnsweredCorrectly"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-0"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-1"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-2"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-3"]').should('not.exist')
+
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="questionAnsweredWrong"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-0"] [data-cy="matchIsWrong"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-1"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-2"] [data-cy="matchIsWrong"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-3"]').should('not.exist')
+    });
+
+    it('pass quiz by placing matching in wrong spots then re-arranging them', () => {
+        cy.createQuizDef(1);
+        cy.createQuizMatchingQuestionDef(1, 1);
+        cy.createQuizMatchingQuestionDef(1, 2);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.dragAndDropAnswerMatch(1, 'First Answer', 2)
+        cy.dragAndDropAnswerMatch(1, 'Second Answer', 0)
+        cy.dragAndDropAnswerMatch(1, 'Third Answer', 1)
+
+        cy.rearangeAnswerMatchViaDragAndDrop(1, 'First Answer', 'Second Answer')
+        cy.rearangeAnswerMatchViaDragAndDrop(1, 'Second Answer', 'Third Answer')
+
+        cy.dragAndDropAnswerMatch(2, 'First Answer', 2)
+        cy.rearangeAnswerMatchViaDragAndDrop(2, 'First Answer',
+            '[data-cy="question_2"] [data-cy="matchedList"] [data-cy="matchedNum-0"]', true)
+
+        cy.dragAndDropAnswerMatch(2, 'Second Answer', 0) // 0 was switched with 2 in the previous step
+        cy.rearangeAnswerMatchViaDragAndDrop(2, 'Second Answer',
+            '[data-cy="question_2"] [data-cy="matchedList"] [data-cy="matchedNum-1"]', true)
+        cy.dragAndDropAnswerMatch(2, 'Third Answer', 1) // 1 was switched inot the 3rd slot in the last step
+
+        cy.clickCompleteQuizBtn()
+
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+
+        cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
+        cy.get('[data-cy="quizRunQuestions"]').should('not.exist')
         cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('150')

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {onMounted, ref, computed, onBeforeMount, nextTick} from 'vue';
+import {onMounted, ref, computed, onBeforeMount, nextTick, onUnmounted, watch} from 'vue';
 import Sortable from 'sortablejs';
 import {useField} from "vee-validate";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
@@ -55,10 +55,23 @@ onBeforeMount(() => {
 onMounted(() => {
   initSortableJsInstances()
 })
+watch(() => props.quizComplete, (newVal, oldVal) => {
+  if (!oldVal && newVal) {
+    destroySortableJsInstances()
+  }
+})
+
+onUnmounted(() => {
+  destroySortableJsInstances()
+})
 
 const initSortableJsInstances = () => {
-  matchedAnswersCurrent.value = matchedAnswersOrig.value.map((opt) => ({...opt}))
-  answerBankCurrent.value = answerBankOrig.value.map((opt) => ({...opt}))
+  matchedAnswersCurrent.value = matchedAnswersOrig.value.map((opt) => ({...opt, initialId: opt.id}))
+  answerBankCurrent.value = answerBankOrig.value.map((opt) => ({...opt, initialId: opt.id}))
+
+  if (props.quizComplete) {
+    return
+  }
 
   const commonOptions = {
     group: 'shared',
@@ -87,6 +100,12 @@ const initSortableJsInstances = () => {
   sortableInstances = [matchedSortable, availableSortable]
 }
 
+const destroySortableJsInstances = () => {
+  if (sortableInstances.value) {
+    sortableInstances.forEach((sortable) => sortable.destroy())
+    sortableInstances.value = []
+  }
+}
 const recordMatchedAnswer = (index, newValue, newId) => {
   matchedAnswersCurrent.value[index].matchedAnswer = newValue
   matchedAnswersCurrent.value[index].id = newId
@@ -131,7 +150,7 @@ const itemAddedToList = (evt) => {
 }
 
 const prepKeyboardMove = () => {
-  sortableInstances.forEach((sortable) => sortable.destroy())
+  destroySortableJsInstances()
 
   // sync orig to current
   answerBankOrig.value = answerBankCurrent.value.map((i) => ({...i}))
@@ -190,7 +209,10 @@ const emitAnswerUpdate = (index) => {
   return answerPair
 }
 const { value, errorMessage, validate } = useField(() => props.name, undefined, {syncVModel: true});
-
+const isAnswerCorrect = (id) => {
+  const answerOption = props.q.answerOptions.find((a) => a.id === id)
+  return answerOption.isCorrect
+}
 </script>
 
 <template>
@@ -205,14 +227,14 @@ const { value, errorMessage, validate } = useField(() => props.name, undefined, 
             >{{ answer.answerOption }}:
             </li>
           </ul>
-          <ul :id="matchedListId" class="min-w-[10rem]" data-cy="matchedList">
+          <ul v-if="!quizComplete" :id="matchedListId" class="min-w-[10rem]" data-cy="matchedList">
             <li v-for="(answer, index) in matchedAnswersOrig"
                 :key="answer.id"
                 :class="{'bg-neutral-100 border-dotted border-2 rounded px-3 py-1': answer.matchedAnswer === '', }"
                 class="min-h-[3rem] flex items-center mb-2 "
                 :data-cy="`matchedNum-${index}`"
             >
-             <Button v-if="answer.matchedAnswer"
+             <Button v-if="!quizComplete && answer.matchedAnswer"
                      :id="`matchValBtn-${q.id}-${answer.id}`"
                      outlined
                      @keyup.up="moveItem(answer.id, -1)"
@@ -222,9 +244,25 @@ const { value, errorMessage, validate } = useField(() => props.name, undefined, 
              <div v-else data-cy="matchedAnswer">{{ answer.matchedAnswer }}</div>
             </li>
           </ul>
+          <ul v-if="quizComplete" :id="matchedListId" class="min-w-[10rem]" data-cy="matchedList">
+            <li v-for="(answer, index) in matchedAnswersCurrent"
+                :key="answer.id"
+                class="min-h-[3rem] flex items-center mb-2 border-2 rounded px-3 py-1 flex gap-2"
+                :class="{
+                  'bg-red-50 border-red-200': !isAnswerCorrect(answer.initialId),
+                  'bg-green-50 border-green-200': isAnswerCorrect(answer.initialId),
+                }"
+                :aria-label="`Answer ${answer.matchedAnswer} is ${isAnswerCorrect(answer.initialId) ? 'correct' : 'wrong'}`"
+                :data-cy="`matchedNum-${index}`"
+            >
+              <i v-if="!isAnswerCorrect(answer.initialId)" class="fas fa-ban text-red-500" aria-hidden="true" data-cy="matchIsWrong"></i>
+              <i v-else class="fas fa-check text-green-500" aria-hidden="true" data-cy="matchIsCorrect"></i>
+              {{ answer.matchedAnswer }}
+            </li>
+          </ul>
         </div>
       </Fieldset>
-      <Fieldset legend="Available">
+      <Fieldset v-if="!quizComplete" legend="Available">
         <div v-if="!answerBankOrig || answerBankOrig.length === 0"
              class="max-w-[15rem] text-center" data-cy="allAnswersPlaced">
           <div class="text-surface-700">

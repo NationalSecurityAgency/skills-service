@@ -1018,7 +1018,11 @@ class QuizDefService {
                             originalAnswer.answer = originalAnswer.value
                             originalAnswer.value = foundSelected?.answerText
                             isSelected = originalAnswer.value == originalAnswer.answer
-                            answer = JsonOutput.toJson(originalAnswer)
+                            answer = new UserGradedQuizAnswerResult.MatchingAnswer(
+                                    term: originalAnswer.term,
+                                    selectedMatch: originalAnswer.value,
+                                    correctMatch: originalAnswer.answer
+                            )
                         } else {
                             answer = answerDef.answer
                         }
