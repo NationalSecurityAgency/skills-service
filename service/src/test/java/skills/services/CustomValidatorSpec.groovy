@@ -530,6 +530,17 @@ if (a == true) {
 }
 ```
 """).valid
+
+        validator.validateDescription("""(A) some text
+- item 1
+- item 2
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+""").valid
+
     }
 
     def "support markdown headers"() {
@@ -1132,6 +1143,25 @@ line-height:107%">(A) fancy formatting</span>""").valid
         validator.validateDescription("(A)\n\n${imgStr}").valid
         validator.validateDescription("(A)\n\n**${imgStr}**").valid
         !validator.validateDescription("(A\n\n**${imgStr}**").valid
+        validator.validateDescription("(A) ok\n" +
+                "\t\t\t line 1\n" +
+                "\t\t\t\n" +
+                "\t\t\t line 2\n" +
+                "${imgStr}").valid
+        validator.validateDescription("(A) ok\n" +
+                "\t- one\n" +
+                "\t- two\n" +
+                "${imgStr}\n" +
+                "some\n" +
+                "${imgStr}\n" +
+                "\t\t\t line 1\n" +
+                "\t\t\t\n" +
+                "\t\t\t line 2\n" +
+                "${imgStr}").valid
+
+        validator.validateDescription("<span>(A) some</span>\n\n${imgStr}").valid
+        validator.validateDescription("(A) some\n\n**${imgStr}**").valid
+        validator.validateDescription("<span>(A) some</span>\n\n**${imgStr}**").valid
     }
 
     def "support links" () {
@@ -1152,8 +1182,14 @@ line-height:107%">(A) fancy formatting</span>""").valid
 
         validator.validateDescription("(A) <p>value</p>\n<p><a href=\"${url}\">${url}</a></p>").valid
 
-        validator.validateDescription("(A)&nbsp;[A link] (http://linky.com").valid
-        validator.validateDescription("(A) [A link] (http://linky.com").valid
+        validator.validateDescription("(A)&nbsp;[A link] (http://linky.com)").valid
+        validator.validateDescription("(A) [A link] (http://linky.com)").valid
+        validator.validateDescription("[(A) A link] (http://linky.com)").valid
+        !validator.validateDescription("[A link] (http://linky.com)").valid
+
+        validator.validateDescription("(A) ok\n<span>some</span>\n[A link](http://linky.com)").valid
+        validator.validateDescription("(A) ok\n<span>some</span>\n \n[A link](http://linky.com)").valid
+        validator.validateDescription("(A) ok\n<span>some</span>\n\n[A link](http://linky.com)").valid
     }
 
     def "support mixed html br and newline chars" () {
@@ -1263,7 +1299,7 @@ line-height:107%">(A) fancy formatting</span>""").valid
         res3.valid
     }
 
-    def "html sub lists" () {
+    def "html lists" () {
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
         validator.paragraphValidationMessage = 'fail'
@@ -1286,10 +1322,13 @@ line-height:107%">(A) fancy formatting</span>""").valid
 
         when:
         validator.init()
+        then:
         def res = validator.validateDescription(input)
         println res.validationFailedDetails
-        then:
         res.valid
+
+        validator.validateDescription("<span>1.</span> (A) ok\n<span>2.</span> (A) ok\n").valid
+        !validator.validateDescription("<span>1.</span> (A) ok\n<span>2.</span> (B) not ok\n").valid
     }
 
 

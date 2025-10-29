@@ -820,5 +820,12 @@ ___
                 blah
                 (B) (D) fish
                 clap\n"""
+
+        validator.addPrefixToInvalidParagraphs("(A) ok\n" +
+                "\tTitle:\n" +
+                "\n\t\n\t\n\t value\n", prefix).newDescription == "(A) ok\n" +
+                "Title:\n" +
+                "\n(B) \n\n     value\n"
+
     }
 }
