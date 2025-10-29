@@ -87,6 +87,11 @@ class ParagraphValidator {
             }
 
             @Override
+            void visit(Link link) {
+                blockHandlerValidator(link)
+            }
+
+            @Override
             void visit(HtmlBlock htmlBlock) {
                 String html = htmlBlock.getLiteral()
                 Document doc = Jsoup.parse(html)
@@ -295,7 +300,8 @@ class ParagraphValidator {
             @Override
             void visit(Paragraph paragraph) {
                 boolean isImage = paragraph.firstChild instanceof Image || (paragraph.firstChild instanceof StrongEmphasis && paragraph.firstChild?.firstChild instanceof Image)
-                if (!isImage) {
+                boolean isLink = paragraph.firstChild instanceof Link && paragraph.firstChild == paragraph.lastChild
+                if (!isImage && !isLink) {
                     ValidateNodeRes validateRes = validateNode(paragraph)
                     if (!validateRes.isValid) {
                         invalidate()
@@ -393,7 +399,6 @@ class ParagraphValidator {
         markdownRenderer = MarkdownRenderer.builder().extensions(extensions).build();
         textContentRenderer = TextContentRenderer.builder().extensions(extensions).build()
 
-
         return null
     }
 
@@ -401,7 +406,7 @@ class ParagraphValidator {
         if (text == null || text.isEmpty()) {
             return text
         }
-        return text.replaceFirst('^[\\s\\-*_=~`#]+', '')
+        return text.replaceFirst('^[\\[\\s\\-*_=~`#]+', '')
     }
 
     private static  boolean isOnlySeparatorsOrWhitespace(String text) {
@@ -416,7 +421,12 @@ class ParagraphValidator {
     private static boolean isOnlySpecialChars(String str) {
         return str && str.trim().matches(/^[^a-zA-Z0-9]+$/)
     }
-
+    private static String removeNumberingPrefix(String text) {
+        if (text == null || text.isEmpty()) {
+            return text
+        }
+        return text.replaceFirst('^\\s*\\d+\\.\\s*', '')
+    }
     private static String stripStyleMarkerPairs(String input) {
         if (!input) {
             return input
@@ -573,6 +583,7 @@ class ParagraphValidator {
         if (isOnlySpecialChars(toValidate)) {
             return new StringValidationRes(isValid: true, shouldContinueValidation: false)
         }
+        toValidate = removeNumberingPrefix(toValidate)
         boolean isValid = validationPattern.pattern.matcher(toValidate).matches()
         new StringValidationRes(isValid: isValid, shouldContinueValidation: true)
     }
@@ -624,7 +635,7 @@ class ParagraphValidator {
         return request.prefix && !e.text()?.startsWith(request.prefix)
     }
 
-    private static Node getPreviousForImage(Node currentNode, Node previousNode) {
+    private static Node getPreviousForImageOrLink(Node currentNode, Node previousNode) {
         Node res = previousNode
         Node parent = currentNode.parent
         if ((parent instanceof Paragraph || parent instanceof Link) && parent.firstChild == currentNode) {
@@ -632,7 +643,8 @@ class ParagraphValidator {
         } else if (parent instanceof StrongEmphasis) {
             if (parent?.parent instanceof Paragraph && parent?.parent?.firstChild instanceof Text) {
                 res = parent.parent
-            } else if (parent?.parent?.previous instanceof Paragraph && parent?.parent?.previous?.firstChild instanceof Text) {
+            } else if (parent?.parent?.previous instanceof Paragraph &&
+                    (parent?.parent?.previous?.firstChild instanceof Text || parent?.parent?.previous?.firstChild instanceof HtmlInline)) {
                 res = parent.parent.previous
             }
         }
@@ -650,8 +662,8 @@ class ParagraphValidator {
     private static Node lookForPreviousParagraph(Node node) {
         Node previousNode = node.previous
 
-        if (!previousNode && node instanceof Image) {
-            previousNode = getPreviousForImage(node, previousNode)
+        if (!previousNode && (node instanceof Image || node instanceof Link)) {
+            previousNode = getPreviousForImageOrLink(node, previousNode)
         }
 
         // find first non-softline node
@@ -686,7 +698,8 @@ class ParagraphValidator {
         return currentStartLine - previousEndLine
     }
 
-    private static List<Class<? extends Node>> chainableNodeClasses = [TableBlock.class, Image.class, BulletList.class]
+    private static List<Class<? extends Node>> chainableNodeClasses =
+            [TableBlock.class, Image.class, BulletList.class, IndentedCodeBlock.class, FencedCodeBlock.class]
     private void blockHandlerValidator(Node node, int minLinesToPreviousNode = 2) {
         Node previousNode = lookForPreviousParagraph(node)
 
