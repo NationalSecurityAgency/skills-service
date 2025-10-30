@@ -92,6 +92,14 @@ class ParagraphValidator {
             }
 
             @Override
+            void visit(BlockQuote blockQuote) {
+                boolean isValid = blockHandlerValidator(blockQuote, 2, false);
+                if (!isValid) {
+                    visitChildren(blockQuote);
+                }
+            }
+
+            @Override
             void visit(HtmlBlock htmlBlock) {
                 String html = htmlBlock.getLiteral()
                 Document doc = Jsoup.parse(html)
@@ -700,28 +708,36 @@ class ParagraphValidator {
 
     private static List<Class<? extends Node>> chainableNodeClasses =
             [TableBlock.class, Image.class, BulletList.class, IndentedCodeBlock.class, FencedCodeBlock.class]
-    private void blockHandlerValidator(Node node, int minLinesToPreviousNode = 2) {
+    private boolean blockHandlerValidator(Node node, int minLinesToPreviousNode = 2, boolean mutateValidationState = true) {
         Node previousNode = lookForPreviousParagraph(node)
 
         boolean isNodeChainableBlock = chainableNodeClasses.find { it.isInstance(node) }
         boolean isPrevNodeChainableBlock = chainableNodeClasses.find { it.isInstance(previousNode) }
         if (isNodeChainableBlock && isPrevNodeChainableBlock && linesToPreviousNode(node) <= minLinesToPreviousNode) {
             // validation is delegated to the previous table
-        } else if (!previousNode || linesToPreviousNode(node) > minLinesToPreviousNode) {
-            invalidate()
+            return true
+        }
 
-            if (shouldAddPrefix(node)) {
-                Paragraph paragraph = new Paragraph()
-                paragraph.prependChild(new Text(request.prefix))
-                node.insertBefore(paragraph)
+        if (!previousNode || linesToPreviousNode(node) > minLinesToPreviousNode) {
+            if (mutateValidationState) {
+                invalidate()
+
+                if (shouldAddPrefix(node)) {
+                    Paragraph paragraph = new Paragraph()
+                    paragraph.prependChild(new Text(request.prefix))
+                    node.insertBefore(paragraph)
+                }
             }
-        } else {
-            ValidateNodeRes validRes = validateNode(previousNode)
-            if (!validRes.isValid) {
+            return false
+        }
+
+        ValidateNodeRes validRes = validateNode(previousNode)
+        if (!validRes.isValid) {
+            if (mutateValidationState) {
                 invalidate()
                 if (shouldAddPrefix(validRes.closestNode)) {
                     if (validRes.closestNode instanceof HtmlBlock) {
-                        HtmlBlock htmlBlock = (HtmlBlock)validRes.closestNode
+                        HtmlBlock htmlBlock = (HtmlBlock) validRes.closestNode
                         String currentHtml = htmlBlock.getLiteral()
                         String newHtml = request.prefix + (currentHtml ?: "")
                         customReplacements.put(markdownRenderer.render(previousNode), newHtml)
@@ -730,6 +746,9 @@ class ParagraphValidator {
                     }
                 }
             }
+            return false
         }
+
+        return true
     }
 }
