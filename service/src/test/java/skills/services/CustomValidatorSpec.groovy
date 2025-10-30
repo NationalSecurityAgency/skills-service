@@ -675,6 +675,7 @@ if (a == true) {
         then:
         validator.validateDescription("&gt; (A) This is a test quote").valid
         validator.validateDescription("""> (A) This is a block quote""").valid
+        !validator.validateDescription("""> This is a block quote""").valid
         validator.validateDescription("(A) hello world\n" +
                 "\n" +
                 "\n" +
@@ -736,6 +737,7 @@ if (a == true) {
 > * three
 > * four""").valid
 
+        validator.validateDescription("""(A) A:\n\n> B""").valid
     }
 
     def "apply paragraph validator to bulleted/numbered lists"() {

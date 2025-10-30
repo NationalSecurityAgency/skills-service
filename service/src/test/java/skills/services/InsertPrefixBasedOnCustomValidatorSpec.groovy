@@ -621,7 +621,7 @@ ___
 
 (A) some text
 
-> (A) another one
+> another one
 
 ***
 """
