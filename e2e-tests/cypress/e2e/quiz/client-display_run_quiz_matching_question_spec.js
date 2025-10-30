@@ -114,7 +114,19 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
-        cy.get('[data-cy="quizRunQuestions"]').should('not.exist')
+
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="questionAnsweredCorrectly"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-0"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-1"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-2"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-3"]').should('not.exist')
+
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="questionAnsweredCorrectly"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-0"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-1"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-2"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-3"]').should('not.exist')
+
         cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('150')
@@ -220,7 +232,6 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
-        cy.get('[data-cy="quizRunQuestions"]').should('not.exist')
         cy.get('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('150')
