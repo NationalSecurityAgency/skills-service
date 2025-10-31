@@ -46,6 +46,9 @@ const isTextInputType = computed(() => {
 const isRatingType = computed(() => {
   return props.question.questionType === QuestionType.Rating;
 })
+const isMatchingType = computed(() => {
+  return props.question.questionType === QuestionType.Matching;
+})
 const isDragAndDropControlsVisible = computed(() => {
   return !quizConfig.isReadOnlyQuiz && props.showDragAndDropControls;
 })
@@ -101,7 +104,7 @@ const moveQuestion = (changeIndexBy) => {
         <div v-if="mediaAttributes" class="mb-3">
           <i :class="`far ${mediaAttributes.isAudio ? 'fa-file-audio' : 'fa-file-video'} fa-lg text-primary`"></i> <span class="font-bold">{{ mediaAttributes.internallyHostedFileName }}</span> is configured
         </div>
-        <div v-if="!isTextInputType && !isRatingType">
+        <div v-if="!isTextInputType && !isRatingType && !isMatchingType">
           <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
             <div class="flex items-center justify-center pb-1" :data-cy="`answerDisplay-${index}`">
               <SelectCorrectAnswer v-model="a.isCorrect"
@@ -130,6 +133,21 @@ const moveQuestion = (changeIndexBy) => {
               aria-hidden="true"
               data-cy="textAreaPlaceHolder"
               rows="2"/>
+        </div>
+        <div v-if="isMatchingType">
+          <div v-for="(answer, index) in question.answers" class="w-full flex">
+            <div v-if="answer.multiPartAnswer" class="flex flex-row gap-4 w-full" :data-cy="`question-${questionNum}-answer-${index}`">
+              <div class="flex flex-col">
+                {{ answer.multiPartAnswer.term }}
+              </div>
+              <div>
+                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+              </div>
+              <div class="flex flex-col">
+                {{ answer.multiPartAnswer.value }}
+              </div>
+            </div>
+          </div>
         </div>
         <div class="flex" v-if="question.answerHint">
           <Message size="small" severity="warn" icon="fas fa-lightbulb" :closable="false" class="mt-2" data-cy="answerHintMsg">

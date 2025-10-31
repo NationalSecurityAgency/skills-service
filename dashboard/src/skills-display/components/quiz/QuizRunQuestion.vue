@@ -25,6 +25,7 @@ import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 import {useDebounceFn} from "@vueuse/core";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
+import QuizRunMatchingComponent from "@/skills-display/components/quiz/QuizRunMatchingComponent.vue";
 
 const VideoPlayer = defineAsyncComponent(() =>
     import('@/common-components/video/VideoPlayer.vue')
@@ -37,10 +38,11 @@ const props = defineProps({
   num: Number,
   validate: Function,
   userCommunity: String,
+  quizComplete: Boolean,
 })
 
 const isLoading = ref(true);
-const emit = defineEmits(['answer-text-changed', 'selected-answer'])
+const emit = defineEmits(['answer-text-changed', 'selected-answer', 'answer-matched'])
 
 const appConfig = useAppConfig()
 
@@ -78,6 +80,9 @@ const isTextInput = computed(() => {
 })
 const isRating = computed(() => {
   return props.q.questionType === QuestionType.Rating;
+})
+const isMatchingType = computed(() => {
+  return props.q.questionType === QuestionType.Matching;
 })
 const isMissingAnswer = computed(() => {
   if (isTextInput.value) {
@@ -196,6 +201,24 @@ const showTranscript = ref(false);
 const toggleTranscript = () => {
   showTranscript.value = !showTranscript.value;
 }
+
+const updateAnswerOrder = (newOrder) => {
+  newOrder.forEach((pair) => {
+    const answerItem = answerOptions.value.find((a) => a.answerOption === pair.term)
+    const currentAnswer = {
+      questionId: props.q.id,
+      questionType: props.q.questionType,
+      answerText: pair.value,
+      changedAnswerId: answerItem.id
+    };
+    reportAnswer(currentAnswer).then((reportAnswerPromise) => {
+      emit('answer-matched', {
+        ...currentAnswer,
+        reportAnswerPromise,
+      });
+    })
+  })
+}
 </script>
 
 <template>
@@ -270,6 +293,9 @@ const toggleTranscript = () => {
           </div>
           <div v-else-if="isRating">
             <SkillsRating @update:modelValue="ratingChanged" class="flex-initial rounded-border py-4 px-6" v-model="answerRating" :stars="numberOfStars" :cancel="false" :name="fieldName"/>
+          </div>
+          <div v-else-if="isMatchingType">
+            <QuizRunMatchingComponent :q="q" :name="fieldName" :value="answerOptions" @updateAnswerOrder="updateAnswerOrder" :questionNumber="num" :quizComplete="quizComplete" />
           </div>
           <div v-else>
             <div v-if="isMultipleChoice" class="text-secondary italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>

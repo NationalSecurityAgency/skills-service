@@ -16,7 +16,6 @@
 package skills.controller.request.model
 
 import groovy.transform.Canonical
-import skills.services.quiz.QuizQuestionType
 
 @Canonical
 class QuizAnswerDefRequest {
@@ -24,4 +23,5 @@ class QuizAnswerDefRequest {
     Integer id
     String answer
     Boolean isCorrect
+    QuizMultiPartAnswer multiPartAnswer
 }

@@ -40,6 +40,9 @@ const isTextInputType = computed(() => {
 const isRatingType = computed(() => {
   return props.question.questionType === QuestionType.Rating;
 })
+const isMatchingType = computed(() => {
+  return props.question.questionType === QuestionType.Matching;
+})
 const hasAnswer = computed(() => {
   return props.question.answers.find((a) => a.isSelected === true) !== undefined;
 })
@@ -93,7 +96,7 @@ const manuallyGradedInfo = computed(() => {
                 :instance-id="`question_${question.id}`"
                 data-cy="questionDisplayText"/>
           </div>
-          <div v-if="!isTextInputType && !isRatingType">
+          <div v-if="!isTextInputType && !isRatingType && !isMatchingType">
             <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
               <div class="flex items-center justify-center pb-1" :data-cy="`answerDisplay-${index}`">
                 <SelectCorrectAnswer v-model="a.isSelected"
@@ -115,6 +118,31 @@ const manuallyGradedInfo = computed(() => {
             <MarkdownText
                 :text="answerText"
                 :instance-id="`${question.id}_answer`"/>
+          </div>
+
+          <div v-if="isMatchingType" class="flex flex-col gap-1">
+            <div v-for="answer in question.answers" :key="answer.id">
+
+              <div v-if="answer.answer" class="flex gap-4 w-md items-center">
+                <div>
+                  {{ answer.answer.term }}
+                </div>
+                <div>
+                  <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <div class="relative">
+                    <div :class="{'border-red-500 border rounded': !answer.isSelected && isWrong }"
+                         class="p-2 flex gap-2 items-center"
+                         :aria-label="`Answer ${answer.answer.selectedMatch} is ${!answer.isSelected && isWrong ? 'wrong' : 'correct'}`"
+                    >
+                      <i v-if="!answer.isSelected && isWrong" class="fas fa-ban text-red-500" aria-hidden="true"></i>
+                      {{ answer.answer.selectedMatch }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div v-if="manuallyGradedInfo" class="mt-4 w-full border p-4 rounded-border border-surface" data-cy="manuallyGradedInfo">
             <div class="text-xl mb-4 font-semibold">Manually Graded</div>

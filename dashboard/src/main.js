@@ -59,6 +59,9 @@ import ProgressBar from 'primevue/progressbar'
 import Chip from 'primevue/chip'
 import FloatLabel from "primevue/floatlabel";
 import Timeline from 'primevue/timeline';
+import { Sortable, Swap } from 'sortablejs';
+
+Sortable.mount(new Swap())
 
 import ConfirmationService from 'primevue/confirmationservice'
 import BadgeDirective from 'primevue/badgedirective'

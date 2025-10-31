@@ -36,6 +36,13 @@ const loadData = () => {
   QuizService.getSingleQuizHistoryRun(quizId.value, attemptId.value)
       .then((res) => {
         runInfo.value = res;
+        runInfo.value.questions.forEach((question) => {
+          if(question.questionType === 'Matching') {
+            question.answers.forEach((answer) => {
+              answer.answer = JSON.parse(answer.answer)
+            })
+          }
+        })
       }).finally(() => {
     loading.value = false;
   });

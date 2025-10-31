@@ -55,11 +55,15 @@ describe('Client Display Accessibility Quiz Tests', () => {
             cy.setDarkModeIfNeeded(darkMode)
             cy.setDarkModeIfNeeded(darkMode)
             cy.createQuizDef(1);
+            cy.setQuizShowCorrectAnswers(1, true)
             cy.createQuizQuestionDef(1, 1);
             cy.createQuizMultipleChoiceQuestionDef(1, 2);
             cy.createQuizQuestionDef(1, 3);
             cy.createQuizMultipleChoiceQuestionDef(1, 4);
             cy.createQuizMultipleChoiceQuestionDef(1, 5);
+            cy.createTextInputQuestionDef(1, 6)
+            cy.createQuizMatchingQuestionDef(1, 7);
+            cy.createQuizMatchingQuestionDef(1, 8);
 
             cy.setQuizMaxNumAttempts(1, 3)
             cy.setMinNumQuestionsToPass(1, 2)
@@ -83,6 +87,11 @@ describe('Client Display Accessibility Quiz Tests', () => {
             cy.get('[data-cy="question_5"] [data-cy="answer_2"]').click()
             cy.get('[data-cy="question_5"] [data-cy="answer_3"]').click()
             cy.get('[data-cy="question_5"] [data-cy="answer_4"]').click()
+
+            cy.get('[data-cy="question_7"] [data-cy="bank-0"]').dragAndDrop('[data-cy="question_7"] [data-cy="matchedList"] [data-cy="matchedNum-0"]')
+            cy.get('[data-cy="question_8"] [data-cy="bank-0"]').dragAndDrop('[data-cy="question_8"] [data-cy="matchedList"] [data-cy="matchedNum-0"]')
+            cy.get('[data-cy="question_8"] [data-cy="bank-1"]').dragAndDrop('[data-cy="question_8"] [data-cy="matchedList"] [data-cy="matchedNum-1"]')
+            cy.get('[data-cy="question_8"] [data-cy="bank-2"]').dragAndDrop('[data-cy="question_8"] [data-cy="matchedList"] [data-cy="matchedNum-2"]')
 
             cy.customLighthouse();
             cy.injectAxe();
