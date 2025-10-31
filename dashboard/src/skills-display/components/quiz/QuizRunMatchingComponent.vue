@@ -218,19 +218,21 @@ const isAnswerCorrect = (id) => {
 <template>
   <div>
     <div class="flex gap-4 wrap">
-      <Fieldset legend="Matched">
-        <div class="flex gap-2">
+      <Fieldset :legend="`Matched answers for questions number ${questionNumber}`" :id="`matchedAnswersFieldset-${questionNumber}`">
+        <template #legend>
+          <div :id="`matchedAnswersFieldset-${questionNumber}_header`">Matched<span class="sr-only"> for question #{{ questionNumber }}</span></div>
+        </template><div class="flex gap-2">
           <ul :id="answerOptionsList" class="">
             <li v-for="answer in matchedAnswersOrig"
                 :key="answer.id"
-                class="min-h-[3rem] px-3 py-1 flex items-center mb-2 bg-white"
+                class="min-h-[3rem] px-3 py-1 flex items-center mb-2"
             >{{ answer.answerOption }}:
             </li>
           </ul>
           <ul v-if="!quizComplete" :id="matchedListId" class="min-w-[10rem]" data-cy="matchedList">
             <li v-for="(answer, index) in matchedAnswersOrig"
                 :key="answer.id"
-                :class="{'bg-neutral-100 border-dotted border-2 rounded px-3 py-1': answer.matchedAnswer === '', }"
+                :class="{'bg-neutral-100 dark:bg-neutral-800 border-dotted border-2 rounded px-3 py-1': answer.matchedAnswer === '', }"
                 class="min-h-[3rem] flex items-center mb-2 "
                 :data-cy="`matchedNum-${index}`"
             >
@@ -247,10 +249,10 @@ const isAnswerCorrect = (id) => {
           <ul v-if="quizComplete" :id="matchedListId" class="min-w-[10rem]" data-cy="matchedList">
             <li v-for="(answer, index) in matchedAnswersCurrent"
                 :key="answer.id"
-                class="min-h-[3rem] flex items-center mb-2 border-2 rounded px-3 py-1 flex gap-2"
+                class="min-h-[3rem] items-center mb-2 border-2 rounded px-3 py-1 flex gap-2"
                 :class="{
-                  'bg-red-50 border-red-200': !isAnswerCorrect(answer.initialId),
-                  'bg-green-50 border-green-200': isAnswerCorrect(answer.initialId),
+                  'bg-red-50 border-red-200 dark:bg-red-900': !isAnswerCorrect(answer.initialId),
+                  'bg-green-50 border-green-200 dark:bg-green-800': isAnswerCorrect(answer.initialId),
                 }"
                 :aria-label="`Answer ${answer.matchedAnswer} is ${isAnswerCorrect(answer.initialId) ? 'correct' : 'wrong'}`"
                 :data-cy="`matchedNum-${index}`"
@@ -262,10 +264,13 @@ const isAnswerCorrect = (id) => {
           </ul>
         </div>
       </Fieldset>
-      <Fieldset v-if="!quizComplete" legend="Available">
+      <Fieldset v-if="!quizComplete" :id="`availableAnswersFieldset-${questionNumber}`">
+        <template #legend>
+          <div :id="`availableAnswersFieldset-${questionNumber}_header`">Available<span class="sr-only"> for question #{{ questionNumber }}</span></div>
+        </template>
         <div v-if="!answerBankOrig || answerBankOrig.length === 0"
              class="max-w-[15rem] text-center" data-cy="allAnswersPlaced">
-          <div class="text-surface-700">
+          <div>
             <i class="fas fa-check text-green-700" aria-hidden="true"></i> All Answers Placed
           </div>
           <div class="text-sm mt-2">You can still rearrange your answers in the matched list</div>

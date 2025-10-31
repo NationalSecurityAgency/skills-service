@@ -36,12 +36,14 @@ describe('My Quizzes Accessibility Tests', () => {
             cy.createQuizMultipleChoiceQuestionDef(1, 2);
             cy.createTextInputQuestionDef(1, 3)
             cy.createQuizQuestionDef(1, 4)
+            cy.createQuizMatchingQuestionDef(1, 5)
             cy.setMinNumQuestionsToPass(1, 1)
             cy.runQuizForUser(1, defaultUser, [
                 {selectedIndex: [1]},
                 {selectedIndex: [1, 2]},
                 {selectedIndex: [0]},
-                {selectedIndex: [0]}
+                {selectedIndex: [0]},
+                {selectedIndex: [2, 1, 0]}
             ], true, 'My Answer')
             cy.gradeQuizAttempt(1, false, 'Wrong answer', true)
 
@@ -49,7 +51,7 @@ describe('My Quizzes Accessibility Tests', () => {
             cy.get(`${tableSelector} [data-p-index="0"] [data-cy="viewQuizAttempt"]`).first().click()
             cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 1')
             cy.get('[data-cy="quizRunStatus"]').contains('Passed')
-            cy.get('[data-cy="numQuestionsToPass"]').contains('1 / 4')
+            cy.get('[data-cy="numQuestionsToPass"]').contains('1 / 5')
             cy.get('[data-cy="numQuestionsToPass"]').contains('Need 1 question to pass')
 
             cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
