@@ -232,7 +232,7 @@ const isAnswerCorrect = (id) => {
           <ul v-if="!quizComplete" :id="matchedListId" class="min-w-[10rem]" data-cy="matchedList">
             <li v-for="(answer, index) in matchedAnswersOrig"
                 :key="answer.id"
-                :class="{'bg-neutral-100 dark:bg-neutral-800 border-dotted border-2 rounded px-3 py-1': answer.matchedAnswer === '', }"
+                :class="{'bg-neutral-200 dark:bg-neutral-800 border-dotted border-1 border-surface-400 dark:border-surface-500 rounded px-3 py-1': answer.matchedAnswer === '', }"
                 class="min-h-[3rem] flex items-center mb-2 "
                 :data-cy="`matchedNum-${index}`"
             >
@@ -251,8 +251,8 @@ const isAnswerCorrect = (id) => {
                 :key="answer.id"
                 class="min-h-[3rem] items-center mb-2 border-2 rounded px-3 py-1 flex gap-2"
                 :class="{
-                  'bg-red-50 border-red-200 dark:bg-red-900': !isAnswerCorrect(answer.initialId),
-                  'bg-green-50 border-green-200 dark:bg-green-800': isAnswerCorrect(answer.initialId),
+                  'bg-red-50 border-red-200 dark:bg-red-900 text-red-950 dark:text-red-100': !isAnswerCorrect(answer.initialId),
+                  'bg-green-50 border-green-200 dark:bg-green-800 text-green-950 dark:text-green-100': isAnswerCorrect(answer.initialId),
                 }"
                 :aria-label="`Answer ${answer.matchedAnswer} is ${isAnswerCorrect(answer.initialId) ? 'correct' : 'wrong'}`"
                 :data-cy="`matchedNum-${index}`"

@@ -420,6 +420,52 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]')
     });
+
+    it('theme support: matching questions', () => {
+        cy.createQuizDef(1);
+        cy.createQuizMatchingQuestionDef(1, 1);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.dragAndDropAnswerMatch(1, 'First Answer', 0)
+        cy.dragAndDropAnswerMatch(1, 'Second Answer', 1)
+
+        cy.matchSnapshotImageForElement('[data-cy="question_1"]');
+    });
+
+    it('theme support: display answers after completing quiz', () => {
+        cy.createQuizDef(1);
+        cy.createQuizMatchingQuestionDef(1, 1);
+        cy.setQuizShowCorrectAnswers(1, true)
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.dragAndDropAnswerMatch(1, 'First Answer', 0)
+        cy.dragAndDropAnswerMatch(1, 'Second Answer', 2)
+        cy.dragAndDropAnswerMatch(1, 'Third Answer', 1)
+
+
+        cy.clickCompleteQuizBtn()
+
+        cy.get('[data-cy="quizCompletion"] [data-cy="quizFailed"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="questionAnsweredWrong"]')
+
+        cy.matchSnapshotImageForElement('[data-cy="question_1"]');
+    });
+
+
 });
 
 

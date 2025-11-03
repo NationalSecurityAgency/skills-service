@@ -595,28 +595,22 @@ describe('Badges Tests', () => {
         cy.get('[data-cy="rootHelpUrlSetting"]')
             .contains('https://SomeArticleRepo.com');
 
-        const textDecorationMatch = 'line-through color(srgb 0.0862745 0.396078 0.203922)';
-
         // strike-through when url starts with http:// or https://
         cy.get('[data-cy="skillHelpUrl"]').should('be.visible')
         cy.get('[data-cy="skillHelpUrl"]').click()
         cy.get('[data-cy="skillHelpUrl"]').type('https:/');
-        cy.get('[data-cy="rootHelpUrlSetting"]')
-            .should('not.have.css', 'text-decoration', textDecorationMatch);
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.class', 'line-through');
         cy.get('[data-cy="skillHelpUrl"]').click()
         cy.get('[data-cy="skillHelpUrl"]').type('/');
-        cy.get('[data-cy="rootHelpUrlSetting"]')
-            .should('have.css', 'text-decoration', textDecorationMatch);
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('have.class', 'line-through');
 
         cy.get('[data-cy="skillHelpUrl"]').clear()
         cy.get('[data-cy="skillHelpUrl"]').click()
         cy.get('[data-cy="skillHelpUrl"]').type('http:/');
-        cy.get('[data-cy="rootHelpUrlSetting"]')
-            .should('not.have.css', 'text-decoration', textDecorationMatch);
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.class', 'line-through');
         cy.get('[data-cy="skillHelpUrl"]')
             .type('/');
-        cy.get('[data-cy="rootHelpUrlSetting"]')
-            .should('have.css', 'text-decoration', textDecorationMatch);
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('have.class', 'line-through');
 
         // now test edit
         cy.get('[data-cy="closeDialogBtn"]')
@@ -625,8 +619,7 @@ describe('Badges Tests', () => {
             .click();
         cy.get('[data-cy="rootHelpUrlSetting"]')
             .contains('https://SomeArticleRepo.com');
-        cy.get('[data-cy="rootHelpUrlSetting"]')
-            .should('not.have.css', 'text-decoration', textDecorationMatch);
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('not.have.class', 'line-through');
 
         // edit again - anything that starts with https or http must not use Root Help Url
         cy.get('[data-cy="closeDialogBtn"]')
@@ -635,8 +628,7 @@ describe('Badges Tests', () => {
             .click();
         cy.get('[data-cy="rootHelpUrlSetting"]')
             .contains('https://SomeArticleRepo.com');
-        cy.get('[data-cy="rootHelpUrlSetting"]')
-            .should('have.css', 'text-decoration', textDecorationMatch);
+        cy.get('[data-cy="rootHelpUrlSetting"]').should('have.class', 'line-through');
 
         // do not show Root Help Url if it's not configured
         cy.request('POST', '/admin/projects/proj1/settings/help.url.root', {

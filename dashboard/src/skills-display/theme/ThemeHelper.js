@@ -119,7 +119,8 @@ export default {
         'body .sd-theme-home a, body .sd-theme-home .skills-theme-skills-progress a,' +
         '.sd-theme-home .editor-help-footer,' +
         '.sd-theme-home .editor-help-footer i,' +
-        '.sd-theme-home .sd-theme-icon',
+        '.sd-theme-home .sd-theme-icon,' +
+        '.sd-theme-home .p-fieldset, .sd-theme-home .p-fieldset-legend',
       styleName: 'color'
     }, {
       selector: '.toastui-editor-popup [data-type="Heading"]:hover,' +
@@ -201,6 +202,7 @@ export default {
           + '.sd-theme-home .toastui-editor-popup,'
           + '.sd-theme-home .editor-help-footer,'
           + '.sd-theme-home .sd-theme-tile-background,'
+          + '.sd-theme-home .p-fieldset, .sd-theme-home .p-fieldset-legend,'
           + '.p-dialog',
         styleName: 'background-color'
       }, {
