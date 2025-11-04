@@ -21,6 +21,7 @@ import Column from 'primevue/column'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 import CheckSelector from '@/skills-display/components/quiz/CheckSelector.vue'
 import QuizAnswerHistory from '@/components/quiz/metrics/QuizAnswerHistory.vue'
+import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 
 const props = defineProps({
   q: Object,
@@ -30,6 +31,7 @@ const props = defineProps({
 })
 
 const responsive = useResponsiveBreakpoints()
+const colors = useColors()
 
 const averageScore = ref(0)
 const answers = ref([])
@@ -120,13 +122,13 @@ if(!isMatching.value) {
     key: 'answer',
     label: 'Answer',
     sortable: false,
-    imageClass: 'fas fa-check-double skills-color-projects'
+    imageClass: `fas fa-check-double ${colors.getTextClass(0)}`
   })
   tableFields.push({
     key: 'numAnswered',
     label: '# of Times Selected',
     sortable: false,
-    imageClass: 'fas fa-user-check skills-color-badges'
+    imageClass: `fas fa-user-check ${colors.getTextClass(1)}`
   })
 }
 else {
@@ -134,14 +136,21 @@ else {
     key: 'multiPartAnswer',
     label: 'Answer',
     sortable: false,
-    imageClass: 'fas fa-check-double skills-color-projects'
+    imageClass: `fas fa-check-double ${colors.getTextClass(0)}`
   })
   tableFields.push({
     key: 'numAnsweredCorrect',
-    label: '# of Times Correctly Matched',
+    label: '# Correct Matches',
     sortable: false,
-    imageClass: 'fas fa-user-check skills-color-badges'
+    imageClass: `fas fa-user-check ${colors.getTextClass(1)}`
   })
+  tableFields.push({
+    key: 'numAnsweredWrong',
+    label: '# Incorrect Matches',
+    sortable: false,
+    imageClass: `fas fa-circle-xmark ${colors.getTextClass(2)}`
+  })
+
 }
 
 const tableOptions = {
@@ -165,6 +174,7 @@ onMounted(() => {
     ...a,
     selected: a.selected ? a.selected : false,
     percent: (totalNumUsers > 0 ? Math.trunc(((isMatching.value ? a.numAnsweredCorrect : a.numAnswered) / totalNumUsers) * 100) : 0),
+    percentWrong: (totalNumUsers > 0 ? Math.trunc(((isMatching.value ? a.numAnsweredWrong : a.numAnswered) / totalNumUsers) * 100) : 0),
     multiPartAnswer: a.multiPartAnswer ? a.multiPartAnswer : null
   }))
   if (isRating.value) {
@@ -226,7 +236,7 @@ const removeExpanderClass = (rowData) => {
       aria-label="Question Metrics"
       v-if="!isTextInput && answers"
       v-model:expandedRows="expandedRows"
-      :expander="isMatching ? false : true"
+      :expander="!isMatching"
       expander-label="Expand Answer History"
       :row-class="removeExpanderClass"
       :value="answers">
@@ -243,11 +253,14 @@ const removeExpanderClass = (rowData) => {
           </div>
           <div v-else-if="slotProps.field === 'numAnswered' || slotProps.field === 'numAnsweredCorrect'" :data-cy="`row${slotProps.index}-colNumAnswered`">
             <span data-cy="num" class="pr-1">{{ slotProps.data[col.key] }}</span>
-            <Tag data-cy="percent">{{ slotProps.data.percent }}%</Tag>
+            <Tag data-cy="percent" :severity="(isSurvey || slotProps.data.isCorrect) ? 'success' : 'warn'">{{ slotProps.data.percent }}%</Tag>
           </div>
-          <div v-else-if="slotProps.field === 'multiPartAnswer'">
-
-            {{ slotProps.data[col.key].term }}: {{ slotProps.data[col.key].value }}
+          <div v-else-if="slotProps.field === 'numAnsweredWrong'" :data-cy="`row${slotProps.index}-colNumAnsweredWrong`">
+            <span data-cy="num" class="pr-1">{{ slotProps.data[col.key] }}</span>
+            <Tag v-if="slotProps.data.percent < 100" data-cy="percent" severity="warn">{{ slotProps.data.percentWrong }}%</Tag>
+          </div>
+          <div v-else-if="slotProps.field === 'multiPartAnswer'" :data-cy="`row${slotProps.index}-multiPartAnswerCol`">
+            {{ slotProps.data[col.key].term }}: <span class="font-semibold">{{ slotProps.data[col.key].value }}</span>
           </div>
           <div v-else>
             {{ slotProps.data[col.key] }}
@@ -266,6 +279,10 @@ const removeExpanderClass = (rowData) => {
     <div v-if="!isSurvey && isMultipleChoice" class="bg-surface-100 dark:bg-surface-700 p-2 text-sm" data-cy="multipleChoiceQuestionWarning">
       *** All of the required choices must be selected for the question to be counted as <span
       class="text-primary uppercase">correct</span> ***
+    </div>
+
+    <div v-if="!isSurvey && isMatching" class="bg-surface-100 dark:bg-surface-700 p-2 text-sm" data-cy="matchingQuestionWarning">
+      *** All matches must be correct for the question to be counted as <span class="text-primary uppercase">correct</span> ***
     </div>
 
     <QuizAnswerHistory v-if="isTextInput || isMatching"

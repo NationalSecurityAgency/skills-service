@@ -167,7 +167,7 @@ describe('Accessibility Quiz Tests', () => {
             cy.customA11y();
         });
 
-        it(`results page${darkMode}`, () => {
+        it(`survey results page${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
             cy.createSurveyDef(1);
             cy.createSurveyMultipleChoiceQuestionDef(1, 1);
@@ -175,6 +175,23 @@ describe('Accessibility Quiz Tests', () => {
             cy.createTextInputQuestionDef(1, 3);
             cy.runQuizForUser(1, 1, [{ selectedIndex: [1] }, { selectedIndex: [0] }, { selectedIndex: [0] }])
 
+            cy.visit('/administrator/quizzes/quiz1/results')
+            cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]').should('be.enabled')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y();
+        });
+
+        it(`quiz results page${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.createQuizDef(1);
+            cy.createQuizQuestionDef(1, 1, { question: 'This is a Single Choice Question example for metrics.'})
+            cy.createQuizMultipleChoiceQuestionDef(1, 2, { question: 'This is a Multiple Choice Question example for metrics.'});
+            cy.createTextInputQuestionDef(1, 3);
+            cy.createQuizMatchingQuestionDef(1, 4)
+            cy.runQuizForUser(1, Cypress.env('proxyUser'), [{ selectedIndex: [1] }, { selectedIndex: [0] }, { selectedIndex: [0] }, {selectedIndex: [0, 2, 1]}])
+            cy.gradeQuizAttempt(1, false, 'Wrong answer', false)
             cy.visit('/administrator/quizzes/quiz1/results')
             cy.get('[data-cy="metrics-q1"] [data-p-index="1"] [data-pc-section="rowtogglebutton"]').should('be.enabled')
 

@@ -120,28 +120,29 @@ const manuallyGradedInfo = computed(() => {
                 :instance-id="`${question.id}_answer`"/>
           </div>
 
-          <div v-if="isMatchingType" class="flex flex-col gap-1">
-            <div v-for="answer in question.answers" :key="answer.id">
-
-              <div v-if="answer.answer" class="flex gap-4 w-md items-center">
-                <div>
-                  {{ answer.answer.term }}
-                </div>
-                <div>
-                  <i class="fas fa-arrow-right" aria-hidden="true"></i>
-                </div>
-                <div>
-                  <div class="relative">
-                    <div :class="{'border-red-500 border rounded': !answer.isSelected && isWrong }"
-                         class="p-2 flex gap-2 items-center"
-                         :aria-label="`Answer ${answer.answer.selectedMatch} is ${!answer.isSelected && isWrong ? 'wrong' : 'correct'}`"
-                    >
-                      <i v-if="!answer.isSelected && isWrong" class="fas fa-ban text-red-500" aria-hidden="true"></i>
-                      {{ answer.answer.selectedMatch }}
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <div v-if="isMatchingType">
+            <div class="flex gap-2">
+              <ul>
+                <li v-for="(answer, index) in question.answers"
+                    :key="answer.id"
+                    :data-cy="`term-${index}`"
+                    class="min-h-[3rem] px-3 py-1 flex items-center mb-2">{{ answer.answer.term }}:</li>
+              </ul>
+              <ul>
+                <li v-for="(answer, index) in question.answers"
+                    :key="answer.id"
+                    :class="{
+                      'bg-red-50 border-red-200 dark:bg-red-900 text-red-950 dark:text-red-100': !answer.isSelected && isWrong,
+                      'bg-green-50 border-green-200 dark:bg-green-800 text-green-950 dark:text-green-100': !(!answer.isSelected && isWrong),
+                    }"
+                    :aria-label="`Answer ${answer.matchedAnswer} is ${!answer.isSelected && isWrong ? 'wrong' : 'correct'}`"
+                    :data-cy="`match-${index}`"
+                    class="min-h-[3rem] items-center mb-2 border-2 rounded px-3 py-1 flex gap-2">
+                  <i v-if="!answer.isSelected && isWrong" class="fas fa-ban text-red-500" aria-hidden="true" data-cy="matchIsWrong"></i>
+                  <i v-else class="fas fa-check text-green-500" aria-hidden="true" data-cy="matchIsCorrect"></i>
+                  <span data-cy="matchVal">{{ answer.answer.selectedMatch }}</span>
+                </li>
+              </ul>
             </div>
           </div>
           <div v-if="manuallyGradedInfo" class="mt-4 w-full border p-4 rounded-border border-surface" data-cy="manuallyGradedInfo">

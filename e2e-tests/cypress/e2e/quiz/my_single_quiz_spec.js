@@ -364,6 +364,45 @@ describe('Display Single Quiz Attempt Tests', () => {
 
     });
 
+    it('show matching questions', () => {
+        cy.createQuizDef(1);
+        cy.createQuizMatchingQuestionDef(1, 1);
+        cy.createQuizMatchingQuestionDef(1, 2);
+        cy.createQuizMatchingQuestionDef(1, 3);
+        cy.setQuizShowCorrectAnswers(1, true)
+
+        cy.runQuizForUser(1, defaultUser, [
+            {selectedIndex: [0, 2, 1]},
+            {selectedIndex: [0, 1, 2]},
+            {selectedIndex: [2, 1, 0]},
+        ], true)
+
+        cy.visit('/progress-and-rankings/my-quiz-attempts');
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="viewQuizAttempt"]`).first().click()
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]')
+
+        const validateMatch = (qNum, termNum, term, match, isCorrect) => {
+            cy.get(`[data-cy="questionDisplayCard-${qNum}"] [data-cy="term-${termNum}"]`).contains(term)
+            cy.get(`[data-cy="questionDisplayCard-${qNum}"] [data-cy="match-${termNum}"] [data-cy="matchVal"]`).contains(match)
+            const correctSelector = isCorrect ? '[data-cy="matchIsCorrect"]' : '[data-cy="matchIsWrong"]'
+            cy.get(`[data-cy="questionDisplayCard-${qNum}"] [data-cy="match-${termNum}"] ${correctSelector}`)
+        }
+
+        validateMatch(1, 0, 'First Term', 'First Answer', true)
+        validateMatch(1, 1, 'Second Term', 'Third Answer', false)
+        validateMatch(1, 2, 'Third Term', 'Second Answer', false)
+
+        validateMatch(2, 0, 'First Term', 'First Answer', true)
+        validateMatch(2, 1, 'Second Term', 'Second Answer', true)
+        validateMatch(2, 2, 'Third Term', 'Third Answer', true)
+
+        validateMatch(3, 0, 'First Term', 'Third Answer', false)
+        validateMatch(3, 1, 'Second Term', 'Second Answer', true)
+        validateMatch(3, 2, 'Third Term', 'First Answer', false)
+
+    })
+
 });
 
 

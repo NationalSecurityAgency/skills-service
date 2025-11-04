@@ -134,19 +134,21 @@ const moveQuestion = (changeIndexBy) => {
               data-cy="textAreaPlaceHolder"
               rows="2"/>
         </div>
-        <div v-if="isMatchingType">
-          <div v-for="(answer, index) in question.answers" class="w-full flex">
-            <div v-if="answer.multiPartAnswer" class="flex flex-row gap-4 w-full" :data-cy="`question-${questionNum}-answer-${index}`">
-              <div class="flex flex-col">
+        <div v-if="isMatchingType" class="flex flex-col gap-3 mt-2">
+          <div v-for="(answer, index) in question.answers">
+            <div v-if="answer.multiPartAnswer" class="flex flex-row gap-3" :data-cy="`question-${questionNum}-answer-${index}`">
+              <div>
                 {{ answer.multiPartAnswer.term }}
               </div>
               <div>
-                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                <i class="fas fa-arrow-right text-gray-500 dark:text-gray-400" aria-hidden="true"></i>
               </div>
-              <div class="flex flex-col">
+              <div>
                 {{ answer.multiPartAnswer.value }}
               </div>
             </div>
+            <hr v-if="index < question.answers.length - 1"
+                class="mt-3 border-t border-dashed border-gray-300 dark:border-gray-600"/>
           </div>
         </div>
         <div class="flex" v-if="question.answerHint">

@@ -217,12 +217,12 @@ const isAnswerCorrect = (id) => {
 
 <template>
   <div>
-    <div class="flex gap-4 wrap">
+    <div class="flex flex-col md:flex-row gap-4 wrap">
       <Fieldset :legend="`Matched answers for questions number ${questionNumber}`" :id="`matchedAnswersFieldset-${questionNumber}`">
         <template #legend>
           <div :id="`matchedAnswersFieldset-${questionNumber}_header`">Matched<span class="sr-only"> for question #{{ questionNumber }}</span></div>
         </template><div class="flex gap-2">
-          <ul :id="answerOptionsList" class="">
+          <ul :id="answerOptionsList">
             <li v-for="answer in matchedAnswersOrig"
                 :key="answer.id"
                 class="min-h-[3rem] px-3 py-1 flex items-center mb-2"
