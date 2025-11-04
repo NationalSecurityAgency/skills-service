@@ -436,6 +436,7 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.dragAndDropAnswerMatch(1, 'First Answer', 0)
         cy.dragAndDropAnswerMatch(1, 'Second Answer', 1)
 
+        cy.wait(4000)
         cy.matchSnapshotImageForElement('[data-cy="question_1"]');
     });
 
@@ -462,6 +463,7 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.get('[data-cy="quizCompletion"] [data-cy="quizFailed"]')
         cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="questionAnsweredWrong"]')
 
+        cy.wait(4000)
         cy.matchSnapshotImageForElement('[data-cy="question_1"]');
     });
 
