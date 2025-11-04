@@ -44,13 +44,17 @@ const isMatchingType = computed(() => {
   return props.question.questionType === QuestionType.Matching;
 })
 const hasAnswer = computed(() => {
+  if (isMatchingType.value) {
+    return props.question.answers.find((a) => a.answer?.selectedMatch === null || a.answer?.selectedMatch === undefined || a.answer?.selectedMatch === '') === undefined;
+  }
   return props.question.answers.find((a) => a.isSelected === true) !== undefined;
 })
 const needsGrading = computed(() => {
   return props.question.needsGrading
 })
 const isWrong = computed(() => {
-  return !needsGrading.value && !props.question.isCorrect
+  console.log(props.question)
+  return hasAnswer.value && !needsGrading.value && !props.question.isCorrect
 })
 const isSurvey = computed(() => {
   return props.quizType === 'Survey';
@@ -121,7 +125,8 @@ const manuallyGradedInfo = computed(() => {
           </div>
 
           <div v-if="isMatchingType">
-            <div class="flex gap-2">
+            <InlineMessage v-if="!hasAnswer" data-cy="noAnswerYet">Answer is not provided yet</InlineMessage>
+            <div v-else class="flex gap-2">
               <ul>
                 <li v-for="(answer, index) in question.answers"
                     :key="answer.id"

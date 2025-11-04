@@ -530,6 +530,8 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'value1'])
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: 'value2'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        def quizHistoryRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizHistoryRes))
         then:
         gradedQuizAttempt.passed == true
         gradedQuizAttempt.numQuestionsGotWrong == 0
@@ -542,18 +544,141 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def question = QuizDefFactory.createMatchingQuestion(1, 2, 2)
-        skillsService.createQuizQuestionDef(question)
+        def question1 = QuizDefFactory.createMatchingQuestion(1, 2, 3)
+        def question2 = QuizDefFactory.createMatchingQuestion(1, 2, 3)
+        skillsService.createQuizQuestionDefs([question, question1, question2])
 
         when:
         def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'value2'])
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: 'value1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'value1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: 'value2'])
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [answerText: 'value3'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id, [answerText: 'value2'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id, [answerText: 'value1'])
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, [answerText: 'value1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[1].id, [answerText: 'value2'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[2].id, [answerText: 'value3'])
+
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        def quizHistoryRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizHistoryRes))
 
         then:
         gradedQuizAttempt.passed == false
         gradedQuizAttempt.numQuestionsGotWrong == 1
         !gradedQuizAttempt.gradedQuestions
+
+        quizHistoryRes.questions.size() == 3
+        def q1 = quizHistoryRes.questions[0]
+        def q2 = quizHistoryRes.questions[1]
+        def q3 = quizHistoryRes.questions[2]
+        q1.questionType == QuizQuestionType.Matching.toString()
+        q1.question == question.question
+        q1.isCorrect == true
+        q1.needsGrading == false
+        q1.answers.answer == [
+                [ "term": "term1", "selectedMatch": "value1", "correctMatch": "value1"],
+                [ "term": "term2", "selectedMatch": "value2", "correctMatch": "value2"]
+        ]
+
+        q2.questionType == QuizQuestionType.Matching.toString()
+        q2.question == question1.question
+        q2.isCorrect == false
+        q2.needsGrading == false
+        q2.answers.answer == [
+                [ "term": "term1", "selectedMatch": "value3", "correctMatch": "value1"],
+                [ "term": "term2", "selectedMatch": "value2", "correctMatch": "value2"],
+                [ "term": "term3", "selectedMatch": "value1", "correctMatch": "value3"],
+        ]
+
+        q3.questionType == QuizQuestionType.Matching.toString()
+        q3.question == question2.question
+        q3.isCorrect == true
+        q3.needsGrading == false
+        q3.answers.answer == [
+                [ "term": "term1", "selectedMatch": "value1", "correctMatch": "value1"],
+                [ "term": "term2", "selectedMatch": "value2", "correctMatch": "value2"],
+                [ "term": "term3", "selectedMatch": "value3", "correctMatch": "value3"],
+        ]
+    }
+
+    def "run quiz with matching question - in progress"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createMatchingQuestion(1, 2, 2)
+        def question1 = QuizDefFactory.createMatchingQuestion(1, 3, 3)
+        def question2 = QuizDefFactory.createMatchingQuestion(1, 4, 3)
+        def question3 = QuizDefFactory.createMatchingQuestion(1, 5, 3)
+        skillsService.createQuizQuestionDefs([question, question1, question2, question3])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+
+        // not finished
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'value1'])
+
+        // wrong
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [answerText: 'value3'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id, [answerText: 'value2'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id, [answerText: 'value1'])
+
+        // correct
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, [answerText: 'value1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[1].id, [answerText: 'value2'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[2].id, [answerText: 'value3'])
+
+        // q4 not started
+
+        def quizHistoryRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizHistoryRes))
+
+        then:
+        quizHistoryRes.questions.size() == 4
+        def q1 = quizHistoryRes.questions[0]
+        def q2 = quizHistoryRes.questions[1]
+        def q3 = quizHistoryRes.questions[2]
+        def q4 = quizHistoryRes.questions[3]
+        q1.questionType == QuizQuestionType.Matching.toString()
+        q1.question == question.question
+        q1.isCorrect == false
+        q1.needsGrading == false
+        q1.answers.answer == [
+                [ "term": "term1", "selectedMatch": "value1", "correctMatch": "value1"],
+                [ "term": "term2", "selectedMatch": null, "correctMatch": "value2"]
+        ]
+
+        q2.questionType == QuizQuestionType.Matching.toString()
+        q2.question == question1.question
+        q2.isCorrect == false
+        q2.needsGrading == false
+        q2.answers.answer == [
+                [ "term": "term1", "selectedMatch": "value3", "correctMatch": "value1"],
+                [ "term": "term2", "selectedMatch": "value2", "correctMatch": "value2"],
+                [ "term": "term3", "selectedMatch": "value1", "correctMatch": "value3"],
+        ]
+
+        q3.questionType == QuizQuestionType.Matching.toString()
+        q3.question == question2.question
+        q3.isCorrect == true
+        q3.needsGrading == false
+        q3.answers.answer == [
+                [ "term": "term1", "selectedMatch": "value1", "correctMatch": "value1"],
+                [ "term": "term2", "selectedMatch": "value2", "correctMatch": "value2"],
+                [ "term": "term3", "selectedMatch": "value3", "correctMatch": "value3"],
+        ]
+
+        q4.questionType == QuizQuestionType.Matching.toString()
+        q4.question == question3.question
+        q4.isCorrect == false
+        q4.needsGrading == false
+        q4.answers.answer == [
+                [ "term": "term1", "selectedMatch": null, "correctMatch": "value1"],
+                [ "term": "term2", "selectedMatch": null, "correctMatch": "value2"],
+                [ "term": "term3", "selectedMatch": null, "correctMatch": "value3"],
+        ]
     }
 
     def "run quiz with matching question - fail - return graded question"() {

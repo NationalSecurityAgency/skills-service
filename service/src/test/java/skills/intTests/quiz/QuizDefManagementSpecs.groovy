@@ -15,6 +15,7 @@
  */
 package skills.intTests.quiz
 
+
 import groovy.util.logging.Slf4j
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
@@ -23,9 +24,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.SkillDef
 
-import static skills.intTests.utils.SkillsFactory.createProject
-import static skills.intTests.utils.SkillsFactory.createSkill
-import static skills.intTests.utils.SkillsFactory.createSubject
+import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
 class QuizDefManagementSpecs extends DefaultIntSpec {
@@ -201,6 +200,28 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         newQuestion.body.answers.isCorrect == [true, false, true]
     }
 
+    def "MultipleChoice question choices are sanitized"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 3, QuizQuestionType.MultipleChoice)
+        question.answers[0].answer = "sanitized <script>alert('xss')</script> answer1"
+        question.answers[1].answer = "sanitized <script>alert('xss')</script> answer2"
+        question.answers[2].answer = "sanitized <script>alert('xss')</script> answer3"
+
+        when:
+        def newQuestion = skillsService.createQuizQuestionDef(question)
+        def qDefs = skillsService.getQuizQuestionDefs(quiz.quizId)
+        then:
+        newQuestion.body.id
+        newQuestion.body.question == question.question
+        newQuestion.body.answerHint == question.answerHint
+        newQuestion.body.questionType == QuizQuestionType.MultipleChoice.toString()
+        newQuestion.body.answers.size() == 3
+        newQuestion.body.answers.answer == ["sanitized  answer1", "sanitized  answer2", "sanitized  answer3"]
+        qDefs.questions.answers.answer == [["sanitized  answer1", "sanitized  answer2", "sanitized  answer3"]]
+    }
+
     def "add SingleChoice question to quiz"() {
         def quiz = QuizDefFactory.createQuiz(1)
         def newQuiz = skillsService.createQuizDef(quiz)
@@ -222,6 +243,27 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         newQuestion.body.answers.isCorrect == [true, false]
     }
 
+    def "SingleChoice question choices are sanitized"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 2, QuizQuestionType.SingleChoice)
+        question.answers[0].answer = "sanitized <script>alert('xss')</script> answer1"
+        question.answers[1].answer = "sanitized <script>alert('xss')</script> answer2"
+
+        when:
+        def newQuestion = skillsService.createQuizQuestionDef(question)
+        def qDefs = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        then:
+        newQuestion.body.id
+        newQuestion.body.question == question.question
+        newQuestion.body.answerHint == question.answerHint
+        newQuestion.body.questionType == QuizQuestionType.SingleChoice.toString()
+        newQuestion.body.answers.size() == 2
+        newQuestion.body.answers.answer == ["sanitized  answer1", "sanitized  answer2"]
+        qDefs.questions.answers.answer == [["sanitized  answer1", "sanitized  answer2"]]
+    }
 
     def "add Matching question to quiz"() {
         def quiz = QuizDefFactory.createQuiz(1)
@@ -231,6 +273,7 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
 
         when:
         def newQuestion = skillsService.createQuizQuestionDef(question)
+        def qDefs = skillsService.getQuizQuestionDefs(quiz.quizId)
 
         then:
         newQuestion.body.id
@@ -244,7 +287,66 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         newQuestion.body.answers.isCorrect == [true, true]
         newQuestion.body.answers[0].multiPartAnswer == ["term":"term1", "value":"value1"]
         newQuestion.body.answers[1].multiPartAnswer == ["term":"term2", "value":"value2"]
+
+        qDefs.questions.size() == 1
+        qDefs.questions[0].question == question.question
+        qDefs.questions[0].questionType == QuizQuestionType.Matching.toString()
+        qDefs.questions[0].answerHint == question.answerHint
+        qDefs.questions[0].questionType == QuizQuestionType.Matching.toString()
+        qDefs.questions[0].answers.size() == 2
+        qDefs.questions[0].answers[0].id
+        qDefs.questions[0].answers[1].id
+        qDefs.questions[0].answers.answer == [null, null]
+        qDefs.questions[0].answers.isCorrect == [true, true]
+        qDefs.questions[0].answers[0].multiPartAnswer == ["term":"term1", "value":"value1"]
+        qDefs.questions[0].answers[1].multiPartAnswer == ["term":"term2", "value":"value2"]
     }
+
+    def "Matching question term and answers are sanitized"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        def question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[0].multiPartAnswer = [
+                term: "sanitized <script>alert('xss')</script> term1",
+                value: "sanitized <script>alert('xss')</script> value1"
+        ]
+        question.answers[1].multiPartAnswer = [
+                term: "sanitized <script>alert('xss')</script> term2",
+                value: "sanitized <script>alert('xss')</script> value2"
+        ]
+
+        when:
+        def newQuestion = skillsService.createQuizQuestionDef(question)
+        def qDefs = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        then:
+        newQuestion.body.id
+        newQuestion.body.question == question.question
+        newQuestion.body.answerHint == question.answerHint
+        newQuestion.body.questionType == QuizQuestionType.Matching.toString()
+        newQuestion.body.answers.size() == 2
+        newQuestion.body.answers[0].id
+        newQuestion.body.answers[1].id
+        newQuestion.body.answers.answer == [null, null]
+        newQuestion.body.answers.isCorrect == [true, true]
+        newQuestion.body.answers[0].multiPartAnswer == ["term":"sanitized  term1", "value":"sanitized  value1"]
+        newQuestion.body.answers[1].multiPartAnswer == ["term":"sanitized  term2", "value":"sanitized  value2"]
+
+        qDefs.questions.size() == 1
+        qDefs.questions[0].question == question.question
+        qDefs.questions[0].questionType == QuizQuestionType.Matching.toString()
+        qDefs.questions[0].answerHint == question.answerHint
+        qDefs.questions[0].questionType == QuizQuestionType.Matching.toString()
+        qDefs.questions[0].answers.size() == 2
+        qDefs.questions[0].answers[0].id
+        qDefs.questions[0].answers[1].id
+        qDefs.questions[0].answers.answer == [null, null]
+        qDefs.questions[0].answers.isCorrect == [true, true]
+        qDefs.questions[0].answers[0].multiPartAnswer ==["term":"sanitized  term1", "value":"sanitized  value1"]
+        qDefs.questions[0].answers[1].multiPartAnswer == ["term":"sanitized  term2", "value":"sanitized  value2"]
+    }
+
 
 
     def "copy quiz with a Matching question"() {

@@ -560,13 +560,18 @@ class QuizDefService {
             }
         } else if (isMatchingQuestion) {
             answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
+
+                QuizMultiPartAnswer multiPartAnswer = new QuizMultiPartAnswer(
+                        term: InputSanitizer.sanitize(answerDefRequest.multiPartAnswer?.term),
+                        value: InputSanitizer.sanitize(answerDefRequest.multiPartAnswer?.value)
+                )
                 new QuizAnswerDef(
                         quizId: savedQuestion.quizId,
                         questionRefId: savedQuestion.id,
                         answer: null,
                         isCorrectAnswer: true,
                         displayOrder: index + 1,
-                        multiPartAnswer: JsonOutput.toJson(answerDefRequest.multiPartAnswer),
+                        multiPartAnswer: JsonOutput.toJson(multiPartAnswer),
                 )
             }
         } else {
@@ -1041,7 +1046,9 @@ class QuizDefService {
                     if (isSurvey ) {
                         isCorrect = true
                     } else {
-                        if (questionDef.type == QuizQuestionType.TextInput || questionDef.type == QuizQuestionType.Matching) {
+                        if (questionDef.type == QuizQuestionType.Matching) {
+                            isCorrect = (!answers.find { it.answer.correctMatch != it.answer.selectedMatch }) as Boolean
+                        } else if (questionDef.type == QuizQuestionType.TextInput) {
                             isCorrect = userQuizQuestionAttempt?.status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
                         } else {
                             isCorrect = !answers.find { it.isConfiguredCorrect != it.isSelected }
@@ -1141,6 +1148,14 @@ class QuizDefService {
                 if(questionDefRequest.questionType != QuizQuestionType.Matching) {
                     QuizValidator.isNotBlank(it.answer, "answers.answer", quizId, true)
                     propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "Answer", it.answer, quizDef.quizId)
+                } else {
+                    String term = it.multiPartAnswer?.term
+                    QuizValidator.isNotBlank(term, "answers.multiPartAnswer.term", quizId, true)
+                    propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "answers.multiPartAnswer.term", term, quizDef.quizId)
+
+                    String value = it.multiPartAnswer?.value
+                    QuizValidator.isNotBlank(value, "answers.multiPartAnswer.value", quizId, true)
+                    propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "answers.multiPartAnswer.value", value, quizDef.quizId)
                 }
             }
         }

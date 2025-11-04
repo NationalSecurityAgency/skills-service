@@ -430,4 +430,54 @@ describe('Quiz Runs History Tests', () => {
 
         cy.get('[data-cy="questionDisplayCard-5"] [data-cy="questionDisplayText"]').should('not.exist')
     });
+
+    it('view single in progress quiz run with multiple matching questions', function () {
+        cy.createQuizDef(1);
+        cy.createQuizMatchingQuestionDef(1, 1);
+        cy.createQuizMatchingQuestionDef(1, 2);
+        cy.createQuizMatchingQuestionDef(1, 3);
+        cy.createQuizMatchingQuestionDef(1, 4);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [1]}, {selectedIndex: [0, 1, 2]}, {selectedIndex: [0, 2, 1]}], false)
+
+        cy.visit('/administrator/quizzes/quiz1/runs');
+
+        cy.get('[data-cy="row0-viewRun"]').click()
+        cy.get('[data-cy="quizRunStatus"]').contains('In Progress')
+        cy.get('[data-cy="quizRunStatus"]').contains('2 / 4')
+
+        cy.get('[data-cy="numQuestionsToPass"]').contains('1 / 4')
+        cy.get('[data-cy="numQuestionsToPass"]').contains('Need 4 questions to pass')
+
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="wrongAnswer"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="wrongAnswer"]').should('exist')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="wrongAnswer"]').should('not.exist')
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="noAnswerYet"]').should('exist')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="noAnswerYet"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="noAnswerYet"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="noAnswerYet"]').should('exist')
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="noAnswer"]').should('exist')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="noAnswer"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="noAnswer"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-4"] [data-cy="noAnswer"]').should('exist')
+
+        const validateMatch = (qNum, rowNum, term, value, isCorrect) => {
+            cy.get(`[data-cy="questionDisplayCard-${qNum}"] [data-cy="term-${rowNum}"]`).contains(term)
+            cy.get(`[data-cy="questionDisplayCard-${qNum}"] [data-cy="match-${rowNum}"] [data-cy="matchVal"]`).contains(value)
+            cy.get(`[data-cy="questionDisplayCard-${qNum}"] [data-cy="match-${rowNum}"] [data-cy="matchIsCorrect"]`).should(isCorrect ? 'exist' : 'not.exist')
+            cy.get(`[data-cy="questionDisplayCard-${qNum}"] [data-cy="match-${rowNum}"] [data-cy="matchIsWrong"]`).should(isCorrect ? 'not.exist' : 'exist')
+        }
+
+        validateMatch(2, 0, 'First Term', 'First Answer', true)
+        validateMatch(2, 1, 'Second Term', 'Second Answer', true)
+        validateMatch(2, 2, 'Third Term', 'Third Answer', true)
+
+        validateMatch(3, 0, 'First Term', 'First Answer', true)
+        validateMatch(3, 1, 'Second Term', 'Third Answer', false)
+        validateMatch(3, 2, 'Third Term', 'Second Answer', false)
+
+    });
 });
