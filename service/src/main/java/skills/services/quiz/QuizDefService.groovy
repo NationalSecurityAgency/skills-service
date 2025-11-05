@@ -18,6 +18,7 @@ package skills.services.quiz
 import callStack.profiler.Profile
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -294,7 +295,7 @@ class QuizDefService {
             newQuestion.questionType = question.questionType
 
             List<QuizAnswerDefRequest> newAnswers = answers.collect( it -> {
-                return new QuizAnswerDefRequest(answer: it.answer, isCorrect: it.isCorrect)
+                return new QuizAnswerDefRequest(answer: it.answer, isCorrect: it.isCorrect, multiPartAnswer: it.multiPartAnswer)
             })
             newQuestion.answers = newAnswers
             newQuestion.attributes = question.attributes
@@ -534,6 +535,7 @@ class QuizDefService {
         List<QuizAnswerDef> answerDefs
         boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
         boolean isRatingsQuestion = questionDefRequest.questionType == QuizQuestionType.Rating
+        boolean isMatchingQuestion = questionDefRequest.questionType == QuizQuestionType.Matching
         if (isTextInputQuestion) {
             answerDefs = [
                     new QuizAnswerDef(
@@ -542,6 +544,7 @@ class QuizDefService {
                             answer: null,
                             isCorrectAnswer: false,
                             displayOrder: 1,
+                            multiPartAnswer: null,
                     )
             ]
         } else if (isRatingsQuestion) {
@@ -551,7 +554,24 @@ class QuizDefService {
                         questionRefId: savedQuestion.id,
                         answer: it,
                         isCorrectAnswer: false,
-                        displayOrder: it
+                        displayOrder: it,
+                        multiPartAnswer: null
+                )
+            }
+        } else if (isMatchingQuestion) {
+            answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
+
+                QuizMultiPartAnswer multiPartAnswer = new QuizMultiPartAnswer(
+                        term: InputSanitizer.sanitize(answerDefRequest.multiPartAnswer?.term),
+                        value: InputSanitizer.sanitize(answerDefRequest.multiPartAnswer?.value)
+                )
+                new QuizAnswerDef(
+                        quizId: savedQuestion.quizId,
+                        questionRefId: savedQuestion.id,
+                        answer: null,
+                        isCorrectAnswer: true,
+                        displayOrder: index + 1,
+                        multiPartAnswer: JsonOutput.toJson(multiPartAnswer),
                 )
             }
         } else {
@@ -562,6 +582,7 @@ class QuizDefService {
                         answer: InputSanitizer.sanitize(answerDefRequest.answer),
                         isCorrectAnswer: answerDefRequest.isCorrect,
                         displayOrder: index + 1,
+                        multiPartAnswer: null,
                 )
             }
         }
@@ -573,6 +594,7 @@ class QuizDefService {
     private  List<QuizAnswerDef> updateQuizQuestionAnswerDefs(QuizQuestionDef savedQuestion, QuizQuestionDefRequest questionDefRequest) {
         boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
         boolean isRating = questionDefRequest.questionType == QuizQuestionType.Rating
+        boolean isMatchingQuestion = questionDefRequest.questionType == QuizQuestionType.Matching
         List<QuizAnswerDef> savedAnswers
         List<QuizAnswerDef> existingAnswerDefs = quizAnswerRepo.findAllByQuestionRefId(savedQuestion.id).sort { it.displayOrder }
         if (isTextInputQuestion) {
@@ -597,6 +619,31 @@ class QuizDefService {
                         isCorrectAnswer: false,
                         displayOrder: it
                 )
+            }
+            savedAnswers = quizAnswerRepo.saveAllAndFlush(answerDefs)
+        } else if (isMatchingQuestion) {
+            if(existingAnswerDefs.size() > 0) {
+                List<Integer> requestedIds = questionDefRequest.answers.collect{ it.id }
+                List<Integer> existingIds = existingAnswerDefs.collect { it.id }
+                List<Integer> idsToRemove = existingIds - requestedIds
+                quizAnswerRepo.deleteAllById(idsToRemove)
+            }
+            List<QuizAnswerDef> answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
+                QuizAnswerDef answerDef = existingAnswerDefs.find { it.id == answerDefRequest.id }
+                if(answerDef) {
+                    answerDef.multiPartAnswer = JsonOutput.toJson(answerDefRequest.multiPartAnswer)
+                    answerDef.displayOrder = index + 1
+                    return answerDef
+                } else {
+                    return new QuizAnswerDef(
+                            quizId: savedQuestion.quizId,
+                            questionRefId: savedQuestion.id,
+                            answer: null,
+                            isCorrectAnswer: true,
+                            displayOrder: index + 1,
+                            multiPartAnswer: JsonOutput.toJson(answerDefRequest.multiPartAnswer),
+                    )
+                }
             }
             savedAnswers = quizAnswerRepo.saveAllAndFlush(answerDefs)
         } else {
@@ -856,6 +903,7 @@ class QuizDefService {
                         new QuizAnswerMetricsResult(
                                 id: quizAnswerDefResult.id,
                                 answer: quizAnswerDefResult.answer,
+                                multiPartAnswer: quizAnswerDefResult.multiPartAnswer,
                                 isCorrect: isSurvey ? true : quizAnswerDefResult.isCorrect,
                                 numAnswered: numAnswered,
                                 numAnsweredCorrect: isSurvey ? numAnswered : (answerCorrectCount?.getCount() ?: 0),
@@ -886,16 +934,19 @@ class QuizDefService {
                 questionType: savedQuestion.type,
                 answers: savedAnswers.collect { convert (it)}.sort { it.displayOrder},
                 displayOrder: savedQuestion.displayOrder,
-                attributes: savedQuestion.attributes
+                attributes: savedQuestion.attributes,
         )
     }
 
     private QuizAnswerDefResult convert(QuizAnswerDef savedAnswer) {
+        JsonSlurper jsonSlurper = new JsonSlurper()
+        def multiPartAnswer = savedAnswer.multiPartAnswer ? jsonSlurper.parseText(savedAnswer.multiPartAnswer) : null
         new QuizAnswerDefResult(
                 id: savedAnswer.id,
                 answer: savedAnswer.answer,
                 isCorrect: Boolean.valueOf(savedAnswer.isCorrectAnswer),
                 displayOrder: savedAnswer.displayOrder,
+                multiPartAnswer: new QuizMultiPartAnswer(term: multiPartAnswer?.term, value: multiPartAnswer?.value)
         )
     }
 
@@ -944,6 +995,7 @@ class QuizDefService {
 
                     boolean isTextInput = questionDef.type == QuizQuestionType.TextInput
                     boolean isRating = questionDef.type == QuizQuestionType.Rating
+                    boolean isMatching = questionDef.type == QuizQuestionType.Matching
                     List<UserGradedQuizAnswerResult> answers = quizAnswerDefs.collect { QuizAnswerDef answerDef ->
                         UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText foundSelected = alreadySelected.find { it.answerId == answerDef.id }
 
@@ -961,11 +1013,29 @@ class QuizDefService {
                                 )
                             }
                         }
+
+                        def answer
+                        def isSelected = foundSelected != null
+                        if(isTextInput) {
+                            answer = foundSelected?.answerText
+                        } else if(isMatching) {
+                            def originalAnswer = jsonSlurper.parseText(answerDef.multiPartAnswer)
+                            originalAnswer.answer = originalAnswer.value
+                            originalAnswer.value = foundSelected?.answerText
+                            isSelected = originalAnswer.value == originalAnswer.answer
+                            answer = new UserGradedQuizAnswerResult.MatchingAnswer(
+                                    term: originalAnswer.term,
+                                    selectedMatch: originalAnswer.value,
+                                    correctMatch: originalAnswer.answer
+                            )
+                        } else {
+                            answer = answerDef.answer
+                        }
                         return new UserGradedQuizAnswerResult(
                                 id: answerDef.id,
-                                answer: isTextInput ? foundSelected?.answerText : answerDef.answer,
+                                answer: answer,
                                 isConfiguredCorrect: Boolean.valueOf(answerDef.isCorrectAnswer),
-                                isSelected: foundSelected != null,
+                                isSelected: isSelected,
                                 needsGrading: foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING,
                                 gradingResult: gradingResult
                         )
@@ -976,7 +1046,9 @@ class QuizDefService {
                     if (isSurvey ) {
                         isCorrect = true
                     } else {
-                        if (questionDef.type == QuizQuestionType.TextInput) {
+                        if (questionDef.type == QuizQuestionType.Matching) {
+                            isCorrect = (!answers.find { it.answer.correctMatch != it.answer.selectedMatch }) as Boolean
+                        } else if (questionDef.type == QuizQuestionType.TextInput) {
                             isCorrect = userQuizQuestionAttempt?.status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
                         } else {
                             isCorrect = !answers.find { it.isConfiguredCorrect != it.isSelected }
@@ -1073,8 +1145,18 @@ class QuizDefService {
             QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)
             QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least 2 answers", quizId)
             questionDefRequest.answers.each {
-                QuizValidator.isNotBlank(it.answer, "answers.answer", quizId, true)
-                propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "Answer", it.answer, quizDef.quizId)
+                if(questionDefRequest.questionType != QuizQuestionType.Matching) {
+                    QuizValidator.isNotBlank(it.answer, "answers.answer", quizId, true)
+                    propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "Answer", it.answer, quizDef.quizId)
+                } else {
+                    String term = it.multiPartAnswer?.term
+                    QuizValidator.isNotBlank(term, "answers.multiPartAnswer.term", quizId, true)
+                    propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "answers.multiPartAnswer.term", term, quizDef.quizId)
+
+                    String value = it.multiPartAnswer?.value
+                    QuizValidator.isNotBlank(value, "answers.multiPartAnswer.value", quizId, true)
+                    propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "answers.multiPartAnswer.value", value, quizDef.quizId)
+                }
             }
         }
         if (quizDef.type == QuizDefParent.QuizType.Quiz) {

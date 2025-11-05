@@ -110,6 +110,7 @@ const maxWidthStyle = computed(() => {
     @page="onPage"
     :tableProps="tableProps"
     :style="maxWidthStyle"
+    :pt="{ pcPaginator: {paginatorContainer: { 'aria-label': `Pagination Controls for table with id of ${tableStoredStateId}`}}}"
   >
     <template v-for="(_, name) in slots" v-slot:[name]="slotData">
       <Column v-if="expander" v-bind:key="name"

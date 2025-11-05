@@ -15,19 +15,19 @@ limitations under the License.
 */
 <script setup>
 
-import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { useTruncateFormatter } from '@/components/utils/UseTruncateFormatter.js'
-import { useUserTagsUtils } from '@/components/utils/UseUserTagsUtils.js'
-import { useUserInfo } from '@/components/utils/UseUserInfo.js'
-import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
+import {computed, onMounted, ref} from 'vue'
+import {useRoute} from 'vue-router'
+import {useUserTagsUtils} from '@/components/utils/UseUserTagsUtils.js'
+import {useUserInfo} from '@/components/utils/UseUserInfo.js'
+import {useResponsiveBreakpoints} from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import Column from 'primevue/column'
 import QuizService from '@/components/quiz/QuizService.js'
 import DateCell from '@/components/utils/table/DateCell.vue'
-import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import {useNumberFormat} from '@/common-components/filter/UseNumberFormat.js'
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
+import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 
 const timeUtils = useTimeUtils()
 const props = defineProps({
@@ -41,11 +41,11 @@ const props = defineProps({
 })
 
 const route = useRoute();
-const truncateFormatter = useTruncateFormatter();
 const userTagsUtils = useUserTagsUtils();
 const userInfo = useUserInfo();
 const numberFormat = useNumberFormat()
 const responsive = useResponsiveBreakpoints()
+const colors = useColors()
 const quizId = ref(route.params.quizId);
 const answerHistory = ref([]);
 const sortInfo = ref({  sortOrder: 1, sortBy: 'updated' })
@@ -169,7 +169,7 @@ const collapseAll = () => {
 <template>
   <div>
     <SkillsDataTable
-        tableStoredStateId="answerHistory"
+        :tableStoredStateId="`answerHistory${answerDefId}`"
         :value="answerHistory"
         :loading="tableOptions.busy"
         stripedRows
@@ -223,14 +223,14 @@ const collapseAll = () => {
           <span class="sr-only">Expander Control</span>
         </template>
       </Column>
-      <Column v-for="col of tableOptions.fields"
+      <Column v-for="(col, index) of tableOptions.fields"
               :key="col.key"
               :field="col.key"
               :sortable="col.sortable"
               class="align-top"
               :class="{'flex': responsive.md.value }">
         <template #header>
-          <span :data-cy="col.dataCy" ><i :class="col.imageClass" aria-hidden="true"></i> {{ col.label }}</span>
+          <span :data-cy="col.dataCy" ><i :class="`${col.imageClass} ${colors.getTextClass(index)}`" aria-hidden="true"></i> {{ col.label }}</span>
         </template>
         <template #body="slotProps">
           <div v-if="slotProps.field === 'userIdForDisplay'" class="flex flex-row flex-wrap items-center"  :data-cy="`row${slotProps.index}-colUserId`">

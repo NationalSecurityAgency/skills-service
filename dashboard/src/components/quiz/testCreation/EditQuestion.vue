@@ -25,6 +25,8 @@ import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormD
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
 import ConfigureAnswers from '@/components/quiz/testCreation/ConfigureAnswers.vue';
 import QuizType from "@/skills-display/components/quiz/QuizType.js";
+import InputText from "primevue/inputtext";
+import MatchingQuestion from "@/components/quiz/testCreation/MatchingQuestion.vue";
 
 const model = defineModel()
 const props = defineProps({
@@ -72,27 +74,33 @@ function questionTypeChanged(inputItem) {
   questionType.value.selectedType = inputItem;
   if (!inputItem.isInitialLoad) {
     if (isSurveyType.value
-        && inputItem.id !== QuestionType.TextInput && inputItem.id !== QuestionType.Rating
+        && inputItem.id !== QuestionType.TextInput && inputItem.id !== QuestionType.Rating && inputItem.id !== QuestionType.Matching
         && (!initialQuestionData.answers || initialQuestionData.answers.length < 2)) {
       nextTick(() => {
-        answersRef.value.replaceAnswers([{
-          id: null,
-          answer: '',
-          isCorrect: false,
-        }, {
-          id: null,
-          answer: '',
-          isCorrect: false,
-        }]);
+        answersRef.value.replaceAnswers(defaultAnswers);
       })
     } else {
       if(answersRef.value) {
-        answersRef.value.resetAnswers();
+        if(inputItem.id === QuestionType.Matching) {
+          answersRef.value.replaceAnswers(defaultAnswers);
+        }
+        answersRef.value.resetAnswers()
       }
     }
   }
-
 }
+
+const defaultAnswers = [{
+  id: null,
+  answer: '',
+  isCorrect: false,
+  multiPartAnswer: { term: '', value: '' }
+}, {
+  id: null,
+  answer: '',
+  isCorrect: false,
+  multiPartAnswer: { term: '', value: '' }
+}];
 
 const questionTypes = [{
   label: 'Multiple Answers',
@@ -118,6 +126,13 @@ if (QuizType.isSurvey(props.questionDef.quizType)) {
     id: QuestionType.Rating,
     icon: 'fa fa-star',
   })
+} else {
+  questionTypes.push({
+    label: 'Matching',
+    description: 'Match terms',
+    id: QuestionType.Matching,
+    icon: 'fas fa-diagram-project',
+  })
 }
 
 const questionType = ref({
@@ -139,6 +154,9 @@ const isQuestionTypeTextInput = computed(() => {
 })
 const isQuestionTypeRatingInput = computed(() => {
   return questionType.value.selectedType && questionType.value.selectedType.id === QuestionType.Rating;
+})
+const isQuestionTypeMatching = computed(() => {
+  return questionType.value.selectedType && questionType.value.selectedType.id === QuestionType.Matching;
 })
 const isQuestionTypeMultipleChoice = computed(() => {
   return questionType.value.selectedType && questionType.value.selectedType.id === QuestionType.MultipleChoice;
@@ -165,21 +183,21 @@ const quizId = computed(() => {
 const isDirty = ref(false)
 const answersErrorMessage = ref('')
 const atLeastOneCorrectAnswer = (value) => {
-  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value) {
+  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
     return true;
   }
   const numCorrect = value.filter((a) => a.isCorrect).length;
   return numCorrect >= 1;
 }
 const atLeastTwoAnswersFilledIn = (value) => {
-  if (!isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value) {
+  if (!isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
     return true;
   }
   const numWithContent = value.filter((a) => (a.answer && a.answer.trim().length > 0)).length;
   return numWithContent >= 2;
 }
 const correctAnswersMustHaveText = (value) => {
-  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value) {
+  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
     return true;
   }
   const correctWithoutText = value.filter((a) => (a.isCorrect && (!a.answer || a.answer.trim().length === 0))).length;
@@ -205,7 +223,33 @@ const multipleChoiceQuestionsMustHaveAtLeast2Answer = (value) => {
   const numCorrect = value.filter((a) => (a.isCorrect)).length;
   return numCorrect >= 2;
 }
+const matchesMustNotBeBlank = (value) => {
+  if(!isQuestionTypeMatching.value) {
+    return true;
+  }
 
+  let emptyAnswers = []
+  value.forEach((term) => {
+    let answer = term.multiPartAnswer
+    if(answer) {
+      if(!answer.term || !answer.value || answer.term.trim() === '' || answer.value.trim() === '') {
+        emptyAnswers.push(term);
+      }
+    }
+  })
+  return emptyAnswers.length === 0;
+}
+const noRepeatAnswers = (value) => {
+  if(!isQuestionTypeMatching.value) {
+    return true;
+  }
+  const terms = value.map((term) => term.multiPartAnswer?.term)
+  const values = value.map((term) => term.multiPartAnswer?.value)
+  const hasDuplicateTerms = (new Set(terms)).size !== terms.length
+  const hasDuplicateValues = (new Set(values)).size !== values.length
+
+  return !hasDuplicateTerms && !hasDuplicateValues;
+}
 
 const schema = object({
   'questionType': object()
@@ -226,7 +270,7 @@ const schema = object({
       .of(
           object({
             'answer': string().nullable().label('Answer'),
-            'isCorrect': boolean().label('Is Correct')
+            'isCorrect': boolean().label('Is Correct'),
           })
       )
       .test('atLeastOneCorrectAnswer', 'Must have at least 1 correct answer selected', (value) => atLeastOneCorrectAnswer(value))
@@ -235,6 +279,8 @@ const schema = object({
       .test('maxNumAnswers', `Exceeded maximum number of [${appConfig.maxAnswersPerQuizQuestion}] answers`, (value) => maxNumAnswers(value))
       .test('singleChoiceQuestionsMustHave1Answer', 'Multiple Choice Question must have 1 correct answer', (value) => singleChoiceQuestionsMustHave1Answer(value))
       .test('multipleChoiceQuestionsMustHaveAtLeast2Answer', 'Multiple Answers Question must have at least 2 correct answers', (value) => multipleChoiceQuestionsMustHaveAtLeast2Answer(value))
+      .test('matchesMustNotBeBlank', 'Answers must include both a term and a value', (value) => matchesMustNotBeBlank(value))
+      .test('noRepeatAnswers', 'Answers can not contain duplicate terms or values', (value) => noRepeatAnswers(value))
   ,
 })
 const initialQuestionData = {
@@ -249,16 +295,27 @@ const close = () => { model.value = false }
 
 const saveQuiz = (values) => {
   const { question, answerHint, answers, currentScaleValue } = values
-  const removeEmptyQuestions = answers.filter((a) => (a.answer && a.answer.trim().length > 0));
-  const numCorrect = answers.filter((a) => a.isCorrect).length;
+  let processedAnswers = answers
   let { questionType : { id : questionType } } = values
+
+  if(questionType === 'Matching') {
+    processedAnswers.forEach((answer) => {
+      answer.isCorrect = true
+    })
+  } else {
+    processedAnswers.forEach((answer) => {
+      delete answer.multiPartAnswer
+    })
+    processedAnswers = answers.filter((a) => a.answer && a.answer.trim().length > 0)
+  }
+
   const quizToSave = {
     id: props.questionDef.id,
     quizId: quizId.value,
     question,
     answerHint,
     questionType,
-    answers: (questionType === QuestionType.TextInput || questionType === QuestionType.Rating) ? [] : removeEmptyQuestions,
+    answers: (questionType === QuestionType.TextInput || questionType === QuestionType.Rating) ? [] : processedAnswers,
   };
   if (questionType === QuestionType.Rating) {
     quizToSave.questionScale = currentScaleValue;
@@ -400,8 +457,11 @@ const onSavedQuestion = (savedQuestion) => {
           <span
               v-if="isQuestionTypeSingleChoice"
               class="text-secondary">Check one correct answer on the left:</span>
+          <span
+            v-if="isQuestionTypeMatching" class="text-secondary">Add pairs of terms and their matching values:</span>
         </div>
         <ConfigureAnswers
+            v-if="!isQuestionTypeMatching"
             ref="answersRef"
             v-model="props.questionDef.answers"
             :quiz-type="props.questionDef.quizType"
@@ -410,6 +470,9 @@ const onSavedQuestion = (savedQuestion) => {
             :aria-invalid="!!answersErrorMessage"
             aria-errormessage="answersError"
               aria-describedby="answersError" />
+
+        <matching-question ref="answersRef" v-model="props.questionDef.answers" v-if="isQuestionTypeMatching" />
+
         <Message severity="error"
                  variant="simple"
                  size="small"

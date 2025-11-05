@@ -40,14 +40,21 @@ const isTextInputType = computed(() => {
 const isRatingType = computed(() => {
   return props.question.questionType === QuestionType.Rating;
 })
+const isMatchingType = computed(() => {
+  return props.question.questionType === QuestionType.Matching;
+})
 const hasAnswer = computed(() => {
+  if (isMatchingType.value) {
+    return props.question.answers.find((a) => a.answer?.selectedMatch === null || a.answer?.selectedMatch === undefined || a.answer?.selectedMatch === '') === undefined;
+  }
   return props.question.answers.find((a) => a.isSelected === true) !== undefined;
 })
 const needsGrading = computed(() => {
   return props.question.needsGrading
 })
 const isWrong = computed(() => {
-  return !needsGrading.value && !props.question.isCorrect
+  console.log(props.question)
+  return hasAnswer.value && !needsGrading.value && !props.question.isCorrect
 })
 const isSurvey = computed(() => {
   return props.quizType === 'Survey';
@@ -93,7 +100,7 @@ const manuallyGradedInfo = computed(() => {
                 :instance-id="`question_${question.id}`"
                 data-cy="questionDisplayText"/>
           </div>
-          <div v-if="!isTextInputType && !isRatingType">
+          <div v-if="!isTextInputType && !isRatingType && !isMatchingType">
             <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
               <div class="flex items-center justify-center pb-1" :data-cy="`answerDisplay-${index}`">
                 <SelectCorrectAnswer v-model="a.isSelected"
@@ -115,6 +122,33 @@ const manuallyGradedInfo = computed(() => {
             <MarkdownText
                 :text="answerText"
                 :instance-id="`${question.id}_answer`"/>
+          </div>
+
+          <div v-if="isMatchingType">
+            <InlineMessage v-if="!hasAnswer" data-cy="noAnswerYet">Answer is not provided yet</InlineMessage>
+            <div v-else class="flex gap-2">
+              <ul>
+                <li v-for="(answer, index) in question.answers"
+                    :key="answer.id"
+                    :data-cy="`term-${index}`"
+                    class="min-h-[3rem] px-3 py-1 flex items-center mb-2">{{ answer.answer.term }}:</li>
+              </ul>
+              <ul>
+                <li v-for="(answer, index) in question.answers"
+                    :key="answer.id"
+                    :class="{
+                      'bg-red-50 border-red-200 dark:bg-red-900 text-red-950 dark:text-red-100': !answer.isSelected && isWrong,
+                      'bg-green-50 border-green-200 dark:bg-green-800 text-green-950 dark:text-green-100': !(!answer.isSelected && isWrong),
+                    }"
+                    :aria-label="`Answer ${answer.matchedAnswer} is ${!answer.isSelected && isWrong ? 'wrong' : 'correct'}`"
+                    :data-cy="`match-${index}`"
+                    class="min-h-[3rem] items-center mb-2 border-2 rounded px-3 py-1 flex gap-2">
+                  <i v-if="!answer.isSelected && isWrong" class="fas fa-ban text-red-500" aria-hidden="true" data-cy="matchIsWrong"></i>
+                  <i v-else class="fas fa-check text-green-500" aria-hidden="true" data-cy="matchIsCorrect"></i>
+                  <span data-cy="matchVal">{{ answer.answer.selectedMatch }}</span>
+                </li>
+              </ul>
+            </div>
           </div>
           <div v-if="manuallyGradedInfo" class="mt-4 w-full border p-4 rounded-border border-surface" data-cy="manuallyGradedInfo">
             <div class="text-xl mb-4 font-semibold">Manually Graded</div>

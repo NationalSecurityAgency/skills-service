@@ -545,7 +545,11 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldCom
                 if (isTextInputQuestion) {
                     answerText = userAnswerTxt ? userAnswerTxt : `This is answer for question # ${questionIndex}`;
                 }
-                return { answerIds: selectedAnswerIds, isTextInputQuestion , answerText };
+                const isMatchingQuestion = qDef.questionType === 'Matching'
+                if (isMatchingQuestion) {
+                    answerText = answers.map((answ) => { return answ.multiPartAnswer.value })
+                }
+                return { answerIds: selectedAnswerIds, isTextInputQuestion, answerText, isMatchingQuestion };
             }).flat();
 
             // cy.log(JSON.stringify(questionAnswers, null, 2));
@@ -555,8 +559,18 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldCom
                     const attemptId = response.body.id;
 
                     questionAnswers.forEach((answer) => {
-                            answer.answerIds.forEach((answerId) => {
-                                cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, { isSelected: true, answerText: answer.answerText });
+                            answer.answerIds.forEach((answerId, index) => {
+                                if(answer.isMatchingQuestion) {
+                                    cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, {
+                                        isSelected: true,
+                                        answerText: answer.answerText[index]
+                                    });
+                                } else {
+                                    cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/answers/${answerId}`, {
+                                        isSelected: true,
+                                        answerText: answer.answerText
+                                    });
+                                }
                             });
                         })
                     if (shouldComplete) {
@@ -610,6 +624,39 @@ Cypress.Commands.add("createQuizMultipleChoiceQuestionDef", (quizNum = 1, questi
         }, {
             answer: 'Fourth Answer',
             isCorrect: false,
+        }],
+    }, overrideProps));
+});
+
+Cypress.Commands.add("createQuizMatchingQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
+    const answer1 = {
+        'term': 'First Term',
+        'value': 'First Answer'
+    }
+    const answer2 = {
+        'term': 'Second Term',
+        'value': 'Second Answer'
+    }
+    const answer3 = {
+        'term': 'Third Term',
+        'value': 'Third Answer'
+    }
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
+        quizId: `quizId${quizNum}`,
+        question: `This is a question # ${questionNum}`,
+        questionType: 'Matching',
+        answers: [{
+            answer: '',
+            isCorrect: true,
+            multiPartAnswer: answer1
+        }, {
+            answer: '',
+            isCorrect: true,
+            multiPartAnswer: answer2
+        }, {
+            answer: '',
+            isCorrect: true,
+            multiPartAnswer: answer3
         }],
     }, overrideProps));
 });
@@ -1455,12 +1502,12 @@ Cypress.Commands.add('closeToasts', (retry=true) => {
 Cypress.Commands.add('dragAndDrop', { prevSubject: 'element' }, (sourceElement, destSelector) => {
     const dataTransfer = new DataTransfer()
 
-    cy.get(destSelector).then((destProject) => {
-        cy.wrap(sourceElement.get(0))
+    return cy.get(destSelector).then((destProject) => {
+        return cy.wrap(sourceElement.get(0))
             .trigger('pointerdown', { eventConstructor: 'PointerEvent' })
             .trigger('dragstart', { dataTransfer, eventConstructor: 'DragEvent' })
             .then(() => {
-                cy.wrap(destProject.get(0))
+                return cy.wrap(destProject.get(0))
                     .trigger('dragover', { dataTransfer, eventConstructor: 'DragEvent' })
                     .wait(1000)
                     .trigger('drop', {

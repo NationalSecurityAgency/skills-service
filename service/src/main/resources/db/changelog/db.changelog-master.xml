@@ -3041,4 +3041,11 @@
                                  referencedTableName="skill_definition"/>
     </changeSet>
 
+    <changeSet id="57" author="skills team">
+        <addColumn tableName="quiz_answer_definition">
+            <column name="multi_part_answer" type="jsonb">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

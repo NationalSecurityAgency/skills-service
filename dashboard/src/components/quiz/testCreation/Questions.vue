@@ -113,10 +113,16 @@ function openNewQuestionModal() {
       id: null,
       answer: '',
       isCorrect: false,
+      multiPartAnswer: {
+        term: '', value: ''
+      },
     }, {
       id: null,
       answer: '',
       isCorrect: false,
+      multiPartAnswer: {
+        term: '', value: ''
+      },
     }],
   };
   editQuestionInfo.value.isEdit = false;

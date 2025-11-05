@@ -13,16 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.quizLoading.model
+package skills.controller.request.model
 
-class QuizQuestionInfo {
-    Integer id
-    String question
-    Boolean canSelectMoreThanOne
-    List<QuizAnswerOptionsInfo> answerOptions
-    String questionType
-    String answerHint
-    Integer displayOrder
-    String mediaAttributes
-    List<String> matchingTerms
+class QuizMultiPartAnswer {
+    String term
+    String value
 }

@@ -21,6 +21,7 @@ import Column from 'primevue/column'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 import CheckSelector from '@/skills-display/components/quiz/CheckSelector.vue'
 import QuizAnswerHistory from '@/components/quiz/metrics/QuizAnswerHistory.vue'
+import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 
 const props = defineProps({
   q: Object,
@@ -30,6 +31,7 @@ const props = defineProps({
 })
 
 const responsive = useResponsiveBreakpoints()
+const colors = useColors()
 
 const averageScore = ref(0)
 const answers = ref([])
@@ -86,6 +88,19 @@ const chartOptions = {
   }
 }
 
+const isMultipleChoice = computed(() => {
+  return props.q.questionType === 'MultipleChoice'
+})
+const isTextInput = computed(() => {
+  return props.q.questionType === 'TextInput'
+})
+const isMatching = computed(() => {
+  return props.q.questionType === 'Matching'
+})
+const isRating = computed(() => {
+  return props.q.questionType === 'Rating'
+})
+
 const questionCorrectChartRef = ref()
 watch(() => responsive.sm.value, (newValue) => {
   if (!props.isSurvey) {
@@ -100,24 +115,49 @@ watch(() => responsive.sm.value, (newValue) => {
   }
 })
 
+const tableFields = []
+
+if(!isMatching.value) {
+  tableFields.push({
+    key: 'answer',
+    label: 'Answer',
+    sortable: false,
+    imageClass: `fas fa-check-double ${colors.getTextClass(0)}`
+  })
+  tableFields.push({
+    key: 'numAnswered',
+    label: '# of Times Selected',
+    sortable: false,
+    imageClass: `fas fa-user-check ${colors.getTextClass(1)}`
+  })
+}
+else {
+  tableFields.push({
+    key: 'multiPartAnswer',
+    label: 'Answer',
+    sortable: false,
+    imageClass: `fas fa-check-double ${colors.getTextClass(0)}`
+  })
+  tableFields.push({
+    key: 'numAnsweredCorrect',
+    label: '# Correct Matches',
+    sortable: false,
+    imageClass: `fas fa-user-check ${colors.getTextClass(1)}`
+  })
+  tableFields.push({
+    key: 'numAnsweredWrong',
+    label: '# Incorrect Matches',
+    sortable: false,
+    imageClass: `fas fa-circle-xmark ${colors.getTextClass(2)}`
+  })
+
+}
+
 const tableOptions = {
   bordered: true,
   outlined: true,
   stacked: 'md',
-  fields: [
-    {
-      key: 'answer',
-      label: 'Answer',
-      sortable: false,
-      imageClass: 'fas fa-check-double skills-color-projects'
-    },
-    {
-      key: 'numAnswered',
-      label: '# of Times Selected',
-      sortable: false,
-      imageClass: 'fas fa-user-check skills-color-badges'
-    }
-  ],
+  fields: tableFields,
   pagination: {
     hideUnnecessary: true,
     server: false,
@@ -133,7 +173,9 @@ onMounted(() => {
   answers.value = props.q.answers.map((a) => ({
     ...a,
     selected: a.selected ? a.selected : false,
-    percent: (totalNumUsers > 0 ? Math.trunc((a.numAnswered / totalNumUsers) * 100) : 0)
+    percent: (totalNumUsers > 0 ? Math.trunc(((isMatching.value ? a.numAnsweredCorrect : a.numAnswered) / totalNumUsers) * 100) : 0),
+    percentWrong: (totalNumUsers > 0 ? Math.trunc(((isMatching.value ? a.numAnsweredWrong : a.numAnswered) / totalNumUsers) * 100) : 0),
+    multiPartAnswer: a.multiPartAnswer ? a.multiPartAnswer : null
   }))
   if (isRating.value) {
     let totalScore = 0
@@ -148,15 +190,6 @@ onMounted(() => {
 
 const questionTypeLabel = computed(() => {
   return props.q.questionType.match(/[A-Z][a-z]+/g).join(' ')
-})
-const isMultipleChoice = computed(() => {
-  return props.q.questionType === 'MultipleChoice'
-})
-const isTextInput = computed(() => {
-  return props.q.questionType === 'TextInput'
-})
-const isRating = computed(() => {
-  return props.q.questionType === 'Rating'
 })
 const qNum = computed(() => {
   return props.num + 1
@@ -197,12 +230,13 @@ const removeExpanderClass = (rowData) => {
               :cancel="false" />
       <span class="text-lg">{{ averageScore }}</span>
     </div>
+
     <SkillsDataTable
       tableStoredStateId="quizQuestionMetrics"
       aria-label="Question Metrics"
       v-if="!isTextInput && answers"
       v-model:expandedRows="expandedRows"
-      :expander="true"
+      :expander="!isMatching"
       expander-label="Expand Answer History"
       :row-class="removeExpanderClass"
       :value="answers">
@@ -217,9 +251,16 @@ const removeExpanderClass = (rowData) => {
                            :data-cy="`checkbox-${slotProps.data.isCorrect}`" />
             {{ slotProps.data[col.key] }}
           </div>
-          <div v-else-if="slotProps.field === 'numAnswered'" :data-cy="`row${slotProps.index}-colNumAnswered`">
+          <div v-else-if="slotProps.field === 'numAnswered' || slotProps.field === 'numAnsweredCorrect'" :data-cy="`row${slotProps.index}-colNumAnswered`">
             <span data-cy="num" class="pr-1">{{ slotProps.data[col.key] }}</span>
-            <Tag data-cy="percent">{{ slotProps.data.percent }}%</Tag>
+            <Tag data-cy="percent" :severity="(isSurvey || slotProps.data.isCorrect) ? 'success' : 'warn'">{{ slotProps.data.percent }}%</Tag>
+          </div>
+          <div v-else-if="slotProps.field === 'numAnsweredWrong'" :data-cy="`row${slotProps.index}-colNumAnsweredWrong`">
+            <span data-cy="num" class="pr-1">{{ slotProps.data[col.key] }}</span>
+            <Tag v-if="slotProps.data.percent < 100" data-cy="percent" severity="warn">{{ slotProps.data.percentWrong }}%</Tag>
+          </div>
+          <div v-else-if="slotProps.field === 'multiPartAnswer'" :data-cy="`row${slotProps.index}-multiPartAnswerCol`">
+            {{ slotProps.data[col.key].term }}: <span class="font-semibold">{{ slotProps.data[col.key].value }}</span>
           </div>
           <div v-else>
             {{ slotProps.data[col.key] }}
@@ -240,7 +281,11 @@ const removeExpanderClass = (rowData) => {
       class="text-primary uppercase">correct</span> ***
     </div>
 
-    <QuizAnswerHistory v-if="isTextInput"
+    <div v-if="!isSurvey && isMatching" class="bg-surface-100 dark:bg-surface-700 p-2 text-sm" data-cy="matchingQuestionWarning">
+      *** All matches must be correct for the question to be counted as <span class="text-primary uppercase">correct</span> ***
+    </div>
+
+    <QuizAnswerHistory v-if="isTextInput || isMatching"
                        :is-survey="isSurvey"
                        :question-type="q.questionType"
                        :answer-def-id="q.answers[0].id" />

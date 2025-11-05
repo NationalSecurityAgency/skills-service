@@ -26,19 +26,20 @@ describe('Quiz Metrics With Reused Data Tests', () => {
         cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
         cy.createQuizQuestionDef(1, 1, { question: 'This is a Single Choice Question example for metrics.'})
         cy.createQuizMultipleChoiceQuestionDef(1, 2, { question: 'This is a Multiple Choice Question example for metrics.'});
+        cy.createQuizMatchingQuestionDef(1, 3)
 
-        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
-        cy.runQuizForUser(1, 2, [{selectedIndex: [0]}, {selectedIndex: [0,2]}], false);
-        cy.runQuizForUser(1, 3, [{selectedIndex: [1]}, {selectedIndex: [0,2]}]);
-        cy.runQuizForUser(1, 3, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
-        cy.runQuizForUser(1, 4, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
-        cy.runQuizForUser(1, 5, [{selectedIndex: [1]}, {selectedIndex: [0,2]}]);
-        cy.runQuizForUser(1, 6, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
-        cy.runQuizForUser(1, 7, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
-        cy.runQuizForUser(1, 8, [{selectedIndex: [1]}, {selectedIndex: [0,2]}]);
-        cy.runQuizForUser(1, 9, [{selectedIndex: [1]}, {selectedIndex: [0,2]}]);
-        cy.runQuizForUser(1, 10, [{selectedIndex: [1]}, {selectedIndex: [0]}]);
-        cy.runQuizForUser(1, 11, [{selectedIndex: [0]}, {selectedIndex: [0]}]);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0,2]}, {selectedIndex: [0, 1, 2]}]);
+        cy.runQuizForUser(1, 2, [{selectedIndex: [0]}, {selectedIndex: [0,2]}, {selectedIndex: [0, 1, 2]}], false);
+        cy.runQuizForUser(1, 3, [{selectedIndex: [1]}, {selectedIndex: [0,2]}, {selectedIndex: [0, 1, 2]}]);
+        cy.runQuizForUser(1, 3, [{selectedIndex: [0]}, {selectedIndex: [0,2]}, {selectedIndex: [0, 1, 2]}]);
+        cy.runQuizForUser(1, 4, [{selectedIndex: [0]}, {selectedIndex: [0,2]}, {selectedIndex: [0, 1, 2]}]);
+        cy.runQuizForUser(1, 5, [{selectedIndex: [1]}, {selectedIndex: [0,2]}, {selectedIndex: [0, 1, 2]}]);
+        cy.runQuizForUser(1, 6, [{selectedIndex: [0]}, {selectedIndex: [0,2]}, {selectedIndex: [0, 1, 2]}]);
+        cy.runQuizForUser(1, 7, [{selectedIndex: [0]}, {selectedIndex: [0,2]}, {selectedIndex: [0, 1, 2]}]);
+        cy.runQuizForUser(1, 8, [{selectedIndex: [1]}, {selectedIndex: [0,2]}, {selectedIndex: [0, 2, 1]}]);
+        cy.runQuizForUser(1, 9, [{selectedIndex: [1]}, {selectedIndex: [0,2]}, {selectedIndex: [0, 2, 1]}]);
+        cy.runQuizForUser(1, 10, [{selectedIndex: [1]}, {selectedIndex: [0]}, {selectedIndex: [0, 2, 1]}]);
+        cy.runQuizForUser(1, 11, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [0, 2, 1]}]);
     });
 
     after(() => {
@@ -89,6 +90,30 @@ describe('Quiz Metrics With Reused Data Tests', () => {
         cy.get('[data-cy="metrics-q1"] [data-p-index="2"] [data-pc-section="rowtogglebutton"]').should('not.be.visible')
 
         cy.get('[data-cy="metrics-q1"] [data-cy="multipleChoiceQuestionWarning"]').should('not.exist')
+    });
+
+    it('matching question metrics', function () {
+        cy.visit('/administrator/quizzes/quiz1/results');
+        cy.get('[data-cy="metrics-q3"] [data-cy="qType"]').should('have.text', 'Matching')
+
+        const validateRow = (rowNum, matched, numCorrect, percentCorrect, numWrong, percentWrong) => {
+            cy.get(`[data-cy="metrics-q3"] [data-cy="row${rowNum}-multiPartAnswerCol"]`).contains(matched)
+            cy.get(`[data-cy="metrics-q3"] [data-cy="row${rowNum}-colNumAnswered"] [data-cy="num"]`).should('have.text', numCorrect)
+            cy.get(`[data-cy="metrics-q3"] [data-cy="row${rowNum}-colNumAnswered"] [data-cy="percent"]`).should('have.text', `${percentCorrect}%`)
+            cy.get(`[data-cy="metrics-q3"] [data-cy="row${rowNum}-colNumAnsweredWrong"] [data-cy="num"]`).should('have.text', numWrong)
+            if (percentWrong) {
+                cy.get(`[data-cy="metrics-q3"] [data-cy="row${rowNum}-colNumAnsweredWrong"] [data-cy="percent"]`).should('have.text', `${percentWrong}%`)
+            } else {
+                cy.get(`[data-cy="metrics-q3"] [data-cy="row${rowNum}-colNumAnsweredWrong"] [data-cy="percent"]`).should('not.exist')
+            }
+        }
+
+        validateRow(0, 'First Term: First Answer', 11, 100, 0, null)
+        validateRow(1, 'Second Term: Second Answer', 7, 63, 4, 36)
+        validateRow(2, 'Third Term: Third Answer', 7, 63, 4, 36)
+
+        cy.get('[data-cy="metrics-q3"] [data-cy="matchingQuestionWarning"]').should('exist')
+        cy.get('[data-cy="metrics-q3"] [data-cy="multipleChoiceQuestionWarning"]').should('not.exist')
     });
 
     it('multiple choice question metrics', function () {
@@ -187,4 +212,6 @@ describe('Quiz Metrics With Reused Data Tests', () => {
             [{ colIndex: 0, value: 'user10' }],
         ], 5);
     });
+
+
 });

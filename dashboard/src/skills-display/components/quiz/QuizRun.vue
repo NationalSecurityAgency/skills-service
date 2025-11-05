@@ -83,7 +83,10 @@ const dateTimer = ref(null);
 const scrollDistance = ref(0);
 const isAttemptAlreadyInProgress = ref(false);
 
-
+const allChoicesMatched = (value) => {
+  const unansweredQuestions = value.filter((q) => !q.currentAnswer)
+  return unansweredQuestions.length === 0;
+}
 const atLeastOneSelected = (value) => {
   return !isAttemptAlreadyInProgress.value || value && (value.findIndex((a) => a.selected) >= 0);
 }
@@ -180,6 +183,13 @@ const schema = object({
                       .required()
                       .test('atLeastOneSelected', 'At least 1 choice must be selected', (value) => atLeastOneSelected(value))
                       .label('Answers'),
+                })
+                .when('questionType', {
+                  is: (questionType) => questionType === QuestionType.Matching,
+                  then: (sch) => sch
+                      .required()
+                      .test('mustBeCompleted', 'All choices must be matched', (value) => allChoicesMatched(value))
+                      .label('Answers')
                 })
           })
       ),
@@ -339,6 +349,14 @@ const startQuizAttempt = () => {
               // eslint-disable-next-line no-param-reassign
               answerOptions[0].answerText = enteredTextObj.answerText;
             }
+          } else if (enteredText && q.questionType === QuestionType.Matching) {
+            enteredText.map((existingAnswer) => {
+              let selectedAnswer = answerOptions.find((it) => it.id === existingAnswer.answerId)
+              if(selectedAnswer) {
+                selectedAnswer.currentAnswer = existingAnswer.answerText
+              }
+            })
+
           }
           return ({ ...q, answerOptions });
         });
@@ -366,6 +384,12 @@ const updateSelectedAnswers = (questionSelectedAnswer) => {
   isAttemptAlreadyInProgress.value = true;
   if (questionSelectedAnswer.reportAnswerPromise) {
     reportAnswerPromises.value.push(questionSelectedAnswer.reportAnswerPromise);
+  }
+}
+const updateMatchedAnswer = (matchedAnswer) => {
+  isAttemptAlreadyInProgress.value = true;
+  if (matchedAnswer.reportAnswerPromise) {
+    reportAnswerPromises.value.push(matchedAnswer.reportAnswerPromise);
   }
 }
 const completeTestRun = () => {
@@ -552,6 +576,8 @@ const onResize = (newWidth) => {
                   :num="index+1"
                   :validate="validateTextAnswer"
                   @selected-answer="updateSelectedAnswers"
+                  @answer-matched="updateMatchedAnswer"
+                  :quizComplete="!!quizResult"
                   @answer-text-changed="updateSelectedAnswers"/>
             </div>
           </SkillsOverlay>

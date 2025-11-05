@@ -1885,6 +1885,7 @@ describe('Client Display Quiz Tests', () => {
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
     });
+
 });
 
 

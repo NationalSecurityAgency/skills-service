@@ -226,6 +226,74 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
         skillsClientException.resBody.contains("Provided question id [${quiz2Questions.questions[0].id}] does not exist in quiz [${quiz1.quizId}]")
     }
 
+    def "matching question term must be provided"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[0].multiPartAnswer = [
+                term: null,
+                value: "val"
+        ]
+
+        when:
+        skillsService.createQuizQuestionDefs([question])
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("answers.multiPartAnswer.term was not provided")
+    }
+
+    def "matching question term <= 2000 chars"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[0].multiPartAnswer = [
+                term: (1..2001).collect { "a" }.join(""),
+                value: "val"
+        ]
+
+        when:
+        skillsService.createQuizQuestionDefs([question])
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("[answers.multiPartAnswer.term] must not exceed [2000] chars")
+    }
+
+    def "matching question value must be provided"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[0].multiPartAnswer = [
+                term: "term",
+                value: null,
+        ]
+
+        when:
+        skillsService.createQuizQuestionDefs([question])
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("answers.multiPartAnswer.value was not provided")
+    }
+
+    def "matching question value <= 2000 chars"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[0].multiPartAnswer = [
+                term: "term",
+                value: (1..2001).collect { "a" }.join(""),
+        ]
+
+        when:
+        skillsService.createQuizQuestionDefs([question])
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("[answers.multiPartAnswer.value] must not exceed [2000] chars")
+    }
+
 }
 
 
