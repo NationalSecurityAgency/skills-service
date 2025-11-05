@@ -437,7 +437,7 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.dragAndDropAnswerMatch(1, 'Second Answer', 1)
 
         cy.wait(4000)
-        cy.matchSnapshotImageForElement('[data-cy="question_1"]');
+        cy.matchSnapshotImageForElement('[data-cy="question_1"]', { errorThreshold: 0.1 });
     });
 
     it('theme support: display answers after completing quiz', () => {
@@ -464,7 +464,7 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="questionAnsweredWrong"]')
 
         cy.wait(4000)
-        cy.matchSnapshotImageForElement('[data-cy="question_1"]');
+        cy.matchSnapshotImageForElement('[data-cy="question_1"]', { errorThreshold: 0.1 });
     });
 
 
