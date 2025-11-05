@@ -34,7 +34,10 @@ import SettingsService from '@/components/settings/SettingsService.js'
 import LengthyOperationProgressBarModal from '@/components/utils/modal/LengthyOperationProgressBarModal.vue'
 import { useAdminProjectsState } from '@/stores/UseAdminProjectsState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
+import LinkToSkillPage from "@/components/utils/LinkToSkillPage.vue";
+import {useRouter} from "vue-router";
 
+const router = useRouter()
 const appConfig = useAppConfig()
 const accessState = useAccessState()
 const announcer = useSkillsAnnouncer()
@@ -62,7 +65,13 @@ const sortOrder = ref({
 const copyProgressModal = ref({
   show: false,
   isComplete: false,
-  copiedProjectId: ''
+  hasFailed: false,
+  skillIdThatFailedParagraphValidation: null,
+  isSubject: false,
+  isBadge: false,
+  isSkill: false,
+  copiedProjectId: '',
+  originalProjectId: '',
 })
 
 const addProjectDisabled = computed(() => {
@@ -105,7 +114,13 @@ const projectRemoved = (project) => {
 }
 const copyProject = (projectInfo) => {
   copyProgressModal.value.isComplete = false
+  copyProgressModal.value.hasFailed = false
+  copyProgressModal.value.isSubject = false
+  copyProgressModal.value.isBadge = false
+  copyProgressModal.value.isSkill = false
+  copyProgressModal.value.skillIdThatFailedParagraphValidation = null
   copyProgressModal.value.copiedProjectId = ''
+  copyProgressModal.value.originalProjectId = projectInfo.originalProjectId
   copyProgressModal.value.show = true
   ProjectService.copyProject(projectInfo.originalProjectId, projectInfo.newProject)
     .then(() => {
@@ -114,7 +129,25 @@ const copyProject = (projectInfo) => {
       announcer.polite(`Project ${projectInfo.newProject.name} was copied`)
       SkillsReporter.reportSkill('CopyProject')
       loadProjectsAfterCopy()
-    })
+    }).catch((err) => {
+      const isParagraphValidationFailed = err && err.response && err.response.data && err.response.data.errorCode === 'ParagraphValidationFailed'
+      if (isParagraphValidationFailed) {
+        const explanation = err.response.data.explanation
+        const isSubject = explanation.includes('Failed to copy a subject')
+        const isBadge = explanation.includes('Failed to copy a badge')
+        const isSkill = explanation.includes('Failed to copy a skill')
+        copyProgressModal.value.isSubject = isSubject
+        copyProgressModal.value.isBadge = isBadge
+        copyProgressModal.value.isSkill = isSkill
+        copyProgressModal.value.hasFailed = true
+        copyProgressModal.value.isComplete = true
+        const failedSkillId = err.response.data.skillId
+        copyProgressModal.value.skillIdThatFailedParagraphValidation = failedSkillId
+        announcer.polite(`Project ${projectInfo.newProject.name} failed to be copied due to paragraph validation for skill with id ${failedSkillId}`)
+      } else {
+        router.push({ name: 'ErrorPage', query: { err } });
+      }
+  });
 }
 const loadProjectsAfterCopy = () => {
   loadProjects()
@@ -338,10 +371,42 @@ const createNewProject = () => {
     <lengthy-operation-progress-bar-modal v-if="copyProgressModal.show"
                                           v-model="copyProgressModal.show"
                                           :is-complete="copyProgressModal.isComplete"
+                                          :has-failed="copyProgressModal.hasFailed"
                                           @operation-done="loadProjectsAfterCopy"
                                           title="Copying Project"
                                           progress-message="Copying Project's Training Profile"
-                                          success-message="Project's training profile was successfully copied, please enjoy!" />
+                                          success-message="Project's training profile was successfully copied, please enjoy!">
+      <template #failed>
+        <Message severity="error" :closable="false">
+          <div class="flex flex-col gap-1 text-left" data-cy="copyFailedMsg">
+            <div class="text-xl">Failed to copy the project.</div>
+            <div v-if="copyProgressModal.isSkill">The skill with ID
+              <link-to-skill-page
+                  :skill-id="copyProgressModal.skillIdThatFailedParagraphValidation"
+                  :project-id="copyProgressModal.originalProjectId"
+                  :link-label="copyProgressModal.skillIdThatFailedParagraphValidation"
+                  data-cy="failedSkillLink"
+              />
+              has a description that doesn't meet validation requirements.
+            </div>
+            <div v-if="copyProgressModal.isSubject">The subject with ID
+              <router-link
+                  :to="{
+                    name: 'SubjectSkills',
+                    params: { projectId: copyProgressModal.originalProjectId, subjectId: copyProgressModal.skillIdThatFailedParagraphValidation }
+                  }"
+                  class="underline"
+                  data-cy="failedSkillLink"
+              > {{copyProgressModal.skillIdThatFailedParagraphValidation}}</router-link>
+              has a description that doesn't meet validation requirements.
+            </div>
+            <div>
+              Please update the skill's description to resolve the issue, then try copying the project again.
+            </div>
+          </div>
+        </Message>
+      </template>
+    </lengthy-operation-progress-bar-modal>
   </div>
 </template>
 

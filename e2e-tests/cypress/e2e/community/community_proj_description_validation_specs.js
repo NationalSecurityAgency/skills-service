@@ -503,4 +503,47 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="videoTranscript"]').type('{backspace}');
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled');
     });
+
+    it('copy project gracefully handles errors when a skill description does not validate', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true, description: 'test project' })
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2, {description: 'jabberwocky'})
+        cy.createSkill(1, 1, 3)
+
+        cy.execSql(`delete from settings where project_id='proj1' and setting='user_community'`, true)
+
+        cy.visit('/administrator');
+
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
+        cy.get('[data-cy="projectName"]').type('New Project');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains(' has a description that doesn\'t meet validation requirements.');
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').contains('skill2')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').click()
+        cy.get('[data-cy="pageHeader"] [data-cy="skillId"]').contains('ID: skill2')
+    });
+
+    it('copy project gracefully handles errors when a subject description does not validate', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true, description: 'test project' })
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSubject(1, 2, {description: 'jabberwocky'});
+        cy.createSkill(1, 2, 3)
+
+        cy.execSql(`delete from settings where project_id='proj1' and setting='user_community'`, true)
+
+        cy.visit('/administrator');
+
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
+        cy.get('[data-cy="projectName"]').type('New Project');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains(' has a description that doesn\'t meet validation requirements.');
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').contains('subj2')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').click()
+        cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: subj2')
+    });
 });

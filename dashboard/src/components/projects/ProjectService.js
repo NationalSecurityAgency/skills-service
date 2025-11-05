@@ -94,7 +94,7 @@ export default {
   },
   copyProject(oringinalProjectId, newProject) {
     return axios
-      .post(`/admin/projects/${encodeURIComponent(oringinalProjectId)}/copy`, newProject)
+      .post(`/admin/projects/${encodeURIComponent(oringinalProjectId)}/copy`, newProject, { handleError: false })
       .then((res) => res.data)
   },
   deleteProject(projectId) {

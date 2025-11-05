@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, watch } from 'vue';
+import {nextTick, ref, watch} from 'vue';
 import LengthyOperationProgressBar from "@/components/utils/LengthyOperationProgressBar.vue";
 
 const model = defineModel();
 
 const emit = defineEmits(['operation-done']);
-defineProps({
+const props = defineProps({
   title: {
     type: String,
     required: true,
@@ -33,6 +33,10 @@ defineProps({
     type: Boolean,
     required: true,
   },
+  hasFailed: {
+    type: Boolean,
+    required: false,
+  },
   successMessage: {
     type: String,
     default: 'Operation completed successfully!',
@@ -43,6 +47,14 @@ const allDone = () => {
   emit('operation-done');
   model.value = false;
 };
+
+watch(() => props.isComplete, (newVal, oldVal) => {
+  if (newVal && !oldVal) {
+   nextTick(() => {
+     document.getElementById('lengthyOpDoneBtn')?.focus();
+   })
+  }
+})
 </script>
 
 <template>
@@ -55,7 +67,13 @@ const allDone = () => {
         <lengthy-operation-progress-bar :showValue="false" height="15px" :animated="true"/>
         <div class="text-secondary mt-1">This operation takes a little while so buckle up!</div>
       </div>
-      <div v-else>
+
+      <div v-if="isComplete && hasFailed">
+        <slot name="failed">
+          <Message severity="error" :closable="false" data-cy="failedMessage">Unfortunately, the operation failed.</Message>
+        </slot>
+      </div>
+      <div v-if="isComplete && !hasFailed">
         <i class="fas fa-check-double p-2 mb-1 p-badge p-badge-info" style="font-size: 2.5rem; height: 100%;"/>
         <div class="h4 text-primary mb-1 mt-1">We are all done!</div>
         <div class="text-secondary" data-cy="successMessage">{{ successMessage }}</div>
@@ -63,7 +81,7 @@ const allDone = () => {
     </div>
 
     <template #footer>
-      <SkillsButton v-if="isComplete" variant="success" size="small" class="float-right" @click="allDone" data-cy="allDoneBtn">
+      <SkillsButton v-if="isComplete" id="lengthyOpDoneBtn" variant="success" size="small" class="float-right" @click="allDone" data-cy="allDoneBtn">
         Done
       </SkillsButton>
     </template>

@@ -103,7 +103,7 @@ class SubjAdminService {
         CustomValidationResult customValidationResult = customValidator.validate(subjectRequest, projectId)
         if (performCustomValidation && !customValidationResult.valid) {
             String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[subject], subjectId=[${subjectRequest.subjectId}], name=[${subjectRequest.name}], description=[${subjectRequest.description}]"
-            throw new SkillException(msg)
+            throw new SkillException(msg, projectId, subjectRequest.subjectId, ErrorCode.ParagraphValidationFailed)
         }
 
         final boolean isEnabledSkillInRequest = Boolean.valueOf(subjectRequest.enabled)

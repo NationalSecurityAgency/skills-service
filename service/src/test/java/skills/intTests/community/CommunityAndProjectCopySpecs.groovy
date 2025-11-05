@@ -15,6 +15,9 @@
  */
 package skills.intTests.community
 
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -23,6 +26,9 @@ import skills.intTests.utils.SkillsService
 import static skills.intTests.utils.SkillsFactory.*
 
 class CommunityAndProjectCopySpecs extends DefaultIntSpec {
+
+    @Autowired
+    JdbcTemplate jdbcTemplate
 
     def "copying project should copy the community"() {
         List<String> users = getRandomUsers(2)
@@ -235,6 +241,99 @@ class CommunityAndProjectCopySpecs extends DefaultIntSpec {
         copiedProject.userCommunity == 'All Dragons'
 
         originalProject.userCommunity == 'All Dragons'
+    }
+
+    def "clearly indicate which skill is failing to copy due to paragraph validation"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills[2].description = "jabberwocky"
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        jdbcTemplate.execute("delete from settings where project_id='${p1.projectId}' and setting='user_community'")
+
+        when:
+        def projToCopy = [projectId: "NewProj", name: "New Project"]
+        pristineDragonsUser.copyProject(p1.projectId, projToCopy)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Failed to copy a skill due to the paragraph validation")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("skillId:${p1Skills[2].skillId}")
+    }
+
+    def "clearly indicate which subject is failing to copy due to paragraph validation"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        def p1SkillsSubj2 = createSkills(3, 1, 2, 100, 5)
+        p1subj2.description = "jabberwocky"
+        pristineDragonsUser.createSubject(p1subj2)
+        pristineDragonsUser.createSkills(p1SkillsSubj2)
+
+        jdbcTemplate.execute("delete from settings where project_id='${p1.projectId}' and setting='user_community'")
+
+        when:
+        def projToCopy = [projectId: "NewProj", name: "New Project"]
+        pristineDragonsUser.copyProject(p1.projectId, projToCopy)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Failed to copy a subject due to the paragraph validation")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("skillId:${p1subj2.subjectId}")
+    }
+
+    def "clearly indicate which badge is failing to copy due to paragraph validation"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        def p1subj2 = createSubject(1, 2)
+        def p1SkillsSubj2 = createSkills(3, 1, 2, 100, 5)
+
+        pristineDragonsUser.createSubject(p1subj2)
+        pristineDragonsUser.createSkills(p1SkillsSubj2)
+
+        Map badge1 = createBadge(1, 1)
+        pristineDragonsUser.createBadge(badge1)
+        pristineDragonsUser.assignSkillToBadge(p1.projectId, badge1.badgeId, p1Skills[0].skillId)
+
+        Map badge2 = createBadge(1, 2)
+        badge2.description = "jabberwocky"
+        pristineDragonsUser.createBadge(badge2)
+        pristineDragonsUser.assignSkillToBadge(p1.projectId, badge2.badgeId, p1Skills[0].skillId)
+        pristineDragonsUser.assignSkillToBadge(p1.projectId, badge2.badgeId, p1Skills[1].skillId)
+
+        jdbcTemplate.execute("delete from settings where project_id='${p1.projectId}' and setting='user_community'")
+
+        when:
+        def projToCopy = [projectId: "NewProj", name: "New Project"]
+        pristineDragonsUser.copyProject(p1.projectId, projToCopy)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Failed to copy a badge due to the paragraph validation")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("skillId:${badge2.badgeId}")
     }
 
 }

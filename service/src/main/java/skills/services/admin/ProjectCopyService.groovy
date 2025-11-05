@@ -584,25 +584,42 @@ class ProjectCopyService {
     private void saveBadgesAndTheirSkills(ProjDef fromProject, ProjDef toProj, HashMap<String, String> newIcons) {
         List<SkillDefWithExtra> badges = skillDefWithExtraRepo.findAllByProjectIdAndType(fromProject.projectId, SkillDef.ContainerType.Badge)
         badges.sort { it.displayOrder }.each { SkillDefWithExtra fromBadge ->
-            BadgeRequest badgeRequest = new BadgeRequest()
-            Props.copy(fromBadge, badgeRequest)
-            badgeRequest.badgeId = fromBadge.skillId
-            badgeRequest.description = handleAttachmentsInDescription(badgeRequest.description, toProj.projectId)
-            badgeRequest.enabled = Boolean.FALSE.toString()
-            if(newIcons[fromBadge.iconClass]) {
-                badgeRequest.iconClass = newIcons[fromBadge.iconClass];
-            }
-            badgeAdminService.saveBadge(toProj.projectId, fromBadge.skillId, badgeRequest)
-            List<SkillDefPartialRes> badgeSkills = skillsAdminService.getSkillsForBadge(fromProject.projectId, fromBadge.skillId)
-            badgeSkills.each { SkillDefPartialRes fromBadgeSkill ->
-                badgeAdminService.addSkillToBadge(toProj.projectId, badgeRequest.badgeId, fromBadgeSkill.skillId)
-            }
-            // must enable it after the skills were added
-            if (fromBadge.enabled == Boolean.TRUE.toString() && badgeSkills) {
-                badgeRequest.enabled = fromBadge.enabled
+            try {
+                BadgeRequest badgeRequest = new BadgeRequest()
+                Props.copy(fromBadge, badgeRequest)
+                badgeRequest.badgeId = fromBadge.skillId
+                badgeRequest.description = handleAttachmentsInDescription(badgeRequest.description, toProj.projectId)
+                badgeRequest.enabled = Boolean.FALSE.toString()
+                if (newIcons[fromBadge.iconClass]) {
+                    badgeRequest.iconClass = newIcons[fromBadge.iconClass];
+                }
                 badgeAdminService.saveBadge(toProj.projectId, fromBadge.skillId, badgeRequest)
+                List<SkillDefPartialRes> badgeSkills = skillsAdminService.getSkillsForBadge(fromProject.projectId, fromBadge.skillId)
+                badgeSkills.each { SkillDefPartialRes fromBadgeSkill ->
+                    badgeAdminService.addSkillToBadge(toProj.projectId, badgeRequest.badgeId, fromBadgeSkill.skillId)
+                }
+                // must enable it after the skills were added
+                if (fromBadge.enabled == Boolean.TRUE.toString() && badgeSkills) {
+                    badgeRequest.enabled = fromBadge.enabled
+                    badgeAdminService.saveBadge(toProj.projectId, fromBadge.skillId, badgeRequest)
+                }
+            } catch (Throwable t) {
+                handleItemFailure(t, fromBadge)
             }
         }
+    }
+
+    private static void handleItemFailure(Throwable t, SkillDefParent item) {
+        ErrorCode errorCode = ErrorCode.InternalError
+        String itemType = item.type.toString().toLowerCase()
+        String msg = "Error copying ${itemType}: ${item.skillId}"
+        if (t instanceof SkillException) {
+            if (t.errorCode == ErrorCode.ParagraphValidationFailed) {
+                errorCode = ErrorCode.ParagraphValidationFailed
+                msg = "Failed to copy a ${itemType} due to the paragraph validation. Full message: ${t.message}"
+            }
+        }
+        throw new SkillException(msg, t, item.projectId, item.skillId, errorCode)
     }
 
     @Profile
@@ -620,11 +637,16 @@ class ProjectCopyService {
         Props.copy(fromSubj, toSubj)
         toSubj.subjectId = fromSubj.skillId
         toSubj.description = handleAttachmentsInDescription(toSubj.description, toProj.projectId)
-        if(newIcons[fromSubj.iconClass]) {
+        if (newIcons[fromSubj.iconClass]) {
             toSubj.iconClass = newIcons[fromSubj.iconClass]
         }
-        subjAdminService.saveSubject(toProj.projectId, fromSubj.skillId, toSubj)
-        log.info("PROJ COPY: [{}]=[{}] subj[{}] - created new subject")
+
+        try {
+            subjAdminService.saveSubject(toProj.projectId, fromSubj.skillId, toSubj)
+        } catch (Throwable t) {
+            handleItemFailure(t, fromSubj)
+        }
+
         createSkills(fromProject.projectId, toProj.projectId, toSubj.subjectId, allCollectedSkills, null, validateNameAndIdCollisions)
     }
 
@@ -689,7 +711,7 @@ class ProjectCopyService {
 
                         handleSkillAttributes(fromSkill, saveSkillTmpRes)
                     } catch (Throwable t) {
-                        throw new SkillException("Error copying skill: ${fromSkill.skillId}", t)
+                        handleItemFailure(t, fromSkill)
                     }
                 }
     }
