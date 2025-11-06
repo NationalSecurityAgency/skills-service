@@ -368,7 +368,7 @@ class CommunityAndProjectCopySpecs extends DefaultIntSpec {
         exception.message.contains("skillId:${p1Skills[1].skillId}")
     }
 
-    def "clearly indicate which video transcript is failing to copy due to paragraph validation - internlly hosted video"() {
+    def "clearly indicate which video transcript is failing to copy due to paragraph validation - internally hosted video"() {
         List<String> users = getRandomUsers(2)
         SkillsService pristineDragonsUser = createService(users[1])
         SkillsService rootUser = createRootSkillService()

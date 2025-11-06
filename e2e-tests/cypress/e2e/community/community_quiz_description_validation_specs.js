@@ -804,7 +804,7 @@ describe('Community Quiz Description Validation Tests', () => {
 
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="copyFailedMsg"]')
-            .contains('Question #2 doesn\'t meet validation requirements.');
+            .contains('Question #2 doesn\'t meet the validation requirements');
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="closeDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="closeDialogBtn"]').should('be.focused')
