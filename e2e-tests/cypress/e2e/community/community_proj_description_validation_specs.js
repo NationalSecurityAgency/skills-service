@@ -607,4 +607,36 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').click()
         cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: skill2')
     });
+
+    it('prevent export of skills with invalid descriptions to catalog', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true, description: 'test project' })
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2, {description: 'jabberwocky'})
+        cy.createSkill(1, 1, 3)
+
+        cy.execSql(`delete from settings where project_id='proj1' and setting='user_community'`, true)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsNumSelected"]').should('have.text', '3');
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Export To Catalog"]').click()
+
+        const exportMsg = 'This will export 3 Skills to the SkillTree Catalog'
+        cy.get('[data-pc-name="dialog"]').contains(exportMsg);
+        cy.get('[data-cy="exportToCatalogButton"]').click();
+        cy.get('[data-cy="exportFailedMessage"]').contains('The skill with ID skill2 has a description that doesn\'t meet the validation requirements')
+        cy.get('[data-pc-name="dialog"]').should('not.contain', exportMsg)
+
+        cy.get('[data-cy="exportToCatalogButton"]').should('be.disabled')
+        cy.get('[data-cy="closeButton"]').should('be.enabled')
+        cy.get('[data-cy="exportFailedMessage"] [data-cy="failedSkillLink"]').contains('skill2')
+        cy.get('[data-cy="exportFailedMessage"] [data-cy="failedSkillLink"]').click()
+        cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: skill2')
+    });
+
 });

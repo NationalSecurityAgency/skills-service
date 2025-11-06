@@ -22,7 +22,7 @@ export default {
   },
   bulkExport(projectId, skillIds) {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/export`
-    return axios.post(url, skillIds).then((response) => response.data)
+    return axios.post(url, skillIds, { handleError: false }).then((response) => response.data)
   },
   import(projectId, subjectId, fromProjectId, fromSkillId) {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/import/${encodeURIComponent(fromProjectId)}/${encodeURIComponent(fromSkillId)}`
