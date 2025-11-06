@@ -785,4 +785,88 @@ describe('Community Quiz Description Validation Tests', () => {
 
     });
 
+    it('quiz copy gracefully handles errors when a question does not validate', () => {
+        cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createTextInputQuestionDef(1, 2, {question: 'jabberwocky'})
+        cy.createTextInputQuestionDef(1, 3)
+
+        cy.execSql(`DELETE FROM quiz_settings qs
+            USING quiz_definition qd
+                    WHERE qs.quiz_ref_id = qd.id
+                      AND qd.quiz_id = 'quiz1'
+                      AND qs.setting = 'user_community'`, true)
+
+        cy.visit('/administrator/quizzes')
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of This is quiz 1')
+
+        cy.clickSaveDialogBtn()
+        cy.get('[data-cy="copyFailedMsg"]')
+            .contains('Question #2 doesn\'t meet validation requirements.');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="closeDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="closeDialogBtn"]').should('be.focused')
+    });
+
+    it('quiz copy gracefully handles errors when a question hint does not validate', () => {
+        cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createTextInputQuestionDef(1, 2, {answerHint: 'jabberwocky'})
+        cy.createTextInputQuestionDef(1, 3)
+
+        cy.execSql(`DELETE FROM quiz_settings qs
+            USING quiz_definition qd
+                    WHERE qs.quiz_ref_id = qd.id
+                      AND qd.quiz_id = 'quiz1'
+                      AND qs.setting = 'user_community'`, true)
+
+        cy.visit('/administrator/quizzes')
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of This is quiz 1')
+
+        cy.clickSaveDialogBtn()
+        cy.get('[data-cy="copyFailedMsg"]')
+            .contains('Question #2 doesn\'t meet the validation requirements.');
+        cy.get('[data-cy="copyFailedMsg"]')
+            .contains('Please update Question #2 to resolve the issue, then try copying the quiz again.');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="closeDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="closeDialogBtn"]').should('be.focused')
+    });
+
+    it('quiz copy gracefully handles errors when video transcript does not validate', () => {
+        cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createTextInputQuestionDef(1, 2)
+
+        cy.createQuizQuestionDef(1, 3, {},
+            { videoUrl: '/static/videos/create-quiz.mp4', captions: 'some', transcript: 'jabberwocky' });
+        cy.createTextInputQuestionDef(1, 3)
+
+        cy.execSql(`DELETE FROM quiz_settings qs
+            USING quiz_definition qd
+                    WHERE qs.quiz_ref_id = qd.id
+                      AND qd.quiz_id = 'quiz1'
+                      AND qs.setting = 'user_community'`, true)
+
+        cy.visit('/administrator/quizzes')
+
+        cy.get('[data-cy="copyQuizButton_quiz1"]').click()
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of This is quiz 1')
+
+        cy.clickSaveDialogBtn()
+        cy.get('[data-cy="copyFailedMsg"]')
+            .contains('Video transcript for Question #3 doesn\'t meet validation requirements.');
+        cy.get('[data-cy="copyFailedMsg"]')
+            .contains('Please update the video transcript for Question #3 to resolve the issue, then try copying the quiz again.');
+
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="closeDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="closeDialogBtn"]').should('be.focused')
+    });
+
+
 });

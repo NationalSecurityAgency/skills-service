@@ -58,6 +58,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     static class DomainSpecificQuizErrBody extends BasicErrBody {
         String quizId
+        Integer questionId
         String userId
     }
 
@@ -108,8 +109,9 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         Object body
         HttpStatus status = HttpStatus.BAD_REQUEST
         if (ex instanceof SkillQuizException) {
-            body = new DomainSpecificQuizErrBody(userId: ex.userId, quizId: ex.quizId, explanation: ex.message, errorCode: ex.errorCode.name())
-            String msg = "Exception for: quizId=[${ex.quizId}], ${buildRequestInfo(webRequest)}"
+            body = new DomainSpecificQuizErrBody(userId: ex.userId, quizId: ex.quizId, questionId: ex.questionId, explanation: ex.message, errorCode: ex.errorCode.name())
+            String qMsg = ex.questionId != null ? "questionId=[${ex.questionId}], " : ""
+            String msg = "Exception for: quizId=[${ex.quizId}], ${qMsg}${buildRequestInfo(webRequest)}"
             if (ex.userId) {
                 msg = "${msg}, userId=[${ex.userId}]"
             }

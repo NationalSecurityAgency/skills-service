@@ -20,6 +20,7 @@ import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -711,6 +712,10 @@ class ProjectCopyService {
 
                         handleSkillAttributes(fromSkill, saveSkillTmpRes)
                     } catch (Throwable t) {
+                        boolean isVideoTranscriptError = t instanceof SkillException && t?.errorCode == ErrorCode.ParagraphValidationFailed && t?.message?.contains('Video transcript validation failed')
+                        if (isVideoTranscriptError) {
+                            throw t
+                        }
                         handleItemFailure(t, fromSkill)
                     }
                 }
@@ -758,6 +763,13 @@ class ProjectCopyService {
     private boolean handleInternallyHostedVideo(SkillAttributesDef attributesDef, SkillDefWithExtra fromSkill, SkillsAdminService.SaveSkillTmpRes toSkill) {
         if (attributesDef.type == SkillAttributesDef.SkillAttributesType.Video) {
             SkillVideoAttrs videoAttrs = skillAttributeService.convertAttrs(attributesDef, SkillVideoAttrs.class)
+            if (StringUtils.isNotBlank(videoAttrs.transcript)) {
+                CustomValidationResult validationResult = customValidator.validateDescription(videoAttrs.transcript, fromSkill.projectId)
+                if (!validationResult.valid) {
+                    String msg = "Video transcript validation failed, fullMessage=[${validationResult.msg}]"
+                    throw new SkillException(msg, null, fromSkill.projectId, fromSkill.skillId, ErrorCode.ParagraphValidationFailed)
+                }
+            }
             if (!videoAttrs.isInternallyHosted) {
                 return false
             }

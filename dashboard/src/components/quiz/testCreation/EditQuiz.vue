@@ -27,6 +27,7 @@ import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
 import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js';
 import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js';
 import CommunityProtectionControls from '@/components/projects/CommunityProtectionControls.vue';
+import {useRouter} from "vue-router";
 
 const model = defineModel()
 const props = defineProps({
@@ -53,6 +54,7 @@ if(props.isEdit) {
   modalId.value = `copyQuizDialog${props.quiz.quizId}`
 }
 
+const router = useRouter()
 const appConfig = useAppConfig()
 
 const communityLabels = useCommunityLabels()
@@ -194,6 +196,27 @@ const saveQuiz = (values) => {
         ...newQuizDef,
         originalQuizId: newQuizDef.quizId
       }
+    }).catch((err) => {
+      const isParagraphValidationFailed = err && err.response && err.response.data && err.response.data.errorCode === 'ParagraphValidationFailed'
+      if (isParagraphValidationFailed) {
+        const explanation = err.response.data.explanation
+        const isVideoTranscript = explanation.includes('Video transcript validation failed')
+        const quizId = err.response.data.quizId
+        const questionId = err.response.data.questionId
+        return QuizService.getQuizQuestionDef(quizId, questionId).then((questionDef) => {
+          return {
+            failed: true,
+            quizId,
+            questionId,
+            isVideoTranscript,
+            questionNum: questionDef.displayOrder + 1
+          }
+        })
+
+        // announcer.polite(`Project ${projectInfo.newProject.name} failed to be copied due to paragraph validation for skill with id ${failedSkillId}`)
+      } else {
+        router.push({ name: 'ErrorPage', query: { err } });
+      }
     })
   }
   return QuizService.updateQuizDef(quizToSave)
@@ -264,6 +287,22 @@ const onSavedQuiz = (savedQuiz) => {
           class="mt-8"
           name="description" />
 
+    </template>
+    <template #failed="{ failedInfo }">
+      <Message severity="error" :closable="false">
+        <div class="flex flex-col gap-1 text-left" data-cy="copyFailedMsg">
+          <div class="text-xl">Failed to copy the quiz.</div>
+          <div v-if="!failedInfo.isVideoTranscript">
+            Question #{{ failedInfo.questionNum }} doesn't meet the validation requirements.
+          </div>
+          <div v-if="failedInfo.isVideoTranscript">
+            Video transcript for Question #{{ failedInfo.questionNum }} doesn't meet validation requirements.
+          </div>
+          <div>
+            Please update<span v-if="failedInfo.isVideoTranscript"> the video transcript for</span> Question #{{ failedInfo.questionNum }} to resolve the issue, then try copying the quiz again.
+          </div>
+        </div>
+      </Message>
     </template>
   </SkillsInputFormDialog>
 </template>

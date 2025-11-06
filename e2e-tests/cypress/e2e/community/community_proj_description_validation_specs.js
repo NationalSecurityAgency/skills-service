@@ -519,7 +519,9 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="projectName"]').type('New Project');
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
-            .contains(' has a description that doesn\'t meet validation requirements.');
+            .contains('The skill with ID skill2 has a description that doesn\'t meet the validation requirements.');
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('Please update the skill\'s description to resolve the issue, then try copying the project again.')
         cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').contains('skill2')
         cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').click()
         cy.get('[data-cy="pageHeader"] [data-cy="skillId"]').contains('ID: skill2')
@@ -541,9 +543,68 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="projectName"]').type('New Project');
         cy.get('[data-cy="saveDialogBtn"]').click()
         cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
-            .contains(' has a description that doesn\'t meet validation requirements.');
+            .contains('The subject with ID subj2 has a description that doesn\'t meet the validation requirements.');
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('Please update the subject\'s description to resolve the issue, then try copying the project again.');
         cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').contains('subj2')
         cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').click()
         cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: subj2')
+    });
+
+    it('copy project gracefully handles errors when a badge description does not validate', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true, description: 'test project' })
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSubject(1, 2);
+        cy.createSkill(1, 2, 3)
+
+        cy.createBadge(1, 1, {description: 'jabberwocky'});
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.assignSkillToBadge(1, 1, 2);
+
+        cy.execSql(`delete from settings where project_id='proj1' and setting='user_community'`, true)
+
+        cy.visit('/administrator');
+
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
+        cy.get('[data-cy="projectName"]').type('New Project');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('The badge with ID badge1 has a description that doesn\'t meet the validation requirements.');
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('Please update the badge\'s description to resolve the issue, then try copying the project again.');
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').contains('badge1')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').click()
+        cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: badge1')
+    });
+
+    it('copy project gracefully handles errors when video transcript does not validate', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true, description: 'test project' })
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        const vidAttr = {
+            videoUrl: '/static/videos/create-quiz.mp4',
+            captions: 'some',
+            transcript: 'jabberwocky',
+        }
+        cy.saveVideoAttrs(1, 2, vidAttr)
+        cy.createSkill(1, 1, 3)
+
+        cy.execSql(`delete from settings where project_id='proj1' and setting='user_community'`, true)
+
+        cy.visit('/administrator');
+
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
+        cy.get('[data-cy="projectName"]').type('New Project');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('Video/Audio for Skill ID skill2 has a transcript that doesn\'t meet the validation requirements.');
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('Please update the skill\'s video transcript to resolve the issue, then try copying the project again.')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').contains('skill2')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').click()
+        cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: skill2')
     });
 });

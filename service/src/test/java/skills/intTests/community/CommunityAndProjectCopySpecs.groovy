@@ -17,6 +17,8 @@ package skills.intTests.community
 
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.Resource
 import org.springframework.jdbc.core.JdbcTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -336,4 +338,64 @@ class CommunityAndProjectCopySpecs extends DefaultIntSpec {
         exception.message.contains("skillId:${badge2.badgeId}")
     }
 
+    def "clearly indicate which video transcript is failing to copy due to paragraph validation"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        pristineDragonsUser.saveSkillVideoAttributes(p1.projectId, p1Skills[1].skillId, [
+                videoUrl: "http://some.url",
+                transcript: "jabberwocky",
+                captions: "captions",
+        ])
+
+        jdbcTemplate.execute("delete from settings where project_id='${p1.projectId}' and setting='user_community'")
+
+        when:
+        def projToCopy = [projectId: "NewProj", name: "New Project"]
+        pristineDragonsUser.copyProject(p1.projectId, projToCopy)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Video transcript validation failed")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("skillId:${p1Skills[1].skillId}")
+    }
+
+    def "clearly indicate which video transcript is failing to copy due to paragraph validation - internlly hosted video"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        Resource video = new ClassPathResource("/testVideos/create-quiz.mp4")
+        pristineDragonsUser.saveSkillVideoAttributes(p1.projectId, p1Skills[1].skillId, [
+                file: video,
+                transcript: "jabberwocky",
+                captions: "captions",
+        ])
+
+        jdbcTemplate.execute("delete from settings where project_id='${p1.projectId}' and setting='user_community'")
+
+        when:
+        def projToCopy = [projectId: "NewProj", name: "New Project"]
+        pristineDragonsUser.copyProject(p1.projectId, projToCopy)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Video transcript validation failed")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("skillId:${p1Skills[1].skillId}")
+    }
 }

@@ -159,16 +159,23 @@ const close = () => {
   }
 }
 const isSaving = ref(false)
+const failed = ref(false)
+const failedInfo = ref({})
 const onSubmit = handleSubmit(formValue => {
   isSaving.value = true
   props.saveDataFunction(formValue).then((res) => {
-    if (props.enableInputFormResiliency) {
-      inputFormResiliency.stop()
-    }
-    emit('saved', res)
-    matomo.trackEvent(MatomoEvents.category.Modal, MatomoEvents.action.Save, props.header)
-    if (props.closeOnSuccess) {
-      close()
+    if (res?.failed) {
+      failed.value = true
+      failedInfo.value = res
+    } else {
+      if (props.enableInputFormResiliency) {
+        inputFormResiliency.stop()
+      }
+      emit('saved', res)
+      matomo.trackEvent(MatomoEvents.category.Modal, MatomoEvents.action.Save, props.header)
+      if (props.closeOnSuccess) {
+        close()
+      }
     }
     isSaving.value = false
   })
@@ -263,7 +270,7 @@ const dialogUtils = useDialogUtils()
     :pt="{ content: { class: 'p-0' }, pcMaximizeButton: dialogUtils.getMaximizeButtonPassThrough() }"
     footer-class="px-4 pb-4"
   >
-    <div class="p-4">
+    <div v-if="!failed" class="p-4">
       <form-reload-warning
         v-if="inputFormResiliency.isRestoredFromStore && enableInputFormResiliency"
         @discard-changes="inputFormResiliency.discard" />
@@ -274,6 +281,9 @@ const dialogUtils = useDialogUtils()
           <slot></slot>
         </div>
       </BlockUI>
+    </div>
+    <div v-if="failed">
+      <slot name="failed" :failedInfo="failedInfo"></slot>
     </div>
   </SkillsDialog>
 </template>

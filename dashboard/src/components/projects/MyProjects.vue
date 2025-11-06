@@ -70,6 +70,7 @@ const copyProgressModal = ref({
   isSubject: false,
   isBadge: false,
   isSkill: false,
+  isVideoTranscript: false,
   copiedProjectId: '',
   originalProjectId: '',
 })
@@ -118,6 +119,7 @@ const copyProject = (projectInfo) => {
   copyProgressModal.value.isSubject = false
   copyProgressModal.value.isBadge = false
   copyProgressModal.value.isSkill = false
+  copyProgressModal.value.isVideoTranscript = false
   copyProgressModal.value.skillIdThatFailedParagraphValidation = null
   copyProgressModal.value.copiedProjectId = ''
   copyProgressModal.value.originalProjectId = projectInfo.originalProjectId
@@ -136,9 +138,11 @@ const copyProject = (projectInfo) => {
         const isSubject = explanation.includes('Failed to copy a subject')
         const isBadge = explanation.includes('Failed to copy a badge')
         const isSkill = explanation.includes('Failed to copy a skill')
+        const isVideoTranscript = explanation.includes('Video transcript validation failed')
         copyProgressModal.value.isSubject = isSubject
         copyProgressModal.value.isBadge = isBadge
         copyProgressModal.value.isSkill = isSkill
+        copyProgressModal.value.isVideoTranscript = isVideoTranscript
         copyProgressModal.value.hasFailed = true
         copyProgressModal.value.isComplete = true
         const failedSkillId = err.response.data.skillId
@@ -380,28 +384,66 @@ const createNewProject = () => {
         <Message severity="error" :closable="false">
           <div class="flex flex-col gap-1 text-left" data-cy="copyFailedMsg">
             <div class="text-xl">Failed to copy the project.</div>
-            <div v-if="copyProgressModal.isSkill">The skill with ID
+            <div v-if="copyProgressModal.isSkill">
+              <div>The skill with ID
               <link-to-skill-page
                   :skill-id="copyProgressModal.skillIdThatFailedParagraphValidation"
                   :project-id="copyProgressModal.originalProjectId"
                   :link-label="copyProgressModal.skillIdThatFailedParagraphValidation"
                   data-cy="failedSkillLink"
               />
-              has a description that doesn't meet validation requirements.
+              has a description that doesn't meet the validation requirements.
+              </div>
+              <div>
+                Please update the skill's description to resolve the issue, then try copying the project again.
+              </div>
             </div>
-            <div v-if="copyProgressModal.isSubject">The subject with ID
-              <router-link
-                  :to="{
+            <div v-if="copyProgressModal.isSubject">
+              <div>The subject with ID
+                <router-link
+                    :to="{
                     name: 'SubjectSkills',
                     params: { projectId: copyProgressModal.originalProjectId, subjectId: copyProgressModal.skillIdThatFailedParagraphValidation }
                   }"
-                  class="underline"
-                  data-cy="failedSkillLink"
-              > {{copyProgressModal.skillIdThatFailedParagraphValidation}}</router-link>
-              has a description that doesn't meet validation requirements.
+                    class="underline"
+                    data-cy="failedSkillLink"
+                > {{ copyProgressModal.skillIdThatFailedParagraphValidation }}
+                </router-link> has a description that doesn't meet the validation requirements.
+              </div>
+              <div>
+                Please update the subject's description to resolve the issue, then try copying the project again.
+              </div>
             </div>
-            <div>
-              Please update the skill's description to resolve the issue, then try copying the project again.
+            <div v-if="copyProgressModal.isBadge">
+              <div>The badge with ID
+                <router-link
+                    :to="{
+                    name: 'BadgeSkills',
+                    params: { projectId: copyProgressModal.originalProjectId, badgeId: copyProgressModal.skillIdThatFailedParagraphValidation }
+                  }"
+                    class="underline"
+                    data-cy="failedSkillLink"
+                > {{ copyProgressModal.skillIdThatFailedParagraphValidation }}
+                </router-link> has a description that doesn't meet the validation requirements.
+              </div>
+              <div>
+                Please update the badge's description to resolve the issue, then try copying the project again.
+              </div>
+            </div>
+            <div v-if="copyProgressModal.isVideoTranscript">
+              <div>
+                Video/Audio for Skill ID
+                <link-to-skill-page
+                    :skill-id="copyProgressModal.skillIdThatFailedParagraphValidation"
+                    :project-id="copyProgressModal.originalProjectId"
+                    :link-label="copyProgressModal.skillIdThatFailedParagraphValidation"
+                    data-cy="failedSkillLink"
+                />
+                has a transcript that doesn't meet the validation requirements.
+              </div>
+              <div>
+                Please update the skill's video transcript to resolve the issue, then try copying the project again.
+              </div>
             </div>
           </div>
         </Message>
