@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import './copy_commands'
+
 describe('Copy skills from one project to another Tests', () => {
     const tableSelector = '[data-cy="skillsTable"]'
 
@@ -25,18 +27,6 @@ describe('Copy skills from one project to another Tests', () => {
 
         cy.createProject(2)
         cy.createSubject(2, 1)
-
-        Cypress.Commands.add("initiateSkillsCopyModal", (skillIndexesToCopy, optionalExpandedGroupSelector = '') => {
-            skillIndexesToCopy.forEach((index) => {
-                cy.get(`${optionalExpandedGroupSelector} ${tableSelector} [data-p-index="${index}"] [data-pc-name="pcrowcheckbox"] [data-pc-section="input"]`).click()
-            })
-            cy.get(`${optionalExpandedGroupSelector} [data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]`).should('have.text', skillIndexesToCopy.length)
-            cy.get(`${optionalExpandedGroupSelector} [data-cy="skillActionsBtn"]`).click()
-            cy.get('[data-cy="skillsActionsMenu"] [aria-label="Copy to another Project"]').click()
-
-            cy.get('[data-pc-name="dialog"] [data-pc-section="title"]').should('have.text', 'Copy Selected Skills To Another Project')
-        });
-
     });
 
     it('copy skills from a a subject to a subject in another project', () => {

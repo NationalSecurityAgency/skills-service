@@ -180,7 +180,8 @@ class ProjectCopyService {
             return new CopyValidationRes(isAllowed: false, validationErrors: [skillException.getMessage()?.toString()])
         }
 
-        List<String> validationErrors = checkForSkillIdAndNameCollisions(itemsToCopy.collect { new SkillIdAndName(skillId: it.skillId, skillName: it.name) }, otherProjectId)
+        List<SkillIdAndName> itemsToCheck = itemsToCopy.collect { new SkillIdAndName(skillId: it.skillId, skillName: it.name, description: it.description) }
+        List<String> validationErrors = checkForSkillIdAndNameCollisions(itemsToCheck, otherProjectId, projectId)
         if (otherSubject && !Boolean.valueOf(otherSubject.enabled)) {
             List<String> enabledSkillIds = itemsToCopy.findAll { Boolean.valueOf(it.enabled) }.collect { it.skillId }
             if (enabledSkillIds) {
@@ -276,9 +277,10 @@ class ProjectCopyService {
         }
 
 
-        List<SkillDefRepo.SkillIdAndName> itemsToCopy = skillDefRepo.findSkillsIdAndNameUnderASubject(subject.id)
+        List<SkillDefRepo.SkillIdAndNameAndDesc> itemsToCopy = skillDefRepo.findSkillsIdAndNameUnderASubject(subject.id)
 
-        List<String> validationErrors = checkForSkillIdAndNameCollisions(itemsToCopy.collect { new SkillIdAndName(skillId: it.skillId, skillName: it.skillName) }, otherProjectId)
+        List<SkillIdAndName> itemsToCheck = itemsToCopy.collect { new SkillIdAndName(skillId: it.skillId, skillName: it.skillName, description: it.description) }
+        List<String> validationErrors = checkForSkillIdAndNameCollisions(itemsToCheck, otherProjectId, projectId)
         CopyValidationRes res = new CopyValidationRes(isAllowed: validationErrors?.isEmpty(), validationErrors: validationErrors)
         return res
     }
@@ -286,10 +288,11 @@ class ProjectCopyService {
     private static class SkillIdAndName {
         String skillId
         String skillName
+        String description
     }
 
     @Profile
-    private List<String> checkForSkillIdAndNameCollisions(List<SkillIdAndName> itemsToCopy, String otherProjectId) {
+    private List<String> checkForSkillIdAndNameCollisions(List<SkillIdAndName> itemsToCopy, String otherProjectId, String origProjId) {
         List<SkillDef> destItems = skillDefRepo.findAllByProjectIdAndTypeIn(otherProjectId, [SkillDef.ContainerType.Subject, SkillDef.ContainerType.Skill, SkillDef.ContainerType.Badge, SkillDef.ContainerType.SkillsGroup])
         List<String> validationErrors = []
 
@@ -306,6 +309,29 @@ class ProjectCopyService {
         if (namesAlreadyInProject) {
             validationErrors.add("The following names already exist in the destination project: ${namesAlreadyInProject.sort().subList(0, Math.min(namesAlreadyInProject.size(), 10)).join(", ")}.".toString())
         }
+
+        if (!validationErrors) {
+            validLoop: for (SkillIdAndName skillToCheck : itemsToCopy) {
+                CustomValidationResult validationResult = customValidator.validateDescription(skillToCheck.description, origProjId)
+                if (!validationResult.isValid()) {
+                    validationErrors.add("The skill [${skillToCheck.skillName}] has a description that doesn\'t meet the validation requirements. Please fix and try again.".toString())
+                }
+
+                SkillVideoAttrs videoAttrs = skillAttributeService.getVideoAttrs(origProjId, skillToCheck.skillId)
+                if (StringUtils.isNotBlank(videoAttrs?.transcript)) {
+                    validationResult = customValidator.validateDescription(videoAttrs.transcript, origProjId)
+                    if (!validationResult.isValid()) {
+                        validationErrors.add("The skill [${skillToCheck.skillName}] has a video trascript that doesn\'t meet the validation requirements. Please fix and try again.".toString())
+                    }
+                }
+
+                if (validationErrors.size() >= 3) {
+                    break validLoop
+                }
+            }
+        }
+
+
         return validationErrors
     }
 

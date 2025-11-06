@@ -398,4 +398,248 @@ class CommunityAndProjectCopySpecs extends DefaultIntSpec {
         exception.message.contains("errorCode:ParagraphValidationFailed")
         exception.message.contains("skillId:${p1Skills[1].skillId}")
     }
+
+    def "prevent subject copy if any of the skills have an invalid description "() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills[2].description = "jabberwocky"
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        jdbcTemplate.execute("delete from settings where project_id='${p1.projectId}' and setting='user_community'")
+
+        def p2 = createProject(2)
+        pristineDragonsUser.createProject(p2)
+        when:
+        def validRes = pristineDragonsUser.validateCopySubjectDefIntoAnotherProject(p1.projectId, p1subj1.subjectId, p2.projectId)
+        pristineDragonsUser.copySubjectDefIntoAnotherProject(p1.projectId, p1subj1.subjectId, p2.projectId)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Failed to copy a skill due to the paragraph validation")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("skillId:${p1Skills[2].skillId}")
+
+        validRes.isAllowed == false
+        validRes.validationErrors == ["The skill [${p1Skills[2].name}] has a description that doesn't meet the validation requirements. Please fix and try again."]
+    }
+
+    def "prevent subject copy if any of the skills video transcript are invalid"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        pristineDragonsUser.saveSkillVideoAttributes(p1.projectId, p1Skills[2].skillId, [
+                videoUrl: "http://some.url",
+                transcript: "jabberwocky",
+                captions: "captions",
+        ])
+
+        jdbcTemplate.execute("delete from settings where project_id='${p1.projectId}' and setting='user_community'")
+
+        def p2 = createProject(2)
+        pristineDragonsUser.createProject(p2)
+        when:
+        def validRes = pristineDragonsUser.validateCopySubjectDefIntoAnotherProject(p1.projectId, p1subj1.subjectId, p2.projectId)
+        pristineDragonsUser.copySubjectDefIntoAnotherProject(p1.projectId, p1subj1.subjectId, p2.projectId)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Video transcript validation failed")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("skillId:${p1Skills[2].skillId}")
+
+        validRes.isAllowed == false
+        validRes.validationErrors == ["The skill [${p1Skills[2].name}] has a video trascript that doesn't meet the validation requirements. Please fix and try again."]
+    }
+
+    def "prevent subject copy if any of the skills video transcript are invalid - internally hosted video"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        Resource video = new ClassPathResource("/testVideos/create-quiz.mp4")
+        pristineDragonsUser.saveSkillVideoAttributes(p1.projectId, p1Skills[2].skillId, [
+                file: video,
+                transcript: "jabberwocky",
+                captions: "captions",
+        ])
+
+        jdbcTemplate.execute("delete from settings where project_id='${p1.projectId}' and setting='user_community'")
+
+        def p2 = createProject(2)
+        pristineDragonsUser.createProject(p2)
+        when:
+        def validRes = pristineDragonsUser.validateCopySubjectDefIntoAnotherProject(p1.projectId, p1subj1.subjectId, p2.projectId)
+        pristineDragonsUser.copySubjectDefIntoAnotherProject(p1.projectId, p1subj1.subjectId, p2.projectId)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Video transcript validation failed")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("skillId:${p1Skills[2].skillId}")
+
+        validRes.isAllowed == false
+        validRes.validationErrors == ["The skill [${p1Skills[2].name}] has a video trascript that doesn't meet the validation requirements. Please fix and try again."]
+    }
+
+    def "prevent skill batch copy if any of the skills have an invalid description "() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills[2].description = "jabberwocky"
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        jdbcTemplate.execute("delete from settings where project_id='${p1.projectId}' and setting='user_community'")
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        pristineDragonsUser.createProject(p2)
+        pristineDragonsUser.createSubject(p2subj1)
+        when:
+        def validRes = pristineDragonsUser.validateCopySkillDefsIntoAnotherProject(p1.projectId,
+                p1Skills.collect { it.skillId as String },
+                p2.projectId, p2subj1.subjectId)
+        pristineDragonsUser.copySkillDefsIntoAnotherProjectSubject(p1.projectId,
+                p1Skills.collect { it.skillId as String },
+                p2.projectId, p2subj1.subjectId)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Failed to copy a skill due to the paragraph validation")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("skillId:${p1Skills[2].skillId}")
+
+        validRes.isAllowed == false
+        validRes.validationErrors == ["The skill [${p1Skills[2].name}] has a description that doesn't meet the validation requirements. Please fix and try again."]
+    }
+
+    def "prevent skill batch copy if any of the skills video transcript are invalid"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        pristineDragonsUser.saveSkillVideoAttributes(p1.projectId, p1Skills[2].skillId, [
+                videoUrl: "http://some.url",
+                transcript: "jabberwocky",
+                captions: "captions",
+        ])
+
+        jdbcTemplate.execute("delete from settings where project_id='${p1.projectId}' and setting='user_community'")
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        pristineDragonsUser.createProject(p2)
+        pristineDragonsUser.createSubject(p2subj1)
+        when:
+        def validRes = pristineDragonsUser.validateCopySkillDefsIntoAnotherProject(p1.projectId,
+                p1Skills.collect { it.skillId as String },
+                p2.projectId, p2subj1.subjectId)
+        pristineDragonsUser.copySkillDefsIntoAnotherProjectSubject(p1.projectId,
+                p1Skills.collect { it.skillId as String },
+                p2.projectId, p2subj1.subjectId)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Video transcript validation failed")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("skillId:${p1Skills[2].skillId}")
+
+        validRes.isAllowed == false
+        validRes.validationErrors == ["The skill [${p1Skills[2].name}] has a video trascript that doesn't meet the validation requirements. Please fix and try again."]
+    }
+
+    def "prevent skill batch copy if any of the skills video transcript are invalid - internally hosted video"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        Resource video = new ClassPathResource("/testVideos/create-quiz.mp4")
+        pristineDragonsUser.saveSkillVideoAttributes(p1.projectId, p1Skills[2].skillId, [
+                file: video,
+                transcript: "jabberwocky",
+                captions: "captions",
+        ])
+
+        jdbcTemplate.execute("delete from settings where project_id='${p1.projectId}' and setting='user_community'")
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        pristineDragonsUser.createProject(p2)
+        pristineDragonsUser.createSubject(p2subj1)
+        when:
+        def validRes = pristineDragonsUser.validateCopySkillDefsIntoAnotherProject(p1.projectId,
+                p1Skills.collect { it.skillId as String },
+                p2.projectId, p2subj1.subjectId)
+        pristineDragonsUser.copySkillDefsIntoAnotherProjectSubject(p1.projectId,
+                p1Skills.collect { it.skillId as String },
+                p2.projectId, p2subj1.subjectId)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Video transcript validation failed")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("skillId:${p1Skills[2].skillId}")
+
+        validRes.isAllowed == false
+        validRes.validationErrors == ["The skill [${p1Skills[2].name}] has a video trascript that doesn't meet the validation requirements. Please fix and try again."]
+    }
+
+//    def "prevent skill reuse if any of the skills have an invalid description "() {
+//        List<String> users = getRandomUsers(2)
+//        SkillsService pristineDragonsUser = createService(users[1])
+//        SkillsService rootUser = createRootSkillService()
+//        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+//
+//        def p1 = createProject(1)
+//        p1.enableProtectedUserCommunity = true
+//        def p1subj1 = createSubject(1, 1)
+//        def p1Skills = createSkills(3, 1, 1, 100, 5)
+//        p1Skills[2].description = "jabberwocky"
+//        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+//
+//        def p1subj2 = createSubject(1, 2)
+//        pristineDragonsUser.createSubject(p1subj2)
+//
+//        jdbcTemplate.execute("delete from settings where project_id='${p1.projectId}' and setting='user_community'")
+//
+//        when:
+//        pristineDragonsUser.reuseSkills(p1.projectId, p1Skills.collect { it.skillId as String }, p1subj2.subjectId)
+//        then:
+//        def exception = thrown(SkillsClientException)
+//        exception.message.contains("Failed to copy a skill due to the paragraph validation")
+//        exception.message.contains("errorCode:ParagraphValidationFailed")
+//        exception.message.contains("skillId:${p1Skills[2].skillId}")
+//    }
+
 }

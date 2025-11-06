@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import '../copy/copy_commands'
 
 describe('Community Project Creation Tests', () => {
 
@@ -637,6 +638,62 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="exportFailedMessage"] [data-cy="failedSkillLink"]').contains('skill2')
         cy.get('[data-cy="exportFailedMessage"] [data-cy="failedSkillLink"]').click()
         cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: skill2')
+    });
+
+    it('prevent subject copy if any of the skills have an invalid description', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true, description: 'test project' })
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2, {description: 'jabberwocky'})
+        cy.createSkill(1, 1, 3)
+
+        cy.createProject(2)
+
+        cy.execSql(`delete from settings where project_id='proj1' and setting='user_community'`, true)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="btn_copy-subject"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="selectAProjectDropdown"]').click();
+        cy.get('[data-cy="projectSelector-projectName"]').contains('This is project 2').click();
+        cy.get('[data-cy="closeDialogBtn"]').contains('Cancel')
+
+        cy.get('[data-cy="validationFailedMsg"]').should('be.visible');
+        cy.get('[data-cy="validationFailedMsg"]').contains('The skill [Very Great Skill 2] has a description that doesn\'t meet the validation requirements. Please fix and try again.')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+    });
+
+    it('prevent batch skill copy if any of the skills have an invalid description', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true, description: 'test project' })
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2, {description: 'jabberwocky'})
+        cy.createSkill(1, 1, 3)
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+
+        cy.execSql(`delete from settings where project_id='proj1' and setting='user_community'`, true)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.initiateSkillsCopyModal([0, 1, 2])
+
+        // 1. select project
+        cy.get('[data-cy="selectAProjectDropdown"]').click();
+        cy.get('[data-cy="projectSelector-projectName"]').contains('This is project 2').click();
+
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="validationPassedMsg"]').should('not.exist');
+
+        // 2. select subject
+        cy.get('[data-cy="selectASubjectOrGroupDropdown"]').click();
+        cy.get('[data-cy="subjOrGroupSelector-name"]').contains('Subject 1').click();
+
+        cy.get('[data-cy="validationFailedMsg"]').contains('The skill [Very Great Skill 2] has a description that doesn\'t meet the validation requirements. Please fix and try again.')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
     });
 
 });
