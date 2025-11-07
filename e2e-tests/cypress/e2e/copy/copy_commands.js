@@ -25,3 +25,15 @@ Cypress.Commands.add("initiateSkillsCopyModal", (skillIndexesToCopy, optionalExp
 
     cy.get('[data-pc-name="dialog"] [data-pc-section="title"]').should('have.text', 'Copy Selected Skills To Another Project')
 });
+
+Cypress.Commands.add("initiateSkillsReuseModal", (skillIndexesToCopy, optionalExpandedGroupSelector = '') => {
+    const tableSelector = '[data-cy="skillsTable"]'
+    skillIndexesToCopy.forEach((index) => {
+        cy.get(`${optionalExpandedGroupSelector} ${tableSelector} [data-p-index="${index}"] [data-pc-name="pcrowcheckbox"] [data-pc-section="input"]`).click()
+    })
+    cy.get(`${optionalExpandedGroupSelector} [data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]`).should('have.text', skillIndexesToCopy.length)
+    cy.get(`${optionalExpandedGroupSelector} [data-cy="skillActionsBtn"]`).click()
+    cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()
+
+    cy.get('[ data-cy="reuseSkillsModalStep1"]')
+});

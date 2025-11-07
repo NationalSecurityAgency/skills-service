@@ -17,6 +17,7 @@ package skills.services.admin.skillReuse
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -27,16 +28,22 @@ import skills.controller.request.model.SkillsActionRequest
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.SkillDefSkinnyRes
 import skills.controller.result.model.SkillReuseDestination
+import skills.services.CustomValidationResult
+import skills.services.CustomValidator
 import skills.services.RuleSetDefGraphService
 import skills.services.admin.SkillCatalogFinalizationService
 import skills.services.admin.SkillCatalogService
+import skills.services.attributes.SkillAttributeService
+import skills.services.attributes.SkillVideoAttrs
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefParent
 import skills.storage.model.SkillDefSkinny
+import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillRelDefRepo
@@ -73,11 +80,17 @@ class SkillReuseService {
     @Autowired
     UserActionsHistoryService userActionsHistoryService
 
+    @Autowired
+    CustomValidator customValidator
+
+    @Autowired
+    SkillAttributeService skillAttributeService
+
     @Transactional
     @Profile
     void reuseSkill(String projectId, SkillsActionRequest skillReuseRequest) {
         // validate
-        validateSkillIsNotDisabled(projectId, skillReuseRequest)
+        validateSkillsForReuse(projectId, skillReuseRequest)
         validateParentIsNotDestination(projectId, skillReuseRequest)
         validateNoAlreadyReusedInDestination(skillReuseRequest, projectId)
         skillCatalogFinalizationService.validateNotInFinalizationState(projectId, "Cannot reuse skills while finalization is running")
@@ -141,13 +154,41 @@ class SkillReuseService {
     }
 
     @Profile
-    private void validateSkillIsNotDisabled(String projectId, SkillsActionRequest skillReuseRequest) {
-        SkillDef skillToReuse = skillDefAccessor.getSkillDef(projectId, skillReuseRequest.skillIds[0])
-        if (!Boolean.valueOf(skillToReuse.enabled)) {
-            throw new SkillException("Not allowed to reuse a disabled skill", projectId, skillToReuse.skillId, ErrorCode.BadParam)
-        }
+    private void validateSkillsForReuse(String projectId, SkillsActionRequest skillReuseRequest) {
+        skillReuseRequest.skillIds.each { validateSkillForReuse(projectId, it) }
     }
 
+    @Profile
+    private void validateSkillForReuse(String projectId, String skillId) {
+        if (customValidator.isParagraphValidationConfigured()) {
+            SkillDefWithExtra skillToReuse = skillDefAccessor.getSkillDefWithExtra(projectId, skillId)
+            validateSkillIsNotDisabled(skillToReuse)
+
+            CustomValidationResult customValidationResult = customValidator.validateDescription(skillToReuse.description, skillToReuse.projectId)
+            if (!customValidationResult.valid) {
+                String msg = "Failed to reuse a skill due to the paragraph validation: msg=[${customValidationResult.msg}]"
+                throw new SkillException(msg, skillToReuse.projectId, skillToReuse.skillId, ErrorCode.ParagraphValidationFailed)
+            }
+
+            SkillVideoAttrs videoAttrs = skillAttributeService.getVideoAttrs(skillToReuse.projectId, skillToReuse.skillId)
+            if (StringUtils.isNotBlank(videoAttrs?.transcript)) {
+                customValidationResult = customValidator.validateDescription(videoAttrs.transcript, skillToReuse.projectId)
+                if (!customValidationResult.isValid()) {
+                    String msg = "Video transcript validation failed: msg=[${customValidationResult.msg}]"
+                    throw new SkillException(msg, skillToReuse.projectId, skillToReuse.skillId, ErrorCode.ParagraphValidationFailed)
+                }
+            }
+        } else {
+            SkillDef skillToReuse = skillDefAccessor.getSkillDef(projectId, skillId)
+            validateSkillIsNotDisabled(skillToReuse)
+        }
+    }
+    @Profile
+    private static void validateSkillIsNotDisabled(SkillDefParent skillDefParent) {
+        if (!Boolean.valueOf(skillDefParent.enabled)) {
+            throw new SkillException("Not allowed to reuse a disabled skill", skillDefParent.projectId, skillDefParent.skillId, ErrorCode.BadParam)
+        }
+    }
     @Transactional(readOnly = true)
     List<SkillDefSkinnyRes> getReusedSkills(String projectId, String parentSkillId) {
         List<SkillDefSkinny> data = skillDefRepo.findChildReusedSkills(projectId, parentSkillId)
