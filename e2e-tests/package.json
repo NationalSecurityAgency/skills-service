@@ -77,31 +77,31 @@
   },
   "devDependencies": {
     "@bahmutov/print-env": "2.1.2",
-    "axe-core": "4.10.3",
-    "badge-maker": "4.1.0",
-    "cypress": "^14.5.4",
+    "axe-core": "4.11.0",
+    "badge-maker": "5.0.2",
+    "cypress": "15.6.0",
     "cypress-audit": "1.1.0",
-    "cypress-axe": "1.6.0",
+    "cypress-axe": "1.7.0",
     "cypress-file-upload": "5.0.8",
     "cypress-plugin-tab": "1.0.5",
-    "cypress-real-events": "1.14.0",
+    "cypress-real-events": "1.15.0",
     "cypress-visual-regression": "5.3.0",
     "cypress-wait-until": "3.0.2",
-    "dayjs": "1.11.13",
-    "eslint": "9.25.1",
+    "dayjs": "1.11.19",
+    "eslint": "9.39.1",
     "license-check-and-add": "4.0.5",
     "license-checker": "25.0.1",
     "mochawesome": "7.1.4",
     "mochawesome-merge": "5.0.0",
     "mochawesome-report-generator": "6.3.2",
     "moment": "2.30.1",
-    "moment-timezone": "0.5.48",
+    "moment-timezone": "0.6.0",
     "number-format.js": "2.0.9",
-    "pdf-parse": "1.1.1",
-    "stop-only": "3.4.2",
-    "wait-on": "8.0.3"
+    "pdf-parse": "2.4.5",
+    "stop-only": "3.4.4",
+    "wait-on": "9.0.1"
   },
   "dependencies": {
-    "idb-keyval": "6.2.1"
+    "idb-keyval": "6.2.2"
   }
 }
