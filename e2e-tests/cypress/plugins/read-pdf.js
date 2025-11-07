@@ -1,12 +1,14 @@
 const fs = require('fs')
-const pdf = require('pdf-parse')
+const { PDFParse } = require('pdf-parse');
 
 const readPdf = (filename) => {
   const dataBuffer = fs.readFileSync(filename)
-  return pdf(dataBuffer).then(function (data) {
-    return {
-      numpages: data.numpages,
-      text: data.text,
+  const parser = new PDFParse({ data: dataBuffer });
+
+  return parser.getText().then(function (data) {
+      return {
+          numpages: data.pages?.length || -1,
+          text: data.text,
     }
   })
 }
