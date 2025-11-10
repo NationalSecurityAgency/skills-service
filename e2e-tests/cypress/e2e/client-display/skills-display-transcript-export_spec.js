@@ -206,7 +206,7 @@ describe('Transcript export tests', () => {
       expect(clean(doc.text)).to.include('Level: 1 / 5 ')
       expect(clean(doc.text)).to.include('Points: 600 / 2,600 (23%)')
       expect(clean(doc.text)).to.include('Skills: 6 / 26 (23%)')
-      expect(clean(doc.text)).to.include('Badges: 1 ')
+      expect(clean(doc.text)).to.include('Badges: 1')
 
       // should be a title on the 2nd page
       expect(clean(doc.text)).to.include('Subject: Subject 1'.toUpperCase())

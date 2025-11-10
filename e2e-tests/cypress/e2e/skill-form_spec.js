@@ -20,12 +20,17 @@ describe('Skill Form Tests', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.visit('/administrator/projects/proj1');
+
+        cy.get('[data-cy="projectLastReportedSkillValue"]').contains('Never')
+        cy.get('[data-cy="manageBtn_subj1"]').click()
 
         cy.openNewSkillDialog();
         cy.get('[data-cy="skillName"]').type('testname')
 
         cy.go('back');
+        cy.get('[data-cy="projectLastReportedSkillValue"]').contains('Never')
+        cy.get('[data-cy="manageBtn_subj1"]')
         cy.go('forward');
 
         cy.openNewSkillDialog();
