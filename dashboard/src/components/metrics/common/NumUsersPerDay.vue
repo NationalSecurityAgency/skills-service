@@ -17,6 +17,8 @@ limitations under the License.
 import {ref, onMounted, computed} from 'vue';
 import { useRoute } from 'vue-router';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import Chart from 'primevue/chart';
+import 'chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm';
 import dayjs from 'dayjs';
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import MetricsService from "@/components/metrics/MetricsService.js";
@@ -55,10 +57,14 @@ onMounted(() => {
     localProps.value.skillId = route.params.subjectId;
   }
   loadData();
+
+  chartData.value = setChartData();
+  chartJsOptions.value = setChartOptions();
 })
 
 const loading = ref(true);
 const distinctUsersOverTime = ref([]);
+const distinctUsersOverTimeChartData = ref([]);
 const hasDataEnoughData = ref(false);
 const mutableTitle = ref(props.title);
 const byMonth = ref(false);
@@ -185,6 +191,21 @@ const loadData = () => {
             data: response.newUsers.map((item) => [item.value, item.count]),
             name: 'New Users',
           }];
+          distinctUsersOverTimeChartData.value = {
+            datasets: [{
+              label: 'Users',
+              cubicInterpolationMode: 'monotone',
+              data: response.users.map((item) => {
+                return {x: dayjs(item.value).format('YYYY-MM-DD'), y: item.count}
+              })
+            }, {
+              label: 'New Users',
+              cubicInterpolationMode: 'monotone',
+              data: response.newUsers.map((item) => {
+                return {x: dayjs(item.value).format('YYYY-MM-DD'), y: item.count}
+              })
+            }]
+          }
         } else {
           distinctUsersOverTime.value = [];
           hasDataEnoughData.value = false;
@@ -211,6 +232,93 @@ const dateOptionChanged = (option) => {
     loadData()
   }
 }
+
+
+const chartData = ref();
+const chartJsOptions = ref();
+
+const setChartData = () => {
+  const documentStyle = getComputedStyle(document.documentElement);
+
+  return {
+    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    datasets: [
+      {
+        label: 'First Dataset',
+        data: [65, 59, 80, 81, 56, 55, 40],
+        fill: false,
+        borderColor: documentStyle.getPropertyValue('--p-cyan-500'),
+        tension: 0.4
+      },
+      {
+        label: 'Second Dataset',
+        data: [28, 48, 40, 19, 86, 27, 90],
+        fill: false,
+        borderColor: documentStyle.getPropertyValue('--p-gray-500'),
+        tension: 0.4
+      }
+    ]
+  };
+};
+const setChartOptions = () => {
+  const documentStyle = getComputedStyle(document.documentElement);
+  const textColor = documentStyle.getPropertyValue('--p-text-color');
+  const textColorSecondary = documentStyle.getPropertyValue('--p-text-muted-color');
+  const surfaceBorder = documentStyle.getPropertyValue('--p-content-border-color');
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        type: 'time',
+        time: {
+          unit: 'day'
+        },
+        ticks: {
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder,
+          drawOnChartArea: false  // Ensures no grid lines are drawn in the chart area
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder
+        },
+        title: {
+          display: true,
+          text: 'Distinct # of Users',
+          color: textColorSecondary,
+          font: {
+            size: 12,
+            weight: '500'
+          },
+          padding: { left: 10, right: 5 }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: textColor,
+          padding: 20,
+          boxWidth: 12,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+    }
+  };
+}
+
 </script>
 
 <template>
@@ -233,6 +341,14 @@ const dateOptionChanged = (option) => {
       </SkillsCardHeader>
     </template>
     <template #content>
+      <div>
+        <Chart type="line" :data="distinctUsersOverTimeChartData" :options="chartJsOptions" class="h-[30rem]" />
+      </div>
+      <div>
+<!--        <pre>{{ chartData }}</pre>-->
+<!--        <pre>{{ distinctUsersOverTimeChartData }}</pre>-->
+      </div>
+
       <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity." class="mt-6">
         <apexchart type="area" height="350" width="100%" :options="chartOptions" :series="distinctUsersOverTime" data-cy="apexchart"></apexchart>
       </metrics-overlay>

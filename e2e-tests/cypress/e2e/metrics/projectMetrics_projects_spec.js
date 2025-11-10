@@ -157,7 +157,7 @@ describe('Metrics Tests', () => {
                 numPerformToCompletion: '25',
             });
         }
-        ;
+
 
         const m = moment.utc();
         cy.request('POST', `/api/projects/proj1/skills/skill1`, { userId: 'user0Good@skills.org',
@@ -174,6 +174,20 @@ describe('Metrics Tests', () => {
                 .subtract(1, 'day')
                 .format('x')
         });
+
+        for (let day = 0; day < 100; day++) {
+            if (day % 2 === 0) {
+                for (let i = 0; i < 12; i++) {
+                    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+                        userId: `user${i}Good@skills.org`,
+                        timestamp: m.clone()
+                            .subtract(day, 'day')
+                            .format('x')
+                    });
+                }
+            }
+        }
+
 
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
