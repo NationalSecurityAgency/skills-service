@@ -1753,7 +1753,7 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/reuse", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
-    RequestResult reuseASkill(@PathVariable("projectId") String projectId,
+    RequestResult reuseSkills(@PathVariable("projectId") String projectId,
                               @RequestBody SkillsActionRequest skillReuseRequest) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotEmpty(skillReuseRequest.skillIds, "skillReuseRequest.skillIds")

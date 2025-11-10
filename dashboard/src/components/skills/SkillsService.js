@@ -165,7 +165,7 @@ export default {
       subjectId: newSubjectId,
       groupId: newGroupId,
       skillIds
-    })
+    }, { handleError: false })
   },
   moveSkills(projectId, skillIds, newSubjectId, newGroupId = null, handleError = true) {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/move`

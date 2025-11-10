@@ -950,19 +950,21 @@ ORDER BY s.name ASC
     int unsetSelfReportTypeByProjectIdSkillIdAndSelfReportType(String projectId, String skillId, SelfReportingType selfReportingType)
 
 
-    static interface SkillIdAndName {
+    static interface SkillIdAndNameAndDesc {
         String getSkillId()
         String getSkillName()
         ContainerType getType()
+        @Nullable
+        String getDescription()
     }
 
     @Nullable
-    @Query('''select sd.skillId as skillId, sd.name as skillName, sd.type as type
-            from SkillDef sd, SkillRelDef rel
+    @Query('''select sd.skillId as skillId, sd.name as skillName, sd.type as type, sd.description as description
+            from SkillDefWithExtra sd, SkillRelDef rel
             where
                 sd.id = rel.child.id
                 and rel.parent.id = ?1
                 and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')''')
-    List<SkillIdAndName> findSkillsIdAndNameUnderASubject(Integer subjectRefId)
+    List<SkillIdAndNameAndDesc> findSkillsIdAndNameUnderASubject(Integer subjectRefId)
 
 }

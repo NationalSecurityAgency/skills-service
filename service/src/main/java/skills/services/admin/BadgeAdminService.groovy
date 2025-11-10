@@ -125,7 +125,7 @@ class BadgeAdminService {
             CustomValidationResult customValidationResult = customValidator.validate(badgeRequest, projectId)
             if (!customValidationResult.valid) {
                 String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[badge], badgeId=[${badgeRequest.badgeId}], badgeName=[${badgeRequest.name}], description=[${badgeRequest.description}]"
-                throw new SkillException(msg)
+                throw new SkillException(msg, projectId, originalBadgeId, ErrorCode.ParagraphValidationFailed)
             }
         }
 

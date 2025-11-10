@@ -153,7 +153,7 @@ class SkillsAdminService {
             final CustomValidationResult customValidationResult = customValidator.validate(skillRequest)
             if (!customValidationResult.valid) {
                 String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[skill], skillId=[${skillRequest.skillId}], name=[${skillRequest.name}], description=[${skillRequest.description}]"
-                throw new SkillException(msg)
+                throw new SkillException(msg, skillRequest.projectId, skillRequest.skillId, ErrorCode.ParagraphValidationFailed)
             }
         }
 

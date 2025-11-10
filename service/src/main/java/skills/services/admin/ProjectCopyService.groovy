@@ -20,6 +20,7 @@ import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import jakarta.persistence.EntityManager
 import jakarta.persistence.PersistenceContext
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -179,7 +180,8 @@ class ProjectCopyService {
             return new CopyValidationRes(isAllowed: false, validationErrors: [skillException.getMessage()?.toString()])
         }
 
-        List<String> validationErrors = checkForSkillIdAndNameCollisions(itemsToCopy.collect { new SkillIdAndName(skillId: it.skillId, skillName: it.name) }, otherProjectId)
+        List<SkillIdAndName> itemsToCheck = itemsToCopy.collect { new SkillIdAndName(skillId: it.skillId, skillName: it.name, description: it.description) }
+        List<String> validationErrors = checkForSkillIdAndNameCollisions(itemsToCheck, otherProjectId, projectId)
         if (otherSubject && !Boolean.valueOf(otherSubject.enabled)) {
             List<String> enabledSkillIds = itemsToCopy.findAll { Boolean.valueOf(it.enabled) }.collect { it.skillId }
             if (enabledSkillIds) {
@@ -275,9 +277,10 @@ class ProjectCopyService {
         }
 
 
-        List<SkillDefRepo.SkillIdAndName> itemsToCopy = skillDefRepo.findSkillsIdAndNameUnderASubject(subject.id)
+        List<SkillDefRepo.SkillIdAndNameAndDesc> itemsToCopy = skillDefRepo.findSkillsIdAndNameUnderASubject(subject.id)
 
-        List<String> validationErrors = checkForSkillIdAndNameCollisions(itemsToCopy.collect { new SkillIdAndName(skillId: it.skillId, skillName: it.skillName) }, otherProjectId)
+        List<SkillIdAndName> itemsToCheck = itemsToCopy.collect { new SkillIdAndName(skillId: it.skillId, skillName: it.skillName, description: it.description) }
+        List<String> validationErrors = checkForSkillIdAndNameCollisions(itemsToCheck, otherProjectId, projectId)
         CopyValidationRes res = new CopyValidationRes(isAllowed: validationErrors?.isEmpty(), validationErrors: validationErrors)
         return res
     }
@@ -285,10 +288,11 @@ class ProjectCopyService {
     private static class SkillIdAndName {
         String skillId
         String skillName
+        String description
     }
 
     @Profile
-    private List<String> checkForSkillIdAndNameCollisions(List<SkillIdAndName> itemsToCopy, String otherProjectId) {
+    private List<String> checkForSkillIdAndNameCollisions(List<SkillIdAndName> itemsToCopy, String otherProjectId, String origProjId) {
         List<SkillDef> destItems = skillDefRepo.findAllByProjectIdAndTypeIn(otherProjectId, [SkillDef.ContainerType.Subject, SkillDef.ContainerType.Skill, SkillDef.ContainerType.Badge, SkillDef.ContainerType.SkillsGroup])
         List<String> validationErrors = []
 
@@ -305,6 +309,29 @@ class ProjectCopyService {
         if (namesAlreadyInProject) {
             validationErrors.add("The following names already exist in the destination project: ${namesAlreadyInProject.sort().subList(0, Math.min(namesAlreadyInProject.size(), 10)).join(", ")}.".toString())
         }
+
+        if (!validationErrors) {
+            validLoop: for (SkillIdAndName skillToCheck : itemsToCopy) {
+                CustomValidationResult validationResult = customValidator.validateDescription(skillToCheck.description, origProjId)
+                if (!validationResult.isValid()) {
+                    validationErrors.add("The skill [${skillToCheck.skillName}] has a description that doesn\'t meet the validation requirements. Please fix and try again.".toString())
+                }
+
+                SkillVideoAttrs videoAttrs = skillAttributeService.getVideoAttrs(origProjId, skillToCheck.skillId)
+                if (StringUtils.isNotBlank(videoAttrs?.transcript)) {
+                    validationResult = customValidator.validateDescription(videoAttrs.transcript, origProjId)
+                    if (!validationResult.isValid()) {
+                        validationErrors.add("The skill [${skillToCheck.skillName}] has a video trascript that doesn\'t meet the validation requirements. Please fix and try again.".toString())
+                    }
+                }
+
+                if (validationErrors.size() >= 3) {
+                    break validLoop
+                }
+            }
+        }
+
+
         return validationErrors
     }
 
@@ -584,25 +611,42 @@ class ProjectCopyService {
     private void saveBadgesAndTheirSkills(ProjDef fromProject, ProjDef toProj, HashMap<String, String> newIcons) {
         List<SkillDefWithExtra> badges = skillDefWithExtraRepo.findAllByProjectIdAndType(fromProject.projectId, SkillDef.ContainerType.Badge)
         badges.sort { it.displayOrder }.each { SkillDefWithExtra fromBadge ->
-            BadgeRequest badgeRequest = new BadgeRequest()
-            Props.copy(fromBadge, badgeRequest)
-            badgeRequest.badgeId = fromBadge.skillId
-            badgeRequest.description = handleAttachmentsInDescription(badgeRequest.description, toProj.projectId)
-            badgeRequest.enabled = Boolean.FALSE.toString()
-            if(newIcons[fromBadge.iconClass]) {
-                badgeRequest.iconClass = newIcons[fromBadge.iconClass];
-            }
-            badgeAdminService.saveBadge(toProj.projectId, fromBadge.skillId, badgeRequest)
-            List<SkillDefPartialRes> badgeSkills = skillsAdminService.getSkillsForBadge(fromProject.projectId, fromBadge.skillId)
-            badgeSkills.each { SkillDefPartialRes fromBadgeSkill ->
-                badgeAdminService.addSkillToBadge(toProj.projectId, badgeRequest.badgeId, fromBadgeSkill.skillId)
-            }
-            // must enable it after the skills were added
-            if (fromBadge.enabled == Boolean.TRUE.toString() && badgeSkills) {
-                badgeRequest.enabled = fromBadge.enabled
+            try {
+                BadgeRequest badgeRequest = new BadgeRequest()
+                Props.copy(fromBadge, badgeRequest)
+                badgeRequest.badgeId = fromBadge.skillId
+                badgeRequest.description = handleAttachmentsInDescription(badgeRequest.description, toProj.projectId)
+                badgeRequest.enabled = Boolean.FALSE.toString()
+                if (newIcons[fromBadge.iconClass]) {
+                    badgeRequest.iconClass = newIcons[fromBadge.iconClass];
+                }
                 badgeAdminService.saveBadge(toProj.projectId, fromBadge.skillId, badgeRequest)
+                List<SkillDefPartialRes> badgeSkills = skillsAdminService.getSkillsForBadge(fromProject.projectId, fromBadge.skillId)
+                badgeSkills.each { SkillDefPartialRes fromBadgeSkill ->
+                    badgeAdminService.addSkillToBadge(toProj.projectId, badgeRequest.badgeId, fromBadgeSkill.skillId)
+                }
+                // must enable it after the skills were added
+                if (fromBadge.enabled == Boolean.TRUE.toString() && badgeSkills) {
+                    badgeRequest.enabled = fromBadge.enabled
+                    badgeAdminService.saveBadge(toProj.projectId, fromBadge.skillId, badgeRequest)
+                }
+            } catch (Throwable t) {
+                handleItemFailure(t, fromBadge)
             }
         }
+    }
+
+    private static void handleItemFailure(Throwable t, SkillDefParent item) {
+        ErrorCode errorCode = ErrorCode.InternalError
+        String itemType = item.type.toString().toLowerCase()
+        String msg = "Error copying ${itemType}: ${item.skillId}"
+        if (t instanceof SkillException) {
+            if (t.errorCode == ErrorCode.ParagraphValidationFailed) {
+                errorCode = ErrorCode.ParagraphValidationFailed
+                msg = "Failed to copy a ${itemType} due to the paragraph validation. Full message: ${t.message}"
+            }
+        }
+        throw new SkillException(msg, t, item.projectId, item.skillId, errorCode)
     }
 
     @Profile
@@ -620,11 +664,16 @@ class ProjectCopyService {
         Props.copy(fromSubj, toSubj)
         toSubj.subjectId = fromSubj.skillId
         toSubj.description = handleAttachmentsInDescription(toSubj.description, toProj.projectId)
-        if(newIcons[fromSubj.iconClass]) {
+        if (newIcons[fromSubj.iconClass]) {
             toSubj.iconClass = newIcons[fromSubj.iconClass]
         }
-        subjAdminService.saveSubject(toProj.projectId, fromSubj.skillId, toSubj)
-        log.info("PROJ COPY: [{}]=[{}] subj[{}] - created new subject")
+
+        try {
+            subjAdminService.saveSubject(toProj.projectId, fromSubj.skillId, toSubj)
+        } catch (Throwable t) {
+            handleItemFailure(t, fromSubj)
+        }
+
         createSkills(fromProject.projectId, toProj.projectId, toSubj.subjectId, allCollectedSkills, null, validateNameAndIdCollisions)
     }
 
@@ -689,7 +738,11 @@ class ProjectCopyService {
 
                         handleSkillAttributes(fromSkill, saveSkillTmpRes)
                     } catch (Throwable t) {
-                        throw new SkillException("Error copying skill: ${fromSkill.skillId}", t)
+                        boolean isVideoTranscriptError = t instanceof SkillException && t?.errorCode == ErrorCode.ParagraphValidationFailed && t?.message?.contains('Video transcript validation failed')
+                        if (isVideoTranscriptError) {
+                            throw t
+                        }
+                        handleItemFailure(t, fromSkill)
                     }
                 }
     }
@@ -736,6 +789,13 @@ class ProjectCopyService {
     private boolean handleInternallyHostedVideo(SkillAttributesDef attributesDef, SkillDefWithExtra fromSkill, SkillsAdminService.SaveSkillTmpRes toSkill) {
         if (attributesDef.type == SkillAttributesDef.SkillAttributesType.Video) {
             SkillVideoAttrs videoAttrs = skillAttributeService.convertAttrs(attributesDef, SkillVideoAttrs.class)
+            if (StringUtils.isNotBlank(videoAttrs.transcript)) {
+                CustomValidationResult validationResult = customValidator.validateDescription(videoAttrs.transcript, fromSkill.projectId)
+                if (!validationResult.valid) {
+                    String msg = "Video transcript validation failed, fullMessage=[${validationResult.msg}]"
+                    throw new SkillException(msg, null, fromSkill.projectId, fromSkill.skillId, ErrorCode.ParagraphValidationFailed)
+                }
+            }
             if (!videoAttrs.isInternallyHosted) {
                 return false
             }

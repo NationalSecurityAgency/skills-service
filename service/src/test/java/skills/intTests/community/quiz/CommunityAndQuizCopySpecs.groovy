@@ -15,18 +15,21 @@
  */
 package skills.intTests.community.quiz
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.Resource
+import org.springframework.jdbc.core.JdbcTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
-import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
 import skills.storage.model.QuizSetting
 
-import static skills.intTests.utils.SkillsFactory.*
-
 class CommunityAndQuizCopySpecs extends DefaultIntSpec {
 
+    @Autowired
+    JdbcTemplate jdbcTemplate
 
     def "non-UC user cannot copy non-uc quiz to uc"() {
         def q1 = QuizDefFactory.createQuiz(1)
@@ -266,6 +269,105 @@ class CommunityAndQuizCopySpecs extends DefaultIntSpec {
         originalQuizDef.quizId == q1.quizId
         originalQuizDef.userCommunity == 'All Dragons'
         !originalQuizDef.description
+    }
+
+    def "clearly indicate which question is failing to copy due to paragraph validation"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(q1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
+        questions[1].question = "jabberwocky"
+        pristineDragonsUser.createQuizQuestionDefs(questions)
+
+        jdbcTemplate.execute("DELETE FROM quiz_settings qs USING quiz_definition qd WHERE qs.quiz_ref_id = qd.id " +
+                " AND qd.quiz_id = '${q1.quizId}' AND qs.setting = 'user_community'")
+
+        def origQuestionDefs = pristineDragonsUser.getQuizQuestionDefs(q1.quizId)
+        when:
+        def copy = [quizId: 'newQuizCopy',
+                    name: 'Copy of Quiz',
+                    type: q1.type]
+        pristineDragonsUser.copyQuiz(q1.quizId, copy)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Validation failed for questionId")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("questionId:${origQuestionDefs.questions[1].id}")
+    }
+
+    def "clearly indicate which question's video transcript is failing to copy due to paragraph validation"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(q1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
+        pristineDragonsUser.createQuizQuestionDefs(questions)
+
+        def origQuestionDefs = pristineDragonsUser.getQuizQuestionDefs(q1.quizId)
+        pristineDragonsUser.saveSkillVideoAttributes(q1.quizId, origQuestionDefs.questions[1].id?.toString(), [
+                videoUrl: "http://some.url",
+                transcript: "jabberwocky",
+                captions: "captions",
+        ], true)
+
+        jdbcTemplate.execute("DELETE FROM quiz_settings qs USING quiz_definition qd WHERE qs.quiz_ref_id = qd.id " +
+                " AND qd.quiz_id = '${q1.quizId}' AND qs.setting = 'user_community'")
+
+
+        when:
+        def copy = [quizId: 'newQuizCopy',
+                    name: 'Copy of Quiz',
+                    type: q1.type]
+        pristineDragonsUser.copyQuiz(q1.quizId, copy)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Video transcript validation failed")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("questionId:${origQuestionDefs.questions[1].id}")
+    }
+
+    def "clearly indicate which question's video transcript is failing to copy due to paragraph validation - internally hosted video"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(q1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
+        pristineDragonsUser.createQuizQuestionDefs(questions)
+
+        def origQuestionDefs = pristineDragonsUser.getQuizQuestionDefs(q1.quizId)
+        Resource video = new ClassPathResource("/testVideos/create-quiz.mp4")
+        pristineDragonsUser.saveSkillVideoAttributes(q1.quizId, origQuestionDefs.questions[1].id?.toString(), [
+                file: video,
+                transcript: "jabberwocky",
+                captions: "captions",
+        ], true)
+
+        jdbcTemplate.execute("DELETE FROM quiz_settings qs USING quiz_definition qd WHERE qs.quiz_ref_id = qd.id " +
+                " AND qd.quiz_id = '${q1.quizId}' AND qs.setting = 'user_community'")
+
+        when:
+        def copy = [quizId: 'newQuizCopy',
+                    name: 'Copy of Quiz',
+                    type: q1.type]
+        pristineDragonsUser.copyQuiz(q1.quizId, copy)
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Video transcript validation failed")
+        exception.message.contains("errorCode:ParagraphValidationFailed")
+        exception.message.contains("questionId:${origQuestionDefs.questions[1].id}")
     }
 
 }

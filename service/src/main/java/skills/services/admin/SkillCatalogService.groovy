@@ -32,6 +32,8 @@ import skills.controller.request.model.ImportedSkillUpdate
 import skills.controller.request.model.SkillImportRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.*
+import skills.services.CustomValidationResult
+import skills.services.CustomValidator
 import skills.services.RuleSetDefGraphService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.attributes.SkillAttributeService
@@ -114,6 +116,9 @@ class SkillCatalogService {
 
     @Autowired
     UserActionsHistoryService userActionsHistoryService
+
+    @Autowired
+    CustomValidator customValidator
 
     @Transactional(readOnly = true)
     TotalCountAwareResult<ProjectNameAwareSkillDefRes> getSkillsAvailableInCatalog(String projectId, String projectNameSearch, String subjectNameSearch, String skillNameSearch, PageRequest pageable) {
@@ -225,6 +230,10 @@ class SkillCatalogService {
         }
         if (doesSkillNameAlreadyExistInCatalog(skillDef.name)) {
             throw new SkillException("Skill name [${skillDef.name}] already exists in the catalog. Duplicate skill names are not allowed", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
+        }
+        CustomValidationResult validationResult = customValidator.validateDescription(skillDef.description, skillDef.projectId)
+        if (!validationResult.isValid()) {
+            throw new SkillException("Skill description is invalid", null, skillDef.projectId, skillDef.skillId, ErrorCode.ParagraphValidationFailed)
         }
         SkillDef mySubject = relationshipService.getMySubjectParent(skillDef.id)
         insufficientPointsValidator.validateSubjectPoints(mySubject.totalPoints, mySubject.projectId,  mySubject.skillId, null, ", export to catalog is disallowed")

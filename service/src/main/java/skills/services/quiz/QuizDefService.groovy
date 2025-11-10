@@ -288,6 +288,30 @@ class QuizDefService {
         QuizQuestionsResult originalQuestions = getQuestionDefs(originalQuizId)
         List<QuizQuestionDefRequest> newQuestions = new ArrayList<QuizQuestionDefRequest>()
         originalQuestions.questions.forEach(question -> {
+
+            CustomValidationResult validationResult = customValidator.validateDescription(question.question,
+                    null, false, originalQuizId)
+            if (validationResult.valid && StringUtils.isNotBlank(question.answerHint)) {
+                validationResult = customValidator.validateDescription(question.answerHint,
+                        null, false, originalQuizId)
+            }
+            if (!validationResult.valid) {
+                String msg = "Validation failed for questionId=[${question.id}], fullMessage=[${validationResult.msg}]"
+                throw new SkillQuizException(msg, null, originalQuizId, question.id, ErrorCode.ParagraphValidationFailed)
+            }
+            if (question.attributes) {
+                def parsed = jsonSlurper.parseText(question.attributes)
+                String trasnscript = parsed["transcript"]
+                if (StringUtils.isNotBlank(trasnscript)) {
+                    validationResult = customValidator.validateDescription(trasnscript,
+                            null, false, originalQuizId)
+                    if (!validationResult.valid) {
+                        String msg = "Video transcript validation failed for questionId=[${question.id}], fullMessage=[${validationResult.msg}]"
+                        throw new SkillQuizException(msg, null, originalQuizId, question.id, ErrorCode.ParagraphValidationFailed)
+                    }
+                }
+            }
+
             List<QuizAnswerDefResult> answers = question.answers
             QuizQuestionDefRequest newQuestion = new QuizQuestionDefRequest()
             String updateQuestion = attachmentService.copyAttachmentsForIncomingDescription(question.question, null, null, newQuizId)
@@ -387,7 +411,7 @@ class QuizDefService {
 
         CustomValidationResult customValidationResult = customValidator.validate(quizDefRequest)
         if (!customValidationResult.valid) {
-            throw new SkillQuizException(customValidationResult.msg, quizDefWithDescription.quizId, ErrorCode.BadParam)
+            throw new SkillQuizException(customValidationResult.msg, quizDefWithDescription.quizId, ErrorCode.ParagraphValidationFailed)
         }
 
         QuizDefWithDescription updatedDef = quizDefWithDescRepo.findByQuizIdIgnoreCase(quizDefWithDescription.quizId)

@@ -15,6 +15,8 @@
  */
 package skills.intTests.community
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -26,6 +28,9 @@ import static skills.intTests.utils.SkillsFactory.createSkills
 import static skills.intTests.utils.SkillsFactory.createSubject
 
 class CommunityAndSkillsCatalogSpecs extends DefaultIntSpec {
+
+    @Autowired
+    JdbcTemplate jdbcTemplate
 
     def "projects with a protected community are not allowed to export skills"() {
         List<String> users = getRandomUsers(2)
@@ -93,5 +98,30 @@ class CommunityAndSkillsCatalogSpecs extends DefaultIntSpec {
         then:
         res.isUserCommunityRestricted == true
         res1.isUserCommunityRestricted == false
+    }
+
+    def "prevent export of skills with invalid descriptions to catalog"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        p1Skills[2].description = "jabberwocky"
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        jdbcTemplate.execute("delete from settings where project_id='${p1.projectId}' and setting='user_community'")
+
+        when:
+        pristineDragonsUser.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Skill description is invalid")
+        e.message.contains("errorCode:ParagraphValidationFailed")
+        e.message.contains("skillId:${p1Skills[2].skillId}")
+        e.message.contains("projectId:${p1.projectId}")
     }
 }

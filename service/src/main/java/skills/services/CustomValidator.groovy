@@ -111,6 +111,10 @@ class CustomValidator {
         return this
     }
 
+    boolean isParagraphValidationConfigured() {
+        return paragraphPattern != null
+    }
+
     CustomValidationResult validate(ProjectRequest projectRequest) {
         CustomValidationResult validationResult = validateDescription(projectRequest.description, projectRequest.projectId)
         if (!validationResult.valid) {

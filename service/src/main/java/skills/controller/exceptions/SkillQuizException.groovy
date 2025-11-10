@@ -22,6 +22,7 @@ class SkillQuizException extends RuntimeException {
     public static final String NA = 'N/A'
 
     String quizId
+    Integer questionId
     String userId
     ErrorCode errorCode = ErrorCode.InternalError
     boolean printStackTrace = true
@@ -58,6 +59,13 @@ class SkillQuizException extends RuntimeException {
     SkillQuizException(String msg, Throwable var2, String quizId, ErrorCode errorCode) {
         super(msg, var2)
         this.quizId = quizId
+        this.errorCode = errorCode
+    }
+
+    SkillQuizException(String msg, Throwable var2, String quizId, Integer questionId, ErrorCode errorCode) {
+        super(msg, var2)
+        this.quizId = quizId
+        this.questionId = questionId
         this.errorCode = errorCode
     }
 
