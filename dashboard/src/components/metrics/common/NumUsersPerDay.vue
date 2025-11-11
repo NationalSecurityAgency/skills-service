@@ -27,6 +27,7 @@ import NumberFormatter from '@/components/utils/NumberFormatter.js'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
+import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
 
 
 const appConfig = useAppConfig();
@@ -191,23 +192,35 @@ const loadData = () => {
             data: response.newUsers.map((item) => [item.value, item.count]),
             name: 'New Users',
           }];
+          const formatTimestamp = (timestamp) => {
+            const format = localProps.value.byMonth ? 'YYYY-MM' : 'YYYY-MM-DD';
+            return dayjs(timestamp).format(format)
+          }
           distinctUsersOverTimeChartData.value = {
             datasets: [{
               label: 'Users',
-              cubicInterpolationMode: 'monotone',
               data: response.users.map((item) => {
-                return {x: dayjs(item.value).format('YYYY-MM-DD'), y: item.count}
-              })
+                return {x: formatTimestamp(item.value), y: item.count}
+              }),
+              cubicInterpolationMode: 'monotone',
+              order: 2, // Lower order means it will be drawn first (in the background)
+              borderColor: getComputedStyle(document.documentElement).getPropertyValue('--p-cyan-500'),
+              backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--p-cyan-100'),
             }, {
               label: 'New Users',
-              cubicInterpolationMode: 'monotone',
               data: response.newUsers.map((item) => {
-                return {x: dayjs(item.value).format('YYYY-MM-DD'), y: item.count}
-              })
+                return {x: formatTimestamp(item.value), y: item.count}
+              }),
+              cubicInterpolationMode: 'monotone',
+              order: 1,  // Higher order means it will be drawn last (on top)
+              borderColor: getComputedStyle(document.documentElement).getPropertyValue('--p-green-500'),
+              backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--p-green-100'),
             }]
           }
+          chartJsOptions.value.scales.x.time.unit = byMonth.value ? 'month' : 'day';
         } else {
           distinctUsersOverTime.value = [];
+          distinctUsersOverTimeChartData.value = [];
           hasDataEnoughData.value = false;
         }
         loading.value = false;
@@ -315,10 +328,20 @@ const setChartOptions = () => {
           pointStyle: 'circle'
         }
       },
+      tooltip: {
+        callbacks: {
+          title: (context) => {
+            const date = new Date(context[0].parsed.x)
+            const formatStr = byMonth.value ? 'MMM YYYY' :'MMM D, YYYY'
+            return dayjs(date).format(formatStr)
+          },
+        },
+      }
     }
   };
 }
 
+const usersChartRef = ref(null)
 </script>
 
 <template>
@@ -341,16 +364,14 @@ const setChartOptions = () => {
       </SkillsCardHeader>
     </template>
     <template #content>
-      <div>
-        <Chart type="line" :data="distinctUsersOverTimeChartData" :options="chartJsOptions" class="h-[30rem]" />
-      </div>
-      <div>
-<!--        <pre>{{ chartData }}</pre>-->
-<!--        <pre>{{ distinctUsersOverTimeChartData }}</pre>-->
-      </div>
-
-      <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity." class="mt-6">
-        <apexchart type="area" height="350" width="100%" :options="chartOptions" :series="distinctUsersOverTime" data-cy="apexchart"></apexchart>
+      <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity.">
+        <chart-download-controls :vue-chart-ref="usersChartRef" />
+        <Chart ref="usersChartRef"
+               id="usersTimeChart"
+               type="line"
+               :data="distinctUsersOverTimeChartData"
+               :options="chartJsOptions"
+               class="h-[30rem]" />
       </metrics-overlay>
     </template>
   </Card>
