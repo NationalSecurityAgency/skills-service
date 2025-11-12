@@ -14,14 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted } from 'vue';
+import {onMounted, ref} from 'vue';
 import MetricsService from '@/components/metrics/MetricsService.js';
-import { useRoute } from 'vue-router';
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
-import NumberFormatter from '@/components/utils/NumberFormatter.js'
+import {useRoute} from 'vue-router';
 import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue';
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
+import Chart from "primevue/chart";
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
+
 
 const route = useRoute();
 const props = defineProps({
@@ -31,112 +33,15 @@ const props = defineProps({
     default: 'Overall Levels',
   },
 });
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
 const layoutSizes = useLayoutSizesState()
-
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
+const chartSupportColors = useChartSupportColors()
 
 const isLoading = ref(true);
 const isEmpty = ref(false);
-const series = ref([]);
-const chartOptions = ref({
-  chart: {
-    type: 'bar',
-    height: 350,
-    toolbar: {
-      show: true,
-      offsetX: -20,
-      offsetY: -85,
-    },
-  },
-  plotOptions: {
-    bar: {
-      barHeight: '90%',
-      endingShape: 'rounded-sm',
-      distributed: true,
-      horizontal: true,
-      dataLabels: {
-        position: 'bottom',
-      },
-    },
-  },
-  dataLabels: {
-    enabled: true,
-    textAnchor: 'start',
-    style: {
-      colors: ['#17a2b8'],
-      fontSize: '14px',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      fontWeight: 'bold',
-    },
-    formatter(val, opt) {
-      return `${opt.w.globals.labels[opt.dataPointIndex]}: ${NumberFormatter.format(val)} users`;
-    },
-    offsetX: 0,
-      dropShadow: {
-      enabled: true,
-    },
-    background: {
-      enabled: true,
-      foreColor: '#ffffff',
-      padding: 10,
-      borderRadius: 2,
-      borderWidth: 1,
-      borderColor: '#686565',
-      opacity: 1,
-      dropShadow: {
-        enabled: false,
-      },
-    },
-  },
-  stroke: {
-    show: true,
-    width: 2,
-    colors: ['transparent'],
-  },
-  xaxis: {
-    categories: [],
-    labels: {
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-      style: {
-        colors: chartAxisColor()
-      }
-    },
-  },
-  yaxis: {
-    labels: {
-      show: false,
-    },
-  },
-  grid: {
-    borderColor: '#cfeaf3',
-    position: 'front',
-  },
-  legend: {
-    show: false,
-  },
-  fill: {
-    opacity: 1,
-  },
-  tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
-    y: {
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-    },
-  },
-});
+const chartData = ref([])
 
 onMounted(() => {
+  chartJsOptions.value = setChartOptions();
   let localProps = { };
   // figure out if subjectId is passed based on the context (page it's being loaded from)
   if (route.params.subjectId) {
@@ -151,24 +56,96 @@ onMounted(() => {
         const sorted = response.sort((item) => item.value).reverse();
 
         isEmpty.value = response.find((item) => item.count > 0) === undefined;
-        chartOptions.value.xaxis.categories = sorted.map((item) => item.value);
-        series.value = [{
-          name: 'Number of Users',
-          data: sorted.map((item) => item.count),
-        }];
+        chartData.value = {
+          labels: sorted.map((item) => item.value),
+          datasets: [{
+            label: 'Number of Users',
+            data: sorted.map((item) => item.count),
+            backgroundColor: chartSupportColors.getBackgroundColorArray(sorted.length),
+            borderColor: chartSupportColors.getBorderColorArray(sorted.length),
+            borderWidth: 1,
+            borderRadius: 6,
+          }]
+        }
         isLoading.value = false;
       });
 });
+
+const chartJsOptions = ref();
+const levelsBarChart = ref(null)
+const setChartOptions = () => {
+  const colors = chartSupportColors.getColors()
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    scales: {
+      x: {
+        ticks: {
+          color: colors.textMutedColor
+        },
+        grid: {
+          color: colors.contentBorderColor,
+        }
+      },
+      y: {
+        display: false,
+        beginAtZero: true,
+        ticks: {
+          color: colors.textMutedColor
+        },
+        grid: {
+          color: colors.contentBorderColor
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      datalabels: {
+        color: '#36A2EB',
+        anchor: 'start',
+        align: 'end',
+        offset: -5,
+        font: {
+          size: 14,
+        },
+        backgroundColor: colors.surface100Color,
+        borderColor: colors.surface600Color,
+        borderWidth: 1,
+        borderRadius: 4,
+        padding: 5,
+        formatter: function(value, context) {
+          const numLevels = context.dataset.data.length
+          const level = numLevels - context.dataIndex // highest levels comes first
+          return `Level ${level}: ${value}`
+        }
+      }
+    }
+  };
+}
+
 </script>
 
 <template>
   <Card data-cy="levelsChart" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
     <template #header>
-      <SkillsCardHeader :title="title"></SkillsCardHeader>
+      <SkillsCardHeader :title="title">
+        <template #headerContent>
+        <chart-download-controls :vue-chart-ref="levelsBarChart" />
+        </template>
+      </SkillsCardHeader>
     </template>
     <template #content>
       <metrics-overlay :loading="isLoading" :has-data="!isLoading && !isEmpty" no-data-icon="fa fa-info-circle" no-data-msg="No one reached Level 1 yet...">
-        <apexchart v-if="!isLoading" type="bar" width="100%" height="350" :options="chartOptions" :series="series" class="mt-8" />
+        <Chart ref="levelsBarChart"
+               id="levelsBarChart"
+               type="bar"
+               :data="chartData"
+               :options="chartJsOptions"
+               :plugins="[ChartDataLabels]"
+               class="h-[30rem]" />
       </metrics-overlay>
     </template>
   </Card>

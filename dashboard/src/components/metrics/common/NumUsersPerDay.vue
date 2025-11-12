@@ -14,20 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {ref, onMounted, computed} from 'vue';
-import { useRoute } from 'vue-router';
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import {computed, onMounted, ref} from 'vue';
+import {useRoute} from 'vue-router';
+import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
 import Chart from 'primevue/chart';
 import 'chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm';
 import dayjs from 'dayjs';
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import MetricsService from "@/components/metrics/MetricsService.js";
 import TimeLengthSelector from "@/components/metrics/common/TimeLengthSelector.vue";
-import NumberFormatter from '@/components/utils/NumberFormatter.js'
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
 
 
 const appConfig = useAppConfig();
@@ -40,16 +38,7 @@ const props = defineProps({
   },
 });
 
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
 const layoutSizes = useLayoutSizesState()
-
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
 
 onMounted(() => {
   if (route.params.skillId) {
@@ -58,13 +47,10 @@ onMounted(() => {
     localProps.value.skillId = route.params.subjectId;
   }
   loadData();
-
-  chartData.value = setChartData();
   chartJsOptions.value = setChartOptions();
 })
 
 const loading = ref(true);
-const distinctUsersOverTime = ref([]);
 const distinctUsersOverTimeChartData = ref([]);
 const hasDataEnoughData = ref(false);
 const mutableTitle = ref(props.title);
@@ -87,69 +73,6 @@ const timeSelectorOptions = ref([
     unit: 'year',
   },
 ]);
-const chartOptions = ref({
-  chart: {
-    type: 'area',
-    stacked: false,
-    height: 350,
-    zoom: {
-      type: 'x',
-      enabled: true,
-      autoScaleYaxis: true,
-    },
-    toolbar: {
-      autoSelected: 'zoom',
-      offsetY: -30,
-    },
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  markers: {
-    size: 0,
-  },
-  fill: {
-    type: 'gradient',
-    gradient: {
-      shadeIntensity: 1,
-      inverseColors: false,
-      opacityFrom: 0.5,
-      opacityTo: 0,
-      stops: [0, 90, 100],
-    },
-  },
-  yaxis: {
-    labels: {
-      style: {
-        colors: chartAxisColor()
-      },
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-    },
-    title: {
-      text: 'Distinct # of Users',
-    },
-  },
-  xaxis: {
-    type: 'datetime',
-    labels: {
-      style: {
-        colors: chartAxisColor()
-      }
-    }
-  },
-  tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
-    shared: false,
-        y: {
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-    },
-  },
-});
-
 const dateOptions = [{ label: 'Day/Week', value: false}, { label: 'Month', value: true }]
 const currentDateOption = ref('days');
 const isUsingDays = computed(() => {
@@ -185,13 +108,6 @@ const loadData = () => {
 
         if (response && response.users?.length > 1 && !allZeros(response.users)) {
           hasDataEnoughData.value = true;
-          distinctUsersOverTime.value = [{
-            data: response.users.map((item) => [item.value, item.count]),
-            name: 'Users',
-          }, {
-            data: response.newUsers.map((item) => [item.value, item.count]),
-            name: 'New Users',
-          }];
           const formatTimestamp = (timestamp) => {
             const format = localProps.value.byMonth ? 'YYYY-MM' : 'YYYY-MM-DD';
             return dayjs(timestamp).format(format)
@@ -219,7 +135,6 @@ const loadData = () => {
           }
           chartJsOptions.value.scales.x.time.unit = byMonth.value ? 'month' : 'day';
         } else {
-          distinctUsersOverTime.value = [];
           distinctUsersOverTimeChartData.value = [];
           hasDataEnoughData.value = false;
         }
@@ -246,38 +161,13 @@ const dateOptionChanged = (option) => {
   }
 }
 
-
-const chartData = ref();
 const chartJsOptions = ref();
-
-const setChartData = () => {
-  const documentStyle = getComputedStyle(document.documentElement);
-
-  return {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-    datasets: [
-      {
-        label: 'First Dataset',
-        data: [65, 59, 80, 81, 56, 55, 40],
-        fill: false,
-        borderColor: documentStyle.getPropertyValue('--p-cyan-500'),
-        tension: 0.4
-      },
-      {
-        label: 'Second Dataset',
-        data: [28, 48, 40, 19, 86, 27, 90],
-        fill: false,
-        borderColor: documentStyle.getPropertyValue('--p-gray-500'),
-        tension: 0.4
-      }
-    ]
-  };
-};
+const chartSupportColors = useChartSupportColors()
 const setChartOptions = () => {
-  const documentStyle = getComputedStyle(document.documentElement);
-  const textColor = documentStyle.getPropertyValue('--p-text-color');
-  const textColorSecondary = documentStyle.getPropertyValue('--p-text-muted-color');
-  const surfaceBorder = documentStyle.getPropertyValue('--p-content-border-color');
+  const colors = chartSupportColors.getColors()
+  const textColor = colors.textColor
+  const textColorSecondary = colors.textMutedColor
+  const surfaceBorder =  colors.contentBorderColor
 
   return {
     responsive: true,
@@ -349,23 +239,27 @@ const usersChartRef = ref(null)
     <template #header>
       <SkillsCardHeader :title="mutableTitle">
         <template #headerContent>
-          <span class="mr-3">
-            <Badge v-for="option in dateOptions" class="ml-2"
+          <div class="flex gap-2 items-center">
+          <div class="flex gap-1">
+            <Badge v-for="option in dateOptions"
                    :class="{'can-select': byMonth !== option.value }"
                    :severity="byMonth === option.value ? 'success' : 'secondary'"
                    :key="option.label"
                    @click="dateOptionChanged(option.value)">
               {{option.label}}
             </Badge>
-          </span>
+          </div>
           |
           <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange" ref="timeRangeSelector" :disable-days="byMonth" />
+
+          <chart-download-controls :vue-chart-ref="usersChartRef" />
+          </div>
         </template>
       </SkillsCardHeader>
     </template>
     <template #content>
       <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity.">
-        <chart-download-controls :vue-chart-ref="usersChartRef" />
+
         <Chart ref="usersChartRef"
                id="usersTimeChart"
                type="line"

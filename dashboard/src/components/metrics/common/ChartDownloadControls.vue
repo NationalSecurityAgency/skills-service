@@ -19,7 +19,7 @@ import dayjs from "dayjs";
 
 const props = defineProps({
   vueChartRef: {
-    type: Object,
+    type: [Object, null], // Allow both Object and null
     required: true
   },
 })
@@ -33,18 +33,40 @@ const getChartDataForExport = (chartRef) => {
   }
 
   return chart.data.datasets.map(dataset => ({
+    chartType: chart.type,
     label: dataset.label,
-    data: dataset.data
+    data: dataset.data,
+    barChart: {
+      labels: chart.data.labels,
+    }
   }));
 };
 
 const exportChartDataToCSV = () => {
   const chartData = getChartDataForExport(props.vueChartRef);
   if (!chartData) return;
-  console.log(chartData)
+
+  let csvContent = ''
+  if (chartData[0].chartType === 'bar') {
+    csvContent = createCvsForBarChart(chartData)
+  } else {
+    csvContent = createCvsForTimeSeriesData(chartData)
+  }
+
+  // Trigger download
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `chart_export_${dayjs().format('YYYY-MM-DD HH:mm:ss')}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+const createCvsForTimeSeriesData = (chartData) => {
   const headers = ['Date', ...chartData.map(ds => ds.label)];
   let csvContent = headers.join(',') + '\n';
-  console.log(csvContent)
   chartData[0].data.forEach((item, index) => {
     csvContent += `${item.x},${item.y}`
     // get other datasets
@@ -62,15 +84,20 @@ const exportChartDataToCSV = () => {
     csvContent += '\n';
   })
 
-  // Trigger download
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.setAttribute('href', url);
-  link.setAttribute('download', `users_metrics_${dayjs().format('YYYY-MM-DD')}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  return csvContent
+}
+
+const createCvsForBarChart = (chartData) => {
+  let csvContent = ''
+  chartData.forEach((singleChartData) => {
+    csvContent += `Category,${singleChartData.label}\n`
+    singleChartData.barChart.labels.forEach((label, index) => {
+      csvContent += `${label},${singleChartData.data[index]}\n`
+    })
+    csvContent += '\n\n';
+  })
+
+  return csvContent
 }
 
 const exportChartToJPG = () => {
@@ -103,7 +130,7 @@ const exportChartToJPG = () => {
 
   // Create a temporary link to trigger download
   const link = document.createElement('a');
-  link.download = `users_chart_${dayjs().format('YYYY-MM-DD')}.jpg`;
+  link.download = `chart_image_${dayjs().format('YYYY-MM-DD HH:mm:ss')}.jpg`;
   link.href = tempCanvas.toDataURL('image/jpeg', 0.9); // 0.9 is the quality (0.0 to 1.0)
   document.body.appendChild(link);
   link.click();
