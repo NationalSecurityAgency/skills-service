@@ -60,9 +60,19 @@ export const useChartSupportColors = () => {
         )
     }
 
+    const getSolidColor = (arrIndex) => {
+        return borderColorBank[arrIndex % borderColorBank.length]
+    }
+    const getTranslucentColor = (arrIndex, opacity = 0.8) => {
+        const color = getSolidColor(arrIndex)
+        return color.endsWith(')') ? color.slice(0, -1) + `, ${opacity})` : color + `, ${opacity})`
+    }
+
     return {
         getColors,
         getBackgroundColorArray,
-        getBorderColorArray
+        getBorderColorArray,
+        getSolidColor,
+        getTranslucentColor
     }
 }

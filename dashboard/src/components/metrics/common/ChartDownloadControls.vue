@@ -67,22 +67,45 @@ const exportChartDataToCSV = () => {
 const createCvsForTimeSeriesData = (chartData) => {
   const headers = ['Date', ...chartData.map(ds => ds.label)];
   let csvContent = headers.join(',') + '\n';
-  chartData[0].data.forEach((item, index) => {
-    csvContent += `${item.x},${item.y}`
-    // get other datasets
-    const otherVals = []
-    if (chartData.length > 1) {
-      for (let i = 1; i < chartData.length; i++) {
-        const otherItem = chartData[i].data[index]
-        if (item.x !== otherItem.x) {
-          throw new Error(`${item.x} !== ${otherItem.x} at index [${index}] from the [${i + 1}] datasets`)
-        }
-        otherVals.push(otherItem.y)
-      }
-      csvContent += `,${otherVals.join(',')}`;
-    }
-    csvContent += '\n';
+
+  // iterate over all datasets and get unique x values
+  const uniqueXValues = new Set()
+  const yLookupMaps = []
+  chartData.forEach(ds => {
+    const yLookupMap = new Map()
+    ds.data.forEach(item => {
+      uniqueXValues.add(item.x)
+      yLookupMap.set(item.x, item.y)
+    })
+    yLookupMaps.push(yLookupMap)
   })
+  // sort x values
+  const sortedXValues = Array.from(uniqueXValues).sort((a, b) => a - b)
+
+  sortedXValues.forEach(x => {
+    csvContent += `${x}`
+    yLookupMaps.forEach(yLookupMap => {
+      csvContent += `,${yLookupMap.get(x) || '0'}`
+    })
+    csvContent += '\n'
+  })
+
+  // chartData[0].data.forEach((item, index) => {
+  //   csvContent += `${item.x},${item.y}`
+  //   // get other datasets
+  //   const otherVals = []
+  //   if (chartData.length > 1) {
+  //     for (let i = 1; i < chartData.length; i++) {
+  //       const otherItem = chartData[i].data[index]
+  //       if (item.x !== otherItem.x) {
+  //         throw new Error(`${item.x} !== ${otherItem.x} at index [${index}] from the [${i + 1}] datasets`)
+  //       }
+  //       otherVals.push(otherItem.y)
+  //     }
+  //     csvContent += `,${otherVals.join(',')}`;
+  //   }
+  //   csvContent += '\n';
+  // })
 
   return csvContent
 }

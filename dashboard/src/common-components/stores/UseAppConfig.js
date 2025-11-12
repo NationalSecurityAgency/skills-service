@@ -28,7 +28,6 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
       .then((response) => {
         config.value = response
         if (config.value.logLevel) {
-            console.log(`UPDATING LOG LEVEL TO ${config.value.logLevel}`)
             log.setLevel(config.value.logLevel)
         }
       })

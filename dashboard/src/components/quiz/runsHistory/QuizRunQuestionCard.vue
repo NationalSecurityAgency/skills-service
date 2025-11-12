@@ -53,7 +53,6 @@ const needsGrading = computed(() => {
   return props.question.needsGrading
 })
 const isWrong = computed(() => {
-  console.log(props.question)
   return hasAnswer.value && !needsGrading.value && !props.question.isCorrect
 })
 const isSurvey = computed(() => {

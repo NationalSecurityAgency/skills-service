@@ -29,6 +29,7 @@ import {useChartSupportColors} from "@/components/metrics/common/UseChartSupport
 
 
 const appConfig = useAppConfig();
+const chartSupportColors = useChartSupportColors()
 const route = useRoute();
 const props = defineProps({
   title: {
@@ -51,7 +52,7 @@ onMounted(() => {
 })
 
 const loading = ref(true);
-const distinctUsersOverTimeChartData = ref([]);
+const distinctUsersOverTimeChartData = ref({});
 const hasDataEnoughData = ref(false);
 const mutableTitle = ref(props.title);
 const byMonth = ref(false);
@@ -162,7 +163,6 @@ const dateOptionChanged = (option) => {
 }
 
 const chartJsOptions = ref();
-const chartSupportColors = useChartSupportColors()
 const setChartOptions = () => {
   const colors = chartSupportColors.getColors()
   const textColor = colors.textColor
@@ -259,7 +259,6 @@ const usersChartRef = ref(null)
     </template>
     <template #content>
       <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity.">
-
         <Chart ref="usersChartRef"
                id="usersTimeChart"
                type="line"

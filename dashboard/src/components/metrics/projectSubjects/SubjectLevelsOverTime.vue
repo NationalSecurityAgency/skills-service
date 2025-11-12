@@ -14,27 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
+import {computed, onMounted, ref} from 'vue';
+import {useRoute} from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import SubjectsService from "@/components/subjects/SubjectsService.js";
-import NumberFormatter from '@/components/utils/NumberFormatter.js'
 import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue'
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
+import Chart from "primevue/chart";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import dayjs from "dayjs";
+import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
 
 const route = useRoute();
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
 const layoutSizes = useLayoutSizesState()
-
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
+const chartSupportColors = useChartSupportColors()
 
 const loading = ref({
   subjects: true,
@@ -46,53 +39,12 @@ const subjects = ref({
   available: [],
 });
 const series = ref([]);
-const chartOptions = ref({
-  chart: {
-    type: 'line',
-    toolbar: {
-      offsetY: -20,
-    },
-  },
-  colors: ['#008FFB', '#546E7A', '#00E396'],
-  yaxis: {
-    title: {
-      text: '# of users',
-    },
-    labels: {
-      style: {
-        colors: chartAxisColor()
-      },
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-    },
-    min: 0,
-    forceNiceScale: true,
-  },
-  xaxis: {
-    type: 'datetime',
-    labels: {
-      style: {
-        colors: chartAxisColor()
-      }
-    }
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  legend: {
-    showForSingleSeries: true,
-  },
-  tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
-  },
-});
+const chartData = ref({})
 
-const isSeriesEmpty = computed(() => {
-  return !series.value || series.value.length === 0;
-});
+const hasData = computed(() => chartData.value?.datasets !== undefined && chartData.value?.datasets?.length > 0)
 
 onMounted(() => {
+  chartJsOptions.value = setChartOptions()
   loadSubjects();
 })
 
@@ -111,13 +63,23 @@ const loadChart = () => {
       .then((res) => {
         // sort by level to force order in the legend's display
         res.sort((a, b) => a.level - b.level);
-        series.value = res.map((resItem) => {
-          const data = resItem.counts.map((dayCount) => [dayCount.value, dayCount.count]);
+
+        const formatTimestamp = (timestamp) => {
+          const format = 'YYYY-MM-DD';
+          return dayjs(timestamp).format(format)
+        }
+        const datasets = res.map((resItem) => {
           return {
-            name: `Level ${resItem.level}`,
-            data,
-          };
-        });
+            label: `Level ${resItem.level}`,
+            data: resItem.counts.map((item) => {
+              return {x: formatTimestamp(item.value), y: item.count}
+            }),
+            cubicInterpolationMode: 'monotone',
+            borderColor: chartSupportColors.getSolidColor(resItem.level),
+            backgroundColor: chartSupportColors.getTranslucentColor(resItem.level, 0.5),
+          }
+        })
+        chartData.value = {datasets}
 
         loading.value.charts = false;
         loading.value.generatedAtLeastOnce = true;
@@ -125,14 +87,88 @@ const loadChart = () => {
 };
 
 const overlayMessage  = computed(() => {
-  if (!loading.value.generatedAtLeastOnce && isSeriesEmpty.value) {
+  if (!loading.value.generatedAtLeastOnce && !hasData.value) {
     return 'Generate the chart using controls above!'
   }
-  if (loading.value.generatedAtLeastOnce && isSeriesEmpty.value) {
+  if (loading.value.generatedAtLeastOnce && !hasData.value) {
     return 'Zero users achieved levels for this subject!'
   }
   return ''
 })
+
+const chartJsOptions = ref();
+const subjectLevelsOverTimeChart = ref(null);
+const setChartOptions = () => {
+  const colors = chartSupportColors.getColors()
+  const textColor = colors.textColor
+  const textColorSecondary = colors.textMutedColor
+  const surfaceBorder =  colors.contentBorderColor
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    elements: {
+      point: {
+        pointStyle: false
+      }
+    },
+    scales: {
+      x: {
+        type: 'time',
+        time: {
+          unit: 'month'
+        },
+        ticks: {
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder,
+          drawOnChartArea: false  // Ensures no grid lines are drawn in the chart area
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder
+        },
+        title: {
+          display: true,
+          text: 'Distinct # of Users',
+          color: textColorSecondary,
+          font: {
+            size: 12,
+            weight: '500'
+          },
+          padding: { left: 10, right: 5 }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: textColor,
+          padding: 20,
+          boxWidth: 12,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+      tooltip: {
+        callbacks: {
+          title: (context) => {
+            const date = new Date(context[0].parsed.x)
+            const formatStr = 'MMM D, YYYY'
+            return dayjs(date).format(formatStr)
+          },
+        },
+      }
+    }
+  };
+}
 </script>
 
 <template>
@@ -141,7 +177,7 @@ const overlayMessage  = computed(() => {
       <SkillsCardHeader title="Number of users for each level over time"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex gap-2 mb-8 flex-col sm:flex-row">
+      <div class="flex gap-2 mb-4 flex-col sm:flex-row">
         <BlockUI :blocked="loading.subjects" rounded-sm="sm" opacity="0.5" spinner-variant="info" spinner-type="grow" spinner-small class="flex flex-1">
           <Select :options="subjects.available"
                     v-model="subjects.selected"
@@ -154,8 +190,14 @@ const overlayMessage  = computed(() => {
         </BlockUI>
         <SkillsButton variant="outline-info" class="ml-2" :disabled="!subjects.selected" @click="loadChart" icon="fas fa-paint-roller" label="Generate" />
       </div>
-      <metrics-overlay :loading="loading.charts" :has-data="!isSeriesEmpty" :no-data-msg="overlayMessage" class="mt-6">
-        <apexchart type="area" height="300" width="100%" :options="chartOptions" :series="series"></apexchart>
+      <metrics-overlay :loading="loading.charts" :has-data="hasData" :no-data-msg="overlayMessage">
+        <chart-download-controls :vue-chart-ref="subjectLevelsOverTimeChart" />
+        <Chart ref="subjectLevelsOverTimeChart"
+               id="subjectLevelsOverTimeChart"
+               type="line"
+               :data="chartData"
+               :options="chartJsOptions"
+               class="h-[30rem]" />
       </metrics-overlay>
     </template>
   </Card>
