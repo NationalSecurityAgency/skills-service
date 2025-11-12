@@ -47,7 +47,7 @@ export const useChartSupportColors = () => {
         'rgba(20, 184, 166)',   // bg-teal-500
     ]
     const backgroundColorBank = borderColorBank.map(color =>
-        color.endsWith(')') ? color.slice(0, -1) + ', 0.2)' : color + ', 0.2)'
+        color.endsWith(')') ? color.slice(0, -1) + ', 0.8)' : color + ', 0.8)'
     );
     const getBackgroundColorArray = (numColors) => {
         return Array.from({ length: numColors }, (_, i) =>

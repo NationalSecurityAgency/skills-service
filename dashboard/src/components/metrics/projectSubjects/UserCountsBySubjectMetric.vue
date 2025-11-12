@@ -14,150 +14,120 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router';
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
+import {computed, onMounted, ref} from 'vue'
+import {useRoute} from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue'
-import NumberFormatter from '@/components/utils/NumberFormatter.js'
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
+import Chart from "primevue/chart";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
 
 const route = useRoute();
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
 const layoutSizes = useLayoutSizesState()
-
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
+const chartSupportColors = useChartSupportColors()
 
 onMounted(() => {
+  chartJsOptions.value = setChartOptions()
   MetricsService.loadChart(route.params.projectId, 'numUsersPerSubjectPerLevelChartBuilder')
       .then((res) => {
-        updateChart(res);
+        const maxNumLevels = Math.max(...res.map((item) => item.numUsersPerLevels.length))
+        const levelsDatasets = []
+        const backgroundColorsPerLevel = chartSupportColors.getBackgroundColorArray(maxNumLevels)
+        const borderColorsPerLevel = chartSupportColors.getBorderColorArray(maxNumLevels)
+
+        let hasData = false
+        for (let level = 1; level <= maxNumLevels; level++) {
+          const data = res.map((item) => item.numUsersPerLevels.find((item) => item.level === level)?.numberUsers || 0)
+          if (data.some((item) => item > 0)) {
+            hasData = true
+          }
+          levelsDatasets.push({
+            label: `Level ${level}`,
+            data,
+            backgroundColor: backgroundColorsPerLevel[level - 1],
+            borderColor: borderColorsPerLevel[level - 1],
+            borderWidth: 1,
+            borderRadius: 6,
+            minBarLength: 4,
+          })
+        }
+        if (hasData) {
+          chartData.value = {
+            labels: res.map((item) => item.subject),
+            datasets: levelsDatasets
+          }
+        }
+
         loading.value = false;
       });
 });
 
 const loading = ref(true);
-const isEmpty = ref(true);
-const series = ref([]);
-const chartOptions = ref({
-  chart: {
-    type: 'bar',
-    height: 350,
-    toolbar: {
-      show: true,
-      offsetX: 0,
-      offsetY: -85,
-    },
-  },
-  plotOptions: {
-    bar: {
-      horizontal: false,
-      columnWidth: '55%',
-      endingShape: 'rounded-sm',
-    },
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  stroke: {
-    show: true,
-    width: 2,
-    colors: ['transparent'],
-  },
-  xaxis: {
-    categories: [],
-    axisTicks: {
-      height: 300,
-      offsetY: -300,
-    },
-    labels: {
-      style: {
-        fontSize: '13px',
-        fontWeight: 600,
-        colors: chartAxisColor(),
-      },
-    },
-  },
-  yaxis: {
-    title: {
-      text: '# of users',
-    },
-    labels: {
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-      style: {
-        colors: chartAxisColor()
-      },
-    },
-    min: 0,
-    forceNiceScale: true,
-  },
-  fill: {
-    opacity: 1,
-  },
-  tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
-    y: {
-      formatter(val) {
-        return `${val}`;
-      },
-    },
-  },
-  legend: {
-    offsetY: 5,
-  },
-});
+const chartData = ref({})
 
-const chartRef = ref(null)
-const updateChart = (res) => {
-  const localSeries = [];
-  const sortedSubjects = res.sort((subj) => subj.subject);
-  chartRef.value.updateOptions({
-    xaxis: {
-      categories: sortedSubjects.map((subj) => subj.subject),
-    },
-  })
-  const allLevels = sortedSubjects.map((subj) => subj.numUsersPerLevels.length);
-  if (allLevels) {
-    const maxLevel = Math.max(...allLevels);
-    for (let i = 1; i <= maxLevel; i += 1) {
-      const data = sortedSubjects.map((subj) => {
-        const found = subj.numUsersPerLevels.find((item) => item.level === i);
-        const numUsers = found ? found.numberUsers : 0;
-        if (numUsers > 0) {
-          isEmpty.value = false;
+const hasData = computed(() => !loading.value && chartData.value?.datasets?.length > 0)
+
+const userPerSubjectChart = ref(null)
+const chartJsOptions = ref();
+const setChartOptions = () => {
+  const colors = chartSupportColors.getColors()
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        ticks: {
+          color: colors.textMutedColor
+        },
+        grid: {
+          color: colors.contentBorderColor,
         }
-        return numUsers;
-      });
-      localSeries.push({
-        name: `Level ${i}`,
-        data,
-      });
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: colors.textMutedColor,
+        },
+        grid: {
+          color: colors.contentBorderColor,
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: colors.textColor,
+          padding: 20,
+          boxWidth: 12,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        },
+      },
     }
-  }
-  series.value = localSeries;
-};
-
-const hasData = computed(() => !loading.value && series.value && series.value?.length > 0)
+  };
+}
 </script>
 
 <template>
   <Card data-cy="userCountsBySubjectMetric" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
     <template #header>
-      <SkillsCardHeader title="Number of users for each level for each subject"></SkillsCardHeader>
+      <SkillsCardHeader title="Number of users for each level for each subject">
+        <template #headerContent>
+          <chart-download-controls :vue-chart-ref="userPerSubjectChart" />
+        </template>
+      </SkillsCardHeader>
     </template>
     <template #content>
-        <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="Users have not achieved any levels, yet..." class="mt-6">
-          <apexchart ref="chartRef" type="bar" width="100%" height="350" :options="chartOptions" :series="series" class="mt-6"></apexchart>
-        </metrics-overlay>
+      <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="Users have not achieved any levels, yet...">
+        <Chart ref="userPerSubjectChart"
+               id="userPerSubjectChart"
+               type="bar"
+               :data="chartData"
+               :options="chartJsOptions"
+               class="h-[30rem]" />
+      </metrics-overlay>
     </template>
   </Card>
 </template>

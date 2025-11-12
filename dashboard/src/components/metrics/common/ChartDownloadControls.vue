@@ -89,12 +89,19 @@ const createCvsForTimeSeriesData = (chartData) => {
 
 const createCvsForBarChart = (chartData) => {
   let csvContent = ''
-  chartData.forEach((singleChartData) => {
-    csvContent += `Category,${singleChartData.label}\n`
-    singleChartData.barChart.labels.forEach((label, index) => {
-      csvContent += `${label},${singleChartData.data[index]}\n`
-    })
-    csvContent += '\n\n';
+  csvContent += ['Category', ...chartData.map((singleChartData) => singleChartData.label)].join(',') + '\n'
+  const firstDataset = chartData[0]
+  firstDataset.barChart.labels.forEach((label, index) => {
+    csvContent += `${label},${firstDataset.data[index]}`
+    if (chartData.length > 1) {
+      const otherVals = []
+      for (let i = 1; i < chartData.length; i++) {
+        const otherDataset = chartData[i]
+        otherVals.push(otherDataset.data[index])
+      }
+      csvContent += `,${otherVals.join(',')}`;
+    }
+    csvContent += '\n';
   })
 
   return csvContent
