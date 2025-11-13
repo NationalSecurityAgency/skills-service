@@ -47,8 +47,8 @@ const exportChartDataToCSV = () => {
   if (!chartData) return;
 
   let csvContent = ''
-  if (chartData[0].chartType === 'bar') {
-    csvContent = createCvsForBarChart(chartData)
+  if (chartData[0].chartType === 'bar' || chartData[0].chartType === 'pie') {
+    csvContent = createCvsForBarOrPieChart(chartData)
   } else {
     csvContent = createCvsForTimeSeriesData(chartData)
   }
@@ -93,7 +93,7 @@ const createCvsForTimeSeriesData = (chartData) => {
   return csvContent
 }
 
-const createCvsForBarChart = (chartData) => {
+const createCvsForBarOrPieChart = (chartData) => {
   let csvContent = ''
   csvContent += ['Category', ...chartData.map((singleChartData) => singleChartData.label)].join(',') + '\n'
   const firstDataset = chartData[0]

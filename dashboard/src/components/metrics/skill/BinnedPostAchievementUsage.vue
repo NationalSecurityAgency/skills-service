@@ -14,93 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
+import {onMounted, ref} from 'vue'
+import {useRoute} from 'vue-router'
 import MetricsService from '@/components/metrics/MetricsService.js'
 import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue'
+import Chart from "primevue/chart";
+import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
 
 const route = useRoute();
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
-
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
+const chartSupportColors = useChartSupportColors()
 
 const loading = ref(true);
 const isEmpty = ref(true);
-const series = ref([]);
-const chartOptions = ref({
-  chart: {
-    type: 'bar',
-      height: 250,
-      toolbar: {
-        show: true,
-        offsetX: 0,
-        offsetY: -55,
-    },
-  },
-  plotOptions: {
-    bar: {
-      horizontal: false,
-    },
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  stroke: {
-    show: true,
-        width: 2,
-        colors: ['transparent'],
-  },
-  xaxis: {
-    categories: [],
-    title: {
-      text: '# of times Skill performed',
-      style: {
-        color: chartAxisColor(),
-      },
-    },
-    labels: {
-      style: {
-        fontSize: '13px',
-        fontWeight: 600,
-        colors: chartAxisColor(),
-      },
-    },
-  },
-  yaxis: {
-    title: {
-      text: '# of distinct users',
-    },
-    labels: {
-      style: {
-        colors: chartAxisColor(),
-      },
-    },
-  },
-  fill: {
-    opacity: 1,
-  },
-  tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
-    y: {
-      formatter(val) {
-        return `${val}`;
-      },
-    },
-  },
-  legend: {
-    offsetY: 5,
-  },
-});
+const chartJsOptions = ref(null)
+const chartData = ref({})
 
 onMounted(() => {
+  chartJsOptions.value = setChartOptions()
   MetricsService.loadChart(route.params.projectId, 'binnedUsagePostAchievementMetricsBuilder', { skillId: route.params.skillId })
     .then((res) => {
       updateChart(res);
@@ -109,31 +40,74 @@ onMounted(() => {
 });
 
 const updateChart = (res) => {
-  const localSeries = [];
   if (res && res.length > 0) {
     isEmpty.value = false;
-    chartOptions.value.xaxis.categories = res.map((labeledCount) => labeledCount.label);
-    const data = [];
-    res.forEach((labeledCount) => {
-      data.push(labeledCount.count);
-    });
-    localSeries.push({
-      data,
-      name: '# of users',
-    });
+    chartData.value = {
+      labels: res.map((labeledCount) => labeledCount.label),
+      datasets: [{
+        label: "# of users",
+        data: res.map((item) => item.count),
+        backgroundColor: chartSupportColors.getBackgroundColorArray(res.length),
+        borderColor: chartSupportColors.getBorderColorArray(res.length),
+        borderWidth: 1,
+        borderRadius: 6,
+        minBarLength: 4,
+      }]
+    }
   }
-  series.value = localSeries;
 };
+
+const setChartOptions = () => {
+  const colors = chartSupportColors.getColors()
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        ticks: {
+          color: colors.textMutedColor,
+        },
+        grid: {
+          color: colors.contentBorderColor,
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: colors.textMutedColor,
+          stepSize: 1,
+        },
+        grid: {
+          color: colors.contentBorderColor
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+    }
+  };
+}
+const binnedNumUsersPostAchievementChartRef = ref(null)
 </script>
 
 <template>
   <Card data-cy="binnedNumUsersPostAchievement">
     <template #header>
-      <SkillsCardHeader title="Usage" title-tag="h4"></SkillsCardHeader>
+      <SkillsCardHeader title="Usage" title-tag="h4">
+        <template #headerContent>
+          <chart-download-controls v-if="!isEmpty" :vue-chart-ref="binnedNumUsersPostAchievementChartRef" />
+        </template>
+      </SkillsCardHeader>
     </template>
     <template #content>
       <MetricsOverlay :loading="loading" :has-data="!isEmpty" no-data-msg="No achievements yet for this skill.">
-        <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="series"></apexchart>
+        <Chart ref="binnedNumUsersPostAchievementChartRef"
+               type="bar"
+               :data="chartData"
+               :options="chartJsOptions"
+               class="min-h-[16em]"/>
       </MetricsOverlay>
       <div class="font-light text-sm">Number of times this Skill is performed per user after having fully achieved it.</div>
     </template>
