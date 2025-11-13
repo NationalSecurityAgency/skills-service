@@ -14,33 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import {onMounted, ref} from 'vue';
+import {useRoute} from 'vue-router';
 import dayjs from 'dayjs';
 import TimeLengthSelector from "@/components/metrics/common/TimeLengthSelector.vue";
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import MetricsService from "@/components/metrics/MetricsService.js";
-import NumberFormatter from '@/components/utils/NumberFormatter.js'
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
+import Chart from "primevue/chart";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
 
 const props = defineProps(['skillName']);
 
 const route = useRoute();
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
-
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
+const chartSupportColors = useChartSupportColors()
 
 const title = 'Skill events';
 const loading = ref(true);
 const hasData = ref(false);
-const series = ref([]);
+const chartData = ref({})
+const chartJsOptions = ref();
 const start = ref(dayjs().subtract(30, 'day').valueOf());
 const timeSelectorOptions = [
   {
@@ -56,99 +49,45 @@ const timeSelectorOptions = [
     unit: 'year',
   },
 ];
-const chartOptions = {
-  chart: {
-    height: 250,
-    type: 'line',
-    id: 'areachart-2',
-    toolbar: {
-      show: true,
-      offsetY: -52,
-      autoSelected: 'zoom',
-      tools: {
-        pan: false,
-      },
-    },
-  },
-  colors: ['#28a745', '#008ffb'],
-  dataLabels: {
-    enabled: false,
-  },
-  stroke: {
-    curve: 'smooth',
-    colors: ['#28a745', '#008ffb'],
-  },
-  grid: {
-    padding: {
-      right: 30,
-      left: 20,
-    },
-  },
-  xaxis: {
-    type: 'datetime',
-  },
-  yaxis: {
-    forceNiceScale: true,
-    min: 0,
-    labels: {
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-      style: {
-        colors: chartAxisColor()
-      }
-    },
-    title: {
-      text: '# of Applied Skill Events',
-    },
-  },
-  legend: {
-    position: 'top',
-  },
-  tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
-  },
-};
 
 onMounted(() => {
+  chartJsOptions.value = setChartOptions()
   loadData();
 });
 
 const loadData = () => {
   loading.value = true;
-  MetricsService.loadChart(route.params.projectId, 'skillEventsOverTimeChartBuilder', { skillId: route.params.skillId, start: start.value })
+  MetricsService.loadChart(route.params.projectId, 'skillEventsOverTimeChartBuilder', {
+    skillId: route.params.skillId,
+    start: start.value
+  })
       .then((dataFromServer) => {
-        let appliedEvents = [];
-        let allEvents = [];
-        if (dataFromServer.countsByDay && dataFromServer.countsByDay.length > 1) {
-          appliedEvents = dataFromServer.countsByDay.map((item) => [item.timestamp, item.num]);
-        }
-        if (dataFromServer.allEvents && dataFromServer.allEvents.length > 0) {
-          allEvents = dataFromServer.allEvents.map((item) => [item.timestamp, item.num]);
-        }
+        const datasets = []
+        const formatTimestamp = (timestamp) => dayjs(timestamp).format('YYYY-MM-DD')
 
-        const s = [];
-        let hasAppliedSkillEvents = false;
-        if (appliedEvents && appliedEvents.length > 0) {
-          s.push({
-            name: 'Applied Skill Events',
-            data: appliedEvents,
-          });
-          hasAppliedSkillEvents = true;
+        const hasAppliedSkillEvents = dataFromServer.countsByDay && dataFromServer.countsByDay.length > 1
+        if (hasAppliedSkillEvents) {
+          datasets.push({
+            label: 'Applied Events',
+            data: dataFromServer.countsByDay.map((item) => {
+              return {x: formatTimestamp(item.timestamp), y: item.num}
+            }),
+            cubicInterpolationMode: 'monotone',
+          })
         }
-
-        let hasAllEvents = false;
-        if (allEvents && allEvents.length > 0) {
-          s.push({
-            name: 'All Skill Events',
-            data: allEvents,
-          });
-          hasAllEvents = true;
+        const hasAllEvents = dataFromServer.allEvents && dataFromServer.allEvents.length > 0
+        if (hasAllEvents) {
+          datasets.push({
+            label: 'All Events',
+            data: dataFromServer.allEvents.map((item) => {
+              return {x: formatTimestamp(item.timestamp), y: item.num}
+            }),
+            cubicInterpolationMode: 'monotone',
+          })
         }
+        chartData.value = {datasets}
 
-        // eslint-disable-next-line
         hasData.value = Boolean(hasAllEvents | hasAppliedSkillEvents);
-        series.value = s;
         loading.value = false;
       });
 };
@@ -157,6 +96,66 @@ const updateTimeRange = (timeEvent) => {
   start.value = timeEvent.startTime.valueOf();
   loadData();
 };
+
+const setChartOptions = () => {
+  const colors = chartSupportColors.getColors()
+  const textColorSecondary = colors.textMutedColor
+  const surfaceBorder =  colors.contentBorderColor
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        type: 'time',
+        time: {
+          unit: 'month'
+        },
+        ticks: {
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder,
+          drawOnChartArea: false  // Ensures no grid lines are drawn in the chart area
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder
+        },
+        title: {
+          display: true,
+          text: 'Distinct # of Users',
+          color: textColorSecondary,
+          font: {
+            size: 12,
+            weight: '500'
+          },
+          padding: { left: 10, right: 5 }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: colors.textColor,
+          padding: 20,
+          boxWidth: 12,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+    }
+  };
+}
+
+const skillEventsOverTimeChartRef = ref(null)
 </script>
 
 <template>
@@ -164,15 +163,22 @@ const updateTimeRange = (timeEvent) => {
     <template #header>
       <SkillsCardHeader :title="title">
         <template #headerContent>
-          <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
+          <div class="flex items-center gap-2" v-if="hasData">
+            <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
+            <chart-download-controls :vue-chart-ref="skillEventsOverTimeChartRef"/>
+          </div>
         </template>
       </SkillsCardHeader>
     </template>
     <template #content>
       <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="This chart needs at least 2 days of user activity.">
-        <apexchart type="line" height="350" :options="chartOptions" :series="series" class="mt-6"></apexchart>
+        <Chart ref="skillEventsOverTimeChartRef"
+               type="line"
+               :data="chartData"
+               :options="chartJsOptions"
+               class="h-[30rem]" />
       </metrics-overlay>
-      <div class="font-light text-sm">Please Note: Only 'applied' events contribute to users' points and achievements. An event will not be applied if that skill has already reached its maximum points or has unfulfilled dependencies.</div>
+      <div class="font-light text-sm mt-2">Please Note: Only 'applied' events contribute to users' points and achievements. An event will not be applied if that skill has already reached its maximum points or has unfulfilled dependencies.</div>
     </template>
   </Card>
 </template>
