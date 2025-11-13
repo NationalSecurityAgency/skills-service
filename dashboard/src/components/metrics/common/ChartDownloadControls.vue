@@ -90,23 +90,6 @@ const createCvsForTimeSeriesData = (chartData) => {
     csvContent += '\n'
   })
 
-  // chartData[0].data.forEach((item, index) => {
-  //   csvContent += `${item.x},${item.y}`
-  //   // get other datasets
-  //   const otherVals = []
-  //   if (chartData.length > 1) {
-  //     for (let i = 1; i < chartData.length; i++) {
-  //       const otherItem = chartData[i].data[index]
-  //       if (item.x !== otherItem.x) {
-  //         throw new Error(`${item.x} !== ${otherItem.x} at index [${index}] from the [${i + 1}] datasets`)
-  //       }
-  //       otherVals.push(otherItem.y)
-  //     }
-  //     csvContent += `,${otherVals.join(',')}`;
-  //   }
-  //   csvContent += '\n';
-  // })
-
   return csvContent
 }
 
