@@ -130,23 +130,22 @@ const filterRange = ref([]);
       <SkillsCardHeader :title="titleInternal"></SkillsCardHeader>
     </template>
     <template #content>
-      <skills-spinner :is-loading="isLoading" class="mb-8"/>
-      <div v-if="!isLoading">
+      <div>
         <div class="flex mb-3 gap-4">
           <div class="flex flex-3 flex-col">
-            <SkillsTextInput label="Filter by Tag" v-model="filters.tag" v-on:keydown.enter="filter" id="userTagTable-tagFilter" name="userTagTable-tagFilter"/>
+            <SkillsTextInput label="Filter by Tag" v-model="filters.tag" v-on:keydown.enter="filter" :disabled="isLoading" id="userTagTable-tagFilter" name="userTagTable-tagFilter"/>
             <div class="flex gap-2">
-              <SkillsButton @click="filter" icon="fa-solid fa-search" label="Filter" data-cy="userTagTable-filterBtn" />
-              <SkillsButton severity="danger" icon="fa-solid fa-eraser" label="Clear" @click="clearFilter" data-cy="userTagTable-clearBtn" />
+              <SkillsButton @click="filter" icon="fa-solid fa-search" label="Filter" :disabled="isLoading" data-cy="userTagTable-filterBtn" />
+              <SkillsButton severity="danger" icon="fa-solid fa-eraser" label="Clear" @click="clearFilter" :disabled="isLoading" data-cy="userTagTable-clearBtn" />
             </div>
           </div>
           <div class="flex flex-wrap flex-col gap-2">
             Filter by Date(s):
-            <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" placeholder="Select a date range" data-cy="metricsDateFilter" />
+            <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" :disabled="isLoading" placeholder="Select a date range" data-cy="metricsDateFilter" />
           </div>
         </div>
         <SkillsDataTable :value="table.items"
-                         :loading="table.options.busy"
+                         :loading="table.options.busy || isLoading"
                          show-gridlines
                          striped-rows
                          paginator
@@ -177,7 +176,7 @@ const filterRange = ref([]);
           </template>
 
           <template #empty>
-            <table-no-res />
+            <table-no-res :is-loading="isLoading"/>
           </template>
         </SkillsDataTable>
       </div>
