@@ -21,17 +21,17 @@ import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import Chart from "primevue/chart";
 import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
 import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
+import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 
 const route = useRoute();
 const props = defineProps(['tag']);
 
 const chartSupportColors = useChartSupportColors()
+const layoutSizes = useLayoutSizesState()
 
 const chartJsOptions = ref();
-const inProgressChartData = ref({})
-const achievedChartData = ref({})
-const hasInProgressData = computed(() => inProgressChartData.value.labels?.length > 0)
-const hasAchievedData = computed(() => achievedChartData.value.labels?.length > 0)
+const chartData = ref({})
+const hasData = computed(() => chartData.value.labels?.length > 0)
 const loading = ref(true);
 
 onMounted(() => {
@@ -55,29 +55,29 @@ const loadData = () => {
         const totalInProgressData = inProgressData.map((value) => value.y).filter((value) => value > 0);
         const totalAchievedData = achievedData.map((value) => value.y).filter((value) => value > 0);
 
-        const convertToChartData = (data, label) => {
+        const convertToChartData = (data, label, colorIndex) => {
           return {
-            labels: data.map((item) => item.x),
-            datasets: [{
-              label: label,
-              data: data.map((item) => item.y),
-              backgroundColor: chartSupportColors.getBackgroundColorArray(data.length),
-              borderColor: chartSupportColors.getBorderColorArray(data.length),
-              borderWidth: 1,
-              borderRadius: 6,
-              maxBarThickness: 15,
-              minBarLength: 4,
-            }]
+            label: label,
+            data: data.map((item) => item.y),
+            backgroundColor: chartSupportColors.getTranslucentColor(colorIndex),
+            borderColor: chartSupportColors.getSolidColor(colorIndex),
+            borderWidth: 1,
+            borderRadius: 6,
+            maxBarThickness: 15,
+            minBarLength: 4,
           }
         }
 
+        const datasets = []
         if (inProgressData.length > 0 && totalInProgressData.length > 0) {
-          inProgressChartData.value = convertToChartData(inProgressData, 'In Progress')
+          datasets.push(convertToChartData(inProgressData, 'In Progress', 0))
         }
 
         if (achievedData.length > 0 && totalAchievedData.length > 0) {
-          achievedChartData.value = convertToChartData(achievedData, 'Achieved')
+          datasets.push(convertToChartData(achievedData, 'Achieved', 1))
         }
+
+        chartData.value = { labels: keysFromServer, datasets}
 
         loading.value = false;
       });
@@ -110,64 +110,39 @@ const setChartOptions = () => {
     },
     plugins: {
       legend: {
-        display: false
+        position: 'top',
+        labels: {
+          color: colors.textColor,
+          padding: 20,
+          boxWidth: 12,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
       },
     }
   };
 }
 
-const topUserCountsInProgressChart = ref(null)
-const topUserCountsAchievedChart = ref(null)
+const topUserCountsChartRef = ref(null)
 </script>
 
 <template>
-  <Card data-cy="numUsersByTag">
+  <Card data-cy="numUsersByTag" :style="`max-width: ${layoutSizes.tableMaxWidth}px;`">
     <template #header>
-      <SkillsCardHeader :title="`Top 20 ${tag.label} User Counts`"></SkillsCardHeader>
+      <SkillsCardHeader :title="`Top 20 ${tag.label} User Counts`">
+        <template #headerContent>
+          <chart-download-controls v-if="hasData" :vue-chart-ref="topUserCountsChartRef" />
+        </template>
+      </SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex flex-col xl:flex-row gap-6">
-        <div class="flex flex-1">
-          <Card data-cy="usersInProgressByTag" class="w-full">
-            <template #header>
-              <SkillsCardHeader title="In Progress" title-tag="h4">
-                <template #headerContent>
-                  <chart-download-controls v-if="hasInProgressData" :vue-chart-ref="topUserCountsInProgressChart" />
-                </template>
-              </SkillsCardHeader>
-            </template>
-            <template #content>
-              <metrics-overlay :loading="loading" :has-data="hasInProgressData" no-data-msg="No users currently working on this skill.">
-                <Chart ref="topUserCountsInProgressChart"
-                       type="bar"
-                       :data="inProgressChartData"
-                       :options="chartJsOptions"
-                       class="min-h-[16em]"/>
-              </metrics-overlay>
-            </template>
-          </Card>
-        </div>
-        <div class="flex flex-1">
-          <Card data-cy="usersAchievedByTag" class="w-full">
-            <template #header>
-              <SkillsCardHeader title="Achieved" title-tag="h4">
-                <template #headerContent>
-                  <chart-download-controls v-if="hasAchievedData" :vue-chart-ref="topUserCountsAchievedChart" />
-                </template>
-              </SkillsCardHeader>
-            </template>
-            <template #content>
-              <metrics-overlay :loading="loading" :has-data="hasAchievedData" no-data-msg="No achievements yet for this skill.">
-                <Chart ref="topUserCountsAchievedChart"
-                       type="bar"
-                       :data="achievedChartData"
-                       :options="chartJsOptions"
-                       class="min-h-[16em]"/>
-              </metrics-overlay>
-            </template>
-          </Card>
-        </div>
-      </div>
+      <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No users currently working on this skill.">
+        <Chart ref="topUserCountsChartRef"
+               type="bar"
+               :data="chartData"
+               :options="chartJsOptions"
+               class="min-h-[16em]"/>
+      </metrics-overlay>
     </template>
   </Card>
 </template>
