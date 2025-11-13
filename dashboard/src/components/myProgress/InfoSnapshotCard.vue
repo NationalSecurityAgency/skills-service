@@ -14,114 +14,93 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed } from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import MyProgressInfoCardUtil from '@/components/myProgress/MyProgressInfoCardUtil.vue'
-import { useMyProgressState } from '@/stores/UseMyProgressState.js'
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
+import {useMyProgressState} from '@/stores/UseMyProgressState.js'
+import Chart from "primevue/chart";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
 
 const myProgressState = useMyProgressState()
 const myProgress = computed(() => myProgressState.myProgress)
 const myProjects = computed(() => myProgressState.myProjects)
-const themeHelper = useThemesHelper()
+const chartSupportColors = useChartSupportColors()
 
-const chartOptions = {
-  chart: {
-    height: 200,
-    width: 200,
-    type: 'radialBar',
-    toolbar: {
-      show: false
-    }
-  },
-  grid: {
-    padding: {
-      top: -10,
-      bottom: -15
-    }
-  },
-  plotOptions: {
-    radialBar: {
-      startAngle: -135,
-      endAngle: 225,
-      hollow: {
-        margin: 0,
-        size: '75%',
-        background: undefined,
-        image: undefined,
-        imageOffsetX: 0,
-        imageOffsetY: 0,
-        position: 'front',
-        dropShadow: {
-          enabled: true,
-          top: 3,
-          left: 0,
-          blur: 4,
-          opacity: 0.24
-        }
-      },
-      track: {
-        background: '#fff',
-        strokeWidth: '67%',
-        margin: 0, // margin is in pixels
-        dropShadow: {
-          enabled: true,
-          top: -3,
-          left: 0,
-          blur: 4,
-          opacity: 0.35
-        }
-      },
-      dataLabels: {
-        show: true,
-        name: {
-          offsetY: -10,
-          show: true,
-          color:  themeHelper.isDarkTheme ? 'white' : '#098da8',
-          fontSize: '16px'
-        },
-        value: {
-          formatter(val) {
-            return `${val} %`
-          },
-          offsetY: 0,
-          color:  themeHelper.isDarkTheme ? 'white' : '#067085',
-          fontSize: '22px',
-          show: true
-        }
-      }
-    }
-  },
-  fill: {
-    type: 'gradient',
-    gradient: {
-      shade: 'dark',
-      type: 'horizontal',
-      shadeIntensity: 0.5,
-      gradientToColors: ['#7ED6F3'],
-      inverseColors: true,
-      opacityFrom: 1,
-      opacityTo: 1,
-      stops: [0, 100]
-    }
-  },
-  stroke: {
-    lineCap: 'round'
-  },
-  labels: ['STARTED']
-}
-
-const series = computed(() => {
+const percentStarted = computed(() => {
   const percent = (myProgress.value.numProjectsContributed / myProjects.value.length) * 100
   if (percent > 0) {
     if (percent < 1) {
-      return [1]
+      return 1
     }
-    return [Math.round(percent)]
+    return Math.round(percent)
   }
-  return [0]
+  return 0
 })
-const projectsNotContributedToYet = computed(() => myProjects.value.length - myProgress.value.numProjectsContributed)
 
+const colors = chartSupportColors.getColors()
+const chartData = computed(() => {
+  const percent = percentStarted.value
+  return {
+    labels: ['Not Started', "Started"],
+    datasets: [
+      {
+        label: 'Started %',
+        data: [percent, 100 - percent],
+        backgroundColor: [colors.green700Color, colors.surface100Color],
+      }
+    ]
+  }
+})
+
+const projectsNotContributedToYet = computed(() => myProjects.value.length - myProgress.value.numProjectsContributed)
+const chartJsOptions = ref(null)
+onMounted(() => {
+  chartJsOptions.value = setChartOptions()
+})
+
+const setChartOptions = () => {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '80%',
+    hover: { mode: null },
+    plugins: {
+      legend: {
+        display: false
+      },
+      title: {
+        display: false,
+      },
+      tooltip: {
+        enabled: false,
+      },
+    },
+  };
+}
+
+const chartPlugins = [{
+  id: 'centerText',
+  beforeDraw(chart) {
+    const { ctx, chartArea: { left, right, top, bottom, width, height } } = chart;
+    const centerX = left + width / 2;
+    const centerY = top + height / 2;
+    ctx.save();
+
+
+    // Draw percentage
+    ctx.font = 'bold 20px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = colors.textColor;
+    ctx.fillText(`${percentStarted.value}%`, centerX, centerY - 10);
+
+    // Draw label
+    ctx.font = '12px Arial';
+    ctx.fillText('Started', centerX, centerY + 15);
+
+    // Restore the context state
+    ctx.restore();
+  }
+}];
 </script>
 
 <template>
@@ -131,8 +110,16 @@ const projectsNotContributedToYet = computed(() => myProjects.value.length - myP
       <span class="text-secondary" data-cy="numProjectsAvailable">/ {{ myProjects.length }}</span>
     </template>
     <template #right-content>
-      <div class="flex justify-center sm:justify-end">
-        <apexchart type="radialBar" height="200" width="200" :options="chartOptions" :series="series"></apexchart>
+      <div class="flex justify-end w-full">
+        <div class="w-[10rem] h-[10rem]">
+          <Chart
+            type="doughnut"
+            :data="chartData"
+            :options="chartJsOptions"
+            :plugins="chartPlugins"
+            class="w-full h-full"
+          />
+        </div>
       </div>
     </template>
     <template #footer>

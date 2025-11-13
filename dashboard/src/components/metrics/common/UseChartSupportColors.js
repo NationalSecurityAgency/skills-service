@@ -22,13 +22,15 @@ export const useChartSupportColors = () => {
         const contentBorderColor = documentStyle.getPropertyValue('--p-content-border-color');
         const surface100Color = documentStyle.getPropertyValue('--p-surface-100')
         const surface600Color = documentStyle.getPropertyValue('--p-surface-400')
+        const green700Color = documentStyle.getPropertyValue('--p-green-700')
 
         return {
             textColor,
             textMutedColor,
             contentBorderColor,
             surface100Color,
-            surface600Color
+            surface600Color,
+            green700Color,
         }
     }
 
