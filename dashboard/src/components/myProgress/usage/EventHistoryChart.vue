@@ -14,14 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
+import {computed, onMounted, ref, watch} from 'vue'
+import {useAppConfig} from '@/common-components/stores/UseAppConfig.js';
 import dayjs from 'dayjs'
-import AutoComplete from 'primevue/autocomplete';
-import NumberFormatter from '@/components/utils/NumberFormatter.js'
 import MetricsService from "@/components/metrics/MetricsService.js";
 import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue';
 import TimeLengthSelector from "@/components/metrics/common/TimeLengthSelector.vue";
+import Chart from "primevue/chart";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
 
 const props = defineProps({
   availableProjects: {
@@ -36,6 +37,7 @@ const props = defineProps({
 });
 
 const appConfig = useAppConfig()
+const chartSupportColors = useChartSupportColors()
 
 const timeLengthSelector = ref(null);
 const loading = ref(true);
@@ -62,60 +64,11 @@ const timeSelectorOptions = ref([
     unit: 'year',
   },
 ]);
-const series = ref([]);
-const chartOptions = ref({
-  chart: {
-    height: 350,
-    type: 'line',
-    zoom: {
-      type: 'x',
-      enabled: true,
-      autoScaleYaxis: true,
-    },
-    toolbar: {
-      autoSelected: 'zoom',
-    },
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  stroke: {
-    curve: 'smooth',
-    dashArray: [0, 0, 5, 0, 0],
-  },
-  markers: {
-    size: 0,
-    hover: {
-      sizeOffset: 6,
-    },
-  },
-  yaxis: {
-    labels: {
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-    },
-    title: {
-      text: 'Skill Events Reported',
-    },
-  },
-  xaxis: {
-    type: 'datetime',
-  },
-  tooltip: {
-    shared: false,
-    y: {
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-    },
-  },
-  grid: {
-    borderColor: '#f1f1f1',
-  },
-})
+const chartData = ref({})
+const chartJsOptions = ref();
 
 onMounted(() => {
+  chartJsOptions.value = setChartOptions()
   projects.value.available = props.availableProjects.map((proj) => ({ ...proj }));
   const numProjectsToSelect = Math.min(props.availableProjects.length, 4);
   const availableSortedByMostPoints = projects.value.available.sort((a, b) => b.points - a.points);
@@ -137,12 +90,6 @@ const noDataMessage = computed(() => {
     return 'Please select at least one project from the list above.';
   }
   return 'There are no events for the selected project(s) and time period.';
-});
-const beforeListSlotText = computed(() => {
-  if (projects.value.selected.length >= 5) {
-    return 'Maximum of 5 options selected. First remove a selected option to select another.';
-  }
-  return '';
 });
 watch(() => projects.value.selected, () => {
   timeProps.value.projIds = projects.value.selected.map((project) => project.projectId);
@@ -168,15 +115,23 @@ const loadData = () => {
         .then((response) => {
           if (response && response.length > 0 && notAllZeros(response)) {
             hasData.value = true;
-            series.value = response.map((item) => {
-              const ret = {};
-              ret.project = props.availableProjects.find(({ projectId }) => projectId === item.project);
-              ret.name = ret.project.projectName;
-              ret.data = item.countsByDay.map((it) => [it.timestamp, it.num]);
-              return ret;
+
+            const formatTimestamp = (timestamp) => dayjs(timestamp).format('YYYY-MM-DD')
+            const datasets = response.map((item) => {
+              const proj = props.availableProjects.find(({ projectId }) => projectId === item.project);
+              return {
+                label: proj.projectName,
+                data: item.countsByDay.map((item) => {
+                  return {x: formatTimestamp(item.timestamp), y: item.num}
+                }),
+                cubicInterpolationMode: 'monotone',
+              };
             });
+            chartData.value = {
+              datasets: datasets,
+            };
           } else {
-            series.value = [];
+            chartData.value = {}
             hasData.value = false;
           }
           loading.value = false;
@@ -189,6 +144,56 @@ const loadData = () => {
 const notAllZeros = (data) => {
   return data.filter((item) => item.countsByDay.find((it) => it.num > 0)).length > 0;
 }
+
+const setChartOptions = () => {
+  const colors = chartSupportColors.getColors()
+  const textColorSecondary = colors.textMutedColor
+  const surfaceBorder =  colors.contentBorderColor
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        type: 'time',
+        time: {
+          unit: 'day'
+        },
+        ticks: {
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder,
+          drawOnChartArea: false  // Ensures no grid lines are drawn in the chart area
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder
+        },
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: colors.textColor,
+          padding: 20,
+          boxWidth: 12,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      }
+    }
+  };
+}
+
+const eventHistoryChartRef = ref(null)
 </script>
 
 <template>
@@ -196,8 +201,10 @@ const notAllZeros = (data) => {
     <template #header>
       <SkillsCardHeader :title="mutableTitle" title-tag="h2">
         <template #headerContent>
-          <span class="text-muted ml-2">|</span>
-          <time-length-selector ref="timeLengthSelector" :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
+          <div class="flex gap-2 items-center">
+            <time-length-selector ref="timeLengthSelector" :options="timeSelectorOptions" @time-selected="updateTimeRange"/>
+            <chart-download-controls v-if="hasData" :vue-chart-ref="eventHistoryChartRef" />
+          </div>
         </template>
       </SkillsCardHeader>
     </template>
@@ -216,11 +223,13 @@ const notAllZeros = (data) => {
 
         </MultiSelect>
       </div>
+
       <MetricsOverlay :loading="loading" :has-data="hasData" :no-data-msg="noDataMessage">
-        <apexchart type="line" height="350"
-                   :options="chartOptions"
-                   :series="series">
-        </apexchart>
+        <Chart ref="eventHistoryChartRef"
+               type="line"
+               :data="chartData"
+               :options="chartJsOptions"
+               class="h-[30rem]" />
       </MetricsOverlay>
     </template>
   </Card>
