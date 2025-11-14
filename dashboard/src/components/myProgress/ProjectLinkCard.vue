@@ -20,6 +20,7 @@ import CardWithVericalSections from '@/components/utils/cards/CardWithVericalSec
 import { useMyProgressState } from '@/stores/UseMyProgressState.js'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import RadialPercentageChart from "@/components/utils/charts/RadialPercentageChart.vue";
 
 const props = defineProps(['proj', 'displayOrder'])
 const emit = defineEmits(['sort-changed-requested', 'remove-project'])
@@ -34,55 +35,6 @@ const currentProgressPercent = props.proj.totalPoints ?
   Math.trunc((props.proj.points / props.proj.totalPoints) * 100) : 0
 
 const overSortControl = ref(false)
-const series = [currentProgressPercent]
-const chartOptions = {
-  chart: {
-    height: 200,
-    type: 'radialBar',
-    offsetY: -15,
-    offsetX: -15
-  },
-  plotOptions: {
-    radialBar: {
-      startAngle: -135,
-      endAngle: 135,
-      hollow: {
-        size: '70%',
-        margin: 30,
-      },
-      dataLabels: {
-        show: true,
-        name: {
-          show: false
-        },
-        value: {
-          offsetY: 10,
-          fontSize: '22px',
-          color: themeHelper.isDarkTheme ? 'white' : '#303030',
-          formatter(val) {
-            return `${val}%`
-          }
-        }
-      }
-    }
-  },
-  fill: {
-    colors: ['#de0f0f'],
-    type: 'solid',
-    gradient: {
-      shade: 'dark',
-      shadeIntensity: 0.15,
-      inverseColors: false,
-      opacityFrom: 1,
-      opacityTo: 1,
-      stops: [0, 50, 65, 91]
-    }
-  },
-  stroke: {
-    dashArray: 4
-  },
-  labels: ['Median Ratio']
-}
 const rankVariant = ref('info')
 
 const moveDown = () => {
@@ -149,9 +101,8 @@ const remove = () => {
       <div :class="{'pt-4': !showSortControl }">
 
         <div class="flex flex-col sm:flex-row items-center">
-          <div class="pt-4" style="min-width: 200px;">
-            <apexchart type="radialBar" height="200" width="200" :options="chartOptions"
-                       :series="series"></apexchart>
+          <div class="pt-1 pl-4" style="min-width: 200px;">
+            <radial-percentage-chart :value="currentProgressPercent" :max="100" class="w-[10rem]"/>
           </div>
           <div class="flex-1 pt-0 pr-4 text-center sm:text-right">
             <h3 class="uppercase text-2xl text-primary skills-break-word" data-cy="project-card-project-name"

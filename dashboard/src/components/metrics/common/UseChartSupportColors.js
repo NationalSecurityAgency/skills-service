@@ -21,6 +21,7 @@ export const useChartSupportColors = () => {
         const textMutedColor = documentStyle.getPropertyValue('--p-text-muted-color');
         const contentBorderColor = documentStyle.getPropertyValue('--p-content-border-color');
         const surface100Color = documentStyle.getPropertyValue('--p-surface-100')
+        const surface300Color = documentStyle.getPropertyValue('--p-surface-300')
         const surface600Color = documentStyle.getPropertyValue('--p-surface-400')
         const green700Color = documentStyle.getPropertyValue('--p-green-700')
         const orange700Color = documentStyle.getPropertyValue('--p-orange-700')
@@ -30,6 +31,7 @@ export const useChartSupportColors = () => {
             textMutedColor,
             contentBorderColor,
             surface100Color,
+            surface300Color,
             surface600Color,
             green700Color,
             orange700Color,
