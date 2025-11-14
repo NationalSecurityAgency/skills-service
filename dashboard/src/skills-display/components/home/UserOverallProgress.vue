@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
+import {useUserProgressSummaryState} from '@/skills-display/stores/UseUserProgressSummaryState.js'
 import CircleProgress from '@/skills-display/components/progress/CircleProgress.vue'
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
-import { computed } from 'vue'
-import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import {useSkillsDisplayThemeState} from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
+import {computed} from 'vue'
+import {useNumberFormat} from '@/common-components/filter/UseNumberFormat.js'
 import SkillLevel from '@/skills-display/components/progress/MySkillLevel.vue'
-import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
-import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import {useSkillsDisplaySubjectState} from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
+import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
 import AchievementCelebration from "@/skills-display/components/progress/celebration/AchievementCelebration.vue";
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";

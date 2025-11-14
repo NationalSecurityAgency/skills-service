@@ -18,6 +18,8 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { computed, watch, ref } from 'vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import {useThemesHelper} from "@/components/header/UseThemesHelper.js";
+import RadialPercentageChart from "@/components/utils/charts/RadialPercentageChart.vue";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
 
 const props = defineProps({
   diameter: {
@@ -61,6 +63,9 @@ const props = defineProps({
 const numFormat = useNumberFormat()
 const themeState = useSkillsDisplayThemeState()
 const themeHelper = useThemesHelper()
+const chartSupportColors = useChartSupportColors()
+
+const chartColors = chartSupportColors.getColors()
 
 // If totalPossiblePoints is -1 it means this is charting Level progress and the user has completed this level
 const isCompleted = props.totalPossiblePoints === -1
@@ -93,7 +98,7 @@ const barColor = computed(() => {
   if (themeState.theme?.progressIndicators?.beforeTodayColor) {
     return themeState.theme?.progressIndicators?.beforeTodayColor
   }
-  return defaultColor
+  return chartColors.green700Color;
 })
 
 const backgroundBarColor = computed(() => {
@@ -139,14 +144,37 @@ const chartOptions = computed(() => {
   }
 })
 
-
+const radialChartLabelStyle = computed(() => {
+  if (dataLabelNameColor.value) {
+    return  { color: dataLabelNameColor.value }
+  }
+  return {}
+})
 </script>
 
 <template>
-  <div class="progress-circle-wrapper">
+  <div class="progress-circle-wrapper flex flex-col gap-3">
     <h2 class="text-2xl font-medium">{{ title }}</h2>
     <div>
-      <apexchart type="radialBar" height="250" :options="chartOptions" :series="series"></apexchart>
+      <radial-percentage-chart
+          :value="is100Percent ? 100 :  totalCompletedPoints"
+          :max="is100Percent ? 100 : totalPossiblePoints"
+          :full-circle="true"
+          :size-in-rem="12"
+          :completed-bar-color="barColor"
+          :remaining-bar-color="incompleteColor"
+      >
+        <template #center>
+          <div v-if="is100Percent">
+            <i class="fa-solid fa-check-double text-green-500 text-4xl" aria-hidden="true"></i>
+          </div>
+          <div v-else>
+            <div class="text-xl font-bolder" :style="radialChartLabelStyle">{{ totalCompletedPoints }} Points</div>
+          </div>
+          <div class="text-gray-500 dark:text-gray-200" :style="radialChartLabelStyle">{{  percentComplete }}%</div>
+        </template>
+      </radial-percentage-chart>
+<!--      <apexchart type="radialBar" height="250" :options="chartOptions" :series="series"></apexchart>-->
     </div>
     <div>
       <slot name="footer" />

@@ -28,38 +28,62 @@ const props = defineProps({
   max: {
     type: Number,
     default: 100
-  }
+  },
+  fullCircle: {
+    type: Boolean,
+    default: false
+  },
+  cutout: {
+    type: String,
+    default: '85%'
+  },
+  sizeInRem: {
+    type: Number,
+    default: 10
+  },
+  completedBarColor: {
+    type: String,
+    default: null
+  },
+  remainingBarColor: {
+    type: String,
+    default: null
+  },
 });
 
-const chartData = ref();
-const chartOptions = ref(null);
 
 onMounted(() => {
-  chartData.value = setChartData();
-  chartOptions.value = setChartOptions();
 });
 
 const colors = chartSupportColors.getColors()
-const setChartData = () => {
-  const remaining = Math.max(0, props.max - props.value);
-  console.log(remaining)
+const completedBarColor = computed(() => {
+  return props.completedBarColor || colors.green700Color
+})
+const remainingBarColor = computed(() => {
+  return props.remainingBarColor || colors.surface300Color
+})
+const chartData = computed(() => {
+  const maxValue = props.max <= 0 ? 100 : props.max
+  const remaining = Math.max(0, maxValue - props.value);
   return {
     labels: ['Completed', 'Remaining'],
     datasets: [{
       data: [props.value, remaining],
-      backgroundColor: [colors.green700Color, colors.surface300Color],
+      backgroundColor: [completedBarColor.value, remainingBarColor.value],
       borderWidth: 0
     }]
   };
-};
+})
 
-const setChartOptions = () => {
+const chartOptions = computed(() => {
   return {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '85%',
-    circumference: 270,
-    rotation: -135,
+    cutout: props.cutout,
+    circumference: props.fullCircle ? 360 : 270,
+    rotation:  props.fullCircle ? 0 : -135,
+    onHover: () => null, // Disable hover state changes
+    hover: { mode: null }, // Disable hover mode
     plugins: {
       legend: {
         display: false
@@ -73,27 +97,31 @@ const setChartOptions = () => {
       animateRotate: true
     }
   };
-};
+})
 
 const percentage = computed(() => {
-  return Math.round((props.value / props.max) * 100);
+  return props.max <= 0 ? 0 : Math.round((props.value / props.max) * 100);
 });
 </script>
 
 <template>
-  <div class="relative h-full">
-    <Chart
-        type="doughnut"
-        :data="chartData"
-        :options="chartOptions"
-    />
-    <div class="absolute inset-0 flex flex-col items-center justify-center">
-      <div class="text-xl">{{ percentage }}%</div>
-      <div class="text-sm text-gray-500">Complete</div>
+  <div class="w-full h-full flex justify-center items-center">
+    <div :class="`relative h-[${sizeInRem}rem] w-[${sizeInRem}rem]`">
+      <Chart
+          type="doughnut"
+          :data="chartData"
+          :options="chartOptions"
+          :class="`h-[${sizeInRem}rem] w-[${sizeInRem}rem]`"
+      />
+      <div class="absolute inset-0 flex flex-col justify-center items-center">
+        <slot name="center">
+          <div class="text-xl">{{ percentage }}%</div>
+          <div class="text-sm text-gray-500">Complete</div>
+        </slot>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Add any custom styles here */
 </style>
