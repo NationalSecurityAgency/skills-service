@@ -102,16 +102,21 @@ const chartOptions = computed(() => {
 const percentage = computed(() => {
   return props.max <= 0 ? 0 : Math.round((props.value / props.max) * 100);
 });
+
+const chartStyle = computed(() => ({
+  height: `${props.sizeInRem}rem`,
+  width: `${props.sizeInRem}rem`
+}))
 </script>
 
 <template>
   <div class="w-full h-full flex justify-center items-center">
-    <div :class="`relative h-[${sizeInRem}rem] w-[${sizeInRem}rem]`">
+    <div class="relative">
       <Chart
           type="doughnut"
           :data="chartData"
           :options="chartOptions"
-          :class="`h-[${sizeInRem}rem] w-[${sizeInRem}rem]`"
+          :style="chartStyle"
       />
       <div class="absolute inset-0 flex flex-col justify-center items-center">
         <slot name="center">

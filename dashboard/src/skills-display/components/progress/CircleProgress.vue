@@ -20,6 +20,7 @@ import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDis
 import {useThemesHelper} from "@/components/header/UseThemesHelper.js";
 import RadialPercentageChart from "@/components/utils/charts/RadialPercentageChart.vue";
 import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
 
 const props = defineProps({
   diameter: {
@@ -29,41 +30,19 @@ const props = defineProps({
   title: {
     type: String
   },
-  completedBeforeTodayColor: {
-    type: String,
-    default: '#14a3d2'
-  },
-  totalCompletedColor: {
-    type: String,
-    default: '#7ed6f3'
-  },
-  incompleteColor: {
-    type: String,
-    default: '#cdcdcd'
-  },
-  strokeWidth: {
-    type: Number,
-    default: 12
-  },
-  pointsCompletedToday: {
-    type: Number
-  },
   totalCompletedPoints: {
     type: Number
   },
   totalPossiblePoints: {
     type: Number
   },
-  customLabel: {
-    type: String,
-    default: 'Point',
-  }
 })
 
 const numFormat = useNumberFormat()
 const themeState = useSkillsDisplayThemeState()
 const themeHelper = useThemesHelper()
 const chartSupportColors = useChartSupportColors()
+const attributes = useSkillsDisplayAttributesState()
 
 const chartColors = chartSupportColors.getColors()
 
@@ -78,15 +57,13 @@ const percentComplete = computed(() => {
   }
   return 0
 })
-const is100Percent = percentComplete.value === 100
+const is100Percent = computed(() => percentComplete.value === 100)
 
-const series = computed(() => [percentComplete.value])
-
-const defaultColor = themeHelper.isDarkTheme ? 'white' : '#067085'
-const completedColor = '#22C55E'
+const defaultColor = themeHelper.isDarkTheme ? 'white' : chartColors.cyan700Color
+const completedColor = chartColors.green700Color
 const dataLabelNameColor = computed(() => {
   if (themeState.circleProgressInteriorTextColor) {
-    return  themeState.circleProgressInteriorTextColor
+    return themeState.circleProgressInteriorTextColor
   }
   if (themeState.textPrimaryColor) {
     return themeState.textPrimaryColor
@@ -94,55 +71,8 @@ const dataLabelNameColor = computed(() => {
   return isCompleted ? completedColor : defaultColor
 })
 
-const barColor = computed(() => {
-  if (themeState.theme?.progressIndicators?.beforeTodayColor) {
-    return themeState.theme?.progressIndicators?.beforeTodayColor
-  }
-  return chartColors.green700Color;
-})
-
-const backgroundBarColor = computed(() => {
-  if (themeState.theme?.progressIndicators?.incompleteColor) {
-    return themeState.theme?.progressIndicators?.incompleteColor
-  }
-  return '#f3f4f6'
-})
-
-
-const chartOptions = computed(() => {
-  return {
-    chart: {
-      height: 250,
-      type: 'radialBar'
-    },
-    fill: {
-      colors: [barColor.value]
-    },
-    plotOptions: {
-      radialBar: {
-        hollow: {
-          size: '67%'
-        },
-        track: {
-          background: backgroundBarColor.value
-        },
-        dataLabels: {
-          name: {
-            show: true,
-            fontSize: isCompleted ? '3.5rem' : '1.2rem',
-            color: dataLabelNameColor.value
-          },
-          value: {
-            show: true,
-            fontSize: is100Percent || isCompleted ? '1.2rem' : '1rem',
-            color:  dataLabelNameColor.value // is100Percent || isCompleted ? completedColor : defaultColor
-          }
-        }
-      }
-    },
-    labels: [isCompleted ? '✓' : `${numFormat.pretty(props.totalCompletedPoints > 0 ? props.totalCompletedPoints : 0)} ${props.customLabel}s`]
-  }
-})
+const barColor = computed(() => themeState.theme?.progressIndicators?.beforeTodayColor || chartColors.cyan700Color)
+const remainingBarColor = computed(() => themeState.theme?.progressIndicators?.incompleteColor || chartColors.surface300Color)
 
 const radialChartLabelStyle = computed(() => {
   if (dataLabelNameColor.value) {
@@ -162,19 +92,18 @@ const radialChartLabelStyle = computed(() => {
           :full-circle="true"
           :size-in-rem="12"
           :completed-bar-color="barColor"
-          :remaining-bar-color="incompleteColor"
+          :remaining-bar-color="remainingBarColor"
       >
         <template #center>
           <div v-if="is100Percent">
             <i class="fa-solid fa-check-double text-green-500 text-4xl" aria-hidden="true"></i>
           </div>
           <div v-else>
-            <div class="text-xl font-bolder" :style="radialChartLabelStyle">{{ totalCompletedPoints }} Points</div>
+            <div class="text-xl font-semibold" :style="radialChartLabelStyle"><span>{{ totalCompletedPoints }}</span> {{ attributes.pointDisplayNamePlural }}</div>
           </div>
           <div class="text-gray-500 dark:text-gray-200" :style="radialChartLabelStyle">{{  percentComplete }}%</div>
         </template>
       </radial-percentage-chart>
-<!--      <apexchart type="radialBar" height="250" :options="chartOptions" :series="series"></apexchart>-->
     </div>
     <div>
       <slot name="footer" />

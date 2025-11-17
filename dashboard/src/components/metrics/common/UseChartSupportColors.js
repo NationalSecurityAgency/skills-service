@@ -25,6 +25,7 @@ export const useChartSupportColors = () => {
         const surface600Color = documentStyle.getPropertyValue('--p-surface-400')
         const green700Color = documentStyle.getPropertyValue('--p-green-700')
         const orange700Color = documentStyle.getPropertyValue('--p-orange-700')
+        const cyan700Color = documentStyle.getPropertyValue('--p-cyan-700')
 
         return {
             textColor,
@@ -35,6 +36,7 @@ export const useChartSupportColors = () => {
             surface600Color,
             green700Color,
             orange700Color,
+            cyan700Color
         }
     }
 

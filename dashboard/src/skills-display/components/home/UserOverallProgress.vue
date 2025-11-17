@@ -47,10 +47,6 @@ const totalSkills = computed(() => userProgress.value?.totalSkills || 0)
 const skillsAchieved = computed(() => userProgress.value?.skillsAchieved || 0)
 const skillsPercentAchieved = computed(() => totalSkills.value > 0 ? Math.round((skillsAchieved.value / totalSkills.value) * 100) : 0)
 
-const beforeTodayColor = computed(() => themeState.theme.progressIndicators?.beforeTodayColor || '#14a3d2')
-const earnedTodayColor = computed(() => themeState.theme.progressIndicators?.earnedTodayColor || '#7ed6f3')
-const completeColor = computed(() => themeState.theme.progressIndicators?.completeColor || '#59ad52')
-const incompleteColor = computed(() => themeState.theme.progressIndicators?.incompleteColor || '#cdcdcd')
 const isLevelComplete = computed(() => userProgress.value.levelTotalPoints === -1)
 const levelStats = computed(() => {
   return {
@@ -71,13 +67,8 @@ const levelStats = computed(() => {
           <div>
             <circle-progress
               :total-completed-points="userProgress.points"
-              :points-completed-today="userProgress.todaysPoints"
               :total-possible-points="userProgress.totalPoints"
-              :completed-before-today-color="beforeTodayColor"
-              :incomplete-color="incompleteColor"
-              :total-completed-color="userProgress.points === userProgress.totalPoints ? completeColor : earnedTodayColor"
               data-cy="overallPoints"
-              :custom-label="attributes.pointDisplayName"
               :title="`Overall ${ attributes.pointDisplayName }s`">
               <template #footer>
                 <p v-if="userProgress.points > 0 && userProgress.points === userProgress.totalPoints">All {{ attributes.pointDisplayName }}s earned</p>
@@ -98,13 +89,8 @@ const levelStats = computed(() => {
         <div class="flex-1">
           <circle-progress
             :total-completed-points="userProgress.levelPoints"
-            :points-completed-today="userProgress.todaysPoints"
             :total-possible-points="userProgress.levelTotalPoints"
-            :completed-before-today-color="beforeTodayColor"
-            :incomplete-color="incompleteColor"
-            :total-completed-color="isLevelComplete ? completeColor : earnedTodayColor"
             :title="levelStats.title"
-            :custom-label="attributes.pointDisplayName"
             data-cy="levelProgress">
             <template #footer>
               <p v-if="isLevelComplete">All {{ attributes.levelDisplayName.toLowerCase() }}s complete</p>
