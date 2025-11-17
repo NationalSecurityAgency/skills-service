@@ -1164,6 +1164,28 @@ line-height:107%">(A) fancy formatting</span>""").valid
         validator.validateDescription("<span>(A) some</span>\n\n${imgStr}").valid
         validator.validateDescription("(A) some\n\n**${imgStr}**").valid
         validator.validateDescription("<span>(A) some</span>\n\n**${imgStr}**").valid
+
+        validator.validateDescription("(A) **ok**\n\n1. one\n2. ${imgStr}").valid
+        validator.validateDescription("**(A) ok**\n\n1. one\n2. ${imgStr}").valid
+        validator.validateDescription("### (A) ok\n\n* one\n* two\\*\n* three:\n\n> (A) ok:\n>\n> * one\n> * Two ***and*** three ***<span>blah</span>*** more\n>\n> ${imgStr}").valid
+        validator.validateDescription("### (A) ok\n\n* one\n* two\\*\n* three:\n\n> (A) ok:\n>\n> * one\n> * Two ***and*** three ***<span>blah</span>*** more\n>\n> ${imgStr}\n> ${imgStr}").valid
+        def res3 = validator.validateDescription(
+                "### (A) ok\n\n" +
+                        "* one\n" +
+                        "> (A) ok\n" +
+                        ">\n" +
+                        "> * one\n" +
+                        "> * two\n" +
+                        ">\n" +
+                        "> line of text\n" +
+                        "> ${imgStr}\n" +
+                        ""
+        )
+        !res3.valid
+        res3.validationFailedDetails == "Line[2] [* one]\n" +
+                "\n" +
+                "Line[8] [line of text\n" +
+                "\"This i]\n\n"
     }
 
     def "support links" () {
