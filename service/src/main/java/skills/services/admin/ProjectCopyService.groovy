@@ -139,6 +139,9 @@ class ProjectCopyService {
     @Value('#{"${skills.config.ui.maxSkillsPerSubject}"}')
     int maxSkillsPerSubject
 
+    @Value('#{"${skills.config.ui.maxSubjectsPerProject}"}')
+    int maxSubjectsPerProject
+
     @Transactional
     @Profile
     void copyItemsToAnotherProject(String fromProjectId, String toProjectId, CopyToAnotherProjectRequest copyRequest) {
@@ -266,11 +269,11 @@ class ProjectCopyService {
     @Profile
     private CopyValidationRes validateCopySubjectToAnotherProject(String projectId, String subjectId, String otherProjectId) {
         SkillDefWithExtra subject
+        ProjDef fromProject = loadProject(projectId)
+        ProjDef otherProject = loadProject(otherProjectId)
         try {
             subject = loadSubject(projectId, subjectId)
             validateSubjectDoesNotExist(otherProjectId, subject.skillId, subject.name)
-            ProjDef fromProject = loadProject(projectId)
-            ProjDef otherProject = loadProject(otherProjectId)
             validateProjectsCommunityStatus(fromProject, otherProject)
         } catch (SkillException skillException) {
             return new CopyValidationRes(isAllowed: false, validationErrors: [skillException.getMessage()?.toString()])
@@ -281,6 +284,14 @@ class ProjectCopyService {
 
         List<SkillIdAndName> itemsToCheck = itemsToCopy.collect { new SkillIdAndName(skillId: it.skillId, skillName: it.skillName, description: it.description) }
         List<String> validationErrors = checkForSkillIdAndNameCollisions(itemsToCheck, otherProjectId, projectId)
+        int currentSubjectCount = skillDefRepo.countByProjectIdAndType(otherProjectId, SkillDef.ContainerType.Subject)
+
+        if (currentSubjectCount + itemsToCopy.size() > maxSubjectsPerProject) {
+            validationErrors.add(("Each Project is limited to [${maxSubjectsPerProject}] Subjects, " +
+                    "currently [${otherProjectId}] has [${currentSubjectCount}] Subjects, " +
+                    "copying [${itemsToCopy?.size()}] would exceed the maximum").toString())
+        }
+
         CopyValidationRes res = new CopyValidationRes(isAllowed: validationErrors?.isEmpty(), validationErrors: validationErrors)
         return res
     }
