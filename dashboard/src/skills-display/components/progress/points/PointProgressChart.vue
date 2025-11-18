@@ -43,8 +43,7 @@ const loading = ref(true)
 const animationEnded = ref(false)
 const chartLoaded = ref(false)
 
-const chartJsOptions = ref();
-const chartData = ref({})
+const chartData = ref({});
 const achievedLevels = ref([])
 const splashChartData = ({
   datasets: [{
@@ -63,7 +62,6 @@ const splashChartData = ({
 
 
 onMounted(() => {
-  chartJsOptions.value = setChartOptions()
   loadPointsHistory()
 })
 const formatTimestamp = (timestamp) => dayjs(timestamp).format('YYYY-MM-DD')
@@ -96,7 +94,7 @@ const loadPointsHistory = () => {
       }
 
       const numItems = pointHistoryRes.pointsHistory?.length || 0
-      const pointRadius = numItems < 50 ? 3 : 0
+      const pointRadius = numItems < tooManyPointsForTooltip ? 3 : 0
       chartData.value = {
         datasets: [{
           label: 'Points',
@@ -118,8 +116,16 @@ const hasData = computed(() => {
   const res = chartData.value?.datasets && chartData.value?.datasets.length > 0 && (chartData.value?.datasets[0].data?.length > 0)
   return res !== undefined && res !== false && res !== null
 })
+const tooManyPointsForTooltip = 50
+const hasManyPoints = computed(() => {
+  if (!hasData.value) {
+    return false
+  }
+  const data = chartData.value?.datasets[0].data
+  return data.length > tooManyPointsForTooltip
+})
 
-const setChartOptions = () => {
+const chartJsOptions = computed(() => {
   const labelColor = themeState.theme.charts.axisLabelColor || colors.textMutedColor
   const surfaceBorder =  colors.contentBorderColor
 
@@ -161,7 +167,7 @@ const setChartOptions = () => {
         display: false,
       },
       tooltip: {
-        enabled: true,
+        enabled: !hasManyPoints.value,
         callbacks: {
           title: function (context) {
             return dayjs(context[0].parsed.x).format('MMM D, YYYY')
@@ -210,9 +216,9 @@ const setChartOptions = () => {
       onComplete: function() {
         animationEnded.value = true;
       }
-    }
+    },
   };
-}
+})
 
 const pointsChartRef = ref(null)
 </script>
