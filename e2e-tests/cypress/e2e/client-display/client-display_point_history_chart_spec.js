@@ -609,7 +609,7 @@ describe('Client Display Point History Tests', () => {
     cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
   })
 
-  it.only('empty point history', () => {
+  it('empty point history', () => {
     cy.intercept('/api/projects/proj1/pointHistory')
       .as('getPointHistory')
     cy.cdVisit('/')
