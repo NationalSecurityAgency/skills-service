@@ -113,7 +113,7 @@ Cypress.Commands.add("matchSnapshotImage", (maybeNameOtherwiseCommandOptions) =>
 })
 
 Cypress.Commands.add("doMatchSnapshotImage", (options) => {
-    cy.wait(1500);
+    cy.wait(2000);
 
     const visualRegressionOptions = {
         errorThreshold: 0.05 // in percent

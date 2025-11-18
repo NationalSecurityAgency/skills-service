@@ -49,12 +49,12 @@ watch( () => route.params.subjectId, () => {
         <user-overall-progress :is-subject="true"/>
       </div>
 
-      <div class="mt-4 flex flex-col md:flex-row gap-6 ">
+      <div class="mt-4 flex flex-col lg:flex-row gap-6 ">
         <div class="flex items-center">
           <my-rank class="w-full"/>
         </div>
-        <div class="flex-1 items-center">
-          <point-progress-chart />
+        <div class="flex-1 min-w-0">
+          <point-progress-chart class="w-full" />
         </div>
       </div>
 

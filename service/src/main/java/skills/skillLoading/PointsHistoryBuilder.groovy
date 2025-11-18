@@ -81,12 +81,6 @@ class PointsHistoryBuilder {
             }
         }
 
-        List<Date> dates = pointsByDay.collect { new Date(it.key.time).clearTime() }
-        dates.min().upto(new Date().clearTime()) { Date theDate ->
-            if (!pointsByDay.containsKey(theDate)) {
-                pointsByDay[theDate] = 0L
-            }
-        }
         List<SkillHistoryPoints> historyPoints = pointsByDay.collect {
             new SkillHistoryPoints(dayPerformed: it.key, points: it.value.toInteger())
         }.sort({ it.dayPerformed })

@@ -120,7 +120,8 @@ export default {
         '.sd-theme-home .editor-help-footer,' +
         '.sd-theme-home .editor-help-footer i,' +
         '.sd-theme-home .sd-theme-icon,' +
-        '.sd-theme-home .p-fieldset, .sd-theme-home .p-fieldset-legend',
+        '.sd-theme-home .p-fieldset, .sd-theme-home .p-fieldset-legend,'+
+        '.p-menu-overlay .p-menu-item-content',
       styleName: 'color'
     }, {
       selector: '.toastui-editor-popup [data-type="Heading"]:hover,' +
@@ -203,6 +204,7 @@ export default {
           + '.sd-theme-home .editor-help-footer,'
           + '.sd-theme-home .sd-theme-tile-background,'
           + '.sd-theme-home .p-fieldset, .sd-theme-home .p-fieldset-legend,'
+          + '.p-menu-overlay .p-menu-list,'
           + '.p-dialog',
         styleName: 'background-color'
       }, {
@@ -225,7 +227,8 @@ export default {
           'body #app .sd-theme-home .toastui-editor-contents pre code,' +
           'body #app .sd-theme-home .toastui-editor-popup [data-type="Heading"]:hover,' +
           'body #app .sd-theme-home .toastui-editor-popup .drop-down .drop-down-item:hover,' +
-          'body #app .sd-theme-home .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover',
+          'body #app .sd-theme-home .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover,' +
+          '.p-menu-overlay .p-menu-item-content:hover',
         styleName: 'color'
       }],
       borderColor: [{
