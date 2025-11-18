@@ -106,6 +106,7 @@ const getProgressPercent = (item) => {
           <SelectButton v-model="selected"
                         :options="options"
                         @update:modelValue="onOptionChange"
+                        optionLabel="label"
                         data-cy="badge-selector"
                         aria-label="Select Top 10 or 10 Around Me">
             <template #option="slotProps">
