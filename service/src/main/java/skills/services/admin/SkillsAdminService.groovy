@@ -697,6 +697,26 @@ class SkillsAdminService {
         return res
     }
 
+    int sortByDisplayOrder(DisplayOrderRes a, DisplayOrderRes b) {
+        if( a.groupId != null || b.groupId != null ) {
+            if( a.groupId != null && b.groupId != null) {
+                if( a.groupId != b.groupId ) {
+                    return a.skillGroupDisplayOrder <=> b.skillGroupDisplayOrder
+                }
+            }
+            else {
+                if( a.groupId != null && b.groupId == null ) {
+                    return a.skillGroupDisplayOrder <=> b.displayOrder
+                }
+                else {
+                    return a.displayOrder <=> b.skillGroupDisplayOrder
+                }
+            }
+        }
+
+        return a.displayOrder <=> b.displayOrder
+    }
+
     @Transactional(readOnly = true)
     SkillDefRes getSkill(String projectId, String subjectId, String skillId) {
         SkillDefWithExtra res = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
@@ -712,6 +732,25 @@ class SkillsAdminService {
         }
 
         finalRes.thisSkillWasReusedElsewhere = skillDefRepo.wasThisSkillReusedElsewhere(res.id)
+
+        List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
+
+        def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
+        def orderedGroup = skills?.sort({a, b -> sortByDisplayOrder(a, b)});
+        def orderInGroup = orderedGroup.findIndexOf({it -> it.skillId == currentSkill.skillId}) + 1;
+        def totalSkills = orderedGroup.size();
+
+        if (currentSkill) {
+            def currentIndex = skills.findIndexOf{ it.skillId == currentSkill.skillId }
+            if(currentIndex > 0) {
+                finalRes.prevSkillId = skills[currentIndex - 1]?.skillId
+            }
+            if(currentIndex < totalSkills - 1) {
+                finalRes.nextSkillId = skills[currentIndex + 1]?.skillId
+            }
+            finalRes.totalSkills = totalSkills
+            finalRes.orderInGroup = orderInGroup
+        }
 
         String videoUrl = skillAttributesDefRepo.getVideoUrlBySkillRefId(res.id)
         finalRes.hasVideoConfigured = StringUtils.isNotBlank(videoUrl)
