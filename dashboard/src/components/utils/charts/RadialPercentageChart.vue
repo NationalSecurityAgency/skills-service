@@ -75,6 +75,7 @@ const chartData = computed(() => {
   };
 })
 
+const animationCompleted = ref(false)
 const chartOptions = computed(() => {
   return {
     responsive: true,
@@ -94,7 +95,10 @@ const chartOptions = computed(() => {
     },
     animation: {
       animateScale: true,
-      animateRotate: true
+      animateRotate: true,
+      onComplete: function() {
+        animationCompleted.value = true;
+      }
     }
   };
 })
@@ -125,6 +129,7 @@ const chartStyle = computed(() => ({
         </slot>
       </div>
     </div>
+    <div v-if="animationCompleted" data-cy="animationCompleted" />
   </div>
 </template>
 
