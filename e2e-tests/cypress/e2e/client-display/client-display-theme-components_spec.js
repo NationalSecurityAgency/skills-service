@@ -81,13 +81,19 @@ describe('Client Display Theme Components Tests', () => {
     // use text primary color
     cy.cdVisit(`/?${titleBg}&${textPrimaryColor}`)
 
-    cy.get('[data-cy="overallPoints"] .vue-apexcharts')
-    cy.matchSnapshotImageForElement('[data-cy="overallPoints"] .vue-apexcharts', {
+      cy.get('[data-cy="overallPoints"] [data-cy="circleProgressPts"]').should('have.text', '200')
+      cy.get('[data-cy="overallPoints"] [data-cy="circleProgressPercent"]').should('have.text', '33%')
+      cy.get('[data-cy="levelProgress"] [data-cy="circleProgressPts"]').should('have.text', '50')
+      cy.get('[data-cy="levelProgress"] [data-cy="circleProgressPercent"]').should('have.text', '41%')
+
+      cy.get('[data-cy="overallPoints"] [data-cy="animationCompleted"]')
+      cy.get('[data-cy="levelProgress"] [data-cy="animationCompleted"]')
+    cy.matchSnapshotImageForElement('[data-cy="overallPoints"] [data-pc-name="chart"]', {
       name: 'circleProgressInteriorTextColor is not present default to textPrimaryColor'
     })
 
     cy.cdVisit(`/?${titleBg}&${textPrimaryColor}&${circleProgressInteriorTextColor}`)
-    cy.matchSnapshotImageForElement('[data-cy="overallPoints"] .vue-apexcharts', {
+    cy.matchSnapshotImageForElement('[data-cy="overallPoints"] [data-pc-name="chart"]', {
       name: 'circleProgressInteriorTextColor overrides textPrimaryColor'
     })
   })
@@ -127,7 +133,9 @@ describe('Client Display Theme Components Tests', () => {
       name: 'progressIndicators settings - completeColor'
     })
 
-    cy.matchSnapshotImageForElement('[data-cy="overallPoints"] .vue-apexcharts', {
+
+      cy.get('[data-cy="overallPoints"] [data-cy="animationCompleted"]')
+    cy.matchSnapshotImageForElement('[data-cy="overallPoints"] [data-pc-name="chart"]', {
       name: 'beforeTodayColor and  incompleteColor apply to CircleProgress comoponent'
     })
 
@@ -246,7 +254,6 @@ describe('Client Display Theme Components Tests', () => {
     })
     const url = `/?themeParam=buttons|${buttons}`
     cy.cdVisit(url, true)
-    cy.matchSnapshotImageForElement('[data-cy="pointProgressChart-resetZoomBtn"]', 'buttons-resetZoom')
 
     cy.cdClickSubj(0, 'Subject 1', true)
     cy.matchSnapshotImageForElement('[data-cy="back"]', 'buttons-Back')
