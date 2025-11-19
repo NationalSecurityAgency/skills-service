@@ -179,6 +179,7 @@ const items = [
         aria-haspopup="true"
         aria-controls="chartMenu"
         text
+        data-cy="chartDownloadMenu"
         aria-label="Chart Download Menu"/>
     <Menu ref="chartMenu" id="chartMenu" :model="items" :popup="true" />
   </div>

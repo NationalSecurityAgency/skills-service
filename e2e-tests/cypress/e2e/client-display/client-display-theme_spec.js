@@ -332,11 +332,10 @@ describe('Client Display Tests', () => {
         cy.cdVisit('/?enableTheme=true');
         cy.contains('Point History');
         cy.get('[data-cy="pointHistoryChart-animationEnded"]');
-        cy.get('[title="Menu"]')
-            .click();
-        cy.contains('Download SVG');
+        cy.get('[data-cy="chartDownloadMenu"]').click();
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Export to CSV"]')
         cy.wait(1000)
-        cy.matchSnapshotImageForElement('.apexcharts-menu.apexcharts-menu-open', {
+        cy.matchSnapshotImageForElement('[data-p="popup"][data-pc-name="menu"]', {
             errorThreshold: 0.1
         });
     });
