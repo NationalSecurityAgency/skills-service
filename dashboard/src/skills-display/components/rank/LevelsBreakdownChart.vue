@@ -136,7 +136,12 @@ const setChartOptions = () => {
           return `You are ${attributes.levelDisplayName} ${props.myLevel}!`
         }
       }
-    }
+    },
+    animation: {
+      onComplete: function() {
+        animationEnded.value = true;
+      }
+    },
   };
 }
 const levelBreakdownChartRef = ref(null)
