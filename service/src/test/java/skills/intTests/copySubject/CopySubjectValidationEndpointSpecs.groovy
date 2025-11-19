@@ -15,13 +15,16 @@
  */
 package skills.intTests.copySubject
 
-
+import org.springframework.beans.factory.annotation.Value
 import skills.intTests.copyProject.CopyIntSpec
 import skills.intTests.utils.SkillsService
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class CopySubjectValidationEndpointSpecs extends CopyIntSpec {
+
+    @Value('#{"${skills.config.ui.maxSubjectsPerProject}"}')
+    int maxSubjectsPerProject
 
     def "validate subject name is unique - name lowercase"() {
         def p1 = createProject(1)
@@ -521,4 +524,26 @@ class CopySubjectValidationEndpointSpecs extends CopyIntSpec {
         res.validationErrors == ["Subjects from Divine Dragon projects cannot be copied to All Dragons projects."]
     }
 
+
+    def "validate subject limit can not be bypassed"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Subj1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Subj1Skills)
+
+        def p2 = createProject(2)
+        def subjectsToMake = maxSubjectsPerProject + 1
+        skillsService.createProject(p2)
+        for(def x = 1; x <= maxSubjectsPerProject; x++ ) {
+            def newSubj = createSubject(2, x + 1)
+            def subjSkills = createSkills(3, 2, x + 1, 100)
+            skillsService.createSubjectAndSkills(newSubj, subjSkills)
+        }
+
+        when:
+        def res = skillsService.validateCopySubjectDefIntoAnotherProject(p1.projectId, p1subj1.subjectId, p2.projectId)
+        then:
+        res.isAllowed == false
+        res.validationErrors == ["Each Project is limited to [25] Subjects, currently [TestProject2] has [25] Subjects, copying [3] would exceed the maximum"]
+    }
 }
