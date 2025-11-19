@@ -421,6 +421,135 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.get('[data-cy="quizCompletion"]')
     });
 
+
+    const moveAnswer = (qNum, answerText, commands, bSelectorPart = 'available') => {
+        cy.get(`[data-cy="question_${qNum}"] [data-cy^="${bSelectorPart}-"]`).contains(answerText).then((bankItem) => {
+            // Store the answer text before moving
+            const answerToMove = bankItem.text().trim();
+
+            // Move the answer
+            cy.wrap(bankItem).click().type(commands);
+            // Verify it appears in the matched section
+            cy.get(`[data-cy="question_${qNum}"] [data-cy="matchedList"]`).contains(answerToMove).should('exist');
+        });
+    };
+
+    it('drag into wrong spots then use keyboard to re-arrange', () => {
+        cy.createQuizDef(1);
+        cy.createQuizMatchingQuestionDef(1, 1);
+        cy.createQuizMatchingQuestionDef(1, 2);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.dragAndDropAnswerMatch(1, 'First Answer', 2)
+        cy.dragAndDropAnswerMatch(1, 'Second Answer', 1)
+        cy.dragAndDropAnswerMatch(1, 'Third Answer', 0)
+
+        moveAnswer(1, 'Third Answer', '{downArrow}')
+        moveAnswer(1, 'Third Answer', '{downArrow}', 'matchedNum')
+        moveAnswer(1, 'First Answer', '{upArrow}', 'matchedNum')
+
+        cy.dragAndDropAnswerMatch(2, 'First Answer', 2)
+        cy.dragAndDropAnswerMatch(2, 'Second Answer', 1)
+        cy.dragAndDropAnswerMatch(2, 'Third Answer', 0)
+
+        moveAnswer(2, 'First Answer', '{upArrow}')
+        moveAnswer(2, 'First Answer', '{upArrow}', 'matchedNum')
+        moveAnswer(2, 'Third Answer', '{downArrow}', 'matchedNum')
+
+        cy.clickCompleteQuizBtn()
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+        cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
+
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="questionAnsweredCorrectly"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-0"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-1"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-2"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-3"]').should('not.exist')
+
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="questionAnsweredCorrectly"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-0"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-1"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-2"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-3"]').should('not.exist')
+    });
+
+    it('drag into spots then back and then use keyboard to correct answers', () => {
+        cy.createQuizDef(1);
+        cy.createQuizMatchingQuestionDef(1, 1);
+        cy.createQuizMatchingQuestionDef(1, 2);
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.get('[data-cy="takeQuizBtn"]').click();
+
+        cy.get('[data-cy="title"]').contains('Quiz')
+        cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '2')
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.dragAndDropAnswerMatch(1, 'First Answer', 2)
+        cy.dragAndDropAnswerMatch(1, 'Second Answer', 1)
+        moveAnswer(1, 'Third Answer', '{leftArrow}', 'bank')
+        moveAnswer(1, 'Third Answer', '{downArrow}', 'matchedNum')
+        moveAnswer(1, 'Third Answer', '{downArrow}', 'matchedNum')
+        moveAnswer(1, 'First Answer', '{upArrow}', 'matchedNum')
+
+        cy.dragAndDropAnswerMatch(2, 'Second Answer', 1)
+        moveAnswer(2, 'First Answer', '{leftArrow}', 'available')
+        moveAnswer(2, 'Third Answer', '{leftArrow}', 'available')
+
+        // cy.rearangeAnswerMatchViaDragAndDrop(2, 'First Answer', 'Third Answer')
+        cy.get('[data-cy="question_2"] [data-cy="matchedNum-2"]').dragAndDrop('[data-cy="question_2"] [data-cy="matchedNum-0"]')
+
+        cy.clickCompleteQuizBtn()
+        cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+        cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
+
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="questionAnsweredCorrectly"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-0"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-1"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-2"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="matchedNum-3"]').should('not.exist')
+
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="questionAnsweredCorrectly"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-0"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-1"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-2"] [data-cy="matchIsCorrect"]')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_2"] [data-cy="matchedNum-3"]').should('not.exist')
+    });
+
     it('theme support: matching questions', () => {
         cy.createQuizDef(1);
         cy.createQuizMatchingQuestionDef(1, 1);
