@@ -83,14 +83,17 @@ const computeChartData = () => {
 
 const setChartOptions = () => {
   const colors = chartSupportColors.getColors()
-  const labelColor = themeState.theme.charts.axisLabelColor || colors.textMutedColor
+  const axisLabelColor = themeState.theme.charts.axisLabelColor || colors.textMutedColor
+  const dataLabelBackgroundColor = themeState.theme.charts.labelBackgroundColor || colors.surface100Color
+  const dataLabelBorderColor = themeState.theme.charts.labelBorderColor || colors.surface600Color
+  const dataLabelForegroundColor = themeState.theme.charts.labelForegroundColor || colors.cyan700Color
   return {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
       x: {
         ticks: {
-          color: labelColor
+          color: axisLabelColor
         },
         grid: {
           display: false,  // This will hide the vertical grid lines
@@ -100,7 +103,7 @@ const setChartOptions = () => {
         display: true,
         beginAtZero: true,
         ticks: {
-          color: labelColor,
+          color: axisLabelColor,
           stepSize: 1,  // This ensures the step size is 1
           precision: 0   // Ensures whole numbers
         },
@@ -110,7 +113,7 @@ const setChartOptions = () => {
         title: {
           display: true,
           text: '# of Users',
-          color: labelColor
+          color: axisLabelColor
         },
       }
     },
@@ -119,12 +122,12 @@ const setChartOptions = () => {
         display: false
       },
       datalabels: {
-        color: colors.cyan700Color,
+        color: dataLabelForegroundColor,
         font: {
           size: 12,
         },
-        backgroundColor: colors.surface100Color,
-        borderColor: colors.surface600Color,
+        backgroundColor: dataLabelBackgroundColor,
+        borderColor: dataLabelBorderColor,
         borderWidth: 1,
         borderRadius: 4,
         padding: 5,

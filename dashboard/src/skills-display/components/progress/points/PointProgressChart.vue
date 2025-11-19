@@ -126,7 +126,10 @@ const hasManyPoints = computed(() => {
 })
 
 const chartJsOptions = computed(() => {
-  const labelColor = themeState.theme.charts.axisLabelColor || colors.textMutedColor
+  const axisLabelColor = themeState.theme.charts.axisLabelColor || colors.textMutedColor
+  const dataLabelBackgroundColor = themeState.theme.charts.labelBackgroundColor || colors.surface100Color
+  const dataLabelBorderColor = themeState.theme.charts.labelBorderColor || colors.surface600Color
+  const dataLabelForegroundColor = themeState.theme.charts.labelForegroundColor || colors.cyan700Color
   const surfaceBorder =  colors.contentBorderColor
 
   return {
@@ -142,7 +145,7 @@ const chartJsOptions = computed(() => {
           },
         },
         ticks: {
-          color: labelColor
+          color: axisLabelColor
         },
         grid: {
           color: surfaceBorder,
@@ -152,7 +155,7 @@ const chartJsOptions = computed(() => {
       y: {
         beginAtZero: true,
         ticks: {
-          color: labelColor
+          color: axisLabelColor
         },
         grid: {
           color: surfaceBorder
@@ -175,7 +178,7 @@ const chartJsOptions = computed(() => {
         }
       },
       datalabels: {
-        color: colors.cyan700Color,
+        color: dataLabelForegroundColor,
         font: {
           size: 10,
         },
@@ -198,8 +201,8 @@ const chartJsOptions = computed(() => {
           }
           return 'left'
         },
-        backgroundColor: colors.surface100Color,
-        borderColor: colors.surface600Color,
+        backgroundColor: dataLabelBackgroundColor,
+        borderColor: dataLabelBorderColor,
         borderWidth: 1,
         borderRadius: 4,
         padding: 5,
