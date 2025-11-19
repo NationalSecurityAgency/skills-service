@@ -736,11 +736,12 @@ class SkillsAdminService {
         List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
 
         def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
-        def orderedGroup = skills?.sort({a, b -> sortByDisplayOrder(a, b)});
-        def orderInGroup = orderedGroup.findIndexOf({it -> it.skillId == currentSkill.skillId}) + 1;
-        def totalSkills = orderedGroup.size();
 
         if (currentSkill) {
+            def orderedGroup = skills?.sort({a, b -> sortByDisplayOrder(a, b)});
+            def orderInGroup = orderedGroup.findIndexOf({it -> it.skillId == currentSkill.skillId}) + 1;
+            def totalSkills = orderedGroup.size();
+
             def currentIndex = skills.findIndexOf{ it.skillId == currentSkill.skillId }
             if(currentIndex > 0) {
                 finalRes.prevSkillId = skills[currentIndex - 1]?.skillId
