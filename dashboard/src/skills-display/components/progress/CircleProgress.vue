@@ -99,9 +99,9 @@ const radialChartLabelStyle = computed(() => {
             <i class="fa-solid fa-check-double text-green-500 text-4xl" aria-hidden="true"></i>
           </div>
           <div v-else>
-            <div class="text-xl font-semibold" :style="radialChartLabelStyle"><span>{{ totalCompletedPoints }}</span> {{ attributes.pointDisplayNamePlural }}</div>
+            <div class="text-xl font-semibold" :style="radialChartLabelStyle"><span data-cy="circleProgressPts">{{ totalCompletedPoints }}</span> {{ attributes.pointDisplayNamePlural }}</div>
           </div>
-          <div class="text-gray-500 dark:text-gray-200" :style="radialChartLabelStyle">{{  percentComplete }}%</div>
+          <div class="text-gray-500 dark:text-gray-200" :style="radialChartLabelStyle" data-cy="circleProgressPercent">{{  percentComplete }}%</div>
         </template>
       </radial-percentage-chart>
     </div>
