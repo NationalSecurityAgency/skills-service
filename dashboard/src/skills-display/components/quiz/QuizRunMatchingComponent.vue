@@ -44,15 +44,18 @@ const answerBankCurrent = ref([])
 const matchedListId = `matchedList-q${props.q.id}`
 const availableAnswersListId = `availableAnswersList-q${props.q.id}`
 const answerOptionsList = `answerOptionsList-q${props.q.id}`
+const sortableSharedGroupName = `shared-q${props.q.id}`
 let sortableInstances = []
 onBeforeMount(() => {
   matchedAnswersOrig.value = props.q.answerOptions
       .map((opt) => ({id: opt.id, answerOption: opt.answerOption, matchedAnswer: opt.currentAnswer || ''}))
   answerBankOrig.value =  props.q.matchingTerms
       .filter(term => !matchedAnswersOrig.value.some(matched => matched.matchedAnswer === term))
-      .map((term, index) => ({id: index, answerOption: term}))
+      .map((term, index) => ({id: index, answerOption: term, initialId: index}))
 })
 onMounted(() => {
+  matchedAnswersCurrent.value = matchedAnswersOrig.value.map((opt) => ({...opt, initialId: opt.id}))
+  answerBankCurrent.value = answerBankOrig.value.map((opt) => ({...opt, initialId: opt.id}))
   initSortableJsInstances()
 })
 watch(() => props.quizComplete, (newVal, oldVal) => {
@@ -66,15 +69,14 @@ onUnmounted(() => {
 })
 
 const initSortableJsInstances = () => {
-  matchedAnswersCurrent.value = matchedAnswersOrig.value.map((opt) => ({...opt, initialId: opt.id}))
-  answerBankCurrent.value = answerBankOrig.value.map((opt) => ({...opt, initialId: opt.id}))
+
 
   if (props.quizComplete) {
     return
   }
 
   const commonOptions = {
-    group: 'shared',
+    group: sortableSharedGroupName,
     put: false,
     swap: true,
     swapThreshold: 1, // Requires 100% overlap to swap
@@ -94,7 +96,7 @@ const initSortableJsInstances = () => {
 
   const matchedSortable = new Sortable(matchedList, commonOptions);
   const availableSortable = new Sortable(availableAnswersList, {...commonOptions, group: {
-      name: 'shared',
+      name: sortableSharedGroupName,
       put: false // Do not allow items to be put into this list
     }});
   sortableInstances = [matchedSortable, availableSortable]
@@ -149,31 +151,24 @@ const itemAddedToList = (evt) => {
   return true
 }
 
-const prepKeyboardMove = () => {
-  destroySortableJsInstances()
-
-  // sync orig to current
-  answerBankOrig.value = answerBankCurrent.value.map((i) => ({...i}))
-  matchedAnswersOrig.value = matchedAnswersCurrent.value.map((i) => ({...i}))
-}
-
 const insertElementIntoNextSlot = (availableId) => {
   const availableItemIndex = answerBankOrig.value.findIndex((item) => item.id === availableId)
   if (availableItemIndex >= 0) {
-    prepKeyboardMove()
+    destroySortableJsInstances()
 
-    const availableItem = answerBankOrig.value[availableItemIndex]
-    answerBankOrig.value = answerBankOrig.value.filter((item) => item.id !== availableId)
+    const availableItem = answerBankCurrent.value[availableItemIndex]
+    answerBankCurrent.value = answerBankCurrent.value.filter((item) => item.id !== availableId)
     // find next available matched item after the current index
-    let nextAvailableIndex = matchedAnswersOrig.value.findIndex((item, index) => index >= availableItemIndex && item.matchedAnswer === '')
+    let nextAvailableIndex = matchedAnswersCurrent.value.findIndex((item, index) => index >= availableItemIndex && item.matchedAnswer === '')
     if (nextAvailableIndex === -1) {
-      nextAvailableIndex = matchedAnswersOrig.value.findIndex((item) => item.matchedAnswer === '')
+      nextAvailableIndex = matchedAnswersCurrent.value.findIndex((item) => item.matchedAnswer === '')
     }
-    matchedAnswersOrig.value[nextAvailableIndex].matchedAnswer = availableItem.answerOption
-    matchedAnswersOrig.value[nextAvailableIndex].id = availableItem.id
-    initSortableJsInstances()
-    recordMatchedAnswer(nextAvailableIndex, availableItem.answerOption, availableItem.id)
 
+    recordMatchedAnswer(nextAvailableIndex, availableItem.answerOption, availableItem.id)
+    // sync current to the original
+    answerBankOrig.value = answerBankCurrent.value.map((i) => ({...i}))
+    matchedAnswersOrig.value = matchedAnswersCurrent.value.map((i) => ({...i}))
+    initSortableJsInstances()
     focusOnItem(availableItem.id)
   }
 }
@@ -181,14 +176,19 @@ const moveItem = (itemId, adjustByIndex) => {
   const index1 = matchedAnswersCurrent.value.findIndex((item) => item.id === itemId)
   const index2 = index1 + adjustByIndex
   if (index2 >= 0 && index2 < matchedAnswersCurrent.value.length) {
-    prepKeyboardMove()
-    const item1 = {...matchedAnswersOrig.value[index1]}
-    const item2 = {...matchedAnswersOrig.value[index2]}
-    matchedAnswersOrig.value[index1] = item2
-    matchedAnswersOrig.value[index2] = item1
-    initSortableJsInstances()
+    destroySortableJsInstances()
+    const item1 = {...matchedAnswersCurrent.value[index1]}
+    const item2 = {...matchedAnswersCurrent.value[index2]}
+    matchedAnswersOrig.value[index1].matchedAnswer = item2.matchedAnswer
+    matchedAnswersOrig.value[index2].matchedAnswer = item1.matchedAnswer
+    matchedAnswersOrig.value[index1].id = item2.id
+    matchedAnswersOrig.value[index2].id = item1.id
     recordMatchedAnswer(index1, item2.matchedAnswer, item2.id)
     recordMatchedAnswer(index2, item1.matchedAnswer, item1.id)
+    // sync current to the original
+    answerBankOrig.value = answerBankCurrent.value.map((i) => ({...i}))
+    matchedAnswersOrig.value = matchedAnswersCurrent.value.map((i) => ({...i}))
+    initSortableJsInstances()
     focusOnItem(item1.id)
   }
 }
@@ -211,7 +211,7 @@ const emitAnswerUpdate = (index) => {
 const { value, errorMessage, validate } = useField(() => props.name, undefined, {syncVModel: true});
 const isAnswerCorrect = (id) => {
   const answerOption = props.q.answerOptions.find((a) => a.id === id)
-  return answerOption.isCorrect
+  return answerOption?.isCorrect
 }
 </script>
 
@@ -286,6 +286,8 @@ const isAnswerCorrect = (id) => {
                    :id="`matchValBtn-${q.id}-${available.id}`"
                    outlined
                    @keyup.left="insertElementIntoNextSlot(available.id)"
+                   @keyup.up="moveItem(available.id, -1)"
+                   @keyup.down="moveItem(available.id, 1)"
                    :data-cy="`available-${available.id}`"
                    class="w-full p-0"><div class="w-full text-left">{{ available.answerOption }}</div></Button>
             <div v-else>{{ available.answerOption }}</div>
