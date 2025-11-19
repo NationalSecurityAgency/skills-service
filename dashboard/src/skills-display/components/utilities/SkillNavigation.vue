@@ -81,9 +81,7 @@ const nextButtonClicked = () => {
       </SkillsButton>
     </div>
     <div class="flex-1 text-center " style="font-size: 0.9rem;" data-cy="skillOrder">
-      <div class="flex-1 text-center " style="font-size: 0.9rem;" data-cy="skillOrder">
-        <span class="italic">{{ attributes.skillDisplayName }}</span> <span class="font-semibold">{{ skill.orderInGroup }}</span> <span class="italic">of</span> <span class="font-semibold">{{ skill.totalSkills }}</span>
-      </div>
+      <span class="italic">{{ attributes.skillDisplayName }}</span> <span class="font-semibold">{{ skill.orderInGroup }}</span> <span class="italic">of</span> <span class="font-semibold">{{ skill.totalSkills }}</span>
     </div>
     <div class="w-28 text-right">
       <SkillsButton size="small"
