@@ -89,11 +89,14 @@ const postAchievementUserCountsChartRef = ref(null)
       </SkillsCardHeader>
     </template>
     <template #content>
-      <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">
-        <Chart ref="postAchievementUserCountsChartRef"
-               type="pie"
-               :data="chartData"
-               :options="chartJsOptions"/>
+      <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill." class="flex items-center justify-center">
+        <div class="w-full max-w-[20rem] h-full max-h-[20rem]">
+          <Chart ref="postAchievementUserCountsChartRef"
+                 type="pie"
+                 :data="chartData"
+                 :options="chartJsOptions"
+                 class="w-full h-full"/>
+        </div>
       </metrics-overlay>
     </template>
   </Card>
