@@ -54,13 +54,10 @@ const props = defineProps({
   },
 })
 
-const doShow = computed(() => {
-  return props.loading || !props.hasData;
-})
 </script>
 
 <template>
-  <SkillsOverlay :show="doShow" opacity="50">
+  <SkillsOverlay :show="props.loading || !props.hasData" opacity="50">
     <slot></slot>
     <template #overlay>
       <div v-if="loading">

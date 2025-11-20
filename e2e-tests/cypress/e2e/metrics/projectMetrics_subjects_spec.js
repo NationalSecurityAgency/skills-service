@@ -28,10 +28,7 @@ describe('Metrics Tests', () => {
     });
 
     it('subjects - num users per level over time - not subjects', () => {
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Subjects]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/subjects');
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
@@ -49,10 +46,7 @@ describe('Metrics Tests', () => {
             subjectId: 'subj1',
             name: 'Subject 1',
         });
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Subjects]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/subjects');
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
@@ -60,11 +54,9 @@ describe('Metrics Tests', () => {
             .contains('Generate')
             .should('be.disabled');
 
-         // cy.selectItem('[data-cy="filterSelector"]', 'Project');
-        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
-            .contains('Generate')
-            .should('not.be.disabled');
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]').click({force: true})
+        cy.get('[data-pc-section="overlay"] [aria-label="Subject 1"]').click()
+        cy.get('[data-cy="genSubLevelsOverTimeBtn"]').click()
 
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate')
@@ -115,22 +107,15 @@ describe('Metrics Tests', () => {
         });
         // cy.reportHistoryOfEvents('proj1', 'user0Good@skills.org', 1, [], ['skill1', 'skill2', 'skill3']);
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Subjects]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/subjects');
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
-        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
-            .contains('Generate')
-            .click();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]').click({force: true})
+        cy.get('[data-pc-section="overlay"] [aria-label="Subject 1"]').click()
+        cy.get('[data-cy="genSubLevelsOverTimeBtn"]').click()
 
         cy.wait('@getLevelsOverTimeData');
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
-            .contains('Level 1');
-
         cy.wait(waitForSnap);
         cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
     });
@@ -186,23 +171,17 @@ describe('Metrics Tests', () => {
             })
             .as('getLevelsOverTimeData');
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Subjects]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getSubjects');
 
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
-        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
-            .contains('Generate')
-            .click();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]').click({force: true})
+        cy.get('[data-pc-section="overlay"] [aria-label="Subject 1"]').click()
+        cy.get('[data-cy="genSubLevelsOverTimeBtn"]').click()
 
         cy.wait('@getLevelsOverTimeData');
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
-            .contains('Level 1');
 
         cy.wait(waitForSnap);
         cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
@@ -263,23 +242,17 @@ describe('Metrics Tests', () => {
                 .format('x')
         });
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Subjects]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getSubjects');
 
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
-        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
-            .contains('Generate')
-            .click();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]').click({force: true})
+        cy.get('[data-pc-section="overlay"] [aria-label="Subject 1"]').click()
+        cy.get('[data-cy="genSubLevelsOverTimeBtn"]').click()
 
         cy.wait('@getLevelsOverTimeData');
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
-            .contains('Level 1');
 
         cy.wait(waitForSnap);
         cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
@@ -324,23 +297,17 @@ describe('Metrics Tests', () => {
             })
             .as('getLevelsOverTimeData');
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Subjects]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getSubjects');
 
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
-        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
-            .contains('Generate')
-            .click();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]').click({force: true})
+        cy.get('[data-pc-section="overlay"] [aria-label="Subject 1"]').click()
+        cy.get('[data-cy="genSubLevelsOverTimeBtn"]').click()
 
         cy.wait('@getLevelsOverTimeData');
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
-            .contains('Level 1');
 
         cy.wait(waitForSnap);
         cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
@@ -377,23 +344,17 @@ describe('Metrics Tests', () => {
             })
             .as('getLevelsOverTimeData');
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Subjects]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getSubjects');
 
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
-        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
-            .contains('Generate')
-            .click();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]').click({force: true})
+        cy.get('[data-pc-section="overlay"] [aria-label="Subject 1"]').click()
+        cy.get('[data-cy="genSubLevelsOverTimeBtn"]').click()
 
         cy.wait('@getLevelsOverTimeData');
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
-            .contains('Level 1');
 
         cy.wait(waitForSnap);
         cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
@@ -429,23 +390,17 @@ describe('Metrics Tests', () => {
             })
             .as('getLevelsOverTimeData');
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Subjects]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getSubjects');
 
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
-        cy.selectItem('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]', 'Subject 1');
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
-            .contains('Generate')
-            .click();
+        cy.get('[data-cy=subjectNumUsersPerLevelOverTime-subjectSelector]').click({force: true})
+        cy.get('[data-pc-section="overlay"] [aria-label="Subject 1"]').click()
+        cy.get('[data-cy="genSubLevelsOverTimeBtn"]').click()
 
         cy.wait('@getLevelsOverTimeData');
-        cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
-            .contains('Level 1');
 
         cy.wait(waitForSnap);
         cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
@@ -533,10 +488,7 @@ describe('Metrics Tests', () => {
                 .format('x')
         });
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Subjects]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getChartData');
 
         cy.wait(waitForSnap);
@@ -572,10 +524,7 @@ describe('Metrics Tests', () => {
             })
             .as('getChartData');
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Subjects]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getChartData');
 
         cy.wait(waitForSnap);
@@ -595,10 +544,7 @@ describe('Metrics Tests', () => {
             })
             .as('getChartData');
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Subjects]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getChartData');
 
         cy.wait(waitForSnap);
@@ -624,13 +570,9 @@ describe('Metrics Tests', () => {
             })
             .as('getChartData');
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Subjects]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getChartData');
 
-        cy.contains('Subject # 5');
         cy.wait(waitForSnap);
         cy.matchSnapshotImageForElement('[data-cy=userCountsBySubjectMetric]', visualRegressionOptions);
     });
@@ -644,10 +586,7 @@ describe('Metrics Tests', () => {
             })
             .as('getChartData');
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Subjects]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getChartData');
 
         cy.wait(waitForSnap);

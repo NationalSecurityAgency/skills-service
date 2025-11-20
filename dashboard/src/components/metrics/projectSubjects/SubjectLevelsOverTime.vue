@@ -188,7 +188,7 @@ const setChartOptions = () => {
                     data-cy="subjectNumUsersPerLevelOverTime-subjectSelector">
           </Select>
         </BlockUI>
-        <SkillsButton variant="outline-info" class="ml-2" :disabled="!subjects.selected" @click="loadChart" icon="fas fa-paint-roller" label="Generate" />
+        <SkillsButton variant="outline-info" class="ml-2" :disabled="!subjects.selected" @click="loadChart" icon="fas fa-paint-roller" label="Generate" data-cy="genSubLevelsOverTimeBtn" />
       </div>
       <metrics-overlay :loading="loading.charts" :has-data="hasData" :no-data-msg="overlayMessage">
         <chart-download-controls :vue-chart-ref="subjectLevelsOverTimeChart" />
@@ -197,7 +197,8 @@ const setChartOptions = () => {
                type="line"
                :data="chartData"
                :options="chartJsOptions"
-               class="h-[30rem]" />
+               class="h-[17rem]"
+        />
       </metrics-overlay>
     </template>
   </Card>

@@ -50,6 +50,7 @@ onMounted(() => {
             borderWidth: 1,
             borderRadius: 6,
             minBarLength: 4,
+            maxBarThickness: 50,
           })
         }
         if (hasData) {
@@ -126,7 +127,8 @@ const setChartOptions = () => {
                type="bar"
                :data="chartData"
                :options="chartJsOptions"
-               class="h-[30rem]" />
+               :class="{ 'h-[17rem]' : !hasData, 'h-[25rem]' : hasData }"
+        />
       </metrics-overlay>
     </template>
   </Card>
