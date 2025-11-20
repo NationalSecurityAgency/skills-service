@@ -130,7 +130,8 @@ const skillsAchievedOverTimeChartRef = ref(null)
              type="line"
              :data="chartData"
              :options="chartJsOptions"
-             class="h-[30rem]" />
+             :class="{ 'h-[16rem]' : !hasData, 'h-[30rem]' : hasData }"
+      />
       </metrics-overlay>
     </template>
   </Card>
