@@ -1794,3 +1794,13 @@ Cypress.Commands.add('dismissAllWebNotifications', ()  => {
 Cypress.Commands.add('createWebNotification', (notification)  => {
     cy.request('POST', '/root/webNotifications/create', notification);
 })
+
+Cypress.Commands.add('suppressChartInitError', ()  => {
+    // this error occurs when test code navigates to another page beore the chart fully loaded
+    cy.on('uncaught:exception', (err) => {
+        if (err.message.includes("Cannot read properties of null (reading 'id')")) {
+            return false;
+        }
+        return true;
+    });
+})

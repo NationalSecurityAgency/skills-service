@@ -724,6 +724,8 @@ describe('Users Tests', () => {
     })
 
     it('User Display point history returns data for the selected user', () => {
+        cy.suppressChartInitError()
+
         cy.createSubject(1, 2)
         cy.createSkill(1, 2, 2,  { pointIncrement: '777', numPerformToCompletion: '2', pointIncrementInterval: 0 })
         const userId = 'usera@skills.org'
@@ -764,14 +766,19 @@ describe('Users Tests', () => {
 
         cy.visit('/administrator/projects/proj1/users');
         cy.get('[data-p-index="0"] [data-cy="usersTable_viewDetailsLink"]').click()
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.wait('@pointHistory')
         cy.get('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click()
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.wait('@subj1PointHistory')
         cy.get('[data-cy="skillProgressTitle-skill1"]')
 
         cy.go('back');  // browser back button
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.wait('@pointHistory')
+
         cy.get('[data-cy="subjectTile-subj2"] [data-cy="subjectTileBtn"]').click()
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.wait('@subj2PointHistory')
         cy.get('[data-cy="skillProgressTitle-skill2Subj2"]')
     })

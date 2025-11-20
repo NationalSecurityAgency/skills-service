@@ -940,11 +940,13 @@ describe('My Progress Breadcrumb Tests', () => {
     });
 
     it('navigate through and validate breadcrumbs', function () {
+       cy.suppressChartInitError()
 
         cy.visit('/');
 
         cy.get('[data-cy=project-link-proj1]')
           .click();
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         cy.wait('@pointHistoryChart');
 
         cy.get('[data-cy="skillsDisplayHome"]')
