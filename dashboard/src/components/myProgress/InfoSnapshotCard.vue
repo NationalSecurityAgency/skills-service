@@ -14,16 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed} from 'vue'
 import MyProgressInfoCardUtil from '@/components/myProgress/MyProgressInfoCardUtil.vue'
 import {useMyProgressState} from '@/stores/UseMyProgressState.js'
-import Chart from "primevue/chart";
-import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import RadialPercentageChart from "@/components/utils/charts/RadialPercentageChart.vue";
 
 const myProgressState = useMyProgressState()
 const myProgress = computed(() => myProgressState.myProgress)
 const myProjects = computed(() => myProgressState.myProjects)
-const chartSupportColors = useChartSupportColors()
 
 const percentStarted = computed(() => {
   const percent = (myProgress.value.numProjectsContributed / myProjects.value.length) * 100
@@ -36,90 +34,24 @@ const percentStarted = computed(() => {
   return 0
 })
 
-const colors = chartSupportColors.getColors()
-const chartData = computed(() => {
-  const percent = percentStarted.value
-  return {
-    labels: ['Not Started', "Started"],
-    datasets: [
-      {
-        label: 'Started %',
-        data: [percent, 100 - percent],
-        backgroundColor: [colors.green700Color, colors.surface100Color],
-      }
-    ]
-  }
-})
-
 const projectsNotContributedToYet = computed(() => myProjects.value.length - myProgress.value.numProjectsContributed)
-const chartJsOptions = ref(null)
-onMounted(() => {
-  chartJsOptions.value = setChartOptions()
-})
 
-const setChartOptions = () => {
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: '80%',
-    hover: { mode: null },
-    plugins: {
-      legend: {
-        display: false
-      },
-      title: {
-        display: false,
-      },
-      tooltip: {
-        enabled: false,
-      },
-    },
-  };
-}
-
-const chartPlugins = [{
-  id: 'centerText',
-  beforeDraw(chart) {
-    const { ctx, chartArea: { left, right, top, bottom, width, height } } = chart;
-    const centerX = left + width / 2;
-    const centerY = top + height / 2;
-    ctx.save();
-
-
-    // Draw percentage
-    ctx.font = 'bold 20px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = colors.textColor;
-    ctx.fillText(`${percentStarted.value}%`, centerX, centerY - 10);
-
-    // Draw label
-    ctx.font = '12px Arial';
-    ctx.fillText('Started', centerX, centerY + 15);
-
-    // Restore the context state
-    ctx.restore();
-  }
-}];
 </script>
 
 <template>
-  <my-progress-info-card-util title="Projects">
+  <my-progress-info-card-util title="Projects" data-cy="info-snap-card">
     <template #left-content>
       <span class="text-4xl text-orange-700 dark:text-orange-400 mr-1" data-cy="numProjectsContributed">{{ myProgress.numProjectsContributed }}</span>
       <span class="text-secondary" data-cy="numProjectsAvailable">/ {{ myProjects.length }}</span>
     </template>
     <template #right-content>
       <div class="flex justify-end w-full">
-        <div class="w-[10rem] h-[10rem]">
-          <Chart
-            type="doughnut"
-            :data="chartData"
-            :options="chartJsOptions"
-            :plugins="chartPlugins"
-            class="w-full h-full"
-          />
-        </div>
+        <radial-percentage-chart
+            :value="percentStarted"
+            cutout="80%"
+            :full-circle="true"
+            percent-label="Started"
+        />
       </div>
     </template>
     <template #footer>

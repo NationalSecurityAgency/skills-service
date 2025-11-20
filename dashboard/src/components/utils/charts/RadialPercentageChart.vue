@@ -49,6 +49,10 @@ const props = defineProps({
     type: String,
     default: null
   },
+  percentLabel: {
+    type: String,
+    default: 'Complete'
+  }
 });
 
 
@@ -124,8 +128,8 @@ const chartStyle = computed(() => ({
       />
       <div class="absolute inset-0 flex flex-col justify-center items-center">
         <slot name="center">
-          <div class="text-xl">{{ percentage }}%</div>
-          <div class="text-sm text-gray-500">Complete</div>
+          <div class="text-xl" data-cy="radialChartPercent">{{ percentage }}%</div>
+          <div class="text-sm text-gray-500">{{  percentLabel }}</div>
         </slot>
       </div>
     </div>
