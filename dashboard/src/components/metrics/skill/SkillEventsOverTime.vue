@@ -34,6 +34,7 @@ const loading = ref(true);
 const hasData = ref(false);
 const chartData = ref({})
 const chartJsOptions = ref();
+const animationEnded = ref(false)
 const start = ref(dayjs().subtract(30, 'day').valueOf());
 const timeSelectorOptions = [
   {
@@ -151,7 +152,12 @@ const setChartOptions = () => {
           pointStyle: 'circle'
         }
       },
-    }
+    },
+    animation: {
+      onComplete: function() {
+        animationEnded.value = true;
+      }
+    },
   };
 }
 
@@ -177,6 +183,7 @@ const skillEventsOverTimeChartRef = ref(null)
                :data="chartData"
                :options="chartJsOptions"
                class="h-[30rem]" />
+        <div v-if="animationEnded" data-cy="skillEventsOverTimeChart-animationEnded"></div>
       </metrics-overlay>
       <div class="font-light text-sm mt-2">Please Note: Only 'applied' events contribute to users' points and achievements. An event will not be applied if that skill has already reached its maximum points or has unfulfilled dependencies.</div>
     </template>

@@ -31,7 +31,7 @@ const layoutSizes = useLayoutSizesState()
 
 const chartJsOptions = ref();
 const chartData = ref({})
-const hasData = computed(() => chartData.value.labels?.length > 0)
+const hasData = computed(() => Boolean(chartData.value.labels?.length > 0))
 const loading = ref(true);
 
 onMounted(() => {
