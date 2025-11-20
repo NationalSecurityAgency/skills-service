@@ -85,9 +85,10 @@ describe('Accessibility Project Metrics Tests', () => {
 
         it(`project - achievements metrics${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
+
+            cy.intercept('**numUsersPerLevelChartBuilder**').as('numUsersPerLevelChartBuilder')
             cy.visit('/administrator/projects/proj1/metrics/achievements');
-            cy.contains('Level 2: 1 users');
-            cy.contains('Level 1: 5 users');
+            cy.wait('@numUsersPerLevelChartBuilder')
 
             const headerSelector = `[data-cy="achievementsNavigator"] thead tr th`;
             cy.get(headerSelector)

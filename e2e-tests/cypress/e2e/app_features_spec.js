@@ -200,7 +200,7 @@ describe('App Features Tests', () => {
 
         cy.get('[data-cy="project-link-proj1"]').click()
         cy.get('[data-cy="myRankPosition"]')
-        cy.get('[data-cy="pointHistoryChartPlaceholder-animationEnded"]')
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
         validateLink(trainingAccessibilityLink)
 
         cy.get('[data-cy="settings-button"]').click();
