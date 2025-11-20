@@ -107,15 +107,15 @@ const moveQuestion = (changeIndexBy) => {
         <div class="flex flex-1">
           <markdown-editor v-if="editQuestionInline"
                            :value="question.question"
-                           :id="`question-${questionNum}`"
+                           :id="`${question.id}`"
                            :instance-id="`${question.id}`"
                            :disable-ai-prompt="true"
                            :allow-attachments="false"
                            :allow-insert-images="false"
                            label="Question"
                            markdownHeight="150px"
-                           data-cy="questionDisplayText"
-                           :name="`questions[${props.questionNum-1}].question`"/>
+                           data-cy="questionDisplayTextEditor"
+                           :name="`question${props.questionNum}`"/>
 
           <markdown-text v-else
             :text="question.question"

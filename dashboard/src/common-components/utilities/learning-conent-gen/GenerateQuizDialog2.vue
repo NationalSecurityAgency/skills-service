@@ -44,25 +44,23 @@ const appConfig = useAppConfig()
 const aiPromptDialogRef = ref(null)
 const currentDescription = ref('')
 const isGenerating = ref(true)
-
 const currentQuizData = ref(null)
+const currentQuestions = ref([])
 
 const instructionsGenerator = useInstructionGenerator()
-const schema = object({
-  'questions': array()
-      .of(
-          object({
-            'question': string()
-                .required()
-                // .nullValueNotAllowed()
-                .max(appConfig.descriptionMaxLength)
-                .customDescriptionValidator('Question', false)
-                .label('Question'),
-          })
-      ),
+const dynamicSchema = computed(() => {
+  const validationObj = {}
+  for (let i = 1; i <= currentQuestions.value.length; i++) {
+    validationObj[`question${i}`] = string()
+        .required()
+        .max(appConfig.descriptionMaxLength)
+        .customDescriptionValidator('Question', false)
+        .label('Question')
+  }
+  return object(validationObj)
 })
 const { values, meta, handleSubmit, isSubmitting, resetForm, setFieldValue, validate, validateField, errors, errorBag, setErrors } = useForm({
-  validationSchema: schema,
+  validationSchema: dynamicSchema,
 })
 
 const generateQuizFromDescription = (skillDescription) => {
@@ -81,10 +79,10 @@ const getQuizDataForDisplay = (quizData, historyId) => {
   if (quizData && quizData.generatedQuiz) {
     quizDataForDisplay = quizData.generatedQuiz.map((question, questionIdx) => ({
       ...question,
-      id: `${historyId}-${(questionIdx+1)}`,
-      answers: question.answers.map(answer => ({
+      id: `q-${historyId}-${(questionIdx+1)}`,
+      answers: question.answers.map((answer, answerIdx) => ({
         ...answer,
-        isSelected: answer.isCorrect
+        id: `a-${historyId}-${(questionIdx+1)}-${(answerIdx+1)}`
       }))
     }));
   }
@@ -134,27 +132,26 @@ const handleGeneratedChunk = (chunk) => {
         braceDepth++;
       } else if (char === '}') {
         braceDepth--;
-        const lastHistoryItem = { generatedQuiz: currentQuizData.value }
-        const partialQuestionsExist = lastHistoryItem && lastHistoryItem.generatedQuiz && lastHistoryItem.generatedQuiz.length > 0;
+        const partialQuestionsExist = currentQuizData && currentQuizData.value && currentQuizData.value.length > 0;
         const isFirstQuestion = !partialQuestionsExist && inArray && bracketDepth === 1
         const isAdditionalQuestion = partialQuestionsExist && bracketDepth === 0 && !inArray
 
         if (isFirstQuestion || isAdditionalQuestion) {
           const questionStr = newBuffer.substring(isFirstQuestion ? questionsStartIndex + 1 : startIndex, i + 1);
           try {
-            const question = JSON.parse(questionStr);
-            if (lastHistoryItem && lastHistoryItem.generatedQuiz && lastHistoryItem.generatedQuiz.length > 0) {
-              lastHistoryItem.generatedQuiz.push(question)
+            const question = safeJsonParse(questionStr);
+            ensureValidQuestionType(question)
+            if (currentQuizData && currentQuizData.value && currentQuizData.value.length > 0) {
+              currentQuizData.value.push(question)
             } else {
-              lastHistoryItem.generatedQuiz = [question]
+              currentQuizData.value = [question]
             }
-            currentQuizData.value = lastHistoryItem.generatedQuiz
-            setFieldValue(`questions[${currentQuizData.value.length-1}].question`, question.question)
+            setFieldValue(`question${currentQuizData.value.length}`, question.question)
             currentJsonString.value = ''
           } catch (e) {
             // Continue with partial parsing
             // console.log(`json: ${questionStr}`)
-            console.error('Error parsing questions array:', e);
+            console.error('Error parsing question:', e);
           }
           currentPosition = i + 1;
         } else if (braceDepth < 0) {
@@ -186,13 +183,40 @@ const handleGeneratedChunk = (chunk) => {
     }
   }
 }
+const safeJsonParse = (jsonString) => {
+  try {
+    // First try to parse as is
+    return JSON.parse(jsonString);
+  } catch (e) {
+    try {
+      // If that fails, try to evaluate the string as JavaScript
+      const evaluated = (0, eval)(`(${jsonString})`);
+      // Convert back to string and parse to ensure it's valid JSON
+      return JSON.parse(JSON.stringify(evaluated));
+    } catch (innerError) {
+      throw new Error(`error parsing question: ${jsonString}`, { cause: innerError})
+    }
+  }
+}
+
+const ensureValidQuestionType = (question) => {
+  const correctAnswersCount = question.answers.reduce((count, answer) => {
+    return answer.isCorrect ? count + 1 : count;
+  }, 0);
+  if (question.questionType !== 'MultipleChoice' && correctAnswersCount > 1) {
+    log.debug(`Changing [${question.questionType}] to MultipleChoice, correctAnswersCount [${correctAnswersCount}]`)
+    question.questionType = 'MultipleChoice'
+  } else if (question.questionType !== 'SingleChoice' && correctAnswersCount === 1) {
+    log.debug(`Changing [${question.questionType}] to SingleChoice, correctAnswersCount [${correctAnswersCount}]`)
+    question.questionType = 'SingleChoice'
+  }
+}
 
 const handleGenerationCompleted = (generated) => {
   currentJsonString.value = ''
-  currentQuizData.value = null
   isGenerating.value = false
-  // resetForm({ values: { questions: generated.generatedInfo.generatedQuiz } });
-  // validate()
+  currentQuestions.value = generated.generatedInfo.generatedQuiz
+  validate()
   return generated
 }
 
@@ -219,9 +243,10 @@ const createPromptInstructions = (userEnterInstructions) => {
     const extractedImagesRes = imgHandler.extractImages(currentDescription.value)
     const descriptionText = extractedImagesRes.hasImages ? extractedImagesRes.processedText : currentDescription.value
 
-    // TODO = handle existing quiz and/or follow-on updates after initial generation
     if (currentQuizData.value) {
-      instructionsToSend = instructionsGenerator.updateQuizInstructions(userEnterInstructions)
+      const existingQuiz = JSON.stringify(currentQuizData.value)
+      currentQuizData.value = null
+      instructionsToSend = instructionsGenerator.updateQuizInstructions(descriptionText, existingQuiz, userEnterInstructions)
     } else {
       instructionsToSend = instructionsGenerator.newQuizInstructions(descriptionText, '5 - 10')
     }
@@ -244,9 +269,6 @@ const createPromptInstructions = (userEnterInstructions) => {
       :community-value="communityValue"
   >
     <template #generatedValue="{ historyItem }">
-<!--      <markdown-text :text="historyItem.generatedValue"-->
-<!--                     data-cy="generatedSegment"-->
-<!--                     :instanceId="`${historyItem.id}-desc`"/>-->
       <!--      must not use local variables as there can be more than 1 history item-->
       <div v-if="historyItem.generatedInfo" class="px-5 border rounded-lg bg-blue-50 ml-4">
         <div v-for="(q, index) in getQuizDataForDisplay(historyItem.generatedInfo, historyItem.id)" :key="q.id">
