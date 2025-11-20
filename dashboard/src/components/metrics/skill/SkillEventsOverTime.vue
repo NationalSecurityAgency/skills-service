@@ -182,7 +182,7 @@ const skillEventsOverTimeChartRef = ref(null)
                type="line"
                :data="chartData"
                :options="chartJsOptions"
-               class="h-[30rem]" />
+               :class="{ 'h-[30rem]': hasData, 'h-[16rem]': !hasData }" />
         <div v-if="animationEnded" data-cy="skillEventsOverTimeChart-animationEnded"></div>
       </metrics-overlay>
       <div class="font-light text-sm mt-2">Please Note: Only 'applied' events contribute to users' points and achievements. An event will not be applied if that skill has already reached its maximum points or has unfulfilled dependencies.</div>

@@ -43,10 +43,14 @@ const loadData = () => {
         hasData.value = dataFromServer.achievementCounts && dataFromServer.achievementCounts.length > 0;
         if (hasData.value) {
           const formatTimestamp = (timestamp) => dayjs(timestamp).format('YYYY-MM-DD')
+
+          const achievements = dataFromServer.achievementCounts
+          const prevDay = dayjs(achievements[0].timestamp).subtract(1, 'day').toDate()
+          achievements.unshift({timestamp: prevDay.getTime(), num: 0 })
           chartData.value = {
             datasets: [{
               label: 'Users',
-              data: dataFromServer.achievementCounts.map((item) => {
+              data: achievements.map((item) => {
                 return {x: formatTimestamp(item.timestamp), y: item.num}
               }),
               cubicInterpolationMode: 'monotone',
