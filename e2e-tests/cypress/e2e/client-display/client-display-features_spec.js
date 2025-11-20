@@ -308,13 +308,15 @@ describe('Client Display Features Tests', () => {
     cy.cdVisit('/', true)
 
     cy.get('[data-cy="overallPoints"]').contains('Overall Points')
-    cy.get('[data-cy="overallPoints"]').contains('100 Points')
-    cy.get('[data-cy="overallPoints"]').contains('100%')
+    cy.get('[data-cy="overallPoints"] [data-cy="circleProgressPts"]').should('not.exist')
+    cy.get('[data-cy="overallPoints"] [data-cy="circleProgressCompleted"]')
+    cy.get('[data-cy="overallPoints"] [data-cy="circleProgressPercent"]').should('have.text', '100%')
     cy.get('[data-cy="overallPoints"]').contains('All Points earned')
 
     cy.get('[data-cy="levelProgress"]').contains('Level Progress')
-    cy.get('[data-cy="levelProgress"]').contains('✓')
-    cy.get('[data-cy="levelProgress"]').contains('100%')
+    cy.get('[data-cy="levelProgress"] [data-cy="circleProgressPts"]').should('not.exist')
+    cy.get('[data-cy="levelProgress"] [data-cy="circleProgressCompleted"]')
+    cy.get('[data-cy="levelProgress"] [data-cy="circleProgressPercent"]').should('have.text', '100%')
     cy.get('[data-cy="levelProgress"]').contains('All levels complete')
 
     cy.get('[data-cy="subjectTile-subj1"]').contains('Subject 1')
@@ -342,13 +344,14 @@ describe('Client Display Features Tests', () => {
     cy.cdVisit('/', true)
 
     cy.get('[data-cy="overallPoints"]').contains('Overall Points')
-    cy.get('[data-cy="overallPoints"]').contains('100 Points')
-    cy.get('[data-cy="overallPoints"]').contains('50%')
+    cy.get('[data-cy="overallPoints"] [data-cy="circleProgressPts"]').should('have.text', '100')
+    cy.get('[data-cy="overallPoints"] [data-cy="circleProgressPercent"]').should('have.text', '50%')
     cy.get('[data-cy="overallPoints"]').contains('100 / 200 Points')
 
     cy.get('[data-cy="levelProgress"]').contains('Level Progress')
-    cy.get('[data-cy="levelProgress"]').contains('✓')
-    cy.get('[data-cy="levelProgress"]').contains('100%')
+    cy.get('[data-cy="levelProgress"] [data-cy="circleProgressPts"]').should('not.exist')
+    cy.get('[data-cy="levelProgress"] [data-cy="circleProgressCompleted"]')
+    cy.get('[data-cy="levelProgress"] [data-cy="circleProgressPercent"]').should('have.text', '100%')
     cy.get('[data-cy="levelProgress"]').contains('All levels complete')
 
     cy.get('[data-cy="subjectTile-subj1"]').contains('Subject 1')

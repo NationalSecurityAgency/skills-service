@@ -95,7 +95,7 @@ const radialChartLabelStyle = computed(() => {
           :remaining-bar-color="remainingBarColor"
       >
         <template #center>
-          <div v-if="is100Percent">
+          <div v-if="is100Percent" data-cy="circleProgressCompleted">
             <i class="fa-solid fa-check-double text-green-500 text-4xl" aria-hidden="true"></i>
           </div>
           <div v-else>
