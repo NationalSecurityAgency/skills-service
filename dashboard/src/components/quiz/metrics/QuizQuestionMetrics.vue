@@ -63,6 +63,9 @@ const chartData = computed(() => {
 })
 const overallCorrectPercent = computed(() => {
   const total = props.q.numAnsweredCorrect + props.q.numAnsweredWrong
+  if (total === props.q.numAnsweredCorrect) {
+    return 100
+  }
   return total > 0 ? (props.q.numAnsweredCorrect / total * 100).toFixed(1) : 0
 })
 const overallCorrectWrong = computed(() => 100 - overallCorrectPercent.value)
@@ -241,7 +244,7 @@ const removeExpanderClass = (rowData) => {
       </div>
       <div v-if="!isSurvey">
         <div>
-          <div class="flex flex-col lg:flex-row items-center gap-3">
+          <div class="flex flex-col lg:flex-row items-center gap-3" data-cy="qMetrics">
             <Chart type="doughnut"
                    :data="chartData"
                    :options="chartJsOptions"
@@ -260,8 +263,8 @@ const removeExpanderClass = (rowData) => {
                 </div>
               </div>
               <div  class="flex flex-col gap-2">
-                <div><Tag>{{ q.numAnsweredCorrect }}</Tag> {{ pluralize.plural('Attempt', q.numAnsweredCorrect) }} <span class="text-surface-600 dark:text-white">({{ overallCorrectPercent}}%)</span> </div>
-                <div><Tag severity="warn">{{ q.numAnsweredWrong }}</Tag> {{ pluralize.plural('Attempt', q.numAnsweredWrong) }} <span class="text-surface-600 dark:text-white">({{ overallCorrectWrong}}%)</span></div>
+                <div><Tag data-cy="numCorrect">{{ q.numAnsweredCorrect }}</Tag> {{ pluralize.plural('Attempt', q.numAnsweredCorrect) }} <span class="text-surface-600 dark:text-white" data-cy="percentCorrect">({{ overallCorrectPercent}}%)</span> </div>
+                <div><Tag severity="warn" data-cy="numWrong">{{ q.numAnsweredWrong }}</Tag> {{ pluralize.plural('Attempt', q.numAnsweredWrong) }} <span class="text-surface-600 dark:text-white" data-cy="percentWrong">({{ overallCorrectWrong}}%)</span></div>
               </div>
             </div>
           </div>

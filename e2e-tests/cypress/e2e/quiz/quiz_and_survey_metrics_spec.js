@@ -245,8 +245,10 @@ describe('Quiz and Survey Metrics', () => {
         cy.get('[data-cy="metricsCardRuntime"] [data-cy="statCardDescription"]').contains('Average Quiz runtime for 1 attempt')
         cy.get('[data-cy="noMetricsYet"]').should('not.exist')
 
-        cy.get('[data-cy="metrics-q1"]').contains('Correct: 1 Attempts')
-        cy.get('[data-cy="metrics-q1"]').contains('Wrong: 0 Attempts')
+        cy.get('[data-cy="metrics-q1"] [data-cy="qMetrics"] [data-cy="numCorrect"]').should('have.text', '1')
+        cy.get('[data-cy="metrics-q1"] [data-cy="qMetrics"] [data-cy="percentCorrect"]').should('have.text', '(100%)')
+        cy.get('[data-cy="metrics-q1"] [data-cy="qMetrics"] [data-cy="numWrong"]').should('have.text', '0')
+        cy.get('[data-cy="metrics-q1"] [data-cy="qMetrics"] [data-cy="percentWrong"]').should('have.text', '(0%)')
         cy.get('[data-cy="metrics-q1"] [data-p-index="0"] [data-pc-group-section="rowactionbutton"]').click()
         cy.get('[data-cy="metrics-q1"] [data-cy="row0-answerHistory"]')
         cy.get(`[data-cy="metrics-q1"] [data-cy="row0-answerHistory"] [data-cy="quizAnswerHistoryTable"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '1')
@@ -254,19 +256,22 @@ describe('Quiz and Survey Metrics', () => {
         cy.get(`[data-cy="metrics-q1"] [data-cy="row0-answerHistory"] [data-cy="quizAnswerHistoryTable"] [data-p-index="0"]`).contains('user2')
 
         cy.get(`[data-cy="metrics-q2"]`).contains('Text Input')
-        cy.get('[data-cy="metrics-q2"]').contains('Correct: 1 Attempts')
-        cy.get('[data-cy="metrics-q2"]').contains('Wrong: 0 Attempts')
+        cy.get('[data-cy="metrics-q2"] [data-cy="qMetrics"] [data-cy="numCorrect"]').should('have.text', '1')
+        cy.get('[data-cy="metrics-q2"] [data-cy="qMetrics"] [data-cy="percentCorrect"]').should('have.text', '(100%)')
+        cy.get('[data-cy="metrics-q2"] [data-cy="qMetrics"] [data-cy="numWrong"]').should('have.text', '0')
+        cy.get('[data-cy="metrics-q2"] [data-cy="qMetrics"] [data-cy="percentWrong"]').should('have.text', '(0%)')
         cy.get(`[data-cy="metrics-q2"] [data-cy="quizAnswerHistoryTable"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '1')
         cy.get(`[data-cy="metrics-q2"] [data-cy="quizAnswerHistoryTable"] [data-pc-section="bodyrow"]`).should('have.length', 1)
         cy.get(`[data-cy="metrics-q2"] [data-cy="quizAnswerHistoryTable"] [data-p-index="0"]`).contains('user2')
 
         cy.get(`[data-cy="metrics-q3"]`).contains('Text Input')
-        cy.get('[data-cy="metrics-q3"]').contains('Correct: 1 Attempts')
-        cy.get('[data-cy="metrics-q3"]').contains('Wrong: 0 Attempts')
+        cy.get('[data-cy="metrics-q3"] [data-cy="qMetrics"] [data-cy="numCorrect"]').should('have.text', '1')
+        cy.get('[data-cy="metrics-q3"] [data-cy="qMetrics"] [data-cy="percentCorrect"]').should('have.text', '(100%)')
+        cy.get('[data-cy="metrics-q3"] [data-cy="qMetrics"] [data-cy="numWrong"]').should('have.text', '0')
+        cy.get('[data-cy="metrics-q3"] [data-cy="qMetrics"] [data-cy="percentWrong"]').should('have.text', '(0%)')
         cy.get(`[data-cy="metrics-q3"] [data-cy="quizAnswerHistoryTable"] [data-cy="skillsBTableTotalRows"]`).should('have.text', '1')
         cy.get(`[data-cy="metrics-q3"] [data-cy="quizAnswerHistoryTable"] [data-pc-section="bodyrow"]`).should('have.length', 1)
         cy.get(`[data-cy="metrics-q3"] [data-cy="quizAnswerHistoryTable"] [data-p-index="0"]`).contains('user2')
-
     });
 
     it('display grading information on answer history table', function () {
