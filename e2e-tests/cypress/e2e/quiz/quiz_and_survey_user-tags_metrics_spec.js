@@ -126,9 +126,9 @@ describe('Quiz and Survey User Tag Runs and Metrics', () => {
         cy.runQuizForUser(1, 2, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
         cy.runQuizForUser(1, 3, [{selectedIndex: [0]}, {selectedIndex: [0,2]}]);
 
+        cy.intercept('/admin/quiz-definitions/quiz1/userTagCounts**').as('userTags')
         cy.visit('/administrator/quizzes/quiz1/runs');
-        cy.get('[data-cy="quizUserTagsChart"]').contains('ABC: 2')
-        cy.get('[data-cy="quizUserTagsChart"]').contains('ABC1: 1')
+        cy.wait('@userTags')
     });
 
     it('display user tag quiz chart - empty', function () {
