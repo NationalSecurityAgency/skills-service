@@ -41,71 +41,126 @@ ${instructionsToKeepPlaceholders ? `-${instructionsToKeepPlaceholders}` : ''}
     }
 
     const quizRules = `
-# Quiz Generation Instructions
+# Quiz Generation Instructions - STRICT RULES
 
 ## Output Format
 Return a JSON object with exactly two properties:
 1. \`numQuestions\`: Number of questions generated
 2. \`questions\`: Array of question objects
 
-## Question Requirements
+## Question Type Rules
+
 ### 1. SingleChoice Questions
-- **Requirements**:
-  - Exactly 1 correct answer
-  - 2-3 incorrect answers
-  - Mark correct answer with \`"isCorrect": true\`
-  - All other answers must have \`"isCorrect": false\`
-
-### 2. MultipleChoice Questions
-- **Requirements**:
-  - Minimum 2 correct answers
-  - 3-5 total options
-  - All correct answers must have \`"isCorrect": true\`
-  - All incorrect answers must have \`"isCorrect": false\`
-
-### 3. TextInput Questions
-- **Requirements**:
-  - Always return empty answers array: \`"answers": []\`
-  - No need to provide answer options
-
-## Content Guidelines
-- Include at least one question of each type
-- Ensure questions are clear, concise, and appropriate difficulty
-- Make incorrect answers plausible but clearly wrong
-- Avoid:
-  - Trick questions
-  - Ambiguous phrasing
-  - Questions that are too easy/hard
-  - Questions that are too similar to each other
-
-## Technical Specifications
-- Format: Strict JSON
-- Each question must include:
+- MUST have \`"questionType": "SingleChoice"\`
+- MUST have exactly 1 correct answer
+- MUST have 3-5 answer options
+- Example:
   \`\`\`json
   {
-    "quizId": "string",  // Same for all questions
-    "question": "string", // Markdown supported
-    "questionType": "SingleChoice|MultipleChoice|TextInput",
+    "question": "What is 2+2?",
+    "questionType": "SingleChoice",
     "answers": [
-      {
-        "answer": "string",
-        "isCorrect": boolean
-      }
+      {"answer": "3", "isCorrect": false},
+      {"answer": "4", "isCorrect": true},  // Only ONE true
+      {"answer": "5", "isCorrect": false}
     ]
-  }    
-    `
+  }
+  \`\`\`
+
+### 2. MultipleChoice Questions
+- MUST have \`"questionType": "MultipleChoice"\`
+- MUST have 2 or more correct answers
+- MUST have between 3-5 answer options
+- Example:
+  \`\`\`json
+  {
+    "question": "Which are prime numbers?",
+    "questionType": "MultipleChoice",
+    "answers": [
+      {"answer": "2", "isCorrect": true},   // First correct
+      {"answer": "3", "isCorrect": true},   // Second correct
+      {"answer": "4", "isCorrect": false},
+      {"answer": "5", "isCorrect": true}    // Third correct
+    ]
+  }
+  \`\`\`
+
+### 3. TextInput Questions
+- MUST have \`"questionType": "TextInput"\`
+- MUST have empty answers array
+- Example:
+  \`\`\`json
+  {
+    "question": "What is the capital of France?",
+    "questionType": "TextInput",
+    "answers": []  // ALWAYS empty for TextInput
+  }
+  \`\`\`
+
+## Validation Checklist
+BEFORE finalizing the response, VERIFY each question:
+
+1. For SingleChoice:
+   - Exactly ONE answer has \`"isCorrect": true\`
+   - All others have \`"isCorrect": false\`
+   - 3-5 answer options total
+
+2. For MultipleChoice:
+   - AT LEAST TWO answers have \`"isCorrect": true\`
+   - All others have \`"isCorrect": false\`
+   - 3-5 answer options total
+
+3. For TextInput:
+   - \`"answers": []\` (empty array)
+   - No answer objects
+
+## Common Mistakes to AVOID:
+- MultipleChoice with only 1 correct answer → INVALID
+- SingleChoice with 0 or >1 correct answers → INVALID
+- TextInput with answers array not empty → INVALID
+- Incorrect answer count (must be 3-5 for Single/MultipleChoice)
+
+## Final Check
+Before responding, count the number of \`"isCorrect": true\` for EACH question and verify:
+- SingleChoice: Exactly 1
+- MultipleChoice: 2 or more
+- TextInput: No answers
+
+## IMPORTANT: Count the correct answers
+For EACH question, before including it:
+1. Count the number of answers where \`"isCorrect": true\`
+2. If count == 1 → Must be SingleChoice
+3. If count >= 2 → Must be MultipleChoice
+4. If questionType doesn't match, FIX IT
+
+`
 
     const newQuizInstructions = (existingDescription, numQuestions) => {
-        return `
-# Task: Generate a quiz for a skill that will be part of a larger training. 
+        return `# Quiz Generation Task
 
-## Objective
-Generate a quiz with ${numQuestions} questions for a skill that will be part of a larger training based on this description:
-"${existingDescription}".
+## Skill Description:
+"${existingDescription}"
+
+## Requirements:
+- Generate ${numQuestions} questions
+- Include at least one of each question type
+- Follow ALL rules strictly
+- Double-check the number of correct answers for each question type
 
 ${quizRules}
+
+## Output:
+Provide ONLY valid JSON in this exact format:
+\`\`\`json
+{
+  "numQuestions": ${numQuestions},
+  "questions": [
+    // Your questions here
+  ]
+}
+\`\`\`
 `
-    }
+}
 
     const updateQuizInstructions = ( existingDescription, existingQuiz, userEnteredText, instructionsToKeepPlaceholders ) => {
         return `
@@ -118,7 +173,7 @@ The quiz was originally built based on this description:
 "${existingDescription}".
 
 Here is the existing quiz:
-"${existingQuiz}" 
+${existingQuiz} 
 
 Please modify it based on the following instructions: "${userEnteredText}"
 
