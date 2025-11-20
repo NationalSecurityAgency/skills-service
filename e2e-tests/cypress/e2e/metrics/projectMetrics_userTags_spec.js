@@ -276,13 +276,12 @@ describe('Metrics Using User Tags Tests', () => {
         });
 
         it('user tag table - filter by date', () => {
-            cy.visit('/administrator/projects/proj1/');
+            cy.visit('/administrator/projects/proj1/metrics');
             cy.wait('@getConfig');
 
-            cy.clickNav('Metrics');
             cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]').contains('Many Values');
 
-            cy.get('[data-cy="metricsDateFilter"]').click()
+            cy.get('[data-cy="userTagTableCard"] [data-cy="metricsDateFilter"]').click()
             cy.prevMonth()
             cy.setDay(1)
             cy.setDay(1)
@@ -312,10 +311,9 @@ describe('Metrics Using User Tags Tests', () => {
         });
 
         it('user tag table - clear filter', () => {
-            cy.visit('/administrator/projects/proj1/');
+            cy.visit('/administrator/projects/proj1/metrics');
             cy.wait('@getConfig');
 
-            cy.clickNav('Metrics');
             cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]')
                 .contains('Many Values');
             cy.get('[data-cy="userTagTable-tagFilter"]')
@@ -330,84 +328,38 @@ describe('Metrics Using User Tags Tests', () => {
         });
 
         it('bar chart', () => {
-            cy.visit('/administrator/projects/proj1/');
+            cy.visit('/administrator/projects/proj1/metrics');
             cy.wait('@getConfig');
 
-            cy.clickNav('Metrics');
             cy.get('[data-cy="userTagChart"] [data-pc-section="header"]')
                 .contains('Some Values (Top 20)');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag0: 21 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag1: 20 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag2: 19 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag3: 18 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag4: 17 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag5: 16 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag6: 15 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag7: 14 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag8: 13 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag9: 12 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag10: 11 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag11: 10 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag12: 9 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag13: 8 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag14: 7 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag15: 6 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag16: 5 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag17: 4 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag18: 3 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag19: 2 users');
-            cy.get('[data-cy="userTagChart"]')
-                .contains('tag20')
-                .should('not.exist');
-
+            cy.wait(2000)
+            cy.matchSnapshotImageForElement('[data-cy="userTagChart"]')
         });
 
         it('navigate to user tag metrics', () => {
-
             cy.reportSkill(1, 1, 'notInMetrics1', 'now');
             cy.reportSkill(1, 1, 'notInMetrics2', 'now');
             cy.reportSkill(1, 1, 'notInMetrics3', 'now');
 
-            cy.visit('/administrator/projects/proj1/');
-            cy.wait('@getConfig');
+            cy.intercept('**distinctUsersOverTimeForProject**').as('distinctUsersOverTimeForProject');
+            cy.intercept('**numUsersPerTagBuilder**').as('numUsersPerTagBuilder');
+            cy.visit('/administrator/projects/proj1/metrics');
 
-            cy.clickNav('Metrics');
+            cy.get('[data-cy="usersTimeChart_animationCompleted"]')
+            cy.wait('@getConfig');
+            cy.wait('@distinctUsersOverTimeForProject');
+            cy.wait('@numUsersPerTagBuilder');
+            cy.wait('@numUsersPerTagBuilder');
             cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]').contains('Many Values');
             cy.get(`${userTagsTableSelector} th`).contains('Best Label');
             cy.get(`${userTagsTableSelector} th`).contains('# Users');
+            cy.wait(2000)
 
+            cy.intercept('**numUsersPerLevelChartBuilder**').as('numUsersPerLevelChartBuilder')
             cy.get(`${userTagsTableSelector} [data-cy="userTagTable_viewMetricsLink"]`).first().click();
-
-            cy.get('[data-cy=levelsChart]')
-              .contains('Level 5: 0 users');
-            cy.get('[data-cy=levelsChart]')
-              .contains('Level 4: 0 users');
-            cy.get('[data-cy=levelsChart]')
-              .contains('Level 3: 25 users');
-            cy.get('[data-cy=levelsChart]')
-              .contains('Level 2: 0 users');
-            cy.get('[data-cy=levelsChart]')
-              .contains('Level 1: 0 users');
+            cy.wait('@numUsersPerLevelChartBuilder')
+            cy.matchSnapshotImageForElement('[data-cy="levelsChart"]')
 
             cy.intercept('/admin/projects/proj1/userTags/manyValues/tag0/users*').as('getUsers');
             cy.get(`${usersTableSelector}`).contains('User').click();
@@ -422,6 +374,11 @@ describe('Metrics Using User Tags Tests', () => {
             cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '25')
 
             cy.get('[data-cy="breadcrumb-Metrics"]').click()
+            cy.get('[data-cy="usersTimeChart_animationCompleted"]')
+            cy.wait('@distinctUsersOverTimeForProject');
+            cy.wait('@numUsersPerTagBuilder');
+            cy.wait('@numUsersPerTagBuilder');
+            cy.wait(2000)
             cy.get('[data-cy="cell_tagValue-tag5"] [data-cy="userTagTable_viewMetricsLink"]').click()
             cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '20')
         });

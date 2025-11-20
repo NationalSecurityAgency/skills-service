@@ -251,11 +251,17 @@ const setChartOptions = () => {
           },
         },
       }
-    }
+    },
+    animation: {
+      onComplete: function() {
+        usersChartAnimationCompleted.value = true;
+      }
+    },
   };
 }
 
 const usersChartRef = ref(null)
+const usersChartAnimationCompleted = ref(false)
 </script>
 
 <template>
@@ -289,6 +295,7 @@ const usersChartRef = ref(null)
                :data="distinctUsersOverTimeChartData"
                :options="chartJsOptions"
                class="h-[30rem]" />
+        <div v-if="usersChartAnimationCompleted" data-cy="usersTimeChart_animationCompleted" />
       </metrics-overlay>
     </template>
   </Card>
