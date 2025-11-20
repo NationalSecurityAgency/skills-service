@@ -198,6 +198,7 @@ const setChartOptions = () => {
                  :options="chartJsOptions"
                  :class="{
                    'min-h-[16em] w-full': !isPieChart,
+                   'h-[16rem]': isEmpty,
                  }" />
         </metrics-overlay>
     </template>

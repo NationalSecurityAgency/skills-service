@@ -113,21 +113,40 @@ const loadData = () => {
             const format = localProps.value.byMonth ? 'YYYY-MM' : 'YYYY-MM-DD';
             return dayjs(timestamp).format(format)
           }
+
+          const addZeroPointAtStart = (data) => {
+            if (data && data.length > 0) {
+              const earliestDate = data[0].value
+              const prevDay = dayjs(earliestDate).subtract(1, 'day').toDate()
+              data.unshift({
+                value: formatTimestamp(prevDay),
+                count: 0
+              })
+            }
+
+            return data
+          }
+
+          const usersData = addZeroPointAtStart(response.users)
+          const usersSeriesData = usersData.map((item) => {
+            return {x: formatTimestamp(item.value), y: item.count}
+          })
+
+          const newUsersData = addZeroPointAtStart(response.newUsers)
+          const newUsersSeriesData = newUsersData.map((item) => {
+            return {x: formatTimestamp(item.value), y: item.count}
+          })
           distinctUsersOverTimeChartData.value = {
             datasets: [{
               label: 'Users',
-              data: response.users.map((item) => {
-                return {x: formatTimestamp(item.value), y: item.count}
-              }),
+              data: usersSeriesData,
               cubicInterpolationMode: 'monotone',
               order: 2, // Lower order means it will be drawn first (in the background)
               borderColor: getComputedStyle(document.documentElement).getPropertyValue('--p-cyan-500'),
               backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--p-cyan-100'),
             }, {
               label: 'New Users',
-              data: response.newUsers.map((item) => {
-                return {x: formatTimestamp(item.value), y: item.count}
-              }),
+              data: newUsersSeriesData,
               cubicInterpolationMode: 'monotone',
               order: 1,  // Higher order means it will be drawn last (on top)
               borderColor: getComputedStyle(document.documentElement).getPropertyValue('--p-green-500'),
@@ -176,7 +195,12 @@ const setChartOptions = () => {
       x: {
         type: 'time',
         time: {
-          unit: 'day'
+          unit: 'day',
+          displayFormats: {
+            'day': 'MMM D, YYYY', // Example: Jan 1, 2023
+            'month': 'MMM YYYY', // Example: Jan 2023
+            'year': 'YYYY'        // Example: 2023
+          },
         },
         ticks: {
           color: textColorSecondary
