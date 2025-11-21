@@ -25,6 +25,7 @@ import NoContent2 from "@/components/utils/NoContent2.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import { SkillsReporter } from '@skilltree/skills-client-js';
 import SubjectSelector from "@/components/skills/SubjectSelector.vue";
+import {useStorage} from "@vueuse/core";
 
 const emit = defineEmits(['conf-added', 'conf-removed']);
 const announcer = useSkillsAnnouncer();
@@ -48,7 +49,7 @@ const addedSubjectSkillsStats = ref({
   numSkillsAdded: 0,
   numSkillsAlreadyConfigured: 0,
 });
-const pageSize = 4;
+const pageSize = useStorage('selfReportApprovalConf-pageSize', 4)
 const possiblePageSizes = [4, 10, 15, 20];
 const totalRows = ref(0);
 const sortBy = ref('updated');

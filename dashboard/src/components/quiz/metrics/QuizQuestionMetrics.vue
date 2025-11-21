@@ -22,6 +22,7 @@ import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vu
 import CheckSelector from '@/skills-display/components/quiz/CheckSelector.vue'
 import QuizAnswerHistory from '@/components/quiz/metrics/QuizAnswerHistory.vue'
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
+import {useStorage} from "@vueuse/core";
 
 const props = defineProps({
   q: Object,
@@ -163,10 +164,10 @@ const tableOptions = {
     server: false,
     currentPage: 1,
     totalRows: props.q.answers.length,
-    pageSize: 5,
     possiblePageSizes: [5, 10, 15, 20]
   }
 }
+const pageSize = useStorage('quizQuestionMetrics-tablePageSize', 5)
 
 onMounted(() => {
   const totalNumUsers = props.q.numAnsweredCorrect + props.q.numAnsweredWrong

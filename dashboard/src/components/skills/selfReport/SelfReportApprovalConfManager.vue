@@ -29,6 +29,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import UserRolesUtil from '@/components/utils/UserRolesUtil.js';
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import {useStorage} from "@vueuse/core";
 
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
@@ -38,7 +39,7 @@ const responsive = useResponsiveBreakpoints()
 
 const data = ref([]);
 const loading = ref(true);
-const pageSize = ref(5);
+const pageSize = useStorage('selfReportApprovalConf-pageSize', 5)
 const possiblePageSizes = [5, 10, 15, 20];
 const totalRows = ref(0);
 const sortBy = ref('userId');

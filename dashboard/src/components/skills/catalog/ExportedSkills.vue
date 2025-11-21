@@ -26,6 +26,7 @@ import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import ExportedSkillRemovalValidation from '@/components/skills/catalog/ExportedSkillRemovalValidation.vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
+import {useStorage} from "@vueuse/core";
 
 const route = useRoute()
 const responsive = useResponsiveBreakpoints()
@@ -35,7 +36,7 @@ const initialLoad = ref(true)
 const reloadData = ref(false)
 const data = ref([])
 const totalRows = ref(1)
-const pageSize = ref(5)
+const pageSize = useStorage('exportedSkills-pageSize', 5)
 const possiblePageSizes = [5, 10, 15, 25, 50]
 const currentPage = ref(1)
 const sortInfo = ref({ sortOrder: -1, sortBy: 'exportedOn' })

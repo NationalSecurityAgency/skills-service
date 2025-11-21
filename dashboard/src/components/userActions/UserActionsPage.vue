@@ -31,7 +31,7 @@ import { useContentMaxWidthState } from '@/stores/UseContentMaxWidthState.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js';
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
-import {useDebounceFn} from "@vueuse/core";
+import {useDebounceFn, useStorage} from "@vueuse/core";
 
 const route = useRoute()
 const userInfo = useUserInfo()
@@ -57,10 +57,11 @@ const tableOptions = ref({
     server: true,
     currentPage: 1,
     totalRows: 1,
-    pageSize: 10,
     possiblePageSizes: [10, 25, 50],
   }
 })
+
+const pageSize = useStorage('userActionsPage-table', 10)
 
 const sortInfo = ref({ sortOrder: -1, sortBy: 'created' })
 const isAllEvents = ref(true)
@@ -125,7 +126,7 @@ onMounted(() => {
 const loadData = () => {
   tableOptions.value.busy = true
   const params = {
-    limit: tableOptions.value.pagination.pageSize,
+    limit: pageSize.value,
     page: tableOptions.value.pagination.currentPage,
     orderBy: sortInfo.value.sortBy,
     ascending: sortInfo.value.sortOrder === 1,
@@ -184,7 +185,7 @@ const onFilter = useDebounceFn((filterEvent) => {
   loadData()
 }, 300)
 const pageChanged = (pagingInfo) => {
-  tableOptions.value.pagination.pageSize = pagingInfo.rows
+  pageSize.value = pagingInfo.rows
   tableOptions.value.pagination.currentPage = pagingInfo.page + 1
   loadData()
 }
@@ -234,7 +235,7 @@ const pageAwareTitleLevel = computed(() => route.params.projectId ? 2 : 1)
             @filter="onFilter"
             @page="pageChanged"
             @sort="sortField"
-            :rows="tableOptions.pagination.pageSize"
+            :rows="pageSize"
             :rowsPerPageOptions="tableOptions.pagination.possiblePageSizes"
             :total-records="tableOptions.pagination.totalRows"
             v-model:sort-field="sortInfo.sortBy"

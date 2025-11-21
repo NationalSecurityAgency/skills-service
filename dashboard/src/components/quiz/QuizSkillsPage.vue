@@ -31,6 +31,7 @@ import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import InputGroup from 'primevue/inputgroup'
 import LoadingContainer from '@/components/utils/LoadingContainer.vue'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import {useStorage} from "@vueuse/core";
 
 const route = useRoute()
 const userInfo = useUserInfo()
@@ -67,10 +68,10 @@ const options = ref({
     server: false,
     currentPage: 1,
     totalRows: 1,
-    pageSize: 5,
     possiblePageSizes: [5, 10, 15, 20]
   }
 })
+const pageSize = useStorage('quizSkillsPage-tablePageSize', 5)
 const sortInfo = ref({ sortOrder: -1, sortBy: 'projectId' })
 
 const docsUrl = computed(() => {
@@ -129,7 +130,7 @@ const onFilter = (filterEvent) => {
               v-model:filters="filters"
               :globalFilterFields="['skillName']"
               @filter="onFilter"
-              :rows="options.pagination.pageSize"
+              :rows="pageSize"
               :rowsPerPageOptions="options.pagination.possiblePageSizes"
               v-model:sort-field="sortInfo.sortBy"
               v-model:sort-order="sortInfo.sortOrder">
