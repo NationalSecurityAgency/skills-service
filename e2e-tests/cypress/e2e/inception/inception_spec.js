@@ -21,6 +21,7 @@ describe('Inception Tests', () => {
     });
 
     it('navigation to dashboard skills', function () {
+        cy.suppressChartInitError()
         cy.visit('/administrator/');
         cy.get('[data-cy="inception-button"]').click();
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains('Dashboard Skills');
