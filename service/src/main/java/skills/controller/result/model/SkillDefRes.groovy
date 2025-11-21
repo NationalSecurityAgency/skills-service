@@ -31,4 +31,9 @@ class SkillDefRes extends SkillDefPartialRes {
 
     Boolean hasVideoConfigured
     String iconClass
+
+    String prevSkillId
+    String nextSkillId
+    int totalSkills
+    int orderInGroup
 }

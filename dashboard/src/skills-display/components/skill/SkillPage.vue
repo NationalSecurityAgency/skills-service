@@ -26,9 +26,7 @@ import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkills
 const Prerequisites = defineAsyncComponent(() => import('@/skills-display/components/skill/prerequisites/Prerequisites.vue'))
 import SkillAchievementMsg from "@/skills-display/components/progress/celebration/SkillAchievementMsg.vue";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
-import {useMagicKeys, watchDebounced} from "@vueuse/core";
-import {useUserPreferences} from "@/stores/UseUserPreferences.js";
-import {useLog} from "@/components/utils/misc/useLog.js";
+import SkillNavigation from "@/skills-display/components/utilities/SkillNavigation.vue";
 
 const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
@@ -36,9 +34,6 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 const scrollIntoViewState = useScrollSkillsIntoViewState()
 const route = useRoute()
 const skillState = useSkillsDisplaySubjectState()
-const keys = useMagicKeys()
-const userPreferences = useUserPreferences()
-const log = useLog()
 const skill = computed(() => skillState.skillSummary)
 const loadingSkill = ref(true)
 const displayGroupDescription = ref(false);
@@ -70,34 +65,6 @@ const loadSkillSummary = () => {
       }
     })
 }
-const nextButtonShortcut = ref('Ctrl+Alt+N')
-const previousButtonShortcut = ref('Ctrl+Alt+P')
-userPreferences.afterUserPreferencesLoaded().then((options) => {
-  const debounceOptions = { debounce: 250, maxWait: 1000 }
-  if (options.sd_next_skill_keyboard_shortcut) {
-    nextButtonShortcut.value = options.sd_next_skill_keyboard_shortcut?.toLowerCase().replace(/ /g, '')
-  }
-  if (options.sd_previous_skill_keyboard_shortcut) {
-    previousButtonShortcut.value = options.sd_previous_skill_keyboard_shortcut?.toLowerCase().replace(/ /g, '')
-  }
-
-  log.debug(`Next shortcut is : ${nextButtonShortcut.value}`)
-  log.debug(`Previous shortcut is : ${previousButtonShortcut.value}`)
-  watchDebounced(
-      keys[nextButtonShortcut.value],
-      () => {
-        nextButtonClicked()
-      },
-      debounceOptions
-  )
-  watchDebounced(
-      keys[previousButtonShortcut.value],
-      () => {
-        prevButtonClicked()
-      },
-      debounceOptions
-  )
-})
 
 const prevButtonClicked = () => {
   const params = { skillId: skillState.skillSummary.prevSkillId, projectId: route.params.projectId }
@@ -132,38 +99,7 @@ const descriptionToggled = () => {
       <skills-title>{{ attributes.skillDisplayName }} Overview</skills-title>
       <Card class="mt-4" :pt="{ content: { class: 'p-0' }}">
         <template #content>
-          <div class="flex-col sm:flex-row items-center flex gap-2 mb-6" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !skillsDisplayInfo.isCrossProject()">
-            <div class="w-28">
-              <SkillsButton
-                @click="prevButtonClicked" v-if="skill.prevSkillId"
-                outlined
-                size="small"
-                :title="`Previous ${attributes.skillDisplayName} (${previousButtonShortcut})`"
-                class="skills-theme-btn"
-                data-cy="prevSkill"
-                aria-label="previous skill">
-                <i class="fas fa-arrow-alt-circle-left mr-1" aria-hidden="true"></i> Previous
-              </SkillsButton>
-            </div>
-            <div class="flex-1 text-center " style="font-size: 0.9rem;" data-cy="skillOrder"><span
-              class="italic">{{ attributes.skillDisplayName }}</span> <span class="font-semibold">{{ skill.orderInGroup
-              }}</span> <span class="italic">of</span> <span class="font-semibold">{{ skill.totalSkills }}</span>
-            </div>
-            <div class="w-28 text-right">
-              <SkillsButton
-                @click="nextButtonClicked"
-                v-if="skill.nextSkillId"
-                class="skills-theme-btn"
-                data-cy="nextSkill"
-                outlined
-                size="small"
-                :title="`Next ${attributes.skillDisplayName} (${nextButtonShortcut})`"
-                aria-label="next skill">
-                Next
-                <i class="fas fa-arrow-alt-circle-right ml-1" aria-hidden="true"></i>
-              </SkillsButton>
-            </div>
-          </div>
+          <skill-navigation class="mb-6" :skill="skill" @prevButtonClicked="prevButtonClicked" @nextButtonClicked="nextButtonClicked" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !skillsDisplayInfo.isCrossProject()" />
           <div v-if="!attributes.groupInfoOnSkillPage && skill.groupName" class="mt-4 p-1 mb-4" data-cy="groupInformationSection">
             <div class="flex">
               <div class="mr-2 mt-1 text-xl">
