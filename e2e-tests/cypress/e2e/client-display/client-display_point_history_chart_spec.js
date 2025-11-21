@@ -103,7 +103,7 @@ describe('Client Display Point History Tests', () => {
       }]
     }
 
-    cy.intercept('/api/projects/proj1/pointHistory', data)
+    cy.intercept('/api/projects/proj1/pointHistory**', data)
       .as('getPointHistory')
 
     cy.cdVisit('/', true)
@@ -194,7 +194,7 @@ describe('Client Display Point History Tests', () => {
         .format('x')
     })
 
-    cy.intercept('/api/projects/proj1/pointHistory')
+    cy.intercept('/api/projects/proj1/pointHistory**')
       .as('getPointHistory')
 
     cy.cdVisit('/', true)
@@ -247,7 +247,7 @@ describe('Client Display Point History Tests', () => {
       }]
     }
 
-    cy.intercept('/api/projects/proj1/pointHistory', data)
+    cy.intercept('/api/projects/proj1/pointHistory**', data)
       .as('getPointHistory')
 
     cy.cdVisit('/', true)
@@ -301,7 +301,7 @@ describe('Client Display Point History Tests', () => {
       }]
     }
 
-    cy.intercept('/api/projects/proj1/pointHistory', data)
+    cy.intercept('/api/projects/proj1/pointHistory**', data)
       .as('getPointHistory')
 
     cy.cdVisit('/', true)
@@ -355,7 +355,7 @@ describe('Client Display Point History Tests', () => {
       }]
     }
 
-    cy.intercept('/api/projects/proj1/pointHistory', data)
+    cy.intercept('/api/projects/proj1/pointHistory**', data)
       .as('getPointHistory')
 
     cy.cdVisit('/', true)
@@ -409,7 +409,7 @@ describe('Client Display Point History Tests', () => {
       }]
     }
 
-    cy.intercept('/api/projects/proj1/pointHistory', data)
+    cy.intercept('/api/projects/proj1/pointHistory**', data)
       .as('getPointHistory')
 
     cy.cdVisit('/', true)
@@ -479,7 +479,7 @@ describe('Client Display Point History Tests', () => {
       }]
     }
 
-    cy.intercept('/api/projects/proj1/pointHistory', data)
+    cy.intercept('/api/projects/proj1/pointHistory**', data)
       .as('getPointHistory')
 
     cy.cdVisit('/', true)
@@ -549,7 +549,7 @@ describe('Client Display Point History Tests', () => {
         'name': 'Level 5'
       }]
     }
-    cy.intercept('/api/projects/proj1/pointHistory', data)
+    cy.intercept('/api/projects/proj1/pointHistory**', data)
       .as('getPointHistory')
 
     cy.cdVisit('/', true)
@@ -596,7 +596,7 @@ describe('Client Display Point History Tests', () => {
         'name': 'Level 2'
       }]
     }
-    cy.intercept('/api/projects/proj1/pointHistory', data)
+    cy.intercept('/api/projects/proj1/pointHistory**', data)
       .as('getPointHistory')
 
     cy.cdVisit('/', true)
@@ -609,8 +609,51 @@ describe('Client Display Point History Tests', () => {
     cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
   })
 
+    it('points earned on a single date', () => {
+        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3, {pointIncrement: 500});
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), '2025-11-21 11:00')
+        cy.intercept('/api/projects/proj1/pointHistory**')
+            .as('getPointHistory')
+        cy.cdVisit('/', true)
+        cy.wait('@getPointHistory')
+        cy.get('[data-cy="pointHistoryChartWithData"]')
+
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+        cy.wait(5000)
+        cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    })
+
+    it('chart is updated after the points are earned on subject page', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'HonorSystem' });
+        cy.createSkill(1, 1, 3, {pointIncrement: 500});
+        cy.intercept('/api/projects/proj1/subjects/subj1/pointHistory**')
+            .as('getPointHistory')
+        cy.cdVisit('/subjects/subj1', true)
+        cy.wait('@getPointHistory')
+        cy.get('[data-cy="pointHistoryChartNoData"]').contains('Your Progress Awaits')
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+
+        cy.get('[data-cy=toggleSkillDetails]').click();
+
+        cy.get('[data-cy="skillDescription-skill1"] [data-cy="claimPointsBtn"]').click()
+        cy.wait('@getPointHistory')
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+        cy.get('[data-cy="pointHistoryChartWithData"]')
+
+        cy.get('[data-cy="skillDescription-skill2"] [data-cy="claimPointsBtn"]').click()
+        cy.wait('@getPointHistory')
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+        cy.get('[data-cy="pointHistoryChartWithData"]')
+
+        cy.wait(5000)
+        cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    })
+
   it('empty point history', () => {
-    cy.intercept('/api/projects/proj1/pointHistory')
+    cy.intercept('/api/projects/proj1/pointHistory**')
       .as('getPointHistory')
     cy.cdVisit('/')
     cy.wait('@getPointHistory')

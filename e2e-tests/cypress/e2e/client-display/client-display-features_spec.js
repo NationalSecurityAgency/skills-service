@@ -66,7 +66,7 @@ describe('Client Display Features Tests', () => {
       })
     })
       .as('getSubjectSummary')
-    cy.intercept('GET', '/api/projects/proj1/pointHistory')
+    cy.intercept('GET', '/api/projects/proj1/pointHistory**')
       .as('pointHistoryChart')
 
     cy.cdVisit('/')
@@ -112,7 +112,7 @@ describe('Client Display Features Tests', () => {
       })
     })
       .as('getSubjectSummary')
-    cy.intercept('GET', '/api/projects/proj1/pointHistory')
+    cy.intercept('GET', '/api/projects/proj1/pointHistory**')
       .as('pointHistoryChart')
 
     cy.visit('/test-skills-client/proj1/?enableTheme=true')
@@ -195,7 +195,7 @@ describe('Client Display Features Tests', () => {
       })
     })
       .as('getSubjectSummary')
-    cy.intercept('GET', '/api/projects/proj1/pointHistory')
+    cy.intercept('GET', '/api/projects/proj1/pointHistory**')
       .as('pointHistoryChart')
 
     cy.visit('/progress-and-rankings/projects/proj1')
@@ -302,7 +302,7 @@ describe('Client Display Features Tests', () => {
       // userId: Cypress.env('proxyUser'),
       timestamp: new Date().getTime() - 1000 * 60 * 60 * 24
     })
-    cy.intercept('GET', '/api/projects/proj1/pointHistory')
+    cy.intercept('GET', '/api/projects/proj1/pointHistory**')
       .as('pointHistoryChart')
 
     cy.cdVisit('/', true)

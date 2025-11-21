@@ -26,6 +26,7 @@ export const useSkillsDisplayPointHistoryState = defineStore('skillsDisplayPoint
   const appConfig = useAppConfig()
 
   const pointHistoryMap = ref(new Map())
+  const pointHistoryDateLoadedMap = ref(new Map())
 
   const getUserIdAndVersionParams = () => {
     let config = {}
@@ -50,11 +51,13 @@ export const useSkillsDisplayPointHistoryState = defineStore('skillsDisplayPoint
     if (!subjectId) {
       url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/pointHistory`
     }
-    return axios.get(url, {
-      params: getUserIdAndVersionParams()
-    }).then((result) => {
-      pointHistoryMap.value.set(mapId, result.data)
-    })
+    const params = getUserIdAndVersionParams()
+    params.minNumOfDaysBeforeReturningHistory = 0
+    return axios.get(url, {params})
+      .then((result) => {
+          pointHistoryDateLoadedMap.value.set(mapId, new Date())
+          pointHistoryMap.value.set(mapId, result.data)
+      })
   }
 
   const isInitialLoad = (subjectId) => {
@@ -71,7 +74,8 @@ export const useSkillsDisplayPointHistoryState = defineStore('skillsDisplayPoint
   return {
     loadPointHistory,
     isInitialLoad,
-    getPointHistory
+    getPointHistory,
+    pointHistoryDateLoadedMap
   }
 
 })

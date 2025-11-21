@@ -186,7 +186,7 @@ describe('Client Display Tests', () => {
     sizes.forEach((size) => {
 
         it(`test theming - project overview - ${size}`, () => {
-            cy.intercept('GET', '/api/projects/proj1/pointHistory')
+            cy.intercept('GET', '/api/projects/proj1/pointHistory**')
                 .as('getPointHistory');
             cy.setResolution(size);
 

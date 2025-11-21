@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import {useSkillsDisplayPointHistoryState} from '@/skills-display/stores/UseSkillsDisplayPointHistoryState.js'
 import {useNumberFormat} from '@/common-components/filter/UseNumberFormat.js'
 import {useSkillsDisplayThemeState} from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
@@ -62,54 +62,55 @@ const splashChartData = ({
 
 
 onMounted(() => {
-  loadPointsHistory()
+  pointHistoryState.loadPointHistory(route.params.subjectId)
+      .then(() => {
+        setupData()
+      })
 })
 const formatTimestamp = (timestamp) => dayjs(timestamp).format('YYYY-MM-DD')
-const loadPointsHistory = () => {
-  pointHistoryState.loadPointHistory(route.params.subjectId)
-    .then(() => {
-      const pointHistoryRes = pointHistoryState.getPointHistory(route.params.subjectId)
 
-      if (pointHistoryRes.achievements) {
-        pointHistoryRes.achievements.forEach((achievement) => {
-          const dataIndex = pointHistoryRes.pointsHistory.findIndex((item) => item.dayPerformed === achievement.achievedOn)
+const setupData = () => {
+  const pointHistoryRes = pointHistoryState.getPointHistory(route.params.subjectId)
 
-          achievedLevels.value.push({
-            ...achievement,
-            dataIndex: dataIndex >= 0 ? dataIndex + 1 : null,
-            day: formatTimestamp(achievement.achievedOn)
-          })
-        })
-      }
+  if (pointHistoryRes.achievements) {
+    pointHistoryRes.achievements.forEach((achievement) => {
+      const dataIndex = pointHistoryRes.pointsHistory.findIndex((item) => item.dayPerformed === achievement.achievedOn)
 
-      const pointHistory = pointHistoryRes.pointsHistory
-      if (pointHistory && pointHistory.length > 0) {
-        // find the earliest date, then add a new entry for a previous date with 0 points
-        const earliestDate = pointHistory[0].dayPerformed
-        const prevDay = dayjs(earliestDate).subtract(1, 'day').toDate()
-        pointHistory.unshift({
-          dayPerformed: formatTimestamp(prevDay),
-          points: 0
-        })
-      }
-
-      const numItems = pointHistoryRes.pointsHistory?.length || 0
-      const pointRadius = numItems < tooManyPointsForTooltip ? 3 : 0
-      chartData.value = {
-        datasets: [{
-          label: 'Points',
-          data: pointHistoryRes.pointsHistory.map((item) => {
-            return {x: formatTimestamp(item.dayPerformed), y: item.points}
-          }),
-          cubicInterpolationMode: 'monotone',
-          pointRadius: pointRadius,
-          pointHoverRadius: pointRadius,
-          borderWidth: 4, // Make the line slightly thicker for better visibility
-        }]
-      }
-
-      loading.value = false
+      achievedLevels.value.push({
+        ...achievement,
+        dataIndex: dataIndex >= 0 ? dataIndex + 1 : null,
+        day: formatTimestamp(achievement.achievedOn)
+      })
     })
+  }
+
+  const pointHistory = pointHistoryRes.pointsHistory
+  if (pointHistory && pointHistory.length > 0) {
+    // find the earliest date, then add a new entry for a previous date with 0 points
+    const earliestDate = pointHistory[0].dayPerformed
+    const prevDay = dayjs(earliestDate).subtract(1, 'day').toDate()
+    pointHistory.unshift({
+      dayPerformed: formatTimestamp(prevDay),
+      points: 0
+    })
+  }
+
+  const numItems = pointHistoryRes.pointsHistory?.length || 0
+  const pointRadius = numItems < tooManyPointsForTooltip ? 3 : 0
+  chartData.value = {
+    datasets: [{
+      label: 'Points',
+      data: pointHistoryRes.pointsHistory.map((item) => {
+        return {x: formatTimestamp(item.dayPerformed), y: item.points}
+      }),
+      cubicInterpolationMode: 'monotone',
+      pointRadius: pointRadius,
+      pointHoverRadius: pointRadius,
+      borderWidth: 4, // Make the line slightly thicker for better visibility
+    }]
+  }
+
+  loading.value = false
 }
 
 const hasData = computed(() => {
@@ -224,6 +225,12 @@ const chartJsOptions = computed(() => {
 })
 
 const pointsChartRef = ref(null)
+
+watch(() => pointHistoryState.pointHistoryDateLoadedMap.get(route.params.subjectId), (newVal, oldVal) => {
+  if (oldVal && newVal) {
+    setupData()
+  }
+})
 </script>
 
 <template>
@@ -259,9 +266,7 @@ const pointsChartRef = ref(null)
               <div class="text-blue-800 dark:text-blue-200 sd-theme-primary-color"><i class="fas fa-chart-line"></i>
                 Your Progress Awaits!
               </div>
-              <small class="text-green-900 dark:text-green-100 sd-theme-primary-color">Your progress will start
-                appearing here once <b>2 days</b> worth of {{ pluralize.plural(attributes.pointDisplayNameLower, 2) }}
-                are earned!</small>
+              <small class="text-green-900 dark:text-green-100 sd-theme-primary-color">Your progress journey begins with your first point!</small>
             </template>
           </Card>
         </template>
