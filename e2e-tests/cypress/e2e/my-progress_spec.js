@@ -127,7 +127,7 @@ describe('My Progress Tests', () => {
     });
 
     it('visit My Progress page', function () {
-
+        cy.suppressChartInitError()
         cy.loginAsRootUser();
         cy.request('PUT', `/app/badges/globalBadge1`, {
             badgeId: `globalBadge1`,
@@ -595,6 +595,7 @@ describe('My Progress Tests', () => {
     });
 
     it('Contact project owner', () => {
+        cy.suppressChartInitError()
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
         cy.intercept('POST', '/api/validation/description*').as('validate');
 
@@ -781,6 +782,7 @@ describe('My Progress Tests', () => {
     }
 
     it('custom subject icons are loaded for multiple projects', function () {
+        cy.suppressChartInitError()
         cy.intercept(' /api/projects/proj10/customIconCss').as('proj1CustomIcons')
         cy.intercept(' /api/projects/proj20/customIconCss').as('proj2CustomIcons')
 
