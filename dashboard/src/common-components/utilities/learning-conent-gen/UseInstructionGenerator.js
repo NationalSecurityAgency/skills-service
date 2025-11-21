@@ -118,7 +118,6 @@ BEFORE finalizing the response, VERIFY each question:
 - MultipleChoice with only 1 correct answer → INVALID
 - SingleChoice with 0 or >1 correct answers → INVALID
 - TextInput with answers array not empty → INVALID
-- Incorrect answer count (must be 3-5 for Single/MultipleChoice)
 
 ## Final Check
 Before responding, count the number of \`"isCorrect": true\` for EACH question and verify:
@@ -129,8 +128,8 @@ Before responding, count the number of \`"isCorrect": true\` for EACH question a
 ## IMPORTANT: Count the correct answers
 For EACH question, before including it:
 1. Count the number of answers where \`"isCorrect": true\`
-2. If count == 1 → Must be SingleChoice
-3. If count >= 2 → Must be MultipleChoice
+2. If count == 1 then questionType *Must* be 'SingleChoice'
+3. If count >= 2 → then questionType *Must* be 'MultipleChoice'
 4. If questionType doesn't match, FIX IT
 
 `

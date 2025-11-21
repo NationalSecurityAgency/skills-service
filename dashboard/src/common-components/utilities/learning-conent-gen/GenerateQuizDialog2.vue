@@ -204,10 +204,10 @@ const ensureValidQuestionType = (question) => {
     return answer.isCorrect ? count + 1 : count;
   }, 0);
   if (question.questionType !== 'MultipleChoice' && correctAnswersCount > 1) {
-    log.debug(`Changing [${question.questionType}] to MultipleChoice, correctAnswersCount [${correctAnswersCount}]`)
+    log.debug(`Changing [${question.question}] from [${question.questionType}] to MultipleChoice, correctAnswersCount [${correctAnswersCount}]`)
     question.questionType = 'MultipleChoice'
   } else if (question.questionType !== 'SingleChoice' && correctAnswersCount === 1) {
-    log.debug(`Changing [${question.questionType}] to SingleChoice, correctAnswersCount [${correctAnswersCount}]`)
+    log.debug(`Changing [${question.question}] from [${question.questionType}] to SingleChoice, correctAnswersCount [${correctAnswersCount}]`)
     question.questionType = 'SingleChoice'
   }
 }
