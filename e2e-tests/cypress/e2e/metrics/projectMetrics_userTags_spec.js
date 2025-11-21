@@ -83,10 +83,17 @@ describe('Metrics Using User Tags Tests', () => {
 
     beforeEach(() => {
         cy.intercept('GET', '/public/config', (req) => {
-            req.reply({
-                body: {
-                    projectMetricsTagCharts: '[{"key":"manyValues","type":"table","title":"Many Values","tagLabel":"Best Label"},{"key":"someValues","type":"bar","title":"Some Values"}]'
-                },
+            req.reply((res) => {
+                const conf = res.body;
+                conf.maxIdLength = 50;
+                res.send(conf);
+            });
+        })
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.projectMetricsTagCharts ='[{"key":"manyValues","type":"table","title":"Many Values","tagLabel":"Best Label"},{"key":"someValues","type":"bar","title":"Some Values"}]'
+                res.send(conf);
             });
         })
             .as('getConfig');

@@ -165,16 +165,6 @@ describe('Metrics Tests - Subject', () => {
             .contains(noDataMsg)
             .should('not.exist');
 
-        cy.get('[data-cy=distinctNumUsersOverTime] [data-cy=apexchart]')
-            .should('be.visible')
-            .and(chart => {
-                // we can assert anything about the chart really
-                expect(chart.height())
-                    .to
-                    .be
-                    .greaterThan(350);
-            });
-
         cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');

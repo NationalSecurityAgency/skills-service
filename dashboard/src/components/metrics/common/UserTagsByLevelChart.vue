@@ -22,12 +22,14 @@ import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
 import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
 
 const props = defineProps(['tag']);
 const route = useRoute();
 
 const layoutSizes = useLayoutSizesState()
 const chartSupportColors = useChartSupportColors()
+const skillsDisplayAttributesState = useSkillsDisplayAttributesState()
 
 const loading = ref(true);
 const chartJsOptions = ref();
@@ -73,7 +75,7 @@ const loadData = () => {
                 }
               });
               if (dataForLevel.length > 0) {
-                datasets.push(convertToChartData(dataForLevel, `Level ${level}`, level-1));
+                datasets.push(convertToChartData(dataForLevel, `${skillsDisplayAttributesState.levelDisplayName} ${level}`, level-1));
               }
             }
             chartData.value = {
@@ -87,7 +89,7 @@ const loadData = () => {
 };
 
 const userTagsByLevelChartRef = ref(null)
-const hasData = computed(() => chartData.value.labels && chartData.value.labels?.length > 0)
+const hasData = computed(() => Boolean(chartData.value.labels && chartData.value.labels?.length > 0))
 
 const setChartOptions = () => {
   const colors = chartSupportColors.getColors()
@@ -128,12 +130,19 @@ const setChartOptions = () => {
     }
   };
 }
+
+const heightInRem = computed(() => {
+  if (hasData.value) {
+    return chartData.value.labels.length * 5
+  }
+  return 20;
+})
 </script>
 
 <template>
   <Card :data-cy="`numUsersByTag-${tag.key}`" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
     <template #header>
-      <SkillsCardHeader :title="`Top 20 ${tag.label} Level Breakdown`">
+      <SkillsCardHeader :title="`Top 20 ${tag.label} ${skillsDisplayAttributesState.levelDisplayName} Breakdown`">
         <template #headerContent>
           <chart-download-controls v-if="hasData" :vue-chart-ref="userTagsByLevelChartRef" />
         </template>
@@ -145,7 +154,7 @@ const setChartOptions = () => {
                type="bar"
                :data="chartData"
                :options="chartJsOptions"
-               class="min-h-[16em]"/>
+               :style="`min-height: ${heightInRem}rem;`"/>
       </metrics-overlay>
     </template>
   </Card>
