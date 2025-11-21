@@ -1586,5 +1586,41 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="descriptionError"]').contains('Mocked up validation failure')
   })
 
+  it('can navigate between skills on admin skill page', () => {
+    cy.createSkill(1, 1, 1)
+    cy.createSkill(1, 1, 2)
+    cy.createSkill(1, 1, 3)
 
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+
+    cy.get('[data-cy="title"').contains('Very Great Skill 1');
+    cy.get('[data-cy="skillOrder"]').contains('Skill 1 of 3');
+    cy.get('[data-cy="prevSkill"]').should('not.exist');
+    cy.get('[data-cy="nextSkill"]').should('exist');
+    cy.get('[data-cy="nextSkill"]').click();
+
+
+    cy.get('[data-cy="title"').contains('Very Great Skill 2');
+    cy.get('[data-cy="skillOrder"]').contains('Skill 2 of 3');
+    cy.get('[data-cy="prevSkill"]').should('exist');
+    cy.get('[data-cy="nextSkill"]').should('exist');
+    cy.get('[data-cy="nextSkill"]').click();
+
+    cy.get('[data-cy="title"').contains('Very Great Skill 3');
+    cy.get('[data-cy="skillOrder"]').contains('Skill 3 of 3');
+    cy.get('[data-cy="prevSkill"]').should('exist');
+    cy.get('[data-cy="nextSkill"]').should('not.exist');
+    cy.get('[data-cy="prevSkill"]').click();
+
+    cy.get('[data-cy="title"').contains('Very Great Skill 2');
+    cy.get('[data-cy="skillOrder"]').contains('Skill 2 of 3');
+    cy.get('[data-cy="prevSkill"]').should('exist');
+    cy.get('[data-cy="nextSkill"]').should('exist');
+    cy.get('[data-cy="prevSkill"]').click();
+
+    cy.get('[data-cy="title"').contains('Very Great Skill 1');
+    cy.get('[data-cy="skillOrder"]').contains('Skill 1 of 3');
+    cy.get('[data-cy="prevSkill"]').should('not.exist');
+    cy.get('[data-cy="nextSkill"]').should('exist');
+  })
 })
