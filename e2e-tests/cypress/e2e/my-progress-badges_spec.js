@@ -124,9 +124,7 @@ describe('My Progress Badges Tests', () => {
   });
 
   it('project name should be visible on badges in badge catalog', () => {
-    cy.visit('/progress-and-rankings/');
-    cy.get('[data-cy=viewBadges]')
-      .click();
+    cy.visit('/progress-and-rankings/my-badges');
     cy.get('[data-cy="availableBadges"] [data-cy="badge_gemBadge"] [data-cy=badgeProjectName]')
       .should('have.text', 'Project: This is project 1');
     cy.get('[data-cy="achievedBadge-badge1"] [data-cy=badgeProjectName]')
