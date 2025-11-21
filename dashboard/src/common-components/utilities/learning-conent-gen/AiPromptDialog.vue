@@ -50,6 +50,10 @@ const props = defineProps({
     type: String,
     default: null
   },
+  useGeneratedLabel: {
+    type: String,
+    default: 'Use Generated Value'
+  },
   generationCompletedMsg: {
     type: String,
     default: 'Take a look at what I came up with! Please review it and let me know if you need any changes.'
@@ -65,6 +69,10 @@ const props = defineProps({
   generationStartedMsg: {
     type: String,
     default: 'Got it! I\'ll get started right away!'
+  },
+  isValid: {
+    type: Boolean,
+    default: true
   },
 })
 
@@ -345,7 +353,8 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
                 <SkillsButton
                     icon="fa-solid fa-check-double"
                     severity="info" :outlined="false"
-                    label="Use Generated Value"
+                    :disabled="!isValid"
+                    :label="useGeneratedLabel"
                     :data-cy="`useGenValueBtn-${historyItem.id}`"
                     :loading="isAddingPrefix"
                     @click="useGenerated(historyItem.id)"/>
