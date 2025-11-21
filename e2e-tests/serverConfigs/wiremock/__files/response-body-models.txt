@@ -2,11 +2,11 @@
   "object": "list",
   "data": [
     {
-      "id": "model-1",
+      "id": "model1",
       "object": "model",
       "created": 1763732448,
       "owned_by": "abc",
-      "root": "/path/to/model-1",
+      "root": "/path/to/model1",
       "parent": null,
       "max_model_len": 32768,
       "permission": [
