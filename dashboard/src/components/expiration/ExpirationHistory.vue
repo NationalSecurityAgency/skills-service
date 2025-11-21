@@ -76,7 +76,7 @@ const tableOptions = ref({
   },
   items: [],
 })
-useStorage('expirationHistory-tablePageSize', 10)
+const pageSize = useStorage('expirationHistory-tablePageSize', 10)
 
 onMounted(() => {
   loadData();
