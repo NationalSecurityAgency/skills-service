@@ -266,7 +266,7 @@ watch(() => pointHistoryState.pointHistoryDateLoadedMap.get(route.params.subject
               <div class="text-blue-800 dark:text-blue-200 sd-theme-primary-color"><i class="fas fa-chart-line"></i>
                 Your Progress Awaits!
               </div>
-              <small class="text-green-900 dark:text-green-100 sd-theme-primary-color">Your progress journey begins with your first point!</small>
+              <small class="text-green-900 dark:text-green-100 sd-theme-primary-color">Your progress journey begins with your first {{ attributes.pointDisplayNameLower }}!</small>
             </template>
           </Card>
         </template>

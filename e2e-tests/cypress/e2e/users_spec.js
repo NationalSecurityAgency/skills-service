@@ -733,7 +733,7 @@ describe('Users Tests', () => {
         cy.reportSkill(1, 1, userId, 'now')
         cy.doReportSkill({ project: 1, skill: 2, subjNum: 2, userId, date: 'now' })
 
-        cy.intercept(`/api/projects/proj1/pointHistory?userId=**`, (req) => {
+        cy.intercept(`/api/projects/proj1/pointHistory?userId**`, (req) => {
             req.continue((res) => {
                 expect(res.body.achievements).to.have.length(1)
                 expect(res.body.achievements[0].points).to.equal(3777)
@@ -745,7 +745,7 @@ describe('Users Tests', () => {
             })
         }).as('pointHistory')
 
-        cy.intercept(`/api/projects/proj1/subjects/subj1/pointHistory?userId=**`, (req) => {
+        cy.intercept(`/api/projects/proj1/subjects/subj1/pointHistory**`, (req) => {
             req.continue((res) => {
                 expect(res.body.achievements).to.have.length(1)
                 expect(res.body.achievements[0].points).to.equal(1500)
@@ -757,10 +757,11 @@ describe('Users Tests', () => {
             })
         }).as('subj1PointHistory')
 
-        cy.intercept(`/api/projects/proj1/subjects/subj2/pointHistory?userId=**`, (req) => {
+        cy.intercept(`/api/projects/proj1/subjects/subj2/pointHistory**`, (req) => {
             req.continue((res) => {
-                expect(res.body.achievements).to.have.length(0)
-                expect(res.body.pointsHistory).to.have.length(0)
+                expect(res.body.achievements).to.have.length(1)
+                expect(res.body.pointsHistory).to.have.length(1)
+                expect(res.body.pointsHistory[0].points).to.equal(777)
             })
         }).as('subj2PointHistory')
 

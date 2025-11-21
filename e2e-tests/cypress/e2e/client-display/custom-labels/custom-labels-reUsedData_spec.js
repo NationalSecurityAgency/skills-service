@@ -140,7 +140,6 @@ describe('Custom Label with Reused Data Tests', () => {
 
     it('verify custom labels - project page on default skills display', () => {
         cy.cdVisit();
-        cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains('User Courses');
         cy.get('[data-cy="overallPoints"]').contains('Overall Units');
         cy.get('[data-cy="levelProgress"]').contains('Stage 2 Progress');

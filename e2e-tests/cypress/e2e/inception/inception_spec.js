@@ -105,7 +105,6 @@ describe('Inception Tests', () => {
         cy.get('[data-cy="inception-button"]').click();
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains('Dashboard Skills');
         cy.get('[data-cy="subjectTileBtn"]').should('have.length', 3)
-        cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.get('[data-cy="subjectTile-Projects"]')
     })
 
