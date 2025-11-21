@@ -1139,7 +1139,7 @@ class SkillsService {
         return wsHelper.apiGet(endpoint)
     }
 
-    def getPointHistory(String userId, String projectId, String subjectId=null, Integer version = -1){
+    def getPointHistory(String userId, String projectId, String subjectId=null, Integer version = -1, Integer minNumOfDaysBeforeReturningHistory = null){
         userId = getUserId(userId)
         String endpointStart = subjectId ? getSubjectUrl(projectId, subjectId) : getProjectUrl(projectId)
         String url = "${endpointStart}/pointHistory"
@@ -1150,6 +1150,9 @@ class SkillsService {
         }
         if (version >= 0) {
             url += "${paramAdded ? "&" : "?"}version=${version}"
+        }
+        if (minNumOfDaysBeforeReturningHistory != null) {
+            url += "${paramAdded ? "&" : "?"}minNumOfDaysBeforeReturningHistory=${minNumOfDaysBeforeReturningHistory}"
         }
         return wsHelper.apiGet(url.toString())
     }

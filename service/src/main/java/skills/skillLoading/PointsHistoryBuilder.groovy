@@ -30,16 +30,13 @@ import skills.storage.repos.UserPerformedSkillRepo
 @CompileStatic
 class PointsHistoryBuilder {
 
-    // optional
-    int minNumOfDaysBeforeReturningHistory = 2
-
     @Autowired
     UserPerformedSkillRepo userPerformedSkillRepo
 
     @Autowired
     UserAchievedLevelRepo userAchievedRepo
 
-    List<SkillHistoryPoints> buildHistory(String projectId, String userId, Integer showHistoryForNumDays, String skillId = null, Integer version = Integer.MAX_VALUE) {
+    List<SkillHistoryPoints> buildHistory(String projectId, String userId, Integer showHistoryForNumDays, String skillId = null, Integer version = Integer.MAX_VALUE, int minNumOfDaysBeforeReturningHistory = 2) {
         List<DayCountItem> userPoints
         if(skillId) {
             userPoints = userPerformedSkillRepo.calculatePointHistoryForSubject(projectId, userId, skillId, version)
@@ -53,10 +50,10 @@ class PointsHistoryBuilder {
             pointsByDay.put(new Date(it.day.time).clearTime(), it.count)
         }
 
-        return doBuildHistory(pointsByDay, showHistoryForNumDays)
+        return doBuildHistory(pointsByDay, showHistoryForNumDays, minNumOfDaysBeforeReturningHistory)
     }
 
-    private List<SkillHistoryPoints> doBuildHistory(Map<Date, Long> pointsByDay, Integer showHistoryForNumDays) {
+    private List<SkillHistoryPoints> doBuildHistory(Map<Date, Long> pointsByDay, Integer showHistoryForNumDays, int minNumOfDaysBeforeReturningHistory = 2) {
         if (!pointsByDay || pointsByDay.size() < minNumOfDaysBeforeReturningHistory) {
             return Collections.EMPTY_LIST
         }

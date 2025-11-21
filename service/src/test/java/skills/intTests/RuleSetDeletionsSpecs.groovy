@@ -212,17 +212,17 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         String user1Id = sampleUserIds.get(0)
         String user2Id = sampleUserIds.get(1)
         String user3Id = sampleUserIds.get(2)
-        def user1PointHistory = skillsService.getPointHistory(user1Id, projId)
-        def user2PointHistory = skillsService.getPointHistory(user2Id, projId)
-        def user3PointHistory = skillsService.getPointHistory(user3Id, projId)
+        def user1PointHistory = skillsService.getPointHistory(user1Id, projId, null, null, 0)
+        def user2PointHistory = skillsService.getPointHistory(user2Id, projId, null, null, 0)
+        def user3PointHistory = skillsService.getPointHistory(user3Id, projId, null, null, 0)
 
-        Closure getPoints = { def ptsHistory, int index -> ptsHistory.pointsHistory.find { df.parse(it.dayPerformed) == dates.get(index) }.points }
+        Closure getPoints = { def ptsHistory, int index -> ptsHistory.pointsHistory.find { df.parse(it.dayPerformed) == dates.get(index) }?.points ?: 0 }
 
         when:
         skillsService.deleteSkill([projectId: projId, subjectId: subj1.get(0).subjectId, skillId: subj1.get(0).skillId])
-        def afterRemovalUser1PointHistory = skillsService.getPointHistory(user1Id, projId)
-        def afterRemovalUser2PointHistory = skillsService.getPointHistory(user2Id, projId)
-        def afterRemovalUser3PointHistory = skillsService.getPointHistory(user3Id, projId)
+        def afterRemovalUser1PointHistory = skillsService.getPointHistory(user1Id, projId, null, null, 0)
+        def afterRemovalUser2PointHistory = skillsService.getPointHistory(user2Id, projId, null, null, 0)
+        def afterRemovalUser3PointHistory = skillsService.getPointHistory(user3Id, projId, null, null, 0)
 
         then:
         getPoints.call(user1PointHistory, 0) == 80
@@ -235,13 +235,13 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         getPoints.call(user1PointHistory, 7) == 320
 
         getPoints.call(afterRemovalUser1PointHistory, 0) == 70
-        getPoints.call(afterRemovalUser1PointHistory, 1) == 70
+        getPoints.call(afterRemovalUser1PointHistory, 1) == 0
         getPoints.call(afterRemovalUser1PointHistory, 2) == 100
         getPoints.call(afterRemovalUser1PointHistory, 3) == 140
         getPoints.call(afterRemovalUser1PointHistory, 4) == 170
-        getPoints.call(afterRemovalUser1PointHistory, 5) == 170
+        getPoints.call(afterRemovalUser1PointHistory, 5) == 0
         getPoints.call(afterRemovalUser1PointHistory, 6) == 240
-        getPoints.call(afterRemovalUser1PointHistory, 7) == 240
+        getPoints.call(afterRemovalUser1PointHistory, 7) == 0
 
         getPoints.call(user2PointHistory, 0) == 10
         getPoints.call(user2PointHistory, 1) == 20
@@ -688,24 +688,24 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         def user3PointHistorySubj2 = skillsService.getPointHistory(user3Id, projId, subj2.first().subjectId)
         def user3PointHistorySubj3 = skillsService.getPointHistory(user3Id, projId, subj3.first().subjectId)
 
-        Closure getPoints = { def ptsHistory, int index -> ptsHistory.pointsHistory.find { df.parse(it.dayPerformed) == dates.get(index) }.points }
+        Closure getPoints = { def ptsHistory, int index -> ptsHistory.pointsHistory.find { df.parse(it.dayPerformed) == dates.get(index) }?.points ?: 0}
 
         when:
         skillsService.deleteSubject([projectId: projId, subjectId: subj1.get(0).subjectId])
-        def afterRemovalUser1PointHistory = skillsService.getPointHistory(user1Id, projId)
-        def afterRemovalUser1PointHistorySubj1 = skillsService.getPointHistory(user1Id, projId, subj1.first().subjectId)
-        def afterRemovalUser1PointHistorySubj2 = skillsService.getPointHistory(user1Id, projId, subj2.first().subjectId)
-        def afterRemovalUser1PointHistorySubj3 = skillsService.getPointHistory(user1Id, projId, subj3.first().subjectId)
+        def afterRemovalUser1PointHistory = skillsService.getPointHistory(user1Id, projId, null, null, 0)
+        def afterRemovalUser1PointHistorySubj1 = skillsService.getPointHistory(user1Id, projId, subj1.first().subjectId, null, 0)
+        def afterRemovalUser1PointHistorySubj2 = skillsService.getPointHistory(user1Id, projId, subj2.first().subjectId, null, 0)
+        def afterRemovalUser1PointHistorySubj3 = skillsService.getPointHistory(user1Id, projId, subj3.first().subjectId, null, 0)
 
-        def afterRemovalUser2PointHistory = skillsService.getPointHistory(user2Id, projId)
-        def afterRemovalUser2PointHistorySubj1 = skillsService.getPointHistory(user2Id, projId, subj1.first().subjectId)
-        def afterRemovalUser2PointHistorySubj2 = skillsService.getPointHistory(user2Id, projId, subj2.first().subjectId)
-        def afterRemovalUser2PointHistorySubj3 = skillsService.getPointHistory(user2Id, projId, subj3.first().subjectId)
+        def afterRemovalUser2PointHistory = skillsService.getPointHistory(user2Id, projId, null, null, 0)
+        def afterRemovalUser2PointHistorySubj1 = skillsService.getPointHistory(user2Id, projId, subj1.first().subjectId, null, 0)
+        def afterRemovalUser2PointHistorySubj2 = skillsService.getPointHistory(user2Id, projId, subj2.first().subjectId, null, 0)
+        def afterRemovalUser2PointHistorySubj3 = skillsService.getPointHistory(user2Id, projId, subj3.first().subjectId, null, 0)
 
-        def afterRemovalUser3PointHistory = skillsService.getPointHistory(user3Id, projId)
-        def afterRemovalUser3PointHistorySubj1 = skillsService.getPointHistory(user3Id, projId, subj1.first().subjectId)
-        def afterRemovalUser3PointHistorySubj2 = skillsService.getPointHistory(user3Id, projId, subj2.first().subjectId)
-        def afterRemovalUser3PointHistorySubj3 = skillsService.getPointHistory(user3Id, projId, subj3.first().subjectId)
+        def afterRemovalUser3PointHistory = skillsService.getPointHistory(user3Id, projId, null,null, 0)
+        def afterRemovalUser3PointHistorySubj1 = skillsService.getPointHistory(user3Id, projId, subj1.first().subjectId, null, 0)
+        def afterRemovalUser3PointHistorySubj2 = skillsService.getPointHistory(user3Id, projId, subj2.first().subjectId, null, 0)
+        def afterRemovalUser3PointHistorySubj3 = skillsService.getPointHistory(user3Id, projId, subj3.first().subjectId, null, 0)
 
         then:
 
@@ -729,13 +729,13 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         getPoints.call(user1PointHistorySubj1, 7) == 120
 
         getPoints.call(user1PointHistorySubj2, 0) == 60
-        getPoints.call(user1PointHistorySubj2, 1) == 60
+        getPoints.call(user1PointHistorySubj2, 1) == 0
         getPoints.call(user1PointHistorySubj2, 2) == 80
         getPoints.call(user1PointHistorySubj2, 3) == 120
         getPoints.call(user1PointHistorySubj2, 4) == 140
-        getPoints.call(user1PointHistorySubj2, 5) == 140
+        getPoints.call(user1PointHistorySubj2, 5) == 0
         getPoints.call(user1PointHistorySubj2, 6) == 200
-        getPoints.call(user1PointHistorySubj2, 7) == 200
+        getPoints.call(user1PointHistorySubj2, 7) == 0
 
         getPoints.call(user1PointHistorySubj3, 0) == 10
         getPoints.call(user1PointHistorySubj3, 1) == 20
@@ -758,13 +758,13 @@ class RuleSetDeletionsSpecs  extends DefaultIntSpec {
         !afterRemovalUser1PointHistorySubj1.pointsHistory
 
         getPoints.call(afterRemovalUser1PointHistorySubj2, 0) == 60
-        getPoints.call(afterRemovalUser1PointHistorySubj2, 1) == 60
+        getPoints.call(afterRemovalUser1PointHistorySubj2, 1) == 0
         getPoints.call(afterRemovalUser1PointHistorySubj2, 2) == 80
         getPoints.call(afterRemovalUser1PointHistorySubj2, 3) == 120
         getPoints.call(afterRemovalUser1PointHistorySubj2, 4) == 140
-        getPoints.call(afterRemovalUser1PointHistorySubj2, 5) == 140
+        getPoints.call(afterRemovalUser1PointHistorySubj2, 5) == 0
         getPoints.call(afterRemovalUser1PointHistorySubj2, 6) == 200
-        getPoints.call(afterRemovalUser1PointHistorySubj2, 7) == 200
+        getPoints.call(afterRemovalUser1PointHistorySubj2, 7) == 0
 
         getPoints.call(afterRemovalUser1PointHistorySubj3, 0) == 10
         getPoints.call(afterRemovalUser1PointHistorySubj3, 1) == 20

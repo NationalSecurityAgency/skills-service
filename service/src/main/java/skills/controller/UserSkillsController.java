@@ -364,10 +364,11 @@ class UserSkillsController {
     public UserPointHistorySummary getProjectsPointHistory(@PathVariable("projectId") String projectId,
                                                            @RequestParam(name = "userId", required = false) String userIdParam,
                                                            @RequestParam(name = "version", required = false) Integer version,
-                                                           @RequestParam(name = "idType", required = false) String idType
+                                                           @RequestParam(name = "idType", required = false) String idType,
+                                                           @RequestParam(name = "minNumOfDaysBeforeReturningHistory", required = false, defaultValue = "2") Integer minNumOfDaysBeforeReturningHistory
                                                            ) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
-        return skillsLoader.loadPointHistorySummary(projectId, userId, maxDaysBack, null, getProvidedVersionOrReturnDefault(version));
+        return skillsLoader.loadPointHistorySummary(projectId, userId, maxDaysBack, null, getProvidedVersionOrReturnDefault(version), minNumOfDaysBeforeReturningHistory);
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/pointHistory", method = RequestMethod.GET, produces = "application/json")
@@ -376,9 +377,10 @@ class UserSkillsController {
                                                            @PathVariable("subjectId") String subjectId,
                                                            @RequestParam(name = "userId", required = false) String userIdParam,
                                                            @RequestParam(name = "version", required = false) Integer version,
-                                                           @RequestParam(name = "idType", required = false) String idType) {
+                                                           @RequestParam(name = "idType", required = false) String idType,
+                                                           @RequestParam(name = "minNumOfDaysBeforeReturningHistory", required = false, defaultValue = "2") Integer minNumOfDaysBeforeReturningHistory) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
-        return skillsLoader.loadPointHistorySummary(projectId, userId, maxDaysBack, subjectId, getProvidedVersionOrReturnDefault(version));
+        return skillsLoader.loadPointHistorySummary(projectId, userId, maxDaysBack, subjectId, getProvidedVersionOrReturnDefault(version), minNumOfDaysBeforeReturningHistory);
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/dependencies", method = RequestMethod.GET, produces = "application/json")
