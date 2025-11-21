@@ -265,8 +265,10 @@ const createPromptInstructions = (userEnterInstructions) => {
       :generation-completed-fn="handleGenerationCompleted"
       :add-prefix-fn="handleAddPrefix"
       :generation-started-msg="'Generating a new quiz for this skill, please stand by...'"
+      :use-generated-label="'Use Generated Quiz'"
       @use-generated="useGenerated"
       :community-value="communityValue"
+      :is-valid="meta.valid"
   >
     <template #generatedValue="{ historyItem }">
       <!--      must not use local variables as there can be more than 1 history item-->
