@@ -25,6 +25,7 @@ import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 import SkillsDisplayPathAppendValues from "@/router/SkillsDisplayPathAppendValues.js";
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import {useStorage} from "@vueuse/core";
 
 defineProps(['skillName']);
 const route = useRoute();
@@ -49,7 +50,7 @@ const loading = ref(true);
 const hasData = ref(false);
 const currentPage = ref(1);
 const totalRows = ref(0);
-const pageSize = ref(5);
+const pageSize = useStorage('postAchievementUsersTable-pageSize', 5)
 const sortField = ref('userId');
 const sortOrder = ref(-1);
 const possiblePageSizes = [5, 10, 15, 20, 50];

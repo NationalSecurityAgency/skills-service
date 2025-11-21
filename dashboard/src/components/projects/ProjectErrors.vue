@@ -26,6 +26,7 @@ import Column from 'primevue/column'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import {useStorage} from "@vueuse/core";
 
 const dialogMessages = useDialogMessages()
 const route = useRoute();
@@ -37,7 +38,7 @@ const projectDetailsState = useProjDetailsState();
 const loading = ref(true);
 const errors = ref([]);
 const totalRows = ref(null);
-const pageSize = ref(5);
+const pageSize = useStorage('projectErrors-pageSize', 5)
 const currentPage = ref(1);
 const sortOrder = ref(-1);
 const sortBy = ref('lastSeen');

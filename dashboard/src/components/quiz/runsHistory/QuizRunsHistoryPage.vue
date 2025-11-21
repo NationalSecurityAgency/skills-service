@@ -41,6 +41,7 @@ import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import {useStorage} from "@vueuse/core";
 
 const route = useRoute()
 const userInfo = useUserInfo()
@@ -99,10 +100,10 @@ const options = ref({
     server: true,
     currentPage: 1,
     totalRows: 0,
-    pageSize: 10,
     possiblePageSizes: [10, 20, 50]
   }
 })
+const pageSize = useStorage('quizRunsHistory-tablePageSize', 10)
 const sortInfo = ref({ sortOrder: -1, sortBy: 'started' })
 const deleteQuizRunInfo = ref({
   showDialog: false,
@@ -125,7 +126,7 @@ const loadData = () => {
   options.value.busy = true
   const params = {
     query: filters.value.global.value ? filters.value.global.value.trim() : '',
-    limit: options.value.pagination.pageSize,
+    limit: pageSize.value,
     ascending: sortInfo.value.sortOrder === 1 ? true : false,
     page: options.value.pagination.currentPage,
     orderBy: sortInfo.value.sortBy
@@ -158,7 +159,7 @@ const onFilter = (filterEvent) => {
   loadData().then(() => filtering.value = true)
 }
 const pageChanged = (pagingInfo) => {
-  options.value.pagination.pageSize = pagingInfo.rows
+  pageSize.value = pagingInfo.rows
   options.value.pagination.currentPage = pagingInfo.page + 1
   loadData()
 }
@@ -212,7 +213,7 @@ const deleteRun = () => {
           @filter="onFilter"
           @page="pageChanged"
           @sort="sortField"
-          :rows="options.pagination.pageSize"
+          :rows="pageSize"
           :rowsPerPageOptions="options.pagination.possiblePageSizes"
           :total-records="options.pagination.totalRows"
           v-model:sort-field="sortInfo.sortBy"

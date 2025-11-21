@@ -27,6 +27,7 @@ import Column from 'primevue/column'
 import DateCell from '@/components/utils/table/DateCell.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import {useStorage} from "@vueuse/core";
 
 const route = useRoute()
 const userInfo = useUserInfo()
@@ -71,11 +72,11 @@ const tableOptions = ref({
     server: true,
     currentPage: 1,
     totalRows: 1,
-    pageSize: 10,
     possiblePageSizes: [10, 25, 50],
   },
   items: [],
 })
+useStorage('expirationHistory-tablePageSize', 10)
 
 onMounted(() => {
   loadData();
@@ -84,7 +85,7 @@ onMounted(() => {
 const loadData = () => {
   tableOptions.value.busy = true
   const params = {
-    limit: tableOptions.value.pagination.pageSize,
+    limit: pageSize.value,
     page: tableOptions.value.pagination.currentPage,
     orderBy: sortInfo.value.sortBy,
     ascending: sortInfo.value.sortOrder === 1,
@@ -107,7 +108,7 @@ const onFilter = (filterEvent) => {
   loadData().then(() => filtering.value = true)
 }
 const pageChanged = (pagingInfo) => {
-  tableOptions.value.pagination.pageSize = pagingInfo.rows
+  pageSize.value = pagingInfo.rows
   tableOptions.value.pagination.currentPage = pagingInfo.page + 1
   loadData()
 }
@@ -156,7 +157,7 @@ const calculateClientDisplayRoute = (props) => {
           @filter="onFilter"
           @page="pageChanged"
           @sort="sortField"
-          :rows="tableOptions.pagination.pageSize"
+          :rows="pageSize"
           :rowsPerPageOptions="tableOptions.pagination.possiblePageSizes"
           :total-records="tableOptions.pagination.totalRows"
           v-model:sort-field="sortInfo.sortBy"

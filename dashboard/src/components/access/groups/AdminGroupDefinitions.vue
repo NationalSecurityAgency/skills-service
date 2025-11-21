@@ -32,6 +32,7 @@ import { useAdminGroupState } from '@/stores/UseAdminGroupState.js';
 import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js';
 import Avatar from 'primevue/avatar';
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import {useStorage} from "@vueuse/core";
 
 const announcer = useSkillsAnnouncer()
 const responsive = useResponsiveBreakpoints()
@@ -73,10 +74,10 @@ const options = ref({
     server: false,
     currentPage: 1,
     totalRows: 0,
-    pageSize: 5,
     possiblePageSizes: [5, 10, 15, 20],
   },
 });
+const pageSize = useStorage('adminGroupDefinitions-tablePageSize', 5)
 const deleteAdminGroupInfo = ref( {
   showDialog: false,
   adminGroupDef: {},
@@ -186,7 +187,7 @@ defineExpose({
         @filter="onFilter"
         v-model:sort-field="sortInfo.sortBy"
         v-model:sort-order="sortInfo.sortOrder"
-        paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"
+        paginator :rows="pageSize" :rowsPerPageOptions="[5, 10, 15, 20]"
         show-gridlines
         striped-rows>
         <template #header>

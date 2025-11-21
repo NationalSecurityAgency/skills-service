@@ -38,6 +38,7 @@ import StringHighlighter from '@/common-components/utilities/StringHighlighter.j
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import {useStorage} from "@vueuse/core";
 
 const dialogMessages = useDialogMessages()
 const timeUtils = useTimeUtils()
@@ -68,11 +69,11 @@ const table = ref({
       server: true,
       currentPage: 1,
       totalRows: 1,
-      pageSize: 10,
       possiblePageSizes: [5, 10, 15, 20, 50],
     },
   },
 });
+const pageSize = useStorage('userSkillsPerformed-tablePageSize', 10)
 const sortInfo = ref({ sortOrder: -1, sortBy: 'performedOn' })
 const filtering = ref(false)
 const filters = ref({
@@ -94,7 +95,7 @@ const onFilter = (filterEvent) => {
   loadData()
 }
 const pageChanged = (pagingInfo) => {
-  table.value.options.pagination.pageSize = pagingInfo.rows
+  pageSize.value = pagingInfo.rows
   table.value.options.pagination.currentPage = pagingInfo.page + 1
   loadData()
 }
@@ -148,7 +149,7 @@ const loadTableData = () => {
   const url = getUrl();
   UsersService.ajaxCall(url, {
     query: filters.value.global.value ? filters.value.global.value.trim() : '',
-    limit: table.value.options.pagination.pageSize,
+    limit: pageSize.value,
     ascending: sortInfo.value.sortOrder === 1,
     page: table.value.options.pagination.currentPage,
     byColumn: 0,
@@ -291,7 +292,7 @@ const selectedSkills = ref([]);
             @filter="onFilter"
             @page="pageChanged"
             @sort="sortField"
-            :rows="table.options.pagination.pageSize"
+            :rows="pageSize"
             :rowsPerPageOptions="table.options.pagination.possiblePageSizes"
             :total-records="table.options.pagination.totalRows"
             v-model:sort-field="sortInfo.sortBy"

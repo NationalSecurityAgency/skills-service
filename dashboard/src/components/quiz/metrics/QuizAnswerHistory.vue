@@ -28,6 +28,7 @@ import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vu
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
+import {useStorage} from "@vueuse/core";
 
 const timeUtils = useTimeUtils()
 const props = defineProps({
@@ -59,10 +60,10 @@ const tableOptions = ref({
     server: true,
     currentPage: 1,
     totalRows: 0,
-    pageSize: 5,
     possiblePageSizes: [5, 10, 15, 20],
   },
 })
+const pageSize = useStorage('quizAnswerHistory-tablePageSize', 5)
 const answerTxtTruncate = {
   truncateThreshold: 600,
   truncateTo: 550,
@@ -112,7 +113,7 @@ const loadData = () => {
   const dateRange = timeUtils.prepareDateRange(props.dateRange)
 
   const params = {
-    limit: tableOptions.value.pagination.pageSize,
+    limit: pageSize.value,
     ascending: sortInfo.value.sortOrder === 1,
     page: tableOptions.value.pagination.currentPage,
     orderBy: sortInfo.value.sortBy,
@@ -130,7 +131,7 @@ const loadData = () => {
           });
         });
         tableOptions.value.pagination.totalRows = res.count;
-        tableOptions.value.pagination.hideUnnecessary = res.totalCount <= tableOptions.value.pagination.pageSize;
+        tableOptions.value.pagination.hideUnnecessary = res.totalCount <= pageSize.value;
         if (expanded.value) {
           expandAll()
         }
@@ -141,7 +142,7 @@ const loadData = () => {
 }
 
 const pageChanged = (pagingInfo) => {
-  tableOptions.value.pagination.pageSize = pagingInfo.rows;
+  pageSize.value = pagingInfo.rows;
   tableOptions.value.pagination.currentPage = pagingInfo.page + 1;
   loadData();
 };
@@ -177,7 +178,7 @@ const collapseAll = () => {
         :paginator="true"
         dataKey="userQuizAttemptId"
         v-model:expandedRows="expandedRows"
-        :rows="tableOptions.pagination.pageSize"
+        :rows="pageSize"
         :rowsPerPageOptions="tableOptions.pagination.possiblePageSizes"
         :total-records="tableOptions.pagination.totalRows"
         @page="pageChanged"

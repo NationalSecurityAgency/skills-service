@@ -23,6 +23,7 @@ import DateCell from "@/components/utils/table/DateCell.vue";
 import * as yup from "yup";
 import {useForm} from "vee-validate";
 import DataTable from "primevue/datatable";
+import {useStorage} from "@vueuse/core";
 
 const emit = defineEmits(['conf-added', 'conf-removed']);
 const announcer = useSkillsAnnouncer();
@@ -46,7 +47,7 @@ const data = ref([]);
 const enteredTag = ref('');
 const sortBy = ref('updated');
 const sortOrder = ref(-1);
-const pageSize = 4;
+const pageSize = useStorage('selfReportApprovalConfUserTag-pageSize', 4)
 const possiblePageSizes = [4, 10, 15, 20];
 
 const hadData = computed(() => {
