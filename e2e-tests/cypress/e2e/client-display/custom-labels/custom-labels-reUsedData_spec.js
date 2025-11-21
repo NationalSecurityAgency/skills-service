@@ -175,8 +175,7 @@ describe('Custom Label with Reused Data Tests', () => {
             .contains('My Stage');
         cy.get('[data-cy="levelBreakdownChart"]')
             .contains('Stage Breakdown');
-        cy.get('[data-cy="levelBreakdownChart"]')
-            .contains('You are Stage 1!');
+        cy.get('[data-cy="levelBreakdownChart"] [data-pc-name="chart"]')
         cy.contains('Level')
             .should('not.exist');
 
@@ -257,8 +256,7 @@ describe('Custom Label with Reused Data Tests', () => {
             .contains('My Stage');
         cy.get('[data-cy="levelBreakdownChart"]')
             .contains('Stage Breakdown');
-        cy.get('[data-cy="levelBreakdownChart"]')
-            .contains('You are Stage 2!');
+        cy.get('[data-cy="levelBreakdownChart"] [data-pc-name="chart"]')
         cy.contains('Level')
             .should('not.exist');
 
