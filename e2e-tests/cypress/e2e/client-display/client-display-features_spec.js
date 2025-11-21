@@ -253,7 +253,7 @@ describe('Client Display Features Tests', () => {
       .as('getRank')
 
     cy.intercept({
-      url: '/api/projects/proj1/subjects/subj1/pointHistory'
+      url: '/api/projects/proj1/subjects/subj1/pointHistory**'
     }, {
       statusCode: 200,
       body: { 'pointsHistory': [] },

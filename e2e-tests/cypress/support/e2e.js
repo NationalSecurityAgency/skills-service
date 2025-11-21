@@ -101,6 +101,7 @@ beforeEach(function () {
             cy.loginAsAdminUser()
         }
     });
+    cy.suppressChartInitError()
     cy.log(`[${Cypress.currentTest.title}] [${moment.utc().toISOString()}] start`)
 });
 
