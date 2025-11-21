@@ -29,10 +29,7 @@ describe('Metrics Tests - Skills', () => {
     it('skills table - empty table', () => {
         cy.intercept('/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder')
             .as('skillUsageNavigatorChartBuilder');
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Skills]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/skills');
         cy.wait('@skillUsageNavigatorChartBuilder');
 
         cy.get('[data-cy=skillsNavigator]')
@@ -66,10 +63,7 @@ describe('Metrics Tests - Skills', () => {
             body: res,
         })
             .as('skillUsageNavigatorChartBuilder');
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Skills]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/skills');
         cy.wait('@skillUsageNavigatorChartBuilder');
 
         const tableSelector = '[data-cy=skillsNavigator-table]';
@@ -113,12 +107,8 @@ describe('Metrics Tests - Skills', () => {
                 numPerformToCompletion: '1',
             });
         }
-        ;
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Skills]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/skills');
         cy.wait('@skillUsageNavigatorChartBuilder');
 
         const tableSelector = '[data-cy=skillsNavigator-table]';
@@ -277,10 +267,7 @@ describe('Metrics Tests - Skills', () => {
             });
         }
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Skills]')
-          .click();
+        cy.visit('/administrator/projects/proj1/metrics/skills');
         cy.wait('@skillUsageNavigatorChartBuilder');
 
         // delay export and verify loading indicator is showing
@@ -336,10 +323,7 @@ describe('Metrics Tests - Skills', () => {
             }
         }
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Skills]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/skills');
         cy.wait('@skillUsageNavigatorChartBuilder');
 
         cy.get('[data-cy=overlookedFilterButton]').click();
@@ -593,10 +577,7 @@ describe('Metrics Tests - Skills', () => {
         cy.addTagToSkills(1, skills, 1);
         cy.addTagToSkills(1, ['skill3', 'skill6'], 2);
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Skills]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/skills');
         cy.wait('@skillUsageNavigatorChartBuilder');
 
         cy.get('[data-cy=skillTag-filters]').should('exist');
