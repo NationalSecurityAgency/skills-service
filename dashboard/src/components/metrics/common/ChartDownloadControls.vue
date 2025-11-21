@@ -58,7 +58,7 @@ const exportChartDataToCSV = () => {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.setAttribute('href', url);
-  link.setAttribute('download', `chart_export_${dayjs().format('YYYY-MM-DD HH:mm:ss')}.csv`);
+  link.setAttribute('download', `chart_export_${dayjs().format('YYYY-MM-DD_HH:mm:ss')}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -143,7 +143,7 @@ const exportChartToJPG = () => {
 
   // Create a temporary link to trigger download
   const link = document.createElement('a');
-  link.download = `chart_image_${dayjs().format('YYYY-MM-DD HH:mm:ss')}.jpg`;
+  link.download = `chart_image_${dayjs().format('YYYY-MM-DD_HH_mm_ss')}.jpg`;
   link.href = tempCanvas.toDataURL('image/jpeg', 0.9); // 0.9 is the quality (0.0 to 1.0)
   document.body.appendChild(link);
   link.click();

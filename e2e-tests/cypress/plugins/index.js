@@ -167,6 +167,9 @@ module.exports = (on, config) => {
         },
         deleteFolderRecursive,
         readPdf,
+        listFiles(folderPath) {
+            return fs.readdirSync(folderPath)
+        }
     });
 };
 
