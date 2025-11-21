@@ -23,6 +23,7 @@ import Chart from "primevue/chart";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
 import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 
 const route = useRoute();
@@ -35,6 +36,7 @@ const props = defineProps({
 });
 const layoutSizes = useLayoutSizesState()
 const chartSupportColors = useChartSupportColors()
+const pluralize = usePluralize()
 
 const isLoading = ref(true);
 const isEmpty = ref(false);
@@ -119,7 +121,7 @@ const setChartOptions = () => {
         formatter: function(value, context) {
           const numLevels = context.dataset.data.length
           const level = numLevels - context.dataIndex // highest levels comes first
-          return `Level ${level}: ${value}`
+          return `Level ${level}: ${value} ${pluralize.plural('user', value)}`
         }
       }
     }
