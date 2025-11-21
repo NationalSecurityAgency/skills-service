@@ -26,6 +26,7 @@ import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import {useStorage} from "@vueuse/core";
 
 
 const route = useRoute();
@@ -38,7 +39,7 @@ const numberFormat = useNumberFormat()
 
 const approvals = ref([]);
 const loading = ref(true);
-const pageSize = ref(5);
+const pageSize = useStorage('selfReportApproval-pageSize', 5)
 const possiblePageSizes = ref([5, 10, 25]);
 const currentPage = ref(1);
 const sortOrder = ref(-1);

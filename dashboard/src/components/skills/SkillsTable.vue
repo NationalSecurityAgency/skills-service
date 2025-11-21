@@ -77,10 +77,8 @@ const log = useLog()
 const subjectId = computed(() => route.params.subjectId)
 const projectId = computed(() => route.params.projectId)
 const tableId = props.groupId || route.params.subjectId
-const pagination = {
-  pageSize: 10,
-  possiblePageSizes: [10, 20, 50, 100]
-}
+const possiblePageSizes = [10, 20, 50, 100]
+const pageSize = useStorage(`${tableId}-pageSize`, 10)
 
 const sortInfo = ref({ sortOrder: -1, sortBy: 'created' })
 const options = ref({
@@ -601,9 +599,9 @@ const onRowExpand = () => {
       @update:first="(val) => indexOfFirstRow = val"
       @filter="onFilter"
       @sort="onColumnSort"
-      :paginator="totalRows > pagination.pageSize"
-      :rows="pagination.pageSize"
-      :rowsPerPageOptions="pagination.possiblePageSizes"
+      :paginator="totalRows > pageSize"
+      :rows="pageSize"
+      :rowsPerPageOptions="possiblePageSizes"
       :globalFilterFields="['name']"
       :exportFilename="`skilltree-${subjectId}-skills`"
       :row-class="disableRow"

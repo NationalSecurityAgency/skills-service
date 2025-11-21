@@ -25,6 +25,7 @@ import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vu
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import {useStorage} from "@vueuse/core";
 
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
@@ -33,7 +34,7 @@ const responsive = useResponsiveBreakpoints()
 const numberFormat = useNumberFormat()
 
 const loading = ref(true);
-const pageSize = ref(5);
+const pageSize = useStorage('selfReportApprovalHistory-pageSize', 5)
 const possiblePageSizes = ref([5, 10, 25]);
 const currentPage = ref(1);
 const sortOrder = ref(-1);
