@@ -723,9 +723,13 @@ class ParagraphValidator {
                 invalidate()
 
                 if (shouldAddPrefix(node)) {
-                    Paragraph paragraph = new Paragraph()
-                    paragraph.prependChild(new Text(request.prefix))
-                    node.insertBefore(paragraph)
+                    if (node instanceof Link) {
+                        addPrefixIfNeeded (node)
+                    } else {
+                        Paragraph paragraph = new Paragraph()
+                        paragraph.prependChild(new Text(request.prefix))
+                        node.insertBefore(paragraph)
+                    }
                 }
             }
             return false
@@ -741,6 +745,8 @@ class ParagraphValidator {
                         String currentHtml = htmlBlock.getLiteral()
                         String newHtml = request.prefix + (currentHtml ?: "")
                         customReplacements.put(markdownRenderer.render(previousNode), newHtml)
+                    } else if (validRes.closestNode instanceof BulletList) {
+                        addPrefixIfNeeded(node)
                     } else {
                         addPrefixIfNeeded(validRes)
                     }
