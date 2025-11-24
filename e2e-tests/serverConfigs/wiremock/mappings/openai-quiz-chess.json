@@ -5,8 +5,8 @@
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
       { "contains": "chess" },
-      { "contains": "current description" },
-      { "doesNotContain": "Quiz Generation" }
+      { "doesNotContain": "Modify an existing quiz" },
+      { "contains": "Quiz Generation Task" }
     ]
   },
   "response": {
@@ -14,7 +14,7 @@
     "headers": {
       "Content-Type": "text/event-stream"
     },
-    "bodyFileName": "response-body-chess-edit.txt",
+    "bodyFileName": "response-body-quiz-chess.txt",
     "transformers": ["response-template"],
     "chunkedDribbleDelay": {
       "numberOfChunks": 20,
