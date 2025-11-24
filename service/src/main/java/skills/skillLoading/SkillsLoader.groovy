@@ -560,6 +560,35 @@ class SkillsLoader {
         return a.displayOrder <=> b.displayOrder
     }
 
+    class SkillOrderInfo {
+        String nextSkillId = null;
+        String prevSkillId = null;
+        int totalSkills = 0;
+        int orderInGroup = 0;
+    }
+
+    SkillOrderInfo getSkillOrderStats(String projectId, String subjectId, String skillId) {
+        SkillOrderInfo orderInfo = new SkillOrderInfo()
+        List<DisplayOrderRes> skillOrder = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
+        DisplayOrderRes currentSkill = skillOrder.find({ it -> it.getSkillId() == skillId })
+
+        if (currentSkill) {
+            List<DisplayOrderRes> orderedGroup = skillOrder?.sort({a, b -> sortByDisplayOrder(a, b)});
+            orderInfo.orderInGroup = orderedGroup.findIndexOf({it -> it.skillId == currentSkill.skillId}) + 1;
+            orderInfo.totalSkills = orderedGroup.size();
+
+            int currentIndex = skillOrder.findIndexOf{ it -> it.skillId == currentSkill.skillId }
+            if(currentIndex > 0) {
+                orderInfo.prevSkillId = skillOrder[currentIndex - 1]?.skillId
+            }
+            if(currentIndex < orderInfo.totalSkills - 1) {
+                orderInfo.nextSkillId = skillOrder[currentIndex + 1]?.skillId
+            }
+        }
+
+        return orderInfo
+    }
+
     @Transactional(readOnly = true)
     SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, String subjectId) {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
@@ -574,31 +603,10 @@ class SkillsLoader {
             groupName = skillDefRepo.getSkillNameByProjectIdAndSkillId(projectId, skillDef.groupId)?.skillName
         }
 
-        String nextSkillId = null;
-        String prevSkillId = null;
-        int totalSkills = 0;
-        int orderInGroup = 0;
-
         boolean isCrossProjectSkill = crossProjectId && crossProjectId != projectId
+        SkillOrderInfo orderInfo = null
         if(subjectId && !isCrossProjectSkill) {
-            List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
-            def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
-            if (!currentSkill) {
-                throw new SkillException("Provided skill id [${skillId}] des not exist under subject [${subjectId}]", projectId, skillId, ErrorCode.BadParam)
-            }
-            def orderedGroup = skills?.sort({a, b -> sortByDisplayOrder(a, b)});
-            orderInGroup = orderedGroup.findIndexOf({it -> it.skillId == currentSkill.skillId}) + 1;
-            totalSkills = orderedGroup.size();
-
-            if (currentSkill) {
-                def currentIndex = skills.findIndexOf{ it.skillId == currentSkill.skillId }
-                if(currentIndex > 0) {
-                    prevSkillId = skills[currentIndex - 1]?.skillId
-                }
-                if(currentIndex < totalSkills - 1) {
-                    nextSkillId = skills[currentIndex + 1]?.skillId
-                }
-            }
+            orderInfo = getSkillOrderStats(projectId, subjectId, skillId)
         }
 
         if (crossProjectId) {
@@ -678,10 +686,10 @@ class SkillsLoader {
                 projectName: InputSanitizer.unsanitizeName(projDef.name),
                 skillId: skillDef.skillId,
                 subjectId: skillSubjectId,
-                prevSkillId: prevSkillId,
-                nextSkillId: nextSkillId,
-                orderInGroup: orderInGroup,
-                totalSkills: totalSkills,
+                prevSkillId: orderInfo?.prevSkillId,
+                nextSkillId: orderInfo?.nextSkillId,
+                orderInGroup: orderInfo?.orderInGroup,
+                totalSkills: orderInfo?.totalSkills,
                 skill: isReusedSkill ? SkillReuseIdUtil.removeTag(unsanitizedName) : unsanitizedName,
                 points: points, todaysPoints: todayPoints,
                 pointIncrement: skillDef.pointIncrement,

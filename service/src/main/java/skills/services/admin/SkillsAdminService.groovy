@@ -44,6 +44,7 @@ import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
+import skills.skillLoading.SkillsLoader
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.model.SkillDef.SelfReportingType
@@ -133,6 +134,9 @@ class SkillsAdminService {
 
     @Autowired
     SkillAttributeService skillAttributeService
+
+    @Autowired
+    private SkillsLoader skillsLoader;
 
     protected static class SaveSkillTmpRes {
         // because of the skill re-use it could be imported but NOT available in the catalog
@@ -733,25 +737,11 @@ class SkillsAdminService {
 
         finalRes.thisSkillWasReusedElsewhere = skillDefRepo.wasThisSkillReusedElsewhere(res.id)
 
-        List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
-
-        def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
-
-        if (currentSkill) {
-            def orderedGroup = skills?.sort({a, b -> sortByDisplayOrder(a, b)});
-            def orderInGroup = orderedGroup.findIndexOf({it -> it.skillId == currentSkill.skillId}) + 1;
-            def totalSkills = orderedGroup.size();
-
-            def currentIndex = skills.findIndexOf{ it.skillId == currentSkill.skillId }
-            if(currentIndex > 0) {
-                finalRes.prevSkillId = skills[currentIndex - 1]?.skillId
-            }
-            if(currentIndex < totalSkills - 1) {
-                finalRes.nextSkillId = skills[currentIndex + 1]?.skillId
-            }
-            finalRes.totalSkills = totalSkills
-            finalRes.orderInGroup = orderInGroup
-        }
+        SkillsLoader.SkillOrderInfo orderInfo = skillsLoader.getSkillOrderStats(projectId, subjectId, skillId)
+        finalRes.prevSkillId = orderInfo.prevSkillId
+        finalRes.nextSkillId = orderInfo.nextSkillId
+        finalRes.totalSkills = orderInfo.totalSkills
+        finalRes.orderInGroup = orderInfo.orderInGroup
 
         String videoUrl = skillAttributesDefRepo.getVideoUrlBySkillRefId(res.id)
         finalRes.hasVideoConfigured = StringUtils.isNotBlank(videoUrl)
