@@ -278,7 +278,7 @@ const createPromptInstructions = (userEnterInstructions) => {
       <div v-if="historyItem.generatedInfo" class="px-5 border rounded-lg bg-blue-50 ml-4">
         <div v-for="(q, index) in getQuizDataForDisplay(historyItem.generatedInfo, historyItem.id)" :key="q.id">
           <div class="my-4">
-            <QuestionCard data-cy="generatedQuestion" :question="q" :question-num="index+1" quiz-type="Quiz" :show-edit-controls="false" :edit-question-inline="true"/>
+            <QuestionCard data-cy="generatedQuestion" :question="q" :question-num="index+1" quiz-type="Quiz" :show-edit-controls="false" :edit-question-inline="!!historyItem.finalMsg"/>
           </div>
         </div>
       </div>
