@@ -39,7 +39,7 @@ const responsive = useResponsiveBreakpoints()
 
 const data = ref([]);
 const loading = ref(true);
-const pageSize = useStorage('selfReportApprovalConf-pageSize', 5)
+const pageSize = useStorage('selfReportApprovalConfManager-pageSize', 5)
 const possiblePageSizes = [5, 10, 15, 20];
 const totalRows = ref(0);
 const sortBy = ref('userId');
