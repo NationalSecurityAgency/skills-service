@@ -707,7 +707,7 @@ class ParagraphValidator {
     }
 
     private static List<Class<? extends Node>> chainableNodeClasses =
-            [TableBlock.class, Image.class, BulletList.class, IndentedCodeBlock.class, FencedCodeBlock.class]
+            [TableBlock.class, Image.class, BulletList.class, OrderedList.class, IndentedCodeBlock.class, FencedCodeBlock.class]
     private boolean blockHandlerValidator(Node node, int minLinesToPreviousNode = 2, boolean mutateValidationState = true) {
         Node previousNode = lookForPreviousParagraph(node)
 
