@@ -174,7 +174,7 @@ const nextButtonClicked = () => {
 
 <template>
   <div class="mt-2">
-    <Card class="p-2" :pt="{ body: { class: 'p-0!' } }">
+    <Card class="p-2" :pt="{ body: { class: 'p-0!' } }" v-if="skillsState.skill && (skillsState.skill.prevSkillId || skillsState.skill.nextSkillId)" >
       <template #content>
         <skill-navigation @prevButtonClicked="prevButtonClicked" @nextButtonClicked="nextButtonClicked" :skill="skillsState.skill" buttonSeverity="info" />
       </template>

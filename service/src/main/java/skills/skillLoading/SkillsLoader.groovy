@@ -540,26 +540,6 @@ class SkillsLoader {
         Integer points
     }
 
-    int sortByDisplayOrder(DisplayOrderRes a, DisplayOrderRes b) {
-        if( a.groupId != null || b.groupId != null ) {
-            if( a.groupId != null && b.groupId != null) {
-                if( a.groupId != b.groupId ) {
-                    return a.skillGroupDisplayOrder <=> b.skillGroupDisplayOrder
-                }
-            }
-            else {
-                if( a.groupId != null && b.groupId == null ) {
-                    return a.skillGroupDisplayOrder <=> b.displayOrder
-                }
-                else {
-                    return a.displayOrder <=> b.skillGroupDisplayOrder
-                }
-            }
-        }
-
-        return a.displayOrder <=> b.displayOrder
-    }
-
     class SkillOrderInfo {
         String nextSkillId = null;
         String prevSkillId = null;
@@ -569,21 +549,14 @@ class SkillsLoader {
 
     SkillOrderInfo getSkillOrderStats(String projectId, String subjectId, String skillId) {
         SkillOrderInfo orderInfo = new SkillOrderInfo()
-        List<DisplayOrderRes> skillOrder = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
-        DisplayOrderRes currentSkill = skillOrder.find({ it -> it.getSkillId() == skillId })
+        DisplayOrderRes skill = skillDefRepo.findDisplayOrderByProjectIdAndSubjectIdAndSkillId(projectId, subjectId, skillId)
+        Integer totalSkills = skillDefRepo.countSkillChildren(projectId, subjectId)
 
-        if (currentSkill) {
-            List<DisplayOrderRes> orderedGroup = skillOrder?.sort({a, b -> sortByDisplayOrder(a, b)});
-            orderInfo.orderInGroup = orderedGroup.findIndexOf({it -> it.skillId == currentSkill.skillId}) + 1;
-            orderInfo.totalSkills = orderedGroup.size();
-
-            int currentIndex = skillOrder.findIndexOf{ it -> it.skillId == currentSkill.skillId }
-            if(currentIndex > 0) {
-                orderInfo.prevSkillId = skillOrder[currentIndex - 1]?.skillId
-            }
-            if(currentIndex < orderInfo.totalSkills - 1) {
-                orderInfo.nextSkillId = skillOrder[currentIndex + 1]?.skillId
-            }
+        if (skill) {
+            orderInfo.prevSkillId = skill.previousSkillId
+            orderInfo.nextSkillId = skill.nextSkillId
+            orderInfo.orderInGroup = skill.overallOrder
+            orderInfo.totalSkills = totalSkills
         }
 
         return orderInfo

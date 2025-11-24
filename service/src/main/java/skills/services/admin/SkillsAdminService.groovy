@@ -701,26 +701,6 @@ class SkillsAdminService {
         return res
     }
 
-    int sortByDisplayOrder(DisplayOrderRes a, DisplayOrderRes b) {
-        if( a.groupId != null || b.groupId != null ) {
-            if( a.groupId != null && b.groupId != null) {
-                if( a.groupId != b.groupId ) {
-                    return a.skillGroupDisplayOrder <=> b.skillGroupDisplayOrder
-                }
-            }
-            else {
-                if( a.groupId != null && b.groupId == null ) {
-                    return a.skillGroupDisplayOrder <=> b.displayOrder
-                }
-                else {
-                    return a.displayOrder <=> b.skillGroupDisplayOrder
-                }
-            }
-        }
-
-        return a.displayOrder <=> b.displayOrder
-    }
-
     @Transactional(readOnly = true)
     SkillDefRes getSkill(String projectId, String subjectId, String skillId) {
         SkillDefWithExtra res = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
