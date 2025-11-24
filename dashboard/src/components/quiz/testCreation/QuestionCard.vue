@@ -114,7 +114,7 @@ const moveQuestion = (changeIndexBy) => {
                            :allow-insert-images="false"
                            label="Question"
                            markdownHeight="150px"
-                           data-cy="questionDisplayTextEditor"
+                           :data-cy="`questionDisplayTextEditor-${questionNum}`"
                            :name="`question${props.questionNum}`"/>
 
           <markdown-text v-else

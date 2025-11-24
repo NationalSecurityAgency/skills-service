@@ -5,7 +5,8 @@
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
       {
-        "contains": "jabberwocky"
+        "contains": "jabberwocky",
+        "doesNotContain": "Quiz Generation"
       }
     ]
   },

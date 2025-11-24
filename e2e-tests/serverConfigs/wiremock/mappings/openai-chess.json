@@ -5,7 +5,8 @@
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
       { "contains": "chess" },
-      { "doesNotContain": "current description" }
+      { "doesNotContain": "current description" },
+      { "doesNotContain": "Quiz Generation" }
     ]
   },
   "response": {
