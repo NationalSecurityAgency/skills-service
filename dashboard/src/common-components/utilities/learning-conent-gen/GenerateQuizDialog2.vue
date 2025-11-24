@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, watch, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useImgHandler } from '@/common-components/utilities/learning-conent-gen/UseImgHandler.js'
@@ -24,8 +24,7 @@ import AiPromptDialog from '@/common-components/utilities/learning-conent-gen/Ai
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
-import { array, number, object, string } from 'yup'
-import QuestionType from '@/skills-display/components/quiz/QuestionType.js'
+import { object, string } from 'yup'
 import { useForm } from 'vee-validate'
 
 const model = defineModel()
@@ -58,6 +57,9 @@ const dynamicSchema = computed(() => {
         .label('Question')
   }
   return object(validationObj)
+})
+watch(dynamicSchema, () => {
+  validate()
 })
 const { values, meta, handleSubmit, isSubmitting, resetForm, setFieldValue, validate, validateField, errors, errorBag, setErrors } = useForm({
   validationSchema: dynamicSchema,
@@ -215,6 +217,7 @@ const ensureValidQuestionType = (question) => {
 const handleGenerationCompleted = (generated) => {
   currentJsonString.value = ''
   isGenerating.value = false
+  // console.log(generated.generatedValue)
   currentQuestions.value = generated.generatedInfo.generatedQuiz
   validate()
   return generated
@@ -275,7 +278,7 @@ const createPromptInstructions = (userEnterInstructions) => {
       <div v-if="historyItem.generatedInfo" class="px-5 border rounded-lg bg-blue-50 ml-4">
         <div v-for="(q, index) in getQuizDataForDisplay(historyItem.generatedInfo, historyItem.id)" :key="q.id">
           <div class="my-4">
-            <QuestionCard :question="q" :question-num="index+1" quiz-type="Quiz" :show-edit-controls="false" :edit-question-inline="true"/>
+            <QuestionCard data-cy="generatedQuestion" :question="q" :question-num="index+1" quiz-type="Quiz" :show-edit-controls="false" :edit-question-inline="true"/>
           </div>
         </div>
       </div>

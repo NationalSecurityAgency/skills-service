@@ -286,6 +286,7 @@ const onDialogShow = () => {
               <SkillsButton icon="fa-solid fa-wand-magic-sparkles"
                             label="AI"
                             size="small"
+                            data-cy="generateQuizBtn"
                             @click="showGenerateQuizDialog = true"/>
             </div>
           </div>
