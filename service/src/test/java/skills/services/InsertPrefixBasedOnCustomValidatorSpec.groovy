@@ -226,6 +226,45 @@ noe more
 > * three
 > * four\n"""
 
+        validator.addPrefixToInvalidParagraphs("""(A) ok
+* item
+* item
+
+<span>some text</span>
+""", prefix).newDescription == """(A) ok
+
+* item
+* item
+
+(A) <span>some text</span>
+"""
+
+        validator.addPrefixToInvalidParagraphs("""(A) ok
+* item
+* <span>item</span>
+
+<span>some text</span>
+""", prefix).newDescription == """(A) ok
+
+* item
+* <span>item</span>
+
+(A) <span>some text</span>
+"""
+
+        validator.addPrefixToInvalidParagraphs("""(A) ok
+* item
+* <span>item</span>
+
+[some text](https://some.url.com)
+""", prefix).newDescription == """(A) ok
+
+* item
+* <span>item</span>
+
+[(A) some text](https://some.url.com)
+"""
+
     }
 
     def "support markdown tables"() {
@@ -693,6 +732,7 @@ ___
 
         then:
         validator.addPrefixToInvalidParagraphs("${url}", prefix).newDescription == "(A) ${url}\n"
+        validator.addPrefixToInvalidParagraphs("[some text](${url})", prefix).newDescription == "[(A) some text](${url})\n"
     }
 
     def "support html paragraphs" () {
