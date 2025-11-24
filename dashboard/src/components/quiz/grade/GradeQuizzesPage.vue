@@ -58,7 +58,7 @@ const checkIfQuizHasInputTextQuestions = () => {
 }
 
 const sortInfo = ref({ sortOrder: -1, sortBy: 'started' })
-const pagination = useStorage('quizRunsHistory-tablePageSize', {
+const pagination = useStorage('gradedQuizzes-tablePageSize', {
   currentPage: 1,
   totalRows: 0,
   pageSize: 10,
