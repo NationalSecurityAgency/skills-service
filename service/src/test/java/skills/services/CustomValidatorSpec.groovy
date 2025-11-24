@@ -292,6 +292,23 @@ Paragraph three
         validator.validateDescription("""1. (A) item 1
 1. item 2
 """).valid
+
+        validator.validateDescription("""## (A) Heading
+1. item 1
+1. item 2
+
+1. item 1
+1. item 2
+""").valid
+
+        validator.validateDescription("""## (A) Heading
+1. item 1
+1. item 2
+
+> (A) Blockquote
+> Blockquote
+""").valid
+
     }
 
     def "support markdown tables"() {
