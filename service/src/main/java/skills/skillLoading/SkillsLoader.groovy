@@ -540,26 +540,8 @@ class SkillsLoader {
         Integer points
     }
 
-    class SkillOrderInfo {
-        String nextSkillId = null;
-        String prevSkillId = null;
-        int totalSkills = 0;
-        int orderInGroup = 0;
-    }
-
-    SkillOrderInfo getSkillOrderStats(String projectId, String subjectId, String skillId) {
-        SkillOrderInfo orderInfo = new SkillOrderInfo()
-        DisplayOrderRes skill = skillDefRepo.findDisplayOrderByProjectIdAndSubjectIdAndSkillId(projectId, subjectId, skillId)
-        Integer totalSkills = skillDefRepo.countSkillChildren(projectId, subjectId)
-
-        if (skill) {
-            orderInfo.prevSkillId = skill.previousSkillId
-            orderInfo.nextSkillId = skill.nextSkillId
-            orderInfo.orderInGroup = skill.overallOrder
-            orderInfo.totalSkills = totalSkills
-        }
-
-        return orderInfo
+    DisplayOrderRes getSkillOrderStats(String projectId, String subjectId, String skillId) {
+        return skillDefRepo.findDisplayOrderByProjectIdAndSubjectIdAndSkillId(projectId, subjectId, skillId)
     }
 
     @Transactional(readOnly = true)
@@ -577,7 +559,7 @@ class SkillsLoader {
         }
 
         boolean isCrossProjectSkill = crossProjectId && crossProjectId != projectId
-        SkillOrderInfo orderInfo = null
+        DisplayOrderRes orderInfo = null
         if(subjectId && !isCrossProjectSkill) {
             orderInfo = getSkillOrderStats(projectId, subjectId, skillId)
         }
@@ -659,10 +641,10 @@ class SkillsLoader {
                 projectName: InputSanitizer.unsanitizeName(projDef.name),
                 skillId: skillDef.skillId,
                 subjectId: skillSubjectId,
-                prevSkillId: orderInfo?.prevSkillId,
+                prevSkillId: orderInfo?.previousSkillId,
                 nextSkillId: orderInfo?.nextSkillId,
-                orderInGroup: orderInfo?.orderInGroup ?: 0,
-                totalSkills: orderInfo?.totalSkills ?: 0,
+                orderInGroup: orderInfo?.overallOrder ?: 0,
+                totalSkills: orderInfo?.totalCount ?: 0,
                 skill: isReusedSkill ? SkillReuseIdUtil.removeTag(unsanitizedName) : unsanitizedName,
                 points: points, todaysPoints: todayPoints,
                 pointIncrement: skillDef.pointIncrement,

@@ -717,11 +717,11 @@ class SkillsAdminService {
 
         finalRes.thisSkillWasReusedElsewhere = skillDefRepo.wasThisSkillReusedElsewhere(res.id)
 
-        SkillsLoader.SkillOrderInfo orderInfo = skillsLoader.getSkillOrderStats(projectId, subjectId, skillId)
-        finalRes.prevSkillId = orderInfo.prevSkillId
+        DisplayOrderRes orderInfo = skillsLoader.getSkillOrderStats(projectId, subjectId, skillId)
+        finalRes.prevSkillId = orderInfo.previousSkillId
         finalRes.nextSkillId = orderInfo.nextSkillId
-        finalRes.totalSkills = orderInfo.totalSkills
-        finalRes.orderInGroup = orderInfo.orderInGroup
+        finalRes.totalSkills = orderInfo.totalCount
+        finalRes.orderInGroup = orderInfo.overallOrder
 
         String videoUrl = skillAttributesDefRepo.getVideoUrlBySkillRefId(res.id)
         finalRes.hasVideoConfigured = StringUtils.isNotBlank(videoUrl)

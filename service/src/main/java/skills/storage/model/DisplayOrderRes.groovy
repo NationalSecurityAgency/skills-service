@@ -20,4 +20,5 @@ interface DisplayOrderRes {
     String getPreviousSkillId();
     String getNextSkillId();
     Integer getOverallOrder();
+    Integer getTotalCount();
 }

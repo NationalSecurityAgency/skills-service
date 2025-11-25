@@ -235,7 +235,8 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
                         select skillId,
                                lag(skillId, 1) over ( order by displayOrder, skillGroupDisplayOrder ) as previousSkillId,
                                lead(skillId, 1) over (order by displayOrder, skillGroupDisplayOrder)  as nextSkillId,
-                               row_number() over () as overallOrder
+                               row_number() over () as overallOrder,
+                               count(*) over() as totalCount
                         from (
                             select child.skill_id           as skillId,
                                    (case when skillGroup.display_order is null then child.display_order else skillGroup.display_order end) as displayOrder,
