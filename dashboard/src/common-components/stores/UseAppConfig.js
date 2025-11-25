@@ -178,6 +178,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const matomoSiteId = computed(() => config.value.matomoSiteId)
   const matomoProcessUserIdRegex = computed(() => config.value.matomoProcessUserIdRegex)
   const enableOpenAIIntegration = computed(() => config.value.enableOpenAIIntegration)
+  const openaiTakingLongerThanExpectedMessages = computed(() => config.value.openaiTakingLongerThanExpectedMessages)
+  const openaiTakingLongerThanExpectedTimeoutPerMsg = computed(() => config.value.openaiTakingLongerThanExpectedTimeoutPerMsg)
   const sdPointHistoryChartAchievementsCombinePct = computed(() => config.value.sdPointHistoryChartAchievementsCombinePct || 0.05)
 
 
@@ -296,6 +298,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     matomoSiteId,
     matomoProcessUserIdRegex,
     enableOpenAIIntegration,
+    openaiTakingLongerThanExpectedMessages,
+    openaiTakingLongerThanExpectedTimeoutPerMsg,
     sdPointHistoryChartAchievementsCombinePct
   }
 })
