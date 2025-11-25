@@ -6,7 +6,7 @@ module.exports = defineConfig({
   projectId: '7kivjf',
   requestTimeout: 10000,
   defaultCommandTimeout: 10000,
-  numTestsKeptInMemory: 10,
+  numTestsKeptInMemory: 5,
   chromeWebSecurity: false,
   retries: {
     runMode: 2,
