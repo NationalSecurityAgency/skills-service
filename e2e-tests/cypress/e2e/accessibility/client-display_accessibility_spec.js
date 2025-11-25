@@ -153,7 +153,7 @@ describe('Client Display Accessibility tests', () => {
                 });
             })
               .as('getSubjectSummary');
-            cy.intercept('GET', '/api/projects/proj1/pointHistory')
+            cy.intercept('GET', '/api/projects/proj1/pointHistory**')
               .as('pointHistoryChart');
 
             cy.cdVisit('/', true);

@@ -41,7 +41,10 @@ Cypress.Commands.add('cdVisit', (url = '', expectPointHistoryData = false) => {
     cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
     if (!url || url === '' || url === '/' || url === '/?internalBackButton=true') {
-        cy.get(expectPointHistoryData ? '[data-cy="pointHistoryChartWithData"]' : '[data-cy="pointHistoryChartNoData"]')
+        if (expectPointHistoryData) {
+            cy.get('[data-cy="pointHistoryChartWithData"]')
+        }
+        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     }
 })
 
@@ -68,7 +71,11 @@ Cypress.Commands.add('cdClickSubj', (subjIndex, expectedTitle = null, expectPoin
   // wait for the loader to go way
   cy.get('[data-pc-name="progressspinner"]').should('not.exist')
 
-  cy.get(expectPointHistoryData ? '[data-cy="pointHistoryChartWithData"]' : '[data-cy="pointHistoryChartNoData"]')
+    if (expectPointHistoryData) {
+        cy.get('[data-cy="pointHistoryChartWithData"]')
+    }
+    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+
 })
 
 Cypress.Commands.add("cdClickSkill", (skillIndex, useProgressBar = true, skillLabel = 'Skill') => {

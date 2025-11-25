@@ -140,7 +140,6 @@ describe('Custom Label with Reused Data Tests', () => {
 
     it('verify custom labels - project page on default skills display', () => {
         cy.cdVisit();
-        cy.get('[data-cy="pointHistoryChartNoData"]')
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="title"]').contains('User Courses');
         cy.get('[data-cy="overallPoints"]').contains('Overall Units');
         cy.get('[data-cy="levelProgress"]').contains('Stage 2 Progress');
@@ -175,8 +174,7 @@ describe('Custom Label with Reused Data Tests', () => {
             .contains('My Stage');
         cy.get('[data-cy="levelBreakdownChart"]')
             .contains('Stage Breakdown');
-        cy.get('[data-cy="levelBreakdownChart"]')
-            .contains('You are Stage 1!');
+        cy.get('[data-cy="levelBreakdownChart"] [data-pc-name="chart"]')
         cy.contains('Level')
             .should('not.exist');
 
@@ -257,8 +255,7 @@ describe('Custom Label with Reused Data Tests', () => {
             .contains('My Stage');
         cy.get('[data-cy="levelBreakdownChart"]')
             .contains('Stage Breakdown');
-        cy.get('[data-cy="levelBreakdownChart"]')
-            .contains('You are Stage 2!');
+        cy.get('[data-cy="levelBreakdownChart"] [data-pc-name="chart"]')
         cy.contains('Level')
             .should('not.exist');
 

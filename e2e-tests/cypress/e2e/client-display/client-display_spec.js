@@ -157,7 +157,7 @@ describe('Client Display Tests', () => {
             badgeId: 'badge1',
             name: 'Badge 1'
         });
-        cy.intercept('GET', '/api/projects/proj1/pointHistory')
+        cy.intercept('GET', '/api/projects/proj1/pointHistory**')
             .as('pointHistoryChart');
         cy.cdVisit('/', true);
         cy.injectAxe();
@@ -187,7 +187,7 @@ describe('Client Display Tests', () => {
 
     it('internal back button', () => {
 
-        cy.intercept('GET', '/api/projects/proj1/pointHistory')
+        cy.intercept('GET', '/api/projects/proj1/pointHistory**')
             .as('pointHistoryChart');
 
         cy.cdVisit('/?internalBackButton=true', true);

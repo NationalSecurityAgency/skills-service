@@ -22,6 +22,10 @@ import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vu
 import CheckSelector from '@/skills-display/components/quiz/CheckSelector.vue'
 import QuizAnswerHistory from '@/components/quiz/metrics/QuizAnswerHistory.vue'
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
+import Chart from "primevue/chart";
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 const props = defineProps({
   q: Object,
@@ -32,60 +36,81 @@ const props = defineProps({
 
 const responsive = useResponsiveBreakpoints()
 const colors = useColors()
+const chartSupportColors = useChartSupportColors()
+const pluralize = usePluralize()
 
 const averageScore = ref(0)
 const answers = ref([])
 const expandedRows = ref([])
 
-const series = [props.q.numAnsweredCorrect, props.q.numAnsweredWrong]
-const chartOptions = {
-  labels: ['Correct', 'Wrong'],
-  colors: ['#007c49', '#ffc42b'],
-  chart: {
-    width: 300,
-    type: 'donut'
-  },
-  plotOptions: {
-    pie: {
-      startAngle: -180,
-      endAngle: 180
-    }
-  },
-  dataLabels: {
-    enabled: true,
-    style: {
-      fontSize: '14px'
-    },
-    background: {
-      enabled: true,
-      foreColor: '#146c75',
-      padding: 6,
-      borderRadius: 2,
-      borderWidth: 1,
-      borderColor: '#3cbcad',
-      opacity: 1,
-      dropShadow: {
-        enabled: false,
-        top: 1,
-        left: 1,
-        blur: 1,
-        color: '#000',
-        opacity: 0.45
+const chartJsOptions = ref(null)
+
+const chartColors = chartSupportColors.getColors()
+const chartData = computed(() => {
+  return {
+    labels: [`Correct: ${props.q.numAnsweredCorrect} Attempts`, `Wrong: ${props.q.numAnsweredWrong} Attempts`],
+    datasets: [
+      {
+        label: 'Attempts',
+        data: [props.q.numAnsweredCorrect, props.q.numAnsweredWrong],
+        backgroundColor: [chartColors.green700Color, chartColors.orange700Color],
+        datalabels: {
+          anchor: 'end'
+        }
+      }
+    ]
+  }
+})
+const overallCorrectPercent = computed(() => {
+  const total = props.q.numAnsweredCorrect + props.q.numAnsweredWrong
+  if (total === props.q.numAnsweredCorrect) {
+    return 100
+  }
+  return total > 0 ? (props.q.numAnsweredCorrect / total * 100).toFixed(1) : 0
+})
+const overallCorrectWrong = computed(() => 100 - overallCorrectPercent.value)
+const setChartOptions = () => {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '60%',
+    layout: {
+      padding: {
+        left: 20,  // Add left padding to prevent cutting off
+        top: 20,
+        bottom: 20,
       }
     },
-    dropShadow: {
-      enabled: false
-    }
-  },
-  fill: {
-    type: 'gradient'
-  },
-  legend: {
-    position: 'left',
-    formatter(val, opts) {
-      return `${val}: ${opts.w.globals.series[opts.seriesIndex]} Attempts`
-    }
-  }
+    hover: { mode: null },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      title: {
+        display: false,
+      },
+      tooltip: {
+        enabled: false,
+      },
+      datalabels: {
+        font: {
+          weight: 'bold'
+        },
+        backgroundColor: function(context) {
+          return context.dataset.backgroundColor;
+        },
+        borderColor: 'white',
+        borderRadius: 25,
+        borderWidth: 2,
+        color: 'white',
+        padding: 6,
+        formatter: function(value, context) {
+          const percent = context.dataIndex === 0 ? overallCorrectPercent.value : overallCorrectWrong.value
+          return `${percent}%`
+        }
+      }
+    },
+  };
 }
 
 const isMultipleChoice = computed(() => {
@@ -169,6 +194,7 @@ const tableOptions = {
 }
 
 onMounted(() => {
+  chartJsOptions.value = setChartOptions()
   const totalNumUsers = props.q.numAnsweredCorrect + props.q.numAnsweredWrong
   answers.value = props.q.answers.map((a) => ({
     ...a,
@@ -203,6 +229,7 @@ const removeExpanderClass = (rowData) => {
   }
   return ''
 }
+
 </script>
 
 <template>
@@ -217,9 +244,30 @@ const removeExpanderClass = (rowData) => {
       </div>
       <div v-if="!isSurvey">
         <div>
-          <apexchart :type="chartOptions.chart.type" :width="chartOptions.chart.width" :options="chartOptions"
-                     ref="questionCorrectChartRef"
-                     :series="series"></apexchart>
+          <div class="flex flex-col lg:flex-row items-center gap-3" data-cy="qMetrics">
+            <Chart type="doughnut"
+                   :data="chartData"
+                   :options="chartJsOptions"
+                   :plugins="[ChartDataLabels]"
+                   class="h-[15rem]"
+            />
+            <div class="flex gap-2 items-center">
+              <div class="flex flex-col gap-2">
+                <div class="flex gap-1 items-center">
+                  <div class="w-4 h-4 rounded-sm border border-white" :style="{ backgroundColor: chartColors.green700Color }"></div>
+                  <span>Correct: </span>
+                </div>
+                <div class="flex gap-1 items-center">
+                  <div class="w-4 h-4 rounded-sm border border-white" :style="{ backgroundColor: chartColors.orange700Color }"></div>
+                  <span>Wrong: </span>
+                </div>
+              </div>
+              <div  class="flex flex-col gap-2">
+                <div><Tag data-cy="numCorrect">{{ q.numAnsweredCorrect }}</Tag> {{ pluralize.plural('Attempt', q.numAnsweredCorrect) }} <span class="text-surface-600 dark:text-white" data-cy="percentCorrect">({{ overallCorrectPercent}}%)</span> </div>
+                <div><Tag severity="warn" data-cy="numWrong">{{ q.numAnsweredWrong }}</Tag> {{ pluralize.plural('Attempt', q.numAnsweredWrong) }} <span class="text-surface-600 dark:text-white" data-cy="percentWrong">({{ overallCorrectWrong}}%)</span></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

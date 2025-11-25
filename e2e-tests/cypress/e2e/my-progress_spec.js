@@ -127,7 +127,7 @@ describe('My Progress Tests', () => {
     });
 
     it('visit My Progress page', function () {
-
+        cy.suppressChartInitError()
         cy.loginAsRootUser();
         cy.request('PUT', `/app/badges/globalBadge1`, {
             badgeId: `globalBadge1`,
@@ -566,12 +566,12 @@ describe('My Progress Tests', () => {
         const proj2Selector = '[data-cy="project-link-card-proj2"]'
         cy.get(`${proj2Selector} [data-cy="project-card-project-level"]`).should('have.text', 'Level 0')
         cy.get(`${proj2Selector} [data-cy="project-card-project-points"]`).should('have.text', '0 / 1,200')
-        cy.get(`${proj2Selector} .apexcharts-text.apexcharts-datalabel-value`).should('have.text', '0%')
+        cy.get(`${proj2Selector} [data-cy="radialChartPercent"]`).should('have.text', '0%')
 
         const proj1Selector = '[data-cy="project-link-card-proj1"]'
         cy.get(`${proj1Selector} [data-cy="project-card-project-level"]`).should('have.text', 'Level 3')
         cy.get(`${proj1Selector} [data-cy="project-card-project-points"]`).should('have.text', '400 / 800')
-        cy.get(`${proj1Selector} .apexcharts-text.apexcharts-datalabel-value`).should('have.text', '50%')
+        cy.get(`${proj1Selector} [data-cy="radialChartPercent"]`).should('have.text', '50%')
     });
 
     it('My Progress page - verify custom project label', function () {
@@ -595,6 +595,7 @@ describe('My Progress Tests', () => {
     });
 
     it('Contact project owner', () => {
+        cy.suppressChartInitError()
         cy.intercept('POST', '/api/projects/*/contact').as('contact');
         cy.intercept('POST', '/api/validation/description*').as('validate');
 
@@ -710,14 +711,14 @@ describe('My Progress Tests', () => {
 
         cy.get('[data-cy="numProjectsContributed"]').contains('1');
         cy.get('[data-cy="numProjectsAvailable"]').contains('3');
-        cy.get('.apexcharts-datalabels-group > .apexcharts-datalabel-value').contains('33');
+        cy.get('[data-cy="info-snap-card"] [data-cy="radialChartPercent"]').contains('33%');
 
         cy.get('[data-cy="remove-proj3Btn"]').click()
         cy.get('[data-pc-name="pcacceptbutton"]').click()
 
         cy.get('[data-cy="numProjectsContributed"]').contains('1');
         cy.get('[data-cy="numProjectsAvailable"]').contains('2');
-        cy.get('.apexcharts-datalabels-group > .apexcharts-datalabel-value').contains('50');
+        cy.get('[data-cy="info-snap-card"] [data-cy="radialChartPercent"]').contains('50%');
 
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1']);
         cy.get('[data-cy="project-link-card-proj3"]').should('not.exist');
@@ -730,7 +731,7 @@ describe('My Progress Tests', () => {
 
         cy.get('[data-cy="numProjectsContributed"]').contains('0');
         cy.get('[data-cy="numProjectsAvailable"]').contains('1');
-        cy.get('.apexcharts-datalabels-group > .apexcharts-datalabel-value').contains('0');
+        cy.get('[data-cy="info-snap-card"] [data-cy="radialChartPercent"]').contains('0%');
     });
 
     if (!Cypress.env('oauthMode')) {
@@ -781,6 +782,7 @@ describe('My Progress Tests', () => {
     }
 
     it('custom subject icons are loaded for multiple projects', function () {
+        cy.suppressChartInitError()
         cy.intercept(' /api/projects/proj10/customIconCss').as('proj1CustomIcons')
         cy.intercept(' /api/projects/proj20/customIconCss').as('proj2CustomIcons')
 

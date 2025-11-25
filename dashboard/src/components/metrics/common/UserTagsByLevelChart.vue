@@ -14,132 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import MetricsService from "@/components/metrics/MetricsService.js";
-import { useRoute } from 'vue-router';
+import {useRoute} from 'vue-router';
+import Chart from "primevue/chart";
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
-import NumberFormatter from '@/components/utils/NumberFormatter.js';
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
+import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
 
 const props = defineProps(['tag']);
 const route = useRoute();
 
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
 const layoutSizes = useLayoutSizesState()
+const chartSupportColors = useChartSupportColors()
+const skillsDisplayAttributesState = useSkillsDisplayAttributesState()
 
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
-const series = ref([]);
 const loading = ref(true);
-const chartOptions = ref({
-  chart: {
-    width: 250,
-    type: 'bar',
-    toolbar: {
-      show: true,
-      offsetX: 0,
-      offsetY: 0,
-    },
-  },
-  plotOptions: {
-    bar: {
-      horizontal: true,
-      dataLabels: {
-        position: 'bottom',
-      },
-    },
-  },
-  stroke: {
-    show: true,
-    width: 2,
-    colors: ['transparent'],
-  },
-  xaxis: {
-    title: {
-      style: {
-        color: chartAxisColor()
-      },
-      text: '# of Users',
-    },
-    labels: {
-      style: {
-        fontSize: '13px',
-        fontWeight: 600,
-        colors: chartAxisColor(),
-      },
-    },
-  },
-  yaxis: {
-    title: {
-      text: props.tag.label,
-    },
-    labels: {
-      style: {
-        colors: chartAxisColor()
-      }
-    }
-  },
-  tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
-    y: {
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-    },
-  },
-  dataLabels: {
-    enabled: true,
-        textAnchor: 'start',
-        offsetX: 0,
-        style: {
-      colors: ['#17a2b8'],
-          fontSize: '14px',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          fontWeight: 'bold',
-    },
-    formatter(val, opt) {
-      return `${opt.w.globals.seriesNames[opt.seriesIndex]}: ${NumberFormatter.format(val)} users`;
-    },
-    dropShadow: {
-      enabled: true,
-    },
-    background: {
-      enabled: true,
-          foreColor: '#ffffff',
-          padding: 10,
-          borderRadius: 2,
-          borderWidth: 1,
-          borderColor: '#686565',
-          opacity: 1,
-          dropShadow: {
-        enabled: false,
-      },
-    },
-  },
-  legend: {
-    show: false,
-  },
-});
+const chartJsOptions = ref();
+const chartData = ref({})
 
 onMounted(() => {
+  chartJsOptions.value = setChartOptions()
   loadData();
 })
-
-const chartHeight = computed(() => {
-  let height = 350;
-  if (chartOptions.value?.xaxis?.categories) {
-    const dataSize = chartOptions.value.xaxis.categories.length;
-    height = dataSize > 0 ? dataSize * 250 : 350;
-  }
-  return height;
-});
 
 const loadData = () => {
   loading.value = true;
@@ -151,9 +50,20 @@ const loadData = () => {
 
           if (tags) {
             const categories = userData.map((a) => a.tag);
-            chartOptions.value.xaxis.categories = categories;
             const numberOfLevels = dataFromServer.totalLevels;
-            const localSeries = [];
+
+            const datasets = []
+            const convertToChartData = (data, label, colorIndex) => {
+              return {
+                label: label,
+                data: data,
+                backgroundColor: chartSupportColors.getTranslucentColor(colorIndex),
+                borderColor: chartSupportColors.getSolidColor(colorIndex),
+                borderWidth: 1,
+                borderRadius: 6,
+                minBarLength: 4,
+              }
+            }
 
             for (let level = 1; level <= numberOfLevels; level += 1) {
               const dataForLevel = [];
@@ -165,28 +75,87 @@ const loadData = () => {
                 }
               });
               if (dataForLevel.length > 0) {
-                localSeries.push({ name: `Level ${level}`, data: dataForLevel });
+                datasets.push(convertToChartData(dataForLevel, `${skillsDisplayAttributesState.levelDisplayName} ${level}`, level-1));
               }
             }
-            series.value = localSeries;
+            chartData.value = {
+              labels: categories,
+              datasets: datasets,
+            }
           }
         }
         loading.value = false;
       });
 };
+
+const userTagsByLevelChartRef = ref(null)
+const hasData = computed(() => Boolean(chartData.value.labels && chartData.value.labels?.length > 0))
+
+const setChartOptions = () => {
+  const colors = chartSupportColors.getColors()
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    scales: {
+      x: {
+        ticks: {
+          color: colors.textMutedColor
+        },
+        grid: {
+          color: colors.contentBorderColor,
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: colors.textMutedColor
+        },
+        grid: {
+          color: colors.contentBorderColor
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          color: colors.textColor,
+          padding: 20,
+          boxWidth: 12,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+    }
+  };
+}
+
+const heightInRem = computed(() => {
+  if (hasData.value) {
+    return chartData.value.labels.length * 5
+  }
+  return 20;
+})
 </script>
 
 <template>
   <Card :data-cy="`numUsersByTag-${tag.key}`" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
     <template #header>
-      <SkillsCardHeader :title="`Top 20 ${tag.label} Level Breakdown`"></SkillsCardHeader>
+      <SkillsCardHeader :title="`Top 20 ${tag.label} ${skillsDisplayAttributesState.levelDisplayName} Breakdown`">
+        <template #headerContent>
+          <chart-download-controls v-if="hasData" :vue-chart-ref="userTagsByLevelChartRef" />
+        </template>
+      </SkillsCardHeader>
     </template>
     <template #content>
-      <div style="max-height: 800px; overflow-y: auto; overflow-x: clip;">
-        <metrics-overlay :loading="loading" :has-data="series.length > 0" no-data-msg="No users currently">
-          <apexchart v-if="!loading" width="100%" type="bar" :height="chartHeight" :options="chartOptions" :series="series"></apexchart>
-        </metrics-overlay>
-      </div>
+      <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No users currently">
+        <Chart ref="userTagsByLevelChartRef"
+               type="bar"
+               :data="chartData"
+               :options="chartJsOptions"
+               :style="`min-height: ${heightInRem}rem;`"/>
+      </metrics-overlay>
     </template>
   </Card>
 </template>

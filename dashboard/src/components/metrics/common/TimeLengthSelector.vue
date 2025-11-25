@@ -47,9 +47,9 @@ defineExpose({
 </script>
 
 <template>
-  <span data-cy="timeLengthSelector" class="time-length-selector">
+  <span data-cy="timeLengthSelector" class="time-length-selector flex gap-1">
     <Badge v-for="(item, index) in options" :key="`${item.length}${item.unit}`"
-             class="ml-2" :class="{'can-select' : (index !== selectedIndex && !(item.unit === 'days' && disableDays)), 'disabled': item.unit === 'days' && disableDays }"
+             :class="{'can-select' : (index !== selectedIndex && !(item.unit === 'days' && disableDays)), 'disabled': item.unit === 'days' && disableDays }"
              :aria-label="`show data for the last ${item.length} ${item.unit}`"
              :severity="getVariant(index)" @click="handleClick(index)" @keyup.enter="handleClick(index)" tabindex="0">
       {{ item.length }} {{ item.unit }}

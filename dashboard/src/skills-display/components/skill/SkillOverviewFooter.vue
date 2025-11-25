@@ -28,6 +28,8 @@ import ApprovalHistory from '@/skills-display/components/skill/ApprovalHistory.v
 import QuizType from '@/skills-display/components/quiz/QuizType.js';
 import { useSelfReportHelper } from '@/skills-display/UseSelfReportHelper.js';
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
+import {useRoute} from "vue-router";
+import {useSkillsDisplayPointHistoryState} from "@/skills-display/stores/UseSkillsDisplayPointHistoryState.js";
 
 const props = defineProps({
   skill: Object
@@ -40,8 +42,10 @@ const skillsDisplayService = useSkillsDisplayService()
 const attributes = useSkillsDisplayAttributesState()
 const pluralize =usePluralize()
 const skillState = useSkillsDisplaySubjectState()
+const pointHistoryState = useSkillsDisplayPointHistoryState()
 const selfReportHelper = useSelfReportHelper()
 const log = useLog()
+const route = useRoute()
 
 const selfReport = ref({
   res: null,
@@ -177,6 +181,9 @@ const updateEarnedPoints = (res) => {
   if (res.pointsEarned > 0 || isMotivationalSkill.value) {
     log.trace(`Skill ${skillInternal.value.skillId} earned ${res.pointsEarned} points`)
     skillState.addPoints(skillInternal.value.skillId, res.pointsEarned)
+    if (skillsDisplayInfo.isSubjectPage?.value) {
+      pointHistoryState.loadPointHistory(route.params.subjectId)
+    }
   }
 }
 const focusOnId = (elementId) => {

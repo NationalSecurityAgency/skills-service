@@ -397,7 +397,7 @@ describe('Community Quiz Description Validation Tests', () => {
     });
 
     it('Input Text answer is validated against custom validators', () => {
-        cy.intercept('GET', '/api/projects/*/pointHistory').as('getPointHistory');
+        cy.intercept('GET', '/api/projects/*/pointHistory**').as('getPointHistory');
 
         cy.createQuizDef(1, {enableProtectedUserCommunity: true})
         cy.createTextInputQuestionDef(1, 1)
@@ -726,7 +726,7 @@ describe('Community Quiz Description Validation Tests', () => {
     });
 
     it('video transcript is validated against custom validators', () => {
-        cy.intercept('GET', '/api/projects/*/pointHistory').as('getPointHistory');
+        cy.intercept('GET', '/api/projects/*/pointHistory**').as('getPointHistory');
 
         cy.createQuizDef(1)
         cy.createTextInputQuestionDef(1, 1)
@@ -756,7 +756,7 @@ describe('Community Quiz Description Validation Tests', () => {
     });
 
     it('video transcript is validated against custom validators - uc protected', () => {
-        cy.intercept('GET', '/api/projects/*/pointHistory').as('getPointHistory');
+        cy.intercept('GET', '/api/projects/*/pointHistory**').as('getPointHistory');
 
         cy.createQuizDef(1, {enableProtectedUserCommunity: true})
         cy.createTextInputQuestionDef(1, 1)

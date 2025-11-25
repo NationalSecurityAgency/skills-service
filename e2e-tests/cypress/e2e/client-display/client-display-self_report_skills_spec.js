@@ -893,10 +893,8 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
 
-        cy.get('[data-cy="overallPoints"] .apexcharts-canvas')
-            .contains('0 Points');
-        cy.get('[data-cy="overallPoints"] .apexcharts-canvas')
-          .contains('0%');
+        cy.get('[data-cy="overallPoints"] [data-cy="circleProgressPts"]').should('have.text', '0')
+        cy.get('[data-cy="overallPoints"] [data-cy="circleProgressPercent"]').should('have.text', '0%')
         cy.get('[data-cy="overallPoints"] [data-cy="earnedPoints"]')
           .should('have.text', '0');
         cy.get('[data-cy="overallPoints"] [data-cy="pointsEarnedToday"]')
@@ -904,10 +902,8 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="overallPoints"] [data-cy="totalPoints"]')
           .should('have.text', '400');
 
-        cy.get('[data-cy="levelProgress"] .apexcharts-canvas')
-          .contains('0 Points');
-        cy.get('[data-cy="levelProgress"] .apexcharts-canvas')
-          .contains('0%');
+        cy.get('[data-cy="levelProgress"] [data-cy="circleProgressPts"]').should('have.text', '0')
+        cy.get('[data-cy="levelProgress"] [data-cy="circleProgressPercent"]').should('have.text', '0%')
         cy.get('[data-cy="levelProgress"] [data-cy="pointsTillNextLevel"]').should('have.text', '40')
         cy.get('[data-cy="levelProgress"]').contains('40 Points to Level 1')
         cy.get('[data-cy="levelProgress"]').contains('Level 1 Progress')
@@ -918,10 +914,8 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="claimPointsBtn"]')
             .click();
 
-        cy.get('[data-cy="overallPoints"] .apexcharts-canvas')
-          .contains('50 Points');
-        cy.get('[data-cy="overallPoints"] .apexcharts-canvas')
-          .contains('12%');
+        cy.get('[data-cy="overallPoints"] [data-cy="circleProgressPts"]').should('have.text', '50')
+        cy.get('[data-cy="overallPoints"] [data-cy="circleProgressPercent"]').should('have.text', '12%')
         cy.get('[data-cy="overallPoints"] [data-cy="earnedPoints"]')
           .should('have.text', '50');
         cy.get('[data-cy="overallPoints"] [data-cy="pointsEarnedToday"]')
@@ -929,10 +923,8 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="overallPoints"] [data-cy="totalPoints"]')
           .should('have.text', '400');
 
-        cy.get('[data-cy="levelProgress"] .apexcharts-canvas')
-          .contains('10 Points');
-        cy.get('[data-cy="levelProgress"] .apexcharts-canvas')
-          .contains('16%');
+        cy.get('[data-cy="levelProgress"] [data-cy="circleProgressPts"]').should('have.text', '10')
+        cy.get('[data-cy="levelProgress"] [data-cy="circleProgressPercent"]').should('have.text', '16%')
         cy.get('[data-cy="levelProgress"] [data-cy="pointsTillNextLevel"]').should('have.text', '50')
         cy.get('[data-cy="levelProgress"]').contains('50 Points to Level 2')
         cy.get('[data-cy="levelProgress"]').contains('Level 2 Progress')

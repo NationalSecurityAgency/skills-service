@@ -182,7 +182,24 @@ describe('Breadcrumb Navigation Tests', () => {
         cy.get('[data-cy=errorPage]')
             .should('not.exist');
 
+        const toWaitFor = [
+            'skillEventsOverTimeChartBuilder',
+            'numUserAchievedOverTimeChartBuilder',
+            'singleSkillCountsChartBuilder',
+            'usagePostAchievementUsersBuilder',
+            'binnedUsagePostAchievementMetricsBuilder',
+            'usagePostAchievementMetricsBuilder',
+            'skillAchievementsByTagBuilder'
+        ]
+        toWaitFor.forEach((name) => {
+            cy.intercept('GET', `**${name}**`).as(name);
+        })
         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/metrics');
+        cy.get('[data-cy="skillEventsOverTimeChart-animationEnded"]')
+        toWaitFor.forEach((name) => {
+            cy.wait(`@${name}`)
+        })
+        cy.wait(2000)
         cy.get('[data-cy=breadcrumb-skill1]')
             .click();
         cy.get('[data-cy=errorPage]')
@@ -250,7 +267,21 @@ describe('Breadcrumb Navigation Tests', () => {
         cy.get('[data-cy=errorPage]')
             .should('not.exist');
 
+        const toWaitFor = [
+            'numUsersPerLevelChartBuilder',
+            'distinctUsersOverTimeForProject',
+            'achievementsByTagPerLevelMetricsBuilder',
+            'achievementsByTagPerLevelMetricsBuilder',
+        ]
+        toWaitFor.forEach((name) => {
+            cy.intercept('GET', `**${name}**`).as(name);
+        })
         cy.visit('/administrator/projects/proj1/subjects/subj1/metrics');
+        toWaitFor.forEach((name) => {
+            cy.wait(`@${name}`)
+        })
+        cy.wait(2000)
+
         cy.get('[data-cy=breadcrumb-subj1]')
             .click();
         cy.get('[data-cy=errorPage]')
@@ -377,10 +408,20 @@ describe('Breadcrumb Navigation Tests', () => {
     });
 
     it('Metrics', () => {
-        cy.intercept('GET', '/admin/projects/proj1/metrics/distinctUsersOverTimeForProject*')
-            .as('loadMetrics');
+        const toWaitFor = [
+            'numUsersPerTagBuilder',
+            'numUsersPerTagBuilder',
+            'distinctUsersOverTimeForProject',
+        ]
+        toWaitFor.forEach((name) => {
+            cy.intercept('GET', `**${name}**`).as(name);
+        })
         cy.visit('/administrator/projects/proj1/metrics');
-        cy.wait('@loadMetrics');
+        toWaitFor.forEach((name) => {
+            cy.wait(`@${name}`)
+        })
+        cy.wait(2000)
+
         cy.get('[data-cy=breadcrumb-proj1]')
             .click();
         cy.wait('@loadProject');

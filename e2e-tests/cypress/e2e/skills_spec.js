@@ -1286,8 +1286,8 @@ describe('Skills Tests', () => {
       cy.wait('@skillEventsOverTimeChartBuilder')
       cy.wait('@usagePostAchievementUsersBuilder')
       cy.wait(2000)
-      cy.contains('# Users')
-      cy.contains('stopped after achieving')
+      cy.get('[data-cy="numUsersPostAchievement"] [data-pc-name="chart"]')
+      cy.get('[data-cy="appliedSkillEventsOverTimeMetric"] [data-pc-name="chart"]')
     }
   })
 

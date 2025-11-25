@@ -271,14 +271,21 @@ describe('Accessibility Subject Tests', () => {
 
         it(`subject - metrics${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1');
+            cy.intercept('**numUsersPerLevelChartBuilder**').as('numUsersPerLevelChartBuilder')
+            cy.intercept('**distinctUsersOverTimeForProject**').as('distinctUsersOverTimeForProject')
+            cy.intercept('**achievementsByTagPerLevelMetricsBuilder**').as('achievementsByTagPerLevelMetricsBuilder')
+            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/metrics');
             cy.injectAxe();
-            cy.get('[data-cy=nav-Metrics]')
-              .click();
             cy.contains('This chart needs at least 2 days of user activity.');
-            cy.contains('Level 2: 1 users');
+            cy.wait('@numUsersPerLevelChartBuilder')
+            cy.wait('@distinctUsersOverTimeForProject')
+            cy.wait('@achievementsByTagPerLevelMetricsBuilder')
+            cy.wait('@achievementsByTagPerLevelMetricsBuilder')
+
+            cy.wait(1000)
             cy.customLighthouse();
             cy.customA11y();
         })
     })
 });
+

@@ -186,7 +186,7 @@ describe('Client Display Tests', () => {
     sizes.forEach((size) => {
 
         it(`test theming - project overview - ${size}`, () => {
-            cy.intercept('GET', '/api/projects/proj1/pointHistory')
+            cy.intercept('GET', '/api/projects/proj1/pointHistory**')
                 .as('getPointHistory');
             cy.setResolution(size);
 
@@ -235,7 +235,6 @@ describe('Client Display Tests', () => {
 
                 // back button - border color
                 cy.cdClickRank();
-                cy.contains('You are Level 2!');
                 // wait for the bar (on the bar chart) to render
                 cy.get('[data-cy="levelBreakdownChart-animationEnded"]');
                 cy.wait(5000)

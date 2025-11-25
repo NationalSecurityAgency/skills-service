@@ -14,103 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import {computed, onMounted, ref} from 'vue';
+import {useRoute} from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
-import NumberFormatter from '@/components/utils/NumberFormatter.js'
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
+import Chart from "primevue/chart";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
+import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 
 const route = useRoute();
 const props = defineProps(['tag']);
 
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
+const chartSupportColors = useChartSupportColors()
+const layoutSizes = useLayoutSizesState()
 
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
-
-const inProgressSeries = ref([]);
-const achievedSeries = ref([]);
-const chartOptions = ref({
-  chart: {
-    height: 250,
-    width: 250,
-    type: 'bar',
-    toolbar: {
-      show: true,
-      offsetX: 0,
-      offsetY: -60,
-    },
-  },
-  tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
-    y: {
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-    },
-  },
-  plotOptions: {
-    bar: {
-      horizontal: true,
-      barHeight: '30%',
-      dataLabels: {
-        position: 'bottom',
-      },
-      distributed: true,
-    },
-  },
-  stroke: {
-    show: true,
-    width: 2,
-    colors: ['transparent'],
-  },
-  xaxis: {
-    categories: [],
-    title: {
-      style: {
-        color: chartAxisColor()
-      },
-      text: '# of Users',
-    },
-    labels: {
-      style: {
-        fontSize: '13px',
-        fontWeight: 600,
-        colors: chartAxisColor(),
-      },
-    },
-  },
-  yaxis: {
-    categories: [],
-    title: {
-      style: {
-        color: chartAxisColor()
-      },
-      text: props.tag.label,
-    },
-    labels: {
-      style: {
-        colors: chartAxisColor()
-      }
-    }
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  legend: {
-    show: false,
-  },
-})
+const chartJsOptions = ref();
+const chartData = ref({})
+const hasData = computed(() => Boolean(chartData.value.labels?.length > 0))
 const loading = ref(true);
 
 onMounted(() => {
+  chartJsOptions.value = setChartOptions()
   loadData();
 });
 
@@ -118,11 +43,11 @@ const loadData = () => {
   loading.value = true;
   MetricsService.loadChart(route.params.projectId, 'skillAchievementsByTagBuilder', { skillId: route.params.skillId, userTagKey: props.tag.key })
       .then((dataFromServer) => {
-        chartOptions.value.labels = Object.keys(dataFromServer);
+        const keysFromServer = Object.keys(dataFromServer);
         const inProgressData = [];
         const achievedData = [];
 
-        chartOptions.value.labels.forEach((label) => {
+        keysFromServer.forEach((label) => {
           inProgressData.push({ x: label, y: dataFromServer[label].numberInProgress });
           achievedData.push({ x: label, y: dataFromServer[label].numberAchieved });
         });
@@ -130,50 +55,94 @@ const loadData = () => {
         const totalInProgressData = inProgressData.map((value) => value.y).filter((value) => value > 0);
         const totalAchievedData = achievedData.map((value) => value.y).filter((value) => value > 0);
 
+        const convertToChartData = (data, label, colorIndex) => {
+          return {
+            label: label,
+            data: data.map((item) => item.y),
+            backgroundColor: chartSupportColors.getTranslucentColor(colorIndex),
+            borderColor: chartSupportColors.getSolidColor(colorIndex),
+            borderWidth: 1,
+            borderRadius: 6,
+            maxBarThickness: 15,
+            minBarLength: 4,
+          }
+        }
+
+        const datasets = []
         if (inProgressData.length > 0 && totalInProgressData.length > 0) {
-          inProgressSeries.value = [{ data: inProgressData, name: 'In Progress' }];
+          datasets.push(convertToChartData(inProgressData, 'In Progress', 0))
         }
 
         if (achievedData.length > 0 && totalAchievedData.length > 0) {
-          achievedSeries.value = [{ data: achievedData, name: 'Achieved' }];
+          datasets.push(convertToChartData(achievedData, 'Achieved', 1))
         }
+
+        chartData.value = { labels: keysFromServer, datasets}
+
         loading.value = false;
       });
 };
+
+const setChartOptions = () => {
+  const colors = chartSupportColors.getColors()
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    scales: {
+      x: {
+        ticks: {
+          color: colors.textMutedColor
+        },
+        grid: {
+          color: colors.contentBorderColor,
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: colors.textMutedColor
+        },
+        grid: {
+          color: colors.contentBorderColor
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          color: colors.textColor,
+          padding: 20,
+          boxWidth: 12,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+    }
+  };
+}
+
+const topUserCountsChartRef = ref(null)
 </script>
 
 <template>
-  <Card data-cy="numUsersByTag">
+  <Card data-cy="numUsersByTag" :style="`max-width: ${layoutSizes.tableMaxWidth}px;`">
     <template #header>
-      <SkillsCardHeader :title="`Top 20 ${tag.label} User Counts`"></SkillsCardHeader>
+      <SkillsCardHeader :title="`Top 20 ${tag.label} User Counts`">
+        <template #headerContent>
+          <chart-download-controls v-if="hasData" :vue-chart-ref="topUserCountsChartRef" />
+        </template>
+      </SkillsCardHeader>
     </template>
     <template #content>
-      <div class="flex flex-col xl:flex-row gap-6">
-        <div class="flex flex-1">
-          <Card data-cy="usersInProgressByTag" class="w-full">
-            <template #header>
-              <SkillsCardHeader title="In Progress" title-tag="h4"></SkillsCardHeader>
-            </template>
-            <template #content>
-              <metrics-overlay :loading="loading" :has-data="inProgressSeries.length > 0" no-data-msg="No users currently working on this skill.">
-                <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="inProgressSeries"></apexchart>
-              </metrics-overlay>
-            </template>
-          </Card>
-        </div>
-        <div class="flex flex-1">
-          <Card data-cy="usersAchievedByTag" class="w-full">
-            <template #header>
-              <SkillsCardHeader title="Achieved" title-tag="h4"></SkillsCardHeader>
-            </template>
-            <template #content>
-              <metrics-overlay :loading="loading" :has-data="achievedSeries.length > 0" no-data-msg="No achievements yet for this skill.">
-                <apexchart v-if="!loading" type="bar" height="350" :options="chartOptions" :series="achievedSeries"></apexchart>
-              </metrics-overlay>
-            </template>
-          </Card>
-        </div>
-      </div>
+      <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No users currently working on this skill.">
+        <Chart ref="topUserCountsChartRef"
+               type="bar"
+               :data="chartData"
+               :options="chartJsOptions"
+               class="min-h-[16em]"/>
+      </metrics-overlay>
     </template>
   </Card>
 </template>

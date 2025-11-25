@@ -14,124 +14,124 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
+import {onMounted, ref} from 'vue';
+import {useRoute} from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
-import NumberFormatter from '@/components/utils/NumberFormatter.js'
+import Chart from "primevue/chart";
+import dayjs from "dayjs";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
 
 const route = useRoute();
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
+const chartSupportColors = useChartSupportColors()
 
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
-
-const series = ref([]);
-const chartOptions = ref ({
-  chart: {
-    height: 350,
-    type: 'area',
-    toolbar: {
-      show: true,
-      offsetY: -85,
-      autoSelected: 'zoom',
-      tools: {
-        pan: false,
-      },
-    },
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  stroke: {
-    curve: 'smooth',
-  },
-  fill: {
-    type: 'gradient',
-    gradient: {
-      shade: 'light',
-      gradientToColors: ['#17a2b8', '#28a745'],
-      shadeIntensity: 1,
-      type: 'horizontal',
-      opacityFrom: 0.3,
-      opacityTo: 0.8,
-      stops: [0, 100, 100, 100],
-    },
-  },
-  grid: {
-    padding: {
-      right: 30,
-      left: 20,
-    },
-  },
-  xaxis: {
-    type: 'datetime',
-  },
-  yaxis: {
-    forceNiceScale: true,
-    min: 0,
-    labels: {
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-      style: {
-        colors: chartAxisColor()
-      }
-    },
-    title: {
-      text: '# Users',
-    },
-  },
-  legend: {
-    position: 'top',
-  },
-  tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
-  },
-});
+const chartData = ref({})
+const chartJsOptions = ref();
 const loading = ref(true);
 const hasData = ref(false);
 
 onMounted(() => {
+  chartJsOptions.value = setChartOptions()
   loadData();
 });
 
 const loadData = () => {
   loading.value = true;
-  MetricsService.loadChart(route.params.projectId, 'numUserAchievedOverTimeChartBuilder', { skillId: route.params.skillId })
+  MetricsService.loadChart(route.params.projectId, 'numUserAchievedOverTimeChartBuilder', {skillId: route.params.skillId})
       .then((dataFromServer) => {
-        if (dataFromServer.achievementCounts) {
-          const datSeries = dataFromServer.achievementCounts.map((item) => [item.timestamp, item.num]);
-          hasData.value = datSeries.length > 0;
-          if (hasData.value) {
-            const dayAgo = dataFromServer.achievementCounts[0].timestamp - (1000 * 60 * 60 * 24);
-            datSeries.unshift([dayAgo, 0]);
+        hasData.value = dataFromServer.achievementCounts && dataFromServer.achievementCounts.length > 0;
+        if (hasData.value) {
+          const formatTimestamp = (timestamp) => dayjs(timestamp).format('YYYY-MM-DD')
+
+          const achievements = dataFromServer.achievementCounts
+          const prevDay = dayjs(achievements[0].timestamp).subtract(1, 'day').toDate()
+          achievements.unshift({timestamp: prevDay.getTime(), num: 0 })
+          chartData.value = {
+            datasets: [{
+              label: 'Users',
+              data: achievements.map((item) => {
+                return {x: formatTimestamp(item.timestamp), y: item.num}
+              }),
+              cubicInterpolationMode: 'monotone',
+            }]
           }
-          series.value = [{
-            name: '# Users Achieved',
-            data: datSeries,
-          }];
         }
         loading.value = false;
       });
 };
+
+const setChartOptions = () => {
+  const colors = chartSupportColors.getColors()
+  const textColorSecondary = colors.textMutedColor
+  const surfaceBorder =  colors.contentBorderColor
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        type: 'time',
+        time: {
+          unit: 'month'
+        },
+        ticks: {
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder,
+          drawOnChartArea: false  // Ensures no grid lines are drawn in the chart area
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder
+        },
+        title: {
+          display: true,
+          text: 'Distinct # of Users',
+          color: textColorSecondary,
+          font: {
+            size: 12,
+            weight: '500'
+          },
+          padding: { left: 10, right: 5 }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+    }
+  };
+}
+
+const skillsAchievedOverTimeChartRef = ref(null)
 </script>
 
 <template>
   <Card data-cy="numUsersAchievedOverTimeMetric">
     <template #header>
-      <SkillsCardHeader title="Achievements over time"></SkillsCardHeader>
+      <SkillsCardHeader title="Achievements over time">
+        <template #headerContent>
+          <chart-download-controls v-if="hasData" :vue-chart-ref="skillsAchievedOverTimeChartRef" />
+        </template>
+      </SkillsCardHeader>
     </template>
     <template #content>
       <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">
-        <apexchart v-if="chartOptions?.chart?.height" type="area" :height="chartOptions.chart.height" :options="chartOptions" :series="series" class="mt-6"></apexchart>
+      <Chart ref="skillsAchievedOverTimeChartRef"
+             type="line"
+             :data="chartData"
+             :options="chartJsOptions"
+             :class="{ 'h-[16rem]' : !hasData, 'h-[30rem]' : hasData }"
+      />
       </metrics-overlay>
     </template>
   </Card>

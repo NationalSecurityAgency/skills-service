@@ -47,21 +47,11 @@ describe('Metrics Tests - Achievements', () => {
     });
 
     it('overall levels - empty', () => {
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Achievements]')
-            .click();
+        cy.intercept('**userAchievementsChartBuilder**').as('userAchievementsChartBuilder')
+        cy.visit('/administrator/projects/proj1/metrics/achievements');
+        cy.wait('@userAchievementsChartBuilder')
 
-        cy.get('[data-cy=levelsChart]')
-            .contains('Level 5: 0 users');
-        cy.get('[data-cy=levelsChart]')
-            .contains('Level 4: 0 users');
-        cy.get('[data-cy=levelsChart]')
-            .contains('Level 3: 0 users');
-        cy.get('[data-cy=levelsChart]')
-            .contains('Level 2: 0 users');
-        cy.get('[data-cy=levelsChart]')
-            .contains('Level 1: 0 users');
+        cy.get('[data-cy=levelsChart] [data-pc-name="chart"]')
 
         cy.get('[data-cy=levelsChart]')
             .contains('No one reached Level 1 yet...');
@@ -90,23 +80,18 @@ describe('Metrics Tests - Achievements', () => {
             })
             .as('getLevels');
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Achievements]')
-            .click();
+        cy.intercept('**userAchievementsChartBuilder**').as('userAchievementsChartBuilder')
+        cy.visit('/administrator/projects/proj1/metrics/achievements');
+        cy.wait('@userAchievementsChartBuilder')
 
-        cy.contains('Level 5: 754 users');
-        cy.contains('Level 4: 1,254 users');
-        cy.contains('Level 3: 3,525 users');
-        cy.contains('Level 2: 4,521 users');
-        cy.contains('Level 1: 6,251 users');
+        cy.get('[data-cy=levelsChart] [data-pc-name="chart"]')
+
+        cy.wait(5000)
+        cy.matchSnapshotImageForElement('[data-cy=levelsChart] [data-pc-name="chart"]')
     });
 
     it('achievements table - empty table', () => {
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Achievements]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/achievements');
 
         cy.get('[data-cy=achievementsNavigator]')
             .contains('There are no records to show');
@@ -150,10 +135,7 @@ describe('Metrics Tests - Achievements', () => {
                 .format('x')
         });
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Achievements]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/achievements');
         cy.wait('@userAchievementsChartBuilder');
 
         const tableSelector = '[data-cy=achievementsNavigator-table]';
@@ -235,10 +217,7 @@ describe('Metrics Tests - Achievements', () => {
                 .format('x')
         });
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Achievements]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/achievements');
         cy.wait('@userAchievementsChartBuilder');
 
         const tableSelector = '[data-cy=achievementsNavigator-table]';
@@ -372,10 +351,7 @@ describe('Metrics Tests - Achievements', () => {
                 .format('x')
         });
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Achievements]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/achievements');
         cy.wait('@userAchievementsChartBuilder');
 
         // default is descending by date
@@ -554,10 +530,7 @@ describe('Metrics Tests - Achievements', () => {
             });
         }
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Achievements]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/achievements');
         cy.wait('@userAchievementsChartBuilder');
 
         //from date must come before to date
@@ -1024,10 +997,7 @@ describe('Metrics Tests - Achievements', () => {
                 .format('x')
         });
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Achievements]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/achievements');
 
         const tableSelector = '[data-cy=achievementsNavigator-table]';
         cy.validateTable(tableSelector, [
@@ -1146,10 +1116,7 @@ describe('Metrics Tests - Achievements', () => {
         });
         cy.request('POST', '/admin/projects/proj1/badge/badge1/skills/skill1');
 
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.get('[data-cy=metricsNav-Achievements]')
-            .click();
+        cy.visit('/administrator/projects/proj1/metrics/achievements');
         cy.contains('User Name Filter');
 
         cy.get('[data-cy="achievementsNavigator-usernameInput"]')

@@ -24,6 +24,10 @@ const props = defineProps({
   showResetFilter: {
     type: Boolean,
     default: false
+  },
+  isLoading: {
+    type: Boolean,
+    default: false
   }
 })
 const emit = defineEmits(['resetFilter'])
@@ -34,8 +38,8 @@ const resetFilter = () => {
 
 <template>
   <div class="flex flex-col gap-2 items-center my-6">
-    <i class="fa-solid fa-exclamation-circle fa-3x text-orange-400" aria-hidden="true"></i>
-    <div class="text-center">
+    <i v-if="!isLoading" class="fa-solid fa-exclamation-circle fa-3x text-orange-400" aria-hidden="true"></i>
+    <div class="text-center" v-if="!isLoading">
       <span class="text-lg">{{ noResMsg }}</span>
       <span v-if="showResetFilter" class="flex gap-2 items-center mt-1">Click
           <SkillsButton
@@ -47,6 +51,7 @@ const resetFilter = () => {
               data-cy="tblFilterResetBtn"/> to clear the existing filter.
       </span>
     </div>
+    <div v-if="isLoading" class="text-center">Loading...</div>
   </div>
 </template>
 

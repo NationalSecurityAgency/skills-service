@@ -14,20 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {ref, onMounted, computed} from 'vue';
-import { useRoute } from 'vue-router';
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import {computed, onMounted, ref} from 'vue';
+import {useRoute} from 'vue-router';
+import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
+import Chart from 'primevue/chart';
+import 'chartjs-adapter-dayjs-4/dist/chartjs-adapter-dayjs-4.esm';
 import dayjs from 'dayjs';
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import MetricsService from "@/components/metrics/MetricsService.js";
 import TimeLengthSelector from "@/components/metrics/common/TimeLengthSelector.vue";
-import NumberFormatter from '@/components/utils/NumberFormatter.js'
-import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js';
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
+import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
 
 
 const appConfig = useAppConfig();
+const chartSupportColors = useChartSupportColors()
 const route = useRoute();
 const props = defineProps({
   title: {
@@ -37,16 +39,7 @@ const props = defineProps({
   },
 });
 
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
 const layoutSizes = useLayoutSizesState()
-
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
 
 onMounted(() => {
   if (route.params.skillId) {
@@ -55,10 +48,11 @@ onMounted(() => {
     localProps.value.skillId = route.params.subjectId;
   }
   loadData();
+  chartJsOptions.value = setChartOptions();
 })
 
 const loading = ref(true);
-const distinctUsersOverTime = ref([]);
+const distinctUsersOverTimeChartData = ref({});
 const hasDataEnoughData = ref(false);
 const mutableTitle = ref(props.title);
 const byMonth = ref(false);
@@ -80,69 +74,6 @@ const timeSelectorOptions = ref([
     unit: 'year',
   },
 ]);
-const chartOptions = ref({
-  chart: {
-    type: 'area',
-    stacked: false,
-    height: 350,
-    zoom: {
-      type: 'x',
-      enabled: true,
-      autoScaleYaxis: true,
-    },
-    toolbar: {
-      autoSelected: 'zoom',
-      offsetY: -30,
-    },
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  markers: {
-    size: 0,
-  },
-  fill: {
-    type: 'gradient',
-    gradient: {
-      shadeIntensity: 1,
-      inverseColors: false,
-      opacityFrom: 0.5,
-      opacityTo: 0,
-      stops: [0, 90, 100],
-    },
-  },
-  yaxis: {
-    labels: {
-      style: {
-        colors: chartAxisColor()
-      },
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-    },
-    title: {
-      text: 'Distinct # of Users',
-    },
-  },
-  xaxis: {
-    type: 'datetime',
-    labels: {
-      style: {
-        colors: chartAxisColor()
-      }
-    }
-  },
-  tooltip: {
-    theme: themeHelper.isDarkTheme ? 'dark' : 'light',
-    shared: false,
-        y: {
-      formatter(val) {
-        return NumberFormatter.format(val);
-      },
-    },
-  },
-});
-
 const dateOptions = [{ label: 'Day/Week', value: false}, { label: 'Month', value: true }]
 const currentDateOption = ref('days');
 const isUsingDays = computed(() => {
@@ -178,15 +109,53 @@ const loadData = () => {
 
         if (response && response.users?.length > 1 && !allZeros(response.users)) {
           hasDataEnoughData.value = true;
-          distinctUsersOverTime.value = [{
-            data: response.users.map((item) => [item.value, item.count]),
-            name: 'Users',
-          }, {
-            data: response.newUsers.map((item) => [item.value, item.count]),
-            name: 'New Users',
-          }];
+          const formatTimestamp = (timestamp) => {
+            const format = localProps.value.byMonth ? 'YYYY-MM' : 'YYYY-MM-DD';
+            return dayjs(timestamp).format(format)
+          }
+
+          const addZeroPointAtStart = (data) => {
+            if (data && data.length > 0) {
+              const earliestDate = data[0].value
+              const prevDay = dayjs(earliestDate).subtract(1, 'day').toDate()
+              data.unshift({
+                value: formatTimestamp(prevDay),
+                count: 0
+              })
+            }
+
+            return data
+          }
+
+          const usersData = addZeroPointAtStart(response.users)
+          const usersSeriesData = usersData.map((item) => {
+            return {x: formatTimestamp(item.value), y: item.count}
+          })
+
+          const newUsersData = addZeroPointAtStart(response.newUsers)
+          const newUsersSeriesData = newUsersData.map((item) => {
+            return {x: formatTimestamp(item.value), y: item.count}
+          })
+          distinctUsersOverTimeChartData.value = {
+            datasets: [{
+              label: 'Users',
+              data: usersSeriesData,
+              cubicInterpolationMode: 'monotone',
+              order: 2, // Lower order means it will be drawn first (in the background)
+              borderColor: getComputedStyle(document.documentElement).getPropertyValue('--p-cyan-500'),
+              backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--p-cyan-100'),
+            }, {
+              label: 'New Users',
+              data: newUsersSeriesData,
+              cubicInterpolationMode: 'monotone',
+              order: 1,  // Higher order means it will be drawn last (on top)
+              borderColor: getComputedStyle(document.documentElement).getPropertyValue('--p-green-500'),
+              backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--p-green-100'),
+            }]
+          }
+          chartJsOptions.value.scales.x.time.unit = byMonth.value ? 'month' : 'day';
         } else {
-          distinctUsersOverTime.value = [];
+          distinctUsersOverTimeChartData.value = [];
           hasDataEnoughData.value = false;
         }
         loading.value = false;
@@ -211,6 +180,88 @@ const dateOptionChanged = (option) => {
     loadData()
   }
 }
+
+const chartJsOptions = ref();
+const setChartOptions = () => {
+  const colors = chartSupportColors.getColors()
+  const textColor = colors.textColor
+  const textColorSecondary = colors.textMutedColor
+  const surfaceBorder =  colors.contentBorderColor
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: {
+        type: 'time',
+        time: {
+          unit: 'day',
+          displayFormats: {
+            'day': 'MMM D, YYYY', // Example: Jan 1, 2023
+            'month': 'MMM YYYY', // Example: Jan 2023
+            'year': 'YYYY'        // Example: 2023
+          },
+        },
+        ticks: {
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder,
+          drawOnChartArea: false  // Ensures no grid lines are drawn in the chart area
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          color: textColorSecondary
+        },
+        grid: {
+          color: surfaceBorder
+        },
+        title: {
+          display: true,
+          text: 'Distinct # of Users',
+          color: textColorSecondary,
+          font: {
+            size: 12,
+            weight: '500'
+          },
+          padding: { left: 10, right: 5 }
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: textColor,
+          padding: 20,
+          boxWidth: 12,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      },
+      tooltip: {
+        callbacks: {
+          title: (context) => {
+            const date = new Date(context[0].parsed.x)
+            const formatStr = byMonth.value ? 'MMM YYYY' :'MMM D, YYYY'
+            return dayjs(date).format(formatStr)
+          },
+        },
+      }
+    },
+    animation: {
+      onComplete: function() {
+        usersChartAnimationCompleted.value = true;
+      }
+    },
+  };
+}
+
+const usersChartRef = ref(null)
+const usersChartAnimationCompleted = ref(false)
 </script>
 
 <template>
@@ -218,23 +269,33 @@ const dateOptionChanged = (option) => {
     <template #header>
       <SkillsCardHeader :title="mutableTitle">
         <template #headerContent>
-          <span class="mr-3">
-            <Badge v-for="option in dateOptions" class="ml-2"
+          <div class="flex gap-2 items-center">
+          <div class="flex gap-1">
+            <Badge v-for="option in dateOptions"
                    :class="{'can-select': byMonth !== option.value }"
                    :severity="byMonth === option.value ? 'success' : 'secondary'"
                    :key="option.label"
                    @click="dateOptionChanged(option.value)">
               {{option.label}}
             </Badge>
-          </span>
+          </div>
           |
           <time-length-selector :options="timeSelectorOptions" @time-selected="updateTimeRange" ref="timeRangeSelector" :disable-days="byMonth" />
+
+          <chart-download-controls :vue-chart-ref="usersChartRef" />
+          </div>
         </template>
       </SkillsCardHeader>
     </template>
     <template #content>
-      <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity." class="mt-6">
-        <apexchart type="area" height="350" width="100%" :options="chartOptions" :series="distinctUsersOverTime" data-cy="apexchart"></apexchart>
+      <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity.">
+        <Chart ref="usersChartRef"
+               id="usersTimeChart"
+               type="line"
+               :data="distinctUsersOverTimeChartData"
+               :options="chartJsOptions"
+               class="h-[30rem]" />
+        <div v-if="usersChartAnimationCompleted" data-cy="usersTimeChart_animationCompleted" />
       </metrics-overlay>
     </template>
   </Card>

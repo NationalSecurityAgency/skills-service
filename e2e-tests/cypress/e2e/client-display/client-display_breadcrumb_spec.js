@@ -34,7 +34,7 @@ describe('Client Display Breadcrumb Tests', () => {
                 cy.loginAsProxyUser();
             });
 
-        cy.intercept('GET', '/api/projects/proj1/pointHistory')
+        cy.intercept('GET', '/api/projects/proj1/pointHistory**')
             .as('pointHistoryChart');
     });
 

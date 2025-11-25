@@ -54,13 +54,10 @@ const props = defineProps({
   },
 })
 
-const doShow = computed(() => {
-  return props.loading || !props.hasData;
-})
 </script>
 
 <template>
-  <SkillsOverlay :show="doShow" opacity="50">
+  <SkillsOverlay :show="props.loading || !props.hasData" opacity="50">
     <slot></slot>
     <template #overlay>
       <div v-if="loading">
@@ -70,7 +67,9 @@ const doShow = computed(() => {
         <Tag class="p-2 text-base font-light":icon="chartNotGeneratedIcon" :value="chartNotGeneratedMsg" severity="info"></Tag>
       </div>
       <div v-if="!loading && loadedOnce && !hasData" class="alert alert-info">
-        <Tag class="mr-1 p-2 text-base font-light" :icon="noDataIcon" :value="noDataMsg" severity="info"></Tag>
+        <slot name="no-data">
+          <Tag class="mr-1 p-2 text-base font-light" :icon="noDataIcon" :value="noDataMsg" severity="info"></Tag>
+        </slot>
       </div>
     </template>
   </SkillsOverlay>

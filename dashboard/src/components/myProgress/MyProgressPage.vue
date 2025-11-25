@@ -14,11 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { onMounted, ref } from 'vue'
-import { useMyProgressState } from '@/stores/UseMyProgressState.js'
+import {onMounted, ref} from 'vue'
+import {useMyProgressState} from '@/stores/UseMyProgressState.js'
 import ProgressAndRankingSplash from '@/components/myProgress/ProgressAndRankingSplash.vue'
 import InfoSnapshotCard from '@/components/myProgress/InfoSnapshotCard.vue'
-import NumSkills from '@/components/myProgress/NumSkills.vue'
 import LastEarnedCard from '@/components/myProgress/LastEarnedCard.vue'
 import BadgeNumCard from '@/components/myProgress/BadgeNumCard.vue'
 import MyCurrentProjects from '@/components/myProgress/MyCurrentProjects.vue'

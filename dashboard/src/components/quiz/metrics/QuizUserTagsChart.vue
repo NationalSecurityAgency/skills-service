@@ -20,144 +20,106 @@ import {useNumberFormat} from '@/common-components/filter/UseNumberFormat.js';
 import QuizService from '@/components/quiz/QuizService.js';
 import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue';
 import {useUserTagsUtils} from "@/components/utils/UseUserTagsUtils.js";
-import {useThemesHelper} from "@/components/header/UseThemesHelper.js";
-import {useSkillsDisplayThemeState} from "@/skills-display/stores/UseSkillsDisplayThemeState.js";
+import Chart from "primevue/chart";
+import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
 
 const route = useRoute()
 const numberFormat = useNumberFormat()
 const userTagsUtils = useUserTagsUtils();
-const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
+const chartSupportColors = useChartSupportColors()
 
 const loading = ref(true);
 const hasData = ref(false);
-const series = ref([]);
+const chartJsOptions = ref();
+const chartData = ref({})
 
-
-const chartAxisColor = () => {
-  if (themeState.theme.charts.axisLabelColor) {
-    return themeState.theme.charts.axisLabelColor
-  }
-  return themeHelper.isDarkTheme ? 'white' : undefined
-}
-
-const chartOptions = ref({
-  chart: {
-    height: 350,
-    width: 250,
-    type: 'bar',
-    toolbar: {
-      show: true,
-      offsetX: -13,
-      offsetY: 0,
-    },
-  },
-  tooltip: {
-    y: {
-      formatter(val) {
-        return numberFormat.pretty(val);
-      },
-    },
-  },
-  plotOptions: {
-    bar: {
-      horizontal: true,
-      barHeight: '40%',
-      dataLabels: {
-        position: 'bottom',
-      },
-      distributed: true,
-    },
-  },
-  stroke: {
-    show: true,
-    width: 2,
-    colors: ['transparent'],
-  },
-  xaxis: {
-    categories: [],
-    title: {
-      text: '# of runs',
-    },
-    labels: {
-      style: {
-        colors: chartAxisColor()
-      },
-      formatter(val) {
-        return Math.trunc(val);
-      },
-    },
-  },
-  yaxis: {
-    title: {
-      text: '',
-    },
-    labels: {
-      show: false,
-      style: {
-        colors: chartAxisColor()
-      },
-    },
-  },
-  dataLabels: {
-    enabled: true,
-    textAnchor: 'start',
-    offsetX: 0,
-    formatter(val, {seriesIndex, dataPointIndex, w}) {
-      return `${w.globals.seriesX[seriesIndex][dataPointIndex]}: ${numberFormat.pretty(val)}`;
-    },
-    style: {
-      colors: ['#17a2b8'],
-      fontSize: '14px',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      fontWeight: 'bold',
-    },
-    dropShadow: {
-      enabled: true,
-    },
-    background: {
-      enabled: true,
-      foreColor: '#ffffff',
-      padding: 10,
-      borderRadius: 2,
-      borderWidth: 1,
-      borderColor: '#686565',
-      opacity: 1,
-      dropShadow: {
-        enabled: false,
-      },
-    },
-  },
-  legend: {
-    show: false,
-  },
-});
-
-onMounted(()=> {        
+onMounted(()=> {
+  chartJsOptions.value = setChartOptions()
   loading.value = true;
   QuizService.getUserTagCounts(route.params.quizId, userTagsUtils.userTagKey())
       .then((res) => {
-        const seriesData = res.map((item) => ({ x: item.value, y: item.count }));
-        const height = seriesData.length > 0 ? 150 + (seriesData.length * 50) : 350;
-        chartOptions.value.chart.height = height;
-        series.value = [{ data: seriesData, name: '# of Runs' }];
-        hasData.value = seriesData.length > 0;
+        chartData.value = {
+          labels: res.map((item) => item.value),
+          datasets: [{
+            label: '# of Runs',
+            data: res.map((item) => item.count),
+            backgroundColor: chartSupportColors.getBackgroundColorArray(res.length),
+            borderColor: chartSupportColors.getBorderColorArray(res.length),
+            borderWidth: 1,
+            borderRadius: 6,
+            minBarLength: 4,
+            maxBarThickness: 40,
+          }]
+        }
+
+        hasData.value = res.length > 0;
       })
       .finally(() => {
         loading.value = false;
       });
 })
+
+const setChartOptions = () => {
+  const colors = chartSupportColors.getColors()
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: '# of Runs',
+          color: colors.textMutedColor,
+        },
+        ticks: {
+          color: colors.textMutedColor
+        },
+        grid: {
+          color: colors.contentBorderColor,
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: colors.textMutedColor
+        },
+        grid: {
+          color: colors.contentBorderColor
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+    }
+  };
+}
+
+const quizUserTagsChartRef = ref()
 </script>
 
 <template>
-    <Card :pt="{ content: { class: 'p-0' } }" data-cy="quizUserTagsChart">
-      <template #title>{{ `${userTagsUtils.userTagLabel()} Metrics (Top 20)` }}</template>
+    <Card data-cy="quizUserTagsChart">
+      <template #header>
+        <SkillsCardHeader :title="`${userTagsUtils.userTagLabel()} Metrics (Top 20)`">
+          <template #headerContent>
+            <chart-download-controls v-if="hasData" :vue-chart-ref="quizUserTagsChartRef"/>
+          </template>
+        </SkillsCardHeader>
+      </template>
       <template #content>
-        <div style="max-height: 400px; min-height: 275px; overflow-y: auto; overflow-x: clip;" class="pt-2 pr-2">
           <MetricsOverlay :loading="loading" :has-data="hasData" no-data-msg="No data yet...">
-            <apexchart v-if="!loading" type="bar" width="100%" :height="chartOptions?.chart?.height" :options="chartOptions" :series="series"></apexchart>
+            <Chart ref="quizUserTagsChartRef"
+                   type="bar"
+                   :data="chartData"
+                   :options="chartJsOptions"
+                   class="min-h-[12em]"
+            />
           </MetricsOverlay>
-        </div>
+
       </template>
     </Card>
 </template>

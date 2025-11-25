@@ -14,40 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import {onMounted, ref} from 'vue';
+import {useRoute} from 'vue-router';
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import MetricsService from "@/components/metrics/MetricsService.js";
+import Chart from "primevue/chart";
+import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
+import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
 
 const props = defineProps(['skillName']);
 const route = useRoute();
+const chartSupportColors = useChartSupportColors()
 
-const series = ref([]);
-const chartOptions = ref({
-  chart: {
-    height: 250,
-    width: 250,
-    type: 'pie',
-    toolbar: {
-      show: true,
-      offsetX: 0,
-      offsetY: -75,
-    },
-  },
-  colors: ['#17a2b8', '#28a745'],
-  labels: ['stopped after achieving', 'performed Skill at least once after achieving'],
-  dataLabels: {
-    enabled: false,
-  },
-  legend: {
-    position: 'top',
-    horizontalAlign: 'left',
-  },
-});
+const chartJsOptions = ref();
+const chartData = ref({})
 const loading = ref(true);
 const hasData = ref(false);
 
+
 onMounted(() => {
+  chartJsOptions.value = setChartOptions()
   loadData();
 });
 
@@ -60,21 +46,57 @@ const loadData = () => {
             && Object.prototype.hasOwnProperty.call(dataFromServer, 'usersPostAchievement')) {
           const usersWhoStoppedAfterAchieving = dataFromServer.totalUsersAchieved - dataFromServer.usersPostAchievement;
           hasData.value = true;
-          series.value = [usersWhoStoppedAfterAchieving, dataFromServer.usersPostAchievement];
+          chartData.value = {
+            labels: ['stopped after achieving', 'performed Skill at least once after achieving'],
+            datasets: [{
+              label: 'Number of Users',
+              data: [usersWhoStoppedAfterAchieving, dataFromServer.usersPostAchievement],
+            }]
+          }
         }
         loading.value = false;
       });
 };
+
+const setChartOptions = () => {
+  const colors = chartSupportColors.getColors()
+  return {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          color: colors.textColor,
+          padding: 20,
+          boxWidth: 12,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        },
+      },
+    }
+  }
+}
+const postAchievementUserCountsChartRef = ref(null)
 </script>
 
 <template>
   <Card data-cy="numUsersPostAchievement">
     <template #header>
-      <SkillsCardHeader title="User Counts" title-tag="h4"></SkillsCardHeader>
+      <SkillsCardHeader title="User Counts" title-tag="h4">
+        <template #headerContent>
+          <chart-download-controls v-if="hasData" :vue-chart-ref="postAchievementUserCountsChartRef" />
+        </template>
+      </SkillsCardHeader>
     </template>
     <template #content>
-      <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill.">
-        <apexchart type="pie" height="350" :options="chartOptions" :series="series" class="mt-4"></apexchart>
+      <metrics-overlay :loading="loading" :has-data="hasData" no-data-msg="No achievements yet for this skill." class="flex items-center justify-center">
+        <div class="w-full max-w-[20rem] h-full max-h-[20rem]">
+          <Chart ref="postAchievementUserCountsChartRef"
+                 type="pie"
+                 :data="chartData"
+                 :options="chartJsOptions"
+                 class="w-full h-full"/>
+        </div>
       </metrics-overlay>
     </template>
   </Card>

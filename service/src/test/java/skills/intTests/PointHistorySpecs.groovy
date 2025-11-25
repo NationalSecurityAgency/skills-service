@@ -149,43 +149,6 @@ class PointHistorySpecs extends DefaultIntSpec {
         res1.achievements.find { it.name == "Level 2" }.achievedOn == res1.pointsHistory.get(3).dayPerformed
     }
 
-
-    def "empty dates should carry points from previous day"() {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-
-        List<Map> skills = SkillsFactory.createSkills(2)
-        skills = skills.collect { it.numPerformToCompletion = 10; return it; }
-        def subject = SkillsFactory.createSubject()
-
-        skillsService.createProject(SkillsFactory.createProject())
-        skillsService.createSubject(subject)
-        skillsService.createSkills(skills)
-
-        List<Date> dates
-        use(TimeCategory) {
-            dates = [new Date(), 1.day.ago, 2.days.ago, 3.days.ago].sort()
-        }
-        when:
-        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, dates.get(0))
-        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, dates.get(1))
-        skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(1).skillId], userId, dates.get(1))
-        def res1 = skillsService.getPointHistory(userId, SkillsFactory.defaultProjId)
-
-        then:
-        res1.pointsHistory.size() == 4
-        res1.pointsHistory.get(0).points == 10
-        parseDate(res1.pointsHistory.get(0).dayPerformed) ==  dates.get(0).clearTime()
-
-        res1.pointsHistory.get(1).points == 30
-        parseDate(res1.pointsHistory.get(1).dayPerformed) ==  dates.get(1).clearTime()
-
-        res1.pointsHistory.get(2).points == 30
-        parseDate(res1.pointsHistory.get(2).dayPerformed) ==  dates.get(2).clearTime()
-
-        res1.pointsHistory.get(3).points == 30
-        parseDate(res1.pointsHistory.get(3).dayPerformed) ==  dates.get(3).clearTime()
-    }
-
     def "SUBJECTS: user has no points"(){
         List<Map> skills = SkillsFactory.createSkills(2)
         def subject = SkillsFactory.createSubject()
@@ -368,15 +331,13 @@ class PointHistorySpecs extends DefaultIntSpec {
         res1.achievements.find { it.name == "Level 2" }.points == res1.pointsHistory.get(3).points
         res1.achievements.find { it.name == "Level 2" }.achievedOn == res1.pointsHistory.get(3).dayPerformed
 
-        res2.pointsHistory.size() == 4
+        res2.pointsHistory.size() == 3
         parseDate(res2.pointsHistory.get(0).dayPerformed) == dates.get(0).clearTime()
         res2.pointsHistory.get(0).points == 100
         parseDate(res2.pointsHistory.get(1).dayPerformed) == dates.get(1).clearTime()
         res2.pointsHistory.get(1).points == 300
         parseDate(res2.pointsHistory.get(2).dayPerformed) == dates.get(2).clearTime()
         res2.pointsHistory.get(2).points == 500
-        parseDate(res2.pointsHistory.get(3).dayPerformed) == dates.get(3).clearTime()
-        res2.pointsHistory.get(3).points == 500
 
         res2.achievements.size() == 2
 
@@ -387,7 +348,7 @@ class PointHistorySpecs extends DefaultIntSpec {
         res2.achievements.find { it.name == "Levels 2, 3, 4" }.points == 500
     }
 
-    def "SUBJECTS: empty dates should carry points from prevous day"() {
+    def "SUBJECTS: empty dates should carry points from previous day"() {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
         List<Map> skills = SkillsFactory.createSkills(2)
@@ -409,18 +370,12 @@ class PointHistorySpecs extends DefaultIntSpec {
         def res1 = skillsService.getPointHistory(userId, SkillsFactory.defaultProjId, skills.get(0).subjectId)
 
         then:
-        res1.pointsHistory.size() == 4
+        res1.pointsHistory.size() == 2
         res1.pointsHistory.get(0).points == 10
         parseDate(res1.pointsHistory.get(0).dayPerformed) ==  dates.get(0).clearTime()
 
         res1.pointsHistory.get(1).points == 30
         parseDate(res1.pointsHistory.get(1).dayPerformed) == dates.get(1).clearTime()
-
-        res1.pointsHistory.get(2).points == 30
-        parseDate(res1.pointsHistory.get(2).dayPerformed) == dates.get(2).clearTime()
-
-        res1.pointsHistory.get(3).points == 30
-        parseDate(res1.pointsHistory.get(3).dayPerformed) == dates.get(3).clearTime()
     }
 
     def "history considers group skills"() {

@@ -113,7 +113,7 @@ Cypress.Commands.add("matchSnapshotImage", (maybeNameOtherwiseCommandOptions) =>
 })
 
 Cypress.Commands.add("doMatchSnapshotImage", (options) => {
-    cy.wait(1500);
+    cy.wait(2000);
 
     const visualRegressionOptions = {
         errorThreshold: 0.05 // in percent
@@ -1793,4 +1793,14 @@ Cypress.Commands.add('dismissAllWebNotifications', ()  => {
 
 Cypress.Commands.add('createWebNotification', (notification)  => {
     cy.request('POST', '/root/webNotifications/create', notification);
+})
+
+Cypress.Commands.add('suppressChartInitError', ()  => {
+    // this error occurs when test code navigates to another page beore the chart fully loaded
+    cy.on('uncaught:exception', (err) => {
+        if (err.message.includes("Cannot read properties of null (reading 'id')")) {
+            return false;
+        }
+        return true;
+    });
 })

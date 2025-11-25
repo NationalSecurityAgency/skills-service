@@ -62,11 +62,11 @@ const hasBadges = computed(() => {
       <user-overall-progress class="mt-4"/>
 
       <div class="mt-4 flex flex-col lg:flex-row gap-4 items-stretch">
-        <div class=" items-center">
+        <div class="">
           <my-rank />
         </div>
-        <div class="flex-1 items-center">
-          <point-progress-chart />
+        <div class="flex-1 min-w-0">
+          <point-progress-chart class="w-full" />
         </div>
         <div v-if="hasBadges" class="">
           <my-badges :badges="userProgress.userProgressSummary.badges"></my-badges>

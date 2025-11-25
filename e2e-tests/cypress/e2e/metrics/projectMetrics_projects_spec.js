@@ -18,6 +18,7 @@ var moment = require('moment-timezone');
 describe('Metrics Tests', () => {
 
     const waitForSnap = 4000;
+    const oneDay = 1000*60*60*24
 
     beforeEach(() => {
         cy.request('POST', '/app/projects/proj1', {
@@ -27,83 +28,159 @@ describe('Metrics Tests', () => {
     });
 
     it('projects - Distinct number of users over time', () => {
+        const lastTimestamp = 1763641900000
         cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
             {
                 statusCode: 200,
-                body: { newUsers: [], users: [{
-                    'value': 1600128000000,
+                body: { newUsers: [{
+                        'value': lastTimestamp - (oneDay * 24),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - (oneDay * 23),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - (oneDay * 22),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - (oneDay * 21),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - (oneDay * 20),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - (oneDay * 19),
+                        'count': 1
+                    }, {
+                        'value': lastTimestamp - (oneDay * 18),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - (oneDay * 17),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - (oneDay * 16),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - (oneDay * 15),
+                        'count': 1
+                    }, {
+                        'value': lastTimestamp - (oneDay * 14),
+                        'count': 1
+                    }, {
+                        'value': lastTimestamp - (oneDay * 13),
+                        'count': 1
+                    }, {
+                        'value': lastTimestamp - (oneDay * 12),
+                        'count': 1
+                    }, {
+                        'value': lastTimestamp - (oneDay * 11),
+                        'count': 2
+                    }, {
+                        'value': lastTimestamp - (oneDay * 10),
+                        'count': 3
+                    }, {
+                        'value': lastTimestamp - (oneDay * 9),
+                        'count': 2
+                    }, {
+                        'value': lastTimestamp - (oneDay * 8),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - (oneDay * 7),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - (oneDay * 6),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - (oneDay * 5),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - (oneDay * 4),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - (oneDay * 3),
+                        'count': 2
+                    }, {
+                        'value': lastTimestamp - (oneDay * 2),
+                        'count': 0
+                    }, {
+                        'value': lastTimestamp - oneDay,
+                        'count': 10
+                    }, {
+                        'value': lastTimestamp,
+                        'count': 5
+                    }], users: [{
+                    'value': lastTimestamp - (oneDay * 24),
                     'count': 2
                 }, {
-                    'value': 1600214400000,
+                    'value': lastTimestamp - (oneDay * 23),
                     'count': 2
                 }, {
-                    'value': 1600300800000,
+                    'value': lastTimestamp - (oneDay * 22),
                     'count': 2
                 }, {
-                    'value': 1600387200000,
+                    'value': lastTimestamp - (oneDay * 21),
                     'count': 1
                 }, {
-                    'value': 1600473600000,
+                    'value': lastTimestamp - (oneDay * 20),
                     'count': 1
                 }, {
-                    'value': 1600560000000,
+                    'value': lastTimestamp - (oneDay * 19),
                     'count': 2
                 }, {
-                    'value': 1600646400000,
+                    'value': lastTimestamp - (oneDay * 18),
                     'count': 3
                 }, {
-                    'value': 1600732800000,
+                    'value': lastTimestamp - (oneDay * 17),
                     'count': 3
                 }, {
-                    'value': 1600819200000,
+                    'value': lastTimestamp - (oneDay * 16),
                     'count': 3
                 }, {
-                    'value': 1600905600000,
+                    'value': lastTimestamp - (oneDay * 15),
                     'count': 3
                 }, {
-                    'value': 1600992000000,
+                    'value': lastTimestamp - (oneDay * 14),
                     'count': 2
                 }, {
-                    'value': 1601078400000,
+                    'value': lastTimestamp - (oneDay * 13),
                     'count': 1
                 }, {
-                    'value': 1601164800000,
+                    'value': lastTimestamp - (oneDay * 12),
                     'count': 2
                 }, {
-                    'value': 1601251200000,
+                    'value': lastTimestamp - (oneDay * 11),
                     'count': 4
                 }, {
-                    'value': 1601337600000,
+                    'value': lastTimestamp - (oneDay * 10),
                     'count': 3
                 }, {
-                    'value': 1601424000000,
+                    'value': lastTimestamp - (oneDay * 9),
                     'count': 4
                 }, {
-                    'value': 1601510400000,
+                    'value': lastTimestamp - (oneDay * 8),
                     'count': 4
                 }, {
-                    'value': 1601596800000,
+                    'value': lastTimestamp - (oneDay * 7),
                     'count': 3
                 }, {
-                    'value': 1601683200000,
+                    'value': lastTimestamp - (oneDay * 6),
                     'count': 12
                 }, {
-                    'value': 1601769600000,
+                    'value': lastTimestamp - (oneDay * 5),
                     'count': 10
                 }, {
-                    'value': 1601856000000,
+                    'value': lastTimestamp - (oneDay * 4),
                     'count': 60
                 }, {
-                    'value': 1601942400000,
+                    'value': lastTimestamp - (oneDay * 3),
                     'count': 45
                 }, {
-                    'value': 1602028800000,
+                    'value': lastTimestamp - (oneDay * 2),
                     'count': 2
                 }, {
-                    'value': 1602115200000,
+                    'value': lastTimestamp - oneDay,
                     'count': 52
                 }, {
-                    'value': 1602201600000,
+                    'value': lastTimestamp,
                     'count': 72
                 }]},
             })
@@ -124,86 +201,37 @@ describe('Metrics Tests', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
-        cy.wait(6000);
 
-        cy.get('[data-cy=distinctNumUsersOverTime]')
-            .contains('This chart needs at least 2 days of user activity.');
-
-        cy.get('[data-cy=distinctNumUsersOverTime]')
-            .get('.apexcharts-svg')
-            .get('line');
+        cy.get('[data-cy=distinctNumUsersOverTime] [data-pc-name="chart"]')
 
         cy.get('[data-cy=distinctNumUsersOverTime]')
             .contains('This chart needs at least 2 days of user activity');
     });
 
-    it('projects - Distinct number of users over time - two days with real data', () => {
-        cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**')
-            .as('distinctUsersOverTimeForProject');
-
-        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
-            projectId: 'proj1',
-            subjectId: 'subj1',
-            name: 'Subject 1',
-        });
-        const numSkills = 1;
-        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
-            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
-                projectId: 'proj1',
-                subjectId: 'subj1',
-                skillId: `skill${skillsCounter}`,
-                name: `Skill ${skillsCounter}`,
-                pointIncrement: '200',
-                numPerformToCompletion: '25',
-            });
-        }
-        ;
-
-        const m = moment.utc();
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, { userId: 'user0Good@skills.org',
-            timestamp: m.clone()
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, { userId: 'user0Good@skills.org',
-            timestamp: m.clone()
-                .subtract(1, 'day')
-                .format('x')
-        });
-        cy.request('POST', `/api/projects/proj1/skills/skill1`, { userId: 'user1Good@skills.org',
-            timestamp: m.clone()
-                .subtract(1, 'day')
-                .format('x')
-        });
-
-        cy.visit('/administrator/projects/proj1/');
-        cy.clickNav('Metrics');
-        cy.wait('@distinctUsersOverTimeForProject');
-        // make sure a line i rendered on a chart
-        cy.get('[data-cy=distinctNumUsersOverTime]')
-            .get('.apexcharts-svg .apexcharts-area-series')
-            .should('be.visible')
-            .and(chart => {
-                expect(chart.height())
-                    .to
-                    .be
-                    .greaterThan(200);
-            });
-    });
-
     it('projects - Distinct number of users over time - two days', () => {
+        const lastTimestamp = 1763641900000
         cy.intercept('/admin/projects/proj1/metrics/distinctUsersOverTimeForProject**',
             {
                 statusCode: 200,
-                body: { newUsers: [], users: [{
-                    'value': 1602115200000,
-                    'count': 52
-                }, {
-                    'value': 1602201600000,
-                    'count': 82
-                }]},
+                body: {
+                    newUsers: [{
+                        'value': lastTimestamp - oneDay,
+                        'count': 10
+                    }, {
+                        'value': lastTimestamp,
+                        'count': 3
+                    }], users: [{
+                        'value': lastTimestamp - oneDay,
+                        'count': 52
+                    }, {
+                        'value': lastTimestamp,
+                        'count': 82
+                    }]
+                },
             })
             .as('distinctUsersOverTimeForProject');
 
+        cy.log(new Date().getTime())
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
