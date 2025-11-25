@@ -45,7 +45,6 @@ const startWave = () => {
     do {
       activeIndex.value = (activeIndex.value + 1) % props.value.length
     } while (CHARS_TO_SKIP.includes(props.value[activeIndex.value]))
-    console.log(props.value[activeIndex.value])
   }, props.speed)
 }
 </script>
