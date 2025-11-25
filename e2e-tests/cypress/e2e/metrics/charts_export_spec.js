@@ -57,10 +57,6 @@ describe('Metrics Tests - Achievements', () => {
 
         // Wait for the file to be downloaded
 const expectedCsv = `Date,Users,New Users
-2025-10-22,0,0
-2025-10-23,0,0
-2025-10-24,0,0
-2025-10-25,0,0
 2025-10-26,0,0
 2025-10-27,0,0
 2025-10-28,0,0
@@ -88,6 +84,10 @@ const expectedCsv = `Date,Users,New Users
 2025-11-19,1,1
 2025-11-20,3,2
 2025-11-21,1,0
+2025-11-22,0,0
+2025-11-23,0,0
+2025-11-24,0,0
+2025-11-25,0,0
 `
         cy.validateCsvFile(expectedCsv)
     });
