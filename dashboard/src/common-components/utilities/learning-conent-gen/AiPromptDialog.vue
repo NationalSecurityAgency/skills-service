@@ -305,7 +305,11 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
           </div>
           <assistant-msg v-if="historyItem.role === ChatRole.ASSISTANT" class="flex flex-col gap-2" :id="historyItem.id" :is-generating="historyItem.isGenerating">
             <div>
-              <gen-status :id="`${historyItem.id}-genStatusId`" :welcome-msg="historyItem.origMessage" :is-generating="historyItem.isGenerating" data-cy="origSegment"/>
+              <gen-status :id="`${historyItem.id}-genStatusId`"
+                          :welcome-msg="historyItem.origMessage"
+                          :is-generating="historyItem.isGenerating"
+                          :is-generate-value-empty="!historyItem.generatedValue || historyItem.generatedValue.trim() === ''"
+                          data-cy="origSegment"/>
             </div>
             <div v-if="historyItem.generatedValue" class="px-5 border rounded-lg bg-blue-50">
               <slot name="generatedValue" :historyItem="historyItem" data-cy="generatedSegment"/>
