@@ -30,6 +30,7 @@ describe('Generate Desc Fail And Cancel Tests', () => {
                 const conf = res.body;
                 conf.enableOpenAIIntegration = true;
                 conf.addPrefixToInvalidParagraphsOptions = '(A) ,(B) ,(C) ,(D) ';
+                conf.openaiTakingLongerThanExpectedTimeoutPerMsg = 5000
                 res.send(conf);
             });
         }).as('getConfig');
@@ -67,12 +68,12 @@ describe('Generate Desc Fail And Cancel Tests', () => {
         // cy.wait('@openaiStream', { timeout: 40000 })
 
         const messageToWaitFor = [
-            "This is taking longer than expected but I am still working on it...",
-            "Still working on generating the best response for you...",
-            "Hang tight! Still processing your request...",
-            "I am trying but unfortunately it is still taking way longer than expected...",
+            "Just a moment while I get everything ready.",
+            "Hang tight! Still processing your request.",
+            "Still working on generating the best response for you.",
             "I am still trying, sorry for the delay!",
-            "I may not be able to generate a description at this time. But I'll try my best to get it done."
+            "This is taking longer than expected but I am still working on it.",
+            "I am trying but unfortunately it is still taking way longer than expected.",
         ]
         messageToWaitFor.forEach((message) => {
             cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(message)

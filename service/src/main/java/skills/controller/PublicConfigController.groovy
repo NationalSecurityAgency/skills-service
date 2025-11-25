@@ -95,7 +95,7 @@ class PublicConfigController {
     @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     Map<String,Object> getConfig(){
-        Map<String,String> res = new HashMap<>(uiConfigProperties.ui)
+        Map<String,Object> res = new HashMap<>(uiConfigProperties.ui)
         configureUserCommunityProps(res)
         res["authMode"] = authMode.name()
         res["needToBootstrap"] = !accessSettingsStorageService.rootAdminExists()
@@ -119,7 +119,22 @@ class PublicConfigController {
         if(authMode.name() == 'SAML2'){
             res['saml2RegistrationId'] = regId
         }
+
+        updatedSpringListProps(res, "openaiTakingLongerThanExpectedMessages")
+
         return res
+    }
+
+    /**
+     * @param prefix
+     * @param currentProps - will be mutated in place
+     * @return
+     */
+    private static void updatedSpringListProps(Map<String,Object> currentProps, String prefix) {
+        String normalizeKey = prefix
+        List<String> listOfValues = currentProps.findAll { it.key.startsWith(normalizeKey) }.sort { it.key }.collect { it.value?.toString() }
+        currentProps.removeAll { it.key.startsWith(normalizeKey) }
+        currentProps[normalizeKey] = listOfValues
     }
 
     @CrossOrigin(originPatterns = ['*'])

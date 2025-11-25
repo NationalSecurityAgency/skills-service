@@ -27,6 +27,7 @@ import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {useOpenaiService} from "@/common-components/utilities/learning-conent-gen/UseOpenaiService.js";
 import SkillsDropDown from "@/components/utils/inputForm/SkillsDropDown.vue";
 import Slider from "primevue/slider";
+import GenStatus from "@/common-components/utilities/learning-conent-gen/GenStatus.vue";
 
 const model = defineModel()
 const props = defineProps({
@@ -181,37 +182,8 @@ const onStartStopBtn = () => {
   }
 }
 
-const checkThatProgressWasMade = () => {
-  const TIMEOUT_MS = 5000;
-  const MAX_ATTEMPTS = 6; // Max 30 seconds (5s * 6)
-  let numAttempts = 0;
-  const statusMessages = [
-    "This is taking longer than expected but I am still working on it...",
-    "Still working on generating the best response for you...",
-    "Hang tight! Still processing your request...",
-    "I am trying but unfortunately it is still taking way longer than expected...",
-    "I am still trying, sorry for the delay!",
-    "I may not be able to generate a description at this time. But I'll try my best to get it done."
-  ];
-  const lastItem = getLastChatItem()
-  const initialLength = lastItem.generatedValue.length;
-
-  const checkProgress = () => {
-    setTimeout(() => {
-      if (isGenerating.value && numAttempts < MAX_ATTEMPTS && lastItem.generatedValue.length === initialLength) {
-        lastItem.origMessage += ` \n${statusMessages[numAttempts]}`
-        numAttempts += 1
-        log.info(`GenerateDescriptionDialog: Checking progress attempt=[${numAttempts}]`)
-        checkProgress()
-      }
-    }, TIMEOUT_MS)
-  }
-  checkProgress()
-}
-
 const genWithStreaming = (instructionsToSend) => {
   lastPromptCancelled.value = false
-  checkThatProgressWasMade()
   scrollInstructionsIntoView()
   return openaiService.prompt(instructionsToSend,
       (chunk) => {
@@ -318,7 +290,7 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
                   </div>
                 </div>
               </div>
-            </div>
+            </div>f
           </Fieldset>
         </div>
       </div>
@@ -332,8 +304,8 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
             </user-msg>
           </div>
           <assistant-msg v-if="historyItem.role === ChatRole.ASSISTANT" class="flex flex-col gap-2" :id="historyItem.id" :is-generating="historyItem.isGenerating">
-            <div class="flex gap-2 items-center" data-cy="origSegment">
-              <markdown-text :text="historyItem.origMessage" :instanceId="`${historyItem.id}-content`"/>
+            <div>
+              <gen-status :id="`${historyItem.id}-genStatusId`" :welcome-msg="historyItem.origMessage" :is-generating="historyItem.isGenerating" data-cy="origSegment"/>
             </div>
             <div v-if="historyItem.generatedValue" class="px-5 border rounded-lg bg-blue-50">
               <slot name="generatedValue" :historyItem="historyItem" data-cy="generatedSegment"/>
