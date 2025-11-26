@@ -106,9 +106,9 @@ const moveQuestion = (changeIndexBy) => {
       <div :class="{ 'ml-3' : !isDragAndDropControlsVisible }" class="flex-col flex-1 items-start px-2 py-1">
         <div class="flex flex-1">
           <markdown-editor v-if="editQuestionInline"
+                           class="w-full"
                            :value="question.question"
                            :id="`${question.id}`"
-                           :instance-id="`${question.id}`"
                            :disable-ai-prompt="true"
                            :allow-attachments="false"
                            :allow-insert-images="false"
