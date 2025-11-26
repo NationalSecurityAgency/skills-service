@@ -27,9 +27,6 @@ import {
 describe('Generate Quiz Tests', () => {
 
     it('generate a new quiz for a skill', () => {
-        cy.on('uncaught:exception', (err, runnable) => {
-            return false
-        })
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
