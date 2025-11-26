@@ -648,7 +648,10 @@ class ParagraphValidator {
         Node parent = currentNode.parent
         if ((parent instanceof Paragraph || parent instanceof Link) && parent.firstChild == currentNode) {
             res = parent.previous
-        } else if (parent instanceof StrongEmphasis) {
+        } else if (parent instanceof StrongEmphasis || parent instanceof Emphasis) {
+            if (parent?.parent instanceof Emphasis){
+                parent = parent.parent
+            }
             if (parent?.parent instanceof Paragraph && parent?.parent?.firstChild instanceof Text) {
                 res = parent.parent
             } else if (parent?.parent?.previous instanceof Paragraph &&

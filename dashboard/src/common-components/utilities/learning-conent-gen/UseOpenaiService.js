@@ -19,7 +19,7 @@ export const useOpenaiService = () => {
 
     let currentRequestController = null;
 
-    const prompt = async (instructions, onChunk, onComplete, onError) => {
+    const prompt = async (promptParams, onChunk, onComplete, onError) => {
         try {
             currentRequestController = new AbortController();
             const response = await fetch(`/openai/stream/description`, {
@@ -28,7 +28,7 @@ export const useOpenaiService = () => {
                     'Content-Type': 'application/json',
                     'Accept': 'text/event-stream'
                 },
-                body: JSON.stringify({ instructions }),
+                body: JSON.stringify(promptParams),
                 signal: currentRequestController.signal  // Add the signal to the request
             })
 
@@ -97,7 +97,8 @@ export const useOpenaiService = () => {
     }
 
     const getAvailableModels = () => {
-      return axios.get(`/openai/models`).then((response) => response.data);
+        return axios.get(`/openai/models`, {handleError: false})
+            .then((response) => response.data);
     }
 
     return {

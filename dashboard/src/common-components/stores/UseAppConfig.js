@@ -180,6 +180,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const enableOpenAIIntegration = computed(() => config.value.enableOpenAIIntegration)
   const openaiTakingLongerThanExpectedMessages = computed(() => config.value.openaiTakingLongerThanExpectedMessages)
   const openaiTakingLongerThanExpectedTimeoutPerMsg = computed(() => config.value.openaiTakingLongerThanExpectedTimeoutPerMsg)
+  const openaiModelDefaultTemperature = computed(() => Number(config.value.openaiModelDefaultTemperature))
+  const openaiDefaultModel = computed(() => config.value.openaiDefaultModel)
   return {
     loadConfigState,
     refreshConfig,
@@ -296,6 +298,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     matomoProcessUserIdRegex,
     enableOpenAIIntegration,
     openaiTakingLongerThanExpectedMessages,
-    openaiTakingLongerThanExpectedTimeoutPerMsg
+    openaiTakingLongerThanExpectedTimeoutPerMsg,
+    openaiModelDefaultTemperature,
+    openaiDefaultModel
   }
 })
