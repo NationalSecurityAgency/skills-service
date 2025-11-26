@@ -125,8 +125,4 @@ const quizUserTagsChartRef = ref()
 </template>
 
 <style scoped>
-.apexcharts-toolbar {
-  color: green;
-  z-index: 10000 !important;
-}
 </style>

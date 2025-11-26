@@ -22,7 +22,6 @@ import ToastService from 'primevue/toastservice'
 import App from './App.vue'
 import constructRouter from './router'
 import VueAnnouncer from '@vue-a11y/announcer'
-import VueApexCharts from 'vue3-apexcharts'
 import log from 'loglevel'
 
 import {Select, ToggleSwitch} from "primevue";
@@ -113,7 +112,6 @@ app.use(PrimeVue, {
 })
 app.use(ToastService)
 app.use(VueAnnouncer, { router })
-app.use(VueApexCharts)
 app.use(ConfirmationService)
 app.component('Button', Button)
 app.component('ButtonGroup', ButtonGroup)
