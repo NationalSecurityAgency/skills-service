@@ -63,12 +63,23 @@ export const useAiModelsState = defineStore('aiModelsStore', () => {
             })
     }
 
+    const afterModelsLoaded = () => {
+        return new Promise((resolve) => {
+            (function waitForLoading() {
+                if (!loadingModels.value) return resolve(availableModels.value);
+                setTimeout(waitForLoading, 100);
+                return loadingModels.value;
+            }());
+        });
+    }
+
     return {
         availableModels,
         loadingModels,
         selectedModel,
         modelTemperature,
         loadModels,
-        failedToLoad
+        failedToLoad,
+        afterModelsLoaded
     }
 })
