@@ -5,6 +5,7 @@ const completedMsg = 'Take a look at what I came up with!'
 const errMsg = 'I apologize, but I couldn\'t process your request at this time'
 const stopMsg = 'Successfully stopped.'
 const gotStartedMsg = 'Got it! I\'ll get started right away!'
+const newQuizGeneratingMsg = 'Generating a new quiz for this skill, please stand by...'
 export {
     newDescWelcomeMsg,
     existingDescWelcomeMsg,
@@ -12,5 +13,6 @@ export {
     completedMsg,
     errMsg,
     stopMsg,
-    gotStartedMsg
+    gotStartedMsg,
+    newQuizGeneratingMsg
 }
