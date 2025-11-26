@@ -41,7 +41,10 @@ class OpenAiController {
     @PostMapping(value = "/stream/description", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     Flux<String> generateDescriptionAndStream(@RequestBody GenDescRequest genDescRequest) {
         SkillsValidator.isNotBlank(genDescRequest.instructions, "genDescRequest.instructions")
-        return openAIService.streamCompletions(genDescRequest.instructions)
+        SkillsValidator.isNotBlank(genDescRequest.model, "genDescRequest.model")
+        SkillsValidator.isNotNull(genDescRequest.modelTemperature, "genDescRequest.modelTemperature")
+        SkillsValidator.isTrue(genDescRequest.modelTemperature >= 0 && genDescRequest.modelTemperature <= 2, "genDescRequest.modelTemperature must be >= 0 and <= 2")
+        return openAIService.streamCompletions(genDescRequest)
     }
 
     @GetMapping("/models")

@@ -191,6 +191,7 @@ skills:
       contactSupportExternalEmail: someSupport@someDomain.com
       contactSupportExternalEmailDescription: As an alternative, you can reach out to the SkillTree team by sending an email to
       maxRolePageSize: 200
+      openaiModelDefaultTemperature: 0.5
       openaiTakingLongerThanExpectedTimeoutPerMsg: 12000
       openaiTakingLongerThanExpectedMessages:
         - "Just a moment while I get everything ready."

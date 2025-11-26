@@ -1231,6 +1231,12 @@ line-height:107%">(A) fancy formatting</span>""").valid
         validator.validateDescription("(A) ok\n<span>some</span>\n[A link](http://linky.com)").valid
         validator.validateDescription("(A) ok\n<span>some</span>\n \n[A link](http://linky.com)").valid
         validator.validateDescription("(A) ok\n<span>some</span>\n\n[A link](http://linky.com)").valid
+
+        validator.validateDescription("(A) inline link [A link](http://linky.com) more text").valid
+        validator.validateDescription("(A) inline link *[A link](http://linky.com)* more text").valid
+        validator.validateDescription("(A) inline link **[A link](http://linky.com)** more text").valid
+        validator.validateDescription("(A) inline link ***[A link](http://linky.com)*** more text").valid
+        validator.validateDescription("(A) inline link <span>[A link](http://linky.com)</span> more text").valid
     }
 
     def "support mixed html br and newline chars" () {
