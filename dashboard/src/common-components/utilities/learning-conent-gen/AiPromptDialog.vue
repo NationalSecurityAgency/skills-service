@@ -91,17 +91,19 @@ const addWelcomeMsg = (welcomeMsg) => {
   })
 }
 const startGeneration = () => {
-  if (log.isTraceEnabled()) {
-    log.trace(`Generating based on instructions: [${instructions.value}]`)
-  }
-  addChatItem(instructions.value, ChatRole.USER)
+  aiModelsState.afterModelsLoaded().then(() => {
+    if (log.isTraceEnabled()) {
+      log.trace(`Generating based on instructions: [${instructions.value}]`)
+    }
+    addChatItem(instructions.value, ChatRole.USER)
 
-  const promptInstructions = props.createInstructionsFn(instructions.value)
-  instructions.value = ''
+    const promptInstructions = props.createInstructionsFn(instructions.value)
+    instructions.value = ''
 
-  isGenerating.value = true
-  addChatItem(props.generationStartedMsg, ChatRole.ASSISTANT, true)
-  genWithStreaming(promptInstructions)
+    isGenerating.value = true
+    addChatItem(props.generationStartedMsg, ChatRole.ASSISTANT, true)
+    genWithStreaming(promptInstructions)
+  })
 }
 defineExpose({
   addWelcomeMsg,
@@ -182,6 +184,7 @@ const genWithStreaming = (instructionsToSend) => {
   return openaiService.prompt(promptParams,
       (chunk) => {
         const chunkRes = props.chunkHandlerFn(chunk)
+
         if (chunkRes.append) {
           appendGeneratedToLastChatItem(chunkRes.chunk)
         }
