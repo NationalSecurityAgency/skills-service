@@ -32,6 +32,7 @@ import InputGroupAddon from 'primevue/inputgroupaddon'
 import Avatar from 'primevue/avatar';
 import { useQuizSummaryState } from '@/stores/UseQuizSummaryState.js';
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import {useStorage} from "@vueuse/core";
 
 const announcer = useSkillsAnnouncer()
 const responsive = useResponsiveBreakpoints()
@@ -71,10 +72,10 @@ const options = ref({
     server: false,
     currentPage: 1,
     totalRows: 0,
-    pageSize: 5,
     possiblePageSizes: [5, 10, 15, 20],
   },
 });
+const pageSize = useStorage('quizDefinitions-tablePageSize', 5)
 const deleteQuizInfo = ref( {
   showDialog: false,
       quizDef: {},
@@ -194,7 +195,7 @@ defineExpose({
         @filter="onFilter"
         v-model:sort-field="sortInfo.sortBy"
         v-model:sort-order="sortInfo.sortOrder"
-        paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"
+        paginator :rows="pageSize" :rowsPerPageOptions="[5, 10, 15, 20]"
         show-gridlines
         striped-rows>
         <template #header>

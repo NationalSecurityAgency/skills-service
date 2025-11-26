@@ -25,6 +25,7 @@ import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveB
 import Column from 'primevue/column'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import {useStorage} from "@vueuse/core";
 
 const route = useRoute();
 const numberFormat = useNumberFormat()
@@ -48,7 +49,7 @@ const filters = ref({
 const loading = ref(false);
 const isExporting = ref(false)
 
-const pageSize = 5;
+const pageSize = useStorage('skillUsageMetrics-pageSize', 5)
 const possiblePageSizes = [5, 10, 15, 20, 50];
 
 const tableOptions = ref({

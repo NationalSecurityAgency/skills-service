@@ -31,6 +31,7 @@ import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseU
 import QuizService from '@/components/quiz/QuizService.js';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import { SkillsReporter } from '@skilltree/skills-client-js'
+import {useStorage} from "@vueuse/core";
 
 const dialogMessages = useDialogMessages()
 // role constants
@@ -106,7 +107,7 @@ onMounted(() => {
 
 const sortInfo = ref({ sortOrder: 1, sortBy: 'userId' })
 const possiblePageSizes = [ 5, 10, 15, 20]
-const pageSize = ref(5)
+const pageSize = useStorage('roleManager-pageSize', 5)
 const isLoading = ref(true)
 
 const expandedRows = ref([])

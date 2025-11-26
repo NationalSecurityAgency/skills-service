@@ -32,6 +32,7 @@ import MyProgressTitle from "@/components/myProgress/MyProgressTitle.vue";
 import BackToMyProgressBtn from "@/components/myProgress/BackToMyProgressBtn.vue";
 import ContactProjectAdminsDialog from "@/components/contact/ContactProjectAdminsDialog.vue";
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
+import {useStorage} from "@vueuse/core";
 
 const responsive = useResponsiveBreakpoints()
 const announcer = useSkillsAnnouncer()
@@ -45,7 +46,7 @@ const searchValue = ref('')
 const originalProjects = ref([])
 const projects = ref([])
 const totalRows = ref(0)
-const pageSize = ref(5)
+const pageSize = useStorage('discoverProjects-pageSize', 5)
 const possiblePageSizes = [5, 10, 15, 25, 50]
 const filters = ref({
   global: {value: null, matchMode: FilterMatchMode.CONTAINS}

@@ -33,6 +33,7 @@ import GradeQuizAttempt from "@/components/quiz/grade/GradeQuizAttempt.vue";
 import {useAppInfoState} from "@/stores/UseAppInfoState.js";
 import SelfReportService from "@/components/skills/selfReport/SelfReportService.js";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import {useStorage} from "@vueuse/core";
 
 const route = useRoute()
 const numberFormat = useNumberFormat()
@@ -57,7 +58,7 @@ const checkIfQuizHasInputTextQuestions = () => {
 }
 
 const sortInfo = ref({ sortOrder: -1, sortBy: 'started' })
-const pagination = ref({
+const pagination = useStorage('gradedQuizzes-tablePageSize', {
   currentPage: 1,
   totalRows: 0,
   pageSize: 10,

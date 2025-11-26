@@ -26,6 +26,7 @@ import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useDialogMessages } from '@/components/utils/modal/UseDialogMessages.js'
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue'
+import {useStorage} from "@vueuse/core";
 
 const route = useRoute()
 const responsive = useResponsiveBreakpoints()
@@ -38,7 +39,7 @@ const recipientFilter = ref('')
 const data = ref([])
 const loadingData = ref(true)
 const busy = ref(false)
-const pageSize = ref(5)
+const pageSize = useStorage('inviteStatuses-pageSize', 5)
 const possiblePageSizes = [5, 10, 15, 20]
 const sortInfo = ref({ sortOrder: -1, sortBy: 'expires' })
 const totalRows = ref(0)
