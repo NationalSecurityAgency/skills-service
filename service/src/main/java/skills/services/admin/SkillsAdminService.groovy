@@ -44,6 +44,7 @@ import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
+import skills.skillLoading.SkillsLoader
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.model.SkillDef.SelfReportingType
@@ -133,6 +134,9 @@ class SkillsAdminService {
 
     @Autowired
     SkillAttributeService skillAttributeService
+
+    @Autowired
+    private SkillsLoader skillsLoader;
 
     protected static class SaveSkillTmpRes {
         // because of the skill re-use it could be imported but NOT available in the catalog
@@ -712,6 +716,14 @@ class SkillsAdminService {
         }
 
         finalRes.thisSkillWasReusedElsewhere = skillDefRepo.wasThisSkillReusedElsewhere(res.id)
+
+        DisplayOrderRes orderInfo = skillsLoader.getSkillOrderStats(projectId, subjectId, skillId)
+        if(orderInfo) {
+            finalRes.prevSkillId = orderInfo.previousSkillId
+            finalRes.nextSkillId = orderInfo.nextSkillId
+            finalRes.totalSkills = orderInfo.totalCount
+            finalRes.orderInGroup = orderInfo.overallOrder
+        }
 
         String videoUrl = skillAttributesDefRepo.getVideoUrlBySkillRefId(res.id)
         finalRes.hasVideoConfigured = StringUtils.isNotBlank(videoUrl)

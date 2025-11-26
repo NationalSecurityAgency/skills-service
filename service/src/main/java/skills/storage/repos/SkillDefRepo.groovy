@@ -231,17 +231,35 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     List<SkillDef> findPreviousSkillDefs(String projectId, String skillId, int beforeDisplayOrder, List<RelationshipType> relationshipType, Pageable pageable)
 
     @Nullable
-    @Query(value='''select child.skill_id as skillId, child.display_order as displayOrder, skillGroup.display_order as skillGroupDisplayOrder, child.group_id as groupId, child.type as type
-                from skill_definition subj,
-                     skill_relationship_definition rel,
-                     skill_definition child left join skill_definition skillGroup on (child.group_id = skillGroup.skill_id and skillGroup.project_id = child.project_id)
-                where subj.project_id = ?1
-                  and subj.skill_id = ?2
-                  and child.type = 'Skill'
-                  and child.enabled = 'true'
-                  and subj.id = rel.parent_ref_id
-                  and child.id = rel.child_ref_id''', nativeQuery=true)
-    List<DisplayOrderRes> findDisplayOrderByProjectIdAndSubjectId(String projectId, String subjectId)
+    @Query(value='''select * from (
+                        select skillId,
+                               lag(skillId, 1) over ( order by displayOrder, skillGroupDisplayOrder ) as previousSkillId,
+                               lead(skillId, 1) over (order by displayOrder, skillGroupDisplayOrder)  as nextSkillId,
+                               row_number() over () as overallOrder,
+                               count(*) over() as totalCount
+                        from (
+                            select child.skill_id           as skillId,
+                                   (case when skillGroup.display_order is null then child.display_order else skillGroup.display_order end) as displayOrder,
+                                   (case when skillGroup.display_order is not null then child.display_order else skillGroup.display_order end) as skillGroupDisplayOrder,
+                                   child.group_id           as groupId,
+                                   child.type               as type
+                            from skill_definition subj,
+                                 skill_relationship_definition rel,
+                                 skill_definition child
+                            left join skill_definition skillGroup
+                                 on (
+                                     child.group_id = skillGroup.skill_id
+                                     and skillGroup.project_id = child.project_id
+                                 )
+                            where subj.project_id = ?1
+                              and subj.skill_id = ?2
+                              and child.type = 'Skill\'
+                              and child.enabled = 'true\'
+                              and subj.id = rel.parent_ref_id
+                              and child.id = rel.child_ref_id
+                        )
+                    ) where skillId = ?3''', nativeQuery=true)
+    DisplayOrderRes findDisplayOrderByProjectIdAndSubjectIdAndSkillId(String projectId, String subjectId, String skillId)
 
     int countByProjectIdAndType(@Nullable String projectId, SkillDef.ContainerType type)
 
