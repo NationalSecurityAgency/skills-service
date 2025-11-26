@@ -180,6 +180,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const enableOpenAIIntegration = computed(() => config.value.enableOpenAIIntegration)
   const openaiTakingLongerThanExpectedMessages = computed(() => config.value.openaiTakingLongerThanExpectedMessages)
   const openaiTakingLongerThanExpectedTimeoutPerMsg = computed(() => config.value.openaiTakingLongerThanExpectedTimeoutPerMsg)
+  const openaiModelDefaultTemperature = computed(() => Number(config.value.openaiModelDefaultTemperature))
+  const openaiDefaultModel = computed(() => config.value.openaiDefaultModel)
   const sdPointHistoryChartAchievementsCombinePct = computed(() => config.value.sdPointHistoryChartAchievementsCombinePct || 0.05)
 
 
@@ -300,6 +302,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     enableOpenAIIntegration,
     openaiTakingLongerThanExpectedMessages,
     openaiTakingLongerThanExpectedTimeoutPerMsg,
+    openaiModelDefaultTemperature,
+    openaiDefaultModel,
     sdPointHistoryChartAchievementsCombinePct
   }
 })

@@ -46,9 +46,6 @@ class OpenAIService {
     @Value('#{"${skills.openai.key:null}"}')
     String openAiKey
 
-    @Value('#{"${skills.openai.model:null}"}')
-    String model
-
     String role = "user"
 
     @Autowired
@@ -139,19 +136,23 @@ class OpenAIService {
     }
 
 
-    Flux<String> streamCompletions(String message) {
+    Flux<String> streamCompletions(GenDescRequest genDescRequest) {
+        String message = genDescRequest.instructions
         JsonSlurper jsonSlurper = new JsonSlurper()
         String url = String.join("/", openAiHost, completionsEndpoint)
         if (log.isDebugEnabled()) {
             log.debug("${Thread.currentThread().name} - streaming from [{}] with message [{}]", url, message)
         }
 
+        String model = genDescRequest.model
+        Double modelTemperature = genDescRequest.modelTemperature
         CompletionsRequest request = new CompletionsRequest(
                 messages: [
                         new CompletionMessage(role: role, content: message)
                 ],
                 model: model,
-                stream: true
+                stream: true,
+                temperature: modelTemperature
         )
 
         WebClient client = sslWebClientConfig.createWebClient()
@@ -202,8 +203,8 @@ class OpenAIService {
     static class CompletionsRequest {
         String model
         List<CompletionMessage> messages
-        Usage usage
         boolean stream = false
+        Double temperature = 1.0
     }
 
     @Canonical
