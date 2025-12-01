@@ -181,7 +181,7 @@ const focusOnMarkdownEditor = () => {
 const addFileLink = (linkUrl, linkText) => {
   toastuiEditor.value.invoke('exec', 'addLink', { linkUrl, linkText })
 }
-const setMarkdownText = (newText) => {
+const callSetMarkdownText = (newText) => {
   return toastuiEditor.value.invoke('setMarkdown', newText)
 }
 
@@ -387,7 +387,7 @@ const editorStyle = computed(() => {
 })
 const showGenerateDescriptionDialog = ref(false)
 const updateDescription = (newDesc) => {
-  setMarkdownText(newDesc)
+  callSetMarkdownText(newDesc)
 }
 
 const generateDescriptionDialogRef = ref(null)
@@ -421,6 +421,13 @@ const showWherePrefixWouldBeAdded = (prefixInfo) => {
 const closeMissingPrefixView = () => {
   valueWithMissingPrefix.value = ''
 }
+const setMarkdownText = (newText) => {
+  callSetMarkdownText(newText)
+  updateValue()
+}
+defineExpose({
+  setMarkdownText,
+})
 </script>
 
 <template>
