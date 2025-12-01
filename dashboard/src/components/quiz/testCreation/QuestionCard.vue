@@ -36,7 +36,11 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-  editQuestionInline: {
+  supportsEditQuestionInline: {
+    type: Boolean,
+    default: false
+  },
+  showEditQuestionInline: {
     type: Boolean,
     default: false
   }
@@ -105,22 +109,24 @@ const moveQuestion = (changeIndexBy) => {
       </div>
       <div :class="{ 'ml-3' : !isDragAndDropControlsVisible }" class="flex-col flex-1 items-start px-2 py-1">
         <div class="flex flex-1">
-          <markdown-editor v-if="editQuestionInline"
-                           class="w-full"
-                           :value="question.question"
-                           :id="`${question.id}`"
-                           :disable-ai-prompt="true"
-                           :allow-attachments="false"
-                           :allow-insert-images="false"
-                           label="Question"
-                           markdownHeight="150px"
-                           :data-cy="`questionDisplayTextEditor-${questionNum}`"
-                           :name="`question${props.questionNum}`"/>
+          <div v-if="supportsEditQuestionInline">
+            <markdown-editor v-show="showEditQuestionInline"
+                             class="w-full"
+                             :value="question.question"
+                             :id="`${question.id}`"
+                             :data-cy="`questionDisplayTextEditor-${question.id}`"
+                             :name="question.name"
+                             :disable-ai-prompt="true"
+                             :allow-attachments="false"
+                             :allow-insert-images="false"
+                             label="Question"
+                             markdownHeight="150px"/>
+          </div>
 
           <markdown-text v-else
-            :text="question.question"
-            :instance-id="`${question.id}`"
-            data-cy="questionDisplayText"/>
+                         :text="question.question"
+                         :instance-id="`${question.id}`"
+                         data-cy="questionDisplayText"/>
         </div>
         <div v-if="mediaAttributes" class="mb-3">
           <i :class="`far ${mediaAttributes.isAudio ? 'fa-file-audio' : 'fa-file-video'} fa-lg text-primary`"></i> <span class="font-bold">{{ mediaAttributes.internallyHostedFileName }}</span> is configured
