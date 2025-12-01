@@ -350,10 +350,18 @@ const onSavedQuestion = (savedQuestion) => {
 
 const showAiButton = computed(() => !props.disableAiPrompt && appConfig.enableOpenAIIntegration)
 const showGenQDialog = ref(false)
+
+const skillsInputFormDialogRef = ref(null)
+const markdownEditorRef = ref(null)
+const onQuestionGenerated = (questionInfo) => {
+  markdownEditorRef.value.setMarkdownText(questionInfo.question)
+  skillsInputFormDialogRef.value.setFieldValue('answers', questionInfo.answers)
+}
 </script>
 
 <template>
   <SkillsInputFormDialog
+      ref="skillsInputFormDialogRef"
       :id="modalId"
       v-model="model"
       :is-edit="isEdit"
@@ -381,9 +389,11 @@ const showGenQDialog = ref(false)
           v-if="showGenQDialog"
           ref="generateDescriptionDialogRef"
           v-model="showGenQDialog"
+          @question-generated="onQuestionGenerated"
       />
 
       <markdown-editor
+          ref="markdownEditorRef"
           id="quizDescription"
           :quiz-id="quizId"
           :upload-url="`/admin/quiz-definitions/${route.params.quizId}/upload`"
