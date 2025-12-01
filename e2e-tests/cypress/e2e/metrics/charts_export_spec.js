@@ -44,51 +44,59 @@ describe('Metrics Tests - Achievements', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
 
-        cy.reportSkill(1, 1, "user1", '2025-11-19 11:00');
-        cy.reportSkill(1, 1, "user1", '2025-11-20 11:00');
-        cy.reportSkill(1, 1, "user1", '2025-11-21 11:00');
-        cy.reportSkill(1, 1, "user2", '2025-11-20 11:00');
-        cy.reportSkill(1, 1, "user3", '2025-11-20 11:00');
+        cy.reportSkill(1, 1, "user1", '4 days ago');
+        cy.reportSkill(1, 1, "user1", '3 days ago');
+        cy.reportSkill(1, 1, "user1", '2 days ago');
+        cy.reportSkill(1, 1, "user2", '3 days ago');
+        cy.reportSkill(1, 1, "user3", '3 days ago');
+
+        const generateDateRange = () => {
+            const today = moment().startOf('day');
+            const daysAgo30 = moment(today).subtract(30, 'days');
+            const dateRange = [];
+            let currentDate = moment(daysAgo30);
+
+            while (currentDate.isSameOrBefore(today)) {
+                dateRange.push(currentDate.format('YYYY-MM-DD'));
+                currentDate = moment(currentDate).add(1, 'day');
+            }
+            return dateRange;
+        };
+
+        // Generate the expected CSV with dynamic dates
+        const dateRange = generateDateRange();
+        let expectedCsv = 'Date,Users,New Users\n';
+
+        const twoDaysAgo = moment().subtract(2, 'days').format('YYYY-MM-DD');
+        const threeDaysAgo = moment().subtract(3, 'days').format('YYYY-MM-DD');
+        const fourDaysAgo = moment().subtract(4, 'days').format('YYYY-MM-DD');
+
+        const csvRows = dateRange.map(date => {
+            let users = '0';
+            let newUsers = '0';
+
+            if (date === twoDaysAgo) {
+                users = '1';
+                newUsers = '0';
+            } else if (date === threeDaysAgo) {
+                users = '3';
+                newUsers = '2';
+            } else if (date === fourDaysAgo) {
+                users = '1';
+                newUsers = '1';
+            }
+
+            return `${date},${users},${newUsers}`;
+        });
+
+        expectedCsv += `${csvRows.join('\n')}\n`;
+
 
         cy.visit('/administrator/projects/proj1/metrics')
 
         cy.get('[data-cy="distinctNumUsersOverTime"] [data-cy="chartDownloadMenu"]').click()
         cy.get('[data-p="popup"] [aria-label="Export to CSV"]').click()
 
-        // Wait for the file to be downloaded
-const expectedCsv = `Date,Users,New Users
-2025-10-26,0,0
-2025-10-27,0,0
-2025-10-28,0,0
-2025-10-29,0,0
-2025-10-30,0,0
-2025-10-31,0,0
-2025-11-01,0,0
-2025-11-02,0,0
-2025-11-03,0,0
-2025-11-04,0,0
-2025-11-05,0,0
-2025-11-06,0,0
-2025-11-07,0,0
-2025-11-08,0,0
-2025-11-09,0,0
-2025-11-10,0,0
-2025-11-11,0,0
-2025-11-12,0,0
-2025-11-13,0,0
-2025-11-14,0,0
-2025-11-15,0,0
-2025-11-16,0,0
-2025-11-17,0,0
-2025-11-18,0,0
-2025-11-19,1,1
-2025-11-20,3,2
-2025-11-21,1,0
-2025-11-22,0,0
-2025-11-23,0,0
-2025-11-24,0,0
-2025-11-25,0,0
-`
         cy.validateCsvFile(expectedCsv)
     });
 
