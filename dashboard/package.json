@@ -25,7 +25,6 @@
     "@tsparticles/confetti": "3.9.1",
     "@vue-a11y/announcer": "3.1.5",
     "@vueuse/core": "14.0.0",
-    "apexcharts": "4.7.0",
     "axios": "1.13.2",
     "chart.js": "4.5.1",
     "chartjs-adapter-dayjs-4": "1.0.4",
@@ -54,7 +53,6 @@
     "vis-network": "10.0.2",
     "vue": "3.5.24",
     "vue-router": "4.6.3",
-    "vue3-apexcharts": "1.8.0",
     "webvtt-parser": "2.2.0",
     "yup": "1.7.1"
   },

@@ -134,14 +134,14 @@ export default {
         '.sd-theme-home .editor-help-footer',
       styleName: 'border-color'
     }, {
-      selector: 'body #app .sd-theme-home .apexcharts-toolbar svg, body #app .sd-theme-home .vs__open-indicator',
+      selector: 'body #app .sd-theme-home .vs__open-indicator',
       styleName: 'fill'
     }],
     textPrimaryMutedColor: [{
       selector: 'body #app .sd-theme-home .todo',
       styleName: 'color'
     }, {
-      selector: 'body #app .sd-theme-home .skills-theme-menu:hover, body #app .sd-theme-home .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover',
+      selector: 'body #app .sd-theme-home .skills-theme-menu:hover',
       styleName: 'background-color'
     }],
     textSecondaryColor: {
@@ -196,7 +196,6 @@ export default {
           + '.p-listbox.p-component,'
           + '.p-autocomplete-overlay.p-component,'
           + '.p-popover.p-component .p-panelmenu-panel,'
-          + '.sd-theme-home .apexcharts-menu.apexcharts-menu-open,'
           + '.sd-theme-home .p-avatar.p-component,'
           + '.sd-theme-home .toastui-editor-ww-container,'
           + '.sd-theme-home .toastui-editor-defaultUI-toolbar,'
@@ -227,7 +226,6 @@ export default {
           'body #app .sd-theme-home .toastui-editor-contents pre code,' +
           'body #app .sd-theme-home .toastui-editor-popup [data-type="Heading"]:hover,' +
           'body #app .sd-theme-home .toastui-editor-popup .drop-down .drop-down-item:hover,' +
-          'body #app .sd-theme-home .apexcharts-menu.apexcharts-menu-open .apexcharts-menu-item:hover,' +
           '.p-menu-overlay .p-menu-item-content:hover',
         styleName: 'color'
       }],
@@ -515,11 +513,6 @@ export default {
     }
     handleMenuItemLinkHoverColor(theme, this.selectorKey)
     populateResult(this.selectorKey, theme)
-
-    // Some CSS may mess up some things, fix those here
-    // Apex charts context menu
-    res.css += 'body #app .sd-theme-home .apexcharts-menu.open { color: black !important; }'
-    res.css += ' body #app .sd-theme-home .apexcharts-tooltip { color: black !important; }'
 
     return res
   }
