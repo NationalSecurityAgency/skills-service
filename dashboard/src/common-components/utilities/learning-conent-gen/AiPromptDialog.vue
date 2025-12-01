@@ -183,7 +183,8 @@ const genWithStreaming = (instructionsToSend) => {
   }
   return openaiService.prompt(promptParams,
       (chunk) => {
-        const chunkRes = props.chunkHandlerFn(chunk)
+        const lastChatItem = getLastChatItem()
+        const chunkRes = props.chunkHandlerFn(chunk, lastChatItem.id)
 
         if (chunkRes.append) {
           appendGeneratedToLastChatItem(chunkRes.chunk)
