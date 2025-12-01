@@ -55,6 +55,20 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
         @Nullable
         String getUserCommunityEnabled()
     }
+
+    @Query(value="""
+                SELECT DISTINCT
+                    qd.quiz_id AS quizId,
+                    qd.name AS name,
+                    qd.type as quizType,
+                    qd.created as created,
+                    settings.value as userCommunityEnabled
+                FROM quiz_definition qd
+                LEFT JOIN quiz_settings settings on (settings.quiz_ref_id = qd.id and settings.setting = 'user_community')
+        """, nativeQuery = true)
+    @Nullable
+    List<QuizDefBasicResult> getAllQuizDefSummaries()
+
     @Query(value="""
                 SELECT DISTINCT
                     qd.quiz_id AS quizId,
