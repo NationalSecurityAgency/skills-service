@@ -14,14 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, watch, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useImgHandler } from '@/common-components/utilities/learning-conent-gen/UseImgHandler.js'
 import { useInstructionGenerator } from '@/common-components/utilities/learning-conent-gen/UseInstructionGenerator.js'
 import QuestionCard from '@/components/quiz/testCreation/QuestionCard.vue'
 import AiPromptDialog from '@/common-components/utilities/learning-conent-gen/AiPromptDialog.vue'
-import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
 import { object, string } from 'yup'
@@ -40,17 +39,18 @@ const log = useLog()
 const imgHandler = useImgHandler()
 const appConfig = useAppConfig()
 
+const enableEditQuestionsIds = ref([])
 const aiPromptDialogRef = ref(null)
 const currentDescription = ref('')
 const isGenerating = ref(true)
 const currentQuizData = ref(null)
-const currentQuestions = ref([])
+const allQuestions = ref([])
 
 const instructionsGenerator = useInstructionGenerator()
 const dynamicSchema = computed(() => {
   const validationObj = {}
-  for (let i = 1; i <= currentQuestions.value.length; i++) {
-    validationObj[`question${i}`] = string()
+  for (const question of allQuestions.value) {
+    validationObj[question.name] = string()
         .required()
         .max(appConfig.descriptionMaxLength)
         .customDescriptionValidator('Question', false)
@@ -59,7 +59,9 @@ const dynamicSchema = computed(() => {
   return object(validationObj)
 })
 watch(dynamicSchema, () => {
-  validate()
+  nextTick(() => {
+    validate()
+  })
 })
 const { values, meta, handleSubmit, isSubmitting, resetForm, setFieldValue, validate, validateField, errors, errorBag, setErrors } = useForm({
   validationSchema: dynamicSchema,
@@ -67,14 +69,33 @@ const { values, meta, handleSubmit, isSubmitting, resetForm, setFieldValue, vali
 
 const generateQuizFromDescription = (skillDescription) => {
   currentDescription.value = skillDescription
-  aiPromptDialogRef.value.startGeneration()
+  const welcomeMsg = 'Hi there! I\'ll generate a quiz based on the existing skill instructions/description. Feel to type additional instructions for me or just click the Send button to get started?'
+  aiPromptDialogRef.value.addWelcomeMsg(welcomeMsg)
 }
 defineExpose({
   generateQuizFromDescription
 });
 
 const useGenerated = (historyItem) => {
-  emit('generated-quiz', historyItem.generatedInfo.generatedQuiz)
+  if (!historyItem?.generatedInfo?.generatedQuiz) return;
+
+  // Get all q properties from values
+  const qProperties = Object.entries(values)
+      .filter(([key]) => key.startsWith('q') && !isNaN(parseInt(key.substring(1))));
+
+  // Update questions based on q properties
+  qProperties.forEach(([key, value]) => {
+    const questionName = key; // e.g., 'q22'
+    const question = historyItem.generatedInfo.generatedQuiz.find(
+        q => q.name === questionName
+    );
+
+    if (question) {
+      question.question = value;
+    }
+  });
+
+  emit('generated-quiz', historyItem.generatedInfo.generatedQuiz);
 }
 const getQuizDataForDisplay = (quizData, historyId) => {
   let quizDataForDisplay = null
@@ -105,7 +126,7 @@ const communityValue = computed(() => {
 })
 
 const currentJsonString = ref('')
-const handleGeneratedChunk = (chunk) => {
+const handleGeneratedChunk = (chunk, historyId) => {
   let newBuffer = currentJsonString.value + chunk;
   let currentPosition = 0;
   let inString = false;
@@ -142,13 +163,15 @@ const handleGeneratedChunk = (chunk) => {
           const questionStr = newBuffer.substring(isFirstQuestion ? questionsStartIndex + 1 : startIndex, i + 1);
           try {
             const question = safeJsonParse(questionStr);
+            const questionIdx = currentQuizData && currentQuizData.value && currentQuizData.value.length ? currentQuizData.value.length : 0
+            question.name = `q${historyId}${(questionIdx + 1)}`
             ensureValidQuestionType(question)
             if (currentQuizData && currentQuizData.value && currentQuizData.value.length > 0) {
               currentQuizData.value.push(question)
             } else {
               currentQuizData.value = [question]
             }
-            setFieldValue(`question${currentQuizData.value.length}`, question.question)
+            setFieldValue(question.name, question.question)
             currentJsonString.value = ''
           } catch (e) {
             // Continue with partial parsing
@@ -217,8 +240,7 @@ const ensureValidQuestionType = (question) => {
 const handleGenerationCompleted = (generated) => {
   currentJsonString.value = ''
   isGenerating.value = false
-  // console.log(generated.generatedValue)
-  currentQuestions.value = generated.generatedInfo.generatedQuiz
+  allQuestions.value.push(...generated.generatedInfo.generatedQuiz)
   validate()
   return generated
 }
@@ -254,12 +276,14 @@ const createPromptInstructions = (userEnterInstructions) => {
       instructionsToSend = instructionsGenerator.newQuizInstructions(descriptionText, '5 - 10')
     }
   }
- return instructionsToSend
+  return instructionsToSend
 }
+const toggleEnableEditQuestions = ((id) => {
+  enableEditQuestionsIds.value = enableEditQuestionsIds.value.includes(id) ? enableEditQuestionsIds.value.filter(item => item !== id) : [...enableEditQuestionsIds.value, id];
+})
 </script>
 
 <template>
-
   <ai-prompt-dialog
       ref="aiPromptDialogRef"
       v-model="model"
@@ -278,12 +302,18 @@ const createPromptInstructions = (userEnterInstructions) => {
       <div v-if="historyItem.generatedInfo" class="px-5 border rounded-lg bg-blue-50 ml-4">
         <div v-for="(q, index) in getQuizDataForDisplay(historyItem.generatedInfo, historyItem.id)" :key="q.id">
           <div class="my-4">
-            <QuestionCard data-cy="generatedQuestion" :question="q" :question-num="index+1" quiz-type="Quiz" :show-edit-controls="false" :edit-question-inline="!!historyItem.finalMsg"/>
+            <QuestionCard data-cy="generatedQuestion" :question="q" :question-num="index+1" quiz-type="Quiz" :show-edit-controls="false" :supports-edit-question-inline="true" :show-edit-question-inline="enableEditQuestionsIds.includes(historyItem.id)"/>
           </div>
         </div>
-      </div>
-      <div v-if="!!currentJsonString" class="flex mt-2">
-        <skills-spinner :is-loading="!!currentJsonString" :size-in-rem="2"/>
+        <div class="flex justify-start items-center gap-3 my-2">
+          <SkillsButton v-if="!!historyItem.finalMsg"
+                        icon="fa-solid fa-check-double"
+                        severity="info" :outlined="false"
+                        label="Edit Questions"
+                        data-cy="enabledEitQuestionsBtn"
+                        @click="toggleEnableEditQuestions(historyItem.id)"/>
+        </div>
+
       </div>
     </template>
   </ai-prompt-dialog>
