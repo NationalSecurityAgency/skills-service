@@ -123,7 +123,7 @@ const moveQuestion = (changeIndexBy) => {
                              markdownHeight="150px"/>
           </div>
 
-          <markdown-text v-else
+          <markdown-text v-if="!showEditQuestionInline"
                          :text="question.question"
                          :instance-id="`${question.id}`"
                          data-cy="questionDisplayText"/>

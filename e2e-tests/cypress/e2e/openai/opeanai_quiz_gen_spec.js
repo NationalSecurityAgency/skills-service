@@ -15,7 +15,7 @@
  */
 
 import {
-    newDescWelcomeMsg,
+    newQuizWelcomeMsg,
     chessGenValue,
     existingDescWelcomeMsg,
     completedMsg,
@@ -44,10 +44,12 @@ describe('Generate Quiz Tests', () => {
         cy.get('[data-cy="skillOverviewDescription"]').contains(chessGenValue)
 
         cy.get('[data-cy="generateQuizBtn"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(newQuizWelcomeMsg)
+        cy.get('[data-cy="sendAndStopBtn"]').click()
 
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
-        cy.get('[data-cy="useGenValueBtn-1"]').click()
-        cy.get('[data-cy="useGenValueBtn-1"]').should('not.exist')
+        cy.get('[data-cy="useGenValueBtn-2"]').click()
+        cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
 
         cy.get('[data-cy="selfReportMediaCard"]').contains('Self Report: Quiz')
         cy.get('[data-cy="selfReportMediaCard"]').contains('Users can self report this skill and points will be awarded after the Very Great Skill 1 Quiz Quiz is passed!')
