@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import {useRoute} from "vue-router";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import {useLog} from "@/components/utils/misc/useLog.js";
@@ -35,7 +35,7 @@ const props = defineProps({
     default: null
   },
 })
-const emit = defineEmits(['generated-desc'])
+const emit = defineEmits(['question-generated'])
 const route = useRoute()
 const log = useLog()
 const imgHandler = useImgHandler()
@@ -109,7 +109,10 @@ const handleGeneratedChunk = (chunk) => {
 }
 
 const handleGenerationCompleted = (generated) => {
-
+  const questionMatch = /### Question:\s*([\s\S]+?)(?=\s*#+\s|$)/.exec(generated.generatedValue)
+  if (!questionMatch) {
+    throw new Error(`Invalid response format for question=[${generated.generatedValue}]`);
+  }
   const answersMatch = /### Answers:([\s\S]+)/.exec(answersString.value);
   if (!answersMatch) {
     throw new Error(`Invalid response format for answers=[${answersString.value}]`);
@@ -120,6 +123,7 @@ const handleGenerationCompleted = (generated) => {
       generatedValue: generated.generatedValue,
       generateValueChangedNotes: null,
       generatedInfo: {
+        question: questionMatch[1].trim(),
         answers: answers
       }
     }
@@ -133,7 +137,7 @@ const handleGenerationCompleted = (generated) => {
 }
 
 const useGenerated = (historyItem) => {
-  emit('generated-desc', historyItem.generatedValue)
+  emit('question-generated', historyItem.generatedInfo)
 }
 
 const validationService = useDescriptionValidatorService()
