@@ -277,6 +277,7 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
     <skills-spinner v-if="isLoading" :is-loading="isLoading" />
     <ai-models-selector />
     <div v-if="showChat" class="py-5 flex flex-col" style="min-height: 70vh">
+      <slot name="aboveChatHistory" />
       <div id="chatHistory"
            :class="{ 'flex-1': chatHistory.length > 1 }"
            class="flex flex-col gap-3 mb-2">

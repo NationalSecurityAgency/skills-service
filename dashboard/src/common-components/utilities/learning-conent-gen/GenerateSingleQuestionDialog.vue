@@ -25,11 +25,12 @@ import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import AiPromptDialog from "@/common-components/utilities/learning-conent-gen/AiPromptDialog.vue";
 import SelectCorrectAnswer from "@/components/quiz/testCreation/SelectCorrectAnswer.vue";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
-import { useQuizConfig } from '@/stores/UseQuizConfig.js'
+import {useQuizConfig} from '@/stores/UseQuizConfig.js'
+import QuestionTypeDropDown from "@/components/quiz/testCreation/QuestionTypeDropDown.vue";
 
 const model = defineModel()
 const props = defineProps({
-  questionDef: Object,
+  questionType: Object,
   communityValue: {
     type: String,
     default: null
@@ -66,7 +67,7 @@ const createPromptInstructions = (userEnterInstructions) => {
       extractedImageState.extractedImages = extractedImagesRes.extractedImages
     }
   } else {
-    instructionsToSend = instructionsGenerator.newQuestionInstructions(userEnterInstructions)
+    instructionsToSend = instructionsGenerator.newQuestionInstructions(userEnterInstructions, props.questionType.selectedType)
   }
 
   return instructionsToSend
@@ -178,6 +179,18 @@ const communityValue = computed(() => {
       @use-generated="useGenerated"
       :community-value="communityValue"
   >
+    <template #aboveChatHistory>
+      <div class="pb-5">
+        <label>Question Type:</label>
+        <question-type-drop-down
+            name="genQuestionType"
+            data-cy="genQuestionTypeSelector"
+            v-model="questionType.selectedType"
+            :options="questionType.options"
+            :ignore-vee-validate="true"
+        />
+      </div>
+    </template>
     <template #generatedValue="{ historyItem }">
       <markdown-text :text="historyItem.generatedValue"
                      data-cy="generatedSegment"

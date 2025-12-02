@@ -40,6 +40,92 @@ ${instructionsToKeepPlaceholders ? `-${instructionsToKeepPlaceholders}` : ''}
 `
     }
 
+    const questionGenRules = {
+        SingleChoice: `- MUST have exactly 1 correct answer
+- MUST have 3-5 answer options`,
+        MultipleChoice: `- MUST have 2 or more correct answers
+- MUST have between 3-5 answer options`,
+        TextInput: `- MUST have empty answers array`,
+    }
+
+    const questionExampleJson = {
+        SingleChoice: `[
+      {"answer": "3", "isCorrect": false},
+      {"answer": "4", "isCorrect": true},  // Only ONE true
+      {"answer": "5", "isCorrect": false}
+    ]`,
+        MultipleChoice: `[
+      {"answer": "2", "isCorrect": true},   // First correct
+      {"answer": "3", "isCorrect": true},   // Second correct
+      {"answer": "4", "isCorrect": false},
+      {"answer": "5", "isCorrect": true}    // Third correct
+    ]`,
+        TextInput: `[]  // ALWAYS empty for TextInput`
+
+    }
+
+    const questionRules = {
+        SingleChoice: {
+            typeRule: `### 1. SingleChoice Questions
+- MUST have \`"questionType": "SingleChoice"\`
+${questionGenRules.SingleChoice}
+- Example:
+  \`\`\`json
+  {
+    "question": "What is 2+2?",
+    "questionType": "SingleChoice",
+    "answers": ${questionExampleJson.SingleChoice}
+  }
+  \`\`\``,
+            validationCheck: `1. For SingleChoice:
+   - Exactly ONE answer has \`"isCorrect": true\`
+   - All others have \`"isCorrect": false\`
+   - 3-5 answer options total`,
+            mistakesToAvoid: `- SingleChoice with 0 or >1 correct answers → INVALID`,
+            isCorrectCheck: `- SingleChoice: Exactly 1`,
+            countCorrectCheck: `- If count == 1 then questionType *Must* be 'SingleChoice'`,
+        },
+        MultipleChoice: {
+            typeRule: `### 2. MultipleChoice Questions
+- MUST have \`"questionType": "MultipleChoice"\`
+${questionGenRules.MultipleChoice}
+- Example:
+  \`\`\`json
+  {
+    "question": "Which are prime numbers?",
+    "questionType": "MultipleChoice",
+    "answers": ${questionExampleJson.MultipleChoice}
+  }
+  \`\`\``,
+            validationCheck: `2. For MultipleChoice:
+   - AT LEAST TWO answers have \`"isCorrect": true\`
+   - All others have \`"isCorrect": false\`
+   - 3-5 answer options total`,
+            mistakesToAvoid: `- MultipleChoice with only 1 correct answer → INVALID`,
+            isCorrectCheck: `MultipleChoice: 2 or more`,
+            countCorrectCheck: `- If count >= 2 → then questionType *Must* be 'MultipleChoice'`,
+        },
+        TextInput: {
+            typeRule: `### 3. TextInput Questions
+- MUST have \`"questionType": "TextInput"\`
+${questionGenRules.TextInput}
+- Example:
+  \`\`\`json
+  {
+    "question": "What is the capital of France?",
+    "questionType": "TextInput",
+    "answers": ${questionExampleJson.TextInput}
+  }
+  \`\`\``,
+            validationCheck: `3. For TextInput:
+   - \`"answers": []\` (empty array)
+   - No answer objects`,
+            mistakesToAvoid: `- TextInput with answers array not empty → INVALID`,
+            isCorrectCheck: `- TextInput: No answers`,
+            countCorrectCheck: ``,
+        }
+    }
+
     const quizRules = `
 # Quiz Generation Instructions - STRICT RULES
 
@@ -50,88 +136,38 @@ Return a JSON object with exactly two properties:
 
 ## Question Type Rules
 
-### 1. SingleChoice Questions
-- MUST have \`"questionType": "SingleChoice"\`
-- MUST have exactly 1 correct answer
-- MUST have 3-5 answer options
-- Example:
-  \`\`\`json
-  {
-    "question": "What is 2+2?",
-    "questionType": "SingleChoice",
-    "answers": [
-      {"answer": "3", "isCorrect": false},
-      {"answer": "4", "isCorrect": true},  // Only ONE true
-      {"answer": "5", "isCorrect": false}
-    ]
-  }
-  \`\`\`
+${questionRules.SingleChoice.typeRule}
 
-### 2. MultipleChoice Questions
-- MUST have \`"questionType": "MultipleChoice"\`
-- MUST have 2 or more correct answers
-- MUST have between 3-5 answer options
-- Example:
-  \`\`\`json
-  {
-    "question": "Which are prime numbers?",
-    "questionType": "MultipleChoice",
-    "answers": [
-      {"answer": "2", "isCorrect": true},   // First correct
-      {"answer": "3", "isCorrect": true},   // Second correct
-      {"answer": "4", "isCorrect": false},
-      {"answer": "5", "isCorrect": true}    // Third correct
-    ]
-  }
-  \`\`\`
+${questionRules.MultipleChoice.typeRule}
 
-### 3. TextInput Questions
-- MUST have \`"questionType": "TextInput"\`
-- MUST have empty answers array
-- Example:
-  \`\`\`json
-  {
-    "question": "What is the capital of France?",
-    "questionType": "TextInput",
-    "answers": []  // ALWAYS empty for TextInput
-  }
-  \`\`\`
+${questionRules.TextInput.typeRule}
 
 ## Validation Checklist
 BEFORE finalizing the response, VERIFY each question:
 
-1. For SingleChoice:
-   - Exactly ONE answer has \`"isCorrect": true\`
-   - All others have \`"isCorrect": false\`
-   - 3-5 answer options total
+${questionRules.SingleChoice.validationCheck}
 
-2. For MultipleChoice:
-   - AT LEAST TWO answers have \`"isCorrect": true\`
-   - All others have \`"isCorrect": false\`
-   - 3-5 answer options total
+${questionRules.MultipleChoice.validationCheck}
 
-3. For TextInput:
-   - \`"answers": []\` (empty array)
-   - No answer objects
+${questionRules.TextInput.validationCheck}
 
 ## Common Mistakes to AVOID:
-- MultipleChoice with only 1 correct answer → INVALID
-- SingleChoice with 0 or >1 correct answers → INVALID
-- TextInput with answers array not empty → INVALID
+${questionRules.MultipleChoice.mistakesToAvoid}
+${questionRules.SingleChoice.mistakesToAvoid}
+${questionRules.TextInput.mistakesToAvoid}
 
 ## Final Check
 Before responding, count the number of \`"isCorrect": true\` for EACH question and verify:
-- SingleChoice: Exactly 1
-- MultipleChoice: 2 or more
-- TextInput: No answers
+${questionRules.MultipleChoice.isCorrectCheck}
+${questionRules.SingleChoice.isCorrectCheck}
+${questionRules.TextInput.isCorrectCheck}
 
 ## IMPORTANT: Count the correct answers
 For EACH question, before including it:
-1. Count the number of answers where \`"isCorrect": true\`
-2. If count == 1 then questionType *Must* be 'SingleChoice'
-3. If count >= 2 → then questionType *Must* be 'MultipleChoice'
-4. If questionType doesn't match, FIX IT
-
+- Count the number of answers where \`"isCorrect": true\`
+${questionRules.MultipleChoice.countCorrectCheck}
+${questionRules.SingleChoice.countCorrectCheck}
+- If questionType doesn't match, FIX IT
 `
 
     const newQuizInstructions = (existingDescription, numQuestions) => {
@@ -180,17 +216,20 @@ ${quizRules}
 `
     }
 
-    const newQuestionInstructions = (userInput) => {
-        return `# Task: Generate a multiple-choice question with answers based on the user's description.
+    const newQuestionInstructions = (userInput, questionType) => {
+        const questionTypeRules = questionRules[questionType.id]
+        const exampleAnswerJson = questionExampleJson[questionType.id]
+        const genRules = questionGenRules[questionType.id]
+
+        const res = `# Task: Generate a ${questionType.label} question with answers based on the user's description.
 
 ## User's Request:
 "${userInput}"
 
 ## Instructions:
-1. First, generate a clear and concise question based on the user's description.
-2. Then, provide 3-5 answer choices in JSON format.
-3. Mark 1-3 answers as correct (must have at least 1 correct answer).
-4. Ensure answers are plausible and relevant to the question.
+- First, generate a clear and concise question based on the user's description.
+${genRules}
+- Ensure answers are plausible and relevant to the question.
 
 ## Required Response Format:
 ### Question:
@@ -204,13 +243,7 @@ ${quizRules}
 What are some popular chess openings?
 
 ### Answers:
-[
-  {"answer": "The Ruy Lopez", "isCorrect": true},
-  {"answer": "The Sicilian Defense", "isCorrect": true},
-  {"answer": "The King's Gambit", "isCorrect": false},
-  {"answer": "The Italian Game", "isCorrect": true},
-  {"answer": "The Caro-Kann Defense", "isCorrect": false}
-]
+${exampleAnswerJson}
 
 ## Important Notes:
 - Start with "### Question:" on its own line
@@ -221,7 +254,26 @@ What are some popular chess openings?
 - The JSON must be valid and properly formatted
 - Include explanations in the answers if the question is complex
 - Do not include any other text outside these sections
-- Do not number answers`
+- Do not number answers
+
+## Validation Checklist
+BEFORE finalizing the response, that the question:
+${questionTypeRules.validationCheck}
+
+## Common Mistakes to AVOID:
+${questionTypeRules.mistakesToAvoid}
+
+## Final Check
+Before responding, count the number of \`"isCorrect": true\` for the question and verify:
+${questionTypeRules.isCorrectCheck}
+
+## IMPORTANT: Count the correct answers
+- Count the number of answers where \`"isCorrect": true\`
+${questionTypeRules.countCorrectCheck}
+- If questionType doesn't match, FIX IT
+`
+        console.log(res)
+        return res
     }
 
     return {
