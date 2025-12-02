@@ -53,7 +53,7 @@ const loadData = () => {
       isLoading.value = false
     })
   } else {
-
+    loadAvailableQuizzes()
   }
 }
 const quizSelected = (quiz) => {
