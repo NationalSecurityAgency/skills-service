@@ -64,19 +64,6 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
                     qd.created as created,
                     settings.value as userCommunityEnabled
                 FROM quiz_definition qd
-                LEFT JOIN quiz_settings settings on (settings.quiz_ref_id = qd.id and settings.setting = 'user_community')
-        """, nativeQuery = true)
-    @Nullable
-    List<QuizDefBasicResult> getAllQuizDefSummaries()
-
-    @Query(value="""
-                SELECT DISTINCT
-                    qd.quiz_id AS quizId,
-                    qd.name AS name,
-                    qd.type as quizType,
-                    qd.created as created,
-                    settings.value as userCommunityEnabled
-                FROM quiz_definition qd
                 JOIN user_roles ur on (ur.quiz_id = qd.quiz_id AND ur.role_name in ('ROLE_QUIZ_ADMIN'))
                 LEFT JOIN quiz_settings settings on (settings.quiz_ref_id = qd.id and settings.setting = 'user_community')  
                 WHERE ur.user_id = ?1

@@ -121,8 +121,8 @@ class QuizDefAuthSpecs extends DefaultIntSpec {
         }
     }
 
-    def "root users can view all quizzes"() {
-        def users = getRandomUsers(5, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
+    def "root users can retrieve quizzes"() {
+        def users = getRandomUsers(4, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
         def user1 = users[0]
         def root = users[1]
         def user2 = users[2]
@@ -164,20 +164,24 @@ class QuizDefAuthSpecs extends DefaultIntSpec {
 
 
         when:
-        def user1QuizDefRes = quizUser1.getQuizDefs()
-        def user2QuizDefRes = quizUser2.getQuizDefs()
-        def nonQuizUserQuizDefRes = nonQuizUserService.getQuizDefs()
-        def rootQuizDefRes = rootUser.getQuizDefs()
+        def user1QuizDefRes = quizUser1.getQuizDef(quiz1.quizId)
+        def user2QuizDefRes = quizUser2.getQuizDef(quiz2.quizId)
+        def rootQuizDefRes = rootUser.getQuizDef(quiz1.quizId)
+        def rootQuiz2DefRes = rootUser.getQuizDef(quiz2.quizId)
 
         then:
-        rootQuizDefRes.size() == 2
-        rootQuizDefRes.find( it -> it.quizId == quiz1.quizId )
-        rootQuizDefRes.find( it -> it.quizId == quiz2.quizId )
-        user1QuizDefRes.size() == 1
-        user1QuizDefRes[0].quizId == quiz1.quizId
-        user2QuizDefRes.size() == 1
-        user2QuizDefRes[0].quizId == quiz2.quizId
-        nonQuizUserQuizDefRes.size() == 0
+        rootQuizDefRes
+        rootQuizDefRes.quizId == quiz1.quizId
+        rootQuiz2DefRes
+        rootQuiz2DefRes.quizId == quiz2.quizId
+        user1QuizDefRes
+        user1QuizDefRes.quizId == quiz1.quizId
+        validateForbidden { quizUser1.getQuizDef(quiz2.quizId) }
+        user2QuizDefRes
+        user2QuizDefRes.quizId == quiz2.quizId
+        validateForbidden { quizUser2.getQuizDef(quiz1.quizId) }
+        validateForbidden { nonQuizUserService.getQuizDef(quiz1.quizId) }
+        validateForbidden { nonQuizUserService.getQuizDef(quiz2.quizId) }
     }
 
     def "if quiz is assigned to skill, although any project admin in that project gets a read-only view of the quiz, catalog imported skills do not get the same treatment"() {

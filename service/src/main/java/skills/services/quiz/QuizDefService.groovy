@@ -160,16 +160,7 @@ class QuizDefService {
         String userId = userInfo.username?.toLowerCase()
         List<QuizDefResult> res = []
 
-        List<QuizDefRepo.QuizDefBasicResult> fromDb
-        boolean isRoot = userInfo.authorities?.find() {
-            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
-        }
-        if (isRoot) {
-            fromDb = quizDefRepo.getAllQuizDefSummaries()
-        } else {
-            fromDb = quizDefRepo.getQuizDefSummariesByUser(userId)
-        }
-
+        List<QuizDefRepo.QuizDefBasicResult> fromDb = quizDefRepo.getQuizDefSummariesByUser(userId)
         if (fromDb) {
             if (!isCommunityMember) {
                 fromDb = fromDb.findAll { !Boolean.valueOf(it.userCommunityEnabled) }

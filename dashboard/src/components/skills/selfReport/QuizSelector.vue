@@ -30,6 +30,7 @@ const setFieldValue = inject('setFieldValue')
 const isLoading = ref(true)
 const selectedInternal = ref(null)
 const availableQuizzes = ref([])
+const quizzesLoaded = ref(false)
 
 const noQuizzes = computed(() => {
   return availableQuizzes.value && availableQuizzes.value.length === 0;
@@ -39,22 +40,35 @@ onMounted(() => {
 })
 const loadData = () => {
   isLoading.value = true
-  QuizService.getQuizDefs()
-      .then((res) => {
-        availableQuizzes.value = res;
-        if (props.initiallySelectedQuizId) {
-          const found = availableQuizzes.value.find((q) => q.quizId === props.initiallySelectedQuizId);
-          if (found) {
-            selectedInternal.value = found;
-            setFieldValue('associatedQuiz', found);
-          }
-        }
-      }).finally(() => {
-        isLoading.value = false
-      });
+
+  if (props.initiallySelectedQuizId) {
+    QuizService.getQuizDef(props.initiallySelectedQuizId).then((res) => {
+      const found = res;
+
+      if(found) {
+        selectedInternal.value = found;
+        setFieldValue('associatedQuiz', found);
+      }
+    }).finally(() => {
+      isLoading.value = false
+    })
+  } else {
+
+  }
 }
 const quizSelected = (quiz) => {
   emit('changed', quiz ? quiz.quizId : null);
+}
+
+const loadAvailableQuizzes = () => {
+  if(!quizzesLoaded.value) {
+    QuizService.getQuizDefs().then((res) => {
+      availableQuizzes.value = res;
+      quizzesLoaded.value = true
+    }).finally(() => {
+      isLoading.value = false
+    });
+  }
 }
 </script>
 
@@ -70,6 +84,7 @@ const quizSelected = (quiz) => {
         @update:modelValue="quizSelected"
         :emptyMessage="noQuizzes ? 'You currently do not administer any quizzes or surveys.' : 'No results. Please refine your search string.'"
         :isRequired="true"
+        @before-show="loadAvailableQuizzes"
         :options="availableQuizzes">
       <template #value="slotProps">
         <div v-if="slotProps.value" class="p-1" :data-cy="`quizSelected-${slotProps.value.quizId}`">
