@@ -70,6 +70,18 @@ const props = defineProps({
     type: String,
     default: 'Got it! I\'ll get started right away!'
   },
+  instructionsPlaceholder: {
+    type: String,
+    default: 'Type Instructions Here'
+  },
+  sendButtonLabel: {
+    type: String,
+    default: 'Send'
+  },
+  stopButtonLabel: {
+    type: String,
+    default: 'Stop'
+  },
   isValid: {
     type: Boolean,
     default: true
@@ -330,7 +342,7 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
               id="instructionsInputId"
               v-model="instructions"
               class="w-full"
-              placeholder="Type Instructions Here"
+              :placeholder="instructionsPlaceholder"
               :disabled="isGenerating"
               @keydown.enter="startGeneration"
               data-cy="instructionsInput"
@@ -338,7 +350,7 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
           <div class="flex justify-end">
             <SkillsButton
                 :icon="`fa-solid ${isGenerating ? 'fa-stop': 'fa-play'}`"
-                :label="isGenerating ? 'Stop' : 'Send'"
+                :label="isGenerating ? stopButtonLabel : sendButtonLabel"
                 :severity="isGenerating ? 'warn' : 'success'"
                 data-cy="sendAndStopBtn"
                 @click="onStartStopBtn" />

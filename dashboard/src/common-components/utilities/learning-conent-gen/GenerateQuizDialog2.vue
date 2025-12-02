@@ -69,7 +69,7 @@ const { values, meta, handleSubmit, isSubmitting, resetForm, setFieldValue, vali
 
 const generateQuizFromDescription = (skillDescription) => {
   currentDescription.value = skillDescription
-  const welcomeMsg = 'Hi there! I\'ll generate a quiz based on the existing skill instructions/description. Feel to type additional instructions for me or just click the Send button to get started?'
+  const welcomeMsg = 'Hi there! I\'ll generate a quiz based on the *existing skill description*. Feel free to type additional instructions for me or just click the `Generate` button to get started'
   aiPromptDialogRef.value.addWelcomeMsg(welcomeMsg)
 }
 defineExpose({
@@ -293,6 +293,8 @@ const toggleEnableEditQuestions = ((id) => {
       :add-prefix-fn="handleAddPrefix"
       :generation-started-msg="'Generating a new quiz for this skill, please stand by...'"
       :use-generated-label="'Use Generated Quiz'"
+      :instructions-placeholder="'Optional Additional Instructions Here'"
+      :send-button-label="'Generate'"
       @use-generated="useGenerated"
       :community-value="communityValue"
       :is-valid="meta.valid"
