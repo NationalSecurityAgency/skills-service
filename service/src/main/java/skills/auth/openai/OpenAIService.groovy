@@ -19,6 +19,10 @@ import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
+import org.springframework.ai.chat.model.ChatResponse
+import org.springframework.ai.chat.prompt.Prompt
+import org.springframework.ai.openai.OpenAiChatModel
+import org.springframework.ai.openai.OpenAiChatOptions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -36,6 +40,9 @@ class OpenAIService {
 
     @Value('#{"${skills.openai.host:null}"}')
     String openAiHost
+
+    @Value('#{"${spring.ai.openai.base-url:null}"}')
+    String openAiBaseUrl
 
     @Value('#{"${skills.openai.completionsEndpoint:/v1/chat/completions}"}')
     String completionsEndpoint
@@ -57,6 +64,13 @@ class OpenAIService {
 
     @Autowired
     SslWebClientConfig sslWebClientConfig
+
+    @Autowired(required = false)
+    OpenAiChatModel chatModel;
+
+    boolean isChatEnabled() {
+        return chatModel != null
+    }
 
     CompletionsResponse callCompletions(String message) {
         if (!openAiHost) {
@@ -107,7 +121,7 @@ class OpenAIService {
             return null
         }
 
-        String url = String.join("/", openAiHost, modelsEndpoint)
+        String url = String.join("/", openAiBaseUrl, modelsEndpoint)
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -135,6 +149,26 @@ class OpenAIService {
         }
     }
 
+    Flux<String> streamCompletions1(GenDescRequest genDescRequest) {
+        if (!isChatEnabled()) {
+            return Flux.error(new IllegalStateException("Chat model is not enabled. Set spring.ai.model.chat to enable."))
+        }
+
+        Prompt prompt = new Prompt(
+                genDescRequest.instructions,
+                OpenAiChatOptions.builder()
+                        .model(genDescRequest.model)
+                        .temperature(genDescRequest.modelTemperature)
+                        .build()
+        )
+        Flux<ChatResponse> response = chatModel.stream(prompt)
+        return response.mapNotNull { ChatResponse chatResponse ->
+            String res = (String) chatResponse.getResults().get(0).getOutput().getText()
+            res = res?.replaceAll('\\n', '<<newline>>')
+            log.debug("Response: [{}]", res)
+            return res
+        }
+    }
 
     Flux<String> streamCompletions(GenDescRequest genDescRequest) {
         String message = genDescRequest.instructions
