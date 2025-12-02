@@ -247,7 +247,8 @@ watch(() => props.initialValues, (newValues) => {
 const dialogUtils = useDialogUtils()
 
 defineExpose({
-  setFieldValue
+  setFieldValue,
+  validate
 })
 </script>
 
