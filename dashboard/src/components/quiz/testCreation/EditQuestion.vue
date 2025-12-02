@@ -31,6 +31,7 @@ import GenerateDescriptionDialog1
   from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionDialog1.vue";
 import GenerateSingleQuestionDialog
   from "@/common-components/utilities/learning-conent-gen/GenerateSingleQuestionDialog.vue";
+import QuestionTypeDropDown from "@/components/quiz/testCreation/QuestionTypeDropDown.vue";
 
 const model = defineModel()
 const props = defineProps({
@@ -190,10 +191,16 @@ const atLeastOneCorrectAnswer = (value) => {
   if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
     return true;
   }
+  if (value === undefined) {
+    return false
+  }
   const numCorrect = value.filter((a) => a.isCorrect).length;
   return numCorrect >= 1;
 }
 const atLeastTwoAnswersFilledIn = (value) => {
+  if (value === undefined) {
+    return false
+  }
   if (!isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
     return true;
   }
@@ -201,6 +208,9 @@ const atLeastTwoAnswersFilledIn = (value) => {
   return numWithContent >= 2;
 }
 const correctAnswersMustHaveText = (value) => {
+  if (value === undefined) {
+    return false
+  }
   if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
     return true;
   }
@@ -214,6 +224,9 @@ const maxNumAnswers = (value) => {
   return value && value.length <= appConfig.maxAnswersPerQuizQuestion;
 }
 const singleChoiceQuestionsMustHave1Answer = (value) => {
+  if (value === undefined) {
+    return false
+  }
   if (isSurveyType.value || !isDirty.value || !QuestionType.isSingleChoice(questionType.value.selectedType.id)) {
     return true;
   }
@@ -221,6 +234,9 @@ const singleChoiceQuestionsMustHave1Answer = (value) => {
   return numCorrect === 1;
 }
 const multipleChoiceQuestionsMustHaveAtLeast2Answer = (value) => {
+  if (value === undefined) {
+    return false
+  }
   if (isSurveyType.value || !isDirty.value || !QuestionType.isMultipleChoice(questionType.value.selectedType.id)) {
     return true;
   }
@@ -356,6 +372,10 @@ const markdownEditorRef = ref(null)
 const onQuestionGenerated = (questionInfo) => {
   markdownEditorRef.value.setMarkdownText(questionInfo.question)
   skillsInputFormDialogRef.value.setFieldValue('answers', questionInfo.answers)
+
+  setTimeout(() => {
+    skillsInputFormDialogRef.value?.validate()
+  }, 500)
 }
 </script>
 
@@ -389,6 +409,7 @@ const onQuestionGenerated = (questionInfo) => {
           v-if="showGenQDialog"
           ref="generateDescriptionDialogRef"
           v-model="showGenQDialog"
+          :question-type="questionType"
           @question-generated="onQuestionGenerated"
       />
 
@@ -434,28 +455,13 @@ const onQuestionGenerated = (questionInfo) => {
         <span class="font-bold text-primary">Answers</span>
       </div>
       <div class="mb-2">
-        <SkillsDropDown
+        <question-type-drop-down
             name="questionType"
             data-cy="answerTypeSelector"
             v-model="questionType.selectedType"
-            aria-label="Selection Question Type"
-            @update:modelValue="questionTypeChanged"
-            :isRequired="true"
-            :options="questionType.options">
-          <template #value="slotProps">
-            <div v-if="slotProps.value" class="p-1" :data-cy="`selectionItem_${slotProps.value.id}`" :aria-label="`Select ${slotProps.value.label}`">
-              <i :class="slotProps.value.icon" style="min-width: 1.2rem" class="border rounded-sm p-1 mr-2" aria-hidden="true"></i>
-              <span class="">{{ slotProps.value.label }}</span>
-            </div>
-          </template>
-
-          <template #option="slotProps">
-            <div class="p-1" :data-cy="`selectionItem_${slotProps.option.id}`">
-              <i :class="slotProps.option.icon" style="min-width: 1.2rem" class="border rounded-sm p-1 mr-2" aria-hidden="true"></i>
-              <span class="">{{ slotProps.option.label }}</span><span class="hidden sm:inline">: {{ slotProps.option.description }}</span>
-            </div>
-          </template>
-        </SkillsDropDown>
+            :options="questionType.options"
+            @selection-changed="questionTypeChanged"
+        />
       </div>
 
       <div v-if="isQuestionTypeTextInput" class="flex pl-4">
