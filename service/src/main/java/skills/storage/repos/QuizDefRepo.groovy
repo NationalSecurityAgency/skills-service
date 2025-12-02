@@ -55,7 +55,6 @@ interface QuizDefRepo extends CrudRepository<QuizDef, Long> {
         @Nullable
         String getUserCommunityEnabled()
     }
-
     @Query(value="""
                 SELECT DISTINCT
                     qd.quiz_id AS quizId,

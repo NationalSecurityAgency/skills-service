@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional
 import skills.PublicProps
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
-import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.PublicPropsBasedValidator
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
