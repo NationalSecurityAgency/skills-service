@@ -23,6 +23,7 @@ import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
 import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import {useStorage} from "@vueuse/core";
 
 const props = defineProps({
   tagChart: Object
@@ -51,12 +52,12 @@ const table = ref({
       server: true,
       currentPage: 1,
       totalRows: 1,
-      pageSize: 10,
       removePerPage: true,
     },
     tableDescription: `${props.tagChart.title} Users`,
   },
 });
+const pageSize = useStorage('userTagTable-tablePageSize', 10)
 
 const projectId = computed(() => {
   return route.params.projectId;
@@ -67,7 +68,7 @@ const tagKey = computed(() => {
 });
 
 const pageChanged = (pagingInfo) => {
-  table.value.options.pagination.pageSize = pagingInfo.rows
+  pageSize.value = pagingInfo.rows
   table.value.options.pagination.currentPage = pagingInfo.page + 1
   loadData()
 }
@@ -96,7 +97,7 @@ const loadData = (shouldHighlight = false) => {
   const params = {
     tagKey: props.tagChart.key,
     currentPage: table.value.options.pagination.currentPage,
-    pageSize: table.value.options.pagination.pageSize,
+    pageSize: pageSize.value,
     sortDesc: table.value.options.sortOrder === -1,
     tagFilter: filters.value.tag,
     sortBy: table.value.options.sortBy === 'count' ? 'numUsers' : 'tag',
@@ -154,7 +155,7 @@ const filterRange = ref([]);
                          @sort="sortTable"
                          v-model:sort-field="table.options.sortBy"
                          v-model:sort-order="table.options.sortOrder"
-                         :rows="table.options.pagination.pageSize"
+                         :rows="pageSize"
                          :rowsPerPageOptions="table.options.pagination.possiblePageSizes"
                          :total-records="table.options.pagination.totalRows"
                          tableStoredStateId="userTagsTable"

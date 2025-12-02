@@ -26,6 +26,7 @@ import UsersService from '@/components/users/UsersService.js'
 import NoContent2 from '@/components/utils/NoContent2.vue';
 import SkillsDisplayPathAppendValues from '@/router/SkillsDisplayPathAppendValues.js';
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
+import {useStorage} from "@vueuse/core";
 
 const announcer = useSkillsAnnouncer()
 const route = useRoute()
@@ -54,10 +55,10 @@ const options = ref({
     server: false,
     currentPage: 1,
     totalRows: 0,
-    pageSize: 5,
     possiblePageSizes: [5, 10, 20, 50]
   }
 })
+const pageSize = useStorage('userArchive-tablePageSize', 5)
 const sortInfo = ref({ sortOrder: -1, sortBy: 'userIdForDisplay' })
 
 onMounted(() => {
@@ -66,7 +67,7 @@ onMounted(() => {
 
 const loadData = () => {
   const params = {
-    limit: options.value.pagination.pageSize,
+    limit: pageSize.value,
     ascending: sortInfo.value.sortOrder === 1,
     page: options.value.pagination.currentPage,
     orderBy: sortInfo.value.sortBy
@@ -107,7 +108,7 @@ const calculateClientDisplayRoute = (props) => {
 }
 
 const pageChanged = (pagingInfo) => {
-  options.value.pagination.pageSize = pagingInfo.rows
+  pageSize.value = pagingInfo.rows
   options.value.pagination.currentPage = pagingInfo.page + 1
   loadData()
 }
@@ -139,7 +140,7 @@ const sortField = (column) => {
             id="userArchiveTable"
             data-cy="userArchiveTable"
             :total-records="options.pagination.totalRows"
-            :rows="options.pagination.pageSize"
+            :rows="pageSize"
             :rowsPerPageOptions="options.pagination.possiblePageSizes"
             @page="pageChanged"
             @sort="sortField"

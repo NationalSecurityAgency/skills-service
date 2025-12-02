@@ -35,6 +35,7 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js';
 import {useProjDetailsState} from "@/stores/UseProjDetailsState.js";
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import {useStorage} from "@vueuse/core";
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
@@ -58,7 +59,7 @@ const isExporting = ref(false)
 const totalPoints = ref(0)
 const currentPage = ref(1)
 const totalRows = ref(1)
-const pageSize = ref(5)
+const pageSize = useStorage('usersTable-pageSize', 5)
 const possiblePageSizes = [5, 10, 15, 20]
 const sortInfo = ref({ sortOrder: -1, sortBy: 'lastUpdated' })
 const selectedRows = ref([])

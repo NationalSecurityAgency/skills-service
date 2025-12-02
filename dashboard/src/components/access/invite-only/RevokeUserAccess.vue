@@ -29,6 +29,7 @@ import { useDialogMessages } from '@/components/utils/modal/UseDialogMessages.js
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
 import { FilterMatchMode } from '@primevue/core/api'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
+import {useStorage} from "@vueuse/core";
 
 const route = useRoute()
 const responsive = useResponsiveBreakpoints()
@@ -52,7 +53,7 @@ const reset = () => {
 const tableIsBusy = ref(false)
 const data = ref([])
 const loadingData = ref(true)
-const pageSize = ref(5)
+const pageSize = useStorage('revokeUserAccess-pageSize', 5)
 const possiblePageSizes = [5, 10, 15, 20]
 const sortInfo = ref({ sortOrder: -1, sortBy: 'userId' })
 const totalRows = ref(0)
