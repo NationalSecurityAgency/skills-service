@@ -30,6 +30,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -84,6 +91,10 @@
             <artifactId>nimbus-jose-jwt</artifactId>
             <version>10.0.2</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -704,6 +715,7 @@
                                 <licenseMerge>Eclipse Public License - Version 2.0|Eclipse Public License - v 2.0</licenseMerge>
                                 <licenseMerge>The BSD License|BSD</licenseMerge>
                                 <licenseMerge>The BSD License|BSD License</licenseMerge>
+                                <licenseMerge>The BSD License|BSD licence</licenseMerge>
                                 <licenseMerge>MPL 2.0|Mozilla Public License, version 2.0</licenseMerge>
                                 <licenseMerge>Common Development and Distribution License / The GNU General Public License (GPL) Version 2 with the Classpath Exception|CDDL/GPLv2+CE</licenseMerge>
                                 <licenseMerge>Dual license: Common Development and Distribution License 1.1 (CDDL-1.1) and The GNU General Public License (GPL) Version 2|Dual license consisting of the CDDL v1.1 and GPL v2</licenseMerge>

@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import skills.auth.openai.GenDescRequest
-import skills.auth.openai.LearningContentGenerator
 import skills.auth.openai.OpenAIService
 import skills.controller.exceptions.SkillsValidator
 
@@ -44,7 +43,7 @@ class OpenAiController {
         SkillsValidator.isNotBlank(genDescRequest.model, "genDescRequest.model")
         SkillsValidator.isNotNull(genDescRequest.modelTemperature, "genDescRequest.modelTemperature")
         SkillsValidator.isTrue(genDescRequest.modelTemperature >= 0 && genDescRequest.modelTemperature <= 2, "genDescRequest.modelTemperature must be >= 0 and <= 2")
-        return openAIService.streamCompletions(genDescRequest)
+        return openAIService.streamCompletions1(genDescRequest)
     }
 
     @GetMapping("/models")
