@@ -209,6 +209,11 @@ db-scheduler:
   threads: 3
 ---
 spring:
+  ai:
+    model:
+      chat: none
+    openai:
+      api-key: none
   cloud:
     aws:
       s3:
