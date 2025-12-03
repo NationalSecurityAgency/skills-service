@@ -373,6 +373,11 @@ const onQuestionGenerated = (questionInfo) => {
   markdownEditorRef.value.setMarkdownText(questionInfo.question)
   skillsInputFormDialogRef.value.setFieldValue('answers', questionInfo.answers)
 
+  const newQType = questionType.value.options.find((o) => o.id === questionInfo.questionTypeId)
+  questionType.value.selectedType = newQType
+  skillsInputFormDialogRef.value.setFieldValue('questionType', newQType)
+
+
   setTimeout(() => {
     skillsInputFormDialogRef.value?.validate()
   }, 500)

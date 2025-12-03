@@ -1,0 +1,11 @@
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"### Question:\nSelect rock bands? \n\n### Answers:\n[\n      {\"answer\": \"Led Zeppelin\", \"isCorrect\": true},"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"      {\"answer\": \"Daft Punk\", \"isCorrect\": false},"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"      {\"answer\": \"Pink Floyd\", \"isCorrect\": true},"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"      {\"answer\": \"The Beatles\", \"isCorrect\": true},"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"      {\"answer\": \"Norah Jones\", \"isCorrect\": false}"},"finish_reason":null}]}
+
+data: [DONE]
