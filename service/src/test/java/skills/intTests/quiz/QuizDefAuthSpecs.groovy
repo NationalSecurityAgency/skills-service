@@ -121,6 +121,69 @@ class QuizDefAuthSpecs extends DefaultIntSpec {
         }
     }
 
+    def "root users can retrieve quizzes"() {
+        def users = getRandomUsers(4, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
+        def user1 = users[0]
+        def root = users[1]
+        def user2 = users[2]
+        def user3 = users[3]
+        SkillsService quizUser1 = createService(user1)
+        SkillsService rootUser = createRootSkillService(root)
+        SkillsService quizUser2 = createService(user2)
+        SkillsService nonQuizUserService = createService(user3)
+
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        quizUser1.createQuizDef(quiz1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        quizUser1.createQuizQuestionDefs(questions)
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        quizUser1.createProjectAndSubjectAndSkills(proj, subj, [])
+        def skills = createSkills(3, 1, 1, 100, 1)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills[0].quizId = quiz1.quizId
+        quizUser1.createSkills(skills)
+        quizUser1.saveQuizSettings(quiz1.quizId, [
+                [setting: "some", value: '2'],
+        ])
+
+        def quiz2 = QuizDefFactory.createQuiz(2)
+        quizUser2.createQuizDef(quiz2)
+        def questions2 = QuizDefFactory.createChoiceQuestions(2, 2, 2)
+        quizUser2.createQuizQuestionDefs(questions2)
+        def proj2 = createProject(2)
+        def subj2 = createSubject(2, 1)
+        quizUser2.createProjectAndSubjectAndSkills(proj2, subj2, [])
+        def skills2 = createSkills(3, 2, 1, 100, 1)
+        skills2[0].selfReportingType = SkillDef.SelfReportingType.Quiz
+        skills2[0].quizId = quiz2.quizId
+        quizUser2.createSkills(skills2)
+        quizUser2.saveQuizSettings(quiz2.quizId, [
+                [setting: "some", value: '2'],
+        ])
+
+
+        when:
+        def user1QuizDefRes = quizUser1.getQuizDef(quiz1.quizId)
+        def user2QuizDefRes = quizUser2.getQuizDef(quiz2.quizId)
+        def rootQuizDefRes = rootUser.getQuizDef(quiz1.quizId)
+        def rootQuiz2DefRes = rootUser.getQuizDef(quiz2.quizId)
+
+        then:
+        rootQuizDefRes
+        rootQuizDefRes.quizId == quiz1.quizId
+        rootQuiz2DefRes
+        rootQuiz2DefRes.quizId == quiz2.quizId
+        user1QuizDefRes
+        user1QuizDefRes.quizId == quiz1.quizId
+        validateForbidden { quizUser1.getQuizDef(quiz2.quizId) }
+        user2QuizDefRes
+        user2QuizDefRes.quizId == quiz2.quizId
+        validateForbidden { quizUser2.getQuizDef(quiz1.quizId) }
+        validateForbidden { nonQuizUserService.getQuizDef(quiz1.quizId) }
+        validateForbidden { nonQuizUserService.getQuizDef(quiz2.quizId) }
+    }
+
     def "if quiz is assigned to skill, although any project admin in that project gets a read-only view of the quiz, catalog imported skills do not get the same treatment"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
