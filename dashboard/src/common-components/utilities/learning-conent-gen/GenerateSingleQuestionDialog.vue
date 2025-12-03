@@ -27,6 +27,7 @@ import SelectCorrectAnswer from "@/components/quiz/testCreation/SelectCorrectAns
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import {useQuizConfig} from '@/stores/UseQuizConfig.js'
 import QuestionTypeDropDown from "@/components/quiz/testCreation/QuestionTypeDropDown.vue";
+import QuestionType from "@/skills-display/components/quiz/QuestionType.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -76,17 +77,21 @@ const createPromptInstructions = (userEnterInstructions) => {
 const upToStartOfAnswers = ref('')
 const answersFound = ref(false)
 const answersString = ref('')
+const questionsTitle = '### Question:'
+const answersTitle = '### Answers:'
 const handleGeneratedChunk = (chunk) => {
   let append = true
   let chunkToSend = chunk
+
   if (!answersFound.value) {
     upToStartOfAnswers.value += chunk
+    const questionStarted = upToStartOfAnswers.value.indexOf(questionsTitle) !== -1
 
     // Check if we've found the answers section
-    const answersIndex = upToStartOfAnswers.value.indexOf('### Answers:')
+    const answersIndex = upToStartOfAnswers.value.indexOf(answersTitle)
     if (answersIndex !== -1) {
       // Split at the start of answers
-      const beforeAnswers = upToStartOfAnswers.value.substring(0, answersIndex+1)
+      const beforeAnswers = upToStartOfAnswers.value.substring(0, answersIndex)
       const afterAnswers = upToStartOfAnswers.value.substring(answersIndex)
 
       // Update values
@@ -94,8 +99,9 @@ const handleGeneratedChunk = (chunk) => {
       answersString.value = afterAnswers
       answersFound.value = true
 
-      const colonIndex =  chunkToSend.indexOf(':');
-      chunkToSend = colonIndex !== -1 ? chunkToSend.substring(0, colonIndex+1).trim() : chunkToSend;
+      const lookFor = chunkToSend.indexOf(questionsTitle) !== -1 ? 'Answers:' : ':'
+      const colonIndex = chunkToSend.indexOf(lookFor);
+      chunkToSend = (questionStarted && colonIndex !== -1) ? chunkToSend.substring(0, colonIndex+lookFor.length+1).trim() : chunkToSend;
     }
   } else {
     // Once we've found answers, append all new chunks to answersString
@@ -110,25 +116,27 @@ const handleGeneratedChunk = (chunk) => {
 }
 
 const handleGenerationCompleted = (generated) => {
-  const questionMatch = /### Question:\s*([\s\S]+?)(?=\s*#+\s|$)/.exec(generated.generatedValue)
+  const questionMatch = /### Question:\s*([\s\S]+?)(?=\s*#+\s|$)/.exec(upToStartOfAnswers.value)
   if (!questionMatch) {
-    throw new Error(`Invalid response format for question=[${generated.generatedValue}]`);
+    throw new Error(`Invalid response format for question text=[${upToStartOfAnswers.value}]`);
   }
   const answersMatch = /### Answers:([\s\S]+)/.exec(answersString.value);
   if (!answersMatch) {
     throw new Error(`Invalid response format for answers=[${answersString.value}]`);
   }
   try {
-    const answers = JSON.parse(answersMatch[1].trim())
+    const answers = QuestionType.isTextInput(props.questionType.selectedType?.id) ? [] : JSON.parse(answersMatch[1].trim())
     return {
       generatedValue: generated.generatedValue,
       generateValueChangedNotes: null,
       generatedInfo: {
         question: questionMatch[1].trim(),
-        answers: answers
+        answers: answers,
+        questionTypeId: props.questionType.selectedType?.id
       }
     }
   } catch (e) {
+    console.error(e)
     throw new Error(`Failed to parse answers JSON from [${answersString.value}]`);
   } finally {
     answersFound.value = false
@@ -143,9 +151,9 @@ const useGenerated = (historyItem) => {
 
 const validationService = useDescriptionValidatorService()
 const handleAddPrefix = (historyItem, missingPrefix) => {
-  if (historyItem?.generatedValue) {
-    return validationService.addPrefixToInvalidParagraphs(historyItem?.generatedValue, missingPrefix).then((result) => {
-      historyItem.generatedValue = result.newDescription
+  if (historyItem?.generatedInfo?.question) {
+    return validationService.addPrefixToInvalidParagraphs(historyItem?.generatedInfo?.question, missingPrefix).then((result) => {
+      historyItem.generatedInfo.question = result.newDescription
       return historyItem
     })
   }
@@ -166,6 +174,10 @@ const communityValue = computed(() => {
   }
   return res
 })
+
+const generationFailed = () => {
+  answersFound.value = false
+}
 </script>
 
 <template>
@@ -177,6 +189,7 @@ const communityValue = computed(() => {
       :generation-completed-fn="handleGenerationCompleted"
       :add-prefix-fn="handleAddPrefix"
       @use-generated="useGenerated"
+      @generation-failed="generationFailed"
       :community-value="communityValue"
   >
     <template #aboveChatHistory>
@@ -199,11 +212,22 @@ const communityValue = computed(() => {
         <skills-spinner :is-loading="answersFound" :size-in-rem="2"/>
       </div>
       <!--      must not use local variables as there can be more than 1 history item-->
-      <div v-if="historyItem.generatedInfo?.answers" class="mt-2 flex flex-col gap-2">
-        <div v-for="(answer, index) in historyItem.generatedInfo?.answers" :key="index" class="flex gap-1 items-start">
+      <div v-if="historyItem.generatedInfo?.answers" class="mt-2 flex flex-col gap-2" data-cy="generatedAnswers">
+        <div v-if="QuestionType.isTextInput(historyItem.generatedInfo?.questionTypeId)">
+            <Textarea
+                style="resize: none"
+                class="w-full"
+                placeholder="Users will be required to enter text."
+                disabled
+                aria-hidden="true"
+                data-cy="textAreaPlaceHolder"
+                rows="2"/>
+        </div>
+        <div v-else  v-for="(answer, index) in historyItem.generatedInfo?.answers" :key="index" class="flex gap-1 items-start">
           <select-correct-answer
               v-model="answer.isCorrect"
               :read-only="true"
+              :is-radio-icon="QuestionType.isSingleChoice(historyItem.generatedInfo?.questionTypeId)"
               font-size="1.5rem"
               :name="`ans${index}`"/>
           <div>{{ answer.answer }}</div>
