@@ -23,9 +23,12 @@ import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
 import {useRoute} from "vue-router";
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
+import { useDebounceFn } from '@vueuse/core'
+import { useAppConfig } from "@/common-components/stores/UseAppConfig.js";
 
 const route = useRoute()
 const quizConfig = useQuizConfig()
+const appConfig = useAppConfig()
 
 const props = defineProps({
   quizType: String,
@@ -46,7 +49,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested', 'copyQuestion'])
+const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested', 'copyQuestion', 'questionUpdated'])
 
 const showDeleteDialog = ref(false)
 
@@ -88,6 +91,11 @@ const moveQuestion = (changeIndexBy) => {
   emit('sortChangeRequested', { question: props.question, newIndex: props.questionNum + changeIndexBy - 1 })
 }
 
+const questionUpdatedDebounced = useDebounceFn((updatedQuestionText) => questionUpdated(updatedQuestionText), appConfig.formFieldDebounceInMs)
+const questionUpdated = (updatedQuestionText) => {
+  emit('questionUpdated', { question: props.question, updatedQuestionText })
+}
+
 </script>
 
 <template>
@@ -119,6 +127,7 @@ const moveQuestion = (changeIndexBy) => {
                              :disable-ai-prompt="true"
                              :allow-attachments="false"
                              :allow-insert-images="false"
+                             @value-changed="questionUpdatedDebounced"
                              label="Question"
                              markdownHeight="150px"/>
           </div>
