@@ -77,24 +77,6 @@ defineExpose({
 });
 
 const useGenerated = (historyItem) => {
-  if (!historyItem?.generatedInfo?.generatedQuiz) return;
-
-  // Get all q properties from values
-  const qProperties = Object.entries(values)
-      .filter(([key]) => key.startsWith('q') && !isNaN(parseInt(key.substring(1))));
-
-  // Update questions based on q properties
-  qProperties.forEach(([key, value]) => {
-    const questionName = key; // e.g., 'q22'
-    const question = historyItem.generatedInfo.generatedQuiz.find(
-        q => q.name === questionName
-    );
-
-    if (question) {
-      question.question = value;
-    }
-  });
-
   emit('generated-quiz', historyItem.generatedInfo.generatedQuiz);
 }
 const getQuizDataForDisplay = (quizData, historyId) => {
@@ -252,6 +234,7 @@ const handleAddPrefix = (historyItem, missingPrefix) => {
     historyItem.generatedInfo.generatedQuiz.forEach((q) => {
       promises.push(validationService.addPrefixToInvalidParagraphs(q.question, missingPrefix).then((result) => {
         q.question = result.newDescription
+        setFieldValue(q.name, q.question)
         return q
       }))
     })
@@ -281,6 +264,11 @@ const createPromptInstructions = (userEnterInstructions) => {
 const toggleEnableEditQuestions = ((id) => {
   enableEditQuestionsIds.value = enableEditQuestionsIds.value.includes(id) ? enableEditQuestionsIds.value.filter(item => item !== id) : [...enableEditQuestionsIds.value, id];
 })
+const handleQuestionUpdated = (updatedQuestion, historyItem) => {
+  const { updatedQuestionText } = updatedQuestion;
+  const question = historyItem.generatedInfo.generatedQuiz.find(q => q.id === updatedQuestion.id);
+  question.question = updatedQuestionText;
+}
 </script>
 
 <template>
@@ -304,7 +292,14 @@ const toggleEnableEditQuestions = ((id) => {
       <div v-if="historyItem.generatedInfo" class="px-5 border rounded-lg bg-blue-50 ml-4">
         <div v-for="(q, index) in getQuizDataForDisplay(historyItem.generatedInfo, historyItem.id)" :key="q.id">
           <div class="my-4">
-            <QuestionCard data-cy="generatedQuestion" :question="q" :question-num="index+1" quiz-type="Quiz" :show-edit-controls="false" :supports-edit-question-inline="true" :show-edit-question-inline="enableEditQuestionsIds.includes(historyItem.id)"/>
+            <QuestionCard data-cy="generatedQuestion"
+                          quiz-type="Quiz"
+                          @question-updated="handleQuestionUpdated($event, historyItem)"
+                          :question="q"
+                          :question-num="index+1"
+                          :show-edit-controls="false"
+                          :supports-edit-question-inline="true"
+                          :show-edit-question-inline="enableEditQuestionsIds.includes(historyItem.id)"/>
           </div>
         </div>
         <div class="flex justify-start items-center gap-3 my-2">
