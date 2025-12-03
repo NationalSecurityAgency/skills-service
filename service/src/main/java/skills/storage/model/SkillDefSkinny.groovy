@@ -27,5 +27,6 @@ interface SkillDefSkinny {
     Date getCreated()
     Integer getTotalPoints()
     String getGroupId()
+    String getGroupName()
     String getType()
 }
