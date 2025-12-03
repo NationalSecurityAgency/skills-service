@@ -27,6 +27,7 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import ShowMore from '@/components/skills/selfReport/ShowMore.vue'
 import EditSkill from '@/components/skills/EditSkill.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import SkillNavigation from "@/skills-display/components/utilities/SkillNavigation.vue";
 
 const route = useRoute()
 const router = useRouter()
@@ -158,10 +159,26 @@ const buildHeaderOptions = () => {
 const skillId = computed(() => {
   return skillsState.skill ? `ID: ${SkillReuseIdUtil.removeTag(skillsState.skill.skillId)}` : 'Loading...'
 })
+
+const prevButtonClicked = () => {
+  const params = { skillId: skillsState.skill.prevSkillId, projectId: route.params.projectId }
+  router.push({ name: route.name, params: params })
+}
+
+const nextButtonClicked = () => {
+  const params = { skillId: skillsState.skill.nextSkillId, projectId: route.params.projectId }
+  router.push({ name: route.name, params: params })
+}
+
 </script>
 
 <template>
-  <div>
+  <div class="mt-2">
+    <Card class="p-2" :pt="{ body: { class: 'p-0!' } }" v-if="skillsState.skill && (skillsState.skill.prevSkillId || skillsState.skill.nextSkillId)" >
+      <template #content>
+        <skill-navigation @prevButtonClicked="prevButtonClicked" @nextButtonClicked="nextButtonClicked" :skill="skillsState.skill" buttonSeverity="info" />
+      </template>
+    </Card>
     <page-header :loading="isLoading" :options="headerOptions">
       <template #subTitle v-if="skillsState.skill">
         <div v-for="(tag) in skillsState.skill.tags" :key="tag.tagId" class="h6 mr-2 d-inline-block"
@@ -207,6 +224,7 @@ const skillId = computed(() => {
           class="fas fa-eye-slash mr-1" aria-hidden="true"></i> DISABLED</Tag>
       </template>
     </page-header>
+
     <navigation :nav-items="navItems">
     </navigation>
 

@@ -540,24 +540,8 @@ class SkillsLoader {
         Integer points
     }
 
-    int sortByDisplayOrder(DisplayOrderRes a, DisplayOrderRes b) {
-        if( a.groupId != null || b.groupId != null ) {
-            if( a.groupId != null && b.groupId != null) {
-                if( a.groupId != b.groupId ) {
-                    return a.skillGroupDisplayOrder <=> b.skillGroupDisplayOrder
-                }
-            }
-            else {
-                if( a.groupId != null && b.groupId == null ) {
-                    return a.skillGroupDisplayOrder <=> b.displayOrder
-                }
-                else {
-                    return a.displayOrder <=> b.skillGroupDisplayOrder
-                }
-            }
-        }
-
-        return a.displayOrder <=> b.displayOrder
+    DisplayOrderRes getSkillOrderStats(String projectId, String subjectId, String skillId) {
+        return skillDefRepo.findDisplayOrderByProjectIdAndSubjectIdAndSkillId(projectId, subjectId, skillId)
     }
 
     @Transactional(readOnly = true)
@@ -574,31 +558,10 @@ class SkillsLoader {
             groupName = skillDefRepo.getSkillNameByProjectIdAndSkillId(projectId, skillDef.groupId)?.skillName
         }
 
-        String nextSkillId = null;
-        String prevSkillId = null;
-        int totalSkills = 0;
-        int orderInGroup = 0;
-
         boolean isCrossProjectSkill = crossProjectId && crossProjectId != projectId
+        DisplayOrderRes orderInfo = null
         if(subjectId && !isCrossProjectSkill) {
-            List<DisplayOrderRes> skills = skillDefRepo.findDisplayOrderByProjectIdAndSubjectId(projectId, subjectId)?.sort({a, b -> sortByDisplayOrder(a, b)})
-            def currentSkill = skills.find({ it -> it.getSkillId() == skillId })
-            if (!currentSkill) {
-                throw new SkillException("Provided skill id [${skillId}] des not exist under subject [${subjectId}]", projectId, skillId, ErrorCode.BadParam)
-            }
-            def orderedGroup = skills?.sort({a, b -> sortByDisplayOrder(a, b)});
-            orderInGroup = orderedGroup.findIndexOf({it -> it.skillId == currentSkill.skillId}) + 1;
-            totalSkills = orderedGroup.size();
-
-            if (currentSkill) {
-                def currentIndex = skills.findIndexOf{ it.skillId == currentSkill.skillId }
-                if(currentIndex > 0) {
-                    prevSkillId = skills[currentIndex - 1]?.skillId
-                }
-                if(currentIndex < totalSkills - 1) {
-                    nextSkillId = skills[currentIndex + 1]?.skillId
-                }
-            }
+            orderInfo = getSkillOrderStats(projectId, subjectId, skillId)
         }
 
         if (crossProjectId) {
@@ -678,10 +641,10 @@ class SkillsLoader {
                 projectName: InputSanitizer.unsanitizeName(projDef.name),
                 skillId: skillDef.skillId,
                 subjectId: skillSubjectId,
-                prevSkillId: prevSkillId,
-                nextSkillId: nextSkillId,
-                orderInGroup: orderInGroup,
-                totalSkills: totalSkills,
+                prevSkillId: orderInfo?.previousSkillId,
+                nextSkillId: orderInfo?.nextSkillId,
+                orderInGroup: orderInfo?.overallOrder ?: 0,
+                totalSkills: orderInfo?.totalCount ?: 0,
                 skill: isReusedSkill ? SkillReuseIdUtil.removeTag(unsanitizedName) : unsanitizedName,
                 points: points, todaysPoints: todayPoints,
                 pointIncrement: skillDef.pointIncrement,
