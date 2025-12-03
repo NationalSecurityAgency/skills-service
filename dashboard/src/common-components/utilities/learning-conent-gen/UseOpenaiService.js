@@ -82,6 +82,7 @@ export const useOpenaiService = () => {
         } catch (error) {
             currentRequestController = null;
             if (onError) {
+                console.error(error)
                 onError(error);
             } else {
                 throw error; // Re-throw if no error handler is provided

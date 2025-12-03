@@ -88,7 +88,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['use-generated'])
+const emit = defineEmits(['use-generated', 'generation-failed'])
 const route = useRoute()
 const log = useLog()
 const appConfig = useAppConfig()
@@ -223,6 +223,7 @@ const genWithStreaming = (instructionsToSend) => {
           setFinalMsgToLastChatItem(props.failedToGenerateMsg, true)
         }
         focusOnInstructionsInput()
+        emit('generation-failed')
       })
 }
 const lastPromptCancelled = ref(false)
