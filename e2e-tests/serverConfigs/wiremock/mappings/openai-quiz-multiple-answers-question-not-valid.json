@@ -4,10 +4,8 @@
     "method": "POST",
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
-      { "contains": "Great rock bands" },
-      { "contains": "Multiple Answers" },
-      { "doesNotContain": "jabberwocky"},
-      { "doesNotContain": "Bad JSON" }
+      { "contains": "Great jabberwocky rock bands" },
+      { "contains": "Multiple Answers" }
     ]
   },
   "response": {
@@ -15,7 +13,7 @@
     "headers": {
       "Content-Type": "text/event-stream"
     },
-    "bodyFileName": "response-body-question-multiple-answers.txt",
+    "bodyFileName": "response-body-question-multiple-answers-not-valid.txt",
     "transformers": ["response-template"],
     "chunkedDribbleDelay": {
       "numberOfChunks": 20,
