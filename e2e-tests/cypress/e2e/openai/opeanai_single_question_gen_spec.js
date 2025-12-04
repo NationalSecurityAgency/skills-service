@@ -209,6 +209,59 @@ describe('Generate Single Question Tests', () => {
         cy.get('[data-cy="finalSegment"]').contains(errMsg)
     });
 
+    it('generate a new Multiple Choice question with a prefix', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.addPrefixToInvalidParagraphsOptions = '(A) ,(B) ,(C) ,(D) ';
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createQuizDef(1);
+
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(newSingleQuestionWelcomeMsg)
+        cy.get('[data-cy="userMsg-1"]').should('not.exist')
+
+        cy.get('[data-cy="instructionsInput"]').type('Great jabberwocky rock bands{enter}')
+        cy.get('[data-cy="userMsg-1"]').contains('Great jabberwocky rock bands')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').contains('Select jabberwocky rock bands?')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedAnswers"]').contains(`Led Zeppelin`)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedAnswers"]').contains(`Norah Jones`)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
+        cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled')
+
+        cy.get('[data-cy="instructionsInput"]').should('have.focus')
+
+        cy.get('[data-cy="prefixSelect"]').click()
+        const letters = ['A', 'B', 'C', 'D'];
+        for (const letter of letters) {
+            cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(${letter}) "]`);
+        }
+
+        cy.get('[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(B) "]').click()
+
+        cy.get('[data-cy="addPrefixBtn"]').click()
+
+        cy.get('[data-cy="markdownEditorInput"]').contains('(B) Select jabberwocky rock bands?')
+
+        const expectedAnswers = [
+            { text: 'Led Zeppelin', isCorrect: true },
+            { text: 'Daft Punk', isCorrect: false },
+            { text: 'Pink Floyd', isCorrect: true },
+            { text: 'The Beatles', isCorrect: true },
+            { text: 'Norah Jones', isCorrect: false },
+        ]
+
+        validateAnswers(expectedAnswers)
+    })
+
 });
 
 
