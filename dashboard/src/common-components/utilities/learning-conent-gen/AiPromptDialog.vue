@@ -86,6 +86,10 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
+  overallErrMsg: {
+    type: String,
+    default: null
+  },
 })
 
 const emit = defineEmits(['use-generated', 'generation-failed'])
@@ -338,6 +342,9 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
         </div>
       </div>
 
+      <Message severity="warn" v-if="!isValid && overallErrMsg">
+        <div v-html="overallErrMsg"></div>
+      </Message>
       <div class="flex justify-end mt-6">
         <div class="flex gap-2 w-10/12">
           <InputText

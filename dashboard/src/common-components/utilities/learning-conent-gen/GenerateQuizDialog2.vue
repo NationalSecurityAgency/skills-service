@@ -107,6 +107,18 @@ const communityValue = computed(() => {
   return res
 })
 
+const overallErrMsg = 'Use Generate Quiz button is disabled because portion markings are missing - choose "Edit Questions" to fix or "Portion Mark Then Use" to fix all questions'
+// const overallErrMsg = computed(() => {
+//   return `
+//     <div>
+//       <button class="p-button p-component p-button-sm p-button-info" disabled>
+//         <span>Use Generated Quiz</span>
+//         <i class="fa-solid fa-check-double"></i>
+//       </button>
+//       <span>is disabled because portion markings are missing - Choose "Edit Questions" to fix or "Portion Mark Then Use" to fix all questions</span>
+//     </div>
+//   `;
+// });
 const currentJsonString = ref('')
 const handleGeneratedChunk = (chunk, historyId) => {
   let newBuffer = currentJsonString.value + chunk;
@@ -286,6 +298,7 @@ const handleQuestionUpdated = (updatedQuestion, historyItem) => {
       @use-generated="useGenerated"
       :community-value="communityValue"
       :is-valid="meta.valid"
+      :overall-err-msg="overallErrMsg"
   >
     <template #generatedValue="{ historyItem }">
       <!--      must not use local variables as there can be more than 1 history item-->
