@@ -8,6 +8,7 @@ const gotStartedMsg = 'Got it! I\'ll get started right away!'
 const newQuizGeneratingMsg = 'Generating a new quiz for this skill, please stand by...'
 const newQuizWelcomeMsg = 'Hi there! I\'ll generate a quiz based on the existing skill description'
 const newSingleQuestionWelcomeMsg = 'Hi there! I\'m excited to help you craft a new question'
+const existingQuestionWelcomeMsg = 'I noticed you\'ve already started and can help you refine and enhance!'
 const selectRockBandsQuestion = 'Select rock bands?'
 const selectSingleRockBandQuestion = 'Which of these is a rock band?'
 const textInputQuestion = 'Describe a great rock band?'
@@ -24,5 +25,6 @@ export {
     newSingleQuestionWelcomeMsg,
     selectRockBandsQuestion,
     selectSingleRockBandQuestion,
-    textInputQuestion
+    textInputQuestion,
+    existingQuestionWelcomeMsg
 }

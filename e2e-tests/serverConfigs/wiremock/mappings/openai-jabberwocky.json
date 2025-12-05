@@ -7,9 +7,9 @@
       {
         "contains": "jabberwocky",
         "doesNotContain": "Quiz Generation",
-        "doesNotContain": "Multiple Choice",
-        "doesNotContain": "Multiple Answers",
-        "doesNotContain": "Text Input"
+        "doesNotContain": "SingleChoice",
+        "doesNotContain": "MultipleChoice",
+        "doesNotContain": "TextInput"
       }
     ]
   },
