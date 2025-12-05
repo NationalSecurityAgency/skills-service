@@ -2065,6 +2065,11 @@ class SkillsService {
         return wsHelper.adminGet(url.toString())
     }
 
+    def getQuizUsageOverTimeWithinRange(String quizId, String startDate, String endDate) {
+        String url = "${getQuizDefUrl(quizId)}/usageOverTime?startDate=${startDate}&endDate=${endDate}"
+        return wsHelper.adminGet(url.toString())
+    }
+
     def getUserQuizAnswers(String quizId, Integer answerDefId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true) {
         String url = "${getQuizDefUrl(quizId)}/answers/${answerDefId}/attempts"
         return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}".toString())

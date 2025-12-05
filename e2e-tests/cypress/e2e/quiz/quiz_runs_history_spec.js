@@ -22,6 +22,15 @@ describe('Quiz Runs History Tests', () => {
 
     const tableSelector = '[data-cy="quizRunsHistoryTable"]'
 
+    Cypress.Commands.add('prevMonth', () => {
+        cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-name="pcprevbutton"]').click()
+        cy.wait(150);
+    });
+    Cypress.Commands.add('setDay', (dayNum) => {
+        let re = new RegExp(String.raw`^${dayNum}$`)
+        cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="day"]').contains(re).click()
+    });
+
     beforeEach(() => {
         Cypress.Commands.add('validateChoiceAnswer', (qNum, aNum, val, isSingleChoice, isSelected, wrongSelection = false, missedSelection = false,) => {
             cy.get(`[data-cy="questionDisplayCard-${qNum}"] [data-cy="answer-${aNum}_displayText"]`).should('have.text', val)
@@ -479,5 +488,32 @@ describe('Quiz Runs History Tests', () => {
         validateMatch(3, 1, 'Second Term', 'Third Answer', false)
         validateMatch(3, 2, 'Third Term', 'Second Answer', false)
 
+    });
+
+    it('filter quiz runs by date', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizMultipleChoiceQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+        cy.createQuizQuestionDef(1, 4);
+
+        for(let x = 1; x <= 10; x++) {
+            cy.runQuizForUser(1, x, [{selectedIndex: [1]}, {selectedIndex: [0, 3]}, {selectedIndex: [2]}])
+        }
+
+        cy.visit('/administrator/quizzes/quiz1/runs');
+
+        cy.get('[data-cy="metricsDateFilter"]').click()
+        cy.prevMonth()
+        cy.setDay(1)
+        cy.setDay(1)
+
+        cy.get('[data-cy="applyDateFilterButton"]').click()
+
+        cy.get('.alert-info').contains('This chart needs at least 2 days worth of runs')
+        cy.get('.alert-info').contains('No data yet')
+        cy.get('[data-cy="quizRunsHistoryTable"]').contains('There are no records to show')
+
+        cy.get('[data-cy="clearDateFilterButton"]').click()
     });
 });

@@ -449,7 +449,7 @@ class QuizController {
                                               @RequestParam(required = false) String startDate,
                                               @RequestParam(required = false) String endDate) {
         QuizValidator.isNotBlank(quizId, "Quiz Id")
-        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate)
+        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
         List<TimestampCountItem> res = quizDefService.getUsageOverTime(quizId, dates[0], dates[1])
         return res
     }

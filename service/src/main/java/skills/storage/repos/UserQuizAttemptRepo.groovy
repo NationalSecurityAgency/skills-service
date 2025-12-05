@@ -149,7 +149,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                     where quizAttempt.quiz_definition_ref_id = quizDef.id
                       and quizAttempt.user_id = userAttrs.user_id
                       and (quizAttempt.status = :quizAttemptStatus OR :quizAttemptStatus IS NULL)
-                      and ((quizAttempt.started >= :startDate and quizAttempt.started <= :endDate) or (quizAttempt.completed >= :startDate and quizAttempt.completed <= :endDate))
+                      and (quizAttempt.started >= :startDate and quizAttempt.started <= :endDate)
                       and (lower(userAttrs.user_id_for_display) like lower(CONCAT('%', :userQuery, '%')) or
                       (lower(CONCAT(userAttrs.first_name, ' ', userAttrs.last_name, ' (',  userAttrs.user_id_for_display, ')')) like lower(CONCAT(\'%\', :userQuery, \'%\'))) OR
                       (lower(CONCAT(userAttrs.user_id_for_display, ' (', userAttrs.last_name, ', ', userAttrs.first_name,  ')')) like lower(CONCAT(\'%\', :userQuery, \'%\'))))
@@ -256,7 +256,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                          user_tags tags
                     where attempt.user_id = tags.user_id
                         and attempt.quiz_definition_ref_id = quizDef.id
-                      and ((attempt.started >= ?3 and attempt.started <= ?4) or (attempt.completed >= ?3 and attempt.completed <= ?4))
+                      and (attempt.started >= ?3 and attempt.started <= ?4)
                       and quizDef.quiz_id = ?1
                       and tags.key = ?2
                     group by tags.value''', nativeQuery = true)
@@ -274,7 +274,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                 quiz_definition quizDef
                 where attempt.quiz_definition_ref_id = quizDef.id
                         and quizDef.quiz_id = ?1
-                        and ((attempt.started >= ?2 and attempt.started <= ?3) or (attempt.completed >= ?2 and attempt.completed <= ?3))
+                        and (attempt.started >= ?2 and attempt.started <= ?3)
                 group by DATE_TRUNC ('day', attempt.started)
                 order by dateVal''', nativeQuery = true)
     List<DateCount> getUsageOverTime(String quizId, Date startDate, Date endDate)

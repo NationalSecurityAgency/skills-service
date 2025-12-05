@@ -1237,10 +1237,14 @@ class QuizDefService {
         Date now = StartDateUtil.computeStartDate(new Date(), EventType.DAILY)
         List<DayCountItem> items = ZeroFillDayCountItemUtil.zeroFillDailyGaps(now, previousDate, true)
         if (items) {
-            res.addAll(items.collect {new TimestampCountItem( value: it.day.time, count: it.count)}.sort { it.value})
+            items.forEach({ item ->
+                if(item.day >= startDate && item.day <= endDate) {
+                    res.add(new TimestampCountItem( value: item.day.time, count: item.count))
+                }
+            })
         }
 
-        return res
+        return res.sort{ it.value }
     }
 
     @Transactional()
