@@ -5,7 +5,7 @@
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
       { "contains": "Great rock bands" },
-      { "contains": "Input Text" }
+      { "contains": "TextInput" }
     ]
   },
   "response": {

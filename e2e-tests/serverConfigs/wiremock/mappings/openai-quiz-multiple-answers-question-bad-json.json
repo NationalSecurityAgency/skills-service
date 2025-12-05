@@ -5,7 +5,8 @@
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
       { "contains": "Great rock bands" },
-      { "contains": "Bad JSON" }
+      { "contains": "Bad JSON" },
+      { "doesNotContain": "## Existing Question" }
     ]
   },
   "response": {

@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import QuestionType from "@/skills-display/components/quiz/QuestionType.js";
+
 export const useInstructionGenerator = () => {
 
     const newDescriptionInstructions = (userEnteredText) => {
@@ -216,20 +218,45 @@ ${quizRules}
 `
     }
 
-    const newQuestionInstructions = (userInput, questionType) => {
+    const singleQuestionInstructions = (userInput, questionType, existingQuestionInfo, instructionsToKeepPlaceholders) => {
         const questionTypeRules = questionRules[questionType.id]
         const exampleAnswerJson = questionExampleJson[questionType.id]
         const genRules = questionGenRules[questionType.id]
 
-        const res = `# Task: Generate a ${questionType.label} question with answers based on the user's description.
+        const intro = existingQuestionInfo ? `# Task: Update an existing ${questionType.id} question and its answers based on the user's feedback.`
+            : `# Task: Generate a ${questionType.id} question with answers based on the user's request.`
 
-## User's Request:
+        const usersRequestWord = existingQuestionInfo ? 'Feedback' : 'Request'
+
+        const additionalInstructions = !existingQuestionInfo ? '' : `
+- At the end create a new section with the title of "Here is what was changed" - then list any comments or suggestions.
+`
+
+        let answersJson = []
+        if (existingQuestionInfo?.answers?.length > 0 && (QuestionType.isMultipleChoice(questionType.id) || QuestionType.isSingleChoice(questionType.id))) {
+            answersJson = existingQuestionInfo.answers.map((answer) => ({ answer: answer.answer, isCorrect: answer.isCorrect}))
+        }
+
+        const existingQuestionInfoString = !existingQuestionInfo ? '' : `
+
+## Existing Question
+        
+### Question:
+${existingQuestionInfo.question}
+   
+### Answers:
+${JSON.stringify(answersJson)}
+
+`
+        const res = `${intro}${existingQuestionInfoString}
+
+## User's ${usersRequestWord}:
 "${userInput}"
 
 ## Instructions:
 - First, generate a clear and concise question based on the user's description.
 ${genRules}
-- Ensure answers are plausible and relevant to the question.
+- Ensure answers are plausible and relevant to the question.${additionalInstructions}
 
 ## Required Response Format:
 ### Question:
@@ -272,7 +299,6 @@ ${questionTypeRules.isCorrectCheck}
 ${questionTypeRules.countCorrectCheck}
 - If questionType doesn't match, FIX IT
 `
-        console.log(res)
         return res
     }
 
@@ -281,6 +307,6 @@ ${questionTypeRules.countCorrectCheck}
         existingDescriptionInstructions,
         newQuizInstructions,
         updateQuizInstructions,
-        newQuestionInstructions
+        singleQuestionInstructions
     }
 }
