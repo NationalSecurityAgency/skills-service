@@ -77,7 +77,7 @@ onMounted(() => {
 
 function questionTypeChanged(inputItem) {
   questionType.value.selectedType = inputItem;
-  if (!inputItem.isInitialLoad) {
+  if (!inputItem.isInitialLoad && !inputItem.doNotResetOrReplaceAnswers) {
     if (isSurveyType.value
         && inputItem.id !== QuestionType.TextInput && inputItem.id !== QuestionType.Rating && inputItem.id !== QuestionType.Matching
         && (!initialQuestionData.answers || initialQuestionData.answers.length < 2)) {
@@ -371,16 +371,37 @@ const skillsInputFormDialogRef = ref(null)
 const markdownEditorRef = ref(null)
 const onQuestionGenerated = (questionInfo) => {
   markdownEditorRef.value.setMarkdownText(questionInfo.question)
-  skillsInputFormDialogRef.value.setFieldValue('answers', questionInfo.answers)
-
   const newQType = questionType.value.options.find((o) => o.id === questionInfo.questionTypeId)
-  questionType.value.selectedType = newQType
-  skillsInputFormDialogRef.value.setFieldValue('questionType', newQType)
+  skillsInputFormDialogRef.value.setFieldValue('questionType', {...newQType, doNotResetOrReplaceAnswers: true})
 
+  if (QuestionType.isMultipleChoice(questionInfo.questionTypeId) || QuestionType.isSingleChoice(questionInfo.questionTypeId)) {
+    const existingValues = skillsInputFormDialogRef.value.getFieldValues()
+    const existingAnswers = existingValues.answers
+    const answersToSet = questionInfo.answers.map((a, index) => {
+      const id = existingAnswers.length > index ? existingAnswers[index].id : null
+      return {...a, id, displayOrder: (index + 1)}
+    })
+    skillsInputFormDialogRef.value.setFieldValue('answers', answersToSet)
+    answersRef.value.replaceAnswers(answersToSet)
+  }
 
   setTimeout(() => {
     skillsInputFormDialogRef.value?.validate()
   }, 500)
+}
+
+const existingQuestionInfo = ref(null)
+const startAiAssistant = () => {
+  const fieldValues = skillsInputFormDialogRef.value.getFieldValues()
+  if (fieldValues.question?.trim()?.length > 0) {
+    existingQuestionInfo.value = {
+      question: fieldValues.question,
+      answers: fieldValues.answers?.filter((a) => a.answer?.trim()?.length > 0).map((a) => ({...a}))
+    }
+  } else {
+    existingQuestionInfo.value = null
+  }
+  showGenQDialog.value = true
 }
 </script>
 
@@ -408,13 +429,14 @@ const onQuestionGenerated = (questionInfo) => {
                       label="AI"
                       size="small"
                       data-cy="aiButton"
-                      @click="showGenQDialog = true"/>
+                      @click="startAiAssistant"/>
       </div>
       <generate-single-question-dialog
           v-if="showGenQDialog"
           ref="generateDescriptionDialogRef"
           v-model="showGenQDialog"
           :question-type="questionType"
+          :existing-question="existingQuestionInfo"
           @question-generated="onQuestionGenerated"
       />
 
@@ -503,7 +525,7 @@ const onQuestionGenerated = (questionInfo) => {
             v-if="isQuestionTypeMatching" class="text-secondary">Add pairs of terms and their matching values:</span>
         </div>
         <ConfigureAnswers
-            v-if="!isQuestionTypeMatching"
+            v-if="!isQuestionTypeMatching && props.questionDef.quizType"
             ref="answersRef"
             v-model="props.questionDef.answers"
             :quiz-type="props.questionDef.quizType"
