@@ -95,18 +95,20 @@ class UserAuthService {
 
     @Transactional(readOnly = true)
     Collection<GrantedAuthority> loadAuthorities(String userId) {
+        RequestAttributes requestAttributes = AuthUtils.getRequestAttributes()
         List<UserRole> userRoles = userRoleRepo.findAllByUserId(userId?.toLowerCase())
-        return convertRoles(userRoles, AuthUtils.getRequestAttributes())
+        return convertRoles(userRoles, requestAttributes)
     }
 
     @Transactional(readOnly = true)
     @Profile
     UserInfo loadByUserId(String userId) {
         UserInfo userInfo = null
+        RequestAttributes requestAttributes = AuthUtils.getRequestAttributes()
         User user = userRepository.findByUserId(userId?.toLowerCase())
         if (user) {
             UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId?.toLowerCase())
-            userInfo = createUserInfo(user, userAttrs)
+            userInfo = createUserInfo(user, userAttrs, requestAttributes)
             if (verifyEmailAddresses) {
                 userInfo.accountNonLocked = userInfo.emailVerified
             }
@@ -114,8 +116,7 @@ class UserAuthService {
         return userInfo
     }
 
-    private UserInfo createUserInfo(User user, UserAttrs userAttrs) {
-        RequestAttributes requestAttributes = AuthUtils.getRequestAttributes()
+    private UserInfo createUserInfo(User user, UserAttrs userAttrs, RequestAttributes requestAttributes) {
         List<UserRole> userRoles = userRoleRepo.findAllByUserId(user.userId.toLowerCase())
         return new UserInfo (
                 username: user.userId,
@@ -140,8 +141,9 @@ class UserAuthService {
     @Transactional
     @Profile
     UserInfo createOrUpdateUser(UserInfo userInfo, boolean refreshSecurityContext=true) {
+        RequestAttributes requestAttributes = AuthUtils.getRequestAttributes()
         AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.createAppUser(userInfo, true)
-        UserInfo updatedUserInfo = createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
+        UserInfo updatedUserInfo = createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs, requestAttributes)
         if (authMode == AuthMode.FORM && refreshSecurityContext) {
             SecurityContext securityContext = SecurityContextHolder.getContext()
             Authentication authentication = securityContext?.getAuthentication()
@@ -168,9 +170,10 @@ class UserAuthService {
     @Transactional(readOnly=true)
     @Profile
     UserInfo get(UserInfo userInfo) {
+        RequestAttributes requestAttributes = AuthUtils.getRequestAttributes()
         AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.get(userInfo)
         if (userAndUserAttrs) {
-            return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
+            return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs, requestAttributes)
         }
         return null
     }
