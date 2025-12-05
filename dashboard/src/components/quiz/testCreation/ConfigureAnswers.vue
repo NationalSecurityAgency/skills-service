@@ -19,6 +19,7 @@ import { useFieldArray } from "vee-validate";
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
+import {useLog} from "@/components/utils/misc/useLog.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -33,6 +34,7 @@ const props = defineProps({
 })
 const { remove, insert, push, replace, fields } = useFieldArray('answers');
 const appConfig = useAppConfig()
+const log = useLog()
 const isQuizType = computed(() => {
   return props.quizType === 'Quiz';
 })
@@ -71,20 +73,13 @@ const answerSelected = (answerNumber) => {
 }
 
 const resetAnswers = (answerToPreserve = null) => {
-  for(let answerValue in fields.value) {
-    const answerValueAsInt = parseInt(answerValue);
-    if(answerToPreserve) {
-      const adjustedAnswer = answerToPreserve - 1
-      if(answerValueAsInt !== adjustedAnswer) {
-        if(fields.value[answerValueAsInt].value.isCorrect) {
-          answersRef.value[answerValueAsInt].resetValue()
-        }
-      }
-    } else {
-      if(fields.value[answerValueAsInt].value.isCorrect) {
-        answersRef.value[answerValueAsInt].resetValue()
-      }
-    }
+  const numFields = fields.value.length
+  for(let index = 0; index < numFields; index++) {
+    fields.value[index].value.isCorrect = false;
+  }
+  if (answerToPreserve) {
+    const adjustedAnswer = answerToPreserve - 1
+    fields.value[adjustedAnswer].value.isCorrect = true;
   }
 }
 

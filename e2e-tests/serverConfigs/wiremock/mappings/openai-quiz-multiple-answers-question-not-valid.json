@@ -5,7 +5,7 @@
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
       { "contains": "Great jabberwocky rock bands" },
-      { "contains": "Multiple Answers" }
+      { "contains": "MultipleChoice" }
     ]
   },
   "response": {

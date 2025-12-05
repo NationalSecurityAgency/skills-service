@@ -5,9 +5,10 @@
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
       { "contains": "Great rock bands" },
-      { "contains": "Multiple Answers" },
+      { "contains": "MultipleChoice" },
       { "doesNotContain": "jabberwocky"},
-      { "doesNotContain": "Bad JSON" }
+      { "doesNotContain": "Bad JSON" },
+      { "doesNotContain": "## Existing Question" }
     ]
   },
   "response": {

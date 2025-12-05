@@ -32,6 +32,7 @@ import QuestionType from "@/skills-display/components/quiz/QuestionType.js";
 const model = defineModel()
 const props = defineProps({
   questionType: Object,
+  existingQuestion: Object,
   communityValue: {
     type: String,
     default: null
@@ -45,30 +46,31 @@ const appConfig = useAppConfig()
 const quizConfig = useQuizConfig()
 const instructionsGenerator = useInstructionGenerator()
 
-const currentDescription = ref('')
 const extractedImageState = { hasImages: false, extractedImages: null, }
 
 const aiPromptDialogRef = ref(null)
 onMounted(() => {
-  const welcomeMsg = props.questionDef ?
+  const welcomeMsg = props.existingQuestion ?
       'I noticed you\'ve already started and can help you refine and enhance! \n\nFor example, you could type `proofread` or `rewrite with more detail`. The more **specific** you are, the better I can assist you!'
       : 'Hi there! I\'m excited to help you craft a new question. Please share some `details` about what you have in mind.'
 
   aiPromptDialogRef.value.addWelcomeMsg(welcomeMsg)
+  lastGeneratedQuestionInfo.value = props.existingQuestion
 })
 
 const createPromptInstructions = (userEnterInstructions) => {
   let instructionsToSend = ''
-  if (currentDescription.value) {
-    const extractedImagesRes = imgHandler.extractImages(currentDescription.value)
-    const descriptionText = extractedImagesRes.hasImages ? extractedImagesRes.processedText : currentDescription.value
+  if (lastGeneratedQuestionInfo.value) {
+    const question = lastGeneratedQuestionInfo.value.question
+    const extractedImagesRes = imgHandler.extractImages(question)
+    lastGeneratedQuestionInfo.value.question = extractedImagesRes.hasImages ? extractedImagesRes.processedText : question
     const instructionsToKeepPlaceholders = extractedImagesRes.hasImages? imgHandler.instructionsToKeepPlaceholders() : ''
-    instructionsToSend = instructionsGenerator.existingDescriptionInstructions(descriptionText, userEnterInstructions, instructionsToKeepPlaceholders)
+    instructionsToSend = instructionsGenerator.singleQuestionInstructions(userEnterInstructions, props.questionType.selectedType, lastGeneratedQuestionInfo.value, instructionsToKeepPlaceholders)
     if (extractedImagesRes.hasImages) {
       extractedImageState.extractedImages = extractedImagesRes.extractedImages
     }
   } else {
-    instructionsToSend = instructionsGenerator.newQuestionInstructions(userEnterInstructions, props.questionType.selectedType)
+    instructionsToSend = instructionsGenerator.singleQuestionInstructions(userEnterInstructions, props.questionType.selectedType)
   }
 
   return instructionsToSend
@@ -79,6 +81,7 @@ const answersFound = ref(false)
 const answersString = ref('')
 const questionsTitle = '### Question:'
 const answersTitle = '### Answers:'
+const lastGeneratedQuestionInfo = ref(null)
 const handleGeneratedChunk = (chunk) => {
   let append = true
   let chunkToSend = chunk
@@ -120,20 +123,33 @@ const handleGenerationCompleted = (generated) => {
   if (!questionMatch) {
     throw new Error(`Invalid response format for question text=[${upToStartOfAnswers.value}]`);
   }
-  const answersMatch = /### Answers:([\s\S]+)/.exec(answersString.value);
+
+  let answersToParse = answersString.value
+  let generateValueChangedNotes = null
+  const [newText, comments] = answersString.value.split('Here is what was changed');
+  if (newText && comments) {
+    const cleanedComments = comments.replace(/^[\s:]+/, '').trim()
+    answersToParse = newText.replace(/\s*#+\s*$/gm, '') // Remove ### at end of lines.trim()
+    generateValueChangedNotes = `### Here is what was changed\n\n${cleanedComments}`
+  }
+
+  const answersMatch = /### Answers:([\s\S]+)/.exec(answersToParse);
   if (!answersMatch) {
-    throw new Error(`Invalid response format for answers=[${answersString.value}]`);
+    throw new Error(`Invalid response format for answers=[${answersToParse}]`);
   }
   try {
     const answers = QuestionType.isTextInput(props.questionType.selectedType?.id) ? [] : JSON.parse(answersMatch[1].trim())
+
+    const generatedInfo = {
+      question: questionMatch[1].trim(),
+      answers: answers,
+      questionTypeId: props.questionType.selectedType?.id
+    }
+    lastGeneratedQuestionInfo.value = generatedInfo
     return {
       generatedValue: generated.generatedValue,
-      generateValueChangedNotes: null,
-      generatedInfo: {
-        question: questionMatch[1].trim(),
-        answers: answers,
-        questionTypeId: props.questionType.selectedType?.id
-      }
+      generateValueChangedNotes,
+      generatedInfo
     }
   } catch (e) {
     console.error(e)
