@@ -145,14 +145,14 @@ export default {
       .get(`/admin/quiz-definitions/${quizId}/skills`)
       .then((response) => response.data)
   },
-  getUserTagCounts(quizId, userTagKey) {
+  getUserTagCounts(quizId, userTagKey, startDate, endDate) {
     return axios
-      .get(`/admin/quiz-definitions/${quizId}/userTagCounts?userTagKey=${userTagKey}`)
+      .get(`/admin/quiz-definitions/${quizId}/userTagCounts?userTagKey=${userTagKey}&startDate=${startDate}&endDate=${endDate}`)
       .then((response) => response.data)
   },
-  getUsageOverTime(quizId) {
+  getUsageOverTime(quizId, startDate, endDate) {
     return axios
-      .get(`/admin/quiz-definitions/${quizId}/usageOverTime`)
+      .get(`/admin/quiz-definitions/${quizId}/usageOverTime?startDate=${startDate}&endDate=${endDate}`)
       .then((response) => response.data)
   },
   saveMyPreference(quizId, preferenceKey, value) {

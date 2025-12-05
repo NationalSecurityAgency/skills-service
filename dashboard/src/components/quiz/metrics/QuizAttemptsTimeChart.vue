@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {onMounted, ref} from 'vue'
+import {onMounted, ref, watch} from 'vue'
 import {useRoute} from 'vue-router';
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 import QuizService from '@/components/quiz/QuizService.js';
@@ -23,10 +23,16 @@ import ChartDownloadControls from "@/components/metrics/common/ChartDownloadCont
 import Chart from "primevue/chart";
 import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
 import dayjs from "dayjs";
+import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
+
+const props = defineProps({
+  dateRange: Array,
+})
 
 const route = useRoute()
 const numberFormat = useNumberFormat()
 const chartSupportColors = useChartSupportColors()
+const timeUtils = useTimeUtils()
 
 const loading = ref(false);
 const hasData = ref(false);
@@ -35,8 +41,17 @@ const chartJsOptions = ref();
 
 onMounted(()=> {
   chartJsOptions.value = setChartOptions()
+  loadData()
+})
+
+watch(() => props.dateRange, (newDateRange) => {
+  loadData()
+});
+
+const loadData = () => {
   loading.value = true;
-  QuizService.getUsageOverTime(route.params.quizId)
+  const dateRange = timeUtils.prepareDateRange(props.dateRange)
+  QuizService.getUsageOverTime(route.params.quizId, dateRange.startDate, dateRange.endDate)
       .then((res) => {
         hasData.value = res && res.length > 0;
         const formatTimestamp = (timestamp) => dayjs(timestamp).format('YYYY-MM-DD')
@@ -53,7 +68,8 @@ onMounted(()=> {
       .finally(() => {
         loading.value = false;
       });
-})
+}
+
 const setChartOptions = () => {
   const colors = chartSupportColors.getColors()
   const textColorSecondary = colors.textMutedColor

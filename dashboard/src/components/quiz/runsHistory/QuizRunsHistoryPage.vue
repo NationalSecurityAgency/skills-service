@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 
-import { onMounted, ref } from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useUserTagsUtils } from '@/components/utils/UseUserTagsUtils.js'
 import { useQuizSummaryState } from '@/stores/UseQuizSummaryState.js'
@@ -42,6 +42,7 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useStorage} from "@vueuse/core";
+import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
 
 const route = useRoute()
 const userInfo = useUserInfo()
@@ -54,6 +55,7 @@ const responsive = useResponsiveBreakpoints()
 const colors = useColors()
 const numberFormat = useNumberFormat()
 const layoutSizes = useLayoutSizesState()
+const filterRange = ref([]);
 
 const quizType = ref('')
 const runsHistory = ref([])
@@ -124,12 +126,15 @@ onMounted(() => {
 
 const loadData = () => {
   options.value.busy = true
+  const dateRange = timeUtils.prepareDateRange(filterRange.value)
   const params = {
     query: filters.value.global.value ? filters.value.global.value.trim() : '',
     limit: pageSize.value,
     ascending: sortInfo.value.sortOrder === 1 ? true : false,
     page: options.value.pagination.currentPage,
-    orderBy: sortInfo.value.sortBy
+    orderBy: sortInfo.value.sortBy,
+    startDate: dateRange.startDate,
+    endDate: dateRange.endDate
   }
 
   return quizSummaryState.afterQuizSummaryLoaded().then((quizSummary) => {
@@ -184,16 +189,43 @@ const deleteRun = () => {
       })
     })
 }
+
+const subFilter = ref([]);
+
+const applyDateFilter = () => {
+  announcer.polite(`Results have been filtered by date, from ${filterRange.value[0]}` + filterRange.value.length > 1 ? ` to ${filterRange.value[1]}` : '')
+  subFilter.value = filterRange.value
+  loadData()
+};
+
+const clearDateFilter = () => {
+  announcer.polite("Clearing the date range filter")
+  filterRange.value = [];
+  subFilter.value = [];
+  loadData()
+};
 </script>
 
 <template>
   <div class="flex flex-col flex-wrap">
     <SubPageHeader title="Runs"
                    aria-label="Runs">
+      <template #underTitle>
+        <div class="flex flex-wrap gap-2 items-center">
+          <div>
+            Filter by Date(s):
+          </div>
+          <div class="flex gap-2">
+            <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" placeholder="Select a date range" data-cy="metricsDateFilter" />
+            <SkillsButton label="Apply" @click="applyDateFilter" data-cy="applyDateFilterButton" />
+            <SkillsButton label="Clear" @click="clearDateFilter" data-cy="clearDateFilterButton" />
+          </div>
+        </div>
+      </template>
     </SubPageHeader>
     <div :style="`width: ${layoutSizes.tableMaxWidth}px;`">
-      <QuizAttemptsTimeChart class="flex-1 w-full my-4"/>
-      <QuizUserTagsChart v-if="userTagsUtils.showUserTagColumn()" class="flex-1 w-full mb-4" :style="`width: ${layoutSizes.tableMaxWidth}px;`"/>
+      <QuizAttemptsTimeChart class="flex-1 w-full my-4" :dateRange="subFilter" />
+      <QuizUserTagsChart v-if="userTagsUtils.showUserTagColumn()" class="flex-1 w-full mb-4" :style="`width: ${layoutSizes.tableMaxWidth}px;`" :dateRange="subFilter"/>
     </div>
 
     <Card :pt="{ body: { class: 'p-0!' } }">
