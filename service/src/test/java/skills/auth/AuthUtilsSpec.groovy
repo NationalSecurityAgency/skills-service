@@ -15,30 +15,24 @@
  */
 package skills.auth
 
-
 import spock.lang.Specification
 
-import jakarta.servlet.http.HttpServletRequest
 import java.nio.charset.StandardCharsets
 
 class AuthUtilsSpec extends Specification {
 
     def "pick first project is if it appears twice in the url"() {
-        HttpServletRequest httpServletRequest = Mock()
-        httpServletRequest.getServletPath() >> "/admin/projects/test/skills/other1/shared/projects/testProj"
 
         when:
-        String res = AuthUtils.getProjectIdFromRequest(httpServletRequest)
+        String res = AuthUtils.getProjectIdFromPath('/admin/projects/test/skills/other1/shared/projects/testProj')
         then:
         res == "test"
     }
 
     def "parse project name from url"() {
-        HttpServletRequest httpServletRequest = Mock()
-        httpServletRequest.getServletPath() >> url
 
         expect:
-        AuthUtils.getProjectIdFromRequest(httpServletRequest) == projectId
+        AuthUtils.getProjectIdFromPath(url) == projectId
 
         where:
         projectId | url
@@ -48,11 +42,12 @@ class AuthUtilsSpec extends Specification {
     }
 
     def "match self reporting approve or reject url only"() {
-        HttpServletRequest httpServletRequest = Mock()
-        httpServletRequest.getServletPath() >> url
+
+        GroovyMock(AuthUtils, global: true)
+        AuthUtils.getRequestAttributes() >> new AuthUtils.RequestAttributes(requestPath: url)
 
         expect:
-        AuthUtils.isSelfReportApproveOrRejectEndpoint(httpServletRequest) == matched
+        AuthUtils.getRequestAttributes().isSelfReportApproveOrRejectEndpoint() == matched
 
         where:
         matched | url
@@ -82,11 +77,11 @@ class AuthUtilsSpec extends Specification {
     }
 
     def "only match approver conf endpoint"() {
-        HttpServletRequest httpServletRequest = Mock()
-        httpServletRequest.getServletPath() >> url
+        GroovyMock(AuthUtils, global: true)
+        AuthUtils.getRequestAttributes() >> new AuthUtils.RequestAttributes(requestPath: url)
 
         expect:
-        AuthUtils.isSelfReportApproverConfEndpoint(httpServletRequest) == matched
+        AuthUtils.getRequestAttributes().isSelfReportApproverConfEndpoint() == matched
 
         where:
         matched | url
@@ -101,11 +96,11 @@ class AuthUtilsSpec extends Specification {
     }
 
     def "only match email sub/unsub conf endpoint"() {
-        HttpServletRequest httpServletRequest = Mock()
-        httpServletRequest.getServletPath() >> url
+        GroovyMock(AuthUtils, global: true)
+        AuthUtils.getRequestAttributes() >> new AuthUtils.RequestAttributes(requestPath: url)
 
         expect:
-        AuthUtils.isSelfReportEmailSubscriptionEndpoint(httpServletRequest) == matched
+        AuthUtils.getRequestAttributes().isSelfReportEmailSubscriptionEndpoint() == matched
 
         where:
         matched | url
@@ -129,11 +124,11 @@ class AuthUtilsSpec extends Specification {
     }
 
     def "only match dashboard actions for project-based endpoints"() {
-        HttpServletRequest httpServletRequest = Mock()
-        httpServletRequest.getServletPath() >> url
+        GroovyMock(AuthUtils, global: true)
+        AuthUtils.getRequestAttributes() >> new AuthUtils.RequestAttributes(requestPath: url)
 
         expect:
-        AuthUtils.isDashboardActionsEndpoint(httpServletRequest) == matched
+        AuthUtils.getRequestAttributes().isDashboardActionsEndpoint() == matched
 
         where:
         matched | url
