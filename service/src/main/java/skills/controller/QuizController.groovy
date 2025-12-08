@@ -296,7 +296,7 @@ class QuizController {
                             @RequestParam(required = false) String startDate,
                             @RequestParam(required = false) String endDate) {
         PageRequest pageRequest = TablePageUtil.validateAndConstructQuizPageRequest(limit, page, orderBy, ascending)
-        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate)
+        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
         return quizDefService.getQuizRuns(quizId, query, quizAttemptStatus, pageRequest, dates[0], dates[1]);
     }
 
@@ -439,7 +439,7 @@ class QuizController {
                                           @RequestParam(required = false) String endDate) {
         QuizValidator.isNotBlank(quizId, "Quiz Id")
         QuizValidator.isNotBlank(userTagKey, "User Tag Key")
-        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate)
+        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
         return quizDefService.getUserTagCounts(quizId, userTagKey, dates[0], dates[1])
     }
 

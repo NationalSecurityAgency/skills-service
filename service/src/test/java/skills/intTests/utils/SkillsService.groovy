@@ -1999,12 +1999,7 @@ class SkillsService {
         return wsHelper.adminGet(url)
     }
 
-    def getQuizMetrics(String quizId) {
-        String url = "${getQuizDefUrl(quizId)}/metrics"
-        return wsHelper.adminGet(url)
-    }
-
-    def getQuizMetricsWithinRange(String quizId, String startDate, String endDate) {
+    def getQuizMetrics(String quizId, String startDate = defaultStart, String endDate = defaultEnd) {
         String url = "${getQuizDefUrl(quizId)}/metrics?startDate=${startDate}&endDate=${endDate}"
         return wsHelper.adminGet(url)
     }
@@ -2050,22 +2045,20 @@ class SkillsService {
         return wsHelper.adminGet(url)
     }
 
-    def getQuizRuns(String quizId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = "") {
+    String defaultStart = '1900-01-01 00:00:00'
+    String defaultEnd = '2100-12-31 23:59:59'
+
+    def getQuizRuns(String quizId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = "", String startDate = defaultStart, String endDate = defaultEnd) {
         String url = "${getQuizDefUrl(quizId)}/runs"
-        return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}".toString())
+        return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&startDate=${startDate}&endDate=${endDate}".toString())
     }
 
-    def getQuizUserTagCounts(String quizId, String userTagKey) {
-        String url = "${getQuizDefUrl(quizId)}/userTagCounts?userTagKey=${userTagKey}"
+    def getQuizUserTagCounts(String quizId, String userTagKey, String startDate = defaultStart, String endDate = defaultEnd) {
+        String url = "${getQuizDefUrl(quizId)}/userTagCounts?userTagKey=${userTagKey}&startDate=${startDate}&endDate=${endDate}"
         return wsHelper.adminGet(url.toString())
     }
 
-    def getQuizUsageOverTime(String quizId) {
-        String url = "${getQuizDefUrl(quizId)}/usageOverTime"
-        return wsHelper.adminGet(url.toString())
-    }
-
-    def getQuizUsageOverTimeWithinRange(String quizId, String startDate, String endDate) {
+    def getQuizUsageOverTime(String quizId, String startDate = defaultStart, String endDate = defaultEnd) {
         String url = "${getQuizDefUrl(quizId)}/usageOverTime?startDate=${startDate}&endDate=${endDate}"
         return wsHelper.adminGet(url.toString())
     }

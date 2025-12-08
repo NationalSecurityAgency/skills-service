@@ -146,11 +146,11 @@ class QuizUsageOverTimeSpecs extends DefaultIntSpec {
         def format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
         when:
-        def q1UsageOverTimeRange1 = skillsService.getQuizUsageOverTimeWithinRange(quiz.quizId, format.format(dates[0]), format.format(dates[1]))
-        def q1UsageOverTimeRange2 = skillsService.getQuizUsageOverTimeWithinRange(quiz.quizId, format.format(dates[1]), format.format(dates[2]))
-        def q1UsageOverTimeRange3 = skillsService.getQuizUsageOverTimeWithinRange(quiz.quizId, format.format(dates[2]), format.format(dates[3]))
-        def q1UsageOverTimeRange4 = skillsService.getQuizUsageOverTimeWithinRange(quiz.quizId, format.format(dates[3]), format.format(dates[3]))
-        def q1UsageOverTimeRange5 = skillsService.getQuizUsageOverTimeWithinRange(quiz.quizId, format.format(dates[0]), format.format(dates[3]))
+        def q1UsageOverTimeRange1 = skillsService.getQuizUsageOverTime(quiz.quizId, format.format(dates[0]), format.format(dates[1]))
+        def q1UsageOverTimeRange2 = skillsService.getQuizUsageOverTime(quiz.quizId, format.format(dates[1]), format.format(dates[2]))
+        def q1UsageOverTimeRange3 = skillsService.getQuizUsageOverTime(quiz.quizId, format.format(dates[2]), format.format(dates[3]))
+        def q1UsageOverTimeRange4 = skillsService.getQuizUsageOverTime(quiz.quizId, format.format(dates[3]), format.format(dates[3]))
+        def q1UsageOverTimeRange5 = skillsService.getQuizUsageOverTime(quiz.quizId, format.format(dates[0]), format.format(dates[3]))
 
         then:
         q1UsageOverTimeRange1.value == dates[0..1].collect { new Date(it.time).clearTime() }.time
