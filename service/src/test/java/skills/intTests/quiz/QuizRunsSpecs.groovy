@@ -15,7 +15,7 @@
  */
 package skills.intTests.quiz
 
-import groovy.json.JsonOutput
+import groovy.time.TimeCategory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import skills.intTests.utils.DefaultIntSpec
@@ -289,16 +289,18 @@ class QuizRunsSpecs extends DefaultIntSpec {
 
         List<String> users = getRandomUsers(10, true)
 
-        runQuiz(users[0], quiz, quizInfo, true, dates[0])
-        runQuiz(users[1], quiz, quizInfo, true, dates[0])
-        runQuiz(users[2], quiz, quizInfo, false, dates[0])
-        runQuiz(users[3], quiz, quizInfo, true, dates[0])
-        runQuiz(users[4], quiz, quizInfo, true, dates[1])
-        runQuiz(users[5], quiz, quizInfo, false, dates[1])
-        runQuiz(users[6], quiz, quizInfo, true, dates[1])
-        runQuiz(users[7], quiz, quizInfo, true, dates[2])
-        runQuiz(users[8], quiz, quizInfo, false, dates[2])
-        runQuiz(users[9], quiz, quizInfo, true, dates[2])
+        use (TimeCategory) {
+            runQuiz(users[0], quiz, quizInfo, true, dates[0])
+            runQuiz(users[1], quiz, quizInfo, true, dates[0] + 30.minutes)
+            runQuiz(users[2], quiz, quizInfo, false, dates[0] + 45.minutes)
+            runQuiz(users[3], quiz, quizInfo, true, dates[0] + 60.minutes)
+            runQuiz(users[4], quiz, quizInfo, true, dates[1])
+            runQuiz(users[5], quiz, quizInfo, false, dates[1] + 30.minutes)
+            runQuiz(users[6], quiz, quizInfo, true, dates[1] + 60.minutes)
+            runQuiz(users[7], quiz, quizInfo, true, dates[2])
+            runQuiz(users[8], quiz, quizInfo, false, dates[2] + 30.minutes)
+            runQuiz(users[9], quiz, quizInfo, true, dates[2] + 60.minutes)
+        }
 
         def format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
@@ -308,11 +310,10 @@ class QuizRunsSpecs extends DefaultIntSpec {
         def quizRuns_filter2 = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '', format.format(dates[1]), format.format(dates[2]))
         def quizRuns_filter3 = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '', format.format(dates[2]), format.format(dates[3]))
         def quizRuns_filter4 = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '', format.format(dates[1]), format.format(dates[3]))
-        def usersSorted = users.sort()
         then:
         quizRuns.totalCount == users.size()
         quizRuns.count == users.size()
-        quizRuns.data.userId.sort() == usersSorted
+        quizRuns.data.userId == users
         quizRuns.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                  UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                  UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
@@ -326,7 +327,7 @@ class QuizRunsSpecs extends DefaultIntSpec {
         ]
 
         quizRuns_filter1.count == 7
-        quizRuns_filter1.data.userId.sort() == ['user3', 'user4', 'user5', 'user6', 'user7', 'user8', 'user9']
+        quizRuns_filter1.data.userId == users[0..6]
         quizRuns_filter1.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
@@ -338,7 +339,7 @@ class QuizRunsSpecs extends DefaultIntSpec {
 
         quizRuns_filter2.totalCount == users.size()
         quizRuns_filter2.count == 6
-        quizRuns_filter2.data.userId.sort() == ['user10', 'user11', 'user12', 'user7', 'user8', 'user9']
+        quizRuns_filter2.data.userId == users[4..9]
         quizRuns_filter2.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
@@ -349,7 +350,7 @@ class QuizRunsSpecs extends DefaultIntSpec {
 
         quizRuns_filter3.totalCount == users.size()
         quizRuns_filter3.count == 3
-        quizRuns_filter3.data.userId.sort() == ['user10', 'user11', 'user12']
+        quizRuns_filter3.data.userId == users[7..9]
         quizRuns_filter3.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
@@ -357,7 +358,7 @@ class QuizRunsSpecs extends DefaultIntSpec {
 
         quizRuns_filter4.totalCount == users.size()
         quizRuns_filter4.count == 6
-        quizRuns_filter4.data.userId.sort() == ['user10', 'user11', 'user12', 'user7', 'user8', 'user9']
+        quizRuns_filter4.data.userId == users[4..9]
         quizRuns_filter4.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
