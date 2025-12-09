@@ -15,6 +15,7 @@
  */
 package skills.auth.openai
 
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovy.transform.ToString
@@ -41,7 +42,7 @@ class OpenAIService {
     @Value('#{"${skills.openai.host:null}"}')
     String openAiHost
 
-    @Value('#{"${spring.ai.openai.base-url:null}"}')
+    @Value('#{"${skills.openai.host:null}"}')
     String openAiBaseUrl
 
     @Value('#{"${skills.openai.completionsEndpoint:/v1/chat/completions}"}')
@@ -163,10 +164,20 @@ class OpenAIService {
         )
         Flux<ChatResponse> response = chatModel.stream(prompt)
         return response.mapNotNull { ChatResponse chatResponse ->
-            String res = (String) chatResponse.getResults().get(0).getOutput().getText()
-            res = res?.replaceAll('\\n', '<<newline>>')
-            log.debug("Response: [{}]", res)
-            return res
+            try {
+                String res = (String) chatResponse.getResults().get(0).getOutput().getText()
+                res = res?.replaceAll('\\n', '<<newline>>')
+                log.debug("Response: [{}]", res)
+                return res
+            } catch (Throwable t) {
+                String chatResponseAsStr = ""
+                try {
+                    chatResponseAsStr = JsonOutput.toJson(chatResponse)
+                } catch (Throwable t2) {
+                }
+                log.error("Failed to get response from OpenAI, chatResponse=[${chatResponseAsStr}]", t)
+                throw t
+            }
         }
     }
 
