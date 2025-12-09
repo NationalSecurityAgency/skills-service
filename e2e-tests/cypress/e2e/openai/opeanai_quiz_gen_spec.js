@@ -24,6 +24,14 @@ import {
 }
     from './openai_helper_commands'
 
+
+const validateAnswers = (questionNum, expected) => {
+    expected.forEach((answer, index) => {
+        cy.get(`[data-cy="questionDisplayCard-${questionNum}"] [data-cy="answer-${index}_displayText"]`).should('have.text', answer.text)
+        answer.isCorrect ? cy.get(`[data-cy="questionDisplayCard-${questionNum}"] [data-cy="answerDisplay-${index}"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]`) : cy.get(`[data-cy="questionDisplayCard-${questionNum}"] [data-cy="answerDisplay-${index}"] [data-cy="selectCorrectAnswer"] [data-cy="notSelected"]`)
+    })
+}
+
 describe('Generate Quiz Tests', () => {
 
     it('generate a new quiz for a skill', () => {
@@ -48,6 +56,25 @@ describe('Generate Quiz Tests', () => {
         cy.get('[data-cy="sendAndStopBtn"]').click()
 
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('Which piece can move diagonally in any direction?')
+        let expectedAnswers = [
+            { text: 'Pawn', isCorrect: false },
+            { text: 'Rook', isCorrect: false },
+            { text: 'Knight', isCorrect: false },
+            { text: 'Bishop', isCorrect: true },
+        ]
+        validateAnswers(1, expectedAnswers)
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('Which chess piece can be placed in the center of the board on the starting move?')
+        expectedAnswers = [
+            { text: 'Rook', isCorrect: false },
+            { text: 'Queen', isCorrect: false },
+            { text: 'Bishop', isCorrect: false },
+            { text: 'Knight', isCorrect: false },
+            { text: 'King', isCorrect: false },
+            { text: 'Pawn', isCorrect: true },
+        ]
+        validateAnswers(2, expectedAnswers)
         cy.get('[data-cy="useGenValueBtn-2"]').click()
         cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
 
