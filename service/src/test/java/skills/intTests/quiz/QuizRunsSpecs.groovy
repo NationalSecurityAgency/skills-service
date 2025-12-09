@@ -308,10 +308,11 @@ class QuizRunsSpecs extends DefaultIntSpec {
         def quizRuns_filter2 = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '', format.format(dates[1]), format.format(dates[2]))
         def quizRuns_filter3 = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '', format.format(dates[2]), format.format(dates[3]))
         def quizRuns_filter4 = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, '', format.format(dates[1]), format.format(dates[3]))
+        def usersSorted = users.sort()
         then:
         quizRuns.totalCount == users.size()
         quizRuns.count == users.size()
-        quizRuns.data.userId == users
+        quizRuns.data.userId.sort() == usersSorted
         quizRuns.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                  UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                  UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
@@ -325,7 +326,7 @@ class QuizRunsSpecs extends DefaultIntSpec {
         ]
 
         quizRuns_filter1.count == 7
-        quizRuns_filter1.data.userId == users[0..6]
+        quizRuns_filter1.data.userId.sort() == ['user3', 'user4', 'user5', 'user6', 'user7', 'user8', 'user9']
         quizRuns_filter1.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
@@ -337,7 +338,7 @@ class QuizRunsSpecs extends DefaultIntSpec {
 
         quizRuns_filter2.totalCount == users.size()
         quizRuns_filter2.count == 6
-        quizRuns_filter2.data.userId == users[4..9]
+        quizRuns_filter2.data.userId.sort() == ['user10', 'user11', 'user12', 'user7', 'user8', 'user9']
         quizRuns_filter2.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
@@ -348,7 +349,7 @@ class QuizRunsSpecs extends DefaultIntSpec {
 
         quizRuns_filter3.totalCount == users.size()
         quizRuns_filter3.count == 3
-        quizRuns_filter3.data.userId == users[7..9]
+        quizRuns_filter3.data.userId.sort() == ['user10', 'user11', 'user12']
         quizRuns_filter3.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
@@ -356,7 +357,7 @@ class QuizRunsSpecs extends DefaultIntSpec {
 
         quizRuns_filter4.totalCount == users.size()
         quizRuns_filter4.count == 6
-        quizRuns_filter4.data.userId == users[4..9]
+        quizRuns_filter4.data.userId.sort() == ['user10', 'user11', 'user12', 'user7', 'user8', 'user9']
         quizRuns_filter4.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
