@@ -18,6 +18,7 @@ package skills.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -37,13 +38,19 @@ class OpenAiController {
     @Autowired
     OpenAIService openAIService
 
+    @Value('#{"${skills.openai.useSpringAi:true}"}')
+    Boolean useSpringAi
+
     @PostMapping(value = "/stream/description", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     Flux<String> generateDescriptionAndStream(@RequestBody GenDescRequest genDescRequest) {
         SkillsValidator.isNotBlank(genDescRequest.instructions, "genDescRequest.instructions")
         SkillsValidator.isNotBlank(genDescRequest.model, "genDescRequest.model")
         SkillsValidator.isNotNull(genDescRequest.modelTemperature, "genDescRequest.modelTemperature")
         SkillsValidator.isTrue(genDescRequest.modelTemperature >= 0 && genDescRequest.modelTemperature <= 2, "genDescRequest.modelTemperature must be >= 0 and <= 2")
-        return openAIService.streamCompletions1(genDescRequest)
+        if (useSpringAi) {
+            return openAIService.streamCompletions1(genDescRequest)
+        }
+        return openAIService.streamCompletions(genDescRequest)
     }
 
     @GetMapping("/models")
