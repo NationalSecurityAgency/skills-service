@@ -15,6 +15,7 @@
  */
 package skills.auth.openai
 
+import groovy.util.logging.Slf4j
 import io.netty.handler.ssl.SslContext
 import io.netty.handler.ssl.SslContextBuilder
 import org.springframework.ai.openai.OpenAiChatModel
@@ -37,7 +38,8 @@ import java.security.cert.X509Certificate
 import java.time.Duration
 
 @Configuration
-public class OpenAIChatConfig {
+@Slf4j
+class OpenAIChatConfig {
 
     @Value('#{"${skills.openai.key:null}"}')
     String openAiKey
@@ -66,11 +68,14 @@ public class OpenAIChatConfig {
     @Value('#{"${skills.openai.stream.closeNotifyReadTimeout:5000}"}')
     Integer closeNotifyReadTimeout = 5000
 
-    @Value('#{"${spring.ai.openai.base-url:null}"}')
-    String openAiBaseUrl
+    @Value('#{"${skills.openai.host:null}"}')
+    String aiHost
+
+    @Value('#{"${skills.openai.completionsEndpoint:/v1/chat/completions}"}')
+    String completionsEndpoint
 
     @Bean
-    public OpenAiChatModel openAiChatModel(WebClient.Builder webClientBuilder) {
+    OpenAiChatModel openAiChatModel(WebClient.Builder webClientBuilder) {
         // Get system properties
         String keyStorePath = System.getProperty("javax.net.ssl.keyStore");
         String keyStorePassword = System.getProperty("javax.net.ssl.keyStorePassword");
@@ -130,7 +135,8 @@ public class OpenAIChatConfig {
         webClientBuilder = webClientBuilder.clientConnector(new ReactorClientHttpConnector(httpClient))
         OpenAiApi openAiApi = OpenAiApi.builder()
                 .apiKey(openAiKey)
-                .baseUrl(openAiBaseUrl)
+                .baseUrl(aiHost)
+                .completionsPath(completionsEndpoint)
                 .webClientBuilder(webClientBuilder)
                 .build();
         OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
