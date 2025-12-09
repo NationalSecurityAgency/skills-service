@@ -120,18 +120,44 @@ const overallErrMsg = 'Use Generate Quiz button is disabled because portion mark
 //   `;
 // });
 const currentJsonString = ref('')
+const inQuestionsArray = ref(false);
+const pendingBuffer = ref('');
+
 const handleGeneratedChunk = (chunk, historyId) => {
+  // Combine any previous buffer with the new chunk
   let newBuffer = currentJsonString.value + chunk;
-  let currentPosition = 0;
   let inString = false;
-  let inArray = false;
   let braceDepth = 0;
   let bracketDepth = 0;
-  let startIndex = -1;
-  let questionsStartIndex = -1;
+  let objectStart = -1;
+  let questionBraceDepth = -1;
+  let lastProcessedIndex = -1;
+  let processedQuestions = [];
+  let i = 0;
+
+  // If we have a pending buffer from the previous chunk, prepend it
+  if (pendingBuffer.value) {
+    newBuffer = pendingBuffer.value + newBuffer;
+    pendingBuffer.value = '';
+  }
+
+  // Check if we're already in the questions array from previous chunks
+  if (inQuestionsArray.value) {
+    // Find the start of the first complete object in this chunk
+    while (i < newBuffer.length && (newBuffer[i] === ' ' || newBuffer[i] === ',' || newBuffer[i] === '\n' || newBuffer[i] === '\r')) {
+      i++;
+    }
+    if (i < newBuffer.length && newBuffer[i] === '{') {
+      // already started processing questions, assume the first object is a question and increment depth to the proper level
+      objectStart = i;
+      questionBraceDepth = braceDepth++;
+      bracketDepth++;
+      i++;
+    }
+  }
 
   // Process the buffer to find complete objects
-  for (let i = 0; i < newBuffer.length; i++) {
+  for (; i < newBuffer.length; i++) {
     const char = newBuffer[i];
     const prevChar = i > 0 ? newBuffer[i - 1] : '';
 
@@ -143,56 +169,69 @@ const handleGeneratedChunk = (chunk, historyId) => {
     // Only process structure when not in a string
     if (!inString) {
       if (char === '{') {
-        if (braceDepth === 0) {
-          startIndex = i; // Start of a new object
+        if (inQuestionsArray.value && questionBraceDepth === -1) {
+          objectStart = i; // Start of a new object
+          questionBraceDepth = braceDepth;
         }
         braceDepth++;
       } else if (char === '}') {
         braceDepth--;
-        const partialQuestionsExist = currentQuizData && currentQuizData.value && currentQuizData.value.length > 0;
-        const isFirstQuestion = !partialQuestionsExist && inArray && bracketDepth === 1
-        const isAdditionalQuestion = partialQuestionsExist && bracketDepth === 0 && !inArray
-
-        if (isFirstQuestion || isAdditionalQuestion) {
-          const questionStr = newBuffer.substring(isFirstQuestion ? questionsStartIndex + 1 : startIndex, i + 1);
+        
+        // If we've found a complete object and we're inside the questions array
+        if (braceDepth === questionBraceDepth && (inQuestionsArray.value ||
+            (i > 12 && newBuffer.lastIndexOf('"questions"') > -1 &&
+                newBuffer.lastIndexOf('"questions"') < i &&
+                newBuffer.substring(newBuffer.lastIndexOf('"questions"'), i).includes('[')))) {
           try {
-            const question = safeJsonParse(questionStr);
-            const questionIdx = currentQuizData && currentQuizData.value && currentQuizData.value.length ? currentQuizData.value.length : 0
-            question.name = `q${historyId}${(questionIdx + 1)}`
-            ensureValidQuestionType(question)
-            if (currentQuizData && currentQuizData.value && currentQuizData.value.length > 0) {
-              currentQuizData.value.push(question)
-            } else {
-              currentQuizData.value = [question]
+            inQuestionsArray.value = true;
+            const jsonStr = newBuffer.substring(objectStart, i + 1);
+            const question = safeJsonParse(jsonStr);
+            
+            if (question && question.question) {  // Basic validation
+              const questionIdx = (currentQuizData.value?.length || 0) + processedQuestions.length;
+              question.name = `q${historyId}${questionIdx + 1}`;
+              ensureValidQuestionType(question);
+              processedQuestions.push(question);
+              setFieldValue(question.name, question.question);
+              lastProcessedIndex = i + 1;
+              objectStart = -1; // Reset for next object
+              questionBraceDepth = -1;
             }
-            setFieldValue(question.name, question.question)
-            currentJsonString.value = ''
           } catch (e) {
-            // Continue with partial parsing
-            // console.log(`json: ${questionStr}`)
             console.error('Error parsing question:', e);
           }
-          currentPosition = i + 1;
-        } else if (braceDepth < 0) {
-          braceDepth = 0; // Reset on error
         }
       } else if (char === '[') {
-        if (bracketDepth === 0) {
-          inArray = true;
-          questionsStartIndex = i;
+        if (i > 12 && newBuffer.substring(i - 13, i).includes('"questions"')) {
+          inQuestionsArray.value = true;
         }
         bracketDepth++;
       } else if (char === ']') {
         bracketDepth--;
-        if (bracketDepth === 0) {
-          inArray = false;
+        if (bracketDepth === 0 && inQuestionsArray.value) {
+          inQuestionsArray.value = false;
+          lastProcessedIndex = i + 1;
         }
       }
     }
   }
 
-  // Return remaining buffer that couldn't be processed yet
-  currentJsonString.value = newBuffer.substring(currentPosition);
+  // If we're in the middle of an object when the chunk ends, save the partial object
+  if (objectStart !== -1 && braceDepth > 0) {
+    pendingBuffer.value = newBuffer.substring(objectStart);
+    lastProcessedIndex = objectStart;
+  }
+
+  // Update the quiz data with any newly processed questions
+  if (processedQuestions.length > 0) {
+    if (!currentQuizData.value) {
+      currentQuizData.value = [];
+    }
+    currentQuizData.value.push(...processedQuestions);
+  }
+
+  // Update the buffer with any unprocessed content
+  currentJsonString.value = newBuffer.substring(lastProcessedIndex > -1 ? lastProcessedIndex : 0);
 
   return {
     append: true,
