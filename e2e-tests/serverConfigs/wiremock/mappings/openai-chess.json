@@ -6,7 +6,8 @@
     "bodyPatterns": [
       { "contains": "chess" },
       { "doesNotContain": "current description" },
-      { "doesNotContain": "Quiz Generation" }
+      { "doesNotContain": "Quiz Generation" },
+      { "doesNotContain": "question" }
     ]
   },
   "response": {
