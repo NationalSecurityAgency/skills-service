@@ -15,7 +15,7 @@
  */
 package skills.auth.openai
 
-class GenDescRequest {
+class AiChatRequest {
 
     String userInstructions
     String assistantInstructions
