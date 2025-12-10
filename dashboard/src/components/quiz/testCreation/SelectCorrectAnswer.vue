@@ -49,8 +49,10 @@ const model = defineModel()
 const flipSelected = () =>{
   if (!props.readOnly && !props.isRadioIcon){
     value.value = !value.value
+    model.value = !model.value
   } else if (!props.readOnly && props.isRadioIcon) {
     value.value = true;
+    model.value = true
   }
   emit('answer-selected', parseInt(props.answerNumber))
 }
