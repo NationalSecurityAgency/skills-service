@@ -16,7 +16,10 @@
 package skills.auth.openai
 
 class GenDescRequest {
-    String instructions
+
+    String userInstructions
+    String assistantInstructions
+
     String model
     Double modelTemperature
 }

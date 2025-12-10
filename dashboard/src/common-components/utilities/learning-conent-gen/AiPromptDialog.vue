@@ -114,11 +114,19 @@ const startGeneration = () => {
     addChatItem(instructions.value, ChatRole.USER)
 
     const promptInstructions = props.createInstructionsFn(instructions.value)
+    let userInstructions
+    let assistantInstructions = null
+    if (promptInstructions instanceof Object) {
+      userInstructions = promptInstructions.userInstructions
+      assistantInstructions = promptInstructions.assistantInstructions
+    } else {
+      userInstructions = promptInstructions
+    }
     instructions.value = ''
 
     isGenerating.value = true
     addChatItem(props.generationStartedMsg, ChatRole.ASSISTANT, true)
-    genWithStreaming(promptInstructions)
+    genWithStreaming(userInstructions, assistantInstructions)
   })
 }
 defineExpose({
@@ -189,11 +197,12 @@ const onStartStopBtn = () => {
   }
 }
 
-const genWithStreaming = (instructionsToSend) => {
+const genWithStreaming = (userInstructions, assistantInstructions=null) => {
   lastPromptCancelled.value = false
   scrollInstructionsIntoView()
   const promptParams = {
-    instructions: instructionsToSend,
+    userInstructions: userInstructions,
+    assistantInstructions: assistantInstructions,
     model: aiModelsState.selectedModel.model,
     modelTemperature: aiModelsState.modelTemperature,
   }

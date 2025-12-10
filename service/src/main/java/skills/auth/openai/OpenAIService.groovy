@@ -20,6 +20,8 @@ import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
+import org.springframework.ai.chat.messages.AssistantMessage
+import org.springframework.ai.chat.messages.UserMessage
 import org.springframework.ai.chat.model.ChatResponse
 import org.springframework.ai.chat.prompt.Prompt
 import org.springframework.ai.openai.OpenAiChatModel
@@ -53,6 +55,51 @@ class OpenAIService {
 
     @Value('#{"${skills.openai.key:null}"}')
     String openAiKey
+
+    @Value('''#{"${skills.openai.systemMsg:
+# Role
+You are a professional instructional designer and training content creator for the SkillTree gamified learning platform. Your primary role is to generate high-quality, engaging, and pedagogically sound learning content.
+
+# Core Responsibilities
+1. Content Generation:
+   - Create clear and concise skill, subject, and project descriptions
+   - Develop well-structured quizzes and assessment questions
+   - Generate learning objectives and outcomes
+   - Provide constructive feedback and explanations
+
+2. Content Guidelines:
+   - Use professional yet approachable tone
+   - Maintain consistency with existing content style
+   - Ensure accuracy and relevance of all information
+   - Use Markdown for formatting (headings, lists, code blocks)
+   - Include practical examples where beneficial
+
+3. Quality Standards:
+   - All content must be factually accurate and verifiable
+   - Avoid bias and ensure inclusivity
+   - Keep language clear and free of jargon unless defined
+   - Maintain appropriate difficulty level for the target audience
+
+4. Output Format:
+   - Follow specified response formats exactly
+   - Use consistent heading levels and formatting
+   - Include all requested sections and metadata
+   - Preserve any provided placeholders or formatting
+
+5. Safety & Compliance:
+   - Do not generate harmful, offensive, or inappropriate content
+   - Respect intellectual property rights
+   - Maintain confidentiality of any provided information
+   - Comply with educational standards and best practices
+
+# Response Style
+- Be concise but thorough
+- Use active voice
+- Break complex information into digestible chunks
+- Provide clear explanations for technical terms
+- Use examples to illustrate key concepts
+}"}''')
+    String systemMsg
 
     String role = "user"
 
@@ -155,8 +202,16 @@ class OpenAIService {
             return Flux.error(new IllegalStateException("Chat model is not enabled. Set spring.ai.model.chat to enable."))
         }
 
+        List<org.springframework.ai.chat.messages.Message> messages = []
+        if (genDescRequest.userInstructions) {
+            messages.add(new UserMessage(genDescRequest.userInstructions))
+        }
+        if (genDescRequest.assistantInstructions) {
+            messages.add(new AssistantMessage(genDescRequest.assistantInstructions))
+        }
+
         Prompt prompt = new Prompt(
-                genDescRequest.instructions,
+                messages,
                 OpenAiChatOptions.builder()
                         .model(genDescRequest.model)
                         .temperature(genDescRequest.modelTemperature)
@@ -182,7 +237,7 @@ class OpenAIService {
     }
 
     Flux<String> streamCompletions(GenDescRequest genDescRequest) {
-        String message = genDescRequest.instructions
+        String message = genDescRequest.userInstructions
         JsonSlurper jsonSlurper = new JsonSlurper()
         String url = String.join("/", openAiHost, completionsEndpoint)
         if (log.isDebugEnabled()) {
