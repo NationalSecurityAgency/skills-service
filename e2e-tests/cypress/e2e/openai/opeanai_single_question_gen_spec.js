@@ -360,12 +360,12 @@ describe('Generate Single Question Tests', () => {
             req.reply();
 
             req.on('response', (res) => {
-                expect(requestBody).to.have.property('instructions');
-                const instructions = requestBody.instructions.replace(/\s+/g, ' ').trim();
+                expect(requestBody).to.have.property('userInstructions');
+                const userInstructions = requestBody.userInstructions.replace(/\s+/g, ' ').trim();
 
                 // Validate question
                 const expectedQuestion = '## Existing Question ### Question: This is a question # 1';
-                expect(instructions).to.include(expectedQuestion.replace(/\s+/g, ' ').trim());
+                expect(userInstructions).to.include(expectedQuestion.replace(/\s+/g, ' ').trim());
 
                 const expectedAnswers = [
                     { answer: "Question 1 - First Answer", isCorrect: true },
@@ -373,8 +373,8 @@ describe('Generate Single Question Tests', () => {
                     { answer: "Question 1 - Third Answer", isCorrect: false }
                 ];
 
-                // Parse the instructions to get the answers section
-                const answersMatch = instructions.match(/### Answers:\s*(\[.*?\])/s);
+                // Parse the userInstructions to get the answers section
+                const answersMatch = userInstructions.match(/### Answers:\s*(\[.*?\])/s);
                 expect(answersMatch).to.exist;
 
                 const actualAnswers = JSON.parse(answersMatch[1]);
@@ -454,12 +454,12 @@ describe('Generate Single Question Tests', () => {
             req.reply();
 
             req.on('response', (res) => {
-                expect(requestBody).to.have.property('instructions');
-                const instructions = requestBody.instructions.replace(/\s+/g, ' ').trim();
+                expect(requestBody).to.have.property('userInstructions');
+                const userInstructions = requestBody.userInstructions.replace(/\s+/g, ' ').trim();
 
                 // Validate question
                 const expectedQuestion = '## Existing Question ### Question: This is a question # 1';
-                expect(instructions).to.include(expectedQuestion.replace(/\s+/g, ' ').trim());
+                expect(userInstructions).to.include(expectedQuestion.replace(/\s+/g, ' ').trim());
 
                 const expectedAnswers = [
                     { answer: "First Answer", isCorrect: true },
@@ -468,8 +468,8 @@ describe('Generate Single Question Tests', () => {
                     { answer: "Fourth Answer", isCorrect: false },
                 ];
 
-                // Parse the instructions to get the answers section
-                const answersMatch = instructions.match(/### Answers:\s*(\[.*?\])/s);
+                // Parse the userInstructions to get the answers section
+                const answersMatch = userInstructions.match(/### Answers:\s*(\[.*?\])/s);
                 expect(answersMatch).to.exist;
 
                 const actualAnswers = JSON.parse(answersMatch[1]);
@@ -551,17 +551,17 @@ describe('Generate Single Question Tests', () => {
             req.reply();
 
             req.on('response', (res) => {
-                expect(requestBody).to.have.property('instructions');
-                const instructions = requestBody.instructions.replace(/\s+/g, ' ').trim();
+                expect(requestBody).to.have.property('userInstructions');
+                const userInstructions = requestBody.userInstructions.replace(/\s+/g, ' ').trim();
 
                 // Validate question
                 const expectedQuestion = '## Existing Question ### Question: This is a question # 1';
-                expect(instructions).to.include(expectedQuestion.replace(/\s+/g, ' ').trim());
+                expect(userInstructions).to.include(expectedQuestion.replace(/\s+/g, ' ').trim());
 
                 const expectedAnswers = [];
 
-                // Parse the instructions to get the answers section
-                const answersMatch = instructions.match(/### Answers:\s*(\[.*?\])/s);
+                // Parse the userInstructions to get the answers section
+                const answersMatch = userInstructions.match(/### Answers:\s*(\[.*?\])/s);
                 expect(answersMatch).to.exist;
 
                 const actualAnswers = JSON.parse(answersMatch[1]);
@@ -642,22 +642,22 @@ describe('Generate Single Question Tests', () => {
             req.reply();
 
             req.on('response', (res) => {
-                expect(requestBody).to.have.property('instructions');
-                const instructions = requestBody.instructions.replace(/\s+/g, ' ').trim();
+                expect(requestBody).to.have.property('userInstructions');
+                const userInstructions = requestBody.userInstructions.replace(/\s+/g, ' ').trim();
 
                 const expectedTask = '# Task: Update an existing SingleChoice question'
-                expect(instructions).to.include(expectedTask.replace(/\s+/g, ' ').trim());
+                expect(userInstructions).to.include(expectedTask.replace(/\s+/g, ' ').trim());
 
                 const expectedQuestion = '## Existing Question ### Question: What is the capital of France?';
-                expect(instructions).to.include(expectedQuestion.replace(/\s+/g, ' ').trim());
+                expect(userInstructions).to.include(expectedQuestion.replace(/\s+/g, ' ').trim());
 
                 const expectedAnswers = [
                     { answer: "Berlin", isCorrect: false },
                     { answer: "Paris", isCorrect: true },
                 ];
 
-                // Parse the instructions to get the answers section
-                const answersMatch = instructions.match(/### Answers:\s*(\[.*?\])/s);
+                // Parse the userInstructions to get the answers section
+                const answersMatch = userInstructions.match(/### Answers:\s*(\[.*?\])/s);
                 expect(answersMatch).to.exist;
 
                 const actualAnswers = JSON.parse(answersMatch[1]);

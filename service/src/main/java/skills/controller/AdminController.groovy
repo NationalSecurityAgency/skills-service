@@ -25,16 +25,12 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
-import reactor.core.publisher.Flux
 import skills.PublicProps
 import skills.auth.UserInfoService
-import skills.auth.openai.GenDescRequest
-import skills.auth.openai.GenDescResponse
-import skills.auth.openai.LearningContentGenerator
+
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
@@ -111,9 +107,6 @@ class AdminController {
 
     @Autowired
     AttachmentService attachmentService
-
-    @Autowired
-    LearningContentGenerator learningContentGenerator
 
     @Autowired
     SubjAdminService subjAdminService
@@ -1971,16 +1964,6 @@ class AdminController {
     UploadAttachmentResult uploadFileToProject(@RequestParam("file") MultipartFile file,
                                              @PathVariable("projectId") String projectId) {
         return attachmentService.saveAttachment(file, projectId, null, null);
-    }
-
-
-
-    @RequestMapping(value = "/projects/{projectId}/generateDescription", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
-    GenDescResponse generateDescription(@PathVariable("projectId") String projectId, @RequestBody GenDescRequest genDescRequest) {
-        SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(genDescRequest.instructions, "genDescRequest.instructions")
-
-        return learningContentGenerator.generateDescription(genDescRequest)
     }
 
 
