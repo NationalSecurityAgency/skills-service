@@ -177,17 +177,19 @@ ${questionRules.SingleChoice.countCorrectCheck}
 - If questionType doesn't match, FIX IT
 `
 
-    const newQuizInstructions = (existingDescription, numQuestions) => {
+    const newQuizInstructions = (existingDescription, numQuestions, userEnteredText) => {
         return `# Quiz Generation Task
 
 ## Skill Description:
 "${existingDescription}"
 
 ## Requirements:
-- Generate ${numQuestions} questions
+- Generate ${numQuestions} questions, unless otherwise specified in the user instructions
 - Include at least one of each question type
 - Follow ALL rules strictly
 - Double-check the number of correct answers for each question type
+
+${(userEnteredText ? `Please generate it based on the following user instructions: "${userEnteredText}"` : '')}
 
 ${quizRules}
 
@@ -217,7 +219,7 @@ The quiz was originally built based on this description:
 Here is the existing quiz:
 ${existingQuiz} 
 
-Please modify it based on the following instructions: "${userEnteredText}"
+${(userEnteredText ? `Please modify it based on the following user instructions: "${userEnteredText}"` : '')}
 
 ${quizRules}
 `

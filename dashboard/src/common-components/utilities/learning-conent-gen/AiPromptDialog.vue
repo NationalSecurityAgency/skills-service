@@ -351,7 +351,7 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
         </div>
       </div>
 
-      <Message severity="warn" v-if="!isValid && overallErrMsg">
+      <Message severity="warn" v-if="!isValid && overallErrMsg" data-cy="overallErrMsg">
         <div v-html="overallErrMsg"></div>
       </Message>
       <div class="flex justify-end mt-6">
