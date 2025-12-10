@@ -14,26 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import Badge from 'primevue/badge'
 import Card from 'primevue/card'
 import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
 import LoadingContainer from '@/components/utils/LoadingContainer.vue'
 import SkillsService from '@/components/skills/SkillsService'
-import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import {useNumberFormat} from '@/common-components/filter/UseNumberFormat.js'
 import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil'
 import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
-import { useTimeWindowFormatter } from '@/components/skills/UseTimeWindowFormatter.js'
-import { useProjConfig } from '@/stores/UseProjConfig.js'
+import {useTimeWindowFormatter} from '@/components/skills/UseTimeWindowFormatter.js'
+import {useProjConfig} from '@/stores/UseProjConfig.js'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 import LinkToSkillPage from '@/components/utils/LinkToSkillPage.vue'
-import { useRoute } from 'vue-router'
+import {useRoute} from 'vue-router'
 import SelfReportType from "@/components/skills/selfReport/SelfReportType.js";
-import GenerateQuizDialog from '@/common-components/utilities/learning-conent-gen/GenerateQuizDialog.vue'
 import GenerateQuizDialog2 from '@/common-components/utilities/learning-conent-gen/GenerateQuizDialog2.vue'
 import QuizService from '@/components/quiz/QuizService.js'
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
 
 const appConfig = useAppConfig()
 const config = useProjConfig()

@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
-import skills.auth.openai.GenDescRequest
+import skills.auth.openai.AiChatRequest
 import skills.auth.openai.OpenAIService
 import skills.controller.exceptions.SkillsValidator
 
@@ -41,8 +41,8 @@ class OpenAiController {
     @Value('#{"${skills.openai.useSpringAi:true}"}')
     Boolean useSpringAi
 
-    @PostMapping(value = "/stream/description", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    Flux<String> generateDescriptionAndStream(@RequestBody GenDescRequest genDescRequest) {
+    @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    Flux<String> generateDescriptionAndStream(@RequestBody AiChatRequest genDescRequest) {
         SkillsValidator.isNotBlank(genDescRequest.userInstructions, "genDescRequest.instructuserInstructionsions")
         SkillsValidator.isNotBlank(genDescRequest.model, "genDescRequest.model")
         SkillsValidator.isNotNull(genDescRequest.modelTemperature, "genDescRequest.modelTemperature")

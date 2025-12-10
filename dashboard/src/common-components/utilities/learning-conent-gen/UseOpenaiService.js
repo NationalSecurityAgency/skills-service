@@ -22,7 +22,7 @@ export const useOpenaiService = () => {
     const prompt = async (promptParams, onChunk, onComplete, onError) => {
         try {
             currentRequestController = new AbortController();
-            const response = await fetch(`/openai/stream/description`, {
+            const response = await fetch(`/openai/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

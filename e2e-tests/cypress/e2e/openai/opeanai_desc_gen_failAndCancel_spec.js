@@ -34,7 +34,7 @@ describe('Generate Desc Fail And Cancel Tests', () => {
                 res.send(conf);
             });
         }).as('getConfig');
-        cy.intercept('POST', '/openai/stream/description', (req) => {
+        cy.intercept('POST', '/openai/chat', (req) => {
             // Delay the response by 30 seconds
             return new Promise((resolve) => {
                 setTimeout(() => {
@@ -94,7 +94,7 @@ describe('Generate Desc Fail And Cancel Tests', () => {
                 res.send(conf);
             });
         }).as('getConfig');
-        cy.intercept('POST', '/openai/stream/description', (req) => {
+        cy.intercept('POST', '/openai/chat', (req) => {
             req.reply({
                 statusCode: 400,
                 body: 'Internal Server Error\n',
