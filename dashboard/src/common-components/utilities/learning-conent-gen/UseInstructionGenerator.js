@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 import QuestionType from "@/skills-display/components/quiz/QuestionType.js";
+import {useLog} from "@/components/utils/misc/useLog.js";
 
 export const useInstructionGenerator = () => {
+
+    const log = useLog()
 
     const newDescriptionInstructions = (userEnteredText) => {
         return `Generate a detailed description for a skill that will be part of a larger training. Here is user provided text that gives information about the skills: "${userEnteredText}". 
@@ -29,17 +32,19 @@ Here are the requirements:
 `
     }
 
-    const existingDescriptionInstructions = (existingDescription, userEnteredText, instructionsToKeepPlaceholders) => {
-        return `Here is the current description:
-"${existingDescription}"
+    const existingDescriptionInstructions = (existingText, userInstructions, instructionsToKeepPlaceholders) => {
+        const res = `Here is the current description:
+"${existingText}"
 
-Please modify it based on the following instructions: "${userEnteredText}"
+Please modify it based on the following instructions: "${userInstructions}"
 
 Here are the specific requirements:
 - First provide the new text without any comments or fields (such as "corrected text")
 - At the end create a new section with the title of "Here is what was changed" - then list any comments or suggestions.
 ${instructionsToKeepPlaceholders ? `-${instructionsToKeepPlaceholders}` : ''}
 `
+        log.debug(res)
+        return res
     }
 
     const questionGenRules = {
@@ -299,6 +304,7 @@ ${questionTypeRules.isCorrectCheck}
 ${questionTypeRules.countCorrectCheck}
 - If questionType doesn't match, FIX IT
 `
+        log.debug(res)
         return res
     }
 
