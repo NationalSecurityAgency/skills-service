@@ -59,7 +59,7 @@ describe('Model Selector Tests', () => {
         cy.get('[data-cy="aiModelsSelector"]  [data-cy="modelSettingsButton"]').click()
         cy.get('[data-cy="aiModelsSelector"] [data-cy="modelSettings"]').should('not.exist')
 
-        cy.intercept('POST', '/openai/stream/description', (req) => {
+        cy.intercept('POST', '/openai/chat', (req) => {
             expect(req.body.model).to.equal('model2');
             expect(req.body.modelTemperature).to.equal(0.51);
             req.continue();
@@ -127,7 +127,7 @@ describe('Model Selector Tests', () => {
         cy.get('[data-cy="aiModelsSelector"] [data-cy="selectedModel"]').contains('model11')
         cy.get('[data-cy="aiModelsSelector"] [data-cy="modelSettings"]').should('not.exist')
 
-        cy.intercept('POST', '/openai/stream/description', (req) => {
+        cy.intercept('POST', '/openai/chat', (req) => {
             expect(req.body.model).to.equal('model11');
             expect(req.body.modelTemperature).to.equal(0.50);
             req.continue();
@@ -196,7 +196,7 @@ describe('Model Selector Tests', () => {
         cy.get('[data-cy="aiModelsSelector"] [data-cy="selectedModel"]').contains('model2')
         cy.get('[data-cy="aiModelsSelector"] [data-cy="modelSettings"]').should('not.exist')
 
-        cy.intercept('POST', '/openai/stream/description', (req) => {
+        cy.intercept('POST', '/openai/chat', (req) => {
             expect(req.body.model).to.equal('model2');
             expect(req.body.modelTemperature).to.equal(0.23);
             req.continue();
@@ -223,7 +223,7 @@ describe('Model Selector Tests', () => {
         cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg)
         cy.get('[data-cy="aiModelsSelector"] [data-cy="selectedModel"]').contains('model1')
 
-        cy.intercept('POST', '/openai/stream/description', (req) => {
+        cy.intercept('POST', '/openai/chat', (req) => {
             expect(req.body.model).to.equal('model1');
             expect(req.body.modelTemperature).to.equal(0.22);
             req.continue();

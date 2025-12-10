@@ -197,7 +197,7 @@ You are a professional instructional designer and training content creator for t
         }
     }
 
-    Flux<String> streamCompletions1(GenDescRequest genDescRequest) {
+    Flux<String> streamCompletions1(AiChatRequest genDescRequest) {
         if (!isChatEnabled()) {
             return Flux.error(new IllegalStateException("Chat model is not enabled. Set spring.ai.model.chat to enable."))
         }
@@ -236,7 +236,7 @@ You are a professional instructional designer and training content creator for t
         }
     }
 
-    Flux<String> streamCompletions(GenDescRequest genDescRequest) {
+    Flux<String> streamCompletions(AiChatRequest genDescRequest) {
         String message = genDescRequest.userInstructions
         JsonSlurper jsonSlurper = new JsonSlurper()
         String url = String.join("/", openAiHost, completionsEndpoint)

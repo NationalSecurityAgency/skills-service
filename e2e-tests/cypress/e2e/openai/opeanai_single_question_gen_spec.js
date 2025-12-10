@@ -355,7 +355,7 @@ describe('Generate Single Question Tests', () => {
 
         cy.get('[data-cy="genQuestionTypeSelector"] [data-cy="selectionItem_SingleChoice"]')
 
-        cy.intercept('POST', '/openai/stream/description', (req) => {
+        cy.intercept('POST', '/openai/chat', (req) => {
             const requestBody = req.body;
             req.reply();
 
@@ -449,7 +449,7 @@ describe('Generate Single Question Tests', () => {
 
         cy.get('[data-cy="genQuestionTypeSelector"] [data-cy="selectionItem_MultipleChoice"]')
 
-        cy.intercept('POST', '/openai/stream/description', (req) => {
+        cy.intercept('POST', '/openai/chat', (req) => {
             const requestBody = req.body;
             req.reply();
 
@@ -504,7 +504,7 @@ describe('Generate Single Question Tests', () => {
         cy.get('[data-cy="useGenValueBtn-2"]').click()
         cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
 
-        cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"]').should('be.visible')
+        cy.wait(1000)
         cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"]').contains(selectRockBandsQuestion)
 
         cy.get('[data-cy="answerTypeSelector"] [data-cy="selectionItem_MultipleChoice"]')
@@ -546,7 +546,7 @@ describe('Generate Single Question Tests', () => {
 
         cy.get('[data-cy="genQuestionTypeSelector"] [data-cy="selectionItem_TextInput"]')
 
-        cy.intercept('POST', '/openai/stream/description', (req) => {
+        cy.intercept('POST', '/openai/chat', (req) => {
             const requestBody = req.body;
             req.reply();
 
@@ -637,7 +637,7 @@ describe('Generate Single Question Tests', () => {
 
         cy.get('[data-cy="genQuestionTypeSelector"] [data-cy="selectionItem_SingleChoice"]')
 
-        cy.intercept('POST', '/openai/stream/description', (req) => {
+        cy.intercept('POST', '/openai/chat', (req) => {
             const requestBody = req.body;
             req.reply();
 
