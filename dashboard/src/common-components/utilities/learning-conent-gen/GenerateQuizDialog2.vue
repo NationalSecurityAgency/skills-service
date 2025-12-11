@@ -126,10 +126,10 @@ const alreadyParsedQuestions = () => {
 }
 
 const handleGeneratedChunk = (chunk, historyId) => {
-  log.debug(`handleGeneratedChunk [inQuestionsArray: ${inQuestionsArray.value}]`, chunk)
+  log.debug(`handleGeneratedChunk [inQuestionsArray: ${inQuestionsArray.value}], [chunk: ${chunk}]`)
   // Combine any previous buffer with the new chunk
   let newBuffer = currentJsonString.value + chunk;
-  log.debug('newBuffer', newBuffer)
+  log.debug(`newBuffer: ${newBuffer}`)
   let currentPosition = 0;
   let inString = false;
   let braceDepth = 0;
@@ -170,7 +170,6 @@ const handleGeneratedChunk = (chunk, historyId) => {
             const jsonStr = newBuffer.substring(objectStart, i + 1);
             log.debug(`found complete question [jsonStr: ${jsonStr}]`)
             const question = safeJsonParse(jsonStr);
-
             if (question && question.question) {  // Basic validation
               const questionIdx = currentQuizData && currentQuizData.value && currentQuizData.value.length ? currentQuizData.value.length : 0
               question.name = `q${historyId}${questionIdx + 1}`;
@@ -185,6 +184,8 @@ const handleGeneratedChunk = (chunk, historyId) => {
               questionBraceDepth = -1;
               currentJsonString.value = ''
               currentPosition = i + 1;
+            } else {
+              log.warn(`invalid question [jsonStr: ${jsonStr}]`)
             }
           } catch (e) {
             console.error('Error parsing question:', e);
@@ -203,7 +204,7 @@ const handleGeneratedChunk = (chunk, historyId) => {
 
   // Return remaining buffer that couldn't be processed yet
   currentJsonString.value = newBuffer.substring(currentPosition);
-  log.debug('returning remaining buffer', currentJsonString.value)
+  log.debug(`returning remaining buffer: ${currentJsonString.value}`)
 
   return {
     append: true,
@@ -243,7 +244,7 @@ const ensureValidQuestionType = (question) => {
 }
 
 const handleGenerationCompleted = (generated) => {
-  log.debug('handleGenerationCompleted', generated)
+  log.debug(`handleGenerationCompleted: ${generated}`)
   currentJsonString.value = ''
   isGenerating.value = false
   allQuestions.value.push(...generated.generatedInfo.generatedQuiz)
