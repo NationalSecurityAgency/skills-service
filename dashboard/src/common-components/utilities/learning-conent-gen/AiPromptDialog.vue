@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, nextTick, onMounted, ref} from 'vue'
+import {computed, nextTick, onMounted, ref, useTemplateRef} from 'vue'
 import SkillsDialog from "@/components/utils/inputForm/SkillsDialog.vue";
 import {useRoute} from "vue-router";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
@@ -27,6 +27,7 @@ import {useOpenaiService} from "@/common-components/utilities/learning-conent-ge
 import GenStatus from "@/common-components/utilities/learning-conent-gen/GenStatus.vue";
 import {useAiModelsState} from "@/common-components/utilities/learning-conent-gen/UseAiModelsState.js";
 import AiModelsSelector from "@/common-components/utilities/learning-conent-gen/AiModelsSelector.vue";
+import {useElementVisibility, useEventListener} from "@vueuse/core";
 
 const model = defineModel()
 const props = defineProps({
@@ -245,11 +246,35 @@ const cancelCurrentPrompt = () => {
   openaiService.cancelCurrentPrompt()
 }
 
+const instructionsInputTemplateRef = useTemplateRef('instructionsInputRef')
+const isInstructionsInputVisible = useElementVisibility(instructionsInputTemplateRef)
+const showScrollToBottomBtn = computed(() => !isInstructionsInputVisible.value)
+
+const stopScrollingWithIncomingText = ref(false)
+useEventListener(document, 'wheel', (evt) => {
+  if (evt.deltaY < 0) {
+    stopScrollingWithIncomingText.value = true
+  }
+})
+
+const resumeAutoScroll = () => {
+  stopScrollingWithIncomingText.value = false
+  if (isGenerating.value) {
+    scrollInstructionsIntoView()
+  } else {
+    focusOnInstructionsInput()
+  }
+}
+
 const scrollInstructionsIntoView = () => {
-  nextTick(() => document.getElementById('instructionsInputId')?.scrollIntoView())
+  if (!stopScrollingWithIncomingText.value) {
+    nextTick(() => document.getElementById('instructionsInputId')?.scrollIntoView())
+  }
 }
 const focusOnInstructionsInput = () => {
-  nextTick(() => document.getElementById('instructionsInputId')?.focus())
+  if (!stopScrollingWithIncomingText.value) {
+    nextTick(() => document.getElementById('instructionsInputId')?.focus())
+  }
 }
 
 const useGenerated = (historyId) => {
@@ -287,7 +312,13 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
       :show-ok-button="false"
       :show-cancel-button="false"
       :enable-return-focus="true">
-
+    <SkillsButton v-if="showScrollToBottomBtn"
+                  icon="fas fa-arrow-down"
+                  class="scrollToBottomBtn"
+                  @click="resumeAutoScroll"
+                  data-cy="scrollToBottomBtn"
+                  aria-label="Scroll to Bottom"
+                  :outlined="false"/>
     <skills-spinner v-if="isLoading" :is-loading="isLoading" />
     <ai-models-selector />
     <div v-if="showChat" class="py-5 flex flex-col" style="min-height: 70vh">
@@ -358,6 +389,7 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
         <div class="flex gap-2 w-10/12">
           <InputText
               id="instructionsInputId"
+              ref="instructionsInputRef"
               v-model="instructions"
               class="w-full"
               :placeholder="instructionsPlaceholder"
@@ -380,5 +412,15 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
 </template>
 
 <style scoped>
+.scrollToBottomBtn {
+  position: fixed;
+  top: 7rem;
+  right: 2rem;
+  opacity: 0.7;
+  z-index: 50;
+}
 
+.scrollToBottomBtn:hover {
+  opacity: 1;
+}
 </style>
