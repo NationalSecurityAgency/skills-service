@@ -291,7 +291,7 @@ const toggleEnableEditQuestions = ((id) => {
 })
 const handleQuestionUpdated = (updatedQuestion, historyItem) => {
   const { updatedQuestionText } = updatedQuestion;
-  const question = historyItem.generatedInfo.generatedQuiz.find(q => q.id === updatedQuestion.id);
+  const question = historyItem.generatedInfo.generatedQuiz.find(q => q.name === updatedQuestion.question.name);
   question.question = updatedQuestionText;
 }
 </script>
