@@ -18,7 +18,9 @@ import {
     newDescWelcomeMsg,
     errMsg,
     stopMsg,
-    gotStartedMsg
+    gotStartedMsg,
+    catchAllResponse,
+    completedMsg
 }
     from './openai_helper_commands'
 
@@ -161,6 +163,71 @@ describe('Generate Desc Fail And Cancel Tests', () => {
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
     });
 
+    it('send button is enabled only after 1 character is entered', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg)
+        cy.get('[data-cy="userMsg-1"]').should('not.exist')
+        cy.get('[data-cy="sendAndStopBtn"]').should('be.disabled')
+        cy.get('[data-cy="instructionsInput"]').type('a')
+        cy.get('[data-cy="sendAndStopBtn"]').should('be.enabled')
+        cy.get('[data-cy="instructionsInput"]').type('{backspace}')
+        cy.get('[data-cy="sendAndStopBtn"]').should('be.disabled')
+    });
+
+    it('pressing enter in the empty instructions input field does nothing', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg)
+        cy.get('[data-cy="userMsg-1"]').should('not.exist')
+        cy.get('[data-cy="sendAndStopBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="instructionsInput"]').type('{enter}')
+        cy.wait(3000)
+        cy.get('[data-cy="userMsg-1"]').should('not.exist')
+        cy.get('[data-cy="aiMsg-2"]').should('not.exist')
+        cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
+
+        cy.get('[data-cy="instructionsInput"]').type('a{enter}')
+
+        cy.get('[data-cy="userMsg-1"]').contains('a')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').contains(catchAllResponse)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
+        cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled')
+    });
+
 });
+
 
 
