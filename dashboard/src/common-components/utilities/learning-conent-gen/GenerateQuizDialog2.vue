@@ -244,7 +244,7 @@ const ensureValidQuestionType = (question) => {
 }
 
 const handleGenerationCompleted = (generated) => {
-  log.debug(`handleGenerationCompleted: ${generated}`)
+  log.debug(`handleGenerationCompleted: ${JSON.stringify(generated, null, 2)}`)
   currentJsonString.value = ''
   isGenerating.value = false
   allQuestions.value.push(...generated.generatedInfo.generatedQuiz)
