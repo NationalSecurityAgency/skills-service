@@ -97,7 +97,6 @@ describe('Generate Desc Tests', () => {
         cy.get('[data-cy="skillOverviewDescription"]').contains(chessGenValue)
     });
 
-
     it('apply prefix after generating a new description for a skill', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
