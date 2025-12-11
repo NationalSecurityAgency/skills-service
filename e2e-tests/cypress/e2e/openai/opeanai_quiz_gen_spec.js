@@ -53,8 +53,12 @@ describe('Generate Quiz Tests', () => {
 
         cy.get('[data-cy="generateQuizBtn"]').click()
         cy.get('[data-cy="aiMsg-0"]').contains(newQuizWelcomeMsg)
-        cy.get('[data-cy="sendAndStopBtn"]').click()
 
+        cy.get('[data-cy="instructionsInput"]').type('chess{enter}')
+        cy.get('[data-cy="userMsg-1"]').contains('chess')
+
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(newQuizGeneratingMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('Which piece can move diagonally in any direction?')
@@ -87,6 +91,77 @@ describe('Generate Quiz Tests', () => {
           .should('have.attr', 'href')
           .and('include', '/administrator/quizzes/skill1Quiz');
         cy.get('[data-cy="buttonToQuiz"]').contains('View Quiz')
+    });
+
+    it('apply prefix after generating a new quiz for a skill, Add Prefix Then Use', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                conf.addPrefixToInvalidParagraphsOptions = '(A) ,(B) ,(C) ,(D) ';
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, { description: chessGenValue, numPerformToCompletion: 1 })
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="skillOverviewDescription"]').contains(chessGenValue)
+
+        cy.get('[data-cy="generateQuizBtn"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(newQuizWelcomeMsg)
+
+        cy.get('[data-cy="userMsg-1"]').should('not.exist')
+        cy.get('[data-cy="instructionsInput"]').type('invalidquiz{enter}')
+        cy.get('[data-cy="userMsg-1"]').contains('invalidquiz')
+
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(newQuizGeneratingMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
+        cy.get('[data-cy="instructionsInput"]').should('have.focus')
+
+        cy.validateMarkdownViewerText('[data-cy="aiMsg-2"] [data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]', [
+            'Has jabberwocky',
+            'clean line',
+            'jabberwocky again',
+            'and nothing here'
+        ])
+
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"] [data-cy="useGenValueBtn-2"]').should('be.disabled')
+        cy.get(`[data-cy="aiMsg-2"] [data-cy="finalSegment"] [data-cy="addPrefixBtn"]`).should('be.enabled')
+        cy.get('[data-cy="instructionsInput"]').should('have.focus')
+
+        cy.get(`[data-cy="aiMsg-2"] [data-cy="finalSegment"] [data-cy="prefixSelect"]`).click()
+        const options = ['A', 'B', 'C', 'D']
+        options.forEach((val) => {
+            cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(${val}) "]`)
+        })
+        cy.get(`[data-pc-section="overlay"] [data-pc-section="list"] [aria-label="(${options[2]}) "]`).click()
+
+        // Intercept and modify the create-question requests
+        cy.intercept('POST', '/admin/quiz-definitions/skill1Quiz/create-question', (req) => {
+          if (req.body && req.body.question) {
+              const question = req.body.question
+              if (question.includes('jabberwock')) {
+                  console.log(`checking questions: ${question}`)
+                  expect(question).to.match(/^\(C\) /)
+                  req.body.question = question.replace(/jabberwocky/gi, '');
+              }
+          }
+          req.continue();
+        }).as('createQuestion');
+
+
+        cy.get(`[data-cy="aiMsg-2"] [data-cy="finalSegment"] [data-cy="addPrefixBtn"]`).should('be.enabled');
+        cy.get(`[data-cy="aiMsg-2"] [data-cy="finalSegment"] [data-cy="addPrefixBtn"]`).click()
+
+        // Wait for the request to complete
+        cy.wait('@createQuestion');
+
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"] [data-cy="useGenValueBtn-2"]').should('not.exist')
+        cy.get(`[data-cy="aiMsg-2"] [data-cy="finalSegment"] [data-cy="addPrefixBtn"]`).should('not.exist')
     });
 
 });

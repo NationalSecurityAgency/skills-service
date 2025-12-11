@@ -4,14 +4,9 @@
     "method": "POST",
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
-      {
-        "contains": "jabberwocky",
-        "doesNotContain": "invalidquiz",
-        "doesNotContain": "Quiz Generation",
-        "doesNotContain": "SingleChoice",
-        "doesNotContain": "MultipleChoice",
-        "doesNotContain": "TextInput"
-      }
+        { "contains": "invalidquiz" },
+        { "contains": "Quiz Generation" },
+        { "doesNotContain": "Modify an existing quiz" }
     ]
   },
   "response": {
@@ -19,7 +14,7 @@
     "headers": {
       "Content-Type": "text/event-stream"
     },
-    "bodyFileName": "response-body-jabberwocky.txt",
+    "bodyFileName": "response-body-quiz-jabberwocky.txt",
     "transformers": ["response-template"],
     "chunkedDribbleDelay": {
       "numberOfChunks": 15,
