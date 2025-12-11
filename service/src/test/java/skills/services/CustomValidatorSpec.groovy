@@ -400,6 +400,12 @@ Paragraph three
 
         validator.validateDescription("""(A) \n\n| (A) Locate and explain the Skills. |\n| -------------------------------------------------------------- |\n|\n""").valid
 
+        validator.validateDescription("""(A) table to follow
+
+| (A) header1 | (A) header 2  |
+| --- | --- |
+| [(A) cell 1](https://some.url.com) | (A) cell 2 |
+""").valid
     }
 
     def "support markdown codeblocks"() {
@@ -1211,6 +1217,7 @@ line-height:107%">(A) fancy formatting</span>""").valid
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
         validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
 
         when:
         validator.init()
@@ -1237,6 +1244,8 @@ line-height:107%">(A) fancy formatting</span>""").valid
         validator.validateDescription("(A) inline link **[A link](http://linky.com)** more text").valid
         validator.validateDescription("(A) inline link ***[A link](http://linky.com)*** more text").valid
         validator.validateDescription("(A) inline link <span>[A link](http://linky.com)</span> more text").valid
+
+        validator.validateDescription("(A) some text [<span style=\"font-size:9.0pt\">A link</span>](http://linky.com) more text").valid
     }
 
     def "support mixed html br and newline chars" () {

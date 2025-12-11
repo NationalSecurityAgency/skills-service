@@ -88,7 +88,7 @@ class ParagraphValidator {
 
             @Override
             void visit(Link link) {
-                String text = textContentRenderer.render(link)
+                String text = textContentRenderer.render(link?.firstChild ?: link)
                 StringValidationRes isValidLinkOnItsOwn = validateString(text)
 
                 if (!isValidLinkOnItsOwn.isValid) {
