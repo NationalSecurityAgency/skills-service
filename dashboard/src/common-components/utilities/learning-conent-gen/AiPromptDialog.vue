@@ -197,6 +197,11 @@ const onStartStopBtn = () => {
     startGeneration()
   }
 }
+const onInputEnter = () => {
+  if (!isGenerating.value && isSendEnabled.value) {
+    startGeneration()
+  }
+}
 
 const genWithStreaming = (userInstructions, assistantInstructions=null) => {
   lastPromptCancelled.value = false
@@ -300,6 +305,8 @@ const addPrefix = (info) => {
 const isLoading = computed(() => aiModelsState.loadingModels)
 const showChat = computed(() => !isLoading.value && !aiModelsState.failedToLoad)
 const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error' : historyItem.cancelled ? 'warn' : 'info'
+
+const isSendEnabled = computed(() => (instructions.value && instructions.value.trim().length > 0) || isGenerating.value)
 </script>
 
 <template>
@@ -394,7 +401,7 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
               class="w-full"
               :placeholder="instructionsPlaceholder"
               :disabled="isGenerating"
-              @keydown.enter="startGeneration"
+              @keydown.enter="onInputEnter"
               data-cy="instructionsInput"
               autofocus/>
           <div class="flex justify-end">
@@ -403,6 +410,7 @@ const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error'
                 :label="isGenerating ? stopButtonLabel : sendButtonLabel"
                 :severity="isGenerating ? 'warn' : 'success'"
                 data-cy="sendAndStopBtn"
+                :disabled="!isSendEnabled"
                 @click="onStartStopBtn" />
           </div>
         </div>
