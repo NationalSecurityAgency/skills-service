@@ -17,8 +17,17 @@ package skills.auth.openai
 
 class AiChatRequest {
 
-    String userInstructions
-    String assistantInstructions
+    static enum Role {
+        User,
+        Assistant
+    }
+
+    static class ChatMessage {
+        Role role
+        String content
+    }
+
+    List<ChatMessage> messages
 
     String model
     Double modelTemperature

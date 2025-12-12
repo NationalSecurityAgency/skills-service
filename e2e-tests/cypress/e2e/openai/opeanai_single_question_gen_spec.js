@@ -360,8 +360,8 @@ describe('Generate Single Question Tests', () => {
             req.reply();
 
             req.on('response', (res) => {
-                expect(requestBody).to.have.property('userInstructions');
-                const userInstructions = requestBody.userInstructions.replace(/\s+/g, ' ').trim();
+                expect(requestBody).to.have.property('messages');
+                const userInstructions = requestBody.messages[0].content.replace(/\s+/g, ' ').trim();
 
                 // Validate question
                 const expectedQuestion = '## Existing Question ### Question: This is a question # 1';
@@ -454,8 +454,8 @@ describe('Generate Single Question Tests', () => {
             req.reply();
 
             req.on('response', (res) => {
-                expect(requestBody).to.have.property('userInstructions');
-                const userInstructions = requestBody.userInstructions.replace(/\s+/g, ' ').trim();
+                expect(requestBody).to.have.property('messages');
+                const userInstructions = requestBody.messages[0].content.replace(/\s+/g, ' ').trim();
 
                 // Validate question
                 const expectedQuestion = '## Existing Question ### Question: This is a question # 1';
@@ -551,8 +551,8 @@ describe('Generate Single Question Tests', () => {
             req.reply();
 
             req.on('response', (res) => {
-                expect(requestBody).to.have.property('userInstructions');
-                const userInstructions = requestBody.userInstructions.replace(/\s+/g, ' ').trim();
+                expect(requestBody).to.have.property('messages');
+                const userInstructions = requestBody.messages[0].content.replace(/\s+/g, ' ').trim();
 
                 // Validate question
                 const expectedQuestion = '## Existing Question ### Question: This is a question # 1';
@@ -642,8 +642,8 @@ describe('Generate Single Question Tests', () => {
             req.reply();
 
             req.on('response', (res) => {
-                expect(requestBody).to.have.property('userInstructions');
-                const userInstructions = requestBody.userInstructions.replace(/\s+/g, ' ').trim();
+                expect(requestBody).to.have.property('messages');
+                const userInstructions = requestBody.messages[0].content.replace(/\s+/g, ' ').trim();
 
                 const expectedTask = '# Task: Update an existing SingleChoice question'
                 expect(userInstructions).to.include(expectedTask.replace(/\s+/g, ' ').trim());

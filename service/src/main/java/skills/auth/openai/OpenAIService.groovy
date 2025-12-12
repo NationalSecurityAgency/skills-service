@@ -21,6 +21,7 @@ import groovy.transform.Canonical
 import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 import org.springframework.ai.chat.messages.AssistantMessage
+import org.springframework.ai.chat.messages.SystemMessage
 import org.springframework.ai.chat.messages.UserMessage
 import org.springframework.ai.chat.model.ChatResponse
 import org.springframework.ai.chat.prompt.Prompt
@@ -62,9 +63,7 @@ You are a professional instructional designer and training content creator for t
 
 # Core Responsibilities
 1. Content Generation:
-   - Create clear and concise skill, subject, and project descriptions
-   - Develop well-structured quizzes and assessment questions
-   - Generate learning objectives and outcomes
+   - Create clear and concise training content
    - Provide constructive feedback and explanations
 
 2. Content Guidelines:
@@ -202,13 +201,17 @@ You are a professional instructional designer and training content creator for t
             return Flux.error(new IllegalStateException("Chat model is not enabled. Set spring.ai.model.chat to enable."))
         }
 
-        List<org.springframework.ai.chat.messages.Message> messages = []
-        if (genDescRequest.userInstructions) {
-            messages.add(new UserMessage(genDescRequest.userInstructions))
-        }
-        if (genDescRequest.assistantInstructions) {
-            messages.add(new AssistantMessage(genDescRequest.assistantInstructions))
-        }
+        boolean isFirstMessage = genDescRequest.messages.size() == 1
+        List<org.springframework.ai.chat.messages.Message> messages = isFirstMessage ? [new SystemMessage(systemMsg)] : []
+        messages.addAll(genDescRequest.messages.collect { msg ->
+            if (msg.role == AiChatRequest.Role.User) {
+                return new UserMessage(msg.content)
+            } else if (msg.role == AiChatRequest.Role.Assistant) {
+                return new AssistantMessage(msg.content)
+            } else {
+                throw new IllegalArgumentException("Invalid role: " + msg.role)
+            }
+        })
 
         Prompt prompt = new Prompt(
                 messages,
@@ -237,7 +240,7 @@ You are a professional instructional designer and training content creator for t
     }
 
     Flux<String> streamCompletions(AiChatRequest genDescRequest) {
-        String message = genDescRequest.userInstructions
+        String message = genDescRequest.messages.first().content
         JsonSlurper jsonSlurper = new JsonSlurper()
         String url = String.join("/", openAiHost, completionsEndpoint)
         if (log.isDebugEnabled()) {

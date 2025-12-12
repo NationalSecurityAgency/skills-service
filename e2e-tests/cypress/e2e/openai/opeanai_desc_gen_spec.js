@@ -97,6 +97,71 @@ describe('Generate Desc Tests', () => {
         cy.get('[data-cy="skillOverviewDescription"]').contains(chessGenValue)
     });
 
+    it('conversation to generate a new description for a skill', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg)
+        cy.get('[data-cy="userMsg-1"]').should('not.exist')
+
+        cy.intercept('POST', '/openai/chat', (req) => {
+            const requestBody = req.body;
+            req.reply();
+
+            req.on('response', (res) => {
+                expect(requestBody.messages).to.have.length(1);
+                expect(requestBody.messages[0].role).to.equal('User')
+                expect(requestBody.messages[0].content).to.contain('Generate a detailed description for a skill that will be part of a larger training');
+                expect(requestBody.messages[0].content).to.contain('Learn chess');
+            });
+        }).as('genDescription1');
+        cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
+        cy.get('@genDescription1')
+
+        cy.get('[data-cy="userMsg-1"]').contains('Learn chess')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').contains(chessGenValue)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
+        cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled')
+
+        cy.get('[data-cy="instructionsInput"]').should('have.focus')
+
+        cy.intercept('POST', '/openai/chat', (req) => {
+            const requestBody = req.body;
+            req.reply();
+
+            req.on('response', (res) => {
+                expect(requestBody.messages).to.have.length(3);
+                expect(requestBody.messages[0].role).to.equal('User')
+                expect(requestBody.messages[0].content).to.contain('Generate a detailed description for a skill that will be part of a larger training');
+                expect(requestBody.messages[0].content).to.contain('Learn chess');
+
+                expect(requestBody.messages[1].role).to.equal('Assistant')
+                expect(requestBody.messages[1].content).to.contain('In order to learn chess you will need to get a chess board!')
+
+                expect(requestBody.messages[2].role).to.equal('User')
+                expect(requestBody.messages[2].content).to.contain('Apply the following instructions to this conversation')
+
+
+            });
+        }).as('genDescription2');
+        cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
+        cy.get('@genDescription2')
+    });
+
     it('apply prefix after generating a new description for a skill', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
