@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue'
+import {computed, nextTick, ref, toRaw, watch} from 'vue'
 import { useRoute } from 'vue-router'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useImgHandler } from '@/common-components/utilities/learning-conent-gen/UseImgHandler.js'
@@ -185,7 +185,7 @@ const handleGeneratedChunk = (chunk, historyId) => {
               currentJsonString.value = ''
               currentPosition = i + 1;
             } else {
-              log.warn(`invalid question [jsonStr: ${jsonStr}]`)
+              log.debug(`invalid question [jsonStr: ${jsonStr}]`)
             }
           } catch (e) {
             console.error('Error parsing question:', e);
@@ -248,6 +248,16 @@ const handleGenerationCompleted = (generated) => {
   currentJsonString.value = ''
   isGenerating.value = false
   allQuestions.value.push(...generated.generatedInfo.generatedQuiz)
+  const generatedValue = generated.generatedValue
+      .replace(/^\s*```(?:json)?\s*([\s\S]*?)\s*```\s*$/i, '$1')
+      .trim()
+  const parsedGeneratedValue = JSON.parse(generatedValue)
+
+  const changedNotes = Object.entries(parsedGeneratedValue)
+      .find(([key]) => key.toLowerCase().includes('change'))?.[1] || null;
+  if (changedNotes) {
+    generated.generateValueChangedNotes = `### Here is what was changed\n- ${changedNotes.join('\n- ')}`
+  }
   validate()
   return generated
 }
@@ -270,19 +280,22 @@ const handleAddPrefix = (historyItem, missingPrefix) => {
   return Promise.resolve(historyItem)
 }
 
+const beforeGenerationStarted = () => {
+  currentJsonString.value = ''
+  currentQuizData.value = []
+  inQuestionsArray.value = false
+}
+
+const createFollowOnConvoInstructions = (userEnterInstructions) => {
+  return instructionsGenerator.updateQuizInstructions(userEnterInstructions)
+}
+
 const createPromptInstructions = (userEnterInstructions) => {
   let instructionsToSend = ''
   if (currentDescription.value) {
     const extractedImagesRes = imgHandler.extractImages(currentDescription.value)
     const descriptionText = extractedImagesRes.hasImages ? extractedImagesRes.processedText : currentDescription.value
-
-    if (currentQuizData.value) {
-      const existingQuiz = JSON.stringify(currentQuizData.value)
-      currentQuizData.value = null
-      instructionsToSend = instructionsGenerator.updateQuizInstructions(descriptionText, existingQuiz, userEnterInstructions)
-    } else {
-      instructionsToSend = instructionsGenerator.newQuizInstructions(descriptionText, '5 - 10', userEnterInstructions)
-    }
+    instructionsToSend = instructionsGenerator.newQuizInstructions(descriptionText, '5 - 10', userEnterInstructions)
   }
   return instructionsToSend
 }
@@ -300,7 +313,9 @@ const handleQuestionUpdated = (updatedQuestion, historyItem) => {
   <ai-prompt-dialog
       ref="aiPromptDialogRef"
       v-model="model"
+      :before-generation-started-fn="beforeGenerationStarted"
       :create-instructions-fn="createPromptInstructions"
+      :create-follow-on-convo-instructions-fn="createFollowOnConvoInstructions"
       :chunk-handler-fn="handleGeneratedChunk"
       :generation-completed-fn="handleGenerationCompleted"
       :add-prefix-fn="handleAddPrefix"
@@ -312,10 +327,11 @@ const handleQuestionUpdated = (updatedQuestion, historyItem) => {
       :community-value="communityValue"
       :is-valid="meta.valid"
       :overall-err-msg="overallErrMsg"
+      :allow-initial-submit-without-input="true"
   >
     <template #generatedValue="{ historyItem }">
       <!--      must not use local variables as there can be more than 1 history item-->
-      <div v-if="historyItem.generatedInfo" class="px-5 border rounded-lg bg-blue-50 ml-4">
+      <div v-if="historyItem.generatedInfo?.generatedQuiz?.length > 0" class="px-5 border rounded-lg bg-blue-50 ml-4">
         <div v-for="(q, index) in getQuizDataForDisplay(historyItem.generatedInfo, historyItem.id)" :key="q.id">
           <div class="my-4">
             <QuestionCard data-cy="generatedQuestion"

@@ -206,22 +206,35 @@ Provide ONLY valid JSON in this exact format:
 `
 }
 
-    const updateQuizInstructions = ( existingDescription, existingQuiz, userEnteredText, instructionsToKeepPlaceholders ) => {
-        return `
-# Task: Modify an existing quiz for a skill that will be part of a larger training. 
+    const updateQuizInstructions = ( userEnteredText ) => {
+        return `Apply the following instructions this conversation: "${userEnteredText}"
 
-## Objective
-Modify an existing quiz
+Here are the specific requirements:
+- Make sure to regenerate the entire quiz again
+- Add a new parameter to the returned json called "changes" that will contain a list of comments or suggestions.
 
-The quiz was originally built based on this description:
-"${existingDescription}".
+## Output:
+Provide ONLY valid JSON in this exact format:
+\`\`\`json
+{
+  "numQuestions": Number,
+  "questions": [
+    // Your questions here
+  ],
+  "changes": [
+    // Your changes here
+  ]
+}
+\`\`\`
+`
+    }
 
-Here is the existing quiz:
-${existingQuiz} 
+    const followOnConvoInstructions = (userEnteredText) => {
+        return `Apply the following instructions to this conversation: "${userEnteredText}"
 
-${(userEnteredText ? `Please modify it based on the following user instructions: "${userEnteredText}"` : '')}
-
-${quizRules}
+Here are the specific requirements:
+- Make sure to regenerate the entire content again
+- At the end create a new section with the title of "Here is what was changed" - then list any comments or suggestions.
 `
     }
 
@@ -315,6 +328,7 @@ ${questionTypeRules.countCorrectCheck}
         existingDescriptionInstructions,
         newQuizInstructions,
         updateQuizInstructions,
-        singleQuestionInstructions
+        singleQuestionInstructions,
+        followOnConvoInstructions
     }
 }

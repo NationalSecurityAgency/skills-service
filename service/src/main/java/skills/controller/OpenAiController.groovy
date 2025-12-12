@@ -43,7 +43,8 @@ class OpenAiController {
 
     @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     Flux<String> generateDescriptionAndStream(@RequestBody AiChatRequest genDescRequest) {
-        SkillsValidator.isNotBlank(genDescRequest.userInstructions, "genDescRequest.instructuserInstructionsions")
+        SkillsValidator.isNotNull(genDescRequest.messages, "genDescRequest.messages")
+        SkillsValidator.isTrue(genDescRequest.messages.size() > 0, "genDescRequest.messages must have at least one message")
         SkillsValidator.isNotBlank(genDescRequest.model, "genDescRequest.model")
         SkillsValidator.isNotNull(genDescRequest.modelTemperature, "genDescRequest.modelTemperature")
         SkillsValidator.isTrue(genDescRequest.modelTemperature >= 0 && genDescRequest.modelTemperature <= 2, "genDescRequest.modelTemperature must be >= 0 and <= 2")
