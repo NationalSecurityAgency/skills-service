@@ -222,14 +222,11 @@ final class SkillsAuthorityFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication()
-
         if (currentAuth != null && currentAuth.isAuthenticated() && currentAuth.principal instanceof UserInfo && !permitAllMatcher.matches(request)) {
-            // Update the security context
-            SecurityContextHolder.getContext().authentication = new UsernamePasswordAuthenticationToken(
-                    currentAuth.principal,
-                    currentAuth.credentials,
-                    userAuthService.loadAuthorities(((UserInfo) currentAuth.principal).username)
-            )
+            // Update the security context with roles based on the current request
+            UserInfo userInfo = currentAuth.principal.clone() as UserInfo
+            userInfo.authorities = userAuthService.loadAuthorities(userInfo.username)
+            SecurityContextHolder.getContext().authentication = new UsernamePasswordAuthenticationToken(userInfo, currentAuth.credentials, userInfo.authorities)
         }
 
         filterChain.doFilter(request, response)
