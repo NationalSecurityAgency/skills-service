@@ -118,6 +118,17 @@ const handleGeneratedChunk = (chunk) => {
   }
 }
 
+const cleanJsonString = (jsonString) => {
+  // Remove single-line comments (// ...)
+  const res = jsonString.replace(/\/\/.*$/gm, '')
+      // Remove multi-line comments (/* ... */)
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      // Remove any remaining whitespace
+      .trim();
+
+  return res
+};
+
 const handleGenerationCompleted = (generated) => {
   const questionMatch = /### Question:\s*([\s\S]+?)(?=\s*#+\s|$)/.exec(upToStartOfAnswers.value)
   if (!questionMatch) {
@@ -138,7 +149,7 @@ const handleGenerationCompleted = (generated) => {
     throw new Error(`Invalid response format for answers=[${answersToParse}]`);
   }
   try {
-    const answers = QuestionType.isTextInput(props.questionType.selectedType?.id) ? [] : JSON.parse(answersMatch[1].trim())
+    const answers = QuestionType.isTextInput(props.questionType.selectedType?.id) ? [] : JSON.parse(cleanJsonString(answersMatch[1].trim()))
 
     const generatedInfo = {
       question: questionMatch[1].trim(),

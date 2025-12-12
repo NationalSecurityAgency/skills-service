@@ -16,7 +16,6 @@ limitations under the License.
 <script setup>
 import {computed, nextTick, onMounted, ref, useTemplateRef} from 'vue'
 import SkillsDialog from "@/components/utils/inputForm/SkillsDialog.vue";
-import {useRoute} from "vue-router";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import AssistantMsg from "@/common-components/utilities/learning-conent-gen/AssistantMsg.vue";
 import UserMsg from "@/common-components/utilities/learning-conent-gen/UserMsg.vue";
@@ -28,12 +27,17 @@ import GenStatus from "@/common-components/utilities/learning-conent-gen/GenStat
 import {useAiModelsState} from "@/common-components/utilities/learning-conent-gen/UseAiModelsState.js";
 import AiModelsSelector from "@/common-components/utilities/learning-conent-gen/AiModelsSelector.vue";
 import {useElementVisibility, useEventListener} from "@vueuse/core";
+import {useInstructionGenerator} from "@/common-components/utilities/learning-conent-gen/UseInstructionGenerator.js";
 
 const model = defineModel()
 const props = defineProps({
   createInstructionsFn: {
     type: Function,
     required: true
+  },
+  createFollowOnConvoInstructionsFn: {
+    type: Function,
+    required: false
   },
   chunkHandlerFn: {
     type: Function,
@@ -42,6 +46,10 @@ const props = defineProps({
   generationCompletedFn: {
     type: Function,
     required: true
+  },
+  beforeGenerationStartedFn: {
+    type: Function,
+    required: false
   },
   addPrefixFn: {
     type: Function,
@@ -91,48 +99,64 @@ const props = defineProps({
     type: String,
     default: null
   },
+  allowInitialSubmitWithoutInput: {
+    type: Boolean,
+    default: false
+  },
 })
 
 const emit = defineEmits(['use-generated', 'generation-failed'])
-const route = useRoute()
 const log = useLog()
 const appConfig = useAppConfig()
 const openaiService = useOpenaiService()
 const aiModelsState = useAiModelsState()
+const instructionsGenerator = useInstructionGenerator()
 
 const addWelcomeMsg = (welcomeMsg) => {
-  chatHistory.value.push({
-    id: `${chatCounter.value++}`,
-    role: 'assistant',
-    origMessage: welcomeMsg
-  })
+  log.debug('Adding welcome msg: [{}]', welcomeMsg)
+  addChatItem(welcomeMsg, ChatRole.ASSISTANT)
 }
 const startGeneration = () => {
+  stopScrollingWithIncomingText.value = false
   aiModelsState.afterModelsLoaded().then(() => {
     if (log.isTraceEnabled()) {
       log.trace(`Generating based on instructions: [${instructions.value}]`)
     }
-    addChatItem(instructions.value, ChatRole.USER)
-
-    const promptInstructions = props.createInstructionsFn(instructions.value)
-    let userInstructions
-    let assistantInstructions = null
-    if (promptInstructions instanceof Object) {
-      userInstructions = promptInstructions.userInstructions
-      assistantInstructions = promptInstructions.assistantInstructions
-    } else {
-      userInstructions = promptInstructions
+    if (props.beforeGenerationStartedFn) {
+      props.beforeGenerationStartedFn()
     }
+    const messages = []
+    const isNewConvo = chatHistory.value.length === 1
+    let userChatInstructions
+    if (isNewConvo) {
+      userChatInstructions = props.createInstructionsFn(instructions.value)
+      messages.push({role: 'User', content: userChatInstructions})
+    } else {
+      chatHistory.value.slice(1).forEach((item) => {
+        const content = item.role === ChatRole.USER ? item.userChatInstructions : item.generatedValue
+        messages.push({role: item.role, content})
+      })
+      if (props.createFollowOnConvoInstructionsFn) {
+        userChatInstructions = props.createFollowOnConvoInstructionsFn(instructions.value)
+      } else {
+        userChatInstructions = instructionsGenerator.followOnConvoInstructions(instructions.value)
+      }
+      messages.push({role: 'User', content: userChatInstructions})
+    }
+    addChatItem(instructions.value, ChatRole.USER, false, userChatInstructions)
     instructions.value = ''
+
+    if (log.isDebugEnabled()) {
+      log.debug(JSON.stringify(chatHistory.value.map((v) => ({...v}))))
+    }
 
     isGenerating.value = true
     addChatItem(props.generationStartedMsg, ChatRole.ASSISTANT, true)
-    genWithStreaming(userInstructions, assistantInstructions)
+    genWithStreaming(messages)
   })
 }
 defineExpose({
   addWelcomeMsg,
-  startGeneration
 });
 
 const close = () => {
@@ -150,17 +174,18 @@ onMounted(() => {
 })
 
 const ChatRole = {
-  USER: 'user',
-  ASSISTANT: 'assistant',
+  USER: 'User',
+  ASSISTANT: 'Assistant',
 }
 const getLastChatItem = () => {
   return chatHistory.value[chatHistory.value.length - 1]
 }
-const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false) => {
+const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false, userChatInstructions=null) => {
   const res = {
     id: `${chatCounter.value++}`,
     role,
     origMessage: origMsg,
+    userChatInstructions,
     isGenerating,
     generatedValue: '',
     generateValueChangedNotes: '',
@@ -203,12 +228,11 @@ const onInputEnter = () => {
   }
 }
 
-const genWithStreaming = (userInstructions, assistantInstructions=null) => {
+const genWithStreaming = (messages) => {
   lastPromptCancelled.value = false
   scrollInstructionsIntoView()
   const promptParams = {
-    userInstructions: userInstructions,
-    assistantInstructions: assistantInstructions,
+    messages,
     model: aiModelsState.selectedModel.model,
     modelTemperature: aiModelsState.modelTemperature,
   }
@@ -306,7 +330,7 @@ const isLoading = computed(() => aiModelsState.loadingModels)
 const showChat = computed(() => !isLoading.value && !aiModelsState.failedToLoad)
 const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error' : historyItem.cancelled ? 'warn' : 'info'
 
-const isSendEnabled = computed(() => (instructions.value && instructions.value.trim().length > 0) || isGenerating.value)
+const isSendEnabled = computed(() => ((props.allowInitialSubmitWithoutInput && chatHistory.value?.length === 1) || instructions.value?.trim()?.length > 0) || isGenerating.value)
 </script>
 
 <template>
@@ -336,7 +360,7 @@ const isSendEnabled = computed(() => (instructions.value && instructions.value.t
         <div v-for="(historyItem) in chatHistory" :key="historyItem.id">
           <div v-if="historyItem.role === ChatRole.USER" class="relative flex justify-end">
             <user-msg :id="historyItem.id">
-              <markdown-text :text="historyItem.origMessage" :instanceId="historyItem.id"/>
+              <markdown-text :text="historyItem.origMessage || 'Not Provided'" :instanceId="historyItem.id"/>
             </user-msg>
           </div>
           <assistant-msg v-if="historyItem.role === ChatRole.ASSISTANT" class="flex flex-col gap-2" :id="historyItem.id" :is-generating="historyItem.isGenerating">
