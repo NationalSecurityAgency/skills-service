@@ -355,7 +355,7 @@ const handleQuestionUpdated = (updatedQuestion, historyItem) => {
                         icon="fa-solid fa-check-double"
                         severity="info" :outlined="false"
                         label="Edit Questions"
-                        data-cy="enabledEitQuestionsBtn"
+                        :data-cy="`enabledEitQuestionsBtn-${historyItem.id}`"
                         @click="toggleEnableEditQuestions(historyItem.id)"/>
         </div>
 
