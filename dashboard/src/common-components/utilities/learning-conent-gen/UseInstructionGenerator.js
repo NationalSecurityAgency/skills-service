@@ -207,7 +207,7 @@ Provide ONLY valid JSON in this exact format:
 }
 
     const updateQuizInstructions = ( userEnteredText ) => {
-        return `Apply the following instructions this conversation: "${userEnteredText}"
+        return `Apply the following instructions to this conversation: "${userEnteredText}"
 
 Here are the specific requirements:
 - Make sure to regenerate the entire quiz again
