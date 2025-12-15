@@ -141,8 +141,8 @@ describe('Generate Quiz Tests', () => {
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="markdownEditorInput"]').should('not.be.visible')
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="markdownEditorInput"]').should('not.be.visible')
-        cy.get('[data-cy="enabledEitQuestionsBtn"]').should('be.enabled')
-        cy.get('[data-cy="enabledEitQuestionsBtn"]').click()
+        cy.get('[data-cy="enabledEitQuestionsBtn-2"]').should('be.enabled')
+        cy.get('[data-cy="enabledEitQuestionsBtn-2"]').click()
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').should('not.exist')
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').should('not.exist')
@@ -283,6 +283,9 @@ describe('Generate Quiz Tests', () => {
         cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(newQuizGeneratingMsg)
         cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
         cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled')
+        cy.get('[data-cy="enabledEitQuestionsBtn-2"]').should('be.enabled')
+        cy.get('[data-cy="useGenValueBtn-4"]').should('not.exist')
+        cy.get('[data-cy="enabledEitQuestionsBtn-4"]').should('not.exist')
 
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
 
@@ -307,6 +310,11 @@ describe('Generate Quiz Tests', () => {
         }).as('genQuiz2');
         cy.get('[data-cy="instructionsInput"]').type('Quiz chess{enter}')
         cy.get('@genQuiz2')
+
+        cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
+        cy.get('[data-cy="useGenValueBtn-4"]').should('be.enabled')
+        cy.get('[data-cy="enabledEitQuestionsBtn-2"]').should('not.exist')
+        cy.get('[data-cy="enabledEitQuestionsBtn-4"]').should('be.enabled')
     });
 });
 
