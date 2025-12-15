@@ -4,10 +4,9 @@
     "method": "POST",
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
-      { "contains": "chess" },
+      { "contains": "Quiz chess" },
       { "contains": "Quiz Generation Task" },
-      { "doesNotContain": "invalidquiz" },
-      { "doesNotContain": "Modify an existing quiz" }
+      { "doesNotContain": "invalidquiz" }
     ]
   },
   "response": {
