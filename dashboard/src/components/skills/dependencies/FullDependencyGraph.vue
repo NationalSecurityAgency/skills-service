@@ -30,6 +30,7 @@ import SharedSkillsFromOtherProjects from "@/components/skills/crossProjects/Sha
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
+import dagre from "@dagrejs/dagre"
 
 const dialogMessages = useDialogMessages()
 const projConfig = useProjConfig();
@@ -42,26 +43,28 @@ const showGraph = ref(true);
 const selectedFromSkills = ref({});
 const data = ref([]);
 const graph = ref({});
-let network = null;
+const network = (ref);
+const enableZoom = ref(true);
+const enableAnimations = ref(true);
+const fullDepsSkillsGraph = ref()
+const fullDepsSkillsGraphContainer = ref()
 let nodes = [];
 let edges = [];
 const legendItems = [
   { label: 'Skill', color: 'lightgreen', iconClass: 'fa-graduation-cap' },
   { label: 'Badge', color: '#88a9fc', iconClass: 'fa-award' },
 ];
+const dependencyGraph = ref()
 const displayOptions = ref({
   layout: {
     hierarchical: {
-      enabled: true,
-          sortMethod: 'directed',
-          nodeSpacing: 350,
-          treeSpacing: 370,
+      enabled: false,
     },
   },
   interaction: {
     selectConnectedEdges: false,
-        navigationButtons: true,
-        selectable: true,
+    navigationButtons: true,
+    selectable: true,
   },
   physics: {
     enabled: false,
@@ -84,8 +87,8 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  if (network) {
-    network.destroy();
+  if (network.value) {
+    network.value.destroy();
   }
 })
 
@@ -93,9 +96,13 @@ const hasGraphData = computed(() => {
   return graph.value && graph.value.nodes && graph.value.nodes.length > 0;
 });
 
-const updateSelectedFromSkills = (item) => {
+const updateSelectedFromSkills = (item, zoomTo = true) => {
   if(item) {
     selectedFromSkills.value = item;
+    const foundNode = nodes.find((node) => node.details.skillId === item.skillId)
+    if(foundNode && zoomTo && enableZoom.value) {
+      panToNode(foundNode.id)
+    }
   }
   else {
     clearSelectedFromSkills();
@@ -109,7 +116,7 @@ const clearSelectedFromSkills = () => {
 const handleUpdate = () => {
   clearSelectedFromSkills();
   graph.value = [];
-  network = null;
+  network.value = null;
   nodes = [];
   edges = [];
   isLoading.value = true;
@@ -129,21 +136,26 @@ const loadGraphDataAndCreateGraph = () => {
       });
 };
 
-const onSortNodeStrategyChange = (newStrategy) => {
-  displayOptions.value.layout.hierarchical.sortMethod = newStrategy;
-  createGraph();
-};
+const panToNode = (node, scrollIntoView = false) => {
+  network.value.focus(node, {scale: 0.75, animation: enableAnimations.value})
+  if(scrollIntoView) {
+    fullDepsSkillsGraph.value.scrollIntoView({ behavior: 'smooth' })
+  }
+}
 
 const selectNode = (params) => {
   const selectedNode = params.nodes[0];
   const nodeValue = nodes.find((node) => node.id === selectedNode);
-  updateSelectedFromSkills(nodeValue.details);
+  if(enableZoom.value) {
+    panToNode(selectedNode)
+  }
+  updateSelectedFromSkills(nodeValue.details, false);
 }
 
 const selectEdge = (params) => {
   const allNodes = graph.value.nodes;
   const selectedEdge = params.edges[0];
-  const connectedNodes = network.getConnectedNodes(selectedEdge);
+  const connectedNodes = network.value.getConnectedNodes(selectedEdge);
 
   const fromNode = allNodes.find((node) => node.id === connectedNodes[0]);
   const toNode = allNodes.find((node) => node.id === connectedNodes[1]);
@@ -167,9 +179,9 @@ const selectEdge = (params) => {
 }
 
 const createGraph = () => {
-  if (network) {
-    network.destroy();
-    network = null;
+  if (network.value) {
+    network.value.destroy();
+    network.value = null;
     nodes = [];
     edges = [];
   }
@@ -177,11 +189,10 @@ const createGraph = () => {
   data.value = buildData();
   if (hasGraphData.value) {
     showGraph.value = true;
-    const container = document.getElementById('dependency-graph');
-    network = new Network(container, data.value, displayOptions.value);
+    network.value = new Network(dependencyGraph.value, data.value, displayOptions.value);
 
-    network.on('selectNode', selectNode);
-    network.on('selectEdge', selectEdge);
+    network.value.on('selectNode', selectNode);
+    network.value.on('selectEdge', selectEdge);
 
     setVisNetworkTabIndex();
   } else {
@@ -191,7 +202,7 @@ const createGraph = () => {
 
 const buildData = () => {
   const sortedNodes = graph.value.nodes.sort((a, b) => a.id - b.id);
-  sortedNodes.forEach((node) => {
+  sortedNodes.forEach((node, index) => {
     const isCrossProject = node.projectId !== route.params.projectId;
     const newNode = {
       id: node.id,
@@ -238,6 +249,8 @@ const buildData = () => {
     });
   });
 
+  layout();
+
   return { nodes: nodes, edges: edges };
 };
 
@@ -252,35 +265,112 @@ const setVisNetworkTabIndex = () => {
     }
   }, 500);
 };
+
+const nodeSize = 65
+
+const layout = (direction = "TB") => {
+  if (nodes.length <= 1 || edges.length === 0) {
+    return
+  }
+  // convert graph
+  // ref: https://github.com/dagrejs/dagre/wiki
+  const g = new dagre.graphlib.Graph()
+  // Set an object for the graph label
+  g.setGraph({
+    rankdir: direction,
+    nodesep: nodeSize * 3,
+    edgesep: nodeSize,
+    ranksep: nodeSize * 2,
+  })
+  // Default to assigning a new object as a label for each new edge.
+  g.setDefaultEdgeLabel(() => ({}))
+
+  // Add nodes to the graph. The first argument is the node id. The second is
+  // metadata about the node. In this case we're going to add labels to each of
+  // our nodes.
+  nodes.forEach((node) => {
+    g.setNode(node.id, { label: node.label, width: nodeSize, height: nodeSize })
+  })
+
+  // Add edges to the graph.
+  edges.forEach(edge => {
+    g.setEdge(edge.from, edge.to)
+  })
+
+  dagre.layout(g)
+
+  g.nodes().forEach((nodeId) => {
+    // update node position
+    const x = g.node(nodeId).x
+    const y = g.node(nodeId).y
+    nodes[nodeId - 1].x = x
+    nodes[nodeId - 1].y = y
+  })
+
+}
+
+const toggleFullScreen = () => {
+  if(document.fullscreenElement) {
+    document.exitFullscreen().then(() => {
+      setTimeout(() => {
+        network.value.fit()
+      }, 300)
+    })
+  } else {
+    fullDepsSkillsGraphContainer.value.requestFullscreen().then(() => {
+      setTimeout(() => {
+        network.value.fit()
+      }, 300)
+    })
+  }
+}
 </script>
 
 <template>
-  <div id="full-dependent-skills-graph">
+  <div id="full-dependent-skills-graph" ref="fullDepsSkillsGraph">
     <sub-page-header title="Learning Path"/>
 
     <prerequisite-selector v-if="!isReadOnlyProj" :project-id="route.params.projectId" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
                            @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills"></prerequisite-selector>
     <Card data-cy="fullDepsSkillsGraph" style="margin-bottom: 25px;">
       <template #content>
-<!--      <loading-container :is-loading="isLoading">-->
-        <div v-if="!hasGraphData && !isLoading" class="my-8">
-          <no-content2 icon="fa fa-project-diagram" title="No Learning Path Yet..."
-                       message="Here you can create and manage the project's Learning Path which may consist of skills and badges. You can get started by adding a path above."></no-content2>
-        </div>
-        <div v-else class="relative w-full">
-          <div class="left-0">
-            <graph-legend class="graph-legend deps-overlay" :items="legendItems"/>
+        <div ref="fullDepsSkillsGraphContainer" id="fullDepsSkillsGraphContainer">
+          <div v-if="!hasGraphData && !isLoading" class="my-8">
+            <no-content2 icon="fa fa-project-diagram" title="No Learning Path Yet..."
+                         message="Here you can create and manage the project's Learning Path which may consist of skills and badges. You can get started by adding a path above."></no-content2>
           </div>
-          <div class="absolute right-0" style="top: -20px;">
-            <graph-node-sort-method-selector class="deps-overlay" @value-changed="onSortNodeStrategyChange"/>
+          <div v-else class="relative w-full mt-4 ml-1">
+            <div class="left-0">
+              <graph-legend class="graph-legend deps-overlay" :items="legendItems"/>
+            </div>
+            <div class="absolute right-0 mr-1 flex items-center" id="additionalControls">
+              <SkillsCheckboxInput
+                  v-model="enableZoom"
+                  :binary="true"
+                  inputId="enableZoom"
+                  name="enableZoom">
+              </SkillsCheckboxInput>
+              <span class="align-content-end mr-3">
+                <label for="enableZoom" class="font-bold text-primary ml-2">Zoom On Select</label>
+              </span>
+              <SkillsCheckboxInput
+                  v-model="enableAnimations"
+                  :binary="true"
+                  inputId="enableAnimations"
+                  name="enableAnimations">
+              </SkillsCheckboxInput>
+              <span class="align-content-end mr-3">
+                <label for="enableAnimations" class="font-bold text-primary ml-2">Animations</label>
+              </span>
+              <SkillsButton @click="toggleFullScreen">Toggle Full Screen</SkillsButton>
+            </div>
           </div>
+          <div id="dependency-graph" ref="dependencyGraph" v-bind:style="{'visibility': showGraph ? 'visible' : 'hidden'}"></div>
         </div>
-<!--      </loading-container>-->
-        <div id="dependency-graph" v-bind:style="{'visibility': showGraph ? 'visible' : 'hidden', 'height': '500px'}"></div>
       </template>
     </Card>
 
-    <dependency-table v-if="hasGraphData" :is-loading="isLoading" :data="data" @update="handleUpdate" />
+    <dependency-table v-if="hasGraphData" :is-loading="isLoading" :data="data" @update="handleUpdate" @panToNode="panToNode" />
     <share-skills-with-other-projects v-if="!isReadOnlyProj" :project-id="route.params.projectId" />
     <shared-skills-from-other-projects v-if="!isReadOnlyProj" :project-id="route.params.projectId" />
   </div>
@@ -353,5 +443,35 @@ const setVisNetworkTabIndex = () => {
 }
 .deps-overlay {
   z-index: 99;
+}
+
+:fullscreen, ::backdrop {
+  background-color: rgba(255,255,255,1);
+}
+
+#dependency-graph {
+  height: 98%;
+}
+
+.vis-navigation {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  background-color: white;
+}
+
+#fullDepsSkillsGraphContainer:not(:fullscreen) {
+  height: 500px;
+}
+
+#additionalControls:not(:fullscreen) {
+  top: -15px;
+  z-index:999;
+}
+
+#additionalControls:fullscreen {
+  top: 40px;
+  margin-right: 40px;
+  z-index:999;
 }
 </style>

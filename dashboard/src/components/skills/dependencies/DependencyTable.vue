@@ -26,7 +26,7 @@ import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 const dialogMessages = useDialogMessages()
 const projConfig = useProjConfig();
 const props = defineProps(['isLoading', 'data'])
-const emit = defineEmits(['update'])
+const emit = defineEmits(['update', 'panToNode'])
 const announcer = useSkillsAnnouncer()
 
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
@@ -94,6 +94,10 @@ const sortTable = (criteria) => {
 
 const responsive = useResponsiveBreakpoints()
 const isFlex = computed(() => responsive.sm.value)
+
+const jumpToNode = (value) => {
+  emit('panToNode', value.fromNode.id, true)
+}
 </script>
 
 <template>
@@ -123,6 +127,12 @@ const isFlex = computed(() => responsive.sm.value)
           <Column field="toItem" header="To" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
               <a :href="getUrl(slotProps.data.toNode)">{{ slotProps.data.toItem }}</a>
+            </template>
+          </Column>
+          <Column field="edit" header="View Route" v-if="!isReadOnlyProj" :class="{'flex': isFlex }">
+            <template #body="slotProps">
+              <SkillsButton @click="jumpToNode(slotProps.data)" variant="outline-info" size="small" class="text-info mr-2" icon="fa fa-network-wired"
+                            :aria-label="`View route of ${slotProps.data.fromItem} to ${slotProps.data.toItem} in graph`" title="View route in graph"></SkillsButton>
             </template>
           </Column>
           <Column field="edit" header="Edit" v-if="!isReadOnlyProj" :class="{'flex': isFlex }">
