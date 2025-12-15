@@ -54,8 +54,8 @@ describe('Generate Quiz Tests', () => {
         cy.get('[data-cy="generateQuizBtn"]').click()
         cy.get('[data-cy="aiMsg-0"]').contains(newQuizWelcomeMsg)
 
-        cy.get('[data-cy="instructionsInput"]').type('chess{enter}')
-        cy.get('[data-cy="userMsg-1"]').contains('chess')
+        cy.get('[data-cy="instructionsInput"]').type('Quiz chess{enter}')
+        cy.get('[data-cy="userMsg-1"]').contains('Quiz chess')
 
         cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(newQuizGeneratingMsg)
         cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
@@ -113,8 +113,8 @@ describe('Generate Quiz Tests', () => {
         cy.get('[data-cy="generateQuizBtn"]').click()
         cy.get('[data-cy="aiMsg-0"]').contains(newQuizWelcomeMsg)
 
-        cy.get('[data-cy="instructionsInput"]').type('chess{enter}')
-        cy.get('[data-cy="userMsg-1"]').contains('chess')
+        cy.get('[data-cy="instructionsInput"]').type('Quiz chess{enter}')
+        cy.get('[data-cy="userMsg-1"]').contains('Quiz chess')
 
         cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(newQuizGeneratingMsg)
         cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
@@ -173,7 +173,6 @@ describe('Generate Quiz Tests', () => {
           .and('include', '/administrator/quizzes/skill1Quiz');
         cy.get('[data-cy="buttonToQuiz"]').contains('View Quiz')
     });
-
 
     it('apply prefix after generating a new quiz for a skill, Add Prefix Then Use', () => {
         cy.intercept('GET', '/public/config', (req) => {
@@ -245,6 +244,70 @@ describe('Generate Quiz Tests', () => {
         cy.get(`[data-cy="aiMsg-2"] [data-cy="finalSegment"] [data-cy="addPrefixBtn"]`).should('not.exist')
     });
 
+    it('conversation to generate a new quiz for a skill', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, { description: chessGenValue, numPerformToCompletion: 1 })
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="skillOverviewDescription"]').contains(chessGenValue)
+
+        cy.get('[data-cy="generateQuizBtn"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(newQuizWelcomeMsg)
+        cy.get('[data-cy="userMsg-1"]').should('not.exist')
+
+        cy.intercept('POST', '/openai/chat', (req) => {
+            const requestBody = req.body;
+            req.reply();
+
+            req.on('response', (res) => {
+                expect(requestBody.messages).to.have.length(1);
+                expect(requestBody.messages[0].role).to.equal('User')
+                expect(requestBody.messages[0].content).to.contain('Generate 5 - 10 questions, unless otherwise specified in the user instructions');
+                expect(requestBody.messages[0].content).to.contain('Quiz chess');
+            });
+        }).as('genQuiz1');
+        cy.get('[data-cy="instructionsInput"]').type('Quiz chess{enter}')
+        cy.get('@genQuiz1')
+
+        cy.get('[data-cy="userMsg-1"]').contains('Quiz chess')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(newQuizGeneratingMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
+        cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled')
+
+        cy.get('[data-cy="instructionsInput"]').should('have.focus')
+
+        cy.intercept('POST', '/openai/chat', (req) => {
+            const requestBody = req.body;
+            req.reply();
+
+            req.on('response', (res) => {
+                expect(requestBody.messages).to.have.length(3);
+                expect(requestBody.messages[0].role).to.equal('User')
+                expect(requestBody.messages[0].content).to.contain('Generate 5 - 10 questions, unless otherwise specified in the user instructions');
+                expect(requestBody.messages[0].content).to.contain('Quiz chess');
+
+                expect(requestBody.messages[1].role).to.equal('Assistant')
+                expect(requestBody.messages[1].content).to.contain('Which piece can move diagonally in any direction?')
+
+                expect(requestBody.messages[2].role).to.equal('User')
+                expect(requestBody.messages[2].content).to.contain('Apply the following instructions to this conversation')
+
+
+            });
+        }).as('genQuiz2');
+        cy.get('[data-cy="instructionsInput"]').type('Quiz chess{enter}')
+        cy.get('@genQuiz2')
+    });
 });
 
 

@@ -5,8 +5,7 @@
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
         { "contains": "invalidquiz" },
-        { "contains": "Quiz Generation" },
-        { "doesNotContain": "Modify an existing quiz" }
+        { "contains": "Quiz Generation" }
     ]
   },
   "response": {
