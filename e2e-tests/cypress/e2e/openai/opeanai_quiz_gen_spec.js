@@ -69,14 +69,12 @@ describe('Generate Quiz Tests', () => {
             { text: 'Bishop', isCorrect: true },
         ]
         validateAnswers(1, expectedAnswers)
-        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('Which chess piece can be placed in the center of the board on the starting move?')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('Which piece can jump over other pieces?')
         expectedAnswers = [
-            { text: 'Rook', isCorrect: false },
-            { text: 'Queen', isCorrect: false },
+            { text: 'Pawn', isCorrect: false },
+            { text: 'Knight', isCorrect: true },
             { text: 'Bishop', isCorrect: false },
-            { text: 'Knight', isCorrect: false },
-            { text: 'King', isCorrect: false },
-            { text: 'Pawn', isCorrect: true },
+            { text: 'Rook', isCorrect: false },
         ]
         validateAnswers(2, expectedAnswers)
         cy.get('[data-cy="useGenValueBtn-2"]').click()
@@ -128,14 +126,12 @@ describe('Generate Quiz Tests', () => {
             { text: 'Bishop', isCorrect: true },
         ]
         validateAnswers(1, expectedAnswers)
-        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('Which chess piece can be placed in the center of the board on the starting move?')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('Which piece can jump over other pieces?')
         expectedAnswers = [
-            { text: 'Rook', isCorrect: false },
-            { text: 'Queen', isCorrect: false },
+            { text: 'Pawn', isCorrect: false },
+            { text: 'Knight', isCorrect: true },
             { text: 'Bishop', isCorrect: false },
-            { text: 'Knight', isCorrect: false },
-            { text: 'King', isCorrect: false },
-            { text: 'Pawn', isCorrect: true },
+            { text: 'Rook', isCorrect: false },
         ]
         validateAnswers(2, expectedAnswers)
 
