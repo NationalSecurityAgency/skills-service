@@ -44,17 +44,20 @@ const aiPromptDialogRef = ref(null)
 const currentDescription = ref('')
 const isGenerating = ref(true)
 const currentQuizData = ref(null)
+const currentQuizHistoryId = ref(null)
 const allQuestions = ref([])
 
 const instructionsGenerator = useInstructionGenerator()
 const dynamicSchema = computed(() => {
   const validationObj = {}
-  for (const question of allQuestions.value) {
-    validationObj[question.name] = string()
-        .required()
-        .max(appConfig.descriptionMaxLength)
-        .customDescriptionValidator('Question', false)
-        .label('Question')
+  if (currentQuizData.value) {
+    for (const question of currentQuizData.value) {
+      validationObj[question.name] = string()
+          .required()
+          .max(appConfig.descriptionMaxLength)
+          .customDescriptionValidator('Question', false)
+          .label('Question')
+    }
   }
   return object(validationObj)
 })
@@ -249,7 +252,7 @@ const handleGenerationCompleted = (generated) => {
   isGenerating.value = false
   allQuestions.value.push(...generated.generatedInfo.generatedQuiz)
   const generatedValue = generated.generatedValue
-      .replace(/^\s*```(?:json)?\s*([\s\S]*?)\s*```\s*$/i, '$1')
+      .replace(/^[\s\S]*?```(?:json)?\s*([\s\S]*?)\s*```[\s\S]*$/i, '$1')
       .trim()
   const parsedGeneratedValue = JSON.parse(generatedValue)
 
@@ -259,6 +262,7 @@ const handleGenerationCompleted = (generated) => {
     generated.generateValueChangedNotes = `### Here is what was changed\n- ${changedNotes.join('\n- ')}`
   }
   validate()
+  currentQuizHistoryId.value = generated.id
   return generated
 }
 
@@ -283,7 +287,9 @@ const handleAddPrefix = (historyItem, missingPrefix) => {
 const beforeGenerationStarted = () => {
   currentJsonString.value = ''
   currentQuizData.value = []
+  currentQuizHistoryId.value = null
   inQuestionsArray.value = false
+  isGenerating.value = true
 }
 
 const createFollowOnConvoInstructions = (userEnterInstructions) => {
@@ -341,10 +347,10 @@ const handleQuestionUpdated = (updatedQuestion, historyItem) => {
                           :question-num="index+1"
                           :show-edit-controls="false"
                           :supports-edit-question-inline="true"
-                          :show-edit-question-inline="enableEditQuestionsIds.includes(historyItem.id)"/>
+                          :show-edit-question-inline="currentQuizHistoryId === historyItem.id && enableEditQuestionsIds.includes(historyItem.id)"/>
           </div>
         </div>
-        <div class="flex justify-start items-center gap-3 my-2">
+        <div v-if="currentQuizHistoryId === historyItem.id" class="flex justify-start items-center gap-3 my-2">
           <SkillsButton v-if="!!historyItem.finalMsg"
                         icon="fa-solid fa-check-double"
                         severity="info" :outlined="false"
