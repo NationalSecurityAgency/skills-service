@@ -180,6 +180,9 @@ const ChatRole = {
 const getLastChatItem = () => {
   return chatHistory.value[chatHistory.value.length - 1]
 }
+const isLastChatItem = (item) => {
+  return item.id === getLastChatItem().id
+}
 const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false, userChatInstructions=null) => {
   const res = {
     id: `${chatCounter.value++}`,
@@ -380,7 +383,7 @@ const isSendEnabled = computed(() => ((props.allowInitialSubmitWithoutInput && c
                              :instanceId="`${historyItem.id}-generateValueChangedNotes`"/>
               </div>
             </div>
-            <div v-if="historyItem.finalMsg" data-cy="finalSegment">
+            <div v-if="isLastChatItem(historyItem) && historyItem.finalMsg" data-cy="finalSegment">
               <Message :closable="false" :severity="finalMsgSeverity(historyItem)">
                 <markdown-text :text="historyItem.finalMsg" :instanceId="`${historyItem.id}-finalMsg`"/>
               </Message>
@@ -413,7 +416,7 @@ const isSendEnabled = computed(() => ((props.allowInitialSubmitWithoutInput && c
         </div>
       </div>
 
-      <Message severity="warn" v-if="!isValid && overallErrMsg" data-cy="overallErrMsg">
+      <Message severity="warn" v-if="!isValid && overallErrMsg && !isGenerating" data-cy="overallErrMsg">
         <div v-html="overallErrMsg"></div>
       </Message>
       <div class="flex justify-end mt-6">
