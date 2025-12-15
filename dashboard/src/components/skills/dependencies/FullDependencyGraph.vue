@@ -348,6 +348,7 @@ const toggleFullScreen = () => {
                   v-model="enableZoom"
                   :binary="true"
                   inputId="enableZoom"
+                  data-cy="enableZoom"
                   name="enableZoom">
               </SkillsCheckboxInput>
               <span class="align-content-end mr-3">
