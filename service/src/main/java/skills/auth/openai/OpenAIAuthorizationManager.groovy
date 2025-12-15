@@ -47,9 +47,8 @@ class OpenAIAuthorizationManager implements AuthorizationManager<RequestAuthoriz
 
     @Override
     AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext authorizationContext) {
-        Authentication auth = authentication.get()
         HttpServletRequest request = authorizationContext?.getRequest()
-        log.trace("Auth check [{}], auth.principal [{}]", request?.getRequestURI(), auth.principal)
+        log.trace("Auth check [{}], userInfoService?.currentUser [{}]", request?.getRequestURI(), userInfoService?.currentUser)
 
         List<UserRole> userRoles = userRoleRepo.findAllByUserId(userInfoService?.currentUser?.username)
         log.trace("Username: [{}], roles: [{}]", userInfoService?.currentUser?.username, userRoles)
