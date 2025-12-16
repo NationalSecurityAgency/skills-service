@@ -232,6 +232,51 @@ describe('Model Selector Tests', () => {
         cy.get('@chatCompletion1')
     });
 
+    it('configuration that can filter certain models', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                conf.openaiNotSupportedChatModels = 'model2, mOdEl4 '
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.intercept('/openai/models', {
+            "models": [
+                { "model": "model1", "created": "1970-01-21T09:55:32.448+00:00" },
+                { "model": "MoDeL2", "created": "1970-01-21T09:55:32.448+00:00" },
+                { "model": "model3", "created": "1970-01-21T09:55:32.448+00:00" },
+                { "model": "model4", "created": "1970-01-21T09:55:32.448+00:00" },
+                { "model": "model5", "created": "1970-01-21T09:55:32.448+00:00" },
+            ]
+        }).as('getModels');
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('@getModels')
+        cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg)
+        cy.get('[data-cy="userMsg-1"]').should('not.exist')
+
+        cy.get('[data-cy="aiModelsSelector"] [data-cy="selectedModel"]').contains('model1')
+        cy.get('[data-cy="aiModelsSelector"] [data-cy="modelSettings"]').should('not.exist')
+        cy.get('[data-cy="aiModelsSelector"]  [data-cy="modelSettingsButton"]').click()
+
+        cy.get('[data-cy="aiModelsSelector"] [data-cy="modelSettings"]').should('be.visible')
+        cy.get('[data-cy="aiModelsSelector"] [data-cy="modelSelector"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="model1"]')
+        cy.get('[data-pc-section="overlay"] [aria-label="model2"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [aria-label="model3"]')
+        cy.get('[data-pc-section="overlay"] [aria-label="model4"]').should('not.exist')
+        cy.get('[data-pc-section="overlay"] [aria-label="model5"]')
+        cy.get('[data-pc-section="overlay"] [aria-label="model6"]').should('not.exist')
+    });
+
 });
 
 

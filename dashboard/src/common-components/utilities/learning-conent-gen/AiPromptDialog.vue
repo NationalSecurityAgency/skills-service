@@ -352,7 +352,7 @@ const hasFooter = computed(() => appConfig.openaiFooterMsg || hasPoweredByInfo.v
       :show-ok-button="false"
       :show-cancel-button="false"
       :enable-return-focus="true">
-    <SkillsButton v-if="showScrollToBottomBtn"
+    <SkillsButton v-if="showScrollToBottomBtn && showChat"
                   icon="fas fa-arrow-down"
                   class="scrollToBottomBtn"
                   @click="resumeAutoScroll"
