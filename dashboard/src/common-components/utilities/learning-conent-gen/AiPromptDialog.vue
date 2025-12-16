@@ -29,6 +29,7 @@ import AiModelsSelector from "@/common-components/utilities/learning-conent-gen/
 import {useElementVisibility, useEventListener} from "@vueuse/core";
 import {useInstructionGenerator} from "@/common-components/utilities/learning-conent-gen/UseInstructionGenerator.js";
 import AiPromptDialogFooter from "@/common-components/utilities/learning-conent-gen/AiPromptDialogFooter.vue";
+import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -112,6 +113,7 @@ const appConfig = useAppConfig()
 const openaiService = useOpenaiService()
 const aiModelsState = useAiModelsState()
 const instructionsGenerator = useInstructionGenerator()
+const dialogUtils = useDialogUtils()
 
 const addWelcomeMsg = (welcomeMsg) => {
   log.debug('Adding welcome msg: [{}]', welcomeMsg)
@@ -342,7 +344,7 @@ const hasFooter = computed(() => appConfig.openaiFooterMsg || hasPoweredByInfo.v
 
 <template>
   <SkillsDialog
-      :pt="{ header: { class: '!pb-2' }, footer: { class: '!pb-3' } }"
+      :pt="{ header: { class: '!pb-2' }, footer: { class: '!pb-3' }, pcMaximizeButton: dialogUtils.getMaximizeButtonPassThrough() }"
       ref="generateDescriptionDialog"
       :maximizable="true"
       :maximized="true"
@@ -379,7 +381,7 @@ const hasFooter = computed(() => appConfig.openaiFooterMsg || hasPoweredByInfo.v
                           :is-generate-value-empty="!historyItem.generatedValue || historyItem.generatedValue.trim() === ''"
                           data-cy="origSegment"/>
             </div>
-            <div v-if="historyItem.generatedValue" class="px-5 border rounded-lg bg-blue-50">
+            <div v-if="historyItem.generatedValue" class="px-5 border rounded-lg bg-blue-50 dark:bg-blue-900">
               <slot name="generatedValue" :historyItem="historyItem" data-cy="generatedSegment"/>
               <div v-if="historyItem.generateValueChangedNotes"
                    data-cy="generatedSegmentNotes"

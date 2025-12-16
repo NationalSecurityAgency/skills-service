@@ -87,10 +87,15 @@ const setMarkdownText = (newText) => {
 </style>
 
 <style>
-.markdown-text-theme-dark pre,
-.markdown-text-theme-dark code {
+.markdown .markdown-text-theme-dark pre,
+.markdown .markdown-text-theme-dark code {
   background-color: #374151 !important;
 }
+.markdown code {
+  background-color: #fbf7fa !important;
+  color: #aa566c !important;
+}
+
 .markdown-text-theme-dark .toastui-editor-contents table tbody tr td,
 .markdown-text-theme-dark .toastui-editor-contents h1,
 .markdown-text-theme-dark .toastui-editor-contents h2,
