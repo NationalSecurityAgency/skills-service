@@ -22,7 +22,7 @@ defineProps({
 
 <template>
   <div class="flex justify-start relative" :data-cy="`aiMsg-${id}`">
-    <div class="p-2 bg-blue-100 rounded-2xl pr-4 pl-8">
+    <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-2xl pr-4 pl-8">
       <div class="flex gap-2 items-end">
         <div class="flex-1">
          <slot />

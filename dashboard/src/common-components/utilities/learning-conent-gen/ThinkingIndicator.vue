@@ -56,8 +56,8 @@ const startWave = () => {
           :key="index"
           class="inline-block transition-all duration-300"
           :class="{
-          'text-gray-400': activeIndex === index,
-          'text-gray-900': activeIndex !== index
+          'text-gray-400 dark:text-gray-600': activeIndex === index,
+          'text-gray-900 dark:text-gray-200': activeIndex !== index
         }"
       >
           {{ char === ' ' ? '\u00A0' : char }}

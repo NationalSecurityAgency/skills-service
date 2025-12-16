@@ -25,7 +25,7 @@ const hasInfo = computed(() => appConf.openaiFooterMsg || hasPoweredByInfo.value
 
 <template>
   <div v-if="hasInfo"
-       class="text-sm text-gray-500 flex flex-col sm:flex-row gap-2 text-left flex-1 pt-3"
+       class="text-sm text-gray-500 dark:text-gray-200 flex flex-col sm:flex-row gap-2 text-left flex-1 pt-3"
        data-cy="aiPromptDialogFooter">
     <div v-if="appConf.openaiFooterMsg"
          data-cy="aiPromptDialogFooterMsg"

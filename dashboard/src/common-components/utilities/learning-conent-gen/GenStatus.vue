@@ -79,7 +79,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="mt-2 text-gray-900">
+  <div class="mt-2 text-gray-900 dark:text-gray-200">
     <div>
       <markdown-text :text="welcomeMsg" :instanceId="id"/>
       <div v-if="isGenerateValueEmpty">
