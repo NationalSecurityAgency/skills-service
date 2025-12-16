@@ -173,13 +173,13 @@ const questionUpdated = (updatedQuestionText) => {
         <div v-if="isMatchingType" class="flex flex-col gap-3 mt-2">
           <div v-for="(answer, index) in question.answers">
             <div v-if="answer.multiPartAnswer" class="flex flex-row gap-3" :data-cy="`question-${questionNum}-answer-${index}`">
-              <div>
+              <div :data-cy="`question-${questionNum}-answer-${index}-term`">
                 {{ answer.multiPartAnswer.term }}
               </div>
               <div>
                 <i class="fas fa-arrow-right text-gray-500 dark:text-gray-400" aria-hidden="true"></i>
               </div>
-              <div>
+              <div :data-cy="`question-${questionNum}-answer-${index}-value`">
                 {{ answer.multiPartAnswer.value }}
               </div>
             </div>

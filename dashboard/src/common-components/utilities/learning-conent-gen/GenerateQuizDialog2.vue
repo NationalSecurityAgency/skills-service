@@ -234,6 +234,9 @@ const safeJsonParse = (jsonString) => {
 }
 
 const ensureValidQuestionType = (question) => {
+  if (question.questionType === 'Matching') {
+    return
+  }
   const correctAnswersCount = question.answers.reduce((count, answer) => {
     return answer.isCorrect ? count + 1 : count;
   }, 0);

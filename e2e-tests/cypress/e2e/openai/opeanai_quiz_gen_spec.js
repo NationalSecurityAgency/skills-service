@@ -25,10 +25,15 @@ import {
     from './openai_helper_commands'
 
 
-const validateAnswers = (questionNum, expected) => {
+const validateAnswers = (questionNum, expected, matching = false) => {
     expected.forEach((answer, index) => {
-        cy.get(`[data-cy="questionDisplayCard-${questionNum}"] [data-cy="answer-${index}_displayText"]`).should('have.text', answer.text)
-        answer.isCorrect ? cy.get(`[data-cy="questionDisplayCard-${questionNum}"] [data-cy="answerDisplay-${index}"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]`) : cy.get(`[data-cy="questionDisplayCard-${questionNum}"] [data-cy="answerDisplay-${index}"] [data-cy="selectCorrectAnswer"] [data-cy="notSelected"]`)
+        if (matching) {
+            cy.get(`[data-cy="questionDisplayCard-${questionNum}"] [data-cy="question-${questionNum}-answer-${index}-term"]`).should('have.text', answer.term)
+            cy.get(`[data-cy="questionDisplayCard-${questionNum}"] [data-cy="question-${questionNum}-answer-${index}-value"]`).should('have.text', answer.value)
+        } else {
+            cy.get(`[data-cy="questionDisplayCard-${questionNum}"] [data-cy="answer-${index}_displayText"]`).should('have.text', answer.text)
+            answer.isCorrect ? cy.get(`[data-cy="questionDisplayCard-${questionNum}"] [data-cy="answerDisplay-${index}"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]`) : cy.get(`[data-cy="questionDisplayCard-${questionNum}"] [data-cy="answerDisplay-${index}"] [data-cy="selectCorrectAnswer"] [data-cy="notSelected"]`)
+        }
     })
 }
 
@@ -77,6 +82,15 @@ describe('Generate Quiz Tests', () => {
             { text: 'Rook', isCorrect: false },
         ]
         validateAnswers(2, expectedAnswers)
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]').contains('Match the pieces with their movements:')
+        expectedAnswers = [
+            { term: 'King', value: 'Moves one square in any direction' },
+            { term: 'Queen', value: 'Can move any number of squares along a rank, file, or diagonal' },
+            { term: 'Rook', value: 'Can move any number of squares along a rank or file' },
+            { term: 'Bishop', value: 'Can move any number of squares diagonally' },
+            { term: 'Knight', value: 'Moves in an L-shape: two squares in one direction (horizontally or vertically) and then one square perpendicular to that' },
+        ]
+        validateAnswers(3, expectedAnswers, true)
         cy.get('[data-cy="useGenValueBtn-2"]').click()
         cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
 
@@ -134,6 +148,15 @@ describe('Generate Quiz Tests', () => {
             { text: 'Rook', isCorrect: false },
         ]
         validateAnswers(2, expectedAnswers)
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]').contains('Match the pieces with their movements:')
+        expectedAnswers = [
+            { term: 'King', value: 'Moves one square in any direction' },
+            { term: 'Queen', value: 'Can move any number of squares along a rank, file, or diagonal' },
+            { term: 'Rook', value: 'Can move any number of squares along a rank or file' },
+            { term: 'Bishop', value: 'Can move any number of squares diagonally' },
+            { term: 'Knight', value: 'Moves in an L-shape: two squares in one direction (horizontally or vertically) and then one square perpendicular to that' },
+        ]
+        validateAnswers(3, expectedAnswers, true)
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="markdownEditorInput"]').should('not.be.visible')
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="markdownEditorInput"]').should('not.be.visible')
@@ -146,11 +169,13 @@ describe('Generate Quiz Tests', () => {
         cy.validateMarkdownEditorText('[data-cy="questionDisplayCard-1"] [data-cy="markdownEditorInput"]', ['this is a new question 1']);
         cy.typeInMarkdownEditor('[data-cy="questionDisplayCard-2"] [data-cy="markdownEditorInput"]', '{selectall}this is a new question 2');
         cy.validateMarkdownEditorText('[data-cy="questionDisplayCard-2"] [data-cy="markdownEditorInput"]', ['this is a new question 2']);
+        cy.typeInMarkdownEditor('[data-cy="questionDisplayCard-3"] [data-cy="markdownEditorInput"]', '{selectall}this is a new question 3');
+        cy.validateMarkdownEditorText('[data-cy="questionDisplayCard-3"] [data-cy="markdownEditorInput"]', ['this is a new question 3']);
         cy.wait(500) //wait for debounce
 
         cy.intercept('POST', '/admin/quiz-definitions/skill1Quiz/create-question', (req) => {
             if (req.body && req.body.question) {
-                expect(req.body.question).to.match(/^this is a new question ([12])/)
+                expect(req.body.question).to.match(/^this is a new question ([123])/)
             }
             req.continue();
         }).as('createQuestion');
