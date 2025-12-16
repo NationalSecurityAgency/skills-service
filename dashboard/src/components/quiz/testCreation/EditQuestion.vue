@@ -374,12 +374,16 @@ const onQuestionGenerated = (questionInfo) => {
   const newQType = questionType.value.options.find((o) => o.id === questionInfo.questionTypeId)
   skillsInputFormDialogRef.value.setFieldValue('questionType', {...newQType, doNotResetOrReplaceAnswers: true})
 
-  if (QuestionType.isMultipleChoice(questionInfo.questionTypeId) || QuestionType.isSingleChoice(questionInfo.questionTypeId)) {
+  if (QuestionType.isMultipleChoice(questionInfo.questionTypeId) || QuestionType.isSingleChoice(questionInfo.questionTypeId) || QuestionType.isMatching(questionInfo.questionTypeId)) {
     const existingValues = skillsInputFormDialogRef.value.getFieldValues()
     const existingAnswers = existingValues.answers
     const answersToSet = questionInfo.answers.map((a, index) => {
       const id = existingAnswers.length > index ? existingAnswers[index].id : null
-      return {...a, id, displayOrder: (index + 1)}
+      const answer = { ...a, id, displayOrder: (index + 1) }
+      if (a.multiPartAnswer) {
+        answer.multiPartAnswer = { ...a.multiPartAnswer }
+      }
+      return answer
     })
     skillsInputFormDialogRef.value.setFieldValue('answers', answersToSet)
     answersRef.value.replaceAnswers(answersToSet)
