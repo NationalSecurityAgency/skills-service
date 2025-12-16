@@ -53,6 +53,8 @@ ${instructionsToKeepPlaceholders ? `-${instructionsToKeepPlaceholders}` : ''}
         MultipleChoice: `- MUST have 2 or more correct answers
 - MUST have between 3-5 answer options`,
         TextInput: `- MUST have empty answers array`,
+        Matching: `- ALL answers must be marked true for isCorrect
+- ALL answers must have a multiPartAnswer with a term and and a value`,
     }
 
     const questionExampleJson = {
@@ -67,7 +69,24 @@ ${instructionsToKeepPlaceholders ? `-${instructionsToKeepPlaceholders}` : ''}
       {"answer": "4", "isCorrect": false},
       {"answer": "5", "isCorrect": true}    // Third correct
     ]`,
-        TextInput: `[]  // ALWAYS empty for TextInput`
+        TextInput: `[]  // ALWAYS empty for TextInput`,
+        Matching: `[
+    {
+      "answer": "",
+      "isCorrect": true,
+      "multiPartAnswer": {
+        "term": "banana",
+        "value": "yellow"
+      }
+    },
+    {
+      "isCorrect": true
+      "multiPartAnswer": {
+        "term": "apple",
+        "value": "red"
+      }
+    }
+  ]`
 
     }
 
@@ -130,6 +149,50 @@ ${questionGenRules.TextInput}
             mistakesToAvoid: `- TextInput with answers array not empty → INVALID`,
             isCorrectCheck: `- TextInput: No answers`,
             countCorrectCheck: ``,
+        },
+        Matching: {
+          typeRule: `### 4. Matching Questions
+- MUST have \`"questionType": "Matching"\`
+${questionGenRules.Matching}
+- Example:
+  \`\`\`json
+  {
+  "question": "What are the colors of these fruits?",
+  "questionType": "Matching",
+  "answers": [
+    {
+      "answer": "",
+      "isCorrect": true,
+      "multiPartAnswer": {
+        "term": "banana",
+        "value": "yellow"
+      }
+    },
+    {
+      "answer": "",
+      "isCorrect": true
+      "multiPartAnswer": {
+        "term": "apple",
+        "value": "red"
+      }
+    },
+    {
+      "answer": "",
+      "isCorrect": true
+      "multiPartAnswer": {
+        "term": "carrot",
+        "value": "orange"
+      }
+    }
+  ]
+}   
+  \`\`\``,
+          validationCheck: `4. For Matching:
+   - ALL answers have \`"isCorrect": true\`
+   - ALL answers have \`"multiPartAnswer"\` with \`"term"\` and \`"value"\` properties`,
+          mistakesToAvoid: `- MultipleChoice with only 1 correct answer → INVALID`,
+          isCorrectCheck: ``,
+          countCorrectCheck: ``,
         }
     }
 
@@ -149,6 +212,8 @@ ${questionRules.MultipleChoice.typeRule}
 
 ${questionRules.TextInput.typeRule}
 
+${questionRules.Matching.typeRule}
+
 ## Validation Checklist
 BEFORE finalizing the response, VERIFY each question:
 
@@ -162,12 +227,14 @@ ${questionRules.TextInput.validationCheck}
 ${questionRules.MultipleChoice.mistakesToAvoid}
 ${questionRules.SingleChoice.mistakesToAvoid}
 ${questionRules.TextInput.mistakesToAvoid}
+${questionRules.Matching.mistakesToAvoid}
 
 ## Final Check
 Before responding, count the number of \`"isCorrect": true\` for EACH question and verify:
 ${questionRules.MultipleChoice.isCorrectCheck}
 ${questionRules.SingleChoice.isCorrectCheck}
 ${questionRules.TextInput.isCorrectCheck}
+${questionRules.Matching.isCorrectCheck}
 
 ## IMPORTANT: Count the correct answers
 For EACH question, before including it:
