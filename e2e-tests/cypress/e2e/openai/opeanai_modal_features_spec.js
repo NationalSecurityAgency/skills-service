@@ -24,7 +24,7 @@ import {
 }
     from './openai_helper_commands'
 
-describe('Generate Desc Fail And Cancel Tests', () => {
+describe('AI Features Tests', () => {
 
     it('handle if generation never starts and eventually times out', () => {
         cy.intercept('GET', '/public/config', (req) => {

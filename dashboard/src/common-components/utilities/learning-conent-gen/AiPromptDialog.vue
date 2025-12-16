@@ -28,6 +28,7 @@ import {useAiModelsState} from "@/common-components/utilities/learning-conent-ge
 import AiModelsSelector from "@/common-components/utilities/learning-conent-gen/AiModelsSelector.vue";
 import {useElementVisibility, useEventListener} from "@vueuse/core";
 import {useInstructionGenerator} from "@/common-components/utilities/learning-conent-gen/UseInstructionGenerator.js";
+import AiPromptDialogFooter from "@/common-components/utilities/learning-conent-gen/AiPromptDialogFooter.vue";
 
 const model = defineModel()
 const props = defineProps({
@@ -334,15 +335,20 @@ const showChat = computed(() => !isLoading.value && !aiModelsState.failedToLoad)
 const finalMsgSeverity = (historyItem) => historyItem.failedToGenerate ? 'error' : historyItem.cancelled ? 'warn' : 'info'
 
 const isSendEnabled = computed(() => ((props.allowInitialSubmitWithoutInput && chatHistory.value?.length === 1) || instructions.value?.trim()?.length > 0) || isGenerating.value)
+
+const hasPoweredByInfo = computed(() => appConfig.openaiFooterPoweredByLink && appConfig.openaiFooterPoweredByLinkText)
+const hasFooter = computed(() => appConfig.openaiFooterMsg || hasPoweredByInfo.value)
 </script>
 
 <template>
   <SkillsDialog
+      :pt="{ header: { class: '!pb-2' }, footer: { class: '!pb-3' } }"
       ref="generateDescriptionDialog"
       :maximizable="true"
       :maximized="true"
       v-model="model"
       header="AI Assistant"
+      :loading="isLoading"
       :show-ok-button="false"
       :show-cancel-button="false"
       :enable-return-focus="true">
@@ -353,7 +359,6 @@ const isSendEnabled = computed(() => ((props.allowInitialSubmitWithoutInput && c
                   data-cy="scrollToBottomBtn"
                   aria-label="Scroll to Bottom"
                   :outlined="false"/>
-    <skills-spinner v-if="isLoading" :is-loading="isLoading" />
     <ai-models-selector />
     <div v-if="showChat" class="py-5 flex flex-col" style="min-height: 70vh">
       <slot name="aboveChatHistory" />
@@ -443,6 +448,9 @@ const isSendEnabled = computed(() => ((props.allowInitialSubmitWithoutInput && c
         </div>
       </div>
     </div>
+    <template #footer v-if="hasFooter">
+      <ai-prompt-dialog-footer />
+    </template>
   </SkillsDialog>
 </template>
 
