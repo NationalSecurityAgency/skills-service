@@ -20,7 +20,7 @@ defineProps({
 </script>
 
 <template>
-  <div class="p-2 bg-green-100 rounded-2xl relative pr-8 pl-4" :data-cy="`userMsg-${id}`">
+  <div class="p-2 bg-green-100 dark:bg-green-900 rounded-2xl relative pr-8 pl-4" :data-cy="`userMsg-${id}`">
     <slot />
     <i
         shape="circle"
