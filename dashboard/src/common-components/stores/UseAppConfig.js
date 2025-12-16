@@ -182,6 +182,10 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const openaiTakingLongerThanExpectedTimeoutPerMsg = computed(() => config.value.openaiTakingLongerThanExpectedTimeoutPerMsg)
   const openaiModelDefaultTemperature = computed(() => Number(config.value.openaiModelDefaultTemperature))
   const openaiDefaultModel = computed(() => config.value.openaiDefaultModel)
+  const openaiFooterMsg = computed(() => config.value.openaiFooterMsg)
+  const openaiFooterPoweredByLink = computed(() => config.value.openaiFooterPoweredByLink)
+  const openaiFooterPoweredByLinkText = computed(() => config.value.openaiFooterPoweredByLinkText)
+
   return {
     loadConfigState,
     refreshConfig,
@@ -300,6 +304,9 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     openaiTakingLongerThanExpectedMessages,
     openaiTakingLongerThanExpectedTimeoutPerMsg,
     openaiModelDefaultTemperature,
-    openaiDefaultModel
+    openaiDefaultModel,
+    openaiFooterMsg,
+    openaiFooterPoweredByLink,
+    openaiFooterPoweredByLinkText
   }
 })
