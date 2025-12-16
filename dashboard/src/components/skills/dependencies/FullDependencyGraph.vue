@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
+import { ref, onMounted, computed, onBeforeUnmount, useTemplateRef } from 'vue';
+import { useFullscreen } from '@vueuse/core';
 import { useRoute } from 'vue-router';
 import { Network } from 'vis-network';
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
@@ -31,13 +32,18 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 import dagre from "@dagrejs/dagre"
+import Popover from "primevue/popover";
+import GraphControls from "@/components/skills/dependencies/GraphControls.vue";
 
 const dialogMessages = useDialogMessages()
 const projConfig = useProjConfig();
 const route = useRoute();
 const themeHelper = useThemesHelper()
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
+const graphTemplate = useTemplateRef('fullDepsSkillsGraphContainer')
+const { isFullscreen, enter, exit, toggle } = useFullscreen(graphTemplate)
 
+const nodeSize = 65
 const isLoading = ref(true);
 const showGraph = ref(true);
 const selectedFromSkills = ref({});
@@ -47,7 +53,6 @@ const network = (ref);
 const enableZoom = ref(true);
 const enableAnimations = ref(true);
 const fullDepsSkillsGraph = ref()
-const fullDepsSkillsGraphContainer = ref()
 let nodes = [];
 let edges = [];
 const legendItems = [
@@ -137,7 +142,7 @@ const loadGraphDataAndCreateGraph = () => {
 };
 
 const panToNode = (node, scrollIntoView = false) => {
-  network.value.focus(node, {scale: 0.75, animation: enableAnimations.value})
+  network.value.focus(node, {scale: 1, animation: enableAnimations.value})
   if(scrollIntoView) {
     fullDepsSkillsGraph.value.scrollIntoView({ behavior: 'smooth' })
   }
@@ -266,8 +271,6 @@ const setVisNetworkTabIndex = () => {
   }, 500);
 };
 
-const nodeSize = 65
-
 const layout = (direction = "TB") => {
   if (nodes.length <= 1 || edges.length === 0) {
     return
@@ -309,21 +312,22 @@ const layout = (direction = "TB") => {
 
 }
 
-const toggleFullScreen = () => {
-  if(document.fullscreenElement) {
-    document.exitFullscreen().then(() => {
-      setTimeout(() => {
-        network.value.fit()
-      }, 300)
-    })
-  } else {
-    fullDepsSkillsGraphContainer.value.requestFullscreen().then(() => {
-      setTimeout(() => {
-        network.value.fit()
-      }, 300)
-    })
-  }
+const toggleFullscreen = () => {
+  toggle().then(() => {
+    setTimeout(() => {
+      network.value.fit()
+    }, 300)
+  })
 }
+
+const toggleZoom = (value) => {
+  enableZoom.value = value
+}
+
+const toggleAnimations = (value) => {
+  enableAnimations.value = value
+}
+
 </script>
 
 <template>
@@ -343,27 +347,11 @@ const toggleFullScreen = () => {
             <div class="left-0">
               <graph-legend class="graph-legend deps-overlay" :items="legendItems"/>
             </div>
-            <div class="absolute right-0 mr-1 flex items-center" id="additionalControls">
-              <SkillsCheckboxInput
-                  v-model="enableZoom"
-                  :binary="true"
-                  inputId="enableZoom"
-                  data-cy="enableZoom"
-                  name="enableZoom">
-              </SkillsCheckboxInput>
-              <span class="align-content-end mr-3">
-                <label for="enableZoom" class="font-bold text-primary ml-2">Zoom On Select</label>
-              </span>
-              <SkillsCheckboxInput
-                  v-model="enableAnimations"
-                  :binary="true"
-                  inputId="enableAnimations"
-                  name="enableAnimations">
-              </SkillsCheckboxInput>
-              <span class="align-content-end mr-3">
-                <label for="enableAnimations" class="font-bold text-primary ml-2">Animations</label>
-              </span>
-              <SkillsButton @click="toggleFullScreen">Toggle Full Screen</SkillsButton>
+            <div class="absolute right-0 mr-1 gap-2 flex items-center" id="additionalControls">
+              <graph-controls @toggleZoom="toggleZoom"
+                              :isFullscreen="isFullscreen"
+                              @toggleAnimations="toggleAnimations"
+                              @toggleFullscreen="toggleFullscreen" />
             </div>
           </div>
           <div id="dependency-graph" ref="dependencyGraph" v-bind:style="{'visibility': showGraph ? 'visible' : 'hidden'}"></div>
