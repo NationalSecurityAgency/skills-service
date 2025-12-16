@@ -301,6 +301,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
+        cy.get('[data-cy="learningPathSettingsMenu"]').click();
         cy.get('[data-cy="enableZoom"]').click()
 
         cy.clickOnNode(320, 150);
@@ -318,6 +319,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
+        cy.get('[data-cy="learningPathSettingsMenu"]').click();
         cy.get('[data-cy="enableZoom"]').click()
 
         cy.clickOnNode(320, 350);
