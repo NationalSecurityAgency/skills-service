@@ -250,6 +250,23 @@ const generationFailed = () => {
                 data-cy="textAreaPlaceHolder"
                 rows="2"/>
         </div>
+        <div v-else-if="QuestionType.isMatching(historyItem.generatedInfo?.questionTypeId)">
+          <div v-for="(answer, index) in historyItem.generatedInfo?.answers" :key="index">
+            <div v-if="answer.multiPartAnswer" class="flex flex-row gap-3" :data-cy="`answer-${index}`">
+              <div :data-cy="`answer-${index}-term`">
+                {{ answer.multiPartAnswer.term }}
+              </div>
+              <div>
+                <i class="fas fa-arrow-right text-gray-500 dark:text-gray-400" aria-hidden="true"></i>
+              </div>
+              <div :data-cy="`answer-${index}-value`">
+                {{ answer.multiPartAnswer.value }}
+              </div>
+            </div>
+            <hr v-if="index < historyItem.generatedInfo?.answers.length - 1"
+                class="mt-3 border-t border-dashed border-gray-300 dark:border-gray-600"/>
+          </div>
+        </div>
         <div v-else  v-for="(answer, index) in historyItem.generatedInfo?.answers" :key="index" class="flex gap-1 items-start">
           <select-correct-answer
               v-model="answer.isCorrect"

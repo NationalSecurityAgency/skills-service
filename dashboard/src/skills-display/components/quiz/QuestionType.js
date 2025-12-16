@@ -22,4 +22,5 @@ export default {
     isMultipleChoice: (questionType) => questionType === 'MultipleChoice',
     isSingleChoice: (questionType) => questionType === 'SingleChoice',
     isTextInput: (questionType) => questionType === 'TextInput',
+    isMatching: (questionType) => questionType === 'Matching',
 };

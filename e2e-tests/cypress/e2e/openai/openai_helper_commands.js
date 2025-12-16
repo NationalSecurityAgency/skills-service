@@ -12,6 +12,7 @@ const existingQuestionWelcomeMsg = 'I noticed you\'ve already started and can he
 const selectRockBandsQuestion = 'Select rock bands?'
 const selectSingleRockBandQuestion = 'Which of these is a rock band?'
 const textInputQuestion = 'Describe a great rock band?'
+const matchingQuestion = 'Match great rock bands with their hit songs.'
 const catchAllResponse = 'I am here to help!'
 export {
     newDescWelcomeMsg,
@@ -28,5 +29,6 @@ export {
     selectSingleRockBandQuestion,
     textInputQuestion,
     existingQuestionWelcomeMsg,
-    catchAllResponse
+    catchAllResponse,
+    matchingQuestion
 }

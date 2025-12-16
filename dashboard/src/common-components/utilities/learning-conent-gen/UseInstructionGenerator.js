@@ -161,7 +161,6 @@ ${questionGenRules.Matching}
   "questionType": "Matching",
   "answers": [
     {
-      "answer": "",
       "isCorrect": true,
       "multiPartAnswer": {
         "term": "banana",
@@ -169,7 +168,6 @@ ${questionGenRules.Matching}
       }
     },
     {
-      "answer": "",
       "isCorrect": true
       "multiPartAnswer": {
         "term": "apple",
@@ -177,7 +175,6 @@ ${questionGenRules.Matching}
       }
     },
     {
-      "answer": "",
       "isCorrect": true
       "multiPartAnswer": {
         "term": "carrot",
@@ -189,8 +186,9 @@ ${questionGenRules.Matching}
   \`\`\``,
           validationCheck: `4. For Matching:
    - ALL answers have \`"isCorrect": true\`
-   - ALL answers have \`"multiPartAnswer"\` with \`"term"\` and \`"value"\` properties`,
-          mistakesToAvoid: `- MultipleChoice with only 1 correct answer → INVALID`,
+   - ALL answers have \`"multiPartAnswer"\` with \`"term"\` and \`"value"\` properties that are not repeated
+   - ALL multiPartAnswers must not contain any duplicate term or duplicate value fields`,
+          mistakesToAvoid: `- All multiPartAnswer.term and multiPartAnswer.value field values in the answers array must be unique.  Duplicate term or value fields → INVALID`,
           isCorrectCheck: ``,
           countCorrectCheck: ``,
         }
