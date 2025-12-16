@@ -18,10 +18,12 @@ import {ref, watch} from "vue";
 import {useOpenaiService} from "@/common-components/utilities/learning-conent-gen/UseOpenaiService.js";
 import {useStorage} from "@vueuse/core";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import {useLog} from "@/components/utils/misc/useLog.js";
 
 export const useAiModelsState = defineStore('aiModelsStore', () => {
 
     const appConfig = useAppConfig()
+    const log = useLog()
 
     const availableModels = ref([])
     const loadingModels = ref(true)
@@ -49,15 +51,26 @@ export const useAiModelsState = defineStore('aiModelsStore', () => {
         failedToLoad.value = false
         return openaiService.getAvailableModels()
             .then((data) => {
-                const defaultModel = data.models.find((model) => model.model === appConfig.openaiDefaultModel) ?? data.models[0]
-                selectedModel.value = data.models.find((model) => model.model === selectedModelLocalStorage.value) ?? defaultModel
-                availableModels.value = data.models
+                const notSupportedModels = appConfig.openaiNotSupportedChatModels
+                if (log.isDebugEnabled()) {
+                    log.debug(`notSupportedModels=[${notSupportedModels}]`)
+                }
+                const modelsToConsider = !Array.isArray(notSupportedModels) || notSupportedModels.length === 0
+                    ? data.models
+                    : data.models.filter((model) => !notSupportedModels.some(unsupported =>
+                        model.model.toLowerCase() === unsupported.toLowerCase()
+                    ))
+
+                const defaultModel = modelsToConsider.find((model) => model.model === appConfig.openaiDefaultModel) ?? modelsToConsider[0]
+                selectedModel.value = modelsToConsider.find((model) => model.model === selectedModelLocalStorage.value) ?? defaultModel
+                availableModels.value = modelsToConsider
                 if (modelTemperatureStorage.value !== null) {
                     modelTemperature.value = Number(modelTemperatureStorage.value)
                 }
             }).finally(() => {
                 loadingModels.value = false
-            }).catch(() => {
+            }).catch((e) => {
+                log.error(`Failed to load models`, e)
                 loadingModels.value = false
                 failedToLoad.value = true
             })

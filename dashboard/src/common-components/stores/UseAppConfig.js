@@ -66,6 +66,10 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     return res
   }
 
+  const listFromCommaSeparatedString = (strProp) => {
+    return strProp ? strProp.split(',').map(s => s.trim()) : []
+  }
+
   const isTrue = (val) => val && (val === true || val?.toLowerCase() === 'true')
 
   const maxBadgeBonusInMinutes = computed(() => config.value.maxBadgeBonusInMinutes)
@@ -185,6 +189,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const openaiFooterMsg = computed(() => config.value.openaiFooterMsg)
   const openaiFooterPoweredByLink = computed(() => config.value.openaiFooterPoweredByLink)
   const openaiFooterPoweredByLinkText = computed(() => config.value.openaiFooterPoweredByLinkText)
+  const openaiNotSupportedChatModels = computed(() => listFromCommaSeparatedString(config.value.openaiNotSupportedChatModels))
 
   return {
     loadConfigState,
@@ -307,6 +312,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     openaiDefaultModel,
     openaiFooterMsg,
     openaiFooterPoweredByLink,
-    openaiFooterPoweredByLinkText
+    openaiFooterPoweredByLinkText,
+    openaiNotSupportedChatModels,
   }
 })
