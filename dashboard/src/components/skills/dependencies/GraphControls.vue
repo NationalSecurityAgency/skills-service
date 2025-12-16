@@ -72,6 +72,7 @@ const toggleAnimations = () => {
           severity="info"
           outlined
           raised
+          aria-label="Toggle fullscreen"
           @click="toggleFullscreen" />
   <Button
       icon="fas fa-gear"
