@@ -406,6 +406,34 @@ Paragraph three
 | --- | --- |
 | [(A) cell 1](https://some.url.com) | (A) cell 2 |
 """).valid
+
+        validator.validateDescription("""(A) table to follow
+
+| (A) header1 | (A) header 2  |
+| --- | --- |
+| (A) some text [some link](https://some.url.com) | (A) cell 2 |
+""").valid
+
+        validator.validateDescription("""<span>(A) (table to follow)</span>
+
+| (A) header1 | (A) header 2  |
+| --- | --- |
+| [(A) some text](https://some.text.com) | (A) cell 2 [some link ](https://some.url.com/) |
+""").valid
+
+        validator.validateDescription("""<span>(A) (table to follow)</span>
+
+| (A) header1 | (A) header 2  |
+| --- | --- |
+| | (A) cell 2 [some link ](https://some.url.com/) |
+""").valid
+
+        validator.validateDescription("""<span>(A) (table to follow)</span>
+
+| (A) header1 | (A) header 2  |
+| --- | --- |
+| | (A) [some link ](https://some.url.com/) |
+""").valid
     }
 
     def "support markdown codeblocks"() {
@@ -1576,9 +1604,41 @@ Line[7] [one
         validator.validateDescription("(A) **one** (AB)").valid
         !validator.validateDescription("(A one (AB)").valid
         !validator.validateDescription("(A **one** (AB)").valid
+        validator.validateName("(A) some value This Cool Acronym (ACA) some parans <span>(\"keep hydrated\")</span>. More interesting info (but more stuff could happen)").valid
+        validator.validateDescription("(A) ok\n(A) <span style=\"font-size: 9pt; font-family: SimSun;\">¶</span>(AB)").valid
     }
 
+    def "Test force validation with more specific regex"(){
+        CustomValidator validator = new CustomValidator();
+        validator.nameValidationRegex = '^\\(A\\).*$'
+        validator.nameValidationMessage = 'fail'
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '(?i)^\\(.*(?:AB|CD).*\\).*$'
 
+        when:
+        validator.init()
+        then:
+        validator.validateDescription("(A) ok\n(A) (AB)").valid
+        validator.validateDescription("(A) ok\n(A) <span>a</span>(AB)").valid
+    }
+
+    def "Deal with styling"(){
+        CustomValidator validator = new CustomValidator();
+        validator.nameValidationRegex = '^\\(A\\).*$'
+        validator.nameValidationMessage = 'fail'
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        when:
+        validator.init()
+        then:
+        validator.validateDescription("<span>(A) some</span> value").valid
+        validator.validateDescription("<span>(A)</span> some value").valid
+        validator.validateDescription("<span>(A)</span> [some](https://some.com)").valid
+        validator.validateDescription("<span>(A)</span> **[some](https://some.com)**").valid
+    }
 
 }
 

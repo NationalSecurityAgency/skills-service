@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { onMounted, onBeforeUnmount } from 'vue';
+import { onMounted, onBeforeUnmount, useSlots } from 'vue';
 import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
@@ -80,6 +80,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['on-ok', 'on-cancel', 'confirm-cancel'])
 const focusState = useFocusState()
+const slots = useSlots()
 
 onMounted(() => {
   window.addEventListener('keydown', handleEscape);
@@ -169,6 +170,9 @@ const dialogUtils = useDialogUtils()
             data-cy="saveDialogBtn" />
       </div>
     </div>
+    <template #footer v-if="!loading && slots.footer">
+      <slot name="footer"></slot>
+    </template>
   </Dialog>
 </template>
 

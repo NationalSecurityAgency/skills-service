@@ -91,6 +91,18 @@ class ParagraphValidator {
                 String text = textContentRenderer.render(link?.firstChild ?: link)
                 StringValidationRes isValidLinkOnItsOwn = validateString(text)
 
+                // check if this link is part of a paragraph or table cell
+                if (!isValidLinkOnItsOwn.isValid) {
+                    Node parent = link.parent
+                    while (parent instanceof StrongEmphasis || parent instanceof Emphasis) {
+                        parent = parent.parent
+                    }
+                    if (parent instanceof Paragraph || parent instanceof Text || parent instanceof TableCell) {
+                        String paragraphText = textContentRenderer.render(parent)
+                        isValidLinkOnItsOwn = validateString(paragraphText)
+                    }
+                }
+
                 if (!isValidLinkOnItsOwn.isValid) {
                     blockHandlerValidator(link)
                 }
@@ -534,8 +546,10 @@ class ParagraphValidator {
                 if (textToCheck) {
                     boolean forceValidate = request.forceValidationPattern.matcher(textToCheck).matches()
                     if (forceValidate) {
-                        boolean isValidLine = validationPattern.pattern.matcher(textToCheck).matches()
-                        if (!isValidLine) {
+                        String fulLineForThisText = allNodesOnSameLineToString(textNode)
+                        boolean isValidLine = request.validationPattern.pattern.matcher(fulLineForThisText).matches()
+                        boolean isValidText = request.validationPattern.pattern.matcher(textToCheck).matches()
+                        if (!isValidLine && !isValidText) {
                             invalidate()
                             if (request.prefix) {
                                 textNode.setLiteral("${request.prefix}${textNode.literal}".toString())
