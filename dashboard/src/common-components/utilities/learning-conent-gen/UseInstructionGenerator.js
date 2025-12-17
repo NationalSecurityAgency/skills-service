@@ -73,23 +73,10 @@ ${instructionsToKeepPlaceholders ? `-${instructionsToKeepPlaceholders}` : ''}
     ]`,
         TextInput: `[]  // ALWAYS empty for TextInput`,
         Matching: `[
-    {
-      "answer": "",
-      "isCorrect": true,
-      "multiPartAnswer": {
-        "term": "banana",
-        "value": "yellow"
-      }
-    },
-    {
-      "isCorrect": true
-      "multiPartAnswer": {
-        "term": "apple",
-        "value": "red"
-      }
-    }
+      { "multiPartAnswer": { "term": "banana", "value": "yellow" }, "isCorrect": true },
+      { "multiPartAnswer": { "term": "apple", "value": "red" }, "isCorrect": true },
+      { "multiPartAnswer": { "term": "carrot", "value": "orange" }, "isCorrect": true },
   ]`
-
     }
 
     const questionRules = {
@@ -108,6 +95,7 @@ ${questionGenRules.SingleChoice}
             validationCheck: `1. For SingleChoice:
    - Exactly ONE answer has \`"isCorrect": true\`
    - All others have \`"isCorrect": false\`
+   - ALL objects in the answers array should have the \`"answer"\` property and should not have the \`"multiPartAnswer"\` property
    - 3-5 answer options total`,
             mistakesToAvoid: `- SingleChoice with 0 or >1 correct answers → INVALID`,
             isCorrectCheck: `- SingleChoice: Exactly 1`,
@@ -128,6 +116,7 @@ ${questionGenRules.MultipleChoice}
             validationCheck: `2. For MultipleChoice:
    - AT LEAST TWO answers have \`"isCorrect": true\`
    - All others have \`"isCorrect": false\`
+   - ALL objects in the answers array should have the \`"answer"\` property and should not have the \`"multiPartAnswer"\` property
    - 3-5 answer options total`,
             mistakesToAvoid: `- MultipleChoice with only 1 correct answer → INVALID`,
             isCorrectCheck: `MultipleChoice: 2 or more`,
@@ -187,10 +176,12 @@ ${questionGenRules.Matching}
 }   
   \`\`\``,
           validationCheck: `4. For Matching:
-   - ALL answers have \`"isCorrect": true\`
-   - ALL answers have \`"multiPartAnswer"\` with \`"term"\` and \`"value"\` properties that are not repeated
+   - ALL objects in the answers array have the property \`"isCorrect": true\`
+   - ALL objects in the answers array should have the \`"multiPartAnswer"\` property and should not have the \`"answer"\` property
+   - ALL objects in the answers array have the property \`"multiPartAnswer"\` with \`"term"\` and \`"value"\` properties that are not repeated
    - ALL multiPartAnswers must not contain any duplicate term or duplicate value fields`,
-          mistakesToAvoid: `- All multiPartAnswer.term and multiPartAnswer.value field values in the answers array must be unique.  Duplicate term or value fields → INVALID`,
+          mistakesToAvoid: `- All objects in the answers array have the property \`"multiPartAnswer"\` with \`"term"\` and \`"value"\` properties, eg: \`"multiPartAnswer": { "term": "carrot", "value": "orange" }\`
+- All multiPartAnswer.term and multiPartAnswer.value field values in the answers array must be unique.  Duplicate term or value fields → INVALID`,
           isCorrectCheck: ``,
           countCorrectCheck: ``,
         }
@@ -296,6 +287,22 @@ Provide ONLY valid JSON in this exact format:
 `
     }
 
+  const updateSingleQuestionTypeChangedInstructions = ( userEnteredText, previousQuestionType, questionType ) => {
+    return `${followOnConvoInstructions(userEnteredText)}
+
+## IMPORTANT: The Question Type has changed from \`${previousQuestionType}\` to \`${questionType.id}\`.  
+- **You must change the answers array to follow the new questionType (${questionType.id}) rules!**  
+- Disregard the "Question Type Rules (${previousQuestionType})" from earlier in the conversation and use only the following "Question Type Rules (${questionType.id})" for this response.
+
+# Question Generation Instructions - STRICT RULES
+
+## Output Format
+Return the answers as JSON array of objects that strictly adhere to the following rules based on the new questionType (${questionType.id}):
+
+${singleQuestionRulesInstructions(questionType)}
+`
+  }
+
     const followOnConvoInstructions = (userEnteredText) => {
         return `Apply the following instructions to this conversation: "${userEnteredText}"
 
@@ -306,12 +313,8 @@ Here are the specific requirements:
     }
 
     const singleQuestionInstructions = (userInput, questionType, existingQuestionInfo, instructionsToKeepPlaceholders) => {
-        const questionTypeRules = questionRules[questionType.id]
-        const exampleAnswerJson = questionExampleJson[questionType.id]
-        const genRules = questionGenRules[questionType.id]
-
-        const intro = existingQuestionInfo ? `# Task: Update an existing ${questionType.id} question and its answers based on the user's feedback.`
-            : `# Task: Generate a ${questionType.id} question with answers based on the user's request.`
+        const intro = existingQuestionInfo ? `# Task: Update an existing ${questionType.id} Question Type and its answers based on the user's feedback.`
+            : `# Task: Generate a ${questionType.id} Question Type with answers based on the user's request.`
 
         const usersRequestWord = existingQuestionInfo ? 'Feedback' : 'Request'
 
@@ -340,6 +343,19 @@ ${JSON.stringify(answersJson)}
 ## User's ${usersRequestWord}:
 "${userInput}"
 
+${singleQuestionRulesInstructions(questionType, additionalInstructions)}`
+
+        log.debug(res)
+        return res
+    }
+
+    const singleQuestionRulesInstructions = (questionType, additionalInstructions) => {
+      const questionTypeRules = questionRules[questionType.id]
+      const exampleAnswerJson = questionExampleJson[questionType.id]
+      const genRules = questionGenRules[questionType.id]
+      return `
+# Question Type Rules (${questionType.id})
+
 ## Instructions:
 - First, generate a clear and concise question based on the user's description.
 ${genRules}
@@ -366,6 +382,7 @@ ${exampleAnswerJson}
 - Then "### Answers:" on its own line
 - Follow with the JSON array
 - The JSON must be valid and properly formatted
+- The JSON array must strictly adhere to the Question Type Rules (${questionType.id}):
 - Include explanations in the answers if the question is complex
 - Do not include any other text outside these sections
 - Do not number answers
@@ -386,8 +403,6 @@ ${questionTypeRules.isCorrectCheck}
 ${questionTypeRules.countCorrectCheck}
 - If questionType doesn't match, FIX IT
 `
-        log.debug(res)
-        return res
     }
 
     return {
@@ -396,6 +411,7 @@ ${questionTypeRules.countCorrectCheck}
         newQuizInstructions,
         updateQuizInstructions,
         singleQuestionInstructions,
+        updateSingleQuestionTypeChangedInstructions,
         followOnConvoInstructions
     }
 }
