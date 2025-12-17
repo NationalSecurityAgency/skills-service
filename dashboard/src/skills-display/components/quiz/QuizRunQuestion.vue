@@ -289,6 +289,7 @@ const updateAnswerOrder = (newOrder) => {
                              :allow-insert-images="false"
                              :aria-label="`Please enter text to answer question number ${num}`"
                              placeholder="Please enter your response here..."
+                             :disable-ai-prompt="true"
                              :resizable="true" />
           </div>
           <div v-else-if="isRating">
