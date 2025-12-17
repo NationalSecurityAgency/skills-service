@@ -76,6 +76,13 @@ const createPromptInstructions = (userEnterInstructions) => {
   return instructionsToSend
 }
 
+const createFollowOnConvoInstructions = (userEnterInstructions) => {
+  if (props.questionType.selectedType.id !== lastGeneratedQuestionInfo.value.questionTypeId) {
+    return instructionsGenerator.updateSingleQuestionTypeChangedInstructions(userEnterInstructions, lastGeneratedQuestionInfo.value.questionTypeId, props.questionType.selectedType)
+  }
+  return instructionsGenerator.updateQuizInstructions(userEnterInstructions)
+}
+
 const upToStartOfAnswers = ref('')
 const answersFound = ref(false)
 const answersString = ref('')
@@ -212,6 +219,7 @@ const generationFailed = () => {
       ref="aiPromptDialogRef"
       v-model="model"
       :create-instructions-fn="createPromptInstructions"
+      :create-follow-on-convo-instructions-fn="createFollowOnConvoInstructions"
       :chunk-handler-fn="handleGeneratedChunk"
       :generation-completed-fn="handleGenerationCompleted"
       :add-prefix-fn="handleAddPrefix"

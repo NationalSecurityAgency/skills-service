@@ -5,7 +5,7 @@
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
       { "contains": "Great rock bands" },
-      { "contains": "Generate a Matching question" }
+      { "contains": "Generate a Matching Question Type" }
     ]
   },
   "response": {

@@ -707,7 +707,7 @@ describe('Generate Single Question Tests', () => {
                 expect(requestBody).to.have.property('messages');
                 const userInstructions = requestBody.messages[0].content.replace(/\s+/g, ' ').trim();
 
-                const expectedTask = '# Task: Update an existing SingleChoice question'
+                const expectedTask = '# Task: Update an existing SingleChoice Question Type'
                 expect(userInstructions).to.include(expectedTask.replace(/\s+/g, ' ').trim());
 
                 const expectedQuestion = '## Existing Question ### Question: What is the capital of France?';
