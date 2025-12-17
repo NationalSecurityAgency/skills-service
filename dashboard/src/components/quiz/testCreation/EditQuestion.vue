@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, nextTick, onMounted, ref } from 'vue'
-import { array, boolean, object, string } from 'yup'
-import { useRoute } from 'vue-router';
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import {computed, nextTick, onMounted, ref} from 'vue'
+import {array, boolean, object, string} from 'yup'
+import {useRoute} from 'vue-router';
+import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
 import QuizService from '@/components/quiz/QuizService.js';
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
@@ -25,10 +25,7 @@ import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormD
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
 import ConfigureAnswers from '@/components/quiz/testCreation/ConfigureAnswers.vue';
 import QuizType from "@/skills-display/components/quiz/QuizType.js";
-import InputText from "primevue/inputtext";
 import MatchingQuestion from "@/components/quiz/testCreation/MatchingQuestion.vue";
-import GenerateDescriptionDialog1
-  from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionDialog1.vue";
 import GenerateSingleQuestionDialog
   from "@/common-components/utilities/learning-conent-gen/GenerateSingleQuestionDialog.vue";
 import QuestionTypeDropDown from "@/components/quiz/testCreation/QuestionTypeDropDown.vue";
