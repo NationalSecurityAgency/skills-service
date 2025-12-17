@@ -25,6 +25,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
 import { object, string } from 'yup'
 import { useForm } from 'vee-validate'
+import ThinkingIndicator from "@/common-components/utilities/learning-conent-gen/ThinkingIndicator.vue";
 
 const model = defineModel()
 const props = defineProps({
@@ -339,6 +340,10 @@ const handleQuestionUpdated = (updatedQuestion, historyItem) => {
       :allow-initial-submit-without-input="true"
   >
     <template #generatedValue="{ historyItem }">
+      <div v-if="historyItem.generatedValue?.length > 0 && (!historyItem.generatedInfo?.generatedQuiz || historyItem.generatedInfo?.generatedQuiz?.length === 0)"
+           class="py-5">
+        <thinking-indicator value="Generating first question..." />
+      </div>
       <!--      must not use local variables as there can be more than 1 history item-->
       <div v-if="historyItem.generatedInfo?.generatedQuiz?.length > 0" class="px-5 border rounded-lg bg-blue-50 ml-4">
         <div v-for="(q, index) in getQuizDataForDisplay(historyItem.generatedInfo, historyItem.id)" :key="q.id">

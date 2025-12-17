@@ -21,7 +21,7 @@ export const useInstructionGenerator = () => {
     const log = useLog()
 
     const newDescriptionInstructions = (userEnteredText) => {
-        return `Generate a detailed description for a skill that will be part of a larger training. Here is user provided text that gives information about the skills: "${userEnteredText}". 
+        const res = `Generate a detailed description for a skill that will be part of a larger training. Here is user provided text that gives information about the skills: "${userEnteredText}". 
 
 Here are the requirements:
 - Do not provide an introduction. 
@@ -30,6 +30,8 @@ Here are the requirements:
 - Do not include the word "skill" in any titles.
 - Do not wrap sections with \`\`\`
 `
+        log.debug(res)
+        return res
     }
 
     const existingDescriptionInstructions = (existingText, userInstructions, instructionsToKeepPlaceholders) => {
