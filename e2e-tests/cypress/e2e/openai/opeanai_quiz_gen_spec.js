@@ -38,8 +38,9 @@ const validateAnswers = (questionNum, expected, matching = false) => {
 }
 
 describe('Generate Quiz Tests', () => {
+    const tableSelector = '[data-cy="skillsTable"]'
 
-    it('generate a new quiz for a skill', () => {
+    it('generate a new quiz for a skill from the skill details page', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
@@ -104,6 +105,85 @@ describe('Generate Quiz Tests', () => {
           .and('include', '/administrator/quizzes/skill1Quiz');
         cy.get('[data-cy="buttonToQuiz"]').contains('View Quiz')
     });
+
+    it('generate a new quiz for a skill from the subject page', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, { description: chessGenValue, numPerformToCompletion: 1 })
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="nameCell_skill1"]')
+        cy.get(`${tableSelector} [data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Self Report"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-cy="selfReportCell-skill1"]').contains('Disabled')
+        cy.get(`${tableSelector} th`).contains('Self Report').click()
+
+        cy.get('[data-cy="skillOverviewDescription"]').contains(chessGenValue)
+
+        cy.get('[data-cy="generateQuizBtn"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(newQuizWelcomeMsg)
+
+        cy.get('[data-cy="instructionsInput"]').type('Quiz chess{enter}')
+        cy.get('[data-cy="userMsg-1"]').contains('Quiz chess')
+
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(newQuizGeneratingMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
+        cy.get('[data-cy="instructionsInput"]').should('have.focus')
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').contains('Which piece can move diagonally in any direction?')
+        let expectedAnswers = [
+            { text: 'Pawn', isCorrect: false },
+            { text: 'Rook', isCorrect: false },
+            { text: 'Knight', isCorrect: false },
+            { text: 'Bishop', isCorrect: true },
+        ]
+        validateAnswers(1, expectedAnswers)
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]').contains('Which piece can jump over other pieces?')
+        expectedAnswers = [
+            { text: 'Pawn', isCorrect: false },
+            { text: 'Knight', isCorrect: true },
+            { text: 'Bishop', isCorrect: false },
+            { text: 'Rook', isCorrect: false },
+        ]
+        validateAnswers(2, expectedAnswers)
+        cy.get('[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]').contains('Match the pieces with their movements:')
+        expectedAnswers = [
+            { term: 'King', value: 'Moves one square in any direction' },
+            { term: 'Queen', value: 'Can move any number of squares along a rank, file, or diagonal' },
+            { term: 'Rook', value: 'Can move any number of squares along a rank or file' },
+            { term: 'Bishop', value: 'Can move any number of squares diagonally' },
+            { term: 'Knight', value: 'Moves in an L-shape: two squares in one direction (horizontally or vertically) and then one square perpendicular to that' },
+        ]
+        validateAnswers(3, expectedAnswers, true)
+        cy.get('[data-cy="useGenValueBtn-2"]').click()
+        cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
+
+        cy.get('[data-cy="selfReportMediaCard"]').contains('Self Report: Quiz')
+        cy.get('[data-cy="selfReportMediaCard"]').contains('Users can self report this skill and points will be awarded after the Very Great Skill 1 Quiz Quiz is passed!')
+        cy.get('[data-cy="linkToQuiz"]')
+          .should('have.attr', 'href')
+          .and('include', '/administrator/quizzes/skill1Quiz');
+        cy.get('[data-cy="buttonToQuiz"]')
+          .should('have.attr', 'href')
+          .and('include', '/administrator/quizzes/skill1Quiz');
+        cy.get('[data-cy="buttonToQuiz"]').contains('View Quiz')
+
+        cy.get('[data-cy="selfReportCell-skill1"]').should('not.exist')
+        cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('Quiz-Based Validation')
+        cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('Very Great Skill 1 Quiz').click()
+    });
+
 
     it('generate a new quiz for a skill, modify questions inline', () => {
         cy.intercept('GET', '/public/config', (req) => {
