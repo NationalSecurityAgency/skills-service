@@ -39,6 +39,7 @@ import {useDescriptionValidatorService} from "@/common-components/validators/Use
 import PrefixControls from "@/common-components/utilities/markdown/PrefixControls.vue";
 import GenerateDescriptionDialog1
   from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionDialog1.vue";
+import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
 
 const appConfig = useAppConfig()
 const quizConfig = useQuizConfig()
@@ -120,6 +121,13 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  aiPromptType: {
+    type: String,
+    default: GenerateDescriptionType.Skill,
+    validator: (value) => {
+      return GenerateDescriptionType.AllTypes.includes(value)
+    }
+  }
 })
 const emit = defineEmits(['value-changed'])
 const themeHelper = useThemesHelper()
@@ -450,6 +458,7 @@ defineExpose({
         v-if="showGenerateDescriptionDialog"
         ref="generateDescriptionDialogRef"
         v-model="showGenerateDescriptionDialog"
+        :type="aiPromptType"
         :community-value="communityValue"
         @generated-desc="updateDescription"
         @show="onDialogShow" />

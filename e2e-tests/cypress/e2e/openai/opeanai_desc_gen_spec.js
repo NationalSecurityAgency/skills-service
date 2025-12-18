@@ -60,7 +60,7 @@ describe('Generate Desc Tests', () => {
         cy.get('[data-cy="skillOverviewDescription"]').contains(chessGenValue)
     });
 
-    it('generate a new description for an existing skill', () => {
+    it('update an existing skill description', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
@@ -80,7 +80,18 @@ describe('Generate Desc Tests', () => {
         cy.get('[data-cy="aiMsg-0"]').contains(existingDescWelcomeMsg)
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
         cy.get('[data-cy="generatedSegmentNotes"]').should('not.exist')
+        let requestBody
+        cy.intercept('POST', '/openai/chat', (req) => {
+            requestBody = req.body;
+            req.reply();
+        }).as('genDescription1');
         cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
+        cy.get('@genDescription1').then(() => {
+            expect(requestBody.messages).to.have.length(1);
+            expect(requestBody.messages[0].role).to.equal('User')
+            expect(requestBody.messages[0].content).to.contain('Modify current descriptions based on the following user instructions:');
+            expect(requestBody.messages[0].content).to.contain('Learn chess');
+        });
         cy.get('[data-cy="userMsg-1"]').contains('Learn chess')
         cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
         cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').contains(chessGenValue)
@@ -117,19 +128,18 @@ describe('Generate Desc Tests', () => {
         cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg)
         cy.get('[data-cy="userMsg-1"]').should('not.exist')
 
+        let requestBody
         cy.intercept('POST', '/openai/chat', (req) => {
-            const requestBody = req.body;
+            requestBody = req.body;
             req.reply();
-
-            req.on('response', (res) => {
-                expect(requestBody.messages).to.have.length(1);
-                expect(requestBody.messages[0].role).to.equal('User')
-                expect(requestBody.messages[0].content).to.contain('Generate a detailed description for a skill that will be part of a larger training');
-                expect(requestBody.messages[0].content).to.contain('Learn chess');
-            });
         }).as('genDescription1');
         cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
-        cy.get('@genDescription1')
+        cy.get('@genDescription1').then(() => {
+            expect(requestBody.messages).to.have.length(1);
+            expect(requestBody.messages[0].role).to.equal('User')
+            expect(requestBody.messages[0].content).to.contain('Generate a detailed description for a skill based on this information:');
+            expect(requestBody.messages[0].content).to.contain('Learn chess');
+        });
 
         cy.get('[data-cy="userMsg-1"]').contains('Learn chess')
         cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
@@ -139,27 +149,24 @@ describe('Generate Desc Tests', () => {
 
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
 
+
         cy.intercept('POST', '/openai/chat', (req) => {
-            const requestBody = req.body;
+            requestBody = req.body;
             req.reply();
-
-            req.on('response', (res) => {
-                expect(requestBody.messages).to.have.length(3);
-                expect(requestBody.messages[0].role).to.equal('User')
-                expect(requestBody.messages[0].content).to.contain('Generate a detailed description for a skill that will be part of a larger training');
-                expect(requestBody.messages[0].content).to.contain('Learn chess');
-
-                expect(requestBody.messages[1].role).to.equal('Assistant')
-                expect(requestBody.messages[1].content).to.contain('In order to learn chess you will need to get a chess board!')
-
-                expect(requestBody.messages[2].role).to.equal('User')
-                expect(requestBody.messages[2].content).to.contain('Apply the following instructions to this conversation')
-
-
-            });
         }).as('genDescription2');
         cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
-        cy.get('@genDescription2')
+        cy.get('@genDescription2').then(() => {
+            expect(requestBody.messages).to.have.length(3);
+            expect(requestBody.messages[0].role).to.equal('User')
+            expect(requestBody.messages[0].content).to.contain('Generate a detailed description for a skill based on this information:');
+            expect(requestBody.messages[0].content).to.contain('Learn chess');
+
+            expect(requestBody.messages[1].role).to.equal('Assistant')
+            expect(requestBody.messages[1].content).to.contain('In order to learn chess you will need to get a chess board!')
+
+            expect(requestBody.messages[2].role).to.equal('User')
+            expect(requestBody.messages[2].content).to.contain('Apply the following instructions to this conversation')
+        })
     });
 
     it('apply prefix after generating a new description for a skill', () => {

@@ -28,6 +28,8 @@ import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js';
 import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js';
 import CommunityProtectionControls from '@/components/projects/CommunityProtectionControls.vue';
 import {useRouter} from "vue-router";
+import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
+import QuizType from "@/skills-display/components/quiz/QuizType.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -232,6 +234,8 @@ const onSavedQuiz = (savedQuiz) => {
   close()
 }
 
+const quizType = ref(props.quiz?.type || QuizType.Quiz)
+const genDescriptionType = computed(() => QuizType.isQuiz(quizType.value) ? GenerateDescriptionType.Quiz : GenerateDescriptionType.Survey)
 </script>
 
 <template>
@@ -269,6 +273,7 @@ const onSavedQuiz = (savedQuiz) => {
         <SkillsDropDown
             label="Type"
             name="type"
+            v-model="quizType"
             data-cy="quizTypeSelector"
             :isRequired="true"
             :disabled="isEdit || isCopy"
@@ -284,6 +289,7 @@ const onSavedQuiz = (savedQuiz) => {
           :request-community-elevation="enableProtectedUserCommunity"
           :allow-community-elevation="true"
           :allow-attachments="isEdit"
+          :ai-prompt-type="genDescriptionType"
           data-cy="quizDescription"
           class="mt-8"
           name="description" />

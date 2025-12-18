@@ -1,5 +1,5 @@
-const newDescWelcomeMsg = 'Hi there! I\'m excited to help you craft something amazing'
-const existingDescWelcomeMsg = 'I noticed you\'ve already started and can help you refine and enhance!'
+const newDescWelcomeMsg = 'Let\'s create an engaging'
+const existingDescWelcomeMsg = 'I can help improve your existing'
 const chessGenValue = 'In order to learn chess you will need to get a chess board!'
 const completedMsg = 'Take a look at what I came up with!'
 const errMsg = 'I apologize, but I couldn\'t process your request at this time'
