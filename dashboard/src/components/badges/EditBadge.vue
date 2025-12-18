@@ -33,6 +33,7 @@ import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 import AdminGroupsService from '@/components/access/groups/AdminGroupsService.js'
 import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
 import { useDebounceFn } from '@vueuse/core'
+import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -399,6 +400,7 @@ const onBadgeSaved = () => {
           :user-community="userCommunityVal"
           :allow-community-elevation="true"
           :request-community-elevation="enableProtectedUserCommunity && global"
+          :ai-prompt-type="GenerateDescriptionType.Badge"
           name="description" />
 
       <Card v-if="!global" data-cy="bonusAwardCard">

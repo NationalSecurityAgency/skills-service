@@ -15,10 +15,9 @@
  */
 package skills.auth.openai
 
-
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import jakarta.servlet.http.HttpServletRequest
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.annotation.Order
 import org.springframework.security.authorization.AuthorizationDecision
@@ -27,8 +26,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext
 import org.springframework.stereotype.Component
 import skills.auth.UserInfoService
-import skills.storage.model.auth.RoleName
-import skills.storage.model.auth.UserRole
 import skills.storage.repos.UserRoleRepo
 
 import java.util.function.Supplier
@@ -47,16 +44,8 @@ class OpenAIAuthorizationManager implements AuthorizationManager<RequestAuthoriz
 
     @Override
     AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext authorizationContext) {
-        HttpServletRequest request = authorizationContext?.getRequest()
-        log.trace("Auth check [{}], userInfoService?.currentUser [{}]", request?.getRequestURI(), userInfoService?.currentUser)
-
-        List<UserRole> userRoles = userRoleRepo.findAllByUserId(userInfoService?.currentUser?.username)
-        log.trace("Username: [{}], roles: [{}]", userInfoService?.currentUser?.username, userRoles)
-
-        List<RoleName> mustHaveOneOfThese = [RoleName.ROLE_SUPER_DUPER_USER, RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_QUIZ_ADMIN]
-        List<RoleName> userRoleNames = userRoles.collect { it.roleName }
-
-        boolean hasOneOfThese = mustHaveOneOfThese.any { userRoleNames.contains(it) }
-        return new AuthorizationDecision(hasOneOfThese)
+        String userName = userInfoService?.currentUser?.username
+        boolean isLoggedIn = StringUtils.isNoneBlank(userName)
+        return new AuthorizationDecision(isLoggedIn)
     }
 }
