@@ -15,14 +15,12 @@ limitations under the License.
 */
 <script setup>
 import {ref} from 'vue'
-import {useRoute} from "vue-router";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
-import {useLog} from "@/components/utils/misc/useLog.js";
 import {useImgHandler} from "@/common-components/utilities/learning-conent-gen/UseImgHandler.js";
 import {useInstructionGenerator} from "@/common-components/utilities/learning-conent-gen/UseInstructionGenerator.js";
 import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
-import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import AiPromptDialog from "@/common-components/utilities/learning-conent-gen/AiPromptDialog.vue";
+import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -30,12 +28,16 @@ const props = defineProps({
     type: String,
     default: null
   },
+  type: {
+    type: String,
+    default: GenerateDescriptionType.Skill,
+    validator: (value) => {
+      return GenerateDescriptionType.AllTypes.includes(value)
+    }
+  }
 })
 const emit = defineEmits(['generated-desc'])
-const route = useRoute()
-const log = useLog()
 const imgHandler = useImgHandler()
-const appConfig = useAppConfig()
 const instructionsGenerator = useInstructionGenerator()
 
 const currentDescription = ref('')
@@ -46,8 +48,12 @@ const updateDescription = (newDesc) => {
   currentDescription.value = newDesc
 
   const welcomeMsg = newDesc ?
-      'I noticed you\'ve already started and can help you refine and enhance! \n\nFor example, you could type `proofread` or `rewrite with more detail`. The more **specific** you are, the better I can assist you!'
-      : 'Hi there! I\'m excited to help you craft something **amazing**. Please share some `details` about what you have in mind.'
+      `I can help improve your existing \`${props.type}\` description. Try these requests:
+- "Make it more engaging"
+- "Add more technical details"
+- "Shorten while keeping key points"
+- "Improve the flow"`
+      : `Let's create an engaging \`${props.type}\` description together! What's the main idea you want to convey?`
 
   aiPromptDialogRef.value.addWelcomeMsg(welcomeMsg)
 }
@@ -66,7 +72,28 @@ const createPromptInstructions = (userEnterInstructions) => {
       extractedImageState.extractedImages = extractedImagesRes.extractedImages
     }
   } else {
-    instructionsToSend = instructionsGenerator.newDescriptionInstructions(userEnterInstructions)
+    switch (props.type) {
+      case GenerateDescriptionType.Badge:
+        instructionsToSend = instructionsGenerator.newBadgeDescriptionInstructions(userEnterInstructions)
+        break
+      case GenerateDescriptionType.Subject:
+        instructionsToSend = instructionsGenerator.newSubjectDescriptionInstructions(userEnterInstructions)
+        break
+      case GenerateDescriptionType.Project:
+        instructionsToSend = instructionsGenerator.newProjectDescriptionInstructions(userEnterInstructions)
+        break
+      case GenerateDescriptionType.Quiz:
+        instructionsToSend = instructionsGenerator.newQuizDescriptionInstructions(userEnterInstructions)
+        break
+      case GenerateDescriptionType.Survey:
+        instructionsToSend = instructionsGenerator.newSurveyDescriptionInstructions(userEnterInstructions)
+        break
+      case GenerateDescriptionType.SkillGroup:
+        instructionsToSend = instructionsGenerator.newSkillGroupDescriptionInstructions(userEnterInstructions)
+        break
+      default:
+        instructionsToSend = instructionsGenerator.newSkillDescriptionInstructions(userEnterInstructions)
+    }
   }
 
   return instructionsToSend

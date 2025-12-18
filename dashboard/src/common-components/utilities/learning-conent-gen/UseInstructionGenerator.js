@@ -20,29 +20,164 @@ export const useInstructionGenerator = () => {
 
     const log = useLog()
 
-    const newDescriptionInstructions = (userEnteredText) => {
-        const res = `Generate a detailed description for a skill that will be part of a larger training. Here is user provided text that gives information about the skills: "${userEnteredText}". 
+    const newSkillDescriptionInstructions = (userEnteredText) => {
+        const res = `Generate a detailed description for a skill based on this information: "${userEnteredText}". 
 
-Here are the requirements:
+# Requirements:
 - Do not provide an introduction. 
-- Use Markdown. 
-- Use the word "skill" instead of "training". 
-- Do not include the word "skill" in any titles.
+- Use extensive Markdown formatting
+- Avoid using the word "skill" in any headers
 - Do not wrap sections with \`\`\`
+- Maintain a professional yet engaging tone
+`
+        log.debug(res)
+        return res
+    }
+
+    const newBadgeDescriptionInstructions = (userEnteredText) => {
+        const res = `Generate a detailed description for a badge that will be part of a training program based on this information: "${userEnteredText}". 
+
+# Requirements:
+- Generate engaging overview and background information for the badge
+- Focus on the badge as a whole, not individual skills
+- Use Markdown formatting
+- Do not wrap sections with \`\`\`
+- Keep the description engaging and interesting
+- Do not include titles or headers
+
+# Badge Context:
+- A badge represents a collection of related skills
+- It's earned when all required skills are completed
+- Badges serve as gamification elements to recognize achievement
+- The description should provide an overview of the badge's purpose and value
+- Focus on the badge's overall theme, not specific skills
+`
+        log.debug(res)
+        return res
+    }
+
+    const newSubjectDescriptionInstructions = (userEnteredText) => {
+        const res = `Generate a detailed description for a training subject based on this information: "${userEnteredText}". 
+
+# Requirements:
+- Create an engaging overview of the subject
+- Focus on the subject as a whole, not individual skills
+- Start directly with the content (no introduction needed)
+- Use Markdown formatting
+- Do not wrap sections with \`\`\`
+- Keep the description engaging and informative
+- Do not include titles or headers
+
+# Subject Context:
+- A Subject is a collection of related skills in a training program
+- It helps organize skills into logical groupings
+- The description should explain the subject's purpose and scope
+- Focus on the overall subject, not specific skills
+- Keep the tone professional yet engaging
+`
+        log.debug(res)
+        return res
+    }
+
+    const newSkillGroupDescriptionInstructions = (userEnteredText) => {
+        const res = `Generate a detailed description for a Skill Group based on this information: "${userEnteredText}". 
+
+# Requirements:
+- Create a clear and engaging overview of the Skill Group
+- Focus on the group's collective purpose, not individual skills
+- Start directly with the content (no introduction needed)
+- Use Markdown formatting
+- Do not wrap sections with \`\`\`
+- Keep the description concise and informative
+- Do not include titles or headers
+- Keep it brief (2-3 sentences)
+
+# Skill Group Context:
+- A way to organize related skills under a subject
+- Represents a collection of 2+ skills to be completed together
+- Can require all skills or a subset to be completed
+- Description should explain the group's learning objectives
+- Emphasize the collective value of the skills
+- Maintain a professional yet engaging tone
+`
+        log.debug(res)
+        return res
+    }
+
+    const newProjectDescriptionInstructions = (userEnteredText) => {
+        const res = `Generate a detailed description for a training program based on this information: "${userEnteredText}". 
+
+# Requirements:
+- Create an engaging overview of the training program
+- Focus on the overall training, not individual skills
+- Use Markdown formatting
+- Do not wrap sections with \`\`\`
+- Make the description compelling and informative
+- Keep the tone professional yet engaging
+
+# Training Context:
+- A SkillTree training is a comprehensive gamified learning experience
+- It includes skills, subjects, levels, and learning paths
+- The description should provide an overview of the training's purpose and value
+- Focus on the training as a whole, not specific skills
+- Highlight the learning journey and outcomes
+`
+        log.debug(res)
+        return res
+    }
+
+    const newQuizDescriptionInstructions = (userEnteredText) => {
+        const res = `Generate a detailed description for a Quiz based on this information: "${userEnteredText}". 
+
+# Requirements:
+- Create a clear and engaging overview of the quiz
+- Focus on the assessment's purpose and scope
+- Use Markdown formatting
+- Do not wrap sections with \`\`\`
+- Do not generate sample questions
+
+# Quiz Context:
+- A knowledge assessment with multiple question types 
+- Includes a passing score requirement
+- Emphasize the learning outcomes and objectives 
+- Avoid mentioning specific questions
+`
+        log.debug(res)
+        return res
+    }
+
+    const newSurveyDescriptionInstructions = (userEnteredText) => {
+        const res = `Generate a detailed description for a Survey based on this information: "${userEnteredText}". 
+
+# Requirements:
+- Create a clear and engaging introduction of the survey
+- Focus on the survey's purpose and scope
+- Use Markdown formatting
+- Do not wrap sections with \`\`\`
+- Do not generate sample questions
+- Keep the description concise and informative
+- Consider that description's audience is the participants of the survey
+
+# Survey Context:
+- A tool for gathering feedback and insights
+- Used to collect opinions, preferences, or experiences
+- Emphasize the value of participant responses
+- Avoid mentioning specific questions
+- Description will be displayed on the survey's splash page
 `
         log.debug(res)
         return res
     }
 
     const existingDescriptionInstructions = (existingText, userInstructions, instructionsToKeepPlaceholders) => {
-        const res = `Here is the current description:
-"${existingText}"
+        const res = `Modify current descriptions based on the following user instructions: "${userInstructions}"
+        
+# Current Description:
+${existingText}
 
-Please modify it based on the following instructions: "${userInstructions}"
-
-Here are the specific requirements:
+# Specific Requirements:
 - First provide the new text without any comments or fields (such as "corrected text")
-- At the end create a new section with the title of "Here is what was changed" - then list any comments or suggestions.
+- At the very end create a new section with the title of "Here is what was changed" - then list any comments or suggestions.
 ${instructionsToKeepPlaceholders ? `-${instructionsToKeepPlaceholders}` : ''}
 `
         log.debug(res)
@@ -406,7 +541,13 @@ ${questionTypeRules.countCorrectCheck}
     }
 
     return {
-        newDescriptionInstructions,
+        newSkillDescriptionInstructions,
+        newBadgeDescriptionInstructions,
+        newSubjectDescriptionInstructions,
+        newSkillGroupDescriptionInstructions,
+        newProjectDescriptionInstructions,
+        newQuizDescriptionInstructions,
+        newSurveyDescriptionInstructions,
         existingDescriptionInstructions,
         newQuizInstructions,
         updateQuizInstructions,
