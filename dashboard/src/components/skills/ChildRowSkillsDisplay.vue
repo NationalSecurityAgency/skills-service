@@ -33,6 +33,7 @@ import SelfReportType from "@/components/skills/selfReport/SelfReportType.js";
 import GenerateQuizDialog2 from '@/common-components/utilities/learning-conent-gen/GenerateQuizDialog2.vue'
 import QuizService from '@/components/quiz/QuizService.js'
 import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
+import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 
 const appConfig = useAppConfig()
 const config = useProjConfig()
@@ -53,6 +54,7 @@ const props = defineProps({
 const loading = ref(true)
 const skillInfo = ref({})
 const projectId = computed(() => route.params.projectId)
+const skillsState = useSubjectSkillsState()
 
 onMounted(() => {
   loadSkill()
@@ -164,6 +166,13 @@ const saveQuizForSkill = async (generatedQuiz) => {
   skillInfo.value.selfReportEnabled = true
   SkillsService.saveSkill( {
     ...skillInfo.value
+  }).then(() => {
+    const subjectSkillState = skillsState.subjectSkills.find((item) => item.skillId === skillInfo.value.skillId)
+    subjectSkillState.quizId = quizDef.quizId;
+    subjectSkillState.quizName = quizDef.name;
+    subjectSkillState.quizType = quizDef.type;
+    subjectSkillState.selfReportingType = quizDef.type;
+    subjectSkillState.selfReportEnabled = true
   })
 }
 const createQuizDef = async () => {
