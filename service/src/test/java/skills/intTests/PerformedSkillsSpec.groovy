@@ -49,10 +49,13 @@ class PerformedSkillsSpec extends DefaultIntSpec {
         events.data.size() == 3
         events.data[0].skillName == "Test Skill 3"
         events.data[0].skillId == "skill3"
+        events.data[0].subjectId == proj1_subj1.subjectId
         events.data[1].skillName == "Test Skill 2"
         events.data[1].skillId == "skill2"
+        events.data[1].subjectId == proj1_subj1.subjectId
         events.data[2].skillName == "Test Skill 1"
         events.data[2].skillId == "skill1"
+        events.data[2].subjectId == proj1_subj1.subjectId
     }
 
     def "filter by skill name"() {
