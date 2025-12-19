@@ -39,6 +39,7 @@ import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useStorage} from "@vueuse/core";
+import SkillNameRouterLink from "@/components/skills/SkillNameRouterLink.vue";
 
 const dialogMessages = useDialogMessages()
 const timeUtils = useTimeUtils()
@@ -379,8 +380,8 @@ const selectedSkills = ref([]);
                    :data-cy="`row${slotProps.index}-skillCell`">
                 <div class="flex flex-col">
                   <div class="flex items-start justify-start">
-                    <highlighted-value :value="slotProps.data.skillName"
-                                       :filter="filters.global.value"/>
+                    <SkillNameRouterLink :skill="{ name: slotProps.data.skillName, skillId: slotProps.data.skillId, projectId: projectId }" :subjectId="slotProps.data.subjectId"
+                                         :filter-value="filters.global.value" />
                     <Tag v-if="slotProps.data.importedSkill === true" severity="success" class="uppercase ml-1"
                          data-cy="importedTag">Imported
                     </Tag>

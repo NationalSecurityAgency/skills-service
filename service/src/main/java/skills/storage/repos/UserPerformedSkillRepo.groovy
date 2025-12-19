@@ -147,9 +147,10 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
         String getSkillName()
         String getSkillId()
         Date getPerformedOn()
+        String getSubjectId()
     }
-    @Query('''select u.projectId as projectId, s.name as skillName, u.skillId as skillId, u.performedOn as performedOn, u.id as id
-              from UserPerformedSkill u, SkillDef s
+    @Query('''select u.projectId as projectId, s.name as skillName, u.skillId as skillId, u.performedOn as performedOn, u.id as id, subjectDef.skillId as subjectId
+              from UserPerformedSkill u, SkillDef s, SkillDef subjectDef, SkillRelDef srd
               where u.skillRefId in (
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s
                 where s.projectId = ?2 and
@@ -160,7 +161,11 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                 )
               ) 
               and u.userId = ?1
-              and u.skillRefId = s.id''')
+              and u.skillRefId = s.id
+              AND subjectDef = srd.parent AND 
+                  s = srd.child AND
+                  (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') AND
+                  subjectDef.type = 'Subject'  ''')
     List<PerformedSkillQRes> findByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(String userId, String projectId, String skillId, Pageable pageable)
 
     @Query('''SELECT COUNT(DISTINCT p.skillId) from UserPerformedSkill p where p.userId = ?2 
