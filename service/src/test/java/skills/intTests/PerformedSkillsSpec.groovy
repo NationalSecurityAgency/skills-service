@@ -47,14 +47,14 @@ class PerformedSkillsSpec extends DefaultIntSpec {
 
         then:
         events.data.size() == 3
-        events.data[0].skillName == "Test Skill 3"
-        events.data[0].skillId == "skill3"
+        events.data[0].skillName == proj1_skills[2].name
+        events.data[0].skillId == proj1_skills[2].skillId
         events.data[0].subjectId == proj1_subj1.subjectId
-        events.data[1].skillName == "Test Skill 2"
-        events.data[1].skillId == "skill2"
+        events.data[1].skillName == proj1_skills[1].name
+        events.data[1].skillId == proj1_skills[1].skillId
         events.data[1].subjectId == proj1_subj1.subjectId
-        events.data[2].skillName == "Test Skill 1"
-        events.data[2].skillId == "skill1"
+        events.data[2].skillName == proj1_skills[0].name
+        events.data[2].skillId == proj1_skills[0].skillId
         events.data[2].subjectId == proj1_subj1.subjectId
     }
 
@@ -129,39 +129,39 @@ class PerformedSkillsSpec extends DefaultIntSpec {
 
         then:
         events.data.size() == 10
-        events.data[0].skillName == "Test Skill 5 Subject2"
-        events.data[0].skillId == "skill5subj2"
+        events.data[0].skillName == proj1_skills2[4].name
+        events.data[0].skillId == proj1_skills2[4].skillId
         events.data[0].subjectId == proj1_subj2.subjectId
-        events.data[1].skillName == "Test Skill 5"
-        events.data[1].skillId == "skill5"
+        events.data[1].skillName == proj1_skills[4].name
+        events.data[1].skillId == proj1_skills[4].skillId
         events.data[1].subjectId == proj1_subj1.subjectId
 
-        events.data[2].skillName == "Test Skill 4 Subject2"
-        events.data[2].skillId == "skill4subj2"
+        events.data[2].skillName == proj1_skills2[3].name
+        events.data[2].skillId == proj1_skills2[3].skillId
         events.data[2].subjectId == proj1_subj2.subjectId
-        events.data[3].skillName == "Test Skill 4"
-        events.data[3].skillId == "skill4"
+        events.data[3].skillName == proj1_skills[3].name
+        events.data[3].skillId == proj1_skills[3].skillId
         events.data[3].subjectId == proj1_subj1.subjectId
 
-        events.data[4].skillName == "Test Skill 3 Subject2"
-        events.data[4].skillId == "skill3subj2"
+        events.data[4].skillName == proj1_skills2[2].name
+        events.data[4].skillId == proj1_skills2[2].skillId
         events.data[4].subjectId == proj1_subj2.subjectId
-        events.data[5].skillName == "Test Skill 3"
-        events.data[5].skillId == "skill3"
+        events.data[5].skillName == proj1_skills[2].name
+        events.data[5].skillId == proj1_skills[2].skillId
         events.data[5].subjectId == proj1_subj1.subjectId
 
-        events.data[6].skillName == "Test Skill 2 Subject2"
-        events.data[6].skillId == "skill2subj2"
+        events.data[6].skillName == proj1_skills2[1].name
+        events.data[6].skillId == proj1_skills2[1].skillId
         events.data[6].subjectId == proj1_subj2.subjectId
-        events.data[7].skillName == "Test Skill 2"
-        events.data[7].skillId == "skill2"
+        events.data[7].skillName == proj1_skills[1].name
+        events.data[7].skillId == proj1_skills[1].skillId
         events.data[7].subjectId == proj1_subj1.subjectId
 
-        events.data[8].skillName == "Test Skill 1 Subject2"
-        events.data[8].skillId == "skill1subj2"
+        events.data[8].skillName == proj1_skills2[0].name
+        events.data[8].skillId == proj1_skills2[0].skillId
         events.data[8].subjectId == proj1_subj2.subjectId
-        events.data[9].skillName == "Test Skill 1"
-        events.data[9].skillId == "skill1"
+        events.data[9].skillName == proj1_skills[0].name
+        events.data[9].skillId == proj1_skills[0].skillId
         events.data[9].subjectId == proj1_subj1.subjectId
     }
 }
