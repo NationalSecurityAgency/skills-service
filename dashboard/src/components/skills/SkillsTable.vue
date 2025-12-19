@@ -78,7 +78,7 @@ const subjectId = computed(() => route.params.subjectId)
 const projectId = computed(() => route.params.projectId)
 const tableId = props.groupId || route.params.subjectId
 const possiblePageSizes = [10, 20, 50, 100]
-const pageSize = useStorage(`${tableId}-pageSize`, 10)
+const pageSize = useStorage(`${tableId}-skillsTable-pageSize`, 10)
 
 const sortInfo = ref({ sortOrder: -1, sortBy: 'created' })
 const options = ref({
@@ -498,6 +498,10 @@ const exportSkills = () => {
 const onRowExpand = () => {
   SkillsReporter.reportSkill('ExpandSkillDetailsSkillsPage')
 }
+
+const pageChanged = (pagingInfo) => {
+  pageSize.value = pagingInfo.rows
+}
 </script>
 
 <template>
@@ -599,7 +603,8 @@ const onRowExpand = () => {
       @update:first="(val) => indexOfFirstRow = val"
       @filter="onFilter"
       @sort="onColumnSort"
-      :paginator="totalRows > pageSize"
+      @page="pageChanged"
+      paginator
       :rows="pageSize"
       :rowsPerPageOptions="possiblePageSizes"
       :globalFilterFields="['name']"
