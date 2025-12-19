@@ -70,7 +70,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     return strProp ? strProp.split(',').map(s => s.trim()) : []
   }
 
-  const isTrue = (val) => val && (val === true || val?.toLowerCase() === 'true')
+  const isTrue = (val) => !!val && (val === true || val?.toLowerCase() === 'true')
 
   const maxBadgeBonusInMinutes = computed(() => config.value.maxBadgeBonusInMinutes)
   const minNameLength = computed(() => config.value.minNameLength)
@@ -190,6 +190,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const openaiFooterPoweredByLink = computed(() => config.value.openaiFooterPoweredByLink)
   const openaiFooterPoweredByLinkText = computed(() => config.value.openaiFooterPoweredByLinkText)
   const openaiNotSupportedChatModels = computed(() => listFromCommaSeparatedString(config.value.openaiNotSupportedChatModels))
+  const openAiDisableSingleQuestionTypeChange = computed(() => isTrue(config.value.openAiDisableSingleQuestionTypeChange))
 
   return {
     loadConfigState,
@@ -314,5 +315,6 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     openaiFooterPoweredByLink,
     openaiFooterPoweredByLinkText,
     openaiNotSupportedChatModels,
+    openAiDisableSingleQuestionTypeChange,
   }
 })

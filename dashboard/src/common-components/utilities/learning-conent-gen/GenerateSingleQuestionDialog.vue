@@ -89,7 +89,9 @@ const answersString = ref('')
 const questionsTitle = '### Question:'
 const answersTitle = '### Answers:'
 const lastGeneratedQuestionInfo = ref(null)
+const isGenerating = ref(false)
 const handleGeneratedChunk = (chunk) => {
+  isGenerating.value = true
   let append = true
   let chunkToSend = chunk
 
@@ -164,6 +166,7 @@ const handleGenerationCompleted = (generated) => {
       questionTypeId: props.questionType.selectedType?.id
     }
     lastGeneratedQuestionInfo.value = generatedInfo
+    isGenerating.value = false
     return {
       generatedValue: generated.generatedValue,
       generateValueChangedNotes,
@@ -212,6 +215,10 @@ const communityValue = computed(() => {
 const generationFailed = () => {
   answersFound.value = false
 }
+
+const questionTypeSelectionDisabled = computed(() => {
+  return isGenerating.value || (appConfig.openAiDisableSingleQuestionTypeChange && !!lastGeneratedQuestionInfo.value);
+})
 </script>
 
 <template>
@@ -236,6 +243,7 @@ const generationFailed = () => {
             v-model="questionType.selectedType"
             :options="questionType.options"
             :ignore-vee-validate="true"
+            :disabled="questionTypeSelectionDisabled"
         />
       </div>
     </template>
