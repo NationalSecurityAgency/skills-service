@@ -16,17 +16,26 @@
 package skills.utils
 
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 class TimeRangeFormatterUtil {
 
     static String defaultStart = "1900-01-01 00:00:00"
     static String defaultEnd = "2100-12-31 23:59:59"
 
-    static List<Date> formatTimeRange(String start, String end) {
-        def format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        Date startDate = start ? format.parse(start) : format.parse(defaultStart)
-        Date endDate = end ? format.parse(end) : format.parse(defaultEnd)
+    static List<Date> formatTimeRange(String start, String end, Boolean exactTime = true) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        LocalDateTime startDate = start ? LocalDateTime.parse(start, formatter) : LocalDateTime.parse(defaultStart, formatter) //start ? format.parse(start) : format.parse(defaultStart)
+        LocalDateTime endDate = end ? LocalDateTime.parse(end, formatter) : LocalDateTime.parse(defaultEnd, formatter)
 
-        return [startDate, endDate]
+        if(!exactTime) {
+            startDate = startDate.toLocalDate().atTime(LocalTime.MIN)
+            endDate = endDate.toLocalDate().atTime(LocalTime.MAX)
+        }
+
+        return [startDate.toDate(), endDate.toDate()]
     }
 }

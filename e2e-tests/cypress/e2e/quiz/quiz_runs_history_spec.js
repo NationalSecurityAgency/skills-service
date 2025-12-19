@@ -15,12 +15,30 @@
  */
 import dayjs from 'dayjs';
 import utcPlugin from 'dayjs/plugin/utc';
+import moment from "moment-timezone";
 
 dayjs.extend(utcPlugin);
 
 describe('Quiz Runs History Tests', () => {
 
     const tableSelector = '[data-cy="quizRunsHistoryTable"]'
+
+    Cypress.Commands.add('prevMonth', () => {
+        cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-name="pcprevbutton"]').click()
+        cy.wait(150);
+    });
+    Cypress.Commands.add('setDay', (dayNum) => {
+        let re = new RegExp(String.raw`^${dayNum}$`)
+        cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="day"]').contains(re).click()
+    });
+
+    Cypress.Commands.add('filterSetYear', (yearNum) => {
+        cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="selectyear"]').click()
+        cy.get('[data-pc-section="panel"] [data-pc-section="year"]').contains(yearNum).click()
+    })
+    Cypress.Commands.add('filterSetMonth', (month) => {
+        cy.get('[data-pc-section="panel"] [data-pc-section="month"]').contains(month).click()
+    })
 
     beforeEach(() => {
         Cypress.Commands.add('validateChoiceAnswer', (qNum, aNum, val, isSingleChoice, isSelected, wrongSelection = false, missedSelection = false,) => {
@@ -479,5 +497,81 @@ describe('Quiz Runs History Tests', () => {
         validateMatch(3, 1, 'Second Term', 'Third Answer', false)
         validateMatch(3, 2, 'Third Term', 'Second Answer', false)
 
+    });
+
+    it('filter quiz runs by date', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizMultipleChoiceQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+        cy.createQuizQuestionDef(1, 4);
+
+        for(let x = 1; x <= 10; x++) {
+            cy.runQuizForUser(1, x, [{selectedIndex: [1]}, {selectedIndex: [0, 3]}, {selectedIndex: [2]}])
+            const dateInPast = moment('2025-10-01 00:00:00.0').add(x, 'days').format('YYYY-MM-DD 00:00:00.0');
+            cy.execSql(`UPDATE user_quiz_attempt SET started = '${dateInPast}' WHERE user_id='${'user' + x}'`, true)
+        }
+
+
+        cy.visit('/administrator/quizzes/quiz1/runs');
+
+        cy.get('[data-cy="metricsDateFilter"]').click()
+        cy.filterSetYear(2025)
+        cy.filterSetMonth('Oct')
+        cy.setDay(1)
+        cy.setDay(3)
+
+        cy.get('[data-cy="applyDateFilterButton"]').click()
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Failed' }],
+        ], 10);
+
+        cy.get('[data-cy="clearDateFilterButton"]').click()
+
+        cy.get('[data-cy="metricsDateFilter"]').click()
+        cy.filterSetYear(2025)
+        cy.filterSetMonth('Oct')
+        cy.setDay(3)
+        cy.setDay(7)
+
+        cy.get('[data-cy="applyDateFilterButton"]').click()
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user6' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user5' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user4' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user3' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'Failed' }],
+        ], 10);
+
+        cy.get('[data-cy="clearDateFilterButton"]').click()
+
+        cy.get('[data-cy="metricsDateFilter"]').click()
+        cy.filterSetYear(2025)
+        cy.filterSetMonth('Oct')
+        cy.setDay(15)
+        cy.setDay(20)
+        cy.get('[data-cy="applyDateFilterButton"]').click()
+
+        cy.get('.alert-info').contains('This chart needs at least 2 days worth of runs')
+        cy.get('.alert-info').contains('No data yet')
+        cy.get('[data-cy="quizRunsHistoryTable"]').contains('There are no records to show')
+
+        cy.get('[data-cy="clearDateFilterButton"]').click()
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user9' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user8' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user7' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user6' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user5' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user4' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user3' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'Failed' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Failed' }],
+        ], 10);
     });
 });

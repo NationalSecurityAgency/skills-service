@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {onMounted, ref} from 'vue'
+import {onMounted, ref, watch} from 'vue'
 import {useRoute} from 'vue-router';
 import {useNumberFormat} from '@/common-components/filter/UseNumberFormat.js';
 import QuizService from '@/components/quiz/QuizService.js';
@@ -23,21 +23,36 @@ import {useUserTagsUtils} from "@/components/utils/UseUserTagsUtils.js";
 import Chart from "primevue/chart";
 import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
 import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
+
+const props = defineProps({
+  dateRange: Array,
+})
 
 const route = useRoute()
 const numberFormat = useNumberFormat()
 const userTagsUtils = useUserTagsUtils();
 const chartSupportColors = useChartSupportColors()
+const timeUtils = useTimeUtils()
 
 const loading = ref(true);
 const hasData = ref(false);
 const chartJsOptions = ref();
 const chartData = ref({})
 
+watch(() => props.dateRange, (newDateRange) => {
+  loadData()
+});
+
 onMounted(()=> {
   chartJsOptions.value = setChartOptions()
+  loadData()
+})
+
+const loadData = () => {
   loading.value = true;
-  QuizService.getUserTagCounts(route.params.quizId, userTagsUtils.userTagKey())
+  const dateRange = timeUtils.prepareDateRange(props.dateRange)
+  QuizService.getUserTagCounts(route.params.quizId, userTagsUtils.userTagKey(), dateRange.startDate, dateRange.endDate)
       .then((res) => {
         chartData.value = {
           labels: res.map((item) => item.value),
@@ -58,7 +73,7 @@ onMounted(()=> {
       .finally(() => {
         loading.value = false;
       });
-})
+}
 
 const setChartOptions = () => {
   const colors = chartSupportColors.getColors()

@@ -292,9 +292,12 @@ class QuizController {
                             @RequestParam int limit,
                             @RequestParam int page,
                             @RequestParam String orderBy,
-                            @RequestParam Boolean ascending) {
+                            @RequestParam Boolean ascending,
+                            @RequestParam(required = false) String startDate,
+                            @RequestParam(required = false) String endDate) {
         PageRequest pageRequest = TablePageUtil.validateAndConstructQuizPageRequest(limit, page, orderBy, ascending)
-        return quizDefService.getQuizRuns(quizId, query, quizAttemptStatus, pageRequest);
+        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
+        return quizDefService.getQuizRuns(quizId, query, quizAttemptStatus, pageRequest, dates[0], dates[1]);
     }
 
     @RequestMapping(value = "/{quizId}/runs/{attemptId}", method = RequestMethod.DELETE, produces = "application/json")
@@ -430,17 +433,24 @@ class QuizController {
 
     @RequestMapping(value = "/{quizId}/userTagCounts", method = [RequestMethod.GET], produces = "application/json")
     @ResponseBody
-    List<LabelCountItem> getUserTagCounts(@PathVariable("quizId") String quizId, @RequestParam String userTagKey) {
+    List<LabelCountItem> getUserTagCounts(@PathVariable("quizId") String quizId,
+                                          @RequestParam String userTagKey,
+                                          @RequestParam(required = false) String startDate,
+                                          @RequestParam(required = false) String endDate) {
         QuizValidator.isNotBlank(quizId, "Quiz Id")
         QuizValidator.isNotBlank(userTagKey, "User Tag Key")
-        return quizDefService.getUserTagCounts(quizId, userTagKey)
+        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
+        return quizDefService.getUserTagCounts(quizId, userTagKey, dates[0], dates[1])
     }
 
     @RequestMapping(value = "/{quizId}/usageOverTime", method = [RequestMethod.GET], produces = "application/json")
     @ResponseBody
-    List<TimestampCountItem> getUsageOverTime(@PathVariable("quizId") String quizId) {
+    List<TimestampCountItem> getUsageOverTime(@PathVariable("quizId") String quizId,
+                                              @RequestParam(required = false) String startDate,
+                                              @RequestParam(required = false) String endDate) {
         QuizValidator.isNotBlank(quizId, "Quiz Id")
-        List<TimestampCountItem> res = quizDefService.getUsageOverTime(quizId)
+        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
+        List<TimestampCountItem> res = quizDefService.getUsageOverTime(quizId, dates[0], dates[1])
         return res
     }
 

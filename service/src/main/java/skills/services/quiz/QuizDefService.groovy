@@ -808,14 +808,14 @@ class QuizDefService {
     }
 
     @Transactional
-    TableResult getQuizRuns(String quizId, String query, UserQuizAttempt.QuizAttemptStatus quizAttemptStatus, PageRequest pageRequest) {
+    TableResult getQuizRuns(String quizId, String query, UserQuizAttempt.QuizAttemptStatus quizAttemptStatus, PageRequest pageRequest, Date startDate, Date endDate) {
         long totalCount = userQuizAttemptRepo.countByQuizId(quizId)
         if (totalCount == 0) {
             return new TableResult(totalCount: totalCount, count: 0, data: [])
         }
 
         query = query ?: ''
-        Page<QuizRun> quizRunsPage = userQuizAttemptRepo.findQuizRuns(quizId, query, usersTableAdditionalUserTagKey, quizAttemptStatus?.toString(), pageRequest)
+        Page<QuizRun> quizRunsPage = userQuizAttemptRepo.findQuizRuns(quizId, query, usersTableAdditionalUserTagKey, quizAttemptStatus?.toString(), startDate, endDate, pageRequest)
         long count = quizRunsPage.getTotalElements()
         List<QuizRun> quizRuns = quizRunsPage.getContent()
 
@@ -1202,15 +1202,15 @@ class QuizDefService {
     }
 
     @Transactional(readOnly = true)
-    List<LabelCountItem> getUserTagCounts(String quizId, String userTag) {
+    List<LabelCountItem> getUserTagCounts(String quizId, String userTag, Date startDate, Date endDate) {
         PageRequest pageRequest = PageRequest.of(0, 20, DESC, "tagCount")
-        List<UserQuizAttemptRepo.TagValueCount> tagValueCounts = userQuizAttemptRepo.getUserTagCounts(quizId, userTag, pageRequest)
+        List<UserQuizAttemptRepo.TagValueCount> tagValueCounts = userQuizAttemptRepo.getUserTagCounts(quizId, userTag, startDate, endDate, pageRequest)
         return tagValueCounts?.collect { new LabelCountItem(value: it.tagValue, count: it.tagCount)}
     }
 
     @Transactional(readOnly = true)
-    List<TimestampCountItem> getUsageOverTime(String quizId) {
-        List<UserQuizAttemptRepo.DateCount> usageOverTime = userQuizAttemptRepo.getUsageOverTime(quizId)
+    List<TimestampCountItem> getUsageOverTime(String quizId, Date startDate, Date endDate) {
+        List<UserQuizAttemptRepo.DateCount> usageOverTime = userQuizAttemptRepo.getUsageOverTime(quizId, startDate, endDate)
         if (!usageOverTime) {
             return []
         }
@@ -1237,10 +1237,14 @@ class QuizDefService {
         Date now = StartDateUtil.computeStartDate(new Date(), EventType.DAILY)
         List<DayCountItem> items = ZeroFillDayCountItemUtil.zeroFillDailyGaps(now, previousDate, true)
         if (items) {
-            res.addAll(items.collect {new TimestampCountItem( value: it.day.time, count: it.count)}.sort { it.value})
+            items.forEach({ item ->
+                if(item.day >= startDate && item.day <= endDate) {
+                    res.add(new TimestampCountItem( value: item.day.time, count: item.count))
+                }
+            })
         }
 
-        return res
+        return res.sort{ it.value }
     }
 
     @Transactional()

@@ -119,9 +119,9 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         String tomorrow = format.format(new Date() + 1)
 
         when:
-        def metrics_day4_to_2 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[0]), format.format(dates[2]))
-        def metrics_day4_to_1 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[0]), tomorrow)
-        def metrics_day3_to_1 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[1]), tomorrow)
+        def metrics_day4_to_2 = skillsService.getQuizMetrics(quiz.quizId, format.format(dates[0]), format.format(dates[2]))
+        def metrics_day4_to_1 = skillsService.getQuizMetrics(quiz.quizId, format.format(dates[0]), tomorrow)
+        def metrics_day3_to_1 = skillsService.getQuizMetrics(quiz.quizId, format.format(dates[1]), tomorrow)
 
         then:
         metrics_day4_to_2.avgAttemptRuntimeInMs >= 6130000
@@ -313,13 +313,13 @@ class QuizMetricsSpecs extends DefaultIntSpec {
         String tomorrow = format.format(new Date() + 1)
 
         when:
-        def metrics_day4 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[0]), format.format(dates[1]))
-        def metrics_day3 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[1]), format.format(dates[2]))
-        def metrics_day2 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[2]), format.format(dates[3]))
-        def metrics_day1 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[3]), tomorrow)
-        def metrics_day4_to_2 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[0]), format.format(dates[2]))
-        def metrics_day4_to_1 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[0]), tomorrow)
-        def metrics_day3_to_1 = skillsService.getQuizMetricsWithinRange(quiz.quizId, format.format(dates[1]), tomorrow)
+        def metrics_day4 = skillsService.getQuizMetrics(quiz.quizId, format.format(dates[0]), format.format(dates[1]))
+        def metrics_day3 = skillsService.getQuizMetrics(quiz.quizId, format.format(dates[1]), format.format(dates[2]))
+        def metrics_day2 = skillsService.getQuizMetrics(quiz.quizId, format.format(dates[2]), format.format(dates[3]))
+        def metrics_day1 = skillsService.getQuizMetrics(quiz.quizId, format.format(dates[3]), tomorrow)
+        def metrics_day4_to_2 = skillsService.getQuizMetrics(quiz.quizId, format.format(dates[0]), format.format(dates[2]))
+        def metrics_day4_to_1 = skillsService.getQuizMetrics(quiz.quizId, format.format(dates[0]), tomorrow)
+        def metrics_day3_to_1 = skillsService.getQuizMetrics(quiz.quizId, format.format(dates[1]), tomorrow)
 
         then:
         metrics_day4.numTaken == 4

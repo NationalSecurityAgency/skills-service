@@ -21,6 +21,8 @@ import skills.intTests.utils.QuizDefFactory
 import skills.storage.model.UserQuizAttempt
 import skills.storage.repos.UserQuizAttemptRepo
 
+import java.text.SimpleDateFormat
+
 class QuizUsageOverTimeSpecs extends DefaultIntSpec {
 
     @Autowired
@@ -69,7 +71,7 @@ class QuizUsageOverTimeSpecs extends DefaultIntSpec {
         q2UsageOverTime.count == [1, 0, 2, 0]
     }
 
-    def "get usage over time - will in lengthy gaps"() {
+    def "get usage over time - fill in lengthy gaps"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
@@ -119,6 +121,50 @@ class QuizUsageOverTimeSpecs extends DefaultIntSpec {
         !q1UsageOverTime
     }
 
+    def "get usage over time - filter by date"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 2, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+
+        List<String> users = getRandomUsers(10, true)
+        List<Date> dates = (0..3).collect { new Date() - it }.reverse()
+
+        runQuiz(users[0], quiz, quizInfo, true, dates[0], true)
+        runQuiz(users[1], quiz, quizInfo, true, dates[0], true)
+        runQuiz(users[2], quiz, quizInfo, true, dates[0], false)
+        runQuiz(users[3], quiz, quizInfo, true, dates[0], true)
+        runQuiz(users[4], quiz, quizInfo, true, dates[1], true)
+        runQuiz(users[5], quiz, quizInfo, true, dates[1], false)
+        runQuiz(users[6], quiz, quizInfo, true, dates[2], false)
+        runQuiz(users[7], quiz, quizInfo, true, dates[3], true)
+        runQuiz(users[8], quiz, quizInfo, true, dates[3], false)
+        runQuiz(users[9], quiz, quizInfo, true, dates[3], true)
+
+        def format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
+        when:
+        def q1UsageOverTimeRange1 = skillsService.getQuizUsageOverTime(quiz.quizId, format.format(dates[0]), format.format(dates[1]))
+        def q1UsageOverTimeRange2 = skillsService.getQuizUsageOverTime(quiz.quizId, format.format(dates[1]), format.format(dates[2]))
+        def q1UsageOverTimeRange3 = skillsService.getQuizUsageOverTime(quiz.quizId, format.format(dates[2]), format.format(dates[3]))
+        def q1UsageOverTimeRange4 = skillsService.getQuizUsageOverTime(quiz.quizId, format.format(dates[3]), format.format(dates[3]))
+        def q1UsageOverTimeRange5 = skillsService.getQuizUsageOverTime(quiz.quizId, format.format(dates[0]), format.format(dates[3]))
+
+        then:
+        q1UsageOverTimeRange1.value == dates[0..1].collect { new Date(it.time).clearTime() }.time
+        q1UsageOverTimeRange1.count == [4, 2]
+        q1UsageOverTimeRange2.value == dates[1..2].collect { new Date(it.time).clearTime() }.time
+        q1UsageOverTimeRange2.count == [2, 1]
+        q1UsageOverTimeRange3.value == dates[2..3].collect { new Date(it.time).clearTime() }.time
+        q1UsageOverTimeRange3.count == [1, 3]
+        q1UsageOverTimeRange4.value == dates[3].collect { new Date(it.time).clearTime() }.time
+        q1UsageOverTimeRange4.count == [3]
+        q1UsageOverTimeRange5.value == dates.collect { new Date(it.time).clearTime() }.time
+        q1UsageOverTimeRange5.count == [4, 2, 1, 3]
+
+    }
 
     void runQuiz(String userId, def quiz, def quizInfo, boolean pass, Date startDate, boolean complete = true) {
         def quizAttempt =  skillsService.startQuizAttemptForUserId(quiz.quizId, userId).body
