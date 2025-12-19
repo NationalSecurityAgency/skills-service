@@ -411,6 +411,35 @@ Paragraph three
 
 | (A) header1 | (A) header 2  |
 | --- | --- |
+| (A) [cell 1](https://some.url.com) | (A) cell 2 |
+""").valid
+
+        validator.validateDescription("""(A) table to follow
+
+| header1 | header 2  |
+| --- | --- |
+| [cell 1](https://some.url.com) | cell 2 |
+""").valid
+
+        !validator.validateDescription("""(A) table to follow
+
+| header1 | header 2  |
+| --- | --- |
+| [(B) cell 1](https://some.url.com) | cell 2 |
+""").valid
+
+        !validator.validateDescription("""(A) table to follow
+
+| header1 | header 2  |
+| --- | --- |
+| (B)[cell 1](https://some.url.com) | cell 2 |
+""").valid
+
+
+        validator.validateDescription("""(A) table to follow
+
+| (A) header1 | (A) header 2  |
+| --- | --- |
 | (A) some text [some link](https://some.url.com) | (A) cell 2 |
 """).valid
 
