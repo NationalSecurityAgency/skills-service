@@ -580,4 +580,47 @@ class AdminBadgesSpecs extends DefaultIntSpec {
         res.numSkills == 1
         resAfterRemoval.numSkills == 0
     }
+
+    void "get skills for badge"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2)
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def skillsInSubj2 = SkillsFactory.createSkills(2, 1, 2)
+        def skillGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        def skillInGroup = SkillsFactory.createSkill(1, 1, 6)
+        def badge = SkillsFactory.createBadge()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(skills)
+        skillsService.createSkills(skillsInSubj2)
+        skillsService.createSkill(skillGroup)
+        skillsService.assignSkillToSkillsGroup(skillGroup.skillId, skillInGroup)
+
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills.get(1).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skillInGroup.skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skillsInSubj2.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skillsInSubj2.get(1).skillId])
+
+        def collectedSkills = [skills.get(0), skills.get(1), skillInGroup, skillsInSubj2.get(0), skillsInSubj2.get(1)]
+
+        when:
+        def badgeSkills = skillsService.getBadgeSkills(proj.projectId, badge.badgeId)
+
+        then:
+        badgeSkills
+        badgeSkills.size() == 5
+        badgeSkills.forEach{skill ->
+            def foundSkill = collectedSkills.find({it -> skill.skillId == it.skillId})
+            foundSkill.skillId == skill.skillId
+            foundSkill.subjectId == skill.subjectId
+            foundSkill.subjectName == skill.name
+            foundSkill.groupName == skill.groupName
+            foundSkill.groupId == skill.groupId
+        }
+    }
 }

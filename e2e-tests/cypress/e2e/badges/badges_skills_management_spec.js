@@ -225,7 +225,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill0'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '50'
             }],
             [{
@@ -235,7 +235,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '100'
             }],
             [{
@@ -245,7 +245,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill2'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '150'
             }],
             [{
@@ -255,7 +255,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill3'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '200'
             }],
             [{
@@ -265,7 +265,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill4'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '250'
             }],
             [{
@@ -275,7 +275,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill5'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '300'
             }],
             [{
@@ -285,7 +285,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill6'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '350'
             }],
         ], 10);
@@ -301,7 +301,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill6'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '350'
             }],
             [{
@@ -311,7 +311,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill5'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '300'
             }],
             [{
@@ -321,7 +321,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill4'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '250'
             }],
             [{
@@ -331,7 +331,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill3'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '200'
             }],
             [{
@@ -341,7 +341,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill2'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '150'
             }],
             [{
@@ -351,7 +351,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '100'
             }],
             [{
@@ -361,7 +361,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill0'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '50'
             }],
         ], 10);
@@ -377,7 +377,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill6'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '350'
             }],
             [{
@@ -387,7 +387,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill5'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '300'
             }],
             [{
@@ -397,7 +397,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill4'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '250'
             }],
             [{
@@ -407,7 +407,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill3'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '200'
             }],
             [{
@@ -417,7 +417,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill2'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '150'
             }],
             [{
@@ -427,7 +427,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '100'
             }],
             [{
@@ -437,7 +437,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill0'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '50'
             }],
         ], 10);
@@ -453,7 +453,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill0'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '50'
             }],
             [{
@@ -463,7 +463,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '100'
             }],
             [{
@@ -473,7 +473,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill2'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '150'
             }],
             [{
@@ -483,7 +483,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill3'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '200'
             }],
             [{
@@ -493,7 +493,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill4'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '250'
             }],
             [{
@@ -503,7 +503,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill5'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '300'
             }],
             [{
@@ -513,7 +513,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill6'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '350'
             }],
         ], 10);
@@ -529,7 +529,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill0'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '50'
             }],
             [{
@@ -539,7 +539,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '100'
             }],
             [{
@@ -549,7 +549,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill2'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '150'
             }],
             [{
@@ -559,7 +559,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill3'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '200'
             }],
             [{
@@ -569,7 +569,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill4'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '250'
             }],
             [{
@@ -579,7 +579,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill5'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '300'
             }],
             [{
@@ -589,7 +589,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill6'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '350'
             }],
         ], 10);
@@ -605,7 +605,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill6'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '350'
             }],
             [{
@@ -615,7 +615,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill5'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '300'
             }],
             [{
@@ -625,7 +625,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill4'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '250'
             }],
             [{
@@ -635,7 +635,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill3'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '200'
             }],
             [{
@@ -645,7 +645,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill2'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '150'
             }],
             [{
@@ -655,7 +655,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill1'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '100'
             }],
             [{
@@ -665,7 +665,7 @@ describe('Badges Tests', () => {
                 colIndex: 1,
                 value: 'skill0'
             }, {
-                colIndex: 2,
+                colIndex: 4,
                 value: '50'
             }],
         ], 10);

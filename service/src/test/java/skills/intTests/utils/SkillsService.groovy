@@ -562,7 +562,7 @@ class SkillsService {
     }
 
     def getBadgeSkills(String projectId, String badgeId) {
-        wsHelper.adminGet("/projects/${projectId}/badges/${badgeId}/skills")
+        wsHelper.adminGet("/projects/${projectId}/badge/${badgeId}/skills")
     }
     def removeBadge(Map props) {
         wsHelper.adminDelete("/projects/${props.projectId}/badges/${props.badgeId}")

@@ -238,6 +238,17 @@ const filterSkills = (searchQuery) => {
                 </template>
               </Column>
               <Column header="Skill ID" field="skillId" sortable :class="{'flex': responsive.md.value }"></Column>
+              <Column header="Subject" field="subjectName" sortable :class="{'flex': responsive.md.value }">
+                <template #body="slotProps">
+                  <router-link v-if="slotProps.data.subjectId && !hideManageButton" :id="slotProps.data.subjectId" :to="{ name:'SubjectSkills',
+                    params: { projectId: slotProps.data.projectId, subjectId: slotProps.data.subjectId }}"
+                               class="btn btn-sm btn-outline-hc ml-2"
+                               :data-cy="`manage_${slotProps.data.subjectId}`">
+                    {{ slotProps.data.subjectName }}
+                  </router-link>
+                </template>
+              </Column>
+              <Column header="Group" field="groupName" sortable :class="{'flex': responsive.md.value }"></Column>
               <Column header="Total Points" field="totalPoints" sortable :class="{'flex': responsive.md.value }"></Column>
               <Column header="Delete" :class="{'flex': responsive.md.value }">
                 <template #body="slotProps">

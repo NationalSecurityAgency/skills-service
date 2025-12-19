@@ -867,6 +867,8 @@ class SkillsAdminService {
                 name: reusedSkill ? SkillReuseIdUtil.removeTag(unsanitizeName) : unsanitizeName,
                 subjectId: partial.subjectSkillId,
                 subjectName: InputSanitizer.unsanitizeName(partial.subjectName),
+                groupId: partial.groupId,
+                groupName: partial.groupName,
                 pointIncrement: partial.pointIncrement,
                 pointIncrementInterval: partial.pointIncrementInterval,
                 numMaxOccurrencesIncrementInterval: partial.numMaxOccurrencesIncrementInterval,
