@@ -89,4 +89,79 @@ class PerformedSkillsSpec extends DefaultIntSpec {
         skillsService.getPerformedSkills(users[0], proj1.projectId, "ok fi", "skillId").data.collect { it.skillName } == ["ool ok find", "one ok find"]
         skillsService.getPerformedSkills(users[0], proj1.projectId, "gr", "skillId").data.collect { it.skillName } == ["grr 5 find"]
     }
+
+    def "get performed skills in groups"() {
+        List<String> users = getRandomUsers(3)
+        def proj1 = SkillsFactory.createProject(5)
+        def proj1_subj1 = SkillsFactory.createSubject(5, 1)
+        def proj1_subj2 = SkillsFactory.createSubject(5, 2)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(5, 5, 1)
+        List<Map> proj1_skills2 = SkillsFactory.createSkills(5, 5, 2)
+        proj1_skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        proj1_skills2.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_skills)
+        skillsService.createSubject(proj1_subj2)
+        skillsService.createSkills(proj1_skills2)
+        def skillsGroup = SkillsFactory.createSkillsGroup(5, 1, 6)
+        skillsService.createSkill(skillsGroup)
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, proj1_skills[3])
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, proj1_skills[4])
+
+        List<Date> dates = (1..5).collect { new Date() - it }
+        dates.eachWithIndex { it, index ->
+            skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(index).skillId], users[0], it).body
+            skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills2.get(index).skillId], users[0], it).body
+        }
+
+        when:
+        def events = skillsService.getPerformedSkills(users[0], proj1.projectId, "", "skillId")
+
+        then:
+        events.data.size() == 10
+        events.data[0].skillName == "Test Skill 5 Subject2"
+        events.data[0].skillId == "skill5subj2"
+        events.data[0].subjectId == proj1_subj2.subjectId
+        events.data[1].skillName == "Test Skill 5"
+        events.data[1].skillId == "skill5"
+        events.data[1].subjectId == proj1_subj1.subjectId
+
+        events.data[2].skillName == "Test Skill 4 Subject2"
+        events.data[2].skillId == "skill4subj2"
+        events.data[2].subjectId == proj1_subj2.subjectId
+        events.data[3].skillName == "Test Skill 4"
+        events.data[3].skillId == "skill4"
+        events.data[3].subjectId == proj1_subj1.subjectId
+
+        events.data[4].skillName == "Test Skill 3 Subject2"
+        events.data[4].skillId == "skill3subj2"
+        events.data[4].subjectId == proj1_subj2.subjectId
+        events.data[5].skillName == "Test Skill 3"
+        events.data[5].skillId == "skill3"
+        events.data[5].subjectId == proj1_subj1.subjectId
+
+        events.data[6].skillName == "Test Skill 2 Subject2"
+        events.data[6].skillId == "skill2subj2"
+        events.data[6].subjectId == proj1_subj2.subjectId
+        events.data[7].skillName == "Test Skill 2"
+        events.data[7].skillId == "skill2"
+        events.data[7].subjectId == proj1_subj1.subjectId
+
+        events.data[8].skillName == "Test Skill 1 Subject2"
+        events.data[8].skillId == "skill1subj2"
+        events.data[8].subjectId == proj1_subj2.subjectId
+        events.data[9].skillName == "Test Skill 1"
+        events.data[9].skillId == "skill1"
+        events.data[9].subjectId == proj1_subj1.subjectId
+    }
 }
