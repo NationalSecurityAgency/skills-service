@@ -15,17 +15,31 @@
  */
 package skills.intTests.ai
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.MockLlmServer
 import spock.lang.IgnoreIf
 
 class AiEndpointsSpecs extends DefaultIntSpec {
 
     @LocalServerPort
     int localPort
+
+    @Autowired
+    MockLlmServer mockLlmServer
+
+    def setup() {
+        mockLlmServer.start()
+    }
+
+    def cleanup() {
+        mockLlmServer.stop()
+    }
+
 
     def "get available models"() {
         when:
