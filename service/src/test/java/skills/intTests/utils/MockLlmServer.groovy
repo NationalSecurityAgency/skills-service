@@ -38,7 +38,6 @@ class MockLlmServer {
 
     WireMockServer mockServer
 
-    @PostConstruct
     void start() {
         try {
             mockServer = new WireMockServer(wireMockConfig()
@@ -133,7 +132,6 @@ class MockLlmServer {
         )
     }
 
-    @PreDestroy
     void stop() {
         mockServer.stop();
     }
