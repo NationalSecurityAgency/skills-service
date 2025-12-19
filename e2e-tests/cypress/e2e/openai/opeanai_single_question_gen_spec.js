@@ -749,6 +749,100 @@ describe('Generate Single Question Tests', () => {
 
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
     })
+
+    it('Cannot change question type after initial question generation when openaiNotSupportedChatModels is true', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                conf.openAiDisableSingleQuestionTypeChange = true
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createQuizDef(1);
+
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(newSingleQuestionWelcomeMsg)
+        cy.get('[data-cy="userMsg-1"]').should('not.exist')
+
+        cy.get('[data-cy="genQuestionTypeSelector"]').should('not.have.class', 'p-disabled')
+        cy.get('[data-cy="genQuestionTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="instructionsInput"]').type('Great rock bands{enter}')
+        cy.get('[data-cy="userMsg-1"]').contains('Great rock bands')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
+        cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled')
+
+        cy.get('[data-cy="genQuestionTypeSelector"]').should('have.class', 'p-disabled')
+    })
+
+    it('Can change question type after initial question generation when openaiNotSupportedChatModels is not true', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createQuizDef(1);
+
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(newSingleQuestionWelcomeMsg)
+        cy.get('[data-cy="userMsg-1"]').should('not.exist')
+
+        cy.get('[data-cy="genQuestionTypeSelector"]').should('not.have.class', 'p-disabled')
+        cy.get('[data-cy="genQuestionTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="instructionsInput"]').type('Great rock bands{enter}')
+        cy.get('[data-cy="userMsg-1"]').contains('Great rock bands')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
+        cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled')
+
+        cy.get('[data-cy="genQuestionTypeSelector"]').should('not.have.class', 'p-disabled')
+    })
+
+    it('Cannot change question type while question is being generated', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createQuizDef(1);
+
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(newSingleQuestionWelcomeMsg)
+        cy.get('[data-cy="userMsg-1"]').should('not.exist')
+
+        cy.get('[data-cy="genQuestionTypeSelector"]').should('not.have.class', 'p-disabled')
+        cy.get('[data-cy="genQuestionTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="instructionsInput"]').type('Great rock bands{enter}')
+        cy.get('[data-cy="userMsg-1"]').contains('Great rock bands')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
+
+        cy.get('[data-cy="genQuestionTypeSelector"]').should('have.class', 'p-disabled')
+
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(completedMsg)
+        cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled')
+
+        cy.get('[data-cy="genQuestionTypeSelector"]').should('not.have.class', 'p-disabled')
+    })
 });
 
 
