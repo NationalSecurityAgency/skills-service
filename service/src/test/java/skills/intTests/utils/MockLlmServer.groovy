@@ -33,7 +33,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_TYPE
 @Component
 class MockLlmServer {
 
-    @Value('#{"${skills.tests.mockLlmServerPort:8191}"}')
+    @Value('#{"${skills.tests.mockLlmServerPort:50001}"}')
     Integer mockLlmServerPort
 
     WireMockServer mockServer
