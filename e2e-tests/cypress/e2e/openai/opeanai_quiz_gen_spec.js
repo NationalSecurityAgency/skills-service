@@ -181,9 +181,8 @@ describe('Generate Quiz Tests', () => {
 
         cy.get('[data-cy="selfReportCell-skill1"]').should('not.exist')
         cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('Quiz-Based Validation')
-        cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('Very Great Skill 1 Quiz').click()
+        cy.get('[data-cy="selfReportCell-skill1-quiz"]').contains('Very Great Skill 1 Quiz')
     });
-
 
     it('generate a new quiz for a skill, modify questions inline', () => {
         cy.intercept('GET', '/public/config', (req) => {
