@@ -97,9 +97,17 @@ class ParagraphValidator {
                     while (parent instanceof StrongEmphasis || parent instanceof Emphasis) {
                         parent = parent.parent
                     }
-                    if (parent instanceof Paragraph || parent instanceof Text || parent instanceof TableCell) {
+                    if (parent instanceof Paragraph || parent instanceof Text) {
                         String paragraphText = textContentRenderer.render(parent)
                         isValidLinkOnItsOwn = validateString(paragraphText)
+                    } else if (parent instanceof TableCell){
+                        String paragraphText = textContentRenderer.render(parent)?.trim()
+                        boolean forceValidate = doesStringMatchPattern(paragraphText, request.forceValidationPattern)
+                        if (forceValidate) {
+                            isValidLinkOnItsOwn = validateString(paragraphText)
+                        } else {
+                            isValidLinkOnItsOwn = new StringValidationRes(isValid: true)
+                        }
                     }
                 }
 
@@ -434,6 +442,13 @@ class ParagraphValidator {
         return text.replaceFirst('^[\\[\\s\\-*_=~`#]+', '')
     }
 
+    private static  String removeLeadingQuotes(String text) {
+        if (text == null || text.isEmpty()) {
+            return text
+        }
+        return text.replaceFirst('^[\'"]+', '')
+    }
+
     private static  boolean isOnlySeparatorsOrWhitespace(String text) {
         if (text == null || text.trim().isEmpty()) {
             return true
@@ -601,18 +616,23 @@ class ParagraphValidator {
         boolean shouldContinueValidation = true
     }
     private StringValidationRes validateString(String toValidate) {
+        boolean isValid = doesStringMatchPattern(toValidate, validationPattern.pattern)
+        return new StringValidationRes(isValid: isValid, shouldContinueValidation: true)
+    }
+    private static boolean doesStringMatchPattern(String toValidate, Pattern pattern) {
         toValidate = Jsoup.parse(toValidate).text()
         if (isOnlySeparatorsOrWhitespace(toValidate)) {
             return new StringValidationRes(isValid: true, shouldContinueValidation: false)
         }
         toValidate = stripStyleMarkerPairs(toValidate)
         toValidate = removeLeadingSeparators(toValidate)
+        toValidate = removeLeadingQuotes(toValidate)
         if (isOnlySpecialChars(toValidate)) {
             return new StringValidationRes(isValid: true, shouldContinueValidation: false)
         }
         toValidate = removeNumberingPrefix(toValidate)
-        boolean isValid = validationPattern.pattern.matcher(toValidate).matches()
-        new StringValidationRes(isValid: isValid, shouldContinueValidation: true)
+        boolean doesMatch = pattern.matcher(toValidate).matches()
+        return doesMatch
     }
 
     private void appendValidationMsg(Node node) {
