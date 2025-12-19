@@ -253,6 +253,10 @@ class WSHelper {
         return get(endpoint, "api", params)
     }
 
+    def openaiGet(String endpoint, Map params = null) {
+        return get(endpoint, "openai", params)
+    }
+
     String getTokenForUser(String userId, boolean includeGrantType=true, boolean includeProxyUser=true) {
         log.info("Getting token for user [$userId]")
         String tokenUrl = "${skillsService}/oauth/token"

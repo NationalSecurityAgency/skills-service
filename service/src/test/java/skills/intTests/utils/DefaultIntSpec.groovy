@@ -74,6 +74,9 @@ class DefaultIntSpec extends Specification {
     @Autowired(required=false)
     MockUserInfoService mockUserInfoService
 
+    @Autowired
+    MockLlmServer mockLlmServer
+
     @Autowired(required=false)
     CertificateRegistry certificateRegistry
 

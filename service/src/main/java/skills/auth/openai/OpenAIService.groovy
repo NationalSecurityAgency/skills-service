@@ -42,7 +42,7 @@ import reactor.core.publisher.Mono
 @Slf4j
 class OpenAIService {
 
-    @Value('#{"${skills.openai.host:null}"}')
+    @Value('#{"${skills.openai.host}"}')
     String openAiHost
 
     @Value('#{"${skills.openai.host:null}"}')
@@ -164,8 +164,7 @@ You are a professional instructional designer and training content creator for t
 
     AvailableModels getAvailableModels() {
         if (!openAiHost) {
-            log.debug("skills.openai.host is not configured")
-            return null
+            throw new UnsupportedOperationException("ai support is not configured" )
         }
 
         String url = String.join("/", openAiBaseUrl, modelsEndpoint)
@@ -197,8 +196,8 @@ You are a professional instructional designer and training content creator for t
     }
 
     Flux<String> streamCompletions1(AiChatRequest genDescRequest) {
-        if (!isChatEnabled()) {
-            return Flux.error(new IllegalStateException("Chat model is not enabled. Set spring.ai.model.chat to enable."))
+        if (!openAiHost) {
+            throw new UnsupportedOperationException("ai support is not configured" )
         }
 
         boolean isFirstMessage = genDescRequest.messages.size() == 1

@@ -68,7 +68,7 @@ class OpenAIChatConfig {
     @Value('#{"${skills.openai.stream.closeNotifyReadTimeout:5000}"}')
     Integer closeNotifyReadTimeout = 5000
 
-    @Value('#{"${skills.openai.host:null}"}')
+    @Value('#{"${skills.openai.host}"}')
     String aiHost
 
     @Value('#{"${skills.openai.completionsEndpoint:/v1/chat/completions}"}')
@@ -76,6 +76,10 @@ class OpenAIChatConfig {
 
     @Bean
     OpenAiChatModel openAiChatModel(WebClient.Builder webClientBuilder) {
+        if (!aiHost) {
+            log.debug("skills.openai.host is not configured")
+            return null
+        }
         // Get system properties
         String keyStorePath = System.getProperty("javax.net.ssl.keyStore");
         String keyStorePassword = System.getProperty("javax.net.ssl.keyStorePassword");

@@ -88,6 +88,8 @@ skills:
   artificialDelay:
     enabled: false
   clientLibVersion: @maven.build.timestamp@
+  openai:
+    host: null
   config:
     publiclyExposePrometheusMetrics: false
     # Changing this to a larger value once events have been compacted into WEEKLY events will cause
