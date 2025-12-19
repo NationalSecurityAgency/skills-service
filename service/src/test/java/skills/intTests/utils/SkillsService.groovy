@@ -2300,6 +2300,10 @@ class SkillsService {
         return wsHelper.rootPost("/webNotifications/create", props)
     }
 
+    def getAiModels() {
+        return wsHelper.openaiGet("/models")
+    }
+
     static private String getAdminGroupDefUrl(String adminGroupId) {
         return "/admin-group-definitions/${adminGroupId}".toString()
     }
