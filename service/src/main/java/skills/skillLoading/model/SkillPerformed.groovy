@@ -24,4 +24,5 @@ class SkillPerformed {
     String skillId
     Date performedOn
     boolean importedSkill
+    String subjectId
 }

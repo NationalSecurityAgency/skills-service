@@ -61,7 +61,8 @@ class UserAdminService {
                         skillName: it.getSkillName(),
                         skillId: it.getSkillId(),
                         performedOn: it.getPerformedOn(),
-                        importedSkill: it.getProjectId() != projectId)
+                        importedSkill: it.getProjectId() != projectId,
+                        subjectId: it.getSubjectId())
             })
             result.count = filteredPerformedSkillsCount
         }

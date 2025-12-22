@@ -39,6 +39,7 @@ import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useStorage} from "@vueuse/core";
+import SkillNameRouterLink from "@/components/skills/SkillNameRouterLink.vue";
 
 const dialogMessages = useDialogMessages()
 const timeUtils = useTimeUtils()
@@ -379,8 +380,7 @@ const selectedSkills = ref([]);
                    :data-cy="`row${slotProps.index}-skillCell`">
                 <div class="flex flex-col">
                   <div class="flex items-start justify-start">
-                    <highlighted-value :value="slotProps.data.skillName"
-                                       :filter="filters.global.value"/>
+                    <highlighted-value :value="slotProps.data.skillName" :filter="filters.global.value"/>
                     <Tag v-if="slotProps.data.importedSkill === true" severity="success" class="uppercase ml-1"
                          data-cy="importedTag">Imported
                     </Tag>
@@ -391,12 +391,23 @@ const selectedSkills = ref([]);
                   </div>
                 </div>
                 <div class="flex grow items-start justify-end">
+                  <router-link :aria-label="`View Skill ${slotProps.data.skillName}`"
+                               :to="{ name:'SkillOverview', params: { projectId: projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId }}">
+                    <SkillsButton outlined
+                                  size="small"
+                                  data-cy="viewSkillBtn"
+                                  id="viewSkillBtn"
+                                  :aria-label="`View Skill ${slotProps.data.skillName}`"
+                                  label="View Skill">
+                    </SkillsButton>
+                  </router-link>
                   <SkillsButton icon="fas fa-search-plus"
                                 outlined
                                 class="ml-2"
                                 @click="setSkillFilter(slotProps.data.skillName)"
                                 aria-label="Filter by Skill Name"
                                 data-cy="addSkillFilter"
+                                label="Add to Filter"
                                 size="small" />
                 </div>
               </div>
