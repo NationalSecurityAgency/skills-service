@@ -80,7 +80,7 @@ const createFollowOnConvoInstructions = (userEnterInstructions) => {
   if (props.questionType.selectedType.id !== lastGeneratedQuestionInfo.value.questionTypeId) {
     return instructionsGenerator.updateSingleQuestionTypeChangedInstructions(userEnterInstructions, lastGeneratedQuestionInfo.value.questionTypeId, props.questionType.selectedType)
   }
-  return instructionsGenerator.updateQuizInstructions(userEnterInstructions)
+  return instructionsGenerator.followOnConvoInstructions(userEnterInstructions)
 }
 
 const upToStartOfAnswers = ref('')
