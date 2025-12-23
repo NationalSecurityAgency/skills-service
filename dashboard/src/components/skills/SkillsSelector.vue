@@ -79,6 +79,11 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  appendTo: {
+    type: String,
+    default: 'body',
+    required: false,
+  }
 });
 
 const selectedInternal = ref([]);
@@ -193,6 +198,7 @@ defineExpose({
           @blur="handleBlur"
           optionLabel="name"
           :completeOnFocus="true"
+          :appendTo="appendTo"
           :delay="500">
 
         <template #option="slotProps">

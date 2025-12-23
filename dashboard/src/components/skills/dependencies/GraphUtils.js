@@ -52,7 +52,7 @@ export default {
   getLabel(skillItem, isCrossProject) {
     return isCrossProject ? `Shared from\n<b>${this.truncate(skillItem.projectName)}</b>\n${this.truncate(skillItem.name)} ` : this.truncate(skillItem.name);
   },
-  truncate(strValue, truncateTo = 25) {
+  truncate(strValue, truncateTo = 20) {
     let chunks = strValue.split(' ');
     if(chunks.length > 1) {
       return stringUtils.addNewlinesToChunks(chunks, truncateTo)
