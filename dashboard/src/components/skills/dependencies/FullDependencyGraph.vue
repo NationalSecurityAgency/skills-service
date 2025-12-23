@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { ref, onMounted, computed, onBeforeUnmount, useTemplateRef } from 'vue';
-import { useFullscreen } from '@vueuse/core';
+import {useFullscreen, useStorage} from '@vueuse/core';
 import { useRoute } from 'vue-router';
 import { Network } from 'vis-network';
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
@@ -23,7 +23,6 @@ import PrerequisiteSelector from '@/components/skills/dependencies/PrerequisiteS
 import SkillsService from '@/components/skills/SkillsService';
 import GraphUtils from '@/components/skills/dependencies/GraphUtils';
 import GraphLegend from '@/components/skills/dependencies/GraphLegend.vue';
-import GraphNodeSortMethodSelector from '@/components/skills/dependencies/GraphNodeSortMethodSelector.vue';
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import DependencyTable from "@/components/skills/dependencies/DependencyTable.vue";
 import ShareSkillsWithOtherProjects from "@/components/skills/crossProjects/ShareSkillsWithOtherProjects.vue";
@@ -31,8 +30,11 @@ import SharedSkillsFromOtherProjects from "@/components/skills/crossProjects/Sha
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
+import Accordion from 'primevue/accordion';
+import AccordionPanel from 'primevue/accordionpanel';
+import AccordionHeader from 'primevue/accordionheader';
+import AccordionContent from 'primevue/accordioncontent';
 import dagre from "@dagrejs/dagre"
-import Popover from "primevue/popover";
 import GraphControls from "@/components/skills/dependencies/GraphControls.vue";
 
 const dialogMessages = useDialogMessages()
@@ -50,8 +52,9 @@ const selectedFromSkills = ref({});
 const data = ref([]);
 const graph = ref({});
 const network = (ref);
-const enableZoom = ref(true);
-const enableAnimations = ref(true);
+const enableZoom = useStorage('learningPath-enableZoom', true);
+const enableAnimations = useStorage('learningPath-enableAnimations', true);
+const horizontalOrientation = useStorage('learningPath-horizontalOrientation', false);
 const fullDepsSkillsGraph = ref()
 let nodes = [];
 let edges = [];
@@ -118,7 +121,7 @@ const clearSelectedFromSkills = () => {
   selectedFromSkills.value = {};
 };
 
-const handleUpdate = () => {
+const handleUpdate = (addedNode) => {
   clearSelectedFromSkills();
   graph.value = [];
   network.value = null;
@@ -126,15 +129,15 @@ const handleUpdate = () => {
   edges = [];
   isLoading.value = true;
 
-  loadGraphDataAndCreateGraph();
+  loadGraphDataAndCreateGraph(addedNode);
 };
 
-const loadGraphDataAndCreateGraph = () => {
+const loadGraphDataAndCreateGraph = (addedNode = null) => {
   SkillsService.getDependentSkillsGraphForProject(route.params.projectId)
       .then((response) => {
         graph.value = response;
         isLoading.value = false;
-        createGraph();
+        createGraph(addedNode);
       })
       .finally(() => {
         isLoading.value = false;
@@ -183,7 +186,7 @@ const selectEdge = (params) => {
   });
 }
 
-const createGraph = () => {
+const createGraph = (nodeToPanTo = null) => {
   if (network.value) {
     network.value.destroy();
     network.value = null;
@@ -199,6 +202,12 @@ const createGraph = () => {
     network.value.on('selectNode', selectNode);
     network.value.on('selectEdge', selectEdge);
 
+    if(nodeToPanTo && enableZoom.value) {
+      const foundNode = nodes.find((node) => node.details.skillId === nodeToPanTo)
+      if(foundNode && foundNode.id) {
+        panToNode(foundNode.id);
+      }
+    }
     setVisNetworkTabIndex();
   } else {
     showGraph.value = false;
@@ -207,41 +216,8 @@ const createGraph = () => {
 
 const buildData = () => {
   const sortedNodes = graph.value.nodes.sort((a, b) => a.id - b.id);
-  sortedNodes.forEach((node, index) => {
-    const isCrossProject = node.projectId !== route.params.projectId;
-    const newNode = {
-      id: node.id,
-      label: GraphUtils.getLabel(node, isCrossProject),
-      margin: {
-        top: 25,
-      },
-      shape: 'icon',
-      icon: {
-        face: '"Font Awesome 5 Free"',
-        code: '\uf19d',
-        weight: '900',
-        size: 50,
-        color: 'lightgreen',
-      },
-      chosen: false,
-      details: node,
-      font: { multi: 'html', size: 20 },
-      title: GraphUtils.getTitle(node, isCrossProject),
-    };
-    if(themeHelper.isDarkTheme) {
-      newNode.font.color = '#f5f9ff'
-    }
-
-    if (isCrossProject) {
-      newNode.margin = { top: 40 };
-    }
-    if (node.type === 'Badge') {
-      newNode.icon.code = '\uf559';
-      newNode.icon.color = '#88a9fc';
-    }
-    if (node.belongsToBadge) {
-      newNode.icon.color = '#88a9fc';
-    }
+  sortedNodes.forEach((node) => {
+    const newNode = buildNode(node)
     nodes.push(newNode);
   });
   const sortedEdges = graph.value.edges.sort((a, b) => a.toId - b.toId);
@@ -259,6 +235,45 @@ const buildData = () => {
   return { nodes: nodes, edges: edges };
 };
 
+const buildNode = (node) => {
+  const isCrossProject = node.projectId !== route.params.projectId;
+  const newNode = {
+    id: node.id,
+    label: GraphUtils.getLabel(node, isCrossProject),
+    margin: {
+      top: 25,
+    },
+    shape: 'icon',
+    icon: {
+      face: '"Font Awesome 5 Free"',
+      code: '\uf19d',
+      weight: '900',
+      size: 50,
+      color: 'lightgreen',
+    },
+    chosen: false,
+    details: node,
+    font: { multi: 'html', size: 20 },
+    title: GraphUtils.getTitle(node, isCrossProject),
+  };
+  if(themeHelper.isDarkTheme) {
+    newNode.font.color = '#f5f9ff'
+  }
+
+  if (isCrossProject) {
+    newNode.margin = { top: 40 };
+  }
+  if (node.type === 'Badge') {
+    newNode.icon.code = '\uf559';
+    newNode.icon.color = '#88a9fc';
+  }
+  if (node.belongsToBadge) {
+    newNode.icon.color = '#88a9fc';
+  }
+
+  return newNode;
+}
+
 const setVisNetworkTabIndex = () => {
   setTimeout(() => {
     const elements = document.getElementsByClassName('vis-network');
@@ -271,7 +286,7 @@ const setVisNetworkTabIndex = () => {
   }, 500);
 };
 
-const layout = (direction = "TB") => {
+const layout = () => {
   if (nodes.length <= 1 || edges.length === 0) {
     return
   }
@@ -280,7 +295,7 @@ const layout = (direction = "TB") => {
   const g = new dagre.graphlib.Graph()
   // Set an object for the graph label
   g.setGraph({
-    rankdir: direction,
+    rankdir: horizontalOrientation.value ? 'LR' : 'TB',
     nodesep: nodeSize * 3,
     edgesep: nodeSize,
     ranksep: nodeSize * 2,
@@ -320,14 +335,18 @@ const toggleFullscreen = () => {
   })
 }
 
-const toggleZoom = (value) => {
-  enableZoom.value = value
+const toggleZoom = () => {
+  enableZoom.value = !enableZoom.value
 }
 
-const toggleAnimations = (value) => {
-  enableAnimations.value = value
+const toggleAnimations = () => {
+  enableAnimations.value = !enableAnimations.value
 }
 
+const toggleOrientation = () => {
+  horizontalOrientation.value = !horizontalOrientation.value;
+  handleUpdate()
+}
 </script>
 
 <template>
@@ -335,26 +354,39 @@ const toggleAnimations = (value) => {
     <sub-page-header title="Learning Path"/>
 
     <prerequisite-selector v-if="!isReadOnlyProj" :project-id="route.params.projectId" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
-                           @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills"></prerequisite-selector>
+                           @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills" :showHeader="true"></prerequisite-selector>
     <Card data-cy="fullDepsSkillsGraph" style="margin-bottom: 25px;">
       <template #content>
-        <div ref="fullDepsSkillsGraphContainer" id="fullDepsSkillsGraphContainer">
+        <div ref="fullDepsSkillsGraphContainer" id="fullDepsSkillsGraphContainer" :class="horizontalOrientation ? 'horizontal-orientation' : 'vertical-orientation'">
+          <Accordion value="0" v-if="isFullscreen" id="prerequisiteContent">
+            <AccordionPanel>
+              <AccordionHeader>Add a new item to the learning path</AccordionHeader>
+              <AccordionContent>
+                <prerequisite-selector :showHeader="false" v-if="!isReadOnlyProj" :project-id="route.params.projectId" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
+                                       @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills" appendTo="self"></prerequisite-selector>
+              </AccordionContent>
+            </AccordionPanel>
+          </Accordion>
           <div v-if="!hasGraphData && !isLoading" class="my-8">
             <no-content2 icon="fa fa-project-diagram" title="No Learning Path Yet..."
                          message="Here you can create and manage the project's Learning Path which may consist of skills and badges. You can get started by adding a path above."></no-content2>
           </div>
           <div v-else class="relative w-full mt-4 ml-1">
-            <div class="left-0">
+            <div class="left-0" :class="isFullscreen ? 'pl-2' : ''">
               <graph-legend class="graph-legend deps-overlay" :items="legendItems"/>
             </div>
-            <div class="absolute right-0 mr-1 gap-2 flex items-center" id="additionalControls">
+            <div class="absolute right-0 mr-1 gap-2 flex items-center" id="additionalControls" :class="isFullscreen ? 'pr-2 mt-1' : ''">
               <graph-controls @toggleZoom="toggleZoom"
                               :isFullscreen="isFullscreen"
+                              :enableZoom="enableZoom"
+                              :enableAnimations="enableAnimations"
+                              :horizontalOrientation="horizontalOrientation"
+                              @toggleOrientation="toggleOrientation"
                               @toggleAnimations="toggleAnimations"
                               @toggleFullscreen="toggleFullscreen" />
             </div>
           </div>
-          <div id="dependency-graph" ref="dependencyGraph" v-bind:style="{'visibility': showGraph ? 'visible' : 'hidden'}"></div>
+          <div id="dependency-graph" ref="dependencyGraph" v-bind:style="{'visibility': showGraph ? 'visible' : 'hidden'}" :class="isFullscreen ? 'fullscreen' : ''"></div>
         </div>
       </template>
     </Card>
@@ -443,24 +475,27 @@ const toggleAnimations = (value) => {
 }
 
 .vis-navigation {
+  background-color: white;
   position: absolute;
   top: 30px;
   right: 0;
-  background-color: white;
 }
 
-#fullDepsSkillsGraphContainer:not(:fullscreen) {
+.fullscreen > .vis-network > .vis-navigation {
+  right: 15px !important;
+}
+
+.vertical-orientation {
   height: 500px;
 }
 
-#additionalControls:not(:fullscreen) {
+.horizontal-orientation {
+  height: 1200px !important;
+}
+
+#additionalControls {
   top: -15px;
   z-index:999;
 }
 
-#additionalControls:fullscreen {
-  top: 40px;
-  margin-right: 40px;
-  z-index:999;
-}
 </style>

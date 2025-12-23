@@ -16,15 +16,21 @@ limitations under the License.
 <script setup>
 import { ref } from 'vue';
 import Popover from "primevue/popover";
+import {useStorage} from "@vueuse/core";
 
-const props = defineProps(['isFullscreen'])
-const emit = defineEmits(['toggleFullscreen', 'toggleZoom', 'toggleAnimations'])
+const props = defineProps(['isFullscreen', 'enableZoom', 'enableAnimations', 'horizontalOrientation'])
+const emit = defineEmits(['toggleFullscreen', 'toggleZoom', 'toggleAnimations', 'toggleOrientation'])
 
-const enableZoom = ref(true);
-const enableAnimations = ref(true)
+const storedEnableZoom = useStorage('learningPath-enableZoom', true);
+const storedEnableAnimations = useStorage('learningPath-enableAnimations', true);
+const storedHorizontalOrientation = useStorage('learningPath-horizontalOrientation', false);
 
 const toggleFullscreen = () => {
   emit('toggleFullscreen')
+}
+
+const toggleOrientation = () => {
+  emit('toggleOrientation');
 }
 
 const menu = ref()
@@ -33,41 +39,50 @@ const toggleMenu = (event) => {
 }
 
 const toggleZoom = () => {
-  emit('toggleZoom', enableZoom.value)
+  emit('toggleZoom')
 }
 
 const toggleAnimations = () => {
-  emit('toggleAnimations', enableAnimations.value)
+  emit('toggleAnimations')
 }
 
 </script>
 
 <template>
   <div v-if="isFullscreen">
-    <SkillsCheckboxInput
-        v-model="enableZoom"
+    <Checkbox
+        :defaultValue="storedEnableZoom"
+        :value="enableZoom"
         :binary="true"
         @change="toggleZoom"
         inputId="enableZoom"
         data-cy="enableZoom"
         name="enableZoom">
-    </SkillsCheckboxInput>
+    </Checkbox>
     <span class="align-content-end mr-3">
-                    <label for="enableZoom" class="font-bold text-primary ml-2">Focus On Select</label>
-                  </span>
+      <label for="enableZoom" class="font-bold text-primary ml-2">Focus On Select</label>
+    </span>
   </div>
   <div v-if="isFullscreen">
-    <SkillsCheckboxInput
-        v-model="enableAnimations"
+    <Checkbox
+        :value="enableAnimations"
+        :defaultValue="storedEnableAnimations"
         @change="toggleAnimations"
         :binary="true"
+        :disabled="!enableZoom"
         inputId="enableAnimations"
         name="enableAnimations">
-    </SkillsCheckboxInput>
+    </Checkbox>
     <span class="align-content-end mr-3">
-                    <label for="enableAnimations" class="font-bold text-primary ml-2">Animations</label>
-                  </span>
+      <label for="enableAnimations" class="font-bold text-primary ml-2">Smooth Focus</label>
+    </span>
   </div>
+  <Button icon="fas fa-rotate"
+          severity="info"
+          outlined
+          raised
+          aria-label="Toggle orientation"
+          @click="toggleOrientation" />
   <Button icon="fas fa-expand"
           severity="info"
           outlined
@@ -86,30 +101,33 @@ const toggleAnimations = () => {
       aria-haspopup="true"
       aria-controls="learning_path_settings_menu" />
   <Popover ref="menu">
-    <div>
-      <SkillsCheckboxInput
-          v-model="enableZoom"
+    <div class="p-1">
+      <Checkbox
+          :value="enableZoom"
+          :defaultValue="storedEnableZoom"
           :binary="true"
           @change="toggleZoom"
           inputId="enableZoom"
           data-cy="enableZoom"
           name="enableZoom">
-      </SkillsCheckboxInput>
+      </Checkbox>
       <span class="align-content-end mr-3">
-                    <label for="enableZoom" class="font-bold text-primary ml-2">Focus On Select</label>
-                  </span>
+        <label for="enableZoom" class="font-bold text-primary ml-2">Focus On Select</label>
+      </span>
     </div>
-    <div>
-      <SkillsCheckboxInput
-          v-model="enableAnimations"
+    <div class="p-1">
+      <Checkbox
+          :value="enableAnimations"
+          :defaultValue="storedEnableAnimations"
           :binary="true"
+          :disabled="!enableZoom"
           @change="toggleAnimations"
           inputId="enableAnimations"
           name="enableAnimations">
-      </SkillsCheckboxInput>
+      </Checkbox>
       <span class="align-content-end mr-3">
-                    <label for="enableAnimations" class="font-bold text-primary ml-2">Animations</label>
-                  </span>
+        <label for="enableAnimations" class="font-bold text-primary ml-2">Smooth Focus</label>
+      </span>
     </div>
   </Popover>
 </template>
