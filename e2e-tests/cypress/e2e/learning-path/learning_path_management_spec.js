@@ -304,6 +304,8 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="learningPathSettingsMenu"]').click();
         cy.get('[data-cy="enableZoom"]').click()
 
+        cy.get('.vis-zoomExtends').click()
+
         cy.clickOnNode(320, 150);
         cy.get('[data-cy="learningPathFromSkillSelector"] input').should('have.value', 'Badge 1');
 
@@ -321,6 +323,7 @@ describe('Learning Path Management Validation Tests', () => {
 
         cy.get('[data-cy="learningPathSettingsMenu"]').click();
         cy.get('[data-cy="enableZoom"]').click()
+        cy.get('.vis-zoomExtends').click()
 
         cy.clickOnNode(320, 350);
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge2')
@@ -341,6 +344,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('.vis-zoomExtends').click()
 
         cy.clickOnNode(300, 250);
         cy.get('button').contains('Remove').click();
