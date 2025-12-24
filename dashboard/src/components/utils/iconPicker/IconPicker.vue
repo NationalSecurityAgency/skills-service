@@ -83,7 +83,7 @@ const themeHelper = useThemesHelper()
       aria-label="icon selector"
       :disabled="disabled"
       data-cy="iconPicker">
-      <div class="text-primary text-5xl w-24 h-20 flex items-center justify-center m-0">
+      <div class="text-primary text-5xl w-24 h-20 flex items-center justify-center m-0 icon-picker-icon">
         <i :class="[startIcon]" />
       </div>
     </SkillsButton>
@@ -114,5 +114,7 @@ const themeHelper = useThemesHelper()
 </template>
 
 <style scoped>
-
+.icon-picker-icon > i {
+  font-size: 42px !important;
+}
 </style>
