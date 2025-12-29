@@ -68,7 +68,7 @@ class NumberUsersPerTagMetricsBuilder implements ProjectMetricsBuilder {
         PageRequest pageRequest = PageRequest.of(currentPage, pageSize, sortDesc ? DESC : ASC, sortBy)
         List<UserTagRepo.UserTagCount> userTagCounts = findDistinctUserIdByProjectIdAndUserTag(projectId, tagKey, tagFilter, startDate, endDate, pageRequest)
 
-        Integer numDistinctTags = (pageSize > userTagCounts.size() && currentPage == 1) ? userTagCounts.size() : countDistinctUserTag(projectId, tagKey, tagFilter)
+        Integer numDistinctTags = (pageSize > userTagCounts.size() && currentPage == 0) ? userTagCounts.size() : countDistinctUserTag(projectId, tagKey, tagFilter)
 
         List<LabelCountItem> items = userTagCounts.collect {
             new LabelCountItem(value: it.tag, count: it.numUsers)
