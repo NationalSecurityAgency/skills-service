@@ -153,6 +153,6 @@ class UsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
         result.totalCount == 1
         result.users[0].userId == users[0]
         result.users[0].count == 15
-        result.users[0].date.toString() == date.format('YYYY-MM-dd 00:00:00.0')
+        result.users[0].date.toString() == date.format('yyyy-MM-dd 00:00:00.0')
     }
 }
