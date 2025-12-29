@@ -750,7 +750,7 @@ describe('Generate Single Question Tests', () => {
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
     })
 
-    it('Cannot change question type after initial question generation when openaiNotSupportedChatModels is true', () => {
+    it('Cannot change question type after initial question generation when openAiDisableSingleQuestionTypeChange is true', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
@@ -781,7 +781,7 @@ describe('Generate Single Question Tests', () => {
         cy.get('[data-cy="genQuestionTypeSelector"]').should('have.class', 'p-disabled')
     })
 
-    it('Can change question type after initial question generation when openaiNotSupportedChatModels is not true', () => {
+    it('Can change question type after initial question generation when openAiDisableSingleQuestionTypeChange is not true', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
