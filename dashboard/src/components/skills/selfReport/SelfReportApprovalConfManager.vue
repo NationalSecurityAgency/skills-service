@@ -40,7 +40,7 @@ const responsive = useResponsiveBreakpoints()
 const data = ref([]);
 const loading = ref(true);
 const pageSize = useStorage('selfReportApprovalConfManager-pageSize', 5)
-const possiblePageSizes = [5, 10, 15, 20];
+const possiblePageSizes = [5, 10, 15, 20, 50];
 const totalRows = ref(0);
 const sortBy = ref('userId');
 const sortOrder = ref(-1);
@@ -262,7 +262,7 @@ const collapseRow = (row) => {
                        tableStoredStateId="skillApprovalConfTable"
                        aria-label="Configure Approval Workload"
                        data-cy="skillApprovalConfTable">
-        <Column field="userId" sortable :class="{'flex': responsive.md.value }">
+        <Column field="userIdForDisplay" sortable :class="{'flex': responsive.md.value }">
           <template #header>
             <span class=""><i class="fas fa-user" :class="colors.getTextClass(0)" aria-hidden="true"/> Approver</span>
           </template>

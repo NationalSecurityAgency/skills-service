@@ -32,6 +32,7 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     interface UserRoleWithAttrs {
         UserRole getRole()
         UserAttrs getAttrs()
+        String getUserIdForDisplay()
     }
 
     @Nullable
@@ -115,7 +116,7 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.roleName in ?2 ''')
     Integer countUserRolesByAdminGroupIdAndUserRoles(String projectId, List<RoleName> roles)
 
-    @Query('''SELECT ur as role, ua as attrs
+    @Query('''SELECT ur as role, ua as attrs, ua.userIdForDisplay as userIdForDisplay
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and 
@@ -123,7 +124,7 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.roleName in ?2 ''')
     List<UserRoleWithAttrs> findRoleWithAttrsByProjectIdAndUserRoles(String projectId, List<RoleName> roles, PageRequest pageRequest)
 
-    @Query('''SELECT ur as role, ua as attrs
+    @Query('''SELECT ur as role, ua as attrs, ua.userIdForDisplay as userIdForDisplay
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and 
