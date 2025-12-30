@@ -29,6 +29,8 @@ import reactor.core.publisher.Flux
 import skills.auth.openai.AiChatRequest
 import skills.auth.openai.OpenAIService
 import skills.controller.exceptions.SkillsValidator
+import skills.settings.AiPromptSettings
+import skills.settings.AiPromptSettingsService
 
 @RestController
 @RequestMapping("/openai")
@@ -37,6 +39,9 @@ class OpenAiController {
 
     @Autowired
     OpenAIService openAIService
+
+    @Autowired
+    AiPromptSettingsService aiPromptSettingsService
 
     @Value('#{"${skills.openai.useSpringAi:true}"}')
     Boolean useSpringAi
@@ -58,5 +63,11 @@ class OpenAiController {
     OpenAIService.AvailableModels getModels() {
         return openAIService.getAvailableModels()
     }
+
+    @GetMapping('/getAiPromptSettings')
+    AiPromptSettings getAiPromptSettings(){
+        return aiPromptSettingsService.fetchAiPromptSettings()
+    }
+
 }
 

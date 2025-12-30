@@ -1371,5 +1371,164 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="enableDarkMode"]').contains('Off');
         cy.get('[data-cy=userPrefsSettingsSave]').should('be.enabled');
     });
+
+    it('AI Prompt Settings', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        const tooLong = Array(5001).fill('a').join('')
+        cy.intercept('GET', '/openai/getAiPromptSettings')
+          .as('getAiPromptSettings');
+        cy.intercept('GET', '/app/userInfo')
+          .as('loadUserInfo');
+        cy.visit('/administrator/');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadConfig')
+        cy.wait('@getAiPromptSettings');
+
+        cy.get('[data-cy="settings-button"] button').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
+
+        cy.get('[data-cy="nav-Profile"]').should('exist');
+        cy.get('[data-cy="nav-Preferences"]').should('exist');
+        cy.get('[data-cy="nav-Security"]').should('exist');
+        cy.get('[data-cy="nav-Email"]').should('exist');
+        cy.get('[data-cy="nav-System"]').should('exist');
+        cy.get('[data-cy="nav-AI Prompts"]').should('exist');
+
+        cy.get('[data-cy="nav-AI Prompts"]').click();
+        
+        // Get all default value tags and verify initial state
+        cy.get('[data-cy^="isDefaultValueTag-"]').each(($defaultTag) => {
+          const dataCy = $defaultTag.attr('data-cy');
+          const settingName = dataCy.replace('isDefaultValueTag-', '');
+          const inputSelector = `[data-cy="aiPromptSetting-${settingName}"] textarea`;
+          const resetToDefaultButton = `[data-cy="resetToDefault-${settingName}"]`;
+          const errorField = `[data-cy="${settingName}Error"]`;
+
+          // Verify initial state is 'Default'
+          cy.wrap($defaultTag)
+            .should('be.visible')
+            .and('contain', 'Default');
+
+          cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+
+          // Modify the corresponding input field
+          cy.get(inputSelector).then(($input) => {
+            const defaultValue = $input.val();
+            const modifiedValue = defaultValue + 'X'; // Add a character to modify the value
+
+            cy.get(inputSelector)
+              .type('{moveToEnd}X')
+              .should('have.value', modifiedValue);
+
+            cy.get(errorField).should('not.be.visible');
+
+            cy.get('[data-cy="aiPromptSettingsSave"').should('be.enabled')
+
+            // Verify the default tag updates to 'Modified'
+            cy.wrap($defaultTag)
+              .should('be.visible')
+              .and('contain', 'Modified');
+
+            cy.get(inputSelector).clear()
+            cy.get(errorField).should('be.visible')
+              .and('contain', 'is a required field');
+            cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+            cy.get(inputSelector)
+              .type(`{selectall}${tooLong}`, { delay: 0 })
+              cy.get(errorField).should('be.visible')
+                .and('contain', ' must be at most 5000 characters');
+              cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+
+            cy.get(resetToDefaultButton).click();
+
+            // Verify it goes back to 'Default'
+            cy.wrap($defaultTag)
+              .should('be.visible')
+              .and('contain', 'Default');
+            const resetValue = $input.val();
+            expect(resetValue).to.equal(defaultValue)
+
+            cy.get(errorField).should('not.be.visible');
+            cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+          });
+        });
+
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+    });
+
+    it('AI Prompt Settings are not shown when OpenAI is not enabled', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = false;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        cy.intercept('GET', '/openai/getAiPromptSettings')
+          .as('getAiPromptSettings');
+        cy.intercept('GET', '/app/userInfo')
+          .as('loadUserInfo');
+        cy.visit('/administrator/');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadConfig')
+        cy.get('@getAiPromptSettings').should('not.exist');
+
+        cy.get('[data-cy="settings-button"] button').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
+
+        cy.get('[data-cy="nav-Profile"]').should('exist');
+        cy.get('[data-cy="nav-Preferences"]').should('exist');
+        cy.get('[data-cy="nav-Security"]').should('exist');
+        cy.get('[data-cy="nav-Email"]').should('exist');
+        cy.get('[data-cy="nav-System"]').should('exist');
+
+        cy.get('[data-cy="nav-AI Prompts"]').should('not.exist');
+    });
+
+    it('Root Only Settings are not shown for non-root users', () => {
+        cy.fixture('vars.json')
+          .then((vars) => {
+              cy.logout();
+              if (!Cypress.env('oauthMode')) {
+                  cy.log('NOT in oauthMode, using form login');
+                  cy.login(vars.defaultUser, vars.defaultPass);
+              } else {
+                  cy.log('oauthMode, using loginBySingleSignOn');
+                  cy.loginBySingleSignOn();
+              }
+          });
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        cy.intercept('GET', '/openai/getAiPromptSettings')
+          .as('getAiPromptSettings');
+        cy.intercept('GET', '/app/userInfo')
+          .as('loadUserInfo');
+        cy.visit('/administrator/');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadConfig')
+        cy.wait('@getAiPromptSettings');
+        
+        cy.get('[data-cy="settings-button"] button').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
+
+        cy.get('[data-cy="nav-Profile"]').should('exist');
+        cy.get('[data-cy="nav-Preferences"]').should('exist');
+
+        cy.get('[data-cy="nav-Security"]').should('not.exist');
+        cy.get('[data-cy="nav-Email"]').should('not.exist');
+        cy.get('[data-cy="nav-System"]').should('not.exist');
+        cy.get('[data-cy="nav-AI Prompts"]').should('not.exist');
+    });
 });
 

@@ -24,6 +24,7 @@ import GeneralSettings from '@/components/settings/GeneralSettings.vue'
 import Preferences from '@/components/settings/Preferences.vue'
 import SecuritySettings from '@/components/settings/SecuritySettings.vue'
 import EmailSettings from '@/components/settings/EmailSettings.vue'
+import AiPromptSettings from '@/components/settings/AiPromptSettings.vue'
 import SystemSettings from '@/components/settings/SystemSettings.vue'
 import ProjectPage from '@/components/projects/ProjectPage.vue'
 import Subjects from '@/components/subjects/Subjects.vue'
@@ -331,6 +332,17 @@ const routes = [
           nonAdmin: true,
           announcer: {
             message: 'Email Configuration Settings',
+          },
+        },
+      }, {
+        name: 'AiPromptSettings',
+        path: 'aiPromptSettings',
+        component: AiPromptSettings,
+        meta: {
+          requiresAuth: true,
+          nonAdmin: true,
+          announcer: {
+            message: 'AI Prompt Settings',
           },
         },
       }, {

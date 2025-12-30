@@ -1,0 +1,241 @@
+/*
+Copyright 2025 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+<script setup>
+import { onMounted, ref, computed } from 'vue'
+import { object, string, boolean } from 'yup'
+import { useForm } from 'vee-validate'
+import SettingsService from '@/components/settings/SettingsService.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useAiPromptState } from '@/common-components/utilities/learning-conent-gen/UseAiPromptState.js';
+import AiPromptSettingsTextarea from '@/components/settings/AiPromptSettingsTextarea.vue'
+
+const appConfig = useAppConfig()
+const aiPrompts = useAiPromptState()
+const loadingPrompts = ref(true)
+const isLoading = computed(() => loadingPrompts.value || aiPrompts.isLoading)
+const schema = object({
+  systemInstructionsIsDefault: boolean(),
+  systemInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('System Instructions'),
+  newSkillDescriptionInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('New Skill Description'),
+  newBadgeDescriptionInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('New Badge Description'),
+  newSubjectDescriptionInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('New Subject Description'),
+  newSkillGroupDescriptionInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('New Skill Group Description'),
+  newProjectDescriptionInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('New Project Description'),
+  newQuizDescriptionInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('New Quiz Description'),
+  newSurveyDescriptionInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('New Survey Description'),
+  existingDescriptionInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('Existing Skill Description'),
+  followOnConvoInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('Follow on Conversation'),
+  newQuizInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('New Quiz'),
+  updateQuizInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('Update Quiz'),
+  singleQuestionInstructionsMultipleChoice: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('New Quiz Question Multiple Answers'),
+   singleQuestionInstructionsSingleChoice: string()
+       .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('New Quiz Question Multiple Choice'),
+  singleQuestionInstructionsTextInput: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('New Quiz Question Text Input'),
+  singleQuestionInstructionsMatching: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('New Quiz Question Matching'),
+  updateSingleQuestionTypeChangedToMultipleChoiceInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('Update Quiz Question to Multiple Choice'),
+  updateSingleQuestionTypeChangedToSingleChoiceInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('Update Quiz Question to Single Choice'),
+  updateSingleQuestionTypeChangedToTextInputInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('Update Quiz Question to Text Input'),
+  updateSingleQuestionTypeChangedToMatchingInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('Update Quiz Question to Matching'),
+});
+
+const { handleSubmit, setFieldValue, resetForm, values, meta } = useForm({
+  validationSchema: schema
+});
+
+const onSubmit = handleSubmit((values) => {
+  saveAiPromptSettings(values);
+});
+
+const settingGroup = 'GLOBAL.AIPROMPTS';
+const isSaving = ref(false);
+const saveMessage = ref('');
+
+onMounted(() => {
+  loadAiPromptSettings()
+});
+const saveAiPromptSettings = (values) => {
+  isSaving.value = true
+  saveMessage.value = ''
+  const settings = convertToSettings(values)
+  SettingsService.saveAiPromptSettings(settings).then((result) => {
+    if (result) {
+      aiPrompts.updateAiPromptSettings(settings)
+      if (result.success) {
+        saveMessage.value = 'AI Prompt Settings Saved!'
+      }
+    }
+  }).catch(() => {
+    saveMessage.value = 'Failed to Save the AI Prompt Settings!'
+  }).finally(() => {
+    isSaving.value = false
+  })
+}
+
+const convertToSettings = (values) => {
+  const settings = []
+  const keys = Object.keys(values);
+  keys.forEach((key) => {
+    // Skip any keys that end with 'IsDefault'
+    if (!key.endsWith('IsDefault')) {
+      settings.push({
+        settingGroup,
+        value: values[key],
+        setting: `aiPrompt.${key}`
+      });
+    }
+  });
+
+  return settings;
+};
+
+const convertFromSettings = (settings) => {
+  const keys = Object.keys(settings);
+  keys.forEach((key) => {
+    setFieldValue(key, settings[key].value);
+    setFieldValue(`${key}IsDefault`, settings[key].isDefault);
+  });
+  resetForm({ values })
+};
+
+const loadAiPromptSettings = () => {
+  loadingPrompts.value = true
+  aiPrompts.afterPromptsLoaded().then(() => {
+    convertFromSettings(aiPrompts.aiPromptSettings)
+  }).finally(() => {
+    loadingPrompts.value = false
+  })
+};
+const resetToDefault = (name) => {
+  SettingsService.getDefaultAiPromptSettings(name).then((response) => {
+    setFieldValue(name, response);
+    setFieldValue(`${name}IsDefault`, true);
+  });
+}
+</script>
+
+<template>
+  <div v-if="!isLoading" data-cy="aiPromptSettings">
+    <AiPromptSettingsTextarea name="systemInstructions" label="System Instructions" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="newSkillDescriptionInstructions" label="New Skill Description" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="newBadgeDescriptionInstructions" label="New Badge Description" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="newSubjectDescriptionInstructions" label="New Subject Description" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="newSkillGroupDescriptionInstructions" label="New Skill Group Description" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="newProjectDescriptionInstructions" label="New Project Description" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="newQuizDescriptionInstructions" label="New Quiz Description" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="newSurveyDescriptionInstructions" label="New Survey Description" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="existingDescriptionInstructions" label="Existing Description" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="followOnConvoInstructions" label="Follow on Conversation" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="newQuizInstructions" label="New Quiz" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="updateQuizInstructions" label="Update Quiz" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="singleQuestionInstructionsMultipleChoice" label="New Single Question Multiple Choice" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="singleQuestionInstructionsSingleChoice" label="New Single Question Single Choice" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="singleQuestionInstructionsTextInput" label="New Single Question Text Input" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="singleQuestionInstructionsMatching" label="New Single Question Matching" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="updateSingleQuestionTypeChangedToMultipleChoiceInstructions" label="Update Single Question Type Changed To Multiple Choice" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="updateSingleQuestionTypeChangedToSingleChoiceInstructions" label="Update Single Question Type Changed To Single Choice" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="updateSingleQuestionTypeChangedToTextInputInstructions" label="Update Single Question Type Changed To Text Input" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea name="updateSingleQuestionTypeChangedToMatchingInstructions" label="Update Single Question Type Changed To Matching" @reset-to-default="resetToDefault" />
+
+    <Message v-if="saveMessage" :sticky="false" :life="10000">{{saveMessage}}</Message>
+
+    <SkillsButton v-on:click="onSubmit" :disabled="!meta.valid || !meta.dirty || isSaving" data-cy="aiPromptSettingsSave"
+                  label="Save" :icon="isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right'" >
+    </SkillsButton>
+  </div>
+</template>
+
+<style scoped>
+
+</style>

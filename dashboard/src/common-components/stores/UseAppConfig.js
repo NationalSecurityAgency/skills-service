@@ -191,6 +191,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const openaiFooterPoweredByLinkText = computed(() => config.value.openaiFooterPoweredByLinkText)
   const openaiNotSupportedChatModels = computed(() => listFromCommaSeparatedString(config.value.openaiNotSupportedChatModels))
   const openAiDisableSingleQuestionTypeChange = computed(() => isTrue(config.value.openAiDisableSingleQuestionTypeChange))
+  const maxAiPromptLength = computed(() => config.value.maxAiPromptLength)
 
   return {
     loadConfigState,
@@ -316,5 +317,6 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     openaiFooterPoweredByLinkText,
     openaiNotSupportedChatModels,
     openAiDisableSingleQuestionTypeChange,
+    maxAiPromptLength,
   }
 })

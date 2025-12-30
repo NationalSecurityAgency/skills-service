@@ -18,8 +18,9 @@ import { ref, onMounted } from 'vue';
 import PageHeader from '../utils/pages/PageHeader.vue';
 import Navigation from '../utils/Navigation.vue';
 import SettingsService from './SettingsService.js';
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
-
+const appConfig = useAppConfig()
 const navItems = ref([
   { name: 'Profile', iconClass: 'fa-address-card skills-color-profile', page: 'GeneralSettings' },
   { name: 'Preferences', iconClass: 'fa-user-cog skills-color-preferences', page: 'Preferences' },
@@ -37,6 +38,11 @@ const loadSettings = () => {
             { name: 'Email', iconClass: 'fa-at skills-color-email', page: 'EmailSettings' },
             { name: 'System', iconClass: 'fa-wrench skills-color-system', page: 'SystemSettings' },
           );
+          if (appConfig.enableOpenAIIntegration) {
+            navItems.value.push(
+              { name: 'AI Prompts', iconClass: 'fa-solid fa-wand-magic-sparkles', page: 'AiPromptSettings' },
+            );
+          }
         }
       })
       .finally(() => {
