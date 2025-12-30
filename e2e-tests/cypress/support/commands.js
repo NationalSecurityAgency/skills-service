@@ -326,8 +326,8 @@ Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = nu
                 } else {
                     cy.log(`Creating app user [${user}]`)
                     cy.request('PUT', '/createAccount', {
-                        firstName: 'Firstname',
-                        lastName: 'LastName',
+                        firstName: firstName,
+                        lastName: lastName,
                         email: user,
                         password: pass,
                         usernameForDisplay,

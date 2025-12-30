@@ -558,4 +558,49 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="userGroupMember_user1"]')
     });
 
+    it('Sort users alphabetically', () => {
+        cy.register('newuser', 'password', false, 'some display name', 'Jeff', 'Jackson')
+        cy.register('efgh', 'password', false, 'edward johnson', 'Edward', 'Johnson')
+        cy.register('zed', 'password', false, 'zed jones', 'Zed', 'Jones')
+        cy.register('abcd', 'password', false, 'alan davis', 'Alan', 'Davis')
+        cy.fixture('vars.json').then((vars) => {
+            cy.logout()
+            cy.login(vars.defaultUser, vars.defaultPass);
+        });
+
+        cy.request('POST', '/app/projects/proj1', {
+            projectId: 'proj1',
+            name: 'proj1'
+        });
+
+        cy.request('POST', `/admin/projects/proj1/users/newuser/roles/ROLE_PROJECT_APPROVER`);
+        cy.request('POST', `/admin/projects/proj1/users/abcd/roles/ROLE_PROJECT_APPROVER`);
+        cy.request('POST', `/admin/projects/proj1/users/zed/roles/ROLE_PROJECT_APPROVER`);
+        cy.request('POST', `/admin/projects/proj1/users/efgh/roles/ROLE_PROJECT_APPROVER`);
+
+        cy.intercept('GET', '/app/userInfo').as('loadUserInfo');
+        cy.intercept('GET', '/admin/projects/proj1').as('loadProject');
+
+        cy.visit('/administrator/projects/proj1/access');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadProject');
+
+        cy.get(`${tableSelector} thead th`).contains('User').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'Zed Jones (zed jones)' }, { colIndex: 2,  value: 'Approver' }],
+            [{ colIndex: 1,  value: 'Firstname LastName (skills@skills.org)' }, { colIndex: 2,  value: 'Administrator' }],
+            [{ colIndex: 1,  value: 'Jeff Jackson (some display name)' }, { colIndex: 2,  value: 'Approver' }],
+            [{ colIndex: 1,  value: 'Edward Johnson (edward johnson)' }, { colIndex: 2,  value: 'Approver' }],
+            [{ colIndex: 1,  value: 'Alan Davis (alan davis)' }, { colIndex: 2,  value: 'Approver' }],
+        ], 5, true, null, false);
+
+        cy.get(`${tableSelector} thead th`).contains('User').click();
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'Alan Davis (alan davis)' }, { colIndex: 2,  value: 'Approver' }],
+            [{ colIndex: 1,  value: 'Edward Johnson (edward johnson)' }, { colIndex: 2,  value: 'Approver' }],
+            [{ colIndex: 1,  value: 'Jeff Jackson (some display name)' }, { colIndex: 2,  value: 'Approver' }],
+            [{ colIndex: 1,  value: 'Firstname LastName (skills@skills.org)' }, { colIndex: 2,  value: 'Administrator' }],
+            [{ colIndex: 1,  value: 'Zed Jones (zed jones)' }, { colIndex: 2,  value: 'Approver' }],
+        ], 5, true, null, false);
+    });
 })
