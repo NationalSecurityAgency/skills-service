@@ -591,7 +591,7 @@ describe('Approver Config Tests', () => {
         });
     });
 
-    it.only('sorting works by userIdForDisplay', function () {
+    it('sorting works by userIdForDisplay', function () {
         cy.fixture('vars.json').then((vars) => {
             cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
             cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
