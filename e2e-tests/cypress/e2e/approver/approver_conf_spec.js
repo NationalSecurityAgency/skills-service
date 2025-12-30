@@ -132,6 +132,7 @@ describe('Approver Config Tests', () => {
             cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
             // cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userb', true, true);
             cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]`).click()
+            cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="existingUserInputDropdown"]`).type('userb')
             cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('userb').click();
 
             cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
