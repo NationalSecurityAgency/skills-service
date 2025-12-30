@@ -1495,6 +1495,14 @@ class SkillsService {
         return wsHelper.post("/resetPassword", "", ["userId", userId])
     }
 
+    def saveAiPromptSettings(List<Map> settings) {
+        return wsHelper.rootPost("/saveAiPromptSettings", settings)
+    }
+
+    def getDefaultAiPromptSetting(String setting) {
+        return wsHelper.rootGet("/getDefaultAiPromptSettings/default/${setting}")
+    }
+
     def saveEmailSettings(String host, String protocol, Integer port, boolean tlsEnabled, boolean authEnabled, String username, String password) {
 //        username = getUserId(username)
         return wsHelper.rootPost("/saveEmailSettings", [
@@ -2300,6 +2308,10 @@ class SkillsService {
 
     def getAiModels() {
         return wsHelper.openaiGet("/models")
+    }
+
+    def getAiPromptSettings() {
+        return wsHelper.openaiGet("/getAiPromptSettings")
     }
 
     static private String getAdminGroupDefUrl(String adminGroupId) {

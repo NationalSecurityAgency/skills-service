@@ -118,5 +118,14 @@ export default {
     return axios
       .get('/public/isFeatureSupported?feature=emailservice')
       .then((response) => response.data)
+  },
+  saveAiPromptSettings(settings) {
+    return axios.post('/root/saveAiPromptSettings', settings).then((response) => response.data)
+  },
+  getAiPromptSettings() {
+    return axios.get('/openai/getAiPromptSettings').then((response) => response.data)
+  },
+  getDefaultAiPromptSettings(setting) {
+    return axios.get(`/root/getAiPromptSettings/default/${setting}`).then((response) => response.data)
   }
 }
