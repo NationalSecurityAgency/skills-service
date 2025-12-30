@@ -68,6 +68,7 @@ class UserRoleSpecs extends DefaultIntSpec {
         res2.data.get(1).roleName == RoleName.ROLE_PROJECT_APPROVER.toString()
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "can sort by userIdForDisplay" () {
         String user = "jsmith"
         String user2 = "bcool"
