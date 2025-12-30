@@ -617,23 +617,19 @@ describe('Approver Config Tests', () => {
                 }],
                 [{
                     colIndex: 0,
-                    value: 'ghij'
-                }],
-                [{
-                    colIndex: 0,
-                    value: defaultUser
-                }],
-                [{
-                    colIndex: 0,
-                    value: 'testuser'
-                }],
-                [{
-                    colIndex: 0,
                     value: 'user1'
                 }],
                 [{
                     colIndex: 0,
                     value: 'user2'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'ghij'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'testuser'
                 }],
                 [{
                     colIndex: 0,
@@ -651,12 +647,19 @@ describe('Approver Config Tests', () => {
                     colIndex: 0,
                     value: 'zed'
                 }],
+                [{
+                    colIndex: 0,
+                    value: defaultUser
+                }],
             ]
             tableContents.sort((a, b) => {
-                const itemA = a[0].value
-                const itemB = b[0].value
-
-                return itemA - itemB
+                if(a[0].value < b[0].value) {
+                    return -1;
+                } else if (a[0].value > b[0].value) {
+                    return 1;
+                } else {
+                    return 0;
+                }
             })
             cy.validateTable(tableSelector, tableContents, 5);
 
