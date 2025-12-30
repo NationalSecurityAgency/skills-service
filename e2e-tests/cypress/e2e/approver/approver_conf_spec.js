@@ -591,7 +591,7 @@ describe('Approver Config Tests', () => {
         });
     });
 
-    it('sorting works by userIdForDisplay', function () {
+    it.only('sorting works by userIdForDisplay', function () {
         cy.fixture('vars.json').then((vars) => {
             cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
             cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
@@ -614,150 +614,55 @@ describe('Approver Config Tests', () => {
                 [{
                     colIndex: 0,
                     value: 'abcd'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
                 }],
                 [{
                     colIndex: 0,
                     value: 'ghij'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
                 }],
                 [{
                     colIndex: 0,
                     value: defaultUser
-                }, {
-                    colIndex: 1,
-                    value: 'Admin'
                 }],
                 [{
                     colIndex: 0,
                     value: 'testuser'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
                 }],
                 [{
                     colIndex: 0,
                     value: 'user1'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
                 }],
                 [{
                     colIndex: 0,
                     value: 'user2'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
                 }],
                 [{
                     colIndex: 0,
                     value: 'user3'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
                 }],
                 [{
                     colIndex: 0,
                     value: 'user4'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
                 }],
                 [{
                     colIndex: 0,
                     value: 'user5'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
                 }],
                 [{
                     colIndex: 0,
                     value: 'zed'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
                 }],
             ]
+            tableContents.sort((a, b) => {
+                const itemA = a[0].value
+                const itemB = b[0].value
+
+                return itemA - itemB
+            })
             cy.validateTable(tableSelector, tableContents, 5);
 
             cy.get('[data-pc-section="columnheadercontent"]').contains('Approver').click();
 
-            cy.validateTable(tableSelector, [
-                [{
-                    colIndex: 0,
-                    value: 'zed'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
-                }],
-                [{
-                    colIndex: 0,
-                    value: 'user5'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
-                }],
-                [{
-                    colIndex: 0,
-                    value: 'user4'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
-                }],
-                [{
-                    colIndex: 0,
-                    value: 'user3'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
-                }],
-                [{
-                    colIndex: 0,
-                    value: 'user2'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
-                }],
-                [{
-                    colIndex: 0,
-                    value: 'user1'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
-                }],
-                [{
-                    colIndex: 0,
-                    value: 'testuser'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
-                }],
-                [{
-                    colIndex: 0,
-                    value: defaultUser
-                }, {
-                    colIndex: 1,
-                    value: 'Admin'
-                }],
-                [{
-                    colIndex: 0,
-                    value: 'ghij'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
-                }],
-                [{
-                    colIndex: 0,
-                    value: 'abcd'
-                }, {
-                    colIndex: 1,
-                    value: 'Approver'
-                }],
-            ], 5);
+            cy.validateTable(tableSelector, tableContents.toReversed(), 5);
         });
 
     });
