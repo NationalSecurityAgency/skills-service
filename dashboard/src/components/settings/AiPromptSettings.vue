@@ -130,7 +130,7 @@ const schema = object({
       .label('Update Quiz Question to Matching'),
 });
 
-const { handleSubmit, setFieldValue, resetForm, values, meta } = useForm({
+const { handleSubmit, setFieldValue, validate, meta } = useForm({
   validationSchema: schema
 });
 
@@ -180,13 +180,20 @@ const convertToSettings = (values) => {
   return settings;
 };
 
+const promptSettings = ref([]);
 const convertFromSettings = (settings) => {
   const keys = Object.keys(settings);
   keys.forEach((key) => {
     setFieldValue(key, settings[key].value);
     setFieldValue(`${key}IsDefault`, settings[key].isDefault);
+    promptSettings.value.push({
+      setting: key,
+      value: settings[key].value,
+      label: settings[key].label,
+      isDefault: settings[key].isDefault
+    });
   });
-  resetForm({ values })
+  validate()
 };
 
 const loadAiPromptSettings = () => {
@@ -207,29 +214,12 @@ const resetToDefault = (name) => {
 
 <template>
   <div v-if="!isLoading" data-cy="aiPromptSettings">
-    <AiPromptSettingsTextarea name="systemInstructions" label="System Instructions" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="newSkillDescriptionInstructions" label="New Skill Description" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="newBadgeDescriptionInstructions" label="New Badge Description" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="newSubjectDescriptionInstructions" label="New Subject Description" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="newSkillGroupDescriptionInstructions" label="New Skill Group Description" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="newProjectDescriptionInstructions" label="New Project Description" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="newQuizDescriptionInstructions" label="New Quiz Description" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="newSurveyDescriptionInstructions" label="New Survey Description" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="existingDescriptionInstructions" label="Existing Description" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="followOnConvoInstructions" label="Follow on Conversation" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="newQuizInstructions" label="New Quiz" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="updateQuizInstructions" label="Update Quiz" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="singleQuestionInstructionsMultipleChoice" label="New Single Question Multiple Choice" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="singleQuestionInstructionsSingleChoice" label="New Single Question Single Choice" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="singleQuestionInstructionsTextInput" label="New Single Question Text Input" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="singleQuestionInstructionsMatching" label="New Single Question Matching" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="updateSingleQuestionTypeChangedToMultipleChoiceInstructions" label="Update Single Question Type Changed To Multiple Choice" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="updateSingleQuestionTypeChangedToSingleChoiceInstructions" label="Update Single Question Type Changed To Single Choice" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="updateSingleQuestionTypeChangedToTextInputInstructions" label="Update Single Question Type Changed To Text Input" @reset-to-default="resetToDefault" />
-    <AiPromptSettingsTextarea name="updateSingleQuestionTypeChangedToMatchingInstructions" label="Update Single Question Type Changed To Matching" @reset-to-default="resetToDefault" />
+    <AiPromptSettingsTextarea v-for="aiPromptSetting in promptSettings" :key="aiPromptSetting.setting"
+                              :name="aiPromptSetting.setting"
+                              :label="aiPromptSetting.label"
+                              @reset-to-default="resetToDefault" />
 
     <Message v-if="saveMessage" :sticky="false" :life="10000">{{saveMessage}}</Message>
-
     <SkillsButton v-on:click="onSubmit" :disabled="!meta.valid || !meta.dirty || isSaving" data-cy="aiPromptSettingsSave"
                   label="Save" :icon="isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right'" >
     </SkillsButton>

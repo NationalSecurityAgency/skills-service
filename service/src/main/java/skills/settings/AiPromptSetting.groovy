@@ -21,5 +21,6 @@ import groovy.transform.Canonical
 @Canonical
 class AiPromptSetting {
     String value
+    String label
     Boolean isDefault
 }
