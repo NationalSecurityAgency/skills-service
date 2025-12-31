@@ -168,11 +168,13 @@ const saveQuizForSkill = async (generatedQuiz) => {
     ...skillInfo.value
   }).then(() => {
     const subjectSkillState = skillsState.subjectSkills.find((item) => item.skillId === skillInfo.value.skillId)
-    subjectSkillState.quizId = quizDef.quizId;
-    subjectSkillState.quizName = quizDef.name;
-    subjectSkillState.quizType = quizDef.type;
-    subjectSkillState.selfReportingType = quizDef.type;
-    subjectSkillState.selfReportEnabled = true
+    if (subjectSkillState) {
+      subjectSkillState.quizId = quizDef.quizId;
+      subjectSkillState.quizName = quizDef.name;
+      subjectSkillState.quizType = quizDef.type;
+      subjectSkillState.selfReportingType = quizDef.type;
+      subjectSkillState.selfReportEnabled = true
+    }
   })
 }
 const createQuizDef = async () => {
