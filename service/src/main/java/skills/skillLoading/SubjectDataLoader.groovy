@@ -20,6 +20,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.settings.ClientPrefKey
 import skills.services.settings.ClientPrefService
 import skills.services.settings.Settings
@@ -184,9 +185,10 @@ class SubjectDataLoader {
             def badges = skillDefRepo.findAllBadgesForSkill(skillIds, projectId);
             def badgesById = badges.groupBy{ it.skillId }
             skillsAndPoints.forEach{ it ->
-                it.badges = badgesById[it.skillDef.skillId]
+                def processedSkillId = SkillReuseIdUtil.isTagged(it.skillDef.skillId) ? SkillReuseIdUtil.removeTag(it.skillDef.skillId) : it.skillDef.skillId
+                it.badges = badgesById[processedSkillId]
                 it.children.forEach{ child ->
-                    child.badges = badgesById[child.skillDef.skillId]
+                    child.badges = badgesById[processedSkillId]
                 }
             }
         }
@@ -297,7 +299,11 @@ class SubjectDataLoader {
                 }
             }
             else if(it.skillDef.type == SkillDef.ContainerType.Skill) {
-                skillIds.add(it.skillDef.skillId)
+                if(SkillReuseIdUtil.isTagged(it.skillDef.skillId)) {
+                    skillIds.add(SkillReuseIdUtil.removeTag(it.skillDef.skillId))
+                } else {
+                    skillIds.add(it.skillDef.skillId)
+                }
             }
         }
         return skillIds
