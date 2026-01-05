@@ -30,6 +30,7 @@ import {useElementVisibility, useEventListener} from "@vueuse/core";
 import {useInstructionGenerator} from "@/common-components/utilities/learning-conent-gen/UseInstructionGenerator.js";
 import AiPromptDialogFooter from "@/common-components/utilities/learning-conent-gen/AiPromptDialogFooter.vue";
 import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 
 const model = defineModel()
 const props = defineProps({
@@ -114,10 +115,13 @@ const openaiService = useOpenaiService()
 const aiModelsState = useAiModelsState()
 const instructionsGenerator = useInstructionGenerator()
 const dialogUtils = useDialogUtils()
+const announcer = useSkillsAnnouncer()
 
 const addWelcomeMsg = (welcomeMsg) => {
   log.debug('Adding welcome msg: [{}]', welcomeMsg)
-  addChatItem(welcomeMsg, ChatRole.ASSISTANT)
+  const item = addChatItem(welcomeMsg, ChatRole.ASSISTANT)
+  announcer.polite(`${welcomeMsg}`)
+  return item
 }
 const startGeneration = () => {
   stopScrollingWithIncomingText.value = false
@@ -127,6 +131,10 @@ const startGeneration = () => {
     }
     if (props.beforeGenerationStartedFn) {
       props.beforeGenerationStartedFn()
+    }
+
+    if (instructions.value?.trim()) {
+      announcer.polite(`Processing your request: ${instructions.value}`)
     }
     const messages = []
     const isNewConvo = chatHistory.value.length === 1
@@ -155,6 +163,7 @@ const startGeneration = () => {
 
     isGenerating.value = true
     addChatItem(props.generationStartedMsg, ChatRole.ASSISTANT, true)
+    announcer.polite(props.generationStartedMsg)
     genWithStreaming(messages)
   })
 }
@@ -213,6 +222,14 @@ const setFinalMsgToLastChatItem = (finalMsg, failedToGenerate = false, cancelled
   historyItem.isGenerating = false
   historyItem.failedToGenerate = failedToGenerate
   historyItem.cancelled = cancelled
+
+  if (failedToGenerate) {
+    announcer.assertive(`Error: ${finalMsg}`)
+  } else if (cancelled) {
+    announcer.polite(`Generation cancelled: ${finalMsg}`)
+  } else {
+    announcer.polite(`Generation complete. ${finalMsg}`)
+  }
 }
 const updateLastChatItemGeneratedValue = (item) => {
   const toUpdate = getLastChatItem()
@@ -279,6 +296,7 @@ const lastPromptCancelled = ref(false)
 const cancelCurrentPrompt = () => {
   lastPromptCancelled.value = true
   openaiService.cancelCurrentPrompt()
+  announcer.polite('Stopping generation...')
 }
 
 const instructionsInputTemplateRef = useTemplateRef('instructionsInputRef')
@@ -308,13 +326,20 @@ const scrollInstructionsIntoView = () => {
 }
 const focusOnInstructionsInput = () => {
   if (!stopScrollingWithIncomingText.value) {
-    nextTick(() => document.getElementById('instructionsInputId')?.focus())
+    nextTick(() => {
+      const input = document.getElementById('instructionsInputId')
+      input?.focus()
+      if (input) {
+        announcer.polite('Ready for your input. Type your message and press Enter or click Send.')
+      }
+    })
   }
 }
 
 const useGenerated = (historyId) => {
   const historyItem = chatHistory.value.find(item => item.id === historyId)
   emit('use-generated', historyItem)
+  announcer.polite('Using generated content. Closing dialog.')
   close()
 }
 
@@ -324,6 +349,7 @@ const addPrefix = (info) => {
   const missingPrefix = info.prefix
   const historyItem = chatHistory.value.find(item => item.id === historyId)
   if (historyItem?.generatedValue) {
+    announcer.polite('Adding prefix to the generated content...')
     return props.addPrefixFn(historyItem, missingPrefix).then((result) => {
       historyItem.generatedValue = result.generatedValue
       useGenerated(historyItem.id)
@@ -391,8 +417,8 @@ const hasFooter = computed(() => appConfig.openaiFooterMsg || hasPoweredByInfo.v
               </div>
             </div>
             <div v-if="isLastChatItem(historyItem) && historyItem.finalMsg" data-cy="finalSegment">
-              <Message :closable="false" :severity="finalMsgSeverity(historyItem)">
-                <markdown-text :text="historyItem.finalMsg" :instanceId="`${historyItem.id}-finalMsg`"/>
+              <Message :closable="false" :severity="finalMsgSeverity(historyItem)" aria-live="polite">
+                <markdown-text :text="historyItem.finalMsg" :instanceId="`${historyItem.id}-finalMsg`" aria-hidden="true"/>
               </Message>
               <div v-if="!historyItem.failedToGenerate && !historyItem.cancelled"
                    class="flex justify-start items-center gap-3 mt-2">
