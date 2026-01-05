@@ -293,12 +293,13 @@ const layout = () => {
   // convert graph
   // ref: https://github.com/dagrejs/dagre/wiki
   const g = new dagre.graphlib.Graph()
+  const separationAmount = nodeSize * (horizontalOrientation.value ? 4 : 2)
   // Set an object for the graph label
   g.setGraph({
     rankdir: horizontalOrientation.value ? 'LR' : 'TB',
     nodesep: nodeSize * 3,
     edgesep: nodeSize,
-    ranksep: nodeSize * 2,
+    ranksep: separationAmount,
   })
   // Default to assigning a new object as a label for each new edge.
   g.setDefaultEdgeLabel(() => ({}))
