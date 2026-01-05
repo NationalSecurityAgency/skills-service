@@ -28,6 +28,7 @@ import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import {useQuizConfig} from '@/stores/UseQuizConfig.js'
 import QuestionTypeDropDown from "@/components/quiz/testCreation/QuestionTypeDropDown.vue";
 import QuestionType from "@/skills-display/components/quiz/QuestionType.js";
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 
 const model = defineModel()
 const props = defineProps({
@@ -45,6 +46,7 @@ const imgHandler = useImgHandler()
 const appConfig = useAppConfig()
 const quizConfig = useQuizConfig()
 const instructionsGenerator = useInstructionGenerator()
+const announcer = useSkillsAnnouncer()
 
 const extractedImageState = { hasImages: false, extractedImages: null, }
 
@@ -151,6 +153,7 @@ const handleGenerationCompleted = (generated) => {
     const cleanedComments = comments.replace(/^[\s:]+/, '').trim()
     answersToParse = newText.replace(/\s*#+\s*$/gm, '') // Remove ### at end of lines.trim()
     generateValueChangedNotes = `### Here is what was changed\n\n${cleanedComments}`
+    announcer.polite(`Here is what was changed: ${cleanedComments}`)
   }
 
   const answersMatch = /### Answers:([\s\S]+)/.exec(answersToParse);
@@ -164,6 +167,17 @@ const handleGenerationCompleted = (generated) => {
       question: questionMatch[1].trim(),
       answers: answers,
       questionTypeId: props.questionType.selectedType?.id
+    }
+    announcer.polite(`Here is what was generated.  Question (${generatedInfo.questionTypeId}): ${generatedInfo.question}.`)
+    if (answers) {
+      answers.forEach((answer) => {
+        announcer.polite(`Answer: ${answer.answer}`)
+        if (QuestionType.isMatching(generatedInfo.questionTypeId)){
+          announcer.polite(`${answer.multiPartAnswer.term} matches ${answer.multiPartAnswer.term}`)
+        } else {
+          announcer.polite(`Is Correct: ${answer.isCorrect}`)
+        }
+      })
     }
     lastGeneratedQuestionInfo.value = generatedInfo
     isGenerating.value = false

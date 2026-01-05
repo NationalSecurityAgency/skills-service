@@ -26,6 +26,8 @@ import { useDescriptionValidatorService } from '@/common-components/validators/U
 import { object, string } from 'yup'
 import { useForm } from 'vee-validate'
 import ThinkingIndicator from "@/common-components/utilities/learning-conent-gen/ThinkingIndicator.vue";
+import QuestionType from '@/skills-display/components/quiz/QuestionType.js'
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 
 const model = defineModel()
 const props = defineProps({
@@ -39,6 +41,7 @@ const route = useRoute()
 const log = useLog()
 const imgHandler = useImgHandler()
 const appConfig = useAppConfig()
+const announcer = useSkillsAnnouncer()
 
 const enableEditQuestionsIds = ref([])
 const aiPromptDialogRef = ref(null)
@@ -188,6 +191,19 @@ const handleGeneratedChunk = (chunk, historyId) => {
               questionBraceDepth = -1;
               currentJsonString.value = ''
               currentPosition = i + 1;
+              announcer.polite(`Question ${questionIdx + 1} generated (${question.questionTypeId}): ${question.question}`)
+              const answers = question.answers;
+              if (answers) {
+                answers.forEach((answer) => {
+                  announcer.polite(answer.answer)
+                  announcer.polite(`Answer: ${answer.answer}.`)
+                  if (QuestionType.isMatching(question.questionTypeId)){
+                    announcer.polite(`${answer.multiPartAnswer.term} matches ${answer.multiPartAnswer.term}.`)
+                  } else {
+                    announcer.polite(`Is Correct: ${answer.isCorrect}.`)
+                  }
+                })
+              }
             } else {
               log.debug(`invalid question [jsonStr: ${jsonStr}]`)
             }
