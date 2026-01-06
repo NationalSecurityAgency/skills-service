@@ -20,6 +20,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.settings.ClientPrefKey
 import skills.services.settings.ClientPrefService
 import skills.services.settings.Settings
@@ -184,9 +185,11 @@ class SubjectDataLoader {
             def badges = skillDefRepo.findAllBadgesForSkill(skillIds, projectId);
             def badgesById = badges.groupBy{ it.skillId }
             skillsAndPoints.forEach{ it ->
-                it.badges = badgesById[it.skillDef.skillId]
+                String processedSkillId = SkillReuseIdUtil.isTagged(it.skillDef.skillId) ? SkillReuseIdUtil.removeTag(it.skillDef.skillId) : it.skillDef.skillId
+                it.badges = badgesById[processedSkillId]
                 it.children.forEach{ child ->
-                    child.badges = badgesById[child.skillDef.skillId]
+                    String processedChildSkillId = SkillReuseIdUtil.isTagged(child.skillDef.skillId) ? SkillReuseIdUtil.removeTag(child.skillDef.skillId) : child.skillDef.skillId
+                    child.badges = badgesById[processedChildSkillId]
                 }
             }
         }
@@ -293,11 +296,21 @@ class SubjectDataLoader {
         skillsAndPoints.forEach { it ->
             if(it.skillDef.type == SkillDef.ContainerType.SkillsGroup) {
                 if(it.children) {
-                    skillIds.addAll(it.children.collect{ child -> child.skillDef.skillId })
+                    it.children.forEach { child ->
+                        if(SkillReuseIdUtil.isTagged(child.skillDef.skillId)) {
+                            skillIds.add(SkillReuseIdUtil.removeTag(child.skillDef.skillId))
+                        } else {
+                            skillIds.add(child.skillDef.skillId)
+                        }
+                    }
                 }
             }
             else if(it.skillDef.type == SkillDef.ContainerType.Skill) {
-                skillIds.add(it.skillDef.skillId)
+                if(SkillReuseIdUtil.isTagged(it.skillDef.skillId)) {
+                    skillIds.add(SkillReuseIdUtil.removeTag(it.skillDef.skillId))
+                } else {
+                    skillIds.add(it.skillDef.skillId)
+                }
             }
         }
         return skillIds

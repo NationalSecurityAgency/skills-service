@@ -924,4 +924,87 @@ class ClientDisplaySubjSummarySpec extends DefaultIntSpec {
         !res1.get(0).selfReporting.rejectedOn
         res1.get(0).selfReporting.requestedOn == dates[2].time
     }
+
+
+    def "load subject summary with badges with a reused skill"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        proj1_subj.helpUrl = "http://foo.org"
+        proj1_subj.description = "This is a description"
+        def proj2_subj = SkillsFactory.createSubject(1, 2)
+        proj2_subj.helpUrl = "http://foo.org"
+        proj2_subj.description = "This is a description"
+        List<Map> allSkills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(allSkills)
+        skillsService.reuseSkillInAnotherSubject(proj1.projectId, allSkills[0].skillId, proj2_subj.subjectId)
+
+        Map badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge(proj1.projectId, badge2.badgeId, allSkills[0].skillId)
+        badge2.enabled = true
+        skillsService.updateBadge(badge2, badge2.badgeId)
+
+        Map badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        allSkills.each {
+            skillsService.assignSkillToBadge(proj1.projectId, badge1.badgeId, it.skillId)
+        }
+        badge1.enabled = true
+        skillsService.updateBadge(badge1, badge1.badgeId)
+
+        when:
+        def summary = skillsService.getSkillSummary("user1", proj1.projectId, proj2_subj.subjectId)
+        then:
+        summary.skills.size() == 1
+        summary.skills[0].badges.size() == 2
+        summary.skills[0].badges[0].badgeId == badge1.badgeId
+        summary.skills[0].badges[1].badgeId == badge2.badgeId
+    }
+
+    def "load subject summary with badges in a group with a reused skill"(){
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        proj1_subj.helpUrl = "http://foo.org"
+        proj1_subj.description = "This is a description"
+        def proj2_subj = SkillsFactory.createSubject(1, 2)
+        proj2_subj.helpUrl = "http://foo.org"
+        proj2_subj.description = "This is a description"
+        List<Map> allSkills = SkillsFactory.createSkills(6, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(allSkills[0..2])
+
+        Map badge1 = SkillsFactory.createBadge(1, 1)
+        skillsService.createBadge(badge1)
+        allSkills[0..2].each {
+            skillsService.assignSkillToBadge(proj1.projectId, badge1.badgeId, it.skillId)
+        }
+        badge1.enabled = true
+        skillsService.updateBadge(badge1, badge1.badgeId)
+
+        def skillsGroup1 = allSkills[3]
+        skillsGroup1.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup1)
+        String skillsGroup1Id = skillsGroup1.skillId
+        def group1Children = allSkills[4..5]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
+            skillsService.assignSkillToBadge(proj1.projectId, badge1.badgeId, skill.skillId)
+        }
+        skillsService.reuseSkillInAnotherSubject(proj1.projectId, allSkills[0].skillId, proj2_subj.subjectId)
+
+        when:
+        def summary = skillsService.getSkillSummary("user1", proj1.projectId, proj2_subj.subjectId)
+        then:
+        summary.skills.size() == 1
+        summary.skills[0].badges.size() == 1
+        summary.skills[0].badges[0].badgeId == badge1.badgeId
+
+    }
 }
