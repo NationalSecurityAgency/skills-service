@@ -39,8 +39,9 @@ const responsive = useResponsiveBreakpoints()
 
 const data = ref([]);
 const loading = ref(true);
+const tableIsLoading = ref(true);
 const pageSize = useStorage('selfReportApprovalConfManager-pageSize', 5)
-const possiblePageSizes = [5, 10, 15, 20];
+const possiblePageSizes = [5, 10, 15, 20, 50];
 const totalRows = ref(0);
 const sortBy = ref('userId');
 const sortOrder = ref(-1);
@@ -88,6 +89,7 @@ const maxConfigReached = computed(() => {
 })
 
 const loadData = () => {
+  tableIsLoading.value = true;
   const pageParams = {
     limit: maxRolePageSize.value,
     page: 1,
@@ -118,7 +120,7 @@ const loadData = () => {
       totalRows.value = basicTableInfo.length;
       updateTable(basicTableInfo);
     }).finally(() => {
-      loading.value = false;
+      tableIsLoading.value = false;
     });
   });
 };
@@ -243,11 +245,11 @@ const collapseRow = (row) => {
       <SkillsCardHeader title="Configure Approval Workload"></SkillsCardHeader>
     </template>
     <template #content>
-      <SkillsSpinner :is-loading="loading" />
+      <SkillsSpinner :is-loading="loading && !shouldLoadTable" />
 
       <SkillsDataTable :value="data"
                        v-if="shouldLoadTable"
-                       :loading="loading"
+                       :loading="loading || tableIsLoading"
                        v-model:expandedRows="expandedRows"
                        dataKey="userId"
                        show-gridlines
