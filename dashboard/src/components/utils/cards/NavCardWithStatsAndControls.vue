@@ -85,9 +85,9 @@ defineExpose({
           <router-link v-if="options.icon"
                        :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink" aria-hidden="true"
                        tabindex="-1" class="">
-            <div class="d-inline-block mr-2 border text-center rounded-border w-16 subject-icon-container text-primary"
+            <div class="d-inline-block mr-2 border text-center rounded-border w-15 h-15 p-1 text-primary"
                  aria-hidden="true">
-              <i :class="[`${options.icon} subject-icon`]" aria-hidden="true" />
+              <i class="text-5xl!" :class="[`${options.icon}`]" aria-hidden="true" />
             </div>
           </router-link>
           <div class="media-body">
@@ -173,21 +173,5 @@ defineExpose({
 
 .sort-control {
   cursor: grab;
-}
-
-.subject-icon {
-  height: 100%;
-  width: 100%;
-  background-size: cover;
-  background-position: center;
-  font-size: 42px !important;
-  line-height: 58px;
-}
-
-.subject-icon-container {
-  max-width:100px;
-  max-height:100px;
-  height:60px;
-  width: 60px;
 }
 </style>
