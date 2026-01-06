@@ -18,14 +18,10 @@ package skills.intTests.utils
 import com.github.tomakehurst.wiremock.WireMockServer
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import jakarta.annotation.PostConstruct
-import jakarta.annotation.PreDestroy
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
-import static com.github.tomakehurst.wiremock.client.WireMock.any
-import static com.github.tomakehurst.wiremock.client.WireMock.ok
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
+import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE
 
@@ -43,7 +39,7 @@ class MockLlmServer {
             mockServer = new WireMockServer(wireMockConfig()
                     .port(mockLlmServerPort))
             stubModelsEndpoint()
-            stubChatsCompletionsEndpoint()
+            setupMockLlmEndpoint()
 
             mockServer.start()
             log.info("WireMock server started on port {}", mockLlmServerPort)
@@ -94,42 +90,60 @@ class MockLlmServer {
         )
     }
 
-    private static String createStreamMsg(String val) {
-        def delta = val ? ["role": "assistant", "content": val] : [:]
-        def msg = [
-                data: [
-                        "id"     : "chat-1", "object": "chat.completion.chunk", "created": 1677652288, "model": "model-1",
-                        "choices": [
-                                [
-                                        "index"        : 0,
-                                        "delta"        : delta,
-                                        "finish_reason": val ? null : "stop"
-                                ]
-                        ]
-                ]]
+    static List<String> createStreamMessages() {
+        List<String> messages = []
 
-        return JsonOutput.toJson(msg)
+        // Add initial message
+        messages.add(createStreamMsg("Hello! "))
+        messages.add(createStreamMsg("How can I help "))
+        messages.add(createStreamMsg("you today?"))
+
+        // Add stop reason
+        messages.add(createStreamMsg(null)) // null content indicates stop
+
+        // Add done signal
+        messages.add("data: [DONE]")
+
+        return messages
     }
 
-    private void stubChatsCompletionsEndpoint() {
-        String msg1 = createStreamMsg("Hi ")
-        String msg2 = createStreamMsg("there! ")
-        String msg3 = createStreamMsg(" I a")
-        String msg4 = createStreamMsg("m ")
-        String msg5 = createStreamMsg("your ")
-        String msg6 = createStreamMsg("assistant.")
-        String stopMsg = createStreamMsg(null)
-        String endMsg = "data: [DONE]"
+    static String createStreamMsg(String content) {
+        def message = [
+                id: "chatcmpl-${UUID.randomUUID()}",
+                object: "chat.completion.chunk",
+                created: System.currentTimeMillis() / 1000,
+                model: "mock-model",
+                choices: [
+                        [
+                                index: 0,
+                                delta: content ? [content: content] : [:],
+                                finish_reason: content ? null : "stop"
+                        ]
+                ]
+        ]
+        return "data: ${new JsonOutput().toJson(message)}"
+    }
 
-        String body = "$msg1\n$msg2\n$msg3\n$msg4\n$msg5\n$msg6\n$stopMsg\n$endMsg"
+    void setupMockLlmEndpoint() {
+        String body = createStreamMessages().join("\n\n")  // Double newline between events
+
         mockServer.stubFor(
-                any(urlPathEqualTo("/v1/chat/completions"))
+                post(urlPathEqualTo("/v1/chat/completions"))
                         .willReturn(ok()
-                                .withHeader(CONTENT_TYPE, "text/event-stream")
-                                .withChunkedDribbleDelay(1, 10)  // Small delay between chunks for better simulation
-                                .withBody(body.stripIndent().trim())
+                                .withHeader("Content-Type", "text/event-stream")
+                                .withHeader("Cache-Control", "no-cache")
+                                .withHeader("Connection", "keep-alive")
+                                .withChunkedDribbleDelay(3, 100)  // 3 chunks, 100ms between
+                                .withBody(body)
                         )
         )
+
+        // Log requests
+        mockServer.addMockServiceRequestListener { request, _ ->
+            log.info("Received request to: {}", request.getUrl())
+            log.info("Headers: {}", request.getHeaders())
+            log.info("Body: {}", request.getBodyAsString())
+        }
     }
 
     void stop() {
