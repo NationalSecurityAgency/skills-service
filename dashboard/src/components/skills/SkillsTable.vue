@@ -685,6 +685,7 @@ const pageChanged = (pagingInfo) => {
                   v-if="slotProps.data.isCatalogImportedSkills"
                   severity="success"
                   class="mt-1"
+                  aria-label="Reused"
                   :data-cy="`importedBadge-${slotProps.data.skillId}`">
                   <span v-if="slotProps.data.reusedSkill"><i class="fas fa-recycle"
                                                              aria-hidden="true"></i> Reused</span>

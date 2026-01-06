@@ -160,7 +160,7 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
     </div>
     <div v-if="isReused" class="mt-4 alert alert-info" header="Skill Catalog" data-cy="reusedAlert">
       This skill is a
-      <Badge class="text-uppercase"><i class="fas fa-recycle"></i> reused</Badge>
+      <Badge class="text-uppercase"><i class="fas fa-recycle" aria-hidden="true"></i> reused</Badge>
       copy
       of another skill in this project and can only be edited from the
       <link-to-skill-page

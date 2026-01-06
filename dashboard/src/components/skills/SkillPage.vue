@@ -214,8 +214,8 @@ const nextButtonClicked = () => {
         <Tag v-if="skillsState.skill.sharedToCatalog" class="ml-2" data-cy="exportedBadge"><i
           class="fas fa-book" aria-hidden="true"></i> EXPORTED
         </Tag>
-        <Tag v-if="isImported" class="ml-2" severity="success" data-cy="importedBadge">
-          <span v-if="skillsState.skill.reusedSkill"><i class="fas fa-recycle"></i> Reused</span>
+        <Tag v-if="isImported" class="ml-2" severity="success" data-cy="importedBadge" aria-label="Reused">
+          <span v-if="skillsState.skill.reusedSkill"><i class="fas fa-recycle"  aria-hidden="true"></i> Reused</span>
           <span v-else><i class="fas fa-book" aria-hidden="true"></i> IMPORTED</span>
         </Tag>
         <Tag v-if="!skillsState.skill.enabled"
