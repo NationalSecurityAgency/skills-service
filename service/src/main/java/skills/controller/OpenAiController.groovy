@@ -47,7 +47,7 @@ class OpenAiController {
     Boolean useSpringAi
 
     @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    Flux<String> generateDescriptionAndStream(@RequestBody AiChatRequest genDescRequest) {
+    Flux<String> chat(@RequestBody AiChatRequest genDescRequest) {
         SkillsValidator.isNotNull(genDescRequest.messages, "genDescRequest.messages")
         SkillsValidator.isTrue(genDescRequest.messages.size() > 0, "genDescRequest.messages must have at least one message")
         SkillsValidator.isNotBlank(genDescRequest.model, "genDescRequest.model")
