@@ -14,11 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {ref, onMounted, onBeforeUnmount, computed} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import ThinkingIndicator from "@/common-components/utilities/learning-conent-gen/ThinkingIndicator.vue";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import {useLog} from "@/components/utils/misc/useLog.js";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
 const props = defineProps({
   id: String,
@@ -38,6 +39,7 @@ const props = defineProps({
 
 const log = useLog()
 const appConfig = useAppConfig()
+const announcer = useSkillsAnnouncer()
 
 const statusMessages = computed(() => appConfig.openaiTakingLongerThanExpectedMessages)
 const thinkingWords = [
@@ -62,6 +64,7 @@ const checkThatProgressWasMade = () => {
     setTimeout(() => {
       if (props.isGenerating && numAttempts < maxAttempts && props.isGenerateValueEmpty) {
         statusMsg.value = statusMessages.value[numAttempts]
+        announcer.polite(`AI Generation update - ${statusMsg.value}`)
         currentThinkingWord.value = getThinkingWord(numAttempts)
         numAttempts += 1
         log.debug(`GenerateDescriptionDialog: Checking progress attempt=[${numAttempts}]`)

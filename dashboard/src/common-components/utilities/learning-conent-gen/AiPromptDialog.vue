@@ -32,6 +32,7 @@ import AiPromptDialogFooter from "@/common-components/utilities/learning-conent-
 import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 
+
 const model = defineModel()
 const props = defineProps({
   createInstructionsFn: {
@@ -118,9 +119,11 @@ const dialogUtils = useDialogUtils()
 const announcer = useSkillsAnnouncer()
 
 const addWelcomeMsg = (welcomeMsg) => {
-  log.debug('Adding welcome msg: [{}]', welcomeMsg)
+  if (log.isDebugEnabled()) {
+    log.debug(`Adding welcome msg: [${welcomeMsg}]`)
+  }
   const item = addChatItem(welcomeMsg, ChatRole.ASSISTANT)
-  announcer.polite(`${welcomeMsg}`)
+  announcer.polite(welcomeMsg.replaceAll('`', ''))
   return item
 }
 const startGeneration = () => {
@@ -133,9 +136,6 @@ const startGeneration = () => {
       props.beforeGenerationStartedFn()
     }
 
-    if (instructions.value?.trim()) {
-      announcer.polite(`Processing your request: ${instructions.value}`)
-    }
     const messages = []
     const isNewConvo = chatHistory.value.length === 1
     let userChatInstructions
@@ -163,7 +163,8 @@ const startGeneration = () => {
 
     isGenerating.value = true
     addChatItem(props.generationStartedMsg, ChatRole.ASSISTANT, true)
-    announcer.polite(props.generationStartedMsg)
+    announceSlowGenStatusStarted = false
+    announcer.polite('AI Generation Started')
     genWithStreaming(messages)
   })
 }
@@ -227,8 +228,6 @@ const setFinalMsgToLastChatItem = (finalMsg, failedToGenerate = false, cancelled
     announcer.assertive(`Error: ${finalMsg}`)
   } else if (cancelled) {
     announcer.polite(`Generation cancelled: ${finalMsg}`)
-  } else {
-    announcer.polite(`Generation complete. ${finalMsg}`)
   }
 }
 const updateLastChatItemGeneratedValue = (item) => {
@@ -251,6 +250,27 @@ const onInputEnter = () => {
   }
 }
 
+let announceSlowGenStatusStarted = false
+const startAnnounceSlowGenStatus = () => {
+  if (!announceSlowGenStatusStarted) {
+    announceSlowGenStatusStarted = true
+    announceSlowGenStatus()
+  }
+
+}
+const announceSlowGenStatus = () => {
+  setTimeout(() => {
+    if (isGenerating.value) {
+      announcer.polite(`AI Generation is in progress...`)
+      announceSlowGenStatus()
+    } else {
+      announceSlowGenStatusStarted = false
+    }
+  }, appConfig.openAiAnnounceGenStatusInterval)
+}
+
+
+
 const genWithStreaming = (messages) => {
   lastPromptCancelled.value = false
   scrollInstructionsIntoView()
@@ -261,6 +281,7 @@ const genWithStreaming = (messages) => {
   }
   return openaiService.prompt(promptParams,
       (chunk) => {
+        startAnnounceSlowGenStatus()
         const lastChatItem = getLastChatItem()
         const chunkRes = props.chunkHandlerFn(chunk, lastChatItem.id)
 
@@ -279,6 +300,7 @@ const genWithStreaming = (messages) => {
         setFinalMsgToLastChatItem(props.generationCompletedMsg)
         isGenerating.value = false
         focusOnInstructionsInput()
+        announcer.polite(`AI Generation Completed`)
       },
       (error) => {
         isGenerating.value = false
@@ -329,9 +351,6 @@ const focusOnInstructionsInput = () => {
     nextTick(() => {
       const input = document.getElementById('instructionsInputId')
       input?.focus()
-      if (input) {
-        announcer.polite('Ready for your input. Type your message and press Enter or click Send.')
-      }
     })
   }
 }
@@ -349,7 +368,6 @@ const addPrefix = (info) => {
   const missingPrefix = info.prefix
   const historyItem = chatHistory.value.find(item => item.id === historyId)
   if (historyItem?.generatedValue) {
-    announcer.polite('Adding prefix to the generated content...')
     return props.addPrefixFn(historyItem, missingPrefix).then((result) => {
       historyItem.generatedValue = result.generatedValue
       useGenerated(historyItem.id)
