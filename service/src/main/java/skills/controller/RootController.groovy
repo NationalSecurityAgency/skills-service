@@ -285,9 +285,8 @@ class RootController {
     }
 
     @RequestMapping(value = "/saveAiPromptSettings", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
-    RequestResult saveAiPromptSettings(@RequestBody List<GlobalSettingsRequest> aiPromptSettings){
-        aiPromptSettingsService.updateAiPromptsSettings(aiPromptSettings)
-        return RequestResult.success()
+    AiPromptSettings saveAiPromptSettings(@RequestBody List<GlobalSettingsRequest> aiPromptSettings){
+        return aiPromptSettingsService.updateAiPromptsSettings(aiPromptSettings)
     }
 
     @GetMapping('/getAiPromptSettings/default/{setting}')

@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { computed } from 'vue'
-import { useField } from 'vee-validate'
+import { useField, useFieldError, useIsFieldDirty } from 'vee-validate'
 
 const props = defineProps({
   name: {
@@ -47,8 +47,10 @@ const props = defineProps({
     default:8
   }
 })
-const emit = defineEmits(['resetToDefault'])
+const emit = defineEmits(['resetToDefault', 'updateSetting'])
 const { value: isDefault } = useField(() => `${props.name}IsDefault`);
+const isDirty = useIsFieldDirty(props.name)
+const errorMessage = useFieldError(props.name)
 
 const  isDefaultTagLabel = computed(() => {
   return isDefault.value ? 'Default' : 'Modified'
@@ -76,15 +78,26 @@ const isDefaultTagSeverity = computed(() => {
         </div>
       </template>
     </SkillsTextarea>
+
+    <SkillsButton label="Save"
+                  :data-cy="`updateSetting-${name}`"
+                  icon="fas fa-arrow-circle-right"
+                  @click="emit('updateSetting', name)"
+                  outlined
+                  class="mb-4"
+                  :disabled="!isDirty || !!errorMessage"
+                  severity="info"
+                  size="small"/>
     <SkillsButton label="Reset to Default"
                   :data-cy="`resetToDefault-${name}`"
                   icon="fas fa-rotate-left"
                   @click="emit('resetToDefault', name)"
                   outlined
-                  class="mb-4"
+                  class="mt-1 mb-6 ml-2"
                   :disabled="!!isDefault"
                   severity="info"
                   size="small"/>
+    <Tag v-if="isDirty" class="ml-2" severity="warn" :data-cy="`unsavedChanges-${name}`"><i class="fas fa-exclamation-circle mr-1" aria-hidden="true"></i>Unsaved Changes</Tag>
   </div>
 </template>
 

@@ -45,8 +45,9 @@ export const useAiPromptState = defineStore('UseAiPromptState', () => {
     return aiPromptSettings.value[name]
   }
 
-  const updateAiPromptSetting = (name, value) => {
-    aiPromptSettingsState.value[name] = value
+  const updateAiPromptSetting = (name, updatedSetting) => {
+    const originalSetting = aiPromptSettingsState.value[name]
+    aiPromptSettingsState.value[name]  = { ...originalSetting, ...updatedSetting }
   }
 
   const updateAiPromptSettings = (settings) => {
@@ -66,6 +67,7 @@ export const useAiPromptState = defineStore('UseAiPromptState', () => {
     loadAiPromptSettings,
     aiPromptSettings,
     getAiPromptSetting,
+    updateAiPromptSetting,
     updateAiPromptSettings,
     isLoading,
     afterPromptsLoaded,
