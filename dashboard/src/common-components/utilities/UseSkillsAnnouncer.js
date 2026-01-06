@@ -13,22 +13,66 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { nextTick } from 'vue'
-import { useAnnouncer } from '@vue-a11y/announcer'
+import {nextTick, ref} from 'vue'
+import {defineStore} from 'pinia'
+import {useAnnouncer} from '@vue-a11y/announcer'
+import {useLog} from "@/components/utils/misc/useLog.js";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
-export const useSkillsAnnouncer = () => {
+export const useSkillsAnnouncer =  defineStore('skills-announcer', () => {
+
+  const appConfig = useAppConfig()
+  const messageQueue = ref([])
+  const isProcessing = ref(false)
+  let processingTimeout = null
+  const log = useLog()
+
+  function processQueue() {
+    if (messageQueue.value.length === 0 || isProcessing.value) {
+      return
+    }
+
+    isProcessing.value = true
+    const { message, type } = messageQueue.value.shift()
+
+    nextTick(() => {
+      if (type === 'assertive') {
+        announcer.assertive(message)
+        if (log.isDebugEnabled()) {
+          log.debug(`Assertive announce: ${message}`)
+        }
+      } else {
+        announcer.polite(message)
+        if (log.isDebugEnabled()) {
+          log.debug(`Polite announce: ${message}`)
+        }
+      }
+
+      processingTimeout = setTimeout(() => {
+        isProcessing.value = false
+        processQueue()
+      }, appConfig.delayBetweenScreenReaderAnnouncements)
+    })
+  }
+
+  function addToQueue(message, type = 'polite') {
+    messageQueue.value.push({ message, type })
+    if (!isProcessing.value) {
+      processQueue()
+    }
+  }
 
   const announcer = useAnnouncer()
   const polite = (msg) => {
-    nextTick(() => announcer.polite(msg))
+    addToQueue(msg, 'polite')
   }
 
   const assertive = (msg) => {
-    nextTick(() => announcer.assertive(msg))
+    addToQueue(msg, 'assertive')
   }
 
   return {
     polite,
     assertive
   }
-}
+})

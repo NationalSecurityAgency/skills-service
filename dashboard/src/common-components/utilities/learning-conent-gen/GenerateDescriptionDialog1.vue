@@ -21,7 +21,6 @@ import {useInstructionGenerator} from "@/common-components/utilities/learning-co
 import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
 import AiPromptDialog from "@/common-components/utilities/learning-conent-gen/AiPromptDialog.vue";
 import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
-import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 
 const model = defineModel()
 const props = defineProps({
@@ -40,7 +39,6 @@ const props = defineProps({
 const emit = defineEmits(['generated-desc'])
 const imgHandler = useImgHandler()
 const instructionsGenerator = useInstructionGenerator()
-const announcer = useSkillsAnnouncer()
 
 const currentDescription = ref('')
 const extractedImageState = { hasImages: false, extractedImages: null, }
@@ -117,9 +115,6 @@ const handleGenerationCompleted = (generated) => {
     const cleanedComments = comments.replace(/^[\s:]+/, '').trim()
     generatedValue = newText.replace(/\s*#+\s*$/gm, '') // Remove ### at end of lines.trim()
     generateValueChangedNotes = `### Here is what was changed\n\n${cleanedComments}`
-    announcer.polite(`Here is what was changed: ${cleanedComments}`)
-  } else {
-    announcer.polite(`Here is what was generated: ${generatedValue}`)
   }
 
   if (extractedImageState.extractedImages) {

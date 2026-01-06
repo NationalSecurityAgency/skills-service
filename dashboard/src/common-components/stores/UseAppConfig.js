@@ -192,6 +192,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const openaiNotSupportedChatModels = computed(() => listFromCommaSeparatedString(config.value.openaiNotSupportedChatModels))
   const openAiDisableSingleQuestionTypeChange = computed(() => isTrue(config.value.openAiDisableSingleQuestionTypeChange))
   const maxAiPromptLength = computed(() => config.value.maxAiPromptLength)
+  const delayBetweenScreenReaderAnnouncements = computed(() => config.value.delayBetweenScreenReaderAnnouncements || 2500)
+  const openAiAnnounceGenStatusInterval = computed(() => config.value.openAiAnnounceGenStatusInterval || 6000)
 
   const sdPointHistoryChartAchievementsCombinePct = computed(() => config.value.sdPointHistoryChartAchievementsCombinePct || 0.05)
 
@@ -321,6 +323,8 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     openaiNotSupportedChatModels,
     openAiDisableSingleQuestionTypeChange,
     maxAiPromptLength,
+    delayBetweenScreenReaderAnnouncements,
+    openAiAnnounceGenStatusInterval,
     sdPointHistoryChartAchievementsCombinePct
   }
 })
