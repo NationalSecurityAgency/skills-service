@@ -84,7 +84,7 @@ class AiPromptSettingsService {
         return convert(aiPromptSettings)
     }
 
-    void updateAiPromptsSettings(List<GlobalSettingsRequest> aiPromptSettings) {
+    AiPromptSettings updateAiPromptsSettings(List<GlobalSettingsRequest> aiPromptSettings) {
         aiPromptSettings.each {
             it.settingGroup = settingsGroup
         }
@@ -103,6 +103,7 @@ class AiPromptSettingsService {
                 actionAttributes: actionAttributes,
                 itemId: "AiPromptSettings",
         ))
+        return fetchAiPromptSettings()
     }
 
     static String getDefaultSetting(String setting){

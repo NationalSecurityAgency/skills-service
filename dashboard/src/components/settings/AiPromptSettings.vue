@@ -130,12 +130,14 @@ const schema = object({
       .label('Update Quiz Question to Matching'),
 });
 
-const { handleSubmit, setFieldValue, validate, meta } = useForm({
+const { handleSubmit, setFieldValue, values, validate, resetField, resetForm, meta } = useForm({
   validationSchema: schema
 });
 
 const onSubmit = handleSubmit((values) => {
-  saveAiPromptSettings(values);
+  saveAiPromptSettings(values).then(() => {
+    resetForm({ values: { ...values } });
+  });
 });
 
 const settingGroup = 'GLOBAL.AIPROMPTS';
@@ -145,42 +147,16 @@ const saveMessage = ref('');
 onMounted(() => {
   loadAiPromptSettings()
 });
-const saveAiPromptSettings = (values) => {
-  isSaving.value = true
-  saveMessage.value = ''
-  const settings = convertToSettings(values)
-  SettingsService.saveAiPromptSettings(settings).then((result) => {
-    if (result) {
-      aiPrompts.updateAiPromptSettings(settings)
-      if (result.success) {
-        saveMessage.value = 'AI Prompt Settings Saved!'
-      }
-    }
-  }).catch(() => {
-    saveMessage.value = 'Failed to Save the AI Prompt Settings!'
-  }).finally(() => {
-    isSaving.value = false
-  })
-}
-
-const convertToSettings = (values) => {
-  const settings = []
-  const keys = Object.keys(values);
-  keys.forEach((key) => {
-    // Skip any keys that end with 'IsDefault'
-    if (!key.endsWith('IsDefault')) {
-      settings.push({
-        settingGroup,
-        value: values[key],
-        setting: `aiPrompt.${key}`
-      });
-    }
-  });
-
-  return settings;
-};
 
 const promptSettings = ref([]);
+const loadAiPromptSettings = () => {
+  loadingPrompts.value = true
+  aiPrompts.afterPromptsLoaded().then(() => {
+    convertFromSettings(aiPrompts.aiPromptSettings)
+  }).finally(() => {
+    loadingPrompts.value = false
+  })
+};
 const convertFromSettings = (settings) => {
   const keys = Object.keys(settings);
   keys.forEach((key) => {
@@ -196,20 +172,45 @@ const convertFromSettings = (settings) => {
   validate()
 };
 
-const loadAiPromptSettings = () => {
-  loadingPrompts.value = true
-  aiPrompts.afterPromptsLoaded().then(() => {
-    convertFromSettings(aiPrompts.aiPromptSettings)
-  }).finally(() => {
-    loadingPrompts.value = false
-  })
-};
 const resetToDefault = (name) => {
   SettingsService.getDefaultAiPromptSettings(name).then((response) => {
     setFieldValue(name, response);
     setFieldValue(`${name}IsDefault`, true);
   });
 }
+const updateSetting = (name) => {
+  saveAiPromptSettings(values, name).then(() => {
+    resetField(name, { value: values[name] })
+  })
+}
+const saveAiPromptSettings = (values, name = null) => {
+  isSaving.value = true
+  saveMessage.value = ''
+  const settings = convertToSettings(name? { [name]: values[name] } : values)
+  return SettingsService.saveAiPromptSettings(settings).then((result) => {
+    aiPrompts.updateAiPromptSettings(result)
+    saveMessage.value = 'AI Prompt Settings Saved!'
+  }).catch(() => {
+    saveMessage.value = 'Failed to Save the AI Prompt Settings!'
+  }).finally(() => {
+    isSaving.value = false
+  })
+}
+const convertToSettings = (values) => {
+  const settings = []
+  const keys = Object.keys(values);
+  keys.forEach((key) => {
+    // Skip any keys that end with 'IsDefault'
+    if (!key.endsWith('IsDefault')) {
+      settings.push({
+        settingGroup,
+        value: values[key],
+        setting: `aiPrompt.${key}`
+      });
+    }
+  });
+  return settings;
+};
 </script>
 
 <template>
@@ -217,11 +218,19 @@ const resetToDefault = (name) => {
     <AiPromptSettingsTextarea v-for="aiPromptSetting in promptSettings" :key="aiPromptSetting.setting"
                               :name="aiPromptSetting.setting"
                               :label="aiPromptSetting.label"
+                              @update-setting="updateSetting"
                               @reset-to-default="resetToDefault" />
 
     <Message v-if="saveMessage" :sticky="false" :life="10000">{{saveMessage}}</Message>
+    <InlineMessage v-if="meta.dirty"
+                   severity="warn"
+                   class="my-2"
+                   data-cy="unsavedChangesAlert"
+                   aria-label="Settings have been changed, do not forget to save">
+      Unsaved Changes
+    </InlineMessage>
     <SkillsButton v-on:click="onSubmit" :disabled="!meta.valid || !meta.dirty || isSaving" data-cy="aiPromptSettingsSave"
-                  label="Save" :icon="isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right'" >
+                  label="Save All" :icon="isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right'" >
     </SkillsButton>
   </div>
 </template>
