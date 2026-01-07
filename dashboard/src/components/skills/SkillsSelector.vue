@@ -203,8 +203,8 @@ defineExpose({
                   slotProps.option.type
                 }}:</span> {{ slotProps.option.name }}
                 <Tag v-if="slotProps.option.isReused" variant="success" size="sm" class="uppercase"
-                     data-cy="reusedBadge"
-                     style="font-size: 0.85rem !important;"><i class="fas fa-recycle"></i> reused
+                     data-cy="reusedBadge" aria-label="Reused"
+                     style="font-size: 0.85rem !important;"><i class="fas fa-recycle" aria-hidden="true"></i> reused
                 </Tag>
               </div>
               <div style="font-size: 0.8rem;">

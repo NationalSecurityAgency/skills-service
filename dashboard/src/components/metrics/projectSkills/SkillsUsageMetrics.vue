@@ -185,7 +185,7 @@ const totalRows = computed(() => items.value.length);
             <div class="flex gap-2 flex-wrap">
               <div class="flex flex-1 flex-col">
                 {{ slotProps.data.skillName }}
-                <Badge v-if="slotProps.data.isReusedSkill" variant="success" class="text-uppercase"><i class="fas fa-recycle"></i> Reused</Badge>
+                <Badge v-if="slotProps.data.isReusedSkill" variant="success" class="text-uppercase"><i class="fas fa-recycle" aria-hidden="true"></i> Reused</Badge>
                 <div v-if="slotProps.data.skillTags && slotProps.data.skillTags.length > 0">
                   <Badge v-for="tag in slotProps.data.skillTags" :key="tag.tagId" variant="info" class="mr-2 mt-1">
                     <i :class="'fas fa-tag'" class="ml-1" style="margin-left: 0 !important;" aria-hidden="true"></i> {{ tag.tagValue }}

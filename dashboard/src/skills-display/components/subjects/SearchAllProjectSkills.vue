@@ -21,6 +21,7 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
+import SkillReuseIdUtil from "@/components/utils/SkillReuseIdUtil.js";
 
 const skillsDisplayService = useSkillsDisplayService()
 const announcer = useSkillsAnnouncer()
@@ -94,7 +95,11 @@ const navToSkill = (event) => {
               :aria-label="`Selected ${slotProps.option.skillName} ${attributes.skillDisplayNameLower} from ${slotProps.option.subjectName} ${attributes.subjectDisplayName}. You have earned ${slotProps.option.userCurrentPoints} ${attributes.pointDisplayNamePlural} out of ${slotProps.option.totalPoints} for this ${attributes.skillDisplayNameLower}. Click to navigate to the ${attributes.skillDisplayNameLower}. Type to search for a ${attributes.skillDisplayNameLower} across all ${attributes.subjectDisplayNamePlural}.`">
               <i class="fas fa-graduation-cap mr-1 text-xl text-green-800"
                  aria-hidden="true" />
-              <highlighted-value :value="slotProps.option.skillName" :filter="query" class="text-xl" />
+              <highlighted-value :value="SkillReuseIdUtil.removeTag(slotProps.option.skillName)" :filter="query" class="text-xl" />
+              <Tag v-if="SkillReuseIdUtil.isTagged(slotProps.option.skillName)" variant="success" size="sm" class="uppercase ml-2"
+                   data-cy="reusedBadge" aria-label="Reused"
+                   style="font-size: 0.85rem !important;"><i class="fas fa-recycle" aria-hidden="true"></i> reused
+              </Tag>
             </div>
             <div
               class=""
