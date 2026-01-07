@@ -42,7 +42,7 @@ const loading = ref(true);
 const pageSize = useStorage('selfReportApprovalConfManager-pageSize', 5)
 const possiblePageSizes = [5, 10, 15, 20, 50];
 const totalRows = ref(0);
-const sortBy = ref('userId');
+const sortBy = ref('userIdForDisplay');
 const sortOrder = ref(-1);
 const roleCount = ref(null);
 

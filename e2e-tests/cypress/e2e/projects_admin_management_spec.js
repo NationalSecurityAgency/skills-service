@@ -588,8 +588,8 @@ describe('Projects Admin Management Tests', () => {
         cy.get(`${tableSelector} thead th`).contains('User').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'Zed Jones (zed jones)' }, { colIndex: 2,  value: 'Approver' }],
-            [{ colIndex: 1,  value: 'Firstname LastName (skills@skills.org)' }, { colIndex: 2,  value: 'Administrator' }],
             [{ colIndex: 1,  value: 'Jeff Jackson (some display name)' }, { colIndex: 2,  value: 'Approver' }],
+            [{ colIndex: 1,  value: 'Firstname LastName (skills@skills.org)' }, { colIndex: 2,  value: 'Administrator' }],
             [{ colIndex: 1,  value: 'Edward Johnson (edward johnson)' }, { colIndex: 2,  value: 'Approver' }],
             [{ colIndex: 1,  value: 'Alan Davis (alan davis)' }, { colIndex: 2,  value: 'Approver' }],
         ], 5, true, null, false);
@@ -598,8 +598,8 @@ describe('Projects Admin Management Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'Alan Davis (alan davis)' }, { colIndex: 2,  value: 'Approver' }],
             [{ colIndex: 1,  value: 'Edward Johnson (edward johnson)' }, { colIndex: 2,  value: 'Approver' }],
-            [{ colIndex: 1,  value: 'Jeff Jackson (some display name)' }, { colIndex: 2,  value: 'Approver' }],
             [{ colIndex: 1,  value: 'Firstname LastName (skills@skills.org)' }, { colIndex: 2,  value: 'Administrator' }],
+            [{ colIndex: 1,  value: 'Jeff Jackson (some display name)' }, { colIndex: 2,  value: 'Approver' }],
             [{ colIndex: 1,  value: 'Zed Jones (zed jones)' }, { colIndex: 2,  value: 'Approver' }],
         ], 5, true, null, false);
     });

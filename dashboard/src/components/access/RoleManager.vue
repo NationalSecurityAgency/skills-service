@@ -105,7 +105,7 @@ onMounted(() => {
 });
 
 
-const sortInfo = ref({ sortOrder: 1, sortBy: 'userId' })
+const sortInfo = ref({ sortOrder: 1, sortBy: 'userIdForDisplay' })
 const possiblePageSizes = [ 5, 10, 15, 20]
 const pageSize = useStorage('roleManager-pageSize', 5)
 const isLoading = ref(true)
@@ -540,7 +540,7 @@ defineExpose({
                 <span class="sr-only">Rows expand and collapse control - No filtering</span>
               </template>
             </Column>
-            <Column :header="roleDescription" :field="appConfig.isPkiAuthenticated ? 'userIdForDisplay' : 'userId'" sortable :class="{'flex': responsive.md.value }">
+            <Column :header="roleDescription" field="userIdForDisplay" sortable :class="{'flex': responsive.md.value }">
             <template #header>
               <span class="mr-2"><i class="fas fa-user skills-color-users" :class="colors.getTextClass(0)"
                                     aria-hidden="true"></i> </span>
