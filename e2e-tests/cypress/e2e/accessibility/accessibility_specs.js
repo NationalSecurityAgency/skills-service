@@ -285,7 +285,7 @@ describe('Accessibility Tests', () => {
         if (!Cypress.env('oauthMode')) {
             it(`user tags on the metrics page${darkMode}`, () => {
                 cy.setDarkModeIfNeeded(darkMode)
-                const userTagsTableSelector = '[data-cy="userTagsTable"]';
+                const userTagsTableSelector = '[data-cy="userTagsTable-manyValues"]';
 
                 cy.createProject(1);
                 cy.createSubject(1, 1);

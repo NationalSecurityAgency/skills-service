@@ -134,15 +134,15 @@ const filterRange = ref([]);
       <div>
         <div class="flex mb-3 gap-4">
           <div class="flex flex-3 flex-col">
-            <SkillsTextInput label="Filter by Tag" v-model="filters.tag" v-on:keydown.enter="filter" :disabled="isLoading" id="userTagTable-tagFilter" name="userTagTable-tagFilter"/>
+            <SkillsTextInput label="Filter by Tag" v-model="filters.tag" v-on:keydown.enter="filter" :disabled="isLoading" id="userTagTable-tagFilter" :name="`userTagTable-${tagKey}-tagFilter`"/>
             <div class="flex gap-2">
-              <SkillsButton @click="filter" icon="fa-solid fa-search" label="Filter" :disabled="isLoading" data-cy="userTagTable-filterBtn" />
-              <SkillsButton severity="danger" icon="fa-solid fa-eraser" label="Clear" @click="clearFilter" :disabled="isLoading" data-cy="userTagTable-clearBtn" />
+              <SkillsButton @click="filter" icon="fa-solid fa-search" label="Filter" :disabled="isLoading" :data-cy="`userTagTable-${tagKey}-filterBtn`" />
+              <SkillsButton severity="danger" icon="fa-solid fa-eraser" label="Clear" @click="clearFilter" :disabled="isLoading" :data-cy="`userTagTable-${tagKey}-clearBtn`" />
             </div>
           </div>
           <div class="flex flex-wrap flex-col gap-2">
             Filter by Date(s):
-            <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" :disabled="isLoading" placeholder="Select a date range" data-cy="metricsDateFilter" />
+            <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" :disabled="isLoading" placeholder="Select a date range" :data-cy="`${tagKey}-metricsDateFilter`" />
           </div>
         </div>
         <SkillsDataTable :value="table.items"
@@ -160,11 +160,11 @@ const filterRange = ref([]);
                          :total-records="table.options.pagination.totalRows"
                          tableStoredStateId="userTagsTable"
                          aria-label="User Tags"
-                         data-cy="userTagsTable">
+                         :data-cy="`userTagsTable-${tagKey}`">
           <Column field="value" :header="tagChart.tagLabel ? tagChart.tagLabel : 'Tag'" sortable>
             <template #body="slotProps">
               <span :data-cy="`cell_tagValue-${slotProps.data.value}`">
-                <router-link :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: slotProps.data.value } }" data-cy="userTagTable_viewMetricsLink">
+                <router-link :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: slotProps.data.value } }" :data-cy="`userTagTable-${tagKey}_viewMetricsLink`">
                   <span v-if="slotProps.data.htmlValue" v-html="slotProps.data.htmlValue"></span><span v-else>{{ slotProps.data.value }}</span>
                 </router-link>
               </span>
