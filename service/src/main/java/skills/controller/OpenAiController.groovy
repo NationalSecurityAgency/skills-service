@@ -43,9 +43,6 @@ class OpenAiController {
     @Autowired
     AiPromptSettingsService aiPromptSettingsService
 
-    @Value('#{"${skills.openai.useSpringAi:true}"}')
-    Boolean useSpringAi
-
     @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     Flux<String> chat(@RequestBody AiChatRequest genDescRequest) {
         SkillsValidator.isNotNull(genDescRequest.messages, "genDescRequest.messages")
@@ -53,10 +50,7 @@ class OpenAiController {
         SkillsValidator.isNotBlank(genDescRequest.model, "genDescRequest.model")
         SkillsValidator.isNotNull(genDescRequest.modelTemperature, "genDescRequest.modelTemperature")
         SkillsValidator.isTrue(genDescRequest.modelTemperature >= 0 && genDescRequest.modelTemperature <= 2, "genDescRequest.modelTemperature must be >= 0 and <= 2")
-        if (useSpringAi) {
-            return openAIService.streamCompletions1(genDescRequest)
-        }
-        return openAIService.streamCompletions(genDescRequest)
+        return openAIService.streamChat(genDescRequest)
     }
 
     @GetMapping("/models")
