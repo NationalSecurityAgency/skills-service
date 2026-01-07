@@ -62,6 +62,9 @@ class OpenAIChatConfig {
     @Value('#{"${skills.openai.stream.responseTimeout:60}"}')
     Integer responseTimeout = 60
 
+    @Value('#{"${skills.openai.stream.stream-usage:true}"}')
+    Boolean streamUsage
+
     @Value('#{"${skills.openai.stream.closeNotifyFlushTimeout:5000}"}')
     Integer closeNotifyFlushTimeout = 5000
 
@@ -144,6 +147,7 @@ class OpenAIChatConfig {
                 .webClientBuilder(webClientBuilder)
                 .build();
         OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
+                .streamUsage(streamUsage)
                 .build();
 
         return OpenAiChatModel.builder()

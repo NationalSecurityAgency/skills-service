@@ -22,7 +22,9 @@ import org.springframework.ai.chat.messages.AssistantMessage
 import org.springframework.ai.chat.messages.Message
 import org.springframework.ai.chat.messages.SystemMessage
 import org.springframework.ai.chat.messages.UserMessage
+import org.springframework.ai.chat.metadata.Usage
 import org.springframework.ai.chat.model.ChatResponse
+import org.springframework.ai.chat.model.Generation
 import org.springframework.ai.chat.prompt.Prompt
 import org.springframework.ai.openai.OpenAiChatModel
 import org.springframework.ai.openai.OpenAiChatOptions
@@ -53,6 +55,9 @@ class OpenAIService {
 
     @Value('#{"${skills.openai.key:null}"}')
     String openAiKey
+
+    @Value('#{"${skills.openai.stream.stream-usage:true}"}')
+    Boolean streamUsage
 
     String systemMsg
 
@@ -115,6 +120,7 @@ class OpenAIService {
             throw new UnsupportedOperationException("ai systemMsg is not configured" )
         }
 
+        long startTime = System.currentTimeMillis()
         boolean isFirstMessage = genDescRequest.messages.size() == 1
         List<Message> messages = isFirstMessage ? [new SystemMessage(systemMsg)] : []
         messages.addAll(genDescRequest.messages.collect { msg ->
@@ -134,10 +140,18 @@ class OpenAIService {
                         .temperature(genDescRequest.modelTemperature)
                         .build()
         )
+        List<ChatResponse> collectedResponses = Collections.synchronizedList([] as List<ChatResponse>)
         Flux<ChatResponse> response = chatModel.stream(prompt)
         return response.mapNotNull { ChatResponse chatResponse ->
             try {
-                String res = (String) chatResponse.getResults().get(0).getOutput().getText()
+                if (streamUsage && chatResponse?.getMetadata()?.getUsage()?.getTotalTokens() > 0) {
+                    collectedResponses << chatResponse
+                }
+                List<Generation> genList = chatResponse.getResults()
+                if (!genList) {
+                    return ""
+                }
+                String res = (String) genList.get(0).getOutput().getText()
                 res = res?.replaceAll('\\n', '<<newline>>')
                 log.debug("Response: [{}]", res)
                 return res
@@ -149,6 +163,17 @@ class OpenAIService {
                 }
                 log.error("Failed to get response from OpenAI, chatResponse=[${chatResponseAsStr}]", t)
                 throw t
+            }
+        }.doOnComplete {
+            if (streamUsage) {
+                long totalRuntimeMs = (System.currentTimeMillis() - startTime)
+                if (!collectedResponses.isEmpty()) {
+                    // Use the last response which should have the complete usage info
+                    Usage usage = collectedResponses.last().getMetadata().getUsage()
+                    log.info("Chat Usage: totalTokens=[${usage.totalTokens}], promptTokens=[${usage.promptTokens}], completionTokens=[${usage.completionTokens}], totalRuntimeMs=[${totalRuntimeMs}]")
+                } else {
+                    log.warn("Failed to collect chat usage. Total runtime: [${totalRuntimeMs}]")
+                }
             }
         }
     }
