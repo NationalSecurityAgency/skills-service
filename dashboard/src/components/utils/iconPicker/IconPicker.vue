@@ -84,7 +84,7 @@ const themeHelper = useThemesHelper()
       :disabled="disabled"
       data-cy="iconPicker">
       <div class="text-primary text-5xl w-24 h-20 flex items-center justify-center m-0">
-        <i :class="[startIcon]" />
+        <i class="text-5xl!" :class="[startIcon]" />
       </div>
     </SkillsButton>
 
