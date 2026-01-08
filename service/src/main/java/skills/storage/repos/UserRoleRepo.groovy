@@ -32,6 +32,7 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     interface UserRoleWithAttrs {
         UserRole getRole()
         UserAttrs getAttrs()
+        String getUserIdForDisplay()
     }
 
     @Nullable
@@ -115,7 +116,7 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.roleName in ?2 ''')
     Integer countUserRolesByAdminGroupIdAndUserRoles(String projectId, List<RoleName> roles)
 
-    @Query('''SELECT ur as role, ua as attrs
+    @Query('''SELECT ur as role, ua as attrs, ua.userIdForDisplay as userIdForDisplay
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and 
@@ -123,7 +124,7 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.roleName in ?2 ''')
     List<UserRoleWithAttrs> findRoleWithAttrsByProjectIdAndUserRoles(String projectId, List<RoleName> roles, PageRequest pageRequest)
 
-    @Query('''SELECT ur as role, ua as attrs
+    @Query('''SELECT ur as role, ua as attrs, ua.userIdForDisplay as userIdForDisplay
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and 
@@ -131,7 +132,7 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.roleName in ?2 ''')
     List<UserRoleWithAttrs> findRoleWithAttrsByAdminGroupIdAndUserRoles(String adminGroupId, List<RoleName> roles, PageRequest pageRequest)
 
-    @Query('''SELECT ur as role, ua as attrs
+    @Query('''SELECT ur as role, ua as attrs, ua.userIdForDisplay as userIdForDisplay
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and 
@@ -152,7 +153,7 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     ''')
     Integer countRoleWithAttrsByProjectIdAndRoleNameAndUserIdLike(String projectId, RoleName roleName, String userIdQuery)
 
-    @Query('''SELECT ur as role, ua as attrs
+    @Query('''SELECT ur as role, ua as attrs, ua.userIdForDisplay as userIdForDisplay
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and 
@@ -180,14 +181,14 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
 
     boolean existsByRoleName(RoleName roleName)
 
-    @Query('''SELECT ur as role, ua as attrs
+    @Query('''SELECT ur as role, ua as attrs, ua.userIdForDisplay as userIdForDisplay
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and 
             ur.roleName = ?1''')
     List<UserRoleWithAttrs> findAllByRoleName(RoleName roleName)
 
-    @Query('''SELECT ur as role, ua as attrs
+    @Query('''SELECT ur as role, ua as attrs, ua.userIdForDisplay as userIdForDisplay
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and 
@@ -201,7 +202,7 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.roleName = ?1''')
     Integer countAllByRoleName(RoleName roleName)
 
-    @Query('''SELECT ur as role, ua as attrs
+    @Query('''SELECT ur as role, ua as attrs, ua.userIdForDisplay as userIdForDisplay
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and 
@@ -233,14 +234,14 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
 
     int countByRoleName(RoleName roleName)
 
-    @Query('''SELECT ur as role, ua as attrs
+    @Query('''SELECT ur as role, ua as attrs, ua.userIdForDisplay as userIdForDisplay
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and 
             ur.quizId = ?1''')
     List<UserRoleWithAttrs> findRoleWithAttrsByQuizId(String quizId)
 
-    @Query('''SELECT ur as role, ua as attrs
+    @Query('''SELECT ur as role, ua as attrs, ua.userIdForDisplay as userIdForDisplay
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and 
@@ -248,7 +249,7 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     List<UserRoleWithAttrs> findRoleWithAttrsByGlobalBadgeId(String badgeId)
 
 
-    @Query('''SELECT ur as role, ua as attrs
+    @Query('''SELECT ur as role, ua as attrs, ua.userIdForDisplay as userIdForDisplay
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and

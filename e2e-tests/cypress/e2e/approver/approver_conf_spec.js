@@ -40,6 +40,12 @@ describe('Approver Config Tests', () => {
         cy.register('user3', pass);
         cy.register('user4', pass);
         cy.register('user5', pass);
+
+        cy.register('testuser', pass);
+        cy.register('abcd', pass);
+        cy.register('ghij', pass);
+        cy.register('zed', pass);
+
         cy.fixture('vars.json')
             .then((vars) => {
                 if (!Cypress.env('oauthMode')) {
@@ -126,6 +132,7 @@ describe('Approver Config Tests', () => {
             cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"]`).click();
             // cy.selectItem(`[data-cy="expandedChild_${user1}"] [data-cy="userIdInput"] #existingUserInput`, 'userb', true, true);
             cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]`).click()
+            cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="existingUserInputDropdown"]`).type('userb')
             cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('userb').click();
 
             cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addUserConfBtn"]`).click()
@@ -582,5 +589,84 @@ describe('Approver Config Tests', () => {
                 }],
             ], 5);
         });
+    });
+
+    it('sorting works by userIdForDisplay', function () {
+        cy.fixture('vars.json').then((vars) => {
+            cy.request('POST', `/admin/projects/proj1/users/user1/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user2/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user3/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user4/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/user5/roles/ROLE_PROJECT_APPROVER`);
+
+            cy.request('POST', `/admin/projects/proj1/users/testuser/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/abcd/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/ghij/roles/ROLE_PROJECT_APPROVER`);
+            cy.request('POST', `/admin/projects/proj1/users/zed/roles/ROLE_PROJECT_APPROVER`);
+
+            cy.visit('/administrator/projects/proj1/self-report/configure');
+
+            const defaultUser = Cypress.env('oauthMode') ? 'foo': vars.defaultUser
+            cy.get('[data-pc-section="columnheadercontent"]').contains('Approver').click();
+
+            const tableSelector = '[data-cy="skillApprovalConfTable"]'
+            const tableContents = [
+                [{
+                    colIndex: 0,
+                    value: 'abcd'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user1'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user2'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'ghij'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'testuser'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user3'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user4'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'user5'
+                }],
+                [{
+                    colIndex: 0,
+                    value: 'zed'
+                }],
+                [{
+                    colIndex: 0,
+                    value: defaultUser
+                }],
+            ]
+            tableContents.sort((a, b) => {
+                if(a[0].value < b[0].value) {
+                    return -1;
+                } else if (a[0].value > b[0].value) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            })
+            cy.validateTable(tableSelector, tableContents, 5);
+
+            cy.get('[data-pc-section="columnheadercontent"]').contains('Approver').click();
+
+            cy.validateTable(tableSelector, tableContents.toReversed(), 5);
+        });
+
     });
 });

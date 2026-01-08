@@ -132,7 +132,7 @@ describe('Quiz User Role Management Tests', () => {
                 cy.register('5user', pass);
 
                 const oauthMode = Cypress.env('oauthMode');
-                const defaultUserForDisplay = oauthMode ? 'foo' : vars.defaultUser;
+                const defaultUserForDisplay = oauthMode ? 'foo' : 'Firstname LastName (skills@skills.org)';
                 if (!oauthMode) {
                     cy.log('NOT in oauthMode, using form login');
                     cy.login(vars.defaultUser, vars.defaultPass);
@@ -160,12 +160,12 @@ describe('Quiz User Role Management Tests', () => {
 
                 cy.validateTable(tableSelector, [
                     [{ colIndex: 1, value: defaultUserForDisplay }],
-                    [{ colIndex: 1, value: '5user' }],
-                    [{ colIndex: 1, value: '4user' }],
-                    [{ colIndex: 1, value: '3user' }],
-                    [{ colIndex: 1, value: '2user' }],
-                    [{ colIndex: 1, value: '1user' }],
-                    [{ colIndex: 1, value: '0user' }],
+                    [{ colIndex: 1, value: 'Firstname LastName (5user)' }],
+                    [{ colIndex: 1, value: 'Firstname LastName (4user)' }],
+                    [{ colIndex: 1, value: 'Firstname LastName (3user)' }],
+                    [{ colIndex: 1, value: 'Firstname LastName (2user)' }],
+                    [{ colIndex: 1, value: 'Firstname LastName (1user)' }],
+                    [{ colIndex: 1, value: 'Firstname LastName (0user)' }],
                 ], 5);
             });
     })

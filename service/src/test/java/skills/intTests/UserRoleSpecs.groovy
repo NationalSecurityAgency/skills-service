@@ -68,6 +68,105 @@ class UserRoleSpecs extends DefaultIntSpec {
         res2.data.get(1).roleName == RoleName.ROLE_PROJECT_APPROVER.toString()
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "can sort by userIdForDisplay" () {
+        String user = "jsmith"
+        String user2 = "bcool"
+        String user3 = "aaaronson"
+        String user4 = "tjohnson"
+        String user5 = "xjones"
+        SkillsService user1Service = createService(user, "passefeafeaef", "John", "Smith")
+        createService(user2, "passefeafeaef", "Bob", "Cool")
+        createService(user3, "passefeafeaef", "Aaron", "Aaronson")
+        createService(user4, "passefeafeaef", "Theodore", "Johnson")
+        createService(user5, "passefeafeaef", "Xander", "Jones")
+
+        def proj = SkillsFactory.createProject(1)
+        user1Service.createProject(proj)
+        when:
+        user1Service.addUserRole(user2, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        user1Service.addUserRole(user3, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        user1Service.addUserRole(user4, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        user1Service.addUserRole(user5, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def res = user1Service.getUserRolesForProject(proj.projectId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER], 10, 1, "userIdForDisplay", true)
+        def res2 = user1Service.getUserRolesForProject(proj.projectId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER], 10, 1, "userIdForDisplay", false)
+        then:
+
+        res.count == 5
+        res.data.size() == 5
+        res.data.get(0).userId.contains(user3.toLowerCase())
+        res.data.get(0).userIdForDisplay.equalsIgnoreCase("$user3 for display")
+        res.data.get(0).firstName == "Aaron"
+        res.data.get(0).lastName == "Aaronson"
+        res.data.get(0).projectId == proj.projectId
+        res.data.get(0).roleName == RoleName.ROLE_PROJECT_APPROVER.toString()
+
+        res.data.get(1).userId == user2.toLowerCase()
+        res.data.get(1).userIdForDisplay.equalsIgnoreCase("$user2 for display")
+        res.data.get(1).firstName == "Bob"
+        res.data.get(1).lastName == "Cool"
+        res.data.get(1).projectId == proj.projectId
+        res.data.get(1).roleName == RoleName.ROLE_PROJECT_APPROVER.toString()
+
+        res.data.get(2).userId == user.toLowerCase()
+        res.data.get(2).userIdForDisplay.equalsIgnoreCase("$user for display")
+        res.data.get(2).firstName == "John"
+        res.data.get(2).lastName == "Smith"
+        res.data.get(2).projectId == proj.projectId
+        res.data.get(2).roleName == projAdminRole
+
+        res.data.get(3).userId == user4.toLowerCase()
+        res.data.get(3).userIdForDisplay.equalsIgnoreCase("$user4 for display")
+        res.data.get(3).firstName == "Theodore"
+        res.data.get(3).lastName == "Johnson"
+        res.data.get(3).projectId == proj.projectId
+        res.data.get(3).roleName == RoleName.ROLE_PROJECT_APPROVER.toString()
+
+        res.data.get(4).userId == user5.toLowerCase()
+        res.data.get(4).userIdForDisplay.equalsIgnoreCase("$user5 for display")
+        res.data.get(4).firstName == "Xander"
+        res.data.get(4).lastName == "Jones"
+        res.data.get(4).projectId == proj.projectId
+        res.data.get(4).roleName == RoleName.ROLE_PROJECT_APPROVER.toString()
+
+        res2.count == 5
+        res2.data.size() == 5
+        res2.data.get(4).userId.contains(user3.toLowerCase())
+        res2.data.get(4).userIdForDisplay.equalsIgnoreCase("$user3 for display")
+        res2.data.get(4).firstName == "Aaron"
+        res2.data.get(4).lastName == "Aaronson"
+        res2.data.get(4).projectId == proj.projectId
+        res2.data.get(4).roleName == RoleName.ROLE_PROJECT_APPROVER.toString()
+
+        res2.data.get(3).userId == user2.toLowerCase()
+        res2.data.get(3).userIdForDisplay.equalsIgnoreCase("$user2 for display")
+        res2.data.get(3).firstName == "Bob"
+        res2.data.get(3).lastName == "Cool"
+        res2.data.get(3).projectId == proj.projectId
+        res2.data.get(3).roleName == RoleName.ROLE_PROJECT_APPROVER.toString()
+
+        res2.data.get(2).userId == user.toLowerCase()
+        res2.data.get(2).userIdForDisplay.equalsIgnoreCase("$user for display")
+        res2.data.get(2).firstName == "John"
+        res2.data.get(2).lastName == "Smith"
+        res2.data.get(2).projectId == proj.projectId
+        res2.data.get(2).roleName == projAdminRole
+
+        res2.data.get(1).userId == user4.toLowerCase()
+        res2.data.get(1).userIdForDisplay.equalsIgnoreCase("$user4 for display")
+        res2.data.get(1).firstName == "Theodore"
+        res2.data.get(1).lastName == "Johnson"
+        res2.data.get(1).projectId == proj.projectId
+        res2.data.get(1).roleName == RoleName.ROLE_PROJECT_APPROVER.toString()
+
+        res2.data.get(0).userId == user5.toLowerCase()
+        res2.data.get(0).userIdForDisplay.equalsIgnoreCase("$user5 for display")
+        res2.data.get(0).firstName == "Xander"
+        res2.data.get(0).lastName == "Jones"
+        res2.data.get(0).projectId == proj.projectId
+        res2.data.get(0).roleName == RoleName.ROLE_PROJECT_APPROVER.toString()
+    }
+
     def "project admin and approver roles are mutually exclusive" () {
         String user = "UserRoleSpecsUser1".toLowerCase()
         String user2 = "UserRoleSpecsUser2".toLowerCase()

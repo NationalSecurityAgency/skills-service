@@ -325,11 +325,11 @@ describe('Settings Tests', () => {
         cy.validateTable(rootUsrTableSelector, [
             [{
                 colIndex: 0,
-                value: '(root@skills.org)'
+                value: 'Firstname LastName (root@skills.org)'
             }],
             [{
                 colIndex: 0,
-                value: '(skills@skills.org)'
+                value: 'Firstname LastName (skills@skills.org)'
             }],
         ], 5, true, null, false);
         ;
@@ -340,11 +340,11 @@ describe('Settings Tests', () => {
         cy.validateTable(rootUsrTableSelector, [
             [{
                 colIndex: 0,
-                value: '(skills@skills.org)'
+                value: 'Firstname LastName (skills@skills.org)'
             }],
             [{
                 colIndex: 0,
-                value: '(root@skills.org)'
+                value: 'Firstname LastName (root@skills.org)'
             }],
         ], 5, true, null, false);
     });
