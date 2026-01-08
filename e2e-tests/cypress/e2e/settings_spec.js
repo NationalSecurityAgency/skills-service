@@ -332,15 +332,18 @@ describe('Settings Tests', () => {
             .click();
         cy.wait('@addRoot');
 
+        const rootUser = Cypress.env('oauthMode') ? 'Firstname LastName (root@skills.org)' : 'Jack Smith (root@skills.org)';
+        const adminUser = Cypress.env('oauthMode') ? 'Firstname LastName (skills@skills.org)' : 'Zack Smith (skills@skills.org)';
+
         // default sort order is userId asc
         cy.validateTable(rootUsrTableSelector, [
             [{
                 colIndex: 0,
-                value: 'Jack Smith (root@skills.org)'
+                value: rootUser
             }],
             [{
                 colIndex: 0,
-                value: 'Zack Smith (skills@skills.org)'
+                value: adminUser
             }],
         ], 5, true, null, false);
         ;
@@ -351,11 +354,11 @@ describe('Settings Tests', () => {
         cy.validateTable(rootUsrTableSelector, [
             [{
                 colIndex: 0,
-                value: 'Zack Smith (skills@skills.org)'
+                value: adminUser
             }],
             [{
                 colIndex: 0,
-                value: 'Jack Smith (root@skills.org)'
+                value: rootUser
             }],
         ], 5, true, null, false);
     });
