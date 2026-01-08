@@ -16,10 +16,22 @@
 describe('Settings Tests', () => {
 
     beforeEach(() => {
+        const userInfo = {
+            'first': 'Zack',
+            'last': 'Smith',
+            'nickname': 'Zack Smith'
+        }
+        cy.request('POST', '/app/userInfo', userInfo)
         cy.logout();
         cy.fixture('vars.json')
             .then((vars) => {
                 cy.login(vars.rootUser, vars.defaultPass);
+                const userInfo = {
+                    'first': 'Jack',
+                    'last': 'Smith',
+                    'nickname': 'Zack Smith'
+                }
+                cy.request('POST', '/app/userInfo', userInfo)
             });
 
         cy.intercept('GET', '/app/projects').as('getProjects')
@@ -277,7 +289,6 @@ describe('Settings Tests', () => {
     });
 
     it('Add Root User With No Query', () => {
-
         cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE')
             .as('getEligibleForRoot');
         cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER')
@@ -325,11 +336,11 @@ describe('Settings Tests', () => {
         cy.validateTable(rootUsrTableSelector, [
             [{
                 colIndex: 0,
-                value: 'Firstname LastName (root@skills.org)'
+                value: 'Jack Smith (root@skills.org)'
             }],
             [{
                 colIndex: 0,
-                value: 'Firstname LastName (skills@skills.org)'
+                value: 'Zack Smith (skills@skills.org)'
             }],
         ], 5, true, null, false);
         ;
@@ -340,11 +351,11 @@ describe('Settings Tests', () => {
         cy.validateTable(rootUsrTableSelector, [
             [{
                 colIndex: 0,
-                value: 'Firstname LastName (skills@skills.org)'
+                value: 'Zack Smith (skills@skills.org)'
             }],
             [{
                 colIndex: 0,
-                value: 'Firstname LastName (root@skills.org)'
+                value: 'Jack Smith (root@skills.org)'
             }],
         ], 5, true, null, false);
     });
@@ -941,7 +952,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-loggedInName"]')
-            .contains('Firstname LastName');
+            .contains('Zack Smith');
     });
 
     it('nav to settings', () => {
