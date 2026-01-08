@@ -17,7 +17,6 @@ limitations under the License.
 import {computed, onMounted, ref} from 'vue'
 import {useRoute} from "vue-router";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
-import {useLog} from "@/components/utils/misc/useLog.js";
 import {useImgHandler} from "@/common-components/utilities/learning-conent-gen/UseImgHandler.js";
 import {useInstructionGenerator} from "@/common-components/utilities/learning-conent-gen/UseInstructionGenerator.js";
 import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
@@ -40,7 +39,6 @@ const props = defineProps({
 })
 const emit = defineEmits(['question-generated'])
 const route = useRoute()
-const log = useLog()
 const imgHandler = useImgHandler()
 const appConfig = useAppConfig()
 const quizConfig = useQuizConfig()
@@ -250,7 +248,7 @@ const questionTypeSelectionDisabled = computed(() => {
       <markdown-text :text="historyItem.generatedValue"
                      data-cy="generatedSegment"
                      :instanceId="`${historyItem.id}-desc`"/>
-      <div v-if="answersFound" class="flex mt-2">
+      <div v-if="answersFound && !historyItem.generatedInfo?.answers" class="flex mt-2">
         <skills-spinner :is-loading="answersFound" :size-in-rem="2"/>
       </div>
       <!--      must not use local variables as there can be more than 1 history item-->

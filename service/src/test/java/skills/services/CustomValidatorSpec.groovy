@@ -1652,6 +1652,21 @@ Line[7] [one
         validator.validateDescription("(A) ok\n(A) <span>a</span>(AB)").valid
     }
 
+
+    def "Test force validation with complex regex"(){
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '(?i)\\s*(?:\\(\\s*FIRST\\s*\\)|\\([^)]*?(?:ONE|OTHER)[^)]*?\\)).*$'
+
+        when:
+        validator.init()
+        then:
+        validator.validateDescription("(A) OK\n- (1) OTHER (2)").valid
+        !validator.validateDescription("(A) OK\n- (OTHER)").valid
+    }
+
+
     def "Deal with styling"(){
         CustomValidator validator = new CustomValidator();
         validator.nameValidationRegex = '^\\(A\\).*$'
