@@ -332,7 +332,7 @@ describe('Settings Tests', () => {
             .click();
         cy.wait('@addRoot');
 
-        const rootUser = Cypress.env('oauthMode') ? 'Firstname LastName (root@skills.org)' : 'Jack Smith (root@skills.org)';
+        const rootUser = 'Jack Smith (root@skills.org)';
         const adminUser = Cypress.env('oauthMode') ? 'Firstname LastName (skills@skills.org)' : 'Zack Smith (skills@skills.org)';
 
         // default sort order is userId asc
