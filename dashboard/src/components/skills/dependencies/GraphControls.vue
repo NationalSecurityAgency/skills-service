@@ -18,12 +18,12 @@ import { ref } from 'vue';
 import Popover from "primevue/popover";
 import {useStorage} from "@vueuse/core";
 
-const props = defineProps(['isFullscreen', 'enableZoom', 'enableAnimations', 'horizontalOrientation'])
-const emit = defineEmits(['toggleFullscreen', 'toggleZoom', 'toggleAnimations', 'toggleOrientation'])
+const props = defineProps(['isFullscreen', 'enableZoom', 'enableAnimations', 'horizontalOrientation', 'enableDynamicHeight'])
+const emit = defineEmits(['toggleFullscreen', 'toggleZoom', 'toggleAnimations', 'toggleOrientation', 'toggleDynamicHeight'])
 
 const storedEnableZoom = useStorage('learningPath-enableZoom', true);
 const storedEnableAnimations = useStorage('learningPath-enableAnimations', true);
-const storedHorizontalOrientation = useStorage('learningPath-horizontalOrientation', false);
+const storedDynamicHeight =  useStorage('learningPath-dynamicHeight', false);
 
 const toggleFullscreen = () => {
   emit('toggleFullscreen')
@@ -44,6 +44,10 @@ const toggleZoom = () => {
 
 const toggleAnimations = () => {
   emit('toggleAnimations')
+}
+
+const toggleDynamicHeight = () => {
+  emit('toggleDynamicHeight')
 }
 
 </script>
@@ -127,6 +131,19 @@ const toggleAnimations = () => {
       </Checkbox>
       <span class="align-content-end mr-3">
         <label for="enableAnimations" class="font-bold text-primary ml-2">Smooth Focus</label>
+      </span>
+    </div>
+    <div class="p-1">
+      <Checkbox
+          :value="enableDynamicHeight"
+          :defaultValue="storedDynamicHeight"
+          :binary="true"
+          @change="toggleDynamicHeight"
+          inputId="toggleDynamicHeight"
+          name="toggleDynamicHeight">
+      </Checkbox>
+      <span class="align-content-end mr-3">
+        <label for="toggleDynamicHeight" class="font-bold text-primary ml-2">Dynamic Height</label>
       </span>
     </div>
   </Popover>

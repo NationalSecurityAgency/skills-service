@@ -55,6 +55,7 @@ const network = (ref);
 const enableZoom = useStorage('learningPath-enableZoom', true);
 const enableAnimations = useStorage('learningPath-enableAnimations', true);
 const horizontalOrientation = useStorage('learningPath-horizontalOrientation', false);
+const dynamicHeight = useStorage('learningPath-dynamicHeight', false);
 const fullDepsSkillsGraph = ref()
 let nodes = [];
 let edges = [];
@@ -146,8 +147,8 @@ const loadGraphDataAndCreateGraph = (addedNode = null) => {
 
 const panToNode = (node, scrollIntoView = false) => {
   network.value.focus(node, {scale: 1, animation: enableAnimations.value})
-  if(scrollIntoView) {
-    fullDepsSkillsGraph.value.scrollIntoView({ behavior: 'smooth' })
+  if(scrollIntoView || dynamicHeight.value) {
+    dependencyGraph.value.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 }
 
@@ -326,6 +327,8 @@ const layout = () => {
     nodes[nodeId - 1].y = y
   })
 
+  dataHeight.value = g?._label?.height;
+  dataWidth.value = g?._label?.width;
 }
 
 const toggleFullscreen = () => {
@@ -344,10 +347,29 @@ const toggleAnimations = () => {
   enableAnimations.value = !enableAnimations.value
 }
 
+const toggleDynamicHeight = () => {
+  dynamicHeight.value = !dynamicHeight.value
+  network.value.fit()
+}
+
 const toggleOrientation = () => {
   horizontalOrientation.value = !horizontalOrientation.value;
   handleUpdate()
 }
+
+const active = ref(null);
+const isVisible = computed(() => {
+  return active.value === "0";
+})
+
+const dataHeight = ref(0);
+const dataWidth = ref(0);
+const containerWidth = computed(() => {
+  return graphTemplate.value?.offsetWidth
+})
+const computedHeight = computed(() => {
+  return dataHeight.value * (containerWidth.value / dataWidth.value)
+})
 </script>
 
 <template>
@@ -358,9 +380,9 @@ const toggleOrientation = () => {
                            @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills" :showHeader="true"></prerequisite-selector>
     <Card data-cy="fullDepsSkillsGraph" style="margin-bottom: 25px;">
       <template #content>
-        <div ref="fullDepsSkillsGraphContainer" id="fullDepsSkillsGraphContainer" :class="horizontalOrientation ? 'horizontal-orientation' : 'vertical-orientation'">
-          <Accordion value="0" v-if="isFullscreen" id="prerequisiteContent">
-            <AccordionPanel>
+        <div ref="fullDepsSkillsGraphContainer" id="fullDepsSkillsGraphContainer" :class="horizontalOrientation ? 'horizontal-orientation' : 'vertical-orientation'" :style="!horizontalOrientation && !isFullscreen && dynamicHeight ? {'height': computedHeight + 'px !important'} : ''">
+          <Accordion v-model:value="active" v-if="isFullscreen" id="prerequisiteContent">
+            <AccordionPanel value="0">
               <AccordionHeader>Add a new item to the learning path</AccordionHeader>
               <AccordionContent>
                 <prerequisite-selector :showHeader="false" v-if="!isReadOnlyProj" :project-id="route.params.projectId" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
@@ -382,12 +404,14 @@ const toggleOrientation = () => {
                               :enableZoom="enableZoom"
                               :enableAnimations="enableAnimations"
                               :horizontalOrientation="horizontalOrientation"
+                              :enableDynamicHeight="dynamicHeight"
                               @toggleOrientation="toggleOrientation"
                               @toggleAnimations="toggleAnimations"
+                              @toggleDynamicHeight="toggleDynamicHeight"
                               @toggleFullscreen="toggleFullscreen" />
             </div>
           </div>
-          <div id="dependency-graph" ref="dependencyGraph" v-bind:style="{'visibility': showGraph ? 'visible' : 'hidden'}" :class="isFullscreen ? 'fullscreen' : ''"></div>
+          <div id="dependency-graph" ref="dependencyGraph" v-bind:style="{'visibility': showGraph ? 'visible' : 'hidden'}" :class="`${isFullscreen ? 'fullscreen' : ''} ${isVisible ? 'accordion' : ''}`"></div>
         </div>
       </template>
     </Card>
@@ -475,6 +499,14 @@ const toggleOrientation = () => {
   height: 98%;
 }
 
+#dependency-graph.fullscreen {
+  height: 90% !important;
+}
+
+#dependency-graph.fullscreen.accordion {
+  height: 80% !important;
+}
+
 .vis-navigation {
   background-color: white;
   position: absolute;
@@ -498,5 +530,4 @@ const toggleOrientation = () => {
   top: -15px;
   z-index:999;
 }
-
 </style>
