@@ -609,6 +609,36 @@ describe('Client Display Point History Tests', () => {
     cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
   })
 
+  it('overlapping level achievements', () => {
+    const pointHistory = createTimeline('2019-09-12', 512, 10, 10, 10)
+    pointHistory.forEach((value) => {
+      cy.log(value)
+    })
+    const data = {
+      'pointsHistory': pointHistory,
+      'achievements': [{
+        'achievedOn': pointHistory[510].dayPerformed,
+        'points': pointHistory[510].points,
+        'name': 'Level 1, 2'
+      }, {
+        'achievedOn': pointHistory[511].dayPerformed,
+        'points': pointHistory[511].points,
+        'name': 'Level 3, 4'
+      }]
+    }
+    cy.intercept('/api/projects/proj1/pointHistory**', data)
+        .as('getPointHistory')
+
+    cy.cdVisit('/', true)
+    cy.wait('@getPointHistory')
+
+    // let's wait for animation to complete
+    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+
+    cy.wait(4000)
+    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+  })
+
     it('points earned on a single date', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
