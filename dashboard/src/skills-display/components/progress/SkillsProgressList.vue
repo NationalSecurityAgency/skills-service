@@ -193,7 +193,9 @@ const skillsToShow = computed(() => {
         return true
       }
       return false
-    }).map((item) => ({ ...item, children: item.children?.map((child) => ({ ...child })) }))
+    }).map((item) => ({ ...item, children: item.children?.filter((child) => {
+      return child.skill?.trim()?.toLowerCase().includes(searchStrNormalized)
+    })?.map((child) => ({ ...child })) }))
   }
 
   if (resultSkills && filterId.value && filterId.value.length > 0) {
