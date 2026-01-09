@@ -96,10 +96,6 @@ const navToSkill = (event) => {
               <i class="fas fa-graduation-cap mr-1 text-xl text-green-800"
                  aria-hidden="true" />
               <highlighted-value :value="SkillReuseIdUtil.removeTag(slotProps.option.skillName)" :filter="query" class="text-xl" />
-              <Tag v-if="SkillReuseIdUtil.isTagged(slotProps.option.skillName)" variant="success" size="sm" class="uppercase ml-2"
-                   data-cy="reusedBadge" aria-label="Reused"
-                   style="font-size: 0.85rem !important;"><i class="fas fa-recycle" aria-hidden="true"></i> reused
-              </Tag>
             </div>
             <div
               class=""
