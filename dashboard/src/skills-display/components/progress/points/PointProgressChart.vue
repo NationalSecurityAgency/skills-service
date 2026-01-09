@@ -69,19 +69,90 @@ onMounted(() => {
 })
 const formatTimestamp = (timestamp) => dayjs(timestamp).format('YYYY-MM-DD')
 
+
+function combineAchievements(achievements) {
+  if (achievements.length === 1) {
+    return achievements[0];
+  }
+
+  // Sort to ensure consistent ordering
+  const sorted = [...achievements].sort((a, b) => a.dataIndex - b.dataIndex);
+
+  // Extract and sort level numbers
+  const levelNumbers = sorted
+      .map(a => {
+        const match = a.name.match(/^Level\s+([\d,\s]+)$/i);
+        console.log(`${a.name} | match: ${match[1]}`)
+        if (match) {
+          return match[1].split(/\s*,\s*/).map(num => parseInt(num, 10));
+        }
+        return null;
+      })
+      .flat()
+      .filter(Boolean)
+      .filter((value, index, self) => self.indexOf(value) === index) // Remove duplicates
+      .sort((a, b) => a - b);
+
+  // Format as "Level 1, 2, 3"
+  const combinedName = `Level ${levelNumbers.join(', ')}`;
+
+  // Use the first achievement as the base and update its properties
+  return {
+    ...sorted[0],
+    name: combinedName,
+    // Use the latest dataIndex to position the combined label
+    dataIndex: sorted[sorted.length - 1].dataIndex,
+    day: sorted[sorted.length - 1].day
+  };
+}
+
+const combineOverlappingAchievements = (achievements, numItems) => {
+  const minDistance = Math.max(1, Math.floor(numItems * 0.05)); // At least 1 item apart
+  const achievementsWorkCopy = [...achievements]
+  achievementsWorkCopy.sort((a, b) => a.dataIndex - b.dataIndex);
+
+  const combined = [];
+  let currentGroup = [achievementsWorkCopy[0]];
+
+  for (let i = 1; i < achievementsWorkCopy.length; i++) {
+    const prev = currentGroup[currentGroup.length - 1];
+    const current = achievementsWorkCopy[i];
+
+    const distance = current.dataIndex - prev.dataIndex
+    if (distance < minDistance) {
+      // Add to current group if too close to previous
+      currentGroup.push(current);
+    } else {
+      // Push the combined group and start a new one
+      combined.push(combineAchievements(currentGroup));
+      currentGroup = [current];
+    }
+  }
+
+  // Add the last group
+  if (currentGroup.length > 0) {
+    combined.push(combineAchievements(currentGroup));
+  }
+  return combined
+}
+
 const setupData = () => {
   const pointHistoryRes = pointHistoryState.getPointHistory(route.params.subjectId)
+  const numItems = pointHistoryRes.pointsHistory?.length || 0
 
   if (pointHistoryRes.achievements) {
-    pointHistoryRes.achievements.forEach((achievement) => {
+    const achievedLevelsTmp = pointHistoryRes.achievements.map((achievement) => {
       const dataIndex = pointHistoryRes.pointsHistory.findIndex((item) => item.dayPerformed === achievement.achievedOn)
-
-      achievedLevels.value.push({
+      return {
         ...achievement,
         dataIndex: dataIndex >= 0 ? dataIndex + 1 : null,
         day: formatTimestamp(achievement.achievedOn)
-      })
+      }
     })
+
+    // Combine achievements that are too close to each other (within 5% of total items)
+    const considerForOverlapMerge = numItems > 10 && achievedLevelsTmp.length > 1
+    achievedLevels.value = considerForOverlapMerge ? combineOverlappingAchievements(achievedLevelsTmp, numItems) : achievedLevelsTmp
   }
 
   const pointHistory = pointHistoryRes.pointsHistory
@@ -95,7 +166,6 @@ const setupData = () => {
     })
   }
 
-  const numItems = pointHistoryRes.pointsHistory?.length || 0
   const pointRadius = numItems < tooManyPointsForTooltip ? 3 : 0
   chartData.value = {
     datasets: [{
