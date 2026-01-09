@@ -23,6 +23,7 @@ import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import SkillReuseIdUtil from "@/components/utils/SkillReuseIdUtil.js";
 
 const emit = defineEmits(['hidden']);
 const props = defineProps({
@@ -178,11 +179,15 @@ const dialogPosition = computed(() => {
         <template #option="slotProps">
           <div class="py-0 w-full sd-theme-primary-color" :data-cy="`searchRes-${slotProps.option.skillId}`">
             <div class="flex flex-nowrap">
-              <div class="flex-1 flex items-center inline"
+              <div class="flex-1 flex items-center"
                    data-cy="skillName"
                    :aria-label="`Selected ${slotProps.option.skillName} ${slotProps.option.skillType}${slotProps.option.subjectName ? ` from ${slotProps.option.subjectName} ${attributes.subjectDisplayName}` : ''}. You have earned ${getUserProgress(slotProps.option)} ${getProgressLabel(slotProps.option)} out of ${getTotalProgress(slotProps.option)} for this ${slotProps.option.skillType}. Click to navigate to the ${slotProps.option.skillType}.`">
                 <i :class="`${getIconClass(slotProps.option)} mr-1 text-xl`" style="min-width: 25px" aria-hidden="true" />
-                <highlighted-value :value="slotProps.option.skillName" :filter="query" class="text-xl" />
+                <highlighted-value :value="SkillReuseIdUtil.removeTag(slotProps.option.skillName)" :filter="query" class="text-xl" />
+                <Tag v-if="SkillReuseIdUtil.isTagged(slotProps.option.skillName)" variant="success" size="sm" class="uppercase ml-2"
+                     data-cy="reusedBadge" aria-label="Reused"
+                     style="font-size: 0.85rem !important;"><i class="fas fa-recycle" aria-hidden="true"></i> reused
+                </Tag>
               </div>
               <div
                   class=""
