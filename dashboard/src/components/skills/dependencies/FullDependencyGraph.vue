@@ -147,7 +147,7 @@ const loadGraphDataAndCreateGraph = (addedNode = null) => {
 
 const panToNode = (node, scrollIntoView = false) => {
   network.value.focus(node, {scale: 1, animation: enableAnimations.value})
-  if(scrollIntoView || dynamicHeight.value) {
+  if(scrollIntoView) {
     dependencyGraph.value.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 }
@@ -156,7 +156,7 @@ const selectNode = (params) => {
   const selectedNode = params.nodes[0];
   const nodeValue = nodes.find((node) => node.id === selectedNode);
   if(enableZoom.value) {
-    panToNode(selectedNode)
+    panToNode(selectedNode, dynamicHeight.value)
   }
   updateSelectedFromSkills(nodeValue.details, false);
 }
