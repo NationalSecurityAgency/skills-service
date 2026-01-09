@@ -40,7 +40,7 @@ const addTagFilter = (tag) => {
   emit('add-tag-filter', tag)
 }
 
-const hasBadges = computed(() => props.skill.badges && props.skill.badges.length > 0 && skillsDisplayInfo.isSubjectPage.value)
+const hasBadges = computed(() => props.skill.badges && props.skill.badges.length > 0)
 const hasTags = computed(()=> props.skill.tags && props.skill.tags.length > 0)
 </script>
 
