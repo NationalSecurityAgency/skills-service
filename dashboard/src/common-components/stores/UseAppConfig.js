@@ -172,6 +172,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const matomoUrl = computed(() => config.value.matomoUrl)
   const matomoSiteId = computed(() => config.value.matomoSiteId)
   const matomoProcessUserIdRegex = computed(() => config.value.matomoProcessUserIdRegex)
+  const sdPointHistoryChartAchievementsCombinePct = computed(() => config.value.sdPointHistoryChartAchievementsCombinePct || 0.05)
 
   return {
     loadConfigState,
@@ -281,6 +282,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxRolePageSize,
     matomoUrl,
     matomoSiteId,
-    matomoProcessUserIdRegex
+    matomoProcessUserIdRegex,
+    sdPointHistoryChartAchievementsCombinePct
   }
 })
