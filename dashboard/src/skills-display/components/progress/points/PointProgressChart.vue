@@ -16,29 +16,25 @@ limitations under the License.
 <script setup>
 import {computed, onMounted, ref, watch} from 'vue'
 import {useSkillsDisplayPointHistoryState} from '@/skills-display/stores/UseSkillsDisplayPointHistoryState.js'
-import {useNumberFormat} from '@/common-components/filter/UseNumberFormat.js'
 import {useSkillsDisplayThemeState} from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import {useRoute} from 'vue-router'
-import {useThemesHelper} from '@/components/header/UseThemesHelper.js'
 import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
-import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import Chart from "primevue/chart";
 import dayjs from "dayjs";
 import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
 import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
+const appConfig = useAppConfig()
 const pointHistoryState = useSkillsDisplayPointHistoryState()
-const numFormat = useNumberFormat()
 const themeState = useSkillsDisplayThemeState()
-const themeHelper = useThemesHelper()
 const route = useRoute()
 const attributes = useSkillsDisplayAttributesState()
 const chartSupportColors = useChartSupportColors()
 const colors = chartSupportColors.getColors()
 
-const pluralize = usePluralize()
 const loading = ref(true)
 const animationEnded = ref(false)
 const chartLoaded = ref(false)
@@ -81,8 +77,8 @@ function combineAchievements(achievements) {
   // Extract and sort level numbers
   const levelNumbers = sorted
       .map(a => {
-        const match = a.name.match(/^Level\s+([\d,\s]+)$/i);
-        console.log(`${a.name} | match: ${match[1]}`)
+        const match = a.name.match(/^Levels?\s+([\d,\s]+)$/i);
+        console.log(`${a.name} | match: ${match ? match[1] : 'Nope'}`)
         if (match) {
           return match[1].split(/\s*,\s*/).map(num => parseInt(num, 10));
         }
@@ -107,7 +103,8 @@ function combineAchievements(achievements) {
 }
 
 const combineOverlappingAchievements = (achievements, numItems) => {
-  const minDistance = Math.max(1, Math.floor(numItems * 0.05)); // At least 1 item apart
+  // At least 1 item apart
+  const minDistance = Math.max(1, Math.floor(numItems * appConfig.sdPointHistoryChartAchievementsCombinePct));
   const achievementsWorkCopy = [...achievements]
   achievementsWorkCopy.sort((a, b) => a.dataIndex - b.dataIndex);
 
@@ -119,7 +116,7 @@ const combineOverlappingAchievements = (achievements, numItems) => {
     const current = achievementsWorkCopy[i];
 
     const distance = current.dataIndex - prev.dataIndex
-    if (distance < minDistance) {
+    if (distance <= minDistance) {
       // Add to current group if too close to previous
       currentGroup.push(current);
     } else {
