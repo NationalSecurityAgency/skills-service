@@ -208,6 +208,10 @@ const createGraph = (nodeToPanTo = null) => {
       if(foundNode && foundNode.id) {
         panToNode(foundNode.id);
       }
+    } else {
+      setTimeout(() => {
+        network.value.fit()
+      }, 300)
     }
     setVisNetworkTabIndex();
   } else {
@@ -368,7 +372,15 @@ const containerWidth = computed(() => {
   return graphTemplate.value?.offsetWidth
 })
 const computedHeight = computed(() => {
-  return dataHeight.value * (containerWidth.value / dataWidth.value)
+  if(containerWidth.value > dataWidth.value) {
+    if(horizontalOrientation.value) {
+      return dataHeight.value >= 700 ? dataHeight.value: 700;
+    } else {
+      return dataHeight.value >= 500 ? dataHeight.value : 500;
+    }
+  } else {
+    return dataHeight.value * (containerWidth.value / dataWidth.value)
+  }
 })
 </script>
 
@@ -380,7 +392,7 @@ const computedHeight = computed(() => {
                            @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills" :showHeader="true"></prerequisite-selector>
     <Card data-cy="fullDepsSkillsGraph" style="margin-bottom: 25px;">
       <template #content>
-        <div ref="fullDepsSkillsGraphContainer" id="fullDepsSkillsGraphContainer" :class="horizontalOrientation ? 'horizontal-orientation' : 'vertical-orientation'" :style="!horizontalOrientation && !isFullscreen && dynamicHeight ? {'height': computedHeight + 'px !important'} : ''">
+        <div ref="fullDepsSkillsGraphContainer" id="fullDepsSkillsGraphContainer" :class="horizontalOrientation ? 'horizontal-orientation' : 'vertical-orientation'" :style="!isFullscreen && dynamicHeight ? {'height': computedHeight + 'px !important'} : ''">
           <Accordion v-model:value="active" v-if="isFullscreen" id="prerequisiteContent">
             <AccordionPanel value="0">
               <AccordionHeader>Add a new item to the learning path</AccordionHeader>

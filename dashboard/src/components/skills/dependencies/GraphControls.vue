@@ -24,6 +24,7 @@ const emit = defineEmits(['toggleFullscreen', 'toggleZoom', 'toggleAnimations', 
 const storedEnableZoom = useStorage('learningPath-enableZoom', true);
 const storedEnableAnimations = useStorage('learningPath-enableAnimations', true);
 const storedDynamicHeight =  useStorage('learningPath-dynamicHeight', false);
+const storedHorizontalOrientation = useStorage('learningPath-horizontalOrientation', false);
 
 const toggleFullscreen = () => {
   emit('toggleFullscreen')
@@ -81,10 +82,12 @@ const toggleDynamicHeight = () => {
       <label for="enableAnimations" class="font-bold text-primary ml-2">Smooth Focus</label>
     </span>
   </div>
-  <Button icon="fas fa-rotate"
-          severity="info"
-          outlined
-          raised
+  <ToggleButton :value="horizontalOrientation"
+          :defaultValue="storedHorizontalOrientation"
+          onLabel="Horizontal"
+          offLabel="Vertical"
+          offIcon="fas fa-arrows-up-down"
+          onIcon="fas fa-arrows-left-right"
           aria-label="Toggle orientation"
           @click="toggleOrientation" />
   <Button icon="fas fa-expand"
