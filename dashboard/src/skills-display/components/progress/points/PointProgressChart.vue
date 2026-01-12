@@ -78,7 +78,6 @@ function combineAchievements(achievements) {
   const levelNumbers = sorted
       .map(a => {
         const match = a.name.match(/^Levels?\s+([\d,\s]+)$/i);
-        console.log(`${a.name} | match: ${match ? match[1] : 'Nope'}`)
         if (match) {
           return match[1].split(/\s*,\s*/).map(num => parseInt(num, 10));
         }
