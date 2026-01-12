@@ -388,7 +388,7 @@ const computedHeight = computed(() => {
   <div id="full-dependent-skills-graph" ref="fullDepsSkillsGraph">
     <sub-page-header title="Learning Path"/>
 
-    <prerequisite-selector v-if="!isReadOnlyProj" :project-id="route.params.projectId" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
+    <prerequisite-selector v-if="!isReadOnlyProj && !isFullscreen" :project-id="route.params.projectId" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
                            @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills" :showHeader="true"></prerequisite-selector>
     <Card data-cy="fullDepsSkillsGraph" style="margin-bottom: 25px;">
       <template #content>

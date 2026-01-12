@@ -404,4 +404,81 @@ describe('Learning Path Management Validation Tests', () => {
 
         cy.get('[data-cy="learningPathError"]').should('not.exist')
     })
+
+    it('Create a simple learning path in full screen', () => {
+        visitLearningPath()
+
+        // Add Badge1 as a prerequisite for Badge2
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        cy.get('[data-cy="learningPath-fullScreenButton"]').realClick();
+        cy.get('#prerequisiteContent').click()
+
+        // Add Skill5 as a prerequisite for Badge1
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill5Subj2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        // Add Skill6 as a prerequisite for Badge2
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill6Subj2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        // Add Skill7 as a prerequisite for Skill5
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill7Subj2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'skill5Subj2');
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        // Add Skill8 as a prerequisite for Badge1
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill8Subj2')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
+        cy.get('[data-cy="addLearningPathItemBtn"]').click();
+
+        cy.wait(1000);
+
+        cy.get('[data-cy="learningPath-fullScreenButton"]').realClick();
+
+        cy.get(headerSelector).contains('From').click();
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Badge 1'
+            }, {
+                colIndex: 1,
+                value: 'Badge 2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 5 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Badge 1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 6 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Badge 2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 7 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 5 Subj2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 8 Subj2'
+            }, {
+                colIndex: 1,
+                value: 'Badge 1'
+            }],
+        ], 5, false, null, false);
+
+    })
 });

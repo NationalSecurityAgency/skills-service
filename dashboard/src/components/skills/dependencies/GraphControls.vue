@@ -94,6 +94,7 @@ const toggleDynamicHeight = () => {
           severity="info"
           outlined
           raised
+          data-cy="learningPath-fullScreenButton"
           aria-label="Toggle fullscreen"
           @click="toggleFullscreen" />
   <Button
