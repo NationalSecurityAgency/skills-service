@@ -78,10 +78,10 @@ class VideoHelperService {
 
     static SkillVideoAttrs verifyCaptionsAndTranscript(SkillVideoAttrs videoAttrs, String captions, String transcript) {
         if (StringUtils.isNotBlank(captions)){
-            videoAttrs.captions = InputSanitizer.sanitize(captions)?.trim()
+            videoAttrs.captions = InputSanitizer.sanitizeDescription(captions)?.trim()
         }
         if (StringUtils.isNotBlank(transcript)){
-            videoAttrs.transcript = InputSanitizer.sanitize(transcript)?.trim()
+            videoAttrs.transcript = InputSanitizer.sanitizeDescription(transcript)?.trim()
         }
 
         return videoAttrs
