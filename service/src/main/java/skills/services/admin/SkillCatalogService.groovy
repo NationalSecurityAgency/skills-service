@@ -739,7 +739,7 @@ class SkillCatalogService {
         esr.exportedOn = exportedSkillTiny.exportedOn
         esr.subjectId = exportedSkillTiny.subjectId
         esr.importedProjectCount = exportedSkillTiny.importedProjectCount
-        esr.groupName = exportedSkillTiny.groupName
+        esr.groupName = InputSanitizer.unsanitizeName(exportedSkillTiny.groupName)
         return esr
     }
 

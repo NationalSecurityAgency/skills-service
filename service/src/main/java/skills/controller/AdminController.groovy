@@ -366,7 +366,7 @@ class AdminController {
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Subject Description", subjectRequest.description)
 
         subjectRequest.subjectId = InputSanitizer.sanitize(subjectRequest.subjectId)
-        subjectRequest.description = InputSanitizer.sanitize(subjectRequest.description)
+        subjectRequest.description = InputSanitizer.sanitizeDescription(subjectRequest.description)
         subjectRequest.name = InputSanitizer.sanitize(subjectRequest.name)?.trim()
         subjectRequest.iconClass = InputSanitizer.sanitize(subjectRequest.iconClass)
         subjectRequest.helpUrl = InputSanitizer.sanitizeUrl(subjectRequest.helpUrl)
@@ -498,7 +498,7 @@ class AdminController {
 
         badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)?.trim()
         badgeRequest.badgeId = InputSanitizer.sanitize(badgeRequest.badgeId)
-        badgeRequest.description = InputSanitizer.sanitize(badgeRequest.description)
+        badgeRequest.description = InputSanitizer.sanitizeDescription(badgeRequest.description)
         badgeRequest.helpUrl = InputSanitizer.sanitizeUrl(badgeRequest.helpUrl)
 
         badgeAdminService.saveBadge(projectId, badgeId, badgeRequest)
@@ -811,7 +811,7 @@ class AdminController {
             propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxSkillVersion, "Skill Version", skillRequest.version)
 
             propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Skill Description", skillRequest.description)
-            skillRequest.description = InputSanitizer.sanitize(skillRequest.description)
+            skillRequest.description = InputSanitizer.sanitizeDescription(skillRequest.description)
             skillRequest.helpUrl = InputSanitizer.sanitizeUrl(skillRequest.helpUrl)
         }
 

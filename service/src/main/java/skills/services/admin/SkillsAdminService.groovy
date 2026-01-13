@@ -814,7 +814,7 @@ class SkillsAdminService {
                 throw new SkillException("Failed to find skill's group with groupId=[${skillDef.groupId}]", skillDef.projectId, skillDef.skillId)
             }
             res.enabled = Boolean.valueOf(skillDef.enabled)
-            res.groupName = skillsGroup.name
+            res.groupName = InputSanitizer.unsanitizeName(skillsGroup.name)
             res.groupId = skillsGroup.skillId
         }
         if (skillDef.selfReportingType == SelfReportingType.Quiz) {
@@ -849,7 +849,7 @@ class SkillsAdminService {
                 created: skinny.created,
                 totalPoints: skinny.totalPoints,
                 isReused: SkillReuseIdUtil.isTagged(skinny.skillId),
-                groupName: groupName,
+                groupName: InputSanitizer.unsanitizeName(groupName),
                 groupId: skinny.groupId,
                 type: skinny.type
         )
@@ -868,7 +868,7 @@ class SkillsAdminService {
                 subjectId: partial.subjectSkillId,
                 subjectName: InputSanitizer.unsanitizeName(partial.subjectName),
                 groupId: partial.groupId,
-                groupName: partial.groupName,
+                groupName: InputSanitizer.unsanitizeName(partial.groupName),
                 pointIncrement: partial.pointIncrement,
                 pointIncrementInterval: partial.pointIncrementInterval,
                 numMaxOccurrencesIncrementInterval: partial.numMaxOccurrencesIncrementInterval,

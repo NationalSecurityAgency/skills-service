@@ -208,7 +208,7 @@ class QuizDefService {
 
         newQuizId = InputSanitizer.sanitize(newQuizId)
         quizDefRequest.name = InputSanitizer.sanitize(quizDefRequest.name)?.trim()
-        quizDefRequest.description = StringUtils.trimToNull(InputSanitizer.sanitize(quizDefRequest.description))
+        quizDefRequest.description = StringUtils.trimToNull(InputSanitizer.sanitizeDescription(quizDefRequest.description))
 
         lockingService.lockQuizDefs()
 
@@ -358,7 +358,7 @@ class QuizDefService {
 
         newQuizId = InputSanitizer.sanitize(newQuizId)
         quizDefRequest.name = InputSanitizer.sanitize(quizDefRequest.name)?.trim()
-        quizDefRequest.description = StringUtils.trimToNull(InputSanitizer.sanitize(quizDefRequest.description))
+        quizDefRequest.description = StringUtils.trimToNull(InputSanitizer.sanitizeDescription(quizDefRequest.description))
 
         lockingService.lockQuizDefs()
 

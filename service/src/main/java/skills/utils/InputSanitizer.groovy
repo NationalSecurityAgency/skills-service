@@ -39,10 +39,14 @@ class InputSanitizer {
     private static final Pattern SPACE = ~/\s/
     private static final Pattern CAPTION_ARROW = ~/--&gt;/
 
-    private static final SAFE_LIST = Safelist.relaxed()
+    private static final SAFE_LIST_FOR_DESC = Safelist.relaxed()
             .addTags('del', 'skills-display')
             .addAttributes('skills-display', 'version')
             .addAttributes('span', 'style')
+
+    private static final SAFE_LIST = Safelist.none()
+            .addTags('del', 'skills-display')
+            .addAttributes('skills-display', 'version')
 
     static String sanitize(String input) {
         if (!input) {
@@ -51,6 +55,15 @@ class InputSanitizer {
 
         return Jsoup.clean(input, "", SAFE_LIST, print)
     }
+
+    static String sanitizeDescription(String input) {
+        if (!input) {
+            return input;
+        }
+
+        return Jsoup.clean(input, "", SAFE_LIST_FOR_DESC, print)
+    }
+
     static String unSanitizeCaption(String input) {
         if (!input) {
             return input;
