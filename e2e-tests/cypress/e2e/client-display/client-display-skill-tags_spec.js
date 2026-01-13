@@ -173,7 +173,7 @@ describe('Client Display Skill Tags Visible on Skill Summaries', () => {
 
     // tag filter and search string matching group
     cy.get('[data-cy="skillsSearchInput"]').clear().type('Awesome')
-    cy.get('[data-cy="skillTag-1"]').should('exist')
+    cy.get('[data-cy="skillTag-1"]').should('not.exist')
   })
 
   it('filter on same skill tag from multiple skills', () => {
