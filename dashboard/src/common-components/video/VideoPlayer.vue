@@ -80,6 +80,7 @@ onMounted(() => {
     playbackRates: [0.5, 1, 1.5, 2],
     enableSmoothSeeking: true,
     audioOnlyMode: props.options.isAudio,
+    preload: 'none',
   }, () => {
     player.on('durationchange', () => {
       watchProgress.value.videoDuration = player.duration();
@@ -230,6 +231,7 @@ const createResizeSupport = () => {
         <video :id="vidPlayerId"
                class="video-js vjs-fluid"
                data-setup='{}'
+               preload="none"
                responsive
                controls>
           <source :src="options.url" :type="options.videoType">
