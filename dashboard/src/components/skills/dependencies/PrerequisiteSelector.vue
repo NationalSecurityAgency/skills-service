@@ -24,7 +24,7 @@ import SkillsShareService from '@/components/skills/crossProjects/SkillsShareSer
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 
-const props = defineProps(['selectedFromSkills']);
+const props = defineProps(['selectedFromSkills', 'appendTo', 'showHeader']);
 const emit = defineEmits(['updateSelectedFromSkills', 'clearSelectedFromSkills', 'update'])
 const announcer = useSkillsAnnouncer();
 const route = useRoute();
@@ -114,6 +114,7 @@ const onFromSelected = (item) => {
 }
 
 const onAddPath = () => {
+  const targetSkillId = toSkillId.value;
   SkillsService.assignDependency(toProjectId.value, toSkillId.value, props.selectedFromSkills.skillId, props.selectedFromSkills.projectId)
     .then(() => {
       const from = props.selectedFromSkills.name;
@@ -125,7 +126,8 @@ const onAddPath = () => {
       }
       nextTick(() => announcer.assertive(`Successfully added Learning Path from ${from} to ${to}`));
       clearData();
-      emit('update');
+
+      emit('update', targetSkillId);
   });
 };
 
@@ -185,7 +187,7 @@ function validate(value, ctx) {
 
 <template>
   <Card style="margin-bottom:10px;" data-cy="addPrerequisiteToLearningPath">
-    <template #header>
+    <template #header v-if="showHeader">
       <SkillsCardHeader title="Add a new item to the learning path"></SkillsCardHeader>
     </template>
     <template #content>
@@ -203,6 +205,7 @@ function validate(value, ctx) {
                            placeholder-icon="fas fa-search"
                            aria-label="Select a skill or a badge for the Learning Path's from step"
                            v-on:added="onFromSelected"
+                           :appendTo="appendTo"
                            :showType=true />
         </div>
         <div class="flex-1 field">
@@ -218,6 +221,7 @@ function validate(value, ctx) {
                            :selected="selectedToSkills"
                            v-on:added="onToSelected"
                            :disabled="!selectedFromSkills || !selectedFromSkills.skillId"
+                           :appendTo="appendTo"
                            :showType=true />
         </div>
         <div class="field text-center">

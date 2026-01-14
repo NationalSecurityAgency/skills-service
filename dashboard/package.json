@@ -18,6 +18,7 @@
     "deploy": "npm install && npm run build && npm run copyDistToService"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^1.1.8",
     "@fortawesome/fontawesome-free": "6.7.2",
     "@primevue/themes": "4.4.1",
     "@skilltree/skills-client-js": "3.6.2",
