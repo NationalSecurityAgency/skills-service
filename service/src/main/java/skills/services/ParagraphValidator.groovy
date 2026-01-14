@@ -552,6 +552,31 @@ class ParagraphValidator {
             return true
         }
 
+        Closure<Boolean> isTextNodeAValidInlineHtml = { Node nodeToCheck ->
+            boolean isTextAndPartOfInlineHtml = nodeToCheck instanceof Text
+            boolean isValidInlineHtml = false
+            if (isTextAndPartOfInlineHtml) {
+                Node prev = nodeToCheck.previous
+                Node next = nodeToCheck.next
+
+                boolean hasMatchingTags = false
+                if (prev instanceof HtmlInline && next instanceof HtmlInline) {
+                    String prevText = prev.literal
+                    String nextText = next.literal
+
+                    // Check if previous is an opening tag and next is a closing tag
+                    hasMatchingTags = prevText.matches("^<[a-zA-Z][^>]*>\$") && nextText.matches("^</[a-zA-Z][^>]*>\$")
+                }
+                if (hasMatchingTags) {
+                    String parentText = textContentRenderer.render(nodeToCheck.parent)
+                    StringValidationRes validationRes = validateString(parentText)
+                    isValidInlineHtml = validationRes.isValid
+                }
+            }
+
+            return isValidInlineHtml
+        }
+
         Node currentNode = node.next
 
         siblingsCheckLoop: while (currentNode) {
@@ -564,7 +589,8 @@ class ParagraphValidator {
                         String fulLineForThisText = allNodesOnSameLineToString(textNode)
                         boolean isValidLine = request.validationPattern.pattern.matcher(fulLineForThisText).matches()
                         boolean isValidText = request.validationPattern.pattern.matcher(textToCheck).matches()
-                        if (!isValidLine && !isValidText) {
+                        boolean isValidInlineHtml = isTextNodeAValidInlineHtml.call(textNode)
+                        if (!isValidLine && !isValidText && !isValidInlineHtml) {
                             invalidate()
                             if (request.prefix) {
                                 textNode.setLiteral("${request.prefix}${textNode.literal}".toString())
