@@ -74,6 +74,8 @@ class CustomValidationController {
     @RequestMapping(value = "/description", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     ValidationResult validateDescription(@RequestBody Map<String,String> body){
+        String dMsg = "validateDescription: projId=[{}], quizId=[{}], Description:\n-----------------\n{}\n-----------------"
+        log.debug(dMsg, body.projectId, body.quizId, body.value)
         CustomValidationResult vr = customValidator.validateDescription(body.value, body.projectId, shouldUseProtectedCommunityValidator(body), body.quizId)
         ValidationResult validationResult = new ValidationResult(vr.valid, vr.msg, vr.validationFailedDetails)
         return validationResult
