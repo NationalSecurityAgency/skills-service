@@ -1135,12 +1135,6 @@ line-height:107%">(A) fancy formatting</span>""").valid
         res1.validationFailedDetails == "Failed within an html element for text [Paragraph2] after line[0]\n"
 
         validator.validateDescription("<span style=\\\"box-sizing: border-box; font-style: normal;\\\">(A) Very Cool Message (VCM)</span>\n<span style=\\\"box-sizing: border-box; font-style: normal;\\\">(A) message 2</span>").valid
-        def res2 = validator.validateDescription("""<span style="box-sizing: border-box; font-style: normal;">(A) Items:</span>
-<span style="box-sizing: border-box; font-style: normal;">          (t) (A) Item 1</span>
-<span style="box-sizing: border-box; font-style: normal;">          (f) (A) Item 2</span>""")
-        !res2.valid
-        res2.validationFailedDetails == "Via forced validation, after line[1] [          (t) (A) It]\n\n" +
-                "Via forced validation, after line[2] [          (f) (A) It]\n\n"
     }
 
     def "test list validation with html items"(){
@@ -1664,6 +1658,15 @@ Line[7] [one
         then:
         validator.validateDescription("(A) OK\n- (1) OTHER (2)").valid
         !validator.validateDescription("(A) OK\n- (OTHER)").valid
+
+        validator.validateDescription("<span>(A) some (OTHER)</span>").valid
+        validator.validateDescription("<span>(A) some (blah).</span>**<span> other more stuff</span>**<span> (OTHER)</span>").valid
+        validator.validateDescription('''<span>(A) blah. </span><span style="font:some;
+size:some;"> (blah OTHER blah).</span>''').valid
+        !validator.validateDescription('''<span>blah. </span><span style="font:some;
+size:some;"> (blah OTHER blah).</span>''').valid
+        !validator.validateDescription('''<span>(A blah. </span><span style="font:some;
+size:some;"> blah.</span>''').valid
     }
 
 

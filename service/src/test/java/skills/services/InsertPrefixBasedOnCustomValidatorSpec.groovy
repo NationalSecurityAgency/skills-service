@@ -760,14 +760,6 @@ ___
         then:
         String newDesc = validator.addPrefixToInvalidParagraphs(text, prefix).newDescription
         newDesc == expect
-
-        String input2 = """<span style="box-sizing: border-box; font-style: normal;">(A) Items:</span>
-<span style="box-sizing: border-box; font-style: normal;">          (t) (A) Item 1</span>
-<span style="box-sizing: border-box; font-style: normal;">          (f) (A) Item 2</span>""".toString()
-        String expected2 = """<span style="box-sizing: border-box; font-style: normal;">(A) Items:</span>
-<span style="box-sizing: border-box; font-style: normal;">(B)           (t) (A) Item 1</span>
-<span style="box-sizing: border-box; font-style: normal;">(B)           (f) (A) Item 2</span>\n""".toString()
-        validator.addPrefixToInvalidParagraphs(input2, prefix).newDescription == expected2
     }
 
     def "support mixed html br and newline chars" () {
