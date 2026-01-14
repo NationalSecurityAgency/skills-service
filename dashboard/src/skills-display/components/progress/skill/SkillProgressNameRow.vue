@@ -162,8 +162,9 @@ const iconClass = computed(() => {
                 :aria-label="`${skill.isSkillType ? `Navigate to ${skill.skill}` : skill.skill }`">
                 <component :is="titleComponent"><highlighted-value :value="skill.skill" :filter="childSkillHighlightString" /></component>
               </router-link>
-              <component :is="titleComponent" v-else class="inline-block" data-cy="skillProgressTitle">
+              <component :is="titleComponent" v-else data-cy="skillProgressTitle" :class="skill.isSkillsGroupType ? 'flex' : 'inline-block'">
                 <highlighted-value :value="skill.skill" :filter="childSkillHighlightString" />
+                <div v-if="skill.isSkillsGroupType" class="content-center ml-2 text-sm mt-1">({{ skill.numberOfChildren }} skills{{ skill.children.length === 0 ? ' - no matches' : ''}})</div>
               </component>
               <div v-if="skillDisplayInfo.isGlobalBadgePage.value" class="text-sm" data-cy="skillProjectName">
                 <span class="italic text-muted-color">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}
