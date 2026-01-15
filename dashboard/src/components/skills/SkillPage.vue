@@ -196,7 +196,7 @@ const nextButtonClicked = () => {
       </template>
       <template #subSubTitle v-if="!isImported">
         <SkillsButton
-          id="edidSkillBtn"
+          id="editSkillBtn"
           v-if="skillsState.skill && !isReadOnlyProj"
           @click="displayEdit"
           size="small"
@@ -233,6 +233,8 @@ const nextButtonClicked = () => {
       v-model="showEdit"
       :skill="skillsState.skill"
       :is-subject-enabled="subjectState.subject.enabled"
+      :group-id="skillsState.skill.groupId"
+      :is-group-enabled="skillsState.skill.groupEnabled"
       :is-edit="true"
       :project-user-community="projConfig.getProjectCommunityValue()"
       @skill-saved="skillEdited" />

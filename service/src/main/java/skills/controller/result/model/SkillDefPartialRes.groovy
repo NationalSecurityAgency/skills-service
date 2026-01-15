@@ -49,6 +49,7 @@ class SkillDefPartialRes extends SkillDefSkinnyRes{
     boolean justificationRequired
     String groupId
     String groupName
+    boolean groupEnabled
     @Convert(converter=BooleanConverter)
     Boolean readOnly
     String copiedFromProjectId
