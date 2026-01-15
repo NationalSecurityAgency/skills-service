@@ -130,7 +130,7 @@ class AppController {
 
         projectRequest.projectId = InputSanitizer.sanitize(projectRequest.projectId)
         projectRequest.name = InputSanitizer.sanitize(projectRequest.name)?.trim()
-        projectRequest.description = StringUtils.trimToNull(InputSanitizer.sanitize(projectRequest.description))
+        projectRequest.description = StringUtils.trimToNull(InputSanitizer.sanitizeDescription(projectRequest.description))
 
         projAdminService.saveProject(null, projectRequest)
         return new RequestResult(success: true)
@@ -291,7 +291,7 @@ class AppController {
 
         badgeRequest.name = InputSanitizer.sanitize(badgeRequest.name)?.trim()
         badgeRequest.badgeId = InputSanitizer.sanitize(badgeRequest.badgeId)
-        badgeRequest.description = InputSanitizer.sanitize(badgeRequest.description)
+        badgeRequest.description = InputSanitizer.sanitizeDescription(badgeRequest.description)
         badgeRequest.helpUrl = InputSanitizer.sanitizeUrl(badgeRequest.helpUrl)
 
         globalBadgesService.saveBadge(badgeId, badgeRequest)

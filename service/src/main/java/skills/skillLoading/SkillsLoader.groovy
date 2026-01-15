@@ -672,7 +672,7 @@ class SkillsLoader {
                 daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
                 mostRecentlyPerformedOn: mostRecentlyPerformedOn,
                 lastExpirationDate: lastExpirationDate,
-                groupName: groupName,
+                groupName: InputSanitizer.unsanitizeName(groupName),
                 groupSkillId: skillDef.groupId,
                 approvalHistory: approvalHistory,
                 iconClass: skillDef.iconClass,

@@ -1446,4 +1446,53 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         subject.skillId == subj.skillId
         subject.name == subj.name
     }
+
+    void "SkillsGroup sanitizes name appropriately" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        skillsGroup.name = '<span style="font-size: 72px"><em>Fact & Fiction</em></span>'
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+
+        def allSkills = SkillsFactory.createSkills(4)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+
+        when:
+        def subjectSkills = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId, true)
+        def groupSkill = skillsService.getSkill(skillsGroup)
+        def skillsInGroup = skillsService.getSkillsForGroup(proj.projectId, skillsGroup.skillId)
+
+        then:
+        subjectSkills
+        subjectSkills[0].name == 'Fact & Fiction'
+        groupSkill.name == 'Fact & Fiction'
+        skillsInGroup[0].name == 'Test Skill 2'
+        skillsInGroup[0].groupName == 'Fact & Fiction'
+        skillsInGroup[1].name == 'Test Skill 3'
+        skillsInGroup[1].groupName == 'Fact & Fiction'
+    }
+
+    void "SkillsGroup allows for markdown in descriptions" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        skillsGroup.description = '<span style="font-size: 72px"><em>Fact & Fiction</em></span>'
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+
+        when:
+
+        def result = skillsService.getSkillDescription(proj.projectId, skillsGroup.skillId)
+
+        then:
+        result
+        result.description == '<span style="font-size: 72px"><em>Fact & Fiction</em></span>'
+    }
 }
