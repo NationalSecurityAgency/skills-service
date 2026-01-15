@@ -42,8 +42,8 @@ onMounted(() => {
 
     if (edges && edges.length > 0) {
       edges.forEach((edge) => {
-        const fromNode = nodes.find((node) => node.id === edge.from && node.type !== 'Badge-Skills')
-        const toNode = nodes.find((node) => node.id === edge.to && node.type !== 'Badge-Skills')
+        const fromNode = nodes.get({filter: (node) => node.id === edge.from && node.type !== 'Badge-Skills'})[0]
+        const toNode = nodes.get({filter: (node) => node.id === edge.to && node.type !== 'Badge-Skills'})[0]
 
         if( fromNode && toNode ) {
           learningPaths.value.push({
