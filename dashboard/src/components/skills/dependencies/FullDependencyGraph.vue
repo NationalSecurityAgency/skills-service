@@ -18,6 +18,7 @@ import { ref, onMounted, computed, onBeforeUnmount, useTemplateRef } from 'vue';
 import {useFullscreen, useStorage} from '@vueuse/core';
 import { useRoute } from 'vue-router';
 import { Network } from 'vis-network';
+import { DataSet } from 'vis-data';
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import PrerequisiteSelector from '@/components/skills/dependencies/PrerequisiteSelector.vue';
 import SkillsService from '@/components/skills/SkillsService';
@@ -57,8 +58,8 @@ const enableAnimations = useStorage('learningPath-enableAnimations', true);
 const horizontalOrientation = useStorage('learningPath-horizontalOrientation', false);
 const dynamicHeight = useStorage('learningPath-dynamicHeight', false);
 const fullDepsSkillsGraph = ref()
-let nodes = [];
-let edges = [];
+let nodes = new DataSet();
+let edges = new DataSet();
 const legendItems = [
   { label: 'Skill', color: 'lightgreen', iconClass: 'fa-graduation-cap' },
   { label: 'Badge', color: '#88a9fc', iconClass: 'fa-award' },
@@ -78,6 +79,11 @@ const displayOptions = ref({
   physics: {
     enabled: false,
   },
+  edges: {
+    smooth: {
+      enabled: false
+    }
+  },
   nodes: {
     font: {
       size: 18,
@@ -90,8 +96,8 @@ const displayOptions = ref({
 });
 
 onMounted(() => {
-  nodes = [];
-  edges = [];
+  nodes.clear();
+  edges.clear();
   loadGraphDataAndCreateGraph();
 })
 
@@ -108,9 +114,13 @@ const hasGraphData = computed(() => {
 const updateSelectedFromSkills = (item, zoomTo = true) => {
   if(item) {
     selectedFromSkills.value = item;
-    const foundNode = nodes.find((node) => node.details.skillId === item.skillId)
+    const foundNode = nodes.get({
+      filter: (node) => {
+        return node.details.skillId === item.skillId
+      }
+    })
     if(foundNode && zoomTo && enableZoom.value) {
-      panToNode(foundNode.id)
+      panToNode(foundNode[0].id)
     }
   }
   else {
@@ -123,15 +133,36 @@ const clearSelectedFromSkills = () => {
 };
 
 const handleUpdate = (addedNode) => {
-  clearSelectedFromSkills();
   graph.value = [];
-  network.value = null;
-  nodes = [];
-  edges = [];
+  nodes.clear()
+  edges.clear()
+  clearSelectedFromSkills();
   isLoading.value = true;
 
-  loadGraphDataAndCreateGraph(addedNode);
+  loadGraphDataAndUpdateGraph(addedNode);
 };
+
+const loadGraphDataAndUpdateGraph = (addedNode = null) => {
+  SkillsService.getDependentSkillsGraphForProject(route.params.projectId)
+      .then((response) => {
+        graph.value = response;
+        isLoading.value = false;
+        buildData()
+      })
+      .finally(() => {
+        isLoading.value = false;
+        if(addedNode && enableZoom.value) {
+          const foundNode = nodes.get({filter: (node) => node.details.skillId === addedNode})[0]
+          if(foundNode && foundNode.id) {
+            panToNode(foundNode.id);
+          }
+        } else {
+          setTimeout(() => {
+            network.value.fit()
+          }, 300)
+        }
+      });
+}
 
 const loadGraphDataAndCreateGraph = (addedNode = null) => {
   SkillsService.getDependentSkillsGraphForProject(route.params.projectId)
@@ -154,11 +185,11 @@ const panToNode = (node, scrollIntoView = false) => {
 
 const selectNode = (params) => {
   const selectedNode = params.nodes[0];
-  const nodeValue = nodes.find((node) => node.id === selectedNode);
+  const nodeValue = nodes.get({filter: (node) => node.id === selectedNode});
   if(enableZoom.value) {
     panToNode(selectedNode, dynamicHeight.value)
   }
-  updateSelectedFromSkills(nodeValue.details, false);
+  updateSelectedFromSkills(nodeValue[0].details, false);
 }
 
 const selectEdge = (params) => {
@@ -166,8 +197,8 @@ const selectEdge = (params) => {
   const selectedEdge = params.edges[0];
   const connectedNodes = network.value.getConnectedNodes(selectedEdge);
 
-  const fromNode = allNodes.find((node) => node.id === connectedNodes[0]);
-  const toNode = allNodes.find((node) => node.id === connectedNodes[1]);
+  const fromNode = allNodes.get({filter: (node) => node.id === connectedNodes[0]})[0];
+  const toNode = allNodes.get({filter: (node) => node.id === connectedNodes[1]})[0];
 
   if(fromNode.belongsToBadge || toNode.belongsToBadge) {
     return;
@@ -188,13 +219,6 @@ const selectEdge = (params) => {
 }
 
 const createGraph = (nodeToPanTo = null) => {
-  if (network.value) {
-    network.value.destroy();
-    network.value = null;
-    nodes = [];
-    edges = [];
-  }
-
   data.value = buildData();
   if (hasGraphData.value) {
     showGraph.value = true;
@@ -204,7 +228,7 @@ const createGraph = (nodeToPanTo = null) => {
     network.value.on('selectEdge', selectEdge);
 
     if(nodeToPanTo && enableZoom.value) {
-      const foundNode = nodes.find((node) => node.details.skillId === nodeToPanTo)
+      const foundNode = nodes.get({filter: (node) => node.details.skillId === nodeToPanTo})[0]
       if(foundNode && foundNode.id) {
         panToNode(foundNode.id);
       }
@@ -223,11 +247,11 @@ const buildData = () => {
   const sortedNodes = graph.value.nodes.sort((a, b) => a.id - b.id);
   sortedNodes.forEach((node) => {
     const newNode = buildNode(node)
-    nodes.push(newNode);
+    nodes.update(newNode);
   });
   const sortedEdges = graph.value.edges.sort((a, b) => a.toId - b.toId);
   sortedEdges.forEach((edge) => {
-    edges.push({
+    edges.add({
       from: edge.toId,
       to: edge.fromId,
       arrows: 'to',
@@ -312,12 +336,12 @@ const layout = () => {
   // Add nodes to the graph. The first argument is the node id. The second is
   // metadata about the node. In this case we're going to add labels to each of
   // our nodes.
-  nodes.forEach((node) => {
+  nodes.getDataSet().forEach((node) => {
     g.setNode(node.id, { label: node.label, width: nodeSize, height: nodeSize })
   })
 
   // Add edges to the graph.
-  edges.forEach(edge => {
+  edges.getDataSet().forEach(edge => {
     g.setEdge(edge.from, edge.to)
   })
 
@@ -327,8 +351,11 @@ const layout = () => {
     // update node position
     const x = g.node(nodeId).x
     const y = g.node(nodeId).y
-    nodes[nodeId - 1].x = x
-    nodes[nodeId - 1].y = y
+
+    const node = nodes.get(parseInt(nodeId));
+    if(node) {
+      nodes.update({...node, x: x, y: y})
+    }
   })
 
   dataHeight.value = g?._label?.height;
@@ -427,7 +454,7 @@ const computedHeight = computed(() => {
         </div>
       </template>
     </Card>
-
+    
     <dependency-table v-if="hasGraphData" :is-loading="isLoading" :data="data" @update="handleUpdate" @panToNode="panToNode" />
     <share-skills-with-other-projects v-if="!isReadOnlyProj" :project-id="route.params.projectId" />
     <shared-skills-from-other-projects v-if="!isReadOnlyProj" :project-id="route.params.projectId" />
