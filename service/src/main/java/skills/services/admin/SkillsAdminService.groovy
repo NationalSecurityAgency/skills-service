@@ -816,6 +816,7 @@ class SkillsAdminService {
             res.enabled = Boolean.valueOf(skillDef.enabled)
             res.groupName = skillsGroup.name
             res.groupId = skillsGroup.skillId
+            res.groupEnabled = Boolean.valueOf(skillsGroup.enabled)
         }
         if (skillDef.selfReportingType == SelfReportingType.Quiz) {
             QuizToSkillDefRepo.QuizNameAndId quizIdAndName = quizToSkillService.getQuizIdForSkillRefId(skillDef.copiedFrom ?: skillDef.id)

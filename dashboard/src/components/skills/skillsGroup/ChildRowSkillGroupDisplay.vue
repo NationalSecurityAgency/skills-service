@@ -205,7 +205,7 @@ const groupChanged = (updatedGroup) => {
           <!--        :show-search="false"-->
           <!--        :show-header="false"-->
           <!--        :show-paging="false"-->
-          <skills-table v-if="hasSkills" :group-id="skillInfo.skillId" />
+          <skills-table v-if="hasSkills" :group-id="skillInfo.skillId" :group-enabled="skillInfo.enabled" />
           <no-content2
             v-if="!hasSkills"
             title="Group has no Skills"
