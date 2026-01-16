@@ -107,6 +107,33 @@ onBeforeUnmount(() => {
   }
 })
 
+
+const getNodeBySkillId = (skillId) => {
+  const foundNode = nodes.get({
+    filter: (node) => {
+      return node.details.skillId === skillId
+    }
+  })
+  if(foundNode && foundNode.length > 0) {
+    return foundNode[0];
+  } else {
+    return null;
+  }
+}
+
+const getNodeById = (id) => {
+  const foundNode = nodes.get({
+    filter: (node) => {
+      return node.id === id
+    }
+  })
+  if(foundNode && foundNode.length > 0) {
+    return foundNode[0];
+  } else {
+    return null;
+  }
+}
+
 const hasGraphData = computed(() => {
   return graph.value && graph.value.nodes && graph.value.nodes.length > 0;
 });
@@ -114,13 +141,9 @@ const hasGraphData = computed(() => {
 const updateSelectedFromSkills = (item, zoomTo = true) => {
   if(item) {
     selectedFromSkills.value = item;
-    const foundNode = nodes.get({
-      filter: (node) => {
-        return node.details.skillId === item.skillId
-      }
-    })
+    const foundNode = getNodeBySkillId(item.skillId)
     if(foundNode && zoomTo && enableZoom.value) {
-      panToNode(foundNode[0].id)
+      panToNode(foundNode.id)
     }
   }
   else {
@@ -147,12 +170,17 @@ const loadGraphDataAndUpdateGraph = (addedNode = null) => {
       .then((response) => {
         graph.value = response;
         isLoading.value = false;
-        buildData()
+        // buildData()
+        if(!network.value) {
+          createGraph()
+        } else {
+          buildData()
+        }
       })
       .finally(() => {
         isLoading.value = false;
         if(addedNode && enableZoom.value) {
-          const foundNode = nodes.get({filter: (node) => node.details.skillId === addedNode})[0]
+          const foundNode = getNodeBySkillId(addedNode)
           if(foundNode && foundNode.id) {
             panToNode(foundNode.id);
           }
@@ -185,33 +213,32 @@ const panToNode = (node, scrollIntoView = false) => {
 
 const selectNode = (params) => {
   const selectedNode = params.nodes[0];
-  const nodeValue = nodes.get({filter: (node) => node.id === selectedNode});
+  const nodeValue = getNodeById(selectedNode);
   if(enableZoom.value) {
     panToNode(selectedNode, dynamicHeight.value)
   }
-  updateSelectedFromSkills(nodeValue[0].details, false);
+  updateSelectedFromSkills(nodeValue.details, false);
 }
 
 const selectEdge = (params) => {
-  const allNodes = graph.value.nodes;
   const selectedEdge = params.edges[0];
   const connectedNodes = network.value.getConnectedNodes(selectedEdge);
 
-  const fromNode = allNodes.get({filter: (node) => node.id === connectedNodes[0]})[0];
-  const toNode = allNodes.get({filter: (node) => node.id === connectedNodes[1]})[0];
+  const fromNode = getNodeById(connectedNodes[0])
+  const toNode = getNodeById(connectedNodes[1])
 
-  if(fromNode.belongsToBadge || toNode.belongsToBadge) {
+  if(fromNode.details.belongsToBadge || toNode.details.belongsToBadge) {
     return;
   }
 
-  const message = `Do you want to remove the path from ${fromNode.name} to ${toNode.name}?`;
+  const message = `Do you want to remove the path from ${fromNode.details.name} to ${toNode.details.name}?`;
   dialogMessages.msgConfirm({
     message: message,
     header: 'Remove Learning Path?',
     acceptLabel: 'Remove',
     rejectLabel: 'Cancel',
     accept: () => {
-      SkillsService.removeDependency(toNode.projectId, toNode.skillId, fromNode.skillId, fromNode.projectId).then(() => {
+      SkillsService.removeDependency(toNode.details.projectId, toNode.details.skillId, fromNode.details.skillId, fromNode.details.projectId).then(() => {
         handleUpdate();
       });
     }
@@ -228,7 +255,7 @@ const createGraph = (nodeToPanTo = null) => {
     network.value.on('selectEdge', selectEdge);
 
     if(nodeToPanTo && enableZoom.value) {
-      const foundNode = nodes.get({filter: (node) => node.details.skillId === nodeToPanTo})[0]
+      const foundNode = getNodeBySkillId(nodeToPanTo)
       if(foundNode && foundNode.id) {
         panToNode(foundNode.id);
       }
