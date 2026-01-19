@@ -118,6 +118,9 @@ class UserSkillsController {
     AttachmentService attachmentService;
 
     @Autowired
+    VideoStreamService videoStreamService;
+
+    @Autowired
     InviteOnlyProjectService inviteOnlyProjectService;
 
     @Autowired
@@ -130,7 +133,7 @@ class UserSkillsController {
     GlobalBadgesService globalBadgeService;
 
     @Value("${skills.config.allowedVideoUploadMimeTypes}")
-    List<MediaType> allowedMediaUploadTypes;
+    List<MediaType> allowedVideoUploadMimeTypes;
 
     private int getProvidedVersionOrReturnDefault(Integer versionParam) {
         if (versionParam != null) {
@@ -551,6 +554,7 @@ class UserSkillsController {
     @Transactional(readOnly = true)
     public void download(@PathVariable("uuid") String uuid,
                          @RequestParam(name = "alwaysReturnContentDispositionForPdf", required = false, defaultValue = "false") Boolean alwaysReturnContentDispositionForPdf,
+                         @RequestHeader(value = "Range", required = false) String rangeHeader,
                          HttpServletResponse response) {
         Attachment attachment = attachmentService.getAttachment(uuid);
         if (attachment == null) {
@@ -564,23 +568,22 @@ class UserSkillsController {
             }
         }
 
-        try (InputStream inputStream = attachment.getContent().getBinaryStream();
-             OutputStream outputStream = response.getOutputStream()) {
-            response.setContentType(attachment.getContentType());
-            if (alwaysReturnContentDispositionForPdf || !StringUtils.equalsIgnoreCase(attachment.getContentType(), "application/pdf")) {
-                response.setHeader("Content-Disposition", "attachment; filename=\"" + attachment.getFilename() + "\"");
-            }
+        String contentType = attachment.getContentType().toLowerCase();
+        boolean isVideoType = AttachmentValidator.isAllowedAttachmentMimeTypeBoolean(contentType, allowedVideoUploadMimeTypes);
+        if (isVideoType) {
+            videoStreamService.streamVideo(attachment, rangeHeader, response);
+        } else {
+            try (InputStream inputStream = attachment.getContent().getBinaryStream();
+                 OutputStream outputStream = response.getOutputStream()) {
+                response.setContentType(attachment.getContentType());
+                if (alwaysReturnContentDispositionForPdf || !StringUtils.equalsIgnoreCase(attachment.getContentType(), "application/pdf")) {
+                    response.setHeader("Content-Disposition", "attachment; filename=\"" + attachment.getFilename() + "\"");
+                }
 
-            String contentType = attachment.getContentType().toLowerCase();
-            if (AttachmentValidator.isAllowedAttachmentMimeTypeBoolean(contentType, allowedMediaUploadTypes)) {
-                response.setHeader("Content-Length", attachment.getSize().toString());
-                long attachmentSize = attachment.getSize() - 1;
-                response.setHeader("Content-Range", "bytes 0-" + attachmentSize + "/" + attachment.getSize().toString());
-                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+                IOUtils.copy(inputStream, outputStream);
+            } catch (Exception e) {
+                throw new SkillException("Error closing stream resources", e);
             }
-            IOUtils.copy(inputStream, outputStream);
-        } catch (Exception e) {
-            throw new SkillException("Error closing stream resources", e);
         }
     }
 
