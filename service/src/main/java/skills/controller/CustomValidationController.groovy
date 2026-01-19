@@ -19,8 +19,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 import skills.controller.result.model.ModifiedDescription
-import skills.controller.result.model.RequestResult
-import skills.controller.result.model.ValidationCheckResult
 import skills.controller.result.model.ValidationResult
 import skills.dbupgrade.DBUpgradeSafe
 import skills.profile.EnableCallStackProf
@@ -37,38 +35,6 @@ class CustomValidationController {
 
     @Autowired
     CustomValidator customValidator
-
-    @Autowired
-    ValidateAllDesc validateAllDesc
-
-    @DBUpgradeSafe
-    @RequestMapping(value = "/validateAllDescriptions", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    RequestResult validateAllDescriptions(){
-        validateAllDesc.validateAllDesc()
-        return RequestResult.success()
-    }
-    @DBUpgradeSafe
-    @RequestMapping(value = "/validateProjDescriptions", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    RequestResult validateProjDescriptions(){
-        validateAllDesc.validateProjDesc()
-        return RequestResult.success()
-    }
-    @DBUpgradeSafe
-    @RequestMapping(value = "/validateQuizDescriptions", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    RequestResult validateQuizDesc(){
-        validateAllDesc.validateQuizDesc()
-        return RequestResult.success()
-    }
-    @DBUpgradeSafe
-    @RequestMapping(value = "/validateQuestionDescriptions", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    RequestResult validateQuizQuestions(){
-        validateAllDesc.validateQuizQuestions()
-        return RequestResult.success()
-    }
 
     @DBUpgradeSafe
     @RequestMapping(value = "/description", method = RequestMethod.POST, produces = "application/json")
