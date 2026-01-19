@@ -88,6 +88,8 @@ skills:
   artificialDelay:
     enabled: false
   clientLibVersion: @maven.build.timestamp@
+  openai:
+    host: null
   config:
     publiclyExposePrometheusMetrics: false
     # Changing this to a larger value once events have been compacted into WEEKLY events will cause
@@ -191,6 +193,16 @@ skills:
       contactSupportExternalEmail: someSupport@someDomain.com
       contactSupportExternalEmailDescription: As an alternative, you can reach out to the SkillTree team by sending an email to
       maxRolePageSize: 200
+      openaiModelDefaultTemperature: 0.5
+      openaiTakingLongerThanExpectedTimeoutPerMsg: 12000
+      openaiTakingLongerThanExpectedMessages:
+        - "Just a moment while I get everything ready."
+        - "Hang tight! Still processing your request."
+        - "Still working on generating the best response for you."
+        - "I am still trying, sorry for the delay!"
+        - "This is taking longer than expected but I am still working on it."
+        - "I am trying but unfortunately it is still taking way longer than expected."
+      maxAiPromptLength: 5000
     client:
       loggingEnabled: false
       loggingLevel: DEBUG
@@ -200,6 +212,11 @@ db-scheduler:
   threads: 3
 ---
 spring:
+  ai:
+    model:
+      chat: none
+    openai:
+      api-key: none
   cloud:
     aws:
       s3:

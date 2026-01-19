@@ -1,0 +1,11 @@
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"### Question:\nMatch great rock bands with their hit songs.\n\n### Answers:\n[\n  {\n    \"answer\": \"\","},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"    \"isCorrect\": true,\n    \"multiPartAnswer\": {\n      \"term\": \"The Beatles\",\n      \"value\": \"Hey Jude\"\n    }\n  },\n  {\n    \"isCorrect\": true,"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"    \"multiPartAnswer\": {\n      \"term\": \"Queen\",\n      \"value\": \"Bohemian Rhapsody\"\n    }\n  },\n  {\n    \"isCorrect\": true,"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"    \"multiPartAnswer\": {\n      \"term\": \"Led Zeppelin\",\n      \"value\": \"Stairway to Heaven\"\n    }\n  },\n  {\n    \"isCorrect\": true,"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"    \"multiPartAnswer\": {\n      \"term\": \"Pink Floyd\",\n      \"value\": \"Another Brick in the Wall\"\n    }\n  }\n]"},"finish_reason":null}]}
+
+data: [DONE]

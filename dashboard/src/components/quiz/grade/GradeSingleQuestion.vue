@@ -104,12 +104,13 @@ const grade = (isCorrect, feedback) => {
                        :id="`qFeedback-${quizAttemptId}_${question.questionNumber}`"
                        :allow-community-elevation="true"
                        markdownHeight="120px"
-                       label="Your Feedback (optional):"
+                       label="Your Feedback (optional)"
                        name="feedbackTxt"
                        :disabled="isSubmitting"
                        :allow-attachments="false"
                        :allow-insert-images="false"
                        :aria-label="`optionally provide feedback for answer of question # ${question.questionNumber}`"
+                       :disable-ai-prompt="true"
                        :resizable="false" />
       <div class="flex gap-2 mt-4">
       <SkillsButton

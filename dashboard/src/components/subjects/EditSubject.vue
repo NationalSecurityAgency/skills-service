@@ -29,6 +29,7 @@ import { useFocusState } from '@/stores/UseFocusState.js'
 import InputGroupAddon from 'primevue/inputgroupaddon'
 import InputGroup from 'primevue/inputgroup'
 import SkillsInputSwitch from '@/components/utils/inputForm/SkillsInputSwitch.vue'
+import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
 
 const focusState = useFocusState()
 const model = defineModel()
@@ -225,6 +226,7 @@ const onSubjectSaved = (subject) => {
           :upload-url="`/admin/projects/${route.params.projectId}/upload`"
           class="mt-4"
           :allow-community-elevation="true"
+          :ai-prompt-type="GenerateDescriptionType.Subject"
           name="description" />
       <help-url-input class="mt-4"
                       :next-focus-el="previousFocus"

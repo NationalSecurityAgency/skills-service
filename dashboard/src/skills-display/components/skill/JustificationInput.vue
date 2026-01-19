@@ -83,6 +83,7 @@ const submit = handleSubmit(formValues => {
                        :aria-label="isJustitificationRequired ? 'Optional request approval justification' : 'Required request approval justification'"
                        :placeholder="`Justification (${isJustitificationRequired ? 'required' : 'optional'})`"
                        :resizable="true"
+                       :disable-ai-prompt="true"
                        aria-errormessage="approvalMessageError" />
 
       <div class="text-right mt-2">

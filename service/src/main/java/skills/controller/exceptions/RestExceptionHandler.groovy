@@ -19,10 +19,7 @@ import groovy.util.logging.Slf4j
 import org.apache.catalina.connector.ClientAbortException
 import org.springframework.core.annotation.AnnotatedElementUtils
 import org.springframework.dao.DataIntegrityViolationException
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
-import org.springframework.http.ResponseEntity
+import org.springframework.http.*
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.lang.Nullable
 import org.springframework.security.access.AccessDeniedException
@@ -33,6 +30,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import skills.auth.SkillsAuthorizationException
@@ -270,4 +268,14 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return "${requestMethodFrag}${uriInfoFrag}$paramsFrag"
     }
 
+
+    private static final String LLM_COMMUNICATION_ERROR =
+            "Unable to communicate with the configured LLM. Please try again later.";
+
+    @ExceptionHandler(WebClientResponseException.class)
+    ProblemDetail handle(WebClientResponseException exception) {
+        String resBody = exception?.responseBodyAsString
+        log.error("LLM returned an error, responseBody=[${resBody}]", exception);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, LLM_COMMUNICATION_ERROR);
+    }
 }

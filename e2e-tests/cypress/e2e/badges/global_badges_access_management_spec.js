@@ -107,6 +107,13 @@ describe('Global Badge Access Management Tests', () => {
   })
 
   it('paging users', function () {
+    const userInfo = {
+          'first': 'Zack',
+          'last': 'Smith',
+          'nickname': 'Zack Smith'
+    }
+    cy.request('POST', '/app/userInfo', userInfo)
+
     cy.fixture('vars.json')
       .then((vars) => {
         const pass = 'password'
@@ -118,7 +125,7 @@ describe('Global Badge Access Management Tests', () => {
         cy.register('5user', pass)
 
         const oauthMode = Cypress.env('oauthMode')
-        const defaultUserForDisplay = oauthMode ? 'foo' : 'Firstname LastName (skills@skills.org)'
+        const defaultUserForDisplay = oauthMode ? 'foo' : 'Zack Smith (skills@skills.org)'
         if (!oauthMode) {
           cy.log('NOT in oauthMode, using form login')
           cy.login(vars.defaultUser, vars.defaultPass)

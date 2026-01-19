@@ -15,7 +15,6 @@
  */
 package skills.controller
 
-
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
@@ -31,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 import skills.PublicProps
 import skills.auth.UserInfoService
+
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
@@ -1965,6 +1965,7 @@ class AdminController {
                                              @PathVariable("projectId") String projectId) {
         return attachmentService.saveAttachment(file, projectId, null, null);
     }
+
 
 }
 

@@ -19,6 +19,17 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import org.apache.commons.lang3.StringUtils
+import org.commonmark.Extension
+import org.commonmark.ext.gfm.tables.TableBlock
+import org.commonmark.ext.gfm.tables.TableHead
+import org.commonmark.ext.gfm.tables.TablesExtension
+import org.commonmark.node.*
+import org.commonmark.parser.IncludeSourceSpans
+import org.commonmark.parser.Parser
+import org.commonmark.renderer.markdown.MarkdownRenderer
+import org.commonmark.renderer.text.TextContentRenderer
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -26,9 +37,10 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.*
+import skills.controller.result.model.ModifiedDescription
 import skills.services.admin.UserCommunityService
-import skills.utils.InputSanitizer
 
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -186,8 +198,12 @@ class CustomValidator {
         return (boolean)utilizeUserCommunityParagraphPatternByDefault
     }
 
+    static class ValidationPattern {
+        Pattern pattern
+        String message
+    }
 
-    CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
+    private ValidationPattern getValidationPattern(String projectId = null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
         Pattern paragraphPatternToUse = this.paragraphPattern
         String paragraphValidationMsgToUse = this.paragraphValidationMsg
 
@@ -200,36 +216,31 @@ class CustomValidator {
                 throw new SkillException("User [${userId}] is not allowed to validate using user community validation", projectId, null, ErrorCode.AccessDenied)
             }
         }
-        if (!paragraphPatternToUse || StringUtils.isBlank(description)) {
-            return new CustomValidationResult(valid: true)
-        }
-        log.debug("Validating description:\n[{}]", description)
 
-        description = InputSanitizer.unsanitizeForMarkdown(description)
+        return new ValidationPattern(pattern: paragraphPatternToUse, message: paragraphValidationMsgToUse)
+    }
 
-        // split if
-        // - there is at least 2 new lines
-        // - markdown separator (3 underscores, 3 dashes, 3 stars)
-        description = preProcessForMarkdownSupport(description)
-        if (StringUtils.isBlank(description)) {
-            return new CustomValidationResult(valid: true)
-        }
+    CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
+        ParagraphValidator.InternalValidationResult result = new ParagraphValidator(new ParagraphValidator.InternalValidationRequest(
+                description: description,
+                projectId: projectId,
+                validationPattern: getValidationPattern(projectId, utilizeUserCommunityParagraphPatternByDefault, quizId),
+                forceValidationPattern: forceValidationPattern,
+                utilizeUserCommunityParagraphPatternByDefault: utilizeUserCommunityParagraphPatternByDefault,
+                quizId: quizId)).validateMarkdown()
+        return new CustomValidationResult(valid: result.isValid, msg: result.validationMsg, validationFailedDetails: result.validationFailedDetails ?: null)
+    }
 
-        CustomValidationResult validationResult = null
-
-        String[] paragraphs = description.split("([\n]{2,})|(\n[\\s]*[-_*]{3,})")
-        if (paragraphs) {
-            validationResult = validateParagraphs(paragraphPatternToUse, paragraphValidationMsgToUse, paragraphs.toList())
-            if (validationResult && !validationResult.valid) {
-                return validationResult
-            }
-        }
-
-        List<String> htmlParagraphs = extractHtmlParagraphs(description)
-        if (htmlParagraphs) {
-            validationResult = validateParagraphs(paragraphPatternToUse, paragraphValidationMsgToUse, htmlParagraphs)
-        }
-        return validationResult
+    ModifiedDescription addPrefixToInvalidParagraphs(String description, String prefix, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
+        assert prefix
+        ParagraphValidator.InternalValidationResult result = new ParagraphValidator(new ParagraphValidator.InternalValidationRequest(
+                description: description,
+                prefix: prefix, projectId: projectId,
+                validationPattern: getValidationPattern(projectId, utilizeUserCommunityParagraphPatternByDefault, quizId),
+                forceValidationPattern: forceValidationPattern,
+                utilizeUserCommunityParagraphPatternByDefault: utilizeUserCommunityParagraphPatternByDefault,
+                quizId: quizId)).validateMarkdown()
+        return new ModifiedDescription(newDescription: result.newDescription)
     }
 
     CustomValidationResult validateEmailBodyAndSubject(ContactUsersRequest contactUsersRequest) {
@@ -247,23 +258,26 @@ class CustomValidator {
     }
 
     private CustomValidationResult validateParagraphs(Pattern paragraphPatternToUse, String paragraphValidationMsgToUse, List<String> paragraphs){
-        CustomValidationResult validationResult = null
+        CustomValidationResult validationResult = CustomValidationResult.valid()
         for (String s : paragraphs) {
             if (!s){
                 continue
             }
-            String toValidate = adjustForMarkdownSupport(s)
-            if (StringUtils.isNotBlank(toValidate)) {
-                validationResult = validateInternal(paragraphPatternToUse, toValidate, paragraphValidationMsgToUse)
-                if (!validationResult.valid) {
-                    break
-                }
-            } else if(!validationResult) {
-                validationResult = new CustomValidationResult(valid: true)
+            CustomValidationResult singleParagraphValidationResult = validateSingleParagraph(s, paragraphPatternToUse, paragraphValidationMsgToUse)
+            if (!singleParagraphValidationResult.valid) {
+                return singleParagraphValidationResult
             }
         }
-
         return validationResult
+    }
+
+    private CustomValidationResult validateSingleParagraph(String paragraph, Pattern paragraphPatternToUse, String paragraphValidationMsgToUse) {
+        String toValidate = adjustForMarkdownSupport(paragraph)
+        if (StringUtils.isNotBlank(toValidate)) {
+            CustomValidationResult validationResult = validateInternal(paragraphPatternToUse, toValidate, paragraphValidationMsgToUse)
+            return validationResult
+        }
+        return CustomValidationResult.valid()
     }
 
     final static Pattern HTML_PARAGRAPHS_PATTERN = Pattern.compile("<p>(.+?)</p>", Pattern.DOTALL);
@@ -274,29 +288,6 @@ class CustomValidator {
             htmlParagraphs.add(matcher.group(1));
         }
         return htmlParagraphs
-    }
-
-    private String preProcessForMarkdownSupport(String toValidate) {
-//        String toValidate = s.trim()
-
-        // treat all linebreaks and separators as newlines
-        toValidate = toValidate.replaceAll(/(?m)(^\s*[-_*]{3,}\s*$)|(^\s*<br>\s*$)/, '\n')
-
-        // remove a single new line above a table and/or codeblock
-        toValidate = TABLE_FIX.matcher(toValidate).replaceAll('$2')
-        toValidate = CODEBLOCK_FIX.matcher(toValidate).replaceAll('$2')
-        toValidate = LIST_FIX.matcher(toValidate).replaceAll('$2')
-
-        // remove two+ newlines from codeblocks so we do not split
-        StringBuilder out = new StringBuilder()
-        Matcher matcher = CODEBLOCK.matcher(toValidate)
-        while(matcher.find()) {
-            matcher.appendReplacement(out, matcher.group(1).replaceAll(/[\n]{2,}+/, '\n'))
-        }
-        matcher.appendTail(out)
-        toValidate = out.toString()
-
-        return toValidate.trim()
     }
 
     private String adjustForMarkdownSupport(String s) {

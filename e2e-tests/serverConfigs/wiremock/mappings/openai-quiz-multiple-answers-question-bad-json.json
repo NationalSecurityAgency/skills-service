@@ -1,0 +1,24 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      { "contains": "Great rock bands" },
+      { "contains": "Bad JSON" },
+      { "doesNotContain": "## Existing Question" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "text/event-stream"
+    },
+    "bodyFileName": "response-body-question-multiple-answers-bad-json.txt",
+    "transformers": ["response-template"],
+    "chunkedDribbleDelay": {
+      "numberOfChunks": 20,
+      "totalDuration": 1500
+    }
+  }
+}

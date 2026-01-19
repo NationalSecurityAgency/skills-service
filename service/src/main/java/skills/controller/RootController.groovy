@@ -31,20 +31,11 @@ import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
-import skills.controller.request.model.ContactUsersRequest
-import skills.controller.request.model.GlobalSettingsRequest
-import skills.controller.request.model.SuggestRequest
-import skills.controller.request.model.UserTagRequest
-import skills.controller.request.model.WebNotificationRequest
+import skills.controller.request.model.*
 import skills.controller.result.model.*
 import skills.dbupgrade.ReportedSkillEventQueue
 import skills.profile.EnableCallStackProf
-import skills.services.AccessSettingsStorageService
-import skills.services.ContactUsersService
-import skills.services.CustomValidationResult
-import skills.services.CustomValidator
-import skills.services.FeatureService
-import skills.services.SystemSettingsService
+import skills.services.*
 import skills.services.admin.ProjAdminService
 import skills.services.settings.SettingsService
 import skills.services.userActions.DashboardAction
@@ -53,10 +44,7 @@ import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
 import skills.services.webNotifications.WebNotificationRes
 import skills.services.webNotifications.WebNotificationsService
-import skills.settings.EmailConfigurationResult
-import skills.settings.EmailConnectionInfo
-import skills.settings.EmailSettingsService
-import skills.settings.SystemSettings
+import skills.settings.*
 import skills.storage.model.UserTag
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserTagRepo
@@ -129,6 +117,9 @@ class RootController {
 
     @Autowired
     ReportedSkillEventQueue reportedSkillEventQueue
+
+    @Autowired
+    AiPromptSettingsService aiPromptSettingsService
 
     @GetMapping('/rootUsers')
     @ResponseBody
@@ -291,6 +282,17 @@ class RootController {
     @GetMapping('/getSystemSettings')
     SystemSettings getSystemSettings(){
         return systemSettingsService.get()
+    }
+
+    @RequestMapping(value = "/saveAiPromptSettings", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    AiPromptSettings saveAiPromptSettings(@RequestBody List<GlobalSettingsRequest> aiPromptSettings){
+        return aiPromptSettingsService.updateAiPromptsSettings(aiPromptSettings)
+    }
+
+    @GetMapping('/getAiPromptSettings/default/{setting}')
+    String getDefaultAiPromptSetting(@PathVariable("setting") String setting) {
+        SkillsValidator.isNotBlank(setting, "Setting Id")
+        return aiPromptSettingsService.getDefaultSetting(setting)
     }
 
     @RequestMapping(value = "/global/settings/{setting}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)

@@ -1,0 +1,23 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      { "contains": "Great rock bands" },
+      { "contains": "TextInput" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "text/event-stream"
+    },
+    "bodyFileName": "response-body-question-text-input.txt",
+    "transformers": ["response-template"],
+    "chunkedDribbleDelay": {
+      "numberOfChunks": 20,
+      "totalDuration": 1500
+    }
+  }
+}

@@ -18,8 +18,6 @@ package skills.auth
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,8 +33,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.context.request.RequestContextHolder
-import org.springframework.web.context.request.ServletRequestAttributes
+import skills.auth.AuthUtils.RequestAttributes
 import skills.services.AccessSettingsStorageService
 import skills.services.admin.ProjAdminService
 import skills.services.inception.InceptionProjectService
@@ -98,18 +95,20 @@ class UserAuthService {
 
     @Transactional(readOnly = true)
     Collection<GrantedAuthority> loadAuthorities(String userId) {
+        RequestAttributes requestAttributes = AuthUtils.getRequestAttributes()
         List<UserRole> userRoles = userRoleRepo.findAllByUserId(userId?.toLowerCase())
-        return convertRoles(userRoles)
+        return convertRoles(userRoles, requestAttributes)
     }
 
     @Transactional(readOnly = true)
     @Profile
     UserInfo loadByUserId(String userId) {
-        UserInfo userInfo
+        UserInfo userInfo = null
+        RequestAttributes requestAttributes = AuthUtils.getRequestAttributes()
         User user = userRepository.findByUserId(userId?.toLowerCase())
         if (user) {
             UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId?.toLowerCase())
-            userInfo = createUserInfo(user, userAttrs)
+            userInfo = createUserInfo(user, userAttrs, requestAttributes)
             if (verifyEmailAddresses) {
                 userInfo.accountNonLocked = userInfo.emailVerified
             }
@@ -117,7 +116,7 @@ class UserAuthService {
         return userInfo
     }
 
-    private UserInfo createUserInfo(User user, UserAttrs userAttrs) {
+    private UserInfo createUserInfo(User user, UserAttrs userAttrs, RequestAttributes requestAttributes) {
         List<UserRole> userRoles = userRoleRepo.findAllByUserId(user.userId.toLowerCase())
         return new UserInfo (
                 username: user.userId,
@@ -128,7 +127,7 @@ class UserAuthService {
                 emailVerified: Boolean.valueOf(userAttrs.emailVerified),
                 userDn: userAttrs.dn,
                 nickname: userAttrs.nickname,
-                authorities: convertRoles(userRoles),
+                authorities: convertRoles(userRoles, requestAttributes),
                 usernameForDisplay: userAttrs.userIdForDisplay,
         )
     }
@@ -142,15 +141,16 @@ class UserAuthService {
     @Transactional
     @Profile
     UserInfo createOrUpdateUser(UserInfo userInfo, boolean refreshSecurityContext=true) {
+        RequestAttributes requestAttributes = AuthUtils.getRequestAttributes()
         AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.createAppUser(userInfo, true)
-        UserInfo updatedUserInfo = createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
+        UserInfo updatedUserInfo = createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs, requestAttributes)
         if (authMode == AuthMode.FORM && refreshSecurityContext) {
             SecurityContext securityContext = SecurityContextHolder.getContext()
             Authentication authentication = securityContext?.getAuthentication()
             if (authentication && authentication instanceof UsernamePasswordAuthenticationToken && authentication.getPrincipal() instanceof UserInfo) {
                 Authentication updatedAuth = new UsernamePasswordAuthenticationToken(updatedUserInfo, authentication.getCredentials(), updatedUserInfo.getAuthorities())
                 securityContext.setAuthentication(updatedAuth)
-                securityContextRepository.saveContext(securityContext, servletRequest, servletResponse)
+                securityContextRepository.saveContext(securityContext, AuthUtils.getServletRequest(), AuthUtils.getServletResponse())
             }
         }
         return updatedUserInfo
@@ -170,26 +170,27 @@ class UserAuthService {
     @Transactional(readOnly=true)
     @Profile
     UserInfo get(UserInfo userInfo) {
+        RequestAttributes requestAttributes = AuthUtils.getRequestAttributes()
         AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.get(userInfo)
         if (userAndUserAttrs) {
-            return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs)
+            return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs, requestAttributes)
         }
         return null
     }
 
-    private Collection<GrantedAuthority> convertRoles(List<UserRole> roles) {
+    private Collection<GrantedAuthority> convertRoles(List<UserRole> roles, RequestAttributes requestAttributes) {
         Collection<GrantedAuthority> grantedAuthorities = EMPTY_ROLES
-        List<UserRole> addedRoles
+        List<UserRole> addedRoles = null
         if (!CollectionUtils.isEmpty(roles)) {
             grantedAuthorities = new ArrayList<GrantedAuthority>(roles.size())
             for (UserRole role : roles) {
-                if (shouldAddRole(role)) {
+                if (shouldAddRole(role, requestAttributes)) {
                     addedRoles = addedRoles ?: []
                     addedRoles.add(role)
                     grantedAuthorities.add(new UserSkillsGrantedAuthority(role))
                 }
             }
-            UserRole quizReadOnlyRole = checkQuizReadOnlyRole(roles, addedRoles)
+            UserRole quizReadOnlyRole = checkQuizReadOnlyRole(roles, addedRoles, requestAttributes)
             if (quizReadOnlyRole) {
                 grantedAuthorities.add(new UserSkillsGrantedAuthority(quizReadOnlyRole))
             }
@@ -204,12 +205,11 @@ class UserAuthService {
      *   in this case project admin is allowed to view (but not mutate) quiz definition
      */
     @CompileStatic
-    private UserRole checkQuizReadOnlyRole(List<UserRole> roles, List<UserRole> addedRoles) {
-        UserRole role
-        HttpServletRequest request = getServletRequest()
-        String quizId = AuthUtils.getQuizIdFromRequest(request)
-        String quizIdUnderApiEndpoint = AuthUtils.getQuizIdFromApiRequest(request)
-        String method = request?.method
+    private UserRole checkQuizReadOnlyRole(List<UserRole> roles, List<UserRole> addedRoles, RequestAttributes requestAttributes) {
+        UserRole role = null
+        String quizId = requestAttributes.quizId
+        String quizIdUnderApiEndpoint = requestAttributes.quizIdUnderApiEndpoint
+        String method = requestAttributes.httpMethod
 
         // this role is allowed to execute get methods for /admin/* path and get/post/put under /api/* path
         // unfortunately ROLE_QUIZ_READ_ONLY doesn't quite accurately represent its function
@@ -230,69 +230,47 @@ class UserAuthService {
         return role
     }
 
-    private boolean shouldAddRole(UserRole userRole) {
+    private static boolean shouldAddRole(UserRole userRole, RequestAttributes requestAttributes) {
         boolean shouldAddRole = true
         if (userRole.roleName == RoleName.ROLE_PROJECT_ADMIN) {
             shouldAddRole = false
-            String projectId = AuthUtils.getProjectIdFromRequest(servletRequest)
-            if (projectId && userRole.projectId && projectId.equalsIgnoreCase(userRole.projectId)) {
+            String projectId = requestAttributes.projectId
+            if (requestAttributes.projectId && userRole.projectId && projectId.equalsIgnoreCase(userRole.projectId)) {
                 shouldAddRole = true
             }
         }
         if (userRole.roleName == RoleName.ROLE_PROJECT_APPROVER) {
-            shouldAddRole = approverRoleDecider.shouldGrantApproverRole(servletRequest, userRole)
+            shouldAddRole = ApproverRoleDecider.shouldGrantApproverRole(requestAttributes, userRole)
         }
         if (userRole.roleName == RoleName.ROLE_QUIZ_ADMIN) {
             shouldAddRole = false
-            String quizId = AuthUtils.getQuizIdFromRequest(servletRequest)
+            String quizId = requestAttributes.quizId
             if (quizId && userRole.quizId && quizId.equalsIgnoreCase(userRole.quizId)) {
                 shouldAddRole = true
             }
         }
         if (userRole.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER) {
             shouldAddRole = false
-            String adminGroupId = AuthUtils.getAdminGroupIdFromRequest(servletRequest)
+            String adminGroupId = requestAttributes.adminGroupId
             if (adminGroupId && userRole.adminGroupId && adminGroupId.equalsIgnoreCase(userRole.adminGroupId)) {
                 shouldAddRole = true
             }
         }
         if (userRole.roleName == RoleName.ROLE_PRIVATE_PROJECT_USER) {
             shouldAddRole = false
-            String projectId = AuthUtils.getProjectIdFromRequest(servletRequest)
+            String projectId = requestAttributes.projectId
             if (projectId && userRole.projectId && projectId.equalsIgnoreCase(userRole.projectId)) {
                 shouldAddRole = true
             }
         }
         if (userRole.roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN) {
             shouldAddRole = false
-            String globalBadgeId = AuthUtils.getGlobalBadgeIdFromRequest(servletRequest)
+            String globalBadgeId = requestAttributes.globalBadgeId
             if (globalBadgeId && userRole.globalBadgeId && globalBadgeId.equalsIgnoreCase(userRole.globalBadgeId)) {
                 shouldAddRole = true
             }
         }
         return shouldAddRole
-    }
-
-    HttpServletRequest getServletRequest() {
-        HttpServletRequest httpServletRequest
-        try {
-            ServletRequestAttributes currentRequestAttributes = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes
-            httpServletRequest = currentRequestAttributes?.getRequest()
-        } catch (Exception e) {
-            log.warn("Unable to access current HttpServletRequest. Error Recieved [$e]", e)
-        }
-        return httpServletRequest
-    }
-
-    HttpServletResponse getServletResponse() {
-        HttpServletResponse httpServletResponse
-        try {
-            ServletRequestAttributes currentRequestAttributes = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes
-            httpServletResponse = currentRequestAttributes?.getResponse()
-        } catch (Exception e) {
-            log.warn("Unable to access current HttpServletResponse. Error Recieved [$e]", e)
-        }
-        return httpServletResponse
     }
 
     @Transactional(readOnly = true)

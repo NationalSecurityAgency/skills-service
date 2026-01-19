@@ -17,7 +17,7 @@ limitations under the License.
 import {computed, onMounted, ref} from 'vue'
 import {useField} from 'vee-validate'
 import ToastUiEditor from '@/common-components/utilities/markdown/ToastUiEditor.vue'
-
+import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import fontSize from 'tui-editor-plugin-font-size'
 import "tui-editor-plugin-font-size/dist/tui-editor-plugin-font-size.css";
 import {useCommonMarkdownOptions} from '@/common-components/utilities/markdown/UseCommonMarkdownOptions.js'
@@ -35,6 +35,11 @@ import {useProjConfig} from "@/stores/UseProjConfig.js";
 import {useQuizConfig} from "@/stores/UseQuizConfig.js";
 import {useSkillsDisplayInfo} from "@/skills-display/UseSkillsDisplayInfo.js";
 import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
+import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
+import PrefixControls from "@/common-components/utilities/markdown/PrefixControls.vue";
+import GenerateDescriptionDialog1
+  from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionDialog1.vue";
+import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
 
 const appConfig = useAppConfig()
 const quizConfig = useQuizConfig()
@@ -108,6 +113,21 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  requestCommunityElevation: {
+    type: Boolean,
+    default: false
+  },
+  disableAiPrompt: {
+    type: Boolean,
+    default: false
+  },
+  aiPromptType: {
+    type: String,
+    default: GenerateDescriptionType.Skill,
+    validator: (value) => {
+      return GenerateDescriptionType.AllTypes.includes(value)
+    }
+  }
 })
 const emit = defineEmits(['value-changed'])
 const themeHelper = useThemesHelper()
@@ -169,7 +189,7 @@ const focusOnMarkdownEditor = () => {
 const addFileLink = (linkUrl, linkText) => {
   toastuiEditor.value.invoke('exec', 'addLink', { linkUrl, linkText })
 }
-const setMarkdownText = (newText) => {
+const callSetMarkdownText = (newText) => {
   return toastuiEditor.value.invoke('setMarkdown', newText)
 }
 
@@ -179,17 +199,20 @@ onMounted(() => {
       fileInputRef.value.click();
     });
   }
+
 })
 function onLoad() {
   markdownAccessibilityFixes.fixAccessibilityIssues(idForToastUIEditor, props.allowInsertImages)
 }
 
 const updateValue = () => {
+  value.value = fetchValue()
+}
+const fetchValue = () => {
   if (props.useHtml) {
-    value.value = htmlText()
-  } else {
-    value.value = markdownText()
+    return htmlText()
   }
+  return markdownText()
 }
 const imgMatch = /^\!\[.*\]\(.*\)/
 
@@ -278,31 +301,38 @@ function handleFocus() {
 const descriptionWarningMsg = computed(() => {
   return substituteCommunityValue(appConfig?.descriptionWarningMessage, 'descriptionWarningMessage')
 })
-const allowedAttachmentFileTypes = appConfig.allowedAttachmentFileTypes
-const maxAttachmentSize = appConfig.maxAttachmentSize
-const substituteCommunityValue = (warningMsg, configName) => {
-  let communityValue = appConfig.defaultCommunityDescriptor
-  let errMsg = ''
-
+const communityValue = computed(() => {
+  let res = appConfig.defaultCommunityDescriptor
   if (props.allowCommunityElevation) {
     if (props.userCommunity) {
-      communityValue = props.userCommunity
+      res = props.userCommunity
     } else {
       if (route.params.projectId) {
         if (skillsDisplayInfo.isSkillsDisplayPath()) {
-          communityValue = skillDisplayAttributes.projectUserCommunityDescriptor
+          res = skillDisplayAttributes.projectUserCommunityDescriptor
         } else {
-          communityValue = projConfig.getProjectCommunityValue();
+          res = projConfig.getProjectCommunityValue();
         }
-        errMsg = `projId=[${route.params.projectId}] `
       } else if (route.params.quizId) {
-        communityValue = quizConfig.quizCommunityValue;
-        errMsg = `quizId=[${route.params.quizId}] `
+        res = quizConfig.quizCommunityValue;
       }
     }
   }
+  return res
+})
+const allowedAttachmentFileTypes = appConfig.allowedAttachmentFileTypes
+const maxAttachmentSize = appConfig.maxAttachmentSize
+const substituteCommunityValue = (warningMsg, configName) => {
+  let errMsg = ''
+  if (props.allowCommunityElevation && !props.userCommunity) {
+    if (route.params.projectId) {
+      errMsg = `projId=[${route.params.projectId}] `
+    } else if (route.params.quizId) {
+      errMsg = `quizId=[${route.params.quizId}] `
+    }
+  }
   try {
-    return projectCommunityReplacement.populateProjectCommunity(warningMsg, communityValue, `${errMsg} config.${configName}`);
+    return projectCommunityReplacement.populateProjectCommunity(warningMsg, communityValue.value, `${errMsg} config.${configName}`);
   } catch(err) {
     console.error(err)
     // eslint-disable-next-line vue/no-side-effects-in-computed-properties
@@ -363,15 +393,75 @@ const editorStyle = computed(() => {
     'min-height': '285px'
   }
 })
+const showGenerateDescriptionDialog = ref(false)
+const updateDescription = (newDesc) => {
+  callSetMarkdownText(newDesc)
+}
+
+const generateDescriptionDialogRef = ref(null)
+const onDialogShow = () => {
+  const newValue = fetchValue()
+  generateDescriptionDialogRef.value.updateDescription(newValue)
+}
+const validationService = useDescriptionValidatorService()
+const addPrefixToInvalidParagraphs = (prefixInfo) => {
+  const enabledIdParams = !props.requestCommunityElevation ? props.allowCommunityElevation : false
+  return validationService.addPrefixToInvalidParagraphs(markdownText(), prefixInfo.prefix, enabledIdParams, props.requestCommunityElevation, enabledIdParams).then((result) => {
+    updateDescription(result.newDescription)
+  })
+}
+
+const valueWithMissingPrefix = ref('')
+const previewingMissing = computed(() => valueWithMissingPrefix.value && valueWithMissingPrefix.value.length > 0)
+const showAiButton = computed(() => !props.disableAiPrompt && appConfig.enableOpenAIIntegration && !previewingMissing.value)
+const loadingMissingPreview = ref(false)
+const showWherePrefixWouldBeAdded = (prefixInfo) => {
+  loadingMissingPreview.value = true
+  const originalValue = markdownText()
+  const missingPrefix = 'mmmmmissinggggg'
+  const enabledIdParams = !props.requestCommunityElevation ? props.allowCommunityElevation : false
+  return validationService.addPrefixToInvalidParagraphs(originalValue, missingPrefix, enabledIdParams, props.requestCommunityElevation, enabledIdParams).then((result) => {
+    valueWithMissingPrefix.value = result.newDescription.replaceAll(missingPrefix, `<span class="p-1 border border-red-500 rounded">${prefixInfo.prefix}</span>`)
+  }).finally(() => {
+    loadingMissingPreview.value = false
+  })
+}
+const closeMissingPrefixView = () => {
+  valueWithMissingPrefix.value = ''
+}
+const setMarkdownText = (newText) => {
+  callSetMarkdownText(newText)
+  updateValue()
+}
+defineExpose({
+  setMarkdownText,
+})
 </script>
 
 <template>
   <div id="markdown-editor" @drop="attachFile" class="flex flex-col gap-2 text-left" :data-cy="`${name}MarkdownEditor`">
-    <label v-if="showLabel"
-           data-cy="markdownEditorLabel"
-           :class="`${labelClass}`"
-           :for="name" @click="focusOnMarkdownEditor">{{ label }}:</label>
-
+    <div class="flex">
+      <div class="flex-1">
+        <label v-if="showLabel"
+               data-cy="markdownEditorLabel"
+               :class="`${labelClass}`"
+               :for="name" @click="focusOnMarkdownEditor">{{ label }}:</label>
+      </div>
+      <SkillsButton v-if="showAiButton"
+                    icon="fa-solid fa-wand-magic-sparkles"
+                    label="AI"
+                    size="small"
+                    data-cy="aiButton"
+                    @click="showGenerateDescriptionDialog = true"/>
+    </div>
+    <generate-description-dialog1
+        v-if="showGenerateDescriptionDialog"
+        ref="generateDescriptionDialogRef"
+        v-model="showGenerateDescriptionDialog"
+        :type="aiPromptType"
+        :community-value="communityValue"
+        @generated-desc="updateDescription"
+        @show="onDialogShow" />
     <BlockUI :blocked="disabled">
 
 
@@ -381,7 +471,25 @@ const editorStyle = computed(() => {
       >
         <i class="fa-solid fa-circle-exclamation text-lg" aria-hidden="true"></i> {{ descriptionWarningMsg }}
       </div>
-      <toast-ui-editor :id="idForToastUIEditor"
+
+      <Card v-if="previewingMissing">
+        <template #content>
+          <div class="w-full flex justify-end sticky top-2 right-2 !z-10">
+            <SkillsButton  icon="fa-solid fa-x"
+                          label="Close Missing Preview"
+                          size="small"
+                          severity="warn"
+                          :outlined="false"
+                          data-cy="closeMissingPreviewBtn"
+                          @click="closeMissingPrefixView"/>
+          </div>
+          <MarkdownText :text="valueWithMissingPrefix"
+                        data-cy="missingPreviewText"
+                        :instance-id="`${idForToastUIEditor}-missing`"/>
+        </template>
+      </Card>
+      <toast-ui-editor v-show="!previewingMissing"
+                       :id="idForToastUIEditor"
                        :style="editorStyle"
                        class="no-bottom-border"
                        :class="{'editor-theme-dark' : themeHelper.isDarkTheme, 'is-resizable': resizable, 'no-top-border' : descriptionWarningMsg }"
@@ -397,7 +505,8 @@ const editorStyle = computed(() => {
                        @keydown="onKeydown"
                        @focus="handleFocus"
                        @load="onLoad" />
-      <div class="border border-surface bg-surface-100 dark:bg-surface-700 rounded-b px-2 py-2 sd-theme-tile-background">
+
+      <div v-if="!previewingMissing" class="border border-surface bg-surface-100 dark:bg-surface-700 rounded-b px-2 py-2 sd-theme-tile-background">
       <div  class="flex text-xs">
         <div v-if="allowInsertImages" class="">
           Insert images and attach files by pasting, dragging & dropping, or selecting from toolbar.
@@ -411,21 +520,30 @@ const editorStyle = computed(() => {
           </a>
         </div>
       </div>
-      <Message
-        v-if="attachmentWarningMessage && hasNewAttachment"
-        severity="error"
-        data-cy="attachmentWarningMessage"
-        class="m-0 mt-2">
-        {{ attachmentWarningMessage }}
-      </Message>
+        <Message
+          v-if="attachmentWarningMessage && hasNewAttachment"
+          severity="error"
+          data-cy="attachmentWarningMessage"
+          class="m-0 mt-2">
+          {{ attachmentWarningMessage }}
+        </Message>
     </div>
     </BlockUI>
-    <Message severity="error"
+    <div v-show="!previewingMissing" class="flex gap-2">
+      <Message severity="error"
              variant="simple"
              size="small"
              :closable="false"
              data-cy="descriptionError"
              :id="`${name}Error`">{{ errorMessage || '' }}</Message>
+      <prefix-controls v-if="errorMessage"
+                       :id="`${id}PrefixControls`"
+                       :is-loading="loadingMissingPreview"
+                       :show-preview-control="true"
+                       :community-value="communityValue"
+                       @preview-prefix="showWherePrefixWouldBeAdded"
+                       @add-prefix="addPrefixToInvalidParagraphs" />
+    </div>
 
     <input @change="attachFile"
            type="file"

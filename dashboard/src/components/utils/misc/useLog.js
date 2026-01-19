@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 import log from 'loglevel';
+import dayjs from '@/common-components/DayJsCustomizer'
 
 export const useLog = () => {
   const trace = (message) => {
     log.trace(message)
   }
   const debug = (message) => {
-    log.debug(message)
+    if (isDebugEnabled()) {
+      const timestamp = dayjs().format('HH:mm:ss')
+      log.debug(`[${timestamp}] ${message}`);
+    }
   }
   const info = (message) => {
     log.info(message)

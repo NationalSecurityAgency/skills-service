@@ -18,6 +18,7 @@ package skills.controller
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import skills.controller.result.model.ModifiedDescription
 import skills.controller.result.model.ValidationResult
 import skills.dbupgrade.DBUpgradeSafe
 import skills.profile.EnableCallStackProf
@@ -39,10 +40,25 @@ class CustomValidationController {
     @RequestMapping(value = "/description", method = RequestMethod.POST, produces = "application/json")
     @ResponseBody
     ValidationResult validateDescription(@RequestBody Map<String,String> body){
-        Boolean useProtectedCommunityValidator = body.useProtectedCommunityValidator ? Boolean.valueOf(body.useProtectedCommunityValidator) : false
-        CustomValidationResult vr = customValidator.validateDescription(body.value, body.projectId, useProtectedCommunityValidator, body.quizId)
-        ValidationResult validationResult = new ValidationResult(vr.valid, vr.msg)
+        String dMsg = "validateDescription: projId=[{}], quizId=[{}], Description:\n-----------------\n{}\n-----------------"
+        log.debug(dMsg, body.projectId, body.quizId, body.value)
+        CustomValidationResult vr = customValidator.validateDescription(body.value, body.projectId, shouldUseProtectedCommunityValidator(body), body.quizId)
+        ValidationResult validationResult = new ValidationResult(vr.valid, vr.msg, vr.validationFailedDetails)
         return validationResult
+    }
+
+
+    @DBUpgradeSafe
+    @RequestMapping(value = "/addPrefixToInvalidParagraphs", method = RequestMethod.POST, produces = "application/json")
+    @ResponseBody
+    ModifiedDescription addPrefixToInvalidParagraphs(@RequestBody Map<String,String> body){
+        ModifiedDescription result = customValidator.addPrefixToInvalidParagraphs(body.value, body.prefix, body.projectId, shouldUseProtectedCommunityValidator(body), body.quizId)
+        return result
+    }
+
+    private static Boolean shouldUseProtectedCommunityValidator(Map<String,String> body) {
+        Boolean useProtectedCommunityValidator = body.useProtectedCommunityValidator ? Boolean.valueOf(body.useProtectedCommunityValidator) : false
+        return useProtectedCommunityValidator
     }
 
     @DBUpgradeSafe

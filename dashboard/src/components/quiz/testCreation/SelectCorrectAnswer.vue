@@ -49,8 +49,10 @@ const model = defineModel()
 const flipSelected = () =>{
   if (!props.readOnly && !props.isRadioIcon){
     value.value = !value.value
+    model.value = !model.value
   } else if (!props.readOnly && props.isRadioIcon) {
     value.value = true;
+    model.value = true
   }
   emit('answer-selected', parseInt(props.answerNumber))
 }
@@ -74,11 +76,11 @@ defineExpose({
          :tabindex="readOnly ? -1 : 0"
          role="checkbox"
          :aria-label="`Select answer number ${answerNumber} as the correct answer`"
-         :aria-checked="`${value}`"
+         :aria-checked="`${model}`"
          :class="{ 'cursorPointer': !readOnly}"
          data-cy="selectCorrectAnswer">
-      <i v-if="!value" data-cy="notSelected" class="far" :class="{ 'fa-square' : !isRadioIcon, 'fa-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
-      <i v-if="value" data-cy="selected" class="far text-primary" :class="{ 'fa-check-square' : !isRadioIcon, 'fa-check-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
+      <i v-if="!model" data-cy="notSelected" class="far" :class="{ 'fa-square' : !isRadioIcon, 'fa-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
+      <i v-if="model" data-cy="selected" class="far text-primary" :class="{ 'fa-check-square' : !isRadioIcon, 'fa-check-circle': isRadioIcon }" :style="{ 'font-size': fontSize }"></i>
     </div>
   </SkillsOverlay>
 

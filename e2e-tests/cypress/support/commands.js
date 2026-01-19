@@ -349,7 +349,7 @@ Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = nu
     cy.log(`Completed user registration for [${user}]`);
 });
 
-Cypress.Commands.add("login", (user, pass) => {
+Cypress.Commands.add("login", (user, pass = 'password') => {
     cy.log(`Logging in as [${user}] with [${pass}]`);
 
     let requestStatus = 0;
@@ -1754,9 +1754,53 @@ Cypress.Commands.add('assignUserAsAdmin', (projId, userId) => {
 
 Cypress.Commands.add('typeInMarkdownEditor', (selector, text) => {
     const fullSelector = `${selector} .toastui-editor-ww-container .toastui-editor-contents`
-    cy.get(fullSelector).should('be.visible')
+    cy.wait(100)
+    cy.get(fullSelector).scrollIntoView().should('be.visible')
     cy.wait(100)
     cy.get(fullSelector).type(text, { force: true })
+})
+
+Cypress.Commands.add('validateMarkdownViewerText', (selector, expectedLinesArr) => {
+    cy.get(`${selector} [data-cy="markdownViewer"] .toastui-editor-contents`)
+        .then($el => {
+            const text = $el.text();
+            const actualLines = text.split(/\n+/).filter(Boolean)
+
+            expectedLinesArr.forEach((expectedLine, index) => {
+                const actual = actualLines[index];
+                const debugInfo = `Line ${index + 1} mismatch:
+  Expected: ${JSON.stringify(expectedLine)}
+  Actual  : ${JSON.stringify(actual)}
+  Expected codes: ${JSON.stringify([...expectedLine].map(c => c.charCodeAt(0)))}
+  Actual codes  : ${JSON.stringify([...actual].map(c => c.charCodeAt(0)))}`;
+
+                expect(actual, debugInfo).to.equal(expectedLine);
+            });
+
+            expect(actualLines.length, 'Actual lines count').to.equal(expectedLinesArr.length);
+        });
+})
+
+Cypress.Commands.add('validateMarkdownEditorText', (selector, expectedLinesArr) => {
+    cy.get(`${selector} .toastui-editor-ww-container .toastui-editor-contents`)
+        .then($el => {
+            const html = $el.html();
+            const text = html.replace(/<\/p>/g, '\n').replace(/<[^>]*>/g, '').trim();
+            const actualLines = text.split(/\n+/).filter(Boolean)
+
+            expectedLinesArr.forEach((expectedLine, index) => {
+                const actual = actualLines[index] || '';
+                const debugInfo = `Line ${index + 1} mismatch:
+  Expected: ${JSON.stringify(expectedLine)}
+  Actual  : ${JSON.stringify(actual)}
+  Expected codes: ${JSON.stringify([...expectedLine].map(c => c.charCodeAt(0)))}
+  Actual codes  : ${JSON.stringify([...actual].map(c => c.charCodeAt(0)))}`;
+
+                expect(actual, debugInfo).to.equal(expectedLine);
+            });
+
+            expect(actualLines.length, 'Actual lines count').to.equal(expectedLinesArr.length);
+        });
 })
 
 Cypress.Commands.add('typeQuestion', (text) => {

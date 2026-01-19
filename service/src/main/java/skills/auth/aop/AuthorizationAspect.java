@@ -30,7 +30,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.stereotype.Component;
-import skills.auth.AuthUtils;
 import skills.auth.UserInfo;
 import skills.auth.UserInfoService;
 import skills.auth.UserSkillsGrantedAuthority;
@@ -38,6 +37,9 @@ import skills.controller.request.model.SkillEventRequest;
 import skills.storage.model.auth.RoleName;
 
 import java.util.Collection;
+
+import static skills.auth.AuthUtils.RequestAttributes;
+import static skills.auth.AuthUtils.getRequestAttributes;
 
 @Aspect
 @Component
@@ -71,17 +73,18 @@ class AuthorizationAspect {
         boolean foundRole = false;
 
         if (authorities != null) {
+            RequestAttributes requestAttributes = getRequestAttributes();
             for (GrantedAuthority grantedAuthority : authorities) {
                 UserSkillsGrantedAuthority userSkillsGrantedAuthority = (UserSkillsGrantedAuthority) grantedAuthority;
                 RoleName roleName = userSkillsGrantedAuthority.getRole().getRoleName();
-                String projectId = AuthUtils.getProjectIdFromRequest(userAuthService.getServletRequest());
+                String projectId = requestAttributes.getProjectId();
                 boolean projectBasedRole = roleName.equals(RoleName.ROLE_PROJECT_ADMIN) || roleName.equals(RoleName.ROLE_PROJECT_APPROVER) || roleName.equals(RoleName.ROLE_SUPER_DUPER_USER);
                 if (StringUtils.isNotBlank(projectId) && projectBasedRole) {
                     foundRole = true;
                     break;
                 }
 
-                String quizId = AuthUtils.getQuizIdFromRequest(userAuthService.getServletRequest());
+                String quizId = requestAttributes.getQuizId();
                 boolean quizBasedRole = roleName.equals(RoleName.ROLE_QUIZ_ADMIN) || roleName.equals(RoleName.ROLE_QUIZ_READ_ONLY) || roleName.equals(RoleName.ROLE_SUPER_DUPER_USER);
                 if (StringUtils.isNotBlank(quizId) && quizBasedRole) {
                     foundRole = true;

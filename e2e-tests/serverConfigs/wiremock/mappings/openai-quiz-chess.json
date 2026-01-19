@@ -1,0 +1,24 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      { "contains": "Quiz chess" },
+      { "contains": "Quiz Generation Task" },
+      { "doesNotContain": "invalidquiz" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "text/event-stream"
+    },
+    "bodyFileName": "response-body-quiz-chess.txt",
+    "transformers": ["response-template"],
+    "chunkedDribbleDelay": {
+      "numberOfChunks": 20,
+      "totalDuration": 1500
+    }
+  }
+}

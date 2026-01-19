@@ -189,7 +189,7 @@ class WSHelper {
         return get(endpoint, 'root', null)
     }
 
-    def rootPost(String endpoint, Map params = null) {
+    def rootPost(String endpoint, def params = null) {
         return post(endpoint, 'root', params)
     }
 
@@ -251,6 +251,10 @@ class WSHelper {
 
     def apiGet(String endpoint, Map params = null) {
         return get(endpoint, "api", params)
+    }
+
+    def openaiGet(String endpoint, Map params = null) {
+        return get(endpoint, "openai", params)
     }
 
     String getTokenForUser(String userId, boolean includeGrantType=true, boolean includeProxyUser=true) {

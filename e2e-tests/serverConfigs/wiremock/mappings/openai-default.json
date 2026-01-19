@@ -1,0 +1,19 @@
+{
+  "priority": 10,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "text/event-stream"
+    },
+    "bodyFileName": "response-body-default.txt",
+    "transformers": ["response-template"],
+    "chunkedDribbleDelay": {
+      "numberOfChunks": 15,
+      "totalDuration": 2000
+    }
+  }
+}

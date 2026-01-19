@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, nextTick, onMounted, ref } from 'vue'
-import { array, boolean, object, string } from 'yup'
-import { useRoute } from 'vue-router';
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import {computed, nextTick, onMounted, ref} from 'vue'
+import {array, boolean, object, string} from 'yup'
+import {useRoute} from 'vue-router';
+import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
 import QuizService from '@/components/quiz/QuizService.js';
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
@@ -25,8 +25,10 @@ import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormD
 import SkillsDropDown from '@/components/utils/inputForm/SkillsDropDown.vue';
 import ConfigureAnswers from '@/components/quiz/testCreation/ConfigureAnswers.vue';
 import QuizType from "@/skills-display/components/quiz/QuizType.js";
-import InputText from "primevue/inputtext";
 import MatchingQuestion from "@/components/quiz/testCreation/MatchingQuestion.vue";
+import GenerateSingleQuestionDialog
+  from "@/common-components/utilities/learning-conent-gen/GenerateSingleQuestionDialog.vue";
+import QuestionTypeDropDown from "@/components/quiz/testCreation/QuestionTypeDropDown.vue";
 
 const model = defineModel()
 const props = defineProps({
@@ -72,7 +74,7 @@ onMounted(() => {
 
 function questionTypeChanged(inputItem) {
   questionType.value.selectedType = inputItem;
-  if (!inputItem.isInitialLoad) {
+  if (!inputItem.isInitialLoad && !inputItem.doNotResetOrReplaceAnswers) {
     if (isSurveyType.value
         && inputItem.id !== QuestionType.TextInput && inputItem.id !== QuestionType.Rating && inputItem.id !== QuestionType.Matching
         && (!initialQuestionData.answers || initialQuestionData.answers.length < 2)) {
@@ -186,10 +188,16 @@ const atLeastOneCorrectAnswer = (value) => {
   if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
     return true;
   }
+  if (value === undefined) {
+    return false
+  }
   const numCorrect = value.filter((a) => a.isCorrect).length;
   return numCorrect >= 1;
 }
 const atLeastTwoAnswersFilledIn = (value) => {
+  if (value === undefined) {
+    return false
+  }
   if (!isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
     return true;
   }
@@ -197,6 +205,9 @@ const atLeastTwoAnswersFilledIn = (value) => {
   return numWithContent >= 2;
 }
 const correctAnswersMustHaveText = (value) => {
+  if (value === undefined) {
+    return false
+  }
   if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
     return true;
   }
@@ -210,6 +221,9 @@ const maxNumAnswers = (value) => {
   return value && value.length <= appConfig.maxAnswersPerQuizQuestion;
 }
 const singleChoiceQuestionsMustHave1Answer = (value) => {
+  if (value === undefined) {
+    return false
+  }
   if (isSurveyType.value || !isDirty.value || !QuestionType.isSingleChoice(questionType.value.selectedType.id)) {
     return true;
   }
@@ -217,6 +231,9 @@ const singleChoiceQuestionsMustHave1Answer = (value) => {
   return numCorrect === 1;
 }
 const multipleChoiceQuestionsMustHaveAtLeast2Answer = (value) => {
+  if (value === undefined) {
+    return false
+  }
   if (isSurveyType.value || !isDirty.value || !QuestionType.isMultipleChoice(questionType.value.selectedType.id)) {
     return true;
   }
@@ -344,10 +361,54 @@ const onSavedQuestion = (savedQuestion) => {
   close()
 }
 
+const showAiButton = computed(() => !props.disableAiPrompt && appConfig.enableOpenAIIntegration)
+const showGenQDialog = ref(false)
+
+const skillsInputFormDialogRef = ref(null)
+const markdownEditorRef = ref(null)
+const onQuestionGenerated = (questionInfo) => {
+  markdownEditorRef.value.setMarkdownText(questionInfo.question)
+  const newQType = questionType.value.options.find((o) => o.id === questionInfo.questionTypeId)
+  skillsInputFormDialogRef.value.setFieldValue('questionType', {...newQType, doNotResetOrReplaceAnswers: true})
+
+  if (QuestionType.isMultipleChoice(questionInfo.questionTypeId) || QuestionType.isSingleChoice(questionInfo.questionTypeId) || QuestionType.isMatching(questionInfo.questionTypeId)) {
+    const existingValues = skillsInputFormDialogRef.value.getFieldValues()
+    const existingAnswers = existingValues.answers
+    const answersToSet = questionInfo.answers.map((a, index) => {
+      const id = existingAnswers.length > index ? existingAnswers[index].id : null
+      const answer = { ...a, id, displayOrder: (index + 1) }
+      if (a.multiPartAnswer) {
+        answer.multiPartAnswer = { ...a.multiPartAnswer }
+      }
+      return answer
+    })
+    skillsInputFormDialogRef.value.setFieldValue('answers', answersToSet)
+    answersRef.value.replaceAnswers(answersToSet)
+  }
+
+  setTimeout(() => {
+    skillsInputFormDialogRef.value?.validate()
+  }, 500)
+}
+
+const existingQuestionInfo = ref(null)
+const startAiAssistant = () => {
+  const fieldValues = skillsInputFormDialogRef.value.getFieldValues()
+  if (fieldValues.question?.trim()?.length > 0) {
+    existingQuestionInfo.value = {
+      question: fieldValues.question,
+      answers: fieldValues.answers?.filter((a) => a.answer?.trim()?.length > 0).map((a) => ({...a}))
+    }
+  } else {
+    existingQuestionInfo.value = null
+  }
+  showGenQDialog.value = true
+}
 </script>
 
 <template>
   <SkillsInputFormDialog
+      ref="skillsInputFormDialogRef"
       :id="modalId"
       v-model="model"
       :is-edit="isEdit"
@@ -363,11 +424,30 @@ const onSavedQuestion = (savedQuestion) => {
       @errors="answersErrorMessage = $event['answers']"
   >
     <template #default>
+      <div class="flex justify-end">
+        <SkillsButton v-if="showAiButton"
+                      icon="fa-solid fa-wand-magic-sparkles"
+                      label="AI"
+                      size="small"
+                      data-cy="aiButton"
+                      @click="startAiAssistant"/>
+      </div>
+      <generate-single-question-dialog
+          v-if="showGenQDialog"
+          ref="generateDescriptionDialogRef"
+          v-model="showGenQDialog"
+          :question-type="questionType"
+          :existing-question="existingQuestionInfo"
+          @question-generated="onQuestionGenerated"
+      />
+
       <markdown-editor
+          ref="markdownEditorRef"
           id="quizDescription"
           :quiz-id="quizId"
           :upload-url="`/admin/quiz-definitions/${route.params.quizId}/upload`"
           :allow-community-elevation="true"
+          :disable-ai-prompt="true"
           data-cy="questionText"
           label="Question"
           label-class="text-primary font-bold"
@@ -403,28 +483,13 @@ const onSavedQuestion = (savedQuestion) => {
         <span class="font-bold text-primary">Answers</span>
       </div>
       <div class="mb-2">
-        <SkillsDropDown
+        <question-type-drop-down
             name="questionType"
             data-cy="answerTypeSelector"
             v-model="questionType.selectedType"
-            aria-label="Selection Question Type"
-            @update:modelValue="questionTypeChanged"
-            :isRequired="true"
-            :options="questionType.options">
-          <template #value="slotProps">
-            <div v-if="slotProps.value" class="p-1" :data-cy="`selectionItem_${slotProps.value.id}`" :aria-label="`Select ${slotProps.value.label}`">
-              <i :class="slotProps.value.icon" style="min-width: 1.2rem" class="border rounded-sm p-1 mr-2" aria-hidden="true"></i>
-              <span class="">{{ slotProps.value.label }}</span>
-            </div>
-          </template>
-
-          <template #option="slotProps">
-            <div class="p-1" :data-cy="`selectionItem_${slotProps.option.id}`">
-              <i :class="slotProps.option.icon" style="min-width: 1.2rem" class="border rounded-sm p-1 mr-2" aria-hidden="true"></i>
-              <span class="">{{ slotProps.option.label }}</span><span class="hidden sm:inline">: {{ slotProps.option.description }}</span>
-            </div>
-          </template>
-        </SkillsDropDown>
+            :options="questionType.options"
+            @selection-changed="questionTypeChanged"
+        />
       </div>
 
       <div v-if="isQuestionTypeTextInput" class="flex pl-4">
@@ -461,7 +526,7 @@ const onSavedQuestion = (savedQuestion) => {
             v-if="isQuestionTypeMatching" class="text-secondary">Add pairs of terms and their matching values:</span>
         </div>
         <ConfigureAnswers
-            v-if="!isQuestionTypeMatching"
+            v-if="!isQuestionTypeMatching && props.questionDef.quizType"
             ref="answersRef"
             v-model="props.questionDef.answers"
             :quiz-type="props.questionDef.quizType"

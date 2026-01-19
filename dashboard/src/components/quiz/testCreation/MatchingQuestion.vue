@@ -69,8 +69,12 @@ const resetAnswers = () => {
   ])
 }
 
-const replaceAnswers = () => {
-  resetAnswers()
+const replaceAnswers = (answers) => {
+  const fieldSize = fields.value.length
+  for(let x = 0; x < fieldSize; x++) {
+    remove(0)
+  }
+  replace(answers)
 }
 
 defineExpose( {

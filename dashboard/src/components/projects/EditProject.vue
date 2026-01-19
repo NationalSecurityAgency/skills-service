@@ -27,6 +27,7 @@ import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormD
 import { useAccessState } from '@/stores/UseAccessState.js'
 import CommunityProtectionControls from '@/components/projects/CommunityProtectionControls.vue'
 import { useDescriptionValidatorService } from '@/common-components/validators/UseDescriptionValidatorService.js'
+import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
 
 const model = defineModel()
 const props = defineProps(['project', 'isEdit', 'isCopy'])
@@ -226,6 +227,8 @@ const onSavedProject = () => {
         :allow-attachments="isEdit"
         :user-community="userCommunityVal"
         :allow-community-elevation="true"
+        :request-community-elevation="enableProtectedUserCommunity"
+        :ai-prompt-type="GenerateDescriptionType.Project"
         name="description" />
 
     </template>

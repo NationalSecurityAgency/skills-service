@@ -27,6 +27,7 @@ import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEdito
 import InputGroup from 'primevue/inputgroup'
 import SkillsInputSwitch from '@/components/utils/inputForm/SkillsInputSwitch.vue'
 import InputGroupAddon from 'primevue/inputgroupaddon'
+import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
 
 const show = defineModel()
 const route = useRoute()
@@ -172,6 +173,7 @@ const onSkillSaved = (skill) => {
       class="mt-8"
       :upload-url="`/admin/projects/${route.params.projectId}/upload`"
       :allow-community-elevation="true"
+      :ai-prompt-type="GenerateDescriptionType.SkillGroup"
       name="description" />
 
   </SkillsInputFormDialog>

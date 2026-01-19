@@ -15,12 +15,19 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
+import skills.storage.model.ProjDefWithDescription
 import skills.storage.model.QuizDefWithDescription
+
+import java.util.stream.Stream
 
 interface QuizDefWithDescRepo extends CrudRepository<QuizDefWithDescription, Long> {
 
     @Nullable
     QuizDefWithDescription findByQuizIdIgnoreCase(String quizId)
+
+    @Query('''SELECT s FROM QuizDefWithDescription s''')
+    Stream<QuizDefWithDescription> streamAll()
 }

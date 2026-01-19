@@ -1,0 +1,31 @@
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"role":"assistant","content":"In or"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"der to"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" lear"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"n chess"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" you"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" will"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" need"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" to get"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" a"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" chess"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":" board!\n\n"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"### Here is What Was Changed\n\n"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"* Modified chess board!\n"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{"content":"* Changed all the pieces!"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1677652288,"model":"model-1","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]

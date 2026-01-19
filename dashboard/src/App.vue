@@ -44,6 +44,7 @@ import IconManagerService from '@/components/utils/iconPicker/IconManagerService
 import log from 'loglevel';
 import {useUserPreferences} from "@/stores/UseUserPreferences.js";
 import {useMatomoSupport} from "@/stores/UseMatomoSupport.js";
+import { useAiPromptState } from '@/common-components/utilities/learning-conent-gen/UseAiPromptState.js'
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -54,6 +55,7 @@ const errorHandling = useErrorHandling()
 const userAgreementInterceptor = useUserAgreementInterceptor()
 const route = useRoute()
 const matomo = useMatomoSupport()
+const aiPrompts = useAiPromptState()
 
 const customGlobalValidators = useCustomGlobalValidators()
 const globalNavGuards = useGlobalNavGuards()
@@ -81,7 +83,8 @@ const loadUserAndDisplayInfo = () => {
   const loadRoot = accessState.loadIsRoot()
   const loadEmailEnabled = appInfoState.loadEmailEnabled()
   const loadCustomIconCSS = addCustomIconCSSForClientDisplay()
-  const promises = [loadRoot, loadEmailEnabled, loadCustomIconCSS]
+  const loadAiPromptSettings = aiPrompts.loadAiPromptSettings()
+  const promises = [loadRoot, loadEmailEnabled, loadCustomIconCSS, loadAiPromptSettings]
   if (!skillsDisplayInfo.isSkillsClientPath()) {
     const loadUserPreferences =
         userPreferences.loadUserPreferences().then(() => {

@@ -37,6 +37,7 @@
         <springboot.version>3.5.9</springboot.version>
 
         <springcloud.version>3.4.0</springcloud.version>
+        <spring-ai.version>1.1.0</spring-ai.version>
 
         <logback-access.version>2.0.6</logback-access.version>
 
@@ -55,6 +56,8 @@
 
         <bouncycastle.version>1.80</bouncycastle.version>
         <velocity.version>2.4.1</velocity.version>
+
+        <commonmark.version>0.26.0</commonmark.version>
     </properties>
 
     <parent>

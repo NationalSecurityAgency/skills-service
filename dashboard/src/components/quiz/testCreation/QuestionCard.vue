@@ -22,18 +22,34 @@ import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
 import {useRoute} from "vue-router";
+import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
+import { useDebounceFn } from '@vueuse/core'
+import { useAppConfig } from "@/common-components/stores/UseAppConfig.js";
 
 const route = useRoute()
 const quizConfig = useQuizConfig()
+const appConfig = useAppConfig()
 
 const props = defineProps({
   quizType: String,
   question: Object,
   questionNum: Number,
-  showDragAndDropControls: Boolean
+  showDragAndDropControls: Boolean,
+  showEditControls: {
+    type: Boolean,
+    default: true
+  },
+  supportsEditQuestionInline: {
+    type: Boolean,
+    default: false
+  },
+  showEditQuestionInline: {
+    type: Boolean,
+    default: false
+  }
 })
 
-const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested', 'copyQuestion'])
+const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested', 'copyQuestion', 'questionUpdated'])
 
 const showDeleteDialog = ref(false)
 
@@ -75,6 +91,11 @@ const moveQuestion = (changeIndexBy) => {
   emit('sortChangeRequested', { question: props.question, newIndex: props.questionNum + changeIndexBy - 1 })
 }
 
+const questionUpdatedDebounced = useDebounceFn((updatedQuestionText) => questionUpdated(updatedQuestionText), appConfig.formFieldDebounceInMs)
+const questionUpdated = (updatedQuestionText) => {
+  emit('questionUpdated', { question: props.question, updatedQuestionText })
+}
+
 </script>
 
 <template>
@@ -96,10 +117,25 @@ const moveQuestion = (changeIndexBy) => {
       </div>
       <div :class="{ 'ml-3' : !isDragAndDropControlsVisible }" class="flex-col flex-1 items-start px-2 py-1">
         <div class="flex flex-1">
-          <markdown-text
-              :text="question.question"
-              :instance-id="`${question.id}`"
-              data-cy="questionDisplayText"/>
+          <div v-if="supportsEditQuestionInline">
+            <markdown-editor v-show="showEditQuestionInline"
+                             class="w-full"
+                             :value="question.question"
+                             :id="`${question.id}`"
+                             :data-cy="`questionDisplayTextEditor-${question.id}`"
+                             :name="question.name"
+                             :disable-ai-prompt="true"
+                             :allow-attachments="false"
+                             :allow-insert-images="false"
+                             @value-changed="questionUpdatedDebounced"
+                             label="Question"
+                             markdownHeight="150px"/>
+          </div>
+
+          <markdown-text v-if="!showEditQuestionInline"
+                         :text="question.question"
+                         :instance-id="`${question.id}`"
+                         data-cy="questionDisplayText"/>
         </div>
         <div v-if="mediaAttributes" class="mb-3">
           <i :class="`far ${mediaAttributes.isAudio ? 'fa-file-audio' : 'fa-file-video'} fa-lg text-primary`"></i> <span class="font-bold">{{ mediaAttributes.internallyHostedFileName }}</span> is configured
@@ -137,13 +173,13 @@ const moveQuestion = (changeIndexBy) => {
         <div v-if="isMatchingType" class="flex flex-col gap-3 mt-2">
           <div v-for="(answer, index) in question.answers">
             <div v-if="answer.multiPartAnswer" class="flex flex-row gap-3" :data-cy="`question-${questionNum}-answer-${index}`">
-              <div>
+              <div :data-cy="`question-${questionNum}-answer-${index}-term`">
                 {{ answer.multiPartAnswer.term }}
               </div>
               <div>
                 <i class="fas fa-arrow-right text-gray-500 dark:text-gray-400" aria-hidden="true"></i>
               </div>
-              <div>
+              <div :data-cy="`question-${questionNum}-answer-${index}-value`">
                 {{ answer.multiPartAnswer.value }}
               </div>
             </div>
@@ -157,7 +193,7 @@ const moveQuestion = (changeIndexBy) => {
           </Message>
         </div>
       </div>
-      <div v-if="!quizConfig.isReadOnlyQuiz" class="flex flex-col gap-4">
+      <div v-if="!quizConfig.isReadOnlyQuiz && showEditControls" class="flex flex-col gap-4">
         <div>
           <ButtonGroup class="ml-1 mt-2 mr-4">
             <SkillsButton @click="editQuestion"

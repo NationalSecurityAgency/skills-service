@@ -48,6 +48,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  ignoreVeeValidate: {
+    type: Boolean,
+    default: false
+  },
 })
 const model = defineModel()
 
@@ -55,9 +59,13 @@ const { value, errorMessage } = useField(() => props.name);
 const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 
 onMounted(() => {
-  const rawValue = toRaw(value.value)
-  if (rawValue && model.value !== rawValue) {
-    model.value = {...rawValue, isInitialLoad: true}
+  if (!props.ignoreVeeValidate) {
+    const rawValue = toRaw(value.value)
+    if (rawValue && model.value !== rawValue) {
+      model.value = {...rawValue, isInitialLoad: true}
+    }
+  } else {
+    value.value = model.value
   }
 })
 watch(value, (newValue) => {

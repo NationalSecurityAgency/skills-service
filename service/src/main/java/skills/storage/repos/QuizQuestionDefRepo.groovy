@@ -20,8 +20,11 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.lang.Nullable
 import skills.services.attributes.SkillVideoAttrs
+import skills.storage.model.QuizDefWithDescription
 import skills.storage.model.QuizQuestionDef
 import org.springframework.data.repository.query.Param
+
+import java.util.stream.Stream
 
 interface QuizQuestionDefRepo extends JpaRepository<QuizQuestionDef, Long> {
 
@@ -84,4 +87,7 @@ interface QuizQuestionDefRepo extends JpaRepository<QuizQuestionDef, Long> {
     ''', nativeQuery = true)
     String getVideoTranscripts(String quizId, Integer questionId)
 
+
+    @Query('''SELECT s FROM QuizQuestionDef s''')
+    Stream<QuizQuestionDef> streamAll()
 }

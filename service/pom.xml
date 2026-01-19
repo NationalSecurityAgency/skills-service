@@ -30,6 +30,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -86,6 +93,10 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-openai</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
@@ -100,6 +111,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
         <dependency>
@@ -319,7 +334,12 @@
         <dependency>
             <groupId>org.commonmark</groupId>
             <artifactId>commonmark</artifactId>
-            <version>0.18.0</version>
+            <version>${commonmark.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.commonmark</groupId>
+            <artifactId>commonmark-ext-gfm-tables</artifactId>
+            <version>${commonmark.version}</version>
         </dependency>
 
         <dependency>
@@ -695,6 +715,7 @@
                                 <licenseMerge>Eclipse Public License - Version 2.0|Eclipse Public License - v 2.0</licenseMerge>
                                 <licenseMerge>The BSD License|BSD</licenseMerge>
                                 <licenseMerge>The BSD License|BSD License</licenseMerge>
+                                <licenseMerge>The BSD License|BSD licence</licenseMerge>
                                 <licenseMerge>MPL 2.0|Mozilla Public License, version 2.0</licenseMerge>
                                 <licenseMerge>Common Development and Distribution License / The GNU General Public License (GPL) Version 2 with the Classpath Exception|CDDL/GPLv2+CE</licenseMerge>
                                 <licenseMerge>Dual license: Common Development and Distribution License 1.1 (CDDL-1.1) and The GNU General Public License (GPL) Version 2|Dual license consisting of the CDDL v1.1 and GPL v2</licenseMerge>

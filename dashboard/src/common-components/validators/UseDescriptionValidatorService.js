@@ -20,17 +20,28 @@ export const useDescriptionValidatorService = () => {
 
   const route = useRoute()
 
+    const getBody = (description, enableProjectIdParam = true, useProtectedCommunityValidator = null, enableQuizIdParam = true) => {
+        return {
+            value: description,
+            projectId: enableProjectIdParam ? route.params.projectId : null,
+            useProtectedCommunityValidator,
+            quizId: enableQuizIdParam ? route.params.quizId : null
+        };
+    }
+
   const validateDescription = (description, enableProjectIdParam = true, useProtectedCommunityValidator = null, enableQuizIdParam = true) => {
-    const body = {
-      value: description,
-      projectId: enableProjectIdParam ? route.params.projectId : null,
-      useProtectedCommunityValidator,
-      quizId: enableQuizIdParam ? route.params.quizId : null
-    };
+    const body = getBody(description, enableProjectIdParam, useProtectedCommunityValidator, enableQuizIdParam)
     return axios.post('/api/validation/description', body).then((result) => result.data);
   }
 
+    const addPrefixToInvalidParagraphs = (description, prefix, enableProjectIdParam = true, useProtectedCommunityValidator = null, enableQuizIdParam = true) => {
+        const body = getBody(description, enableProjectIdParam, useProtectedCommunityValidator, enableQuizIdParam)
+        body.prefix = prefix
+        return axios.post('/api/validation/addPrefixToInvalidParagraphs', body).then((result) => result.data);
+    }
+
   return {
-    validateDescription
+    validateDescription,
+    addPrefixToInvalidParagraphs
   }
 };

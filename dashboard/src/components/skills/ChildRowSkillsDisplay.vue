@@ -14,23 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import Badge from 'primevue/badge'
 import Card from 'primevue/card'
 import InputGroup from 'primevue/inputgroup'
 import InputGroupAddon from 'primevue/inputgroupaddon'
 import LoadingContainer from '@/components/utils/LoadingContainer.vue'
 import SkillsService from '@/components/skills/SkillsService'
-import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import {useNumberFormat} from '@/common-components/filter/UseNumberFormat.js'
 import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil'
 import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
-import { useTimeWindowFormatter } from '@/components/skills/UseTimeWindowFormatter.js'
-import { useProjConfig } from '@/stores/UseProjConfig.js'
+import {useTimeWindowFormatter} from '@/components/skills/UseTimeWindowFormatter.js'
+import {useProjConfig} from '@/stores/UseProjConfig.js'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 import LinkToSkillPage from '@/components/utils/LinkToSkillPage.vue'
-import { useRoute } from 'vue-router'
+import {useRoute} from 'vue-router'
 import SelfReportType from "@/components/skills/selfReport/SelfReportType.js";
+import GenerateQuizDialog2 from '@/common-components/utilities/learning-conent-gen/GenerateQuizDialog2.vue'
+import QuizService from '@/components/quiz/QuizService.js'
+import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
+import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 
+const appConfig = useAppConfig()
 const config = useProjConfig()
 const timeWindowFormatter = useTimeWindowFormatter()
 const numberFormat = useNumberFormat()
@@ -49,6 +54,7 @@ const props = defineProps({
 const loading = ref(true)
 const skillInfo = ref({})
 const projectId = computed(() => route.params.projectId)
+const skillsState = useSubjectSkillsState()
 
 onMounted(() => {
   loadSkill()
@@ -145,6 +151,49 @@ const loadSkill = () => {
 }
 
 const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skillInfo.value.skillId))
+const showGenerateQuizDialog = ref(false)
+const saveQuizForSkill = async (generatedQuiz) => {
+  const quizDef = await createQuizDef()
+  await QuizService.updateQuizDef(quizDef);
+  const savePromises = generatedQuiz.map(question =>
+      QuizService.saveQuizQuestionDef(quizDef.quizId, question)
+  );
+  await Promise.all(savePromises);
+  skillInfo.value.quizId = quizDef.quizId;
+  skillInfo.value.quizName = quizDef.name;
+  skillInfo.value.quizType = quizDef.type;
+  skillInfo.value.selfReportingType = quizDef.type;
+  skillInfo.value.selfReportEnabled = true
+  SkillsService.saveSkill( {
+    ...skillInfo.value
+  }).then(() => {
+    const subjectSkillState = skillsState.subjectSkills.find((item) => item.skillId === skillInfo.value.skillId)
+    if (subjectSkillState) {
+      subjectSkillState.quizId = quizDef.quizId;
+      subjectSkillState.quizName = quizDef.name;
+      subjectSkillState.quizType = quizDef.type;
+      subjectSkillState.selfReportingType = quizDef.type;
+      subjectSkillState.selfReportEnabled = true
+    }
+  })
+}
+const createQuizDef = async () => {
+  const randomId = Date.now().toString(36) + Math.random().toString(36).substring(2);
+  const quizId = `${skillInfo.value.skillId}Quiz`;
+  const name = `${skillInfo.value.name} Quiz`
+  const type = 'Quiz'
+  const quizIdExists = await QuizService.checkIfQuizIdExist(quizId)
+  const quizNameExists = await QuizService.checkIfQuizNameExist(name)
+  return {
+    quizId: quizIdExists ? `${quizId}${randomId}` : quizId,
+    name: quizNameExists ? `${name}${randomId}` : name,
+    type
+  }
+}
+const generateQuizDialogRef = ref(null)
+const onDialogShow = () => {
+  generateQuizDialogRef.value.generateQuizFromDescription(description.value)
+}
 </script>
 
 <template>
@@ -242,7 +291,21 @@ const skillIdOfTheOriginalSkill = computed(() => SkillReuseIdUtil.removeTag(skil
           </div>
           <div v-else>
             Self reporting is <b class="text-primary">disabled</b> for this skill.
+            <div v-if="description && appConfig.enableOpenAIIntegration" class="mt-2">
+              <span class="mr-2">Generate a Quiz for this skill using AI </span>
+              <SkillsButton icon="fa-solid fa-wand-magic-sparkles"
+                            label="AI"
+                            size="small"
+                            data-cy="generateQuizBtn"
+                            @click="showGenerateQuizDialog = true"/>
+            </div>
           </div>
+          <generate-quiz-dialog2
+              v-if="showGenerateQuizDialog"
+              ref="generateQuizDialogRef"
+              v-model="showGenerateQuizDialog"
+              @generated-quiz="saveQuizForSkill"
+              @show="onDialogShow" />
         </media-info-card>
       </div>
     </div>

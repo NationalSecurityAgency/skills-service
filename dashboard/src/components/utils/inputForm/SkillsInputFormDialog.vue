@@ -245,6 +245,15 @@ watch(() => props.initialValues, (newValues) => {
 })
 
 const dialogUtils = useDialogUtils()
+
+const getFieldValues = () => {
+  return values
+}
+defineExpose({
+  setFieldValue,
+  validate,
+  getFieldValues
+})
 </script>
 
 <template>

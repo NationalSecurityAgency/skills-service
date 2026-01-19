@@ -15,7 +15,12 @@
  */
 package skills.services
 
+
 import spock.lang.Specification
+
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class CustomValidatorSpec extends Specification {
 
@@ -72,6 +77,7 @@ class CustomValidatorSpec extends Specification {
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
         validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
         validator.init()
 
         when:
@@ -93,12 +99,64 @@ Paragraph three
 
 (A) paragraph four
 """
-        CustomValidationResult result = validator.validateDescription(paragraphs)
-        CustomValidationResult result2 = validator.validateDescription(paragraphs2)
+
+        String paragraphs3 = """(A) Paragraph one
+
+(A) Paragraph two
+Paragraph three
+
+(A) paragraph four
+still part of it
+noe more
+
+(A) now new
+"""
+
+        String paragraphs4 = """(A) Paragraph one **bold** then *italic* then ~~crossed out~~ and we are done
+
+(A) Paragraph two **bold** then *italic* then ~~crossed out~~ and we are done
+
+Paragraph three **bold** then *italic* then ~~crossed out~~ and we are done
+
+(A) paragraph four **bold** then *italic* then ~~crossed out~~ and we are done
+"""
+
+
 
         then:
+        CustomValidationResult result = validator.validateDescription(paragraphs)
         !result.valid
+        CustomValidationResult result2 = validator.validateDescription(paragraphs2)
         result2.valid
+        CustomValidationResult result3 = validator.validateDescription(paragraphs3)
+        result3.valid
+        CustomValidationResult result4 = validator.validateDescription(paragraphs4)
+        !result4.valid
+        result4.validationFailedDetails == "Line[4] [Paragraph three bold]\n\n"
+    }
+
+    def "test indented block"(){
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        when:
+        validator.init()
+        then:
+        validator.validateDescription("\t(A) ok").valid
+        CustomValidationResult res1 = validator.validateDescription("\t(A ok")
+        !res1.valid
+        res1.validationFailedDetails == "Line[0] [(A ok]\n\n"
+
+        validator.validateDescription("(A) ok\n\t indented").valid
+        validator.validateDescription("(A) ok\n\n\t indented").valid
+
+        CustomValidationResult res2 = validator.validateDescription("(A) ok\n\n\n\t indented")
+        !res2.valid
+        res2.validationFailedDetails == "Line[3] [ indented]\n\n"
+
+        validator.validateDescription("\t(A) ok\n\n\t- item 1\n\t- item-2").valid
     }
 
     def "test custom paragraph validation, no regex configured"(){
@@ -203,12 +261,61 @@ Paragraph three
 - item 1
 - item 2
 """).valid
+
+        validator.validateDescription("""(A) one
+* item 1
+* item 2
+""").valid
+        validator.validateDescription("""(A) one
+- item 1
+- item 2
+""").valid
+        validator.validateDescription("""(A) one
+1. item 1
+1. item 2
+""").valid
+        !validator.validateDescription("""- item 1
+- item 2
+""").valid
+        !validator.validateDescription("""* item 1
+* item 2
+""").valid
+        !validator.validateDescription("""1. item 1
+1. item 2
+""").valid
+        validator.validateDescription("""- (A) item 1
+- item 2
+""").valid
+        validator.validateDescription("""* (A) item 1
+* item 2
+""").valid
+        validator.validateDescription("""1. (A) item 1
+1. item 2
+""").valid
+
+        validator.validateDescription("""## (A) Heading
+1. item 1
+1. item 2
+
+1. item 1
+1. item 2
+""").valid
+
+        validator.validateDescription("""## (A) Heading
+1. item 1
+1. item 2
+
+> (A) Blockquote
+> Blockquote
+""").valid
+
     }
 
     def "support markdown tables"() {
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
         validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
 
 
         when:
@@ -283,6 +390,79 @@ Paragraph three
 
 <br>
 """).valid
+
+        !validator.validateDescription("""| header 1 | header 2 | header 3 |
+| ---      |  ------  |---------:|
+| cell 1   | cell 2   | cell 3   |
+| cell 4 | cell 5 is longer | cell 6 is much longer than the others, but that's ok. It will eventually wrap the text when the cell is too large for the display size. |
+| cell 7   |          | cell <br> 9 |
+""").valid
+
+        validator.validateDescription("""(A) \n\n| (A) Locate and explain the Skills. |\n| -------------------------------------------------------------- |\n|\n""").valid
+
+        validator.validateDescription("""(A) table to follow
+
+| (A) header1 | (A) header 2  |
+| --- | --- |
+| [(A) cell 1](https://some.url.com) | (A) cell 2 |
+""").valid
+
+        validator.validateDescription("""(A) table to follow
+
+| (A) header1 | (A) header 2  |
+| --- | --- |
+| (A) [cell 1](https://some.url.com) | (A) cell 2 |
+""").valid
+
+        validator.validateDescription("""(A) table to follow
+
+| header1 | header 2  |
+| --- | --- |
+| [cell 1](https://some.url.com) | cell 2 |
+""").valid
+
+        !validator.validateDescription("""(A) table to follow
+
+| header1 | header 2  |
+| --- | --- |
+| [(B) cell 1](https://some.url.com) | cell 2 |
+""").valid
+
+        !validator.validateDescription("""(A) table to follow
+
+| header1 | header 2  |
+| --- | --- |
+| (B)[cell 1](https://some.url.com) | cell 2 |
+""").valid
+
+
+        validator.validateDescription("""(A) table to follow
+
+| (A) header1 | (A) header 2  |
+| --- | --- |
+| (A) some text [some link](https://some.url.com) | (A) cell 2 |
+""").valid
+
+        validator.validateDescription("""<span>(A) (table to follow)</span>
+
+| (A) header1 | (A) header 2  |
+| --- | --- |
+| [(A) some text](https://some.text.com) | (A) cell 2 [some link ](https://some.url.com/) |
+""").valid
+
+        validator.validateDescription("""<span>(A) (table to follow)</span>
+
+| (A) header1 | (A) header 2  |
+| --- | --- |
+| | (A) cell 2 [some link ](https://some.url.com/) |
+""").valid
+
+        validator.validateDescription("""<span>(A) (table to follow)</span>
+
+| (A) header1 | (A) header 2  |
+| --- | --- |
+| | (A) [some link ](https://some.url.com/) |
+""").valid
     }
 
     def "support markdown codeblocks"() {
@@ -306,15 +486,6 @@ if (a == true) {
 (A) paragraph two
 """).valid
 
-        !validator.validateDescription("""(A) Paragraph one
-```
-if (a == true) {
-  (B) println 'Hello <br> <br /> World'
-}
-```
-
-(A) paragraph two
-""").valid
 
         validator.validateDescription("""(A) Paragraph one
 ```
@@ -335,7 +506,20 @@ if (a == true) {
 (A) paragraph two
 """).valid
 
+        validator.validateDescription("""(A) Paragraph one
+
+
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+(A) paragraph two
+""").valid
+
         !validator.validateDescription("""(A) Paragraph one
+
 
 
 ```
@@ -392,21 +576,51 @@ line two
 
 """).valid
 
-        !validator.validateDescription("""(A)
-
-```
-line one
-
-(B)
-line two
-```
-
-""").valid
-
         validator.validateDescription("""(A) empty
 ```
 
 ```""").valid
+
+        validator.validateDescription("""(A) Paragraph one
+
+
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+
+(A) paragraph two
+""").valid
+
+        !validator.validateDescription("""(A) Paragraph one
+
+
+
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+""").valid
+
+        !validator.validateDescription("""```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+""").valid
+
+        validator.validateDescription("""(A) some text
+- item 1
+- item 2
+```
+if (a == true) {
+  println 'Hello <br> <br /> World'
+}
+```
+""").valid
+
     }
 
     def "support markdown headers"() {
@@ -428,6 +642,12 @@ line two
         !validator.validateDescription("""## Paragraph one""").valid
         !validator.validateDescription("""### Paragraph one""").valid
         !validator.validateDescription("""#### Paragraph one""").valid
+
+        validator.validateDescription("## **(**A) ok").valid
+        validator.validateDescription("## **(**A)&nbsp;**S**some&nbsp;").valid
+        validator.validateDescription("## \\*\\*(\\*\\*A) **S**ome").valid
+        validator.validateDescription("## *(*A) great").valid
+        validator.validateDescription('## *~~(~~*A) great').valid
     }
 
     def "ignore markdown separators"() {
@@ -440,47 +660,69 @@ line two
 
         then:
         validator.validateDescription("""(A) Separate me
-        ___
-        (A) Separate me
-        ---
-        (A) Separate me
-        ***""").valid
+
+___
+
+(A) Separate me
+
+---
+
+(A) Separate me
+
+***""").valid
+
+        def sepRes = validator.validateDescription("""(A) Separate me
+
+___
+
+Separate me
+
+---
+
+(A) Separate me
+***""")
+        !sepRes.valid
+        sepRes.validationFailedDetails == "Line[4] [Separate me]\n\n"
 
         !validator.validateDescription("""(A) Separate me
-        ___
-        Separate me
-        ---
-        (A) Separate me
-        ***""").valid
 
-        !validator.validateDescription("""(A) Separate me
-        ___
-        (A) Separate me
-        ---
-        (A) Separate me
-        ***
-        no go""").valid
+___
+
+(A) Separate me
+
+---
+
+(A) Separate me
+
+***
+
+no go""").valid
 
         validator.validateDescription("""(A) Separate me
+
 ___
-        (A) Separate me
+
+(A) Separate me
+
 ---
-        (A) Separate me
+
+(A) Separate me
+
 ***
-        
-        
-        ___
-        
-        (A) Separate me
-        
-        
+  
+
+___
+
+(A) Separate me
+
+
 ---
-        
-        
-        (A) Separate me
-        
-        
-        ***
+
+
+(A) Separate me
+
+
+***
 (A)
 
 ```
@@ -505,39 +747,96 @@ if (a == true) {
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
         validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
 
         when:
         validator.init()
 
         then:
+        validator.validateDescription("&gt; (A) This is a test quote").valid
         validator.validateDescription("""> (A) This is a block quote""").valid
-        validator.validateDescription("""(A) hello world\n" +
+        !validator.validateDescription("""> This is a block quote""").valid
+        validator.validateDescription("(A) hello world\n" +
                 "\n" +
                 "\n" +
                 "<br>\n" +
                 "> \n" +
                 "> \n" +
-                "> (A) quote<em>s</em>""").valid
+                "> (A) quote<em>s</em>").valid
         !validator.validateDescription("""> This is a block quote""").valid
+
+        validator.validateDescription("""> (A) **this is ok**:
+> * one
+> * two """).valid
+
+        validator.validateDescription("""> (A) **this is ok**:
+>
+> * one
+> * two ***and** three also ***four*** and five""").valid
+
+        validator.validateDescription("""> (A) **this is ok**:
+>
+> * one
+> * two ***and** three also ***four*** and ***<span>five</span>*** and six""").valid
+
+        validator.validateDescription("""> (A) **this is ok**:
+>
+> * one
+> * two ***and** three also ***four*** and ***<span>five</span>*** and six
+>
+> ![This is Image](data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAD0pRVz/2Q==)""").valid
+
+        validator.validateDescription("""> (A) **this is ok**:
+>
+> * one
+> * two ***and** three also ***four*** and ***<span>five</span>*** and six
+>
+> ![This is Image](data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAD0pRVz/2Q==)![This is Image](data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAD0pRVz/2Q==)""").valid
+
+        validator.validateDescription("""### (A) title
+
+* item 1
+* item 2\\*
+* item 3
+
+> (A) **this is ok**:
+>
+> * one
+> * two ***and** three also ***four*** and five""").valid
+
+
+        !validator.validateDescription("""> (A) this is not ok:
+>
+> **List 1**
+>
+> * one
+> * two
+>
+> **List 2**
+>
+> * three
+> * four""").valid
+
+        validator.validateDescription("""(A) A:\n\n> B""").valid
     }
 
     def "apply paragraph validator to bulleted/numbered lists"() {
         String text = """
-        (A) fish
-        (A) fish
+(A) one
+(A) two
 
-        * (A) fish
-        * Not a fish 
+* (A) three
+* four 
 
-        - (A) fish
-        - Not a fish
+- (A) five
+- six
 
-        1. (A) fish
-        1. Not a fish
+1. (A) seven
+1. eight
 
-        2. (A) fish
-        3. Not a fish
-            - (A) fish
+2. (A) nine
+3. ten
+    - (A) eleven
         """
 
         CustomValidator validator = new CustomValidator();
@@ -546,45 +845,52 @@ if (a == true) {
         validator.forceValidationRegex = '^\\(.+\\).*$'
 
         String shouldFail = """
-        (A) fish
-        (A) fish
+(A) fish
+(A) fish
 
-        * Not (A) fish
-        * Not a fish 
+
+* Not (A) fish
+* Not a fish 
         """
 
         String invalidListItem = """
-        (A) fish
-        (A) fish
+(A) fish
+(A) fish
 
-        * (A) fish
-        * (B) Not a fish 
+* (A) fish
+* (B) Not a fish 
 
-        - (A) fish
-        - Not a fish
+- (A) fish
+- Not a fish
 
-        1. (A) fish
-        1. (B) Not a fish
+1. (A) fish
+1. (B) Not a fish
 
-        2. (A) fish
-        3. Not a fish
-            - (A) fish
+2. (A) fish
+3. Not a fish
+    - (A) fish
         """
 
         when:
         validator.init()
 
-        boolean success = validator.validateDescription(text).valid
-        boolean shouldBeInvalid = validator.validateDescription(shouldFail).valid
-        boolean shouldBeInvalid2 = validator.validateDescription(invalidListItem).valid
-        boolean shouldBeInvalid3 = validator.validateDescription("""
+        then:
+        validator.validateDescription(text).valid
+        !validator.validateDescription(shouldFail).valid
+        !validator.validateDescription(invalidListItem).valid
+        !validator.validateDescription("""
                 (A) fish
                 (B) fish""").valid
-        then:
-        success
-        !shouldBeInvalid
-        !shouldBeInvalid2
-        !shouldBeInvalid3
+
+        !validator.validateDescription("""- (A) item 1
+- (B) item 2
+""").valid
+        !validator.validateDescription("""* (A) item 1
+* (B) item 2
+""").valid
+        !validator.validateDescription("""1. (A) item 1
+1. (B) item 2
+""").valid
     }
 
     def "force single newline paragraph validation" () {
@@ -595,14 +901,14 @@ if (a == true) {
         when:
         validator.init()
         boolean shouldBeValid = validator.validateDescription("""
-                (A) fish
-                (B) fish""").valid
+(A) fish
+(B) fish""").valid
 
         validator.forceValidationRegex = '^\\(.+\\).*$'
         validator.init()
         boolean shouldBeInvalid = validator.validateDescription("""
-                (A) fish
-                (B) fish""").valid
+(A) fish
+(B) fish""").valid
         then:
         shouldBeValid
         !shouldBeInvalid
@@ -627,7 +933,7 @@ if (a == true) {
 
 **(A) bold words** not preceded by spaces
 
-***(A) bold and italic words** sentence not preceded by spaces
+***(A) bold and italic words*** sentence not preceded by spaces
 
         *(A)* an italic at the beginning of a line preceded by spaces
         
@@ -662,11 +968,12 @@ if (a == true) {
         validator.init()
 
         boolean success = validator.validateDescription(text).valid
-        boolean fail = validator.validateDescription(invalidText).valid
+        def failRes = validator.validateDescription(invalidText)
         then:
 
         success
-        !fail
+        !failRes.valid
+        failRes.validationFailedDetails == "Line[2] [another]\n\n"
         validator.validateDescription(styledBlockQuote).valid
     }
 
@@ -674,6 +981,7 @@ if (a == true) {
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
         validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
 
         when:
         validator.init()
@@ -699,6 +1007,29 @@ if (a == true) {
 | <br> | <br> |
 
 """).valid
+
+        validator.validateDescription("""(A) some
+
+| First | Second |
+| ----- | ------ |
+| Third | Fourth |
+
+| Fifth | Sixth |
+| ----- | ------ |
+| Seventh | Eighth |
+""").valid
+
+        validator.validateDescription("""<span>(A) some</span>
+
+| First | Second |
+| ----- | ------ |
+| Third | Fourth |
+
+| Fifth | Sixth |
+| ----- | ------ |
+| Seventh | Eighth |
+""").valid
+
 
     }
 
@@ -792,15 +1123,569 @@ line-height:107%">(A) fancy formatting</span>""").valid
         CustomValidator validator = new CustomValidator();
         validator.paragraphValidationRegex = '^\\(A\\).*$'
         validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        when:
+        validator.init()
+
+        then:
+        String paragraphs = "<p>(A) Paragraph 1</p><p><br></p><p>Paragraph2</p>"
+        CustomValidationResult res1 = validator.validateDescription(paragraphs)
+        !res1.valid
+        res1.validationFailedDetails == "Failed within an html element for text [Paragraph2] after line[0]\n"
+
+        validator.validateDescription("<span style=\\\"box-sizing: border-box; font-style: normal;\\\">(A) Very Cool Message (VCM)</span>\n<span style=\\\"box-sizing: border-box; font-style: normal;\\\">(A) message 2</span>").valid
+    }
+
+    def "test list validation with html items"(){
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
         validator.init()
 
         when:
 
-        String paragraphs = "<p>(A) Paragraph 1</p><p><br></p><p>Paragraph2</p>"
-        CustomValidationResult result = validator.validateDescription(paragraphs)
+        String validList = "* <span class=\"SomeFancyText\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) One</span><span class=\"SomeFont\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"FancyFont\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Two</span><span class=\"someclass\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"Text\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Three</span><span class=\"Some\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\""
+        String notValidList = "* <span class=\"SomeFancyText\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">One</span><span class=\"SomeFont\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"FancyFont\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Two</span><span class=\"someclass\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"Text\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Three</span><span class=\"Some\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\""
+        String notValidList1 = "(A) one\n\n(A) two\n\n\n\n* <span class=\"SomeFancyText\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">One</span><span class=\"SomeFont\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"FancyFont\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Two</span><span class=\"someclass\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\\n\\n\\n* <span class=\"Text\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent;\">(A) Three</span><span class=\"Some\" data-ccp-props=\"{}\" style=\"margin: 0px; padding: 0px; user-select: text; -webkit-user-drag: none; -webkit-tap-highlight-color: transparent; font-size: 12pt; line-height: 20.925px; font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, sans-serif;\"> </span>\""
 
         then:
-        !result.valid
+        validator.validateDescription(validList).valid
+        def res = validator.validateDescription(notValidList)
+        !res.valid
+        res.validationFailedDetails == "Line[0] [<span class=\"SomeFan]\n\n"
+
+        def res1 = validator.validateDescription(notValidList1)
+        !res1.valid
+        res1.validationFailedDetails == "Line[6] [<span class=\"SomeFan]\n\n"
     }
+
+    def "support images" () {
+        String table = """|First|Second|\n|---|---|\n|Third|Fourth|"""
+        String imgStr =
+                "![This is Image](data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAD0pRVz/2Q==)"
+
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        when:
+        validator.init()
+
+        then:
+        !validator.validateDescription(imgStr).valid
+        validator.validateDescription("(A) ok\n${imgStr}").valid
+        validator.validateDescription("(A) ok\n\n${imgStr}").valid
+        !validator.validateDescription("(A) not\n\n\n${imgStr}").valid
+
+        validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${imgStr}\n\n(A) ok\n\n${imgStr}").valid
+        !validator.validateDescription("(A) ok\n\n${imgStr}\n\n Negative\n\n${imgStr}\n\n(A) ok\n\n${imgStr}").valid
+        validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}").valid
+        def imageRes = validator.validateDescription("(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}\n\n(A NOT\n\n${imgStr}")
+        !imageRes.valid
+        imageRes.validationFailedDetails == "Line[10] [(A NOT]\n\n"
+        validator.validateDescription("(A) ok\n\n${table}\n\n(A) ok\n\n${imgStr}\n\n(A) ok\n\n${table}").valid
+        !validator.validateDescription("(A) ok\n\n${table}\n\n(A notok\n\n${imgStr}\n\n(A) ok\n\n${table}").valid
+
+        validator.validateDescription("""** (A) This is the title:**
+![image.png](data:image/png;base64,XXXXXXXXXXXX)""").valid
+
+        validator.validateDescription("(A) val 1\n\n${imgStr}\n${imgStr}").valid
+
+        validator.validateDescription("(A) **some text - image: cool image:**\n${imgStr}").valid
+        def imageRes2= validator.validateDescription("(A **some text - image: cool image:**\n${imgStr}")
+        !imageRes2.valid
+        imageRes2.validationFailedDetails == "Line[0] [(A some text - image]\n\n"
+
+        validator.validateDescription("(A) great\n\n\n\n**(A) some **<span sytle=\"color: 'blue'\"> - </span>**image:**\n${imgStr}").valid
+
+        // image via external link
+        validator.validateDescription("(A)\n![This is Image](https://some.path.some.png)").valid
+        // image via external link wrapped with a link
+        validator.validateDescription("(A)\n[![This is Image](https://some.path.some.png)](https://some.url.com)").valid
+
+        validator.validateDescription("(A) SOME - (Ok 'OK') / [ https://some.web.com/some/page](https://some.web.com/some/page)\n${imgStr}").valid
+
+        validator.validateDescription("""(A) ok:
+
+| one | two |
+| ----- | ------ |
+| three | four |
+| five | six """ + imgStr + """|
+| seven | eight |
+""").valid
+
+        validator.validateDescription("(A)\n**${imgStr}**").valid
+        validator.validateDescription("(A)\n\n${imgStr}").valid
+        validator.validateDescription("(A)\n\n**${imgStr}**").valid
+        !validator.validateDescription("(A\n\n**${imgStr}**").valid
+        validator.validateDescription("(A) ok\n" +
+                "\t\t\t line 1\n" +
+                "\t\t\t\n" +
+                "\t\t\t line 2\n" +
+                "${imgStr}").valid
+        validator.validateDescription("(A) ok\n" +
+                "\t- one\n" +
+                "\t- two\n" +
+                "${imgStr}\n" +
+                "some\n" +
+                "${imgStr}\n" +
+                "\t\t\t line 1\n" +
+                "\t\t\t\n" +
+                "\t\t\t line 2\n" +
+                "${imgStr}").valid
+
+        validator.validateDescription("<span>(A) some</span>\n\n${imgStr}").valid
+        validator.validateDescription("(A) some\n\n**${imgStr}**").valid
+        validator.validateDescription("<span>(A) some</span>\n\n**${imgStr}**").valid
+
+        validator.validateDescription("(A) **ok**\n\n1. one\n2. ${imgStr}").valid
+        validator.validateDescription("**(A) ok**\n\n1. one\n2. ${imgStr}").valid
+        validator.validateDescription("### (A) ok\n\n* one\n* two\\*\n* three:\n\n> (A) ok:\n>\n> * one\n> * Two ***and*** three ***<span>blah</span>*** more\n>\n> ${imgStr}").valid
+        validator.validateDescription("### (A) ok\n\n* one\n* two\\*\n* three:\n\n> (A) ok:\n>\n> * one\n> * Two ***and*** three ***<span>blah</span>*** more\n>\n> ${imgStr}\n> ${imgStr}").valid
+        def res3 = validator.validateDescription(
+                "### (A) ok\n\n" +
+                        "* one\n" +
+                        "> (A) ok\n" +
+                        ">\n" +
+                        "> * one\n" +
+                        "> * two\n" +
+                        ">\n" +
+                        "> line of text\n" +
+                        "> ${imgStr}\n" +
+                        ""
+        )
+        !res3.valid
+        res3.validationFailedDetails == "Line[2] [* one]\n" +
+                "\n" +
+                "Line[8] [line of text\n" +
+                "\"This i]\n\n"
+    }
+
+    def "support links" () {
+        String url = "https://www.some.com"
+
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        when:
+        validator.init()
+
+        then:
+        validator.validateDescription("(A) ${url}").valid
+        def invalidLink = validator.validateDescription("(A)somet\n\n${url}")
+        !invalidLink.valid
+        invalidLink.validationFailedDetails == "Line[2] [https://www.some.com]\n\n"
+
+        validator.validateDescription("(A) <p>value</p>\n<p><a href=\"${url}\">${url}</a></p>").valid
+
+        validator.validateDescription("(A)&nbsp;[A link] (http://linky.com)").valid
+        validator.validateDescription("(A) [A link] (http://linky.com)").valid
+        validator.validateDescription("[(A) A link] (http://linky.com)").valid
+        !validator.validateDescription("[A link] (http://linky.com)").valid
+
+        validator.validateDescription("(A) ok\n<span>some</span>\n[A link](http://linky.com)").valid
+        validator.validateDescription("(A) ok\n<span>some</span>\n \n[A link](http://linky.com)").valid
+        validator.validateDescription("(A) ok\n<span>some</span>\n\n[A link](http://linky.com)").valid
+
+        validator.validateDescription("(A) inline link [A link](http://linky.com) more text").valid
+        validator.validateDescription("(A) inline link *[A link](http://linky.com)* more text").valid
+        validator.validateDescription("(A) inline link **[A link](http://linky.com)** more text").valid
+        validator.validateDescription("(A) inline link ***[A link](http://linky.com)*** more text").valid
+        validator.validateDescription("(A) inline link <span>[A link](http://linky.com)</span> more text").valid
+
+        validator.validateDescription("(A) some text [<span style=\"font-size:9.0pt\">A link</span>](http://linky.com) more text").valid
+    }
+
+    def "support mixed html br and newline chars" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+
+        String p1 = "**(A) First W's:**\n\n* [okd](http://ljelaj.com/dljl/dljl\n* [some (doje)](http://dlj.com/dlj)\n* [another](http://dlj.com/dlj.pdf)'\n* [eafeafe](http://dljel.com/dljld/dljdlj.pdf)"
+        String p2 = "<strong>(A) Something &nbsp; &nbsp; very st'rong:</strong>\n\n* [dlaj (dljdl)](http://dlj.com/dlj/)\n"
+        when:
+        validator.init()
+        then:
+        validator.validateDescription("<strong>(A) one <br/>two<br>three </strong>").valid
+        validator.validateDescription("${p1}\n\n\n<br>\n${p2}").valid
+    }
+
+    def "bad list" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String input = "*\n\n* \n* \n* one"
+        when:
+        validator.init()
+        def res = validator.validateDescription(input)
+        then:
+        !res.valid
+        res.validationFailedDetails == "First bullet is empty\n"
+    }
+
+    def "list under a heading" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String input = """### (A) This is a list
+
+* first
+* second
+* third"""
+        when:
+        validator.init()
+        def res = validator.validateDescription(input)
+        then:
+        res.valid
+    }
+
+    def "first bullet point in the list has html" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String input = "* <div>blah<span>ok</span></div>\n* two"
+        String input2 = "* <div>(A) blah<span>ok</span></div>\n* two"
+        when:
+        validator.init()
+        def res = validator.validateDescription(input)
+        def res2 = validator.validateDescription(input2)
+        then:
+        !res.valid
+        res.validationFailedDetails == "Line[0] [<div>blah<span>ok</s]\n\n"
+
+        res2.valid
+    }
+
+    def "html list" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String input = """<ol>
+    <li>(A) First item with <strong>bold text</strong></li>
+    <li>Second item with <strong>another bold text</strong></li>
+    <li>Third item with <strong>final bold text</strong></li>
+    </ol>"""
+        String input1 = """<ol>
+    <li>First item with <strong>bold text</strong></li>
+    <li>Second item with <strong>another bold text</strong></li>
+    <li>Third item with <strong>final bold text</strong></li>
+    </ol>"""
+        String input2 = """<p></p><p><ol>
+    <li>First item with <strong>bold text</strong></li>
+    <li>Second item with <strong>another bold text</strong></li>
+    <li>Third item with <strong>final bold text</strong></li>
+    </ol></p>"""
+        String input3 = """<p>(A) some</p><p><ol>
+    <li>First item with <strong>bold text</strong></li>
+    <li>Second item with <strong>another bold text</strong></li>
+    <li>Third item with <strong>final bold text</strong></li>
+    </ol></p>"""
+        when:
+        validator.init()
+        def res = validator.validateDescription(input)
+        def res1 = validator.validateDescription(input1)
+        def res2 = validator.validateDescription(input2)
+        def res3 = validator.validateDescription(input3)
+        then:
+        res.valid
+        !res1.valid
+        res1.validationFailedDetails == "Failed within an html element for text [First item with bold] after line[0]\n"
+        !res2.valid
+        res2.validationFailedDetails == "Failed within an html element for text [First item with bold] after line[0]\n"
+        res3.valid
+    }
+
+    def "html lists" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String input = """(A) <p><span>Title</span></p>
+<ul>
+<li><span>Level 1</span>
+<ul>
+<li><span>Sub List Item 1</span></li>
+<li><span>Sub List Item 2</span></li>
+<li><span>Sub List Item 3</span>
+<ul>
+<li><span>Sub-sub List Item 1</span></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>"""
+
+        when:
+        validator.init()
+        then:
+        def res = validator.validateDescription(input)
+        println res.validationFailedDetails
+        res.valid
+
+        validator.validateDescription("<span>1.</span> (A) ok\n<span>2.</span> (A) ok\n").valid
+        !validator.validateDescription("<span>1.</span> (A) ok\n<span>2.</span> (B) not ok\n").valid
+    }
+
+
+    def "lists and its parent" () {
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        String input = '''(A)\n<strong>Fake Heading</strong>
+<li>one</li>
+<li>two</li>
+<strong>Fake Heading</strong>
+<ol>\n<li>three</li></ol>
+<strong>Fake Heading</strong>\\n<p>four</p> 
+<ol> \n<li>Five</li> \n
+<li>Six</li>\n
+<li>Seven</li>\n
+</ol>'''
+
+        String inputB = '''(A)\n<strong>Fake Heading</strong>
+<li>one</li>
+<li>two</li>
+<strong>Fake Heading</strong>
+<ol>\n<li>(B) three</li></ol>
+<strong>Fake Heading</strong>\\n<p>four</p> 
+<ol> \n<li>Five</li> \n
+<li>Six</li>\n
+<li>Seven</li>\n
+</ol>'''
+
+        String inputC = '''(A)\n<strong>Fake Heading</strong>
+<li>one</li>
+<li>two</li>
+<strong>Fake Heading</strong>
+<ol>
+    <li>three</li>
+</ol>
+<strong>Fake Heading</strong>\\n<p>four</p> 
+<ol>
+  <li>Five</li>
+  <li>Six</li>
+  <li>(B) Seven</li>
+</ol>'''
+
+        when:
+        validator.init()
+        then:
+        def res = validator.validateDescription(input)
+        def res1 = validator.validateDescription(inputB)
+        def res2 = validator.validateDescription(inputC)
+        res.valid
+        !res1.valid
+        res1.validationFailedDetails == "Failed within an html element for text [(B) three] after line[2]\n"
+        !res2.valid
+        res2.validationFailedDetails == "Failed within an html element for text [(B) Seven] after line[2]\n"
+
+
+        validator.validateDescription('''(A) some text
+1. item
+2. item
+''').valid
+
+        validator.validateDescription('''(A) some text
+1. item
+2. item
+- some text
+''').valid
+
+        validator.validateDescription('''(A) some text
+
+1. item
+2. item
+- some text
+''').valid
+
+        validator.validateDescription('''(A) some text
+
+1. item
+2. item
+
+- some text
+''').valid
+
+        def res4 = validator.validateDescription('''(A some text
+1. item
+2. item
+- some text
+''')
+        !res4.valid
+        res4.validationFailedDetails == "Line[0] [(A some text]\n" +
+                "\n" +
+                "Line[1] [item]\n" +
+                "\n" +
+                "Line[3] [some text]\n\n"
+
+        validator.validateDescription('''(A)
+some text
+1. item
+2. item
+3. item
+*some text*
+- one
+-two''').valid
+
+        def res5 = validator.validateDescription('''(A)
+some text
+1. item
+2. item
+3. item
+
+*some text*
+- one
+-two''')
+        !res5.valid
+        res5.validationFailedDetails == """Line[6] [some text]
+
+Line[7] [one
+-two]
+
+"""
+
+        validator.validateDescription('''(A) some text:
+1.\t (A) item
+2.\t (A) item
+1.\t (A) item
+2.\t (A) item
+(A) some text
+-\tone
+-\ttwo''').valid
+
+        def res6 = validator.validateDescription('''(A) some text:\n\n* ((BLAH: DLJD-LDJD))''')
+        !res6.valid
+        res6.validationFailedDetails == "Line[2] [((BLAH: DLJD-LDJD))]\n\n"
+    }
+
+    def "support text with multiple paragraphs and lists - test concurrency"() {
+        CustomValidator validator = new CustomValidator()
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.init()
+
+        String desc = """## (A) Main Heading\\n\\n### (A) Subheading 1\\n\\n* (A) First list item.\\n* Second list item.\\n    \\\\*data: Third list item with indentation.\\n* \\n* Fourth list item \\n\\n\\n* (A) Fifth list item.\\n* Sixth list item.\\n* Seventh list item.\\n\\n### (A) Subheading 2\\n\\n* (A) Eighth list item.\\n* Ninth list item.\\n* Tenth list item.\\n\\n### (A) Subheading 3\\n\\n* (A) Eleventh list item.\\n* Twelfth list item.\\n* Thirteenth list item.\\n\\n### (A) Subheading 4\\n\\n* (A) Fourteenth list item.\\n* Fifteenth list item.\\n* Sixteenth list item.\\n\\n(A)"""
+
+        int threadCount = 5
+        int numSubmissions = 10000
+        def executor = Executors.newFixedThreadPool(threadCount)
+        def results = Collections.synchronizedList([])
+        def latch = new CountDownLatch(numSubmissions)
+
+        when:
+        (1..numSubmissions).each { threadNum ->
+            executor.submit({
+                try {
+                    boolean isValid = validator.validateDescription(desc).valid
+                    results.push("Thread $threadNum: ${isValid ? 'PASSED' : 'FAILED'}")
+                } catch (Exception e) {
+                    results.push("Thread $threadNum: ERROR - ${e.message}")
+                } finally {
+                    latch.countDown()
+                }
+            } as Runnable)
+        }
+        latch.await(20, TimeUnit.SECONDS) // Wait for all threads to complete with a timeout
+        executor.shutdown()
+
+        then:
+        results.size() == numSubmissions
+        results.every { it.endsWith('PASSED') }
+
+    }
+
+
+    def "Test force validation"(){
+        CustomValidator validator = new CustomValidator();
+        validator.nameValidationRegex = '^\\(A\\).*$'
+        validator.nameValidationMessage = 'fail'
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+
+        when:
+        validator.init()
+        then:
+        validator.validateName("(A) some value This Cool Acronym (ACA) some parans (\"keep hydrated\"). More interesting info (but more stuff could happen)").valid
+        validator.validateName("(A) **one** (AB)").valid
+        validator.validateDescription("(A) one (AB)").valid
+        validator.validateDescription("(A) **one** (AB)").valid
+        !validator.validateDescription("(A one (AB)").valid
+        !validator.validateDescription("(A **one** (AB)").valid
+        validator.validateName("(A) some value This Cool Acronym (ACA) some parans <span>(\"keep hydrated\")</span>. More interesting info (but more stuff could happen)").valid
+        validator.validateDescription("(A) ok\n(A) <span style=\"font-size: 9pt; font-family: SimSun;\">¶</span>(AB)").valid
+    }
+
+    def "Test force validation with more specific regex"(){
+        CustomValidator validator = new CustomValidator();
+        validator.nameValidationRegex = '^\\(A\\).*$'
+        validator.nameValidationMessage = 'fail'
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '(?i)^\\(.*(?:AB|CD).*\\).*$'
+
+        when:
+        validator.init()
+        then:
+        validator.validateDescription("(A) ok\n(A) (AB)").valid
+        validator.validateDescription("(A) ok\n(A) <span>a</span>(AB)").valid
+    }
+
+
+    def "Test force validation with complex regex"(){
+        CustomValidator validator = new CustomValidator();
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '(?i)\\s*(?:\\(\\s*FIRST\\s*\\)|\\([^)]*?(?:ONE|OTHER)[^)]*?\\)).*$'
+
+        when:
+        validator.init()
+        then:
+        validator.validateDescription("(A) OK\n- (1) OTHER (2)").valid
+        !validator.validateDescription("(A) OK\n- (OTHER)").valid
+
+        validator.validateDescription("<span>(A) some (OTHER)</span>").valid
+        validator.validateDescription("<span>(A) some (blah).</span>**<span> other more stuff</span>**<span> (OTHER)</span>").valid
+        validator.validateDescription('''<span>(A) blah. </span><span style="font:some;
+size:some;"> (blah OTHER blah).</span>''').valid
+        !validator.validateDescription('''<span>blah. </span><span style="font:some;
+size:some;"> (blah OTHER blah).</span>''').valid
+        !validator.validateDescription('''<span>(A blah. </span><span style="font:some;
+size:some;"> blah.</span>''').valid
+    }
+
+
+    def "Deal with styling"(){
+        CustomValidator validator = new CustomValidator();
+        validator.nameValidationRegex = '^\\(A\\).*$'
+        validator.nameValidationMessage = 'fail'
+        validator.paragraphValidationRegex = '^\\(A\\).*$'
+        validator.paragraphValidationMessage = 'fail'
+        validator.forceValidationRegex = '^\\(.+\\).*$'
+
+        when:
+        validator.init()
+        then:
+        validator.validateDescription("<span>(A) some</span> value").valid
+        validator.validateDescription("<span>(A)</span> some value").valid
+        validator.validateDescription("<span>(A)</span> [some](https://some.com)").valid
+        validator.validateDescription("<span>(A)</span> **[some](https://some.com)**").valid
+    }
+
 }
 

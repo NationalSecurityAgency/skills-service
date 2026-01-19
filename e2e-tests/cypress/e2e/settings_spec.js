@@ -16,10 +16,22 @@
 describe('Settings Tests', () => {
 
     beforeEach(() => {
+        const userInfo = {
+            'first': 'Zack',
+            'last': 'Smith',
+            'nickname': 'Zack Smith'
+        }
+        cy.request('POST', '/app/userInfo', userInfo)
         cy.logout();
         cy.fixture('vars.json')
             .then((vars) => {
                 cy.login(vars.rootUser, vars.defaultPass);
+                const userInfo = {
+                    'first': 'Jack',
+                    'last': 'Smith',
+                    'nickname': 'Zack Smith'
+                }
+                cy.request('POST', '/app/userInfo', userInfo)
             });
 
         cy.intercept('GET', '/app/projects').as('getProjects')
@@ -277,7 +289,6 @@ describe('Settings Tests', () => {
     });
 
     it('Add Root User With No Query', () => {
-
         cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE')
             .as('getEligibleForRoot');
         cy.intercept('PUT', '/root/users/skills@skills.org/roles/ROLE_SUPER_DUPER_USER')
@@ -321,15 +332,18 @@ describe('Settings Tests', () => {
             .click();
         cy.wait('@addRoot');
 
+        const rootUser = 'Jack Smith (root@skills.org)';
+        const adminUser = Cypress.env('oauthMode') ? 'Firstname LastName (skills@skills.org)' : 'Zack Smith (skills@skills.org)';
+
         // default sort order is userId asc
         cy.validateTable(rootUsrTableSelector, [
             [{
                 colIndex: 0,
-                value: 'Firstname LastName (root@skills.org)'
+                value: rootUser
             }],
             [{
                 colIndex: 0,
-                value: 'Firstname LastName (skills@skills.org)'
+                value: adminUser
             }],
         ], 5, true, null, false);
         ;
@@ -340,11 +354,11 @@ describe('Settings Tests', () => {
         cy.validateTable(rootUsrTableSelector, [
             [{
                 colIndex: 0,
-                value: 'Firstname LastName (skills@skills.org)'
+                value: adminUser
             }],
             [{
                 colIndex: 0,
-                value: 'Firstname LastName (root@skills.org)'
+                value: rootUser
             }],
         ], 5, true, null, false);
     });
@@ -941,7 +955,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="settings-button"] button')
             .click();
         cy.get('[data-cy="settingsButton-loggedInName"]')
-            .contains('Firstname LastName');
+            .contains('Zack Smith');
     });
 
     it('nav to settings', () => {
@@ -1370,6 +1384,468 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="enableDarkModeSwitch"]').click();
         cy.get('[data-cy="enableDarkMode"]').contains('Off');
         cy.get('[data-cy=userPrefsSettingsSave]').should('be.enabled');
+    });
+
+    it('AI Prompt Settings', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        const tooLong = Array(5001).fill('a').join('')
+        cy.intercept('GET', '/openai/getAiPromptSettings')
+          .as('getAiPromptSettings');
+        cy.intercept('GET', '/app/userInfo')
+          .as('loadUserInfo');
+        cy.visit('/administrator/');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadConfig')
+        cy.wait('@getAiPromptSettings');
+
+        cy.get('[data-cy="settings-button"] button').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
+
+        cy.get('[data-cy="nav-Profile"]').should('exist');
+        cy.get('[data-cy="nav-Preferences"]').should('exist');
+        cy.get('[data-cy="nav-Security"]').should('exist');
+        cy.get('[data-cy="nav-Email"]').should('exist');
+        cy.get('[data-cy="nav-System"]').should('exist');
+        cy.get('[data-cy="nav-AI Prompts"]').should('exist');
+
+        cy.get('[data-cy="nav-AI Prompts"]').click();
+        
+        // Get all default value tags and verify initial state
+        cy.get('[data-cy^="isDefaultValueTag-"]').each(($defaultTag) => {
+          const dataCy = $defaultTag.attr('data-cy');
+          const settingName = dataCy.replace('isDefaultValueTag-', '');
+          const inputSelector = `[data-cy="aiPromptSetting-${settingName}"] textarea`;
+          const resetToDefaultButton = `[data-cy="resetToDefault-${settingName}"]`;
+          const errorField = `[data-cy="${settingName}Error"]`;
+
+          // Verify initial state is 'Default'
+          cy.wrap($defaultTag)
+            .should('be.visible')
+            .and('contain', 'Default');
+
+          cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+
+          // Modify the corresponding input field
+          cy.get(inputSelector).then(($input) => {
+            const defaultValue = $input.val();
+            const modifiedValue = defaultValue + 'X'; // Add a character to modify the value
+
+            cy.get(inputSelector)
+              .type('{moveToEnd}X')
+              .should('have.value', modifiedValue);
+
+            cy.get(errorField).should('not.be.visible');
+
+            cy.get('[data-cy="aiPromptSettingsSave"').should('be.enabled')
+
+            // Verify the default tag updates to 'Modified'
+            cy.wrap($defaultTag)
+              .should('be.visible')
+              .and('contain', 'Modified');
+
+            cy.get(inputSelector).clear()
+            cy.get(errorField).should('be.visible')
+              .and('contain', 'is a required field');
+            cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+            cy.get(inputSelector)
+              .type(`{selectall}${tooLong}`, { delay: 0 })
+              cy.get(errorField).should('be.visible')
+                .and('contain', ' must be at most 5000 characters');
+              cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+
+            cy.get(resetToDefaultButton).click();
+
+            // Verify it goes back to 'Default'
+            cy.wrap($defaultTag)
+              .should('be.visible')
+              .and('contain', 'Default');
+            const resetValue = $input.val();
+            expect(resetValue).to.equal(defaultValue)
+
+            cy.get(errorField).should('not.be.visible');
+            cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+          });
+        });
+
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+    });
+
+    it('AI Prompt Settings - Update Individual fields', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        const tooLong = Array(5001).fill('a').join('')
+        cy.intercept('GET', '/openai/getAiPromptSettings')
+          .as('getAiPromptSettings');
+        cy.intercept('GET', '/app/userInfo')
+          .as('loadUserInfo');
+        cy.visit('/administrator/');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadConfig')
+        cy.wait('@getAiPromptSettings');
+
+        cy.get('[data-cy="settings-button"] button').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
+
+        cy.get('[data-cy="nav-Profile"]').should('exist');
+        cy.get('[data-cy="nav-Preferences"]').should('exist');
+        cy.get('[data-cy="nav-Security"]').should('exist');
+        cy.get('[data-cy="nav-Email"]').should('exist');
+        cy.get('[data-cy="nav-System"]').should('exist');
+        cy.get('[data-cy="nav-AI Prompts"]').should('exist');
+
+        cy.get('[data-cy="nav-AI Prompts"]').click();
+
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+
+        // initialized to default value
+        cy.get('[data-cy="isDefaultValueTag-systemInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Default');
+        cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.disabled')
+
+        // modify value
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').type('X')
+        cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('be.visible')
+        cy.get('[data-cy="isDefaultValueTag-systemInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Modified');
+
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.enabled')
+
+        // clear value
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').clear()
+        cy.get('[data-cy="systemInstructionsError"]').should('be.visible')
+          .and('contain', 'is a required field');
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+
+        // reset to default
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').click()
+        cy.get('[data-cy="isDefaultValueTag-systemInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Default');
+        cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.disabled')
+        cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('not.exist')
+        cy.get('[data-cy="systemInstructionsError"]').should('not.be.visible')
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+
+        // update value again
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').type('{selectall}X')
+        cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('be.visible')
+        cy.get('[data-cy="isDefaultValueTag-systemInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Modified');
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.enabled')
+
+        // also update (but don't save) newSkillDescriptionInstructions
+        // initialized to default value
+        cy.get('[data-cy="isDefaultValueTag-newSkillDescriptionInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Default');
+        cy.get('[data-cy="updateSetting-newSkillDescriptionInstructions"]').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-newSkillDescriptionInstructions"]').should('be.disabled')
+
+        // modify value
+        cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea').type('{selectall}XYZ')
+        cy.get('[data-cy="updateSetting-newSkillDescriptionInstructions"]').should('be.enabled')
+        cy.get('[data-cy="resetToDefault-newSkillDescriptionInstructions"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChanges-newSkillDescriptionInstructions"]').should('be.visible')
+        cy.get('[data-cy="isDefaultValueTag-newSkillDescriptionInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Modified');
+        cy.get('[data-cy="newSkillDescriptionInstructionsError"]').should('not.be.visible')
+
+        // now save systemInstructions and validate changes took place to it, but not to newSkillDescriptionInstructions
+        cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="updateSetting-systemInstructions"]').click()
+        cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('not.exist')
+        cy.get('[data-cy="isDefaultValueTag-systemInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Modified');
+        // validate text is == "X"
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').should('have.value', 'X')
+
+        cy.get('[data-cy="updateSetting-newSkillDescriptionInstructions"]').should('be.enabled')
+        cy.get('[data-cy="resetToDefault-newSkillDescriptionInstructions"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChanges-newSkillDescriptionInstructions"]').should('be.visible')
+        cy.get('[data-cy="isDefaultValueTag-newSkillDescriptionInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Modified');
+        cy.get('[data-cy="newSkillDescriptionInstructionsError"]').should('not.be.visible')
+        // validate text is == "XYZ"
+        cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea').should('have.value', 'XYZ')
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.enabled')  // overall save button is still enabled
+
+        // navigate away and then back and confirm the settings changes persisted for systemInstructions and not for newSkillDescriptionInstructions
+        cy.intercept('GET', '/root/getSystemSettings')
+          .as('loadSystemSettings');
+        cy.get('[data-cy="nav-System"]').click()
+        cy.wait('@loadSystemSettings');
+        cy.get('[data-cy="nav-AI Prompts"]').click();
+
+        cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('not.exist')
+        cy.get('[data-cy="isDefaultValueTag-systemInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Modified');
+        // validate text is == "X"
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').should('have.value', 'X')
+
+        cy.get('[data-cy="isDefaultValueTag-newSkillDescriptionInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Default');
+        cy.get('[data-cy="updateSetting-newSkillDescriptionInstructions"]').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-newSkillDescriptionInstructions"]').should('be.disabled')
+        cy.get('[data-cy="unsavedChanges-newSkillDescriptionInstructions"]').should('not.exist')
+        cy.get('[data-cy="newSkillDescriptionInstructionsError"]').should('not.be.visible')
+        // validate text NOT is == "XYZ"
+        cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea').should('not.have.value', 'XYZ')
+
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+    });
+
+    it('AI Prompt Settings - Update All fields', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        const tooLong = Array(5001).fill('a').join('')
+        cy.intercept('GET', '/openai/getAiPromptSettings')
+          .as('getAiPromptSettings');
+        cy.intercept('GET', '/app/userInfo')
+          .as('loadUserInfo');
+        cy.visit('/administrator/');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadConfig')
+        cy.wait('@getAiPromptSettings');
+
+        cy.get('[data-cy="settings-button"] button').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
+
+        cy.get('[data-cy="nav-Profile"]').should('exist');
+        cy.get('[data-cy="nav-Preferences"]').should('exist');
+        cy.get('[data-cy="nav-Security"]').should('exist');
+        cy.get('[data-cy="nav-Email"]').should('exist');
+        cy.get('[data-cy="nav-System"]').should('exist');
+        cy.get('[data-cy="nav-AI Prompts"]').should('exist');
+
+        cy.get('[data-cy="nav-AI Prompts"]').click();
+
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+
+        // initialized to default value
+        cy.get('[data-cy="isDefaultValueTag-systemInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Default');
+        cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.disabled')
+
+        // modify value
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').type('X')
+        cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('be.visible')
+        cy.get('[data-cy="isDefaultValueTag-systemInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Modified');
+
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.enabled')
+
+        // clear value
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').clear()
+        cy.get('[data-cy="systemInstructionsError"]').should('be.visible')
+          .and('contain', 'is a required field');
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+
+        // reset to default
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').click()
+        cy.get('[data-cy="isDefaultValueTag-systemInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Default');
+        cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.disabled')
+        cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('not.exist')
+        cy.get('[data-cy="systemInstructionsError"]').should('not.be.visible')
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+
+        // update value again
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').type('{selectall}X')
+        cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('be.visible')
+        cy.get('[data-cy="isDefaultValueTag-systemInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Modified');
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.enabled')
+
+        // also update newSkillDescriptionInstructions
+        // initialized to default value
+        cy.get('[data-cy="isDefaultValueTag-newSkillDescriptionInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Default');
+        cy.get('[data-cy="updateSetting-newSkillDescriptionInstructions"]').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-newSkillDescriptionInstructions"]').should('be.disabled')
+
+        // modify value
+        cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea').type('{selectall}XYZ')
+        cy.get('[data-cy="updateSetting-newSkillDescriptionInstructions"]').should('be.enabled')
+        cy.get('[data-cy="resetToDefault-newSkillDescriptionInstructions"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChanges-newSkillDescriptionInstructions"]').should('be.visible')
+        cy.get('[data-cy="isDefaultValueTag-newSkillDescriptionInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Modified');
+        cy.get('[data-cy="newSkillDescriptionInstructionsError"]').should('not.be.visible')
+
+        // now save all settings and validate both changes took place
+
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.enabled')
+        cy.get('[data-cy="unsavedChangesAlert"]').should('be.visible')
+        cy.get('[data-cy="aiPromptSettingsSave"').click()
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+        cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist')
+
+        cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('not.exist')
+        cy.get('[data-cy="isDefaultValueTag-systemInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Modified');
+        // validate text is == "X"
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').should('have.value', 'X')
+
+        cy.get('[data-cy="updateSetting-newSkillDescriptionInstructions"]').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-newSkillDescriptionInstructions"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChanges-newSkillDescriptionInstructions"]').should('not.exist')
+        cy.get('[data-cy="isDefaultValueTag-newSkillDescriptionInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Modified');
+        cy.get('[data-cy="newSkillDescriptionInstructionsError"]').should('not.be.visible')
+        // validate text is == "XYZ"
+        cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea').should('have.value', 'XYZ')
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')  // overall save button should be disabled since no changes since last save
+
+        // navigate away and then back and confirm the settings changes persisted for systemInstructions and not for newSkillDescriptionInstructions
+        cy.intercept('GET', '/root/getSystemSettings')
+          .as('loadSystemSettings');
+        cy.get('[data-cy="nav-System"]').click()
+        cy.wait('@loadSystemSettings');
+        cy.get('[data-cy="nav-AI Prompts"]').click();
+
+        cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('not.exist')
+        cy.get('[data-cy="isDefaultValueTag-systemInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Modified');
+        // validate text is == "X"
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').should('have.value', 'X')
+
+        cy.get('[data-cy="isDefaultValueTag-newSkillDescriptionInstructions"]')
+          .should('be.visible')
+          .and('contain', 'Modified');
+        cy.get('[data-cy="updateSetting-newSkillDescriptionInstructions"]').should('be.disabled')
+        cy.get('[data-cy="resetToDefault-newSkillDescriptionInstructions"]').should('be.enabled')
+        cy.get('[data-cy="unsavedChanges-newSkillDescriptionInstructions"]').should('not.exist')
+        cy.get('[data-cy="newSkillDescriptionInstructionsError"]').should('not.be.visible')
+        // validate text is == "XYZ"
+        cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea').should('have.value', 'XYZ')
+
+        cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+    });
+
+    it('AI Prompt Settings are not shown when OpenAI is not enabled', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = false;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        cy.intercept('GET', '/openai/getAiPromptSettings')
+          .as('getAiPromptSettings');
+        cy.intercept('GET', '/app/userInfo')
+          .as('loadUserInfo');
+        cy.visit('/administrator/');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadConfig')
+        cy.get('@getAiPromptSettings').should('not.exist');
+
+        cy.get('[data-cy="settings-button"] button').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
+
+        cy.get('[data-cy="nav-Profile"]').should('exist');
+        cy.get('[data-cy="nav-Preferences"]').should('exist');
+        cy.get('[data-cy="nav-Security"]').should('exist');
+        cy.get('[data-cy="nav-Email"]').should('exist');
+        cy.get('[data-cy="nav-System"]').should('exist');
+
+        cy.get('[data-cy="nav-AI Prompts"]').should('not.exist');
+    });
+
+    it('Root Only Settings are not shown for non-root users', () => {
+        cy.fixture('vars.json')
+          .then((vars) => {
+              cy.logout();
+              if (!Cypress.env('oauthMode')) {
+                  cy.log('NOT in oauthMode, using form login');
+                  cy.login(vars.defaultUser, vars.defaultPass);
+              } else {
+                  cy.log('oauthMode, using loginBySingleSignOn');
+                  cy.loginBySingleSignOn();
+              }
+          });
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        cy.intercept('GET', '/openai/getAiPromptSettings')
+          .as('getAiPromptSettings');
+        cy.intercept('GET', '/app/userInfo')
+          .as('loadUserInfo');
+        cy.visit('/administrator/');
+        cy.wait('@loadUserInfo');
+        cy.wait('@loadConfig')
+        cy.wait('@getAiPromptSettings');
+        
+        cy.get('[data-cy="settings-button"] button').click();
+        cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
+
+        cy.get('[data-cy="nav-Profile"]').should('exist');
+        cy.get('[data-cy="nav-Preferences"]').should('exist');
+
+        cy.get('[data-cy="nav-Security"]').should('not.exist');
+        cy.get('[data-cy="nav-Email"]').should('not.exist');
+        cy.get('[data-cy="nav-System"]').should('not.exist');
+        cy.get('[data-cy="nav-AI Prompts"]').should('not.exist');
     });
 });
 

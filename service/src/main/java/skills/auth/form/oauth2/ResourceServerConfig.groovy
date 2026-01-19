@@ -105,7 +105,7 @@ class ResourceServerConfig {
         AbstractAuthenticationToken convert(Jwt jwt) {
             AbstractAuthenticationToken auth = jwtAuthenticationConverter.convert(jwt)
             if (auth.isAuthenticated()) {
-                String projectId = AuthUtils.getProjectIdFromRequest(servletRequest)
+                String projectId = AuthUtils.getRequestAttributes().getProjectId()
                 auth = oAuthUtils.convertToSkillsAuth(auth)
                 if (projectId && auth && auth.principal instanceof UserInfo) {
                     String proxyingSystemId = ((UserInfo) auth.principal).proxyingSystemId

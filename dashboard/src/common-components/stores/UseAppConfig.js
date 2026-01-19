@@ -66,7 +66,11 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     return res
   }
 
-  const isTrue = (val) => val && (val === true || val?.toLowerCase() === 'true')
+  const listFromCommaSeparatedString = (strProp) => {
+    return strProp ? strProp.split(',').map(s => s.trim()) : []
+  }
+
+  const isTrue = (val) => !!val && (val === true || val?.toLowerCase() === 'true')
 
   const maxBadgeBonusInMinutes = computed(() => config.value.maxBadgeBonusInMinutes)
   const minNameLength = computed(() => config.value.minNameLength)
@@ -79,6 +83,11 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxIdLength = computed(() => config.value.maxIdLength)
   const descriptionMaxLength = computed(() => config.value.descriptionMaxLength)
   const paragraphValidationRegex = computed(() => config.value.paragraphValidationRegex)
+  const addPrefixToInvalidParagraphsOptions = computed(() => config.value.addPrefixToInvalidParagraphsOptions)
+  const addPrefixToInvalidParagraphsBtnLabel  = computed(() => config.value.addPrefixToInvalidParagraphsBtnLabel || 'Add Prefix')
+  const addPrefixToGeneratedValueBtnLabel =  computed(() => config.value.addPrefixToGeneratedValueBtnLabel || 'Add Prefix Then Use')
+  const showMissingPrefixBtnLabel  = computed(() => config.value.showMissingPrefixBtnLabel || 'View Missing Preview')
+  const closeMissingPrefixPreview  = computed(() => config.value.closeMissingPrefixPreview || 'Close Preview')
   const formFieldDebounceInMs = computed(() => config.value.formFieldDebounceInMs || 400)
   const maxSubjectNameLength = computed(() => config.value.maxSubjectNameLength)
   const maxBadgeNameLength = computed(() => config.value.maxBadgeNameLength)
@@ -172,7 +181,22 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const matomoUrl = computed(() => config.value.matomoUrl)
   const matomoSiteId = computed(() => config.value.matomoSiteId)
   const matomoProcessUserIdRegex = computed(() => config.value.matomoProcessUserIdRegex)
+  const enableOpenAIIntegration = computed(() => config.value.enableOpenAIIntegration)
+  const openaiTakingLongerThanExpectedMessages = computed(() => config.value.openaiTakingLongerThanExpectedMessages)
+  const openaiTakingLongerThanExpectedTimeoutPerMsg = computed(() => config.value.openaiTakingLongerThanExpectedTimeoutPerMsg)
+  const openaiModelDefaultTemperature = computed(() => Number(config.value.openaiModelDefaultTemperature))
+  const openaiDefaultModel = computed(() => config.value.openaiDefaultModel)
+  const openaiFooterMsg = computed(() => config.value.openaiFooterMsg)
+  const openaiFooterPoweredByLink = computed(() => config.value.openaiFooterPoweredByLink)
+  const openaiFooterPoweredByLinkText = computed(() => config.value.openaiFooterPoweredByLinkText)
+  const openaiNotSupportedChatModels = computed(() => listFromCommaSeparatedString(config.value.openaiNotSupportedChatModels))
+  const openAiDisableSingleQuestionTypeChange = computed(() => isTrue(config.value.openAiDisableSingleQuestionTypeChange))
+  const maxAiPromptLength = computed(() => config.value.maxAiPromptLength)
+  const delayBetweenScreenReaderAnnouncements = computed(() => config.value.delayBetweenScreenReaderAnnouncements || 2500)
+  const openAiAnnounceGenStatusInterval = computed(() => config.value.openAiAnnounceGenStatusInterval || 6000)
+
   const sdPointHistoryChartAchievementsCombinePct = computed(() => config.value.sdPointHistoryChartAchievementsCombinePct || 0.05)
+
 
   return {
     loadConfigState,
@@ -193,6 +217,11 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     descriptionMaxLength,
     formFieldDebounceInMs,
     paragraphValidationRegex,
+    addPrefixToInvalidParagraphsOptions,
+    addPrefixToInvalidParagraphsBtnLabel,
+    addPrefixToGeneratedValueBtnLabel,
+    showMissingPrefixBtnLabel,
+    closeMissingPrefixPreview,
     maxSubjectNameLength,
     maxBadgeNameLength,
     maxCustomLabelLength,
@@ -283,6 +312,19 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     matomoUrl,
     matomoSiteId,
     matomoProcessUserIdRegex,
+    enableOpenAIIntegration,
+    openaiTakingLongerThanExpectedMessages,
+    openaiTakingLongerThanExpectedTimeoutPerMsg,
+    openaiModelDefaultTemperature,
+    openaiDefaultModel,
+    openaiFooterMsg,
+    openaiFooterPoweredByLink,
+    openaiFooterPoweredByLinkText,
+    openaiNotSupportedChatModels,
+    openAiDisableSingleQuestionTypeChange,
+    maxAiPromptLength,
+    delayBetweenScreenReaderAnnouncements,
+    openAiAnnounceGenStatusInterval,
     sdPointHistoryChartAchievementsCombinePct
   }
 })

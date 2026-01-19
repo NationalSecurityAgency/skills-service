@@ -23,20 +23,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.DependsOn
 import org.springframework.http.HttpMethod
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.authorization.AuthorityAuthorizationManager
 import org.springframework.security.authorization.AuthorizationManager
 import org.springframework.security.authorization.AuthorizationManagers
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext
-import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository
-import org.springframework.security.web.csrf.CsrfToken
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler
-import org.springframework.security.web.csrf.CsrfTokenRequestHandler
-import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
-import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler
+import org.springframework.security.web.csrf.*
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.security.web.util.matcher.OrRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
@@ -44,6 +41,7 @@ import org.springframework.stereotype.Component
 import org.springframework.util.StringUtils
 import org.springframework.web.filter.OncePerRequestFilter
 import skills.auth.inviteOnly.InviteOnlyProjectAuthorizationManager
+import skills.auth.openai.OpenAIAuthorizationManager
 import skills.auth.userCommunity.UserCommunityAuthorizationManager
 import skills.storage.model.auth.RoleName
 
@@ -72,6 +70,9 @@ class PortalWebSecurityHelper {
     InviteOnlyProjectAuthorizationManager inviteOnlyProjectAuthorizationManager
 
     @Autowired
+    OpenAIAuthorizationManager openAIAuthorizationManager
+
+    @Autowired
     CookieCsrfTokenRepository cookieCsrfTokenRepository
 
     @Autowired
@@ -79,6 +80,9 @@ class PortalWebSecurityHelper {
 
     @Autowired
     SessionAuthenticationStrategy csrfAuthenticationStrategy
+
+    @Autowired
+    UserAuthService userAuthService
 
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
         if (disableCsrfProtection) {
@@ -93,25 +97,31 @@ class PortalWebSecurityHelper {
                     .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
         }
 
+        List permitAllPatterns = ["/", "/favicon.ico",
+                                  "/icons/**", "/static/**", "/assets/**",
+                                  "/skilltree.ico",
+                                  "/error", "/oauth/**",
+                                  "/app/oAuthProviders", "/login*", "/login/**",
+                                  "/performLogin", "/createAccount",
+                                  "/createRootAccount", '/grantFirstRoot',
+                                  '/userExists/**', "/app/userInfo",
+                                  "/app/users/validExistingDashboardUserId/*", "/app/oAuthProviders",
+                                  "/index.html", "index.html", "/public/**",
+                                  "/skills-websocket/**", "/requestPasswordReset",
+                                  "/resetPassword/**", "/performPasswordReset",
+                                  "/resendEmailVerification/**", "/verifyEmail", "/userEmailIsVerified/*","/saml2/**"]
+        RequestMatcher permitAllMatcher = new OrRequestMatcher(
+                permitAllPatterns.collect { new AntPathRequestMatcher(it) }
+        )
+
+        http.addFilterAfter(new SkillsAuthorityFilter(userAuthService, permitAllMatcher), CsrfCookieFilter.class)
+
         if (publiclyExposePrometheusMetrics) {
             http.authorizeHttpRequests().requestMatchers(HttpMethod.GET, "${managementPath}/${prometheusPath}").permitAll()
         }
-
         http.authorizeHttpRequests((authorize) ->
             authorize
-                .requestMatchers("/", "/favicon.ico",
-                    "/icons/**", "/static/**", "/assets/**",
-                    "/skilltree.ico",
-                    "/error", "/oauth/**",
-                    "/app/oAuthProviders", "/login*", "/login/**",
-                    "/performLogin", "/createAccount",
-                    "/createRootAccount", '/grantFirstRoot',
-                    '/userExists/**', "/app/userInfo",
-                    "/app/users/validExistingDashboardUserId/*", "/app/oAuthProviders",
-                    "/index.html", "index.html", "/public/**",
-                    "/skills-websocket/**", "/requestPasswordReset",
-                    "/resetPassword/**", "/performPasswordReset",
-                    "/resendEmailVerification/**", "/verifyEmail", "/userEmailIsVerified/*","/saml2/**").permitAll()
+                .requestMatchers(permitAllMatcher).permitAll()
                 .requestMatchers('/root/isRoot').hasAnyAuthority(RoleName.values().collect {it.name()}.toArray(new String[0]))
                 .requestMatchers('/root/**').access(hasAnyAuthorityPlus([inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager], RoleName.ROLE_SUPER_DUPER_USER.name()))
                 .requestMatchers('/admin/badges/**').access(hasAnyAuthorityPlus([userCommunityAuthorizationManager], RoleName.ROLE_GLOBAL_BADGE_ADMIN.name(),RoleName.ROLE_SUPER_DUPER_USER.name()))
@@ -121,6 +131,7 @@ class PortalWebSecurityHelper {
                 .requestMatchers('/app/**').access(AuthorizationManagers.allOf(inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager))
                 .requestMatchers('/api/**').access(AuthorizationManagers.allOf(inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager))
                 .requestMatchers("/${managementPath}/**").hasAuthority(RoleName.ROLE_SUPER_DUPER_USER.name())
+                .requestMatchers("/openai/**").access(AuthorizationManagers.allOf(openAIAuthorizationManager))
                 .anyRequest().authenticated()
         )
         http.headers().frameOptions().disable()
@@ -193,5 +204,32 @@ final class MultipartRequestMatcher implements RequestMatcher {
     boolean matches(HttpServletRequest request) {
         Boolean matches = (pathMatcher.matches(request) && !this.allowedMethods.contains(request.getMethod()))
         return matches
+    }
+}
+
+final class SkillsAuthorityFilter extends OncePerRequestFilter {
+    private final UserAuthService userAuthService
+    private final RequestMatcher permitAllMatcher
+
+    SkillsAuthorityFilter(UserAuthService userAuthService, RequestMatcher permitAllMatcher) {
+        this.userAuthService = userAuthService
+        this.permitAllMatcher = permitAllMatcher
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+
+        Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication()
+        if (currentAuth != null && currentAuth.isAuthenticated() && currentAuth.principal instanceof UserInfo &&
+                (!permitAllMatcher.matches(request) || request.requestURI == '/app/userInfo')) {
+            // Update the security context with roles based on the current request
+            UserInfo userInfo = currentAuth.principal.clone() as UserInfo
+            userInfo.authorities = userAuthService.loadAuthorities(userInfo.username)
+            SecurityContextHolder.getContext().authentication = new UsernamePasswordAuthenticationToken(userInfo, currentAuth.credentials, userInfo.authorities)
+        }
+
+        filterChain.doFilter(request, response)
     }
 }

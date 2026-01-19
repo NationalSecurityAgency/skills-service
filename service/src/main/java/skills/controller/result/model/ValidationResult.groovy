@@ -22,4 +22,5 @@ import groovy.transform.EqualsAndHashCode
 class ValidationResult {
     boolean valid
     String msg
+    String validationFailedDetails
 }
