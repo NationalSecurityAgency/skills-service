@@ -183,7 +183,7 @@ class AiPromptSettingsService {
         List<SettingsRequest> settingsRequests = []
         List<SettingsRequest> deleteIfExist = []
         settingsMap.each { String setting, String value ->
-            GlobalSettingsRequest gsr = new GlobalSettingsRequest(settingGroup: settingsGroup, setting: setting, value: InputSanitizer.sanitize(value))
+            GlobalSettingsRequest gsr = new GlobalSettingsRequest(settingGroup: settingsGroup, setting: setting, value: InputSanitizer.sanitizeDescription(value))
             if (value) {
                 settingsRequests << gsr
             } else {
