@@ -27,6 +27,8 @@ import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import {useQuizConfig} from '@/stores/UseQuizConfig.js'
 import QuestionTypeDropDown from "@/components/quiz/testCreation/QuestionTypeDropDown.vue";
 import QuestionType from "@/skills-display/components/quiz/QuestionType.js";
+import AssistantGenUtil from "@/common-components/utilities/learning-conent-gen/AssistantGenUtil.js";
+import {useLog} from "@/components/utils/misc/useLog.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -43,6 +45,7 @@ const imgHandler = useImgHandler()
 const appConfig = useAppConfig()
 const quizConfig = useQuizConfig()
 const instructionsGenerator = useInstructionGenerator()
+const log = useLog()
 
 const extractedImageState = { hasImages: false, extractedImages: null, }
 
@@ -137,18 +140,19 @@ const cleanJsonString = (jsonString) => {
 };
 
 const handleGenerationCompleted = (generated) => {
+  if (log.isDebugEnabled()) {
+    log.debug(`GenerateSingleQuestionDialog.vue: handleGenerationCompleted: upToStartOfAnswers=[${upToStartOfAnswers.value}], answersString=[${answersString.value}]`)
+  }
+
   const questionMatch = /### Question:\s*([\s\S]+?)(?=\s*#+\s|$)/.exec(upToStartOfAnswers.value)
   if (!questionMatch) {
     throw new Error(`Invalid response format for question text=[${upToStartOfAnswers.value}]`);
   }
-  let answersToParse = answersString.value
-  let generateValueChangedNotes = null
-  const [newText, comments] = answersString.value.split(/Here is what was changed/i);
-  if (newText && comments) {
-    const cleanedComments = comments.replace(/^[\s:]+/, '').trim()
-    answersToParse = newText.replace(/\s*#+\s*$/gm, '') // Remove ### at end of lines.trim()
-    generateValueChangedNotes = `### Here is what was changed\n\n${cleanedComments}`
-  }
+  const {genValue, getValueNotes} = AssistantGenUtil.handleWhatChangedSection(answersString.value)
+  const answersToParse = genValue
+  const generateValueChangedNotes = getValueNotes
+
+
 
   const answersMatch = /### Answers:([\s\S]+)/.exec(answersToParse);
   if (!answersMatch) {

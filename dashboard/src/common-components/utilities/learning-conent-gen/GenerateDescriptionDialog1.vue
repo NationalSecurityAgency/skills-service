@@ -21,6 +21,8 @@ import {useInstructionGenerator} from "@/common-components/utilities/learning-co
 import {useDescriptionValidatorService} from "@/common-components/validators/UseDescriptionValidatorService.js";
 import AiPromptDialog from "@/common-components/utilities/learning-conent-gen/AiPromptDialog.vue";
 import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
+import {useLog} from "@/components/utils/misc/useLog.js";
+import AssistantGenUtil from "@/common-components/utilities/learning-conent-gen/AssistantGenUtil.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -39,6 +41,7 @@ const props = defineProps({
 const emit = defineEmits(['generated-desc'])
 const imgHandler = useImgHandler()
 const instructionsGenerator = useInstructionGenerator()
+const log = useLog()
 
 const currentDescription = ref('')
 const extractedImageState = { hasImages: false, extractedImages: null, }
@@ -107,15 +110,12 @@ const handleGeneratedChunk = (chunk) => {
 }
 
 const handleGenerationCompleted = (generated) => {
-  let generatedValue = generated.generatedValue
-  let generateValueChangedNotes = null
-
-  const [newText, comments] = generatedValue.split(/Here is what was changed/i);
-  if (newText && comments) {
-    const cleanedComments = comments.replace(/^[\s:]+/, '').trim()
-    generatedValue = newText.replace(/\s*#+\s*$/gm, '') // Remove ### at end of lines.trim()
-    generateValueChangedNotes = `### Here is what was changed\n\n${cleanedComments}`
+  if (log.isDebugEnabled()) {
+    log.debug(`GenerateDescriptionDialog1.vue: handleGenerationCompleted: generatedValue=[${generated.generatedValue}]`)
   }
+  const {genValue, getValueNotes} = AssistantGenUtil.handleWhatChangedSection(generated.generatedValue)
+  let generatedValue = genValue
+  const generateValueChangedNotes = getValueNotes
 
   if (extractedImageState.extractedImages) {
     const {
