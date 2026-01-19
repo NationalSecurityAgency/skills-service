@@ -10,6 +10,6 @@ data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"mode
 
 data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"]"},"finish_reason":null}]}
 
-data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"\n\n# Here is what was changed\n- Change 1\n- Change 2"},"finish_reason":null}]}
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"\n\n# Here is What Was Changed\n- Change 1\n- Change 2"},"finish_reason":null}]}
 
 data: [DONE]

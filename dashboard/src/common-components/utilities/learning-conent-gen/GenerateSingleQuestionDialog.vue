@@ -143,7 +143,7 @@ const handleGenerationCompleted = (generated) => {
   }
   let answersToParse = answersString.value
   let generateValueChangedNotes = null
-  const [newText, comments] = answersString.value.split('Here is what was changed');
+  const [newText, comments] = answersString.value.split(/Here is what was changed/i);
   if (newText && comments) {
     const cleanedComments = comments.replace(/^[\s:]+/, '').trim()
     answersToParse = newText.replace(/\s*#+\s*$/gm, '') // Remove ### at end of lines.trim()
