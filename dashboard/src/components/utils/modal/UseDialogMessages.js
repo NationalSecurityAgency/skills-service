@@ -59,6 +59,7 @@ export const useDialogMessages = () => {
                         rejectClass= 'p-button-warn p-button-outlined',
                         rejectIcon= 'far fa-times-circle',
                         targetElement = undefined,
+                        appendTo = null,
                         onShowHandler = () => {},
                         onHideHandler = () => {},
                       }) => {
@@ -73,6 +74,7 @@ export const useDialogMessages = () => {
       acceptIcon,
       rejectLabel,
       rejectClass,
+      appendTo,
       rejectIcon: 'far fa-times-circle',
       onShow: () => {
         announcer.polite(message);

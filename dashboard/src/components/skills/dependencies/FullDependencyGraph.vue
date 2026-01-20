@@ -241,6 +241,7 @@ const selectEdge = (params) => {
     header: 'Remove Learning Path?',
     acceptLabel: 'Remove',
     rejectLabel: 'Cancel',
+    appendTo: '#dependency-graph',
     accept: () => {
       SkillsService.removeDependency(toNode.details.projectId, toNode.details.skillId, fromNode.details.skillId, fromNode.details.projectId).then(() => {
         nodes.clear()
