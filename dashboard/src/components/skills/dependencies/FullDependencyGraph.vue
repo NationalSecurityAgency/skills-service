@@ -52,7 +52,7 @@ const showGraph = ref(true);
 const selectedFromSkills = ref({});
 const data = ref([]);
 const graph = ref({});
-const network = (ref);
+const network = ref(null);
 const enableZoom = useStorage('learningPath-enableZoom', true);
 const enableAnimations = useStorage('learningPath-enableAnimations', true);
 const horizontalOrientation = useStorage('learningPath-horizontalOrientation', false);
@@ -166,42 +166,45 @@ const handleUpdate = (addedNode) => {
 };
 
 const loadGraphDataAndUpdateGraph = (addedNode = null) => {
-  SkillsService.getDependentSkillsGraphForProject(route.params.projectId)
-      .then((response) => {
-        graph.value = response;
-        isLoading.value = false;
-        // buildData()
-        if(!network.value) {
-          createGraph()
-        } else {
-          buildData()
-        }
-      })
-      .finally(() => {
-        isLoading.value = false;
-        if(addedNode && enableZoom.value) {
-          const foundNode = getNodeBySkillId(addedNode)
-          if(foundNode && foundNode.id) {
-            panToNode(foundNode.id);
-          }
-        } else {
-          setTimeout(() => {
-            network.value.fit()
-          }, 300)
-        }
-      });
+  SkillsService.getDependentSkillsGraphForProject(route.params.projectId).then((response) => {
+    graph.value = response;
+    if(graph.value.nodes.length > 0) {
+      if (!network.value) {
+        createGraph()
+      } else {
+        buildData()
+      }
+    } else {
+      if(network.value) {
+        network.value.destroy()
+      }
+      network.value = null;
+    }
+  }).finally(() => {
+    isLoading.value = false;
+    if(graph.value.nodes.length === 0) {
+      network.value = null;
+    } else if(addedNode && enableZoom.value) {
+      const foundNode = getNodeBySkillId(addedNode)
+      if(foundNode && foundNode.id) {
+        panToNode(foundNode.id);
+      }
+    } else {
+      setTimeout(() => {
+        network.value.fit()
+      }, 300)
+    }
+  });
 }
 
 const loadGraphDataAndCreateGraph = (addedNode = null) => {
-  SkillsService.getDependentSkillsGraphForProject(route.params.projectId)
-      .then((response) => {
-        graph.value = response;
-        isLoading.value = false;
-        createGraph(addedNode);
-      })
-      .finally(() => {
-        isLoading.value = false;
-      });
+  SkillsService.getDependentSkillsGraphForProject(route.params.projectId).then((response) => {
+    graph.value = response;
+    isLoading.value = false;
+    createGraph(addedNode);
+  }).finally(() => {
+    isLoading.value = false;
+  });
 };
 
 const panToNode = (node, scrollIntoView = false) => {

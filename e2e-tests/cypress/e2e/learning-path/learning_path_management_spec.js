@@ -346,7 +346,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
         cy.get('.vis-zoomExtends').click()
 
-        cy.clickOnNode(325, 250);
+        cy.clickOnNode(310, 250);
         cy.get('button').contains('Remove').click();
         cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet')
     })
