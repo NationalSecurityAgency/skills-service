@@ -156,8 +156,7 @@ const clearSelectedFromSkills = () => {
 };
 
 const handleUpdate = (addedNode) => {
-  graph.value = [];
-  nodes.clear()
+  graph.value = null;
   edges.clear()
   clearSelectedFromSkills();
   isLoading.value = true;
@@ -170,6 +169,7 @@ const loadGraphDataAndUpdateGraph = (addedNode = null) => {
     graph.value = response;
     if(graph.value.nodes.length > 0) {
       if (!network.value) {
+        data.value = [];
         createGraph()
       } else {
         buildData()
@@ -201,6 +201,7 @@ const loadGraphDataAndCreateGraph = (addedNode = null) => {
   SkillsService.getDependentSkillsGraphForProject(route.params.projectId).then((response) => {
     graph.value = response;
     isLoading.value = false;
+    data.value = [];
     createGraph(addedNode);
   }).finally(() => {
     isLoading.value = false;
@@ -242,6 +243,7 @@ const selectEdge = (params) => {
     rejectLabel: 'Cancel',
     accept: () => {
       SkillsService.removeDependency(toNode.details.projectId, toNode.details.skillId, fromNode.details.skillId, fromNode.details.projectId).then(() => {
+        nodes.clear()
         handleUpdate();
       });
     }
@@ -439,6 +441,7 @@ const computedHeight = computed(() => {
     return dataHeight.value * (containerWidth.value / dataWidth.value)
   }
 })
+
 </script>
 
 <template>
@@ -484,7 +487,7 @@ const computedHeight = computed(() => {
         </div>
       </template>
     </Card>
-    
+
     <dependency-table v-if="hasGraphData" :is-loading="isLoading" :data="data" @update="handleUpdate" @panToNode="panToNode" />
     <share-skills-with-other-projects v-if="!isReadOnlyProj" :project-id="route.params.projectId" />
     <shared-skills-from-other-projects v-if="!isReadOnlyProj" :project-id="route.params.projectId" />
