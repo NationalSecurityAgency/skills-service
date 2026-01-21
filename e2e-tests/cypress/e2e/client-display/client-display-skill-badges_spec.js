@@ -67,37 +67,49 @@ describe('Client Display Badges Visible on Skill Summaries', () => {
     });
 
    it('display badge and global badge on skill from subject page', () => {
-        cy.resetDb();
-        cy.fixture('vars.json')
-            .then((vars) => {
-                if (!Cypress.env('oauthMode')) {
-                    cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
-                }
-            });
-        cy.loginAsProxyUser();
-        cy.createProject(1);
-        cy.createSubject(1, 1);
-        cy.createSkill(1, 1, 1, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
-        cy.createSkill(1, 1, 2, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
-        cy.createSkill(1, 1, 3, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
+      cy.resetDb()
+      cy.fixture('vars.json')
+        .then((vars) => {
+          if (!Cypress.env('oauthMode')) {
+            cy.register(Cypress.env('proxyUser'), vars.defaultPass, false)
+          }
+        })
+      cy.loginAsProxyUser()
+      cy.createProject(1)
+      cy.createSubject(1, 1)
+      cy.createSkill(1, 1, 1, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' })
+      cy.createSkill(1, 1, 2, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' })
+      cy.createSkill(1, 1, 3, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' })
 
-        cy.createBadge(1, 1);
-        cy.assignSkillToBadge(1, 1, 1);
-        cy.enableBadge(1, 1);
+      cy.createBadge(1, 1)
+      cy.assignSkillToBadge(1, 1, 1)
+      cy.enableBadge(1, 1)
 
-        cy.loginAsRootUser();
-        cy.createGlobalBadge(1)
-        cy.assignSkillToGlobalBadge(1, 1)
-        cy.enableGlobalBadge(1)
-        cy.loginAsProxyUser();
+      cy.createSubject(1, 2)
+      cy.reuseSkillIntoAnotherSubject(1, 1, 2)
 
-        cy.cdVisit('/');
-        cy.cdClickSubj(0);
+      cy.loginAsRootUser()
+      cy.createGlobalBadge(1)
+      cy.assignSkillToGlobalBadge(1, 1)
+      cy.enableGlobalBadge(1)
+      cy.loginAsProxyUser()
 
-        cy.get('[data-cy="skillBadges"]').should('exist');
-        cy.get('[data-cy="skillBadge-0"]').should('exist');
-        cy.get('[data-cy="skillBadge-1"]').should('exist');
-    });
+      // check for the badges on the original skill
+      cy.cdVisit('/')
+      cy.cdClickSubj(0)
+
+      cy.get('[data-cy="skillBadges"]').should('exist')
+      cy.get('[data-cy="skillBadge-0"]').should('exist')
+      cy.get('[data-cy="skillBadge-1"]').should('exist')
+
+      // now check the reused skill
+      cy.cdVisit('/')
+      cy.cdClickSubj(1)
+
+      cy.get('[data-cy="skillBadges"]').should('exist')
+      cy.get('[data-cy="skillBadge-0"]').should('exist')
+      cy.get('[data-cy="skillBadge-1"]').should('exist')
+    })
 
     it('display badge and global badge on skill from skill detail page', () => {
       cy.resetDb();
@@ -118,14 +130,27 @@ describe('Client Display Badges Visible on Skill Summaries', () => {
       cy.assignSkillToBadge(1, 1, 1);
       cy.enableBadge(1, 1);
 
+      cy.createSubject(1, 2)
+      cy.reuseSkillIntoAnotherSubject(1, 1, 2)
+
       cy.loginAsRootUser();
       cy.createGlobalBadge(1)
       cy.assignSkillToGlobalBadge(1, 1)
       cy.enableGlobalBadge(1)
       cy.loginAsProxyUser();
 
+      // check for the badges on the original skill
       cy.cdVisit('/');
       cy.cdClickSubj(0);
+      cy.cdClickSkill(0);
+
+      cy.get('[data-cy="skillBadges"]').should('exist');
+      cy.get('[data-cy="skillBadge-0"]').should('exist');
+      cy.get('[data-cy="skillBadge-1"]').should('exist');
+
+      // now check the reused skill
+      cy.cdVisit('/');
+      cy.cdClickSubj(1);
       cy.cdClickSkill(0);
 
       cy.get('[data-cy="skillBadges"]').should('exist');

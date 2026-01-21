@@ -551,7 +551,8 @@ class SkillsLoader {
 
         String skillSubjectId = skillRelDefRepo.findSubjectSkillIdByChildId(skillDef.id)
 
-        def badges = skillDefRepo.findAllBadgesForSkill([skillId], crossProjectId ?: projectId);
+        String processedSkillId = SkillReuseIdUtil.isTagged(skillId) ? SkillReuseIdUtil.removeTag(skillId) : skillId
+        def badges = skillDefRepo.findAllBadgesForSkill([processedSkillId], crossProjectId ?: projectId);
 
         String groupName = null
         if(skillDef.groupId) {
