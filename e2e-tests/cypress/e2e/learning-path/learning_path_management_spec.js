@@ -413,6 +413,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
+        cy.wait(500);
         cy.get('[data-cy="learningPath-fullScreenButton"]').realClick();
         cy.get('#prerequisiteContent').click()
 
