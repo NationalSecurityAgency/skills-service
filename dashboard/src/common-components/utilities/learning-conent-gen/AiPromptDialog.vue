@@ -196,6 +196,18 @@ const getLastChatItem = () => {
 const isLastChatItem = (item) => {
   return item.id === getLastChatItem().id
 }
+const getGeneratedValueId = (historyId) => {
+  let generatedValueId = 0;
+  for (const item of chatHistory.value) {
+    if (item.generatedValue && item.generatedValue.trim() !== '') {
+      generatedValueId++;
+    }
+    if (item.id === historyId) {
+      break;
+    }
+  }
+  return generatedValueId;
+}
 const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false, userChatInstructions=null) => {
   const res = {
     id: `${chatCounter.value++}`,
@@ -295,12 +307,13 @@ const genWithStreaming = (messages) => {
         scrollInstructionsIntoView()
       },
       () => {
-        const updatedHistoryItem = props.generationCompletedFn(getLastChatItem())
+        const lastItem = getLastChatItem()
+        const updatedHistoryItem = props.generationCompletedFn(lastItem)
         updateLastChatItemGeneratedValue(updatedHistoryItem)
         setFinalMsgToLastChatItem(props.generationCompletedMsg)
         isGenerating.value = false
         focusOnInstructionsInput()
-        announcer.polite(`AI Generation Completed`)
+        announcer.polite(`AI Generation Completed. To review the generated content, navigate to the 'Generated Content ${getGeneratedValueId(lastItem.id)}' section using your screen reader's landmark navigation.`)
       },
       (error) => {
         isGenerating.value = false
@@ -425,15 +438,23 @@ const hasFooter = computed(() => appConfig.openaiFooterMsg || hasPoweredByInfo.v
                           :is-generate-value-empty="!historyItem.generatedValue || historyItem.generatedValue.trim() === ''"
                           data-cy="origSegment"/>
             </div>
-            <div v-if="historyItem.generatedValue" class="px-5 border rounded-lg bg-blue-50 dark:bg-blue-900">
+            <section
+              v-if="historyItem.generatedValue"
+              :id="`generated-content-${historyItem.id}`"
+              :aria-label="`Generated Content ${getGeneratedValueId(historyItem.id)}`"
+              role="region"
+              aria-live="off"
+              aria-atomic="true"
+              class="px-5 border rounded-lg bg-blue-50 dark:bg-blue-900"
+            >
               <slot name="generatedValue" :historyItem="historyItem" data-cy="generatedSegment"/>
               <div v-if="historyItem.generateValueChangedNotes"
                    data-cy="generatedSegmentNotes"
                    class="border-t-2 border-dotted border-blue-200 p-0 mt-5">
-               <markdown-text :text="historyItem.generateValueChangedNotes"
+                <markdown-text :text="historyItem.generateValueChangedNotes"
                              :instanceId="`${historyItem.id}-generateValueChangedNotes`"/>
               </div>
-            </div>
+            </section>
             <div v-if="isLastChatItem(historyItem) && historyItem.finalMsg" data-cy="finalSegment">
               <Message :closable="false" :severity="finalMsgSeverity(historyItem)" aria-live="polite">
                 <markdown-text :text="historyItem.finalMsg" :instanceId="`${historyItem.id}-finalMsg`" aria-hidden="true"/>
