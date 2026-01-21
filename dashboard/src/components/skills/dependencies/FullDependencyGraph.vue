@@ -52,7 +52,7 @@ const showGraph = ref(true);
 const selectedFromSkills = ref({});
 const data = ref([]);
 const graph = ref({});
-const network = ref(null);
+let network = null;
 const enableZoom = useStorage('learningPath-enableZoom', true);
 const enableAnimations = useStorage('learningPath-enableAnimations', true);
 const horizontalOrientation = useStorage('learningPath-horizontalOrientation', false);
@@ -102,8 +102,8 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  if (network.value) {
-    network.value.destroy();
+  if (network) {
+    network.destroy();
   }
 })
 
@@ -153,6 +153,9 @@ const updateSelectedFromSkills = (item, zoomTo = true) => {
 
 const clearSelectedFromSkills = () => {
   selectedFromSkills.value = {};
+  if(network) {
+    network.unselectAll()
+  }
 };
 
 const handleUpdate = (addedNode) => {
@@ -168,22 +171,22 @@ const loadGraphDataAndUpdateGraph = (addedNode = null) => {
   SkillsService.getDependentSkillsGraphForProject(route.params.projectId).then((response) => {
     graph.value = response;
     if(graph.value.nodes.length > 0) {
-      if (!network.value) {
+      if (!network) {
         data.value = [];
         createGraph()
       } else {
         buildData()
       }
     } else {
-      if(network.value) {
-        network.value.destroy()
+      if(network) {
+        network.destroy()
       }
-      network.value = null;
+      network = null;
     }
   }).finally(() => {
     isLoading.value = false;
     if(graph.value.nodes.length === 0) {
-      network.value = null;
+      network = null;
     } else if(addedNode && enableZoom.value) {
       const foundNode = getNodeBySkillId(addedNode)
       if(foundNode && foundNode.id) {
@@ -191,7 +194,7 @@ const loadGraphDataAndUpdateGraph = (addedNode = null) => {
       }
     } else {
       setTimeout(() => {
-        network.value.fit()
+        network.fit()
       }, 300)
     }
   });
@@ -209,7 +212,7 @@ const loadGraphDataAndCreateGraph = (addedNode = null) => {
 };
 
 const panToNode = (node, scrollIntoView = false) => {
-  network.value.focus(node, {scale: 1, animation: enableAnimations.value})
+  network.focus(node, {scale: 1, animation: enableAnimations.value})
   if(scrollIntoView) {
     dependencyGraph.value.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
@@ -226,7 +229,7 @@ const selectNode = (params) => {
 
 const selectEdge = (params) => {
   const selectedEdge = params.edges[0];
-  const connectedNodes = network.value.getConnectedNodes(selectedEdge);
+  const connectedNodes = network.getConnectedNodes(selectedEdge);
 
   const fromNode = getNodeById(connectedNodes[0])
   const toNode = getNodeById(connectedNodes[1])
@@ -255,10 +258,10 @@ const createGraph = (nodeToPanTo = null) => {
   data.value = buildData();
   if (hasGraphData.value) {
     showGraph.value = true;
-    network.value = new Network(dependencyGraph.value, data.value, displayOptions.value);
+    network = new Network(dependencyGraph.value, data.value, displayOptions.value);
 
-    network.value.on('selectNode', selectNode);
-    network.value.on('selectEdge', selectEdge);
+    network.on('selectNode', selectNode);
+    network.on('selectEdge', selectEdge);
 
     if(nodeToPanTo && enableZoom.value) {
       const foundNode = getNodeBySkillId(nodeToPanTo)
@@ -267,7 +270,7 @@ const createGraph = (nodeToPanTo = null) => {
       }
     } else {
       setTimeout(() => {
-        network.value.fit()
+        network.fit()
       }, 300)
     }
     setVisNetworkTabIndex();
@@ -397,8 +400,9 @@ const layout = () => {
 
 const toggleFullscreen = () => {
   toggle().then(() => {
+    clearSelectedFromSkills()
     setTimeout(() => {
-      network.value.fit()
+      network.fit()
     }, 300)
   })
 }
@@ -413,7 +417,7 @@ const toggleAnimations = () => {
 
 const toggleDynamicHeight = () => {
   dynamicHeight.value = !dynamicHeight.value
-  network.value.fit()
+  network.fit()
 }
 
 const toggleOrientation = () => {
