@@ -36,14 +36,27 @@ const isProcessing = ref(true)
 const sortField = ref('')
 const sortOrder = ref(0)
 
+const getNode = (nodes, id) => {
+  const foundNode = nodes.get({
+    filter: (node) => {
+      return node.id === id && node.type !== 'Badge-Skills'
+    }
+  })
+  if(foundNode && foundNode.length > 0) {
+    return foundNode[0];
+  } else {
+    return null;
+  }
+}
+
 onMounted(() => {
   if (props.data && props.data.edges && props.data.edges.length > 0) {
     const { nodes, edges } = props.data
 
     if (edges && edges.length > 0) {
       edges.forEach((edge) => {
-        const fromNode = nodes.get({filter: (node) => node.id === edge.from && node.type !== 'Badge-Skills'})[0]
-        const toNode = nodes.get({filter: (node) => node.id === edge.to && node.type !== 'Badge-Skills'})[0]
+        const fromNode = getNode(nodes, edge.from)
+        const toNode = getNode(nodes, edge.to)
 
         if( fromNode && toNode ) {
           learningPaths.value.push({
