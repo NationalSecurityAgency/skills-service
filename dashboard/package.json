@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm install && npm run licenseCheck && npm run getDashboardVersion && vite build",
+    "build": "npm install && npm run licenseCheck && npm run getDashboardVersion && npm run updateBrowserslistDb && vite build",
     "preview": "vite preview",
     "test:unit": "vitest",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
@@ -15,7 +15,8 @@
     "licenseCheck": "npm run licenseDepCheck",
     "removeServiceResources": "rm -rf ../service/src/main/resources/public/assets && rm -rf ../service/src/main/resources/public/themes && rm ../service/src/main/resources/public/index.html && rm ../service/src/main/resources/public/skilltree.ico",
     "copyDistToService": "cp -rT dist ../service/src/main/resources/public/ && cp -rT dist ../service/target/classes/public/",
-    "deploy": "npm install && npm run build && npm run copyDistToService"
+    "deploy": "npm install && npm run build && npm run copyDistToService",
+    "updateBrowserslistDb": "npx update-browserslist-db@latest"
   },
   "dependencies": {
     "@dagrejs/dagre": "^1.1.8",
