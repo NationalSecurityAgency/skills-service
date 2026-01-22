@@ -255,7 +255,7 @@ const selectEdge = (params) => {
 }
 
 const createGraph = (nodeToPanTo = null) => {
-  data.value = buildData();
+  buildData();
   if (hasGraphData.value) {
     showGraph.value = true;
     network = new Network(dependencyGraph.value, data.value, displayOptions.value);
@@ -295,7 +295,7 @@ const buildData = () => {
 
   layout();
 
-  return { nodes: nodes, edges: edges };
+  data.value = { nodes: nodes, edges: edges };
 };
 
 const buildNode = (node) => {
