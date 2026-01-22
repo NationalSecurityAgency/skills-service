@@ -32,6 +32,9 @@ class NewVersionsNotifCreator {
     @Value('#{"${skills.config.ui.docsHost}"}')
     String docsRootHost
 
+    @Value('${skills.config.ui.enableOpenAIIntegration:#{false}}')
+    Boolean enableOpenAIIntegration
+
     @Autowired
     WebNotificationsRepo webNotificationsRepo
 
@@ -40,63 +43,79 @@ class NewVersionsNotifCreator {
         Date releaseNoLaterThan
     }
 
-    private final List<WebNotifWrapper> newVersionsNotifications = [
-            new WebNotifWrapper(
-                    releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-10-12'),
-                    notif: new WebNotification(
-                            notifiedOn: new Date(),
-                            showUntil: Date.parse('yyyy-MM-dd', '2025-11-01'),
-                            lookupId: "new-versions-4",
-                            title: "Version 3.9 Released",
-                            notification: """- Support for PDF slide decks in quizzes and surveys
-- Enhanced Metric Page with time range filters
-- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
-            ),
-            new WebNotifWrapper(
-                    releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-09-12'),
-                    notif: new WebNotification(
-                            notifiedOn: new Date(),
-                            showUntil: Date.parse('yyyy-MM-dd', '2025-10-01'),
-                            lookupId: "new-versions-3",
-                            title: "Version 3.8 Released",
-                            notification: """- Upload PDF slide decks for skills to enhance training
-- Create Global Badges with skills/levels from any admin-accessible project
-- Customize skill icons, just like subjects and badges
-- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
-            ),
-            new WebNotifWrapper(
-                    releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-07-12'),
-                    notif: new WebNotification(
-                            notifiedOn: new Date(),
-                            showUntil: Date.parse('yyyy-MM-dd', '2025-09-01'),
-                            lookupId: "new-versions-2",
-                            title: "Version 3.7 Released",
-                            notification: """- A training-wide search with a click or keyboard shortcut
-- Ability to easily share non-catalog projects
-- Unobtrusive alerts for updates and new features
-- Filter quiz and survey results by completion date range
-- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
-            ),
-            new WebNotifWrapper(
-                    releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-05-28'),
-                    notif: new WebNotification(
-                            notifiedOn: new Date(),
-                            showUntil: Date.parse('yyyy-MM-dd', '2025-08-01'),
-                            lookupId: "new-versions-1",
-                            title: "Version 3.6 Released",
-                            notification: """- Skill and Subject draft mode until fully configured
-- Audio and video support for quiz and survey questions
-- Context-aware contact process
-- 1,000+ additional Font Awesome icons
-- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
-            )
-    ]
-
-
     @PostConstruct
     @Transactional
     void createNewVersionsNotification() {
         assert docsRootHost // must have it configured
+        List<WebNotifWrapper> newVersionsNotifications = [
+                new WebNotifWrapper(
+                        releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-02-12'),
+                        notif: new WebNotification(
+                                notifiedOn: new Date(),
+                                showUntil: Date.parse('yyyy-MM-dd', '2026-03-12'),
+                                lookupId: "new-versions-5",
+                                title: "Version 4.0 Released",
+                                notification:
+                                        enableOpenAIIntegration ? """
+### ✨ AI-Powered Content Generation
+- **AI Assistant Integration**: Streamline your content creation with our new AI Assistant, now available for generating high-quality skill descriptions and quiz questions
+- **Smart Quiz Creation**: Automatically generate complete quizzes for skills based on their descriptions, complete with multiple-choice questions and answers
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""" : """
+- **Improved Learning Path Display**: Better handling of large skill sets with optimized rendering and navigation as well as full-screen display option
+- **Improved Skill Navigation**: Quick access to adjacent skills with Previous and Next buttons in the Admin Skill Details page
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
+                ),
+                new WebNotifWrapper(
+                        releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-10-12'),
+                        notif: new WebNotification(
+                                notifiedOn: new Date(),
+                                showUntil: Date.parse('yyyy-MM-dd', '2025-11-01'),
+                                lookupId: "new-versions-4",
+                                title: "Version 3.9 Released",
+                                notification: """- Support for PDF slide decks in quizzes and surveys
+- Enhanced Metric Page with time range filters
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
+                ),
+                new WebNotifWrapper(
+                        releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-09-12'),
+                        notif: new WebNotification(
+                                notifiedOn: new Date(),
+                                showUntil: Date.parse('yyyy-MM-dd', '2025-10-01'),
+                                lookupId: "new-versions-3",
+                                title: "Version 3.8 Released",
+                                notification: """- Upload PDF slide decks for skills to enhance training
+- Create Global Badges with skills/levels from any admin-accessible project
+- Customize skill icons, just like subjects and badges
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
+                ),
+                new WebNotifWrapper(
+                        releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-07-12'),
+                        notif: new WebNotification(
+                                notifiedOn: new Date(),
+                                showUntil: Date.parse('yyyy-MM-dd', '2025-09-01'),
+                                lookupId: "new-versions-2",
+                                title: "Version 3.7 Released",
+                                notification: """- A training-wide search with a click or keyboard shortcut
+- Ability to easily share non-catalog projects
+- Unobtrusive alerts for updates and new features
+- Filter quiz and survey results by completion date range
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
+                ),
+                new WebNotifWrapper(
+                        releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2025-05-28'),
+                        notif: new WebNotification(
+                                notifiedOn: new Date(),
+                                showUntil: Date.parse('yyyy-MM-dd', '2025-08-01'),
+                                lookupId: "new-versions-1",
+                                title: "Version 3.6 Released",
+                                notification: """- Skill and Subject draft mode until fully configured
+- Audio and video support for quiz and survey questions
+- Context-aware contact process
+- 1,000+ additional Font Awesome icons
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
+                )
+        ]
+
         List<String> lookupIds = newVersionsNotifications.collect { it.notif.lookupId }
         boolean lookupIdsUnique = lookupIds.toSet().size() == lookupIds.size()
         if (!lookupIdsUnique) {
