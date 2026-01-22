@@ -500,6 +500,21 @@ if (a == true) {
 
 (A) paragraph two
 """
+
+        validator.addPrefixToInvalidParagraphs("""> (A) A
+
+```
+B
+```
+""", prefix).newDescription == """> (A) A
+
+(A) 
+
+```
+B
+```
+"""
+
     }
 
     def "support headings"() {
