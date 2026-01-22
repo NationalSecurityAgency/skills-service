@@ -65,26 +65,31 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
 
         // Add Skill5 as a prerequisite for Badge1
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill5Subj2')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
 
         // Add Skill6 as a prerequisite for Badge2
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill6Subj2')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
 
         // Add Skill7 as a prerequisite for Skill5
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill7Subj2')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'skill5Subj2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
 
         // Add Skill8 as a prerequisite for Badge1
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill8Subj2')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
 
         cy.wait(1000);
 
@@ -188,24 +193,28 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
         cy.wait('@badge1ToBadge2')
 
         // Add Skill5 as a prerequisite for Badge1
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill5Subj2')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
         cy.wait('@skill1ToBadge1')
 
         // Add Skill6 as a prerequisite for Badge2
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill6Subj2')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
         cy.wait('@skill6ToBadge2')
 
         // Add Skill7 as a prerequisite for Skill5
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill7Subj2')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'skill5Subj2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
         cy.wait('@skill7ToSkill5')
 
         // Add Skill8 as a prerequisite for Badge1
@@ -259,6 +268,7 @@ describe('Learning Path Management Validation Tests', () => {
         // Remove the connection from Badge 1 and Badge 2
         cy.get('[data-cy="sharedSkillsTable-removeBtn"]').first().click();
         cy.get('button').contains('Remove').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
         cy.wait('@removeBadge1ToBadge2')
 
         cy.validateTable(tableSelector, [
@@ -346,7 +356,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
         cy.get('.vis-zoomExtends').click()
 
-        cy.clickOnNode(300, 250);
+        cy.clickOnNode(310, 250);
         cy.get('button').contains('Remove').click();
         cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet')
     })
@@ -374,6 +384,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
 
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge2')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
@@ -393,6 +404,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
 
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge2');
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
@@ -413,6 +425,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
 
+        cy.wait(500);
         cy.get('[data-cy="learningPath-fullScreenButton"]').realClick();
         cy.get('#prerequisiteContent').click()
 
@@ -420,21 +433,25 @@ describe('Learning Path Management Validation Tests', () => {
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill5Subj2')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
 
         // Add Skill6 as a prerequisite for Badge2
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill6Subj2')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
 
         // Add Skill7 as a prerequisite for Skill5
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill7Subj2')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'skill5Subj2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
 
         // Add Skill8 as a prerequisite for Badge1
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill8Subj2')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge1');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
 
         cy.wait(1000);
 

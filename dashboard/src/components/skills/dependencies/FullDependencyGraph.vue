@@ -18,6 +18,7 @@ import { ref, onMounted, computed, onBeforeUnmount, useTemplateRef } from 'vue';
 import {useFullscreen, useStorage} from '@vueuse/core';
 import { useRoute } from 'vue-router';
 import { Network } from 'vis-network';
+import { DataSet } from 'vis-data';
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import PrerequisiteSelector from '@/components/skills/dependencies/PrerequisiteSelector.vue';
 import SkillsService from '@/components/skills/SkillsService';
@@ -36,6 +37,7 @@ import AccordionHeader from 'primevue/accordionheader';
 import AccordionContent from 'primevue/accordioncontent';
 import dagre from "@dagrejs/dagre"
 import GraphControls from "@/components/skills/dependencies/GraphControls.vue";
+import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
 
 const dialogMessages = useDialogMessages()
 const projConfig = useProjConfig();
@@ -51,14 +53,14 @@ const showGraph = ref(true);
 const selectedFromSkills = ref({});
 const data = ref([]);
 const graph = ref({});
-const network = (ref);
+let network = null;
 const enableZoom = useStorage('learningPath-enableZoom', true);
 const enableAnimations = useStorage('learningPath-enableAnimations', true);
 const horizontalOrientation = useStorage('learningPath-horizontalOrientation', false);
 const dynamicHeight = useStorage('learningPath-dynamicHeight', false);
 const fullDepsSkillsGraph = ref()
-let nodes = [];
-let edges = [];
+let nodes = new DataSet();
+let edges = new DataSet();
 const legendItems = [
   { label: 'Skill', color: 'lightgreen', iconClass: 'fa-graduation-cap' },
   { label: 'Badge', color: '#88a9fc', iconClass: 'fa-award' },
@@ -78,6 +80,11 @@ const displayOptions = ref({
   physics: {
     enabled: false,
   },
+  edges: {
+    smooth: {
+      enabled: false
+    }
+  },
   nodes: {
     font: {
       size: 18,
@@ -90,16 +97,43 @@ const displayOptions = ref({
 });
 
 onMounted(() => {
-  nodes = [];
-  edges = [];
+  nodes.clear();
+  edges.clear();
   loadGraphDataAndCreateGraph();
 })
 
 onBeforeUnmount(() => {
-  if (network.value) {
-    network.value.destroy();
+  if (network) {
+    network.destroy();
   }
 })
+
+
+const getNodeBySkillId = (skillId) => {
+  const foundNode = nodes.get({
+    filter: (node) => {
+      return node.details.skillId === skillId
+    }
+  })
+  if(foundNode && foundNode.length > 0) {
+    return foundNode[0];
+  } else {
+    return null;
+  }
+}
+
+const getNodeById = (id) => {
+  const foundNode = nodes.get({
+    filter: (node) => {
+      return node.id === id
+    }
+  })
+  if(foundNode && foundNode.length > 0) {
+    return foundNode[0];
+  } else {
+    return null;
+  }
+}
 
 const hasGraphData = computed(() => {
   return graph.value && graph.value.nodes && graph.value.nodes.length > 0;
@@ -108,7 +142,7 @@ const hasGraphData = computed(() => {
 const updateSelectedFromSkills = (item, zoomTo = true) => {
   if(item) {
     selectedFromSkills.value = item;
-    const foundNode = nodes.find((node) => node.details.skillId === item.skillId)
+    const foundNode = getNodeBySkillId(item.skillId)
     if(foundNode && zoomTo && enableZoom.value) {
       panToNode(foundNode.id)
     }
@@ -120,33 +154,65 @@ const updateSelectedFromSkills = (item, zoomTo = true) => {
 
 const clearSelectedFromSkills = () => {
   selectedFromSkills.value = {};
+  if(network) {
+    network.unselectAll()
+  }
 };
+
+const beforeUpdate = (skillId) => {
+  isLoading.value = true;
+}
 
 const handleUpdate = (addedNode) => {
   clearSelectedFromSkills();
-  graph.value = [];
-  network.value = null;
-  nodes = [];
-  edges = [];
   isLoading.value = true;
-
-  loadGraphDataAndCreateGraph(addedNode);
+  loadGraphDataAndUpdateGraph(addedNode);
 };
 
+const loadGraphDataAndUpdateGraph = (addedNode = null) => {
+  SkillsService.getDependentSkillsGraphForProject(route.params.projectId).then((response) => {
+    edges.clear()
+    graph.value = response;
+    if(graph.value.nodes.length > 0) {
+      if (!network) {
+        data.value = [];
+        createGraph()
+      } else {
+        buildData()
+      }
+    } else {
+      if(network) {
+        network.destroy()
+      }
+      network = null;
+    }
+  }).finally(() => {
+    isLoading.value = false;
+    if(graph.value.nodes.length === 0) {
+      network = null;
+    } else if(addedNode && enableZoom.value) {
+      const foundNode = getNodeBySkillId(addedNode)
+      if(foundNode && foundNode.id) {
+        panToNode(foundNode.id);
+      }
+    } else {
+      fitNetworkToScreen()
+    }
+  });
+}
+
 const loadGraphDataAndCreateGraph = (addedNode = null) => {
-  SkillsService.getDependentSkillsGraphForProject(route.params.projectId)
-      .then((response) => {
-        graph.value = response;
-        isLoading.value = false;
-        createGraph(addedNode);
-      })
-      .finally(() => {
-        isLoading.value = false;
-      });
+  SkillsService.getDependentSkillsGraphForProject(route.params.projectId).then((response) => {
+    graph.value = response;
+    data.value = [];
+    createGraph(addedNode);
+  }).finally(() => {
+    isLoading.value = false;
+  });
 };
 
 const panToNode = (node, scrollIntoView = false) => {
-  network.value.focus(node, {scale: 1, animation: enableAnimations.value})
+  network.focus(node, {scale: 1, animation: enableAnimations.value})
   if(scrollIntoView) {
     dependencyGraph.value.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
@@ -154,7 +220,7 @@ const panToNode = (node, scrollIntoView = false) => {
 
 const selectNode = (params) => {
   const selectedNode = params.nodes[0];
-  const nodeValue = nodes.find((node) => node.id === selectedNode);
+  const nodeValue = getNodeById(selectedNode);
   if(enableZoom.value) {
     panToNode(selectedNode, dynamicHeight.value)
   }
@@ -162,25 +228,26 @@ const selectNode = (params) => {
 }
 
 const selectEdge = (params) => {
-  const allNodes = graph.value.nodes;
   const selectedEdge = params.edges[0];
-  const connectedNodes = network.value.getConnectedNodes(selectedEdge);
+  const connectedNodes = network.getConnectedNodes(selectedEdge);
 
-  const fromNode = allNodes.find((node) => node.id === connectedNodes[0]);
-  const toNode = allNodes.find((node) => node.id === connectedNodes[1]);
+  const fromNode = getNodeById(connectedNodes[0])
+  const toNode = getNodeById(connectedNodes[1])
 
-  if(fromNode.belongsToBadge || toNode.belongsToBadge) {
+  if(fromNode.details.belongsToBadge || toNode.details.belongsToBadge) {
     return;
   }
 
-  const message = `Do you want to remove the path from ${fromNode.name} to ${toNode.name}?`;
+  const message = `Do you want to remove the path from ${fromNode.details.name} to ${toNode.details.name}?`;
   dialogMessages.msgConfirm({
     message: message,
     header: 'Remove Learning Path?',
     acceptLabel: 'Remove',
     rejectLabel: 'Cancel',
+    appendTo: '#dependency-graph',
     accept: () => {
-      SkillsService.removeDependency(toNode.projectId, toNode.skillId, fromNode.skillId, fromNode.projectId).then(() => {
+      SkillsService.removeDependency(toNode.details.projectId, toNode.details.skillId, fromNode.details.skillId, fromNode.details.projectId).then(() => {
+        nodes.clear()
         handleUpdate();
       });
     }
@@ -188,30 +255,21 @@ const selectEdge = (params) => {
 }
 
 const createGraph = (nodeToPanTo = null) => {
-  if (network.value) {
-    network.value.destroy();
-    network.value = null;
-    nodes = [];
-    edges = [];
-  }
-
-  data.value = buildData();
+  buildData();
   if (hasGraphData.value) {
     showGraph.value = true;
-    network.value = new Network(dependencyGraph.value, data.value, displayOptions.value);
+    network = new Network(dependencyGraph.value, data.value, displayOptions.value);
 
-    network.value.on('selectNode', selectNode);
-    network.value.on('selectEdge', selectEdge);
+    network.on('selectNode', selectNode);
+    network.on('selectEdge', selectEdge);
 
     if(nodeToPanTo && enableZoom.value) {
-      const foundNode = nodes.find((node) => node.details.skillId === nodeToPanTo)
+      const foundNode = getNodeBySkillId(nodeToPanTo)
       if(foundNode && foundNode.id) {
         panToNode(foundNode.id);
       }
     } else {
-      setTimeout(() => {
-        network.value.fit()
-      }, 300)
+      fitNetworkToScreen()
     }
     setVisNetworkTabIndex();
   } else {
@@ -223,11 +281,11 @@ const buildData = () => {
   const sortedNodes = graph.value.nodes.sort((a, b) => a.id - b.id);
   sortedNodes.forEach((node) => {
     const newNode = buildNode(node)
-    nodes.push(newNode);
+    nodes.update(newNode);
   });
   const sortedEdges = graph.value.edges.sort((a, b) => a.toId - b.toId);
   sortedEdges.forEach((edge) => {
-    edges.push({
+    edges.add({
       from: edge.toId,
       to: edge.fromId,
       arrows: 'to',
@@ -237,7 +295,7 @@ const buildData = () => {
 
   layout();
 
-  return { nodes: nodes, edges: edges };
+  data.value = { nodes: nodes, edges: edges };
 };
 
 const buildNode = (node) => {
@@ -312,12 +370,12 @@ const layout = () => {
   // Add nodes to the graph. The first argument is the node id. The second is
   // metadata about the node. In this case we're going to add labels to each of
   // our nodes.
-  nodes.forEach((node) => {
+  nodes.getDataSet().forEach((node) => {
     g.setNode(node.id, { label: node.label, width: nodeSize, height: nodeSize })
   })
 
   // Add edges to the graph.
-  edges.forEach(edge => {
+  edges.getDataSet().forEach(edge => {
     g.setEdge(edge.from, edge.to)
   })
 
@@ -327,19 +385,27 @@ const layout = () => {
     // update node position
     const x = g.node(nodeId).x
     const y = g.node(nodeId).y
-    nodes[nodeId - 1].x = x
-    nodes[nodeId - 1].y = y
+
+    const node = nodes.get(parseInt(nodeId));
+    if(node) {
+      nodes.update({...node, x: x, y: y})
+    }
   })
 
   dataHeight.value = g?._label?.height;
   dataWidth.value = g?._label?.width;
 }
 
+const fitNetworkToScreen = () => {
+  if(network) {
+    network.fit()
+  }
+}
+
 const toggleFullscreen = () => {
   toggle().then(() => {
-    setTimeout(() => {
-      network.value.fit()
-    }, 300)
+    clearSelectedFromSkills()
+    fitNetworkToScreen()
   })
 }
 
@@ -353,12 +419,13 @@ const toggleAnimations = () => {
 
 const toggleDynamicHeight = () => {
   dynamicHeight.value = !dynamicHeight.value
-  network.value.fit()
+  network.fit()
 }
 
 const toggleOrientation = () => {
   horizontalOrientation.value = !horizontalOrientation.value;
-  handleUpdate()
+  buildData()
+  fitNetworkToScreen()
 }
 
 const active = ref(null);
@@ -382,51 +449,59 @@ const computedHeight = computed(() => {
     return dataHeight.value * (containerWidth.value / dataWidth.value)
   }
 })
+
 </script>
 
 <template>
   <div id="full-dependent-skills-graph" ref="fullDepsSkillsGraph">
     <sub-page-header title="Learning Path"/>
 
-    <prerequisite-selector v-if="!isReadOnlyProj && !isFullscreen" :project-id="route.params.projectId" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
+    <prerequisite-selector v-if="!isReadOnlyProj && !isFullscreen" :project-id="route.params.projectId" :disabled="isLoading"
+                           @beforeUpdate="beforeUpdate" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
                            @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills" :showHeader="true"></prerequisite-selector>
-    <Card data-cy="fullDepsSkillsGraph" style="margin-bottom: 25px;">
-      <template #content>
-        <div ref="fullDepsSkillsGraphContainer" id="fullDepsSkillsGraphContainer" :class="horizontalOrientation ? 'horizontal-orientation' : 'vertical-orientation'" :style="!isFullscreen && dynamicHeight ? {'height': computedHeight + 'px !important'} : ''">
-          <Accordion v-model:value="active" v-if="isFullscreen" id="prerequisiteContent">
-            <AccordionPanel value="0">
-              <AccordionHeader>Add a new item to the learning path</AccordionHeader>
-              <AccordionContent>
-                <prerequisite-selector :showHeader="false" v-if="!isReadOnlyProj" :project-id="route.params.projectId" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
-                                       @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills" appendTo="self"></prerequisite-selector>
-              </AccordionContent>
-            </AccordionPanel>
-          </Accordion>
-          <div v-if="!hasGraphData && !isLoading" class="my-8">
-            <no-content2 icon="fa fa-project-diagram" title="No Learning Path Yet..."
-                         message="Here you can create and manage the project's Learning Path which may consist of skills and badges. You can get started by adding a path above."></no-content2>
-          </div>
-          <div v-else class="relative w-full mt-4 ml-1">
-            <div class="left-0" :class="isFullscreen ? 'pl-2' : ''">
-              <graph-legend class="graph-legend deps-overlay" :items="legendItems"/>
+    <SkillsOverlay :show="isLoading && !isFullscreen ">
+      <Card data-cy="fullDepsSkillsGraph" style="margin-bottom: 25px;">
+        <template #content>
+          <div ref="fullDepsSkillsGraphContainer" id="fullDepsSkillsGraphContainer" :style="!isFullscreen && dynamicHeight ? {'height': computedHeight + 'px !important'} : ''">
+            <Accordion v-model:value="active" v-if="isFullscreen" id="prerequisiteContent">
+              <AccordionPanel value="0">
+                <AccordionHeader>Add a new item to the learning path</AccordionHeader>
+                <AccordionContent>
+                  <prerequisite-selector :showHeader="false" v-if="!isReadOnlyProj" :project-id="route.params.projectId" :disabled="isLoading"
+                                         @beforeUpdate="beforeUpdate"  @update="handleUpdate" :selected-from-skills="selectedFromSkills"
+                                         @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills" appendTo="self"></prerequisite-selector>
+                </AccordionContent>
+              </AccordionPanel>
+            </Accordion>
+            <SkillsOverlay :show="isLoading && isFullscreen" class="h-full">
+            <div v-if="!hasGraphData && !isLoading" class="my-8">
+              <no-content2 icon="fa fa-project-diagram" title="No Learning Path Yet..."
+                           message="Here you can create and manage the project's Learning Path which may consist of skills and badges. You can get started by adding a path above."></no-content2>
             </div>
-            <div class="absolute right-0 mr-1 gap-2 flex items-center" id="additionalControls" :class="isFullscreen ? 'pr-2 mt-1' : ''">
-              <graph-controls @toggleZoom="toggleZoom"
-                              :isFullscreen="isFullscreen"
-                              :enableZoom="enableZoom"
-                              :enableAnimations="enableAnimations"
-                              :horizontalOrientation="horizontalOrientation"
-                              :enableDynamicHeight="dynamicHeight"
-                              @toggleOrientation="toggleOrientation"
-                              @toggleAnimations="toggleAnimations"
-                              @toggleDynamicHeight="toggleDynamicHeight"
-                              @toggleFullscreen="toggleFullscreen" />
+            <div v-else class="relative w-full ml-1">
+              <div class="left-0" :class="isFullscreen ? 'pl-2 pt-4' : ''">
+                <graph-legend class="graph-legend deps-overlay" :items="legendItems"/>
+              </div>
+              <div class="absolute right-0 mr-1 gap-2 flex items-center" id="additionalControls" :class="isFullscreen ? 'pr-2 pt-5' : ''">
+                <graph-controls @toggleZoom="toggleZoom"
+                                :isFullscreen="isFullscreen"
+                                :enableZoom="enableZoom"
+                                :enableAnimations="enableAnimations"
+                                :horizontalOrientation="horizontalOrientation"
+                                :enableDynamicHeight="dynamicHeight"
+                                :disabled="isLoading"
+                                @toggleOrientation="toggleOrientation"
+                                @toggleAnimations="toggleAnimations"
+                                @toggleDynamicHeight="toggleDynamicHeight"
+                                @toggleFullscreen="toggleFullscreen" />
+              </div>
             </div>
+            <div id="dependency-graph" ref="dependencyGraph" v-bind:style="{'visibility': showGraph ? 'visible' : 'hidden'}" :class="`${isFullscreen ? 'fullscreen' : ''} ${isVisible ? 'accordion' : ''}`"></div>
+            </SkillsOverlay>
           </div>
-          <div id="dependency-graph" ref="dependencyGraph" v-bind:style="{'visibility': showGraph ? 'visible' : 'hidden'}" :class="`${isFullscreen ? 'fullscreen' : ''} ${isVisible ? 'accordion' : ''}`"></div>
-        </div>
-      </template>
-    </Card>
+        </template>
+      </Card>
+    </SkillsOverlay>
 
     <dependency-table v-if="hasGraphData" :is-loading="isLoading" :data="data" @update="handleUpdate" @panToNode="panToNode" />
     <share-skills-with-other-projects v-if="!isReadOnlyProj" :project-id="route.params.projectId" />
@@ -530,12 +605,8 @@ const computedHeight = computed(() => {
   right: 15px !important;
 }
 
-.vertical-orientation {
+#fullDepsSkillsGraphContainer {
   height: 500px;
-}
-
-.horizontal-orientation {
-  height: 1200px !important;
 }
 
 #additionalControls {
