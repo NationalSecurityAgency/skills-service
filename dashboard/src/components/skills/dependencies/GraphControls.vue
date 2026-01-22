@@ -18,7 +18,7 @@ import { ref } from 'vue';
 import Popover from "primevue/popover";
 import {useStorage} from "@vueuse/core";
 
-const props = defineProps(['isFullscreen', 'enableZoom', 'enableAnimations', 'horizontalOrientation', 'enableDynamicHeight'])
+const props = defineProps(['isFullscreen', 'enableZoom', 'enableAnimations', 'horizontalOrientation', 'enableDynamicHeight', 'disabled'])
 const emit = defineEmits(['toggleFullscreen', 'toggleZoom', 'toggleAnimations', 'toggleOrientation', 'toggleDynamicHeight'])
 
 const storedEnableZoom = useStorage('learningPath-enableZoom', true);
@@ -60,6 +60,7 @@ const toggleDynamicHeight = () => {
         :value="enableZoom"
         :binary="true"
         @change="toggleZoom"
+        :disabled="disabled"
         inputId="enableZoom"
         data-cy="enableZoom"
         name="enableZoom">
@@ -74,7 +75,7 @@ const toggleDynamicHeight = () => {
         :defaultValue="storedEnableAnimations"
         @change="toggleAnimations"
         :binary="true"
-        :disabled="!enableZoom"
+        :disabled="!enableZoom || disabled"
         inputId="enableAnimations"
         name="enableAnimations">
     </Checkbox>
@@ -89,11 +90,13 @@ const toggleDynamicHeight = () => {
           offIcon="fas fa-arrows-up-down"
           onIcon="fas fa-arrows-left-right"
           aria-label="Toggle orientation"
+          :disabled="disabled"
           @click="toggleOrientation" />
   <Button icon="fas fa-expand"
           severity="info"
           outlined
           raised
+          :disabled="disabled"
           data-cy="learningPath-fullScreenButton"
           aria-label="Toggle fullscreen"
           @click="toggleFullscreen" />
@@ -105,6 +108,7 @@ const toggleDynamicHeight = () => {
       raised
       data-cy="learningPathSettingsMenu"
       @click="toggleMenu"
+      :disabled="disabled"
       aria-label="Learning Path Settings Button"
       aria-haspopup="true"
       aria-controls="learning_path_settings_menu" />
@@ -115,6 +119,7 @@ const toggleDynamicHeight = () => {
           :defaultValue="storedEnableZoom"
           :binary="true"
           @change="toggleZoom"
+          :disabled="disabled"
           inputId="enableZoom"
           data-cy="enableZoom"
           name="enableZoom">
@@ -128,7 +133,7 @@ const toggleDynamicHeight = () => {
           :value="enableAnimations"
           :defaultValue="storedEnableAnimations"
           :binary="true"
-          :disabled="!enableZoom"
+          :disabled="!enableZoom || disabled"
           @change="toggleAnimations"
           inputId="enableAnimations"
           name="enableAnimations">
@@ -142,6 +147,7 @@ const toggleDynamicHeight = () => {
           :value="enableDynamicHeight"
           :defaultValue="storedDynamicHeight"
           :binary="true"
+          :disabled="disabled"
           @change="toggleDynamicHeight"
           inputId="toggleDynamicHeight"
           name="toggleDynamicHeight">

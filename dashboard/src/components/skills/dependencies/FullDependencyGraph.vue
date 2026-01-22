@@ -37,6 +37,7 @@ import AccordionHeader from 'primevue/accordionheader';
 import AccordionContent from 'primevue/accordioncontent';
 import dagre from "@dagrejs/dagre"
 import GraphControls from "@/components/skills/dependencies/GraphControls.vue";
+import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
 
 const dialogMessages = useDialogMessages()
 const projConfig = useProjConfig();
@@ -158,17 +159,19 @@ const clearSelectedFromSkills = () => {
   }
 };
 
+const beforeUpdate = (skillId) => {
+  isLoading.value = true;
+}
+
 const handleUpdate = (addedNode) => {
-  graph.value = null;
-  edges.clear()
   clearSelectedFromSkills();
   isLoading.value = true;
-
   loadGraphDataAndUpdateGraph(addedNode);
 };
 
 const loadGraphDataAndUpdateGraph = (addedNode = null) => {
   SkillsService.getDependentSkillsGraphForProject(route.params.projectId).then((response) => {
+    edges.clear()
     graph.value = response;
     if(graph.value.nodes.length > 0) {
       if (!network) {
@@ -453,37 +456,40 @@ const computedHeight = computed(() => {
   <div id="full-dependent-skills-graph" ref="fullDepsSkillsGraph">
     <sub-page-header title="Learning Path"/>
 
-    <prerequisite-selector v-if="!isReadOnlyProj && !isFullscreen" :project-id="route.params.projectId" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
+    <prerequisite-selector v-if="!isReadOnlyProj && !isFullscreen" :project-id="route.params.projectId" :disabled="isLoading"
+                           @beforeUpdate="beforeUpdate" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
                            @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills" :showHeader="true"></prerequisite-selector>
-    <BlockUI :blocked="isLoading">
+    <SkillsOverlay :show="isLoading && !isFullscreen ">
       <Card data-cy="fullDepsSkillsGraph" style="margin-bottom: 25px;">
         <template #content>
-          <skills-spinner :is-loading="isLoading" />
           <div ref="fullDepsSkillsGraphContainer" id="fullDepsSkillsGraphContainer" :style="!isFullscreen && dynamicHeight ? {'height': computedHeight + 'px !important'} : ''">
             <Accordion v-model:value="active" v-if="isFullscreen" id="prerequisiteContent">
               <AccordionPanel value="0">
                 <AccordionHeader>Add a new item to the learning path</AccordionHeader>
                 <AccordionContent>
-                  <prerequisite-selector :showHeader="false" v-if="!isReadOnlyProj" :project-id="route.params.projectId" @update="handleUpdate" :selected-from-skills="selectedFromSkills"
+                  <prerequisite-selector :showHeader="false" v-if="!isReadOnlyProj" :project-id="route.params.projectId" :disabled="isLoading"
+                                         @beforeUpdate="beforeUpdate"  @update="handleUpdate" :selected-from-skills="selectedFromSkills"
                                          @updateSelectedFromSkills="updateSelectedFromSkills" @clearSelectedFromSkills="clearSelectedFromSkills" appendTo="self"></prerequisite-selector>
                 </AccordionContent>
               </AccordionPanel>
             </Accordion>
+            <SkillsOverlay :show="isLoading && isFullscreen" class="h-full">
             <div v-if="!hasGraphData && !isLoading" class="my-8">
               <no-content2 icon="fa fa-project-diagram" title="No Learning Path Yet..."
                            message="Here you can create and manage the project's Learning Path which may consist of skills and badges. You can get started by adding a path above."></no-content2>
             </div>
-            <div v-else class="relative w-full mt-4 ml-1">
-              <div class="left-0" :class="isFullscreen ? 'pl-2' : ''">
+            <div v-else class="relative w-full ml-1">
+              <div class="left-0" :class="isFullscreen ? 'pl-2 pt-4' : ''">
                 <graph-legend class="graph-legend deps-overlay" :items="legendItems"/>
               </div>
-              <div class="absolute right-0 mr-1 gap-2 flex items-center" id="additionalControls" :class="isFullscreen ? 'pr-2 mt-1' : ''">
+              <div class="absolute right-0 mr-1 gap-2 flex items-center" id="additionalControls" :class="isFullscreen ? 'pr-2 pt-5' : ''">
                 <graph-controls @toggleZoom="toggleZoom"
                                 :isFullscreen="isFullscreen"
                                 :enableZoom="enableZoom"
                                 :enableAnimations="enableAnimations"
                                 :horizontalOrientation="horizontalOrientation"
                                 :enableDynamicHeight="dynamicHeight"
+                                :disabled="isLoading"
                                 @toggleOrientation="toggleOrientation"
                                 @toggleAnimations="toggleAnimations"
                                 @toggleDynamicHeight="toggleDynamicHeight"
@@ -491,10 +497,11 @@ const computedHeight = computed(() => {
               </div>
             </div>
             <div id="dependency-graph" ref="dependencyGraph" v-bind:style="{'visibility': showGraph ? 'visible' : 'hidden'}" :class="`${isFullscreen ? 'fullscreen' : ''} ${isVisible ? 'accordion' : ''}`"></div>
+            </SkillsOverlay>
           </div>
         </template>
       </Card>
-    </BlockUI>
+    </SkillsOverlay>
 
     <dependency-table v-if="hasGraphData" :is-loading="isLoading" :data="data" @update="handleUpdate" @panToNode="panToNode" />
     <share-skills-with-other-projects v-if="!isReadOnlyProj" :project-id="route.params.projectId" />

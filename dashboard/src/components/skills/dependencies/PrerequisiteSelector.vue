@@ -24,8 +24,8 @@ import SkillsShareService from '@/components/skills/crossProjects/SkillsShareSer
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 
-const props = defineProps(['selectedFromSkills', 'appendTo', 'showHeader']);
-const emit = defineEmits(['updateSelectedFromSkills', 'clearSelectedFromSkills', 'update'])
+const props = defineProps(['selectedFromSkills', 'appendTo', 'showHeader', 'disabled']);
+const emit = defineEmits(['updateSelectedFromSkills', 'clearSelectedFromSkills', 'update', 'beforeUpdate'])
 const announcer = useSkillsAnnouncer();
 const route = useRoute();
 
@@ -115,6 +115,7 @@ const onFromSelected = (item) => {
 
 const onAddPath = () => {
   const targetSkillId = toSkillId.value;
+  emit('beforeUpdate', targetSkillId);
   SkillsService.assignDependency(toProjectId.value, toSkillId.value, props.selectedFromSkills.skillId, props.selectedFromSkills.projectId)
     .then(() => {
       const from = props.selectedFromSkills.name;
@@ -205,6 +206,7 @@ function validate(value, ctx) {
                            placeholder-icon="fas fa-search"
                            aria-label="Select a skill or a badge for the Learning Path's from step"
                            v-on:added="onFromSelected"
+                           :disabled="disabled"
                            :appendTo="appendTo"
                            :showType=true />
         </div>
@@ -220,7 +222,7 @@ function validate(value, ctx) {
                            placeholder-icon="fas fa-search"
                            :selected="selectedToSkills"
                            v-on:added="onToSelected"
-                           :disabled="!selectedFromSkills || !selectedFromSkills.skillId"
+                           :disabled="!selectedFromSkills || !selectedFromSkills.skillId || disabled"
                            :appendTo="appendTo"
                            :showType=true />
         </div>
@@ -231,7 +233,7 @@ function validate(value, ctx) {
                         label="Add"
                         data-cy="addLearningPathItemBtn"
                         aria-label="Add item to the learning path"
-                        :disabled="!selectedFromSkills || !selectedFromSkills.skillId || !toSkillId || !!errors.toSkillId">
+                        :disabled="!selectedFromSkills || !selectedFromSkills.skillId || !toSkillId || !!errors.toSkillId || disabled">
           </SkillsButton>
         </div>
       </div>
