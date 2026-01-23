@@ -310,12 +310,12 @@ const initialQuestionData = {
 
 const close = () => { model.value = false }
 
-const saveQuiz = (values) => {
+const saveQuestionDef = (values) => {
   const { question, answerHint, answers, currentScaleValue } = values
   let processedAnswers = answers
   let { questionType : { id : questionType } } = values
 
-  if(questionType === 'Matching') {
+  if(QuestionType.isMatching(questionType)) {
     processedAnswers.forEach((answer) => {
       answer.isCorrect = true
     })
@@ -326,7 +326,11 @@ const saveQuiz = (values) => {
     processedAnswers = answers.filter((a) => a.answer && a.answer.trim().length > 0)
   }
 
-  const quizToSave = {
+  if(!QuestionType.isMatching(questionType)) {
+    // address a race condition where isCorrect could be undefined
+    processedAnswers = processedAnswers.map((ans) => ans.isCorrect !== undefined ? ans : ({...ans, isCorrect: false}))
+  }
+  const questionToSave = {
     id: props.questionDef.id,
     quizId: quizId.value,
     question,
@@ -335,11 +339,11 @@ const saveQuiz = (values) => {
     answers: (questionType === QuestionType.TextInput || questionType === QuestionType.Rating) ? [] : processedAnswers,
   };
   if (questionType === QuestionType.Rating) {
-    quizToSave.questionScale = currentScaleValue;
+    questionToSave.questionScale = currentScaleValue;
   }
 
   if (props.isEdit) {
-    return QuizService.updateQuizQuestionDef(quizId.value, quizToSave)
+    return QuizService.updateQuizQuestionDef(quizId.value, questionToSave)
         .then((updatedQuizQuestionDef) => {
           return {
             ...updatedQuizQuestionDef,
@@ -347,7 +351,7 @@ const saveQuiz = (values) => {
           }
         });
   } else {
-    return QuizService.saveQuizQuestionDef(quizId.value, quizToSave)
+    return QuizService.saveQuizQuestionDef(quizId.value, questionToSave)
         .then((updatedQuizQuestionDef) => {
           return {
             ...updatedQuizQuestionDef,
@@ -417,7 +421,7 @@ const startAiAssistant = () => {
       :loading="loadingComponent"
       :validation-schema="schema"
       :initial-values="initialQuestionData"
-      :save-data-function="saveQuiz"
+      :save-data-function="saveQuestionDef"
       @saved="onSavedQuestion"
       @close="close"
       @isDirty="isDirty = !isDirty"
