@@ -621,6 +621,15 @@ if (a == true) {
 ```
 """).valid
 
+        validator.validateDescription("""> (A) A
+
+(A) 
+
+```
+B
+```
+""").valid
+
     }
 
     def "support markdown headers"() {

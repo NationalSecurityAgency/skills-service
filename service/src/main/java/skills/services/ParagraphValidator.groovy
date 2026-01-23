@@ -816,7 +816,14 @@ class ParagraphValidator {
                     } else if (validRes.closestNode instanceof BulletList) {
                         addPrefixIfNeeded(node)
                     } else {
-                        addPrefixIfNeeded(validRes)
+                        // if previous node is BlockQuote then add it under the block quote
+                        if (previousNode instanceof BlockQuote) {
+                            Paragraph paragraph = new Paragraph()
+                            paragraph.prependChild(new Text(request.prefix))
+                            node.insertBefore(paragraph)
+                        } else {
+                            addPrefixIfNeeded(validRes)
+                        }
                     }
                 }
             }
