@@ -446,7 +446,8 @@ const computedHeight = computed(() => {
       return dataHeight.value >= 500 ? dataHeight.value : 500;
     }
   } else {
-    return dataHeight.value * (containerWidth.value / dataWidth.value)
+    const computed = dataHeight.value * (containerWidth.value / dataWidth.value)
+    return computed >= 500 ? computed : 500;
   }
 })
 
@@ -607,6 +608,7 @@ const computedHeight = computed(() => {
 
 #fullDepsSkillsGraphContainer {
   height: 500px;
+  min-height: 500px;
 }
 
 #additionalControls {
