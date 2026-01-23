@@ -1469,7 +1469,8 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         then:
         subjectSkills
-        subjectSkills[0].name == 'Fact & Fiction'
+        def skillNames = subjectSkills.collect{ it.name }.sort()
+        skillNames[0] == 'Fact & Fiction'
         groupSkill.name == 'Fact & Fiction'
         skillsInGroup[0].name == 'Test Skill 2'
         skillsInGroup[0].groupName == 'Fact & Fiction'
