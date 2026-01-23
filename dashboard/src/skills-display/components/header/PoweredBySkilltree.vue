@@ -57,11 +57,6 @@ const isHovering = ref(false)
   font-size: 0.8rem !important;
   margin-right: -20px !important;
   margin-bottom: -10px !important;
-  //position: absolute !important;
-  //bottom: 0.8rem;
 }
 
-.poweredByContainer .skill-tree-svg-icon {
-  //width: 4.5rem;
-}
 </style>

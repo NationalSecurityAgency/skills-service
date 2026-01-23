@@ -242,7 +242,6 @@ const createResizeSupport = () => {
 
 <style scoped>
 .videoPlayerContainer {
-  //resize: horizontal;
   overflow: hidden;
   max-width: 100%;
   min-width: 222px;

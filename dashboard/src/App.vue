@@ -225,26 +225,6 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
 </style>
 
 <style>
-body a, a:link, a:visited {
-  //text-decoration: none !important;
-}
-
-body .st-light-theme a, a:link {
-  //color: #2f64bd !important;
-}
-
-body .st-light-theme a:visited {
-  //color: #784f9f !important;
-}
-
-body .st-dark-theme a, a:link {
-  //color: #99befb !important;
-}
-
-body .st-dark-theme a:visited {
-  //color: #d5aafb !important;
-}
-
 body a:hover, body a:focus {
   text-decoration: underline !important;
 }

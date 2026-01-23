@@ -81,13 +81,15 @@ defineExpose({
   <CardWithVericalSections class="h-full">
     <template #content>
       <div class="flex mb-2">
-        <div class="flex flex-1 pt-6 pl-6">
+        <div class="flex flex-1 pt-6 pl-6 gap-2">
           <router-link v-if="options.icon"
                        :to="options.navTo" aria-label="Navigate to Skills" data-cy="iconLink" aria-hidden="true"
                        tabindex="-1" class="">
-            <div class="d-inline-block mr-2 border text-center rounded-border w-15 h-15 p-1 text-primary"
+            <div class="d-inline-flex! items-center! justify-center! border rounded-border w-15 h-15 p-1 text-primary"
                  aria-hidden="true">
-              <i class="text-5xl!" :class="[`${options.icon}`]" aria-hidden="true" />
+              <i :class="[`${options.icon}`]"
+                 class="text-[2.7rem]! flex! items-center! justify-center! w-full! h-full!"
+                 aria-hidden="true" />
             </div>
           </router-link>
           <div class="media-body">
