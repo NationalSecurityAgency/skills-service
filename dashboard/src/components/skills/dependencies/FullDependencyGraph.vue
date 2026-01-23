@@ -607,8 +607,8 @@ const computedHeight = computed(() => {
 }
 
 #fullDepsSkillsGraphContainer {
-  height: 500px;
-  min-height: 500px;
+  height: 31.25rem;
+  min-height: 31.25rem;
 }
 
 #additionalControls {
