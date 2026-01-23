@@ -97,7 +97,6 @@ const props = defineProps({
   margin: 14px 0;
   font-size: 4.1rem;
   width: 100%;
-  //color: #0fcc15d1;
 }
 
 .skills-progress-card .skills-icon.user-rank-stack i {
