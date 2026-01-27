@@ -82,7 +82,7 @@ describe('Admin Group Member Management Tests', () => {
           cy.wait('@loadUserRoles');
 
           cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '3');
-          cy.get(`${tableSelector} [data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.exist')
+          cy.get(`${tableSelector} [data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('exist')
           cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('be.enabled')
           cy.get('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
 
@@ -94,9 +94,17 @@ describe('Admin Group Member Management Tests', () => {
 
 
           cy.get('[data-cy="pageHeaderStat_Members"] [data-cy="statValue"]').should('have.text', '2');
-          cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.exist')
+          cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('exist')
           cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('not.exist')
           cy.get('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
+
+          cy.openDialog('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]')
+
+          cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove user2 from having admin privileges.')
+          cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
+          cy.clickSaveDialogBtn()
+
+          cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.exist')
 
           cy.get('[data-cy="existingUserInput"] [data-cy="existingUserInputDropdown"] input').should('have.focus')
         });
