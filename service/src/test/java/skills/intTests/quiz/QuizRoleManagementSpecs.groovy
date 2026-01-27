@@ -84,7 +84,20 @@ class QuizRoleManagementSpecs extends DefaultIntSpec {
         roles_t1.roleName == [RoleName.ROLE_QUIZ_ADMIN.toString()]
     }
 
-    def "cannot remove myself"() {
+    def "cannot remove myself when there are no other admins"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
+        skillsService.createQuizQuestionDefs(questions[0..1])
+
+        when:
+        skillsService.deleteQuizUserRole(quiz1.quizId, skillsService.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Cannot remove roles from myself")
+    }
+
+    def "can remove myself when there are other admins"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
         def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
@@ -95,10 +108,12 @@ class QuizRoleManagementSpecs extends DefaultIntSpec {
         skillsService.addQuizUserRole(quiz1.quizId, otherUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
 
         when:
-        otherUser.deleteQuizUserRole(quiz1.quizId, otherUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        skillsService.deleteQuizUserRole(quiz1.quizId, skillsService.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        skillsService.getQuizDef(quiz1.quizId)
         then:
+
         SkillsClientException skillsClientException = thrown()
-        skillsClientException.message.contains("Cannot remove roles from myself")
+        skillsClientException.httpStatus == org.springframework.http.HttpStatus.FORBIDDEN
     }
 
     def "cannot add myself"() {
