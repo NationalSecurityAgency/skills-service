@@ -116,6 +116,14 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
             ur.roleName in ?2 ''')
     Integer countUserRolesByAdminGroupIdAndUserRoles(String projectId, List<RoleName> roles)
 
+    @Query('''SELECT count(ur.id)
+        from UserRole ur, UserAttrs ua 
+        where
+            ur.userId = ua.userId and 
+            ur.quizId = ?1 and 
+            ur.roleName in ?2 ''')
+    Integer countUserRolesByQuizIdAndUserRoles(String quizId, List<RoleName> roles)
+
     @Query('''SELECT ur as role, ua as attrs, ua.userIdForDisplay as userIdForDisplay
         from UserRole ur, UserAttrs ua 
         where

@@ -44,6 +44,7 @@ const ROLE_DASHBOARD_ADMIN_ACCESS = 'ROLE_DASHBOARD_ADMIN_ACCESS'
 const ROLE_ADMIN_GROUP_MEMBER = 'ROLE_ADMIN_GROUP_MEMBER'
 const ROLE_ADMIN_GROUP_OWNER = 'ROLE_ADMIN_GROUP_OWNER'
 const ROLE_GLOBAL_BADGE_ADMIN = 'ROLE_GLOBAL_BADGE_ADMIN'
+const ROLE_QUIZ_ADMIN = 'ROLE_QUIZ_ADMIN'
 const ALL_ROLES = [ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPER_DUPER_USER, ROLE_PROJECT_APPROVER];
 
 const router = useRouter()
@@ -121,6 +122,15 @@ const isSaving = ref(false);
 const numberOfAdmins = computed(() => {
   return assignedLocalAdmins.value?.filter((o) => o?.roleName === ROLE_PROJECT_ADMIN).length
 });
+const numberOfGroupOwners = computed(() => {
+  return assignedLocalAdmins.value?.filter((o) => o?.roleName === ROLE_ADMIN_GROUP_OWNER).length
+});
+const numberOfQuizAdmins = computed(() => {
+  return assignedLocalAdmins.value?.filter((o) => o?.roleName === ROLE_QUIZ_ADMIN).length
+});
+const numberOfRootUsers = computed(() => {
+  return assignedLocalAdmins.value?.filter((o) => o?.roleName === ROLE_SUPER_DUPER_USER).length
+});
 const errNotification = ref({
   enable: false,
   msg: '',
@@ -172,7 +182,7 @@ const emptyAdminGroupsMessage = computed(() => {
 
 const assignedUserIds = computed(() => {
   const assignedUserIds = new Set(assignedLocalAdmins.value.map((u) => appConfig.isPkiAuthenticated ? u.userIdForDisplay : u.userId));
-  assignedAdminGroups.value.forEach((ag) => {
+  assignedAdminGroups.value?.forEach((ag) => {
     ag.allMembers.forEach((u) => {
       appConfig.isPkiAuthenticated ? assignedUserIds.add(u.userIdForDisplay) : assignedUserIds.add(u.userId);
     })
@@ -228,7 +238,7 @@ const loadData = () => {
         assignedLocalAdmins.value = adminGroupsSupported.value ? result.filter((u) => !u.adminGroupId) : result;
       }) :
       AccessService.getUserRoles(props.projectId, props.roles, pageParams, props.adminGroupId, props.badgeId).then((result) => {
-        assignedLocalAdmins.value = adminGroupsSupported.value ? result.data.filter((u) => !u.adminGroupId) : result.data
+        assignedLocalAdmins.value = adminGroupsSupported.value ? result.data?.filter((u) => !u.adminGroupId) : result.data
       });
 
   const getAdminGroupsForProject = props.projectId ? AdminGroupsService.getAdminGroupsForProject(props.projectId).then((result) => {
@@ -336,7 +346,10 @@ function getUserDisplay(item) {
 }
 
 function canDeleteUser(userId, userRole) {
-  return !(userRole === ROLE_PROJECT_ADMIN && numberOfAdmins.value === 1);
+  return !(userRole === ROLE_PROJECT_ADMIN && numberOfAdmins.value === 1)
+      && !(userRole === ROLE_ADMIN_GROUP_OWNER && numberOfGroupOwners.value === 1)
+      && !(userRole === ROLE_SUPER_DUPER_USER && numberOfRootUsers.value === 1)
+      && !(userRole === ROLE_QUIZ_ADMIN && numberOfQuizAdmins.value === 1);
 }
 
 function isCurrentUser(userId) {

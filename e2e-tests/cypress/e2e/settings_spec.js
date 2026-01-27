@@ -218,9 +218,8 @@ describe('Settings Tests', () => {
         ], 5, true, null, false);
 
         // cannot remove myself - no go
-        cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="removeUserBtn"]`)
-            .should('not.exist');
-        cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="cannotRemoveWarning"]`).should('exist')
+        cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="removeUserBtn"]`).should('exist');
+        cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="cannotRemoveWarning"]`).should('not.exist')
 
         // remove the other user now
         cy.openDialog(`${rootUsrTableSelector} [data-p-index="1"] [data-cy="removeUserBtn"]`)
@@ -234,6 +233,9 @@ describe('Settings Tests', () => {
                 value: '(root@skills.org)'
             }],
         ], 5, true, null, false);
+
+        cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="removeUserBtn"]`).should('not.exist');
+        cy.get(`[data-cy="controlsCell_root@skills.org"] [data-cy="cannotRemoveWarning"]`).should('exist')
     });
 
     it('Add Root User - forward slash character does not cause error', () => {

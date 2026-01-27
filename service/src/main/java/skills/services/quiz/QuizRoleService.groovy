@@ -100,7 +100,11 @@ class QuizRoleService {
         ensureValidRole(roleName, quizDef.quizId)
         String userId = userIdParam?.toLowerCase()
         String currentUser = userInfoService.getCurrentUserId()
-        if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
+
+        Integer numberOfAdmins = userRoleRepo.countUserRolesByQuizIdAndUserRoles(quizId, [RoleName.ROLE_QUIZ_ADMIN, RoleName.ROLE_SUPER_DUPER_USER])
+        Boolean canDeleteSelf = numberOfAdmins > 1
+
+        if (currentUser?.toLowerCase() == userId?.toLowerCase() && !canDeleteSelf) {
             throw new SkillQuizException("Cannot remove roles from myself. userId=[${userId}]", quizId, ErrorCode.AccessDenied)
         }
         accessSettingsStorageService.deleteQuizUserRole(userId, quizDef.quizId, roleName)
