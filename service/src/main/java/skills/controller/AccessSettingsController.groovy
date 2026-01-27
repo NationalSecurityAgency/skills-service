@@ -170,11 +170,14 @@ class AccessSettingsController {
             @PathVariable("userId") String userId, @PathVariable("roleName") RoleName roleName) {
         String currentUser = userInfoService.getCurrentUserId()
         String userIdLower = userId?.toLowerCase()
-        if (currentUser?.toLowerCase() == userIdLower && roleName != RoleName.ROLE_PRIVATE_PROJECT_USER) {
-            throw new SkillException("Cannot delete roles for myself. userId=[${userIdLower}]", projectId, null, ErrorCode.AccessDenied)
+        Integer numberOfAdmins = userRoleRepo.countUserRolesByProjectIdAndUserRoles(projectId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_SUPER_DUPER_USER])
+        Boolean canDeleteSelf = numberOfAdmins > 1
+
+        if (currentUser?.toLowerCase() == userIdLower && roleName != RoleName.ROLE_PRIVATE_PROJECT_USER && !canDeleteSelf) {
+            throw new SkillException("Cannot delete roles for myself when there are no other admins. userId=[${userIdLower}]", projectId, null, ErrorCode.AccessDenied)
         }
 
-        accessSettingsStorageService.deleteUserRole(userIdLower, projectId, roleName)
+        accessSettingsStorageService.deleteUserRole(userIdLower, projectId, roleName, false, canDeleteSelf)
 
         if(roleName == RoleName.ROLE_PROJECT_ADMIN && accessSettingsStorageService.isRoot(userIdLower)) {
             User user = userRepo.findByUserId(userIdLower)
