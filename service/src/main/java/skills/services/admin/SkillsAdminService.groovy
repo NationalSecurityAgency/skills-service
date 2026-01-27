@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
+import skills.auth.openai.VectorStoreAccessor
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ActionPatchRequest
@@ -134,6 +135,9 @@ class SkillsAdminService {
 
     @Autowired
     SkillAttributeService skillAttributeService
+
+    @Autowired
+    VectorStoreAccessor vectorStoreAccessor
 
     @Autowired
     private SkillsLoader skillsLoader;
@@ -360,6 +364,11 @@ class SkillsAdminService {
         if (isSkillsGroup) {
             skillsGroupSkillDef = savedSkill
         }
+
+        if (isEdit) {
+            vectorStoreAccessor.deleteSkillDesc(savedSkill.projectId, savedSkill.skillId)
+        }
+        vectorStoreAccessor.addSkillDesc(savedSkill.projectId, savedSkill.skillId, description)
 
         if (!isEdit) {
             if (isSkillsGroupChild) {

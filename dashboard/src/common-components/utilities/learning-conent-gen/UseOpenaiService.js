@@ -102,9 +102,20 @@ export const useOpenaiService = () => {
             .then((response) => response.data);
     }
 
+    const getNextSkillsRecommendations = (projId, skillId) => {
+        return getAvailableModels().then((models) => {
+            const model = models.models[0].model
+            return axios.get(`/openai/suggestNextSkills?projectId=${projId}&completedSkillId=${skillId}&model=${model}`)
+                .then((response) => response.data);
+        })
+
+    }
+
+
     return {
         prompt,
         cancelCurrentPrompt,
-        getAvailableModels
+        getAvailableModels,
+        getNextSkillsRecommendations
     }
 }

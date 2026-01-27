@@ -27,6 +27,8 @@ const Prerequisites = defineAsyncComponent(() => import('@/skills-display/compon
 import SkillAchievementMsg from "@/skills-display/components/progress/celebration/SkillAchievementMsg.vue";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import SkillNavigation from "@/skills-display/components/utilities/SkillNavigation.vue";
+import {useOpenaiService} from "@/common-components/utilities/learning-conent-gen/UseOpenaiService.js";
+import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 
 const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
@@ -42,9 +44,11 @@ const loadingDescription = ref(true);
 
 onMounted(() => {
   loadSkillSummary()
+  loadSuggestions()
 })
 watch( () => route.params.skillId, () => {
   loadSkillSummary()
+  loadSuggestions()
 });
 watch(() => skill.value.groupSkillId, () => {
   groupDescription.value = null;
@@ -91,12 +95,44 @@ const descriptionToggled = () => {
     })
   }
 }
+
+const openaiService = useOpenaiService()
+const suggestions = ref([])
+const loadingSuggestions = ref(true)
+const loadSuggestions = () => {
+  loadingSuggestions.value = true;
+  openaiService.getNextSkillsRecommendations(route.params.projectId, route.params.skillId).then((res) => {
+    console.log(res)
+    suggestions.value = res;
+  }).finally(() => {
+    loadingSuggestions.value = false;
+  })
+}
 </script>
 
 <template>
   <div>
     <div v-if="!isLoading">
       <skills-title>{{ attributes.skillDisplayName }} Overview</skills-title>
+      <Card class="mt-4">
+        <template #title>
+          <h5 class="font-bold pb-2"><i class="fa-solid fa-stairs text-green-500"></i> Next Skills Recommendations (Prototype)</h5>
+        </template>
+        <template #content>
+          <skills-spinner :is-loading="loadingSuggestions" />
+          <div v-if="!loadingSuggestions" >
+            <div v-for="(suggestion, index) in suggestions" :key="suggestion.skillId" class="flex flex-col gap-1">
+              <div class="flex gap-3 align-center items-center">
+                <div class="font-bold text-lg">{{ suggestion.skillId }}</div>
+                <div class="flex gap-2 align-center items-center border p-2 rounded"><i class="fa-solid fa-lightbulb text-yellow-400 text-lg"></i>{{ suggestion.reason }}</div>
+              </div>
+              <div v-if="index < suggestions.length - 1" class="flex my-2 ml-3">
+                <i class="fa-solid fa-arrow-down text-gray-400 text-lg"></i>
+              </div>
+            </div>
+          </div>
+        </template>
+      </Card>
       <Card class="mt-4" :pt="{ content: { class: 'p-0' }}">
         <template #content>
           <skill-navigation class="mb-6" :skill="skill" @prevButtonClicked="prevButtonClicked" @nextButtonClicked="nextButtonClicked" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !skillsDisplayInfo.isCrossProject()" />

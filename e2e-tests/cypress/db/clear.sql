@@ -26,3 +26,4 @@ delete from custom_icons;
 delete from web_notifications;
 delete from web_notifications_ack;
 delete from attachments;
+delete from vector_store;

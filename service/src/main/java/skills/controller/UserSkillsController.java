@@ -152,6 +152,7 @@ class UserSkillsController {
                                          @RequestHeader(value = "X-FORWARDED-FOR", required = false) String remoteAddr,
                                          HttpServletRequest request) {
         String remoteIp = StringUtils.isNotBlank(remoteAddr) ? remoteAddr : request.getRemoteAddr();
+
         log.info("SkillsClient ["+skillsClientVersion.getSkillsClientVersion()+"], " +
                 "projectId ["+projectId+"], " +
                 "User-Agent ["+userAgent+"], " +

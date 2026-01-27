@@ -217,6 +217,8 @@ spring:
       chat: none
     openai:
       api-key: none
+      embedding:
+        enabled: false
   cloud:
     aws:
       s3:

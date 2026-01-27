@@ -24,10 +24,12 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import skills.auth.openai.AiChatRequest
 import skills.auth.openai.OpenAIService
+import skills.auth.openai.VectorStoreAccessor
 import skills.controller.exceptions.SkillsValidator
 import skills.settings.AiPromptSettings
 import skills.settings.AiPromptSettingsService
@@ -42,6 +44,9 @@ class OpenAiController {
 
     @Autowired
     AiPromptSettingsService aiPromptSettingsService
+
+    @Autowired
+    VectorStoreAccessor vectorStoreAccessor
 
     @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     Flux<String> chat(@RequestBody AiChatRequest genDescRequest) {
@@ -63,5 +68,11 @@ class OpenAiController {
         return aiPromptSettingsService.fetchAiPromptSettings()
     }
 
+    @GetMapping('/suggestNextSkills')
+    String suggestNextSkills(@RequestParam String completedSkillId,
+                                   @RequestParam String projectId,
+                                   @RequestParam String model) {
+        return vectorStoreAccessor.suggestNextSkills(completedSkillId, projectId, model)
+    }
 }
 
