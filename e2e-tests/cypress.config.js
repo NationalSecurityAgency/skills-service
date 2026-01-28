@@ -4,6 +4,7 @@ const { configureVisualRegression } = require('cypress-visual-regression')
 
 module.exports = defineConfig({
   projectId: '7kivjf',
+  experimentalFastVisibility: true,
   requestTimeout: 10000,
   defaultCommandTimeout: 10000,
   numTestsKeptInMemory: 0,  // Don't keep tests in memory
