@@ -128,6 +128,11 @@ const schema = object({
       .max(appConfig.maxAiPromptLength)
       .noScript()
       .label('Update Quiz Question to Matching'),
+  inputTextQuizGradingInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('Input Text Quiz Grading Instructions'),
 });
 
 const { handleSubmit, setFieldValue, values, validate, resetField, resetForm, meta } = useForm({
