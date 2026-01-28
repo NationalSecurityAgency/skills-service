@@ -64,6 +64,7 @@ class AiPromptSettingsService {
     static final String updateSingleQuestionTypeChangedToSingleChoiceInstructions = 'aiPrompt.updateSingleQuestionTypeChangedToSingleChoiceInstructions'
     static final String updateSingleQuestionTypeChangedToTextInputInstructions = 'aiPrompt.updateSingleQuestionTypeChangedToTextInputInstructions'
     static final String updateSingleQuestionTypeChangedToMatchingInstructions = 'aiPrompt.updateSingleQuestionTypeChangedToMatchingInstructions'
+    static final String inputTextQuizGradingInstructions = 'aiPrompt.inputTextQuizGradingInstructions'
 
     @Autowired
     SettingsService settingsService
@@ -142,6 +143,7 @@ class AiPromptSettingsService {
         info.updateSingleQuestionTypeChangedToSingleChoiceInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.updateSingleQuestionTypeChangedToSingleChoiceInstructions, label: 'Update Single Question Type to Single Choice', isDefault: true)
         info.updateSingleQuestionTypeChangedToTextInputInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.updateSingleQuestionTypeChangedToTextInputInstructions, label: 'Update Single Question Type to Text Input', isDefault: true)
         info.updateSingleQuestionTypeChangedToMatchingInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.updateSingleQuestionTypeChangedToMatchingInstructions, label: 'Update Single Question Type to Matching', isDefault: true)
+        info.inputTextQuizGradingInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.inputTextQuizGradingInstructions, label: 'Input Text Quiz Grading Instructions', isDefault: true)
 
         if (aiPromptGroupSettings) {
             Map<String, String> mappedSettings = aiPromptGroupSettings.collectEntries { [it.setting, it.value] }
@@ -174,6 +176,7 @@ class AiPromptSettingsService {
             updateSetting('updateSingleQuestionTypeChangedToSingleChoiceInstructions', updateSingleQuestionTypeChangedToSingleChoiceInstructions)
             updateSetting('updateSingleQuestionTypeChangedToTextInputInstructions', updateSingleQuestionTypeChangedToTextInputInstructions)
             updateSetting('updateSingleQuestionTypeChangedToMatchingInstructions', updateSingleQuestionTypeChangedToMatchingInstructions)
+            updateSetting('inputTextQuizGradingInstructions', inputTextQuizGradingInstructions)
         }
 
         return info
