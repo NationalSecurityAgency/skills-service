@@ -761,6 +761,7 @@
                                 <validHeader>${basedir}/../license-add/LICENSE-HEADER_2022.txt</validHeader>
                                 <validHeader>${basedir}/../license-add/LICENSE-HEADER_2023.txt</validHeader>
                                 <validHeader>${basedir}/../license-add/LICENSE-HEADER_2024.txt</validHeader>
+                                <validHeader>${basedir}/../license-add/LICENSE-HEADER_2025.txt</validHeader>
                             </validHeaders>
                             <excludes>
                                 <exclude>**/*.xml</exclude>
