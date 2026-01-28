@@ -121,7 +121,7 @@ Return the result as a JSON array with objects containing "skillId" and "reason"
   {"skillId": "skill_id_3", "reason": "explanation why this skill is recommended"}
 ]
 
-Reason should an encouraging explanation to the trainee why this skill is recommended.
+Reason should be an encouraging explanation to the trainee why this skill is recommended.
         """
 
         log.info("Prompt: {}", promptStr)
