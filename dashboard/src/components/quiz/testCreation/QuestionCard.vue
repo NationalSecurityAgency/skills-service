@@ -193,9 +193,9 @@ const questionUpdated = (updatedQuestionText) => {
           </Message>
         </div>
       </div>
-      <div v-if="!quizConfig.isReadOnlyQuiz && showEditControls" class="flex flex-col gap-4">
+      <div v-if="!quizConfig.isReadOnlyQuiz && showEditControls" class="flex flex-col gap-2 pr-4">
         <div>
-          <ButtonGroup class="ml-1 mt-2 mr-4">
+          <ButtonGroup class="ml-1 mt-2">
             <SkillsButton @click="editQuestion"
                           icon="fas fa-edit"
                           label="Edit"
@@ -234,10 +234,22 @@ const questionUpdated = (updatedQuestionText) => {
             </SkillsButton>
           </ButtonGroup>
         </div>
-        <div class="flex justify-end mr-4">
-          <router-link :aria-label="`Configure video for question ${question.id}`" style="text-decoration: underline;" :data-cy="`add-video-question-${questionNum}`"
+        <div class="flex justify-end">
+          <router-link :aria-label="`Configure video for question ${question.id}`" :data-cy="`add-video-question-${questionNum}`"
                        :to="`/administrator/quizzes/${route.params.quizId}/questions/${question.id}/config-video`" tabindex="-1">
-            <Avatar icon="far fa-play-circle" shape="circle" /> {{ question.attributes ? "Edit Audio/Video" : "Add Audio/Video"}}
+            <div class="flex gap-1 items-center">
+              <Avatar icon="fa-regular fa-play-circle" shape="circle" class="bg-slate-600! text-orange-300!"/>
+              <div class="underline">{{ question.attributes ? "Edit Audio/Video" : "Add Audio/Video"}}</div>
+            </div>
+          </router-link>
+        </div>
+        <div v-if="isTextInputType && appConfig.enableOpenAIIntegration" class="flex justify-end">
+          <router-link :aria-label="`Configure ai grading for question ${question.id}`" :data-cy="`ai-grader-question-${questionNum}`"
+                       :to="`/administrator/quizzes/${route.params.quizId}/questions/${question.id}/ai-grader`" tabindex="-1">
+            <div class="flex gap-1 items-center">
+              <Avatar icon="fa-solid fa-wand-magic-sparkles" shape="circle" class="bg-indigo-600! text-purple-100!"/>
+              <div class="underline">AI Grader</div>
+            </div>
           </router-link>
         </div>
       </div>
