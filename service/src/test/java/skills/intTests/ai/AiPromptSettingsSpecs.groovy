@@ -17,10 +17,7 @@ package skills.intTests.ai
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestTemplate
-import skills.auth.openai.OpenAIService
-import skills.controller.request.model.GlobalSettingsRequest
+import skills.services.openai.OpenAIService
 import skills.controller.result.model.SettingsResult
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -28,7 +25,6 @@ import skills.intTests.utils.SkillsService
 import skills.services.settings.SettingsService
 import skills.settings.AiPromptSettingDefaults
 import skills.settings.AiPromptSettingsService
-import spock.lang.IgnoreIf
 
 class AiPromptSettingsSpecs extends DefaultIntSpec {
     SkillsService rootSkillsService

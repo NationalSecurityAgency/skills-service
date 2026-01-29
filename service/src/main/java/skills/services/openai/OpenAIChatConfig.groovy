@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.auth.openai
+package skills.services.openai
 
 import groovy.util.logging.Slf4j
 import io.netty.handler.ssl.SslContext

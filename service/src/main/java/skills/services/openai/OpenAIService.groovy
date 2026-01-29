@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.auth.openai
+package skills.services.openai
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -36,6 +36,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
+import skills.controller.result.model.AiGradeQuestionResult
+import skills.controller.request.model.AiChatRequest
 
 @Service
 @Slf4j

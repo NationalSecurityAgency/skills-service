@@ -18,7 +18,6 @@ package skills.controller
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -26,8 +25,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
-import skills.auth.openai.AiChatRequest
-import skills.auth.openai.OpenAIService
+import skills.controller.request.model.AiChatRequest
+import skills.services.openai.OpenAIService
 import skills.controller.exceptions.SkillsValidator
 import skills.settings.AiPromptSettings
 import skills.settings.AiPromptSettingsService

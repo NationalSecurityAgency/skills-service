@@ -34,7 +34,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.netty.http.client.HttpClient
 import reactor.netty.resources.ConnectionProvider
-import skills.auth.openai.AiChatRequest
+import skills.controller.request.model.AiChatRequest
 import skills.intTests.utils.CertificateRegistry
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.MockLlmServer
