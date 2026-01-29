@@ -18,7 +18,7 @@ package skills.controller.request.model
 import groovy.transform.Canonical
 
 @Canonical
-class TextInputAiGradingRequest {
+class TextInputAIGradingRequest {
     String question
     String studentAnswer
     String correctAnswer

@@ -18,7 +18,7 @@ package skills.controller.result.model
 import groovy.transform.Canonical
 
 @Canonical
-class AiGradeQuestionResult {
+class TextInputAIGradingResult {
     Boolean isCorrect
     Integer confidenceLevel // 0 - 100
     String gradingDecisionReason

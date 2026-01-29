@@ -128,7 +128,7 @@ const schema = object({
       .max(appConfig.maxAiPromptLength)
       .noScript()
       .label('Update Quiz Question to Matching'),
-  inputTextQuizGradingInstructions: string()
+  textInputQuestionGradingInstructions: string()
       .required()
       .max(appConfig.maxAiPromptLength)
       .noScript()

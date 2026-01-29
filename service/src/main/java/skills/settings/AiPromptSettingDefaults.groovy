@@ -921,7 +921,7 @@ Before responding, count the number of `"isCorrect": true` for the question and 
 '''
 
 
-    public static final String inputTextQuizGradingInstructions =
+    public static final String textInputQuestionGradingInstructions =
 '''# LLM Quiz Answer Grading Prompt
 
 ## System Prompt
@@ -931,7 +931,7 @@ You are an expert educational assessment AI designed to evaluate free-form text 
 - **Question**: {{ question  }
 - **Student's Answer**: {{ studentAnswer  }
 - **Correct Answer**: {{ correctAnswer  }
-- **Required Confidence Level**: {{ requiredConfidenceLevel  }}
+- **Required Confidence Level**: {{ minimumConfidenceLevel  }}
 
 ## Task Instructions
 Evaluate the student's answer by comparing it to the correct answer. Consider:
@@ -957,14 +957,14 @@ Rate your confidence in the grading decision on a scale of 0-100:
 ## Final Decision Rule
 The answer is considered **correct** only if:
 1. The content meets the correctness criteria AND
-2. Your confidence level is equal to or greater than the required confidence level ({{ requiredConfidenceLevel }})
+2. Your confidence level is equal to or greater than the required confidence level ({{ minimumConfidenceLevel }})
 
 ## Response Format
 Respond with a JSON object containing exactly these fields:
 
 ```json
 {
-  "correct": true/false,
+  "isCorrect": true/false,
   "confidenceLevel": 0-100,
   "gradingDecisionReason": "Detailed explanation of your reasoning, including comparison of key points, assessment of understanding, and justification for the confidence level and final decision."
 }
@@ -973,7 +973,7 @@ Respond with a JSON object containing exactly these fields:
 ## Example Response
 ```json
 {
-  "correct": true,
+  "isCorrect": true,
   "confidenceLevel": 85,
   "gradingDecisionReason": "The student's answer correctly identifies the main concept of photosynthesis as the process by which plants convert sunlight into energy, mentioning chlorophyll and glucose production. While the student doesn't explicitly mention carbon dioxide and water as reactants, the core understanding is demonstrated. The confidence level is high because the essential elements are present, though some details are omitted."
 }
