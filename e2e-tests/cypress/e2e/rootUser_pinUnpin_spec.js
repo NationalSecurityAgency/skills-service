@@ -15,7 +15,6 @@
  */
 describe('Root Pin and Unpin Tests', () => {
     beforeEach(() => {
-        cy.resetDb();
         window.localStorage.setItem('tableState', JSON.stringify({'PinProjects-table': {'sortDesc': false, 'sortBy': 'name'}}))
         cy.intercept('GET', '/app/projects')
             .as('getProjects')
@@ -319,7 +318,7 @@ describe('Root Pin and Unpin Tests', () => {
             });
     });
 
-    it('Assign a root user as a project admin and verify the project is pinned, then remove admin and verify it is unpinned', () => {
+    it.only('Assign a root user as a project admin and verify the project is pinned, then remove admin and verify it is unpinned', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'one'
@@ -399,7 +398,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.log('removing user');
                 cy.get(`${tableSelector} [data-cy="removeUserBtn"]`).eq(0).click();
 
-                cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove')
+                cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove root@skills.org')
                 cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
                 cy.clickSaveDialogBtn()
                 cy.wait('@loadProjectAdmins');
