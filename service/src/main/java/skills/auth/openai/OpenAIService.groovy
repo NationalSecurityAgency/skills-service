@@ -177,4 +177,11 @@ class OpenAIService {
             }
         }
     }
+
+    AiGradeQuestionResult gradeTextInputQuizAnswer(String question, String correctAnswer, Integer minimumConfidenceLevel, String studentAnswer) {
+        if (!openAiHost) {
+            throw new UnsupportedOperationException("ai support is not configured" )
+        }
+        return new AiGradeQuestionResult()
+    }
 }

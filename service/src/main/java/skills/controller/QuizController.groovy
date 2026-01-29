@@ -15,7 +15,7 @@
  */
 package skills.controller
 
-import callStack.profiler.Profile
+
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,9 +24,11 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import skills.PublicProps
+import skills.auth.openai.TextInputAiGradingRequest
+import skills.auth.openai.AiGradeQuestionResult
+import skills.auth.openai.OpenAIService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
-import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
@@ -58,7 +60,6 @@ import skills.utils.TablePageUtil
 import skills.utils.TimeRangeFormatterUtil
 
 import java.nio.charset.StandardCharsets
-import java.text.SimpleDateFormat
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
@@ -104,6 +105,9 @@ class QuizController {
 
     @Autowired
     QuizSlidesService quizSlidesService
+
+    @Autowired
+    OpenAIService openAIService
 
     @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -504,6 +508,22 @@ class QuizController {
     UploadAttachmentResult uploadFileToQuiz(@RequestParam("file") MultipartFile file,
                                                @PathVariable("quizId") String quizId) {
         return attachmentService.saveAttachment(file, null, quizId, null);
+    }
+
+    @RequestMapping(value = "/{quizId}/testTextInputAiGrading/{questionId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    AiGradeQuestionResult testTextInputAiGrading(@PathVariable("quizId") String quizId,
+                                                 @PathVariable("questionId") Integer questionId,
+                                                 @RequestBody TextInputAiGradingRequest textInputAiGradingRequest) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id", quizId)
+        QuizValidator.isNotNull(questionId, "Question Id", quizId)
+        QuizValidator.isNotBlank(quizId, "Quiz Id", quizId)
+        QuizValidator.isNotNull(questionId, "Minimum Confidence Level", quizId)
+        QuizValidator.isTrue(textInputAiGradingRequest?.minimumConfidenceLevel >= 0, "minimumConfidenceLevel must be greater than or equal to 0", quizId)
+        QuizValidator.isTrue(textInputAiGradingRequest?.minimumConfidenceLevel <= 100, "minimumConfidenceLevel must be less than or equal to 100", quizId)
+        QuizValidator.isNotBlank(textInputAiGradingRequest?.correctAnswer, "Correct Answer", quizId)
+        QuizQuestionDefResult questionDef = quizDefService.getQuestionDef(quizId, questionId)
+        return openAIService.gradeTextInputQuizAnswer(questionDef.question, textInputAiGradingRequest.correctAnswer, textInputAiGradingRequest.minimumConfidenceLevel, textInputAiGradingRequest.studentAnswer)
     }
 
 }
