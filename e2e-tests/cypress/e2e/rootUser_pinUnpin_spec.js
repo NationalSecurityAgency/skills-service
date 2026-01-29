@@ -318,7 +318,7 @@ describe('Root Pin and Unpin Tests', () => {
             });
     });
 
-    it.only('Assign a root user as a project admin and verify the project is pinned, then remove admin and verify it is unpinned', () => {
+    it('Assign a root user as a project admin and verify the project is pinned, then remove admin and verify it is unpinned', () => {
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
             name: 'one'
