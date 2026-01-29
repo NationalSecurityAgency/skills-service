@@ -20,7 +20,7 @@ import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
-import skills.auth.openai.OpenAIService
+import skills.services.openai.OpenAIService
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SettingsRequest

@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.auth.openai
+package skills.controller.result.model
 
 import groovy.transform.Canonical
 
 @Canonical
-class TextInputAiGradingRequest {
-    String question
-    String studentAnswer
-    String correctAnswer
-    Integer minimumConfidenceLevel // 0 - 100
+class AiGradeQuestionResult {
+    Boolean isCorrect
+    Integer confidenceLevel // 0 - 100
+    String gradingDecisionReason
 }

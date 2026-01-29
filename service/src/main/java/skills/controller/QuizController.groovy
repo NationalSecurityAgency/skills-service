@@ -24,9 +24,8 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import skills.PublicProps
-import skills.auth.openai.TextInputAiGradingRequest
-import skills.auth.openai.AiGradeQuestionResult
-import skills.auth.openai.OpenAIService
+import skills.controller.request.model.TextInputAiGradingRequest
+import skills.services.openai.OpenAIService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
