@@ -15,6 +15,7 @@
  */
 describe('Root Pin and Unpin Tests', () => {
     beforeEach(() => {
+        cy.resetDb();
         window.localStorage.setItem('tableState', JSON.stringify({'PinProjects-table': {'sortDesc': false, 'sortBy': 'name'}}))
         cy.intercept('GET', '/app/projects')
             .as('getProjects')
