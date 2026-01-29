@@ -129,7 +129,6 @@ describe('Quiz User Role Management Tests', () => {
     })
 
     it('paging users', function () {
-        cy.resetDb();
         cy.fixture('vars.json')
             .then((vars) => {
                 const pass = 'password';
@@ -168,7 +167,7 @@ describe('Quiz User Role Management Tests', () => {
                     .click();
 
                 cy.validateTable(tableSelector, [
-                    [{ colIndex: 1, value: defaultUserForDisplay }],
+                    [{ colIndex: 1, value: 'skills@skills.org' }],
                     [{ colIndex: 1, value: 'Firstname LastName (5user)' }],
                     [{ colIndex: 1, value: 'Firstname LastName (4user)' }],
                     [{ colIndex: 1, value: 'Firstname LastName (3user)' }],
