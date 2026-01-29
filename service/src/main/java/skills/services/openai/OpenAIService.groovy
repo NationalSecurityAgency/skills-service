@@ -36,7 +36,8 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
-import skills.controller.result.model.AiGradeQuestionResult
+import skills.controller.exceptions.SkillException
+import skills.controller.result.model.TextInputAIGradingResult
 import skills.controller.request.model.AiChatRequest
 
 @Service
@@ -61,7 +62,15 @@ class OpenAIService {
     @Value('#{"${skills.openai.stream.stream-usage:true}"}')
     Boolean streamUsage
 
+    @Value('#{"${skills.openai.gradingModel:null}"}')
+    String gradingModel
+
+    @Value('#{"${skills.openai.gradingModelTemperature:0.5}"}')
+    Double gradingModelTemperature
+
     String systemMsg
+
+    String textInputQuestionGradingMsg
 
     @Autowired
     @Qualifier('openAIRestTemplate')
@@ -180,10 +189,52 @@ class OpenAIService {
         }
     }
 
-    AiGradeQuestionResult gradeTextInputQuizAnswer(String question, String correctAnswer, Integer minimumConfidenceLevel, String studentAnswer) {
+    TextInputAIGradingResult gradeTextInputQuizAnswer(String question, String correctAnswer, Integer minimumConfidenceLevel, String studentAnswer) {
         if (!openAiHost) {
             throw new UnsupportedOperationException("ai support is not configured" )
         }
-        return new AiGradeQuestionResult()
+        if (!gradingModel) {
+            throw new UnsupportedOperationException("ai grading model is not configured" )
+        }
+        String promptStr = textInputQuestionGradingMsg
+                .replace('{{ question }}', question)
+                .replace('{{ studentAnswer }}', studentAnswer)
+                .replace('{{ correctAnswer }}', correctAnswer)
+                .replace('{{ minimumConfidenceLevel }}', minimumConfidenceLevel.toString())
+        log.info("Prompt: {}", promptStr)
+        List<Message> messages = [
+                new UserMessage(promptStr)
+        ]
+        Prompt prompt = new Prompt(
+                messages,
+                OpenAiChatOptions.builder()
+                        .model(gradingModel)
+                        .temperature(gradingModelTemperature)
+                        .build()
+        )
+        ChatResponse chatResponse = chatModel.call(prompt)
+
+        List<Generation> genList = chatResponse.getResults()
+        if (!genList) {
+            throw new SkillException("Failed to get response from OpenAI")
+        }
+        String res = (String) genList.get(0).getOutput().getText()
+        log.info("LLM Response: {}", res)
+        
+        // Parse JSON response into TextInputAIGradingResult
+        def jsonSlurper = new JsonSlurper()
+        def parsedResponse
+        try {
+            parsedResponse = jsonSlurper.parseText(res)
+        } catch (Exception e) {
+            log.error("Failed to parse JSON response from LLM: {}", res, e)
+            throw new SkillException("Failed to parse LLM response: ${e.message}", e)
+        }
+        
+        return new TextInputAIGradingResult(
+            isCorrect: parsedResponse.isCorrect,
+            confidenceLevel: parsedResponse.confidenceLevel as Integer,
+            gradingDecisionReason: parsedResponse.gradingDecisionReason
+        )
     }
 }

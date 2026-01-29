@@ -24,7 +24,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import skills.PublicProps
-import skills.controller.request.model.TextInputAiGradingRequest
+import skills.controller.request.model.TextInputAIGradingRequest
 import skills.services.openai.OpenAIService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
@@ -511,18 +511,18 @@ class QuizController {
 
     @RequestMapping(value = "/{quizId}/testTextInputAiGrading/{questionId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    AiGradeQuestionResult testTextInputAiGrading(@PathVariable("quizId") String quizId,
-                                                 @PathVariable("questionId") Integer questionId,
-                                                 @RequestBody TextInputAiGradingRequest textInputAiGradingRequest) {
+    TextInputAIGradingResult testTextInputAiGrading(@PathVariable("quizId") String quizId,
+                                                    @PathVariable("questionId") Integer questionId,
+                                                    @RequestBody TextInputAIGradingRequest textInputAIGradingRequest) {
         QuizValidator.isNotBlank(quizId, "Quiz Id", quizId)
         QuizValidator.isNotNull(questionId, "Question Id", quizId)
         QuizValidator.isNotBlank(quizId, "Quiz Id", quizId)
         QuizValidator.isNotNull(questionId, "Minimum Confidence Level", quizId)
-        QuizValidator.isTrue(textInputAiGradingRequest?.minimumConfidenceLevel >= 0, "minimumConfidenceLevel must be greater than or equal to 0", quizId)
-        QuizValidator.isTrue(textInputAiGradingRequest?.minimumConfidenceLevel <= 100, "minimumConfidenceLevel must be less than or equal to 100", quizId)
-        QuizValidator.isNotBlank(textInputAiGradingRequest?.correctAnswer, "Correct Answer", quizId)
+        QuizValidator.isTrue(textInputAIGradingRequest?.minimumConfidenceLevel >= 0, "minimumConfidenceLevel must be greater than or equal to 0", quizId)
+        QuizValidator.isTrue(textInputAIGradingRequest?.minimumConfidenceLevel <= 100, "minimumConfidenceLevel must be less than or equal to 100", quizId)
+        QuizValidator.isNotBlank(textInputAIGradingRequest?.correctAnswer, "Correct Answer", quizId)
         QuizQuestionDefResult questionDef = quizDefService.getQuestionDef(quizId, questionId)
-        return openAIService.gradeTextInputQuizAnswer(questionDef.question, textInputAiGradingRequest.correctAnswer, textInputAiGradingRequest.minimumConfidenceLevel, textInputAiGradingRequest.studentAnswer)
+        return openAIService.gradeTextInputQuizAnswer(questionDef.question, textInputAIGradingRequest.correctAnswer, textInputAIGradingRequest.minimumConfidenceLevel, textInputAIGradingRequest.studentAnswer)
     }
 
 }

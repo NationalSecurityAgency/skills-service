@@ -40,5 +40,5 @@ class AiPromptSettings {
     AiPromptSetting updateSingleQuestionTypeChangedToSingleChoiceInstructions
     AiPromptSetting updateSingleQuestionTypeChangedToTextInputInstructions
     AiPromptSetting updateSingleQuestionTypeChangedToMatchingInstructions
-    AiPromptSetting inputTextQuizGradingInstructions
+    AiPromptSetting textInputQuestionGradingInstructions
 }
