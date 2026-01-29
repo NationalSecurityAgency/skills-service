@@ -129,6 +129,7 @@ describe('Quiz User Role Management Tests', () => {
     })
 
     it('paging users', function () {
+        cy.resetDb();
         cy.fixture('vars.json')
             .then((vars) => {
                 const pass = 'password';
