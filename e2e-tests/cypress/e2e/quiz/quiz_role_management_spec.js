@@ -82,9 +82,17 @@ describe('Quiz User Role Management Tests', () => {
           cy.get('[data-cy="currentValidationText"]').type('Delete Me')
             cy.clickSaveDialogBtn()
 
-          cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.exist')
+          cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('exist')
           cy.get('[data-cy="controlsCell_user1"] [data-cy="removeUserBtn"]').should('not.exist')
           cy.get('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]').should('be.enabled')
+
+          cy.openDialog('[data-cy="controlsCell_user2"] [data-cy="removeUserBtn"]')
+
+          cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove user2 from having admin privileges.')
+          cy.get('[data-cy="currentValidationText"]').type('Delete Me')
+          cy.clickSaveDialogBtn()
+
+          cy.get(`[data-cy="controlsCell_${defaultUser}"] [data-cy="removeUserBtn"]`).should('not.exist')
 
           cy.get('[data-cy="existingUserInput"] [data-cy="existingUserInputDropdown"] [data-pc-name="pcinputtext"]').should('have.focus')
         });
@@ -132,7 +140,7 @@ describe('Quiz User Role Management Tests', () => {
                 cy.register('5user', pass);
 
                 const oauthMode = Cypress.env('oauthMode');
-                const defaultUserForDisplay = oauthMode ? 'foo' : 'Firstname LastName (skills@skills.org)';
+                const defaultUserForDisplay = oauthMode ? 'foo' : 'skills@skills.org';
                 if (!oauthMode) {
                     cy.log('NOT in oauthMode, using form login');
                     cy.login(vars.defaultUser, vars.defaultPass);

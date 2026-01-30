@@ -64,6 +64,11 @@ const props = defineProps({
     required: false,
     default: 'This will remove',
   },
+  isSelf: {
+    type: Boolean,
+    required: false,
+    default: false
+  }
 });
 
 const model = defineModel()
@@ -123,6 +128,7 @@ const hasSlot = computed(() => {
           {{ removalTextPrefix }} <span
           class="font-bold text-primary">{{ itemName }}</span><span v-if="itemType">&nbsp;{{ itemType }}</span>.
         </div>
+        <div v-if="isSelf" class="font-bold">WARNING: This is your own account. Removing yourself may cause you to lose access.</div>
         <Message v-if="hasSlot" severity="warn" :closable="false">
           <div class="pl-2"><slot /></div>
         </Message>

@@ -106,7 +106,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
         result.projectId == projId
     }
 
-    def 'current user cannot delete them self'() {
+    def 'current user cannot delete themself if they are the only admin'() {
 
         when:
         skillsService.deleteUserRole("skills@skills.org", projId, RoleName.ROLE_PROJECT_ADMIN.toString())
@@ -114,6 +114,23 @@ class AuthorizationSpecs extends DefaultIntSpec {
         then:
         SkillsClientException ex = thrown()
         ex.httpStatus == HttpStatus.BAD_REQUEST
+    }
+
+    def 'current user can delete themself if they are not the only admin'() {
+
+        String newUser = "user2"
+        SkillsService skillsServiceUser2 = createService(newUser)
+        // add 'user2' as an admin to projId
+        skillsService.addProjectAdmin(projId, newUser)
+
+        when:
+        skillsService.deleteUserRole("skills@skills.org", projId, RoleName.ROLE_PROJECT_ADMIN.toString())
+        skillsService.getProject(projId)
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.httpStatus == HttpStatus.FORBIDDEN
+
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
