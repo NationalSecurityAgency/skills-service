@@ -65,28 +65,33 @@ const isLoading = computed(() => {
 })
 
 onMounted(() => {
-  if (route.params.skill) {
-    skillInternal.value = ({ ...route.params.skill });
-    loadingSkillInfo.value = false;
+  loadSkillInfo().then(() => {
     loadQuizInfo();
-  } else {
-    loadSkillInfo().then(() => {
-      loadQuizInfo();
-    });
-  }
+  });
 })
 
 const done = () => {
-  skillsDisplayInfo.routerPush('skillDetails',
-      {
-        subjectId: subjectId.value,
-        skillId: skillId.value,
-      }
-  )
+  if (route.params.crossProjectId && route.params.badgeId) {
+    skillsDisplayInfo.routerPush('globalBadgeSkillDetailsUnderAnotherProject',
+        {
+          badgeId: route.params.badgeId,
+          crossProjectId: route.params.crossProjectId,
+          dependentSkillId: route.params.skillId,
+        }
+    )
+  } else {
+    skillsDisplayInfo.routerPush('skillDetails',
+        {
+          subjectId: subjectId.value,
+          skillId: skillId.value,
+        }
+    )
+  }
+
 }
 const loadSkillInfo = () => {
   loadingSkillInfo.value = true;
-  return skillState.loadSkillSummary(skillId.value, null, null)
+  return skillState.loadSkillSummary(skillId.value, route.params.crossProjectId, null)
       .then((res) => {
         skillInternal.value = res;
       }).finally(() => {

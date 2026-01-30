@@ -572,7 +572,7 @@ class SkillsLoader {
         UserPoints up = userPointsRepo.findByProjectIdAndUserIdAndSkillId(crossProjectId ?: projectId, userId, skillId)
         Integer points = up ? up.points : 0
         Integer todayPoints = userPointsRepo.calculatePointsForSingleSkillForADay(userId, skillDef.id, new Date().clearTime()) ?: 0
-        Date achievedOn = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillId(userId, projectId, skillId)
+        Date achievedOn = achievedLevelRepository.getAchievedDateByUserIdAndProjectIdAndSkillId(userId, crossProjectId ?: projectId, skillId)
 
         ExpirationAttrs expirationAttrs = skillAttributeService.getExpirationAttrs(projectId, skillId)
         Date expirationDate

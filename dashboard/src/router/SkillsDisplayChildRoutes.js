@@ -99,6 +99,13 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
       title: `Global Badge ${skillPlaceholder} Details`
     }
   }, {
+    path: `${prependToPath}badges/global/:badgeId/crossProject/:crossProjectId/:dependentSkillId`,
+    component: SkillPage,
+    name: `globalBadgeSkillDetailsUnderAnotherProject${appendToName}`,
+    meta: {
+      title: `Global Badge ${skillPlaceholder} Details`
+    }
+  }, {
     path: `${prependToPath}badges/:badgeId/skills/:skillId`,
     component: SkillPage,
     name: `badgeSkillDetails${appendToName}`,
@@ -140,6 +147,17 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
   }, {
     name: `quizPage${appendToName}`,
     path: `${prependToPath}subjects/:subjectId/skills/:skillId/quizzes/:quizId`,
+    component: QuizPage,
+    meta: {
+      requiresAuth: true,
+      nonAdmin: true,
+      announcer: {
+        message: 'Quiz or Survey Run'
+      }
+    }
+  }, {
+    name: `quizPageForGlobalBadgeCrossProjectSkill${appendToName}`,
+    path: `${prependToPath}badges/global/:badgeId/crossProject/:crossProjectId/:skillId/quizzes/:quizId`,
     component: QuizPage,
     meta: {
       requiresAuth: true,
