@@ -168,4 +168,392 @@ describe('Global Badge on P&R pages', () => {
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"] [data-cy="skillPoints"]').should('have.text', '100');
     })
 
+    it('Ability to claim points for Global Badge Honor skill from another project - by navigation to the skill', function () {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 3, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1 )
+        cy.assignSkillToGlobalBadge(1, 2, 1)
+        cy.assignSkillToGlobalBadge(1, 3, 2)
+        cy.enableGlobalBadge(1);
+
+        cy.addToMyProjects(1);
+        cy.addToMyProjects(2);
+
+
+        cy.visit('/progress-and-rankings/projects/proj2/badges/global/globalBadge1');
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').click()
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+        cy.get('[data-cy="claimPointsBtn"]').should('be.enabled')
+        cy.get('[data-cy="claimPointsBtn"]').click()
+        cy.get('[data-cy="selfReportAlert"]').contains('You just earned 100 points and completed the skill')
+        cy.get('[data-cy="skillCompletedCheck-skill1=globalBadge1"]')
+        cy.get('[data-cy="achievementDate"]')
+
+        cy.visit('/progress-and-rankings/projects/proj2/badges/global/globalBadge1/crossProject/proj1/skill1');
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+        cy.get('[data-cy="claimPointsBtn"]').should('not.exist')
+        cy.get('[data-cy="skillCompletedCheck-skill1=globalBadge1"]')
+        cy.get('[data-cy="achievementDate"]')
+    })
+
+    it('Ability to claim points for Global Badge Honor skill from another project - by going directly to the skill', function () {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 3, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1 )
+        cy.assignSkillToGlobalBadge(1, 2, 1)
+        cy.assignSkillToGlobalBadge(1, 3, 2)
+        cy.enableGlobalBadge(1);
+
+        cy.addToMyProjects(1);
+        cy.addToMyProjects(2);
+
+        cy.visit('/progress-and-rankings/projects/proj2/badges/global/globalBadge1/crossProject/proj1/skill2');
+        cy.get('[data-cy="skillProgressTitle-skill2=globalBadge1"]').contains('Very Great Skill 2')
+        cy.get('[data-cy="skillProgressTitle-skill2=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+        cy.get('[data-cy="claimPointsBtn"]').should('be.enabled')
+        cy.get('[data-cy="claimPointsBtn"]').click()
+        cy.get('[data-cy="selfReportAlert"]').contains('You just earned 100 points and completed the skill')
+        cy.get('[data-cy="skillCompletedCheck-skill2=globalBadge1"]')
+        cy.get('[data-cy="achievementDate"]')
+
+        // reload
+        cy.visit('/progress-and-rankings/projects/proj2/badges/global/globalBadge1/crossProject/proj1/skill2');
+        cy.get('[data-cy="skillProgressTitle-skill2=globalBadge1"]').contains('Very Great Skill 2')
+        cy.get('[data-cy="skillProgressTitle-skill2=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+        cy.get('[data-cy="claimPointsBtn"]').should('not.exist')
+        cy.get('[data-cy="skillCompletedCheck-skill2=globalBadge1"]')
+        cy.get('[data-cy="achievementDate"]')
+    })
+
+    it('Ability to claim points for Global Badge Honor skill from another project - from the badge page', function () {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 3, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1 )
+        cy.assignSkillToGlobalBadge(1, 2, 1)
+        cy.assignSkillToGlobalBadge(1, 3, 2)
+        cy.enableGlobalBadge(1);
+
+        cy.addToMyProjects(1);
+        cy.addToMyProjects(2);
+
+        cy.visit('/progress-and-rankings/projects/proj2/badges/global/globalBadge1');
+        cy.get('[data-cy="toggleSkillDetails"]').click()
+        cy.get('[data-cy="skillProgressTitle-skill2=globalBadge1"]').contains('Very Great Skill 2')
+        cy.get('[data-cy="skillProgressTitle-skill2=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+        cy.get('[data-cy="skillDescription-skill2"] [data-cy="claimPointsBtn"]').should('be.enabled')
+        cy.get('[data-cy="skillDescription-skill2"] [data-cy="claimPointsBtn"]').click()
+        cy.get('[data-cy="skillDescription-skill2"] [data-cy="selfReportAlert"]').contains('You just earned 100 points and completed the skill')
+        cy.get('[data-cy="skillCompletedCheck-skill2=globalBadge1"]')
+
+        // reload
+        cy.visit('/progress-and-rankings/projects/proj2/badges/global/globalBadge1/crossProject/proj1/skill2');
+        cy.get('[data-cy="skillProgressTitle-skill2=globalBadge1"]').contains('Very Great Skill 2')
+        cy.get('[data-cy="skillProgressTitle-skill2=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+        cy.get('[data-cy="claimPointsBtn"]').should('not.exist')
+        cy.get('[data-cy="skillCompletedCheck-skill2=globalBadge1"]')
+        cy.get('[data-cy="achievementDate"]')
+    })
+
+    it('skills-client: Ability to claim points for Global Badge Honor skill from another project', function () {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 3, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1 )
+        cy.assignSkillToGlobalBadge(1, 2, 1)
+        cy.assignSkillToGlobalBadge(1, 3, 2)
+        cy.enableGlobalBadge(1);
+
+        cy.addToMyProjects(1);
+        cy.addToMyProjects(2);
+
+        // navigate to the skill
+        cy.visit('/test-skills-client/proj1?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1');
+        cy.wrapIframe().find('[data-cy="skillProgress_index-2"] [data-cy="skillProgressTitle"]').click()
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3=globalBadge1"]').contains('Very Great Skill 3')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 2')
+
+        cy.wrapIframe().find('[data-cy="claimPointsBtn"]').should('be.enabled')
+        cy.wrapIframe().find('[data-cy="claimPointsBtn"]').click()
+        cy.wrapIframe().find('[data-cy="selfReportAlert"]').contains('You just earned 100 points and completed the skill')
+        cy.wrapIframe().find('[data-cy="skillCompletedCheck-skill3=globalBadge1"]')
+        cy.wrapIframe().find('[data-cy="achievementDate"]')
+
+        // refresh and validate
+        cy.visit('/test-skills-client/proj1?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1%2FcrossProject%2Fproj2%2Fskill3');
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3=globalBadge1"]').contains('Very Great Skill 3')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 2')
+
+        cy.wrapIframe().find('[data-cy="claimPointsBtn"]').should('not.exist')
+        cy.wrapIframe().find('[data-cy="skillCompletedCheck-skill3=globalBadge1"]')
+        cy.wrapIframe().find('[data-cy="achievementDate"]')
+
+
+        // directly load the skill
+        cy.visit('/test-skills-client/proj2?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1%2FcrossProject%2Fproj1%2Fskill1');
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.wrapIframe().find('[data-cy="claimPointsBtn"]').should('be.enabled')
+        cy.wrapIframe().find('[data-cy="claimPointsBtn"]').click()
+        cy.wrapIframe().find('[data-cy="selfReportAlert"]').contains('You just earned 100 points and completed the skill')
+        cy.wrapIframe().find('[data-cy="skillCompletedCheck-skill1=globalBadge1"]')
+        cy.wrapIframe().find('[data-cy="achievementDate"]')
+
+        // refresh
+        cy.visit('/test-skills-client/proj2?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1%2FcrossProject%2Fproj1%2Fskill1');
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.wrapIframe().find('[data-cy="claimPointsBtn"]').should('not.exist')
+        cy.wrapIframe().find('[data-cy="skillCompletedCheck-skill1=globalBadge1"]')
+        cy.wrapIframe().find('[data-cy="achievementDate"]')
+    })
+
+    it('skills-client: Ability to claim points for Global Badge Honor skill from same project', function () {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 3, { numPerformToCompletion: 1, selfReportingType: 'HonorSystem'});
+
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1 )
+        cy.assignSkillToGlobalBadge(1, 2, 1)
+        cy.assignSkillToGlobalBadge(1, 3, 2)
+        cy.enableGlobalBadge(1);
+
+        cy.addToMyProjects(1);
+        cy.addToMyProjects(2);
+
+        // navigate to the skill
+        cy.visit('/test-skills-client/proj1?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1');
+        cy.wrapIframe().find('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').click()
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.wrapIframe().find('[data-cy="claimPointsBtn"]').should('be.enabled')
+        cy.wrapIframe().find('[data-cy="claimPointsBtn"]').click()
+        cy.wrapIframe().find('[data-cy="selfReportAlert"]').contains('You just earned 100 points and completed the skill')
+        cy.wrapIframe().find('[data-cy="skillCompletedCheck-skill1=globalBadge1"]')
+        cy.wrapIframe().find('[data-cy="achievementDate"]')
+
+        // refresh
+        cy.visit('/test-skills-client/proj1?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1%2Fskills%2Fskill1');
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.wrapIframe().find('[data-cy="claimPointsBtn"]').should('not.exist')
+        cy.wrapIframe().find('[data-cy="skillCompletedCheck-skill1=globalBadge1"]')
+        cy.wrapIframe().find('[data-cy="achievementDate"]')
+
+        // directly load the skill
+        cy.visit('/test-skills-client/proj1?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1%2Fskills%2Fskill2');
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill2=globalBadge1"]').contains('Very Great Skill 2')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill2=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.wrapIframe().find('[data-cy="claimPointsBtn"]').should('be.enabled')
+        cy.wrapIframe().find('[data-cy="claimPointsBtn"]').click()
+        cy.wrapIframe().find('[data-cy="selfReportAlert"]').contains('You just earned 100 points and completed the skill')
+        cy.wrapIframe().find('[data-cy="skillCompletedCheck-skill2=globalBadge1"]')
+        cy.wrapIframe().find('[data-cy="achievementDate"]')
+    })
+
+    it('skills-client: Ability to request approval for Global Badge skill from another project', function () {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 3, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1 )
+        cy.assignSkillToGlobalBadge(1, 2, 1)
+        cy.assignSkillToGlobalBadge(1, 3, 2)
+        cy.enableGlobalBadge(1);
+
+        cy.addToMyProjects(1);
+        cy.addToMyProjects(2);
+
+        // navigate to the skill
+        cy.visit('/test-skills-client/proj1?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1');
+        cy.wrapIframe().find('[data-cy="skillProgress_index-2"] [data-cy="skillProgressTitle"]').click()
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3=globalBadge1"]').contains('Very Great Skill 3')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 2')
+
+        cy.wrapIframe().find('[data-cy="requestApprovalBtn"]').should('be.enabled')
+        cy.wrapIframe().find('[data-cy="requestApprovalBtn"]').click()
+        cy.wrapIframe().find('[data-cy="selfReportSubmitBtn"]').click()
+
+        cy.wrapIframe().find('[data-cy="selfReportAlert"]').contains('This skill requires approval from a project administrator')
+        cy.wrapIframe().find('[data-cy="skillProgress-ptsOverProgressBard"] [data-cy="approvalPending"]')
+
+        // refresh and validate
+        cy.visit('/test-skills-client/proj1?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1%2FcrossProject%2Fproj2%2Fskill3');
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3=globalBadge1"]').contains('Very Great Skill 3')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 2')
+
+        cy.wrapIframe().find('[data-cy="requestApprovalBtn"]').should('not.exist')
+        cy.wrapIframe().find('[data-cy="skillProgress-ptsOverProgressBard"] [data-cy="approvalPending"]')
+    })
+
+    it('skills-client: Ability to achieve skill for Global Badge by watching a video from another project', function () {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        const vidAttr = { file: 'create-subject.webm', transcript: 'another' }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 3, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1 )
+        cy.assignSkillToGlobalBadge(1, 2, 1)
+        cy.assignSkillToGlobalBadge(1, 3, 2)
+        cy.enableGlobalBadge(1);
+
+        cy.addToMyProjects(1);
+        cy.addToMyProjects(2);
+
+        // navigate to the skill
+        cy.visit('/test-skills-client/proj2?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1');
+        cy.wrapIframe().find('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').click()
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.wrapIframe().find('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.wrapIframe().find('[data-cy="viewTranscriptBtn"]').should('be.enabled')
+        cy.wrapIframe().find('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
+        cy.wrapIframe().find('[data-cy="skillVideo-skill1"] [data-cy="viewTranscriptBtn"]')
+        cy.wrapIframe().find('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 0)
+
+        cy.wrapIframe().find('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
+        cy.wait(8000)
+        cy.wrapIframe().find('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 100 points')
+        cy.wrapIframe().find('[data-cy="viewTranscriptBtn"]')
+        cy.wrapIframe().find('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
+
+        // refresh and validate
+        cy.visit('/test-skills-client/proj2?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1%2FcrossProject%2Fproj1%2Fskill1');
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.wrapIframe().find('[data-cy="skillCompletedCheck-skill1=globalBadge1"]')
+        cy.wrapIframe().find('[data-cy="achievementDate"]')
+    })
+
+    it('skills-client: Ability to achieve skill for Global Badge by taking a quiz from another project', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 3, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1 )
+        cy.assignSkillToGlobalBadge(1, 2, 1)
+        cy.assignSkillToGlobalBadge(1, 3, 2)
+        cy.enableGlobalBadge(1);
+
+        cy.addToMyProjects(1);
+        cy.addToMyProjects(2);
+
+        // navigate to the skill
+        cy.visit('/test-skills-client/proj2?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1');
+        cy.wrapIframe().find('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').click()
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.wrapIframe().find('[data-cy="takeQuizBtn"]').contains('Take Quiz')
+        cy.wrapIframe().find('[data-cy="takeQuizBtn"]').click();
+
+        cy.wrapIframe().find('[data-cy="title"]').contains('Quiz')
+        cy.wrapIframe().find('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1 skill by passing this quiz')
+
+        cy.wrapIframe().find('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numQuestions"]').should('have.text', '3')
+        cy.wrapIframe().find('[data-cy="quizSplashScreen"] [data-cy="quizInfoCard"] [data-cy="numAttempts"]').should('have.text', '0 / Unlimited')
+
+        cy.wrapIframe().find('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
+
+        cy.wrapIframe().find('[data-cy="cancelQuizAttempt"]').should('be.enabled')
+        cy.wrapIframe().find('[data-cy="startQuizAttempt"]').should('be.enabled')
+
+        cy.wrapIframe().find('[data-cy="startQuizAttempt"]').click()
+
+        cy.wrapIframe().find('[data-cy="question_1"] [data-cy="answer_1"]').click()
+        cy.wrapIframe().find('[data-cy="question_2"] [data-cy="answer_2"]').click()
+        cy.wrapIframe().find('[data-cy="question_3"] [data-cy="answer_3"]').click()
+
+        cy.wrapIframe().find('[data-cy="completeQuizBtn"]').should('be.enabled')
+        cy.wrapIframe().find('[data-cy="completeQuizBtn"]').click()
+
+        cy.wrapIframe().find('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
+
+        cy.wrapIframe().find('[data-cy="numAttemptsInfoCard"]').should('not.exist')
+
+        cy.wrapIframe().find('[data-cy="quizCompletion"] [data-cy="closeQuizBtn"]').click()
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.wrapIframe().find('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('150')
+        cy.wrapIframe().find('[data-cy="skillCompletedCheck-skill1=globalBadge1"]')
+        cy.wrapIframe().find('[data-cy="achievementDate"]')
+
+        // refresh and validate
+        cy.visit('/test-skills-client/proj2?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1%2FcrossProject%2Fproj1%2Fskill1');
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.wrapIframe().find('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('150')
+        cy.wrapIframe().find('[data-cy="skillCompletedCheck-skill1=globalBadge1"]')
+        cy.wrapIframe().find('[data-cy="achievementDate"]')
+    })
 })

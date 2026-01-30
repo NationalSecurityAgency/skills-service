@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 
-import {ref, computed} from "vue";
+import {ref, computed, toRaw} from "vue";
 import QuizType from "@/skills-display/components/quiz/QuizType.js";
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 import {useSkillsDisplayInfo} from "@/skills-display/UseSkillsDisplayInfo.js";
@@ -57,18 +57,29 @@ const isLocked = computed(() => {
   return lockedDueToSkillPrerequisites || lockedDueToBadgePrerequisites
 })
 const isCrossProject = computed(() => props.skill.crossProject)
-const selfReportAvailable = computed(() => isQuizOrSurveySkill?.value && (!isCompleted.value || isMotivationalSkill.value) && !isLocked.value && !isCrossProject.value)
+const selfReportAvailable = computed(() => isQuizOrSurveySkill?.value && (!isCompleted.value || isMotivationalSkill.value) && !isLocked.value)
 const quizOrSurveyPassed = computed(() => selfReporting.value?.quizOrSurveyPassed)
 const subjectId = computed(() => props.skill.subjectId || route.params.subjectId)
 
 const navToQuiz = () => {
-  skillsDisplayInfo.routerPush('quizPage',
-      {
-        subjectId: subjectId.value,
-        skillId: props.skill.skillId,
-        quizId: props.skill.selfReporting.quizId,
-      }
-  )
+  if (props.skill.crossProject) {
+    skillsDisplayInfo.routerPush('quizPageForGlobalBadgeCrossProjectSkill',
+        {
+          crossProjectId: props.skill.projectId,
+          skillId: props.skill.skillId,
+          quizId: props.skill.selfReporting.quizId,
+          badgeId: route.params.badgeId,
+        }
+    )
+  } else {
+    skillsDisplayInfo.routerPush('quizPage',
+        {
+          subjectId: subjectId.value,
+          skillId: props.skill.skillId,
+          quizId: props.skill.selfReporting.quizId,
+        }
+    )
+  }
 }
 
 const showQuizResults = ref(false)

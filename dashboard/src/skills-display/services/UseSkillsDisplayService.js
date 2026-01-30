@@ -174,8 +174,11 @@ export const useSkillsDisplayService = () => {
     return response
   }
 
-  const reportSkill = (skillId, approvalRequestedMsg) => {
-    return axios.post(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skills/${encodeURIComponent(skillId)}`, {
+  const reportSkill = (skillId, approvalRequestedMsg, crossProjectId) => {
+    const urlToUse = crossProjectId ?
+        `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/crossProject/${encodeURIComponent(crossProjectId)}/skills/${encodeURIComponent(skillId)}`
+        : `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skills/${encodeURIComponent(skillId)}`
+    return axios.post(urlToUse, {
       ...getUserIdAndVersionParams(),
       approvalRequestedMsg
     }, { handleErrorCode: 400 }).then((result) => result.data)

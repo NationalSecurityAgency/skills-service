@@ -51,11 +51,11 @@ watch(() => skill.value.groupSkillId, () => {
   displayGroupDescription.value = false;
 })
 const loadSkillSummary = () => {
-  const skillId = skillsDisplayInfo.isDependency() ? route.params.dependentSkillId : route.params.skillId
-  skillState.loadSkillSummary(skillId, route.params.crossProjectId || route.query.externalProjectId, route.params.subjectId)
+  let skillId = skillsDisplayInfo.isDependency() ? route.params.dependentSkillId : route.params.skillId
+  skillState.loadSkillSummary(skillId, route.params.crossProjectId, route.params.subjectId)
     .then(() => {
       loadingSkill.value = false
-      if (skillId && skill.value.projectId && !skillsDisplayInfo.isCrossProject()) {
+      if (skillId && skill.value.projectId && !skillsDisplayInfo.isCrossProject() && !skillsDisplayInfo.isGlobalBadgeSkillDetails()) {
         skillsDisplayService.updateSkillHistory(skill.value.projectId, skillId)
       }
       scrollIntoViewState.setLastViewedSkillId(skillId)

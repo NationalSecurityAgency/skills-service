@@ -99,8 +99,11 @@ const buildToRoute = () => {
   } else if (route.params.badgeId) {
     params.badgeId = route.params.badgeId
     name = (skillsDisplayInfo.isGlobalBadgePage.value) ? 'globalBadgeSkillDetails' : 'badgeSkillDetails'
-    if (skillsDisplayInfo.isGlobalBadgePage.value && props.skill.projectId !== route.params.projectId) {
-      query.externalProjectId = props.skill.projectId
+
+    if (skillsDisplayInfo.isGlobalBadgePage.value && props.skill.crossProject) {
+      name = 'globalBadgeSkillDetailsUnderAnotherProject'
+      params.crossProjectId = props.skill.projectId
+      params.dependentSkillId = props.skill.skillId
     }
   } else if (props.skill.crossProject && props.skill.projectId) {
     params.crossProjectId = props.skill.projectId

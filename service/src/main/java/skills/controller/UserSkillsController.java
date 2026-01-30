@@ -405,6 +405,17 @@ class UserSkillsController {
         return addSkillHelper.addSkill(projectId, skillId, skillEventRequest);
     }
 
+    @RequestMapping(value = "/projects/{projectId}/crossProject/{crossProjectId}/skills/{skillId}", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
+    @ResponseBody
+    @Profile
+    public SkillEventResult addCrossProjectSkill(@PathVariable("projectId") String projectId,
+                                     @PathVariable("crossProjectId") String crossProjectId,
+                                     @PathVariable("skillId") String skillId,
+                                     @RequestBody(required = false) SkillEventRequest skillEventRequest) {
+        // TODO: validate that skill is either a global badge skill or a cross project skill
+        return addSkillHelper.addSkill(crossProjectId, skillId, skillEventRequest);
+    }
+
     @RequestMapping(value = "/projects/{projectId}/rank", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public SkillsRanking getRanking(@PathVariable("projectId") String projectId,

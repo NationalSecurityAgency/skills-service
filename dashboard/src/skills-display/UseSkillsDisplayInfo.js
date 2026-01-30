@@ -92,7 +92,9 @@ export const useSkillsDisplayInfo = () => {
   const isGlobalBadgePage = computed(() => {
     return route.name === getContextSpecificRouteName('globalBadgeDetails') ||
       route.name === getContextSpecificRouteName('globalBadgeSkillDetails') ||
-      route.name === 'globalBadgeDetails'
+      route.name === 'globalBadgeDetails' ||
+      route.name === getContextSpecificRouteName('globalBadgeSkillDetailsUnderAnotherProject') ||
+      route.name === 'globalBadgeSkillDetailsUnderAnotherProject'
   })
 
   const createToBadgeLink = (badge, globalBadgeUnderProjectId = null) => {
@@ -121,11 +123,20 @@ export const useSkillsDisplayInfo = () => {
 
   const isDependency = () => {
     const routeName = route.name
-    return routeName === getContextSpecificRouteName('crossProjectSkillDetails') || routeName === getContextSpecificRouteName('crossProjectSkillDetailsUnderBadge')
+    return routeName === getContextSpecificRouteName('crossProjectSkillDetails')
+        || routeName === getContextSpecificRouteName('crossProjectSkillDetailsUnderBadge')
+        || routeName === getContextSpecificRouteName('globalBadgeSkillDetailsUnderAnotherProject')
   }
   const isCrossProject = () => {
     const routeName = route.name
     return routeName === getContextSpecificRouteName('crossProjectSkillDetails') || route.params.crossProjectId
+  }
+  const isGlobalBadgeSkillDetails = () => {
+    const routeName = route.name
+    return routeName === 'globalBadgeSkillDetailsSkillsClient'
+        || getContextSpecificRouteName('globalBadgeSkillDetailsSkillsClient')
+        || routeName === 'globalBadgeSkillDetailsUnderAnotherProject'
+        || getContextSpecificRouteName('globalBadgeSkillDetailsUnderAnotherProject')
   }
 
   return {
@@ -140,6 +151,7 @@ export const useSkillsDisplayInfo = () => {
     routerPush,
     isSubjectPage,
     isGlobalBadgePage,
+    isGlobalBadgeSkillDetails,
     createToBadgeLink,
     isDependency,
     isCrossProject,

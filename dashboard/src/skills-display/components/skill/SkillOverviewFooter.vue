@@ -51,7 +51,7 @@ const selfReport = ref({
   res: null,
   msgHidden: true
 })
-const selfReportAvailable = computed(() => selfReportConfigured() && (!isCompleted.value || isMotivationalSkill.value) && !isLocked() && !isCrossProject())
+const selfReportAvailable = computed(() => selfReportConfigured() && (!isCompleted.value || isMotivationalSkill.value) && !isLocked())
 const skillInternal = computed(() => props.skill)
 const isPointsEarned = computed(() => selfReport.value && selfReport.value.res && selfReport.value.res.skillApplied)
 const isCompleted = computed(() => skillInternal.value.points === skillInternal.value.totalPoints)
@@ -126,9 +126,8 @@ const reportSkill = (approvalRequestedMsg) => {
 
   firstReport.value = skillInternal.value.points === 0;
   isRetention.value = skillInternal.value.points === skillInternal.value.totalPoints
-  // selfReport.value.msgHidden = true
-  // selfReport.value.res = null
-  skillsDisplayService.reportSkill(skillInternal.value.skillId, approvalRequestedMsg)
+  const crossProjId = skillInternal.value.crossProject ? skillInternal.value.projectId : null
+  skillsDisplayService.reportSkill(skillInternal.value.skillId, approvalRequestedMsg, crossProjId)
     .then((res) => {
       if (res.explanation.includes('This skill was already submitted for approval and is still pending approval')
         || res.explanation.includes('This skill reached its maximum points')) {
