@@ -72,7 +72,7 @@ const numberOfStars = computed(() => {
   return props.question.answers ? props.question.answers.length : 3;
 })
 const mediaAttributes = computed(() => {
-  const media = props.question.attributes ? JSON.parse(props.question.attributes) : null
+  const media = props.question.attributes ? JSON.parse(props.question.attributes)?.videoConf : null
   if(media) {
     media.isAudio = media.videoType?.includes('audio/')
   }
