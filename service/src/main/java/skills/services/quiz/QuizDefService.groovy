@@ -42,6 +42,7 @@ import skills.services.*
 import skills.services.admin.DataIntegrityExceptionHandlers
 import skills.services.admin.ServiceValidatorHelper
 import skills.services.admin.UserCommunityService
+import skills.services.attributes.QuestionAttrs
 import skills.services.attributes.QuizAttrs
 import skills.services.attributes.SkillVideoAttrs
 import skills.services.attributes.SlidesAttrs
@@ -285,10 +286,76 @@ class QuizDefService {
     }
 
     void copyQuestions(String originalQuizId, String newQuizId) {
-        QuizQuestionsResult originalQuestions = getQuestionDefs(originalQuizId)
-        List<QuizQuestionDefRequest> newQuestions = new ArrayList<QuizQuestionDefRequest>()
-        originalQuestions.questions.forEach(question -> {
+        QuizDef originalQuizDef = findQuizDef(originalQuizId)
+        List<QuizQuestionDef> originalQuestions = quizQuestionRepo.findAllByQuizIdIgnoreCase(originalQuizId)
 
+        // validate questions
+        validateQuestions(originalQuestions, originalQuizDef.quizId)
+
+        QuizDef newQuizDef = findQuizDef(newQuizId)
+        lockingService.lockQuizDef(newQuizDef.quizId)
+
+        originalQuestions.each { QuizQuestionDef fromQuestionDef ->
+            QuestionAttrs questionAttrs = copyQuestionAttrs(fromQuestionDef, newQuizDef)
+
+            String updatedQuestion = attachmentService.copyAttachmentsForIncomingDescription(fromQuestionDef.question, null, null, newQuizId)
+            QuizQuestionDef savedQuestion = quizQuestionRepo.saveAndFlush(new QuizQuestionDef(
+                    quizId: newQuizId,
+                    question: updatedQuestion,
+                    answerHint: fromQuestionDef.answerHint,
+                    type: fromQuestionDef.type,
+                    displayOrder: fromQuestionDef.displayOrder,
+                    attributes: questionAttrs ? mapper.writeValueAsString(questionAttrs) : null
+            ))
+
+            List<QuizAnswerDef> answers = quizAnswerRepo.findAllByQuestionRefId(fromQuestionDef.id)
+
+            List<QuizAnswerDef> newAnswersDefTmp = answers.collect { QuizAnswerDef fromAnswerDef ->
+               return new QuizAnswerDef(
+                        quizId: savedQuestion.quizId,
+                        questionRefId: savedQuestion.id,
+                        answer: fromAnswerDef.answer,
+                        isCorrectAnswer: fromAnswerDef.isCorrectAnswer,
+                        displayOrder: fromAnswerDef.displayOrder,
+                        multiPartAnswer: fromAnswerDef.multiPartAnswer,
+                )
+            }
+            List<QuizAnswerDef> savedAnswers = quizAnswerRepo.saveAllAndFlush(newAnswersDefTmp)
+            addSavedQuestionUserAction(newQuizDef.quizId, savedQuestion, savedAnswers)
+        }
+    }
+
+    private QuestionAttrs copyQuestionAttrs(QuizQuestionDef fromQuestionDef, QuizDef newQuizDef) {
+        QuestionAttrs questionAttrs
+        if (fromQuestionDef.attributes) {
+            questionAttrs = mapper.readValue(fromQuestionDef.attributes, QuestionAttrs.class)
+            SkillVideoAttrs videoAttrs = questionAttrs?.videoConf
+            String transcript = videoAttrs?.transcript
+            if (StringUtils.isNotBlank(transcript)) {
+                CustomValidationResult validationResult = customValidator.validateDescription(transcript,
+                        null, false, fromQuestionDef.quizId)
+                if (!validationResult.valid) {
+                    String msg = "Video transcript validation failed for questionId=[${fromQuestionDef.id}], fullMessage=[${validationResult.msg}]"
+                    throw new SkillQuizException(msg, null, fromQuestionDef.quizId, fromQuestionDef.id, ErrorCode.ParagraphValidationFailed)
+                }
+            }
+
+            String internallyHostedAttachmentUuid = videoAttrs?.internallyHostedAttachmentUuid
+            if (internallyHostedAttachmentUuid) {
+                Attachment attachment = attachmentService.getAttachment(internallyHostedAttachmentUuid)
+                if (attachment) {
+                    Attachment newAttachment = attachmentService.copyAttachmentWithNewUuid(attachment, null, newQuizDef.quizId)
+                    videoAttrs.videoUrl = "/api/download/${newAttachment.uuid}".toString()
+                    videoAttrs.internallyHostedAttachmentUuid = newAttachment.uuid
+                    questionAttrs.videoConf = videoAttrs
+                }
+            }
+        }
+        return questionAttrs
+    }
+
+    private validateQuestions(List<QuizQuestionDef> questionDefList, String originalQuizId) {
+        questionDefList.forEach { QuizQuestionDef question ->
             CustomValidationResult validationResult = customValidator.validateDescription(question.question,
                     null, false, originalQuizId)
             if (validationResult.valid && StringUtils.isNotBlank(question.answerHint)) {
@@ -299,35 +366,7 @@ class QuizDefService {
                 String msg = "Validation failed for questionId=[${question.id}], fullMessage=[${validationResult.msg}]"
                 throw new SkillQuizException(msg, null, originalQuizId, question.id, ErrorCode.ParagraphValidationFailed)
             }
-            if (question.attributes) {
-                def parsed = jsonSlurper.parseText(question.attributes)
-                String trasnscript = parsed["transcript"]
-                if (StringUtils.isNotBlank(trasnscript)) {
-                    validationResult = customValidator.validateDescription(trasnscript,
-                            null, false, originalQuizId)
-                    if (!validationResult.valid) {
-                        String msg = "Video transcript validation failed for questionId=[${question.id}], fullMessage=[${validationResult.msg}]"
-                        throw new SkillQuizException(msg, null, originalQuizId, question.id, ErrorCode.ParagraphValidationFailed)
-                    }
-                }
-            }
-
-            List<QuizAnswerDefResult> answers = question.answers
-            QuizQuestionDefRequest newQuestion = new QuizQuestionDefRequest()
-            String updateQuestion = attachmentService.copyAttachmentsForIncomingDescription(question.question, null, null, newQuizId)
-            newQuestion.question = updateQuestion
-            newQuestion.questionType = question.questionType
-
-            List<QuizAnswerDefRequest> newAnswers = answers.collect( it -> {
-                return new QuizAnswerDefRequest(answer: it.answer, isCorrect: it.isCorrect, multiPartAnswer: it.multiPartAnswer)
-            })
-            newQuestion.answers = newAnswers
-            newQuestion.attributes = question.attributes
-            newQuestion.answerHint = question.answerHint
-            newQuestions.add(newQuestion)
-        })
-
-        saveQuestionBatch(newQuizId, newQuestions)
+        }
     }
 
     QuizDefWithDescription retrieveAndValidateQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest) {
@@ -464,43 +503,6 @@ class QuizDefService {
                 quizSettingsRepo.save(retrievedSetting)
             }
         }
-    }
-
-    @Transactional()
-    void saveQuestionBatch(String quizId, List<QuizQuestionDefRequest> questions) {
-        QuizDef quizDef = findQuizDef(quizId)
-
-        lockingService.lockQuizDef(quizDef.quizId)
-
-        questions.forEach( questionRequest -> {
-            QuizQuestionDef savedQuestion
-            List<QuizAnswerDef> savedAnswers
-            savedQuestion = createQuizQuestionDef(quizDef, questionRequest)
-
-            if(questionRequest.attributes) {
-                def parsed = jsonSlurper.parseText(questionRequest.attributes)
-                String uuid = parsed["internallyHostedAttachmentUuid"].toString()
-                Attachment attachment = attachmentService.getAttachment(uuid)
-                if(attachment) {
-                    Boolean isInternallyHosted = parsed["isInternallyHosted"]
-                    Attachment newAttachment = attachmentService.copyAttachmentWithNewUuid(attachment, null, quizDef.quizId)
-                    SkillVideoAttrs newAttrs = new SkillVideoAttrs()
-                    newAttrs.videoUrl = isInternallyHosted ? "/api/download/" + newAttachment.uuid : parsed["videoUrl"]
-                    newAttrs.videoType = newAttachment.contentType
-                    newAttrs.captions = parsed["captions"]
-                    newAttrs.transcript = parsed["transcript"]
-                    newAttrs.isInternallyHosted = isInternallyHosted
-                    newAttrs.internallyHostedFileName = parsed["internallyHostedFileName"]
-                    newAttrs.internallyHostedAttachmentUuid = newAttachment.uuid
-                    newAttrs.width = parsed["width"]
-                    newAttrs.height = parsed["height"]
-
-                    saveVideoAttributesForQuestion(quizDef.quizId, savedQuestion.id, newAttrs)
-                }
-            }
-            savedAnswers = createQuizQuestionAnswerDefs(questionRequest, savedQuestion)
-            addSavedQuestionUserAction(quizDef.quizId, savedQuestion, savedAnswers)
-        })
     }
 
     @Transactional()
@@ -710,7 +712,6 @@ class QuizDefService {
                 answerHint: InputSanitizer.sanitize(questionDefRequest.answerHint),
                 type: questionDefRequest.questionType,
                 displayOrder: displayOrder,
-                attributes: questionDefRequest.attributes
         )
         QuizQuestionDef savedQuestion = quizQuestionRepo.saveAndFlush(questionDef)
         return  savedQuestion

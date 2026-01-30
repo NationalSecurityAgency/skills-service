@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2026 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.request.model
+package skills.services.attributes
 
 import groovy.transform.Canonical
-import skills.services.quiz.QuizQuestionType
 
 @Canonical
-class QuizQuestionDefRequest {
-    String question
-    String answerHint
-    QuizQuestionType questionType
-
-    List<QuizAnswerDefRequest> answers
-    Integer questionScale = 5
+class QuestionAttrs {
+    SkillVideoAttrs videoConf
+    TextInputAiGradingAttrs textInputAiGradingConf
 }

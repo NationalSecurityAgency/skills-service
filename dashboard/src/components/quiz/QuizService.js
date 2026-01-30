@@ -169,5 +169,15 @@ export default {
     return axios
         .get(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/validateEnablingCommunity`)
         .then((response) => response.data)
-  }
+  },
+  getTextInputAiGradingAttrs(quizId, questionId) {
+    return axios
+        .get(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/questions/${questionId}/textInputAiGradingConf`)
+        .then((response) => response.data)
+  },
+  saveTextInputAiGradingAttrs(quizId, questionId, attrs) {
+    return axios
+        .post(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/questions/${questionId}/textInputAiGradingConf`, attrs)
+        .then((response) => response.data)
+  },
 }
