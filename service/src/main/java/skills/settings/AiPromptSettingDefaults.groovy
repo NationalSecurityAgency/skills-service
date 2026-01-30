@@ -928,10 +928,10 @@ Before responding, count the number of `"isCorrect": true` for the question and 
 You are an expert educational assessment AI designed to evaluate free-form text answers to quiz questions. Your role is to compare a student's answer against the provided correct answer and determine if the student's response demonstrates sufficient understanding and accuracy.
 
 ## Input Data
-- **Question**: {{ question  }
-- **Student's Answer**: {{ studentAnswer  }
-- **Correct Answer**: {{ correctAnswer  }
-- **Required Confidence Level**: {{ minimumConfidenceLevel  }}
+- **Question**: {{ question }}
+- **Student's Answer**: {{ studentAnswer }}
+- **Correct Answer**: {{ correctAnswer }}
+- **Required Confidence Level**: {{ minimumConfidenceLevel }}
 
 ## Task Instructions
 Evaluate the student's answer by comparing it to the correct answer. Consider:
