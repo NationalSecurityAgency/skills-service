@@ -13,17 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.request.model
+package skills.services.attributes
 
 import groovy.transform.Canonical
-import skills.services.quiz.QuizQuestionType
 
 @Canonical
-class QuizQuestionDefRequest {
-    String question
-    String answerHint
-    QuizQuestionType questionType
-
-    List<QuizAnswerDefRequest> answers
-    Integer questionScale = 5
+class TextInputAiGradingAttrs {
+    Boolean enabled
+    String correctAnswer
+    // between 0 and 100
+    Integer minimumConfidenceLevel
 }

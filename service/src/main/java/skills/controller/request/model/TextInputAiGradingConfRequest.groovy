@@ -16,14 +16,11 @@
 package skills.controller.request.model
 
 import groovy.transform.Canonical
-import skills.services.quiz.QuizQuestionType
 
 @Canonical
-class QuizQuestionDefRequest {
-    String question
-    String answerHint
-    QuizQuestionType questionType
-
-    List<QuizAnswerDefRequest> answers
-    Integer questionScale = 5
+class TextInputAiGradingConfRequest {
+    Boolean enabled
+    String correctAnswer
+    // between 0 and 100
+    Integer minimumConfidenceLevel
 }

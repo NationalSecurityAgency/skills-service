@@ -3048,4 +3048,14 @@
             </column>
         </addColumn>
     </changeSet>
+
+    <!-- 4.1 Release -->
+    <changeSet id="58" author="skills team">
+        <sql>
+            UPDATE quiz_question_definition
+            SET attributes = jsonb_build_object('videoConf', attributes)
+            WHERE attributes IS NOT NULL
+              AND attributes ->>'videoConf' IS NULL;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

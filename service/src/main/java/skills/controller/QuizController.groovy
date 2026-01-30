@@ -35,6 +35,7 @@ import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizPreference
 import skills.controller.request.model.QuizQuestionDefRequest
 import skills.controller.request.model.QuizSettingsRequest
+import skills.controller.request.model.TextInputAiGradingConfRequest
 import skills.controller.result.model.*
 import skills.quizLoading.QuizRunService
 import skills.quizLoading.QuizSettings
@@ -45,6 +46,8 @@ import skills.services.adminGroup.AdminGroupService
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
 import skills.services.attributes.SlidesAttrs
+import skills.services.attributes.TextInputAiGradingAttrs
+import skills.services.quiz.QuizAttributesService
 import skills.services.quiz.QuizDefService
 import skills.services.quiz.QuizRoleService
 import skills.services.quiz.QuizSettingsService
@@ -98,6 +101,9 @@ class QuizController {
 
     @Autowired
     QuizVideoService quizVideoService
+
+    @Autowired
+    QuizAttributesService quizAttributesService
 
     @Autowired
     VideoCaptionsService videoCaptionsService;
@@ -250,6 +256,20 @@ class QuizController {
 
         SkillVideoAttrs res = quizVideoService.saveVideo(quizId, questionId, isAlreadyHosted, file, videoUrl, captions, transcript, width, height)
         return res
+    }
+
+    @PostMapping('/{quizId}/questions/{questionId}/textInputAiGradingConf')
+    TextInputAiGradingAttrs saveTextInputAiGradingAttrs(@PathVariable("quizId") String quizId,
+                                                        @PathVariable("questionId") Integer questionId,
+                                                        @RequestBody TextInputAiGradingConfRequest gradingConfRequest) {
+
+        return quizAttributesService.saveTextInputAiGradingAttrs(quizId, questionId, gradingConfRequest)
+    }
+
+    @GetMapping('/{quizId}/questions/{questionId}/textInputAiGradingConf')
+    TextInputAiGradingAttrs getTextInputAiGradingAttrs(@PathVariable("quizId") String quizId,
+                                                        @PathVariable("questionId") Integer questionId) {
+        return quizAttributesService.getTextInputAiGradingAttrs(quizId, questionId)
     }
 
     @RequestMapping(value = "/{quizId}/questions", method = [RequestMethod.GET], produces = "application/json")
