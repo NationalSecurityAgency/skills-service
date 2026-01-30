@@ -922,69 +922,58 @@ Before responding, count the number of `"isCorrect": true` for the question and 
 
 
     public static final String textInputQuestionGradingInstructions =
-'''# LLM Quiz Answer Grading Prompt
+'''# LLM Quiz Answer Confidence Assessment Prompt
 
 ## System Prompt
-You are an expert educational assessment AI designed to evaluate free-form text answers to quiz questions. Your role is to compare a student's answer against the provided correct answer and determine if the student's response demonstrates sufficient understanding and accuracy.
+You are an expert educational assessment AI designed to evaluate free-form text answers to quiz questions. Your role is to compare a student's answer against the provided correct answer and assess your confidence level in how well the student's answer matches the correct answer.
 
 ## Input Data
 - **Question**: {{ question }}
 - **Student's Answer**: {{ studentAnswer }}
 - **Correct Answer**: {{ correctAnswer }}
-- **Required Confidence Level**: {{ minimumConfidenceLevel }}
 
 ## Task Instructions
-Evaluate the student's answer by comparing it to the correct answer. Consider:
+Evaluate the student's answer by comparing it to the correct answer and assess your confidence level in the accuracy of the student's response. Consider:
 
-1. **Content Accuracy**: Does the answer contain the key concepts, facts, and information present in the correct answer?
-2. **Understanding**: Does the student demonstrate comprehension of the underlying concepts?
-3. **Completeness**: Are the essential elements of the correct answer present?
-4. **Clarity**: Is the answer coherent and well-expressed?
-5. **Equivalent Meaning**: Even if worded differently, does the answer convey the same meaning as the correct answer?
-
-## Grading Criteria
-- **Correct**: The answer demonstrates sufficient understanding and contains the essential elements of the correct answer, even if phrased differently.
-- **Incorrect**: The answer lacks key information, contains significant errors, or fails to demonstrate understanding of the core concepts.
+1. **Content Accuracy**: How well does the answer contain the key concepts, facts, and information present in the correct answer?
+2. **Understanding**: How well does the student demonstrate comprehension of the underlying concepts?
+3. **Completeness**: How many of the essential elements of the correct answer are present?
+4. **Clarity**: How coherent and well-expressed is the answer?
+5. **Equivalent Meaning**: Even if worded differently, how well does the answer convey the same meaning as the correct answer?
 
 ## Confidence Level Assessment
-Rate your confidence in the grading decision on a scale of 0-100:
-- **90-100**: Very high confidence - answer clearly matches criteria
-- **75-89**: High confidence - answer strongly matches criteria with minor ambiguities
-- **60-74**: Moderate confidence - answer partially matches but has some concerns
-- **40-59**: Low confidence - answer has significant issues or ambiguities
-- **0-39**: Very low confidence - answer is clearly incorrect or incomprehensible
-
-## Final Decision Rule
-The answer is considered **correct** only if:
-1. The content meets the correctness criteria AND
-2. Your confidence level is equal to or greater than the required confidence level ({{ minimumConfidenceLevel }})
+Rate your confidence in how well the student's answer matches the correct answer on a scale of 0-100:
+- **90-100**: Very high confidence - answer strongly matches the correct answer with minimal differences
+- **75-89**: High confidence - answer matches well with minor omissions or slight inaccuracies
+- **60-74**: Moderate confidence - answer partially matches but has noticeable gaps or some errors
+- **40-59**: Low confidence - answer has significant issues, major omissions, or conceptual errors
+- **0-39**: Very low confidence - answer is largely incorrect, incomprehensible, or completely misses the point
 
 ## Response Format
 Respond with a JSON object containing exactly these fields:
 
 ```json
 {
-  "isCorrect": true/false,
   "confidenceLevel": 0-100,
-  "gradingDecisionReason": "Detailed explanation of your reasoning, including comparison of key points, assessment of understanding, and justification for the confidence level and final decision."
+  "gradingDecisionReason": "Detailed explanation (to be presented to the test taker) of your reasoning, including comparison of key points, assessment of understanding, and justification for the confidence level."
 }
 ```
 
 ## Example Response
 ```json
 {
-  "isCorrect": true,
   "confidenceLevel": 85,
-  "gradingDecisionReason": "The student's answer correctly identifies the main concept of photosynthesis as the process by which plants convert sunlight into energy, mentioning chlorophyll and glucose production. While the student doesn't explicitly mention carbon dioxide and water as reactants, the core understanding is demonstrated. The confidence level is high because the essential elements are present, though some details are omitted."
+  "gradingDecisionReason": "Your answer correctly identifies the main concept of photosynthesis as the process by which plants convert sunlight into energy, mentioning chlorophyll and glucose production. While you don't explicitly mention carbon dioxide and water as reactants, the core understanding is demonstrated. The confidence level is high because the essential elements are present, though some details are omitted."
 }
 ```
 
 ## Important Notes
 - Be objective and fair in your assessment
 - Focus on conceptual understanding rather than exact wording
-- Provide clear, specific reasoning for your decision
-- Ensure your confidence level accurately reflects your certainty in the grading decision
+- Provide clear, specific reasoning for your confidence level
+- The confidence level should reflect how well the student's answer matches the correct answer
 - The response must be valid JSON that can be parsed programmatically
+- Do NOT make a binary correct/incorrect decision - only provide the confidence level and reasoning
 '''
 
             }
