@@ -19,7 +19,6 @@ import groovy.transform.Canonical
 
 @Canonical
 class TextInputAIGradingResult {
-    Boolean isCorrect
     Integer confidenceLevel // 0 - 100
     String gradingDecisionReason
 }
