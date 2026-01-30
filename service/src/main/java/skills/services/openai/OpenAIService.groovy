@@ -201,7 +201,7 @@ class OpenAIService {
                 .replace('{{ studentAnswer }}', studentAnswer)
                 .replace('{{ correctAnswer }}', correctAnswer)
                 .replace('{{ minimumConfidenceLevel }}', minimumConfidenceLevel.toString())
-        log.info("Prompt: {}", promptStr)
+        log.debug("Prompt: {}", promptStr)
         List<Message> messages = [
                 new UserMessage(promptStr)
         ]
@@ -213,28 +213,36 @@ class OpenAIService {
                         .build()
         )
         ChatResponse chatResponse = chatModel.call(prompt)
-
         List<Generation> genList = chatResponse.getResults()
         if (!genList) {
             throw new SkillException("Failed to get response from OpenAI")
         }
         String res = (String) genList.get(0).getOutput().getText()
-        log.info("LLM Response: {}", res)
-        
-        // Parse JSON response into TextInputAIGradingResult
-        def jsonSlurper = new JsonSlurper()
-        def parsedResponse
+        log.debug("LLM Response: {}", res)
         try {
-            parsedResponse = jsonSlurper.parseText(res)
+            // Parse JSON response into TextInputAIGradingResult
+            def jsonSlurper = new JsonSlurper()
+            def parsedResponse = jsonSlurper.parseText(extractJsonFromResponse(res))
+            return new TextInputAIGradingResult(
+                    confidenceLevel: parsedResponse.confidenceLevel as Integer,
+                    gradingDecisionReason: parsedResponse.gradingDecisionReason
+            )
         } catch (Exception e) {
             log.error("Failed to parse JSON response from LLM: {}", res, e)
             throw new SkillException("Failed to parse LLM response: ${e.message}", e)
         }
-        
-        return new TextInputAIGradingResult(
-            isCorrect: parsedResponse.isCorrect,
-            confidenceLevel: parsedResponse.confidenceLevel as Integer,
-            gradingDecisionReason: parsedResponse.gradingDecisionReason
-        )
+    }
+
+    private static String extractJsonFromResponse(String response) {
+        def startIndex = response.indexOf('```json')
+        if (startIndex == -1) {
+            return response.trim()
+        }
+        startIndex += '```json'.length()
+        def endIndex = response.indexOf('```', startIndex)
+        if (endIndex == -1) {
+            return response.substring(startIndex).trim()
+        }
+        return response.substring(startIndex, endIndex).trim()
     }
 }
