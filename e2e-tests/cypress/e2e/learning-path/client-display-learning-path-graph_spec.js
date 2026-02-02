@@ -141,7 +141,7 @@ describe('Client Display Prerequisites Tests', () => {
         cy.clickOnNode(230, 335);
         cy.contains('Project: This is project 2');
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1');
-        cy.get('[data-cy="crossProjAlert"]').contains('cross-project skill');
+        cy.get('[data-cy="crossProjAlert"]').contains('This skill is shared from another project');
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillProgressTitle"]').contains('This is a very long name. yet is it 1')

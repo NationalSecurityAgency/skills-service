@@ -399,8 +399,7 @@ describe('My Progress Breadcrumb Tests', () => {
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-item]')
             .eq(4)
             .should('contain.text', 'skill1');
-        cy.get('[data-cy="skillsDisplayHome"]')
-            .contains('cross-project skill');
+        cy.get('[data-cy="crossProjAlert"]').contains('This skill is shared from another project');
 
         // back to skill page
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill3]')
