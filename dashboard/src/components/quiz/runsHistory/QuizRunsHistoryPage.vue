@@ -333,7 +333,8 @@ const clearDateFilter = () => {
                 <DateCell :value="slotProps.data[col.key]" />
               </div>
               <div v-else-if="slotProps.field === 'results'">
-                <Badge severity="info">{{ slotProps.data.numberCorrect }}</Badge> correct out of {{ slotProps.data.totalAnswers }} ({{ Math.trunc(100 * (slotProps.data.numberCorrect / slotProps.data.totalAnswers)) }}%)
+                <div><Badge severity="success">{{ slotProps.data.numberCorrect }}</Badge> correct</div>
+                <div>out of {{ slotProps.data.totalAnswers }} <span class="text-gray-500">({{ Math.trunc(100 * (slotProps.data.numberCorrect / slotProps.data.totalAnswers)) }}%)</span></div>
               </div>
               <div v-else-if="slotProps.field === 'controls'">
                 <SkillsButton :data-cy="`row${slotProps.index}-deleteBtn`"
@@ -342,6 +343,7 @@ const clearDateFilter = () => {
                               icon="fa fa-trash"
                               size="small"
                               outlined
+                              severity="warn"
                               :track-for-focus="true"
                               :aria-label="`delete ${quizType} result for ${slotProps.data.userIdForDisplay}`" />
               </div>
