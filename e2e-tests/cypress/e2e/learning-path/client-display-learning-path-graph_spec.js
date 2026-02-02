@@ -110,7 +110,7 @@ describe('Client Display Prerequisites Tests', () => {
         cy.get('[data-cy="breadcrumb-subj1"]').should('exist')
         cy.get('[data-cy="breadcrumb-skill1"]').should('exist')
         cy.get('[data-cy="breadcrumb-subj2"]').should('not.exist')
-        cy.contains('This is a cross-project skill!');
+        cy.get('[data-cy="crossProjAlert"]').contains('This skill is shared from another project');
     })
 
     it('Deps Chart - make sure drill down via click works', () => {

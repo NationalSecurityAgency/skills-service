@@ -71,14 +71,27 @@ onMounted(() => {
 })
 
 const done = () => {
-  if (route.params.crossProjectId && route.params.badgeId) {
-    skillsDisplayInfo.routerPush('globalBadgeSkillDetailsUnderAnotherProject',
-        {
-          badgeId: route.params.badgeId,
-          crossProjectId: route.params.crossProjectId,
-          dependentSkillId: route.params.skillId,
-        }
-    )
+  if (route.params.crossProjectId) {
+    if (route.params.badgeId) {
+      // global badge cross-project skill
+      skillsDisplayInfo.routerPush('globalBadgeSkillDetailsUnderAnotherProject',
+          {
+            badgeId: route.params.badgeId,
+            crossProjectId: route.params.crossProjectId,
+            dependentSkillId: route.params.skillId,
+          }
+      )
+    } else {
+      // learning path cross-project skill
+      skillsDisplayInfo.routerPush('crossProjectSkillDetails',
+          {
+            subjectId: subjectId.value,
+            skillId: skillId.value,
+            crossProjectId: route.params.crossProjectId,
+            dependentSkillId: route.params.skillId,
+          }
+      )
+    }
   } else {
     skillsDisplayInfo.routerPush('skillDetails',
         {

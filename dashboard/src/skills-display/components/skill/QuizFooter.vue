@@ -63,14 +63,27 @@ const subjectId = computed(() => props.skill.subjectId || route.params.subjectId
 
 const navToQuiz = () => {
   if (props.skill.crossProject) {
-    skillsDisplayInfo.routerPush('quizPageForGlobalBadgeCrossProjectSkill',
-        {
-          crossProjectId: props.skill.projectId,
-          skillId: props.skill.skillId,
-          quizId: props.skill.selfReporting.quizId,
-          badgeId: route.params.badgeId,
-        }
-    )
+    if (route.params.badgeId) {
+      // global badge
+      skillsDisplayInfo.routerPush('quizPageForGlobalBadgeCrossProjectSkill',
+          {
+            crossProjectId: props.skill.projectId,
+            skillId: props.skill.skillId,
+            quizId: props.skill.selfReporting.quizId,
+            badgeId: route.params.badgeId,
+          }
+      )
+    } else {
+      // learning path cross-project skill
+      skillsDisplayInfo.routerPush('quizPageForLearningPathCrossProjectSkill',
+          {
+            crossProjectId: props.skill.projectId,
+            subjectId: subjectId.value,
+            skillId: props.skill.skillId,
+            quizId: props.skill.selfReporting.quizId,
+          }
+      )
+    }
   } else {
     skillsDisplayInfo.routerPush('quizPage',
         {

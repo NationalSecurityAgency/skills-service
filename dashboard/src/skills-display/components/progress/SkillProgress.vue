@@ -32,6 +32,7 @@ import dayjs from 'dayjs';
 import {useStorage} from "@vueuse/core";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 import SkillSlides from "@/skills-display/components/progress/SkillSlides.vue";
+import SelfReportType from "@/components/skills/selfReport/SelfReportType.js";
 
 const props = defineProps({
   skill: Object,
@@ -159,26 +160,26 @@ watch(() => props.expandGroups, (newValue) => {
     expanded.value = newValue
   }
 })
+
+const skillDispNameLower = computed(() => attributes.skillDisplayName.toLowerCase())
+const projDispNameLower = computed(() => attributes.projectDisplayName.toLowerCase())
+const canSkillBeSelfReported = computed(() => SelfReportType.isSelfReportType(props.skill.selfReporting.type))
 </script>
 
 <template>
   <div class="text-left skills-theme-skills-progress" data-cy="skillProgress">
     <div v-if="skill.crossProject && !skillsDisplayInfo.isGlobalBadgePage.value" class="flex gap-4 flex-wrap">
       <div class="flex-1">
-        <div class="text-xl"><span class="text-muted-color italic">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}</div>
+        <div class="text-xl"><span class="text-muted-color italic" data-cy="crossProjName">{{ attributes.projectDisplayName }}:</span> {{ skill.projectName }}</div>
       </div>
       <div class="">
         <div class="text-xl"><i class="fa fa-vector-square" aria-hidden="true"/> Cross-{{ attributes.projectDisplayName }} {{ attributes.skillDisplayName }}</div>
       </div>
     </div>
-    <Message v-if="skill.crossProject && !isSkillComplete && !skillsDisplayInfo.isGlobalBadgePage.value"
+    <Message v-if="skill.crossProject && !isSkillComplete && !canSkillBeSelfReported && !skillsDisplayInfo.isGlobalBadgePage.value"
              icon="fas fa-hands-helping"
              data-cy="crossProjAlert" :closable="false">
-      This is a cross-{{ attributes.projectDisplayName.toLowerCase() }} {{ attributes.skillDisplayName.toLowerCase()
-      }}! In order to complete
-      this {{ attributes.skillDisplayName.toLowerCase() }} please visit <strong>{{
-        skill.projectName
-      }}</strong> {{ attributes.projectDisplayName.toLowerCase() }}! Happy playing!!
+      This {{  skillDispNameLower }} is shared from another {{ projDispNameLower}}. Visit the <strong>{{ skill.projectName }}</strong> {{ projDispNameLower}} to complete this skill.
     </Message>
 
     <skill-progress-name-row

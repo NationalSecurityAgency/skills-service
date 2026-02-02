@@ -22,4 +22,5 @@ export default {
     isQuiz: (type) => type === 'Quiz',
     isSurvey: (type) => type === 'Survey',
     isQuizOrSurvey: (type) => type === 'Quiz' || type === 'Survey',
+    isSelfReportType: (type) => type === 'Approval' || type === 'HonorSystem' || type === 'Video' || type === 'Quiz' || type === 'Survey',
 };

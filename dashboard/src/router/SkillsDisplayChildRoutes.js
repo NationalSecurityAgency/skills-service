@@ -167,6 +167,17 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
       }
     }
   }, {
+    name: `quizPageForLearningPathCrossProjectSkill${appendToName}`,
+    path: `${prependToPath}subjects/:subjectId/skills/:skillId/crossProject/:crossProjectId/:dependentSkillId/quizzes/:quizId`,
+    component: QuizPage,
+    meta: {
+      requiresAuth: true,
+      nonAdmin: true,
+      announcer: {
+        message: 'Quiz or Survey Run'
+      }
+    }
+  }, {
     name: `SkillsDisplayErrorPage${appendToName}`,
     path: `${prependToPath}error`,
     component: SkillsDisplayErrorPage,
