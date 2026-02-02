@@ -28,4 +28,6 @@ interface QuizRun {
     String getFirstName()
     String getLastName()
     String getQuizType()
+    Integer getNumberCorrect()
+    Integer getTotalAnswers()
 }

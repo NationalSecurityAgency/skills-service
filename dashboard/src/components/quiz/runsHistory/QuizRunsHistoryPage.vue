@@ -43,6 +43,7 @@ import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useStorage} from "@vueuse/core";
 import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
+import Badge from "primevue/badge";
 
 const route = useRoute()
 const userInfo = useUserInfo()
@@ -90,6 +91,11 @@ const options = ref({
       label: 'Started',
       sortable: true,
       imageClass: 'fas fa-clock text-warning'
+    },
+    {
+      key: 'results',
+      label: 'Results',
+      sortable: false,
     },
     {
       key: 'controls',
@@ -325,6 +331,9 @@ const clearDateFilter = () => {
               </div>
               <div v-else-if="slotProps.field === 'started'">
                 <DateCell :value="slotProps.data[col.key]" />
+              </div>
+              <div v-else-if="slotProps.field === 'results'">
+                <Badge severity="info">{{ slotProps.data.numberCorrect }}</Badge> correct out of {{ slotProps.data.totalAnswers }} ({{ Math.trunc(100 * (slotProps.data.numberCorrect / slotProps.data.totalAnswers)) }}%)
               </div>
               <div v-else-if="slotProps.field === 'controls'">
                 <SkillsButton :data-cy="`row${slotProps.index}-deleteBtn`"
