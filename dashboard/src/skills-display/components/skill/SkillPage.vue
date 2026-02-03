@@ -51,7 +51,7 @@ watch(() => skill.value.groupSkillId, () => {
   displayGroupDescription.value = false;
 })
 const loadSkillSummary = () => {
-  let skillId = skillsDisplayInfo.isDependency() ? route.params.dependentSkillId : route.params.skillId
+  const skillId = skillsDisplayInfo.isDependency() ? route.params.dependentSkillId : route.params.skillId
   skillState.loadSkillSummary(skillId, route.params.crossProjectId, route.params.subjectId)
     .then(() => {
       loadingSkill.value = false
