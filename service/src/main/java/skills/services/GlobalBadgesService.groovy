@@ -473,6 +473,11 @@ class GlobalBadgesService {
         return userCommunityService.validateGlobalBadgeForCommunity(badgeId)
     }
 
+    @Transactional(readOnly = true)
+    boolean checkIfSkillBelongsToBadgeThatThisProjectIsPartOf(String projId, String otherProj, String otherProjSkillId) {
+        return skillRelDefRepo.checkIfProjectBelongsToGlobalBadgeViaSkillRequirement(projId, otherProj, otherProjSkillId)
+    }
+
     @Profile
     private GlobalBadgeResult convertToBadge(SkillDefWithExtra skillDef, boolean loadRequiredSkills = false) {
         GlobalBadgeResult res = new GlobalBadgeResult(

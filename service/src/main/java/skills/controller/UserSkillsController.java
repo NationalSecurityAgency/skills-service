@@ -49,6 +49,7 @@ import skills.dbupgrade.DBUpgradeSafe;
 import skills.icons.CustomIconFacade;
 import skills.services.*;
 import skills.services.admin.InviteOnlyProjectService;
+import skills.services.admin.SkillsDepsService;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
 import skills.skillLoading.RankingLoader;
@@ -107,6 +108,12 @@ class UserSkillsController {
 
     @Autowired
     AddSkillHelper addSkillHelper;
+
+    @Autowired
+    SkillsDepsService skillsDepsService;
+
+    @Autowired
+    GlobalBadgesService globalBadgesService;
 
     @Autowired
     MetricsLogger metricsLogger;
@@ -412,7 +419,9 @@ class UserSkillsController {
                                      @PathVariable("crossProjectId") String crossProjectId,
                                      @PathVariable("skillId") String skillId,
                                      @RequestBody(required = false) SkillEventRequest skillEventRequest) {
-        // TODO: validate that skill is either a global badge skill or a cross project skill
+        boolean partOfLP = skillsDepsService.checkIfSkillInAnotherProjectPartOfLearningPath(projectId, crossProjectId, skillId);
+        boolean partOfGB = globalBadgesService.checkIfSkillBelongsToBadgeThatThisProjectIsPartOf(projectId, crossProjectId, skillId);
+        SkillsValidator.isTrue(partOfLP || partOfGB, "The provided crossProjectId and skillId must be associated with this project either through a Learning Path chain or via a Global Badge");
         return addSkillHelper.addSkill(crossProjectId, skillId, skillEventRequest);
     }
 

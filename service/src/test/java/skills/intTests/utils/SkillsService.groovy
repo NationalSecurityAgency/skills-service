@@ -630,6 +630,24 @@ class SkillsService {
         return wsHelper.apiPut("/projects/${props.projectId}/skills/${props.skillId}", params ?: null)
     }
 
+    def reportCrossProjectSkill(String projId, String crossProjectId, String otherProjId, String optionalUserId = null, Date optionalDate = null, String optionalApprovalMsg = null) {
+        String url = "/projects/${projId}/crossProject/${crossProjectId}/skills/${otherProjId}"
+        Map params = [:]
+
+        if (optionalUserId) {
+            optionalUserId = getUserId(optionalUserId)
+            params.userId = optionalUserId
+        }
+        if (optionalDate) {
+            params.timestamp = optionalDate.time
+        }
+        if (optionalApprovalMsg) {
+            params.approvalRequestedMsg = optionalApprovalMsg
+        }
+
+        return wsHelper.apiPost(url, params ?: null)
+    }
+
     @Profile
     def bulkAddSkill(Map props, List<String> userIds, Date date) {
         userIds = userIds.collect { getUserId(it, false) }
