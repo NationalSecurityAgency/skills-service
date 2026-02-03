@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+package skills.tasks.data
 
-class AnswerGradingResult {
-    String graderUserId
-    String graderUserIdForDisplay
-    String graderFirstname
-    String graderLastname
-    String feedback
-    Integer aiConfidenceLevel
-    Date gradedOn
+import skills.services.attributes.TextInputAiGradingAttrs
+
+class TextInputAiGradingRequest {
+    String userId
+    String quizId
+    Integer quizAttemptId
+    Integer answerDefId
+    TextInputAiGradingAttrs textInputAiGradingAttrs
+    String studentAnswer
+    String question
 }

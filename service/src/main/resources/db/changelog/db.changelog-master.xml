@@ -3057,5 +3057,14 @@
             WHERE attributes IS NOT NULL
               AND attributes ->>'videoConf' IS NULL;
         </sql>
+        <sql>
+            INSERT INTO user_attrs (user_id, user_id_for_display, first_name, last_name, created, updated)
+            VALUES ('ai-grader', 'AI Assistant', 'AI', 'Grader', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+        </sql>
+        <addColumn tableName="user_quiz_answer_graded">
+            <column name="ai_confidence_level" type="int">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>

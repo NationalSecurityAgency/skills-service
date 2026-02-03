@@ -37,6 +37,7 @@ import skills.tasks.data.ExpireUserAchievements
 import skills.tasks.data.ImportedSkillAchievement
 import skills.tasks.data.ProjectInviteCleanup
 import skills.tasks.data.RemoveSkillEventsForUserRequest
+import skills.tasks.data.TextInputAiGradingRequest
 import skills.tasks.data.UnachievableLevelIdentification
 import skills.tasks.executors.CatalogSkillUpdatedTaskExecutor
 import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
@@ -44,6 +45,7 @@ import skills.tasks.executors.FinalizeCatalogSkillsImportExecutor
 import skills.tasks.executors.ImportedSkillAchievementTaskExecutor
 import skills.tasks.executors.ProjectInviteCleanupTaskExecutor
 import skills.tasks.executors.RemoveSkillEventsForAUserExecutor
+import skills.tasks.executors.TextInputQuestionAiGradingExecutor
 import skills.tasks.executors.UnachievableLevelIdentificationTaskExecutor
 
 import java.time.Duration
@@ -152,6 +154,15 @@ class TaskConfig {
                 .execute(removeSkillEventsForAUserExecutor);
     }
 
+    @Bean
+    OneTimeTask<TextInputAiGradingRequest> gradeTextInputUsingAi(TextInputQuestionAiGradingExecutor textInputQuestionAiGradingExecutor) {
+        return Tasks.oneTime("grade-text-input-using-ai", TextInputAiGradingRequest.class)
+                .onFailure(
+                        new DontRetryOnNoRetryExceptionHandler(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
+                                new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate)))
+                )
+                .execute(textInputQuestionAiGradingExecutor);
+    }
     @Bean
     RecurringTask<ProjectInviteCleanup> cleanupProjectInvitesTask(ProjectInviteCleanupTaskExecutor projectInviteCleanupTaskExecutor) {
         //recurring tasks are automatically picked up by the scheduler

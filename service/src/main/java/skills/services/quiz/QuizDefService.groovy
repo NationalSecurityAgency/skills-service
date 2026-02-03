@@ -1034,6 +1034,7 @@ class QuizDefService {
                                         graderFirstname: gradedInfo.getGraderFirstname(),
                                         graderLastname: gradedInfo.getGraderLastname(),
                                         feedback: gradedInfo.getFeedback(),
+                                        aiConfidenceLevel: gradedInfo.getAiConfidenceLevel(),
                                         gradedOn: gradedInfo.getGradedOn(),
                                 )
                             }
