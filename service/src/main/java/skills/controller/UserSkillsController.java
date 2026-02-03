@@ -49,6 +49,7 @@ import skills.dbupgrade.DBUpgradeSafe;
 import skills.icons.CustomIconFacade;
 import skills.services.*;
 import skills.services.admin.InviteOnlyProjectService;
+import skills.services.admin.SkillsDepsService;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
 import skills.skillLoading.RankingLoader;
@@ -107,6 +108,12 @@ class UserSkillsController {
 
     @Autowired
     AddSkillHelper addSkillHelper;
+
+    @Autowired
+    SkillsDepsService skillsDepsService;
+
+    @Autowired
+    GlobalBadgesService globalBadgesService;
 
     @Autowired
     MetricsLogger metricsLogger;
@@ -403,6 +410,19 @@ class UserSkillsController {
                                      @PathVariable("skillId") String skillId,
                                      @RequestBody(required = false) SkillEventRequest skillEventRequest) {
         return addSkillHelper.addSkill(projectId, skillId, skillEventRequest);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/crossProject/{crossProjectId}/skills/{skillId}", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
+    @ResponseBody
+    @Profile
+    public SkillEventResult addCrossProjectSkill(@PathVariable("projectId") String projectId,
+                                     @PathVariable("crossProjectId") String crossProjectId,
+                                     @PathVariable("skillId") String skillId,
+                                     @RequestBody(required = false) SkillEventRequest skillEventRequest) {
+        boolean partOfLP = skillsDepsService.checkIfSkillInAnotherProjectPartOfLearningPath(projectId, crossProjectId, skillId);
+        boolean partOfGB = globalBadgesService.checkIfSkillBelongsToBadgeThatThisProjectIsPartOf(projectId, crossProjectId, skillId);
+        SkillsValidator.isTrue(partOfLP || partOfGB, "The provided crossProjectId and skillId must be associated with this project either through a Learning Path chain or via a Global Badge");
+        return addSkillHelper.addSkill(crossProjectId, skillId, skillEventRequest);
     }
 
     @RequestMapping(value = "/projects/{projectId}/rank", method = RequestMethod.GET, produces = "application/json")

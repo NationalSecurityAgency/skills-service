@@ -130,7 +130,8 @@ const achieveSkillByReadingTranscript = () => {
       });
 };
 const doReportSkill = () => {
-  return skillsDisplayService.reportSkill(props.skill.skillId)
+  const crossProjId = props.skill.crossProject ? props.skill.projectId : null
+  return skillsDisplayService.reportSkill(props.skill.skillId, null, crossProjId)
       .then((res) => {
         if (res.pointsEarned > 0) {
           justAchieved.value = true;

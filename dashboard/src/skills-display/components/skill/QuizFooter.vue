@@ -57,18 +57,42 @@ const isLocked = computed(() => {
   return lockedDueToSkillPrerequisites || lockedDueToBadgePrerequisites
 })
 const isCrossProject = computed(() => props.skill.crossProject)
-const selfReportAvailable = computed(() => isQuizOrSurveySkill?.value && (!isCompleted.value || isMotivationalSkill.value) && !isLocked.value && !isCrossProject.value)
+const selfReportAvailable = computed(() => isQuizOrSurveySkill?.value && (!isCompleted.value || isMotivationalSkill.value) && !isLocked.value)
 const quizOrSurveyPassed = computed(() => selfReporting.value?.quizOrSurveyPassed)
 const subjectId = computed(() => props.skill.subjectId || route.params.subjectId)
 
 const navToQuiz = () => {
-  skillsDisplayInfo.routerPush('quizPage',
-      {
-        subjectId: subjectId.value,
-        skillId: props.skill.skillId,
-        quizId: props.skill.selfReporting.quizId,
-      }
-  )
+  if (props.skill.crossProject) {
+    if (route.params.badgeId) {
+      // global badge
+      skillsDisplayInfo.routerPush('quizPageForGlobalBadgeCrossProjectSkill',
+          {
+            crossProjectId: props.skill.projectId,
+            skillId: props.skill.skillId,
+            quizId: props.skill.selfReporting.quizId,
+            badgeId: route.params.badgeId,
+          }
+      )
+    } else {
+      // learning path cross-project skill
+      skillsDisplayInfo.routerPush('quizPageForLearningPathCrossProjectSkill',
+          {
+            crossProjectId: props.skill.projectId,
+            subjectId: subjectId.value,
+            skillId: props.skill.skillId,
+            quizId: props.skill.selfReporting.quizId,
+          }
+      )
+    }
+  } else {
+    skillsDisplayInfo.routerPush('quizPage',
+        {
+          subjectId: subjectId.value,
+          skillId: props.skill.skillId,
+          quizId: props.skill.selfReporting.quizId,
+        }
+    )
+  }
 }
 
 const showQuizResults = ref(false)

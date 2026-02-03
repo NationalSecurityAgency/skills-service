@@ -392,7 +392,7 @@ describe('Client Display Breadcrumb Tests', () => {
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbItemValue"]')
             .eq(3)
             .should('contain.text', 'skill1');
-        cy.contains('cross-project skill');
+        cy.get('[data-cy="crossProjAlert"]').contains('This skill is shared from another project');
 
         // back to skill page
         cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill3]')

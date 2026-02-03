@@ -339,6 +339,48 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         Long getCount()
     }
 
+    @Query('''select count(sd2.id) > 0
+        from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
+        where sd1 = srd.parent 
+              and sd2 = srd.child 
+              and srd.type = 'Dependence' 
+              and sd1.projectId=?1 
+              and sd2.projectId=?2
+              and sd2.skillId=?3
+              ''')
+    Boolean checkIfSkillInAnotherProjectPartOfLearningPath(String projectId, String otherProjectId, String otherProjectSkillId )
+
+    @Query(value = '''
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM skill_definition parent
+                    JOIN skill_relationship_definition srd ON parent.id = srd.parent_ref_id
+                    JOIN skill_definition child ON srd.child_ref_id = child.id
+                    WHERE srd.type = 'BadgeRequirement'
+                      AND parent.project_id IS NULL 
+                      AND child.project_id = :otherProj
+                      AND child.skill_id = :otherProjSkillId
+                      AND parent.skill_id IN (
+                          SELECT parent_badge.skill_id
+                          FROM skill_definition parent_badge
+                          JOIN skill_relationship_definition srd_other ON parent_badge.id = srd_other.parent_ref_id
+                          JOIN skill_definition other_child ON srd_other.child_ref_id = other_child.id
+                          WHERE srd_other.type = 'BadgeRequirement'
+                            AND other_child.project_id = :projId
+                          
+                          UNION
+                          
+                          SELECT gbld.skill_id
+                          FROM global_badge_level_definition gbld
+                          WHERE gbld.project_id = :projId
+                      )
+                )
+    ''', nativeQuery = true)
+    Boolean checkIfProjectBelongsToGlobalBadgeViaSkillRequirement(
+            @Param("projId") projId,
+            @Param("otherProj") otherProj,
+            @Param("otherProjSkillId") otherProjSkillId)
+
     @Query('''select sd1.skillId as skillId, count(sd2) as count from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
         where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 
               and sd1.projectId=?1 and sd1.skillId in (?2) group by sd1.skillId''')

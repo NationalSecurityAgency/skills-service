@@ -82,6 +82,12 @@ class SkillsDepsService {
     @Autowired
     SkillsAdminService skillsAdminService
 
+
+    @Transactional(readOnly = true)
+    boolean checkIfSkillInAnotherProjectPartOfLearningPath(String projId, String otherProj, String otherProjSkillId) {
+        return skillRelDefRepo.checkIfSkillInAnotherProjectPartOfLearningPath(projId, otherProj, otherProjSkillId)
+    }
+
     @Transactional(readOnly = true)
     List<SkillDepResult> checkIfSkillsHaveDeps(String projectId, List<String> skillIds) {
         List<SkillRelDefRepo.SkillIdAndCount> skillIdsAndCounts = skillRelDefRepo.countChildrenForMultipleSkillIds(projectId, skillIds, [SkillRelDef.RelationshipType.Dependence])

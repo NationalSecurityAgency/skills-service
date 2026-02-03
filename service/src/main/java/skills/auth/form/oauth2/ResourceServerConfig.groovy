@@ -115,6 +115,7 @@ class ResourceServerConfig {
                                 HttpStatus.FORBIDDEN,
                                 "Invalid token - proxyingSystemId [${proxyingSystemId}] does not match resource projectId [${projectId}]",
                                 null)
+                        log.error("Invalid token - proxyingSystemId [{}] does not match resource projectId [{}]", proxyingSystemId, projectId)
                         throw new OAuth2AuthenticationException(error)
                     }
                 }
