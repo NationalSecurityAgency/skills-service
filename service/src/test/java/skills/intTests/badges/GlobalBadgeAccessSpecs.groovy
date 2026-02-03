@@ -17,8 +17,10 @@ package skills.intTests.badges
 
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserRoleRepo
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -405,4 +407,41 @@ class GlobalBadgeAccessSpecs extends DefaultIntSpec {
         updatedBadge.badgeId == newBadgeId
     }
 
+    def "can remove myself when there are other admins"() {
+        // Create first user and global badge
+        def user1Service = createService("user1")
+
+        // Create second user and skills
+        def user2Service = createService("user2")
+
+        def badge1 = createBadge(1, 1)
+        user1Service.createGlobalBadge(badge1)
+        user1Service.grantGlobalBadgeAdminRole(badge1.badgeId, user2Service.wsHelper.username)
+
+        when:
+        List<UserRoleRepo.UserRoleWithAttrs> rolesBefore = userRoleRepo.findRoleWithAttrsByGlobalBadgeId(badge1.badgeId)
+        def result = user1Service.removeGlobalBadgeAdminRole(badge1.badgeId, "user1")
+        List<UserRoleRepo.UserRoleWithAttrs> rolesAfter = userRoleRepo.findRoleWithAttrsByGlobalBadgeId(badge1.badgeId)
+
+        then:
+        result.success
+        rolesBefore
+        rolesBefore.role.userId.sort() == [user1Service.wsHelper.username, user2Service.wsHelper.username].sort()
+        rolesAfter.role.userId == [user2Service.wsHelper.username]
+    }
+
+    def "can not remove myself when there are other admins"() {
+        // Create first user and global badge
+        def user1Service = createService("user1")
+
+        def badge1 = createBadge(1, 1)
+        user1Service.createGlobalBadge(badge1)
+
+        when:
+        user1Service.removeGlobalBadgeAdminRole(badge1.badgeId, "user1")
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Cannot delete roles for myself when there are no other admins")
+    }
 }

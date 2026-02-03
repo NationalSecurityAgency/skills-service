@@ -101,6 +101,10 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  roleType: {
+    type: String,
+    default: null,
+  }
 });
 
 onMounted(() => {
@@ -127,6 +131,9 @@ const numberOfGroupOwners = computed(() => {
 });
 const numberOfQuizAdmins = computed(() => {
   return assignedLocalAdmins.value?.filter((o) => o?.roleName === ROLE_QUIZ_ADMIN).length
+});
+const numberOfGlobalBadgeAdmins = computed(() => {
+  return assignedLocalAdmins.value?.filter((o) => o?.roleName === ROLE_GLOBAL_BADGE_ADMIN).length
 });
 const numberOfRootUsers = computed(() => {
   return assignedLocalAdmins.value?.filter((o) => o?.roleName === ROLE_SUPER_DUPER_USER).length
@@ -349,7 +356,8 @@ function canDeleteUser(userId, userRole) {
   return !(userRole === ROLE_PROJECT_ADMIN && numberOfAdmins.value === 1)
       && !(userRole === ROLE_ADMIN_GROUP_OWNER && numberOfGroupOwners.value === 1)
       && !(userRole === ROLE_SUPER_DUPER_USER && numberOfRootUsers.value === 1)
-      && !(userRole === ROLE_QUIZ_ADMIN && numberOfQuizAdmins.value === 1);
+      && !(userRole === ROLE_QUIZ_ADMIN && numberOfQuizAdmins.value === 1)
+      && !(userRole === ROLE_GLOBAL_BADGE_ADMIN && numberOfGlobalBadgeAdmins.value === 1);
 }
 
 function isCurrentUser(userId) {
@@ -662,6 +670,7 @@ defineExpose({
         @do-remove="doDeleteUserRole"
         :item-name="removeRoleInfo.userInfo.userIdForDisplay"
         item-type="from having admin privileges"
+        :role-type="roleType"
         :is-self="removeRoleInfo.isCurrentUser"
         :enable-return-focus="true">
     </RemovalValidation>

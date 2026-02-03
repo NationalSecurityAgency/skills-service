@@ -151,7 +151,7 @@ class AdminGroupRoleService {
         Boolean canDeleteSelf = numberOfOwners > 1
 
         if (currentUser?.toLowerCase() == userId?.toLowerCase() && !canDeleteSelf) {
-            throw new SkillException("Cannot remove roles from yourself. userId=[${userId}], adminGroupName=[${adminGroupDef.name}]", ErrorCode.AccessDenied)
+            throw new SkillException("Cannot delete roles for myself when there are no other admins. userId=[${userId}], adminGroupName=[${adminGroupDef.name}]", ErrorCode.AccessDenied)
         }
         accessSettingsStorageService.deleteAdminGroupUserRole(userId, adminGroupDef.adminGroupId, roleName)
         accessSettingsStorageService.deleteProjectAndQuizAdminUserRolesWithAdminGroupIdForUser(userId, adminGroupDef.adminGroupId)

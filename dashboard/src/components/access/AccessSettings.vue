@@ -61,6 +61,7 @@ onMounted(() => {
       <role-manager :project-id="route.params.projectId"
                     title="Project Management Users"
                     data-cy="projectAdmins"
+                    role-type="Project"
                     :add-role-confirmation="privateProject" />
 
       <private-invite-only-proj-management v-if="privateProject"/>

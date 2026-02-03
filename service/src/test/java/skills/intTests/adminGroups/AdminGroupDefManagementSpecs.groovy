@@ -1038,4 +1038,43 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         adminGroup2GlobalBadges.assignedGlobalBadges.size() == 1 && adminGroup1GlobalBadges.assignedGlobalBadges.find { it.badgeId == badge.badgeId }
     }
 
+    def "owner can remove self if there are other admins in admin group"() {
+        def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
+        def otherService = createService(otherUserId)
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+        skillsService.addAdminGroupOwner(adminGroup.adminGroupId, otherUserId)
+
+        when:
+        def adminGroupResBefore = skillsService.getAdminGroupDef(adminGroup.adminGroupId)
+        def adminGroupMembersBefore = skillsService.getAdminGroupMembers(adminGroup.adminGroupId)
+        otherService.deleteAdminGroupOwner(adminGroup.adminGroupId, otherUserId)
+        def adminGroupResAfter = skillsService.getAdminGroupDef(adminGroup.adminGroupId)
+        def adminGroupMembersAfter = skillsService.getAdminGroupMembers(adminGroup.adminGroupId)
+
+        then:
+
+        adminGroupResBefore.adminGroupId == adminGroup.adminGroupId
+        adminGroupResBefore.numberOfOwners == 2
+        adminGroupMembersBefore.size() == 2
+        adminGroupMembersBefore.find {it.userId == skillsService.currentUser.userId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}
+        adminGroupMembersBefore.find {it.userId == otherUserId && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.toString()}
+
+        adminGroupResAfter.adminGroupId == adminGroup.adminGroupId
+        adminGroupResAfter.numberOfOwners == 1
+        adminGroupMembersAfter.size() == 1
+        !adminGroupMembersAfter.find { it.userId == otherUserId }
+    }
+
+    def "owner can not remove self if there are no other admins in admin group"() {
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        when:
+        skillsService.deleteAdminGroupOwner(adminGroup.adminGroupId, skillsService.currentUser.userId)
+
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Cannot delete roles for myself when there are no other admins")
+    }
 }

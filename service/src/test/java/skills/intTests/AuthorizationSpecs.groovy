@@ -15,6 +15,7 @@
  */
 package skills.intTests
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import skills.intTests.utils.DefaultIntSpec
@@ -22,11 +23,16 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.auth.RoleName
+import skills.storage.model.auth.UserRole
+import skills.storage.repos.UserRoleRepo
 import spock.lang.IgnoreIf
 import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class AuthorizationSpecs extends DefaultIntSpec {
+
+    @Autowired
+    UserRoleRepo userRoleRepo
 
     String projId = "myProject"
     String projId2 = "myProject2"
@@ -124,13 +130,13 @@ class AuthorizationSpecs extends DefaultIntSpec {
         skillsService.addProjectAdmin(projId, newUser)
 
         when:
+        List<UserRole> rolesBefore = userRoleRepo.findAllByProjectIdIgnoreCase(projId)
         skillsService.deleteUserRole("skills@skills.org", projId, RoleName.ROLE_PROJECT_ADMIN.toString())
-        skillsService.getProject(projId)
+        List<UserRole> rolesAfter = userRoleRepo.findAllByProjectIdIgnoreCase(projId)
 
         then:
-        SkillsClientException ex = thrown()
-        ex.httpStatus == HttpStatus.FORBIDDEN
-
+        rolesBefore.userId.sort() == ['skills@skills.org', 'user2'].sort()
+        rolesAfter.userId == ['user2']
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })

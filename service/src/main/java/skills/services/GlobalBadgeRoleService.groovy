@@ -104,8 +104,11 @@ class GlobalBadgeRoleService {
         ensureValidRole(roleName, badgeResult.badgeId)
         String userId = userIdParam?.toLowerCase()
         String currentUser = userInfoService.getCurrentUserId()
-        if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
-            throw new SkillException("Cannot remove roles from yourself. userId=[${userId}], globalBadgeName=[${badgeResult.name}]", ErrorCode.AccessDenied)
+        Integer numberOfOwners = userRoleRepo.countUserRolesByGlobalBadgeId(badgeId, [RoleName.ROLE_GLOBAL_BADGE_ADMIN, RoleName.ROLE_SUPER_DUPER_USER])
+        Boolean canDeleteSelf = numberOfOwners > 1
+
+        if (currentUser?.toLowerCase() == userId?.toLowerCase() && !canDeleteSelf) {
+            throw new SkillException("Cannot delete roles for myself when there are no other admins. userId=[${userId}], globalBadgeName=[${badgeResult.name}]", ErrorCode.AccessDenied)
         }
         accessSettingsStorageService.deleteGlobalBadgeAdminUserRole(userId, badgeResult.badgeId, roleName)
 

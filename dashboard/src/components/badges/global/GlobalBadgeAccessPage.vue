@@ -34,6 +34,7 @@ const badgeId = computed(() => {
     <role-manager id="add-group-admin-access-user"
                   :badge-id="badgeId"
                   title=""
+                  role-type="Global Badge"
                   role-description="Global Badge Admin"
                   data-cy="roleManager"
                   :roles="['ROLE_GLOBAL_BADGE_ADMIN']">

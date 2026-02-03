@@ -105,7 +105,7 @@ class QuizRoleService {
         Boolean canDeleteSelf = numberOfAdmins > 1
 
         if (currentUser?.toLowerCase() == userId?.toLowerCase() && !canDeleteSelf) {
-            throw new SkillQuizException("Cannot remove roles from myself. userId=[${userId}]", quizId, ErrorCode.AccessDenied)
+            throw new SkillQuizException("Cannot delete roles for myself when there are no other admins. userId=[${userId}]", quizId, ErrorCode.AccessDenied)
         }
         accessSettingsStorageService.deleteQuizUserRole(userId, quizDef.quizId, roleName)
 

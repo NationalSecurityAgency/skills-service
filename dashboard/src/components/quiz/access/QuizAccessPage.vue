@@ -34,6 +34,7 @@ const quizId = computed(() => {
     <role-manager id="add-group-admin-access-user"
                   :quiz-id="quizId"
                   title=""
+                  role-type="Quiz"
                   role-description="Quiz Admin"
                   data-cy="roleManager"
                   :roles="['ROLE_QUIZ_ADMIN']">
