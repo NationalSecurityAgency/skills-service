@@ -280,6 +280,88 @@ describe('Global Badge on P&R pages', () => {
         cy.get('[data-cy="achievementDate"]')
     })
 
+    it('Quiz attempt history is displayed for skills in Global Badge from another project', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.runQuizForTheCurrentUser(1, [{selectedIndex: [1]}])
+
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 3, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1 )
+        cy.assignSkillToGlobalBadge(1, 2, 1)
+        cy.assignSkillToGlobalBadge(1, 3, 2)
+        cy.enableGlobalBadge(1);
+
+        cy.addToMyProjects(1);
+        cy.addToMyProjects(2);
+
+        // navigate to the skill
+        cy.visit('/progress-and-rankings/projects/proj2/badges/global/globalBadge1');
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').click()
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.get('[data-cy="approvalHistoryTimeline"]').contains('Failed')
+
+        // refresh and validate
+        cy.visit('/progress-and-rankings/projects/proj2/badges/global/globalBadge1/crossProject/proj1/skill1');
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.get('[data-cy="approvalHistoryTimeline"]').contains('Failed')
+    })
+
+    it('can view quiz results for skills in Global Badge from another project', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.runQuizForTheCurrentUser(1, [{selectedIndex: [0]}])
+
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 3, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1 )
+        cy.assignSkillToGlobalBadge(1, 2, 1)
+        cy.assignSkillToGlobalBadge(1, 3, 2)
+        cy.enableGlobalBadge(1);
+
+        cy.addToMyProjects(1);
+        cy.addToMyProjects(2);
+
+        // navigate to the skill
+        cy.visit('/progress-and-rankings/projects/proj2/badges/global/globalBadge1');
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').click()
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.get('[data-cy="quizCompletedMsg"]').contains('You have passed')
+        cy.get('[data-cy="viewQuizAttemptInfo"]').click()
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-0"] [data-cy="selectCorrectAnswer"]')
+
+        // refresh and validate
+        cy.visit('/progress-and-rankings/projects/proj2/badges/global/globalBadge1/crossProject/proj1/skill1');
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.get('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.get('[data-cy="quizCompletedMsg"]').contains('You have passed')
+        cy.get('[data-cy="viewQuizAttemptInfo"]').click()
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-0"] [data-cy="selectCorrectAnswer"]')
+    })
+
     it('skills-client: Ability to claim points for Global Badge Honor skill from another project', function () {
         cy.createProject(1)
         cy.createSubject(1, 1)
@@ -555,5 +637,87 @@ describe('Global Badge on P&R pages', () => {
         cy.wrapIframe().find('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('150')
         cy.wrapIframe().find('[data-cy="skillCompletedCheck-skill1=globalBadge1"]')
         cy.wrapIframe().find('[data-cy="achievementDate"]')
+    })
+
+    it('skills-client: Quiz attempt history is displayed for skills in Global Badge from another project', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.runQuizForTheCurrentUser(1, [{selectedIndex: [1]}])
+
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 3, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1 )
+        cy.assignSkillToGlobalBadge(1, 2, 1)
+        cy.assignSkillToGlobalBadge(1, 3, 2)
+        cy.enableGlobalBadge(1);
+
+        cy.addToMyProjects(1);
+        cy.addToMyProjects(2);
+
+        // navigate to the skill
+        cy.visit('/test-skills-client/proj2?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1');
+        cy.wrapIframe().find('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').click()
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.wrapIframe().find('[data-cy="approvalHistoryTimeline"]').contains('Failed')
+
+        // refresh and validate
+        cy.visit('/test-skills-client/proj2?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1%2FcrossProject%2Fproj1%2Fskill1');
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.wrapIframe().find('[data-cy="approvalHistoryTimeline"]').contains('Failed')
+    })
+
+    it('skills-client: can view quiz results for skills in Global Badge from another project', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.runQuizForTheCurrentUser(1, [{selectedIndex: [0]}])
+
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 3, { numPerformToCompletion: 1, selfReportingType: 'Approval'});
+
+        cy.createGlobalBadge(1);
+        cy.assignSkillToGlobalBadge(1, 1, 1 )
+        cy.assignSkillToGlobalBadge(1, 2, 1)
+        cy.assignSkillToGlobalBadge(1, 3, 2)
+        cy.enableGlobalBadge(1);
+
+        cy.addToMyProjects(1);
+        cy.addToMyProjects(2);
+
+        // navigate to the skill
+        cy.visit('/test-skills-client/proj2?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1');
+        cy.wrapIframe().find('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').click()
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.wrapIframe().find('[data-cy="quizCompletedMsg"]').contains('You have passed')
+        cy.wrapIframe().find('[data-cy="viewQuizAttemptInfo"]').click()
+        cy.wrapIframe().find('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-0"] [data-cy="selectCorrectAnswer"]')
+
+        // refresh and validate
+        cy.visit('/test-skills-client/proj2?skillsClientDisplayPath=%2Fbadges%2Fglobal%2FglobalBadge1%2FcrossProject%2Fproj1%2Fskill1');
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"]').contains('Very Great Skill 1')
+        cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1=globalBadge1"] [data-cy="skillProjectName"]').contains('This is project 1')
+
+        cy.wrapIframe().find('[data-cy="quizCompletedMsg"]').contains('You have passed')
+        cy.wrapIframe().find('[data-cy="viewQuizAttemptInfo"]').click()
+        cy.wrapIframe().find('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-0"] [data-cy="selectCorrectAnswer"]')
     })
 })
