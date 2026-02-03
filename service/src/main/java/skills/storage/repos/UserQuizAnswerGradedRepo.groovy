@@ -28,6 +28,7 @@ interface UserQuizAnswerGradedRepo extends JpaRepository<UserQuizAnswerGraded, L
         Integer getAnswerAttemptId()
         Date getGradedOn()
         String getFeedback()
+        @Nullable
         Integer getAiConfidenceLevel()
         String getGraderUserId()
         String getGraderUserIdForDisplay()
