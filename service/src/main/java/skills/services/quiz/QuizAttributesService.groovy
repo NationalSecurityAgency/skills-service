@@ -35,7 +35,7 @@ class QuizAttributesService {
     @Autowired
     QuizQuestionDefRepo quizQuestionRepo
 
-    @Value('#{"${skills.openai.textInputAiGraderDefaultMinimumConfidenceLevel:90}"}')
+    @Value('#{"${skills.openai.textInputAiGraderDefaultMinimumConfidenceLevel:75}"}')
     Integer minimumConfidenceLevel
 
     @Transactional

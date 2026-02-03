@@ -14,16 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {ref, onMounted, computed} from 'vue';
+import {onMounted, ref} from 'vue';
+
 import {useRoute} from 'vue-router';
 import * as yup from "yup";
-import { useForm } from 'vee-validate';
+import {number, string} from "yup";
+import {useForm} from 'vee-validate';
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import QuizService from "@/components/quiz/QuizService.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
 import SkillsNumberInput from "@/components/utils/inputForm/SkillsNumberInput.vue";
+import ThinkingIndicator from "@/common-components/utilities/learning-conent-gen/ThinkingIndicator.vue";
 
 const route = useRoute();
 
@@ -34,19 +37,27 @@ const graderEnabled = ref(true);
 const initDataLoading = ref(true)
 
 const schema = yup.object().shape({
-
+  'answerUsedForGrading': string()
+      .trim()
+      .required()
+      .label('Answer Used for Grading'),
+  'minimumConfidenceLevel': number()
+      .required()
+      .min(1)
+      .max(100)
+      .label('Minimum Correct Confidence %'),
 })
 const initialValues = {
   answerUsedForGrading: '',
   minimumConfidenceLevel: 0
 }
-const { values, meta, handleSubmit, resetForm, validate, errors, setFieldValue } = useForm({
+const {values, meta, handleSubmit, resetForm, validate, errors, setFieldValue, isSubmitting} = useForm({
   validationSchema: schema,
   initialValues: initialValues
 })
 
 const loadQuestion = () => {
-  return  QuizService.getQuizQuestionDef(route.params.quizId, route.params.questionId)
+  return QuizService.getQuizQuestionDef(route.params.quizId, route.params.questionId)
       .then((response) => {
         question.value = response
       })
@@ -90,6 +101,27 @@ const saveSettings = () => {
     setTimeout(() => {
       showSavedMsg.value = false;
     }, 3500);
+  })
+}
+
+const loadingTestAnswer = ref(false)
+const testAnswerRes = ref(null)
+const testAnAnswer = () => {
+  validate().then(({valid}) => {
+    if (!valid) {
+      overallErrMsg.value = 'Form did NOT pass validation, please fix and try to Save again';
+    } else {
+      loadingTestAnswer.value = true
+      const correctAnswer = values.answerUsedForGrading
+      const minimumConfidenceLevel = values.minimumConfidenceLevel
+      const answerToTest = values.answerToTest
+      QuizService.testTextInputAiGrading(route.params.quizId, route.params.questionId, correctAnswer, minimumConfidenceLevel, answerToTest)
+          .then((res) => {
+            testAnswerRes.value = {...res, minimumConfidenceLevel}
+          }).finally(() => {
+        loadingTestAnswer.value = false
+      })
+    }
   })
 }
 </script>
@@ -137,17 +169,6 @@ const saveSettings = () => {
                     label="Minimum Correct Confidence %"
                 />
               </div>
-              <div>
-                <SkillsButton
-                    severity="warn"
-                    outlined
-                    data-cy="testAnswersBtn"
-                    aria-label="Test Answers"
-                    @click="submitSaveSettingsForm"
-                    :disabled="!graderEnabled"
-                    icon="fa-solid fa-clipboard-question"
-                    label="Test Answers"/>
-              </div>
             </div>
           </BlockUI>
 
@@ -158,13 +179,74 @@ const saveSettings = () => {
                 data-cy="saveGraderSettingsBtn"
                 aria-label="Save ai grader settings"
                 @click="submitSaveSettingsForm"
-                :loading="savingSettings"
+                :loading="savingSettings || isSubmitting"
+                :disabled="!meta.valid"
                 icon="fa-solid fa-save"
                 label="Save Changes"/>
             <InlineMessage v-if="showSavedMsg" aria-hidden="true" data-cy="savedMsg" severity="success" size="small"
                            icon="fas fa-check">Settings Saved
             </InlineMessage>
           </div>
+
+          <Card v-if="graderEnabled" class="mt-5">
+            <template #header>
+              <SkillsCardHeader title="AI Grading Preview">
+                <template #headerIcon><i class="fa-solid fa-vial mr-2" aria-hidden="true"/></template>
+              </SkillsCardHeader>
+            </template>
+            <template #content>
+              <div class="flex flex-col gap-4">
+                <SkillsTextarea
+                    label="Answer:"
+                    id="answerToTest"
+                    placeholder="Enter a sample answer to test the AI Grader and refine your grading settings."
+                    aria-label="Answer To test"
+                    rows="2"
+                    max-rows="6"
+                    name="answerToTest"
+                    data-cy="answerToTestInput"
+                />
+                <div class="flex gap-3">
+                  <SkillsButton
+                      severity="info"
+                      outlined
+                      data-cy="testAnswersBtn"
+                      aria-label="Test Answers"
+                      @click="testAnAnswer"
+                      :loading="savingSettings || loadingTestAnswer"
+                      :disabled="!meta.valid || isSubmitting || !values.answerToTest?.trim()"
+                      icon="fa-solid fa-clipboard-question"
+                      label="Test Answers"/>
+                  <div v-if="loadingTestAnswer" class="flex gap-2 items-center">
+                    <skills-spinner :is-loading="true" :size-in-rem="2"/>
+                    <div>Loading AI Grading Results. <thinking-indicator value="This may take a while"/>.</div>
+                  </div>
+                </div>
+              </div>
+
+              <BlockUI v-if="testAnswerRes" :blocked="loadingTestAnswer">
+                <div class="mt-5 flex flex-col gap-3">
+                  <div class="text-xl font-bold mb-1 border-b-2">Results:</div>
+                  <div class="flex gap-3 items-center">
+                    <div><span>Answer is: </span>
+                      <Tag v-if="testAnswerRes.confidenceLevel >= testAnswerRes.minimumConfidenceLevel">CORRECT</Tag>
+                      <Tag v-else severity="warn">WRONG</Tag>
+                    </div>
+                    <div>|</div>
+                    <div class="flex gap-2 items-center"><span>AI Confidence Level:</span>
+                      <div>
+                        <Tag severity="info">{{ testAnswerRes.confidenceLevel }}%</Tag>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex flex-col gap-2">
+                    <label>AI Justification: </label>
+                    <p class="border rounded p-4">{{ testAnswerRes.gradingDecisionReason }}</p>
+                  </div>
+                </div>
+              </BlockUI>
+            </template>
+          </Card>
         </div>
 
       </template>

@@ -62,10 +62,10 @@ class OpenAIService {
     @Value('#{"${skills.openai.stream.stream-usage:true}"}')
     Boolean streamUsage
 
-    @Value('#{"${skills.openai.gradingModel:null}"}')
+    @Value('#{"${skills.openai.gradingModel}"}')
     String gradingModel
 
-    @Value('#{"${skills.openai.gradingModelTemperature:0.5}"}')
+    @Value('#{"${skills.openai.gradingModelTemperature:0.0}"}')
     Double gradingModelTemperature
 
     String systemMsg

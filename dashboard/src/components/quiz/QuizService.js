@@ -180,4 +180,14 @@ export default {
         .post(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/questions/${questionId}/textInputAiGradingConf`, attrs)
         .then((response) => response.data)
   },
+  testTextInputAiGrading(quizId, questionId, correctAnswer, minimumConfidenceLevel, studentAnswer) {
+    const attrs = {
+      studentAnswer,
+      correctAnswer,
+      minimumConfidenceLevel,
+    }
+    return axios
+        .post(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/testTextInputAiGrading/${questionId}`, attrs)
+        .then((response) => response.data)
+  }
 }
