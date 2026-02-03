@@ -27,6 +27,7 @@ import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vu
 import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
 import SkillsNumberInput from "@/components/utils/inputForm/SkillsNumberInput.vue";
 import ThinkingIndicator from "@/common-components/utilities/learning-conent-gen/ThinkingIndicator.vue";
+import AiConfidenceTag from "@/components/quiz/testCreation/AiConfidenceTag.vue";
 
 const route = useRoute();
 
@@ -234,8 +235,9 @@ const testAnAnswer = () => {
                     </div>
                     <div>|</div>
                     <div class="flex gap-2 items-center"><span>AI Confidence Level:</span>
-                      <div>
-                        <Tag severity="info">{{ testAnswerRes.confidenceLevel }}%</Tag>
+                      <div class="flex gap-2 items-center">
+                        <span class="font-bold">{{ testAnswerRes.confidenceLevel }}%</span>
+                        <ai-confidence-tag :confidence-percent="testAnswerRes.confidenceLevel" />
                       </div>
                     </div>
                   </div>
