@@ -334,7 +334,7 @@ const clearDateFilter = () => {
               </div>
               <div v-else-if="slotProps.field === 'results'">
                 <div><Badge severity="success">{{ slotProps.data.numberCorrect }}</Badge> correct</div>
-                <div>out of {{ slotProps.data.totalAnswers }} <span class="text-gray-500">({{ Math.trunc(100 * (slotProps.data.numberCorrect / slotProps.data.totalAnswers)) }}%)</span></div>
+                <div>out of {{ slotProps.data.totalAnswers }} <span class="text-gray-500 dark:text-gray-200">({{ Math.trunc(100 * (slotProps.data.numberCorrect / slotProps.data.totalAnswers)) }}%)</span></div>
               </div>
               <div v-else-if="slotProps.field === 'controls'">
                 <SkillsButton :data-cy="`row${slotProps.index}-deleteBtn`"
