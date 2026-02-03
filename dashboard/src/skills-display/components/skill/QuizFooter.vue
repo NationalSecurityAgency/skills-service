@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 
-import {ref, computed, toRaw} from "vue";
+import {ref, computed} from "vue";
 import QuizType from "@/skills-display/components/quiz/QuizType.js";
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 import {useSkillsDisplayInfo} from "@/skills-display/UseSkillsDisplayInfo.js";
