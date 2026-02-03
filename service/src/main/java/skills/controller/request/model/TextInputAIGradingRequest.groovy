@@ -19,7 +19,6 @@ import groovy.transform.Canonical
 
 @Canonical
 class TextInputAIGradingRequest {
-    String question
     String studentAnswer
     String correctAnswer
     Integer minimumConfidenceLevel // 0 - 100
