@@ -327,6 +327,8 @@ class QuizRunService {
                     )
                 }
             }
+
+            QuestionAttrs qAttrs = it.attributes ? mapper.readValue(it.attributes, QuestionAttrs.class) : null
             new QuizQuestionInfo(
                     id: it.id,
                     question: InputSanitizer.unsanitizeForMarkdown(it.question),
@@ -334,7 +336,7 @@ class QuizRunService {
                     canSelectMoreThanOne: quizAnswerDefs?.count({ Boolean.valueOf(it.isCorrectAnswer) }) > 1,
                     answerOptions: answerOptions,
                     answerHint: includeAnswerHints ? it.answerHint : null,
-                    mediaAttributes: it.attributes,
+                    mediaAttributes: qAttrs,
                     matchingTerms: matchingTerms
             )
         }

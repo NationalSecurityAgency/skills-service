@@ -51,7 +51,7 @@ const answerRating = ref(0)
 const answerText = ref(props.q.questionType === QuestionType.TextInput ? (props.q.answerOptions[0]?.answerText || '') : '')
 
 const mediaAttributes = computed(() => {
-  const attr = props.q.mediaAttributes ? JSON.parse(props.q.mediaAttributes)?.videoConf : null;
+  const attr = props.q.mediaAttributes?.videoConf;
   const captionsUrl = attr?.captions
       ? `/api/quiz-definitions/${props.quizId}/questions/${props.q.id}/videoCaptions`
       : null;

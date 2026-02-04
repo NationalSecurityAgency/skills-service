@@ -15,6 +15,8 @@
  */
 package skills.quizLoading.model
 
+import skills.services.attributes.QuestionAttrs
+
 class QuizQuestionInfo {
     Integer id
     String question
@@ -23,6 +25,6 @@ class QuizQuestionInfo {
     String questionType
     String answerHint
     Integer displayOrder
-    String mediaAttributes
+    QuestionAttrs mediaAttributes
     List<String> matchingTerms
 }
