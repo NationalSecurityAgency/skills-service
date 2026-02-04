@@ -15,6 +15,7 @@
  */
 package skills.intTests
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import skills.intTests.utils.DefaultIntSpec
@@ -22,11 +23,16 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.auth.RoleName
+import skills.storage.model.auth.UserRole
+import skills.storage.repos.UserRoleRepo
 import spock.lang.IgnoreIf
 import spock.lang.IgnoreRest
 import spock.lang.Specification
 
 class AuthorizationSpecs extends DefaultIntSpec {
+
+    @Autowired
+    UserRoleRepo userRoleRepo
 
     String projId = "myProject"
     String projId2 = "myProject2"
@@ -106,7 +112,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
         result.projectId == projId
     }
 
-    def 'current user cannot delete them self'() {
+    def 'current user cannot delete themself if they are the only admin'() {
 
         when:
         skillsService.deleteUserRole("skills@skills.org", projId, RoleName.ROLE_PROJECT_ADMIN.toString())
@@ -114,6 +120,23 @@ class AuthorizationSpecs extends DefaultIntSpec {
         then:
         SkillsClientException ex = thrown()
         ex.httpStatus == HttpStatus.BAD_REQUEST
+    }
+
+    def 'current user can delete themself if they are not the only admin'() {
+
+        String newUser = "user2"
+        SkillsService skillsServiceUser2 = createService(newUser)
+        // add 'user2' as an admin to projId
+        skillsService.addProjectAdmin(projId, newUser)
+
+        when:
+        List<UserRole> rolesBefore = userRoleRepo.findAllByProjectIdIgnoreCase(projId)
+        skillsService.deleteUserRole("skills@skills.org", projId, RoleName.ROLE_PROJECT_ADMIN.toString())
+        List<UserRole> rolesAfter = userRoleRepo.findAllByProjectIdIgnoreCase(projId)
+
+        then:
+        rolesBefore.userId.sort() == ['skills@skills.org', 'user2'].sort()
+        rolesAfter.userId == ['user2']
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })

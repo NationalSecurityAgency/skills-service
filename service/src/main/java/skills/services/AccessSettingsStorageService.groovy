@@ -257,10 +257,10 @@ class AccessSettingsStorageService {
     }
 
     @Transactional()
-    void deleteUserRole(String userId, String projectId, RoleName roleName, boolean saveUserAction = false) {
+    void deleteUserRole(String userId, String projectId, RoleName roleName, boolean saveUserAction = false, boolean canDeleteSelf = false) {
         userId = userId?.toLowerCase()
         boolean isPrivateProjRole = roleName == RoleName.ROLE_PRIVATE_PROJECT_USER
-        if (userId != userInfoService.getCurrentUser().username.toLowerCase() || isPrivateProjRole) {
+        if (userId != userInfoService.getCurrentUser().username.toLowerCase() || isPrivateProjRole || canDeleteSelf) {
             deleteUserRoleInternal(userId, projectId, roleName)
             if (isPrivateProjRole) {
                 additionalCleanupForPrivateProjectUserRole(userId, projectId)

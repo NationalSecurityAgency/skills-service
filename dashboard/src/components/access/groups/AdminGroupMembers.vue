@@ -42,6 +42,7 @@ const updateMemberCount = (event, updateValue) => {
                     :admin-group-id="adminGroupId"
                     title=""
                     role-description="Group Member"
+                    role-type="Admin Group"
                     data-cy="adminGroupMemberRoleManager"
                     @role-added="updateMemberCount($event, 1)"
                     @role-deleted="updateMemberCount($event, -1)"

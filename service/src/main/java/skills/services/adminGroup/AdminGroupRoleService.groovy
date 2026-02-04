@@ -147,8 +147,11 @@ class AdminGroupRoleService {
         ensureValidRole(roleName, adminGroupDef.adminGroupId)
         String userId = userIdParam?.toLowerCase()
         String currentUser = userInfoService.getCurrentUserId()
-        if (currentUser?.toLowerCase() == userId?.toLowerCase()) {
-            throw new SkillException("Cannot remove roles from yourself. userId=[${userId}], adminGroupName=[${adminGroupDef.name}]", ErrorCode.AccessDenied)
+        Integer numberOfOwners = userRoleRepo.countUserRolesByAdminGroupIdAndUserRoles(adminGroupId, [RoleName.ROLE_ADMIN_GROUP_OWNER, RoleName.ROLE_SUPER_DUPER_USER])
+        Boolean canDeleteSelf = numberOfOwners > 1
+
+        if (currentUser?.toLowerCase() == userId?.toLowerCase() && !canDeleteSelf) {
+            throw new SkillException("Cannot delete roles for myself when there are no other admins. userId=[${userId}], adminGroupName=[${adminGroupDef.name}]", ErrorCode.AccessDenied)
         }
         accessSettingsStorageService.deleteAdminGroupUserRole(userId, adminGroupDef.adminGroupId, roleName)
         accessSettingsStorageService.deleteProjectAndQuizAdminUserRolesWithAdminGroupIdForUser(userId, adminGroupDef.adminGroupId)

@@ -32,6 +32,7 @@ import QuizService from '@/components/quiz/QuizService.js';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import {useStorage} from "@vueuse/core";
+import {useRouter} from "vue-router";
 
 const dialogMessages = useDialogMessages()
 // role constants
@@ -43,8 +44,10 @@ const ROLE_DASHBOARD_ADMIN_ACCESS = 'ROLE_DASHBOARD_ADMIN_ACCESS'
 const ROLE_ADMIN_GROUP_MEMBER = 'ROLE_ADMIN_GROUP_MEMBER'
 const ROLE_ADMIN_GROUP_OWNER = 'ROLE_ADMIN_GROUP_OWNER'
 const ROLE_GLOBAL_BADGE_ADMIN = 'ROLE_GLOBAL_BADGE_ADMIN'
+const ROLE_QUIZ_ADMIN = 'ROLE_QUIZ_ADMIN'
 const ALL_ROLES = [ROLE_APP_USER, ROLE_PROJECT_ADMIN, ROLE_SUPER_DUPER_USER, ROLE_PROJECT_APPROVER];
 
+const router = useRouter()
 const appConfig = useAppConfig();
 const announcer = useSkillsAnnouncer();
 const userInfo = useUserInfo();
@@ -98,6 +101,10 @@ const props = defineProps({
     type: String,
     default: null,
   },
+  roleType: {
+    type: String,
+    default: null,
+  }
 });
 
 onMounted(() => {
@@ -116,6 +123,21 @@ const assignedAdminGroups = ref([])
 const allAdminGroups = ref([])
 const selectedUser = ref(null);
 const isSaving = ref(false);
+const numberOfAdmins = computed(() => {
+  return assignedLocalAdmins.value?.filter((o) => o?.roleName === ROLE_PROJECT_ADMIN).length
+});
+const numberOfGroupOwners = computed(() => {
+  return assignedLocalAdmins.value?.filter((o) => o?.roleName === ROLE_ADMIN_GROUP_OWNER).length
+});
+const numberOfQuizAdmins = computed(() => {
+  return assignedLocalAdmins.value?.filter((o) => o?.roleName === ROLE_QUIZ_ADMIN).length
+});
+const numberOfGlobalBadgeAdmins = computed(() => {
+  return assignedLocalAdmins.value?.filter((o) => o?.roleName === ROLE_GLOBAL_BADGE_ADMIN).length
+});
+const numberOfRootUsers = computed(() => {
+  return assignedLocalAdmins.value?.filter((o) => o?.roleName === ROLE_SUPER_DUPER_USER).length
+});
 const errNotification = ref({
   enable: false,
   msg: '',
@@ -126,6 +148,7 @@ const userRole = ref({
 });
 const removeRoleInfo = ref({
   showDialog: false,
+  isCurrentUser: false,
   userInfo: {}
 })
 const data = computed(() => {
@@ -166,7 +189,7 @@ const emptyAdminGroupsMessage = computed(() => {
 
 const assignedUserIds = computed(() => {
   const assignedUserIds = new Set(assignedLocalAdmins.value.map((u) => appConfig.isPkiAuthenticated ? u.userIdForDisplay : u.userId));
-  assignedAdminGroups.value.forEach((ag) => {
+  assignedAdminGroups.value?.forEach((ag) => {
     ag.allMembers.forEach((u) => {
       appConfig.isPkiAuthenticated ? assignedUserIds.add(u.userIdForDisplay) : assignedUserIds.add(u.userId);
     })
@@ -222,8 +245,9 @@ const loadData = () => {
         assignedLocalAdmins.value = adminGroupsSupported.value ? result.filter((u) => !u.adminGroupId) : result;
       }) :
       AccessService.getUserRoles(props.projectId, props.roles, pageParams, props.adminGroupId, props.badgeId).then((result) => {
-        assignedLocalAdmins.value = adminGroupsSupported.value ? result.data.filter((u) => !u.adminGroupId) : result.data
+        assignedLocalAdmins.value = adminGroupsSupported.value ? result.data?.filter((u) => !u.adminGroupId) : result.data
       });
+
   const getAdminGroupsForProject = props.projectId ? AdminGroupsService.getAdminGroupsForProject(props.projectId).then((result) => {
     assignedAdminGroups.value = result;
   }) : Promise.resolve();
@@ -328,14 +352,23 @@ function getUserDisplay(item) {
   return item.lastName && item.firstName ? `${item.firstName} ${item.lastName} (${item.userIdForDisplay})` : item.userIdForDisplay;
 }
 
-function notCurrentUser(userId) {
+function canDeleteUser(userId, userRole) {
+  return !(userRole === ROLE_PROJECT_ADMIN && numberOfAdmins.value === 1)
+      && !(userRole === ROLE_ADMIN_GROUP_OWNER && numberOfGroupOwners.value === 1)
+      && !(userRole === ROLE_SUPER_DUPER_USER && numberOfRootUsers.value === 1)
+      && !(userRole === ROLE_QUIZ_ADMIN && numberOfQuizAdmins.value === 1)
+      && !(userRole === ROLE_GLOBAL_BADGE_ADMIN && numberOfGlobalBadgeAdmins.value === 1);
+}
+
+function isCurrentUser(userId) {
   const currentUser = userInfo?.userInfo?.value?.userId;
-  return currentUser && userId !== currentUser;
+  return currentUser && userId === currentUser;
 }
 
 function deleteUserRoleConfirm(row) {
   removeRoleInfo.value.userInfo = row
   removeRoleInfo.value.showDialog = true
+  removeRoleInfo.value.isCurrentUser = isCurrentUser(row.userId);
 }
 
 function doDeleteUserRole() {
@@ -361,6 +394,10 @@ const completeDelete = (row) => {
   emit('role-deleted', { userId: row.userId, role: row.roleName });
   isLoading.value = false;
   document.getElementById('existingUserInput').firstElementChild.focus()
+
+  if(isCurrentUser(row.userId)) {
+    router.push('/administrator')
+  }
 }
 
 function editItem(item) {
@@ -583,23 +620,23 @@ defineExpose({
               <template #body="slotProps">
                 <div v-if="!slotProps.data.adminGroupId || props.adminGroupId">
                   <div class="float-right mr-1 flex flex-col gap-2" :data-cy="`controlsCell_${slotProps.data.userId}`">
-                    <ButtonGroup v-if="notCurrentUser(slotProps.data.userId)">
+                    <ButtonGroup v-if="canDeleteUser(slotProps.data.userId, slotProps.data.roleName)">
                       <SkillsButton v-if="!isOnlyOneRole" @click="editItem(slotProps.data)"
-                                    :disabled="!notCurrentUser(slotProps.data.userId)"
+                                    :disabled="!canDeleteUser(slotProps.data.userId, slotProps.data.roleName)"
                                     :aria-label="`edit access role from user ${getUserDisplay(slotProps.data)}`"
                                     data-cy="editUserBtn" icon="fas fa-edit" label="Edit" size="small">
                       </SkillsButton>
                       <SkillsButton @click="deleteUserRoleConfirm(slotProps.data)"
-                                    :disabled="!notCurrentUser(slotProps.data.userId)"
+                                    :disabled="!canDeleteUser(slotProps.data.userId, slotProps.data.roleName)"
                                     :id="`removeUserBtn_${slotProps.data.userId}`"
                                     :track-for-focus="true"
                                     :aria-label="`remove access role from user ${getUserDisplay(slotProps.data)}`"
                                     data-cy="removeUserBtn" icon="fas fa-trash" label="Delete" size="small">
                       </SkillsButton>
                     </ButtonGroup>
-                    <InlineMessage v-if="!notCurrentUser(slotProps.data.userId)" class="mt-1" severity="info" size="small"
+                    <InlineMessage v-if="!canDeleteUser(slotProps.data.userId, slotProps.data.roleName)" class="mt-1" severity="info" size="small"
                                    aria-live="polite" data-cy="cannotRemoveWarning">
-                      Cannot modify yourself
+                      Cannot delete the only admin
                     </InlineMessage>
                   </div>
 
@@ -633,6 +670,8 @@ defineExpose({
         @do-remove="doDeleteUserRole"
         :item-name="removeRoleInfo.userInfo.userIdForDisplay"
         item-type="from having admin privileges"
+        :role-type="roleType"
+        :is-self="removeRoleInfo.isCurrentUser"
         :enable-return-focus="true">
     </RemovalValidation>
   </div>

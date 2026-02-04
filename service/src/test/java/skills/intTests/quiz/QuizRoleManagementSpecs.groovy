@@ -16,16 +16,21 @@
 package skills.intTests.quiz
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.storage.model.auth.RoleName
+import skills.storage.repos.UserRoleRepo
 
 import static skills.intTests.utils.AdminGroupDefFactory.createAdminGroup
 
 @Slf4j
 class QuizRoleManagementSpecs extends DefaultIntSpec {
+
+    @Autowired
+    UserRoleRepo userRoleRepo
 
     def "add quiz admin"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
@@ -84,7 +89,20 @@ class QuizRoleManagementSpecs extends DefaultIntSpec {
         roles_t1.roleName == [RoleName.ROLE_QUIZ_ADMIN.toString()]
     }
 
-    def "cannot remove myself"() {
+    def "cannot remove myself when there are no other admins"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
+        skillsService.createQuizQuestionDefs(questions[0..1])
+
+        when:
+        skillsService.deleteQuizUserRole(quiz1.quizId, skillsService.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        then:
+        SkillsClientException skillsClientException = thrown()
+        skillsClientException.message.contains("Cannot delete roles for myself when there are no other admins")
+    }
+
+    def "can remove myself when there are other admins"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
         def questions = QuizDefFactory.createChoiceQuestions(1, 3, 2)
@@ -95,10 +113,14 @@ class QuizRoleManagementSpecs extends DefaultIntSpec {
         skillsService.addQuizUserRole(quiz1.quizId, otherUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
 
         when:
-        otherUser.deleteQuizUserRole(quiz1.quizId, otherUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        List<UserRoleRepo.UserRoleWithAttrs> rolesBefore = userRoleRepo.findRoleWithAttrsByQuizId(quiz1.quizId)
+        skillsService.deleteQuizUserRole(quiz1.quizId, skillsService.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        List<UserRoleRepo.UserRoleWithAttrs> rolesAfter = userRoleRepo.findRoleWithAttrsByQuizId(quiz1.quizId)
+
         then:
-        SkillsClientException skillsClientException = thrown()
-        skillsClientException.message.contains("Cannot remove roles from myself")
+        rolesBefore.role.userId.sort() == ['skills@skills.org', otherUser.userName].sort()
+        rolesAfter.role.userId == [otherUser.userName]
+
     }
 
     def "cannot add myself"() {
