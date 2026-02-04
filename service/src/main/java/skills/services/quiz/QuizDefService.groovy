@@ -952,6 +952,7 @@ class QuizDefService {
     }
 
     private QuizQuestionDefResult convert(QuizQuestionDef savedQuestion, List<QuizAnswerDef> savedAnswers) {
+        QuestionAttrs qAttrs = savedQuestion.attributes ? mapper.readValue(savedQuestion.attributes, QuestionAttrs.class) : null
         new QuizQuestionDefResult(
                 id: savedQuestion.id,
                 question: InputSanitizer.unsanitizeForMarkdown(savedQuestion.question),
@@ -959,7 +960,7 @@ class QuizDefService {
                 questionType: savedQuestion.type,
                 answers: savedAnswers.collect { convert (it)}.sort { it.displayOrder},
                 displayOrder: savedQuestion.displayOrder,
-                attributes: savedQuestion.attributes,
+                attributes: qAttrs,
         )
     }
 

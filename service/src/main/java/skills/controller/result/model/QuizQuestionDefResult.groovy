@@ -15,6 +15,7 @@
  */
 package skills.controller.result.model
 
+import skills.services.attributes.QuestionAttrs
 import skills.services.quiz.QuizQuestionType
 
 class QuizQuestionDefResult {
@@ -26,5 +27,5 @@ class QuizQuestionDefResult {
     List<QuizAnswerDefResult> answers
     int displayOrder
 
-    String attributes
+    QuestionAttrs attributes
 }

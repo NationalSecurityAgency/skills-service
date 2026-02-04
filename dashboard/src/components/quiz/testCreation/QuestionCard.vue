@@ -72,7 +72,7 @@ const numberOfStars = computed(() => {
   return props.question.answers ? props.question.answers.length : 3;
 })
 const mediaAttributes = computed(() => {
-  const media = props.question.attributes ? JSON.parse(props.question.attributes)?.videoConf : null
+  const media = props.question.attributes?.videoConf
   if(media) {
     media.isAudio = media.videoType?.includes('audio/')
   }
@@ -239,7 +239,7 @@ const questionUpdated = (updatedQuestionText) => {
                        :to="`/administrator/quizzes/${route.params.quizId}/questions/${question.id}/config-video`" tabindex="-1">
             <div class="flex gap-1 items-center">
               <Avatar icon="fa-regular fa-play-circle" shape="circle" class="bg-slate-600! text-orange-300!"/>
-              <div class="underline">{{ question.attributes ? "Edit Audio/Video" : "Add Audio/Video"}}</div>
+              <div class="underline">{{ question.attributes?.videoConf ? "Edit Audio/Video" : "Add Audio/Video"}}</div>
             </div>
           </router-link>
         </div>
