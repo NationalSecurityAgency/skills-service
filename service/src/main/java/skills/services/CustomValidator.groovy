@@ -54,7 +54,7 @@ class CustomValidator {
     @Value('#{"${skills.config.ui.userCommunityParagraphValidationRegex}"}')
     String userCommunityParagraphValidationRegex
 
-    @Value('#{"${skills.config.ui.forceValidationRegex:null}"}')
+    @Value('${skills.config.ui.forceValidationRegex:#{null}}')
     String forceValidationRegex
 
     @Value('#{"${skills.config.ui.paragraphValidationMessage}"}')

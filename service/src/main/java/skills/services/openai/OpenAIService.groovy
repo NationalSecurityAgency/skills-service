@@ -45,10 +45,10 @@ import skills.controller.request.model.AiChatRequest
 @Slf4j
 class OpenAIService {
 
-    @Value('#{"${skills.openai.host:}"}')
+    @Value('${skills.openai.host:#{null}}')
     String openAiHost
 
-    @Value('#{"${skills.openai.host:}"}')
+    @Value('${skills.openai.host:#{null}}')
     String openAiBaseUrl
 
     @Value('#{"${skills.openai.completionsEndpoint:/v1/chat/completions}"}')
@@ -57,13 +57,13 @@ class OpenAIService {
     @Value('#{"${skills.openai.modelsEndpoint:/v1/models}"}')
     String modelsEndpoint
 
-    @Value('#{"${skills.openai.key:}"}')
+    @Value('${skills.openai.key:#{null}}')
     String openAiKey
 
     @Value('#{"${skills.openai.stream.stream-usage:true}"}')
     Boolean streamUsage
 
-    @Value('#{"${skills.openai.gradingModel:}"}')
+    @Value('${skills.openai.gradingModel:#{null}}')
     String gradingModel
 
     @Value('#{"${skills.openai.gradingModelTemperature:0.0}"}')
