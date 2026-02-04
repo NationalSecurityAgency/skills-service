@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
+import org.springframework.lang.Nullable
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
@@ -44,10 +45,10 @@ import skills.controller.request.model.AiChatRequest
 @Slf4j
 class OpenAIService {
 
-    @Value('#{"${skills.openai.host}"}')
+    @Value('#{"${skills.openai.host:}"}')
     String openAiHost
 
-    @Value('#{"${skills.openai.host:null}"}')
+    @Value('#{"${skills.openai.host:}"}')
     String openAiBaseUrl
 
     @Value('#{"${skills.openai.completionsEndpoint:/v1/chat/completions}"}')
@@ -56,13 +57,13 @@ class OpenAIService {
     @Value('#{"${skills.openai.modelsEndpoint:/v1/models}"}')
     String modelsEndpoint
 
-    @Value('#{"${skills.openai.key:null}"}')
+    @Value('#{"${skills.openai.key:}"}')
     String openAiKey
 
     @Value('#{"${skills.openai.stream.stream-usage:true}"}')
     Boolean streamUsage
 
-    @Value('#{"${skills.openai.gradingModel}"}')
+    @Value('#{"${skills.openai.gradingModel:}"}')
     String gradingModel
 
     @Value('#{"${skills.openai.gradingModelTemperature:0.0}"}')
