@@ -125,7 +125,7 @@ class TextInputAIGraderConfigSpecs extends DefaultIntSpec {
         e.getMessage().contains("Only TextInput type is supported")
     }
 
-    def "question id must exist"() {
+    def "when saving question id must exist"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
         def quizDef = skillsService.createQuizDef(quiz).body
@@ -139,7 +139,21 @@ class TextInputAIGraderConfigSpecs extends DefaultIntSpec {
         e.getMessage().contains("Did not find question with the provided id")
     }
 
-    def "question must be for the provided quizId"() {
+    def "when retrieving question id must exist"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        def questions = QuizDefFactory.createTextInputQuestion(1, 1)
+        def quizDef = skillsService.createQuizDef(quiz).body
+        def questionDef = skillsService.createQuizQuestionDef(questions).body
+
+        when:
+        skillsService.getQuizTextInputAiGraderConfigs(quizDef.quizId, questionDef.id+1)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.resBody.contains("Did not find question with the provided id")
+    }
+
+    def "when saving configs question must be for the provided quizId"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
         def quizDef = skillsService.createQuizDef(quiz).body
@@ -154,6 +168,26 @@ class TextInputAIGraderConfigSpecs extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.getMessage().contains("Question's quiz id must match provided quiz id")
+    }
+
+    def "when retrieving configs question must be for the provided quizId"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        def questions = QuizDefFactory.createTextInputQuestion(1, 1)
+        def quizDef = skillsService.createQuizDef(quiz).body
+        def questionDef = skillsService.createQuizQuestionDef(questions).body
+        skillsService.saveQuizTextInputAiGraderConfigs(quizDef.quizId, questionDef.id, "correct", 62)
+
+        def quiz1 = QuizDefFactory.createQuiz(2)
+        def quizDef1 = skillsService.createQuizDef(quiz1).body
+        def quiz1_question = QuizDefFactory.createTextInputQuestion(2, 1)
+        def quiz1_questionDef = skillsService.createQuizQuestionDef(quiz1_question).body
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz1.quizId, quiz1_questionDef.id, "correct", 62)
+
+        when:
+        skillsService.getQuizTextInputAiGraderConfigs(quizDef.quizId, quiz1_questionDef.id)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.resBody.contains("Question's quiz id must match provided quiz id")
     }
 
     def "AI Grading and Video Settings can coexist - save grading after"() {

@@ -21,6 +21,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
@@ -955,6 +956,133 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         quizInfo_t0.slidesSummary.url != quizInfo.slidesSummary.url
         quizInfo2_t0.slidesSummary.url == quizInfo2.slidesSummary.url
+    }
+
+    def "copy quiz - text input ai grading config is copied"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        def questions = [
+                QuizDefFactory.createTextInputQuestion(1, 1),
+                QuizDefFactory.createTextInputQuestion(1, 2),
+                QuizDefFactory.createTextInputQuestion(1, 3)
+        ]
+        def quizDef = skillsService.createQuizDef(quiz).body
+        def questionDefs = questions.collect { skillsService.createQuizQuestionDef(it).body}
+        skillsService.saveQuizTextInputAiGraderConfigs(quizDef.quizId, questionDefs[0].id, "Correct answer", 62)
+        skillsService.saveQuizTextInputAiGraderConfigs(quizDef.quizId, questionDefs[2].id, "Ohter answer", 50)
+
+        def newQuiz = [quizId: 'newQuizId', name: 'Copy of Quiz', description: '', type: quiz.type]
+        when:
+        def copiedQuiz = skillsService.copyQuiz(quiz.quizId, newQuiz).body
+        def copiedQuestions = skillsService.getQuizQuestionDefs(copiedQuiz.quizId).questions
+        def aiGradingConf1_after = skillsService.getQuizTextInputAiGraderConfigs(copiedQuiz.quizId, copiedQuestions[0].id)
+        def aiGradingConf2_after = skillsService.getQuizTextInputAiGraderConfigs(copiedQuiz.quizId, copiedQuestions[1].id)
+        def aiGradingConf3_after = skillsService.getQuizTextInputAiGraderConfigs(copiedQuiz.quizId, copiedQuestions[2].id)
+
+        def orig1_after = skillsService.getQuizTextInputAiGraderConfigs(quizDef.quizId, questionDefs[0].id)
+        def orig2_after = skillsService.getQuizTextInputAiGraderConfigs(quizDef.quizId, questionDefs[1].id)
+        def orig3_after = skillsService.getQuizTextInputAiGraderConfigs(quizDef.quizId, questionDefs[2].id)
+
+        then:
+        aiGradingConf1_after.enabled == true
+        aiGradingConf1_after.correctAnswer == "Correct answer"
+        aiGradingConf1_after.minimumConfidenceLevel == 62
+
+        aiGradingConf2_after.enabled == false
+        aiGradingConf2_after.correctAnswer == null
+        aiGradingConf2_after.minimumConfidenceLevel == 75 // default
+
+        aiGradingConf3_after.enabled == true
+        aiGradingConf3_after.correctAnswer == "Ohter answer"
+        aiGradingConf3_after.minimumConfidenceLevel == 50
+
+        orig1_after.enabled == true
+        orig1_after.correctAnswer == "Correct answer"
+        orig1_after.minimumConfidenceLevel == 62
+
+        orig2_after.enabled == false
+        orig2_after.correctAnswer == null
+        orig2_after.minimumConfidenceLevel == 75 // default
+
+        orig3_after.enabled == true
+        orig3_after.correctAnswer == "Ohter answer"
+        orig3_after.minimumConfidenceLevel == 50
+    }
+
+    def "copy quiz - text input ai grading config and video configs are copied"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        def questions = [
+                QuizDefFactory.createTextInputQuestion(1, 1),
+                QuizDefFactory.createTextInputQuestion(1, 2),
+                QuizDefFactory.createTextInputQuestion(1, 3)
+        ]
+        def quizDef = skillsService.createQuizDef(quiz).body
+        def questionDefs = questions.collect { skillsService.createQuizQuestionDef(it).body}
+        skillsService.saveQuizTextInputAiGraderConfigs(quizDef.quizId, questionDefs[0].id, "Correct answer", 62)
+        skillsService.saveQuizTextInputAiGraderConfigs(quizDef.quizId, questionDefs[2].id, "Ohter answer", 50)
+
+        skillsService.saveSkillVideoAttributes(quizDef.quizId, questionDefs[0].id.toString(), [
+                videoUrl: "http://some.url",
+                transcript: "transcript",
+                captions: "captions",
+        ], true )
+
+        def newQuiz = [quizId: 'newQuizId', name: 'Copy of Quiz', description: '', type: quiz.type]
+        when:
+        def copiedQuiz = skillsService.copyQuiz(quiz.quizId, newQuiz).body
+        def copiedQuestions = skillsService.getQuizQuestionDefs(copiedQuiz.quizId).questions
+        def aiGradingConf1_after = skillsService.getQuizTextInputAiGraderConfigs(copiedQuiz.quizId, copiedQuestions[0].id)
+        def aiGradingConf2_after = skillsService.getQuizTextInputAiGraderConfigs(copiedQuiz.quizId, copiedQuestions[1].id)
+        def aiGradingConf3_after = skillsService.getQuizTextInputAiGraderConfigs(copiedQuiz.quizId, copiedQuestions[2].id)
+
+        def copiedVideoConf1 = skillsService.getSkillVideoAttributes(copiedQuiz.quizId, copiedQuestions[0].id.toString(), true)
+        boolean noQ2VidConf = false
+        boolean noQ3VidConf = false
+        try {
+            skillsService.getSkillVideoAttributes(copiedQuiz.quizId, copiedQuestions[1].id.toString(), true)
+        } catch (SkillsClientException sk) {
+            noQ2VidConf = true
+        }
+        try {
+            skillsService.getSkillVideoAttributes(copiedQuiz.quizId, copiedQuestions[2].id.toString(), true)
+        } catch (SkillsClientException sk) {
+            noQ3VidConf = true
+        }
+
+        def orig1_after = skillsService.getQuizTextInputAiGraderConfigs(quizDef.quizId, questionDefs[0].id)
+        def orig2_after = skillsService.getQuizTextInputAiGraderConfigs(quizDef.quizId, questionDefs[1].id)
+        def orig3_after = skillsService.getQuizTextInputAiGraderConfigs(quizDef.quizId, questionDefs[2].id)
+
+        then:
+        aiGradingConf1_after.enabled == true
+        aiGradingConf1_after.correctAnswer == "Correct answer"
+        aiGradingConf1_after.minimumConfidenceLevel == 62
+
+        aiGradingConf2_after.enabled == false
+        aiGradingConf2_after.correctAnswer == null
+        aiGradingConf2_after.minimumConfidenceLevel == 75 // default
+
+        aiGradingConf3_after.enabled == true
+        aiGradingConf3_after.correctAnswer == "Ohter answer"
+        aiGradingConf3_after.minimumConfidenceLevel == 50
+
+        orig1_after.enabled == true
+        orig1_after.correctAnswer == "Correct answer"
+        orig1_after.minimumConfidenceLevel == 62
+
+        orig2_after.enabled == false
+        orig2_after.correctAnswer == null
+        orig2_after.minimumConfidenceLevel == 75 // default
+
+        orig3_after.enabled == true
+        orig3_after.correctAnswer == "Ohter answer"
+        orig3_after.minimumConfidenceLevel == 50
+
+        copiedVideoConf1.videoUrl == "http://some.url"
+        copiedVideoConf1.captions == "captions"
+        copiedVideoConf1.transcript == "transcript"
+        copiedVideoConf1.isInternallyHosted == false
+        noQ2VidConf
+        noQ3VidConf
     }
 
     void runQuiz(String userId, def quiz, def quizInfo, boolean pass) {

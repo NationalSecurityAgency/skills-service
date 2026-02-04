@@ -41,19 +41,12 @@ class QuizAttributesService {
 
     @Transactional
     TextInputAiGradingAttrs saveTextInputAiGradingAttrs(String quizId, Integer questionId, TextInputAiGradingConfRequest gradingConfRequest) {
-        QuizValidator.isNotBlank(quizId, "Quiz Id")
-        QuizValidator.isNotNull(questionId, "Question Id")
+        validateTextInputAiGradingInput(quizId, questionId)
         QuizValidator.isNotNull(gradingConfRequest, "Grading Configuration")
         QuizValidator.isNotNull(gradingConfRequest.enabled, "Enabled")
         QuizValidator.isNotNull(gradingConfRequest.correctAnswer, "Correct Answer")
         QuizValidator.isNotNull(gradingConfRequest.minimumConfidenceLevel, "Minimum Confidence Level")
         QuizValidator.isTrue(gradingConfRequest.minimumConfidenceLevel > 0 && gradingConfRequest.minimumConfidenceLevel <= 100, "Minimum Confidence Level must be > 0 and <= 100")
-
-        Optional<QuizQuestionDef> questionDefOptional = quizQuestionRepo.findById(questionId)
-        QuizValidator.isTrue(questionDefOptional.isPresent(), "Did not find question with the provided id")
-        QuizQuestionDef questionDef = questionDefOptional.get()
-        QuizValidator.isTrue(questionDef.type == QuizQuestionType.TextInput, "Only TextInput type is supported")
-        QuizValidator.isTrue(questionDef.quizId == quizId, "Question's quiz id must match provided quiz id")
 
         TextInputAiGradingAttrs textInputAiGradingAttrs = new TextInputAiGradingAttrs(
                 enabled: gradingConfRequest.enabled,
@@ -67,14 +60,24 @@ class QuizAttributesService {
 
     @Transactional
     TextInputAiGradingAttrs getTextInputAiGradingAttrs(String quizId, Integer questionId) {
-        QuizValidator.isNotBlank(quizId, "Quiz Id")
-        QuizValidator.isNotNull(questionId, "Question Id")
+        validateTextInputAiGradingInput(quizId, questionId)
 
         String strAttrs = quizQuestionRepo.getTextInputAiGradingAttrs(quizId, questionId)
         TextInputAiGradingAttrs res = strAttrs ?
                 mapper.readValue(strAttrs, TextInputAiGradingAttrs.class) :
                 new TextInputAiGradingAttrs(enabled: false, minimumConfidenceLevel: minimumConfidenceLevel)
         return res
+    }
+
+    private void validateTextInputAiGradingInput(String quizId, Integer questionId) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id")
+        QuizValidator.isNotNull(questionId, "Question Id")
+
+        Optional<QuizQuestionDef> questionDefOptional = quizQuestionRepo.findById(questionId)
+        QuizValidator.isTrue(questionDefOptional.isPresent(), "Did not find question with the provided id")
+        QuizQuestionDef questionDef = questionDefOptional.get()
+        QuizValidator.isTrue(questionDef.type == QuizQuestionType.TextInput, "Only TextInput type is supported")
+        QuizValidator.isTrue(questionDef.quizId == quizId, "Question's quiz id must match provided quiz id")
     }
 
 }
