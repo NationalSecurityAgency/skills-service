@@ -18,11 +18,9 @@ package skills.storage.repos
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
-import org.springframework.lang.Nullable
-import skills.services.attributes.SkillVideoAttrs
-import skills.storage.model.QuizDefWithDescription
-import skills.storage.model.QuizQuestionDef
 import org.springframework.data.repository.query.Param
+import org.springframework.lang.Nullable
+import skills.storage.model.QuizQuestionDef
 
 import java.util.stream.Stream
 
@@ -68,7 +66,9 @@ interface QuizQuestionDefRepo extends JpaRepository<QuizQuestionDef, Long> {
     void saveVideoAttributes(@Param("quizId") String quizId, @Param("questionId") Integer questionId, @Param("attrs") String attrs)
 
     @Modifying
-    @Query('''update QuizQuestionDef set attributes = null where quizId = ?1 and id = ?2''')
+    @Query(value='''update quiz_question_definition 
+                        set attributes = jsonb_set(attributes, '{videoConf}', 'null'::jsonb, false)
+                        where quiz_id = ?1 and id = ?2 and attributes is not null''', nativeQuery = true)
     void deleteVideoAttrs(String quizId, Integer questionId)
 
 

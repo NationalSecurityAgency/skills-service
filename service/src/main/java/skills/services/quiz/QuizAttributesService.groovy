@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.QuizValidator
 import skills.controller.request.model.TextInputAiGradingConfRequest
 import skills.services.attributes.TextInputAiGradingAttrs
+import skills.storage.model.QuizQuestionDef
 import skills.storage.repos.QuizQuestionDefRepo
 
 @Service
@@ -43,10 +44,16 @@ class QuizAttributesService {
         QuizValidator.isNotBlank(quizId, "Quiz Id")
         QuizValidator.isNotNull(questionId, "Question Id")
         QuizValidator.isNotNull(gradingConfRequest, "Grading Configuration")
-        QuizValidator.isNotNull(gradingConfRequest.enabled, "Enabled must be provided")
-        QuizValidator.isNotNull(gradingConfRequest.correctAnswer, "Correct Answer must be provided")
-        QuizValidator.isNotNull(gradingConfRequest.minimumConfidenceLevel, "Minimum Confidence Level must be provided")
+        QuizValidator.isNotNull(gradingConfRequest.enabled, "Enabled")
+        QuizValidator.isNotNull(gradingConfRequest.correctAnswer, "Correct Answer")
+        QuizValidator.isNotNull(gradingConfRequest.minimumConfidenceLevel, "Minimum Confidence Level")
+        QuizValidator.isTrue(gradingConfRequest.minimumConfidenceLevel > 0 && gradingConfRequest.minimumConfidenceLevel <= 100, "Minimum Confidence Level must be > 0 and <= 100")
 
+        Optional<QuizQuestionDef> questionDefOptional = quizQuestionRepo.findById(questionId)
+        QuizValidator.isTrue(questionDefOptional.isPresent(), "Did not find question with the provided id")
+        QuizQuestionDef questionDef = questionDefOptional.get()
+        QuizValidator.isTrue(questionDef.type == QuizQuestionType.TextInput, "Only TextInput type is supported")
+        QuizValidator.isTrue(questionDef.quizId == quizId, "Question's quiz id must match provided quiz id")
 
         TextInputAiGradingAttrs textInputAiGradingAttrs = new TextInputAiGradingAttrs(
                 enabled: gradingConfRequest.enabled,
