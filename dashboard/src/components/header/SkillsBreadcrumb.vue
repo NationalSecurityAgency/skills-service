@@ -32,7 +32,7 @@ const smallScreenMode = computed(() => responsive.sm.value)
 const skillsDisplayInfo = useSkillsDisplayInfo()
 
 const idsToExcludeFromPath = ['subjects', 'skills', 'projects', 'crossProject', 'dependency', 'global']
-const keysToExcludeFromPath = []
+const keysToExcludeFromPath = ['questions']
 
 const build = () => {
   handleCustomLabels().then(() => {

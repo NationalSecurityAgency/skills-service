@@ -28,8 +28,10 @@ import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
 import SkillsNumberInput from "@/components/utils/inputForm/SkillsNumberInput.vue";
 import ThinkingIndicator from "@/common-components/utilities/learning-conent-gen/ThinkingIndicator.vue";
 import AiConfidenceTag from "@/components/quiz/testCreation/AiConfidenceTag.vue";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
 const route = useRoute();
+const appConfig = useAppConfig()
 
 const question = ref(null)
 const savingSettings = ref(false)
@@ -41,6 +43,7 @@ const schema = yup.object().shape({
   'answerUsedForGrading': string()
       .trim()
       .required()
+      .max(appConfig.maxTextInputAiGradingCorrectAnswerLength)
       .label('Answer Used for Grading'),
   'minimumConfidenceLevel': number()
       .required()
@@ -131,22 +134,22 @@ const testAnAnswer = () => {
   <div>
     <SubPageHeader title="Configure AI Grader">
       <router-link :to="{ name: 'Questions' }" v-if="route.params.quizId" tabindex="-1">
-        <SkillsButton size="small" icon="fas fa-arrow-alt-circle-left" label="Back"/>
+        <SkillsButton size="small" icon="fas fa-arrow-alt-circle-left" label="Back" data-cy="backToQuestionsPage"/>
       </router-link>
     </SubPageHeader>
     <Card>
       <template #content>
         <skills-spinner :is-loading="initDataLoading"/>
         <div class="flex items-center gap-2 mb-2">
-          <Checkbox id="enabledCheckbox" v-model="graderEnabled" binary/>
+          <Checkbox id="enabledCheckbox" v-model="graderEnabled" binary data-cy="aiGraderEnabled"/>
           <label for="enabledCheckbox">AI Grader Enabled</label>
         </div>
         <div v-if="!initDataLoading">
-          <BlockUI :blocked="!graderEnabled" class="p-2">
-            <div class="flex flex-col gap-3">
+          <BlockUI :blocked="!graderEnabled" class="p-2 flex flex-col gap-2">
+            <div class="flex flex-col gap-4">
               <div class="flex flex-col gap-1">
-                <label for="questionTxt">Question:</label>
-                <div class="border rounded py-2 px-4">
+                <label for="questionTxt" class="font-bold">Question:</label>
+                <div class="border-2 border-dashed rounded py-2 px-4">
                   <markdown-text id="questionTxt" :text="question.question"/>
                 </div>
               </div>
@@ -156,10 +159,10 @@ const testAnAnswer = () => {
                   id="answerUsedForGradingInput"
                   placeholder="Enter an answer that will be use for grading"
                   aria-label="Answer key"
-                  rows="6"
-                  max-rows="6"
+                  rows="4"
+                  max-rows="10"
                   name="answerUsedForGrading"
-                  data-cy="videoCaptions"
+                  data-cy="answerForGrading"
               />
             </div>
 
@@ -184,7 +187,7 @@ const testAnAnswer = () => {
                 :disabled="!meta.valid"
                 icon="fa-solid fa-save"
                 label="Save Changes"/>
-            <InlineMessage v-if="showSavedMsg" aria-hidden="true" data-cy="savedMsg" severity="success" size="small"
+            <InlineMessage v-if="showSavedMsg" aria-hidden="true" data-cy="settingsSavedMsg" severity="success" size="small"
                            icon="fas fa-check">Settings Saved
             </InlineMessage>
           </div>

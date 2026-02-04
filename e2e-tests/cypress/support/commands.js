@@ -262,6 +262,15 @@ Cypress.Commands.add("saveVideoAttrs", (container, item, videoAttrs, quiz = fals
     });
 });
 
+Cypress.Commands.add("saveQuizTextInputAiGraderConfigs", (quizId, questionIdAsInt, correctAnswer, minimumConfidenceLevel, enabled = true) => {
+    const url = `/admin/quiz-definitions/quiz${quizId}/questions/${questionIdAsInt}/textInputAiGradingConf`
+    cy.request('POST', url, {
+        enabled,
+        correctAnswer,
+        minimumConfidenceLevel,
+    });
+})
+
 
 Cypress.Commands.add("saveSlidesAttrs", (container, item, slidesAttrs, quiz = false) => {
     const url = quiz ? `/admin/quiz-definitions/quiz${container}/slides` : `/admin/projects/proj${container}/skills/skill${item}/slides`;

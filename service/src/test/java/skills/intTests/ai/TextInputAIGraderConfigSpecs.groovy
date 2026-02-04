@@ -67,6 +67,22 @@ class TextInputAIGraderConfigSpecs extends DefaultIntSpec {
         e.getMessage().contains("Correct Answer was not provided")
     }
 
+    def "correct answer must be not exceed max configure max length when saving AI grading configs"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        def questions = QuizDefFactory.createTextInputQuestion(1, 1)
+        def quizDef = skillsService.createQuizDef(quiz).body
+        def questionDef = skillsService.createQuizQuestionDef(questions).body
+
+        String correctAnswerValid = "x".repeat(10000)
+        skillsService.saveQuizTextInputAiGraderConfigs(quizDef.quizId, questionDef.id, correctAnswerValid, 62)
+        when:
+        skillsService.saveQuizTextInputAiGraderConfigs(quizDef.quizId, questionDef.id, correctAnswerValid + "a", 62)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Correct Answer must not exceed [10000] characters")
+    }
+
     def "min confidence level must be provided when saving AI grading configs"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)

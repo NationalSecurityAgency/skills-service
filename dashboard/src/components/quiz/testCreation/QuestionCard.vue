@@ -78,6 +78,7 @@ const mediaAttributes = computed(() => {
   }
   return media
 })
+const textInputAiGraderConfigured = computed(() =>  appConfig.enableOpenAIIntegration && props.question.attributes?.textInputAiGradingConf?.enabled === true)
 const editQuestion = () => {
   emit('editQuestion', props.question)
 }
@@ -137,8 +138,19 @@ const questionUpdated = (updatedQuestionText) => {
                          :instance-id="`${question.id}`"
                          data-cy="questionDisplayText"/>
         </div>
-        <div v-if="mediaAttributes" class="mb-3">
-          <i :class="`far ${mediaAttributes.isAudio ? 'fa-file-audio' : 'fa-file-video'} fa-lg text-primary`"></i> <span class="font-bold">{{ mediaAttributes.internallyHostedFileName }}</span> is configured
+        <div class="flex flex-col gap-2 mb-3">
+          <div v-if="mediaAttributes" class="flex gap-2 items-center">
+            <div class="border rounded py-1 bg-slate-600! text-orange-300! w-[2.5rem] text-center" data-cy="questionHasVideoOrAudio">
+              <i :class="`${mediaAttributes.isAudio ? 'fa-solid fa-volume-high' : 'fa-solid fa-film'}`" aria-hidden="true" />
+            </div>
+            <span class="uppercase " aria-label="Video is configured for this question">{{ mediaAttributes.isAudio ? 'Audio' : 'Video' }}</span>
+          </div>
+          <div v-if="textInputAiGraderConfigured" class="flex gap-2 items-center" data-cy="questionAiGraded">
+            <div class="border rounded-2xl py-1 bg-indigo-600! text-purple-100! w-[2.5rem] text-center">
+              <i class="fa-solid fa-robot" aria-hidden="true"></i>
+            </div>
+            <span class="" aria-label="This question is graded by AI">Graded via AI</span>
+          </div>
         </div>
         <div v-if="!isTextInputType && !isRatingType && !isMatchingType">
           <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
