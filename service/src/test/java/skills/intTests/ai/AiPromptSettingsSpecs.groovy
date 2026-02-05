@@ -56,6 +56,8 @@ class AiPromptSettingsSpecs extends DefaultIntSpec {
     }
     
     def "root user can call call ai prompt settings endpoints"() {
+        when: true
+        then:
         !validateForbidden { rootSkillsService.getAiPromptSettings() }
         !validateForbidden { rootSkillsService.getDefaultAiPromptSetting(AiPromptSettingsService.newSkillDescriptionInstructions) }
         !validateForbidden { rootSkillsService.saveAiPromptSettings([
@@ -64,9 +66,11 @@ class AiPromptSettingsSpecs extends DefaultIntSpec {
     }
 
     def "non-root user can only call get ai prompt settings endpoints"() {
-        !validateForbidden { rootSkillsService.getAiPromptSettings() }
-        validateForbidden { rootSkillsService.getDefaultAiPromptSetting(AiPromptSettingsService.newSkillDescriptionInstructions) }
-        validateForbidden { rootSkillsService.saveAiPromptSettings([
+        when: true
+        then:
+        !validateForbidden { skillsService.getAiPromptSettings() }
+        validateForbidden { skillsService.getDefaultAiPromptSetting(AiPromptSettingsService.newSkillDescriptionInstructions) }
+        validateForbidden { skillsService.saveAiPromptSettings([
                 [setting: AiPromptSettingsService.systemInstructions, value: "This is an updated systemMsg 2", settingGroup: AiPromptSettingsService.settingsGroup]
         ])}
     }

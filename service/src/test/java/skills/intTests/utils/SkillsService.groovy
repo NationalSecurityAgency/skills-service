@@ -1518,7 +1518,7 @@ class SkillsService {
     }
 
     def getDefaultAiPromptSetting(String setting) {
-        return wsHelper.rootGet("/getDefaultAiPromptSettings/default/${setting}")
+        return wsHelper.rootGet("/getAiPromptSettings/default/${setting}")
     }
 
     def saveEmailSettings(String host, String protocol, Integer port, boolean tlsEnabled, boolean authEnabled, String username, String password) {
