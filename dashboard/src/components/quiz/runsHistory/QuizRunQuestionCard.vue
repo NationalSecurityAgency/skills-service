@@ -71,6 +71,11 @@ const manuallyGradedInfo = computed(() => {
   }
   return props.question.answers[0].gradingResult
 })
+const isAiGraded = computed(() => {
+  const aiAssistant = 'AI Assistant'
+  const gradeInfo = manuallyGradedInfo.value
+  return gradeInfo?.graderUserIdForDisplay === aiAssistant || gradeInfo?.graderUserId === aiAssistant
+})
 </script>
 
 <template>
@@ -149,8 +154,18 @@ const manuallyGradedInfo = computed(() => {
               </ul>
             </div>
           </div>
-          <div v-if="manuallyGradedInfo" class="mt-4 w-full border p-4 rounded-border border-surface" data-cy="manuallyGradedInfo">
-            <div class="text-xl mb-4 font-semibold">Manually Graded</div>
+          <div v-if="manuallyGradedInfo" class="mt-4 w-full border p-4 rounded-border border-surface sd-theme-primary-color" data-cy="manuallyGradedInfo">
+
+            <div class="text-xl mb-4 font-semibold">
+              <div v-if="isAiGraded" class="flex gap-2">
+                <Avatar icon="fa-solid fa-wand-magic-sparkles" shape="circle" class="bg-indigo-600! text-purple-100!" aria-hidden="true"/>
+                <div>AI Graded</div>
+              </div>
+              <div v-else class="flex gap-2">
+                <Avatar icon="fa-solid fa-pen-to-square" shape="circle" class="bg-teal-600! text-teal-100!" aria-hidden="true"/>
+                <div>Manually Graded</div>
+              </div>
+            </div>
 
             <div class="flex gap-4">
               <div class="flex-1" data-cy="grader">Grader:

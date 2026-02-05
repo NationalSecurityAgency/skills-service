@@ -23,6 +23,7 @@ import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 import QuizType from "@/skills-display/components/quiz/QuizType.js";
 import QuizSingleRunCard from "@/components/quiz/runsHistory/QuizSingleRunCard.vue";
+import QuizCompletedMessage from "@/skills-display/components/quiz/QuizCompletedMessage.vue";
 
 const props = defineProps({
   runInfo: Object,
@@ -113,10 +114,7 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
         <QuizRunQuestionCard :question="q" :question-num="q.questionNum" :quiz-type="runInfo.quizType"/>
       </div>
     </div>
-    <Message v-if="QuizStatus.isNeedsGrading(runInfo.status)" :closable="false" severity="warn" icon="fas fa-user-clock" data-cy="quizRequiresGradingMsg">
-      <div>You completed the quiz but it <b>requires grading</b>.</div>
-      <div class="mt-2">It will be assessed by a quiz administrator, so there is nothing to do but wait for the grades to roll in!</div>
-    </Message>
+    <quiz-completed-message v-if="QuizStatus.isNeedsGrading(runInfo.status)" />
     <Message v-if="!runInfo.questions && QuizStatus.isFailed(runInfo.status)" severity="warn" :closable="false" data-cy="allQuestionsNotDisplayedMsg">
       Questions and answers are not displayed so not to give away the correct answers.
     </Message>

@@ -18,6 +18,7 @@ import { computed } from 'vue'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue';
 import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
+import QuizCompletedMessage from "@/skills-display/components/quiz/QuizCompletedMessage.vue";
 
 const props = defineProps({
   quizInfo: Object,
@@ -155,10 +156,7 @@ const start = () => {
         <Message v-if="!quizInfo.canStartQuiz && quizInfo.errorMessage" severity="error" :closable="false" data-cy="cantStartQuiz">
           {{ quizInfo.errorMessage }}
         </Message>
-        <Message v-if="needsGrading" :closable="false" severity="warn" icon="fas fa-user-clock" data-cy="quizRequiresGradingMsg">
-          <div>You completed the quiz on <Tag>{{ timeUtils.formatDate(quizInfo.needsGradingAttemptDate) }}</Tag> but it <b>requires grading</b>.</div>
-          <div class="mt-2">It will be assessed by a quiz administrator, so there is nothing to do but wait for the grades to roll in!</div>
-        </Message>
+        <quiz-completed-message v-if="needsGrading" :attempt-timestamp="quizInfo.needsGradingAttemptDate" />
 
         <p v-if="quizInfo.description && !allAttemptsExhausted" class="mt-8" data-cy="quizDescription">
           <MarkdownText :text="quizInfo.description" />
