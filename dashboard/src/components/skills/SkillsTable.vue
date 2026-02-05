@@ -51,7 +51,6 @@ import { useFocusState } from '@/stores/UseFocusState.js'
 import skillsService from '@/components/skills/SkillsService.js';
 import CopySubjectOrSkillsDialog from "@/components/subjects/CopySubjectOrSkillsDialog.vue";
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
-import SkillBadgesAndTags from "@/skills-display/components/progress/skill/SkillBadgesAndTags.vue";
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
