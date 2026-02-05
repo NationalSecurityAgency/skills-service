@@ -45,7 +45,7 @@ describe('Run Quizzes With Text Input Questions', () => {
 
         cy.clickCompleteQuizBtn()
 
-        cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
+        cy.get('[data-cy="quizRequiresGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
     });
@@ -72,7 +72,7 @@ describe('Run Quizzes With Text Input Questions', () => {
 
         cy.clickCompleteQuizBtn()
 
-        cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
+        cy.get('[data-cy="quizRequiresGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
     });
@@ -103,7 +103,7 @@ describe('Run Quizzes With Text Input Questions', () => {
 
         cy.clickCompleteQuizBtn()
 
-        cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
+        cy.get('[data-cy="quizRequiresGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
 
@@ -132,7 +132,7 @@ describe('Run Quizzes With Text Input Questions', () => {
 
         cy.clickCompleteQuizBtn()
 
-        cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
+        cy.get('[data-cy="quizRequiresGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
 
@@ -224,7 +224,7 @@ describe('Run Quizzes With Text Input Questions', () => {
 
         cy.clickCompleteQuizBtn()
 
-        cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
+        cy.get('[data-cy="quizRequiresGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
     });
@@ -259,7 +259,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').should('not.be.visible')
         cy.clickCompleteQuizBtn()
 
-        cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
+        cy.get('[data-cy="quizRequiresGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
     });
@@ -290,7 +290,7 @@ describe('Run Quizzes With Text Input Questions', () => {
         cy.get('[data-cy="question_1"] [data-cy="descriptionError"]').should('not.be.visible')
         cy.clickCompleteQuizBtn()
 
-        cy.get('[data-cy="requiresManualGradingMsg"]').should( 'exist' )
+        cy.get('[data-cy="quizRequiresGradingMsg"]').should( 'exist' )
         cy.get('[data-cy="quizCompletion"]').should( 'not.contain', 'Congrats!!')
         cy.get('[data-cy="numAttemptsInfoCard"]').should('not.exist')
     });
