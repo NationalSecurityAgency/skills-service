@@ -157,11 +157,11 @@ const isAiGraded = computed(() => {
           <div v-if="manuallyGradedInfo" class="mt-4 w-full border p-4 rounded-border border-surface sd-theme-primary-color" data-cy="manuallyGradedInfo">
 
             <div class="text-xl mb-4 font-semibold">
-              <div v-if="isAiGraded" class="flex gap-2">
+              <div v-if="isAiGraded" class="flex gap-2" data-cy="aiGraded">
                 <Avatar icon="fa-solid fa-wand-magic-sparkles" shape="circle" class="bg-indigo-600! text-purple-100!" aria-hidden="true"/>
                 <div>AI Graded</div>
               </div>
-              <div v-else class="flex gap-2">
+              <div v-else class="flex gap-2" data-cy="adminGraded">
                 <Avatar icon="fa-solid fa-pen-to-square" shape="circle" class="bg-teal-600! text-teal-100!" aria-hidden="true"/>
                 <div>Manually Graded</div>
               </div>

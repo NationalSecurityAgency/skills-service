@@ -496,7 +496,7 @@ Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAtt
 
 Cypress.Commands.add('runQuizForTheCurrentUser', (quizNum = 1, quizAttemptInfo, userAnswerTxt = null) => {
     const userId = Cypress.env('proxyUser')
-    cy.runQuiz(quizNum, userId, quizAttemptInfo)
+    cy.runQuiz(quizNum, userId, quizAttemptInfo, true, userAnswerTxt)
 });
 
 Cypress.Commands.add('gradeQuizAttempt', (quizNum = 1, isCorrect = true, feedback='Good answer', quizFinalResult = null) => {
