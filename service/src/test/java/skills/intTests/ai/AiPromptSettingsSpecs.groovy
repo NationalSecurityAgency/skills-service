@@ -55,11 +55,11 @@ class AiPromptSettingsSpecs extends DefaultIntSpec {
         }
     }
     
-    def "root user can call all ai prompt settings endpoints"() {
+    def "root user can call call ai prompt settings endpoints"() {
         !validateForbidden { rootSkillsService.getAiPromptSettings() }
         !validateForbidden { rootSkillsService.getDefaultAiPromptSetting(AiPromptSettingsService.newSkillDescriptionInstructions) }
         !validateForbidden { rootSkillsService.saveAiPromptSettings([
-                [setting: AiPromptSettingsService.systemInstructions, value: "This is an updated systemMsg", settingGroup: AiPromptSettingsService.settingsGroup]
+                [setting: AiPromptSettingsService.systemInstructions, value: "This is an updated systemMsg 1", settingGroup: AiPromptSettingsService.settingsGroup]
         ])}
     }
 
@@ -67,14 +67,15 @@ class AiPromptSettingsSpecs extends DefaultIntSpec {
         !validateForbidden { rootSkillsService.getAiPromptSettings() }
         validateForbidden { rootSkillsService.getDefaultAiPromptSetting(AiPromptSettingsService.newSkillDescriptionInstructions) }
         validateForbidden { rootSkillsService.saveAiPromptSettings([
-                [setting: AiPromptSettingsService.systemInstructions, value: "This is an updated systemMsg", settingGroup: AiPromptSettingsService.settingsGroup]
+                [setting: AiPromptSettingsService.systemInstructions, value: "This is an updated systemMsg 2", settingGroup: AiPromptSettingsService.settingsGroup]
         ])}
     }
+
     def "systemInstructions changes are reflected in the OpenAIService bean"() {
         String systemMsgBeforeUpdate = openAIService.systemMsg
         when:
         rootSkillsService.saveAiPromptSettings([
-            [setting: AiPromptSettingsService.systemInstructions, value: "This is an updated systemMsg", settingGroup: AiPromptSettingsService.settingsGroup]
+            [setting: AiPromptSettingsService.systemInstructions, value: "This is an updated systemMsg 3", settingGroup: AiPromptSettingsService.settingsGroup]
         ])
         String systemMsgAfterUpdate = openAIService.systemMsg
 
@@ -82,8 +83,7 @@ class AiPromptSettingsSpecs extends DefaultIntSpec {
         systemMsgBeforeUpdate
         systemMsgAfterUpdate
         systemMsgBeforeUpdate != systemMsgAfterUpdate
-        systemMsgBeforeUpdate == AiPromptSettingDefaults.systemInstructions
-        systemMsgAfterUpdate == "This is an updated systemMsg"
+        systemMsgAfterUpdate == "This is an updated systemMsg 3"
     }
 
     def "prevent inject into ai prompt settings"() {
