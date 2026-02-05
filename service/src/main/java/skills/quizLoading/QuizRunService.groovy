@@ -694,6 +694,7 @@ class QuizRunService {
         if (quizDef.type != QuizDefParent.QuizType.Quiz) {
             throw new SkillQuizException("Provided quizId [${quizId}] is not a quiz", ErrorCode.BadParam)
         }
+        lockingService.lockUserQuizAttempt(quizAttemptId)
         UserQuizAttempt userQuizAttempt = getQuizAttempt(quizAttemptId)
         validateAttempt(userQuizAttempt, quizDef, quizAttemptId, quizId, userId)
 
