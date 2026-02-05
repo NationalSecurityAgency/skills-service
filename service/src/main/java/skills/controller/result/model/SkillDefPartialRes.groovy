@@ -18,6 +18,7 @@ package skills.controller.result.model
 import jakarta.persistence.Convert
 import skills.storage.converters.BooleanConverter
 import skills.storage.model.QuizDefParent
+import skills.storage.model.SimpleBadgeRes
 import skills.storage.model.SkillDef
 
 class SkillDefPartialRes extends SkillDefSkinnyRes{
@@ -71,4 +72,6 @@ class SkillDefPartialRes extends SkillDefSkinnyRes{
     Date nextExpirationDate
 
     String iconClass
+
+    List<SimpleBadgeRes> badges
 }

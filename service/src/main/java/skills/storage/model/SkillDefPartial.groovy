@@ -33,4 +33,5 @@ interface SkillDefPartial extends SkillDefSkinny {
     String getQuizId()
     String getQuizName()
     QuizDefParent.QuizType getQuizType()
+    Boolean getHasBadges()
 }

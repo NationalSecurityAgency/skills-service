@@ -204,7 +204,8 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         qDef.quizId as quizId,
         qDef.type as quizType,
         qDef.name as quizName,
-        case when es is not null then true else false end as sharedToCatalog
+        case when es is not null then true else false end as sharedToCatalog,
+        exists (select badgeSrd.parent.name from SkillRelDef badgeSrd where badgeSrd.type = 'BadgeRequirement' and sd2.id = badgeSrd.child.id) as hasBadges
     from SkillRelDef srd
         join SkillDef sd1 on sd1.id = srd.parent.id
         join SkillDef sd2 on sd2.id = srd.child.id

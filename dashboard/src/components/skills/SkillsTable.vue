@@ -51,6 +51,7 @@ import { useFocusState } from '@/stores/UseFocusState.js'
 import skillsService from '@/components/skills/SkillsService.js';
 import CopySubjectOrSkillsDialog from "@/components/subjects/CopySubjectOrSkillsDialog.vue";
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import SkillBadgesAndTags from "@/skills-display/components/progress/skill/SkillBadgesAndTags.vue";
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -681,7 +682,7 @@ const pageChanged = (pagingInfo) => {
                                      :read-only="projConfig.isReadOnlyProj || slotProps.data.isCatalogImportedSkills"
                 />
               </div>
-              <div class="flex flex-wrap gap-1">
+              <div class="flex flex-wrap gap-2 items-center">
                 <Tag
                   v-if="slotProps.data.isCatalogImportedSkills"
                   severity="success"
@@ -713,6 +714,14 @@ const pageChanged = (pagingInfo) => {
                       class="fas fa-tag text-sm" aria-hidden="true"/></span>
                         <span class="font-medium pr-3">{{ tag.tagValue }}</span>
                 </Chip>
+              </div>
+              <div v-if="slotProps.data.badges && slotProps.data.badges.length > 0" class="mt-2">
+                <i class="fa fa-award text-purple-500" aria-hidden="true"></i> Badges:
+                <router-link v-for="badge in slotProps.data.badges" :key="badge.id"
+                             :to="{ name: badge.skillType === 'GlobalBadge' ? 'GlobalBadgeSkills' : 'BadgeSkills', params: { badgeId: badge.badgeId, projectId: projectId } }"
+                             class="skills-theme-primary-color mr-2" style="text-decoration:underline;">
+                  {{ badge.name }}
+                </router-link>
               </div>
             </div>
             <div class="flex items-start justify-end">

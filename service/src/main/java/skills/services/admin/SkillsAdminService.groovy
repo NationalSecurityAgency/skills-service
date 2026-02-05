@@ -862,6 +862,11 @@ class SkillsAdminService {
     SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadTags = false, boolean loadNumUsers = false) {
         boolean reusedSkill = SkillReuseIdUtil.isTagged(partial.skillId)
         String unsanitizeName = InputSanitizer.unsanitizeName(partial.name)
+        List<SimpleBadgeRes> badges = []
+        if(partial.hasBadges) {
+            badges = skillDefRepo.findAllBadgesForSkill([partial.skillId], partial.projectId)
+        }
+
         SkillDefPartialRes res = new SkillDefPartialRes(
                 skillId: partial.skillId,
                 projectId: partial.projectId,
@@ -892,6 +897,7 @@ class SkillsAdminService {
                 quizName: partial.getQuizName(),
                 quizType: partial.getQuizType(),
                 iconClass: partial.iconClass,
+                badges: badges,
         )
 
         if (partial.skillType == SkillDef.ContainerType.Skill) {
@@ -909,6 +915,8 @@ class SkillsAdminService {
                 res.tags.push(new SkillTagRes(tagId: tag.tagId, tagValue: tag.tagValue))
             }
         }
+
+
 
         if (partial.skillType == SkillDef.ContainerType.SkillsGroup) {
             List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(partial.getId())
