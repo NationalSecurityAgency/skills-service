@@ -31,7 +31,7 @@ const confidence = computed(() => {
 </script>
 
 <template>
-<Tag :severity="confidence.severity">{{ confidence.level }}</Tag>
+<Tag :severity="confidence.severity" data-cy="aiConfidenceTag">{{ confidence.level }}</Tag>
 </template>
 
 <style scoped>

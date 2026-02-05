@@ -110,7 +110,9 @@ const saveSettings = () => {
 
 const loadingTestAnswer = ref(false)
 const testAnswerRes = ref(null)
+const failedToTestAnAnswer = ref(false)
 const testAnAnswer = () => {
+  failedToTestAnAnswer.value = false
   validate().then(({valid}) => {
     if (!valid) {
       overallErrMsg.value = 'Form did NOT pass validation, please fix and try to Save again';
@@ -122,7 +124,10 @@ const testAnAnswer = () => {
       QuizService.testTextInputAiGrading(route.params.quizId, route.params.questionId, correctAnswer, minimumConfidenceLevel, answerToTest)
           .then((res) => {
             testAnswerRes.value = {...res, minimumConfidenceLevel}
-          }).finally(() => {
+          }).catch(() => {
+        failedToTestAnAnswer.value = true
+        testAnswerRes.value = null
+      }).finally(() => {
         loadingTestAnswer.value = false
       })
     }
@@ -140,11 +145,14 @@ const testAnAnswer = () => {
     <Card>
       <template #content>
         <skills-spinner :is-loading="initDataLoading"/>
-        <div class="flex items-center gap-2 mb-2">
-          <Checkbox id="enabledCheckbox" v-model="graderEnabled" binary data-cy="aiGraderEnabled"/>
-          <label for="enabledCheckbox">AI Grader Enabled</label>
-        </div>
-        <div v-if="!initDataLoading">
+        <Message v-if="!appConfig.enableOpenAIIntegration" severity="warn" :closable="false" data-cy="aiNotEnabled">
+          AI Integration is not enabled
+        </Message>
+        <div v-if="!initDataLoading && appConfig.enableOpenAIIntegration">
+          <div class="flex items-center gap-2 mb-2">
+            <Checkbox id="enabledCheckbox" v-model="graderEnabled" binary data-cy="aiGraderEnabled"/>
+            <label for="enabledCheckbox">AI Grader Enabled</label>
+          </div>
           <BlockUI :blocked="!graderEnabled" class="p-2 flex flex-col gap-2">
             <div class="flex flex-col gap-4">
               <div class="flex flex-col gap-1">
@@ -171,6 +179,7 @@ const testAnAnswer = () => {
                 <SkillsNumberInput
                     name="minimumConfidenceLevel"
                     label="Minimum Correct Confidence %"
+                    data-cy="minConfidenceLevelInput"
                 />
               </div>
             </div>
@@ -228,25 +237,26 @@ const testAnAnswer = () => {
                 </div>
               </div>
 
+              <Message v-if="failedToTestAnAnswer" severity="error" data-cy="gradingFailedMsg">The AI grading service is temporarily unavailable. Please try again later.</Message>
               <BlockUI v-if="testAnswerRes" :blocked="loadingTestAnswer">
                 <div class="mt-5 flex flex-col gap-3">
                   <div class="text-xl font-bold mb-1 border-b-2">Results:</div>
                   <div class="flex gap-3 items-center">
                     <div><span>Answer is: </span>
-                      <Tag v-if="testAnswerRes.confidenceLevel >= testAnswerRes.minimumConfidenceLevel">CORRECT</Tag>
-                      <Tag v-else severity="warn">WRONG</Tag>
+                      <Tag v-if="testAnswerRes.confidenceLevel >= testAnswerRes.minimumConfidenceLevel" data-cy="gradeResCorrect">CORRECT</Tag>
+                      <Tag v-else severity="warn" data-cy="gradeResWrong">WRONG</Tag>
                     </div>
                     <div>|</div>
                     <div class="flex gap-2 items-center"><span>AI Confidence Level:</span>
                       <div class="flex gap-2 items-center">
-                        <span class="font-bold">{{ testAnswerRes.confidenceLevel }}%</span>
+                        <span class="font-bold" data-cy="gradeResConfidence">{{ testAnswerRes.confidenceLevel }}%</span>
                         <ai-confidence-tag :confidence-percent="testAnswerRes.confidenceLevel" />
                       </div>
                     </div>
                   </div>
                   <div class="flex flex-col gap-2">
                     <label>AI Justification: </label>
-                    <p class="border rounded p-4">{{ testAnswerRes.gradingDecisionReason }}</p>
+                    <p class="border rounded p-4" data-cy="resJustification">{{ testAnswerRes.gradingDecisionReason }}</p>
                   </div>
                 </div>
               </BlockUI>

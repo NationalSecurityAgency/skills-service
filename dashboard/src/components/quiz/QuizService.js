@@ -187,7 +187,7 @@ export default {
       minimumConfidenceLevel,
     }
     return axios
-        .post(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/testTextInputAiGrading/${questionId}`, attrs)
+        .post(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/testTextInputAiGrading/${questionId}`, attrs, { handleError: false })
         .then((response) => response.data)
   }
 }

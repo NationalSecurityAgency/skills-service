@@ -1,0 +1,19 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      { "contains": "LLM Quiz Answer Confidence Assessment Prompt" },
+      { "contains": "**Student's Answer**: answer 75" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"id\":\"chat-1\",\"object\":\"chat.completion\",\"created\":1677652288,\"model\":\"model-1\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"```json\\n{\\n  \\\"confidenceLevel\\\": 75,\\n  \\\"gradingDecisionReason\\\": \\\"Your answer has confidence level of 75\\\"\\n}\\n```\"},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":0,\"completion_tokens\":0,\"total_tokens\":0}}",
+    "transformers": ["response-template"]
+  }
+}

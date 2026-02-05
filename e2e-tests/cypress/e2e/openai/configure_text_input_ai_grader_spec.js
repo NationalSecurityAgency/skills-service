@@ -120,7 +120,38 @@ describe('Configure Text Input AI Grader Tests', () => {
         cy.get('[data-cy="questionDisplayCard-4"] [data-cy="questionAiGraded"]').should('not.exist')
     });
 
-    it('correct answer must be provided validation', () => {
+    it('configure grader starting from config page', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.request(`/admin/quiz-definitions/quiz1/questions`)
+            .then((response) => {
+                const questions = response.body.questions
+                cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
+                cy.wait('@getConfig')
+
+                cy.get('[data-cy="aiGraderEnabled"]').click()
+                cy.get('[data-cy="answerForGrading"]').type('fancy answer')
+                cy.get('[data-cy="minConfidenceLevelInput"]').type('{selectAll}33')
+                cy.get('[data-cy="saveGraderSettingsBtn"]').should('be.enabled')
+                cy.get('[data-cy="saveGraderSettingsBtn"]').click()
+                cy.get('[data-cy="settingsSavedMsg"]')
+
+                cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
+                cy.get('[data-cy="aiGraderEnabled"] [data-pc-section="input"]').should('be.checked')
+                cy.get('[data-cy="answerForGrading"]').should('have.value', 'fancy answer')
+                cy.get('[data-cy="minConfidenceLevelInput"] [data-pc-name="pcinputtext"]').should('have.value', '33')
+            })
+    });
+
+    it('correct answer validation', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
@@ -152,6 +183,204 @@ describe('Configure Text Input AI Grader Tests', () => {
                 cy.get('[data-cy="answerUsedForGradingError"]').contains('Answer Used for Grading must be at most 5 characters')
             })
     });
+
+    it('Minimum Correct Confidence validation', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.request(`/admin/quiz-definitions/quiz1/questions`)
+            .then((response) => {
+                const questions = response.body.questions
+                cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
+                cy.wait('@getConfig')
+
+                cy.get('[data-cy="aiGraderEnabled"]').click()
+                cy.get('[data-cy="answerForGrading"]').type('a')
+                cy.get('[data-cy="saveGraderSettingsBtn"]').should('be.enabled')
+
+                cy.get('[data-cy="minConfidenceLevelInput"]').type('{selectAll}{backspace}')
+                cy.get('[data-cy="saveGraderSettingsBtn"]').should('be.disabled')
+                cy.get('[data-cy="minimumConfidenceLevelError"]').contains('Minimum Correct Confidence % is a required field')
+
+                cy.get('[data-cy="minConfidenceLevelInput"]').type('1')
+                cy.get('[data-cy="saveGraderSettingsBtn"]').should('be.enabled')
+                cy.get('[data-cy="minimumConfidenceLevelError"]').should('not.exist')
+
+                cy.get('[data-cy="minConfidenceLevelInput"]').type('{selectAll}0')
+                cy.get('[data-cy="saveGraderSettingsBtn"]').should('be.disabled')
+                cy.get('[data-cy="minimumConfidenceLevelError"]').contains('Minimum Correct Confidence % must be greater than or equal to 1')
+
+                cy.get('[data-cy="minConfidenceLevelInput"]').type('100')
+                cy.get('[data-cy="saveGraderSettingsBtn"]').should('be.enabled')
+                cy.get('[data-cy="minimumConfidenceLevelError"]').should('not.exist')
+
+                cy.get('[data-cy="minConfidenceLevelInput"]').type('{selectAll}101')
+                cy.get('[data-cy="saveGraderSettingsBtn"]').should('be.disabled')
+                cy.get('[data-cy="minimumConfidenceLevelError"]').contains('Minimum Correct Confidence % must be less than or equal to 100')
+
+            })
+    });
+
+    it('do not show grading config input if ai integration is not enabled', () => {
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.request(`/admin/quiz-definitions/quiz1/questions`)
+            .then((response) => {
+                const questions = response.body.questions
+                cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
+
+                cy.get('[data-cy="aiNotEnabled"]')
+                cy.get('[data-cy="aiGraderEnabled"]').should('not.exist')
+                 cy.get('[data-cy="answerForGrading"]').should('not.exist')
+            })
+    });
+
+    it('preview ai grading', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.request(`/admin/quiz-definitions/quiz1/questions`)
+            .then((response) => {
+                const questions = response.body.questions
+                cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
+                cy.wait('@getConfig')
+
+                cy.get('[data-cy="aiGraderEnabled"]').click()
+                cy.get('[data-cy="answerForGrading"]').type('fancy answer')
+                cy.get('[data-cy="saveGraderSettingsBtn"]').should('be.enabled')
+
+                cy.get('[data-cy="testAnswersBtn"]').should('be.disabled')
+                cy.get('[data-cy="answerToTestInput"]').type('answer 92')
+                cy.get('[data-cy="testAnswersBtn"]').should('be.enabled')
+
+                cy.get('[data-cy="testAnswersBtn"]').click()
+                cy.get('[data-cy="gradeResCorrect"]')
+                cy.get('[data-cy="gradeResWrong"]').should('not.exist')
+                cy.get('[data-cy="gradeResConfidence"]').should('have.text', '92%')
+                cy.get('[data-cy="aiConfidenceTag"]').should('have.text', 'Very High')
+                cy.get('[data-cy="resJustification"]').should('have.text', 'Your answer has confidence level of 92')
+
+                cy.get('[data-cy="answerToTestInput"]').type('{selectAll}answer 75')
+                cy.get('[data-cy="testAnswersBtn"]').click()
+                cy.get('[data-cy="gradeResConfidence"]').should('have.text', '75%')
+                cy.get('[data-cy="aiConfidenceTag"]').should('have.text', 'High')
+                cy.get('[data-cy="resJustification"]').should('have.text', 'Your answer has confidence level of 75')
+                cy.get('[data-cy="gradeResCorrect"]')
+                cy.get('[data-cy="gradeResWrong"]').should('not.exist')
+
+                cy.get('[data-cy="answerToTestInput"]').type('{selectAll}answer 65')
+                cy.get('[data-cy="testAnswersBtn"]').click()
+                cy.get('[data-cy="gradeResConfidence"]').should('have.text', '65%')
+                cy.get('[data-cy="aiConfidenceTag"]').should('have.text', 'Moderate')
+                cy.get('[data-cy="resJustification"]').should('have.text', 'Your answer has confidence level of 65')
+                cy.get('[data-cy="gradeResCorrect"]').should('not.exist')
+                cy.get('[data-cy="gradeResWrong"]')
+
+                cy.get('[data-cy="answerToTestInput"]').type('{selectAll}answer 51')
+                cy.get('[data-cy="testAnswersBtn"]').click()
+                cy.get('[data-cy="gradeResConfidence"]').should('have.text', '51%')
+                cy.get('[data-cy="aiConfidenceTag"]').should('have.text', 'Low')
+                cy.get('[data-cy="resJustification"]').should('have.text', 'Your answer has confidence level of 51')
+                cy.get('[data-cy="gradeResCorrect"]').should('not.exist')
+                cy.get('[data-cy="gradeResWrong"]')
+
+                cy.get('[data-cy="answerToTestInput"]').type('{selectAll}answer 22')
+                cy.get('[data-cy="testAnswersBtn"]').click()
+                cy.get('[data-cy="gradeResConfidence"]').should('have.text', '22%')
+                cy.get('[data-cy="aiConfidenceTag"]').should('have.text', 'Very Low')
+                cy.get('[data-cy="resJustification"]').should('have.text', 'Your answer has confidence level of 22')
+                cy.get('[data-cy="gradeResCorrect"]').should('not.exist')
+                cy.get('[data-cy="gradeResWrong"]')
+            })
+    });
+
+    it('preview ai grading validation', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.request(`/admin/quiz-definitions/quiz1/questions`)
+            .then((response) => {
+                const questions = response.body.questions
+                cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
+                cy.wait('@getConfig')
+
+                cy.get('[data-cy="aiGraderEnabled"]').click()
+                cy.get('[data-cy="answerForGrading"]').type('a')
+                cy.get('[data-cy="saveGraderSettingsBtn"]').should('be.enabled')
+
+                cy.get('[data-cy="testAnswersBtn"]').should('be.disabled')
+                cy.get('[data-cy="answerToTestInput"]').type('a')
+                cy.get('[data-cy="testAnswersBtn"]').should('be.enabled')
+
+                cy.get('[data-cy="answerForGrading"]').type('{backspace}')
+                cy.get('[data-cy="testAnswersBtn"]').should('be.disabled')
+                cy.get('[data-cy="answerUsedForGradingError"]').contains('Answer Used for Grading is a required field')
+                cy.get('[data-cy="answerForGrading"]').type('a')
+                cy.get('[data-cy="testAnswersBtn"]').should('be.enabled')
+
+                cy.get('[data-cy="answerToTestInput"]').type('{backspace}')
+                cy.get('[data-cy="testAnswersBtn"]').should('be.disabled')
+            })
+    });
+
+    it('preview ai grading failed', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.request(`/admin/quiz-definitions/quiz1/questions`)
+            .then((response) => {
+                const questions = response.body.questions
+                cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
+                cy.wait('@getConfig')
+
+                cy.get('[data-cy="aiGraderEnabled"]').click()
+                cy.get('[data-cy="answerForGrading"]').type('a')
+                cy.get('[data-cy="saveGraderSettingsBtn"]').should('be.enabled')
+
+                cy.get('[data-cy="testAnswersBtn"]').should('be.disabled')
+                cy.get('[data-cy="answerToTestInput"]').type('a')
+                cy.get('[data-cy="testAnswersBtn"]').click()
+
+                cy.get('[data-cy="gradingFailedMsg"]')
+
+                cy.get('[data-cy="answerToTestInput"]').type('{selectAll}answer 75')
+                cy.get('[data-cy="testAnswersBtn"]').click()
+                cy.get('[data-cy="gradeResConfidence"]').should('have.text', '75%')
+                cy.get('[data-cy="aiConfidenceTag"]').should('have.text', 'High')
+
+                cy.get('[data-cy="gradingFailedMsg"]').should('not.exist')
+            })
+    });
+
 
 });
 

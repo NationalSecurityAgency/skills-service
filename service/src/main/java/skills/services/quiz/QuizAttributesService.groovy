@@ -45,8 +45,12 @@ class QuizAttributesService {
     @Value('#{"${skills.config.ui.maxTextInputAiGradingCorrectAnswerLength}"}')
     Integer maxTextInputAiGradingCorrectAnswerLength
 
+    @Value('${skills.openai.gradingModel:#{null}}')
+    String gradingModel
+
     @Transactional
     TextInputAiGradingAttrs saveTextInputAiGradingAttrs(String quizId, Integer questionId, TextInputAiGradingConfRequest gradingConfRequest) {
+        QuizValidator.isNotBlank(gradingModel, "ai grading model is not configured")
         quizValidatorService.validateQuestion(quizId, questionId, QuizQuestionType.TextInput)
         QuizValidator.isNotNull(gradingConfRequest, "Grading Configuration")
         QuizValidator.isNotNull(gradingConfRequest.enabled, "Enabled")
