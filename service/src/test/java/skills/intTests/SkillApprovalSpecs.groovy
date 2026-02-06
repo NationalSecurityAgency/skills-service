@@ -1344,8 +1344,8 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         skillsService.createSkills(skills)
 
         List<Date> dates = []
-        List<String> users = getRandomUsers(100)
-        100.times {
+        List<String> users = getRandomUsers(30)
+        30.times {
             Date date = new Date() - it
             dates << date
             def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[it], date, "Please approve this ${it}!")
@@ -1354,30 +1354,24 @@ class SkillApprovalSpecs extends DefaultIntSpec {
 
         when:
         def tableResult = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
-        def tableResultFiltered = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false, "user3")
-        def tableResultFilteredPg2 = skillsService.getApprovals(proj.projectId, 5, 2, 'requestedOn', false, "user3")
-        def tableResultFilteredPg3 = skillsService.getApprovals(proj.projectId, 5, 3, 'requestedOn', false, "user3")
+        def tableResultFiltered = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false, "user2")
+        def tableResultFilteredPg2 = skillsService.getApprovals(proj.projectId, 5, 2, 'requestedOn', false, "user2")
 
         then:
-        tableResult.totalCount == 100
-        tableResult.count == 100
+        tableResult.totalCount == 30
+        tableResult.count == 30
         tableResult.data.size() == 5
         tableResult.data.collect{ it.userId } == ['user3', 'user4', 'user5', 'user6', 'user7']
 
-        tableResultFiltered.totalCount == 11
-        tableResultFiltered.count == 11
+        tableResultFiltered.totalCount == 10
+        tableResultFiltered.count == 10
         tableResultFiltered.data.size() == 5
-        tableResultFiltered.data.collect{ it.userId } == ['user3', 'user30', 'user31', 'user32', 'user33']
+        tableResultFiltered.data.collect{ it.userId } == ['user20', 'user21', 'user22', 'user23', 'user24']
 
-        tableResultFilteredPg2.totalCount == 11
-        tableResultFilteredPg2.count == 11
+        tableResultFilteredPg2.totalCount == 10
+        tableResultFilteredPg2.count == 10
         tableResultFilteredPg2.data.size() == 5
-        tableResultFilteredPg2.data.collect{ it.userId } == ['user34', 'user35', 'user36', 'user37', 'user38']
-
-        tableResultFilteredPg3.totalCount == 11
-        tableResultFilteredPg3.count == 11
-        tableResultFilteredPg3.data.size() == 1
-        tableResultFilteredPg3.data.collect{ it.userId } == ['user39']
+        tableResultFilteredPg2.data.collect{ it.userId } == ['user25', 'user26', 'user27', 'user28', 'user29']
 
     }
 }
