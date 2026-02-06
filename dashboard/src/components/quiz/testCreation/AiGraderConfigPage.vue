@@ -163,9 +163,9 @@ const testAnAnswer = () => {
               </div>
 
               <SkillsTextarea
-                  label="Answer Used for Grading:"
+                  label="Grading Instructions:"
                   id="answerUsedForGradingInput"
-                  placeholder="Enter an answer that will be use for grading"
+                  placeholder="Enter grading instructions, including a preferred answer and any specific criteria for evaluation"
                   aria-label="Answer key"
                   rows="4"
                   max-rows="10"
