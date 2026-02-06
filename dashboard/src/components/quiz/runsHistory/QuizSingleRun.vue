@@ -38,6 +38,14 @@ const props = defineProps({
   showQuestionCard: {
     type: Boolean,
     default: true,
+  },
+  showQuizUnderReview: {
+    type: Boolean,
+    default: true,
+  },
+  showAiGradingMeta: {
+    type: Boolean,
+    default: false,
   }
 })
 const userTagsUtils = useUserTagsUtils();
@@ -111,10 +119,10 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
 
     <div v-if="runInfo.questions" v-for="q in runInfo.questions" :key="q.id">
       <div :class="{ 'mt-4' : showCards }">
-        <QuizRunQuestionCard :question="q" :question-num="q.questionNum" :quiz-type="runInfo.quizType"/>
+        <QuizRunQuestionCard :question="q" :question-num="q.questionNum" :quiz-type="runInfo.quizType" :show-ai-grading-meta="showAiGradingMeta"/>
       </div>
     </div>
-    <quiz-completed-message v-if="QuizStatus.isNeedsGrading(runInfo.status)" />
+    <quiz-completed-message v-if="showQuizUnderReview && QuizStatus.isNeedsGrading(runInfo.status)" />
     <Message v-if="!runInfo.questions && QuizStatus.isFailed(runInfo.status)" severity="warn" :closable="false" data-cy="allQuestionsNotDisplayedMsg">
       Questions and answers are not displayed so not to give away the correct answers.
     </Message>

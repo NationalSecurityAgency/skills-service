@@ -99,7 +99,7 @@ export default {
   },
   gradeQuizAnswerAttempt(quizId, userId, quizAttemptId, answerDefId, gradingInfo) {
     return axios
-        .post(`/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${quizAttemptId}/gradeAnswer/${answerDefId}`, gradingInfo)
+        .post(`/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${quizAttemptId}/gradeAnswer/${answerDefId}`, gradingInfo, { handleError: false })
         .then((response) => response.data)
   },
   deleteQuizRunHistoryItem(quizId, attemptId) {

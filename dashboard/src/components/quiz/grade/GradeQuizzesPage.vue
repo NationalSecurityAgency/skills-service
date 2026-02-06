@@ -34,6 +34,7 @@ import {useAppInfoState} from "@/stores/UseAppInfoState.js";
 import SelfReportService from "@/components/skills/selfReport/SelfReportService.js";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 import {useStorage} from "@vueuse/core";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
 const route = useRoute()
 const numberFormat = useNumberFormat()
@@ -42,6 +43,7 @@ const colors = useColors()
 const userInfo = useUserInfo()
 const appInfo = useAppInfoState()
 const announcer = useSkillsAnnouncer()
+const appConfig = useAppConfig()
 
 const hasGradableQuestionsDefined = ref(false)
 const runningQuizDefinitionCheck = ref(true)
@@ -213,6 +215,12 @@ const loadEmailSubscriptionPreference = () => {
                     <div v-else><Tag severity="success" :data-cy="`attemptGradedFor_${slotProps.data.userId}`"><i class="fas fa-check mr-1" aria-hidden="true" /> Graded</Tag></div>
                   </div>
                 </div>
+                <InlineMessage
+                    v-if="appConfig.enableOpenAIIntegration && slotProps.data.numNeedsAiGrading > 0"
+                    class="mt-3"
+                    data-cy="queuedForAiGradingMsg"
+                    icon="fa-solid fa-wand-magic-sparkles">Queued for AI grading</InlineMessage>
+
               </template>
             </Column>
             <Column header="Date" field="completed" :sortable="true" :class="{'flex': responsive.md.value }">

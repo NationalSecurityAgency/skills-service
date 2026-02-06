@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import QuizService from "@/components/quiz/QuizService.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import {useRoute} from "vue-router";
@@ -55,13 +55,18 @@ onMounted(() => {
 const onGraded = (gradedInfo) => {
   emit('on-graded', gradedInfo)
 }
+const hasQuestionsToGrade = computed(() => questionsToGrade.value?.length > 0)
 </script>
 
 <template>
   <div>
     <skills-spinner v-if="loadingQuestionsToGrade" :is-loading="loadingQuestionsToGrade"/>
     <div v-else class="mb-16">
-      <div v-for="(q, index) in questionsToGrade" :key="q.id">
+      <Message v-if="!hasQuestionsToGrade"
+               severity="warn"
+               data-cy="questionGradedSinceLoadedMsg"
+               :closable="false">All questions have been graded since the table was loaded. Please refresh the page.</Message>
+      <div v-if="hasQuestionsToGrade" v-for="(q, index) in questionsToGrade" :key="q.id">
         <grade-single-question
             :question="q"
             :user-id="userId"

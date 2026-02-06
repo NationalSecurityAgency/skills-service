@@ -58,6 +58,7 @@ const submitWrong = handleSubmit(formValues => {
 })
 
 const isGraded = ref(false)
+const questionAlreadyGraded = ref(false)
 const grade = (isCorrect, feedback) => {
   const gradingInfo = {
     isCorrect,
@@ -72,6 +73,13 @@ const grade = (isCorrect, feedback) => {
           announcer.polite(`Question number ${props.question.questionNumber} has been graded as incorrect`)
         }
         return result
+      }).catch((err) => {
+        const quizAlreadyCompleted = err?.response?.data?.errorCode === 'QuizAlreadyCompleted'
+        if (quizAlreadyCompleted) {
+          questionAlreadyGraded.value = true
+        } else {
+          throw err;
+        }
       }).finally(() => {
         isGraded.value = true
       })
@@ -80,16 +88,17 @@ const grade = (isCorrect, feedback) => {
 
 <template>
   <div class="mb-4" :data-cy="`question_${question.questionNumber}`">
-    <div class="">
-      <div class="font-bold text-lg">Question #{{ question.questionNumber }}:  <Tag v-if="isGraded" data-cy="gradedTag"><i class="fas fa-check mr-1" aria-hidden="true" /> GRADED</Tag></div>
-      <div v-if="!isGraded" class="">
-        <MarkdownText
-            :text="question.question"
-            :instance-id="`${quizAttemptId}_${question.id}_question`"
-            data-cy="questionDisplayText"/>
+    <div v-if="!questionAlreadyGraded">
+      <div class="">
+        <div class="font-bold text-lg">Question #{{ question.questionNumber }}:  <Tag v-if="isGraded" data-cy="gradedTag"><i class="fas fa-check mr-1" aria-hidden="true" /> GRADED</Tag></div>
+        <div v-if="!isGraded" class="">
+          <MarkdownText
+              :text="question.question"
+              :instance-id="`${quizAttemptId}_${question.id}_question`"
+              data-cy="questionDisplayText"/>
+        </div>
       </div>
-    </div>
-    <div v-if="!isGraded">
+      <div v-if="!isGraded">
       <div class="">
         <div class="font-semibold">User's Answer:</div>
         <div class="mt-2 border rounded-border border-dotted border-surface px-6 py-2">
@@ -100,6 +109,12 @@ const grade = (isCorrect, feedback) => {
             data-cy="answerText"/>
         </div>
       </div>
+      <InlineMessage
+          v-if="appConfig.enableOpenAIIntegration && question.aiGradingConfigured"
+          class="mt-2"
+          data-cy="aiManualGradingLongMsg"
+          severity="warn">AI grading is enabled for this question. Manual grading is available but not recommended.</InlineMessage>
+
       <markdown-editor class="form-text mt-4"
                        :id="`qFeedback-${quizAttemptId}_${question.questionNumber}`"
                        :allow-community-elevation="true"
@@ -136,6 +151,8 @@ const grade = (isCorrect, feedback) => {
       />
     </div>
     </div>
+    </div>
+    <Message v-if="questionAlreadyGraded" severity="warn" :closable="false" data-cy="singleQuestionGradedSinceLoadedMsg">This question has been graded since the form was loaded. Please refresh the page.</Message>
   </div>
 </template>
 

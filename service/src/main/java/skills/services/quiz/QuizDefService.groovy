@@ -810,17 +810,12 @@ class QuizDefService {
 
     @Transactional
     TableResult getQuizRuns(String quizId, String query, UserQuizAttempt.QuizAttemptStatus quizAttemptStatus, PageRequest pageRequest, Date startDate, Date endDate) {
-        long totalCount = userQuizAttemptRepo.countByQuizId(quizId)
-        if (totalCount == 0) {
-            return new TableResult(totalCount: totalCount, count: 0, data: [])
-        }
-
         query = query ?: ''
         Page<QuizRun> quizRunsPage = userQuizAttemptRepo.findQuizRuns(quizId, query, usersTableAdditionalUserTagKey, quizAttemptStatus?.toString(), startDate, endDate, pageRequest)
         long count = quizRunsPage.getTotalElements()
         List<QuizRun> quizRuns = quizRunsPage.getContent()
 
-        return new TableResult(totalCount: totalCount, data: quizRuns, count: count)
+        return new TableResult(totalCount: count, data: quizRuns, count: count)
     }
 
     @Transactional
@@ -1017,6 +1012,7 @@ class QuizDefService {
                 .sort { it.displayOrder }
                 .withIndex()
                 .collect { QuizQuestionDef questionDef, int index ->
+                    QuestionAttrs questionAttrs = mapper.readValue(questionDef.attributes, QuestionAttrs.class)
                     List<QuizAnswerDef> quizAnswerDefs = byQuestionId[questionDef.id]
 
                     boolean isTextInput = questionDef.type == QuizQuestionType.TextInput
@@ -1090,7 +1086,8 @@ class QuizDefService {
                             questionType: questionDef.type,
                             answers: answers,
                             isCorrect: isCorrect,
-                            needsGrading: needsGrading
+                            needsGrading: needsGrading,
+                            aiGradingConfigured: questionAttrs?.textInputAiGradingConf?.enabled
                     )
                 }
 

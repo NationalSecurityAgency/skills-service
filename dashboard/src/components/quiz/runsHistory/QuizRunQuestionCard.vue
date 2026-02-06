@@ -20,13 +20,19 @@ import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAns
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
 import { useTimeUtils } from "@/common-components/utilities/UseTimeUtils.js";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
 const props = defineProps({
   quizType: String,
   question: Object,
   questionNum: Number,
+  showAiGradingMeta: {
+    type: Boolean,
+    default: false,
+  }
 })
 
+const appConfig = useAppConfig()
 const timeUtils = useTimeUtils();
 
 const answerText = ref(props.question.answers[0].answer)
@@ -52,6 +58,7 @@ const hasAnswer = computed(() => {
 const needsGrading = computed(() => {
   return props.question.needsGrading
 })
+const showAiGradedTag = computed(() => appConfig.enableOpenAIIntegration && props.showAiGradingMeta && needsGrading.value && props.question.aiGradingConfigured)
 const isWrong = computed(() => {
   return hasAnswer.value && !needsGrading.value && !props.question.isCorrect
 })
@@ -81,8 +88,19 @@ const isAiGraded = computed(() => {
 <template>
   <div data-cy="questionDisplayCard">
     <div :data-cy="`questionDisplayCard-${questionNum}`">
-      <div v-if="needsGrading" class="flex flex-row" data-cy="noAnswer">
-        <Tag severity="warn" class="uppercase" data-cy="needsGradingTag"><i class="fas fa-user-check mr-1" aria-hidden="true"></i> Needs Grading</Tag>
+      <div class="flex items-center gap-2">
+        <div v-if="needsGrading" class="flex flex-row" data-cy="noAnswer">
+          <Tag severity="warn" class="uppercase" data-cy="needsGradingTag"><i class="fas fa-user-check mr-1" aria-hidden="true"></i> Needs Grading</Tag>
+        </div>
+        <div v-if="showAiGradedTag">
+          <Tag severity="info">
+            <div class="flex items-center gap-1" data-cy="queuedForAiGradingTag">
+              <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+              <div>Queued for AI grading</div>
+            </div>
+          </Tag>
+        </div>
+
       </div>
       <div v-if="!hasAnswer" class="flex flex-row" data-cy="noAnswer">
         <Tag severity="warn">No Answer</Tag>

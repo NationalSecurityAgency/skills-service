@@ -788,7 +788,7 @@ class QuizRunService {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${userId}] user", ErrorCode.BadParam)
         }
         if (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED || userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.FAILED) {
-            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] was already completed", ErrorCode.BadParam)
+            throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] was already completed", ErrorCode.QuizAlreadyCompleted)
         }
     }
 

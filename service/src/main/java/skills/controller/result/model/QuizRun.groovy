@@ -30,4 +30,5 @@ interface QuizRun {
     String getQuizType()
     Integer getNumberCorrect()
     Integer getTotalAnswers()
+    Integer getNumNeedsAiGrading()
 }
