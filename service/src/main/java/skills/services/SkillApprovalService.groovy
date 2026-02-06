@@ -140,7 +140,7 @@ class SkillApprovalService {
 
     }
 
-    TableResult getApprovals(String projectId, PageRequest pageRequest) {
+    TableResult getApprovals(String projectId, String userFilter, PageRequest pageRequest) {
         String currentApproverId = userInfoService.currentUser.username
         ConfExistInfo confExistInfo = getConfExistForApprover(projectId, currentApproverId)
 
@@ -148,24 +148,24 @@ class SkillApprovalService {
             if (confExistInfo.projConfExist) {
                 List<SkillApprovalRepo.SimpleSkillApproval> res = []
                 if (confExistInfo.fallBackApprover) {
-                    res = skillApprovalRepo.findFallbackApproverConf(projectId, pageRequest)
+                    res = skillApprovalRepo.findFallbackApproverConf(projectId, userFilter, pageRequest)
                 } else if (confExistInfo.approverHasConf) {
-                    res = skillApprovalRepo.findToApproveWithApproverConf(projectId, currentApproverId, pageRequest)
+                    res = skillApprovalRepo.findToApproveWithApproverConf(projectId, currentApproverId, userFilter, pageRequest)
                 }
                 return res
             }
-            return skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, pageRequest)
+            return skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, userFilter, pageRequest)
         }, {
             if (confExistInfo.projConfExist) {
                 long res = 0
                 if (confExistInfo.fallBackApprover) {
-                    res = skillApprovalRepo.countFallbackApproverConf(projectId)
+                    res = skillApprovalRepo.countFallbackApproverConf(projectId, userFilter)
                 } else if (confExistInfo.approverHasConf) {
-                    res = skillApprovalRepo.countToApproveWithApproverConf(projectId, currentApproverId)
+                    res = skillApprovalRepo.countToApproveWithApproverConf(projectId, currentApproverId, userFilter)
                 }
                 return res
             }
-            return skillApprovalRepo.countByProjectIdAndApproverUserIdIsNull(projectId)
+            return skillApprovalRepo.countByProjectIdAndApproverUserIdIsNull(projectId, userFilter)
         })
     }
 

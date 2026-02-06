@@ -59,6 +59,10 @@ onMounted(() => {
   }
 });
 
+const filters = ref({
+  userId: '',
+});
+
 const pageChanged = (pagingInfo) => {
   currentPage.value = pagingInfo.page + 1;
   pageSize.value = pagingInfo.rows;
@@ -81,6 +85,7 @@ const loadApprovals = () => {
     ascending: sortOrder.value === 1,
     page: currentPage.value,
     orderBy: sortBy.value,
+    userFilter: filters.value.userId,
   };
   return SelfReportService.getApprovals(route.params.projectId, pageParams)
       .then((res) => {
@@ -156,6 +161,12 @@ const toggleRow = (row) => {
 
   expandedRows.value = { ...expandedRows.value };
 }
+
+
+const reset = () => {
+  filters.value.userId = '';
+  loadApprovals();
+};
 </script>
 
 <template>
@@ -182,6 +193,18 @@ const toggleRow = (row) => {
           <SkillsButton size="small" @click="showRejectModal" data-cy="rejectBtn" class="" :disabled="selectedItems.length === 0" icon="fa fa-times-circle" label="Reject" />
           <SkillsButton size="small" @click="showApproveModal" data-cy="approveBtn" class="ml-2" :disabled="selectedItems.length === 0" icon="fa fa-check" label="Approve" />
         </div>
+      </div>
+
+      <div class="flex flex-col md:flex-row gap-2 pt-4 px-4">
+        <div class="w-full">
+          <label for="userId-filter" class="ml-1">User Id</label>
+          <InputText type="text" class="w-full mt-2" placeholder="User Id" v-model="filters.userId" id="userId-filter"
+                     v-on:keydown.enter="loadApprovals" data-cy="selfReportApprovalHistory-userIdFilter" />
+        </div>
+      </div>
+      <div class="flex gap-2 mt-6 mb-6 px-4">
+        <SkillsButton size="small" @click="loadApprovals" data-cy="selfReportApprovalHistory-filterBtn" icon="fa fa-filter" label="Filter" />
+        <SkillsButton size="small" @click="reset" class="ml-1" data-cy="selfReportApprovalHistory-resetBtn" label="Reset" icon="fa fa-times" />
       </div>
 
       <SkillsDataTable :value="approvals"

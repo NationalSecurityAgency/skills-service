@@ -77,9 +77,16 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.projectId = ?1 and 
             s.skillRefId = sd.id and 
             s.userId = uAttrs.userId and
+            (?2 is null OR lower(s.userId) like lower(concat('%', ?2, '%'))) and
             s.approverUserId is null''')
-    List<SimpleSkillApproval> findToApproveByProjectIdAndNotRejectedOrApproved(String projectId, Pageable pageable)
-    long countByProjectIdAndApproverUserIdIsNull(String projectId)
+    List<SimpleSkillApproval> findToApproveByProjectIdAndNotRejectedOrApproved(String projectId, String userFilter, Pageable pageable)
+
+    @Query('''SELECT count(s.userId)
+              FROM SkillApproval s
+              where s.projectId=?1 and
+                    s.approverUserId is null and
+                   (?2 is null OR lower(s.userId) like lower(concat('%', ?2, '%')))''')
+    long countByProjectIdAndApproverUserIdIsNull(String projectId, String userFilter)
 
     @Query('''SELECT
         s.id as approvalId,
@@ -104,6 +111,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.skillRefId = sd.id and 
             s.userId = uAttrs.userId and
             s.approverUserId is null and
+            (:userFilter is null OR lower(s.userId) like lower(concat('%', :userFilter, '%'))) and
             (
                 (exists (select 1 from SkillApprovalConf sac 
                         where sac.approverUserId = :approverId
@@ -127,6 +135,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     List<SimpleSkillApproval> findToApproveWithApproverConf(
             @Param("projectId") String projectId,
             @Param("approverId") String approverId,
+            @Param("userFilter") String userFilter,
             Pageable pageable)
 
 
@@ -136,6 +145,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         where 
             s.projectId = :projectId and 
             s.approverUserId is null and 
+            (:userFilter is null OR lower(s.userId) like lower(concat('%', :userFilter, '%'))) and
             (not exists (select 1 from SkillApprovalConf sac
                             where sac.approverUserId is not null
                                 and sac.projectId = :projectId 
@@ -156,7 +166,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             )            
         ''')
     long countFallbackApproverConf(
-            @Param("projectId") String projectId)
+            @Param("projectId") String projectId, @Param("userFilter") String userFilter)
 
     @Query('''SELECT
         s.id as approvalId,
@@ -181,6 +191,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.skillRefId = sd.id and
             s.userId = uAttrs.userId and
             s.approverUserId is null and 
+            (:userFilter is null OR lower(s.userId) like lower(concat('%', :userFilter, '%'))) and
             (not exists (select 1 from SkillApprovalConf sac
                             where sac.approverUserId is not null
                                 and sac.projectId = :projectId 
@@ -202,6 +213,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         ''')
     List<SimpleSkillApproval> findFallbackApproverConf(
             @Param("projectId") String projectId,
+            @Param("userFilter") String userFilter,
             Pageable pageable)
 
     @Query('''SELECT
@@ -210,6 +222,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         where 
             s.projectId = :projectId and 
             s.approverUserId is null and 
+            (:userFilter is null OR lower(s.userId) like lower(concat('%', :userFilter, '%'))) and
             (
                 (exists (select 1 from SkillApprovalConf sac 
                         where sac.approverUserId = :approverId
@@ -232,7 +245,8 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             )''')
     long countToApproveWithApproverConf(
             @Param("projectId") String projectId,
-            @Param("approverId") String approverId)
+            @Param("approverId") String approverId,
+            @Param("userFilter") String userFilter)
 
     @Query('''SELECT
         s.id as approvalId,
