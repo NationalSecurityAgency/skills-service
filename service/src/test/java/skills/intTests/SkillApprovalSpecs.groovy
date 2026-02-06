@@ -1330,4 +1330,54 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         approvedSummaries.skills[0].selfReporting.approved == true
         approvedSummaries.skills[0].selfReporting.approvedBy == ''
     }
+
+    void "getApprovals filtering by user"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<Date> dates = []
+        List<String> users = getRandomUsers(100)
+        100.times {
+            Date date = new Date() - it
+            dates << date
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[it], date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        when:
+        def tableResult = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        def tableResultFiltered = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false, "user3")
+        def tableResultFilteredPg2 = skillsService.getApprovals(proj.projectId, 5, 2, 'requestedOn', false, "user3")
+        def tableResultFilteredPg3 = skillsService.getApprovals(proj.projectId, 5, 3, 'requestedOn', false, "user3")
+
+        then:
+        tableResult.totalCount == 100
+        tableResult.count == 100
+        tableResult.data.size() == 5
+        tableResult.data.collect{ it.userId } == ['user3', 'user4', 'user5', 'user6', 'user7']
+
+        tableResultFiltered.totalCount == 11
+        tableResultFiltered.count == 11
+        tableResultFiltered.data.size() == 5
+        tableResultFiltered.data.collect{ it.userId } == ['user3', 'user30', 'user31', 'user32', 'user33']
+
+        tableResultFilteredPg2.totalCount == 11
+        tableResultFilteredPg2.count == 11
+        tableResultFilteredPg2.data.size() == 5
+        tableResultFilteredPg2.data.collect{ it.userId } == ['user34', 'user35', 'user36', 'user37', 'user38']
+
+        tableResultFilteredPg3.totalCount == 11
+        tableResultFilteredPg3.count == 11
+        tableResultFilteredPg3.data.size() == 1
+        tableResultFilteredPg3.data.collect{ it.userId } == ['user39']
+
+    }
 }
