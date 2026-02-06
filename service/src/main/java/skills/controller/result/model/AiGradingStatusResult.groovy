@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2026 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,9 @@
  */
 package skills.controller.result.model
 
-class UserGradedQuizAnswerResult {
-    Integer id
-    Object answer // could be of type String or MatchingAnswer
-    Boolean isConfiguredCorrect
-    Boolean isSelected
-    Boolean needsGrading = false
-    AnswerGradingResult gradingResult
-    AiGradingStatusResult aiGradingStatus
-
-    static class MatchingAnswer {
-        String term
-        String selectedMatch
-        String correctMatch
-    }
+class AiGradingStatusResult {
+    Integer attemptCount
+    Integer attemptsLeft
+    Boolean hasFailedAttempts
+    Boolean failed
 }

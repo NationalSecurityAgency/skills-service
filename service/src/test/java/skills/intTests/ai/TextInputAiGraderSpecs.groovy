@@ -97,6 +97,10 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[0].answers.gradingResult.aiConfidenceLevel == [90]
         quizAttemptRes.questions[0].answers.gradingResult.graderUserId == ['ai-grader']
         quizAttemptRes.questions[0].answers.gradingResult.gradedOn
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptCount == [1]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [3]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [false]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [false]
     }
 
     def "AI grade text input and PASS - multiple questions"() {
@@ -138,6 +142,10 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
 
         quizAttemptRes.questions[1].answers.needsGrading == [false, false]
         quizAttemptRes.questions[1].answers.gradingResult == [null, null]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptCount == [1]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [3]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [false]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [false]
     }
 
     def "AI grade text input and PASS with partial requirement"() {
@@ -192,6 +200,10 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[2].answers.gradingResult.feedback == ["The student's answer shows significant misunderstandings and does not match the correct answer."]
         quizAttemptRes.questions[2].answers.gradingResult.graderUserId == ['ai-grader']
         quizAttemptRes.questions[2].answers.gradingResult.gradedOn
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptCount == [1]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [3]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [false]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [false]
     }
 
     def "AI grade text input and PASS with partial requirement - multiple ai graded questions"() {
@@ -246,6 +258,10 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[2].answers.gradingResult.feedback == ["The student's answer demonstrates excellent understanding and closely matches the correct answer."]
         quizAttemptRes.questions[2].answers.gradingResult.graderUserId == ['ai-grader']
         quizAttemptRes.questions[2].answers.gradingResult.gradedOn
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptCount == [1]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [3]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [false]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [false]
     }
 
     def "AI grade text input and FAIL - single question quiz"() {
@@ -280,6 +296,10 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[0].answers.gradingResult.aiConfidenceLevel == [10]
         quizAttemptRes.questions[0].answers.gradingResult.graderUserId == ['ai-grader']
         quizAttemptRes.questions[0].answers.gradingResult.gradedOn
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptCount == [1]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [3]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [false]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [false]
     }
 
     def "AI grade text input and FAIL - multiple questions"() {
@@ -321,6 +341,10 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
 
         quizAttemptRes.questions[1].answers.needsGrading == [false, false]
         quizAttemptRes.questions[1].answers.gradingResult == [null, null]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptCount == [1]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [3]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [false]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [false]
     }
 
     def "AI grade text input and FAIL with partial requirement"() {
@@ -375,6 +399,10 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[2].answers.gradingResult.feedback == ["The student's answer shows significant misunderstandings and does not match the correct answer."]
         quizAttemptRes.questions[2].answers.gradingResult.graderUserId == ['ai-grader']
         quizAttemptRes.questions[2].answers.gradingResult.gradedOn
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptCount == [1]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [3]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [false]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [false]
     }
     
     def "AI grade text input and FAIL because confidence is too low"() {
@@ -409,6 +437,10 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[0].answers.gradingResult.aiConfidenceLevel == [90]
         quizAttemptRes.questions[0].answers.gradingResult.graderUserId == ['ai-grader']
         quizAttemptRes.questions[0].answers.gradingResult.gradedOn
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptCount == [1]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [3]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [false]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [false]
     }
     
     def "AI grade text input and ERROR because confidence not returned from LLM"() {
@@ -439,7 +471,10 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions.isCorrect == [false]
         quizAttemptRes.questions.needsGrading == [true]
         quizAttemptRes.questions[0].answers.needsGrading == [true]
-        quizAttemptRes.questions[0].answers.aiGradingAttemptCount == [4]
         quizAttemptRes.questions[0].answers.gradingResult == [null]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptCount == [4]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [0]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [true]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [true]
     }
 }

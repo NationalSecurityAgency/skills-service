@@ -55,6 +55,7 @@ import skills.services.video.QuizVideoService
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.*
+import skills.tasks.config.TaskConfig
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
@@ -150,6 +151,9 @@ class QuizDefService {
 
     @Autowired
     QuizVideoService quizVideoService
+
+    @Autowired
+    TaskConfig taskConfig
 
     JsonSlurper jsonSlurper = new JsonSlurper()
 
@@ -1054,14 +1058,24 @@ class QuizDefService {
                         } else {
                             answer = answerDef.answer
                         }
+                        Boolean needsGrading = foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING
+                        Integer aiGradingAttemptCount = foundSelected?.aiGradingAttemptCount ?: 0
+                        Integer aiGradingAttemptsLeft = (taskConfig.aiGraderMaxRetries + 1) - aiGradingAttemptCount
+                        Boolean aiGradingHasFailedAttempts = needsGrading && aiGradingAttemptCount >=1
+                        Boolean aiGradingHasFailed = aiGradingAttemptsLeft <= 0
                         return new UserGradedQuizAnswerResult(
                                 id: answerDef.id,
                                 answer: answer,
                                 isConfiguredCorrect: Boolean.valueOf(answerDef.isCorrectAnswer),
                                 isSelected: isSelected,
-                                needsGrading: foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING,
+                                needsGrading: needsGrading,
                                 gradingResult: gradingResult,
-                                aiGradingAttemptCount: foundSelected?.aiGradingAttemptCount
+                                aiGradingStatus: new AiGradingStatusResult(
+                                        attemptCount: aiGradingAttemptCount,
+                                        attemptsLeft: aiGradingAttemptsLeft,
+                                        hasFailedAttempts: aiGradingHasFailedAttempts,
+                                        failed: aiGradingHasFailed,
+                                ),
                         )
                     }
 
