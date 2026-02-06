@@ -199,12 +199,12 @@ const reset = () => {
         <div class="w-full">
           <label for="userId-filter" class="ml-1">User Id</label>
           <InputText type="text" class="w-full mt-2" placeholder="User Id" v-model="filters.userId" id="userId-filter"
-                     v-on:keydown.enter="loadApprovals" data-cy="selfReportApprovalHistory-userIdFilter" />
+                     v-on:keydown.enter="loadApprovals" data-cy="selfReportApproval-userIdFilter" />
         </div>
       </div>
       <div class="flex gap-2 mt-6 mb-6 px-4">
-        <SkillsButton size="small" @click="loadApprovals" data-cy="selfReportApprovalHistory-filterBtn" icon="fa fa-filter" label="Filter" />
-        <SkillsButton size="small" @click="reset" class="ml-1" data-cy="selfReportApprovalHistory-resetBtn" label="Reset" icon="fa fa-times" />
+        <SkillsButton size="small" @click="loadApprovals" data-cy="selfReportApproval-filterBtn" icon="fa fa-filter" label="Filter" />
+        <SkillsButton size="small" @click="reset" class="ml-1" data-cy="selfReportApproval-resetBtn" label="Reset" icon="fa fa-times" />
       </div>
 
       <SkillsDataTable :value="approvals"
