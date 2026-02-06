@@ -37,6 +37,7 @@ import skills.services.admin.ProjAdminService
 import skills.services.admin.UserCommunityService
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
+import skills.tasks.config.TaskConfig
 
 @RestController
 @RequestMapping("/public")
@@ -92,6 +93,9 @@ class PublicConfigController {
     @Autowired
     IconSetsIndexService iconSetsIndexService
 
+    @Autowired
+    TaskConfig taskConfig
+
     @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     Map<String,Object> getConfig(){
@@ -103,6 +107,7 @@ class PublicConfigController {
         res["verifyEmailAddresses"] = featureService.isEmailVerificationFeatureEnabled()
         res["expirationGracePeriod"] = expirationGracePeriod
         res["expireUnusedProjectsOlderThan"] = expireUnusedProjectsOlderThan
+        res["aiGraderMaxRetries"] = taskConfig.aiGraderMaxRetries
         List<SettingsResult> customizationSettings = settingsService.getGlobalSettingsByGroup(SystemSettingsService.CUSTOMIZATION)
         customizationSettings?.each {
             if (Settings.GLOBAL_CUSTOM_HEADER.settingName == it.setting) {

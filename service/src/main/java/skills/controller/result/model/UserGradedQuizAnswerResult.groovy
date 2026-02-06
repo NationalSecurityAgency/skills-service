@@ -22,6 +22,7 @@ class UserGradedQuizAnswerResult {
     Boolean isSelected
     Boolean needsGrading = false
     AnswerGradingResult gradingResult
+    Integer aiGradingAttemptCount = 0
 
     static class MatchingAnswer {
         String term

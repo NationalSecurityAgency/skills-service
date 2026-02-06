@@ -33,13 +33,15 @@ interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt,
         @Nullable
         String getAnswerText()
         UserQuizAnswerAttempt.QuizAnswerStatus getAnswerStatus()
+        Integer getAiGradingAttemptCount()
     }
 
     @Query('''select 
             answerAttempt.id as answerAttemptId,
             answerAttempt.quizAnswerDefinitionRefId as answerId, 
             answerAttempt.answer as answerText, 
-            answerAttempt.status as answerStatus
+            answerAttempt.status as answerStatus,
+            answerAttempt.aiGradingAttemptCount  as aiGradingAttemptCount
         from UserQuizAnswerAttempt answerAttempt
         where answerAttempt.userQuizAttemptRefId = ?1
      ''')

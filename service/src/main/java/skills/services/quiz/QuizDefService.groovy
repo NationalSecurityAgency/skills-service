@@ -1012,7 +1012,7 @@ class QuizDefService {
                 .sort { it.displayOrder }
                 .withIndex()
                 .collect { QuizQuestionDef questionDef, int index ->
-                    QuestionAttrs questionAttrs = mapper.readValue(questionDef.attributes, QuestionAttrs.class)
+                    QuestionAttrs questionAttrs = questionDef.attributes ? mapper.readValue(questionDef.attributes, QuestionAttrs.class) : null
                     List<QuizAnswerDef> quizAnswerDefs = byQuestionId[questionDef.id]
 
                     boolean isTextInput = questionDef.type == QuizQuestionType.TextInput
@@ -1060,7 +1060,8 @@ class QuizDefService {
                                 isConfiguredCorrect: Boolean.valueOf(answerDef.isCorrectAnswer),
                                 isSelected: isSelected,
                                 needsGrading: foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING,
-                                gradingResult: gradingResult
+                                gradingResult: gradingResult,
+                                aiGradingAttemptCount: foundSelected?.aiGradingAttemptCount
                         )
                     }
 

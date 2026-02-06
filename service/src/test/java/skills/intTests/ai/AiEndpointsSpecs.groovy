@@ -16,40 +16,11 @@
 package skills.intTests.ai
 
 import groovy.util.logging.Slf4j
-import io.netty.handler.ssl.SslContext
-import io.netty.handler.ssl.SslContextBuilder
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.core.io.ClassPathResource
-import org.springframework.core.io.Resource
-import org.springframework.http.*
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
-import org.springframework.util.LinkedMultiValueMap
-import org.springframework.util.MultiValueMap
+import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
-import reactor.netty.http.client.HttpClient
-import reactor.netty.resources.ConnectionProvider
 import skills.controller.request.model.AiChatRequest
-import skills.intTests.utils.CertificateRegistry
-import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.MockLlmServer
-import skills.intTests.utils.QuizDefFactory
-import skills.quizLoading.QuizSettings
-import skills.storage.model.UserAttrs
-import skills.storage.model.UserQuizAttempt
 import spock.lang.IgnoreIf
-
-import javax.net.ssl.KeyManagerFactory
-import javax.net.ssl.TrustManagerFactory
-import javax.net.ssl.X509TrustManager
-import java.security.KeyStore
-import java.security.cert.CertificateException
-import java.security.cert.X509Certificate
-import java.time.Duration
 
 @Slf4j
 class AiEndpointsSpecs extends DefaultAiIntSpec {

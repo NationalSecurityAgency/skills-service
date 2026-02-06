@@ -49,6 +49,9 @@ class UserQuizAnswerAttempt {
     // optional - used for QuizQuestionType.TextInput
     String answer
 
+    // optional - used by AI Grader Task (TextInputQuestionAiGradingExecutor)
+    Integer aiGradingAttemptCount = 0
+
     @Column(name="created", updatable = false, insertable = false)
     Date created
 

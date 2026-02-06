@@ -65,7 +65,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         }
     }
 
-    def "AI grade text input and pass - single question quiz"() {
+    def "AI grade text input and PASS - single question quiz"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
@@ -99,7 +99,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[0].answers.gradingResult.gradedOn
     }
 
-    def "AI grade text input and pass - multiple questions"() {
+    def "AI grade text input and PASS - multiple questions"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         skillsService.createQuizQuestionDefs([
@@ -140,7 +140,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[1].answers.gradingResult == [null, null]
     }
 
-    def "AI grade text input and pass with partial requirement"() {
+    def "AI grade text input and PASS with partial requirement"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         skillsService.createQuizQuestionDefs([
@@ -194,7 +194,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[2].answers.gradingResult.gradedOn
     }
 
-    def "AI grade text input and pass with partial requirement - multiple ai graded questions"() {
+    def "AI grade text input and PASS with partial requirement - multiple ai graded questions"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         skillsService.createQuizQuestionDefs([
@@ -248,7 +248,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[2].answers.gradingResult.gradedOn
     }
 
-    def "AI grade text input and fail - single question quiz"() {
+    def "AI grade text input and FAIL - single question quiz"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
@@ -282,7 +282,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[0].answers.gradingResult.gradedOn
     }
 
-    def "AI grade text input and fail - multiple questions"() {
+    def "AI grade text input and FAIL - multiple questions"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         skillsService.createQuizQuestionDefs([
@@ -323,7 +323,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[1].answers.gradingResult == [null, null]
     }
 
-    def "AI grade text input and fail with partial requirement"() {
+    def "AI grade text input and FAIL with partial requirement"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         skillsService.createQuizQuestionDefs([
@@ -376,7 +376,8 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[2].answers.gradingResult.graderUserId == ['ai-grader']
         quizAttemptRes.questions[2].answers.gradingResult.gradedOn
     }
-    def "AI grade text input and fail because confidence is too low"() {
+    
+    def "AI grade text input and FAIL because confidence is too low"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
@@ -408,5 +409,37 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[0].answers.gradingResult.aiConfidenceLevel == [90]
         quizAttemptRes.questions[0].answers.gradingResult.graderUserId == ['ai-grader']
         quizAttemptRes.questions[0].answers.gradingResult.gradedOn
+    }
+    
+    def "AI grade text input and ERROR because confidence not returned from LLM"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createTextInputQuestion(1, 1)
+        skillsService.createQuizQuestionDefs([questions])
+        def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer. no-confidenceLevel", 95, true)
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should fail'])
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.needsGrading == true
+
+        when:
+        def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        then:
+        quizAttemptResBefore.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        quizAttemptResBefore.questions.isCorrect == [false]
+        quizAttemptResBefore.questions.needsGrading == [true]
+        quizAttemptResBefore.questions[0].answers.needsGrading == [true]
+        quizAttemptResBefore.questions[0].answers.gradingResult == [null]
+        quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        quizAttemptRes.questions.isCorrect == [false]
+        quizAttemptRes.questions.needsGrading == [true]
+        quizAttemptRes.questions[0].answers.needsGrading == [true]
+        quizAttemptRes.questions[0].answers.aiGradingAttemptCount == [4]
+        quizAttemptRes.questions[0].answers.gradingResult == [null]
     }
 }

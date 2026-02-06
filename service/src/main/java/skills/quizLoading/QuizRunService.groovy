@@ -916,6 +916,13 @@ class QuizRunService {
         return gradedResult
     }
 
+    @Transactional
+    void incrementAiGradingAttemptCount(Integer quizAttemptId, Integer answerDefId) {
+        UserQuizAnswerAttempt userQuizAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
+        log.debug("Incrementing aiGradingAttemptCount for userQuizAnswerAttempt=[{}]", userQuizAnswerAttempt)
+        userQuizAnswerAttempt.aiGradingAttemptCount++
+    }
+
     private Integer getMinNumQuestionsRequiredToPass(QuizDef quizDef, int numTotalQuestions) {
         Integer minNumQuestionsToPassConf = getMinNumQuestionsToPassSetting(quizDef.id)
         Integer minNumQuestionsToPass = minNumQuestionsToPassConf > 0 ? minNumQuestionsToPassConf : numTotalQuestions;

@@ -73,6 +73,16 @@ class TaskConfig {
     @Value('#{"${skills.config.expireUserAchievementsSchedule:DAILY|01:00}"}')
     String expireUserAchievementsSchedule
 
+    @Value('#{"${skills.config.aiGraderMaxRetries:48}"}')
+    int aiGraderMaxRetries
+
+    @Value('#{"${skills.config.exponentialBackOffSeconds:1800}"}')
+    int aiGraderExponentialBackOffSeconds
+
+    @Value('#{"${skills.config.exponentialBackOffRate:1}"}')
+    int aiGraderExponentialBackOffRate
+
+
     @Bean
     DbSchedulerCustomizer customizer() {
         return new DbSchedulerCustomizer() {
@@ -158,8 +168,8 @@ class TaskConfig {
     OneTimeTask<TextInputAiGradingRequest> gradeTextInputUsingAi(TextInputQuestionAiGradingExecutor textInputQuestionAiGradingExecutor) {
         return Tasks.oneTime("grade-text-input-using-ai", TextInputAiGradingRequest.class)
                 .onFailure(
-                        new DontRetryOnNoRetryExceptionHandler(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
-                                new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate)))
+                        new DontRetryOnNoRetryExceptionHandler(new FailureHandler.MaxRetriesFailureHandler(aiGraderMaxRetries,
+                                new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(aiGraderExponentialBackOffSeconds), aiGraderExponentialBackOffRate)))
                 )
                 .execute(textInputQuestionAiGradingExecutor);
     }

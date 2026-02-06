@@ -47,9 +47,13 @@ class TextInputQuestionAiGradingExecutor implements VoidExecutionHandler<TextInp
         String profName = "${data.quizId}-${data.userId}-${data.quizAttemptId}-${data.answerDefId}-TextInputQuestionAiGradingExecutor".toString()
         CProf.start(profName)
 
-        TextInputAIGradingResult textInputAIGradingResult = openAIService.gradeTextInputQuizAnswer(data.question, data.textInputAiGradingAttrs.correctAnswer, data.textInputAiGradingAttrs.minimumConfidenceLevel, data.studentAnswer)
-        QuizGradeAnswerReq quizGradeAnswerReq = new QuizGradeAnswerReq(isCorrect: textInputAIGradingResult.confidenceLevel >= data.textInputAiGradingAttrs.minimumConfidenceLevel, feedback: textInputAIGradingResult.gradingDecisionReason)
-        quizRunService.gradeQuestionAnswer(data.userId, data.quizId, data.quizAttemptId, data.answerDefId, quizGradeAnswerReq, true, textInputAIGradingResult.confidenceLevel)
+        try {
+            TextInputAIGradingResult textInputAIGradingResult = openAIService.gradeTextInputQuizAnswer(data.question, data.textInputAiGradingAttrs.correctAnswer, data.textInputAiGradingAttrs.minimumConfidenceLevel, data.studentAnswer)
+            QuizGradeAnswerReq quizGradeAnswerReq = new QuizGradeAnswerReq(isCorrect: textInputAIGradingResult.confidenceLevel >= data.textInputAiGradingAttrs.minimumConfidenceLevel, feedback: textInputAIGradingResult.gradingDecisionReason)
+            quizRunService.gradeQuestionAnswer(data.userId, data.quizId, data.quizAttemptId, data.answerDefId, quizGradeAnswerReq, true, textInputAIGradingResult.confidenceLevel)
+        } finally {
+            quizRunService.incrementAiGradingAttemptCount(data.quizAttemptId, data.answerDefId)
+        }
 
         CProf.stop(profName)
         log.info("Profiled TextInputQuestionAiGradingExecutor for [{}-{}-{}-{}]:\n{}", data.quizId, data.userId, data.quizAttemptId, data.answerDefId, CProf.prettyPrint())

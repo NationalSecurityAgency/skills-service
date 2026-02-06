@@ -224,11 +224,13 @@ class OpenAIService {
             // Parse JSON response into TextInputAIGradingResult
             def jsonSlurper = new JsonSlurper()
             def parsedResponse = jsonSlurper.parseText(extractJsonFromResponse(res))
+            assert parsedResponse.confidenceLevel && parsedResponse.confidenceLevel instanceof Integer, "invalid or missing confidenceLevel [${parsedResponse.confidenceLevel}]"
+            assert parsedResponse.gradingDecisionReason instanceof String, "invalid or missing gradingDecisionReason [${parsedResponse.gradingDecisionReason}]"
             return new TextInputAIGradingResult(
                     confidenceLevel: parsedResponse.confidenceLevel as Integer,
                     gradingDecisionReason: parsedResponse.gradingDecisionReason
             )
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Failed to parse JSON response from LLM: {}", res, e)
             throw new SkillException("Failed to parse LLM response: ${e.message}", e)
         }

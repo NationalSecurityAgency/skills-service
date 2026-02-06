@@ -3066,5 +3066,10 @@
                 <constraints nullable="true"/>
             </column>
         </addColumn>
+        <addColumn tableName="user_quiz_answer_attempt">
+            <column name="ai_grading_attempt_count" type="int" defaultValue="0">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>
