@@ -195,16 +195,14 @@ const reset = () => {
         </div>
       </div>
 
-      <div class="flex flex-col md:flex-row gap-2 pt-4 px-4">
+      <div class="flex flex-col pt-4 px-4 mb-6">
+        <label for="userId-filter" class="ml-1">User Id</label>
         <div class="w-full">
-          <label for="userId-filter" class="ml-1">User Id</label>
-          <InputText type="text" class="w-full mt-2" placeholder="User Id" v-model="filters.userId" id="userId-filter"
+          <InputText type="text" class="w-xl mt-2" placeholder="User Id" v-model="filters.userId" id="userId-filter"
                      v-on:keydown.enter="loadApprovals" data-cy="selfReportApproval-userIdFilter" />
+          <SkillsButton size="small" @click="loadApprovals" data-cy="selfReportApproval-filterBtn" icon="fa fa-filter" label="Filter" class="ml-2"/>
+          <SkillsButton size="small" @click="reset" class="ml-1" data-cy="selfReportApproval-resetBtn" label="Reset" icon="fa fa-times" />
         </div>
-      </div>
-      <div class="flex gap-2 mt-6 mb-6 px-4">
-        <SkillsButton size="small" @click="loadApprovals" data-cy="selfReportApproval-filterBtn" icon="fa fa-filter" label="Filter" />
-        <SkillsButton size="small" @click="reset" class="ml-1" data-cy="selfReportApproval-resetBtn" label="Reset" icon="fa fa-times" />
       </div>
 
       <SkillsDataTable :value="approvals"
