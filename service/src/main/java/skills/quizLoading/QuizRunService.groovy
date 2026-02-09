@@ -43,11 +43,7 @@ import skills.services.CustomValidationResult
 import skills.services.CustomValidator
 import skills.services.LockingService
 import skills.services.admin.UserCommunityService
-import skills.services.attributes.ExpirationAttrs
-import skills.services.attributes.QuestionAttrs
-import skills.services.attributes.SkillAttributeService
-import skills.services.attributes.SlidesAttrs
-import skills.services.attributes.TextInputAiGradingAttrs
+import skills.services.attributes.*
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.services.quiz.QuizQuestionType
@@ -921,6 +917,23 @@ class QuizRunService {
         UserQuizAnswerAttempt userQuizAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
         log.debug("Incrementing aiGradingAttemptCount for userQuizAnswerAttempt=[{}]", userQuizAnswerAttempt)
         userQuizAnswerAttempt.aiGradingAttemptCount++
+    }
+
+    void scheduleTextInputAiGradingRequest(String quizId, Integer questionId, TextInputAiGradingAttrs textInputAiGradingAttrs) {
+        Optional<QuizQuestionDef> questionRes = quizQuestionRepo.findById(questionId)
+        if (questionRes.isEmpty()) {
+            throw new SkillQuizException("Provided question id [${questionId}] does not exist", quizId);
+        }
+        QuizQuestionDef quizQuestionDef = questionRes.get()
+        List<UserQuizQuestionAttempt> needsGradingAttempts = quizQuestionAttemptRepo.findAllByQuizQuestionDefinitionRefIdAndStatus(questionId, UserQuizQuestionAttempt.QuizQuestionStatus.NEEDS_GRADING)
+        needsGradingAttempts.each {UserQuizQuestionAttempt needsGradingAttempt ->
+            Integer quizAttemptId = needsGradingAttempt.userQuizAttemptRefId
+            List<QuizAnswerDef> quizAnswerDefs = quizAnswerRepo.findAllByQuestionRefId(questionId)
+            assert quizAnswerDefs.size() == 1, "Unexpected number of quizAnswerDefs for TextInput question [${quizAnswerDefs.size()}]"
+            Integer answerDefId = quizAnswerDefs.first().id
+            UserQuizAnswerAttempt userQuizAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
+            taskSchedulerService.gradeTextInputUsingAi(new TextInputAiGradingRequest(userId: userQuizAnswerAttempt.userId, quizId: quizId, quizAttemptId: quizAttemptId, answerDefId: answerDefId, textInputAiGradingAttrs: textInputAiGradingAttrs, studentAnswer: userQuizAnswerAttempt.answer, question: quizQuestionDef.question))
+        }
     }
 
     private Integer getMinNumQuestionsRequiredToPass(QuizDef quizDef, int numTotalQuestions) {

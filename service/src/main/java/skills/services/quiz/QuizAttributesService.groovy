@@ -23,8 +23,8 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.QuizValidator
 import skills.controller.request.model.TextInputAiGradingConfRequest
+import skills.quizLoading.QuizRunService
 import skills.services.attributes.TextInputAiGradingAttrs
-import skills.storage.model.QuizQuestionDef
 import skills.storage.repos.QuizQuestionDefRepo
 
 @Service
@@ -35,6 +35,9 @@ class QuizAttributesService {
 
     @Autowired
     QuizQuestionDefRepo quizQuestionRepo
+
+    @Autowired
+    QuizRunService quizRunService
 
     @Autowired
     QuizValidatorService quizValidatorService
@@ -62,12 +65,16 @@ class QuizAttributesService {
         QuizValidator.isNotNull(gradingConfRequest.minimumConfidenceLevel, "Minimum Confidence Level")
         QuizValidator.isTrue(gradingConfRequest.minimumConfidenceLevel > 0 && gradingConfRequest.minimumConfidenceLevel <= 100, "Minimum Confidence Level must be > 0 and <= 100")
 
+        Boolean aiGradingWasPreviouslyEnabled = getTextInputAiGradingAttrs(quizId, questionId)?.enabled
         TextInputAiGradingAttrs textInputAiGradingAttrs = new TextInputAiGradingAttrs(
                 enabled: gradingConfRequest.enabled,
                 correctAnswer: gradingConfRequest.correctAnswer,
                 minimumConfidenceLevel: gradingConfRequest.minimumConfidenceLevel,
         )
         quizQuestionRepo.saveTextInputAiGradingAttrs(quizId, questionId, mapper.writeValueAsString(textInputAiGradingAttrs))
+        if (gradingConfRequest.enabled && !aiGradingWasPreviouslyEnabled) {
+            quizRunService.scheduleTextInputAiGradingRequest(quizId, questionId, textInputAiGradingAttrs)
+        }
 
         return textInputAiGradingAttrs
     }

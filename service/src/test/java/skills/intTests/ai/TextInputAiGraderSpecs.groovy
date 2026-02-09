@@ -477,4 +477,45 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [true]
         quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [true]
     }
+
+    def "Previously submitted answers will be sent for AI grading when AI grading gets enabled"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createTextInputQuestion(1, 1)
+        skillsService.createQuizQuestionDefs([questions])
+        def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should pass'])
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.needsGrading == true
+
+        when:
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer.", 90, true)
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+
+        then:
+        quizAttemptResBefore.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        quizAttemptResBefore.questions.isCorrect == [false]
+        quizAttemptResBefore.questions.needsGrading == [true]
+        quizAttemptResBefore.questions[0].answers.needsGrading == [true]
+        quizAttemptResBefore.questions[0].answers.gradingResult == [null]
+        quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        quizAttemptRes.questions.isCorrect == [true]
+        quizAttemptRes.questions.needsGrading == [false]
+        quizAttemptRes.questions[0].answers.needsGrading == [false]
+        quizAttemptRes.questions[0].answers.gradingResult.feedback == ["The student's answer demonstrates excellent understanding and closely matches the correct answer."]
+        quizAttemptRes.questions[0].answers.gradingResult.aiConfidenceLevel == [90]
+        quizAttemptRes.questions[0].answers.gradingResult.graderUserId == ['ai-grader']
+        quizAttemptRes.questions[0].answers.gradingResult.gradedOn
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptCount == [1]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [3]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [false]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [false]
+    }
 }
