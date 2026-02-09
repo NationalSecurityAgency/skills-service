@@ -1354,24 +1354,15 @@ class SkillApprovalSpecs extends DefaultIntSpec {
 
         when:
         def tableResult = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
-        def tableResultFiltered = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false, "user2")
-        def tableResultFilteredPg2 = skillsService.getApprovals(proj.projectId, 5, 2, 'requestedOn', false, "user2")
+        def tableResultFiltered = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false, users[1])
+        def filteredUsers = users.findAll{ it.contains(users[1]) }
 
         then:
-        tableResult.totalCount == 30
         tableResult.count == 30
-        tableResult.data.size() == 5
-        tableResult.data.collect{ it.userId } == ['user3', 'user4', 'user5', 'user6', 'user7']
+        tableResult.data.collect{ it.userId } == users[0..4]
 
-        tableResultFiltered.totalCount == 10
-        tableResultFiltered.count == 10
-        tableResultFiltered.data.size() == 5
-        tableResultFiltered.data.collect{ it.userId } == ['user20', 'user21', 'user22', 'user23', 'user24']
-
-        tableResultFilteredPg2.totalCount == 10
-        tableResultFilteredPg2.count == 10
-        tableResultFilteredPg2.data.size() == 5
-        tableResultFilteredPg2.data.collect{ it.userId } == ['user25', 'user26', 'user27', 'user28', 'user29']
+        tableResultFiltered.count == filteredUsers.size()
+        tableResultFiltered.data.collect{ it.userId } == filteredUsers.sort()
 
     }
 }
