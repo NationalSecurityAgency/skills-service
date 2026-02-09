@@ -717,7 +717,7 @@ class QuizRunService {
         if (userQuizAnswerAttempt.userQuizAttemptRefId != userQuizAttempt.id) {
             throw new SkillQuizException("Supplied quiz answer attempt id  [${userQuizAnswerAttempt.userQuizAttemptRefId}] does not match user quiz attempt id [${userQuizAttempt.id}]", ErrorCode.BadParam)
         }
-        if (aiAssistantGraded && !aiConfidenceLevel) {
+        if (aiAssistantGraded && aiConfidenceLevel == null) {
             throw new SkillQuizException("AI grader confidence level must be provided for AI assistant graded answer attempt", ErrorCode.BadParam)
         }
 
