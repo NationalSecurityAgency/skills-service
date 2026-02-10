@@ -417,10 +417,10 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
         skillsService.createQuizQuestionDefs([questions])
         def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
-        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer. no-confidenceLevel", 95, true)
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer.", 95, true)
 
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should fail'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should fail  no-confidenceLevel'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
@@ -466,16 +466,16 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         skillsService.createQuizQuestionDefs([q1, q2, q3, q4, q5]).body
         def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
 
-        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer. no-confidenceLevel", 95, true)
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer.", 95, true)
         skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[1].id, "This is the correct answer.", 95, true)
-        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[4].id, "This is the correct answer. no-confidenceLevel", 95, true)
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[4].id, "This is the correct answer.", 95, true)
 
         def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should fail'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should fail  no-confidenceLevel'])
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should pass'])
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id)
         skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[0].id, [isSelected: true, answerText: 'Please grade me'])
-        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[4].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should fail'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[4].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should fail  no-confidenceLevel'])
         def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
@@ -735,7 +735,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
         skillsService.createQuizQuestionDefs([questions])
         def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
-        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer. no-gradingDecisionReason", 95, true)
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer.", 95, true)
 
         UserAttrs quizAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
 
@@ -744,7 +744,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         def quizInfo = testTaker.getQuizInfo(quiz.quizId)
 
         def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
-        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should fail'])
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should fail  no-gradingDecisionReason'])
         def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
         assert gradedQuizAttempt.needsGrading == true
 
