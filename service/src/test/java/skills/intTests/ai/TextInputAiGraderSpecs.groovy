@@ -16,11 +16,14 @@
 package skills.intTests.ai
 
 import groovy.util.logging.Slf4j
+import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
 import skills.storage.model.UserAttrs
 import skills.storage.model.UserQuizAttempt
+import skills.utils.WaitFor
 
 @Slf4j
 class TextInputAiGraderSpecs extends DefaultAiIntSpec {
@@ -34,6 +37,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
                     userTagsLastUpdated: new Date())
             userAttrsRepo.save(userAttrs)
         }
+        startEmailServer()
     }
 
     def "AI grade text input and PASS - single question quiz"() {
@@ -611,5 +615,37 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [3]
         quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [false]
         quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [false]
+    }
+
+    def "AI graded text input - quiz grade request and graded notifications are sent"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createTextInputQuestion(1, 1)
+        skillsService.createQuizQuestionDefs([questions])
+        def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer.", 90, true)
+
+        List<String> users = getRandomUsers(1, true)
+        SkillsService testTaker = createService(users[0])
+        UserAttrs testTakerUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(testTaker.userName)
+
+        UserAttrs quizAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+
+        def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should pass'])
+        def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.needsGrading == true
+
+        when:
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
+        List<EmailUtils.EmailRes> emailRes = EmailUtils.getEmails(greenMail)
+
+        EmailUtils.EmailRes gradingRequest = emailRes.find {it.subj == "SkillTree Quiz Grading Requested" }
+        EmailUtils.EmailRes gradedResponse = emailRes.find {it.subj == "SkillTree Quiz Graded" }
+
+        then:
+        gradingRequest
+        gradedResponse
     }
 }
