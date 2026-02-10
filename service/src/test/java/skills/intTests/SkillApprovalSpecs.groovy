@@ -1346,11 +1346,13 @@ class SkillApprovalSpecs extends DefaultIntSpec {
 
         List<Date> dates = []
         List<String> users = getRandomUsers(30)
+        List<String> userIds = []
         30.times {
             Date date = new Date() - it
             dates << date
             def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[it], date, "Please approve this ${it}!")
             assert res.body.explanation == "Skill was submitted for approval"
+            userIds.push(getUserIdForDisplay(users[it]))
         }
 
         def userIdForDisplay = getUserIdForDisplay(users[1])
@@ -1358,14 +1360,14 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         when:
         def tableResult = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
         def tableResultFiltered = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false, userIdForDisplay)
-        def filteredUsers = users.findAll{ it.contains(userIdForDisplay) }
+        def filteredUsers = userIds.findAll{ it.contains(userIdForDisplay) }
 
         then:
         tableResult.count == 30
         tableResult.data.collect{ it.userId } == users[0..4]
 
         tableResultFiltered.count == filteredUsers.size()
-        tableResultFiltered.data.collect{ it.userId } == filteredUsers.sort()
+        tableResultFiltered.data.collect{ it.userIdForDisplay } == filteredUsers.sort()
 
     }
 
