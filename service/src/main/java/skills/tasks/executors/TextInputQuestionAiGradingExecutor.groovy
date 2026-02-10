@@ -23,9 +23,11 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.result.model.TextInputAIGradingResult
+import skills.quizLoading.QuizNotificationService
 import skills.quizLoading.QuizRunService
 import skills.quizLoading.model.QuizGradeAnswerReq
 import skills.services.openai.OpenAIService
+import skills.tasks.config.TaskConfig
 import skills.tasks.data.TextInputAiGradingRequest
 
 @Component
@@ -37,6 +39,12 @@ class TextInputQuestionAiGradingExecutor implements VoidExecutionHandler<TextInp
 
     @Autowired
     OpenAIService openAIService
+
+    @Autowired
+    QuizNotificationService quizNotificationService
+
+    @Autowired
+    TaskConfig taskConfig
 
     @Override
     void execute(TaskInstance<TextInputAiGradingRequest> taskInstance, ExecutionContext executionContext) {
@@ -52,7 +60,19 @@ class TextInputQuestionAiGradingExecutor implements VoidExecutionHandler<TextInp
             QuizGradeAnswerReq quizGradeAnswerReq = new QuizGradeAnswerReq(isCorrect: textInputAIGradingResult.confidenceLevel >= data.textInputAiGradingAttrs.minimumConfidenceLevel, feedback: textInputAIGradingResult.gradingDecisionReason)
             quizRunService.gradeQuestionAnswer(data.userId, data.quizId, data.quizAttemptId, data.answerDefId, quizGradeAnswerReq, true, textInputAIGradingResult.confidenceLevel)
         } finally {
-            quizRunService.incrementAiGradingAttemptCount(data.quizAttemptId, data.answerDefId)
+            int newAttemptCount = quizRunService.incrementAiGradingAttemptCount(data.quizAttemptId, data.answerDefId)
+            
+            // Check if max attempts have been reached and trigger notification if needed
+            if (newAttemptCount >= taskConfig.aiGraderMaxRetries+1) {
+                log.info("AI grading failed after {} attempts for quizId=[{}], userId=[{}], quizAttemptId={}, answerDefId={}. Triggering failure notification.", 
+                    newAttemptCount, data.quizId, data.userId, data.quizAttemptId, data.answerDefId)
+                
+                // Get quiz definition to send notification
+                def quizDef = quizRunService.getQuizDef(data.quizId)
+                if (quizDef) {
+                    quizNotificationService.sendTextInputAiGradingFailedNotifications(quizDef, data.userId)
+                }
+            }
         }
 
         CProf.stop(profName)

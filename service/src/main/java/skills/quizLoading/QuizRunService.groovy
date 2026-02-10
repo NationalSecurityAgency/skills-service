@@ -922,10 +922,11 @@ class QuizRunService {
     }
 
     @Transactional
-    void incrementAiGradingAttemptCount(Integer quizAttemptId, Integer answerDefId) {
+    int incrementAiGradingAttemptCount(Integer quizAttemptId, Integer answerDefId) {
         UserQuizAnswerAttempt userQuizAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
         log.debug("Incrementing aiGradingAttemptCount for userQuizAnswerAttempt=[{}]", userQuizAnswerAttempt)
         userQuizAnswerAttempt.aiGradingAttemptCount++
+        return userQuizAnswerAttempt.aiGradingAttemptCount
     }
 
     void scheduleTextInputAiGradingRequest(String quizId, Integer questionId, TextInputAiGradingAttrs textInputAiGradingAttrs) {
@@ -1022,7 +1023,7 @@ class QuizRunService {
         return new TableResult(totalCount: count, data: quizAttempts, count: count)
     }
 
-    private QuizDef getQuizDef(String quizId) {
+    QuizDef getQuizDef(String quizId) {
         QuizDef quizDef = quizDefRepo.findByQuizIdIgnoreCase(quizId)
         if (!quizDef) {
             throw new SkillQuizException("Failed to find quiz id.", quizId, ErrorCode.BadParam)

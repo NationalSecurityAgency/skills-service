@@ -30,7 +30,7 @@ class Notification {
 
     static enum Type {
         SkillApprovalRequested, SkillApprovalResponse, ProjectExpiration, ContactUsers, ContactOwner, InviteOnly, InviteOnlyReminder, PasswordReset, VerifyEmail,
-        QuizGradingRequested, QuizGradedResponse, NewInviteRequest
+        QuizGradingRequested, QuizGradedResponse, NewInviteRequest, TextInputAiGradingFailed
     }
 
     static class KeyValParam {
