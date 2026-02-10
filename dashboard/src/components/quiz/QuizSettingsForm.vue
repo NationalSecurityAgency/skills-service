@@ -69,6 +69,7 @@ const schema = props.isSurvey ? yup.object().shape({'quizMultipleTakes': yup.boo
   'retakeIncorrectQuestions': yup.boolean(),
   'quizShowAnswerHintsOnRetakeAttemptsOnly': yup.boolean(),
   'showDescriptionOnQuizPage': yup.boolean(),
+  'quizHideCorrectAnswersOnCompletedQuiz': yup.boolean(),
   'quizTimeLimitUnlimited': yup.boolean(),
   'quizTimeLimitHours': yup.number()
       .when('quizTimeLimitUnlimited', {
@@ -345,6 +346,20 @@ const updateTimeLimit = () => {
             inputId="showDescriptionOnQuizPage"
             aria-label="Show the quiz description on the quiz run"
             data-cy="showDescriptionOnQuizPageSwitch"/>
+        <span class="mx-2 align-top">Enabled</span>
+      </div>
+    </div>
+
+    <div class="field grid grid-cols-12 gap-4 items-start" v-if="!isSurvey">
+      <div class="col-span-12 mb-2 md:col-span-3 md:mb-0 text-muted-color">
+        <label for="quizHideCorrectAnswersOnCompletedQuiz">Hide Answers for Completed Quizzes:</label>
+      </div>
+      <div class="col-span-12 md:col-span-9">
+        <SkillsInputSwitch
+            name="quizHideCorrectAnswersOnCompletedQuiz"
+            inputId="quizHideCorrectAnswersOnCompletedQuiz"
+            aria-label="Hide Answers for Completed Quizzes"
+            data-cy="quizHideCorrectAnswersOnCompletedQuiz"/>
         <span class="mx-2 align-top">Enabled</span>
       </div>
     </div>

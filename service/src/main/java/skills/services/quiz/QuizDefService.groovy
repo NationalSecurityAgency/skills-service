@@ -1030,6 +1030,7 @@ class QuizDefService {
         if (userCommunityService.isUserCommunityOnlyQuiz(quizDef.id) && !userCommunityService.isUserCommunityMember(currentUser.username)) {
             throw new SkillQuizException("User [${currentUser.username}] does not have access to quiz [${quizAttemptId}]", quizDef.quizId, ErrorCode.AccessDenied)
         }
+
         return getAttemptGradedResult(quizDef, userQuizAttempt, false)
     }
 
@@ -1056,6 +1057,7 @@ class QuizDefService {
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userQuizAttempt.userId)
         List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = userQuizAnswerAttemptRepo.getSelectedAnswerIdsAndText(userQuizAttempt.id)
         List<UserQuizAnswerGradedRepo.GradedInfo> manuallyGradedAnswers = userQuizAnswerGradedRepo.getGradedAnswersForQuizAttemptId(userQuizAttempt.id)
+        boolean shouldHideQuestions = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.HideCorrectAnswersOnCompletedQuiz.setting, quizDef.id)?.isEnabled()
 
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findQuestionDefsForSpecificQuizAttempt(userQuizAttempt.id)
         List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuestionRefIdIn(dbQuestionDefs.collect({it.id}))
@@ -1174,12 +1176,13 @@ class QuizDefService {
             }
         }
         Integer numQuestionsPassed = questions.count { it.isCorrect }
+
         return new UserGradedQuizQuestionsResult(quizType: quizDef.type,
                 quizName: quizDef.name,
                 userId: userAttrs.userId,
                 userIdForDisplay: userAttrs.userIdForDisplay,
                 status: userQuizAttempt.status,
-                questions: questionsToReturn ?: null,
+                questions: shouldHideQuestions ? [] : (questionsToReturn ?: null),
                 allQuestionsReturned: questionsToReturn.size() == questions.size(),
                 numQuestions: questions.size(),
                 numQuestionsToPass: numQuestionsToPass,
@@ -1187,6 +1190,7 @@ class QuizDefService {
                 started: userQuizAttempt.started,
                 completed: userQuizAttempt.completed,
                 userTag: userTag,
+                questionsHidden: shouldHideQuestions
         )
     }
 

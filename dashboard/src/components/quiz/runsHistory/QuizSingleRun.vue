@@ -129,6 +129,9 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
     <Message v-if="runInfo.questions && !runInfo.allQuestionsReturned" severity="warn" :closable="false" class="mt-8" data-cy="someQuestionsNotDisplayedMsg">
       The rest of the questions and answers are not displayed so not to give away the correct answers.
     </Message>
+    <Message v-if="runInfo.questionsHidden" severity="warn" :closable="false" class="mt-8" data-cy="questionsHidden">
+      The questions and answers for this quiz are not displayed so not to give away the correct answers.
+    </Message>
   </div>
 </template>
 

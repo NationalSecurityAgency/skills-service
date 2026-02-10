@@ -78,7 +78,11 @@ const settings = ref({
   showDescriptionOnQuizPage: {
     value: false,
     setting: 'quizShowDescriptionOnQuizPage'
-  }
+  },
+  quizHideCorrectAnswersOnCompletedQuiz: {
+    value: false,
+    setting: 'quizHideCorrectAnswersOnCompletedQuiz'
+  },
 });
 const hoursForQuiz = ref(1)
 const minutesForQuiz = ref( 0)
@@ -130,7 +134,15 @@ const loadAndUpdateQuizSettings = () => {
                   minutesForQuiz.value =  remainingTime / 60;
                   settings.value.quizTimeLimit.unlimited = false;
                 }
-              } else if ([settings.value.randomizeQuestions.setting, settings.value.randomizeAnswers.setting, settings.value.multipleTakes.setting, settings.value.alwaysShowCorrectAnswers.setting, settings.value.retakeIncorrectQuestions.setting, settings.value.quizShowAnswerHintsOnRetakeAttemptsOnly.setting, settings.value.showDescriptionOnQuizPage.setting].includes(foundFromServer.setting)) {
+              } else if ([settings.value.randomizeQuestions.setting,
+                          settings.value.randomizeAnswers.setting,
+                          settings.value.multipleTakes.setting,
+                          settings.value.alwaysShowCorrectAnswers.setting,
+                          settings.value.retakeIncorrectQuestions.setting,
+                          settings.value.quizShowAnswerHintsOnRetakeAttemptsOnly.setting,
+                          settings.value.showDescriptionOnQuizPage.setting,
+                          settings.value.quizHideCorrectAnswersOnCompletedQuiz.setting
+              ].includes(foundFromServer.setting)) {
                 settings.value[key].value = (/true/i).test(foundFromServer.value);
               } else {
                 settings.value[key].value = foundFromServer.value;
@@ -153,6 +165,7 @@ const loadAndUpdateQuizSettings = () => {
             quizRetakeIncorrectQuestions: settings.value.retakeIncorrectQuestions.value,
             quizShowAnswerHintsOnRetakeAttemptsOnly: settings.value.quizShowAnswerHintsOnRetakeAttemptsOnly.value,
             quizShowDescriptionOnQuizPage: settings.value.showDescriptionOnQuizPage.value,
+            quizHideCorrectAnswersOnCompletedQuiz: settings.value.quizHideCorrectAnswersOnCompletedQuiz.value,
           }
         }
       });
