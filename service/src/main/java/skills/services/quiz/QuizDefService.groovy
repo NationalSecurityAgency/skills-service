@@ -1061,7 +1061,7 @@ class QuizDefService {
                         Boolean needsGrading = foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING
                         Integer aiGradingAttemptCount = foundSelected?.aiGradingAttemptCount ?: 0
                         Integer aiGradingAttemptsLeft = (taskConfig.aiGraderMaxRetries + 1) - aiGradingAttemptCount
-                        Boolean aiGradingHasFailedAttempts = needsGrading && aiGradingAttemptCount >=1
+                        Boolean aiGradingHasFailedAttempts = aiGradingAttemptCount > 1 || (needsGrading && aiGradingAttemptCount == 1)
                         Boolean aiGradingHasFailed = aiGradingAttemptsLeft <= 0
                         return new UserGradedQuizAnswerResult(
                                 id: answerDef.id,
