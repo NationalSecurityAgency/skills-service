@@ -162,7 +162,6 @@ const toggleRow = (row) => {
   expandedRows.value = { ...expandedRows.value };
 }
 
-
 const reset = () => {
   filters.value.userId = '';
   loadApprovals();
