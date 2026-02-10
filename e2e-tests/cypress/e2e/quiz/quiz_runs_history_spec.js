@@ -574,4 +574,38 @@ describe('Quiz Runs History Tests', () => {
             [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Failed' }],
         ], 10);
     });
+
+    it('quiz runs include results', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizMultipleChoiceQuestionDef(1, 2);
+        cy.createQuizQuestionDef(1, 3);
+        cy.createQuizQuestionDef(1, 4);
+
+        cy.runQuizForUser(1, 1, [{selectedIndex: [1]}, {selectedIndex: [0, 3]}, {selectedIndex: [2]}, {selectedIndex: [2]}])
+        cy.runQuizForUser(1, 2, [{selectedIndex: [1]}, {selectedIndex: [0, 3]}, {selectedIndex: [2]}, {selectedIndex: [2]}])
+        cy.runQuizForUser(1, 3, [{selectedIndex: [1]}, {selectedIndex: [0, 3]}, {selectedIndex: [2]}, {selectedIndex: [2]}])
+        cy.runQuizForUser(1, 4, [{selectedIndex: [0]}, {selectedIndex: [0, 3]}, {selectedIndex: [2]}, {selectedIndex: [2]}])
+        cy.runQuizForUser(1, 5, [{selectedIndex: [0]}, {selectedIndex: [0, 3]}, {selectedIndex: [2]}, {selectedIndex: [2]}])
+        cy.runQuizForUser(1, 6, [{selectedIndex: [0]}, {selectedIndex: [0, 3]}, {selectedIndex: [2]}, {selectedIndex: [2]}])
+        cy.runQuizForUser(1, 7, [{selectedIndex: [0]}, {selectedIndex: [0, 2]}, {selectedIndex: [2]}, {selectedIndex: [2]}])
+        cy.runQuizForUser(1, 8, [{selectedIndex: [0]}, {selectedIndex: [0, 2]}, {selectedIndex: [2]}, {selectedIndex: [2]}])
+        cy.runQuizForUser(1, 9, [{selectedIndex: [0]}, {selectedIndex: [0, 2]}, {selectedIndex: [2]}, {selectedIndex: [0]}])
+        cy.runQuizForUser(1, 10, [{selectedIndex: [0]}, {selectedIndex: [0, 2]}, {selectedIndex: [2]}, {selectedIndex: [0]}])
+
+        cy.visit('/administrator/quizzes/quiz1/runs');
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Passed' }, { colIndex: 5, value: '4 correctout of 4 (100%)' }],
+            [{ colIndex: 0, value: 'user9' }, { colIndex: 2, value: 'Passed' }, { colIndex: 5, value: '4 correctout of 4 (100%)' }],
+            [{ colIndex: 0, value: 'user8' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '3 correctout of 4 (75%)' }],
+            [{ colIndex: 0, value: 'user7' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '3 correctout of 4 (75%)' }],
+            [{ colIndex: 0, value: 'user6' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '2 correctout of 4 (50%)' }],
+            [{ colIndex: 0, value: 'user5' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '2 correctout of 4 (50%)' }],
+            [{ colIndex: 0, value: 'user4' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '2 correctout of 4 (50%)' }],
+            [{ colIndex: 0, value: 'user3' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '1 correctout of 4 (25%)' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '1 correctout of 4 (25%)' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '1 correctout of 4 (25%)' }],
+        ], 10);
+    });
 });

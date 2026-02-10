@@ -78,6 +78,8 @@ class QuizRunsSpecs extends DefaultIntSpec {
                                  UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                  UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
         ]
+        quizRuns.data.numberCorrect == [2, 1, 2, 1, 2, 1, 2, 1, 2, 1]
+        quizRuns.data.totalAnswers == [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
 
         quizRuns_pg1.totalCount == users.size()
         quizRuns_pg1.count == users.size()
@@ -86,6 +88,8 @@ class QuizRunsSpecs extends DefaultIntSpec {
                                      UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
         ]
+        quizRuns_pg1.data.numberCorrect == [2, 1, 2]
+        quizRuns_pg1.data.totalAnswers == [2, 2, 2]
 
         quizRuns_pg2.totalCount == users.size()
         quizRuns_pg2.count == users.size()
@@ -94,6 +98,8 @@ class QuizRunsSpecs extends DefaultIntSpec {
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
         ]
+        quizRuns_pg2.data.numberCorrect == [1, 2, 1]
+        quizRuns_pg2.data.totalAnswers == [2, 2, 2]
 
         quizRuns_pg3.totalCount == users.size()
         quizRuns_pg3.count == users.size()
@@ -102,13 +108,16 @@ class QuizRunsSpecs extends DefaultIntSpec {
                                      UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
         ]
+        quizRuns_pg3.data.numberCorrect == [2, 1, 2]
+        quizRuns_pg3.data.totalAnswers == [2, 2, 2]
 
         quizRuns_pg4.totalCount == users.size()
         quizRuns_pg4.count == users.size()
         quizRuns_pg4.data.userId == users[9..9]
         quizRuns_pg4.data.status == [UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
         ]
-
+        quizRuns_pg4.data.numberCorrect == [1]
+        quizRuns_pg4.data.totalAnswers == [2]
     }
 
     def "get quiz runs empty page"() {

@@ -138,8 +138,18 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                            userAttrs.user_id_for_display as userIdForDisplay,
                            ut.value                      as userTag, 
                            userAttrs.first_name          as firstName,
-                           userAttrs.last_name           as lastName
-                    from user_quiz_attempt quizAttempt,
+                           userAttrs.last_name           as lastName,
+                           COALESCE(uqa.numberCorrect, 0) as numberCorrect,
+                           COALESCE(uqa.totalAnswers, 0) as totalAnswers
+                    from user_quiz_attempt quizAttempt
+                        left join (
+                                 select 
+                                     user_quiz_attempt_ref_id,
+                                     sum(case when status = 'CORRECT' then 1 else 0 end) as numberCorrect,
+                                     count(*) as totalAnswers
+                                 from user_quiz_question_attempt 
+                                 group by user_quiz_attempt_ref_id
+                             ) uqa on uqa.user_quiz_attempt_ref_id = quizAttempt.id,
                          quiz_definition quizDef,
                          user_attrs userAttrs
                              left join (SELECT ut.user_id, max(ut.value) AS value
