@@ -21,6 +21,8 @@ import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
 import { useTimeUtils } from "@/common-components/utilities/UseTimeUtils.js";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import AiConfidenceTag from "@/components/quiz/testCreation/AiConfidenceTag.vue";
+import GradingStatusMessage from "@/components/quiz/runsHistory/GradingStatusMessage.vue";
 
 const props = defineProps({
   quizType: String,
@@ -58,7 +60,15 @@ const hasAnswer = computed(() => {
 const needsGrading = computed(() => {
   return props.question.needsGrading
 })
-const showAiGradedTag = computed(() => appConfig.enableOpenAIIntegration && props.showAiGradingMeta && needsGrading.value && props.question.aiGradingConfigured)
+const aiGradingInfo = computed(() => {
+  if (!appConfig.enableOpenAIIntegration || !props.question || props.question.length === 0) {
+    return null
+  }
+  return props.question.answers[0]?.aiGradingStatus
+})
+
+const doShowAiGradingMeta = computed(() => appConfig.enableOpenAIIntegration && props.showAiGradingMeta)
+const showAiGradedTag = computed(() => doShowAiGradingMeta.value && needsGrading.value && props.question.aiGradingConfigured && !aiGradingInfo.value?.failed)
 const isWrong = computed(() => {
   return hasAnswer.value && !needsGrading.value && !props.question.isCorrect
 })
@@ -102,6 +112,8 @@ const isAiGraded = computed(() => {
         </div>
 
       </div>
+      <grading-status-message :question="question" />
+
       <div v-if="!hasAnswer" class="flex flex-row" data-cy="noAnswer">
         <Tag severity="warn">No Answer</Tag>
       </div>
@@ -198,6 +210,15 @@ const isAiGraded = computed(() => {
                   :text="manuallyGradedInfo.feedback"
                   :instance-id="`${question.id}_feedback`"
                   :data-cy="`feedbackDisplayText_q${question.id}`"/>
+            </div>
+
+            <div v-if="doShowAiGradingMeta" class="mt-3">
+              <div class="flex gap-2 items-center"><span>AI Confidence Level:</span>
+                <div class="flex gap-2 items-center">
+                  <span class="font-bold" data-cy="gradeResConfidence">{{ manuallyGradedInfo.aiConfidenceLevel }}%</span>
+                  <ai-confidence-tag :confidence-percent="manuallyGradedInfo.aiConfidenceLevel" />
+                </div>
+              </div>
             </div>
           </div>
 

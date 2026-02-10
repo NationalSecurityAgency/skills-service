@@ -13,10 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import dayjs from 'dayjs';
-import relativeTimePlugin from 'dayjs/plugin/relativeTime';
-import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
-import moment from "moment-timezone";
 
 describe('Display quiz that has ai-graded answers', () => {
 
@@ -78,6 +74,8 @@ describe('Display quiz that has ai-graded answers', () => {
         cy.get('[data-cy="manuallyGradedInfo"] [data-cy="adminGraded"]').should('not.exist')
         cy.get('[data-cy="manuallyGradedInfo"] [data-cy="grader"]').should('have.text', 'Grader: AI Assistant')
         cy.get('[data-cy="manuallyGradedInfo"] [data-cy="feedback"]').contains('Your answer has confidence level of 92')
+        cy.get('[data-cy="aiGradingFailedButHasRetriesMsg"]').should('not.exist')
+        cy.get('[data-cy="aiGradingFailedMsg"]').should('not.exist')
     });
 
     it('ai graded question on trainee skill page', () => {
@@ -89,6 +87,8 @@ describe('Display quiz that has ai-graded answers', () => {
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="adminGraded"]').should('not.exist')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').should('have.text', 'Grader: AI Assistant')
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').contains('Your answer has confidence level of 92')
+        cy.get('[data-cy="aiGradingFailedButHasRetriesMsg"]').should('not.exist')
+        cy.get('[data-cy="aiGradingFailedMsg"]').should('not.exist')
     });
 
     it('skills-client: ai graded question on trainee skill page', () => {
@@ -131,13 +131,14 @@ describe('Display quiz that has ai-graded answers', () => {
 
         cy.get('[data-cy="quizRequiresGradingMsg"]')
         cy.get('[data-cy="quizCompletedMsg"]').should('not.exist')
-        cy.wait(2000)
+        cy.get('[data-cy="aiGradingFailedButHasRetriesMsg"]').should('not.exist')
+        cy.get('[data-cy="aiGradingFailedMsg"]').should('not.exist')
 
         cy.logout()
         cy.loginAsDefaultUser()
     });
 
-    it('ai graded question on admin quiz run page', () => {
+    it('ai grading info on admin quiz run page', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
@@ -145,6 +146,7 @@ describe('Display quiz that has ai-graded answers', () => {
                 res.send(conf);
             });
         }).as('getConfig');
+
         cy.visit('/administrator/quizzes/quiz1/runs');
         cy.wait('@getConfig')
 
@@ -166,6 +168,8 @@ describe('Display quiz that has ai-graded answers', () => {
         cy.get('[data-cy="manuallyGradedInfo"] [data-cy="grader"]').should('have.text', 'Grader: AI Assistant')
         cy.get('[data-cy="manuallyGradedInfo"] [data-cy="feedback"]').contains('Your answer has confidence level of 92')
         cy.get('[data-cy="quizRequiresGradingMsg"]').should('not.exist')
+        cy.get('[data-cy="aiGradingFailedButHasRetriesMsg"]').should('not.exist')
+        cy.get('[data-cy="aiGradingFailedMsg"]').should('not.exist')
 
         cy.go('back')
         cy.validateTable(tableSelector, [
@@ -181,12 +185,38 @@ describe('Display quiz that has ai-graded answers', () => {
         cy.get(`${tableSelector} [data-cy="row0-viewRun"]`).click()
 
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="noAnswer"]')
-        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="queuedForAiGradingTag"]')
+        cy.get('[data-cy="aiGradingFailedMsg"]').contains('failed to grade this question after 2 attempts')
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="queuedForAiGradingTag"]').should('not.exist')
         cy.get('[data-cy="manuallyGradedInfo"]').should('not.exist')
         cy.get('[data-cy="quizRequiresGradingMsg"]').should('not.exist')
+        cy.get('[data-cy="aiGradingFailedButHasRetriesMsg"]').should('not.exist')
+
+
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/runs/**', (req) => {
+            req.reply((res) => {
+                const quizRun = res.body;
+                const aiGradingStatus = quizRun.questions[0].answers[0].aiGradingStatus
+                aiGradingStatus.failed = false;
+                aiGradingStatus.attemptCount = 2;
+                aiGradingStatus.attemptsLeft = 18;
+                res.send(quizRun);
+            });
+        }).as('getQuizRun');
+
+        cy.reload()
+        cy.wait('@getQuizRun')
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="noAnswer"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="queuedForAiGradingTag"]')
+        cy.get('[data-cy="aiGradingFailedButHasRetriesMsg"]').contains('18 attempts remaining out of 20')
+        cy.get('[data-cy="manuallyGradedInfo"]').should('not.exist')
+        cy.get('[data-cy="quizRequiresGradingMsg"]').should('not.exist')
+        cy.get('[data-cy="aiGradingFailedMsg"]').should('not.exist')
+
     });
 
-    it('ai grading pending ', () => {
+    it('ai grading info on admin grading page', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
@@ -198,9 +228,142 @@ describe('Display quiz that has ai-graded answers', () => {
         cy.wait('@getConfig')
 
         const tableSelector = '[data-cy="quizRunsToGradeTable"]'
-        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="queuedForAiGradingMsg"]`)
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="aiGradingFailedMsg"]`)
         cy.get(`${tableSelector} [data-p-index="0"] [data-cy="gradeBtn_user1@skills.net"]`).click()
+
+        cy.get('[data-cy="gradeAttemptFor_user1@skills.net"] [data-cy="question_1"]  [data-cy="aiGradingFailedMsg"]').contains('failed to grade this question after 2 attempts')
+        cy.get('[data-cy="gradeAttemptFor_user1@skills.net"] [data-cy="question_1"] [data-cy="aiManualGradingLongMsg"]').should('not.exist')
+
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/runs**', (req) => {
+            req.reply((res) => {
+                const quizRuns = res.body;
+                quizRuns.data[0].aiGradingStatus[0].failed = false
+                quizRuns.data[0].aiGradingStatus[0].attemptsLeft = 11
+                res.send(quizRuns);
+            });
+        }).as('getQuizRunSomeFailedAttempts');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/runs/**', (req) => {
+            req.reply((res) => {
+                const quizRun = res.body;
+                const aiGradingStatus = quizRun.questions[0].answers[0].aiGradingStatus
+                aiGradingStatus.failed = false;
+                aiGradingStatus.attemptCount = 2;
+                aiGradingStatus.attemptsLeft = 18;
+                res.send(quizRun);
+            });
+        }).as('getSingleQuizSomeFailedAttempts');
+        cy.visit('/administrator/quizzes/quiz1/grading');
+        cy.wait('@getConfig')
+        cy.wait('@getQuizRunSomeFailedAttempts')
+
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="queuedForAiGradingMsg"]`)
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="aiGradingFailedMsg"]`).should('not.exist')
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="gradeBtn_user1@skills.net"]`).click()
+        cy.wait('@getSingleQuizSomeFailedAttempts')
+
+        cy.get('[data-cy="gradeAttemptFor_user1@skills.net"] [data-cy="question_1"]  [data-cy="aiGradingFailedMsg"]').should('not.exist')
+        cy.get('[data-cy="gradeAttemptFor_user1@skills.net"] [data-cy="question_1"]  [data-cy="aiGradingFailedButHasRetriesMsg"]').contains('18 attempts remaining out of 20')
+        cy.get('[data-cy="gradeAttemptFor_user1@skills.net"] [data-cy="question_1"] [data-cy="aiManualGradingLongMsg"]').should('not.exist')
+
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/runs**', (req) => {
+            req.reply((res) => {
+                const quizRuns = res.body;
+                quizRuns.data[0].aiGradingStatus[0].failed = false
+                quizRuns.data[0].aiGradingStatus[0].hasFailedAttempts = false
+                quizRuns.data[0].aiGradingStatus[0].attemptCount = 0
+                quizRuns.data[0].aiGradingStatus[0].attemptsLeft = 20
+                res.send(quizRuns);
+            });
+        }).as('getQuizRunNoFailures');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/runs/**', (req) => {
+            req.reply((res) => {
+                const quizRun = res.body;
+                const aiGradingStatus = quizRun.questions[0].answers[0].aiGradingStatus
+                aiGradingStatus.failed = false;
+                aiGradingStatus.hasFailedAttempts = false
+                aiGradingStatus.attemptCount = 0;
+                aiGradingStatus.attemptsLeft = 20;
+                res.send(quizRun);
+            });
+        }).as('getSingleQuizNoFailures');
+        cy.visit('/administrator/quizzes/quiz1/grading');
+        cy.wait('@getConfig')
+        cy.wait('@getQuizRunNoFailures')
+
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="queuedForAiGradingMsg"]`)
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="aiGradingFailedMsg"]`).should('not.exist')
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="gradeBtn_user1@skills.net"]`).click()
+        cy.wait('@getSingleQuizNoFailures')
+
         cy.get('[data-cy="gradeAttemptFor_user1@skills.net"] [data-cy="question_1"] [data-cy="aiManualGradingLongMsg"]')
+        cy.get('[data-cy="gradeAttemptFor_user1@skills.net"] [data-cy="question_1"]  [data-cy="aiGradingFailedMsg"]').should('not.exist')
+        cy.get('[data-cy="gradeAttemptFor_user1@skills.net"] [data-cy="question_1"]  [data-cy="aiGradingFailedButHasRetriesMsg"]').should('not.exist')
+    });
+
+    it('ai grading info on admin grading page table with multiple grading info items', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/runs**', (req) => {
+            req.reply((res) => {
+                const quizRuns = res.body;
+                quizRuns.data[0].aiGradingStatus = [
+                    { failed: false, hasFailedAttempts: false, attemptCount: 0, attemptsLeft: 20 },
+                    { failed: false, hasFailedAttempts: false, attemptCount: 0, attemptsLeft: 20 },
+                    { failed: false, hasFailedAttempts: false, attemptCount: 0, attemptsLeft: 20 }
+                ]
+                res.send(quizRuns);
+            });
+        }).as('getQuizRunNoFailedAttempts');
+        cy.visit('/administrator/quizzes/quiz1/grading');
+        cy.wait('@getConfig')
+        cy.wait('@getQuizRunNoFailedAttempts')
+
+        const tableSelector = '[data-cy="quizRunsToGradeTable"]'
+
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="queuedForAiGradingMsg"]`)
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="aiGradingFailedMsg"]`).should('not.exist')
+
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/runs**', (req) => {
+            req.reply((res) => {
+                const quizRuns = res.body;
+                quizRuns.data[0].aiGradingStatus = [
+                    { failed: false, hasFailedAttempts: false, attemptCount: 0, attemptsLeft: 20 },
+                    { failed: false, hasFailedAttempts: true, attemptCount: 1, attemptsLeft: 20 },
+                    { failed: true, hasFailedAttempts: true, attemptCount: 20, attemptsLeft: 0 }
+                ]
+                res.send(quizRuns);
+            });
+        }).as('getQuizRunSomeFailedAttempts');
+        cy.visit('/administrator/quizzes/quiz1/grading');
+        cy.wait('@getConfig')
+        cy.wait('@getQuizRunSomeFailedAttempts')
+
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="queuedForAiGradingMsg"]`)
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="aiGradingFailedMsg"]`).should('not.exist')
+
+
+        cy.intercept('GET', '/admin/quiz-definitions/quiz1/runs**', (req) => {
+            req.reply((res) => {
+                const quizRuns = res.body;
+                quizRuns.data[0].aiGradingStatus = [
+                    { failed: true, hasFailedAttempts: true, attemptCount: 20, attemptsLeft: 0 },
+                    { failed: true, hasFailedAttempts: true, attemptCount: 20, attemptsLeft: 0 },
+                    { failed: true, hasFailedAttempts: true, attemptCount: 20, attemptsLeft: 0 }
+                ]
+                res.send(quizRuns);
+            });
+        }).as('getQuizRunAllFailed');
+        cy.visit('/administrator/quizzes/quiz1/grading');
+        cy.wait('@getConfig')
+        cy.wait('@getQuizRunAllFailed')
+
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="aiGradingFailedMsg"]`)
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="queuedForAiGradingMsg"]`).should('not.exist')
     });
 
     it('all questions were graded since the table was loaded', () => {
@@ -223,7 +386,6 @@ describe('Display quiz that has ai-graded answers', () => {
         cy.wait('@getConfig')
 
         const tableSelector = '[data-cy="quizRunsToGradeTable"]'
-        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="queuedForAiGradingMsg"]`)
         cy.get(`${tableSelector} [data-p-index="0"] [data-cy="gradeBtn_user1@skills.net"]`).click()
         cy.wait('@getSingleQuizRun')
 
@@ -253,10 +415,8 @@ describe('Display quiz that has ai-graded answers', () => {
         cy.wait('@getConfig')
 
         const tableSelector = '[data-cy="quizRunsToGradeTable"]'
-        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="queuedForAiGradingMsg"]`)
         cy.get(`${tableSelector} [data-p-index="0"] [data-cy="gradeBtn_user1@skills.net"]`).click()
         cy.get(`[data-cy="markCorrectBtn"]`).click()
-
 
         cy.wait('@grade')
 

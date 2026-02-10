@@ -14,15 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref } from 'vue';
+import {ref} from 'vue';
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEditor.vue";
 import QuizService from "@/components/quiz/QuizService.js";
 import {useRoute} from "vue-router";
-import { useForm } from 'vee-validate'
+import {useForm} from 'vee-validate'
 import {object, string} from "yup";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import GradingStatusMessage from "@/components/quiz/runsHistory/GradingStatusMessage.vue";
 
 const props = defineProps({
   question: Object,
@@ -109,11 +110,7 @@ const grade = (isCorrect, feedback) => {
             data-cy="answerText"/>
         </div>
       </div>
-      <InlineMessage
-          v-if="appConfig.enableOpenAIIntegration && question.aiGradingConfigured"
-          class="mt-2"
-          data-cy="aiManualGradingLongMsg"
-          severity="warn">AI grading is enabled for this question. Manual grading is available but not recommended.</InlineMessage>
+      <grading-status-message :question="question" />
 
       <markdown-editor class="form-text mt-4"
                        :id="`qFeedback-${quizAttemptId}_${question.questionNumber}`"

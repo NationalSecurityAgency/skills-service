@@ -23,7 +23,6 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.controller.result.model.MyQuizAttempt
-import skills.controller.result.model.QuizRun
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.UserQuizAttempt.QuizAttemptStatus
 
@@ -123,12 +122,24 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
      ''')
     boolean checkQuizStatus(String userId, Integer id, String quizId, QuizAttemptStatus quizStatus)
 
-    @Query('''select count(quizAttempt)
-        from UserQuizAttempt quizAttempt, QuizDef quizDef
-        where quizAttempt.quizDefinitionRefId = quizDef.id
-            and quizDef.quizId = ?1
-     ''')
-    long countByQuizId(String quizId)
+
+    static interface QuizRun {
+        Integer getAttemptId()
+        String getUserId()
+        @Nullable
+        String getUserIdForDisplay()
+        Date getStarted()
+        @Nullable
+        Date getCompleted()
+        QuizAttemptStatus getStatus()
+        @Nullable
+        String getUserTag()
+        @Nullable
+        String getFirstName()
+        @Nullable
+        String getLastName()
+        String getQuizType()
+    }
 
     @Query(value = '''select quizAttempt.id                as attemptId,
                            quizAttempt.started           as started,

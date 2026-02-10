@@ -17,8 +17,8 @@ package skills.services.quiz
 
 import callStack.profiler.Profile
 import com.fasterxml.jackson.databind.ObjectMapper
-import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -815,11 +815,43 @@ class QuizDefService {
     @Transactional
     TableResult getQuizRuns(String quizId, String query, UserQuizAttempt.QuizAttemptStatus quizAttemptStatus, PageRequest pageRequest, Date startDate, Date endDate) {
         query = query ?: ''
-        Page<QuizRun> quizRunsPage = userQuizAttemptRepo.findQuizRuns(quizId, query, usersTableAdditionalUserTagKey, quizAttemptStatus?.toString(), startDate, endDate, pageRequest)
+        Page<UserQuizAttemptRepo.QuizRun> quizRunsPage = userQuizAttemptRepo.findQuizRuns(quizId, query, usersTableAdditionalUserTagKey, quizAttemptStatus?.toString(), startDate, endDate, pageRequest)
         long count = quizRunsPage.getTotalElements()
-        List<QuizRun> quizRuns = quizRunsPage.getContent()
+        List<UserQuizAttemptRepo.QuizRun> quizRuns = quizRunsPage.getContent()
 
-        return new TableResult(totalCount: count, data: quizRuns, count: count)
+        List<Integer> quizAttemptIds = quizRuns.collect { it.attemptId}
+        List<UserQuizAnswerAttemptRepo.QuestionAIGradingStatus> qAIGradingStatusList = userQuizAnswerAttemptRepo.findQuestionAiGradingStatus(quizAttemptIds)
+        Map<Integer, List<UserQuizAnswerAttemptRepo.QuestionAIGradingStatus>> qGradingByAttemptId = qAIGradingStatusList?.groupBy { it.quizAttemptId}
+        List<QuizRunResult> quizRunResultList = quizRuns.collect {
+            List<UserQuizAnswerAttemptRepo.QuestionAIGradingStatus> qGradingList =  qGradingByAttemptId.get(it.attemptId)
+            List<AiGradingStatusResult> aiGradingStatus = !qGradingList ? null : qGradingList.collect { UserQuizAnswerAttemptRepo.QuestionAIGradingStatus qGrading ->
+                Integer attemptCount = qGrading.getAiGradingAttemptCount() ?: 0
+                AiGradingStatusResult aiGradingStatusResult = createAiGradingStatusResult(qGrading.getStatus(), attemptCount)
+                return new QuizRunResult.QuestionAiGradingStatus(
+                        questionId: qGrading.getQuestionId(),
+                        attemptCount: aiGradingStatusResult.attemptCount,
+                        attemptsLeft: aiGradingStatusResult.attemptsLeft,
+                        hasFailedAttempts: aiGradingStatusResult.hasFailedAttempts,
+                        failed: aiGradingStatusResult.failed,
+                )
+            }
+
+            return new QuizRunResult(
+                    attemptId: it.attemptId,
+                    userId: it.userId,
+                    userIdForDisplay: it.userIdForDisplay,
+                    started: it.started,
+                    completed: it.completed,
+                    status: it.status,
+                    userTag: it.userTag,
+                    firstName: it.firstName,
+                    lastName: it.lastName,
+                    quizType: it.quizType,
+                    aiGradingStatus: aiGradingStatus
+            )
+        }
+
+        return new TableResult(totalCount: count, data: quizRunResultList, count: count)
     }
 
     @Transactional
@@ -999,6 +1031,23 @@ class QuizDefService {
         return getAttemptGradedResult(quizDef, userQuizAttempt, false)
     }
 
+
+    private AiGradingStatusResult createAiGradingStatusResult(UserQuizAnswerAttempt.QuizAnswerStatus answerStatus, Integer aiGradingAttemptCount) {
+        Boolean needsGrading = answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING
+        Integer aiGradingAttemptsLeft = (taskConfig.aiGraderMaxRetries + 1) - aiGradingAttemptCount
+        Boolean aiGradingHasFailedAttempts = aiGradingAttemptCount > 1 || (needsGrading && aiGradingAttemptCount == 1)
+        Boolean aiGradingHasFailed = aiGradingAttemptsLeft <= 0
+
+        return new AiGradingStatusResult(
+                attemptCount: aiGradingAttemptCount,
+                attemptsLeft: aiGradingAttemptsLeft,
+                hasFailedAttempts: aiGradingHasFailedAttempts,
+                failed: aiGradingHasFailed,
+        )
+    }
+
+
+
     UserGradedQuizQuestionsResult getAttemptGradedResult(QuizDef quizDef, UserQuizAttempt userQuizAttempt, boolean alwaysReturnQuestions = true) {
         String quizId = quizDef.quizId
         boolean isSurvey = quizDef.type == QuizDefParent.QuizType.Survey
@@ -1059,10 +1108,7 @@ class QuizDefService {
                             answer = answerDef.answer
                         }
                         Boolean needsGrading = foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING
-                        Integer aiGradingAttemptCount = foundSelected?.aiGradingAttemptCount ?: 0
-                        Integer aiGradingAttemptsLeft = (taskConfig.aiGraderMaxRetries + 1) - aiGradingAttemptCount
-                        Boolean aiGradingHasFailedAttempts = aiGradingAttemptCount > 1 || (needsGrading && aiGradingAttemptCount == 1)
-                        Boolean aiGradingHasFailed = aiGradingAttemptsLeft <= 0
+                        AiGradingStatusResult aiGradingStatus = createAiGradingStatusResult(foundSelected?.answerStatus, foundSelected?.aiGradingAttemptCount ?: 0)
                         return new UserGradedQuizAnswerResult(
                                 id: answerDef.id,
                                 answer: answer,
@@ -1070,12 +1116,7 @@ class QuizDefService {
                                 isSelected: isSelected,
                                 needsGrading: needsGrading,
                                 gradingResult: gradingResult,
-                                aiGradingStatus: new AiGradingStatusResult(
-                                        attemptCount: aiGradingAttemptCount,
-                                        attemptsLeft: aiGradingAttemptsLeft,
-                                        hasFailedAttempts: aiGradingHasFailedAttempts,
-                                        failed: aiGradingHasFailed,
-                                ),
+                                aiGradingStatus: aiGradingStatus,
                         )
                     }
 

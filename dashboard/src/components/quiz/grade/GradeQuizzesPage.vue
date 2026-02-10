@@ -151,6 +151,25 @@ const loadEmailSubscriptionPreference = () => {
     loadingNotificationPreference.value = false
   })
 }
+
+const hasAiGrading = (aiGradingStatus) => {
+  return appConfig.enableOpenAIIntegration && aiGradingStatus && aiGradingStatus.length > 0
+
+}
+const isAiGradingPending = (quizInfo) => {
+  const aiGradingStatus = quizInfo.aiGradingStatus
+  if (hasAiGrading(aiGradingStatus)) {
+    return aiGradingStatus.findIndex((it) => !it.failed) > -1
+  }
+  return false
+}
+const isAiGradingFailed = (quizInfo) => {
+  const aiGradingStatus = quizInfo.aiGradingStatus
+  if (hasAiGrading(aiGradingStatus)) {
+    return aiGradingStatus.every((it) => it.failed)
+  }
+  return false
+}
 </script>
 
 <template>
@@ -216,11 +235,15 @@ const loadEmailSubscriptionPreference = () => {
                   </div>
                 </div>
                 <InlineMessage
-                    v-if="appConfig.enableOpenAIIntegration && slotProps.data.numNeedsAiGrading > 0"
+                    v-if="isAiGradingPending(slotProps.data)"
                     class="mt-3"
                     data-cy="queuedForAiGradingMsg"
                     icon="fa-solid fa-wand-magic-sparkles">Queued for AI grading</InlineMessage>
-
+                <InlineMessage
+                    v-if="isAiGradingFailed(slotProps.data)"
+                    class="mt-3"
+                    data-cy="aiGradingFailedMsg"
+                    severity="error">AI grading failed - manual review needed</InlineMessage>
               </template>
             </Column>
             <Column header="Date" field="completed" :sortable="true" :class="{'flex': responsive.md.value }">

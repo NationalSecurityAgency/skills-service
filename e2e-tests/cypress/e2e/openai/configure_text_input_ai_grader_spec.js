@@ -372,10 +372,13 @@ describe('Configure Text Input AI Grader Tests', () => {
 
                 cy.get('[data-cy="gradingFailedMsg"]')
 
-                cy.get('[data-cy="answerToTestInput"]').type('{selectAll}answer 75')
+                cy.get('[data-cy="answerToTestInput"]').type('{selectAll}answer 0')
                 cy.get('[data-cy="testAnswersBtn"]').click()
-                cy.get('[data-cy="gradeResConfidence"]').should('have.text', '75%')
-                cy.get('[data-cy="aiConfidenceTag"]').should('have.text', 'High')
+                cy.get('[data-cy="gradeResConfidence"]').should('have.text', '0%')
+                cy.get('[data-cy="aiConfidenceTag"]').should('have.text', 'Very Low')
+                cy.get('[data-cy="resJustification"]').should('have.text', 'Your answer has confidence level of 0')
+                cy.get('[data-cy="gradeResCorrect"]').should('not.exist')
+                cy.get('[data-cy="gradeResWrong"]')
 
                 cy.get('[data-cy="gradingFailedMsg"]').should('not.exist')
             })
