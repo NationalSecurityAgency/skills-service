@@ -22,6 +22,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.storage.model.SkillApproval
 import skills.storage.model.SkillDef
 import skills.storage.model.UserPerformedSkill
@@ -1352,10 +1353,12 @@ class SkillApprovalSpecs extends DefaultIntSpec {
             assert res.body.explanation == "Skill was submitted for approval"
         }
 
+        def userIdForDisplay = getUserIdForDisplay(users[1])
+
         when:
         def tableResult = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
-        def tableResultFiltered = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false, users[1])
-        def filteredUsers = users.findAll{ it.contains(users[1]) }
+        def tableResultFiltered = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false, userIdForDisplay)
+        def filteredUsers = users.findAll{ it.contains(userIdForDisplay) }
 
         then:
         tableResult.count == 30
@@ -1363,6 +1366,59 @@ class SkillApprovalSpecs extends DefaultIntSpec {
 
         tableResultFiltered.count == filteredUsers.size()
         tableResultFiltered.data.collect{ it.userId } == filteredUsers.sort()
+
+    }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    void "getApprovals filters by userIdForDisplay"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        SkillsService createAcctService = createService()
+        createAcctService.createUser([firstName: "Steve", lastName: "Johnson", email: "jdoe@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "Jeff", lastName: "Roberts", email: "jadoe@email.foo", password: "password"])
+        createAcctService.createUser([firstName: "Larry", lastName: "Cheese", email: "fbar@email.foo", password: "password"])
+
+        def user1 = userAttrsRepo.findByUserIdIgnoreCase("jdoe@email.foo")
+        user1.userIdForDisplay = "Steve Johnson"
+        userAttrsRepo.save(user1)
+
+        def user2 = userAttrsRepo.findByUserIdIgnoreCase("jadoe@email.foo")
+        user2.userIdForDisplay = "Bill Jefferson"
+        userAttrsRepo.save(user2)
+
+        def user3 = userAttrsRepo.findByUserIdIgnoreCase("fbar@email.foo")
+        user3.userIdForDisplay = "Larry Hill"
+        userAttrsRepo.save(user3)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date()
+        def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "jdoe@email.foo", date, "Please approve this!")
+        assert res.body.explanation == "Skill was submitted for approval"
+        def res2 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "jadoe@email.foo", date, "Please approve this!")
+        assert res2.body.explanation == "Skill was submitted for approval"
+        def res3 = skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], "fbar@email.foo", date, "Please approve this!")
+        assert res3.body.explanation == "Skill was submitted for approval"
+
+        when:
+        def tableResult = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        def tableResultFiltered = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false, user1.userIdForDisplay)
+
+        then:
+        tableResult.count == 3
+        tableResult.data.collect{ it.userId }.sort() == [ "fbar@email.foo", "jadoe@email.foo", "jdoe@email.foo" ]
+        tableResult.data.collect{ it.userIdForDisplay }.sort() == [ "Bill Jefferson", "Larry Hill", "Steve Johnson" ]
+
+        tableResultFiltered.count == 1
+        tableResultFiltered.data.collect{ it.userId } == [ "jdoe@email.foo" ]
+        tableResultFiltered.data.collect{ it.userIdForDisplay } == [ "Steve Johnson" ]
 
     }
 }

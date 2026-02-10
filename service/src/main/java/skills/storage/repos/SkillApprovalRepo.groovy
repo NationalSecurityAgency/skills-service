@@ -78,7 +78,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.projectId = ?1 and 
             s.skillRefId = sd.id and 
             s.userId = uAttrs.userId and
-            (?2 is null OR lower(s.userId) like lower(concat('%', ?2, '%'))) and
+            (?2 is null OR lower(uAttrs.userIdForDisplay) like lower(concat('%', ?2, '%'))) and
             s.approverUserId is null''')
     Page<SimpleSkillApproval> findToApproveByProjectIdAndNotRejectedOrApproved(String projectId, String userFilter, Pageable pageable)
 
@@ -105,7 +105,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.skillRefId = sd.id and 
             s.userId = uAttrs.userId and
             s.approverUserId is null and
-            (:userFilter is null OR lower(s.userId) like lower(concat('%', :userFilter, '%'))) and
+            (:userFilter is null OR lower(uAttrs.userIdForDisplay) like lower(concat('%', :userFilter, '%'))) and
             (
                 (exists (select 1 from SkillApprovalConf sac 
                         where sac.approverUserId = :approverId
@@ -155,7 +155,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.skillRefId = sd.id and
             s.userId = uAttrs.userId and
             s.approverUserId is null and 
-            (:userFilter is null OR lower(s.userId) like lower(concat('%', :userFilter, '%'))) and
+            (:userFilter is null OR lower(uAttrs.userIdForDisplay) like lower(concat('%', :userFilter, '%'))) and
             (not exists (select 1 from SkillApprovalConf sac
                             where sac.approverUserId is not null
                                 and sac.projectId = :projectId 
