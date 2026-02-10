@@ -15,6 +15,7 @@
  */
 package skills.intTests.ai
 
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.QuizDefFactory
@@ -453,6 +454,59 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizRuns.data[0].aiGradingStatus.attemptCount == [4]
         quizRuns.data[0].aiGradingStatus.attemptsLeft == [0]
     }
+
+    def "AI grade text input - quiz runs with multiple states"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def q1 = QuizDefFactory.createTextInputQuestion(1, 1)
+        def q2 = QuizDefFactory.createTextInputQuestion(1, 2)
+        def q3 = QuizDefFactory.createChoiceQuestion(1, 3)
+        def q4 = QuizDefFactory.createTextInputQuestion(1, 4)
+        def q5 = QuizDefFactory.createTextInputQuestion(1, 5)
+        skillsService.createQuizQuestionDefs([q1, q2, q3, q4, q5]).body
+        def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer. no-confidenceLevel", 95, true)
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[1].id, "This is the correct answer.", 95, true)
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[4].id, "This is the correct answer. no-confidenceLevel", 95, true)
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should fail'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should pass'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id)
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[0].id, [isSelected: true, answerText: 'Please grade me'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[4].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should fail'])
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.needsGrading == true
+
+        SkillsService otherUser = createService(getRandomUsers(1)[0])
+        def quizAttempt1 = otherUser.startQuizAttempt(quiz.quizId).body
+        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt1.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should pass'])
+        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt1.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should pass'])
+        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt1.questions[2].answerOptions[0].id)
+        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt1.questions[3].answerOptions[0].id, [isSelected: true, answerText: 'Please grade me'])
+        otherUser.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt1.questions[4].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should pass'])
+        def gradedQuizAttempt1 = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt1.needsGrading == true
+
+        when:
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def quizRuns = skillsService.getQuizRuns(quiz.quizId)
+
+        println JsonOutput.prettyPrint(JsonOutput.toJson(quizRuns))
+        then:
+        quizRuns.data.size() == 2
+        quizRuns.data[0].status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        quizRuns.data[0].aiGradingStatus.questionId == [qRes.questions[0].id, qRes.questions[4].id]
+        quizRuns.data[0].aiGradingStatus.failed == [true, true]
+        quizRuns.data[0].aiGradingStatus.hasFailedAttempts == [true, true]
+        quizRuns.data[0].aiGradingStatus.attemptCount == [4, 4]
+        quizRuns.data[0].aiGradingStatus.attemptsLeft == [0, 0]
+
+        quizRuns.data[1].status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        !quizRuns.data[1].aiGradingStatus
+    }
+
 
     def "Previously submitted answers will be sent for AI grading when AI grading gets enabled"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
