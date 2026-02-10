@@ -16,40 +16,11 @@
 package skills.intTests.ai
 
 import groovy.util.logging.Slf4j
-import io.netty.handler.ssl.SslContext
-import io.netty.handler.ssl.SslContextBuilder
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.core.io.ClassPathResource
-import org.springframework.core.io.Resource
-import org.springframework.http.*
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
-import org.springframework.util.LinkedMultiValueMap
-import org.springframework.util.MultiValueMap
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
-import reactor.netty.http.client.HttpClient
-import reactor.netty.resources.ConnectionProvider
-import skills.controller.request.model.AiChatRequest
-import skills.intTests.utils.CertificateRegistry
-import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.MockLlmServer
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsClientException
 import skills.quizLoading.QuizSettings
 import skills.storage.model.UserAttrs
 import skills.storage.model.UserQuizAttempt
-import spock.lang.IgnoreIf
-
-import javax.net.ssl.KeyManagerFactory
-import javax.net.ssl.TrustManagerFactory
-import javax.net.ssl.X509TrustManager
-import java.security.KeyStore
-import java.security.cert.CertificateException
-import java.security.cert.X509Certificate
-import java.time.Duration
 
 @Slf4j
 class TextInputAiGraderSpecs extends DefaultAiIntSpec {
@@ -505,6 +476,91 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptResBefore.questions.needsGrading == [true]
         quizAttemptResBefore.questions[0].answers.needsGrading == [true]
         quizAttemptResBefore.questions[0].answers.gradingResult == [null]
+        quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        quizAttemptRes.questions.isCorrect == [true]
+        quizAttemptRes.questions.needsGrading == [false]
+        quizAttemptRes.questions[0].answers.needsGrading == [false]
+        quizAttemptRes.questions[0].answers.gradingResult.feedback == ["The student's answer demonstrates excellent understanding and closely matches the correct answer."]
+        quizAttemptRes.questions[0].answers.gradingResult.aiConfidenceLevel == [90]
+        quizAttemptRes.questions[0].answers.gradingResult.graderUserId == ['ai-grader']
+        quizAttemptRes.questions[0].answers.gradingResult.gradedOn
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptCount == [1]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [3]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [false]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [false]
+    }
+
+    def "Attempt to AI grade text input but was already graded manually"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createTextInputQuestion(1, 1)
+        skillsService.createQuizQuestionDefs([questions])
+        def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer.", 90, true)
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should pass'])
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.needsGrading == true
+
+        when:
+        def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer")
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        then:
+        quizAttemptResBefore.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        quizAttemptResBefore.questions.isCorrect == [false]
+        quizAttemptResBefore.questions.needsGrading == [true]
+        quizAttemptResBefore.questions[0].answers.needsGrading == [true]
+        quizAttemptResBefore.questions[0].answers.gradingResult == [null]
+
+        quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        quizAttemptRes.questions.isCorrect == [true]
+        quizAttemptRes.questions.needsGrading == [false]
+        quizAttemptRes.questions[0].answers.needsGrading == [false]
+        quizAttemptRes.questions[0].answers.gradingResult.feedback == ["Good answer"]
+        quizAttemptRes.questions[0].answers.gradingResult.aiConfidenceLevel == [null]
+        quizAttemptRes.questions[0].answers.gradingResult.graderUserId == [skillsService.userName]
+        quizAttemptRes.questions[0].answers.gradingResult.gradedOn
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptCount == [4]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [0]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [true]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [true]
+    }
+
+    def "Attempt to manually grade text input but was already AI graded"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createTextInputQuestion(1, 1)
+        skillsService.createQuizQuestionDefs([questions])
+        def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer.", 90, true)
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should pass'])
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.needsGrading == true
+
+        when:
+        def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer")
+        then:
+
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("was already completed")
+
+        quizAttemptResBefore.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        quizAttemptResBefore.questions.isCorrect == [false]
+        quizAttemptResBefore.questions.needsGrading == [true]
+        quizAttemptResBefore.questions[0].answers.needsGrading == [true]
+        quizAttemptResBefore.questions[0].answers.gradingResult == [null]
+
         quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
         quizAttemptRes.questions.isCorrect == [true]
         quizAttemptRes.questions.needsGrading == [false]
