@@ -84,7 +84,8 @@ class DataResetHelper {
         projDefRepo.deleteAll()
         quizDefRepo.deleteAll()
         adminGroupDefRepo.deleteAll()
-        userAttrsRepo.deleteAll()
+        List<Integer> userAttrIdsToRemove = userAttrsRepo.findAll().findAll( {it.userId != "ai-grader"}).collect { it.id }
+        userAttrsRepo.deleteAllById(userAttrIdsToRemove)
         // global badges don't have references to a project so must delete those manually
         skillDefRepo.deleteAll()
         // notificationsRepo no longer has a fk to users so must delete explicitly

@@ -15,13 +15,13 @@
  */
 package skills.intTests.ai
 
+
 import groovy.util.logging.Slf4j
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
-import skills.storage.model.UserAttrs
 import skills.storage.model.UserQuizAttempt
 import skills.utils.WaitFor
 
@@ -29,14 +29,6 @@ import skills.utils.WaitFor
 class TextInputAiGraderSpecs extends DefaultAiIntSpec {
 
     def setup() {
-        if (!userAttrsRepo.findByUserIdIgnoreCase('ai-grader')) {
-            UserAttrs userAttrs = new UserAttrs(userId: 'ai-grader',
-                    userIdForDisplay: 'AI Assistant',
-                    firstName: 'AI',
-                    lastName: 'Grader',
-                    userTagsLastUpdated: new Date())
-            userAttrsRepo.save(userAttrs)
-        }
         startEmailServer()
     }
 
@@ -422,7 +414,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
-        skillsService.createQuizQuestionDefs([questions])
+        skillsService.createQuizQuestionDefs([questions]).body
         def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
         skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer. no-confidenceLevel", 95, true)
 
@@ -436,6 +428,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
 
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        def quizRuns = skillsService.getQuizRuns(quiz.quizId)
         then:
         quizAttemptResBefore.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
         quizAttemptResBefore.questions.isCorrect == [false]
@@ -451,6 +444,14 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [0]
         quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [true]
         quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [true]
+
+        quizRuns.data.size() == 1
+        quizRuns.data[0].status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        quizRuns.data[0].aiGradingStatus.questionId == [qRes.questions[0].id]
+        quizRuns.data[0].aiGradingStatus.failed == [true]
+        quizRuns.data[0].aiGradingStatus.hasFailedAttempts == [true]
+        quizRuns.data[0].aiGradingStatus.attemptCount == [4]
+        quizRuns.data[0].aiGradingStatus.attemptsLeft == [0]
     }
 
     def "Previously submitted answers will be sent for AI grading when AI grading gets enabled"() {
