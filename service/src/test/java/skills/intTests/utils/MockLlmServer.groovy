@@ -189,6 +189,9 @@ class MockLlmServer {
             if (!requestBody.contains("no-gradingDecisionReason")) {
                 content.gradingDecisionReason = gradingDecisionReason
             }
+            if (requestBody.contains("add-jabberwocky")) {
+                content.gradingDecisionReason += ' Also, jabberwocky.'
+            }
 
             String responseBody = JsonOutput.toJson([
                     id: "chatcmpl-${UUID.randomUUID()}",

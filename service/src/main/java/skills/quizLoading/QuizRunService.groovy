@@ -682,22 +682,25 @@ class QuizRunService {
     }
 
     @Transactional
-    QuizAnswerGradingResult gradeQuestionAnswer(String userId, String quizId, Integer quizAttemptId, Integer answerDefId, QuizGradeAnswerReq gradeAnswerReq, Boolean aiAssistantGraded = false, Integer aiConfidenceLevel = null) {
-        String graderUserId = aiAssistantGraded ? AI_GRADER_USERID : userInfoService.getCurrentUser().username
+    QuizAnswerGradingResult gradeQuestionAnswer(String userId, String quizId, Integer quizAttemptId, Integer answerDefId, QuizGradeAnswerReq gradeAnswerReq, Boolean aiAssistantGrader = false, Integer aiConfidenceLevel = null) {
+        String graderUserId = aiAssistantGrader ? AI_GRADER_USERID : userInfoService.getCurrentUser().username
         UserAttrs graderUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(graderUserId)
 
         QuizDef quizDef = getQuizDef(quizId)
         if (quizDef.type != QuizDefParent.QuizType.Quiz) {
             throw new SkillQuizException("Provided quizId [${quizId}] is not a quiz", ErrorCode.BadParam)
         }
+        log.debug("Obtaining lock for quizAttemptId [${quizAttemptId}], grader [${graderUserId}]")
         lockingService.lockUserQuizAttempt(quizAttemptId)
         UserQuizAttempt userQuizAttempt = getQuizAttempt(quizAttemptId)
         validateAttempt(userQuizAttempt, quizDef, quizAttemptId, quizId, userId)
 
         propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxGraderFeedbackMessageLength, "Feedback", gradeAnswerReq.feedback, quizId)
-        CustomValidationResult customValidationResult = validator.validateDescription(gradeAnswerReq.feedback, null, null, quizDef.quizId)
-        if (!customValidationResult.valid) {
-            throw new SkillQuizException("Feedback is invalid: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
+        if (!aiAssistantGrader) {
+            CustomValidationResult customValidationResult = validator.validateDescription(gradeAnswerReq.feedback, null, null, quizDef.quizId)
+            if (!customValidationResult.valid) {
+                throw new SkillQuizException("Feedback is invalid: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
+            }
         }
 
         Optional<QuizAnswerDef> quizAnswerDefOptional = quizAnswerRepo.findById(answerDefId)
@@ -713,7 +716,7 @@ class QuizRunService {
         if (userQuizAnswerAttempt.userQuizAttemptRefId != userQuizAttempt.id) {
             throw new SkillQuizException("Supplied quiz answer attempt id  [${userQuizAnswerAttempt.userQuizAttemptRefId}] does not match user quiz attempt id [${userQuizAttempt.id}]", ErrorCode.BadParam)
         }
-        if (aiAssistantGraded && aiConfidenceLevel == null) {
+        if (aiAssistantGrader && aiConfidenceLevel == null) {
             throw new SkillQuizException("AI grader confidence level must be provided for AI assistant graded answer attempt", ErrorCode.BadParam)
         }
 
@@ -755,6 +758,7 @@ class QuizRunService {
             reportAnyAssociatedSkills(userQuizAttempt, quizDef)
         }
 
+        log.debug("Completed grading attempt [${quizAttemptId}] - [${doneGradingAttempt}]")
         return new QuizAnswerGradingResult(doneGradingAttempt: doneGradingAttempt)
     }
 
