@@ -617,7 +617,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [false]
     }
 
-    def "AI graded text input - quiz grade request and graded notifications are sent"() {
+    def "AI graded text input - quiz grade request is not sent for only AI graded questions, but graded notifications are still sent"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
@@ -627,9 +627,6 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
 
         List<String> users = getRandomUsers(1, true)
         SkillsService testTaker = createService(users[0])
-        UserAttrs testTakerUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(testTaker.userName)
-
-        UserAttrs quizAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
 
         def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
         testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should pass'])
@@ -638,6 +635,35 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
 
         when:
 
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1}
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
+
+        then:
+        emailRes
+        emailRes.subj == "SkillTree Quiz Graded"
+    }
+
+    def "AI graded text input - quiz grade request and graded notifications are sent when at least one text input question is manually graded"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def aiGradedQuestion = QuizDefFactory.createTextInputQuestion(1, 1)
+        def manuallyGradedQuestion = QuizDefFactory.createTextInputQuestion(1, 2)
+        skillsService.createQuizQuestionDefs([aiGradedQuestion, manuallyGradedQuestion])
+        def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer.", 90, true)
+
+        List<String> users = getRandomUsers(1, true)
+        SkillsService testTaker = createService(users[0])
+
+        def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should pass'])
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer #2'])
+        def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.needsGrading == true
+
+        when:
+
+        skillsService.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, false, 'manual grader feedback')
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
         List<EmailUtils.EmailRes> emailRes = EmailUtils.getEmails(greenMail)
 

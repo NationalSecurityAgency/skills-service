@@ -816,6 +816,7 @@ class QuizRunService {
         Set<Integer> selectedAnswerIds = quizAttemptAnswerRepo.getSelectedAnswerIds(quizAttemptId).toSet()
         List<UserQuizQuestionAttempt> existingAttempt = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(quizAttemptId)
 
+        Boolean needsManualGrading = false
         List<QuizQuestionGradedResult> gradedQuestions = dbQuestionDefs.collect { QuizQuestionDef quizQuestionDef ->
             List<QuizAnswerDef> quizAnswerDefs = answerDefByQuestionId[quizQuestionDef.id]
 
@@ -834,7 +835,11 @@ class QuizRunService {
                         Integer answerDefId = quizAnswerDefs.first().id
                         UserQuizAnswerAttempt userQuizAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
                         taskSchedulerService.gradeTextInputUsingAi(new TextInputAiGradingRequest(userId: userId, quizId: quizId, quizAttemptId: quizAttemptId, answerDefId: answerDefId, textInputAiGradingAttrs: textInputAiGradingAttrs, studentAnswer: userQuizAnswerAttempt.answer, question: quizQuestionDef.question))
+                    } else {
+                        needsManualGrading = true
                     }
+                } else {
+                    needsManualGrading = true
                 }
             } else if (quizQuestionDef.type == QuizQuestionType.Matching) {
                 List<UserQuizAnswerAttempt> attempt = quizAttemptAnswerRepo.findAllByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefIdIn(quizAttemptId, selectedIds.toSet())
@@ -906,7 +911,7 @@ class QuizRunService {
         userQuizAttempt.numQuestionsToPass = minNumQuestionsToPass
         quizAttemptRepo.save(userQuizAttempt)
 
-        if(userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING) {
+        if(userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING && needsManualGrading) {
             quizNotificationService.sendGradingRequestNotifications(quizDef, userId)
         }
 
