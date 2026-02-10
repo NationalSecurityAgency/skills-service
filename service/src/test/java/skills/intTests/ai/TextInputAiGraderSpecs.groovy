@@ -486,7 +486,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         otherUser.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt1.questions[2].answerOptions[0].id)
         otherUser.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt1.questions[3].answerOptions[0].id, [isSelected: true, answerText: 'Please grade me'])
         otherUser.reportQuizAnswer(quiz.quizId, quizAttempt1.id, quizAttempt1.questions[4].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should pass'])
-        def gradedQuizAttempt1 = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt1.id).body
+        def gradedQuizAttempt1 = otherUser.completeQuizAttempt(quiz.quizId, quizAttempt1.id).body
         assert gradedQuizAttempt1.needsGrading == true
 
         when:
@@ -506,7 +506,6 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         quizRuns.data[1].status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
         !quizRuns.data[1].aiGradingStatus
     }
-
 
     def "Previously submitted answers will be sent for AI grading when AI grading gets enabled"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
