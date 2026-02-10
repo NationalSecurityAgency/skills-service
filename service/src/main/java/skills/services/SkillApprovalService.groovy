@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -144,29 +145,19 @@ class SkillApprovalService {
         String currentApproverId = userInfoService.currentUser.username
         ConfExistInfo confExistInfo = getConfExistForApprover(projectId, currentApproverId)
 
-        return buildApprovalsResult(projectId, pageRequest, {
-            if (confExistInfo.projConfExist) {
-                List<SkillApprovalRepo.SimpleSkillApproval> res = []
-                if (confExistInfo.fallBackApprover) {
-                    res = skillApprovalRepo.findFallbackApproverConf(projectId, userFilter, pageRequest)
-                } else if (confExistInfo.approverHasConf) {
-                    res = skillApprovalRepo.findToApproveWithApproverConf(projectId, currentApproverId, userFilter, pageRequest)
-                }
-                return res
+        if (confExistInfo.projConfExist) {
+            if (confExistInfo.fallBackApprover) {
+                Page<SkillApprovalRepo.SimpleSkillApproval> approvalPage = skillApprovalRepo.findFallbackApproverConf(projectId, userFilter, pageRequest)
+                return buildApprovalsResult(projectId, approvalPage)
+            } else if (confExistInfo.approverHasConf) {
+                Page<SkillApprovalRepo.SimpleSkillApproval> approvalPage = skillApprovalRepo.findToApproveWithApproverConf(projectId, currentApproverId, userFilter, pageRequest)
+                return buildApprovalsResult(projectId, approvalPage)
             }
-            return skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, userFilter, pageRequest)
-        }, {
-            if (confExistInfo.projConfExist) {
-                long res = 0
-                if (confExistInfo.fallBackApprover) {
-                    res = skillApprovalRepo.countFallbackApproverConf(projectId, userFilter)
-                } else if (confExistInfo.approverHasConf) {
-                    res = skillApprovalRepo.countToApproveWithApproverConf(projectId, currentApproverId, userFilter)
-                }
-                return res
-            }
-            return skillApprovalRepo.countByProjectIdAndApproverUserIdIsNull(projectId, userFilter)
-        })
+            return new TableResult()
+        }
+
+        Page<SkillApprovalRepo.SimpleSkillApproval> approvalPage = skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, userFilter, pageRequest)
+        return buildApprovalsResult(projectId, approvalPage)
     }
 
     TableResult getApprovalsHistory(String projectId, String skillNameFilter, String userIdFilter, String approverUserIdFilter, PageRequest pageRequest) {
@@ -176,15 +167,12 @@ class SkillApprovalService {
         }
         String optionalApproverUserIdOrKeywordAll = isApprover ? userInfo.username.toLowerCase() : "All"
 
-        return buildApprovalsResult(projectId, pageRequest, {
-            skillApprovalRepo.findApprovalsHistory(projectId, skillNameFilter, userIdFilter, approverUserIdFilter, optionalApproverUserIdOrKeywordAll, pageRequest)
-        }, {
-            skillApprovalRepo.countApprovalsHistory(projectId, skillNameFilter, userIdFilter, approverUserIdFilter, optionalApproverUserIdOrKeywordAll)
-        })
+        Page<SkillApprovalRepo.SimpleSkillApproval> approvalPage = skillApprovalRepo.findApprovalsHistory(projectId, skillNameFilter, userIdFilter, approverUserIdFilter, optionalApproverUserIdOrKeywordAll, pageRequest)
+        buildApprovalsResult(projectId, approvalPage)
     }
 
-    private TableResult buildApprovalsResult(String projectId, PageRequest pageRequest, Closure<List<SkillApprovalRepo.SimpleSkillApproval>> getData, Closure<Integer> getCount) {
-        List<SkillApprovalRepo.SimpleSkillApproval> approvalsFromDB = getData.call()
+    private static TableResult buildApprovalsResult(String projectId, Page<SkillApprovalRepo.SimpleSkillApproval> skillApprovalPage) {
+        List<SkillApprovalRepo.SimpleSkillApproval> approvalsFromDB = skillApprovalPage.getContent()
         List<SkillApprovalResult> approvals = approvalsFromDB.collect { SkillApprovalRepo.SimpleSkillApproval simpleSkillApproval ->
             new SkillApprovalResult(
                     id: simpleSkillApproval.getApprovalId(),
@@ -205,18 +193,11 @@ class SkillApprovalService {
             )
         }
 
-        Integer count = approvals.size()
-        Integer totalCount = approvals.size()
-        if (totalCount >= pageRequest.pageSize || pageRequest.pageSize > 1) {
-            totalCount = getCount.call()
-            // always the same since filter is never provided
-            count = totalCount
-        }
-
+        Integer count = (Integer)skillApprovalPage.getTotalElements()
         TableResult tableResult = new TableResult(
                 data: approvals,
                 count: count,
-                totalCount: totalCount
+                totalCount: count
         )
 
         return tableResult
