@@ -41,4 +41,7 @@ class QuizRunResult {
     }
 
     List<QuestionAiGradingStatus> aiGradingStatus
+
+    Integer numberCorrect
+    Integer totalAnswers
 }

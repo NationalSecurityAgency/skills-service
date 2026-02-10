@@ -824,7 +824,7 @@ class QuizDefService {
         Map<Integer, List<UserQuizAnswerAttemptRepo.QuestionAIGradingStatus>> qGradingByAttemptId = qAIGradingStatusList?.groupBy { it.quizAttemptId}
         List<QuizRunResult> quizRunResultList = quizRuns.collect {
             List<UserQuizAnswerAttemptRepo.QuestionAIGradingStatus> qGradingList =  qGradingByAttemptId.get(it.attemptId)
-            List<AiGradingStatusResult> aiGradingStatus = !qGradingList ? null : qGradingList.collect { UserQuizAnswerAttemptRepo.QuestionAIGradingStatus qGrading ->
+            List<QuizRunResult.QuestionAiGradingStatus> aiGradingStatus = !qGradingList ? null : qGradingList.collect { UserQuizAnswerAttemptRepo.QuestionAIGradingStatus qGrading ->
                 Integer attemptCount = qGrading.getAiGradingAttemptCount() ?: 0
                 AiGradingStatusResult aiGradingStatusResult = createAiGradingStatusResult(qGrading.getStatus(), attemptCount)
                 return new QuizRunResult.QuestionAiGradingStatus(
@@ -847,6 +847,8 @@ class QuizDefService {
                     firstName: it.firstName,
                     lastName: it.lastName,
                     quizType: it.quizType,
+                    numberCorrect: it.numberCorrect,
+                    totalAnswers: it.totalAnswers,
                     aiGradingStatus: aiGradingStatus
             )
         }

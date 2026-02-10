@@ -138,7 +138,13 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
         String getFirstName()
         @Nullable
         String getLastName()
+        @Nullable
         String getQuizType()
+
+        @Nullable
+        Integer getNumberCorrect()
+        @Nullable
+        Integer getTotalAnswers()
     }
 
     @Query(value = '''select quizAttempt.id                as attemptId,
@@ -150,6 +156,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                            ut.value                      as userTag, 
                            userAttrs.first_name          as firstName,
                            userAttrs.last_name           as lastName,
+                           quizDef.type                  as quizType,
                            COALESCE(uqa.numberCorrect, 0) as numberCorrect,
                            COALESCE(uqa.totalAnswers, 0) as totalAnswers
                     from user_quiz_attempt quizAttempt
