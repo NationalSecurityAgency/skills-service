@@ -27,7 +27,7 @@
     "@tsparticles/confetti": "3.9.1",
     "@vue-a11y/announcer": "3.1.5",
     "@vueuse/core": "14.0.0",
-    "axios": "1.13.2",
+    "axios": "1.13.5",
     "chart.js": "4.5.1",
     "chartjs-adapter-dayjs-4": "1.0.4",
     "chartjs-plugin-datalabels": "2.2.0",
