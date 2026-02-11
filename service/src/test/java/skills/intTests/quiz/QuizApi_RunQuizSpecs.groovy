@@ -817,4 +817,43 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
                 quizAttempt.questions[0].answerOptions[4].id
         ]
     }
+
+
+    def "disable return of quiz questions"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.HideCorrectAnswersOnCompletedQuiz.setting, value: 'true'],
+        ])
+        def question = QuizDefFactory.createMatchingQuestion(1, 2, 2)
+        def question2 = QuizDefFactory.createMatchingQuestion(1, 2, 3)
+        skillsService.createQuizQuestionDefs([question, question2])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'value1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: 'value2'])
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [answerText: 'value1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id, [answerText: 'value2'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id, [answerText: 'value3'])
+
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        def quizHistoryRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        then:
+        gradedQuizAttempt.passed == true
+        gradedQuizAttempt.needsGrading == false
+        gradedQuizAttempt.numQuestionsGotWrong == 0
+        gradedQuizAttempt.numQuestionsNeedGrading == 0
+        gradedQuizAttempt.gradedQuestions.questionId == quizAttempt.questions.id
+        gradedQuizAttempt.gradedQuestions.isCorrect == [true, true]
+        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizAttempt.questions[0].answerOptions[0].id, quizAttempt.questions[0].answerOptions[1].id]
+        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == gradedQuizAttempt.gradedQuestions[0].correctAnswerIds
+
+        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizAttempt.questions[1].answerOptions[0].id, quizAttempt.questions[1].answerOptions[1].id, quizAttempt.questions[1].answerOptions[2].id]
+        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == gradedQuizAttempt.gradedQuestions[1].correctAnswerIds
+
+        quizHistoryRes.questions.size() == 0
+    }
+
 }

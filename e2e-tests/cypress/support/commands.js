@@ -477,6 +477,13 @@ Cypress.Commands.add("setQuizTimeLimit", (quizNum = 1, timeLimit) => {
     }]);
 });
 
+Cypress.Commands.add("setHideAnswers", (quizNum = 1, enabled) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/settings`, [{
+        setting: 'quizHideCorrectAnswersOnCompletedQuiz',
+        value: `${enabled}`
+    }]);
+});
+
 Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAttemptInfo, shouldComplete = true, userAnswerTxt = null) => {
     const userId =  Number.isInteger(userIdOrUserNumber) ? `user${userIdOrUserNumber}` : userIdOrUserNumber;
     cy.register(userId, 'password');
