@@ -493,18 +493,23 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def quizRuns = skillsService.getQuizRuns(quiz.quizId)
 
+        def skillsServiceUserRun = quizRuns.data.find { it.userId == skillsService.userName }
+        def otherUserRun = quizRuns.data.find { it.userId == otherUser.userName }
+
         println JsonOutput.prettyPrint(JsonOutput.toJson(quizRuns))
         then:
         quizRuns.data.size() == 2
-        quizRuns.data[0].status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
-        quizRuns.data[0].aiGradingStatus.questionId == [qRes.questions[0].id, qRes.questions[4].id]
-        quizRuns.data[0].aiGradingStatus.failed == [true, true]
-        quizRuns.data[0].aiGradingStatus.hasFailedAttempts == [true, true]
-        quizRuns.data[0].aiGradingStatus.attemptCount == [4, 4]
-        quizRuns.data[0].aiGradingStatus.attemptsLeft == [0, 0]
+        skillsServiceUserRun
+        skillsServiceUserRun.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        skillsServiceUserRun.aiGradingStatus.questionId == [qRes.questions[0].id, qRes.questions[4].id]
+        skillsServiceUserRun.aiGradingStatus.failed == [true, true]
+        skillsServiceUserRun.aiGradingStatus.hasFailedAttempts == [true, true]
+        skillsServiceUserRun.aiGradingStatus.attemptCount == [4, 4]
+        skillsServiceUserRun.aiGradingStatus.attemptsLeft == [0, 0]
 
-        quizRuns.data[1].status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
-        !quizRuns.data[1].aiGradingStatus
+        otherUserRun
+        otherUserRun.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        !otherUserRun.aiGradingStatus
     }
 
     def "Previously submitted answers will be sent for AI grading when AI grading gets enabled"() {
