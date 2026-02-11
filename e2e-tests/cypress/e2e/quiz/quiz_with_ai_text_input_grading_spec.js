@@ -20,7 +20,16 @@ describe('Display quiz that has ai-graded answers', () => {
     before(() => {
         Cypress.env('disableResetDb', true);
         cy.resetDb();
-        cy.loginAsDefaultUser()
+        cy.fixture('vars.json')
+          .then((vars) => {
+              if (!Cypress.env('oauthMode')) {
+                  cy.log('NOT in oauthMode, using form login');
+                  cy.login(vars.defaultUser, vars.defaultPass);
+              } else {
+                  cy.log('oauthMode, using loginBySingleSignOn');
+                  cy.loginBySingleSignOn();
+              }
+          });
 
         cy.createQuizDef(1);
         cy.setQuizShowCorrectAnswers(1, true)
@@ -44,7 +53,16 @@ describe('Display quiz that has ai-graded answers', () => {
 
         cy.runQuizForUser(1, otherUser, [{selectedIndex: [0]}], true,'will fail')
         cy.logout()
-        cy.loginAsDefaultUser()
+        cy.fixture('vars.json')
+          .then((vars) => {
+              if (!Cypress.env('oauthMode')) {
+                  cy.log('NOT in oauthMode, using form login');
+                  cy.login(vars.defaultUser, vars.defaultPass);
+              } else {
+                  cy.log('oauthMode, using loginBySingleSignOn');
+                  cy.loginBySingleSignOn();
+              }
+          });
 
         cy.waitForBackendAsyncTasksToComplete()
     })
