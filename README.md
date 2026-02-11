@@ -1,6 +1,7 @@
 ![SkillTree](skilltree_logo.png)
 
 # SkillTree Service, Dashboard and Client Display
+[![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/NationalSecurityAgency/skills-service)
 SkillTree is a micro-learning gamification platform providing out-of-the-box UI visualizations, convenient client integration libraries, and a dashboard for managing the creation and administration of Gamified Training Profiles.  
 
 To learn more about the SkillTree platform please visit our [Official Documentation](https://code.nsa.gov/skills-docs/). 
