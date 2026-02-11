@@ -845,15 +845,8 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         gradedQuizAttempt.needsGrading == false
         gradedQuizAttempt.numQuestionsGotWrong == 0
         gradedQuizAttempt.numQuestionsNeedGrading == 0
-        gradedQuizAttempt.gradedQuestions.questionId == quizAttempt.questions.id
-        gradedQuizAttempt.gradedQuestions.isCorrect == [true, true]
-        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizAttempt.questions[0].answerOptions[0].id, quizAttempt.questions[0].answerOptions[1].id]
-        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == gradedQuizAttempt.gradedQuestions[0].correctAnswerIds
-
-        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizAttempt.questions[1].answerOptions[0].id, quizAttempt.questions[1].answerOptions[1].id, quizAttempt.questions[1].answerOptions[2].id]
-        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == gradedQuizAttempt.gradedQuestions[1].correctAnswerIds
-
-        quizHistoryRes.questions.size() == 0
+        gradedQuizAttempt.gradedQuestions == []
+        quizHistoryRes.questions == []
     }
 
 }

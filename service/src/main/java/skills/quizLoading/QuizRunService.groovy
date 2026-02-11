@@ -895,10 +895,11 @@ class QuizRunService {
 
         boolean showCorrectAnswers = alwaysShowCorrectAnswers(quizDef.id)
         boolean quizPassed = numCorrect >= minNumQuestionsToPass
+        boolean shouldHideQuestions = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.HideCorrectAnswersOnCompletedQuiz.setting, quizDef.id)?.isEnabled()
 
         boolean shouldReturnGradedRes = (quizPassed || showCorrectAnswers) && quizDef.type == QuizDefParent.QuizType.Quiz;
         QuizGradedResult gradedResult = new QuizGradedResult(passed: quizPassed, numQuestionsGotWrong: quizLength - numCorrect - numQuestionsNeedGrading,
-                gradedQuestions: shouldReturnGradedRes ? gradedQuestions : [])
+                gradedQuestions: shouldReturnGradedRes && !shouldHideQuestions ? gradedQuestions : [])
 
         if (numQuestionsNeedGrading > 0) {
             userQuizAttempt.status = UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING
