@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.auth.openai
+package skills.services.openai
 
 import groovy.util.logging.Slf4j
 import io.netty.handler.ssl.SslContext
@@ -41,7 +41,7 @@ import java.time.Duration
 @Slf4j
 class OpenAIChatConfig {
 
-    @Value('#{"${skills.openai.key:null}"}')
+    @Value('${skills.openai.key:#{null}}')
     String openAiKey
 
     @Value('#{"${skills.disableHostnameVerifier:false}"}')
@@ -141,7 +141,7 @@ class OpenAIChatConfig {
 
         webClientBuilder = webClientBuilder.clientConnector(new ReactorClientHttpConnector(httpClient))
         OpenAiApi openAiApi = OpenAiApi.builder()
-                .apiKey(openAiKey)
+                .apiKey(openAiKey ?: 'NoKeyProvided')
                 .baseUrl(aiHost)
                 .completionsPath(completionsEndpoint)
                 .webClientBuilder(webClientBuilder)

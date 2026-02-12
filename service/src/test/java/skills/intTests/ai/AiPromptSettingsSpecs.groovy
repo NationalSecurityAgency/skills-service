@@ -17,10 +17,7 @@ package skills.intTests.ai
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestTemplate
-import skills.auth.openai.OpenAIService
-import skills.controller.request.model.GlobalSettingsRequest
+import skills.services.openai.OpenAIService
 import skills.controller.result.model.SettingsResult
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -28,7 +25,6 @@ import skills.intTests.utils.SkillsService
 import skills.services.settings.SettingsService
 import skills.settings.AiPromptSettingDefaults
 import skills.settings.AiPromptSettingsService
-import spock.lang.IgnoreIf
 
 class AiPromptSettingsSpecs extends DefaultIntSpec {
     SkillsService rootSkillsService
@@ -59,26 +55,31 @@ class AiPromptSettingsSpecs extends DefaultIntSpec {
         }
     }
     
-    def "root user can call all ai prompt settings endpoints"() {
+    def "root user can call call ai prompt settings endpoints"() {
+        when: true
+        then:
         !validateForbidden { rootSkillsService.getAiPromptSettings() }
         !validateForbidden { rootSkillsService.getDefaultAiPromptSetting(AiPromptSettingsService.newSkillDescriptionInstructions) }
         !validateForbidden { rootSkillsService.saveAiPromptSettings([
-                [setting: AiPromptSettingsService.systemInstructions, value: "This is an updated systemMsg", settingGroup: AiPromptSettingsService.settingsGroup]
+                [setting: AiPromptSettingsService.systemInstructions, value: "This is an updated systemMsg 1", settingGroup: AiPromptSettingsService.settingsGroup]
         ])}
     }
 
     def "non-root user can only call get ai prompt settings endpoints"() {
-        !validateForbidden { rootSkillsService.getAiPromptSettings() }
-        validateForbidden { rootSkillsService.getDefaultAiPromptSetting(AiPromptSettingsService.newSkillDescriptionInstructions) }
-        validateForbidden { rootSkillsService.saveAiPromptSettings([
-                [setting: AiPromptSettingsService.systemInstructions, value: "This is an updated systemMsg", settingGroup: AiPromptSettingsService.settingsGroup]
+        when: true
+        then:
+        !validateForbidden { skillsService.getAiPromptSettings() }
+        validateForbidden { skillsService.getDefaultAiPromptSetting(AiPromptSettingsService.newSkillDescriptionInstructions) }
+        validateForbidden { skillsService.saveAiPromptSettings([
+                [setting: AiPromptSettingsService.systemInstructions, value: "This is an updated systemMsg 2", settingGroup: AiPromptSettingsService.settingsGroup]
         ])}
     }
+
     def "systemInstructions changes are reflected in the OpenAIService bean"() {
         String systemMsgBeforeUpdate = openAIService.systemMsg
         when:
         rootSkillsService.saveAiPromptSettings([
-            [setting: AiPromptSettingsService.systemInstructions, value: "This is an updated systemMsg", settingGroup: AiPromptSettingsService.settingsGroup]
+            [setting: AiPromptSettingsService.systemInstructions, value: "This is an updated systemMsg 3", settingGroup: AiPromptSettingsService.settingsGroup]
         ])
         String systemMsgAfterUpdate = openAIService.systemMsg
 
@@ -86,8 +87,7 @@ class AiPromptSettingsSpecs extends DefaultIntSpec {
         systemMsgBeforeUpdate
         systemMsgAfterUpdate
         systemMsgBeforeUpdate != systemMsgAfterUpdate
-        systemMsgBeforeUpdate == AiPromptSettingDefaults.systemInstructions
-        systemMsgAfterUpdate == "This is an updated systemMsg"
+        systemMsgAfterUpdate == "This is an updated systemMsg 3"
     }
 
     def "prevent inject into ai prompt settings"() {

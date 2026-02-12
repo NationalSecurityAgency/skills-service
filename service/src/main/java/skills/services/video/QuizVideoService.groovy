@@ -32,6 +32,7 @@ import skills.controller.exceptions.SkillsValidator
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
 import skills.services.quiz.QuizDefService
+import skills.services.quiz.QuizValidatorService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
@@ -60,6 +61,9 @@ class QuizVideoService {
     QuizDefService quizDefService
 
     @Autowired
+    QuizValidatorService quizValidatorService
+
+    @Autowired
     VideoHelperService videoHelperService
 
     @Value('#{"${skills.config.ui.maxVideoUploadSize:250MB}"}')
@@ -69,6 +73,7 @@ class QuizVideoService {
     List<MediaType> allowedAttachmentMimeTypes;
 
     SkillVideoAttrs getVideoAttrs(String quizId, Integer questionId) {
+        quizValidatorService.validateQuestion(quizId, questionId)
         return quizDefService.getVideoAttributesForQuestion(quizId, questionId)
     }
 
@@ -76,7 +81,7 @@ class QuizVideoService {
     SkillVideoAttrs saveVideo(String quizId, Integer questionId, Boolean isAlreadyHosted,
                               MultipartFile file, String videoUrl, String captions, String transcript,
                               Double width, Double height) {
-
+        quizValidatorService.validateQuestion(quizId, questionId)
         SkillVideoAttrs existingVideoAttributes = quizDefService.getVideoAttributesForQuestion(quizId, questionId)
         final boolean isEdit = existingVideoAttributes?.videoUrl
 

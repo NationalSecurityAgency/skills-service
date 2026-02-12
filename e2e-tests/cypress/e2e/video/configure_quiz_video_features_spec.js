@@ -114,16 +114,24 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for All Dragons")
 
         // straight to quiz 2
-        cy.visit('/administrator/quizzes/quiz2/questions/259/config-video');
+        cy.request(`/admin/quiz-definitions/quiz2/questions`)
+            .then((response) => {
+                const questions = response.body.questions
+                cy.visit(`/administrator/quizzes/quiz2/questions/${questions[0].id}/config-video`);
 
-        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
-        cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for Divine Dragon")
+                cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
+                cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for Divine Dragon")
+            })
 
         // straight to quiz 1
-        cy.visit('/administrator/quizzes/quiz1/questions/259/config-video');
+        cy.request(`/admin/quiz-definitions/quiz1/questions`)
+            .then((response) => {
+                const questions = response.body.questions
+                cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/config-video`);
 
-        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
-        cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for All Dragons")
+                cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
+                cy.get('[data-cy="videoUploadWarningMessage"]').contains("Friendly Reminder: Only safe videos please for All Dragons")
+            })
     });
 
     it('video upload warning message uses community.descriptor after project\'s UC protection is raised', () => {

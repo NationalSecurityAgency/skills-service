@@ -15,7 +15,7 @@
 delete from project_definition where project_id <> 'Inception';
 delete from quiz_definition;
 delete from admin_group_definition;
-delete from user_attrs where user_id <> 'root@skills.org' and user_id <> 'skills@skills.org';
+delete from user_attrs where user_id <> 'root@skills.org' and user_id <> 'skills@skills.org' and user_id <> 'ai-grader';
 delete from user_roles where user_id = 'skills@skills.org' and (role_name = 'ROLE_SUPER_DUPER_USER' OR role_name = 'ROLE_GLOBAL_BADGE_ADMIN' OR role_name = 'ROLE_PROJECT_ADMIN' OR role_name = 'ROLE_PRIVATE_PROJECT_USER' OR role_name = 'ROLE_DASHBOARD_ADMIN_ACCESS');
 delete from user_roles where user_id = 'root@skills.org' and role_name = 'ROLE_GLOBAL_BADGE_ADMIN';
 delete from global_badge_level_definition;

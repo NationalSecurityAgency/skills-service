@@ -15,7 +15,7 @@
  */
 package skills.controller
 
-import callStack.profiler.Profile
+
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,9 +24,10 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import skills.PublicProps
+import skills.controller.request.model.TextInputAIGradingRequest
+import skills.services.openai.OpenAIService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
-import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
@@ -34,6 +35,7 @@ import skills.controller.request.model.QuizDefRequest
 import skills.controller.request.model.QuizPreference
 import skills.controller.request.model.QuizQuestionDefRequest
 import skills.controller.request.model.QuizSettingsRequest
+import skills.controller.request.model.TextInputAiGradingConfRequest
 import skills.controller.result.model.*
 import skills.quizLoading.QuizRunService
 import skills.quizLoading.QuizSettings
@@ -44,6 +46,8 @@ import skills.services.adminGroup.AdminGroupService
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
 import skills.services.attributes.SlidesAttrs
+import skills.services.attributes.TextInputAiGradingAttrs
+import skills.services.quiz.QuizAttributesService
 import skills.services.quiz.QuizDefService
 import skills.services.quiz.QuizRoleService
 import skills.services.quiz.QuizSettingsService
@@ -58,7 +62,6 @@ import skills.utils.TablePageUtil
 import skills.utils.TimeRangeFormatterUtil
 
 import java.nio.charset.StandardCharsets
-import java.text.SimpleDateFormat
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
@@ -100,10 +103,16 @@ class QuizController {
     QuizVideoService quizVideoService
 
     @Autowired
+    QuizAttributesService quizAttributesService
+
+    @Autowired
     VideoCaptionsService videoCaptionsService;
 
     @Autowired
     QuizSlidesService quizSlidesService
+
+    @Autowired
+    OpenAIService openAIService
 
     @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -247,6 +256,20 @@ class QuizController {
 
         SkillVideoAttrs res = quizVideoService.saveVideo(quizId, questionId, isAlreadyHosted, file, videoUrl, captions, transcript, width, height)
         return res
+    }
+
+    @PostMapping('/{quizId}/questions/{questionId}/textInputAiGradingConf')
+    TextInputAiGradingAttrs saveTextInputAiGradingAttrs(@PathVariable("quizId") String quizId,
+                                                        @PathVariable("questionId") Integer questionId,
+                                                        @RequestBody TextInputAiGradingConfRequest gradingConfRequest) {
+
+        return quizAttributesService.saveTextInputAiGradingAttrs(quizId, questionId, gradingConfRequest)
+    }
+
+    @GetMapping('/{quizId}/questions/{questionId}/textInputAiGradingConf')
+    TextInputAiGradingAttrs getTextInputAiGradingAttrs(@PathVariable("quizId") String quizId,
+                                                        @PathVariable("questionId") Integer questionId) {
+        return quizAttributesService.getTextInputAiGradingAttrs(quizId, questionId)
     }
 
     @RequestMapping(value = "/{quizId}/questions", method = [RequestMethod.GET], produces = "application/json")
@@ -504,6 +527,22 @@ class QuizController {
     UploadAttachmentResult uploadFileToQuiz(@RequestParam("file") MultipartFile file,
                                                @PathVariable("quizId") String quizId) {
         return attachmentService.saveAttachment(file, null, quizId, null);
+    }
+
+    @RequestMapping(value = "/{quizId}/testTextInputAiGrading/{questionId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    TextInputAIGradingResult testTextInputAiGrading(@PathVariable("quizId") String quizId,
+                                                    @PathVariable("questionId") Integer questionId,
+                                                    @RequestBody TextInputAIGradingRequest textInputAIGradingRequest) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id", quizId)
+        QuizValidator.isNotNull(questionId, "Question Id", quizId)
+        QuizValidator.isNotBlank(quizId, "Quiz Id", quizId)
+        QuizValidator.isNotNull(questionId, "Minimum Confidence Level", quizId)
+        QuizValidator.isTrue(textInputAIGradingRequest?.minimumConfidenceLevel >= 0, "minimumConfidenceLevel must be greater than or equal to 0", quizId)
+        QuizValidator.isTrue(textInputAIGradingRequest?.minimumConfidenceLevel <= 100, "minimumConfidenceLevel must be less than or equal to 100", quizId)
+        QuizValidator.isNotBlank(textInputAIGradingRequest?.correctAnswer, "Correct Answer", quizId)
+        QuizQuestionDefResult questionDef = quizDefService.getQuestionDef(quizId, questionId)
+        return openAIService.gradeTextInputQuizAnswer(questionDef.question, textInputAIGradingRequest.correctAnswer, textInputAIGradingRequest.minimumConfidenceLevel, textInputAIGradingRequest.studentAnswer)
     }
 
 }

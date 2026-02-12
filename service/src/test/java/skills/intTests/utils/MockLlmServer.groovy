@@ -16,6 +16,9 @@
 package skills.intTests.utils
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
+import com.github.tomakehurst.wiremock.http.Response
+import com.github.tomakehurst.wiremock.stubbing.ServeEvent
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Value
@@ -37,9 +40,11 @@ class MockLlmServer {
     void start() {
         try {
             mockServer = new WireMockServer(wireMockConfig()
-                    .port(mockLlmServerPort))
+                    .port(mockLlmServerPort)
+                    .extensions(new DynamicGradingResponseTransformer()))
             stubModelsEndpoint()
-            setupMockLlmEndpoint()
+            stubChatCompletionsStreamingEndpoint()
+            stubTextInputQuizGradingEndpoint()
 
             mockServer.start()
             log.info("WireMock server started on port {}", mockLlmServerPort)
@@ -124,7 +129,7 @@ class MockLlmServer {
         return "data: ${new JsonOutput().toJson(message)}"
     }
 
-    void setupMockLlmEndpoint() {
+    void stubChatCompletionsStreamingEndpoint() {
         String body = createStreamMessages().join("\n\n")  // Double newline between events
 
         mockServer.stubFor(
@@ -146,8 +151,81 @@ class MockLlmServer {
         }
     }
 
+    void stubTextInputQuizGradingEndpoint() {
+        // Stub for grading text input answers with dynamic response based on request body
+        mockServer.stubFor(
+                post(urlPathEqualTo("/v1/chat/completions"))
+                        .withRequestBody(containing("This is user provided answer"))
+                        .willReturn(ok()
+                                .withHeader(CONTENT_TYPE, "application/json")
+                                .withTransformers("dynamic-grading-response-transformer"))
+        )
+
+        // Log requests for debugging
+        mockServer.addMockServiceRequestListener { request, _ ->
+            if (request.getUrl().contains("/v1/chat/completions")) {
+                log.info("Grading request received: {}", request.getBodyAsString())
+            }
+        }
+    }
+
     void stop() {
         mockServer.stop();
     }
 
+    static class DynamicGradingResponseTransformer implements ResponseTransformerV2 {
+        @Override
+        Response transform(Response response, ServeEvent serveEvent) {
+            String requestBody = serveEvent.request.getBodyAsString()
+            Boolean shouldPass = requestBody.contains('this answer should pass')
+            Integer confidenceLevel = shouldPass ? 90 : 10
+            String gradingDecisionReason = shouldPass ?
+                    'The student\'s answer demonstrates excellent understanding and closely matches the correct answer.' :
+                    'The student\'s answer shows significant misunderstandings and does not match the correct answer.'
+            Map content = [:]
+            if (!requestBody.contains("no-confidenceLevel")) {
+                content.confidenceLevel = confidenceLevel
+            }
+            if (!requestBody.contains("no-gradingDecisionReason")) {
+                content.gradingDecisionReason = gradingDecisionReason
+            }
+            if (requestBody.contains("add-jabberwocky")) {
+                content.gradingDecisionReason += ' Also, jabberwocky.'
+            }
+
+            String responseBody = JsonOutput.toJson([
+                    id: "chatcmpl-${UUID.randomUUID()}",
+                    object: "chat.completion",
+                    created: System.currentTimeMillis() / 1000,
+                    model: "mock-grading-model",
+                    choices: [[
+                                      index: 0,
+                                      message: [
+                                              role: "assistant",
+                                              content: JsonOutput.toJson(content)
+                                      ],
+                                      finish_reason: "stop"
+                              ]],
+                    usage: [
+                            prompt_tokens: 100,
+                            completion_tokens: 50,
+                            total_tokens: 150
+                    ]
+            ])
+
+            return Response.Builder.like(response)
+                    .but().body(responseBody)
+                    .build()
+        }
+
+        @Override
+        String getName() {
+            return "dynamic-grading-response-transformer"
+        }
+
+        @Override
+        boolean applyGlobally() {
+            return false
+        }
+    }
 }

@@ -153,14 +153,14 @@ class QuizRunsSpecs extends DefaultIntSpec {
         def quizRuns = skillsService.getQuizRuns(quiz.quizId, 10, 1, 'started', true, 'uSeR1')
         def quizRuns_pg1 = skillsService.getQuizRuns(quiz.quizId, 3, 1, 'started', true, 'R1')
         then:
-        quizRuns.totalCount == users.size()
+        quizRuns.totalCount == 2
         quizRuns.count == 2
         quizRuns.data.userId == ["user1", "user10"]
         quizRuns.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
                                  UserQuizAttempt.QuizAttemptStatus.FAILED.toString(),
         ]
 
-        quizRuns_pg1.totalCount == users.size()
+        quizRuns_pg1.totalCount == 2
         quizRuns_pg1.count == 2
         quizRuns_pg1.data.userId == ["user1", "user10"]
         quizRuns_pg1.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
@@ -346,7 +346,7 @@ class QuizRunsSpecs extends DefaultIntSpec {
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
         ]
 
-        quizRuns_filter2.totalCount == users.size()
+        quizRuns_filter2.totalCount == 6
         quizRuns_filter2.count == 6
         quizRuns_filter2.data.userId == users[4..9]
         quizRuns_filter2.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
@@ -357,7 +357,7 @@ class QuizRunsSpecs extends DefaultIntSpec {
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
         ]
 
-        quizRuns_filter3.totalCount == users.size()
+        quizRuns_filter3.totalCount == 3
         quizRuns_filter3.count == 3
         quizRuns_filter3.data.userId == users[7..9]
         quizRuns_filter3.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
@@ -365,7 +365,7 @@ class QuizRunsSpecs extends DefaultIntSpec {
                                      UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),
         ]
 
-        quizRuns_filter4.totalCount == users.size()
+        quizRuns_filter4.totalCount == 6
         quizRuns_filter4.count == 6
         quizRuns_filter4.data.userId == users[4..9]
         quizRuns_filter4.data.status == [UserQuizAttempt.QuizAttemptStatus.PASSED.toString(),

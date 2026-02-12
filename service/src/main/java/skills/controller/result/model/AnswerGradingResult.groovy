@@ -21,5 +21,6 @@ class AnswerGradingResult {
     String graderFirstname
     String graderLastname
     String feedback
+    Integer aiConfidenceLevel
     Date gradedOn
 }

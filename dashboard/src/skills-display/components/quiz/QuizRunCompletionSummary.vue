@@ -18,6 +18,7 @@ import { computed } from 'vue'
 import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js';
 import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue';
 import QuizType from "@/skills-display/components/quiz/QuizType.js";
+import QuizCompletedMessage from "@/skills-display/components/quiz/QuizCompletedMessage.vue";
 
 const props = defineProps({
   quizResult: Object,
@@ -130,14 +131,7 @@ const runAgain = () => {
         </Card>
       </div>
 
-      <Message v-if="needsGrading" icon="fas fa-user-clock" :closable="false" data-cy="requiresManualGradingMsg">
-        <div>
-          This quiz contains questions that require manual grading and will be assessed by quiz administrators.
-        </div>
-        <div class="mt-1">
-          Let's sit tight and wait for the grades to roll in!
-        </div>
-      </Message>
+      <quiz-completed-message v-if="needsGrading" />
 
       <div v-if="!quizResult.gradedRes.passed && !needsGrading" class="mt-6">
         <div class="my-2" v-if="unlimitedAttempts || numAttemptsLeft > 0"><span class="text-primary">No worries!</span> Would you like to try again?</div>

@@ -72,12 +72,13 @@ const numberOfStars = computed(() => {
   return props.question.answers ? props.question.answers.length : 3;
 })
 const mediaAttributes = computed(() => {
-  const media = props.question.attributes ? JSON.parse(props.question.attributes) : null
+  const media = props.question.attributes?.videoConf
   if(media) {
     media.isAudio = media.videoType?.includes('audio/')
   }
   return media
 })
+const textInputAiGraderConfigured = computed(() =>  appConfig.enableOpenAIIntegration && props.question.attributes?.textInputAiGradingConf?.enabled === true)
 const editQuestion = () => {
   emit('editQuestion', props.question)
 }
@@ -137,8 +138,19 @@ const questionUpdated = (updatedQuestionText) => {
                          :instance-id="`${question.id}`"
                          data-cy="questionDisplayText"/>
         </div>
-        <div v-if="mediaAttributes" class="mb-3">
-          <i :class="`far ${mediaAttributes.isAudio ? 'fa-file-audio' : 'fa-file-video'} fa-lg text-primary`"></i> <span class="font-bold">{{ mediaAttributes.internallyHostedFileName }}</span> is configured
+        <div class="flex flex-col gap-2 mb-3">
+          <div v-if="mediaAttributes" class="flex gap-2 items-center">
+            <div class="border rounded py-1 bg-slate-600! text-orange-300! w-[2.5rem] text-center" data-cy="questionHasVideoOrAudio">
+              <i :class="`${mediaAttributes.isAudio ? 'fa-solid fa-volume-high' : 'fa-solid fa-film'}`" aria-hidden="true" />
+            </div>
+            <span class="uppercase " aria-label="Video is configured for this question">{{ mediaAttributes.isAudio ? 'Audio' : 'Video' }}</span>
+          </div>
+          <div v-if="textInputAiGraderConfigured" class="flex gap-2 items-center" data-cy="questionAiGraded">
+            <div class="border rounded-2xl py-1 bg-indigo-600! text-purple-100! w-[2.5rem] text-center">
+              <i class="fa-solid fa-robot" aria-hidden="true"></i>
+            </div>
+            <span class="" aria-label="This question is graded by AI">Graded via AI</span>
+          </div>
         </div>
         <div v-if="!isTextInputType && !isRatingType && !isMatchingType">
           <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
@@ -193,9 +205,9 @@ const questionUpdated = (updatedQuestionText) => {
           </Message>
         </div>
       </div>
-      <div v-if="!quizConfig.isReadOnlyQuiz && showEditControls" class="flex flex-col gap-4">
+      <div v-if="!quizConfig.isReadOnlyQuiz && showEditControls" class="flex flex-col gap-2 pr-4">
         <div>
-          <ButtonGroup class="ml-1 mt-2 mr-4">
+          <ButtonGroup class="ml-1 mt-2">
             <SkillsButton @click="editQuestion"
                           icon="fas fa-edit"
                           label="Edit"
@@ -234,10 +246,22 @@ const questionUpdated = (updatedQuestionText) => {
             </SkillsButton>
           </ButtonGroup>
         </div>
-        <div class="flex justify-end mr-4">
-          <router-link :aria-label="`Configure video for question ${question.id}`" style="text-decoration: underline;" :data-cy="`add-video-question-${questionNum}`"
+        <div class="flex justify-end">
+          <router-link :aria-label="`Configure video for question ${question.id}`" :data-cy="`add-video-question-${questionNum}`"
                        :to="`/administrator/quizzes/${route.params.quizId}/questions/${question.id}/config-video`" tabindex="-1">
-            <Avatar icon="far fa-play-circle" shape="circle" /> {{ question.attributes ? "Edit Audio/Video" : "Add Audio/Video"}}
+            <div class="flex gap-1 items-center">
+              <Avatar icon="fa-regular fa-play-circle" shape="circle" class="bg-slate-600! text-orange-300!"/>
+              <div class="underline">{{ question.attributes?.videoConf ? "Edit Audio/Video" : "Add Audio/Video"}}</div>
+            </div>
+          </router-link>
+        </div>
+        <div v-if="isTextInputType && appConfig.enableOpenAIIntegration" class="flex justify-end">
+          <router-link :aria-label="`Configure ai grading for question ${question.id}`" :data-cy="`ai-grader-question-${questionNum}`"
+                       :to="`/administrator/quizzes/${route.params.quizId}/questions/${question.id}/ai-grader`" tabindex="-1">
+            <div class="flex gap-1 items-center">
+              <Avatar icon="fa-solid fa-wand-magic-sparkles" shape="circle" class="bg-indigo-600! text-purple-100!"/>
+              <div class="underline">AI Grader</div>
+            </div>
           </router-link>
         </div>
       </div>

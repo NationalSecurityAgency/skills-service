@@ -26,6 +26,7 @@ import skills.tasks.data.CatalogFinalizeRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
 import skills.tasks.data.ImportedSkillAchievement
 import skills.tasks.data.RemoveSkillEventsForUserRequest
+import skills.tasks.data.TextInputAiGradingRequest
 
 import java.time.Instant
 
@@ -50,6 +51,9 @@ class TaskSchedulerService {
 
     @Autowired
     OneTimeTask<RemoveSkillEventsForUserRequest> removeSkillEventsForAUser
+
+    @Autowired
+    OneTimeTask<TextInputAiGradingRequest> gradeTextInputUsingAi
 
     void scheduleCatalogSkillUpdate(String projectId, String catalogSkillId, Integer rawId){
         String id = "${catalogSkillId}-${UUID.randomUUID().toString()}}"
@@ -95,5 +99,10 @@ class TaskSchedulerService {
                 )), Instant.now().plusSeconds(schedulingDelaySeconds))
     }
 
+    void gradeTextInputUsingAi(TextInputAiGradingRequest textInputAiGradingRequest) {
+        String id = "${textInputAiGradingRequest.userId}-${textInputAiGradingRequest.quizId}-${textInputAiGradingRequest.answerDefId}${UUID.randomUUID().toString()}}"
+        log.debug("scheduling AI grading of TextInput answer task [{}] using db-scheduler", id)
+        scheduler.schedule(gradeTextInputUsingAi.instance(id, textInputAiGradingRequest), Instant.now().plusSeconds(schedulingDelaySeconds))
+    }
 
 }

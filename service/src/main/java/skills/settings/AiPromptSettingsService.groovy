@@ -20,7 +20,7 @@ import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
-import skills.auth.openai.OpenAIService
+import skills.services.openai.OpenAIService
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.SettingsRequest
@@ -64,6 +64,7 @@ class AiPromptSettingsService {
     static final String updateSingleQuestionTypeChangedToSingleChoiceInstructions = 'aiPrompt.updateSingleQuestionTypeChangedToSingleChoiceInstructions'
     static final String updateSingleQuestionTypeChangedToTextInputInstructions = 'aiPrompt.updateSingleQuestionTypeChangedToTextInputInstructions'
     static final String updateSingleQuestionTypeChangedToMatchingInstructions = 'aiPrompt.updateSingleQuestionTypeChangedToMatchingInstructions'
+    static final String textInputQuestionGradingInstructions = 'aiPrompt.textInputQuestionGradingInstructions'
 
     @Autowired
     SettingsService settingsService
@@ -76,7 +77,7 @@ class AiPromptSettingsService {
 
     @PostConstruct
     void init() {
-        updateOpenAiSystemMsg()
+        updateOpenAiServiceMessages()
     }
 
     AiPromptSettings fetchAiPromptSettings() {
@@ -93,7 +94,7 @@ class AiPromptSettingsService {
             [(setting.setting): setting.value == AiPromptSettingDefaults."${key}" ? null : setting.value]
         }
         storeSettings(aiPromptSettingsMap)
-        updateOpenAiSystemMsg()  // update system message for openai as it may have changed
+        updateOpenAiServiceMessages()  // update system message for openai as it may have changed
         Map actionAttributes = aiPromptSettings.properties
                 .findAll { key, val -> key != "password" && val instanceof String || val instanceof Number }
                 .collectEntries { key, val -> [(key): val] }
@@ -142,6 +143,7 @@ class AiPromptSettingsService {
         info.updateSingleQuestionTypeChangedToSingleChoiceInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.updateSingleQuestionTypeChangedToSingleChoiceInstructions, label: 'Update Single Question Type to Single Choice', isDefault: true)
         info.updateSingleQuestionTypeChangedToTextInputInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.updateSingleQuestionTypeChangedToTextInputInstructions, label: 'Update Single Question Type to Text Input', isDefault: true)
         info.updateSingleQuestionTypeChangedToMatchingInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.updateSingleQuestionTypeChangedToMatchingInstructions, label: 'Update Single Question Type to Matching', isDefault: true)
+        info.textInputQuestionGradingInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.textInputQuestionGradingInstructions, label: 'Text Input Question Grading Instructions', isDefault: true)
 
         if (aiPromptGroupSettings) {
             Map<String, String> mappedSettings = aiPromptGroupSettings.collectEntries { [it.setting, it.value] }
@@ -174,6 +176,7 @@ class AiPromptSettingsService {
             updateSetting('updateSingleQuestionTypeChangedToSingleChoiceInstructions', updateSingleQuestionTypeChangedToSingleChoiceInstructions)
             updateSetting('updateSingleQuestionTypeChangedToTextInputInstructions', updateSingleQuestionTypeChangedToTextInputInstructions)
             updateSetting('updateSingleQuestionTypeChangedToMatchingInstructions', updateSingleQuestionTypeChangedToMatchingInstructions)
+            updateSetting('textInputQuestionGradingInstructions', textInputQuestionGradingInstructions)
         }
 
         return info
@@ -197,8 +200,9 @@ class AiPromptSettingsService {
         }
     }
 
-    private void updateOpenAiSystemMsg() {
+    private void updateOpenAiServiceMessages() {
         AiPromptSettings aiPromptSettings = fetchAiPromptSettings()
         openAIService.systemMsg = aiPromptSettings.systemInstructions.value
+        openAIService.textInputQuestionGradingMsg = aiPromptSettings.textInputQuestionGradingInstructions.value
     }
 }

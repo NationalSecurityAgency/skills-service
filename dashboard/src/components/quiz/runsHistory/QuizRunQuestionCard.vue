@@ -20,13 +20,21 @@ import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAns
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
 import { useTimeUtils } from "@/common-components/utilities/UseTimeUtils.js";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import AiConfidenceTag from "@/components/quiz/testCreation/AiConfidenceTag.vue";
+import GradingStatusMessage from "@/components/quiz/runsHistory/GradingStatusMessage.vue";
 
 const props = defineProps({
   quizType: String,
   question: Object,
   questionNum: Number,
+  showAiGradingMeta: {
+    type: Boolean,
+    default: false,
+  }
 })
 
+const appConfig = useAppConfig()
 const timeUtils = useTimeUtils();
 
 const answerText = ref(props.question.answers[0].answer)
@@ -52,6 +60,15 @@ const hasAnswer = computed(() => {
 const needsGrading = computed(() => {
   return props.question.needsGrading
 })
+const aiGradingInfo = computed(() => {
+  if (!appConfig.enableOpenAIIntegration || !props.question || props.question.length === 0) {
+    return null
+  }
+  return props.question.answers[0]?.aiGradingStatus
+})
+
+const doShowAiGradingMeta = computed(() => appConfig.enableOpenAIIntegration && props.showAiGradingMeta)
+const showAiGradedTag = computed(() => doShowAiGradingMeta.value && needsGrading.value && props.question.aiGradingConfigured && !aiGradingInfo.value?.failed)
 const isWrong = computed(() => {
   return hasAnswer.value && !needsGrading.value && !props.question.isCorrect
 })
@@ -71,14 +88,32 @@ const manuallyGradedInfo = computed(() => {
   }
   return props.question.answers[0].gradingResult
 })
+const isAiGraded = computed(() => {
+  const aiAssistant = 'AI Assistant'
+  const gradeInfo = manuallyGradedInfo.value
+  return gradeInfo?.graderUserIdForDisplay === aiAssistant || gradeInfo?.graderUserId === aiAssistant
+})
 </script>
 
 <template>
   <div data-cy="questionDisplayCard">
     <div :data-cy="`questionDisplayCard-${questionNum}`">
-      <div v-if="needsGrading" class="flex flex-row" data-cy="noAnswer">
-        <Tag severity="warn" class="uppercase" data-cy="needsGradingTag"><i class="fas fa-user-check mr-1" aria-hidden="true"></i> Needs Grading</Tag>
+      <div class="flex items-center gap-2">
+        <div v-if="needsGrading" class="flex flex-row" data-cy="noAnswer">
+          <Tag severity="warn" class="uppercase" data-cy="needsGradingTag"><i class="fas fa-user-check mr-1" aria-hidden="true"></i> Needs Grading</Tag>
+        </div>
+        <div v-if="showAiGradedTag">
+          <Tag severity="info">
+            <div class="flex items-center gap-1" data-cy="queuedForAiGradingTag">
+              <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+              <div>Queued for AI grading</div>
+            </div>
+          </Tag>
+        </div>
+
       </div>
+      <grading-status-message :question="question" />
+
       <div v-if="!hasAnswer" class="flex flex-row" data-cy="noAnswer">
         <Tag severity="warn">No Answer</Tag>
       </div>
@@ -149,8 +184,18 @@ const manuallyGradedInfo = computed(() => {
               </ul>
             </div>
           </div>
-          <div v-if="manuallyGradedInfo" class="mt-4 w-full border p-4 rounded-border border-surface" data-cy="manuallyGradedInfo">
-            <div class="text-xl mb-4 font-semibold">Manually Graded</div>
+          <div v-if="manuallyGradedInfo" class="mt-4 w-full border p-4 rounded-border border-surface sd-theme-primary-color" data-cy="manuallyGradedInfo">
+
+            <div class="text-xl mb-4 font-semibold">
+              <div v-if="isAiGraded" class="flex gap-2" data-cy="aiGraded">
+                <Avatar icon="fa-solid fa-wand-magic-sparkles" shape="circle" class="bg-indigo-600! text-purple-100!" aria-hidden="true"/>
+                <div>AI Graded</div>
+              </div>
+              <div v-else class="flex gap-2" data-cy="adminGraded">
+                <Avatar icon="fa-solid fa-pen-to-square" shape="circle" class="bg-teal-600! text-teal-100!" aria-hidden="true"/>
+                <div>Manually Graded</div>
+              </div>
+            </div>
 
             <div class="flex gap-4">
               <div class="flex-1" data-cy="grader">Grader:
@@ -165,6 +210,15 @@ const manuallyGradedInfo = computed(() => {
                   :text="manuallyGradedInfo.feedback"
                   :instance-id="`${question.id}_feedback`"
                   :data-cy="`feedbackDisplayText_q${question.id}`"/>
+            </div>
+
+            <div v-if="doShowAiGradingMeta" class="mt-3">
+              <div class="flex gap-2 items-center"><span>AI Confidence Level:</span>
+                <div class="flex gap-2 items-center">
+                  <span class="font-bold" data-cy="gradeResConfidence">{{ manuallyGradedInfo.aiConfidenceLevel }}%</span>
+                  <ai-confidence-tag :confidence-percent="manuallyGradedInfo.aiConfidenceLevel" />
+                </div>
+              </div>
             </div>
           </div>
 

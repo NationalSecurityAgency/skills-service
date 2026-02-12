@@ -26,5 +26,4 @@ class QuizQuestionDefRequest {
 
     List<QuizAnswerDefRequest> answers
     Integer questionScale = 5
-    String attributes
 }

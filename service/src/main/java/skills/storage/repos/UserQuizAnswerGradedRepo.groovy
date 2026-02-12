@@ -28,6 +28,8 @@ interface UserQuizAnswerGradedRepo extends JpaRepository<UserQuizAnswerGraded, L
         Integer getAnswerAttemptId()
         Date getGradedOn()
         String getFeedback()
+        @Nullable
+        Integer getAiConfidenceLevel()
         String getGraderUserId()
         String getGraderUserIdForDisplay()
         String getGraderFirstname()
@@ -39,6 +41,7 @@ interface UserQuizAnswerGradedRepo extends JpaRepository<UserQuizAnswerGraded, L
             answerAttempt.id as answerAttemptId,    
             graded.created as gradedOn, 
             graded.feedback as feedback,
+            graded.aiConfidenceLevel as aiConfidenceLevel,
             userAttrs.userId as graderUserId, 
             userAttrs.userIdForDisplay as graderUserIdForDisplay, 
             userAttrs.firstName as graderFirstname, 

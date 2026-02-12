@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 SkillTree
+ * Copyright 2026 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.auth.openai
+package skills.controller.result.model
 
-class AiChatRequest {
+import groovy.transform.Canonical
 
-    static enum Role {
-        User,
-        Assistant
-    }
-
-    static class ChatMessage {
-        Role role
-        String content
-    }
-
-    List<ChatMessage> messages
-
-    String model
-    Double modelTemperature
+@Canonical
+class TextInputAIGradingResult {
+    Integer confidenceLevel // 0 - 100
+    String gradingDecisionReason
 }

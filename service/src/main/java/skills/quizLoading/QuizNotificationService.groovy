@@ -116,4 +116,34 @@ class QuizNotificationService {
         notifier.sendNotification(request)
     }
 
+    void sendTextInputAiGradingFailedNotifications(QuizDef quizDef, String userId) {
+        String publicUrl = featureService.getPublicUrl()
+        if(!publicUrl) {
+            return
+        }
+
+        List<UserRoleRes> quizRoles = accessSettingsStorageService.findAllQuizRoles(quizDef.quizId)
+        List<UserRoleRes> quizAdminRoles = quizRoles.findAll { it.roleName == RoleName.ROLE_QUIZ_ADMIN }
+        List<UserRoleRes> subscribedUsers = quizAdminRoles.findAll { isUserSubscribed(quizDef, it.userId) }
+
+        if (subscribedUsers) {
+            UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
+            Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                    userIds: subscribedUsers.collect { it.userId },
+                    type: Notification.Type.TextInputAiGradingFailed.toString(),
+                    keyValParams: [
+                            userRequesting: userAttrs.userIdForDisplay,
+                            quizName     : quizDef.name,
+                            quizId     : quizDef.quizId,
+                            gradingUrl    : "${publicUrl}administrator/quizzes/${quizDef.quizId}/grading",
+                            publicUrl     : publicUrl,
+                            replyTo       : userAttrs?.email,
+                            communityHeaderDescriptor : uiConfigProperties.ui.defaultCommunityDescriptor
+                    ],
+            )
+            notifier.sendNotification(request)
+        } else {
+            log.debug("No grading notifications subscribers found for quiz [{}]", quizDef.quizId)
+        }
+    }
 }

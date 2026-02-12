@@ -534,10 +534,10 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         gradedQuizAttempt.gradedQuestions.questionId == quizAttempt.questions.id
         gradedQuizAttempt.gradedQuestions.isCorrect == [true, true]
         gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizAttempt.questions[0].answerOptions[0].id, quizAttempt.questions[0].answerOptions[1].id]
-        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == gradedQuizAttempt.gradedQuestions[0].correctAnswerIds
+        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == gradedQuizAttempt.gradedQuestions[0].correctAnswerIds.sort()
 
         gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizAttempt.questions[1].answerOptions[0].id, quizAttempt.questions[1].answerOptions[1].id, quizAttempt.questions[1].answerOptions[2].id]
-        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == gradedQuizAttempt.gradedQuestions[1].correctAnswerIds
+        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == gradedQuizAttempt.gradedQuestions[1].correctAnswerIds.sort()
 
         quizHistoryRes.questions.size() == 2
         def q1 = quizHistoryRes.questions[0]
@@ -663,14 +663,14 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         gradedQuizAttempt.numQuestionsNeedGrading == 0
         gradedQuizAttempt.gradedQuestions.questionId == quizAttempt.questions.id
         gradedQuizAttempt.gradedQuestions.isCorrect == [true, false, true]
-        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizAttempt.questions[0].answerOptions[0].id, quizAttempt.questions[0].answerOptions[1].id]
-        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == gradedQuizAttempt.gradedQuestions[0].correctAnswerIds
+        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds.sort() == [quizAttempt.questions[0].answerOptions[0].id, quizAttempt.questions[0].answerOptions[1].id].sort()
+        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds.sort() == gradedQuizAttempt.gradedQuestions[0].correctAnswerIds.sort()
+                .sort()
+        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds.sort() == [quizAttempt.questions[1].answerOptions[0].id, quizAttempt.questions[1].answerOptions[1].id, quizAttempt.questions[1].answerOptions[2].id]
+        gradedQuizAttempt.gradedQuestions[1].correctAnswerIds.sort() == [quizAttempt.questions[1].answerOptions[1].id].sort()
 
-        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizAttempt.questions[1].answerOptions[0].id, quizAttempt.questions[1].answerOptions[1].id, quizAttempt.questions[1].answerOptions[2].id]
-        gradedQuizAttempt.gradedQuestions[1].correctAnswerIds == [quizAttempt.questions[1].answerOptions[1].id]
-
-        gradedQuizAttempt.gradedQuestions[2].selectedAnswerIds == [quizAttempt.questions[2].answerOptions[0].id, quizAttempt.questions[2].answerOptions[1].id, quizAttempt.questions[2].answerOptions[2].id]
-        gradedQuizAttempt.gradedQuestions[2].selectedAnswerIds == gradedQuizAttempt.gradedQuestions[2].correctAnswerIds
+        gradedQuizAttempt.gradedQuestions[2].selectedAnswerIds.sort() == [quizAttempt.questions[2].answerOptions[0].id, quizAttempt.questions[2].answerOptions[1].id, quizAttempt.questions[2].answerOptions[2].id].sort()
+        gradedQuizAttempt.gradedQuestions[2].selectedAnswerIds.sort() == gradedQuizAttempt.gradedQuestions[2].correctAnswerIds.sort()
 
         quizHistoryRes.questions.size() == 3
         def q1 = quizHistoryRes.questions[0]

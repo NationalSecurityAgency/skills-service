@@ -3048,4 +3048,28 @@
             </column>
         </addColumn>
     </changeSet>
+
+    <!-- 4.1 Release -->
+    <changeSet id="58" author="skills team">
+        <sql>
+            UPDATE quiz_question_definition
+            SET attributes = jsonb_build_object('videoConf', attributes)
+            WHERE attributes IS NOT NULL
+              AND attributes ->>'videoConf' IS NULL;
+        </sql>
+        <sql>
+            INSERT INTO user_attrs (user_id, user_id_for_display, first_name, last_name, created, updated)
+            VALUES ('ai-grader', 'AI Assistant', 'AI', 'Grader', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+        </sql>
+        <addColumn tableName="user_quiz_answer_graded">
+            <column name="ai_confidence_level" type="int">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="user_quiz_answer_attempt">
+            <column name="ai_grading_attempt_count" type="int" defaultValue="0">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

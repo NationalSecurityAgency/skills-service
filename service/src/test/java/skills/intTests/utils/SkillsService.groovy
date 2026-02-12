@@ -1518,7 +1518,7 @@ class SkillsService {
     }
 
     def getDefaultAiPromptSetting(String setting) {
-        return wsHelper.rootGet("/getDefaultAiPromptSettings/default/${setting}")
+        return wsHelper.rootGet("/getAiPromptSettings/default/${setting}")
     }
 
     def saveEmailSettings(String host, String protocol, Integer port, boolean tlsEnabled, boolean authEnabled, String username, String password) {
@@ -2167,6 +2167,21 @@ class SkillsService {
         String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId}/video"
         return wsHelper.adminUpload(url, body, true)
     }
+
+    def saveQuizTextInputAiGraderConfigs(String quizId, Integer questionId, String correctAnswer, Integer minimumConfidenceLevel, Boolean enabled = true) {
+        String url = "/quiz-definitions/${quizId}/questions/${questionId}/textInputAiGradingConf"
+        return wsHelper.adminPost(url, [
+                enabled: enabled,
+                correctAnswer: correctAnswer,
+                minimumConfidenceLevel: minimumConfidenceLevel,
+        ])
+    }
+
+    def getQuizTextInputAiGraderConfigs(String quizId, Integer questionId) {
+        String url = "/quiz-definitions/${quizId}/questions/${questionId}/textInputAiGradingConf"
+        return wsHelper.adminGet(url)
+    }
+
     def getSkillVideoAttributes(String quizOrProjectId, String questionOrSkillId, Boolean isQuiz = false) {
         String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId}/video"
         return wsHelper.adminGet(url)

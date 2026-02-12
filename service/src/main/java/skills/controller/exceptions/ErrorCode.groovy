@@ -57,5 +57,6 @@ enum ErrorCode {
     SkillEventForQuizSkillIsNotAllowed,
     LearningPathViolation,
     LearningContentGeneratorNotAvailable,
-    ParagraphValidationFailed
+    ParagraphValidationFailed,
+    QuizAlreadyCompleted
 }

@@ -99,7 +99,7 @@ export default {
   },
   gradeQuizAnswerAttempt(quizId, userId, quizAttemptId, answerDefId, gradingInfo) {
     return axios
-        .post(`/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${quizAttemptId}/gradeAnswer/${answerDefId}`, gradingInfo)
+        .post(`/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${quizAttemptId}/gradeAnswer/${answerDefId}`, gradingInfo, { handleError: false })
         .then((response) => response.data)
   },
   deleteQuizRunHistoryItem(quizId, attemptId) {
@@ -168,6 +168,26 @@ export default {
   validateQuizForEnablingCommunity(quizId) {
     return axios
         .get(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/validateEnablingCommunity`)
+        .then((response) => response.data)
+  },
+  getTextInputAiGradingAttrs(quizId, questionId) {
+    return axios
+        .get(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/questions/${questionId}/textInputAiGradingConf`)
+        .then((response) => response.data)
+  },
+  saveTextInputAiGradingAttrs(quizId, questionId, attrs) {
+    return axios
+        .post(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/questions/${questionId}/textInputAiGradingConf`, attrs)
+        .then((response) => response.data)
+  },
+  testTextInputAiGrading(quizId, questionId, correctAnswer, minimumConfidenceLevel, studentAnswer) {
+    const attrs = {
+      studentAnswer,
+      correctAnswer,
+      minimumConfidenceLevel,
+    }
+    return axios
+        .post(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/testTextInputAiGrading/${questionId}`, attrs, { handleError: false })
         .then((response) => response.data)
   }
 }

@@ -25,6 +25,7 @@ import UserActionsPage from "@/components/userActions/UserActionsPage.vue";
 import GradeQuizzesPage  from "@/components/quiz/grade/GradeQuizzesPage.vue";
 import VideoConfigPage from "@/components/video/VideoConfigPage.vue";
 import SlidesConfigPage from "@/components/slides/SlidesConfigPage.vue";
+import AiGraderConfigPage from "@/components/quiz/testCreation/AiGraderConfigPage.vue";
 
 const createQuizRoutes = () => {
   return {
@@ -151,6 +152,17 @@ const createQuizRoutes = () => {
       },
       props: true,
       alias: 'questions/:questionId'
+    }, {
+      name: 'AiGraderConfigPage',
+      path: 'questions/:questionId/ai-grader',
+      component: AiGraderConfigPage,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Configure AI Grader',
+        },
+      },
+      props: true,
     },],
   }
 }

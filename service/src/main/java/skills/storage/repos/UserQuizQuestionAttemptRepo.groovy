@@ -67,4 +67,7 @@ interface UserQuizQuestionAttemptRepo extends JpaRepository<UserQuizQuestionAtte
         where questionAttempt.userQuizAttemptRefId = ?1 and questionAttempt.status = 'WRONG'
     ''')
     Integer countWrongQuestionIdsForAttempt(Integer quizAttemptId)
+
+    @Nullable
+    List<UserQuizQuestionAttempt> findAllByQuizQuestionDefinitionRefIdAndStatus(Integer quizQuestionDefinitionRefId, UserQuizQuestionAttempt.QuizQuestionStatus status)
 }

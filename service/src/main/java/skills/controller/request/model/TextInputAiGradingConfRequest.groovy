@@ -13,21 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller.result.model
+package skills.controller.request.model
 
-import skills.storage.model.UserQuizAttempt
+import groovy.transform.Canonical
 
-interface QuizRun {
-    Integer getAttemptId()
-    String getUserId()
-    String getUserIdForDisplay()
-    Date getStarted()
-    Date getCompleted()
-    UserQuizAttempt.QuizAttemptStatus getStatus()
-    String getUserTag()
-    String getFirstName()
-    String getLastName()
-    String getQuizType()
-    Integer getNumberCorrect()
-    Integer getTotalAnswers()
+@Canonical
+class TextInputAiGradingConfRequest {
+    Boolean enabled
+    String correctAnswer
+    // between 0 and 100
+    Integer minimumConfidenceLevel
 }

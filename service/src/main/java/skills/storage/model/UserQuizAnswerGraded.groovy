@@ -37,6 +37,7 @@ class UserQuizAnswerGraded {
 
     // optional
     String feedback
+    Integer aiConfidenceLevel
 
     @Column(name="created", updatable = false, insertable = false)
     Date created
