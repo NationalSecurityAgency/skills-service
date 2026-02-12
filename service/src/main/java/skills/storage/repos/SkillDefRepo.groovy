@@ -995,7 +995,6 @@ ORDER BY s.name ASC
                   and sd.project_id = ?1
                   and subj.type = 'Subject'
                   and sd2.id = srd2.child_ref_id
-                  and subj.skill_id = ?2
-                group by sd2.skill_id, sd.skill_id, sd.name, sd.type''', nativeQuery = true)
+                  and subj.skill_id = ?2''', nativeQuery = true)
     List<SimpleBadgeRes> findAllSkillsWithBadgesForSubject(String projectId, String subjectId)
 }
