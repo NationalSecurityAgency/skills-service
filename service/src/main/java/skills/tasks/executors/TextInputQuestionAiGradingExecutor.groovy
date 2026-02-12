@@ -64,7 +64,7 @@ class TextInputQuestionAiGradingExecutor implements VoidExecutionHandler<TextInp
             
             // Check if max attempts have been reached and trigger notification if needed
             if (newAttemptCount >= taskConfig.aiGraderMaxRetries+1) {
-                log.info("AI grading failed after {} attempts for quizId=[{}], userId=[{}], quizAttemptId={}, answerDefId={}. Triggering failure notification.", 
+                log.error("AI grading failed after {} attempts for quizId=[{}], userId=[{}], quizAttemptId={}, answerDefId={}. Triggering failure notification.",
                     newAttemptCount, data.quizId, data.userId, data.quizAttemptId, data.answerDefId)
                 
                 // Get quiz definition to send notification
