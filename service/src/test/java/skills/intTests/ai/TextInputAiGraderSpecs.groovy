@@ -811,4 +811,70 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         emailRes.html.contains("<p>The automated AI grading system for the <b>${quizInfo.name}</b> quiz encountered an error and could not complete the evaluation. This quiz now requires manual grading intervention. As a quiz administrator, please review the submitted responses and determine whether the user should pass or fail this quiz attempt.</p>")
         emailRes.html.contains("<a href=\"http://localhost:${localPort}/administrator/quizzes/${quiz.quizId}/grading\" class=\"button\">Review Answers</a>")
     }
+
+    def "header and footer is properly applied to the email"() {
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.saveEmailHeaderAndFooterSettings(
+                '<p>Header attention {{ community.descriptor }} Members</p>',
+                '<p>Footer attention {{ community.descriptor }} Members</p>',
+                'Plain Text Header Attention {{ community.descriptor }} Members',
+                'Plain Text Footer Attention {{ community.descriptor }} Members')
+        
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createTextInputQuestion(1, 1)
+        skillsService.createQuizQuestionDefs([questions])
+        def qRes = skillsService.getQuizQuestionDefs(quiz.quizId)
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, qRes.questions[0].id, "This is the correct answer.", 95, true)
+
+        UserAttrs quizAdminUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(skillsService.userName)
+
+        List<String> users = getRandomUsers(1, true)
+        SkillsService testTaker = createService(users[0])
+        def quizInfo = testTaker.getQuizInfo(quiz.quizId)
+
+        def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer. this answer should fail  no-gradingDecisionReason'])
+        def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.needsGrading == true
+
+        when:
+        def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1}
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail)
+
+        then:
+        quizAttemptResBefore.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        quizAttemptResBefore.questions.isCorrect == [false]
+        quizAttemptResBefore.questions.needsGrading == [true]
+        quizAttemptResBefore.questions[0].answers.needsGrading == [true]
+        quizAttemptResBefore.questions[0].answers.gradingResult == [null]
+        quizAttemptRes.status == UserQuizAttempt.QuizAttemptStatus.NEEDS_GRADING.toString()
+        quizAttemptRes.questions.isCorrect == [false]
+        quizAttemptRes.questions.needsGrading == [true]
+        quizAttemptRes.questions[0].answers.needsGrading == [true]
+        quizAttemptRes.questions[0].answers.gradingResult == [null]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptCount == [4]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.attemptsLeft == [0]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.hasFailedAttempts == [true]
+        quizAttemptRes.questions[0].answers.aiGradingStatus.failed == [true]
+
+        emailRes
+        emailRes.subj == "SkillTree Quiz AI Grading Failed!"
+        emailRes.recipients == [quizAdminUserAttrs.email]
+        emailRes.plainText.startsWith("Plain Text Header Attention All Dragons Members")
+        emailRes.plainText.endsWith("Plain Text Footer Attention All Dragons Members")
+        emailRes.plainText.contains("SkillTree Quiz AI Grading Failed!")
+        emailRes.plainText.contains("The automated AI grading system for the [${quizInfo.name}] quiz encountered an error and could not complete the evaluation. This quiz now requires manual grading intervention. As a quiz administrator, please review the submitted responses and determine whether the user should pass or fail this quiz attempt.")
+        emailRes.plainText.contains("Grading URL: http://localhost:${localPort}/administrator/quizzes/${quiz.quizId}/grading")
+
+        emailRes.html.contains("<body class=\"overall-container\">\r\n<p>Header attention All Dragons Members</p>\r\n<h1>SkillTree Quiz AI Grading Failed!</h1>")
+        emailRes.html.contains("<p>Footer attention All Dragons Members</p>\r\n</body>")
+        emailRes.html.contains("<p>The automated AI grading system for the <b>${quizInfo.name}</b> quiz encountered an error and could not complete the evaluation. This quiz now requires manual grading intervention. As a quiz administrator, please review the submitted responses and determine whether the user should pass or fail this quiz attempt.</p>")
+        emailRes.html.contains("<a href=\"http://localhost:${localPort}/administrator/quizzes/${quiz.quizId}/grading\" class=\"button\">Review Answers</a>")
+    }
 }
