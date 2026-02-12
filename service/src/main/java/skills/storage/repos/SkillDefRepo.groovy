@@ -985,4 +985,17 @@ ORDER BY s.name ASC
                 and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')''')
     List<SkillIdAndNameAndDesc> findSkillsIdAndNameUnderASubject(Integer subjectRefId)
 
+    @Nullable
+    @Query(value='''select sd2.skill_id as skillId, sd.skill_id as badgeId, sd.name as name, sd.type as skillType
+              from skill_definition sd, skill_relationship_definition srd, skill_definition sd2
+                join skill_relationship_definition srd2 on sd2.id = srd2.child_ref_id
+                join skill_definition subj on subj.id = srd2.parent_ref_id
+                where srd.parent_ref_id = sd.id and sd2.id = srd.child_ref_id and sd.type = 'Badge' and sd2.type = 'Skill'
+                  and srd.type = 'BadgeRequirement'
+                  and sd.project_id = ?1
+                  and subj.type = 'Subject'
+                  and sd2.id = srd2.child_ref_id
+                  and subj.skill_id = ?2
+                group by sd2.skill_id, sd.skill_id, sd.name, sd.type''', nativeQuery = true)
+    List<SimpleBadgeRes> findAllSkillsWithBadgesForSubject(String projectId, String subjectId)
 }
