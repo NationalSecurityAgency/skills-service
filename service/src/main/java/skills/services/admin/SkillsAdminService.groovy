@@ -659,9 +659,10 @@ class SkillsAdminService {
 
         Boolean projectHasSkillTags = skillDefRepo.doesProjectHaveSkillTags(projectId) as boolean
 
-        def badges = skillDefRepo.findAllSkillsWithBadgesForSubject(projectId, subjectId)
+        List<SimpleBadgeRes> badges = skillDefRepo.findAllSkillsWithBadgesForSubject(projectId, subjectId)
+        def badgeCollection = badges.groupBy{ it.skillId }
 
-        return res.collect { convertToSkillDefPartialRes(it, projectHasSkillTags, false, badges) }.sort({ it.displayOrder })
+        return res.collect { convertToSkillDefPartialRes(it, projectHasSkillTags, false, badgeCollection[it.skillId]) }.sort({ it.displayOrder })
     }
 
     @Transactional(readOnly = true)
@@ -862,10 +863,9 @@ class SkillsAdminService {
 
     @CompileStatic
     @Profile
-    SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadTags = false, boolean loadNumUsers = false, List<SimpleBadgeRes> badgeList = []) {
+    SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadTags = false, boolean loadNumUsers = false, List<SimpleBadgeRes> badges = null) {
         boolean reusedSkill = SkillReuseIdUtil.isTagged(partial.skillId)
         String unsanitizeName = InputSanitizer.unsanitizeName(partial.name)
-        List<SimpleBadgeRes> badges = badgeList.findAll { it.skillId == partial.skillId }
 
         SkillDefPartialRes res = new SkillDefPartialRes(
                 skillId: partial.skillId,
@@ -897,7 +897,7 @@ class SkillsAdminService {
                 quizName: partial.getQuizName(),
                 quizType: partial.getQuizType(),
                 iconClass: partial.iconClass,
-                badges: badges,
+                badges: badges ?: [],
         )
 
         if (partial.skillType == SkillDef.ContainerType.Skill) {

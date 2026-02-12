@@ -986,15 +986,14 @@ ORDER BY s.name ASC
     List<SkillIdAndNameAndDesc> findSkillsIdAndNameUnderASubject(Integer subjectRefId)
 
     @Nullable
-    @Query(value='''select sd2.skill_id as skillId, sd.skill_id as badgeId, sd.name as name, sd.type as skillType
-              from skill_definition sd, skill_relationship_definition srd, skill_definition sd2
-                join skill_relationship_definition srd2 on sd2.id = srd2.child_ref_id
-                join skill_definition subj on subj.id = srd2.parent_ref_id
-                where srd.parent_ref_id = sd.id and sd2.id = srd.child_ref_id and sd.type = 'Badge' and sd2.type = 'Skill'
-                  and srd.type = 'BadgeRequirement'
-                  and sd.project_id = ?1
-                  and subj.type = 'Subject'
-                  and sd2.id = srd2.child_ref_id
-                  and subj.skill_id = ?2''', nativeQuery = true)
+    @Query(value='''select skill.skill_id as skillId, badge.skill_id as badgeId, badge.name as name, badge.type as skillType
+                    from skill_definition subj
+                    join skill_relationship_definition subj_rel on (subj.id = subj_rel.parent_ref_id and subj_rel.type in ('RuleSetDefinition', 'GroupSkillToSubject'))
+                    join skill_definition skill on (skill.id = subj_rel.child_ref_id and skill.type = 'Skill')
+                    join skill_relationship_definition badge_rel on (skill.id = badge_rel.child_ref_id and badge_rel.type = 'BadgeRequirement')
+                    join skill_definition badge on (badge.id = badge_rel.parent_ref_id and badge.type = 'Badge')
+                    where subj.project_id = ?1
+                      and subj.type = 'Subject'
+                      and subj.skill_id = ?2''', nativeQuery = true)
     List<SimpleBadgeRes> findAllSkillsWithBadgesForSubject(String projectId, String subjectId)
 }
