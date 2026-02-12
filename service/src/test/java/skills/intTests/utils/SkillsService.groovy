@@ -661,8 +661,8 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${props.projectId}/skills/${props.skillId}", [ userIds : userIds, timestamp: timestamp])
     }
 
-    def getApprovals(String projectId, int limit, int page, String orderBy, Boolean ascending) {
-        return wsHelper.adminGet("/projects/${projectId}/approvals?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}")
+    def getApprovals(String projectId, int limit, int page, String orderBy, Boolean ascending, String userFilter = '') {
+        return wsHelper.adminGet("/projects/${projectId}/approvals?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}&userFilter=${userFilter}")
     }
 
     def getApprovalsHistory(String projectId, int limit, int page, String orderBy, Boolean ascending,  String skillNameFilter = '', String userIdFilter ='', String approverUserIdFilter = '') {

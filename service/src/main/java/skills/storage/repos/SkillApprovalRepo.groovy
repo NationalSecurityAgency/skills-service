@@ -16,6 +16,7 @@
 package skills.storage.repos
 
 import groovy.transform.CompileStatic
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -77,9 +78,9 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.projectId = ?1 and 
             s.skillRefId = sd.id and 
             s.userId = uAttrs.userId and
+            (?2 is null OR lower(uAttrs.userIdForDisplay) like lower(concat('%', ?2, '%'))) and
             s.approverUserId is null''')
-    List<SimpleSkillApproval> findToApproveByProjectIdAndNotRejectedOrApproved(String projectId, Pageable pageable)
-    long countByProjectIdAndApproverUserIdIsNull(String projectId)
+    Page<SimpleSkillApproval> findToApproveByProjectIdAndNotRejectedOrApproved(String projectId, String userFilter, Pageable pageable)
 
     @Query('''SELECT
         s.id as approvalId,
@@ -104,6 +105,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.skillRefId = sd.id and 
             s.userId = uAttrs.userId and
             s.approverUserId is null and
+            (:userFilter is null OR lower(uAttrs.userIdForDisplay) like lower(concat('%', :userFilter, '%'))) and
             (
                 (exists (select 1 from SkillApprovalConf sac 
                         where sac.approverUserId = :approverId
@@ -124,39 +126,11 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
                     )
                 )
             )''')
-    List<SimpleSkillApproval> findToApproveWithApproverConf(
+    Page<SimpleSkillApproval> findToApproveWithApproverConf(
             @Param("projectId") String projectId,
             @Param("approverId") String approverId,
+            @Param("userFilter") String userFilter,
             Pageable pageable)
-
-
-    @Query('''SELECT
-        count(s.id)
-        from SkillApproval s
-        where 
-            s.projectId = :projectId and 
-            s.approverUserId is null and 
-            (not exists (select 1 from SkillApprovalConf sac
-                            where sac.approverUserId is not null
-                                and sac.projectId = :projectId 
-                                and (
-                                  (sac.userId is not null and sac.userId = s.userId) OR  
-                                  (sac.skillRefId is not null and sac.skillRefId = s.skillRefId)
-                                  )
-                        )
-            ) and 
-            (not exists (select 1 from SkillApprovalConf sac, UserTag ut
-                where sac.approverUserId is not null 
-                    and ut.userId = s.userId 
-                    and lower(ut.key) = lower(sac.userTagKey)
-                    and sac.projectId = :projectId
-                    and sac.userTagValue is not null
-                    and lower(ut.value) like CONCAT(lower(sac.userTagValue), '%')
-                )
-            )            
-        ''')
-    long countFallbackApproverConf(
-            @Param("projectId") String projectId)
 
     @Query('''SELECT
         s.id as approvalId,
@@ -181,6 +155,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.skillRefId = sd.id and
             s.userId = uAttrs.userId and
             s.approverUserId is null and 
+            (:userFilter is null OR lower(uAttrs.userIdForDisplay) like lower(concat('%', :userFilter, '%'))) and
             (not exists (select 1 from SkillApprovalConf sac
                             where sac.approverUserId is not null
                                 and sac.projectId = :projectId 
@@ -200,39 +175,10 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
                 )
             )            
         ''')
-    List<SimpleSkillApproval> findFallbackApproverConf(
+    Page<SimpleSkillApproval> findFallbackApproverConf(
             @Param("projectId") String projectId,
+            @Param("userFilter") String userFilter,
             Pageable pageable)
-
-    @Query('''SELECT
-        count(s.id)
-        from SkillApproval s
-        where 
-            s.projectId = :projectId and 
-            s.approverUserId is null and 
-            (
-                (exists (select 1 from SkillApprovalConf sac 
-                        where sac.approverUserId = :approverId
-                            and sac.projectId = :projectId
-                            and (
-                                (sac.userId is not null and sac.userId = s.userId) OR  
-                                (sac.skillRefId is not null and sac.skillRefId = s.skillRefId)
-                            )
-                    )
-                ) OR 
-                (exists (select 1 from SkillApprovalConf sac, UserTag ut
-                    where ut.userId = s.userId 
-                        and lower(ut.key) = lower(sac.userTagKey)
-                        and sac.projectId = :projectId
-                        and sac.approverUserId = :approverId
-                        and sac.userTagValue is not null
-                        and lower(ut.value) like CONCAT(lower(sac.userTagValue), '%')
-                    )
-                )
-            )''')
-    long countToApproveWithApproverConf(
-            @Param("projectId") String projectId,
-            @Param("approverId") String approverId)
 
     @Query('''SELECT
         s.id as approvalId,
@@ -265,30 +211,12 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             lower(uAttrs.userIdForDisplay) like lower(CONCAT('%', :userIdFilter, '%')) and
             lower(approverUAttrs.userIdForDisplay) like lower(CONCAT('%', :approverUserIdFilter, '%'))
     ''')
-    List<SimpleSkillApproval> findApprovalsHistory(@Param("projectId") String projectId,
+    Page<SimpleSkillApproval> findApprovalsHistory(@Param("projectId") String projectId,
                                                    @Param("skillNameFilter") String skillNameFilter,
                                                    @Param("userIdFilter") String userIdFilter,
                                                    @Param("approverUserIdFilter") String approverUserIdFilter,
                                                    @Param("optionalApproverUserIdOrKeywordAll") String optionalApproverUserIdOrKeywordAll,
                                                    Pageable pageable)
-    @Query('''SELECT count(s)
-        from SkillApproval s, SkillDef sd, UserAttrs uAttrs, UserAttrs approverUAttrs
-        where 
-            s.projectId = :projectId and 
-            s.skillRefId = sd.id and 
-            s.userId = uAttrs.userId and
-            s.approverUserId = approverUAttrs.userId and 
-            s.approverUserId is not null and
-            (s.approverUserId = :optionalApproverUserIdOrKeywordAll or 'All' = :optionalApproverUserIdOrKeywordAll) and
-            lower(sd.name) like lower(CONCAT('%', :skillNameFilter, '%')) and
-            lower(uAttrs.userIdForDisplay) like lower(CONCAT('%', :userIdFilter, '%')) and
-            lower(approverUAttrs.userIdForDisplay) like lower(CONCAT('%', :approverUserIdFilter, '%'))
-    ''')
-    long countApprovalsHistory(@Param("projectId") String projectId,
-                               @Param("skillNameFilter") String skillNameFilter,
-                               @Param("userIdFilter") String userIdFilter,
-                               @Param("approverUserIdFilter") String approverUserIdFilter,
-                               @Param("optionalApproverUserIdOrKeywordAll") String optionalApproverUserIdOrKeywordAll)
 
     Long deleteByProjectIdAndSkillRefId(String projectId, Integer skillRefId)
     void deleteAllByProjectIdAndUserId(String projectId, String userId)
