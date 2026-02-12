@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {onMounted, ref} from 'vue';
+import {computed, onMounted, ref} from 'vue';
 
 import {useRoute} from 'vue-router';
 import * as yup from "yup";
@@ -29,9 +29,14 @@ import SkillsNumberInput from "@/components/utils/inputForm/SkillsNumberInput.vu
 import ThinkingIndicator from "@/common-components/utilities/learning-conent-gen/ThinkingIndicator.vue";
 import AiConfidenceTag from "@/components/quiz/testCreation/AiConfidenceTag.vue";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import {useQuizConfig} from "@/stores/UseQuizConfig.js";
+import {useProjectCommunityReplacement} from "@/components/customization/UseProjectCommunityReplacement.js";
 
 const route = useRoute();
 const appConfig = useAppConfig()
+const quizConfig = useQuizConfig()
+const projectCommunityReplacement = useProjectCommunityReplacement()
+
 
 const question = ref(null)
 const savingSettings = ref(false)
@@ -133,6 +138,21 @@ const testAnAnswer = () => {
     }
   })
 }
+
+const gradingInstructionsWarningMsg = computed(() => {
+  if (!appConfig?.descriptionWarningMessage) {
+    return null
+  }
+  try {
+    const errMsg = `Id=[${route.params.quizId}] config.descriptionWarningMessage`
+    return projectCommunityReplacement.populateProjectCommunity(appConfig?.descriptionWarningMessage, quizConfig.quizCommunityValue, errMsg);
+  } catch (err) {
+    console.error(err)
+    // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+    router.push({name: 'ErrorPage', query: {err}});
+  }
+
+})
 </script>
 
 <template>
@@ -150,7 +170,7 @@ const testAnAnswer = () => {
         </Message>
         <div v-if="!initDataLoading && appConfig.enableOpenAIIntegration">
           <div class="flex items-center gap-2 mb-2">
-            <Checkbox id="enabledCheckbox" v-model="graderEnabled" binary data-cy="aiGraderEnabled"/>
+            <Checkbox id="enabledCheckbox" v-model="graderEnabled" binary data-cy="aiGraderEnabled" aria-label="AI Grader Enable Control"/>
             <label for="enabledCheckbox">AI Grader Enabled</label>
           </div>
           <BlockUI :blocked="!graderEnabled" class="p-2 flex flex-col gap-2">
@@ -171,7 +191,16 @@ const testAnAnswer = () => {
                   max-rows="10"
                   name="answerUsedForGrading"
                   data-cy="answerForGrading"
-              />
+              >
+                <template #aboveTextarea v-if="gradingInstructionsWarningMsg">
+                  <div class="px-2 py-2 bg-sky-50 text-blue-800 dark:bg-surface-700 dark:text-blue-200 flex gap-1 items-center">
+                    <i class="fa-solid fa-circle-exclamation" aria-hidden="true"/>
+                    <div data-cy="gradingInstructionsWarningMessage" class="text-sm">
+                      {{ gradingInstructionsWarningMsg }}
+                    </div>
+                  </div>
+                </template>
+              </SkillsTextarea>
             </div>
 
             <div class="flex items-end gap-5">
@@ -211,7 +240,6 @@ const testAnAnswer = () => {
               <div class="flex flex-col gap-4">
                 <SkillsTextarea
                     label="Answer:"
-                    id="answerToTest"
                     placeholder="Enter a sample answer to test the AI Grader and refine your grading settings."
                     aria-label="Answer To test"
                     rows="2"

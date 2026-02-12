@@ -143,11 +143,61 @@ describe('Configure Text Input AI Grader Tests', () => {
                 cy.get('[data-cy="saveGraderSettingsBtn"]').should('be.enabled')
                 cy.get('[data-cy="saveGraderSettingsBtn"]').click()
                 cy.get('[data-cy="settingsSavedMsg"]')
+                cy.get('[data-cy="gradingInstructionsWarningMessage"]').should('not.exist')
 
                 cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
                 cy.get('[data-cy="aiGraderEnabled"] [data-pc-section="input"]').should('be.checked')
                 cy.get('[data-cy="answerForGrading"]').should('have.value', 'fancy answer')
                 cy.get('[data-cy="minConfidenceLevelInput"] [data-pc-name="pcinputtext"]').should('have.value', '33')
+                cy.get('[data-cy="gradingInstructionsWarningMessage"]').should('not.exist')
+            })
+    });
+
+
+    it('show warning message', () => {
+        cy.fixture('vars.json').then((vars) => {
+            cy.logout();
+            cy.login(vars.rootUser, vars.defaultPass, true);
+            cy.request('POST', `/root/users/${vars.rootUser}/tags/dragons`, { tags: ['DivineDragon'] });
+            cy.request('POST', `/root/users/${vars.defaultUser}/tags/dragons`, { tags: ['DivineDragon'] });
+            cy.logout();
+
+            cy.login(vars.defaultUser, vars.defaultPass);
+        });
+
+        const descMsg = 'Friendly Reminder: Only safe descriptions for {{community.project.descriptor}}'
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                conf.descriptionWarningMessage = descMsg;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.createQuizDef(2, {enableProtectedUserCommunity: true});
+        cy.createTextInputQuestionDef(2, 1)
+
+        cy.request(`/admin/quiz-definitions/quiz1/questions`)
+            .then((response) => {
+                const questions = response.body.questions
+                cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
+                cy.wait('@getConfig')
+
+                cy.get('[data-cy="aiGraderEnabled"]').click()
+                cy.get('[data-cy="gradingInstructionsWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for All Dragons')
+            })
+
+        cy.request(`/admin/quiz-definitions/quiz2/questions`)
+            .then((response) => {
+                const questions = response.body.questions
+                cy.visit(`/administrator/quizzes/quiz2/questions/${questions[0].id}/ai-grader`);
+                cy.wait('@getConfig')
+
+                cy.get('[data-cy="aiGraderEnabled"]').click()
+                cy.get('[data-cy="gradingInstructionsWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for Divine Dragon')
             })
     });
 
