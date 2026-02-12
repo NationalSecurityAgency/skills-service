@@ -22,6 +22,7 @@ import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
+import skills.services.attributes.ExpirationAttrs
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.SkillDef
 import skills.storage.model.UserQuizAttempt
@@ -632,4 +633,107 @@ class QuizGradingSpecs extends DefaultIntSpec {
         gradedQuizAttempt.needsGrading == false
     }
 
+    def "override failed graded InputText question which causes quiz to pass"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createTextInputQuestion(1, 1)
+        skillsService.createQuizQuestionDefs([questions])
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.quizId
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skillWithQuiz])
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.needsGrading == true
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
+
+        when:
+        def beforeOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer", true)
+        def afterOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
+        then:
+        beforeOverride.status == UserQuizAttempt.QuizAttemptStatus.FAILED.toString()
+        beforeOverride.questions.isCorrect == [false]
+        beforeOverride.questions.needsGrading == [false]
+        beforeOverride.questions[0].answers.needsGrading == [false]
+        beforeOverride.questions[0].answers.gradingResult.feedback == ["Good answer"]
+        beforeOverride.questions[0].answers.gradingResult.graderUserId == [skillsService.userName]
+        beforeOverride.questions[0].answers.gradingResult.gradedOn
+
+        afterOverride.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        afterOverride.questions.isCorrect == [true]
+        afterOverride.questions.needsGrading == [false]
+        afterOverride.questions[0].answers.needsGrading == [false]
+        afterOverride.questions[0].answers.gradingResult.feedback == ["Good answer"]
+        afterOverride.questions[0].answers.gradingResult.graderUserId == [skillsService.userName]
+        afterOverride.questions[0].answers.gradingResult.gradedOn
+
+        skillRes.points ==  skillRes.totalPoints
+    }
+
+    def "override failed question when quiz already passed - skill points are not increased"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def q1 = QuizDefFactory.createTextInputQuestion(1, 1)
+        def q2 = QuizDefFactory.createChoiceQuestion(1, 2)
+        skillsService.createQuizQuestionDefs([q1, q2])
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.MinNumQuestionsToPass.setting, value: 1],
+        ])
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.quizId
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skillWithQuiz])
+        skillsService.saveSkillExpirationAttributes(proj.projectId, skillWithQuiz.skillId, [
+                expirationType: ExpirationAttrs.DAILY,
+                every: 2,
+        ])
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.needsGrading == true
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
+
+        assert userEventsRepo.findAll().collect { it.count } == [1]
+
+        when:
+        def beforeOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        def skillResBeforeOverride = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer", true)
+        def afterOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        def skillRes = skillsService.getSingleSkillSummary(skillsService.userName, proj.projectId, skillWithQuiz.skillId)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(skillResBeforeOverride))
+        println JsonOutput.prettyPrint(JsonOutput.toJson(skillRes))
+        then:
+        beforeOverride.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        beforeOverride.questions.isCorrect == [false, true]
+        beforeOverride.questions.needsGrading == [false, false]
+        beforeOverride.questions[0].answers.needsGrading == [false]
+        beforeOverride.questions[0].answers.gradingResult.feedback == ["Good answer"]
+        beforeOverride.questions[0].answers.gradingResult.graderUserId == [skillsService.userName]
+        beforeOverride.questions[0].answers.gradingResult.gradedOn
+
+        afterOverride.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        afterOverride.questions.isCorrect == [true, true]
+        afterOverride.questions.needsGrading == [false, false]
+        afterOverride.questions[0].answers.needsGrading == [false]
+        afterOverride.questions[0].answers.gradingResult.feedback == ["Good answer"]
+        afterOverride.questions[0].answers.gradingResult.graderUserId == [skillsService.userName]
+        afterOverride.questions[0].answers.gradingResult.gradedOn
+
+        skillRes.points == skillRes.totalPoints
+        // skill should onoly be reported once
+        userEventsRepo.findAll().collect { it.count } == [1]
+    }
 }

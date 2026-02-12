@@ -117,9 +117,12 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
       </div>
     </div>
 
-    <div v-if="runInfo.questions" v-for="q in runInfo.questions" :key="q.id">
+    <div v-if="runInfo.questions" v-for="(q, index) in runInfo.questions" :key="q.id">
       <div :class="{ 'mt-4' : showCards }">
         <QuizRunQuestionCard :question="q" :question-num="q.questionNum" :quiz-type="runInfo.quizType" :show-ai-grading-meta="showAiGradingMeta"/>
+        <div v-if="index < runInfo.questions.length - 1" class="pb-3">
+          <hr class="border-dashed "/>
+        </div>
       </div>
     </div>
     <quiz-completed-message v-if="showQuizUnderReview && QuizStatus.isNeedsGrading(runInfo.status)" />

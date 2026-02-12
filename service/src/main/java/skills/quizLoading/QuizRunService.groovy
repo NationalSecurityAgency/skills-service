@@ -693,7 +693,8 @@ class QuizRunService {
         log.debug("Obtaining lock for quizAttemptId [${quizAttemptId}], grader [${graderUserId}]")
         lockingService.lockUserQuizAttempt(quizAttemptId)
         UserQuizAttempt userQuizAttempt = getQuizAttempt(quizAttemptId)
-        validateAttempt(userQuizAttempt, quizDef, quizAttemptId, quizId, userId)
+        boolean wasQuizAlreadyPassed = userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED
+        validateAttempt(userQuizAttempt, quizDef, quizAttemptId, quizId, userId, gradeAnswerReq)
 
         propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxGraderFeedbackMessageLength, "Feedback", gradeAnswerReq.feedback, quizId)
         if (!aiAssistantGrader) {
@@ -721,8 +722,19 @@ class QuizRunService {
         }
 
         UserQuizAnswerGraded alreadyGraded = userQuizAnswerGradedRepo.findByUserQuizAnswerAttemptRefId(userQuizAnswerAttempt.id)
-        if (alreadyGraded) {
+        if (alreadyGraded && !gradeAnswerReq.changeGrade) {
             throw new SkillQuizException("Question for quiz [${quizId}] attemptId [${quizAttemptId}] answerDefId [${answerDefId}] has already been graded", ErrorCode.BadParam)
+        }
+        if (gradeAnswerReq.changeGrade) {
+            if (!alreadyGraded) {
+                throw new SkillQuizException("Cannot request to change the grade. Question for quiz [${quizId}] attemptId [${quizAttemptId}] answerDefId [${answerDefId}] has not been graded", ErrorCode.BadParam)
+            }
+            if (gradeAnswerReq.isCorrect && userQuizAnswerAttempt.status != UserQuizAnswerAttempt.QuizAnswerStatus.WRONG) {
+                throw new SkillQuizException("Cannot request to change the grade. Question for quiz [${quizId}] attemptId [${quizAttemptId}] answerDefId [${answerDefId}] is not wrong", ErrorCode.BadParam)
+            }
+            if (!gradeAnswerReq.isCorrect && userQuizAnswerAttempt.status != UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT) {
+                throw new SkillQuizException("Cannot request to change the grade. Question for quiz [${quizId}] attemptId [${quizAttemptId}] answerDefId [${answerDefId}] is not correct", ErrorCode.BadParam)
+            }
         }
 
         List<UserQuizQuestionAttempt> questionAttempts = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(userQuizAttempt.id)
@@ -747,14 +759,24 @@ class QuizRunService {
             quizNotificationService.sendGradedRequestNotification(quizDef, userQuizAttempt)
         }
 
-        UserQuizAnswerGraded userQuizAnswerGraded = new UserQuizAnswerGraded(
-                graderUserAttrsRefId: graderUserAttrs.id,
-                userQuizAnswerAttemptRefId: userQuizAnswerAttempt.id,
-                feedback: gradeAnswerReq.feedback,
-                aiConfidenceLevel: aiConfidenceLevel)
+        UserQuizAnswerGraded userQuizAnswerGraded
+        if (gradeAnswerReq.changeGrade) {
+            userQuizAnswerGraded = userQuizAnswerGradedRepo.findByUserQuizAnswerAttemptRefId(userQuizAnswerAttempt.id)
+            if (!userQuizAnswerGraded) {
+                throw new SkillQuizException("Cannot change grade. Could not find an existing answer graded answer for quizAttemptId=[${quizAttemptId}] and answerDefId=[${answerDefId}] and userQuizAnswerAttemptId=[${userQuizAnswerAttempt.id}]", ErrorCode.BadParam)
+            }
+            userQuizAnswerGraded.feedback = gradeAnswerReq.feedback
+            userQuizAnswerGraded.aiConfidenceLevel = null
+        } else {
+            userQuizAnswerGraded = new UserQuizAnswerGraded(
+                    graderUserAttrsRefId: graderUserAttrs.id,
+                    userQuizAnswerAttemptRefId: userQuizAnswerAttempt.id,
+                    feedback: gradeAnswerReq.feedback,
+                    aiConfidenceLevel: aiConfidenceLevel)
+        }
         userQuizAnswerGradedRepo.save(userQuizAnswerGraded)
 
-        if (doneGradingAttempt) {
+        if (doneGradingAttempt && !wasQuizAlreadyPassed) {
             reportAnyAssociatedSkills(userQuizAttempt, quizDef)
         }
 
@@ -780,14 +802,15 @@ class QuizRunService {
         return gradedResult
     }
 
-    private static void validateAttempt(UserQuizAttempt userQuizAttempt, QuizDef quizDef, int quizAttemptId, String quizId, String userId) {
+    private static void validateAttempt(UserQuizAttempt userQuizAttempt, QuizDef quizDef, int quizAttemptId, String quizId, String userId, QuizGradeAnswerReq gradeAnswerReq = null) {
         if (userQuizAttempt.quizDefinitionRefId != quizDef.id) {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${quizId}] quiz", ErrorCode.BadParam)
         }
         if (userQuizAttempt.userId != userId) {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] is not for [${userId}] user", ErrorCode.BadParam)
         }
-        if (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED || userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.FAILED) {
+        if (!gradeAnswerReq?.changeGrade &&
+                (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED || userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.FAILED)) {
             throw new SkillQuizException("Provided quiz attempt id [${quizAttemptId}] was already completed", ErrorCode.QuizAlreadyCompleted)
         }
     }

@@ -2127,9 +2127,9 @@ class SkillsService {
         return wsHelper.apiPost(url, userId ? [userId : userId] : null)
     }
 
-    def gradeAnswer( String userId, String quizId,Integer attemptId, Integer answerDefId, Boolean isCorrect, String feedback = null) {
+    def gradeAnswer( String userId, String quizId,Integer attemptId, Integer answerDefId, Boolean isCorrect, String feedback = null, Boolean changeExistingGrade = false) {
         String url = "/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/gradeAnswer/${answerDefId}"
-        return wsHelper.adminPost(url, [isCorrect: isCorrect, feedback: feedback])
+        return wsHelper.adminPost(url, [isCorrect: isCorrect, feedback: feedback, changeGrade: changeExistingGrade])
     }
 
     def failQuizAttempt(String quizId, Integer attemptId, String userId = null) {
