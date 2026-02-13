@@ -658,7 +658,11 @@ class SkillsAdminService {
         List<SkillDefPartial> res = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subject.skillId, relationshipTypes)
 
         Boolean projectHasSkillTags = skillDefRepo.doesProjectHaveSkillTags(projectId) as boolean
-        return res.collect { convertToSkillDefPartialRes(it, projectHasSkillTags) }.sort({ it.displayOrder })
+
+        List<SimpleBadgeRes> badges = skillDefRepo.findAllSkillsWithBadgesForSubject(projectId, subjectId)
+        Map<String, List<SimpleBadgeRes>> badgeCollection = badges.groupBy{ it.skillId }
+
+        return res.collect { convertToSkillDefPartialRes(it, projectHasSkillTags, false, badgeCollection[it.skillId]) }.sort({ it.displayOrder })
     }
 
     @Transactional(readOnly = true)
@@ -859,9 +863,10 @@ class SkillsAdminService {
 
     @CompileStatic
     @Profile
-    SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadTags = false, boolean loadNumUsers = false) {
+    SkillDefPartialRes convertToSkillDefPartialRes(SkillDefPartial partial, boolean loadTags = false, boolean loadNumUsers = false, List<SimpleBadgeRes> badges = null) {
         boolean reusedSkill = SkillReuseIdUtil.isTagged(partial.skillId)
         String unsanitizeName = InputSanitizer.unsanitizeName(partial.name)
+
         SkillDefPartialRes res = new SkillDefPartialRes(
                 skillId: partial.skillId,
                 projectId: partial.projectId,
@@ -892,6 +897,7 @@ class SkillsAdminService {
                 quizName: partial.getQuizName(),
                 quizType: partial.getQuizType(),
                 iconClass: partial.iconClass,
+                badges: badges ?: [],
         )
 
         if (partial.skillType == SkillDef.ContainerType.Skill) {
@@ -909,6 +915,8 @@ class SkillsAdminService {
                 res.tags.push(new SkillTagRes(tagId: tag.tagId, tagValue: tag.tagValue))
             }
         }
+
+
 
         if (partial.skillType == SkillDef.ContainerType.SkillsGroup) {
             List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(partial.getId())

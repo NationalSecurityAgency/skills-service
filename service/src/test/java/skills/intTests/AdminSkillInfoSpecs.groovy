@@ -273,4 +273,68 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         e.resBody.contains("Skill [Fake] doesn't exist.")
         e.httpStatus == HttpStatus.NOT_FOUND
     }
+
+    def "get all skills for a subject with badge info"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        def proj2_subj = SkillsFactory.createSubject(1, 2)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSubject(proj2_subj)
+        skillsService.createSkills(proj1_skills)
+
+        def badge = SkillsFactory.createBadge()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: proj1_skills.get(0).skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: proj1_skills.get(2).skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        when:
+        def skills = skillsService.getSkillsForSubject(proj1.projectId, proj1_subj.subjectId)
+        skills.sort() { it.skillId }
+        then:
+        skills.size() == 3
+
+        skills.get(0).badges == [[ name: badge.name, badgeId: badge.badgeId, skillType: 'Badge', skillId: proj1_skills.get(0).skillId]]
+        skills.get(1).badges == []
+        skills.get(2).badges == [[ name: badge.name, badgeId: badge.badgeId, skillType: 'Badge', skillId: proj1_skills.get(2).skillId]]
+
+    }
+
+    def "get all skills for a subject - ability to retrieve skills under groups with badge info"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(5, 1, 1)
+        def group = SkillsFactory.createSkillsGroup(1, 1, 10)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills([proj1_skills[0..4], group].flatten())
+        skillsService.assignSkillToSkillsGroup(group.skillId, proj1_skills[3])
+        skillsService.assignSkillToSkillsGroup(group.skillId, proj1_skills[4])
+
+        def badge = SkillsFactory.createBadge()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: proj1_skills.get(2).skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge.badgeId, skillId: proj1_skills.get(3).skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+
+        when:
+        def skills = skillsService.getSkillsForSubject(proj1.projectId, proj1_subj.subjectId)
+        skills.sort() { it.skillId }
+
+        then:
+        skills.size() == 6
+        skills.get(0).badges == []
+        skills.get(1).badges == [] // this will be the group skill
+        skills.get(2).badges == []
+        skills.get(3).badges == [[ name: badge.name, badgeId: badge.badgeId, skillType: 'Badge', skillId: proj1_skills.get(2).skillId]]
+        skills.get(4).badges == [[ name: badge.name, badgeId: badge.badgeId, skillType: 'Badge', skillId: proj1_skills.get(3).skillId]]
+        skills.get(5).badges == []
+    }
+
 }
