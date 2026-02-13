@@ -18,23 +18,42 @@ limitations under the License.
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
 import {object, string} from "yup";
 import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEditor.vue";
+import SkillsInputSwitch from "@/components/utils/inputForm/SkillsInputSwitch.vue";
+import QuizService from "@/components/quiz/QuizService.js";
+import {useRoute} from "vue-router";
 
 const model = defineModel()
 const props = defineProps({
+  userId: String,
   question: Object,
 })
+const emit = defineEmits(['grade-overridden'])
+const route = useRoute()
 
 const schema = object({
 
 })
 
-const overrideGrade = () => {
-
+const overrideGrade = (attributes) => {
+  const quizId = route.params.quizId
+  const runId = route.params.runId
+  const answerDefId = props.question.answers[0].id
+  const gradingInfo = {
+    isCorrect: !props.question.isCorrect,
+    feedback: attributes.feedbackTxt || '',
+    changeGrade: true,
+    notifyUser: attributes.notifyUser
+  }
+  return QuizService.gradeQuizAnswerAttempt(quizId, props.question.userId, runId, answerDefId, gradingInfo)
 }
 
-const initialData = {}
+const initialData = {
+  feedbackTxt: '',
+  notifyUser: false
+}
 
-const afterSave = () => {
+const afterSave = (res) => {
+  emit('grade-overridden', res)
   model.value = false
 }
 </script>
@@ -53,8 +72,8 @@ const afterSave = () => {
       save-button-label="Override Grade"
       save-button-icon="fa-solid fa-hammer">
     <Message  severity="warn" :closable="false">
-      <div v-if="question.isCorrect">This operation will change the answer to <Tag severity="danger">WRONG</tag> which is currently graded as <Tag>CORRECT</Tag>. Please proceed with caution.</div>
-      <div v-else>This operation will change the answer to <Tag>CORRECT</tag> which is currently graded as <Tag severity="danger">WRONG</Tag>. Please proceed with caution.</div>
+      <div v-if="question.isCorrect" data-cy="overrideGradeWarningToWrong">This operation will change the answer to <Tag severity="danger">WRONG</tag> which is currently graded as <Tag>CORRECT</Tag>. Please proceed with caution.</div>
+      <div v-else data-cy="overrideGradeWarningToCorrect">This operation will change the answer to <Tag>CORRECT</tag> which is currently graded as <Tag severity="danger">WRONG</Tag>. Please proceed with caution.</div>
     </Message>
     <MarkdownEditor data-cy="feedback"
                     :id="`qFeedback-${question.id}`"
@@ -66,6 +85,9 @@ const afterSave = () => {
                     :allow-insert-images="false"
                     :aria-label="`optionally provide feedback for answer of question # ${question.questionNumber}`"
                     name="feedbackTxt"/>
+    <div class="flex items-center gap-2 mt-2">
+      <SkillsInputSwitch name="notifyUser" /><label for="notifyUser">Notify Quiz Taker</label>
+    </div>
   </SkillsInputFormDialog>
 </template>
 

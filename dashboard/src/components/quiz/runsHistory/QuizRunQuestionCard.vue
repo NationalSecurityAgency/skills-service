@@ -35,6 +35,7 @@ const props = defineProps({
     default: false,
   }
 })
+const emit = defineEmits(['need-to-reload'])
 
 const appConfig = useAppConfig()
 const timeUtils = useTimeUtils();
@@ -98,6 +99,9 @@ const isAiGraded = computed(() => {
 const showOverrideGradeDialog = ref(false)
 const openOverrideGradeDialog = () => {
   showOverrideGradeDialog.value = true
+}
+const onGradeOverridden = (res) => {
+  emit('need-to-reload', res)
 }
 </script>
 
@@ -204,7 +208,11 @@ const openOverrideGradeDialog = () => {
               </div>
             </div>
             <div v-if="isTextInputType && !needsGrading && showAiGradingMeta">
-              <SkillsButton label="Override Grade" icon="fa-solid fa-pen-to-square" size="small" @click="openOverrideGradeDialog"/>
+              <SkillsButton label="Override Grade"
+                            icon="fa-solid fa-pen-to-square"
+                            size="small"
+                            data-cy="overrideGradeBtn"
+                            @click="openOverrideGradeDialog"/>
             </div>
             </div>
 
@@ -223,7 +231,7 @@ const openOverrideGradeDialog = () => {
                   :data-cy="`feedbackDisplayText_q${question.id}`"/>
             </div>
 
-            <div v-if="doShowAiGradingMeta" class="mt-3">
+            <div v-if="doShowAiGradingMeta && typeof(manuallyGradedInfo.aiConfidenceLevel) === 'number'" class="mt-3">
               <div class="flex gap-2 items-center"><span>AI Confidence Level:</span>
                 <div class="flex gap-2 items-center">
                   <span class="font-bold" data-cy="gradeResConfidence">{{ manuallyGradedInfo.aiConfidenceLevel }}%</span>
@@ -236,7 +244,7 @@ const openOverrideGradeDialog = () => {
         </div>
       </div>
     </div>
-    <override-text-input-question-grade-dialog v-model="showOverrideGradeDialog" :question="question"/>
+    <override-text-input-question-grade-dialog v-model="showOverrideGradeDialog" :question="question" @grade-overridden="onGradeOverridden"/>
   </div>
 </template>
 

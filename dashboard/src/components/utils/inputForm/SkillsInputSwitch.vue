@@ -29,7 +29,9 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 <template>
   <ToggleSwitch
       v-bind="fallthroughAttributes.rootAttrs.value"
-      v-model="value" />
+      v-model="value"
+      :data-cy="`inputSwitch-${name}`"
+  />
 </template>
 
 <style scoped>
