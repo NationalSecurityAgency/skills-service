@@ -4,14 +4,12 @@
     "method": "POST",
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
-      {
-        "contains": "jabberwocky",
-        "doesNotContain": "invalidquiz",
-        "doesNotContain": "Quiz Generation",
-        "doesNotContain": "SingleChoice",
-        "doesNotContain": "MultipleChoice",
-        "doesNotContain": "TextInput"
-      }
+      { "contains": "jabberwocky" },
+      { "doesNotContain": "invalidquiz" },
+      { "doesNotContain": "Quiz Generation" },
+      { "doesNotContain": "SingleChoice" },
+      { "doesNotContain": "MultipleChoice" },
+      { "doesNotContain": "TextInput" }
     ]
   },
   "response": {
