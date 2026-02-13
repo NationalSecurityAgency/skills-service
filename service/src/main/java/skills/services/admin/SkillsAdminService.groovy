@@ -660,7 +660,7 @@ class SkillsAdminService {
         Boolean projectHasSkillTags = skillDefRepo.doesProjectHaveSkillTags(projectId) as boolean
 
         List<SimpleBadgeRes> badges = skillDefRepo.findAllSkillsWithBadgesForSubject(projectId, subjectId)
-        def badgeCollection = badges.groupBy{ it.skillId }
+        Map<String, List<SimpleBadgeRes>> badgeCollection = badges.groupBy{ it.skillId }
 
         return res.collect { convertToSkillDefPartialRes(it, projectHasSkillTags, false, badgeCollection[it.skillId]) }.sort({ it.displayOrder })
     }
