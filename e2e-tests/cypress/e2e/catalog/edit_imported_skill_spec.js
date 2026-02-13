@@ -38,10 +38,13 @@ describe('Edit Imported Skill Tests', () => {
         cy.importSkillFromCatalog(2, 1, 1, 2);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="subTitle"]').contains('ID: subj1')
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.contains('You can change the Point Increment');
-        cy.get('[data-cy="pointIncrement"] input')
+        cy.get('[data-cy="importedSkillMessage"]').should('be.visible')
+        cy.get('[data-cy="importedSkillMessage"]').contains('You can change the Point Increment');
+        cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]').should('be.visible')
+         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '100');
         cy.get('[data-cy="pointIncrement"]')
             .type('1');
@@ -71,12 +74,14 @@ describe('Edit Imported Skill Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.contains('You can change the Point Increment');
-        cy.get('[data-cy="pointIncrement"] input')
+        cy.get('[data-cy="importedSkillMessage"]').should('be.visible')
+        cy.get('[data-cy="importedSkillMessage"]').contains('You can change the Point Increment');
+         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '1,001');
 
         // refresh re-validate
         cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="subTitle"]').contains('ID: subj1')
 
         cy.get(`[data-cy="skillsTable-additionalColumns"]`)
             .contains('Points')
@@ -102,8 +107,9 @@ describe('Edit Imported Skill Tests', () => {
 
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.contains('You can change the Point Increment');
-        cy.get('[data-cy="pointIncrement"] input')
+        cy.get('[data-cy="importedSkillMessage"]').should('be.visible')
+        cy.get('[data-cy="importedSkillMessage"]').contains('You can change the Point Increment');
+         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '1,001');
     });
 
@@ -120,18 +126,19 @@ describe('Edit Imported Skill Tests', () => {
         cy.importSkillFromCatalog(2, 1, 1, 2);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="subTitle"]').contains('ID: subj1')
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.get('[data-cy="pointIncrement"] input')
+         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '100');
 
         // input won't allow chars
         cy.get('[data-cy="pointIncrement"]')
             .type('a');
-        cy.get('[data-cy="pointIncrement"] input')
+         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
           .should('have.value', '100');
 
-        cy.get('[data-cy="pointIncrement"] input')
+         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .clear();
         cy.get('[data-cy="pointIncrementError"]')
             .contains('Point Increment is a required field');
@@ -145,7 +152,7 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]')
             .should('be.disabled');
 
-        cy.get('[data-cy="pointIncrement"] input')
+         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .clear()
             .type('10000');
         cy.get('[data-cy="pointIncrementError"]')
@@ -168,6 +175,7 @@ describe('Edit Imported Skill Tests', () => {
         cy.importSkillFromCatalog(2, 1, 1, 2);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="subTitle"]').contains('ID: subj1')
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
         cy.get('[data-cy="pointIncrement"]')
@@ -238,10 +246,12 @@ describe('Edit Imported Skill Tests', () => {
         cy.finalizeCatalogImport(2);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="subTitle"]').contains('ID: subj1')
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.contains('You can change the Point Increment');
-        cy.get('[data-cy="pointIncrement"] input')
+        cy.get('[data-cy="importedSkillMessage"]').should('be.visible')
+        cy.get('[data-cy="importedSkillMessage"]').contains('You can change the Point Increment');
+         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '100');
         cy.get('[data-cy="pointIncrement"]')
             .type('1');
@@ -270,8 +280,9 @@ describe('Edit Imported Skill Tests', () => {
             .should('have.length', 2);
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.contains('You can change the Point Increment');
-        cy.get('[data-cy="pointIncrement"] input')
+        cy.get('[data-cy="importedSkillMessage"]').should('be.visible')
+        cy.get('[data-cy="importedSkillMessage"]').contains('You can change the Point Increment');
+         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '1,001');
 
         // drill-down and validate the points
@@ -302,7 +313,7 @@ describe('Edit Imported Skill Tests', () => {
             .should('have.text', '400');
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.get('[data-cy="pointIncrement"] input')
+         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '100');
         cy.get('[data-cy="pointIncrement"]')
             .clear()
@@ -329,11 +340,12 @@ describe('Edit Imported Skill Tests', () => {
         cy.importSkillFromCatalog(2, 1, 1, 2);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="subTitle"]').contains('ID: subj1')
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '200');
         cy.get('[data-cy="editSkillButton_skill2"]')
             .click();
-        cy.get('[data-cy="pointIncrement"] input')
+         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '100');
         cy.get('[data-cy="pointIncrement"]')
             .clear()
@@ -393,28 +405,35 @@ describe('Edit Imported Skill Tests', () => {
         cy.wait(1000);
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="subTitle"]').contains('ID: subj1')
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.contains('You can change the Point Increment');
-        cy.get('[data-cy="pointIncrement"] input')
+        cy.get('[data-cy="importedSkillMessage"]').should('be.visible')
+        cy.get('[data-cy="importedSkillMessage"]').contains('You can change the Point Increment');
+        cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]').should('be.visible')
+        cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '150');
-        cy.get('[data-cy="pointIncrement"]')
+        cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .type('1');
         cy.clickSaveDialogBtn()
+        cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]').should("not.exist")
 
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.contains('You can change the Point Increment');
-        cy.get('[data-cy="pointIncrement"] input')
+        cy.get('[data-cy="importedSkillMessage"]').should('be.visible')
+        cy.get('[data-cy="importedSkillMessage"]').contains('You can change the Point Increment');
+        cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '1,501');
 
         // refresh re-validate
         cy.visit('/administrator/projects/proj2/subjects/subj1');
+        cy.get('[data-cy="subTitle"]').contains('ID: subj1')
 
         cy.get('[data-cy="editSkillButton_skill1"]')
             .click();
-        cy.contains('You can change the Point Increment');
-        cy.get('[data-cy="pointIncrement"] input')
+        cy.get('[data-cy="importedSkillMessage"]').should('be.visible')
+        cy.get('[data-cy="importedSkillMessage"]').contains('You can change the Point Increment');
+        cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '1,501');
     });
 });
