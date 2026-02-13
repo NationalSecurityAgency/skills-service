@@ -2127,9 +2127,17 @@ class SkillsService {
         return wsHelper.apiPost(url, userId ? [userId : userId] : null)
     }
 
-    def gradeAnswer( String userId, String quizId,Integer attemptId, Integer answerDefId, Boolean isCorrect, String feedback = null, Boolean changeExistingGrade = false) {
+    def gradeAnswer( String userId, String quizId,Integer attemptId, Integer answerDefId, Boolean isCorrect, String feedback = null, Boolean changeExistingGrade = false, Boolean notifyUser = true) {
         String url = "/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/gradeAnswer/${answerDefId}"
-        return wsHelper.adminPost(url, [isCorrect: isCorrect, feedback: feedback, changeGrade: changeExistingGrade])
+        Map params = [isCorrect: isCorrect, feedback: feedback]
+        if (changeExistingGrade) {
+            params['changeGrade'] = changeExistingGrade
+        }
+        // should default to notify users when not provided
+        if (!notifyUser) {
+            params['notifyUser'] = notifyUser
+        }
+        return wsHelper.adminPost(url, params)
     }
 
     def failQuizAttempt(String quizId, Integer attemptId, String userId = null) {

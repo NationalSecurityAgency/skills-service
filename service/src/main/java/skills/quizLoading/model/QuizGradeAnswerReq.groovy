@@ -20,4 +20,5 @@ class QuizGradeAnswerReq {
     String feedback
 
     Boolean changeGrade = false
+    Boolean notifyUser = true
 }

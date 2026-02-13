@@ -15,15 +15,21 @@
  */
 package skills.intTests.quiz
 
-
+import jakarta.mail.internet.MimeMessage
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizUserPreferences
+import skills.storage.model.SkillDef
 import skills.storage.model.UserAttrs
+import skills.storage.model.UserQuizAttempt
 import skills.storage.model.auth.RoleName
 import skills.utils.WaitFor
+
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSkill
+import static skills.intTests.utils.SkillsFactory.createSubject
 
 class QuizGradingEmailNotificationsSpecs extends DefaultIntSpec {
 
@@ -238,6 +244,129 @@ class QuizGradingEmailNotificationsSpecs extends DefaultIntSpec {
             assert it.html.contains("<a href=\"http://localhost:${localPort}/administrator/quizzes/${quiz.quizId}/grading\" class=\"button\">Review Answers</a>")
         }
         emails.collect { it. recipients }.flatten().sort() == [quizAdminUserAttrs.email, quizAdmin2UserAttrs.email, quizAdmin3UserAttrs.email, quizAdmin4UserAttrs.email, quizAdmin5UserAttrs.email].sort()
+    }
+
+    def "email is sent when overriding graded InputText question"() {
+        List<String> userIds = getRandomUsers(2)
+        SkillsService testTaker = createService(userIds[0])
+        SkillsService otherAdmin = createService(userIds[1])
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createTextInputQuestion(1, 1)
+        skillsService.createQuizQuestionDefs([questions])
+        skillsService.addQuizUserRole(quiz.quizId, otherAdmin.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.quizId
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skillWithQuiz])
+
+        def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.needsGrading == true
+
+        skillsService.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
+
+        String gradedSubject = "SkillTree Quiz Graded"
+        String requestGradingSubject = "SkillTree Quiz Grading Requested"
+        assert WaitFor.wait {
+            MimeMessage[] messages = greenMail.getReceivedMessages()
+            return messages.size() >= 3
+                    && messages.findAll { EmailUtils.convert(it).subj == requestGradingSubject }.size() == 2 // 1 for each quiz admin
+                    && messages.findAll { EmailUtils.convert(it).subj == gradedSubject }.size() == 1
+
+        }
+        greenMail.purgeEmailFromAllMailboxes()
+
+        when:
+        def beforeOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        otherAdmin.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer", true)
+        def afterOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+
+        assert WaitFor.wait {
+            MimeMessage[] messages = greenMail.getReceivedMessages()
+            return messages.size() >= 1
+                    && messages.findAll { EmailUtils.convert(it).subj == gradedSubject }.size() == 1
+        }
+        EmailUtils.EmailRes gradedEmail = EmailUtils.getEmails(greenMail).find { it.subj == gradedSubject }
+
+        UserAttrs testTakerUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(testTaker.userName)
+        def quizInfo = testTaker.getQuizInfo(quiz.quizId)
+        then:
+        beforeOverride.status == UserQuizAttempt.QuizAttemptStatus.FAILED.toString()
+        beforeOverride.questions.isCorrect == [false]
+
+        afterOverride.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        afterOverride.questions.isCorrect == [true]
+
+        gradedEmail.recipients == [testTakerUserAttrs.email]
+        gradedEmail.plainText.contains("SkillTree Quiz Graded.")
+        gradedEmail.plainText.contains("Congratulations, you passed the quiz [${quizInfo.name}]!")
+        gradedEmail.plainText.contains("Quiz Url: http://localhost:${localPort}/progress-and-rankings/my-quiz-attempts/${quizAttempt.id}")
+
+        gradedEmail.html.contains("<h1>SkillTree Quiz Graded</h1>")
+        gradedEmail.html.contains("<p>Congratulations, you passed the quiz <b>${quizInfo.name}</b>!</p>")
+        gradedEmail.html.contains("<a href=\"http://localhost:${localPort}/progress-and-rankings/my-quiz-attempts/${quizAttempt.id}\" class=\"button\">Review Quiz Run</a>")
+    }
+
+    def "email is NOT sent when overriding graded InputText question and notifyUser is false"() {
+        List<String> userIds = getRandomUsers(2)
+        SkillsService testTaker = createService(userIds[0])
+        SkillsService otherAdmin = createService(userIds[1])
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createTextInputQuestion(1, 1)
+        skillsService.createQuizQuestionDefs([questions])
+        skillsService.addQuizUserRole(quiz.quizId, otherAdmin.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.quizId
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skillWithQuiz])
+
+        def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.needsGrading == true
+
+        skillsService.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
+
+        String gradedSubject = "SkillTree Quiz Graded"
+        String requestGradingSubject = "SkillTree Quiz Grading Requested"
+        assert WaitFor.wait {
+            MimeMessage[] messages = greenMail.getReceivedMessages()
+            return messages.size() >= 3
+                    && messages.findAll { EmailUtils.convert(it).subj == requestGradingSubject }.size() == 2 // 1 for each quiz admin
+                    && messages.findAll { EmailUtils.convert(it).subj == gradedSubject }.size() == 1
+
+        }
+        greenMail.purgeEmailFromAllMailboxes()
+
+        when:
+        def beforeOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        otherAdmin.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer", true, false)
+        def afterOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+
+        Thread.sleep(10000)
+        EmailUtils.EmailRes gradedEmail = EmailUtils.getEmails(greenMail).find { it.subj == gradedSubject }
+
+        UserAttrs testTakerUserAttrs = userAttrsRepo.findByUserIdIgnoreCase(testTaker.userName)
+        def quizInfo = testTaker.getQuizInfo(quiz.quizId)
+        then:
+        beforeOverride.status == UserQuizAttempt.QuizAttemptStatus.FAILED.toString()
+        beforeOverride.questions.isCorrect == [false]
+
+        afterOverride.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
+        afterOverride.questions.isCorrect == [true]
+
+        !gradedEmail
     }
 
 }

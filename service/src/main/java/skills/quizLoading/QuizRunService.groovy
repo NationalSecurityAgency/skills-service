@@ -756,7 +756,9 @@ class QuizRunService {
             userQuizAttempt.status = isQuizPassed ? UserQuizAttempt.QuizAttemptStatus.PASSED : UserQuizAttempt.QuizAttemptStatus.FAILED
             quizAttemptRepo.save(userQuizAttempt)
 
-            quizNotificationService.sendGradedRequestNotification(quizDef, userQuizAttempt)
+            if (gradeAnswerReq.notifyUser) {
+                quizNotificationService.sendGradedRequestNotification(quizDef, userQuizAttempt)
+            }
         }
 
         UserQuizAnswerGraded userQuizAnswerGraded
@@ -767,6 +769,7 @@ class QuizRunService {
             }
             userQuizAnswerGraded.feedback = gradeAnswerReq.feedback
             userQuizAnswerGraded.aiConfidenceLevel = null
+            userQuizAnswerGraded.graderUserAttrsRefId = graderUserAttrs.id
         } else {
             userQuizAnswerGraded = new UserQuizAnswerGraded(
                     graderUserAttrsRefId: graderUserAttrs.id,
