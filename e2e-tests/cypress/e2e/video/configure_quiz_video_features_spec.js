@@ -35,28 +35,44 @@ describe('Configure Video and SkillTree Features Tests', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1)
         cy.visit('/administrator/quizzes/quiz1');
+        cy.wait('@loadConfig')
 
         cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
         cy.get('[data-cy="add-video-question-1"]').click()
+        cy.wait('@getVideoProps')
 
-        cy.wait('@loadConfig')
+        cy.get('[data-cy="videoFileUpload"] [data-pc-extend="button"]').should('be.enabled')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.enabled')
+        cy.get('[data-cy="fillCaptionsExamples"]').should('be.enabled')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
         const videoFile = 'create-subject.webm';
         cy.fixture(videoFile, null).as('videoFile');
         cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile('@videoFile',  { force: true })
+
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', videoFile)
+        cy.get('[data-cy="resetBtn"]').should('be.enabled')
+        cy.get('[data-cy="videoFileUpload"] [data-pc-extend="button"]').should('not.exist')
+        cy.get('[data-cy="videoFileInput"] [for="videoFileInput"]').contains('SkillTree Hosted')
         cy.get('[data-cy="videoUploadWarningMessage"]').contains(msg)
 
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="saveVideoSettingsBtn"]').click()
         cy.get('[data-cy="savedMsg"]')
         cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', videoFile)
 
         // click away and return
         cy.visit('/administrator/quizzes/quiz1');
+        cy.wait('@loadConfig')
 
         cy.get('[data-cy="add-video-question-1"]').contains("Edit Audio/Video");
         cy.get('[data-cy="add-video-question-1"]').click()
         cy.wait('@getVideoProps')
-        cy.get('.spinner-border').should('not.exist')
-        cy.wait(5000)
+
+        cy.get('[data-cy="videoFileInput"] input[type=text]').should('have.value', videoFile)
+        cy.get('[data-cy="resetBtn"]').should('be.enabled')
+        cy.get('[data-cy="videoFileUpload"] [data-pc-extend="button"]').should('not.exist')
+        cy.get('[data-cy="videoFileInput"] [for="videoFileInput"]').contains('SkillTree Hosted')
+        cy.get('[data-cy="videoUploadWarningMessage"]').should('not.exist')
     });
 
     it('video upload warning message supports community.descriptor property ', () => {

@@ -56,7 +56,12 @@ describe('Description Global Badge Attachments Tests', () => {
     it('attachments are enabled on global badge edit - from global badge page', () => {
         cy.createGlobalBadge(1)
         cy.viewport(1400, 1000)
+        cy.intercept('/admin/badges/globalBadge1').as('getGlobalBadge')
+        cy.intercept('/admin/badges/globalBadge1/skills/available**').as('getAvailableSkills')
         cy.visit('/administrator/globalBadges/globalBadge1')
+        cy.wait('@getGlobalBadge')
+        cy.wait('@getAvailableSkills')
+        cy.get('[data-cy="noContent"]')
 
         cy.get('[data-cy="btn_edit-badge"]').click()
         cy.get('[data-p="modal"] [data-pc-section="title"]').contains('Editing Existing Badge')

@@ -100,8 +100,7 @@ const openFileDialog = (event) => {
     <!-- file chosen or already uploaded and internally hosted via SkillTree -->
     <div v-if="isInternallyHosted" class="flex items-start">
       <InputGroup>
-        <SkillsTextInput id="videoFileInput"
-                         class="flex-1 rounded-none"
+        <SkillsTextInput class="flex-1 rounded-none"
                          v-model="props.hostedFileName"
                          data-cy="videoFileInput"
                          name="videoFileInput"
