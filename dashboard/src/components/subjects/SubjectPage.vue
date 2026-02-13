@@ -49,7 +49,7 @@ onMounted(() => {
 })
 
 const isLoadingData = computed(() => {
-  return subjectState.isLoadingSubject.value; // || projConfig.loadingProjConfig
+  return subjectState.isLoadingSubject.value || subjectState.subject.subjectId === undefined; // || projConfig.loadingProjConfig
 })
 
 const navItems = computed(() => {
@@ -71,7 +71,7 @@ const headerOptions = computed(() => {
   return {
     icon: 'fas fa-cubes skills-color-subjects',
     title: `SUBJECT: ${subject.name}`,
-    subTitle: `ID: ${subject.subjectId}`,
+    subTitle: `ID: ${subject.subjectId || ''}`,
     stats: [{
       label: 'Groups',
       count: subject.numGroups,

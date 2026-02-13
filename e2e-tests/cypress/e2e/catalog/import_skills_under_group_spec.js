@@ -134,9 +134,9 @@ describe('Import Skills under a Group Tests', () => {
         cy.get('[data-cy="editSkillButton_skill2"]')
             .click();
         cy.contains('This skill was imported from This is project 2 and can only be modified in that project.');
-        cy.get('[data-cy="pointIncrement"]')
-            .clear()
-            .type('33');
+        cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]').clear()
+        cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]').type('33');
+
         cy.clickSaveDialogBtn()
         cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group5"] [data-cy="skillsTable"]', [
             [{

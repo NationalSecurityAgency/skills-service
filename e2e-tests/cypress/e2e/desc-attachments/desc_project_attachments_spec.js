@@ -120,6 +120,8 @@ describe('Description Project Attachments Tests', () => {
         cy.createSubject(1, 1)
         cy.viewport(1400, 1000)
         cy.visit('/administrator/projects/proj1/subjects/subj1')
+        cy.get('[data-cy="noContent"]')
+        cy.get('[data-cy="subjInsufficientPoints"]')
 
         cy.get('[data-cy="btn_edit-subject"]').click()
         cy.get('[data-p="modal"] [data-pc-section="title"]').contains('Editing Existing Subject')
