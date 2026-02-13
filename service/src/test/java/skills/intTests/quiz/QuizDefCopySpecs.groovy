@@ -660,8 +660,10 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         when:
         def copiedHistory = skillsService.getUserActionsForQuiz(copiedQuiz.quizId)
-        def questionOneAttributes = skillsService.getQuizUserActionAttributes(copiedQuiz.quizId, copiedHistory.data[1].id)
-
+        def questionsAttributes = copiedHistory.data
+                .findAll { it.item == "Question"}
+                .collect {  skillsService.getQuizUserActionAttributes(it.quizId, it.id)}
+                .sort { it.question }
         then:
         copiedHistory.totalCount == 4
         copiedHistory.data[0].action == 'Create'
@@ -680,8 +682,10 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         copiedHistory.data[3].item == 'Quiz'
         copiedHistory.data[3].itemId == 'newQuizCopy'
         copiedHistory.data[3].quizId == copiedQuiz.quizId
+        questionsAttributes.question == ["This is questions #1", "This is questions #2"]
+        questionsAttributes.questionType == ["MultipleChoice","SingleChoice"]
+        def questionOneAttributes = questionsAttributes[1]
         questionOneAttributes.question == "This is questions #2"
-        questionOneAttributes.questionType == "SingleChoice"
         questionOneAttributes["Answer1:text"] == "Answer #1"
         questionOneAttributes["Answer1:isCorrectAnswer"] == "true"
         questionOneAttributes["Answer2:text"] == "Answer #2"
