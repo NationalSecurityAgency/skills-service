@@ -208,7 +208,9 @@ const onGradeOverridden = (res) => {
               </div>
             </div>
             <div v-if="isTextInputType && !needsGrading && showAiGradingMeta">
-              <SkillsButton label="Override Grade"
+              <SkillsButton :id="`overrideGradeBtn-q${question.id}`"
+                            :track-for-focus="true"
+                            label="Override Grade"
                             icon="fa-solid fa-pen-to-square"
                             size="small"
                             data-cy="overrideGradeBtn"

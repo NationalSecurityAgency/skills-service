@@ -21,6 +21,8 @@ import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEdito
 import SkillsInputSwitch from "@/components/utils/inputForm/SkillsInputSwitch.vue";
 import QuizService from "@/components/quiz/QuizService.js";
 import {useRoute} from "vue-router";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -29,9 +31,19 @@ const props = defineProps({
 })
 const emit = defineEmits(['grade-overridden'])
 const route = useRoute()
+const appConfig = useAppConfig()
+const announcer = useSkillsAnnouncer()
+
+const initialData = {
+  feedbackTxt: '',
+  notifyUser: false
+}
 
 const schema = object({
-
+  'feedbackTxt': string()
+      .max(appConfig.maxGraderFeedbackMessageLength)
+      .customDescriptionValidator('Feedback')
+      .label('Feedback'),
 })
 
 const overrideGrade = (attributes) => {
@@ -47,20 +59,17 @@ const overrideGrade = (attributes) => {
   return QuizService.gradeQuizAnswerAttempt(quizId, props.question.userId, runId, answerDefId, gradingInfo)
 }
 
-const initialData = {
-  feedbackTxt: '',
-  notifyUser: false
-}
-
 const afterSave = (res) => {
   emit('grade-overridden', res)
-  model.value = false
+  const isCorrect = !props.question.isCorrect
+  const newCorrectness = isCorrect ? 'correct' : 'wrong'
+  announcer.polite(`Question ${props.question.questionNum} grade changed to ${newCorrectness}`)
 }
 </script>
 
 <template>
   <SkillsInputFormDialog
-      id="correctTextInputGrade"
+      :id="`overrideTextInputGrade-q${question.id}`"
       header="Override Grade"
       v-model="model"
       :save-data-function="overrideGrade"
@@ -68,6 +77,8 @@ const afterSave = (res) => {
       :validation-schema="schema"
       :initial-values="initialData"
       :enable-return-focus="true"
+      :enable-input-form-resiliency="false"
+      :should-confirm-cancel="false"
       data-cy="addSkillTagDialog"
       save-button-label="Override Grade"
       save-button-icon="fa-solid fa-hammer">

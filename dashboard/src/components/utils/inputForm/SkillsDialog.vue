@@ -118,7 +118,9 @@ const handleClose = () => {
 
 const handleEscape = (event) => {
   if (event.key === 'Escape' && !props.submitting) {
-    emit('confirm-cancel', event)
+    if (props.shouldConfirmCancel) {
+      emit('confirm-cancel', event)
+    }
     handleClose()
   }
 }

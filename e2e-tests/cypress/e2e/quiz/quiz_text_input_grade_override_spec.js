@@ -242,6 +242,146 @@ describe('Text Input question grading override', () => {
         });
     });
 
+    it('grade override dialog Feedback input custom validation', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+
+        cy.createQuizDef(1);
+        cy.setQuizShowCorrectAnswers(1, true)
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.runQuizForUser(1, otherUser, [{selectedIndex: [0]}], true,'answer 51')
+        cy.gradeQuizAttempt(1, false)
+
+        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.wait('@getConfig')
+
+        const tableSelector = '[data-cy="quizRunsHistoryTable"]'
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2, value: 'Failed'}],
+        ], 5);
+        cy.get(`${tableSelector} [data-cy="row0-viewRun"]`).click()
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="overrideGradeBtn"]').click()
+        cy.get('[data-cy="overrideGradeWarningToCorrect"]')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+
+        cy.typeInMarkdownEditor('[data-cy="feedback"]', 'jabberwocky')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="descriptionError"]').contains('Feedback - paragraphs may not contain jabberwocky')
+
+        cy.typeInMarkdownEditor('[data-cy="feedback"]', '{backspace}')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+
+        cy.typeInMarkdownEditor('[data-cy="feedback"]', 'y o')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="descriptionError"]').contains('Feedback - paragraphs may not contain jabberwocky')
+    });
+
+    it('grade override dialog Feedback input max char validation', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                conf.maxGraderFeedbackMessageLength = 8
+                res.send(conf);
+            });
+        }).as('getConfig');
+
+        cy.createQuizDef(1);
+        cy.setQuizShowCorrectAnswers(1, true)
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.runQuizForUser(1, otherUser, [{selectedIndex: [0]}], true,'answer 51')
+        cy.gradeQuizAttempt(1, false)
+
+        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.wait('@getConfig')
+
+        const tableSelector = '[data-cy="quizRunsHistoryTable"]'
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2, value: 'Failed'}],
+        ], 5);
+        cy.get(`${tableSelector} [data-cy="row0-viewRun"]`).click()
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="overrideGradeBtn"]').click()
+        cy.get('[data-cy="overrideGradeWarningToCorrect"]')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+
+        cy.typeInMarkdownEditor('[data-cy="feedback"]', '123456789')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="descriptionError"]').contains('Feedback must be at most 8 characters')
+
+        cy.typeInMarkdownEditor('[data-cy="feedback"]', '{backspace}')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+
+        cy.typeInMarkdownEditor('[data-cy="feedback"]', 'y o')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="descriptionError"]').contains('Feedback must be at most 8 characters')
+    });
+
+    it('canceling override dialog Feedback should return focus to the grade button', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+
+        cy.createQuizDef(1);
+        cy.setQuizShowCorrectAnswers(1, true)
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createTextInputQuestionDef(1, 2)
+
+        cy.runQuizForUser(1, otherUser, [{selectedIndex: [0]}, {selectedIndex: [0]}], true,'answer 51')
+        cy.gradeQuizAttempt(1, false)
+
+        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.wait('@getConfig')
+
+        const tableSelector = '[data-cy="quizRunsHistoryTable"]'
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2, value: 'Failed'}],
+        ], 5);
+        cy.get(`${tableSelector} [data-cy="row0-viewRun"]`).click()
+
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="wrongAnswer"]')
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="overrideGradeBtn"]').click()
+        cy.get('[data-cy="overrideGradeWarningToCorrect"]')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+
+        cy.get('[data-cy="closeDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="closeDialogBtn"]').click()
+
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="overrideGradeBtn"]').should('have.focus')
+
+
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="overrideGradeBtn"]').click()
+        cy.get('[data-cy="overrideGradeWarningToCorrect"]')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+
+        cy.realPress('Escape');
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="overrideGradeBtn"]').should('have.focus')
+
+    });
+
+
 });
 
 
