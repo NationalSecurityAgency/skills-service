@@ -1623,4 +1623,211 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="prevSkill"]').should('not.exist');
     cy.get('[data-cy="nextSkill"]').should('exist');
   })
+
+  it('Add skill event results clear when skill changed', () => {
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill1',
+      name: 'Skill 1',
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    })
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill2', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill2',
+      name: 'Skill 2',
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    })
+
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill3', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill3',
+      name: 'Skill 3',
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    })
+
+
+    cy.intercept({
+      method: 'POST',
+      url: '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=TWO'
+    }).as('suggestUsers')
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+    }).as('loadSkill')
+    cy.intercept({
+      method: 'POST',
+      url: '/api/projects/Inception/skills/ManuallyAddSkillEvent'
+    }).as('addSkillEvent')
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+    cy.wait('@loadSkill')
+    cy.contains('Add Event').click()
+
+    cy.contains('ONE').click()
+    cy.contains('TWO').click()
+    cy.get('[data-cy="userSuggestOptionsDropdown"]').contains('TWO')
+
+    cy.get('[data-cy="userIdInput"]').click().type('foo{enter}')
+    cy.wait('@suggestUsers')
+    cy.get(addButtonSelector).click();
+    cy.wait('@addSkillEvent')
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('Added points for')
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('[foo]')
+
+    cy.get('[data-cy="userIdInput"]').click().type('{selectall}bar{enter}')
+    cy.wait('@suggestUsers')
+    cy.get(addButtonSelector).click();
+    cy.wait('@addSkillEvent')
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('Added points for')
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('[bar]')
+
+    cy.get('[data-cy="nextSkill"]').click()
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 1000 }).should('not.exist')
+
+    cy.contains('ONE').click()
+    cy.contains('TWO').click()
+    cy.get('[data-cy="userSuggestOptionsDropdown"]').contains('TWO')
+
+    cy.get('[data-cy="userIdInput"]').click().type('{selectall}baz{enter}')
+    cy.wait('@suggestUsers')
+    cy.get(addButtonSelector).click();
+    cy.wait('@addSkillEvent')
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('Added points for')
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('[baz]')
+
+    cy.get('[data-cy="nextSkill"]').click()
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 1000 }).should('not.exist')
+
+    cy.contains('ONE').click()
+    cy.contains('TWO').click()
+    cy.get('[data-cy="userSuggestOptionsDropdown"]').contains('TWO')
+
+    cy.get('[data-cy="userIdInput"]').click().type('{selectall}fo{enter}')
+    cy.wait('@suggestUsers')
+    cy.get('[data-cy="userIdInput"]').click()
+    cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('foo').click({ force: true })
+    cy.get(addButtonSelector).click();
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('Added points for')
+    cy.get('[data-cy="addedUserEventsInfo"]', { timeout: 5 * 1000 }).contains('[foo]')
+  })
+
+  it('Users table updates when skill changes', () => {
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill1',
+      name: 'Skill 1',
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    })
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill2', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill2',
+      name: 'Skill 2',
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    })
+
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill3', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill3',
+      name: 'Skill 3',
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    })
+
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+    }).as('loadSkill')
+
+    cy.reportSkill(1, 1, 'user1', 'now');
+    cy.reportSkill(1, 1, 'user2', 'now');
+    cy.reportSkill(1, 2, 'user3', 'now');
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+    cy.wait('@loadSkill')
+    cy.contains('Users').click()
+
+    cy.validateTable('[data-cy="usersTable"]', [
+      [{ colIndex: 0,  value: "user2" }],
+      [{ colIndex: 0,  value: 'user1' }],
+    ], 5, true, null, false);
+
+    cy.get('[data-cy="nextSkill"]').click()
+    cy.validateTable('[data-cy="usersTable"]', [
+      [{ colIndex: 0,  value: "user3" }],
+    ], 5, true, null, false);
+
+    cy.get('[data-cy="nextSkill"]').click()
+    cy.get('[data-cy="usersTable"]').contains('There are no records to show')
+
+    cy.get('[data-cy="prevSkill"]').click()
+    cy.validateTable('[data-cy="usersTable"]', [
+      [{ colIndex: 0,  value: "user3" }],
+    ], 5, true, null, false);
+
+    cy.get('[data-cy="prevSkill"]').click()
+    cy.validateTable('[data-cy="usersTable"]', [
+      [{ colIndex: 0,  value: "user2" }],
+      [{ colIndex: 0,  value: 'user1' }],
+    ], 5, true, null, false);
+  })
+
+
+  it('Expiration updates when skill changes', () => {
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill1',
+      name: 'Skill 1',
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    })
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill2', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill2',
+      name: 'Skill 2',
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    })
+
+    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill3', {
+      projectId: 'proj1',
+      subjectId: 'subj1',
+      skillId: 'skill3',
+      name: 'Skill 3',
+      pointIncrement: '50',
+      numPerformToCompletion: '5'
+    })
+
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+    }).as('loadSkill')
+
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+    cy.wait('@loadSkill')
+    cy.contains('Expiration').click()
+
+    cy.get('[data-cy="expirationTypeSelector"] [data-cy="expirationNeverRadio"] [data-pc-section="input"]').should('be.checked')
+    cy.get('[data-cy="dailyFormGroup"] [data-pc-section="input"]').click()
+    cy.get('[data-cy="saveSettingsBtn"]').click();
+
+    cy.get('[data-cy="nextSkill"]').click()
+    cy.get('[data-cy="expirationTypeSelector"] [data-cy="expirationNeverRadio"] [data-pc-section="input"]').should('be.checked')
+
+    cy.get('[data-cy="prevSkill"]').click()
+    cy.get('[data-cy="dailyFormGroup"] [data-pc-section="input"]').should('be.checked')
+  })
 })
