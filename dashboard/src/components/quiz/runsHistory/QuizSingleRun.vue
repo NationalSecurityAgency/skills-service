@@ -123,10 +123,10 @@ const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
       </div>
     </div>
     <quiz-completed-message v-if="showQuizUnderReview && QuizStatus.isNeedsGrading(runInfo.status)" />
-    <Message v-if="!runInfo.questions && QuizStatus.isFailed(runInfo.status)" severity="warn" :closable="false" data-cy="allQuestionsNotDisplayedMsg">
+    <Message v-if="(!runInfo.questions && QuizStatus.isFailed(runInfo.status)) || runInfo.questionsHidden" severity="warn" :closable="false" data-cy="allQuestionsNotDisplayedMsg">
       Questions and answers are not displayed so not to give away the correct answers.
     </Message>
-    <Message v-if="runInfo.questions && !runInfo.allQuestionsReturned" severity="warn" :closable="false" class="mt-8" data-cy="someQuestionsNotDisplayedMsg">
+    <Message v-if="!runInfo.questionsHidden && runInfo.questions && !runInfo.allQuestionsReturned" severity="warn" :closable="false" class="mt-8" data-cy="someQuestionsNotDisplayedMsg">
       The rest of the questions and answers are not displayed so not to give away the correct answers.
     </Message>
   </div>

@@ -33,4 +33,5 @@ class UserGradedQuizQuestionsResult {
     Date started
     Date completed
     String userTag
+    Boolean questionsHidden
 }
