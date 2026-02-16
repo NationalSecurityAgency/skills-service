@@ -141,12 +141,6 @@ watch(
     }
 )
 
-watch( () => route.params.skillId, () => {
-  resetForm();
-  currentSelectedUser.value = null;
-  usersAdded.value = [];
-});
-
 const loadProject = (reloadSubject = false) => {
   ProjectService.getProject(props.projectId).then((res) => {
     projectTotalPoints.value = res.totalPoints;

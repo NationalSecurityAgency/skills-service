@@ -58,7 +58,6 @@ watch(() => props.navItems, () => {
     handleResize()
   })
 })
-
 </script>
 
 <template>
@@ -131,7 +130,7 @@ watch(() => props.navItems, () => {
         <div class="md:pl-4" id="mainContent2"
              tabindex="-1"
              aria-label="Main content area, click tab to navigate">
-          <router-view />
+          <router-view :key="$route.fullPath" />
         </div>
       </div>
     </div>
