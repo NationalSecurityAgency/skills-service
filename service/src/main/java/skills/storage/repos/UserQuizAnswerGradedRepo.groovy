@@ -27,6 +27,7 @@ interface UserQuizAnswerGradedRepo extends JpaRepository<UserQuizAnswerGraded, L
     static interface GradedInfo {
         Integer getAnswerAttemptId()
         Date getGradedOn()
+        @Nullable
         String getFeedback()
         @Nullable
         Integer getAiConfidenceLevel()
@@ -39,7 +40,7 @@ interface UserQuizAnswerGradedRepo extends JpaRepository<UserQuizAnswerGraded, L
 
     @Query('''select 
             answerAttempt.id as answerAttemptId,    
-            graded.created as gradedOn, 
+            graded.updated as gradedOn, 
             graded.feedback as feedback,
             graded.aiConfidenceLevel as aiConfidenceLevel,
             userAttrs.userId as graderUserId, 

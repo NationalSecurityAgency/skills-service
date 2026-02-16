@@ -257,6 +257,7 @@ describe('Accessibility Quiz Tests', () => {
         });
 
         it(`text input ai grader settings page${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
             cy.fixture('vars.json').then((vars) => {
                 cy.logout();
                 cy.login(vars.rootUser, vars.defaultPass, true);
@@ -295,6 +296,42 @@ describe('Accessibility Quiz Tests', () => {
                     cy.injectAxe();
                     cy.customA11y();
                 })
+        });
+
+        it(`override override dialog${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.intercept('GET', '/public/config', (req) => {
+                req.reply((res) => {
+                    const conf = res.body;
+                    conf.enableOpenAIIntegration = true;
+                    res.send(conf);
+                });
+            }).as('getConfig');
+
+            cy.createQuizDef(1);
+            cy.createTextInputQuestionDef(1, 1)
+
+            cy.runQuizForTheCurrentUser(1, [{selectedIndex: [0]}], true,'answer 51')
+            cy.gradeQuizAttempt(1, false)
+
+            cy.visit('/administrator/quizzes/quiz1/runs');
+            cy.wait('@getConfig')
+
+            const tableSelector = '[data-cy="quizRunsHistoryTable"]'
+            cy.validateTable(tableSelector, [
+                [{ colIndex: 2, value: 'Failed'}],
+            ], 5);
+            cy.get(`${tableSelector} [data-cy="row0-viewRun"]`).click()
+
+            cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]')
+            cy.get('[data-cy="questionDisplayCard-1"] [data-cy="overrideGradeBtn"]').click()
+            cy.get('[data-cy="overrideGradeWarningToCorrect"]')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+
+            cy.customLighthouse();
+            cy.injectAxe();
+            cy.customA11y();
         });
     })
 });

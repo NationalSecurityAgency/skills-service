@@ -22,28 +22,35 @@ import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue';
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import QuizSingleRun from "@/components/quiz/runsHistory/QuizSingleRun.vue";
 
-
 const loading = ref(true);
+const reloading = ref(false);
 const runInfo = ref({});
 const route = useRoute();
 const quizId = ref(route.params.quizId);
 const attemptId = ref(route.params.runId);
 
-
-
 const loadData = () => {
-  loading.value = true;
-  QuizService.getSingleQuizHistoryRun(quizId.value, attemptId.value)
+  return QuizService.getSingleQuizHistoryRun(quizId.value, attemptId.value)
       .then((res) => {
-        runInfo.value = res;
-      }).finally(() => {
-    loading.value = false;
-  });
+        const userId = res.userId;
+        const questions = res.questions.map((q) => ({...q, userId}));
+        runInfo.value = {...res, questions};
+      })
 }
 
 onMounted(() => {
-  loadData();
+  loading.value = true;
+  loadData().finally(() => {
+    loading.value = false;
+  })
 })
+
+const reloadRunInfo = () => {
+  reloading.value = true;
+  loadData().finally(() => {
+    reloading.value = false;
+  })
+}
 </script>
 
 <template>
@@ -66,7 +73,9 @@ onMounted(() => {
       <template #content>
         <SkillsSpinner v-if="loading" :is-loading="true" class="my-20"/>
         <div v-else>
-          <quiz-single-run :run-info="runInfo" :show-quiz-under-review="false" :show-ai-grading-meta="true"/>
+          <BlockUI :blocked="reloading">
+            <quiz-single-run :run-info="runInfo" :show-quiz-under-review="false" :show-ai-grading-meta="true" @need-to-reload="reloadRunInfo"/>
+          </BlockUI>
         </div>
       </template>
     </Card>

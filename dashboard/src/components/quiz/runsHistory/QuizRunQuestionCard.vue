@@ -23,6 +23,8 @@ import { useTimeUtils } from "@/common-components/utilities/UseTimeUtils.js";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import AiConfidenceTag from "@/components/quiz/testCreation/AiConfidenceTag.vue";
 import GradingStatusMessage from "@/components/quiz/runsHistory/GradingStatusMessage.vue";
+import OverrideTextInputQuestionGradeDialog
+  from "@/components/quiz/runsHistory/OverrideTextInputQuestionGradeDialog.vue";
 
 const props = defineProps({
   quizType: String,
@@ -33,6 +35,7 @@ const props = defineProps({
     default: false,
   }
 })
+const emit = defineEmits(['need-to-reload'])
 
 const appConfig = useAppConfig()
 const timeUtils = useTimeUtils();
@@ -93,6 +96,13 @@ const isAiGraded = computed(() => {
   const gradeInfo = manuallyGradedInfo.value
   return gradeInfo?.graderUserIdForDisplay === aiAssistant || gradeInfo?.graderUserId === aiAssistant
 })
+const showOverrideGradeDialog = ref(false)
+const openOverrideGradeDialog = () => {
+  showOverrideGradeDialog.value = true
+}
+const onGradeOverridden = (res) => {
+  emit('need-to-reload', res)
+}
 </script>
 
 <template>
@@ -186,7 +196,8 @@ const isAiGraded = computed(() => {
           </div>
           <div v-if="manuallyGradedInfo" class="mt-4 w-full border p-4 rounded-border border-surface sd-theme-primary-color" data-cy="manuallyGradedInfo">
 
-            <div class="text-xl mb-4 font-semibold">
+            <div class="flex gap-1 items-start mb-4">
+            <div class="text-xl font-semibold flex-1">
               <div v-if="isAiGraded" class="flex gap-2" data-cy="aiGraded">
                 <Avatar icon="fa-solid fa-wand-magic-sparkles" shape="circle" class="bg-indigo-600! text-purple-100!" aria-hidden="true"/>
                 <div>AI Graded</div>
@@ -195,6 +206,16 @@ const isAiGraded = computed(() => {
                 <Avatar icon="fa-solid fa-pen-to-square" shape="circle" class="bg-teal-600! text-teal-100!" aria-hidden="true"/>
                 <div>Manually Graded</div>
               </div>
+            </div>
+            <div v-if="isTextInputType && !needsGrading && showAiGradingMeta">
+              <SkillsButton :id="`overrideGradeBtn-q${question.id}`"
+                            :track-for-focus="true"
+                            label="Override Grade"
+                            icon="fa-solid fa-pen-to-square"
+                            size="small"
+                            data-cy="overrideGradeBtn"
+                            @click="openOverrideGradeDialog"/>
+            </div>
             </div>
 
             <div class="flex gap-4">
@@ -212,7 +233,7 @@ const isAiGraded = computed(() => {
                   :data-cy="`feedbackDisplayText_q${question.id}`"/>
             </div>
 
-            <div v-if="doShowAiGradingMeta" class="mt-3">
+            <div v-if="doShowAiGradingMeta && typeof(manuallyGradedInfo.aiConfidenceLevel) === 'number'" class="mt-3">
               <div class="flex gap-2 items-center"><span>AI Confidence Level:</span>
                 <div class="flex gap-2 items-center">
                   <span class="font-bold" data-cy="gradeResConfidence">{{ manuallyGradedInfo.aiConfidenceLevel }}%</span>
@@ -225,6 +246,7 @@ const isAiGraded = computed(() => {
         </div>
       </div>
     </div>
+    <override-text-input-question-grade-dialog v-model="showOverrideGradeDialog" :question="question" @grade-overridden="onGradeOverridden"/>
   </div>
 </template>
 

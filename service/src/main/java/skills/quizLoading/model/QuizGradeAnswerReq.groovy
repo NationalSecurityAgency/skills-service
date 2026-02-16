@@ -18,4 +18,7 @@ package skills.quizLoading.model
 class QuizGradeAnswerReq {
     Boolean isCorrect
     String feedback
+
+    Boolean changeGrade = false
+    Boolean notifyUser = true
 }
