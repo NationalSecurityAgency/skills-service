@@ -321,7 +321,13 @@ const pageAwareTitleLevel = computed(() => route.params.projectId ? 2 : 1)
               <i class="fas fa-fingerprint skills-color-points mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
-              <span :data-cy="`row${slotProps.index}-${slotProps.field}`">{{ slotProps.data.itemId }}</span>
+              <div v-if="slotProps.data.itemId" :data-cy="`row${slotProps.index}-${slotProps.field}`">
+                <router-link v-if="slotProps.data.item === 'QuizAttempt'"
+                             :to="{ name:'QuizSingleRunPage', params: { quizId: slotProps.data.quizId, runId: slotProps.data.itemId }}"
+                             class="underline">{{ slotProps.data.itemId }}
+                </router-link>
+                <div v-else>{{ slotProps.data.itemId }}</div>
+              </div>
             </template>
             <template #filter="{ filterModel, filterCallback }">
               <InputText v-model="filterModel.value"
@@ -338,7 +344,9 @@ const pageAwareTitleLevel = computed(() => route.params.projectId ? 2 : 1)
               <i class="fas fa-tasks skills-color-projects mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
-              <span :data-cy="`row${slotProps.index}-${slotProps.field}`">{{ slotProps.data.projectId }}</span>
+              <span :data-cy="`row${slotProps.index}-${slotProps.field}`">
+                <router-link v-if="slotProps.data.projectId" :to="{ name:'Subjects', params: { projectId: slotProps.data.projectId }}"
+                             class="underline">{{ slotProps.data.projectId }}</router-link></span>
             </template>
             <template #filter="{ filterModel, filterCallback }">
               <InputText v-model="filterModel.value"
@@ -355,7 +363,11 @@ const pageAwareTitleLevel = computed(() => route.params.projectId ? 2 : 1)
               <i class="fas fa-spell-check skills-color-subjects mr-1" aria-hidden="true"></i>
             </template>
             <template #body="slotProps">
-              <span :data-cy="`row${slotProps.index}-${slotProps.field}`">{{ slotProps.data.quizId }}</span>
+              <span :data-cy="`row${slotProps.index}-${slotProps.field}`">
+                <router-link v-if="slotProps.data.quizId"
+                             :to="{ name:'Questions', params: { quizId: slotProps.data.quizId }}"
+                             class="underline">{{ slotProps.data.quizId }}</router-link>
+              </span>
             </template>
             <template #filter="{ filterModel, filterCallback }">
               <InputText v-model="filterModel.value"

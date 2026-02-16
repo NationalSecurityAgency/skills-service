@@ -48,6 +48,10 @@ import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 import skills.services.quiz.QuizQuestionType
 import skills.services.slides.QuizAttrsStore
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.skillLoading.model.SlidesSummary
 import skills.storage.model.*
 import skills.storage.repos.*
@@ -103,6 +107,9 @@ class QuizRunService {
 
     @Autowired
     UserQuizAnswerGradedRepo userQuizAnswerGradedRepo
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     @Autowired
     UserQuizAnswerAttemptRepo quizAttemptAnswerRepo
@@ -770,6 +777,19 @@ class QuizRunService {
             userQuizAnswerGraded.feedback = gradeAnswerReq.feedback
             userQuizAnswerGraded.aiConfidenceLevel = null
             userQuizAnswerGraded.graderUserAttrsRefId = graderUserAttrs.id
+
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.Edit,
+                    item: DashboardItem.QuizAttempt,
+                    itemId: userQuizAttempt.id,
+                    quizId: quizId,
+                    actionAttributes: [
+                            action: 'Override Text Input Question Grade',
+                            questionNum: questionAttempt?.displayOrder,
+                            newGrade: userQuizAnswerAttempt.status,
+                    ]
+            ))
+
         } else {
             userQuizAnswerGraded = new UserQuizAnswerGraded(
                     graderUserAttrsRefId: graderUserAttrs.id,

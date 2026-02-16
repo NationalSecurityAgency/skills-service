@@ -112,7 +112,7 @@ const formatLabel = (originalLabel) => {
 <template>
 
   <LoadingContainer :is-loading="loading">
-    <div v-if="attributes && attributes.length > 0">
+    <div v-if="attributes && attributes.length > 0" class="flex flex-col gap-1">
       <div v-for="(attr, index) in attributes" :key="attr.label">
         <div v-if="attr.isDescription && attr.value">
           <div class="italic">
@@ -129,9 +129,9 @@ const formatLabel = (originalLabel) => {
             </template>
           </Card>
         </div>
-        <div v-else class="grid grid-cols-12 gap-4">
-          <div class="col-span-3 italic">{{ attr.label }}:</div>
-          <div class="col my-auto">
+        <div v-else class="flex gap-2">
+          <div class="font-semibold italic">{{ attr.label }}:</div>
+          <div class="">
             <span v-if="!attr.value" class="text-secondary">Not Provided</span>
             <span v-else>
               <div v-if="attr.isTextAreaProp">

@@ -24,7 +24,10 @@ import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
 import skills.services.attributes.ExpirationAttrs
 import skills.services.quiz.QuizQuestionType
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
 import skills.storage.model.SkillDef
+import skills.storage.model.UserQuizAnswerAttempt
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.UserQuizQuestionAttempt
 import skills.storage.model.auth.RoleName
@@ -660,10 +663,14 @@ class QuizGradingSpecs extends DefaultIntSpec {
         skillsService.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
 
         when:
+        def originalActions = skillsService.getUserActionsForQuiz(quiz.quizId)
         def beforeOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         otherAdmin.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer", true)
         def afterOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         def skillRes = skillsService.getSingleSkillSummary(testTaker.userName, proj.projectId, skillWithQuiz.skillId)
+
+        def afterOverrideActions = skillsService.getUserActionsForQuiz(quiz.quizId)
+        def newActions = afterOverrideActions.data.findAll { !originalActions.data.id.contains(it.id)}
         then:
         beforeOverride.status == UserQuizAttempt.QuizAttemptStatus.FAILED.toString()
         beforeOverride.questions.isCorrect == [false]
@@ -682,6 +689,16 @@ class QuizGradingSpecs extends DefaultIntSpec {
         afterOverride.questions[0].answers.gradingResult.gradedOn
 
         skillRes.points ==  skillRes.totalPoints
+
+        newActions.item == [DashboardItem.QuizAttempt.toString()]
+        newActions.projectId == [null]
+        newActions.quizId == [quiz.quizId]
+        newActions.itemId == [quizAttempt.id.toString()]
+        newActions.action == [DashboardAction.Edit.toString()]
+        def userActionAttributes = skillsService.getQuizUserActionAttributes(quiz.quizId, newActions[0].id)
+        userActionAttributes.action == 'Override Text Input Question Grade'
+        userActionAttributes.questionNum == 1
+        userActionAttributes.newGrade == UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT.toString()
     }
 
     def "override failed question when quiz already passed - skill points are not increased"() {
@@ -721,11 +738,15 @@ class QuizGradingSpecs extends DefaultIntSpec {
         assert userEventsRepo.findAll().collect { it.count } == [1]
 
         when:
+        def originalActions = skillsService.getUserActionsForQuiz(quiz.quizId)
         def beforeOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         def skillResBeforeOverride = skillsService.getSingleSkillSummary(testTaker.userName, proj.projectId, skillWithQuiz.skillId)
         otherAdmin.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer", true)
         def afterOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         def skillRes = skillsService.getSingleSkillSummary(testTaker.userName, proj.projectId, skillWithQuiz.skillId)
+
+        def afterOverrideActions = skillsService.getUserActionsForQuiz(quiz.quizId)
+        def newActions = afterOverrideActions.data.findAll { !originalActions.data.id.contains(it.id)}
         then:
         beforeOverride.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
         beforeOverride.questions.isCorrect == [false, true]
@@ -746,6 +767,16 @@ class QuizGradingSpecs extends DefaultIntSpec {
         skillRes.points == skillRes.totalPoints
         // skill should only be reported once
         userEventsRepo.findAll().collect { it.count } == [1]
+
+        newActions.item == [DashboardItem.QuizAttempt.toString()]
+        newActions.projectId == [null]
+        newActions.quizId == [quiz.quizId]
+        newActions.itemId == [quizAttempt.id.toString()]
+        newActions.action == [DashboardAction.Edit.toString()]
+        def userActionAttributes = skillsService.getQuizUserActionAttributes(quiz.quizId, newActions[0].id)
+        userActionAttributes.action == 'Override Text Input Question Grade'
+        userActionAttributes.questionNum == 1
+        userActionAttributes.newGrade == UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT.toString()
     }
 
     def "override failed question when quiz already passed causes quiz to fail"() {
@@ -782,11 +813,15 @@ class QuizGradingSpecs extends DefaultIntSpec {
         assert userEventsRepo.findAll().collect { it.count } == [1]
 
         when:
+        def originalActions = skillsService.getUserActionsForQuiz(quiz.quizId)
         def beforeOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         def skillResBeforeOverride = skillsService.getSingleSkillSummary(testTaker.userName, proj.projectId, skillWithQuiz.skillId)
         otherAdmin.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer", true)
         def afterOverride = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         def skillRes = skillsService.getSingleSkillSummary(testTaker.userName, proj.projectId, skillWithQuiz.skillId)
+
+        def afterOverrideActions = skillsService.getUserActionsForQuiz(quiz.quizId)
+        def newActions = afterOverrideActions.data.findAll { !originalActions.data.id.contains(it.id)}
         then:
         beforeOverride.status == UserQuizAttempt.QuizAttemptStatus.PASSED.toString()
         beforeOverride.questions.isCorrect == [true, true]
@@ -808,6 +843,59 @@ class QuizGradingSpecs extends DefaultIntSpec {
         skillRes.points == skillRes.totalPoints
         // skill should only be reported once
         userEventsRepo.findAll().collect { it.count } == [1]
+
+        newActions.item == [DashboardItem.QuizAttempt.toString()]
+        newActions.projectId == [null]
+        newActions.quizId == [quiz.quizId]
+        newActions.itemId == [quizAttempt.id.toString()]
+        newActions.action == [DashboardAction.Edit.toString()]
+        def userActionAttributes = skillsService.getQuizUserActionAttributes(quiz.quizId, newActions[0].id)
+        userActionAttributes.action == 'Override Text Input Question Grade'
+        userActionAttributes.questionNum == 1
+        userActionAttributes.newGrade == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG.toString()
+    }
+
+    def "override grade report user action event"() {
+        List<String> userIds = getRandomUsers(2)
+        SkillsService testTaker = createService(userIds[0])
+        SkillsService otherAdmin = createService(userIds[1])
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def q1 = QuizDefFactory.createTextInputQuestion(1, 1)
+        def q2 = QuizDefFactory.createChoiceQuestion(1, 2)
+        def q3 = QuizDefFactory.createTextInputQuestion(1, 3)
+        def q4 = QuizDefFactory.createTextInputQuestion(1, 4)
+        skillsService.createQuizQuestionDefs([q1, q2, q3, q4])
+        skillsService.addQuizUserRole(quiz.quizId, otherAdmin.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+
+        def quizAttempt = testTaker.startQuizAttempt(quiz.quizId).body
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id)
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        testTaker.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[0].id, [isSelected: true, answerText: 'This is user provided answer'])
+        def gradedQuizAttempt = testTaker.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        assert gradedQuizAttempt.needsGrading == true
+
+        skillsService.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, false, "Good answer")
+        skillsService.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, false, "Good answer")
+        skillsService.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[3].answerOptions[0].id, false, "Good answer")
+
+        when:
+        def originalActions = skillsService.getUserActionsForQuiz(quiz.quizId)
+        otherAdmin.gradeAnswer(testTaker.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, true, "Good answer", true)
+        def afterOverrideActions = skillsService.getUserActionsForQuiz(quiz.quizId)
+        def newActions = afterOverrideActions.data.findAll { !originalActions.data.id.contains(it.id)}
+        then:
+        newActions.item == [DashboardItem.QuizAttempt.toString()]
+        newActions.projectId == [null]
+        newActions.quizId == [quiz.quizId]
+        newActions.itemId == [quizAttempt.id.toString()]
+        newActions.action == [DashboardAction.Edit.toString()]
+        def userActionAttributes = skillsService.getQuizUserActionAttributes(quiz.quizId, newActions[0].id)
+        userActionAttributes.action == 'Override Text Input Question Grade'
+        userActionAttributes.questionNum == 3
+        userActionAttributes.newGrade == UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT.toString()
     }
 
 }

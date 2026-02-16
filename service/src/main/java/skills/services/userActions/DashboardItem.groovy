@@ -40,5 +40,6 @@ enum DashboardItem {
     ProjectIssue,
     TrustedClientSecret,
     ProjectInvite,
-    UserPreference
+    UserPreference,
+    AiGradingConfig
 }

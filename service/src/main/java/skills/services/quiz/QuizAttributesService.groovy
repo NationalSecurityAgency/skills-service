@@ -25,6 +25,10 @@ import skills.controller.exceptions.QuizValidator
 import skills.controller.request.model.TextInputAiGradingConfRequest
 import skills.quizLoading.QuizRunService
 import skills.services.attributes.TextInputAiGradingAttrs
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
+import skills.services.userActions.UserActionInfo
+import skills.services.userActions.UserActionsHistoryService
 import skills.storage.repos.QuizQuestionDefRepo
 
 @Service
@@ -41,6 +45,9 @@ class QuizAttributesService {
 
     @Autowired
     QuizValidatorService quizValidatorService
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService
 
     @Value('#{"${skills.openai.textInputAiGraderDefaultMinimumConfidenceLevel:75}"}')
     Integer minimumConfidenceLevel
@@ -75,6 +82,14 @@ class QuizAttributesService {
         if (gradingConfRequest.enabled && !aiGradingWasPreviouslyEnabled) {
             quizRunService.scheduleTextInputAiGradingRequest(quizId, questionId, textInputAiGradingAttrs)
         }
+
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: textInputAiGradingAttrs.enabled ? DashboardAction.Configure : DashboardAction.Delete,
+                item: DashboardItem.AiGradingConfig,
+                itemId: questionId,
+                quizId: quizId,
+                actionAttributes: textInputAiGradingAttrs.enabled ? textInputAiGradingAttrs : null
+        ))
 
         return textInputAiGradingAttrs
     }
