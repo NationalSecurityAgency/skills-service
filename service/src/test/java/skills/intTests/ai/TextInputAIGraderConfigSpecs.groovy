@@ -20,6 +20,8 @@ import groovy.util.logging.Slf4j
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
 
 @Slf4j
 class TextInputAIGraderConfigSpecs extends DefaultIntSpec {
@@ -31,13 +33,19 @@ class TextInputAIGraderConfigSpecs extends DefaultIntSpec {
         def questionDef = skillsService.createQuizQuestionDef(questions).body
 
         when:
+        def originalActions = skillsService.getUserActionsForQuiz(quiz.quizId)
         def aiGradingConf_before = skillsService.getQuizTextInputAiGraderConfigs(quizDef.quizId, questionDef.id)
         skillsService.saveQuizTextInputAiGraderConfigs(quizDef.quizId, questionDef.id, "Correct answer", 62)
         def aiGradingConf_after = skillsService.getQuizTextInputAiGraderConfigs(quizDef.quizId, questionDef.id)
+        def afterSaveActions = skillsService.getUserActionsForQuiz(quiz.quizId)
 
         // now disable
         skillsService.saveQuizTextInputAiGraderConfigs(quizDef.quizId, questionDef.id, "Correct answer", 62, false)
         def aiGradingConf_after_disable = skillsService.getQuizTextInputAiGraderConfigs(quizDef.quizId, questionDef.id)
+        def afterDeleteActions = skillsService.getUserActionsForQuiz(quiz.quizId)
+
+        def saveNewActions = afterSaveActions.data.findAll { !originalActions.data.id.contains(it.id)}
+        def deleteNewActions = afterDeleteActions.data.findAll { !afterSaveActions.data.id.contains(it.id)}
 
         then:
         aiGradingConf_before.enabled == false
@@ -51,6 +59,23 @@ class TextInputAIGraderConfigSpecs extends DefaultIntSpec {
         aiGradingConf_after_disable.enabled == false
         aiGradingConf_after_disable.correctAnswer == "Correct answer"
         aiGradingConf_after_disable.minimumConfidenceLevel == 62
+
+        saveNewActions.item == [DashboardItem.AiGradingConfig.toString()]
+        saveNewActions.projectId == [null]
+        saveNewActions.quizId == [quizDef.quizId]
+        saveNewActions.itemId == [questionDef.id.toString()]
+        saveNewActions.action == [DashboardAction.Configure.toString()]
+        def userActionAttributes = skillsService.getQuizUserActionAttributes(quizDef.quizId, saveNewActions[0].id)
+        userActionAttributes.enabled == true
+        userActionAttributes.correctAnswer == "Correct answer"
+        userActionAttributes.minimumConfidenceLevel == 62
+
+        deleteNewActions.item == [DashboardItem.AiGradingConfig.toString()]
+        deleteNewActions.projectId == [null]
+        deleteNewActions.quizId == [quizDef.quizId]
+        deleteNewActions.itemId == [questionDef.id.toString()]
+        deleteNewActions.action == [DashboardAction.Delete.toString()]
+        !skillsService.getQuizUserActionAttributes(quizDef.quizId, deleteNewActions[0].id)
     }
 
     def "correct answer must be provided when saving AI grading configs"() {
