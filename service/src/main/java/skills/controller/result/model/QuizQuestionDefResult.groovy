@@ -17,11 +17,16 @@ package skills.controller.result.model
 
 import skills.services.attributes.QuestionAttrs
 import skills.services.quiz.QuizQuestionType
+import skills.utils.InputSanitizer
 
 class QuizQuestionDefResult {
     Integer id
     String question
     String answerHint
+    String getAnswerHint() {
+        return InputSanitizer.unsanitizeEscapedHtml(answerHint)
+    }
+
     QuizQuestionType questionType
 
     List<QuizAnswerDefResult> answers

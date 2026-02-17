@@ -15,7 +15,12 @@
  */
 package skills.quizLoading.model
 
+import skills.utils.InputSanitizer
+
 class QuizAnswerOptionsInfo {
     Integer id
     String answerOption
+    String getAnswerOption() {
+        return InputSanitizer.unsanitizeEscapedHtml(answerOption)
+    }
 }

@@ -15,7 +15,17 @@
  */
 package skills.controller.request.model
 
+import skills.utils.InputSanitizer
+
 class QuizMultiPartAnswer {
     String term
     String value
+
+    String getTerm() {
+        return InputSanitizer.unsanitizeEscapedHtml(term)
+    }
+
+    String getValue() {
+        return InputSanitizer.unsanitizeEscapedHtml(value)
+    }
 }

@@ -16,6 +16,7 @@
 package skills.controller.result.model
 
 import skills.controller.request.model.QuizMultiPartAnswer
+import skills.utils.InputSanitizer
 
 class QuizAnswerMetricsResult {
     Integer id
@@ -26,4 +27,8 @@ class QuizAnswerMetricsResult {
     int numAnswered
     int numAnsweredCorrect
     int numAnsweredWrong
+
+    String getAnswer() {
+        return InputSanitizer.unsanitizeEscapedHtml(answer)
+    }
 }
