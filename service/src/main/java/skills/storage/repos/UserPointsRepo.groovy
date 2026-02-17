@@ -856,10 +856,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             nativeQuery = true)
     Long countDistinctUserIdByProjectId(String projectId)
 
-    @QueryHints(
-            @QueryHint(name = AvailableHints.HINT_FETCH_SIZE, value = "100")
-    )
-    @Query(value = '''SELECT 
+    static final String FIND_DISTINCT_USERS_SQL = '''SELECT 
                 up.user_id as userId, 
                 min(upa.firstPerformedOn) as firstUpdated, 
                 max(upa.lastPerformedOn) as lastUpdated, 
@@ -901,8 +898,16 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 up.skill_id is null and
                 up.points >= ?4 and up.points < ?5 and
                 not exists (select 1 from archived_users au where au.user_id = up.user_id and au.project_id = ?1)
-            GROUP BY up.user_id''', nativeQuery = true)
+            GROUP BY up.user_id'''
+
+    @Query(value = FIND_DISTINCT_USERS_SQL, nativeQuery = true)
     Page<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, int maximumPoints, Pageable pageable)
+
+    @QueryHints(
+            @QueryHint(name = AvailableHints.HINT_FETCH_SIZE, value = "100")
+    )
+    @Query(value = FIND_DISTINCT_USERS_SQL, nativeQuery = true)
+    Stream<ProjectUser> streamDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, int maximumPoints, Pageable pageable)
 
     @Query(value= '''
         WITH subj_skills AS (

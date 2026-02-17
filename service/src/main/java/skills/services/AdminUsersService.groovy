@@ -138,7 +138,7 @@ class AdminUsersService {
 
     @Profile
     Stream<ProjectUser> streamAllDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
-        return userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, pageRequest)
+        return userPointsRepo.streamDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, pageRequest)
     }
 
     @Profile

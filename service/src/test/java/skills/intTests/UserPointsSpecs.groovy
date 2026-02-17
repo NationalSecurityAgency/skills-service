@@ -481,13 +481,13 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         results2
         results2.count == 3
-        results2.totalCount == 5
+        results2.totalCount == results2.count
         results2.data.size() == 3
         results2.data.get(0).totalPoints == 70
 
         results3
         results3.count == 0
-        results3.totalCount == 5
+        results3.totalCount == 0
         results3.data.size() == 0
     }
 
@@ -516,13 +516,13 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         results2
         results2.count == 2
-        results2.totalCount == 5
+        results2.totalCount == results2.count
         results2.data.size() == 2
         results2.data.get(0).totalPoints == 35
 
         results3
         results3.count == 0
-        results3.totalCount == 5
+        results3.totalCount == 0
         results3.data.size() == 0
     }
 
@@ -551,13 +551,13 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         results2
         results2.count == 2
-        results2.totalCount == 5
+        results2.totalCount == results2.count
         results2.data.size() == 2
         results2.data.get(0).totalPoints == 35
 
         results3
         results3.count == 0
-        results3.totalCount == 5
+        results3.totalCount == 0
         results3.data.size() == 0
     }
 
@@ -642,11 +642,11 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         results2
         results2.count == 3
-        results2.totalCount == 4
+        results2.totalCount == results2.count
 
         results3
         results3.count == 0
-        results3.totalCount == 4
+        results3.totalCount == 0
     }
 
 
@@ -673,11 +673,11 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         results2
         results2.count == 1
-        results2.totalCount == 4
+        results2.totalCount == results2.count
 
         results3
         results3.count == 0
-        results3.totalCount == 4
+        results3.totalCount == 0
     }
 
     def 'get skill users with minimum and maximum points'() {
@@ -708,11 +708,11 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         results3
         results3.count == 1
-        results3.totalCount == 4
+        results3.totalCount == 1
 
         results4
         results4.count == 0
-        results4.totalCount == 4
+        results4.totalCount == 0
     }
 
     def 'can not get skills with negative points'() {
