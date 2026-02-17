@@ -18,8 +18,10 @@ package skills.services
 import callStack.profiler.Profile
 import groovy.time.TimeCategory
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.tuple.Pair
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -112,67 +114,6 @@ class AdminUsersService {
         return countsPerMonth
     }
 
-    List<TimestampCountItem> getBadgesPerDay(String projectId, String badgeId, Integer numDays) {
-        Date startDate
-        use (TimeCategory) {
-            startDate = (numDays-1).days.ago
-            startDate.clearTime()
-        }
-
-        List<DayCountItem> res = userAchievedRepo.countAchievementsForProjectPerDay(projectId, badgeId, SkillDef.ContainerType.Badge, startDate)
-
-        List<TimestampCountItem> countsPerDay = []
-        startDate.upto(new Date().clearTime()) { Date theDate ->
-            DayCountItem found = res.find({
-                it.day.clearTime() == theDate
-            })
-            countsPerDay << new TimestampCountItem(value: theDate.time, count: found?.count ?: 0)
-        }
-
-        return countsPerDay
-    }
-
-    List<LabelCountItem> getBadgesPerMonth(String projectId, String badgeId, Integer numMonths=6) {
-        Date startDate
-        use (TimeCategory) {
-            startDate = (numMonths-1).months.ago
-            startDate.clearTime()
-        }
-
-        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.countAchievementsForProjectPerMonth(projectId, badgeId, SkillDef.ContainerType.Badge, startDate)
-
-        List<LabelCountItem> countsPerMonth = []
-        Month currentMonth = LocalDate.now().month
-        Month startMonth = currentMonth - numMonths
-
-        (1..numMonths).each {
-            Month month = startMonth+it
-
-            UserAchievedLevelRepo.LabelCountInfo found = res.find ({
-                Double.parseDouble(it.label).toInteger() == month.value
-            })
-            countsPerMonth << new LabelCountItem(value: month.getDisplayName(TextStyle.SHORT, Locale.US), count: found?.countRes ?: 0)
-        }
-
-        return countsPerMonth
-    }
-
-    List<LabelCountItem> getAchievementCountsPerSubject(String projectId, int topNToLoad =5) {
-        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getUsageFacetedViaSubject(projectId, SkillDef.ContainerType.Subject, PageRequest.of(0, topNToLoad, Sort.Direction.DESC, "countRes"))
-
-        return res.collect {
-            new LabelCountItem(value: it.label, count: it.countRes)
-        }
-    }
-
-    List<LabelCountItem> getAchievementCountsPerSkill(String projectId, String subjectId, int topNToLoad =5) {
-        List<UserAchievedLevelRepo.LabelCountInfo> res = userAchievedRepo.getSubjectUsageFacetedViaSkill(projectId, subjectId, SkillDef.ContainerType.Subject, PageRequest.of(0, topNToLoad, Sort.Direction.DESC, "countRes"))
-
-        return res.collect {
-            new LabelCountItem(value: it.label, count: it.countRes)
-        }
-    }
-
     List<LabelCountItem> getUserCountsPerLevel(String projectId, subjectId = null, String tagKey = null, String tagFilter = null) {
         List<UsersPerLevel> levels = rankingLoader.getUserCountsPerLevel(projectId, false, subjectId, tagKey, tagFilter)
 
@@ -183,119 +124,64 @@ class AdminUsersService {
 
     @Transactional(readOnly = true)
     TableResultWithTotalPoints loadUsersPageForProject(String projectId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent) {
-        TableResultWithTotalPoints result = new TableResultWithTotalPoints()
-        result.totalPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
-        int minimumPoints = Math.floor((minimumPointsPercent / 100) * result.totalPoints)
-        int maximumPoints = Math.ceil((maximumPointsPercent / 100) * result.totalPoints)
-
-        // Because the database query uses "less than" logic, special consideration must be made
-        // for when maximum points are not filtered at all so as not to exclude users who have
-        // reached 100% completion; thus, a single point is added to the high end of the search
-        if(maximumPointsPercent == 100) {
-            maximumPoints += 1
-        }
-
-        Long totalProjectUsers = countTotalProjUsers(projectId)
-        if (totalProjectUsers) {
-            query = query ? query.trim() : ''
-            result.totalCount = totalProjectUsers
-            List<ProjectUser> projectUsers = findDistinctUsersForProject(projectId, query, pageRequest, minimumPoints, maximumPoints)
-            result.data = projectUsers
-            if (!projectUsers) {
-                result.count = 0
-            } else if (query || minimumPoints > 0 || maximumPoints < result.totalPoints) {
-                result.count = userPointsRepo.countDistinctUserIdByProjectIdAndUserIdLike(projectId, query, minimumPoints, maximumPoints)
-            } else {
-                result.count = totalProjectUsers
-            }
-        }
-        return result
+        query = query ? query.trim() : ''
+        Integer totalPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
+        Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)
+        Page<ProjectUser> usersPage = findDistinctUsersForProject(projectId, query, pageRequest, minMax.left, minMax.right)
+        return new TableResultWithTotalPoints(usersPage, totalPoints)
     }
 
     @Profile
-    private List<ProjectUser> findDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
-        Stream<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, pageRequest)
-        try {
-            return projectUsers.collect(Collectors.toList());
-        } finally {
-            projectUsers.close()
-        }
-    }
-
-    @Profile
-    Stream<ProjectUser> streamAllDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
+    private Page<ProjectUser> findDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
         return userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, pageRequest)
     }
 
     @Profile
-    public long countTotalProjUsers(String projectId) {
+    Stream<ProjectUser> streamAllDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints) {
+        return userPointsRepo.streamDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, pageRequest)
+    }
+
+    @Profile
+    long countTotalProjUsers(String projectId) {
         userPointsRepo.countDistinctUserIdByProjectId(projectId)
     }
 
     TableResultWithTotalPoints loadUsersPageForUserTag(String projectId, String userTagKey, String userTagValue, String query, PageRequest pageRequest) {
-        TableResultWithTotalPoints result = new TableResultWithTotalPoints()
         if (!userTagKey || !userTagValue) {
-            return result
+            return TableResultWithTotalPoints.EMPTY
         }
-        result.totalPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
-        Long totalProjectUsersWithUserTag = userPointsRepo.countDistinctUserIdByProjectIdAndUserTag(projectId, userTagKey, userTagValue)
-        if (totalProjectUsersWithUserTag) {
-            query = query ? query.trim() : ''
-            result.totalCount = totalProjectUsersWithUserTag
-            List<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersByProjectIdAndUserTagAndUserIdLike(projectId, usersTableAdditionalUserTagKey, userTagKey, userTagValue, query, pageRequest)
-            result.data = projectUsers
-            if (!projectUsers) {
-                result.count = 0
-            } else if (query) {
-                result.count = userPointsRepo.countDistinctUserIdByProjectIdAndUserTagAndUserIdLike(projectId, userTagKey, userTagValue, query)
-            } else {
-                result.count = totalProjectUsersWithUserTag
-            }
-        }
-        return result
+        query = query ? query.trim() : ''
+        Integer totalPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
+        Page<ProjectUser> usersPage = userPointsRepo.findDistinctProjectUsersByProjectIdAndUserTagAndUserIdLike(projectId, usersTableAdditionalUserTagKey, userTagKey, userTagValue, query, pageRequest)
+        return new TableResultWithTotalPoints(usersPage, totalPoints)
     }
 
     TableResultWithTotalPoints loadUsersPageForSkills(String projectId, List<String> skillIds, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent) {
-        TableResultWithTotalPoints result = new TableResultWithTotalPoints()
         if (!skillIds) {
-            return result
+            return TableResultWithTotalPoints.EMPTY
         }
-        result.totalPoints = skillDefRepo.getTotalPointsSumForSkills(projectId, skillIds) ?: 0
-        int minimumPoints = Math.floor((minimumPointsPercent / 100) * result.totalPoints)
-        int maximumPoints = Math.ceil((maximumPointsPercent / 100) * result.totalPoints)
-
-        // Because the database query uses "less than" logic, special consideration must be made
-        // for when maximum points are not filtered at all so as not to exclude users who have
-        // reached 100% completion; thus, a single point is added to the high end of the search
-        if(maximumPointsPercent == 100) {
-            maximumPoints += 1
-        }
-
-        Long totalProjectUsersWithSkills = userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdIn(projectId, skillIds)
-        if (totalProjectUsersWithSkills) {
-            query = query ? query.trim() : ''
-            result.totalCount = totalProjectUsersWithSkills
-            List<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(projectId, usersTableAdditionalUserTagKey, skillIds, query, minimumPoints, maximumPoints, pageRequest)
-            result.data = projectUsers
-            if (!projectUsers) {
-                result.count = 0
-            } else if (query || minimumPoints > 0 || maximumPoints < result.totalPoints) {
-                result.count = userPointsRepo.countDistinctUserIdByProjectIdAndSkillIdInAndUserIdLike(projectId, skillIds, query, minimumPoints, maximumPoints)
-            } else {
-                result.count = totalProjectUsersWithSkills
-            }
-        }
-        return result
+        query = query ? query.trim() : ''
+        Integer totalPoints = skillDefRepo.getTotalPointsSumForSkills(projectId, skillIds) ?: 0
+        Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)
+        Page<ProjectUser> usersPage = userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(projectId, usersTableAdditionalUserTagKey, skillIds, query, minMax.left, minMax.right, pageRequest)
+        return new TableResultWithTotalPoints(usersPage, totalPoints)
     }
 
     TableResultWithTotalPoints loadUsersPageForSubject(String projectId, String subjectId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent) {
-        TableResultWithTotalPoints result = new TableResultWithTotalPoints()
         if (!subjectId) {
-            return result
+            return TableResultWithTotalPoints.EMPTY
         }
-        result.totalPoints = skillDefRepo.getTotalPointsByProjectIdAndSkillId(projectId, subjectId) ?: 0
-        int minimumPoints = Math.floor((minimumPointsPercent / 100) * result.totalPoints)
-        int maximumPoints = Math.ceil((maximumPointsPercent / 100) * result.totalPoints)
+        query = query ? query.trim() : ''
+        Integer totalPoints = skillDefRepo.getTotalPointsByProjectIdAndSkillId(projectId, subjectId) ?: 0
+        Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)
+        Integer count = (Integer)PostgresQlNativeRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, query, minMax.left, minMax.right)
+        List<ProjectUser> usersData = userPointsRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectId, query, minMax.left, minMax.right, pageRequest)
+        return new TableResultWithTotalPoints(usersData, count, totalPoints)
+    }
+
+    private static Pair<Integer, Integer> calcMinMaxPointsQueryParams(Integer totalPoints, int minimumPointsPercent, int maximumPointsPercent) {
+        int minimumPoints = (int)Math.floor((minimumPointsPercent / 100) * totalPoints)
+        int maximumPoints = (int)Math.ceil((maximumPointsPercent / 100) * totalPoints)
 
         // Because the database query uses "less than" logic, special consideration must be made
         // for when maximum points are not filtered at all so as not to exclude users who have
@@ -303,22 +189,7 @@ class AdminUsersService {
         if(maximumPointsPercent == 100) {
             maximumPoints += 1
         }
-
-        Long totalProjectUsersWithSkills = PostgresQlNativeRepo.countDistinctUsersByProjectIdAndSubjectId(projectId, subjectId)
-        if (totalProjectUsersWithSkills) {
-            query = query ? query.trim() : ''
-            result.totalCount = totalProjectUsersWithSkills
-            List<ProjectUser> projectUsers = userPointsRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectId, query, minimumPoints, maximumPoints, pageRequest)
-            result.data = projectUsers
-            if (!projectUsers) {
-                result.count = 0
-            } else if (query || minimumPoints > 0 || maximumPoints < result.totalPoints) {
-                result.count = PostgresQlNativeRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, query, minimumPoints, maximumPoints)
-            } else {
-                result.count = totalProjectUsersWithSkills
-            }
-        }
-        return result
+        return Pair.of(minimumPoints, maximumPoints)
     }
 
     @Transactional

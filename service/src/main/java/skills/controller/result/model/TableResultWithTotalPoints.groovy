@@ -16,8 +16,26 @@
 package skills.controller.result.model
 
 import groovy.transform.Canonical
+import org.springframework.data.domain.Page
 
 @Canonical
 class TableResultWithTotalPoints extends TableResult{
     Integer totalPoints = 0
+
+    final static TableResultWithTotalPoints EMPTY = new TableResultWithTotalPoints()
+
+    private TableResultWithTotalPoints() {
+        super()
+    }
+
+    TableResultWithTotalPoints(Page<ProjectUser> usersPage, Integer totalPoints) {
+        this( usersPage.getContent(), (Integer)usersPage.getTotalElements(), totalPoints)
+    }
+
+    TableResultWithTotalPoints(List<ProjectUser> users, Integer count, Integer totalPoints) {
+        this.totalPoints = totalPoints
+        this.count = count
+        this.totalCount =  count
+        this.data = users
+    }
 }

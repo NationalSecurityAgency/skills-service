@@ -496,10 +496,6 @@ class PostgresQlNativeRepo {
         userPointsRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, userId, minimumPoints, maximumPoints)
     }
 
-    Long countDistinctUsersByProjectIdAndSubjectId(String projectId, String subjectId) {
-        userPointsRepo.countDistinctUsersByProjectIdAndSubjectId(projectId, subjectId)
-    }
-
     List<SkillDefPartial> getSkillsWithCatalogStatusExplodeSkillGroups(String projectId, String subjectId) {
         skillRelDefRepo.getSkillsWithCatalogStatusExplodeSkillGroups(projectId, subjectId)
     }
