@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.UserTag
 
@@ -43,36 +44,77 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
         String getTag()
     }
 
+    final static String SELECT_DISTINCT_USER_BY_TAG_SQL = '''WITH
+        valid_skills AS (
+            SELECT CASE WHEN sd.copied_from_skill_ref IS NOT NULL THEN sd.copied_from_skill_ref ELSE sd.id END as skill_ref_id
+            FROM skill_definition sd
+            WHERE sd.type = 'Skill'
+              AND sd.project_id = :projectId
+              AND sd.enabled = 'true'
+        ),
+        users_tmp AS (
+             SELECT DISTINCT up.user_id
+             FROM user_performed_skill up
+                      JOIN valid_skills vs ON up.skill_ref_id = vs.skill_ref_id
+                      LEFT JOIN archived_users au ON (au.user_id = up.user_id AND au.project_id = :projectId)
+             WHERE up.performed_on >= :startDate
+               AND up.performed_on <= :endDate
+               AND au.user_id IS NULL
+        ),
+        tag_counts AS (
+            SELECT COUNT(DISTINCT users_tmp.user_id) as numUsers, ut.value as tag
+            FROM users_tmp
+                     JOIN user_tags ut ON ut.user_id = users_tmp.user_id
+            WHERE ut.key = :tagKey
+              AND ut.value IS NOT NULL
+              AND (LOWER(ut.value) LIKE LOWER(CONCAT('%', :tagFilter, '%')) OR :tagFilter is null)
+            GROUP BY ut.value
+        )
+        SELECT numUsers, tag from tag_counts'''
+
+    final static String COUNT_DISTINCT_USER_BY_TAG_SQL = '''WITH
+        valid_skills AS (
+            SELECT CASE WHEN sd.copied_from_skill_ref IS NOT NULL THEN sd.copied_from_skill_ref ELSE sd.id END as skill_ref_id
+            FROM skill_definition sd
+            WHERE sd.type = 'Skill'
+              AND sd.project_id = :projectId
+              AND sd.enabled = 'true'
+        ),
+        users_tmp AS (
+             SELECT DISTINCT up.user_id
+             FROM user_performed_skill up
+                      JOIN valid_skills vs ON up.skill_ref_id = vs.skill_ref_id
+                      LEFT JOIN archived_users au ON (au.user_id = up.user_id AND au.project_id = :projectId)
+             WHERE up.performed_on >= :startDate
+               AND up.performed_on <= :endDate
+               AND au.user_id IS NULL
+        ),
+        tag_counts AS (
+            SELECT COUNT(DISTINCT users_tmp.user_id) as numUsers, ut.value as tag
+            FROM users_tmp
+                     JOIN user_tags ut ON ut.user_id = users_tmp.user_id
+            WHERE ut.key = :tagKey
+              AND ut.value IS NOT NULL
+              AND (LOWER(ut.value) LIKE LOWER(CONCAT('%', :tagFilter, '%')) OR :tagFilter is null)
+            GROUP BY ut.value
+        )
+        SELECT COUNT(*) from tag_counts'''
+
     @Nullable
-    @Query('''SELECT COUNT(DISTINCT up.userId) as numUsers, ut.value as tag
-        from UserPerformedSkill up
-        join UserTag ut on ut.userId = up.userId 
-        where up.skillRefId in (
-                select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
-                from SkillDef sd
-                where sd.type = 'Skill' and sd.projectId = ?1 and sd.enabled = 'true'
-            )
-            and up.skillRefId is not null 
-            and ut.key = ?2 
-            and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))
-            and not exists (select 1 from ArchivedUser au where au.userId = up.userId and au.projectId = ?1)
-            and up.performedOn >= ?4 and up.performedOn <= ?5
-        group by ut.value''')
-    List<UserTagCount> findDistinctUserIdByProjectIdAndUserTag(String projectId, String tagKey, String tagFilter, Date startDate, Date endDate, Pageable pageable)
+    @Query(value = SELECT_DISTINCT_USER_BY_TAG_SQL, nativeQuery = true)
+    List<UserTagCount> findDistinctUserIdByProjectIdAndUserTag(@Param("projectId") String projectId,
+                                                               @Param("tagKey") String tagKey,
+                                                               @Nullable @Param("tagFilter") String tagFilter,
+                                                               @Param("startDate") Date startDate,
+                                                               @Param("endDate") Date endDate,
+                                                               Pageable pageable)
 
 
-    @Query('''SELECT COUNT(DISTINCT ut.value)
-        from UserPoints up
-        join UserTag ut on ut.userId = up.userId 
-        where up.skillRefId in (
-                select case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end as id 
-                from SkillDef sd
-                where sd.type = 'Skill' and sd.projectId = ?1 and sd.enabled = 'true'
-            )  
-            and up.skillRefId is not null 
-            and ut.key = ?2 
-            and LOWER(ut.value) LIKE LOWER(CONCAT('%',?3,'%'))
-            and not exists (select 1 from ArchivedUser au where au.userId = up.userId and au.projectId = ?1)''')
-    Integer countDistinctUserTag(String projectId, String tagKey, String tagFilter)
+    @Query(value = COUNT_DISTINCT_USER_BY_TAG_SQL, nativeQuery = true)
+    Integer countDistinctUserTag(@Param("projectId") String projectId,
+                                 @Param("tagKey") String tagKey,
+                                 @Nullable @Param("tagFilter") String tagFilter,
+                                 @Param("startDate") Date startDate,
+                                 @Param("endDate") Date endDate)
 
 }
