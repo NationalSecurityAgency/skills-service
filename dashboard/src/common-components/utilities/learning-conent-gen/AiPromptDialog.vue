@@ -455,11 +455,11 @@ const hasFooter = computed(() => appConfig.openaiFooterMsg || hasPoweredByInfo.v
                              :instanceId="`${historyItem.id}-generateValueChangedNotes`"/>
               </div>
             </section>
-            <div v-if="isLastChatItem(historyItem) && historyItem.finalMsg" data-cy="finalSegment">
+            <div v-if="historyItem.finalMsg" data-cy="finalSegment">
               <Message :closable="false" :severity="finalMsgSeverity(historyItem)" aria-live="polite">
                 <markdown-text :text="historyItem.finalMsg" :instanceId="`${historyItem.id}-finalMsg`" aria-hidden="true"/>
               </Message>
-              <div v-if="!historyItem.failedToGenerate && !historyItem.cancelled"
+              <div v-if="isLastChatItem(historyItem) && !historyItem.failedToGenerate && !historyItem.cancelled"
                    class="flex justify-start items-center gap-3 mt-2">
                 <SkillsButton
                     icon="fa-solid fa-check-double"

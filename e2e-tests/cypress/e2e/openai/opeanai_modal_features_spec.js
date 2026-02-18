@@ -20,7 +20,8 @@ import {
     stopMsg,
     gotStartedMsg,
     catchAllResponse,
-    completedMsg
+    completedMsg,
+    chessGenValue
 }
     from './openai_helper_commands'
 
@@ -85,6 +86,19 @@ describe('AI Features Tests', () => {
         cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
         cy.get(`[data-cy="addPrefixBtn"]`).should('not.exist')
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
+
+        cy.intercept('POST', '/openai/chat', (req) => {
+            req.continue();
+        }).as('openaiStreamWithoutError');
+
+        // try again and should work
+        cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
+        cy.get('[data-cy="userMsg-3"]').contains('Learn chess')
+        cy.wait('@openaiStreamWithoutError')
+        cy.get('[data-cy="aiMsg-4"] [data-cy="origSegment"]').contains(gotStartedMsg)
+        cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]').contains(chessGenValue)
+        cy.get('[data-cy="aiMsg-4"] [data-cy="finalSegment"]').contains(completedMsg)
+        cy.get('[data-cy="useGenValueBtn-4"]').should('be.enabled')
     });
 
     it('handle immediate failure', () => {
@@ -96,7 +110,7 @@ describe('AI Features Tests', () => {
                 res.send(conf);
             });
         }).as('getConfig');
-        cy.intercept('POST', '/openai/chat', (req) => {
+        cy.intercept({ method: 'POST', url: '/openai/chat', times: 1 }, (req) => {
             req.reply({
                 statusCode: 400,
                 body: 'Internal Server Error\n',
@@ -125,6 +139,14 @@ describe('AI Features Tests', () => {
         cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
         cy.get(`[data-cy="addPrefixBtn"]`).should('not.exist')
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
+
+        // try again and should work
+        cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
+        cy.get('[data-cy="userMsg-3"]').contains('Learn chess')
+        cy.get('[data-cy="aiMsg-4"] [data-cy="origSegment"]').contains(gotStartedMsg)
+        cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]').contains(chessGenValue)
+        cy.get('[data-cy="aiMsg-4"] [data-cy="finalSegment"]').contains(completedMsg)
+        cy.get('[data-cy="useGenValueBtn-4"]').should('be.enabled')
     });
 
     it('ability to stop generation', () => {
@@ -161,6 +183,15 @@ describe('AI Features Tests', () => {
         cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
         cy.get(`[data-cy="addPrefixBtn"]`).should('not.exist')
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
+
+        // can continue after stopping
+        cy.get('[data-cy="instructionsInput"]').type('try again')
+        cy.get('[data-cy="sendAndStopBtn"]').click()
+        cy.get('[data-cy="userMsg-3"]').contains('try again')
+        cy.get('[data-cy="aiMsg-4"] [data-cy="origSegment"]').contains(gotStartedMsg)
+        cy.get('[data-cy="aiMsg-4"] [data-cy="finalSegment"]').contains(completedMsg)
+        cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]').contains("Paragraph 3")
+        cy.get('[data-cy="useGenValueBtn-4"]').should('be.enabled')
     });
 
     it('send button is enabled only after 1 character is entered', () => {
