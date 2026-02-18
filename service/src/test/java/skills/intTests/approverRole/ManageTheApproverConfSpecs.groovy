@@ -1040,4 +1040,76 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         threeApprovals == 3
         unchangedApprovals == 3
     }
+
+    def "approvers can filter by user and skill"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[1].pointIncrement = 200
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<String> users = getRandomUsers(8, true)
+        def user1Service = createService(users[0])
+        skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        def user2Service = createService(users[1])
+        skillsService.addUserRole(user2Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[2], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[3], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[4], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[5], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[6], new Date(), "Please approve this!")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[7], new Date(), "Please approve this!")
+
+        // should be DN in case of pki
+        String userIdConConf2 = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[2]).dn : users[2]
+        String userIdConConf3 = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[3]).dn : users[3]
+        String userIdConConf4 = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[4]).dn : users[4]
+        String userIdConConf5 = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[5]).dn : users[5]
+        String userIdConConf6 = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[6]).dn : users[6]
+        String userIdConConf7 = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki' ? userAttrsRepo.findByUserIdIgnoreCase(users[7]).dn : users[7]
+
+        when:
+        skillsService.configureApproverForUser(proj.projectId, user2Service.userName, userIdConConf2)
+        skillsService.configureApproverForUser(proj.projectId, user2Service.userName, userIdConConf3)
+        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, userIdConConf4)
+        skillsService.configureApproverForUser(proj.projectId, user1Service.userName, userIdConConf5)
+        def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_user_filter = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, userIdConConf4)
+        def approvals_t1_skill_filter = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, '', skills[1].name)
+        def approvals_t1_u2_user_filter = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, userIdConConf2)
+        def approvals_t1_u2_skill_filter = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, '', skills[1].name)
+        def approvals_t1_default = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
+        def approvals_t1_default_user_filter = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, userIdConConf6)
+        def approvals_t1_default_skill_filter = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, '', skills[1].name)
+
+        then:
+        approvals_t1.count == 2
+        approvals_t1.data.userId == [userIdConConf5, userIdConConf4]
+        approvals_t1_user_filter.count == 1
+        approvals_t1_user_filter.data.userId == [userIdConConf4]
+        approvals_t1_skill_filter.count == 1
+        approvals_t1_skill_filter.data.userId == [userIdConConf5]
+        approvals_t1_skill_filter.data.skillName == [skills[1].name]
+
+        approvals_t1_u2.count == 2
+        approvals_t1_u2.data.userId == [userIdConConf3, userIdConConf2]
+        approvals_t1_u2_user_filter.count == 1
+        approvals_t1_u2_user_filter.data.userId == [userIdConConf2]
+        approvals_t1_u2_skill_filter.count == 1
+        approvals_t1_u2_skill_filter.data.userId == [userIdConConf3]
+        approvals_t1_u2_skill_filter.data.skillName == [skills[1].name]
+
+        approvals_t1_default.count == 2
+        approvals_t1_default.data.userId == [userIdConConf7, userIdConConf6]
+        approvals_t1_default_user_filter.count == 1
+        approvals_t1_default_user_filter.data.userId == [userIdConConf6]
+        approvals_t1_default_skill_filter.count == 1
+        approvals_t1_default_skill_filter.data.userId == [userIdConConf7]
+        approvals_t1_default_skill_filter.data.skillName == [skills[1].name]
+    }
 }
