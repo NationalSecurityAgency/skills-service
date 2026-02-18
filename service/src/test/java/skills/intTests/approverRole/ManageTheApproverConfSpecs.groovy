@@ -1079,37 +1079,37 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         skillsService.configureApproverForUser(proj.projectId, user1Service.userName, userIdConConf5)
         def approvals_t1 = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
         def approvals_t1_u2 = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
-        def approvals_t1_user_filter = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, userIdConConf4)
+        def approvals_t1_user_filter = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, users[4])
         def approvals_t1_skill_filter = user1Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, '', skills[1].name)
-        def approvals_t1_u2_user_filter = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, userIdConConf2)
+        def approvals_t1_u2_user_filter = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, users[2])
         def approvals_t1_u2_skill_filter = user2Service.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, '', skills[1].name)
         def approvals_t1_default = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false)
-        def approvals_t1_default_user_filter = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, userIdConConf6)
+        def approvals_t1_default_user_filter = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, users[6])
         def approvals_t1_default_skill_filter = skillsService.getApprovals(proj.projectId, 10, 1, 'requestedOn', false, '', skills[1].name)
 
         then:
         approvals_t1.count == 2
-        approvals_t1.data.userId == [userIdConConf5, userIdConConf4]
+        approvals_t1.data.userId == [users[5], users[4]]
         approvals_t1_user_filter.count == 1
-        approvals_t1_user_filter.data.userId == [userIdConConf4]
+        approvals_t1_user_filter.data.userId == [users[4]]
         approvals_t1_skill_filter.count == 1
-        approvals_t1_skill_filter.data.userId == [userIdConConf5]
+        approvals_t1_skill_filter.data.userId == [users[5]]
         approvals_t1_skill_filter.data.skillName == [skills[1].name]
 
         approvals_t1_u2.count == 2
-        approvals_t1_u2.data.userId == [userIdConConf3, userIdConConf2]
+        approvals_t1_u2.data.userId == [users[3], users[2]]
         approvals_t1_u2_user_filter.count == 1
-        approvals_t1_u2_user_filter.data.userId == [userIdConConf2]
+        approvals_t1_u2_user_filter.data.userId == [users[2]]
         approvals_t1_u2_skill_filter.count == 1
-        approvals_t1_u2_skill_filter.data.userId == [userIdConConf3]
+        approvals_t1_u2_skill_filter.data.userId == [users[3]]
         approvals_t1_u2_skill_filter.data.skillName == [skills[1].name]
 
         approvals_t1_default.count == 2
-        approvals_t1_default.data.userId == [userIdConConf7, userIdConConf6]
+        approvals_t1_default.data.userId == [users[7], users[6]]
         approvals_t1_default_user_filter.count == 1
-        approvals_t1_default_user_filter.data.userId == [userIdConConf6]
+        approvals_t1_default_user_filter.data.userId == [users[6]]
         approvals_t1_default_skill_filter.count == 1
-        approvals_t1_default_skill_filter.data.userId == [userIdConConf7]
+        approvals_t1_default_skill_filter.data.userId == [users[7]]
         approvals_t1_default_skill_filter.data.skillName == [skills[1].name]
     }
 }
