@@ -1182,7 +1182,7 @@ class QuizDefService {
                 userId: userAttrs.userId,
                 userIdForDisplay: userAttrs.userIdForDisplay,
                 status: userQuizAttempt.status,
-                questions: shouldHideQuestions ? [] : (questionsToReturn ?: null),
+                questions: shouldHideQuestions && !alwaysReturnQuestions ? [] : (questionsToReturn ?: null),
                 allQuestionsReturned: questionsToReturn.size() == questions.size(),
                 numQuestions: questions.size(),
                 numQuestionsToPass: numQuestionsToPass,
