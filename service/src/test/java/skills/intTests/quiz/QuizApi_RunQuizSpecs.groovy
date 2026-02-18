@@ -849,4 +849,60 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         quizHistoryRes.questions == []
     }
 
+    def "getting quiz run properly sanitizes answers"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createMatchingQuestion(1, 2, 2)
+        question.answers[0].multiPartAnswer.value = "sanitized <script>alert('xss')</script> value1 ampersand & less than < greater than >"
+        def question2 = QuizDefFactory.createMatchingQuestion(1, 2, 3)
+
+        def question3 = QuizDefFactory.createChoiceQuestion(1, 1, 2, QuizQuestionType.SingleChoice)
+        question3.answers[0].answer = "sanitized <script>alert('xss')</script> answer ampersand & less than < greater than >"
+        skillsService.createQuizQuestionDefs([question, question2, question3])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'sanitized  value1 ampersand & less than < greater than >'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: 'value2'])
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [answerText: 'value1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id, [answerText: 'value2'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id, [answerText: 'value3'])
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id)
+
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        def quizHistoryRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        then:
+
+        quizHistoryRes.questions.size() == 3
+        def q1 = quizHistoryRes.questions[0]
+        def q2 = quizHistoryRes.questions[1]
+        def q3 = quizHistoryRes.questions[2]
+        q1.questionType == QuizQuestionType.Matching.toString()
+        q1.question == question.question
+        q1.isCorrect == true
+        q1.needsGrading == false
+        q1.answers.answer == [
+                [ "term": "term1", "selectedMatch": "sanitized  value1 ampersand & less than < greater than >", "correctMatch": "sanitized  value1 ampersand & less than < greater than >"],
+                [ "term": "term2", "selectedMatch": "value2", "correctMatch": "value2"]
+        ]
+
+        q2.questionType == QuizQuestionType.Matching.toString()
+        q2.question == question2.question
+        q2.isCorrect == true
+        q2.needsGrading == false
+        q2.answers.answer == [
+                [ "term": "term1", "selectedMatch": "value1", "correctMatch": "value1"],
+                [ "term": "term2", "selectedMatch": "value2", "correctMatch": "value2"],
+                [ "term": "term3", "selectedMatch": "value3", "correctMatch": "value3"],
+        ]
+
+        q3.questionType == QuizQuestionType.SingleChoice.toString()
+        q3.question == question3.question
+        q3.isCorrect == true
+        q3.needsGrading == false
+        q3.answers.answer == ["sanitized  answer ampersand & less than < greater than >", "Answer #2"]
+    }
+
 }
