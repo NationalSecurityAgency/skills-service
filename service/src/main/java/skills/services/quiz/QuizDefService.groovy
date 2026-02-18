@@ -680,14 +680,14 @@ class QuizDefService {
             List<QuizAnswerDef> answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, Integer index ->
                 QuizAnswerDef answerDef = existingAnswerDefs.find { it.id == answerDefRequest.id }
                 if (answerDef) {
-                    answerDef.answer = answerDefRequest.answer
+                    answerDef.answer = InputSanitizer.sanitize(answerDefRequest.answer)
                     answerDef.isCorrectAnswer = answerDefRequest.isCorrect
                     answerDef.displayOrder = index + 1
                 } else {
                     answerDef = new QuizAnswerDef(
                             quizId: savedQuestion.quizId,
                             questionRefId: savedQuestion.id,
-                            answer: answerDefRequest.answer,
+                            answer: InputSanitizer.sanitize(answerDefRequest.answer),
                             isCorrectAnswer: answerDefRequest.isCorrect,
                             displayOrder: index + 1,
                     )
@@ -1105,11 +1105,11 @@ class QuizDefService {
                             isSelected = originalAnswer.value == originalAnswer.answer
                             answer = new UserGradedQuizAnswerResult.MatchingAnswer(
                                     term: originalAnswer.term,
-                                    selectedMatch: originalAnswer.value,
-                                    correctMatch: originalAnswer.answer
+                                    selectedMatch: InputSanitizer.unsanitizeEscapedHtml(originalAnswer.value),
+                                    correctMatch: InputSanitizer.unsanitizeEscapedHtml(originalAnswer.answer)
                             )
                         } else {
-                            answer = answerDef.answer
+                            answer = InputSanitizer.unsanitizeEscapedHtml(answerDef.answer)
                         }
                         Boolean needsGrading = foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING
                         AiGradingStatusResult aiGradingStatus = createAiGradingStatusResult(foundSelected?.answerStatus, foundSelected?.aiGradingAttemptCount ?: 0)

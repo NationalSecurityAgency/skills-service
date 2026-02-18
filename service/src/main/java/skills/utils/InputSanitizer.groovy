@@ -34,6 +34,7 @@ class InputSanitizer {
     public static final Document.OutputSettings print = new Document.OutputSettings().prettyPrint(false)
 
     private static final Pattern GT = ~/&gt;/
+    private static final Pattern LT = ~/&lt;/
     private static final Pattern AMP = ~/&amp;/
     private static final Pattern PURE_AMP = ~/\s&amp;\s/
     private static final Pattern SPACE = ~/\s/
@@ -191,5 +192,17 @@ class InputSanitizer {
         }
 
         return AMP.matcher(input).replaceAll("&")
+    }
+
+    static String unsanitizeEscapedHtml(String input) {
+        if (!input) {
+            return input;
+        }
+
+        String sanitized = GT.matcher(input).replaceAll(">");
+        sanitized = AMP.matcher(sanitized).replaceAll("&");
+        sanitized = LT.matcher(sanitized).replaceAll("<");
+
+        return sanitized;
     }
 }

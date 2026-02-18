@@ -17,17 +17,22 @@ package skills.intTests.quiz
 
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.SkillDef
+import skills.storage.repos.QuizQuestionDefRepo
 
 import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
 class QuizDefManagementSpecs extends DefaultIntSpec {
+
+    @Autowired
+    QuizQuestionDefRepo quizQuestionRepo
 
     def "no quiz definitions"() {
         when:
@@ -205,9 +210,9 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         skillsService.createQuizDef(quiz)
 
         def question = QuizDefFactory.createChoiceQuestion(1, 1, 3, QuizQuestionType.MultipleChoice)
-        question.answers[0].answer = "sanitized <script>alert('xss')</script> answer1"
-        question.answers[1].answer = "sanitized <script>alert('xss')</script> answer2"
-        question.answers[2].answer = "sanitized <script>alert('xss')</script> answer3"
+        question.answers[0].answer = "sanitized <script>alert('xss')</script> answer1 ampersand & less than < greater than >"
+        question.answers[1].answer = "sanitized <script>alert('xss')</script> answer2 ampersand & less than < greater than >"
+        question.answers[2].answer = "sanitized <script>alert('xss')</script> answer3 ampersand & less than < greater than >"
 
         when:
         def newQuestion = skillsService.createQuizQuestionDef(question)
@@ -218,8 +223,8 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         newQuestion.body.answerHint == question.answerHint
         newQuestion.body.questionType == QuizQuestionType.MultipleChoice.toString()
         newQuestion.body.answers.size() == 3
-        newQuestion.body.answers.answer == ["sanitized  answer1", "sanitized  answer2", "sanitized  answer3"]
-        qDefs.questions.answers.answer == [["sanitized  answer1", "sanitized  answer2", "sanitized  answer3"]]
+        newQuestion.body.answers.answer == ["sanitized  answer1 ampersand & less than < greater than >", "sanitized  answer2 ampersand & less than < greater than >", "sanitized  answer3 ampersand & less than < greater than >"]
+        qDefs.questions.answers.answer == [["sanitized  answer1 ampersand & less than < greater than >", "sanitized  answer2 ampersand & less than < greater than >", "sanitized  answer3 ampersand & less than < greater than >"]]
     }
 
     def "add SingleChoice question to quiz"() {
@@ -248,8 +253,8 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         skillsService.createQuizDef(quiz)
 
         def question = QuizDefFactory.createChoiceQuestion(1, 1, 2, QuizQuestionType.SingleChoice)
-        question.answers[0].answer = "sanitized <script>alert('xss')</script> answer1"
-        question.answers[1].answer = "sanitized <script>alert('xss')</script> answer2"
+        question.answers[0].answer = "sanitized <script>alert('xss')</script> answer1 ampersand & less than < greater than >"
+        question.answers[1].answer = "sanitized <script>alert('xss')</script> answer2 ampersand & less than < greater than >"
 
         when:
         def newQuestion = skillsService.createQuizQuestionDef(question)
@@ -261,8 +266,8 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         newQuestion.body.answerHint == question.answerHint
         newQuestion.body.questionType == QuizQuestionType.SingleChoice.toString()
         newQuestion.body.answers.size() == 2
-        newQuestion.body.answers.answer == ["sanitized  answer1", "sanitized  answer2"]
-        qDefs.questions.answers.answer == [["sanitized  answer1", "sanitized  answer2"]]
+        newQuestion.body.answers.answer == ["sanitized  answer1 ampersand & less than < greater than >", "sanitized  answer2 ampersand & less than < greater than >"]
+        qDefs.questions.answers.answer == [["sanitized  answer1 ampersand & less than < greater than >", "sanitized  answer2 ampersand & less than < greater than >"]]
     }
 
     def "add Matching question to quiz"() {
@@ -716,8 +721,8 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
 
         def question = QuizDefFactory.createChoiceQuestion(1, 1, 2, QuizQuestionType.SingleChoice)
         question.question = "sanitized <script>alert('xss')</script> question"
-        question.answerHint = "sanitized <script>alert('xss')</script> hint"
-        question.answers[0].answer = "sanitized <script>alert('xss')</script> answer"
+        question.answerHint = "sanitized <script>alert('xss')</script> hint ampersand & less than < greater than >"
+        question.answers[0].answer = "sanitized <script>alert('xss')</script> answer ampersand & less than < greater than >"
 
         when:
         def newQuestion = skillsService.createQuizQuestionDef(question)
@@ -728,8 +733,8 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         res.questions
         res.questions.size() == 1
         res.questions[0].question == 'sanitized  question'
-        res.questions[0].answerHint == 'sanitized  hint'
-        res.questions[0].answers[0].answer == 'sanitized  answer'
+        res.questions[0].answerHint == 'sanitized  hint ampersand & less than < greater than >'
+        res.questions[0].answers[0].answer == 'sanitized  answer ampersand & less than < greater than >'
     }
 
     def "add a video to a quiz"() {
