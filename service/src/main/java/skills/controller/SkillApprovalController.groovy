@@ -61,9 +61,10 @@ class SkillApprovalController {
                              @RequestParam int page,
                              @RequestParam String orderBy,
                              @RequestParam Boolean ascending,
-                             @RequestParam(required = false, defaultValue = "") String userFilter) {
+                             @RequestParam(required = false, defaultValue = "") String userFilter,
+                             @RequestParam(required = false, defaultValue = "") String skillFilter) {
         PageRequest pageRequest = createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending)
-        return skillApprovalService.getApprovals(projectId, userFilter, pageRequest)
+        return skillApprovalService.getApprovals(projectId, userFilter, skillFilter, pageRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/approvals/history", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

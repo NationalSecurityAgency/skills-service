@@ -141,22 +141,22 @@ class SkillApprovalService {
 
     }
 
-    TableResult getApprovals(String projectId, String userFilter, PageRequest pageRequest) {
+    TableResult getApprovals(String projectId, String userFilter, String skillFilter, PageRequest pageRequest) {
         String currentApproverId = userInfoService.currentUser.username
         ConfExistInfo confExistInfo = getConfExistForApprover(projectId, currentApproverId)
 
         if (confExistInfo.projConfExist) {
             if (confExistInfo.fallBackApprover) {
-                Page<SkillApprovalRepo.SimpleSkillApproval> approvalPage = skillApprovalRepo.findFallbackApproverConf(projectId, userFilter, pageRequest)
+                Page<SkillApprovalRepo.SimpleSkillApproval> approvalPage = skillApprovalRepo.findFallbackApproverConf(projectId, userFilter, skillFilter, pageRequest)
                 return buildApprovalsResult(projectId, approvalPage)
             } else if (confExistInfo.approverHasConf) {
-                Page<SkillApprovalRepo.SimpleSkillApproval> approvalPage = skillApprovalRepo.findToApproveWithApproverConf(projectId, currentApproverId, userFilter, pageRequest)
+                Page<SkillApprovalRepo.SimpleSkillApproval> approvalPage = skillApprovalRepo.findToApproveWithApproverConf(projectId, currentApproverId, userFilter, skillFilter, pageRequest)
                 return buildApprovalsResult(projectId, approvalPage)
             }
             return new TableResult()
         }
 
-        Page<SkillApprovalRepo.SimpleSkillApproval> approvalPage = skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, userFilter, pageRequest)
+        Page<SkillApprovalRepo.SimpleSkillApproval> approvalPage = skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, userFilter, skillFilter, pageRequest)
         return buildApprovalsResult(projectId, approvalPage)
     }
 

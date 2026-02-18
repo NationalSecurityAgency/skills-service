@@ -79,8 +79,9 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.skillRefId = sd.id and 
             s.userId = uAttrs.userId and
             (?2 is null OR lower(uAttrs.userIdForDisplay) like lower(concat('%', ?2, '%'))) and
+            (?3 is null OR lower(sd.name) like lower(concat('%', ?3, '%'))) and
             s.approverUserId is null''')
-    Page<SimpleSkillApproval> findToApproveByProjectIdAndNotRejectedOrApproved(String projectId, String userFilter, Pageable pageable)
+    Page<SimpleSkillApproval> findToApproveByProjectIdAndNotRejectedOrApproved(String projectId, String userFilter, String skillFilter, Pageable pageable)
 
     @Query('''SELECT
         s.id as approvalId,
@@ -106,6 +107,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.userId = uAttrs.userId and
             s.approverUserId is null and
             (:userFilter is null OR lower(uAttrs.userIdForDisplay) like lower(concat('%', :userFilter, '%'))) and
+            (:skillFilter is null OR lower(sd.name) like lower(concat('%', :skillFilter, '%'))) and
             (
                 (exists (select 1 from SkillApprovalConf sac 
                         where sac.approverUserId = :approverId
@@ -130,6 +132,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             @Param("projectId") String projectId,
             @Param("approverId") String approverId,
             @Param("userFilter") String userFilter,
+            @Param("skillFilter") String skillFilter,
             Pageable pageable)
 
     @Query('''SELECT
@@ -156,6 +159,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             s.userId = uAttrs.userId and
             s.approverUserId is null and 
             (:userFilter is null OR lower(uAttrs.userIdForDisplay) like lower(concat('%', :userFilter, '%'))) and
+            (:skillFilter is null OR lower(sd.name) like lower(concat('%', :skillFilter, '%'))) and
             (not exists (select 1 from SkillApprovalConf sac
                             where sac.approverUserId is not null
                                 and sac.projectId = :projectId 
@@ -178,6 +182,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
     Page<SimpleSkillApproval> findFallbackApproverConf(
             @Param("projectId") String projectId,
             @Param("userFilter") String userFilter,
+            @Param("skillFilter") String skillFilter,
             Pageable pageable)
 
     @Query('''SELECT
