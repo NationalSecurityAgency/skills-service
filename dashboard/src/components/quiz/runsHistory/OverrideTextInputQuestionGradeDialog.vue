@@ -23,6 +23,7 @@ import QuizService from "@/components/quiz/QuizService.js";
 import {useRoute} from "vue-router";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 
 const model = defineModel()
 const props = defineProps({
@@ -33,6 +34,7 @@ const emit = defineEmits(['grade-overridden'])
 const route = useRoute()
 const appConfig = useAppConfig()
 const announcer = useSkillsAnnouncer()
+const appInfo = useAppInfoState()
 
 const initialData = {
   feedbackTxt: '',
@@ -96,7 +98,7 @@ const afterSave = (res) => {
                     :allow-insert-images="false"
                     :aria-label="`optionally provide feedback for answer of question # ${question.questionNumber}`"
                     name="feedbackTxt"/>
-    <div class="flex items-center gap-2 mt-2">
+    <div v-if="appInfo.emailEnabled" class="flex items-center gap-2 mt-2">
       <SkillsInputSwitch name="notifyUser" /><label for="notifyUser">Notify Quiz Taker</label>
     </div>
   </SkillsInputFormDialog>
