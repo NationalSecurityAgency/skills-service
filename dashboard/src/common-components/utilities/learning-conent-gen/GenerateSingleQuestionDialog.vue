@@ -78,7 +78,8 @@ const createPromptInstructions = (userEnterInstructions) => {
 }
 
 const createFollowOnConvoInstructions = (userEnterInstructions) => {
-  if (props.questionType.selectedType.id !== lastGeneratedQuestionInfo.value.questionTypeId) {
+  if (lastGeneratedQuestionInfo.value
+      && props.questionType.selectedType.id !== lastGeneratedQuestionInfo.value.questionTypeId) {
     return instructionsGenerator.updateSingleQuestionTypeChangedInstructions(userEnterInstructions, lastGeneratedQuestionInfo.value.questionTypeId, props.questionType.selectedType)
   }
   return instructionsGenerator.followOnConvoInstructions(userEnterInstructions)
@@ -252,7 +253,7 @@ const questionTypeSelectionDisabled = computed(() => {
       <markdown-text :text="historyItem.generatedValue"
                      data-cy="generatedSegment"
                      :instanceId="`${historyItem.id}-desc`"/>
-      <div v-if="answersFound && !historyItem.generatedInfo?.answers" class="flex mt-2">
+      <div v-if="historyItem.isGenerating && answersFound && !historyItem.generatedInfo?.answers" class="flex mt-2">
         <skills-spinner :is-loading="answersFound" :size-in-rem="2"/>
       </div>
       <!--      must not use local variables as there can be more than 1 history item-->

@@ -843,6 +843,68 @@ describe('Generate Single Question Tests', () => {
 
         cy.get('[data-cy="genQuestionTypeSelector"]').should('not.have.class', 'p-disabled')
     })
+
+    it('question generation can restart after a failure', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createQuizDef(1);
+
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('@getConfig')
+
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(newSingleQuestionWelcomeMsg)
+        cy.get('[data-cy="userMsg-1"]').should('not.exist')
+        cy.get('[data-cy="instructionsInput"]').type('will fail{enter}')
+        cy.get('[data-cy="userMsg-1"]').contains('will fail')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(errMsg)
+        cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
+        cy.get(`[data-cy="addPrefixBtn"]`).should('not.exist')
+        cy.get('[data-cy="instructionsInput"]').should('have.focus')
+
+
+        cy.get('[data-cy="instructionsInput"]').type('Great rock bands{enter}')
+        cy.get('[data-cy="userMsg-3"]').contains('Great rock bands')
+        cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]').contains(selectRockBandsQuestion)
+        cy.get('[data-cy="aiMsg-4"] [data-cy="generatedAnswers"]').contains(`Led Zeppelin`)
+        cy.get('[data-cy="aiMsg-4"] [data-cy="generatedAnswers"]').contains(`Norah Jones`)
+        cy.get('[data-cy="aiMsg-4"] [data-cy="finalSegment"]').contains(completedMsg)
+        cy.get('[data-cy="useGenValueBtn-4"]').should('be.enabled')
+
+        // error must not go away
+        cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(errMsg)
+
+
+        cy.get('[data-cy="instructionsInput"]').should('have.focus')
+        cy.get('[data-cy="useGenValueBtn-4"]').click()
+        cy.get('[data-cy="useGenValueBtn-4"]').should('not.exist')
+
+        cy.get('[data-cy="markdownEditorInput"]').contains(selectRockBandsQuestion)
+
+        const expectedAnswers = [
+            { text: 'Led Zeppelin', isCorrect: true },
+            { text: 'Daft Punk', isCorrect: false },
+            { text: 'Pink Floyd', isCorrect: true },
+            { text: 'The Beatles', isCorrect: true },
+            { text: 'Norah Jones', isCorrect: false },
+        ]
+
+        validateAnswers(expectedAnswers)
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="markdownEditorInput"]').should('not.exist')
+
+        cy.get('[data-cy="questionDisplayCard-1"]').contains(selectRockBandsQuestion)
+        validateSavedAnswers(expectedAnswers)
+    });
 });
 
 
