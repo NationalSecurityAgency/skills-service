@@ -381,6 +381,69 @@ describe('Text Input question grading override', () => {
 
     });
 
+    it('grade override dialog notify switch is not shown when email is disabled', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.intercept('/public/isFeatureSupported?feature=emailservice', 'false');
+
+        cy.createQuizDef(1);
+        cy.setQuizShowCorrectAnswers(1, true)
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.runQuizForUser(1, otherUser, [{selectedIndex: [0]}], true,'answer 51')
+        cy.gradeQuizAttempt(1, false)
+
+        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.wait('@getConfig')
+
+        const tableSelector = '[data-cy="quizRunsHistoryTable"]'
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2, value: 'Failed'}],
+        ], 5);
+        cy.get(`${tableSelector} [data-cy="row0-viewRun"]`).click()
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="overrideGradeBtn"]').click()
+
+        cy.get('[data-cy="inputSwitch-notifyUser"]').should('not.exist')
+    });
+    
+    it('grade override dialog notify switch is shown when email is enabled', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.intercept('/public/isFeatureSupported?feature=emailservice', 'true');
+
+        cy.createQuizDef(1);
+        cy.setQuizShowCorrectAnswers(1, true)
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.runQuizForUser(1, otherUser, [{selectedIndex: [0]}], true,'answer 51')
+        cy.gradeQuizAttempt(1, false)
+
+        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.wait('@getConfig')
+
+        const tableSelector = '[data-cy="quizRunsHistoryTable"]'
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2, value: 'Failed'}],
+        ], 5);
+        cy.get(`${tableSelector} [data-cy="row0-viewRun"]`).click()
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="overrideGradeBtn"]').click()
+
+        cy.get('[data-cy="inputSwitch-notifyUser"]').should('exist')
+    });
 
 });
 
