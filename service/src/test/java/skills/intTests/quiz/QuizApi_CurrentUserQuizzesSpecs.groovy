@@ -695,6 +695,47 @@ class QuizApi_CurrentUserQuizzesSpecs extends DefaultIntSpec {
         !res.questions
     }
 
+
+    def "attempt info - quiz does not return questions when HideCorrectAnswersOnCompletedQuiz=true"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questions = [
+                QuizDefFactory.createChoiceQuestion(1, 1, 4, QuizQuestionType.MultipleChoice),
+        ]
+        skillsService.createQuizQuestionDefs(questions)
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.MaxNumAttempts.setting, value: 3],
+                [setting: QuizSettings.HideCorrectAnswersOnCompletedQuiz.setting, value: true],
+        ])
+        String quizId = quiz.quizId
+
+        when:
+        def quizAttempt1 =  skillsService.startQuizAttempt(quizId).body
+        skillsService.reportQuizAnswer(quizId, quizAttempt1.id, quizAttempt1.questions[0].answerOptions[1].id)
+        def attempt1Res = skillsService.completeQuizAttempt(quizId, quizAttempt1.id).body
+        def attempt1Info = skillsService.getCurrentUserSingleQuizAttempt(quizAttempt1.id)
+
+        def quizAttempt2 =  skillsService.startQuizAttempt(quizId).body
+        skillsService.reportQuizAnswer(quizId, quizAttempt2.id, quizAttempt2.questions[0].answerOptions[1].id)
+        def attempt2Res = skillsService.completeQuizAttempt(quizId, quizAttempt2.id).body
+        def attempt2Info = skillsService.getCurrentUserSingleQuizAttempt(quizAttempt2.id)
+
+        def quizAttempt3 =  skillsService.startQuizAttempt(quizId).body
+        skillsService.reportQuizAnswer(quizId, quizAttempt3.id, quizAttempt3.questions[0].answerOptions[1].id)
+        def attempt3Res = skillsService.completeQuizAttempt(quizId, quizAttempt3.id).body
+        def attempt3Info = skillsService.getCurrentUserSingleQuizAttempt(quizAttempt3.id)
+
+        then:
+        attempt1Res.gradedQuestions == []
+        attempt1Info.questions == []
+
+        attempt2Res.gradedQuestions == []
+        attempt2Info.questions == []
+
+        attempt3Res.gradedQuestions == []
+        attempt3Info.questions == []
+    }
+
 }
 
 
