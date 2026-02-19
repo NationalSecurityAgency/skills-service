@@ -819,7 +819,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
     }
 
 
-    def "disable return of quiz questions"() {
+    def "disable return of quiz questions for users should still return results for admin"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         skillsService.saveQuizSettings(quiz.quizId, [
@@ -846,7 +846,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         gradedQuizAttempt.numQuestionsGotWrong == 0
         gradedQuizAttempt.numQuestionsNeedGrading == 0
         gradedQuizAttempt.gradedQuestions == []
-        quizHistoryRes.questions == []
+        quizHistoryRes.questions.size() == 2
     }
 
     def "getting quiz run properly sanitizes answers"() {
