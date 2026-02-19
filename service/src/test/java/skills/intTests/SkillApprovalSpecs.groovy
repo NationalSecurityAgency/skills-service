@@ -1423,4 +1423,43 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         tableResultFiltered.data.collect{ it.userIdForDisplay } == [ "Steve Johnson" ]
 
     }
+
+
+    void "getApprovals filtering by skill name"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(5,)
+        skills.each { skill ->
+            skill.pointIncrement = 200
+            skill.numPerformToCompletion = 200
+            skill.selfReportingType = SkillDef.SelfReportingType.Approval
+        }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<Date> dates = []
+        List<String> users = getRandomUsers(10)
+        5.times {
+            Date date = new Date() - it
+            dates << date
+            def res = skillsService.addSkill([projectId: proj.projectId, skillId: skills[it].skillId], users[it], date, "Please approve this ${it}!")
+            assert res.body.explanation == "Skill was submitted for approval"
+        }
+
+        def skillToFilter = skills[0].name
+
+        when:
+        def tableResult = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        def tableResultFiltered = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false, '', skillToFilter)
+
+        then:
+        tableResult.count == 5
+        tableResult.data.collect{ it.userId } == users[0..4]
+
+        tableResultFiltered.count == 1
+        tableResultFiltered.data.collect{ it.skillName } == [ skillToFilter ]
+
+    }
 }

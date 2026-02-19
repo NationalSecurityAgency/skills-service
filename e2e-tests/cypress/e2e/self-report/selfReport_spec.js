@@ -533,5 +533,237 @@ describe('Self Report Skills Management Tests', () => {
             }],
         ], 5, true, null, false);
     });
+
+    it('filter skills by name', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+        cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00');
+        cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00');
+        cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00');
+        cy.reportSkill(1, 2, 'user3', '2020-09-14 11:00');
+        cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00');
+        cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00');
+        cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00');
+
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('featureSupported');
+        cy.intercept('GET', '/admin/projects/proj1/approvals?*').as('loadApprovals');
+        cy.intercept('GET', '/admin/projects/proj1/approvals/history?*').as('loadApprovalHistory');
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@featureSupported');
+        cy.wait('@loadApprovalHistory');
+        cy.wait('@loadApprovals');
+
+        const tableSelector = '[data-cy="skillsReportApprovalTable"]';
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            }],
+        ], 5, true, null, false);
+
+        cy.get('[data-cy="selfReportApproval-skillNameFilter"]').type('Very Great Skill 1');
+        cy.get('[data-cy="selfReportApproval-filterBtn"]').click()
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 1'
+            }],
+        ], 5, true, null, false);
+
+        cy.get('[data-cy="selfReportApproval-resetBtn"]').click()
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            }],
+        ], 5, true, null, false);
+
+        cy.get('[data-cy="selfReportApproval-skillNameFilter"]').type('Very Great Skill 3');
+        cy.get('[data-cy="selfReportApproval-filterBtn"]').click()
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 3'
+            }],
+        ], 5, true, null, false);
+    });
+
+    it('filter skills by name and user id', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+        cy.reportSkill(1, 2, 'user6', '2020-09-11 11:00');
+        cy.reportSkill(1, 2, 'user5', '2020-09-12 11:00');
+        cy.reportSkill(1, 2, 'user4', '2020-09-13 11:00');
+        cy.reportSkill(1, 2, 'user3', '2020-09-14 11:00');
+        cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00');
+        cy.reportSkill(1, 3, 'user1', '2020-09-17 11:00');
+        cy.reportSkill(1, 1, 'user0', '2020-09-18 11:00');
+
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('featureSupported');
+        cy.intercept('GET', '/admin/projects/proj1/approvals?*').as('loadApprovals');
+        cy.intercept('GET', '/admin/projects/proj1/approvals/history?*').as('loadApprovalHistory');
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@featureSupported');
+        cy.wait('@loadApprovalHistory');
+        cy.wait('@loadApprovals');
+
+        const tableSelector = '[data-cy="skillsReportApprovalTable"]';
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 1'
+            },
+            {
+                colIndex: 2,
+                value: 'user0'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 3'
+            },
+            {
+                colIndex: 2,
+                value: 'user1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            },
+            {
+                colIndex: 2,
+                value: 'user2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            },
+            {
+                colIndex: 2,
+                value: 'user3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            },
+            {
+                colIndex: 2,
+                value: 'user4'
+            }],
+        ], 5, true, null, false);
+
+        cy.get('[data-cy="selfReportApproval-skillNameFilter"]').type('Very Great Skill 2');
+        cy.get('[data-cy="selfReportApproval-userIdFilter"]').type('user6');
+        cy.get('[data-cy="selfReportApproval-filterBtn"]').click()
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            },
+            {
+                colIndex: 2,
+                value: 'user6'
+            }],
+        ], 5, true, null, false);
+
+        cy.get('[data-cy="selfReportApproval-resetBtn"]').click()
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 1'
+            },
+            {
+                colIndex: 2,
+                value: 'user0'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 3'
+            },
+            {
+                colIndex: 2,
+                value: 'user1'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            },
+            {
+                colIndex: 2,
+                value: 'user2'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            },
+            {
+                colIndex: 2,
+                value: 'user3'
+            }],
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            },
+            {
+                colIndex: 2,
+                value: 'user4'
+            }],
+        ], 5, true, null, false);
+
+        cy.get('[data-cy="selfReportApproval-skillNameFilter"]').type('Very Great Skill 2');
+        cy.get('[data-cy="selfReportApproval-userIdFilter"]').type('user4');
+        cy.get('[data-cy="selfReportApproval-filterBtn"]').click()
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 1,
+                value: 'Very Great Skill 2'
+            },
+            {
+                colIndex: 2,
+                value: 'user4'
+            }],
+        ], 5, true, null, false);
+    });
 });
 
