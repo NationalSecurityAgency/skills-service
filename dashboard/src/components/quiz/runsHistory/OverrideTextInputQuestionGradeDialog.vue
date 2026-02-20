@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
-import {object, string} from "yup";
+import { boolean, object, string } from 'yup'
 import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEditor.vue";
 import SkillsInputSwitch from "@/components/utils/inputForm/SkillsInputSwitch.vue";
 import QuizService from "@/components/quiz/QuizService.js";
@@ -46,6 +46,7 @@ const schema = object({
       .max(appConfig.maxGraderFeedbackMessageLength)
       .customDescriptionValidator('Feedback')
       .label('Feedback'),
+  'notifyUser': boolean(),
 })
 
 const overrideGrade = (attributes) => {
@@ -56,7 +57,7 @@ const overrideGrade = (attributes) => {
     isCorrect: !props.question.isCorrect,
     feedback: attributes.feedbackTxt || '',
     changeGrade: true,
-    notifyUser: attributes.notifyUser
+    notifyUser: !!attributes.notifyUser
   }
   return QuizService.gradeQuizAnswerAttempt(quizId, props.question.userId, runId, answerDefId, gradingInfo)
 }
@@ -70,7 +71,7 @@ const afterSave = (res) => {
 </script>
 
 <template>
-  <SkillsInputFormDialog
+  <SkillsInputFormDialog v-if="model"
       :id="`overrideTextInputGrade-q${question.id}`"
       header="Override Grade"
       v-model="model"

@@ -445,6 +445,115 @@ describe('Text Input question grading override', () => {
         cy.get('[data-cy="inputSwitch-notifyUser"]').should('exist')
     });
 
+    it('can enable and disable notify quiz taker when grade is overridden', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+
+        cy.createQuizDef(1);
+        cy.setQuizShowCorrectAnswers(1, true)
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.runQuizForUser(1, otherUser, [{selectedIndex: [0]}], true,'answer 51')
+        cy.gradeQuizAttempt(1, false)
+        cy.getEmails(2).then((emails) => {
+            const sortedEmails = emails.sort((a, b) => b.subject - a.subject)
+            expect(sortedEmails[0].subject).to.eq('SkillTree Quiz Grading Requested');
+            expect(sortedEmails[1].subject).to.eq('SkillTree Quiz Graded');
+        });
+        cy.resetEmail()
+
+        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.wait('@getConfig')
+
+        const tableSelector = '[data-cy="quizRunsHistoryTable"]'
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 2, value: 'Failed'}],
+        ], 5);
+        cy.get(`${tableSelector} [data-cy="row0-viewRun"]`).click()
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="wrongAnswer"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="aiGraded"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="adminGraded"]')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="grader"]').should('have.text', `Grader: ${defaultUser}`)
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').contains('Good answer')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="quizRequiresGradingMsg"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="aiGradingFailedButHasRetriesMsg"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="aiGradingFailedMsg"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="gradeResConfidence"]').should('not.exist')
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="overrideGradeBtn"]').click()
+        cy.get('[data-cy="overrideGradeWarningToCorrect"]')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.typeInMarkdownEditor('[data-cy="feedback"]', 'Updated Feedback 1')
+        cy.get('[data-cy="inputSwitch-notifyUser"]').click()
+
+        // First call - match by notifyUser: true
+        cy.intercept({
+            method: 'POST',
+            url: `/admin/quiz-definitions/quiz1/users/${otherUser}/attempt/*/gradeAnswer/*`
+        }, (req) => {
+            if (req.body && req.body.feedback === 'Updated Feedback 1') {
+                expect(req.body).to.deep.equal({
+                    "isCorrect": true,
+                    "feedback": "Updated Feedback 1",
+                    "changeGrade": true,
+                    "notifyUser": true
+                })
+            }
+        }).as('gradeAnswerNotifyEnabled')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@gradeAnswerNotifyEnabled')
+
+        cy.get('[data-cy="overrideGradeWarningToCorrect"]').should('not.exist')
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').contains('Updated Feedback 1')
+
+
+        cy.getEmails().then((emails) => {
+            const sortedEmails = emails.sort((a, b) => b.subject - a.subject)
+            console.log("sortedEmails:")
+            console.log(sortedEmails)
+            console.log("done.")
+            expect(sortedEmails[0].subject).to.eq('SkillTree Quiz Graded');
+            expect(emails[0].text).to.contain('Congratulations, you passed the quiz [This is quiz 1]');
+        });
+
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="overrideGradeBtn"]').click()
+        cy.get('[data-cy="overrideGradeWarningToWrong"]')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.typeInMarkdownEditor('[data-cy="feedback"]', 'Updated Feedback 2')
+
+        // Second call - match by notifyUser: false
+        cy.intercept({
+            method: 'POST',
+            url: `/admin/quiz-definitions/quiz1/users/${otherUser}/attempt/*/gradeAnswer/*`
+        }, (req) => {
+            if (req.body && req.body.feedback === 'Updated Feedback 2') {
+                expect(req.body).to.deep.equal({
+                    "isCorrect": false,
+                    "feedback": "Updated Feedback 2",
+                    "changeGrade": true,
+                    "notifyUser": false
+                })
+            }
+        }).as('gradeAnswerNotifyDisabled')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@gradeAnswerNotifyDisabled')
+
+        cy.get('[data-cy="overrideGradeWarningToWrong"]').should('not.exist')
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="manuallyGradedInfo"] [data-cy="feedback"]').contains('Updated Feedback 2')
+    });
 });
 
 
