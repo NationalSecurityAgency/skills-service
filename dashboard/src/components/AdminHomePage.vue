@@ -46,6 +46,11 @@ const items = computed(() => {
     iconClass: 'fa-globe-americas skills-color-badges',
     page: 'GlobalBadges',
   });
+  res.push({
+    name: 'Users',
+    iconClass: 'fa-solid fa-users',
+    page: 'UsersOverallProgressPage',
+  });
 
   if (isRoot.value) {
     res.push({
