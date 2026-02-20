@@ -20,6 +20,7 @@ import UserActionsPage from '@/components/userActions/UserActionsPage.vue'
 import EmaillProjectAdmins from '@/components/projects/EmaillProjectAdmins.vue'
 import GlobalBadges from '@/components/badges/global/GlobalBadges.vue'
 import AdminGroupsPage from '@/components/access/groups/AdminGroupsPage.vue'
+import UsersOverallProgressPage from "@/components/users/UsersOverallProgressPage.vue";
 
 const createAdminRoutes = () => {
   return {
@@ -60,6 +61,16 @@ const createAdminRoutes = () => {
           requiresAuth: true,
           announcer: {
             message: 'Global Badges',
+          },
+        },
+      }, {
+        name: 'UsersOverallProgressPage',
+        path: 'users-progress',
+        component: UsersOverallProgressPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Cross-projects users',
           },
         },
       }, {
