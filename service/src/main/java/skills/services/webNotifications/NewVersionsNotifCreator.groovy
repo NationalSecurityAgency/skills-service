@@ -49,6 +49,25 @@ class NewVersionsNotifCreator {
         assert docsRootHost // must have it configured
         List<WebNotifWrapper> newVersionsNotifications = [
                 new WebNotifWrapper(
+                        releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-03-12'),
+                        notif: new WebNotification(
+                                notifiedOn: new Date(),
+                                showUntil: Date.parse('yyyy-MM-dd', '2026-04-12'),
+                                lookupId: "new-versions-6",
+                                title: "Version 4.1 Released",
+                                notification:
+                                        enableOpenAIIntegration ? """
+### ✨ AI-Powered Grading for Input Text Questions
+- Configure the AI grader with correct answers and confidence thresholds directly from question cards
+- Automatic AI grading with transparency through confidence levels and detailed reasoning
+- Manual grade-override functionality with optional user email notifications
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""" : """
+- **Grade Override for Text Input Questions** - Administrators can override grades for Text Input questions
+- **Quiz Answer Visibility Control** - New quiz setting to hide answers on passed quiz attempts for better assessment integrity
+- **Approval Queue Search** - Search by user and skill in the "Skills Requiring Approval" table
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)""")
+                ),
+                new WebNotifWrapper(
                         releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-02-12'),
                         notif: new WebNotification(
                                 notifiedOn: new Date(),
