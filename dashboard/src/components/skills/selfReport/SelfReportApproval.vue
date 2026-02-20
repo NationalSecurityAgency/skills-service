@@ -80,6 +80,7 @@ const sortTable = (sortContext) => {
 };
 
 const loadApprovals = () => {
+  selectedItems.value = [];
   loading.value = true;
   const pageParams = {
     limit: pageSize.value,
@@ -206,8 +207,8 @@ const reset = () => {
           <SkillsButton size="small" @click="reset" class="ml-1" data-cy="selfReportApproval-resetBtn" label="Reset" icon="fa fa-times" />
         </div>
         <div class="flex flex-1 justify-center sm:justify-end">
-          <SkillsButton size="small" @click="showRejectModal" data-cy="rejectBtn" class="" :disabled="selectedItems.length === 0" icon="fa fa-times-circle" label="Reject" />
-          <SkillsButton size="small" @click="showApproveModal" data-cy="approveBtn" class="ml-2" :disabled="selectedItems.length === 0" icon="fa fa-check" label="Approve" />
+          <SkillsButton size="small" @click="showRejectModal" data-cy="rejectBtn" class="" :disabled="selectedItems.length === 0 || loading" icon="fa fa-times-circle" label="Reject" />
+          <SkillsButton size="small" @click="showApproveModal" data-cy="approveBtn" class="ml-2" :disabled="selectedItems.length === 0 || loading" icon="fa fa-check" label="Approve" />
         </div>
       </div>
 
@@ -220,7 +221,7 @@ const reset = () => {
                        :rows="pageSize"
                        :rowsPerPageOptions="possiblePageSizes"
                        :totalRecords="totalRows"
-                       :busy="loading"
+                       :loading="loading"
                        v-model:sort-field="sortBy"
                        v-model:sort-order="sortOrder"
                        @page="pageChanged"
