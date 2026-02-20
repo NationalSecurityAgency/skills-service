@@ -25,7 +25,9 @@ import {useRoute} from "vue-router";
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useAppConfig } from "@/common-components/stores/UseAppConfig.js";
+import { useStringUtils } from '@/common-components/utilities/UseStringUtils.js'
 
+const stringUtils = useStringUtils();
 const route = useRoute()
 const quizConfig = useQuizConfig()
 const appConfig = useAppConfig()
@@ -97,6 +99,8 @@ const questionUpdated = (updatedQuestionText) => {
   emit('questionUpdated', { question: props.question, updatedQuestionText })
 }
 
+const collapsed = ref(false);
+const canCollapse = computed(() => props.question.question.length > 25 || props.question.question.includes('\n'));
 </script>
 
 <template>
@@ -105,7 +109,7 @@ const questionUpdated = (updatedQuestionText) => {
       <div class="flex flex-initial items-start">
         <div v-if="isDragAndDropControlsVisible"
              :id="`questionSortControl-${question.id}`"
-             class="sort-control mr-4 border-r border-b border-surface text-muted-color rounded-border"
+             class="sort-control border-r border-b border-surface text-muted-color rounded-border"
              @click.prevent.self
              tabindex="0"
              aria-label="Questions Sort Control. Press up or down to change the order of this question."
@@ -114,6 +118,16 @@ const questionUpdated = (updatedQuestionText) => {
              @keyup.up="moveQuestion(-1)"
              data-cy="sortControlHandle">
           <i class="fas fa-arrows-alt"/>
+        </div>
+        <div :id="`questionCollapseControl-${question.id}`"
+             v-if="canCollapse"
+             class="collapse-control mr-4 border-r border-b border-surface text-muted-color rounded-border"
+             @click="collapsed = !collapsed"
+             tabindex="0"
+             aria-label="Questions Collapse Control."
+             role="button"
+             data-cy="collapseQuestionButton">
+          <i :class="collapsed ? 'fas fa-angle-right' : 'fas fa-angle-down'"/>
         </div>
       </div>
       <div :class="{ 'ml-3' : !isDragAndDropControlsVisible }" class="flex-col flex-1 items-start px-2 py-1">
@@ -134,7 +148,7 @@ const questionUpdated = (updatedQuestionText) => {
           </div>
 
           <markdown-text v-if="!showEditQuestionInline"
-                         :text="question.question"
+                         :text="collapsed ? stringUtils.truncateStringToLengthOrNewline(question.question) : question.question"
                          :instance-id="`${question.id}`"
                          data-cy="questionDisplayText"/>
         </div>
@@ -300,6 +314,19 @@ const questionUpdated = (updatedQuestionText) => {
   cursor: grab !important;
   color: #146c75 !important;
   font-size: 1.5rem;
+}
+
+.collapse-control i {
+  padding: 0.4rem;
+  font-size: 1.2rem;
+  top: 0rem;
+  left: 0rem;
+  border-bottom-right-radius: .25rem !important
+}
+
+.collapse-control:hover, .collapse-control i:hover {
+  cursor: pointer !important;
+  color: #146c75 !important;
 }
 
 .answerText {

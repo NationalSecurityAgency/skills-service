@@ -38,8 +38,17 @@ export const useStringUtils = () => {
         return processedString
     }
 
+    const truncateStringToLengthOrNewline = (strValue, truncateTo = 25) => {
+        let valueToTruncateTo = truncateTo;
+        if (strValue.includes('\n')) {
+            valueToTruncateTo = strValue.indexOf('\n') < truncateTo ? strValue.indexOf('\n') : truncateTo;
+        }
+        return strValue.length > valueToTruncateTo ? strValue.slice(0, valueToTruncateTo) + '...' : strValue
+    }
+
     return {
         addNewlinesToString,
-        addNewlinesToChunks
+        addNewlinesToChunks,
+        truncateStringToLengthOrNewline
     }
 }
