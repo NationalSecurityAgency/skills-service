@@ -1263,28 +1263,23 @@ class SkillsService {
         wsHelper.adminGet(endpoint, props)
     }
 
-    def getGlobalMetricsData(String metricsId, Map props=null) {
-        String endpoint = "/metrics/${metricsId}"
-        wsHelper.globalBadgeGet(endpoint, props)
-    }
-
     def getApiGlobalMetricsData(String metricsId, Map props = null) {
         String endpoint = "/metrics/${metricsId}"
         wsHelper.apiGet(endpoint, props)
     }
 
-    def getAllMetricsChartsForSection(String projectId, String section, String sectionId, Map props=null) {
-        String endpoint = "/projects/${projectId}/${section}/${sectionId}/metrics"
-        wsHelper.adminGet(endpoint, props)
+    def getGlobalUserProgressMetrics(String userQuery = '', int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true) {
+        String endpoint = "/progress-metrics"
+        Map props = [
+                userQuery: userQuery,
+                limit: limit,
+                page: page,
+                orderBy: orderBy,
+                ascending: ascending
+        ]
+        wsHelper.appGet(endpoint,props)
     }
 
-    def getAllGlobalMetricsChartsForSection(String section, Map props=null) {
-        wsHelper.get("/${section}", "metrics", props)
-    }
-
-    def getGlobalMetricsChart(String chartBuilderId, String section, String sectionId, Map props = null) {
-        wsHelper.get("/${section}/${sectionId}/metric/${chartBuilderId}", "metrics", props)
-    }
 
     def getSetting(String projectId, String setting){
         return wsHelper.adminGet(getSettingUrl(projectId, setting))

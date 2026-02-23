@@ -18,6 +18,9 @@ package skills.controller
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
@@ -29,8 +32,10 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
 import skills.controller.result.model.*
+import skills.controller.result.model.globalMetrics.GlobalMetricsResult
 import skills.dbupgrade.DBUpgradeSafe
 import skills.icons.CustomIconFacade
+import skills.metrics.GlobalProgressMetricsService
 import skills.profile.EnableCallStackProf
 import skills.services.GlobalBadgesService
 import skills.services.IdFormatValidator
@@ -41,6 +46,7 @@ import skills.services.admin.SkillsAdminService
 import skills.services.adminGroup.AdminGroupService
 import skills.services.quiz.QuizDefService
 import skills.utils.InputSanitizer
+import skills.utils.TablePageUtil
 
 import java.nio.charset.StandardCharsets
 
@@ -77,6 +83,9 @@ class AppController {
 
     @Autowired
     InviteOnlyProjectService inviteOnlyProjectService
+
+    @Autowired
+    GlobalProgressMetricsService globalMetricsService
 
     static final RESERVERED_PROJECT_ID = ShareSkillsService.ALL_SKILLS_PROJECTS
 
@@ -296,5 +305,16 @@ class AppController {
 
         globalBadgesService.saveBadge(badgeId, badgeRequest)
         return new RequestResult(success: true)
+    }
+
+    @RequestMapping(value = "/progress-metrics", method =  RequestMethod.GET, produces = "application/json")
+    GlobalMetricsResult getGlobalUserProgressMetrics(@RequestParam(required = false, defaultValue = "10") int limit,
+                                         @RequestParam(required = false, defaultValue = "1") int page,
+                                         @RequestParam(required = false, defaultValue = "userId") String orderBy,
+                                         @RequestParam(required = false, defaultValue = "true") Boolean ascending,
+                                         @RequestParam(required = false, defaultValue = "") String userQuery) {
+
+        PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(limit, page, orderBy, ascending);
+        return globalMetricsService.loadMetrics(userQuery, pageRequest)
     }
 }
