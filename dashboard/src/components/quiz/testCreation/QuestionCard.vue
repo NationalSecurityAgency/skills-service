@@ -48,10 +48,14 @@ const props = defineProps({
   showEditQuestionInline: {
     type: Boolean,
     default: false
+  },
+  collapsed: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested', 'copyQuestion', 'questionUpdated'])
+const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested', 'copyQuestion', 'questionUpdated', 'collapseQuestion', 'expandQuestion'])
 
 const showDeleteDialog = ref(false)
 
@@ -99,17 +103,22 @@ const questionUpdated = (updatedQuestionText) => {
   emit('questionUpdated', { question: props.question, updatedQuestionText })
 }
 
-const collapsed = ref(false);
-const canCollapse = computed(() => props.question.question.length > 25 || props.question.question.includes('\n'));
+const toggleQuestionState = () => {
+  if(!props.collapsed) {
+    emit('collapseQuestion', props.question.id)
+  } else {
+    emit('expandQuestion', props.question.id)
+  }
+}
 </script>
 
 <template>
   <div class="border border-surface-300 dark:border-surface-500" data-cy="questionDisplayCard">
     <div class="flex flex-col md:flex-row flex-wrap gap-0 mb-4" :data-cy="`questionDisplayCard-${questionNum}`">
-      <div class="flex flex-initial items-start">
+      <div class="flex flex-initial items-start flex-col gap-1">
         <div v-if="isDragAndDropControlsVisible"
              :id="`questionSortControl-${question.id}`"
-             class="sort-control border-r border-b border-surface text-muted-color rounded-border"
+             class="sort-control border-r border-b border-surface text-muted-color rounded-br-md"
              @click.prevent.self
              tabindex="0"
              aria-label="Questions Sort Control. Press up or down to change the order of this question."
@@ -119,16 +128,15 @@ const canCollapse = computed(() => props.question.question.length > 25 || props.
              data-cy="sortControlHandle">
           <i class="fas fa-arrows-alt"/>
         </div>
-        <div :id="`questionCollapseControl-${question.id}`"
-             v-if="canCollapse"
-             class="collapse-control mr-4 border-r border-b border-surface text-muted-color rounded-border"
-             @click="collapsed = !collapsed"
+        <SkillsButton :id="`questionCollapseControl-${question.id}`"
+             style="max-width: 33px;"
+             class="border-l-0! rounded-none! rounded-r-md! mt-2"
+             @click="toggleQuestionState"
              tabindex="0"
-             aria-label="Questions Collapse Control."
-             role="button"
+             aria-label="Collapse Question"
+             :icon="collapsed ? 'fas fa-angle-right' : 'fas fa-angle-down'"
              data-cy="collapseQuestionButton">
-          <i :class="collapsed ? 'fas fa-angle-right' : 'fas fa-angle-down'"/>
-        </div>
+        </SkillsButton>
       </div>
       <div :class="{ 'ml-3' : !isDragAndDropControlsVisible }" class="flex-col flex-1 items-start px-2 py-1">
         <div class="flex flex-1">
@@ -166,7 +174,7 @@ const canCollapse = computed(() => props.question.question.length > 25 || props.
             <span class="" aria-label="This question is graded by AI">Graded via AI</span>
           </div>
         </div>
-        <div v-if="!isTextInputType && !isRatingType && !isMatchingType">
+        <div v-if="!isTextInputType && !isRatingType && !isMatchingType && !collapsed">
           <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
             <div class="flex items-center justify-center pb-1" :data-cy="`answerDisplay-${index}`">
               <SelectCorrectAnswer v-model="a.isCorrect"
@@ -181,10 +189,10 @@ const canCollapse = computed(() => props.question.question.length > 25 || props.
             </div>
           </div>
         </div>
-        <div v-if="isRatingType" class="flex">
+        <div v-if="isRatingType && !collapsed" class="flex">
           <Rating class="flex-initial bg-surface-100 dark:bg-surface-700 rounded-border py-4 px-6" :stars="numberOfStars" disabled :cancel="false"/>
         </div>
-        <div v-if="isTextInputType" class="flex">
+        <div v-if="isTextInputType && !collapsed" class="flex">
           <label :for="`q${questionNum}textInputPlaceholder`" hidden>Text Input Answer Placeholder:</label>
           <Textarea
               style="resize: none"
@@ -196,7 +204,7 @@ const canCollapse = computed(() => props.question.question.length > 25 || props.
               data-cy="textAreaPlaceHolder"
               rows="2"/>
         </div>
-        <div v-if="isMatchingType" class="flex flex-col gap-3 mt-2">
+        <div v-if="isMatchingType && !collapsed" class="flex flex-col gap-3 mt-2">
           <div v-for="(answer, index) in question.answers">
             <div v-if="answer.multiPartAnswer" class="flex flex-row gap-3" :data-cy="`question-${questionNum}-answer-${index}`">
               <div :data-cy="`question-${questionNum}-answer-${index}-term`">
@@ -314,19 +322,6 @@ const canCollapse = computed(() => props.question.question.length > 25 || props.
   cursor: grab !important;
   color: #146c75 !important;
   font-size: 1.5rem;
-}
-
-.collapse-control i {
-  padding: 0.4rem;
-  font-size: 1.2rem;
-  top: 0rem;
-  left: 0rem;
-  border-bottom-right-radius: .25rem !important
-}
-
-.collapse-control:hover, .collapse-control i:hover {
-  cursor: pointer !important;
-  color: #146c75 !important;
 }
 
 .answerText {

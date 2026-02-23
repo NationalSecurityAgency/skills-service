@@ -29,6 +29,7 @@ import QuestionCard from '@/components/quiz/testCreation/QuestionCard.vue';
 import EditQuestion from '@/components/quiz/testCreation/EditQuestion.vue';
 import QuizService from '@/components/quiz/QuizService.js';
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
+import {useStorage} from "@vueuse/core";
 
 const announcer = useSkillsAnnouncer()
 const route = useRoute()
@@ -51,6 +52,7 @@ const editQuestionInfo = ref({
   isCopy: false,
   questionDef: {},
 })
+const questionExpandedStates = useStorage(`questionStates-${route.params.quizId}`, {});
 const isLoading = computed(() => quizConfig.loadingQuizConfig || loadingQuestions.value);
 const hasData = computed(() => questions.value && questions.value.length > 0)
 
@@ -209,6 +211,47 @@ function handleNewQuestionBtnFocus() {
   focusState.setElementId('btn_Questions');
   focusState.focusOnLastElement()
 }
+
+function collapseQuestion(questionId) {
+  questionExpandedStates.value[questionId] = { collapsed: true };
+}
+
+function expandQuestion(questionId) {
+  questionExpandedStates.value[questionId] = { collapsed: false };
+}
+
+function collapseAllQuestions() {
+  const ids = questions.value.map(question => question.id)
+  ids.forEach(id => {
+    questionExpandedStates.value[id] = { collapsed: true };
+  })
+}
+
+function expandAllQuestions() {
+  const ids = questions.value.map(question => question.id)
+  ids.forEach(id => {
+    questionExpandedStates.value[id] = { collapsed: false };
+  })
+}
+
+const areAllCollapsed = computed(() => {
+  const collapsed = Object.fromEntries(
+      Object.entries(questionExpandedStates.value).filter(([key, value]) => value.collapsed === false)
+  )
+  return Object.keys(collapsed).length === 0 // Object.keys(questionExpandedStates.value).length
+})
+
+const isExpanded = ref(false);
+
+function toggleQuestions() {
+  if(isExpanded.value) {
+    collapseAllQuestions();
+    isExpanded.value = false;
+  } else {
+    expandAllQuestions();
+    isExpanded.value = true
+  }
+}
 </script>
 
 <template>
@@ -216,8 +259,13 @@ function handleNewQuestionBtnFocus() {
     <SubPageHeader ref="subPageHeader"
                    title="Questions"
                    :is-loading="quizConfig.loadingQuizConfig"
+                   action="Expand"
+                   @add-action="expandAllQuestions"
                    aria-label="new question">
 
+      <template #nextToTitle>
+        <SkillsButton @click="toggleQuestions" :icon="!isExpanded || areAllCollapsed ? 'fas fa-plus' : 'fas fa-minus'" size="small" outlined class="ml-2" />
+      </template>
       <SkillsButton v-if="!quizConfig.isReadOnlyQuiz"
                     @click="openNewQuestionModal()"
                     icon="fas fa-plus-circle"
@@ -259,7 +307,10 @@ function handleNewQuestionBtnFocus() {
                         @copy-question="copyQuestion"
                         @delete-question="deleteQuestion"
                         @sort-change-requested="handleKeySortRequest"
+                        @collapse-question="collapseQuestion"
+                        @expand-question="expandQuestion"
                         :question="q"
+                        :collapsed="questionExpandedStates[q.id]?.collapsed"
                         :quiz-type="quizType"
                         :show-drag-and-drop-controls="questions && questions.length > 1"
                         :question-num="index+1"/>
