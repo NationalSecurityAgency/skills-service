@@ -235,21 +235,38 @@ function expandAllQuestions() {
 }
 
 const areAllCollapsed = computed(() => {
+  if(Object.keys(questionExpandedStates.value).length === 0) {
+    return false;
+  }
+
   const collapsed = Object.fromEntries(
       Object.entries(questionExpandedStates.value).filter(([key, value]) => value.collapsed === false)
   )
+
   return Object.keys(collapsed).length === 0 // Object.keys(questionExpandedStates.value).length
+})
+
+const areAllExpanded = computed(() => {
+  if(Object.keys(questionExpandedStates.value).length === 0) {
+    return true;
+  }
+
+  const collapsed = Object.fromEntries(
+      Object.entries(questionExpandedStates.value).filter(([key, value]) => value.collapsed === false)
+  )
+
+  return Object.keys(collapsed).length === Object.keys(questionExpandedStates.value).length
 })
 
 const isExpanded = ref(false);
 
 function toggleQuestions() {
-  if(isExpanded.value) {
-    collapseAllQuestions();
-    isExpanded.value = false;
+  if(areAllCollapsed.value) {
+    expandAllQuestions()
+  } else if(areAllExpanded.value) {
+    collapseAllQuestions()
   } else {
-    expandAllQuestions();
-    isExpanded.value = true
+    collapseAllQuestions();
   }
 }
 </script>
@@ -264,8 +281,9 @@ function toggleQuestions() {
       <template #nextToTitle>
         <SkillsButton @click="toggleQuestions"
                       v-if="!quizConfig.isReadOnlyQuiz"
-                      :icon="!isExpanded || areAllCollapsed ? 'fas fa-plus' : 'fas fa-minus'"
+                      :icon="areAllCollapsed ? 'fas fa-plus' : 'fas fa-minus'"
                       size="small"
+                      data-cy="expandAllQuestions"
                       outlined
                       class="ml-2"
                       aria-label="Expand/Collapse All Questions" />
