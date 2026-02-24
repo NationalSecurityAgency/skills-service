@@ -264,7 +264,7 @@ function toggleQuestions() {
                    aria-label="new question">
 
       <template #nextToTitle>
-        <SkillsButton @click="toggleQuestions" :icon="!isExpanded || areAllCollapsed ? 'fas fa-plus' : 'fas fa-minus'" size="small" outlined class="ml-2" />
+        <SkillsButton @click="toggleQuestions" :icon="!isExpanded || areAllCollapsed ? 'fas fa-plus' : 'fas fa-minus'" size="small" outlined class="ml-2" aria-label="Expand/Collapse All Questions" />
       </template>
       <SkillsButton v-if="!quizConfig.isReadOnlyQuiz"
                     @click="openNewQuestionModal()"
