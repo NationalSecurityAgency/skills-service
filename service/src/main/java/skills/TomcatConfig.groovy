@@ -89,18 +89,19 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
 
         @Override
         String convert(IAccessEvent accessEvent) {
-            String dn = getSubjectDN(accessEvent)
-            if (dn) {
-                return dn
-            }
-
-            String userIdForLogging =  UserIdLoggingFilter.USER_ID.get()
-            if (userIdForLogging) {
+            try {
+                String dn = getSubjectDN(accessEvent)
+                if (dn) {
+                    return dn
+                }
+                String userIdForLogging = UserIdLoggingFilter.USER_ID.get()
+                if (userIdForLogging) {
+                    return userIdForLogging
+                }
+                return IAccessEvent.NA
+            } finally {
                 UserIdLoggingFilter.USER_ID.remove()
-                return userIdForLogging
             }
-
-            return IAccessEvent.NA
         }
 
         private static String getSubjectDN(IAccessEvent accessEvent) {
