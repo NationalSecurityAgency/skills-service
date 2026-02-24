@@ -229,7 +229,7 @@ const archiveUsers = () => {
           </div>
           <InputText id="userTagFilter" v-model="filters.userTagFilter" v-on:keydown.enter="applyFilters"
                      class="w-full"
-                     data-cy="users-skillIdFilter" aria-label="user filter" />
+                     data-cy="users-userTagFilter" aria-label="user tag filter" />
         </div>
         <div class="flex-1">
           <div>
