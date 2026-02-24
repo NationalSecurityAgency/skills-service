@@ -85,5 +85,8 @@ export default {
   isUserArchived(projectId, userId) {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/users/${userId}/isArchived`)
         .then((res) => res.data.success)
-  }
+  },
+  getGlobalUserProgress() {
+    return axios.get(`/app/progress-metrics`).then((response) => response.data)
+  },
 }
