@@ -114,7 +114,12 @@ const reset = () => {
   })
 }
 
+const isGlobalAdminPage = (route) => route.path?.toLowerCase().startsWith('/administrator/globalbadges')
+
 const getUrl = () => {
+  if(isGlobalAdminPage) {
+    return `/admin/globalBadges/${encodeURIComponent(route.params.badgeId)}/users`;
+  }
   let url = `/admin/projects/${encodeURIComponent(route.params.projectId)}`
   if (route.params.skillId) {
     url += `/skills/${encodeURIComponent(route.params.skillId)}`
