@@ -1164,6 +1164,116 @@ class UserPointsSpecs extends DefaultIntSpec {
         data4.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
     }
 
+    def 'get project users filter by user tag'() {
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def skill1 = createSkill(2, 1, 1, 0, 10, 512, 10,)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [skill1])
+
+        def p2subj2 = createSubject(2, 2)
+        def skill2 = createSkill(2, 2, 2, 0, 10, 512, 10,)
+        skillsService.createSubject(p2subj2)
+        skillsService.createSkill(skill2)
+
+        def p2Badge1 = createBadge(2, 1)
+        skillsService.addBadge(p2Badge1)
+        skillsService.assignSkillToBadge([projectId: p2Badge1.projectId, badgeId: p2Badge1.badgeId, skillId: skill2.skillId])
+
+        List<String> users = usersWithTags
+        skillsService.addSkill(skill1, users[0])
+
+        // overall level 1
+        skillsService.addSkill(skill1, users[1], new Date() - 1)
+        skillsService.addSkill(skill2, users[1])
+        skillsService.addSkill(skill1, users[2], new Date() - 1)
+        skillsService.addSkill(skill2, users[2])
+
+        // overall level 2
+        (5..1).each {
+            skillsService.addSkill(skill1, users[3], new Date() - it)
+        }
+
+        // overall level 4
+        (4..1).each {
+            skillsService.addSkill(skill1, users[4], new Date() - it)
+            skillsService.addSkill(skill1, users[5], new Date() - it)
+        }
+        (10..1).each {
+            skillsService.addSkill(skill2, users[4], new Date() - it)
+            skillsService.addSkill(skill2, users[5], new Date() - it)
+        }
+
+        usersWithTags[0..5].eachWithIndex { userId, idx ->
+            String tagValue = "tag${idx}"
+            rootSkillsService.saveUserTag(userId, "dutyOrganization", [tagValue]);
+        }
+
+        when:
+        def projRes = skillsService.getProjectUsers(p2.projectId)
+        def subjRes = skillsService.getSubjectUsers(p2.projectId, p2subj1.subjectId)
+        def subj2Res = skillsService.getSubjectUsers(p2.projectId, p2subj2.subjectId)
+        def badgeRes = skillsService.getBadgeUsers(p2.projectId, p2Badge1.badgeId)
+        def skillRes = skillsService.getSkillUsers(p2.projectId, skill2.skillId)
+
+        def projResFiltered = skillsService.getProjectUsers(p2.projectId, 10, 1, 'userId', true, '', 0, 100, 'tag2')
+        def subjResFiltered = skillsService.getSubjectUsers(p2.projectId, p2subj1.subjectId, 10, 1, 'userId', true, '', 0, 100, 'tag2')
+        def subj2ResFiltered = skillsService.getSubjectUsers(p2.projectId, p2subj2.subjectId, 10, 1, 'userId', true, '', 0, 100, 'tag2')
+        def badgeResFiltered = skillsService.getBadgeUsers(p2.projectId, p2Badge1.badgeId, 10, 1, 'userId', true, '', 0, 100, 'tag2')
+        def skillResFiltered = skillsService.getSkillUsers(p2.projectId, skill2.skillId, 10, 1, 'userId', true, '', 0, 100, 'tag2')
+
+        then:
+        projRes.count == 6
+        projRes.totalCount == 6
+        def data = users.collect {String usr -> projRes.data.find { it.userId == usr} }
+        data.userTag == ['tag0', 'tag1', 'tag2', 'tag3', 'tag4', 'tag5']
+
+        subjRes.count == 6
+        subjRes.totalCount == 6
+        def data1 = users.collect {String usr -> subjRes.data.find { it.userId == usr} }
+        data1.userTag == ['tag0', 'tag1', 'tag2', 'tag3', 'tag4', 'tag5']
+
+        subj2Res.count == 4
+        subj2Res.totalCount == 4
+        def data2 = users.collect {String usr -> subj2Res.data.find { it.userId == usr} }
+        data2.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
+
+        badgeRes.count == 4
+        badgeRes.totalCount == 4
+        def data3 = users.collect {String usr -> badgeRes.data.find { it.userId == usr} }
+        data3.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
+
+        skillRes.count == 4
+        skillRes.totalCount == 4
+        def data4 = users.collect {String usr -> skillRes.data.find { it.userId == usr} }
+        data4.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
+        
+        // now check filtered results
+        projResFiltered.count == 1
+        projResFiltered.totalCount == 1
+        def dataFiltered = users.collect {String usr -> projResFiltered.data.find { it.userId == usr} }
+        dataFiltered.userTag == ['tag2']
+
+        subjResFiltered.count == 1
+        subjResFiltered.totalCount == 1
+        def data1Filtered = users.collect {String usr -> subjResFiltered.data.find { it.userId == usr} }
+        data1Filtered.userTag == ['tag2']
+
+        subj2ResFiltered.count == 1
+        subj2ResFiltered.totalCount == 1
+        def data2Filtered = users.collect {String usr -> subj2ResFiltered.data.find { it.userId == usr} }
+        data2Filtered.userTag == ['tag2']
+
+        badgeResFiltered.count == 1
+        badgeResFiltered.totalCount == 1
+        def data3Filtered = users.collect {String usr -> badgeResFiltered.data.find { it.userId == usr} }
+        data3Filtered.userTag == ['tag2']
+
+        skillResFiltered.count == 1
+        skillResFiltered.totalCount == 1
+        def data4Filtered = users.collect {String usr -> skillResFiltered.data.find { it.userId == usr} }
+        data4Filtered.userTag == ['tag2']
+    }
+    
     def 'user project points maximum filter is exclusive' () {
         skillsService.deleteProjectIfExist(projId)
         def proj = createProject()
