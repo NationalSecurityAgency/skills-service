@@ -130,6 +130,7 @@ const toggleQuestionState = () => {
         </div>
         <SkillsButton :id="`questionCollapseControl-${question.id}`"
              style="max-width: 33px;"
+             v-if="!quizConfig.isReadOnlyQuiz"
              class="border-l-0! rounded-none! rounded-r-md! mt-2"
              @click="toggleQuestionState"
              tabindex="0"

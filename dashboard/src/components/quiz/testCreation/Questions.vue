@@ -259,12 +259,16 @@ function toggleQuestions() {
     <SubPageHeader ref="subPageHeader"
                    title="Questions"
                    :is-loading="quizConfig.loadingQuizConfig"
-                   action="Expand"
-                   @add-action="expandAllQuestions"
                    aria-label="new question">
 
       <template #nextToTitle>
-        <SkillsButton @click="toggleQuestions" :icon="!isExpanded || areAllCollapsed ? 'fas fa-plus' : 'fas fa-minus'" size="small" outlined class="ml-2" aria-label="Expand/Collapse All Questions" />
+        <SkillsButton @click="toggleQuestions"
+                      v-if="!quizConfig.isReadOnlyQuiz"
+                      :icon="!isExpanded || areAllCollapsed ? 'fas fa-plus' : 'fas fa-minus'"
+                      size="small"
+                      outlined
+                      class="ml-2"
+                      aria-label="Expand/Collapse All Questions" />
       </template>
       <SkillsButton v-if="!quizConfig.isReadOnlyQuiz"
                     @click="openNewQuestionModal()"
