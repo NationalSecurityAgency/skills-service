@@ -1079,6 +1079,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                                                                                    @Param("userId") String userId,
                                                                                    @Param("minimumPoints") int minimumPoints,
                                                                                    @Param("maximumPoints") int maximumPoints,
+                                                                                   @Param("userTagFilter") String userTagFilter,
                                                                                    Pageable pageable)
 
     @Nullable
