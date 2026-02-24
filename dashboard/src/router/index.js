@@ -100,6 +100,7 @@ import SupportPage from "@/components/contact/SupportPage.vue";
 import {defineAsyncComponent} from "vue";
 import GlobalBadgeAccessPage from '@/components/badges/global/GlobalBadgeAccessPage.vue'
 import AdminGroupGlobalBadges from '@/components/access/groups/AdminGroupGlobalBadges.vue'
+import GlobalBadgeUsers from '@/components/badges/global/GlobalBadgeUsers.vue';
 
 const routes = [
   {
@@ -871,7 +872,24 @@ const routes = [
           message: 'Global Badge Access',
         },
       },
-    }],
+    },
+      {
+        path: 'users',
+        component: Users,
+        meta: { requiresAuth: true },
+        children: [{
+          component: UsersTablePage,
+          name: 'GlobalBadgeUsers',
+          path: '',
+          meta: {
+            requiresAuth: true,
+            announcer: {
+              message: 'Global Badge Users',
+            },
+          },
+        }],
+      },
+    ],
   },
   {
     path: '/administrator/adminGroups/:adminGroupId',

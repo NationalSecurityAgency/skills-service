@@ -1472,6 +1472,32 @@ class AdminController {
         return globalBadgesService.isProjectLevelUsedInGlobalBadge(InputSanitizer.sanitize(projectId), level)
     }
 
+
+    @GetMapping(value = "/globalBadges/{badgeId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    TableResult getGlobalBadgeUsers(@PathVariable("badgeId") String badgeId,
+                              @RequestParam String query,
+                              @RequestParam int limit,
+                              @RequestParam int page,
+                              @RequestParam String orderBy,
+                              @RequestParam Boolean ascending,
+                              @RequestParam int minimumPoints,
+                              @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", badgeId)
+        SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", badgeId)
+        SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", badgeId)
+
+        return null;
+//
+//        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+//        List<SkillDefRes> badgeSkills = getBadgeSkills(projectId, badgeId)
+//        List<String> skillIds = badgeSkills.collect { it.skillId }
+//        if (!skillIds) {
+//            return new TableResult()
+//        }
+//        return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest, minimumPoints, maximumPoints)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/errors", method = [RequestMethod.GET], produces = "application/json")
     @ResponseBody
     TableResult getErrors(@PathVariable("projectId") String projectId,

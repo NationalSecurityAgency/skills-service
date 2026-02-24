@@ -211,7 +211,8 @@ const toDate = (value) => {
     <navigation :nav-items="[
           {name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'GlobalBadgeSkills'},
           {name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'GlobalBadgeLevels'},
-          { name: 'Access', iconClass: 'fas fa-shield-alt', page: 'GlobalBadgeAccessPage' }
+          { name: 'Access', iconClass: 'fas fa-shield-alt', page: 'GlobalBadgeAccessPage' },
+          {name: 'Users', iconClass: 'fa-users skills-color-users', page: 'GlobalBadgeUsers'},
         ]">
     </navigation>
     <edit-badge v-if="showEdit" v-model="showEdit" :id="badge.badgeId" :badge="badge" :is-edit="true"
