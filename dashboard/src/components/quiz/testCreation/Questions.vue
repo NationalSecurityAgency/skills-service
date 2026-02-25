@@ -172,6 +172,7 @@ function deleteQuestion(questionDef) {
   operationInProgress.value = true;
   QuizService.deleteQuizQuestion(route.params.quizId, questionDef.id)
       .then(() => {
+        delete questionExpandedStates.value[questionDef.id]
         questions.value = questions.value.filter((q) => q.id !== questionDef.id);
         quizSummaryState.loadQuizSummary(route.params.quizId)
             .then(() => handleNewQuestionBtnFocus());
@@ -243,7 +244,7 @@ const areAllCollapsed = computed(() => {
       Object.entries(questionExpandedStates.value).filter(([key, value]) => value.collapsed === false)
   )
 
-  return Object.keys(collapsed).length === 0 // Object.keys(questionExpandedStates.value).length
+  return Object.keys(collapsed).length === 0
 })
 
 const areAllExpanded = computed(() => {
@@ -280,7 +281,7 @@ function toggleQuestions() {
 
       <template #nextToTitle>
         <SkillsButton @click="toggleQuestions"
-                      v-if="!quizConfig.isReadOnlyQuiz"
+                      v-if="!quizConfig.isReadOnlyQuiz && questions && questions.length > 0"
                       :icon="areAllCollapsed ? 'fas fa-plus' : 'fas fa-minus'"
                       size="small"
                       data-cy="expandAllQuestions"

@@ -152,6 +152,8 @@ function deleteQuiz() {
   QuizService.deleteQuizId(quizDef.quizId)
       .then(() => {
         quizzes.value = quizzes.value.filter((q) => q.quizId !== quizDef.quizId);
+        const newQuizState = useStorage(`questionStates-${quizDef.quizId}`, {})
+        newQuizState.value = null;
       })
       .finally(() => {
         options.value.busy = false;

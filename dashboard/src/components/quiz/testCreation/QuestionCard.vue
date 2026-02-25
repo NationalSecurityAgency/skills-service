@@ -134,7 +134,7 @@ const toggleQuestionState = () => {
              class="border-l-0! rounded-none! rounded-r-md! mt-2"
              @click="toggleQuestionState"
              tabindex="0"
-             aria-label="Collapse Question"
+             :aria-label="collapsed ? 'Expand Question' : 'Collapse Question'"
              :icon="collapsed ? 'fas fa-angle-right' : 'fas fa-angle-down'"
              data-cy="collapseQuestionButton">
         </SkillsButton>
