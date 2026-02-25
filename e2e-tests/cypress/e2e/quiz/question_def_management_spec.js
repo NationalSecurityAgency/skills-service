@@ -1149,6 +1149,7 @@ describe('Quiz Question CRUD Tests', () => {
         const q1text = "This is a question with a fairly long question text to verify truncation in the interface"
         const q2text = "This is a question\nwith multiple lines\nto verify\nthe truncation of\nmulti line\nquestions."
         const q3text = "This is short"
+        const q4text = "This is a new question"
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1, { question: q1text})
         cy.createQuizQuestionDef(1, 2, { question: q2text})
@@ -1181,6 +1182,34 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get(q1Card).should('contain', "This is a question with a...")
         cy.get(q2Card).should('contain', q2text)
         cy.get(q3Card).should('contain', "This is short")
+
+        cy.openDialog('[data-cy="newQuestionOnBottomBtn"]', true)
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', q4text)
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
+        cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('1')
+
+        cy.get('[data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
+        cy.get('[data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
+
+        cy.get('[data-cy="answer-2"] [data-cy="answerText"]').type('three')
+        cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="answer-3"] [data-cy="answerText"]').type('4')
+
+        cy.clickSaveDialogBtn()
+
+        const q4Card = '[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]';
+        const q4CardToggle = '[data-cy="questionDisplayCard-4"] [data-cy="collapseQuestionButton"]';
+
+        cy.get(q4Card).should('contain', q4text)
+
+        cy.openDialog('[data-cy="deleteQuestionButton_2"]')
+        cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
+        cy.clickSaveDialogBtn()
+
+        cy.get(q1Card).should('contain', "This is a question with a...")
+        cy.get(q2Card).should('contain', "This is short")
+        cy.get(q3Card).should('contain', q4text)
     });
 
     it('expand and collapse all question content', function () {

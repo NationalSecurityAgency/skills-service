@@ -222,7 +222,7 @@ const toggleQuestionState = () => {
                 class="mt-3 border-t border-dashed border-gray-300 dark:border-gray-600"/>
           </div>
         </div>
-        <div class="flex" v-if="question.answerHint">
+        <div class="flex" v-if="question.answerHint && !collapsed">
           <Message size="small" severity="warn" icon="fas fa-lightbulb" :closable="false" class="mt-2" data-cy="answerHintMsg">
             <pre data-cy="answerHintMsgContent">{{ question.answerHint }}</pre>
           </Message>
