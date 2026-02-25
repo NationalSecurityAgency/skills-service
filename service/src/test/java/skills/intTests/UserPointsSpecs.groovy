@@ -345,7 +345,7 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     def 'get project users works appropriately with no maximum points'() {
         when:
-        def result = skillsService.wsHelper.adminGet("/projects/${projId}/users?limit=10&ascending=1&page=1&byColumn=0&orderBy=userId&query=&minimumPoints=0".toString())
+        def result = skillsService.getProjectUsers(projId)
 
         then:
         result
