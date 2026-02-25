@@ -215,21 +215,23 @@ const archiveUsers = () => {
   <div class="w-full">
     <div class="px-6 py-4">
       <div class="flex flex-col lg:flex-row gap-6 my-2">
-        <div class="xl:flex-none w-[12rem]">
-          <div>
-            <label for="userFilter">User Filter</label>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="xl:flex-none w-[12rem]">
+            <div>
+              <label for="userFilter">User Filter</label>
+            </div>
+            <InputText id="userFilter" v-model="filters.user" v-on:keydown.enter="applyFilters"
+                       class="w-full"
+                       data-cy="users-skillIdFilter" aria-label="user filter" />
           </div>
-          <InputText id="userFilter" v-model="filters.user" v-on:keydown.enter="applyFilters"
-                     class="w-full"
-                     data-cy="users-skillIdFilter" aria-label="user filter" />
-        </div>
-        <div v-if="showUserTagColumn" class="xl:flex-none w-[12rem]">
-          <div>
-            <label for="userTagFilter">{{ appConfig.usersTableAdditionalUserTagLabel }} Filter</label>
+          <div v-if="showUserTagColumn" class="xl:flex-none w-[12rem]">
+            <div>
+              <label for="userTagFilter">{{ appConfig.usersTableAdditionalUserTagLabel }} Filter</label>
+            </div>
+            <InputText id="userTagFilter" v-model="filters.userTagFilter" v-on:keydown.enter="applyFilters"
+                       class="w-full"
+                       data-cy="users-userTagFilter" aria-label="user tag filter" />
           </div>
-          <InputText id="userTagFilter" v-model="filters.userTagFilter" v-on:keydown.enter="applyFilters"
-                     class="w-full"
-                     data-cy="users-userTagFilter" aria-label="user tag filter" />
         </div>
         <div class="flex-1">
           <div>
