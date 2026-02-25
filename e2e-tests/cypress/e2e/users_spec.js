@@ -1073,7 +1073,7 @@ describe('Users Tests', () => {
         cy.contains("Users for Org: tagA");
     });
 
-    it('do not show user tag in users table when not configured', () => {
+    it('do not show user tag column in users table and user tag filter when not configured', () => {
         const res = `
         {"data":
             [
@@ -1103,6 +1103,8 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
         cy.get(`${tableSelector} th`).should('have.length', 5)
         cy.get(`${tableSelector}`).should('not.contain', 'Org');
+
+        cy.get('[data-cy="users-userTagFilter"]').should('not.exist')
     });
 
     it('show user tag on users page', () => {
@@ -1145,6 +1147,9 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
 
         cy.get(`${tableSelector} th`).should('have.length', 6)
+        cy.get(`${tableSelector}`).should('contain', 'Org');
+
+        cy.get('[data-cy="users-userTagFilter"]').should('exist')
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
         cy.wait('@getUserTags')
