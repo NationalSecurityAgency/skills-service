@@ -389,6 +389,7 @@ describe('Metrics Using User Tags Tests', () => {
             cy.wait(2000)
             cy.get('[data-cy="cell_tagValue-tag5"] [data-cy="userTagTable-manyValues_viewMetricsLink"]').click()
             cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '20')
+            cy.get('[data-cy="users-userTagFilter"]').should('not.exist')
         });
 
         it('ensure user tag metrics table pages appropriately when second page has fewer results', () => {

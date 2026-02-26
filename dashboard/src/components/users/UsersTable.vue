@@ -133,6 +133,10 @@ const isProjectLevel = computed(() => {
   return !(route.params.skillId || route.params.badgeId || route.params.subjectId || (route.params.tagKey && route.params.tagFilter))
 })
 
+const isUserTagsMetricsPage = computed(() => {
+  return route.params.tagKey && route.params.tagFilter
+})
+
 const calculateClientDisplayRoute = (props) => {
   return {
     name: `SkillsDisplay${SkillsDisplayPathAppendValues.SkillsDisplayPreview}`,
@@ -216,7 +220,7 @@ const archiveUsers = () => {
     <div class="px-6 py-4">
       <div class="flex flex-col lg:flex-row gap-6 my-2">
         <div class="flex flex-col sm:flex-row gap-3">
-          <div class="xl:flex-none w-[12rem]">
+          <div class="xl:flex-none w-[14rem]">
             <div>
               <label for="userFilter">User Filter</label>
             </div>
@@ -224,7 +228,7 @@ const archiveUsers = () => {
                        class="w-full"
                        data-cy="users-skillIdFilter" aria-label="user filter" />
           </div>
-          <div v-if="showUserTagColumn" class="xl:flex-none w-[12rem]">
+          <div v-if="showUserTagColumn && !isUserTagsMetricsPage" class="xl:flex-none w-[14rem]">
             <div>
               <label for="userTagFilter">{{ appConfig.usersTableAdditionalUserTagLabel }} Filter</label>
             </div>
