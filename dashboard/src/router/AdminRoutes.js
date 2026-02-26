@@ -21,6 +21,7 @@ import EmaillProjectAdmins from '@/components/projects/EmaillProjectAdmins.vue'
 import GlobalBadges from '@/components/badges/global/GlobalBadges.vue'
 import AdminGroupsPage from '@/components/access/groups/AdminGroupsPage.vue'
 import UsersOverallProgressPage from "@/components/users/UsersOverallProgressPage.vue";
+import OverallMetricsPage from "@/components/metrics/OverallMetricsPage.vue";
 
 const createAdminRoutes = () => {
   return {
@@ -71,6 +72,16 @@ const createAdminRoutes = () => {
           requiresAuth: true,
           announcer: {
             message: 'Cross-projects users',
+          },
+        },
+      }, {
+        name: 'OverallMetricsPage',
+        path: 'overall-metrics',
+        component: OverallMetricsPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Overall Metrics',
           },
         },
       }, {

@@ -51,6 +51,11 @@ const items = computed(() => {
     iconClass: 'fa-solid fa-users',
     page: 'UsersOverallProgressPage',
   });
+  res.push({
+    name: 'Metrics',
+    iconClass: 'fa-solid fa-chart-line',
+    page: 'OverallMetricsPage',
+  });
 
   if (isRoot.value) {
     res.push({
