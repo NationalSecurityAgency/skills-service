@@ -21,6 +21,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import MetricsService from '@/components/metrics/MetricsService.js'
 
 const colors = useColors()
 
@@ -33,14 +34,11 @@ const hasData = computed(() => metricsData.value?.totalMetrics > 0)
 const isLoading = ref(true)
 
 const loadData = () => {
-  // Placeholder for future metrics data loading
-  isLoading.value = false
-  metricsData.value = {
-    totalMetrics: 0,
-    numTotalProjects: 0,
-    numTotalQuizzes: 0,
-    numTotalSurveys: 0
-  }
+  MetricsService.getOverallMetrics().then((response) => {
+    metricsData.value = response
+  }).finally(() => {
+    isLoading.value = false
+  })
 }
 
 </script>

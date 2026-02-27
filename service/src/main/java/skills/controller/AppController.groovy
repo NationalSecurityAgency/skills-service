@@ -19,8 +19,6 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.Sort
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
@@ -316,5 +314,12 @@ class AppController {
 
         PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(limit, page, orderBy, ascending);
         return globalMetricsService.loadMetrics(userQuery, pageRequest)
+    }
+
+    @RequestMapping(value = "/overall-metrics", method = RequestMethod.GET, produces = "application/json")
+    GlobalMetricsResult getOverallMetrics(@RequestParam(required = false, defaultValue = "") List<String> projectIds,
+                                          @RequestParam(required = false, defaultValue = "") List<String> quizIds) {
+
+        return globalMetricsService.loadOverallMetrics(projectIds, quizIds)
     }
 }
