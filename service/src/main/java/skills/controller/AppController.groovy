@@ -34,6 +34,7 @@ import skills.controller.result.model.globalMetrics.GlobalMetricsResult
 import skills.dbupgrade.DBUpgradeSafe
 import skills.icons.CustomIconFacade
 import skills.metrics.GlobalProgressMetricsService
+import skills.metrics.MetricsService
 import skills.profile.EnableCallStackProf
 import skills.services.GlobalBadgesService
 import skills.services.IdFormatValidator
@@ -84,6 +85,9 @@ class AppController {
 
     @Autowired
     GlobalProgressMetricsService globalMetricsService
+
+    @Autowired
+    MetricsService metricsServiceNew
 
     static final RESERVERED_PROJECT_ID = ShareSkillsService.ALL_SKILLS_PROJECTS
 
@@ -321,5 +325,13 @@ class AppController {
                                           @RequestParam(required = false, defaultValue = "") List<String> quizIds) {
 
         return globalMetricsService.loadOverallMetrics(projectIds, quizIds)
+    }
+
+    @RequestMapping(value = "/overall-metrics/{metricsId}", method =  RequestMethod.GET, produces = "application/json")
+    def getChartData(@PathVariable("metricsId") String metricsId,
+                     @RequestParam Map<String,String> metricsProps) {
+
+        // props: start, projIds, quizIds
+        return metricsServiceNew.loadGlobalMetrics(metricsId, metricsProps)
     }
 }

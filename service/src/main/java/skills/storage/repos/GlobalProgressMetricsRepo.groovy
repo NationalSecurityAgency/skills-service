@@ -244,4 +244,45 @@ FROM (
     """)
     Stream<MonthlyCountItem> getDistinctUserCountForProjectsGroupedByMonth(@Param("projectIds") List<String> projectIds, @Param("start") Date start)
 
+    @Query(value="""
+        WITH project_users AS (
+            SELECT DISTINCT ups.user_id, ups.performed_on as day
+            FROM user_performed_skill ups
+            WHERE ups.project_id IN :projectIds 
+            AND ups.performed_on >= :start
+            AND NOT EXISTS (SELECT 1 FROM archived_users au WHERE au.user_id = ups.user_id AND au.project_id IN :projectIds)
+        ),
+        quiz_users AS (
+            SELECT DISTINCT uqa.user_id, uqa.started as day
+            FROM user_quiz_attempt uqa
+            JOIN quiz_definition qd ON uqa.quiz_definition_ref_id = qd.id
+            WHERE qd.quiz_id IN :quizIds
+            AND uqa.started >= :start
+        ),
+        combined_users AS (
+            SELECT user_id, day FROM project_users
+            UNION ALL
+            SELECT user_id, day FROM quiz_users
+        ),
+        grouped_users AS (
+            SELECT 
+                user_id,
+                CASE 
+                    WHEN :groupingType = 'week' THEN date_trunc('week', day + INTERVAL '1 day') - INTERVAL '1 day'
+                    WHEN :groupingType = 'month' THEN date_trunc('month', day)
+                    ELSE day
+                END as grouped_day
+            FROM combined_users
+        )
+        SELECT grouped_day as day, COUNT(DISTINCT user_id) as count
+        FROM grouped_users
+        GROUP BY grouped_day
+        ORDER BY day DESC
+    """, nativeQuery = true)
+    Stream<DayCountItem> getDistinctUserCountForProjectsAndQuizzes(
+            @Param("projectIds") List<String> projectIds,
+            @Param("quizIds") List<String> quizIds,
+            @Param("start") Date start,
+            @Param("groupingType") String groupingType)
+
 }

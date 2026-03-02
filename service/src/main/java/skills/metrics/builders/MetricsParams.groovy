@@ -31,6 +31,7 @@ class MetricsParams {
     public static final String P_SKILL_ID = "skillId"
     public static final String P_SUBJECT_ID = "subjectId"
     public static final String P_PROJECT_IDS = "projIds"
+    public static final String P_QUIZ_IDS = "quizIds"
     public static final String P_PROJECT_IDS_AND_LEVEL = "projIdsAndLevel"
     public static final String P_START_TIMESTAMP = "start"
     public static final String P_ACHIEVEMENT_TYPES = "achievementTypes"
@@ -115,6 +116,10 @@ class MetricsParams {
 
     static List<String> getProjectIds(String chartId, Map<String, String> props) {
         String listStr = getParam(props, P_PROJECT_IDS, chartId)
+        return listStr.split(",").toList()
+    }
+    static List<String> getQuizIds(String chartId, Map<String, String> props) {
+        String listStr = getParam(props, P_QUIZ_IDS, chartId)
         return listStr.split(",").toList()
     }
 

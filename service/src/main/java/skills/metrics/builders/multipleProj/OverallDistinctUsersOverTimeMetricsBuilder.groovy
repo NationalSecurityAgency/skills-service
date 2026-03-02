@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.auth.UserInfoService
+import skills.metrics.GlobalProgressMetricsService
 import skills.metrics.builders.GlobalMetricsBuilder
 import skills.metrics.builders.MetricsParams
 import skills.services.StartDateUtil
@@ -26,26 +27,25 @@ import skills.services.UserEventService
 import skills.services.admin.UserCommunityService
 import skills.storage.model.DayCountItem
 import skills.storage.model.EventType
-import skills.storage.model.MonthlyCountItem
-import skills.storage.model.WeekCountItem
 import skills.storage.repos.GlobalProgressMetricsRepo
 
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.util.stream.Stream
 
 @Component
 @Slf4j
-class AllProjectsDistinctUsersOverTimeMetricsBuilder implements GlobalMetricsBuilder {
+class OverallDistinctUsersOverTimeMetricsBuilder implements GlobalMetricsBuilder {
 
-    // Note: overallDistinctUsersOverTimeMetricsBuilder if we decide to combine projects and quizzes
-    static final String BUILDER_ID = 'allProjectsDistinctUsersOverTimeMetricsBuilder'
+    static final String BUILDER_ID = 'overallDistinctUsersOverTimeMetricsBuilder'
 
     @Autowired
     UserEventService userEventService
 
     @Autowired
     GlobalProgressMetricsRepo globalProgressMetricsRepo
+
+    @Autowired
+    GlobalProgressMetricsService globalProgressMetricsService
 
     @Autowired
     private UserInfoService userInfoService
@@ -73,7 +73,7 @@ class AllProjectsDistinctUsersOverTimeMetricsBuilder implements GlobalMetricsBui
     }
 
     @Override
-    List<ProjResCount> build(Map<String, String> props) {
+    Object build(Map<String, String> props) {
         String userId = userInfoService.getCurrentUserId()
         Date startDate = MetricsParams.getStart(null, BUILDER_ID, props)
         startDate = LocalDateTime.of(startDate.toLocalDate(), LocalTime.MIN).toDate()
@@ -86,6 +86,7 @@ class AllProjectsDistinctUsersOverTimeMetricsBuilder implements GlobalMetricsBui
         }
 
         List<String> projectIds = MetricsParams.getProjectIds(BUILDER_ID, props)
+        List<String> quizIds = MetricsParams.getQuizIds(BUILDER_ID, props)
 
         if (!userCommunityService.isUserCommunityMember(userId)) {
             projectIds.removeAll { userCommunityService.isUserCommunityOnlyProject(it) }
@@ -93,34 +94,16 @@ class AllProjectsDistinctUsersOverTimeMetricsBuilder implements GlobalMetricsBui
         log.debug("Retrieving event counts for user [{}], start date [{}], projectIds [{}]", userId, startDate, projectIds)
 
         List<ProjResCount> projResCounts = []
+        String groupingType = 'day'
         if (byMonth) {
-            Stream<MonthlyCountItem> stream = globalProgressMetricsRepo.getDistinctUserCountForProjectsGroupedByMonth(projectIds, startDate)
-            List<MonthlyCountItem> counts = userEventService.convertMonthlyResults(stream, startDate)
-            Map<String, MonthlyCountItem> byProject = counts.groupBy {it.projectId }
-            byProject.each {projectId, countsForProject ->
-                List<ResCount> countsByDate = countsForProject.collect {
-                    new ResCount(num: it.getCount(), timestamp: it.getMonth().time)
-                }?.sort({it.timestamp})
-                projResCounts += new ProjResCount(project: projectId, countsByDay: countsByDate)
-            }
-        } else {
-            List<DayCountItem> counts
-            if (EventType.DAILY == eventType) {
-                Stream<DayCountItem> stream = globalProgressMetricsRepo.getDistinctUserCountForProjects(projectIds, startDate, eventType)
-                counts = userEventService.convertResults(stream, eventType, startDate, projectIds)
-            } else {
-                Stream<WeekCountItem> stream = globalProgressMetricsRepo.getDistinctUserCountForProjectsGroupedByWeek(projectIds, startDate)
-                counts = userEventService.convertResults(stream, startDate)
-            }
-            Map<String, DayCountItem> byProject = counts.groupBy {it.projectId }
-            byProject.each {projectId, countsForProject ->
-                List<ResCount> countsByDay = countsForProject.collect {
-                    new ResCount(num: it.getCount(), timestamp: it.getDay().time)
-                }?.sort({it.timestamp})
-                projResCounts += new ProjResCount(project: projectId, countsByDay: countsByDay)
-            }
+            groupingType = 'month'
+        } else if (EventType.WEEKLY == eventType) {
+            // set the start date to the nearest sunday that encapsulates the provided startDate
+            startDate = StartDateUtil.computeStartDate(startDate, eventType)
+            groupingType = 'week'
         }
+        List<DayCountItem> counts = globalProgressMetricsService.getDistinctUserCountForProjectsAndQuizzes(projectIds, quizIds, startDate, groupingType)
 
-        return projResCounts
+        return [ users: counts ]
     }
 }
