@@ -15,24 +15,23 @@
  */
 package skills.metrics
 
-
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
 import skills.controller.result.model.globalMetrics.GlobalMetricsResult
 import skills.controller.result.model.globalMetrics.GlobalMetricsUserItem
+import skills.storage.model.DayCountItem
 import skills.storage.model.QuizDefParent
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.GlobalProgressMetricsRepo
 import skills.storage.repos.UserRoleRepo
+
+import java.util.stream.Stream
 
 @Service
 @Slf4j
@@ -112,12 +111,13 @@ class GlobalProgressMetricsService {
 //                metricItemsPage: metricItemsPage
         )
     }
-    @RequestMapping(value = "/metrics/{metricsId}", method =  RequestMethod.GET, produces = "application/json")
-    def getChartData(@PathVariable("metricsId") String metricsId,
-                     @RequestParam Map<String,String> metricsProps) {
 
-        // props: start, projIds
-        return metricsServiceNew.loadGlobalMetrics(metricsId, metricsProps)
+    @Transactional
+    List<DayCountItem> getDistinctUserCountForProjectsAndQuizzes(List<String> projectIds, List<String> quizIds, Date startDate, String groupingType) {
+        Stream<DayCountItem> stream = globalProgressMetricsRepo.getDistinctUserCountForProjectsAndQuizzes(projectIds, quizIds, startDate, groupingType)
+        List<DayCountItem> counts = stream.toList()
+        stream.close()
+        return counts
     }
 
     private ProjectIdsAndQuizIds getProjectIdsAndQuizIdsForCurrentUser() {
