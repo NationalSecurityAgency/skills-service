@@ -29,10 +29,12 @@ import Column from "primevue/column";
 import {useResponsiveBreakpoints} from "@/components/utils/misc/UseResponsiveBreakpoints.js";
 import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 import ProgressBar from "primevue/progressbar";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
 const userInfo = useUserInfo()
+const pluralize = usePluralize()
 
 onMounted(() => {
   loadData()
@@ -47,7 +49,7 @@ const currentPage = ref(1)
 const pageSize = useStorage('usersOverallProgressTable-pageSize', 10)
 const possiblePageSizes = [10, 20, 50, 100]
 const sortInfo = ref({sortOrder: -1, sortBy: 'skillsAccomplished'})
-
+const expandedRows = ref([])
 
 const loadData = () => {
   return UsersService.getGlobalUserProgress().then((data) => {
@@ -82,6 +84,9 @@ const pageChanged = (pagingInfo) => {
   loadData()
 }
 
+const totalQuizzesAndSurveys = computed(() => {
+  return userProgress.value ? userProgress.value.numTotalQuizzes + userProgress.value.numTotalSurveys : 0
+})
 </script>
 
 <template>
@@ -92,17 +97,23 @@ const pageChanged = (pagingInfo) => {
     <div v-if="!isLoading">
       <div class="flex gap-2 mb-3">
         <media-info-card
-            :title="`${userProgress.numTotalProjects} Projects`"
+            :title="`${userProgress.numTotalProjects} ${pluralize.plural('Project', userProgress.numTotalProjects)}`"
             :icon-class="`fa-solid fa-tasks ${colors.getTextClass(1)}`"
-            class="flex-1"/>
+            class="flex-1">
+          <Tag>{{ userProgress.numTotalSkills}}</Tag> {{pluralize.plural('Skill', userProgress.numTotalSkills)}}
+        </media-info-card>
         <media-info-card
-            :title="`${userProgress.numTotalQuizzes} Quizzes`"
+            :title="`${totalQuizzesAndSurveys} ${pluralize.plural('Quiz', totalQuizzesAndSurveys)}/${pluralize.plural('Survey', totalQuizzesAndSurveys)}`"
             :icon-class="`fa-solid fa-spell-check ${colors.getTextClass(2)}`"
-            class="flex-1"/>
+            class="flex-1">
+          <Tag>{{ userProgress.numTotalQuizzes}}</Tag> {{pluralize.plural('Quiz', userProgress.numTotalQuizzes)}} and  <Tag>{{ userProgress.numTotalSurveys}}</Tag> {{ pluralize.plural('Survey', userProgress.numTotalSurveys)}}
+        </media-info-card>
         <media-info-card
-            :title="`${userProgress.numTotalSurveys} Surveys`"
-            :icon-class="`fa-solid fa-clipboard-list ${colors.getTextClass(3)}`"
-            class="flex-1"/>
+            :title="`${userProgress.numTotalBadges} ${pluralize.plural('Badge', userProgress.numTotalBadges)}`"
+            :icon-class="`fa-solid fa-award ${colors.getTextClass(4)}`"
+            class="flex-1">
+          <Tag>{{ userProgress.numTotalGlobalBadges}}</Tag> Global {{ pluralize.plural('Badge', userProgress.numTotalGlobalBadges) }}
+        </media-info-card>
       </div>
       <Card v-if="hasData"
             :pt="{ body: { class: 'p-0!' } }">
@@ -133,6 +144,8 @@ const pageChanged = (pagingInfo) => {
                 :totalRecords="totalRows"
                 :rows="pageSize"
                 @page="pageChanged"
+                :expander="true"
+                v-model:expandedRows="expandedRows"
                 tableStoredStateId="usersTable" data-cy="usersTable"
                 aria-label="Users"
                 :rowsPerPageOptions="possiblePageSizes"
@@ -196,7 +209,9 @@ const pageChanged = (pagingInfo) => {
                 </template>
               </Column>
 
-
+              <template #expansion="slotProps">
+                <pre>{{ slotProps.data }}</pre>
+              </template>
 
             </SkillsDataTable>
           </div>
