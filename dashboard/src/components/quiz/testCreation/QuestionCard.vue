@@ -25,7 +25,9 @@ import {useRoute} from "vue-router";
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useAppConfig } from "@/common-components/stores/UseAppConfig.js";
+import { useStringUtils } from '@/common-components/utilities/UseStringUtils.js'
 
+const stringUtils = useStringUtils();
 const route = useRoute()
 const quizConfig = useQuizConfig()
 const appConfig = useAppConfig()
@@ -46,10 +48,14 @@ const props = defineProps({
   showEditQuestionInline: {
     type: Boolean,
     default: false
+  },
+  collapsed: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested', 'copyQuestion', 'questionUpdated'])
+const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested', 'copyQuestion', 'questionUpdated', 'collapseQuestion', 'expandQuestion'])
 
 const showDeleteDialog = ref(false)
 
@@ -97,15 +103,22 @@ const questionUpdated = (updatedQuestionText) => {
   emit('questionUpdated', { question: props.question, updatedQuestionText })
 }
 
+const toggleQuestionState = () => {
+  if(!props.collapsed) {
+    emit('collapseQuestion', props.question.id)
+  } else {
+    emit('expandQuestion', props.question.id)
+  }
+}
 </script>
 
 <template>
   <div class="border border-surface-300 dark:border-surface-500" data-cy="questionDisplayCard">
     <div class="flex flex-col md:flex-row flex-wrap gap-0 mb-4" :data-cy="`questionDisplayCard-${questionNum}`">
-      <div class="flex flex-initial items-start">
+      <div class="flex flex-initial items-start flex-col gap-1">
         <div v-if="isDragAndDropControlsVisible"
              :id="`questionSortControl-${question.id}`"
-             class="sort-control mr-4 border-r border-b border-surface text-muted-color rounded-border"
+             class="sort-control border-r border-b border-surface text-muted-color rounded-br-md"
              @click.prevent.self
              tabindex="0"
              aria-label="Questions Sort Control. Press up or down to change the order of this question."
@@ -115,6 +128,16 @@ const questionUpdated = (updatedQuestionText) => {
              data-cy="sortControlHandle">
           <i class="fas fa-arrows-alt"/>
         </div>
+        <SkillsButton :id="`questionCollapseControl-${question.id}`"
+             style="max-width: 33px;"
+             v-if="!quizConfig.isReadOnlyQuiz"
+             class="border-l-0! rounded-none! rounded-r-md! mt-2"
+             @click="toggleQuestionState"
+             tabindex="0"
+             :aria-label="collapsed ? 'Expand Question' : 'Collapse Question'"
+             :icon="collapsed ? 'fas fa-angle-right' : 'fas fa-angle-down'"
+             data-cy="collapseQuestionButton">
+        </SkillsButton>
       </div>
       <div :class="{ 'ml-3' : !isDragAndDropControlsVisible }" class="flex-col flex-1 items-start px-2 py-1">
         <div class="flex flex-1">
@@ -134,7 +157,7 @@ const questionUpdated = (updatedQuestionText) => {
           </div>
 
           <markdown-text v-if="!showEditQuestionInline"
-                         :text="question.question"
+                         :text="collapsed ? stringUtils.truncateStringToLengthOrNewline(question.question) : question.question"
                          :instance-id="`${question.id}`"
                          data-cy="questionDisplayText"/>
         </div>
@@ -152,7 +175,7 @@ const questionUpdated = (updatedQuestionText) => {
             <span class="" aria-label="This question is graded by AI">Graded via AI</span>
           </div>
         </div>
-        <div v-if="!isTextInputType && !isRatingType && !isMatchingType">
+        <div v-if="!isTextInputType && !isRatingType && !isMatchingType && !collapsed">
           <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
             <div class="flex items-center justify-center pb-1" :data-cy="`answerDisplay-${index}`">
               <SelectCorrectAnswer v-model="a.isCorrect"
@@ -167,10 +190,10 @@ const questionUpdated = (updatedQuestionText) => {
             </div>
           </div>
         </div>
-        <div v-if="isRatingType" class="flex">
+        <div v-if="isRatingType && !collapsed" class="flex">
           <Rating class="flex-initial bg-surface-100 dark:bg-surface-700 rounded-border py-4 px-6" :stars="numberOfStars" disabled :cancel="false"/>
         </div>
-        <div v-if="isTextInputType" class="flex">
+        <div v-if="isTextInputType && !collapsed" class="flex">
           <label :for="`q${questionNum}textInputPlaceholder`" hidden>Text Input Answer Placeholder:</label>
           <Textarea
               style="resize: none"
@@ -182,7 +205,7 @@ const questionUpdated = (updatedQuestionText) => {
               data-cy="textAreaPlaceHolder"
               rows="2"/>
         </div>
-        <div v-if="isMatchingType" class="flex flex-col gap-3 mt-2">
+        <div v-if="isMatchingType && !collapsed" class="flex flex-col gap-3 mt-2">
           <div v-for="(answer, index) in question.answers">
             <div v-if="answer.multiPartAnswer" class="flex flex-row gap-3" :data-cy="`question-${questionNum}-answer-${index}`">
               <div :data-cy="`question-${questionNum}-answer-${index}-term`">
@@ -199,7 +222,7 @@ const questionUpdated = (updatedQuestionText) => {
                 class="mt-3 border-t border-dashed border-gray-300 dark:border-gray-600"/>
           </div>
         </div>
-        <div class="flex" v-if="question.answerHint">
+        <div class="flex" v-if="question.answerHint && !collapsed">
           <Message size="small" severity="warn" icon="fas fa-lightbulb" :closable="false" class="mt-2" data-cy="answerHintMsg">
             <pre data-cy="answerHintMsgContent">{{ question.answerHint }}</pre>
           </Message>

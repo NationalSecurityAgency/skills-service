@@ -1144,4 +1144,196 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answerText-1"]').should('be.empty')
 
     })
+
+    it('can expand and collapse question content', function () {
+        const q1text = "This is a question with a fairly long question text to verify truncation in the interface"
+        const q2text = "This is a question\nwith multiple lines\nto verify\nthe truncation of\nmulti line\nquestions."
+        const q3text = "This is short"
+        const q4text = "This is a new question"
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1, { question: q1text})
+        cy.createQuizQuestionDef(1, 2, { question: q2text})
+        cy.createQuizQuestionDef(1, 3, { question: q3text})
+        cy.visit('/administrator/quizzes/quiz1');
+
+        const q1Card = '[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]';
+        const q2Card = '[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]';
+        const q3Card = '[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]';
+        const q1CardToggle = '[data-cy="questionDisplayCard-1"] [data-cy="collapseQuestionButton"]';
+        const q2CardToggle = '[data-cy="questionDisplayCard-2"] [data-cy="collapseQuestionButton"]';
+        const q3CardToggle = '[data-cy="questionDisplayCard-3"] [data-cy="collapseQuestionButton"]';
+
+        cy.get(q1Card).should('contain', q1text)
+        cy.get(q2Card).should('contain', q2text)
+        cy.get(q3Card).should('contain', q3text)
+
+        cy.get(q1CardToggle).click()
+        cy.get(q1Card).should('contain', "This is a question with a...")
+        cy.get(q2CardToggle).click()
+        cy.get(q2Card).should('contain', "This is a question...")
+        cy.get(q3CardToggle).click()
+        cy.get(q3Card).should('contain', "This is short")
+
+        cy.get(q2CardToggle).click()
+        cy.get(q2Card).should('contain', q2text)
+
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get(q1Card).should('contain', "This is a question with a...")
+        cy.get(q2Card).should('contain', q2text)
+        cy.get(q3Card).should('contain', "This is short")
+
+        cy.openDialog('[data-cy="newQuestionOnBottomBtn"]', true)
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', q4text)
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('3')
+        cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('1')
+
+        cy.get('[data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
+        cy.get('[data-cy="answer-1"] [data-cy="addNewAnswer"]').click()
+
+        cy.get('[data-cy="answer-2"] [data-cy="answerText"]').type('three')
+        cy.get('[data-cy="answer-2"] [data-cy="selectCorrectAnswer"]').click()
+        cy.get('[data-cy="answer-3"] [data-cy="answerText"]').type('4')
+
+        cy.clickSaveDialogBtn()
+
+        const q4Card = '[data-cy="questionDisplayCard-4"] [data-cy="questionDisplayText"]';
+        const q4CardToggle = '[data-cy="questionDisplayCard-4"] [data-cy="collapseQuestionButton"]';
+
+        cy.get(q4Card).should('contain', q4text)
+
+        cy.openDialog('[data-cy="deleteQuestionButton_2"]')
+        cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
+        cy.clickSaveDialogBtn()
+
+        cy.get(q1Card).should('contain', "This is a question with a...")
+        cy.get(q2Card).should('contain', "This is short")
+        cy.get(q3Card).should('contain', q4text)
+    });
+
+    it('expand and collapse all question content', function () {
+        const q1text = "This is a question with a fairly long question text to verify truncation in the interface"
+        const q2text = "This is a question\nwith multiple lines\nto verify\nthe truncation of\nmulti line\nquestions."
+        const q3text = "This is short"
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1, { question: q1text})
+        cy.createQuizQuestionDef(1, 2, { question: q2text})
+        cy.createQuizQuestionDef(1, 3, { question: q3text})
+        cy.visit('/administrator/quizzes/quiz1');
+
+        const q1Card = '[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]';
+        const q2Card = '[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]';
+        const q3Card = '[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]';
+        const questionToggle = '[data-cy="expandAllQuestions"]';
+
+        cy.get(q1Card).should('contain', q1text)
+        cy.get(q2Card).should('contain', q2text)
+        cy.get(q3Card).should('contain', q3text)
+
+        cy.get(questionToggle).click()
+        cy.get(q1Card).should('contain', "This is a question with a...")
+        cy.get(q2Card).should('contain', "This is a question...")
+        cy.get(q3Card).should('contain', "This is short")
+
+        cy.get(questionToggle).click()
+        cy.get(q1Card).should('contain', q1text)
+        cy.get(q2Card).should('contain', q2text)
+        cy.get(q3Card).should('contain', q3text)
+    });
+
+
+    it('deleting a question removes its related state', function () {
+        const q1text = "This is a question with a fairly long question text to verify truncation in the interface"
+        const q2text = "This is a question\nwith multiple lines\nto verify\nthe truncation of\nmulti line\nquestions."
+        const q3text = "This is short"
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1, { question: q1text})
+        cy.createQuizQuestionDef(1, 2, { question: q2text})
+        cy.createQuizQuestionDef(1, 3, { question: q3text})
+        cy.visit('/administrator/quizzes/quiz1');
+
+        const q1Card = '[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]';
+        const q2Card = '[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]';
+        const q3Card = '[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]';
+        const q1CardToggle = '[data-cy="questionDisplayCard-1"] [data-cy="collapseQuestionButton"]';
+        const q2CardToggle = '[data-cy="questionDisplayCard-2"] [data-cy="collapseQuestionButton"]';
+        const q3CardToggle = '[data-cy="questionDisplayCard-3"] [data-cy="collapseQuestionButton"]';
+
+        cy.get(q1Card).should('contain', q1text)
+        cy.get(q2Card).should('contain', q2text)
+        cy.get(q3Card).should('contain', q3text)
+
+        cy.get(q1CardToggle).click()
+        cy.get(q1Card).should('contain', "This is a question with a...")
+        cy.get(q2CardToggle).click()
+        cy.get(q2Card).should('contain', "This is a question...")
+        cy.get(q3CardToggle).click()
+        cy.get(q3Card).should('contain', "This is short")
+
+        cy.window().then((win) => {
+            const storage = win.localStorage.getItem('questionStates-quiz1');
+            const parsed = JSON.parse(storage);
+            const numberOfItems = Object.keys(parsed).length;
+            expect(numberOfItems).to.equal(3);
+        })
+
+        cy.openDialog('[data-cy="deleteQuestionButton_2"]')
+        cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
+        cy.clickSaveDialogBtn()
+
+        cy.window().then((win) => {
+            const storage = win.localStorage.getItem('questionStates-quiz1');
+            const parsed = JSON.parse(storage);
+            const numberOfItems = Object.keys(parsed).length;
+            expect(numberOfItems).to.equal(2);
+        })
+    });
+
+    it('deleting a quiz removes its related state', function () {
+        const q1text = "This is a question with a fairly long question text to verify truncation in the interface"
+        const q2text = "This is a question\nwith multiple lines\nto verify\nthe truncation of\nmulti line\nquestions."
+        const q3text = "This is short"
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1, { question: q1text})
+        cy.createQuizQuestionDef(1, 2, { question: q2text})
+        cy.createQuizQuestionDef(1, 3, { question: q3text})
+        cy.visit('/administrator/quizzes/quiz1');
+
+        const q1Card = '[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]';
+        const q2Card = '[data-cy="questionDisplayCard-2"] [data-cy="questionDisplayText"]';
+        const q3Card = '[data-cy="questionDisplayCard-3"] [data-cy="questionDisplayText"]';
+        const q1CardToggle = '[data-cy="questionDisplayCard-1"] [data-cy="collapseQuestionButton"]';
+        const q2CardToggle = '[data-cy="questionDisplayCard-2"] [data-cy="collapseQuestionButton"]';
+        const q3CardToggle = '[data-cy="questionDisplayCard-3"] [data-cy="collapseQuestionButton"]';
+
+        cy.get(q1Card).should('contain', q1text)
+        cy.get(q2Card).should('contain', q2text)
+        cy.get(q3Card).should('contain', q3text)
+
+        cy.get(q1CardToggle).click()
+        cy.get(q1Card).should('contain', "This is a question with a...")
+        cy.get(q2CardToggle).click()
+        cy.get(q2Card).should('contain', "This is a question...")
+        cy.get(q3CardToggle).click()
+        cy.get(q3Card).should('contain', "This is short")
+
+        cy.window().then((win) => {
+            const storage = win.localStorage.getItem('questionStates-quiz1');
+            const parsed = JSON.parse(storage);
+            const numberOfItems = Object.keys(parsed).length;
+            expect(numberOfItems).to.equal(3);
+        })
+
+        cy.visit('/administrator/quizzes/');
+
+        cy.openDialog('[data-cy="deleteQuizButton_quiz1"]')
+        cy.get('[data-cy="currentValidationText"]').fill('Delete Me')
+        cy.clickSaveDialogBtn()
+
+        cy.window().then((win) => {
+            const storage = win.localStorage.getItem('questionStates-quiz1');
+            expect(storage).to.be.null;
+        })
+    });
 });

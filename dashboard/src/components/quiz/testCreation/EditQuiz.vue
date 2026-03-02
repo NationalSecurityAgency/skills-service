@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import { ref, computed } from 'vue'
 import { boolean, object, string, ValidationError } from 'yup'
-import { useDebounceFn } from '@vueuse/core'
+import {useDebounceFn, useStorage} from '@vueuse/core'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import QuizService from '@/components/quiz/QuizService.js';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
@@ -214,8 +214,6 @@ const saveQuiz = (values) => {
             questionNum: questionDef.displayOrder + 1
           }
         })
-
-        // announcer.polite(`Project ${projectInfo.newProject.name} failed to be copied due to paragraph validation for skill with id ${failedSkillId}`)
       } else {
         router.push({ name: 'ErrorPage', query: { err } });
       }
@@ -223,6 +221,10 @@ const saveQuiz = (values) => {
   }
   return QuizService.updateQuizDef(quizToSave)
     .then((updatedQuizDef) => {
+      if(!props.isEdit) {
+        const newQuizState = useStorage(`questionStates-${updatedQuizDef.quizId}`, {})
+        newQuizState.value = {};
+      }
       return {
         ...updatedQuizDef,
         originalQuizId: props.quiz.quizId,
