@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.auth.UserInfoService
 import skills.metrics.GlobalProgressMetricsService
+import skills.metrics.GlobalProgressMetricsService.GroupingType
 import skills.metrics.builders.GlobalMetricsBuilder
 import skills.metrics.builders.MetricsParams
 import skills.services.StartDateUtil
@@ -53,20 +54,6 @@ class OverallDistinctUsersOverTimeMetricsBuilder implements GlobalMetricsBuilder
     @Autowired
     UserCommunityService userCommunityService
 
-    static class ResCount {
-        Integer num
-        Long timestamp
-    }
-
-    static class ProjResCount {
-        String project
-        List<ResCount> countsByDay
-    }
-
-    static class FinalRes {
-        List<ProjResCount> countsByDay = []
-    }
-
     @Override
     String getId() {
         return BUILDER_ID
@@ -91,16 +78,15 @@ class OverallDistinctUsersOverTimeMetricsBuilder implements GlobalMetricsBuilder
         if (!userCommunityService.isUserCommunityMember(userId)) {
             projectIds.removeAll { userCommunityService.isUserCommunityOnlyProject(it) }
         }
-        log.debug("Retrieving event counts for user [{}], start date [{}], projectIds [{}]", userId, startDate, projectIds)
+        log.debug("Retrieving event counts for user [{}], start date [{}], projectIds [{}], quizIds [{}]", userId, startDate, projectIds, quizIds)
 
-        List<ProjResCount> projResCounts = []
-        String groupingType = 'day'
+        GroupingType groupingType = GroupingType.DAY
         if (byMonth) {
-            groupingType = 'month'
+            groupingType = GroupingType.MONTH
         } else if (EventType.WEEKLY == eventType) {
             // set the start date to the nearest sunday that encapsulates the provided startDate
             startDate = StartDateUtil.computeStartDate(startDate, eventType)
-            groupingType = 'week'
+            groupingType = GroupingType.WEEK
         }
         List<DayCountItem> counts = globalProgressMetricsService.getDistinctUserCountForProjectsAndQuizzes(projectIds, quizIds, startDate, groupingType)
 

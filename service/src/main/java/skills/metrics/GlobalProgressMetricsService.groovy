@@ -15,6 +15,7 @@
  */
 package skills.metrics
 
+import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
@@ -24,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
 import skills.controller.result.model.globalMetrics.GlobalMetricsResult
 import skills.controller.result.model.globalMetrics.GlobalMetricsUserItem
+import skills.metrics.builders.multipleProj.OverallDistinctUsersOverTimeMetricsBuilder
+import skills.storage.model.DayCount
 import skills.storage.model.DayCountItem
 import skills.storage.model.QuizDefParent
 import skills.storage.model.auth.RoleName
@@ -31,11 +34,30 @@ import skills.storage.model.auth.UserRole
 import skills.storage.repos.GlobalProgressMetricsRepo
 import skills.storage.repos.UserRoleRepo
 
+import java.util.stream.Collectors
 import java.util.stream.Stream
 
+@CompileStatic
 @Service
 @Slf4j
 class GlobalProgressMetricsService {
+
+    enum GroupingType {
+        DAY('day'),
+        WEEK('week'),
+        MONTH('month')
+        
+        final String value
+        
+        GroupingType(String value) {
+            this.value = value
+        }
+        
+        static GroupingType fromValue(String value) {
+            if (!value) return null
+            return values().find { it.value.equalsIgnoreCase(value) }
+        }
+    }
 
     @Autowired
     UserInfoService userInfoService
@@ -113,11 +135,93 @@ class GlobalProgressMetricsService {
     }
 
     @Transactional
-    List<DayCountItem> getDistinctUserCountForProjectsAndQuizzes(List<String> projectIds, List<String> quizIds, Date startDate, String groupingType) {
-        Stream<DayCountItem> stream = globalProgressMetricsRepo.getDistinctUserCountForProjectsAndQuizzes(projectIds, quizIds, startDate, groupingType)
-        List<DayCountItem> counts = stream.toList()
+    List<DayCountItem> getDistinctUserCountForProjectsAndQuizzes(List<String> projectIds, List<String> quizIds, Date startDate, GroupingType groupingType) {
+        Stream<DayCountItem> stream = globalProgressMetricsRepo.getDistinctUserCountForProjectsAndQuizzes(projectIds, quizIds, startDate, groupingType.value)
+        List<DayCountItem> counts = stream.collect(Collectors.toList())
         stream.close()
-        return counts
+
+        // Fill in gaps with zero counts
+        List<DayCountItem> filledCounts = fillGapsWithZeroCounts(counts, startDate, groupingType)
+        return filledCounts
+    }
+    
+    private static List<DayCountItem> fillGapsWithZeroCounts(List<DayCountItem> existingCounts, Date startDate, GroupingType groupingType) {
+        // Sort existing counts by date
+        existingCounts.sort { a, b -> a.day <=> b.day }
+        
+        Date endDate = new Date()
+        List<DayCountItem> result = []
+        
+        // Generate all expected dates based on grouping type
+        List<Date> expectedDates = generateExpectedDates(startDate, endDate, groupingType)
+        
+        // Create a map of existing counts by date for quick lookup
+        Map<Date, Long> existingCountsByDate = existingCounts.collectEntries { [(it.day): it.count] }
+        
+        // Create DayCountItems for all expected dates
+        for (Date expectedDate : expectedDates) {
+            Long count = existingCountsByDate.get(expectedDate, 0L)
+            result.add(new DayCount(expectedDate, count))
+        }
+        
+        return result
+    }
+    
+    private static List<Date> generateExpectedDates(Date startDate, Date endDate, GroupingType groupingType) {
+        List<Date> dates = []
+        Calendar calendar = Calendar.getInstance()
+        calendar.setTime(startDate)
+        
+        switch (groupingType) {
+            case GroupingType.DAY:
+                while (calendar.getTime() <= endDate) {
+                    // Set to beginning of day
+                    calendar.set(Calendar.HOUR_OF_DAY, 0)
+                    calendar.set(Calendar.MINUTE, 0)
+                    calendar.set(Calendar.SECOND, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
+                    dates.add(calendar.getTime())
+                    calendar.add(Calendar.DAY_OF_MONTH, 1)
+                }
+                break
+                
+            case GroupingType.WEEK:
+                // Find the Sunday of the week containing startDate
+                while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+                    calendar.add(Calendar.DAY_OF_MONTH, -1)
+                }
+                
+                // Set to beginning of Sunday
+                calendar.set(Calendar.HOUR_OF_DAY, 0)
+                calendar.set(Calendar.MINUTE, 0)
+                calendar.set(Calendar.SECOND, 0)
+                calendar.set(Calendar.MILLISECOND, 0)
+                
+                while (calendar.getTime() <= endDate) {
+                    dates.add(calendar.getTime())
+                    calendar.add(Calendar.WEEK_OF_YEAR, 1)
+                }
+                break
+                
+            case GroupingType.MONTH:
+                // Set to first day of month for startDate
+                calendar.set(Calendar.DAY_OF_MONTH, 1)
+                calendar.set(Calendar.HOUR_OF_DAY, 0)
+                calendar.set(Calendar.MINUTE, 0)
+                calendar.set(Calendar.SECOND, 0)
+                calendar.set(Calendar.MILLISECOND, 0)
+                
+                while (calendar.getTime() <= endDate) {
+                    dates.add(calendar.getTime())
+                    calendar.add(Calendar.MONTH, 1)
+                }
+                break
+                
+            default:
+                throw new IllegalArgumentException("Unsupported grouping type: ${groupingType?.value}")
+        }
+        
+        return dates
     }
 
     private ProjectIdsAndQuizIds getProjectIdsAndQuizIdsForCurrentUser() {
