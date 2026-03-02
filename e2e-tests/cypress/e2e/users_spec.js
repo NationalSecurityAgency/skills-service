@@ -386,7 +386,7 @@ describe('Users Tests', () => {
                   .format('x')
             });
 
-            const tagKey = 'manyValues'
+            const tagKey = 'dutyOrganization'
             const tags = [`tag${(i < 3) ? 'a' : 'b'}${i}`]
             cy.addUserTag(userId, tagKey, tags)
         }
