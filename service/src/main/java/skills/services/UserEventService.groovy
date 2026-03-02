@@ -341,7 +341,7 @@ class UserEventService {
     }
 
     @CompileStatic
-    private List<MonthlyCountItem> convertMonthlyResults(Stream<MonthlyCountItem> stream, Date startOfQueryRange) {
+    List<MonthlyCountItem> convertMonthlyResults(Stream<MonthlyCountItem> stream, Date startOfQueryRange) {
         List<MonthlyCountItem> items = new ArrayList<MonthlyCountItem>()
 
         LocalDate start = startOfQueryRange.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
@@ -365,7 +365,7 @@ class UserEventService {
     }
 
     @CompileStatic
-    private List<DayCountItem> convertResults(Stream<DayCountItem> stream, EventType eventType, Date startOfQueryRange, List<String> projectIds=[]) {
+    List<DayCountItem> convertResults(Stream<DayCountItem> stream, EventType eventType, Date startOfQueryRange, List<String> projectIds=[]) {
         // initialize counts for all passed in project id's so there will be zero counts added for projects with no events yet
         Map<String, PerProjectCounts> perProjectCounts = projectIds.collectEntries {projectId ->
             [projectId, new PerProjectCounts(lastDate: StartDateUtil.computeStartDate(new Date(), eventType))]
@@ -415,7 +415,7 @@ class UserEventService {
     }
 
     @CompileStatic
-    private List<DayCountItem> convertResults(Stream<WeekCountItem> stream, Date startOfQueryRange, List<String> projectIds=[]) {
+    List<DayCountItem> convertResults(Stream<WeekCountItem> stream, Date startOfQueryRange, List<String> projectIds=[]) {
         // initialize counts for all passed in project id's so there will be zero counts added for projects with no events yet
         Map<String, PerProjectCounts> perProjectCounts = projectIds.collectEntries {projectId ->
             [projectId, new PerProjectCounts(lastDate: StartDateUtil.computeStartDate(new Date(), EventType.WEEKLY))]
