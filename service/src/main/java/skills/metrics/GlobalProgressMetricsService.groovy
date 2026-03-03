@@ -26,6 +26,7 @@ import skills.auth.UserInfoService
 import skills.controller.result.model.globalMetrics.GlobalMetricsUserItem
 import skills.controller.result.model.globalMetrics.OverallMetricsResult
 import skills.controller.result.model.globalMetrics.UsersOverallProgressResult
+import skills.controller.result.model.globalMetrics.SingleUserOverallProgress
 import skills.storage.model.DayCount
 import skills.storage.model.DayCountItem
 import skills.storage.model.QuizDefParent
@@ -46,13 +47,13 @@ class GlobalProgressMetricsService {
         DAY('day'),
         WEEK('week'),
         MONTH('month')
-        
+
         final String value
-        
+
         GroupingType(String value) {
             this.value = value
         }
-        
+
         static GroupingType fromValue(String value) {
             if (!value) return null
             return values().find { it.value.equalsIgnoreCase(value) }
@@ -71,7 +72,7 @@ class GlobalProgressMetricsService {
     @Autowired
     MetricsService metricsServiceNew
 
-    UsersOverallProgressResult loadMetrics(String userQuery, PageRequest pageRequest) {
+    UsersOverallProgressResult loadUsersOverallProgress(String userQuery, PageRequest pageRequest) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
         List<String> projectIds = projectIdsAndQuizIds.projectIds
         List<String> quizIds = projectIdsAndQuizIds.quizIds
@@ -111,6 +112,36 @@ class GlobalProgressMetricsService {
         )
     }
 
+    SingleUserOverallProgress loadSingleUserProgress(String userId) {
+        ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
+        List<String> projectIds = projectIdsAndQuizIds.projectIds
+        List<String> quizIds = projectIdsAndQuizIds.quizIds
+
+        List<GlobalProgressMetricsRepo.SingleUserProjectProgress> projectProgress = globalProgressMetricsRepo.findSingleUserProjectsProgress(userId, projectIds)
+        List<GlobalProgressMetricsRepo.SingleUserAchievement> achievements = globalProgressMetricsRepo.findSingleUserAchievements(userId, projectIds)
+        Map<String, List<GlobalProgressMetricsRepo.SingleUserAchievement>> achievementsByProject = achievements.groupBy { it.projectId}
+
+        List<SingleUserOverallProgress.ProjectProgress> projectsProgressRes = projectProgress.collect {
+            GlobalProgressMetricsRepo.SingleUserAchievement projAchievements = achievementsByProject[it.projectId]?.first()
+            new SingleUserOverallProgress.ProjectProgress(
+                    projectId: it.projectId,
+                    projectName: it.projectName,
+                    numSkills: it.numSkills,
+                    projectTotalPoints: it.projectTotalPoints,
+                    numBadges: it.numBadges,
+                    points: it.points,
+                    updated: it.updated,
+                    numProjectLevels: it.numProjectLevels,
+                    numAchievedSkills: projAchievements?.numAchievedSkills ?: 0,
+                    numAchievedBadges: projAchievements?.numAchievedBadges ?: 0,
+                    achievedProjLevel: projAchievements?.achievedProjLevel ?: 0,
+            )
+        }
+
+
+        return new SingleUserOverallProgress(projectsProgress: projectsProgressRes)
+    }
+
     OverallMetricsResult loadOverallMetrics(List<String> selectedProjectIds, List<String> selectedQuizIds) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
         List<String> projectIds = projectIdsAndQuizIds.projectIds
@@ -145,34 +176,34 @@ class GlobalProgressMetricsService {
         List<DayCountItem> filledCounts = fillGapsWithZeroCounts(counts, startDate, groupingType)
         return filledCounts
     }
-    
+
     private static List<DayCountItem> fillGapsWithZeroCounts(List<DayCountItem> existingCounts, Date startDate, GroupingType groupingType) {
         // Sort existing counts by date
         existingCounts.sort { a, b -> a.day <=> b.day }
-        
+
         Date endDate = new Date()
         List<DayCountItem> result = []
-        
+
         // Generate all expected dates based on grouping type
         List<Date> expectedDates = generateExpectedDates(startDate, endDate, groupingType)
-        
+
         // Create a map of existing counts by date for quick lookup
         Map<Date, Long> existingCountsByDate = existingCounts.collectEntries { [(it.day): it.count] }
-        
+
         // Create DayCountItems for all expected dates
         for (Date expectedDate : expectedDates) {
             Long count = existingCountsByDate.get(expectedDate, 0L)
             result.add(new DayCount(expectedDate, count))
         }
-        
+
         return result
     }
-    
+
     private static List<Date> generateExpectedDates(Date startDate, Date endDate, GroupingType groupingType) {
         List<Date> dates = []
         Calendar calendar = Calendar.getInstance()
         calendar.setTime(startDate)
-        
+
         switch (groupingType) {
             case GroupingType.DAY:
                 while (calendar.getTime() <= endDate) {
@@ -185,25 +216,25 @@ class GlobalProgressMetricsService {
                     calendar.add(Calendar.DAY_OF_MONTH, 1)
                 }
                 break
-                
+
             case GroupingType.WEEK:
                 // Find the Sunday of the week containing startDate
                 while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
                     calendar.add(Calendar.DAY_OF_MONTH, -1)
                 }
-                
+
                 // Set to beginning of Sunday
                 calendar.set(Calendar.HOUR_OF_DAY, 0)
                 calendar.set(Calendar.MINUTE, 0)
                 calendar.set(Calendar.SECOND, 0)
                 calendar.set(Calendar.MILLISECOND, 0)
-                
+
                 while (calendar.getTime() <= endDate) {
                     dates.add(calendar.getTime())
                     calendar.add(Calendar.WEEK_OF_YEAR, 1)
                 }
                 break
-                
+
             case GroupingType.MONTH:
                 // Set to first day of month for startDate
                 calendar.set(Calendar.DAY_OF_MONTH, 1)
@@ -211,17 +242,17 @@ class GlobalProgressMetricsService {
                 calendar.set(Calendar.MINUTE, 0)
                 calendar.set(Calendar.SECOND, 0)
                 calendar.set(Calendar.MILLISECOND, 0)
-                
+
                 while (calendar.getTime() <= endDate) {
                     dates.add(calendar.getTime())
                     calendar.add(Calendar.MONTH, 1)
                 }
                 break
-                
+
             default:
                 throw new IllegalArgumentException("Unsupported grouping type: ${groupingType?.value}")
         }
-        
+
         return dates
     }
 

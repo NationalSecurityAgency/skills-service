@@ -89,4 +89,7 @@ export default {
   getGlobalUserProgress() {
     return axios.get(`/app/progress-metrics`).then((response) => response.data)
   },
+  getGlobalSingleUserProgress(userId) {
+    return axios.get(`/app/progress-metrics/${userId}`).then((response) => response.data)
+  },
 }
