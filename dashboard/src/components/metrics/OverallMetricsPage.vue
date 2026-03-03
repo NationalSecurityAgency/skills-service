@@ -19,13 +19,11 @@ import { computed, onMounted, ref } from 'vue'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
-import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import MetricsService from '@/components/metrics/MetricsService.js'
-import { usePluralize } from '@/components/utils/misc/UsePluralize.js'
+import OverallMetricsCards from '@/components/utils/cards/OverallMetricsCards.vue'
 
 const colors = useColors()
-const pluralize = usePluralize()
 
 onMounted(() => {
   loadData()
@@ -34,10 +32,6 @@ onMounted(() => {
 const metricsData = ref({})
 const hasData = computed(() => metricsData.value?.totalMetrics > 0)
 const isLoading = ref(true)
-
-const totalQuizzesAndSurveys = computed(() => {
-  return metricsData.value ? metricsData.value.numTotalQuizzes + metricsData.value.numTotalSurveys : 0
-})
 
 const loadData = () => {
   MetricsService.getOverallMetrics().then((response) => {
@@ -54,26 +48,7 @@ const loadData = () => {
     <SubPageHeader title="Overall Metrics" :title-level="1"> </SubPageHeader>
     <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-6" />
     <div v-if="!isLoading">
-      <div class="flex gap-2 mb-3">
-        <media-info-card
-          :title="`${metricsData.numTotalProjects} ${pluralize.plural('Project', metricsData.numTotalProjects)}`"
-          :icon-class="`fa-solid fa-tasks ${colors.getTextClass(1)}`"
-          class="flex-1">
-          <Tag>{{ metricsData.numTotalSkills}}</Tag> {{pluralize.plural('Skill', metricsData.numTotalSkills)}}
-        </media-info-card>
-        <media-info-card
-          :title="`${totalQuizzesAndSurveys} ${pluralize.plural('Quiz', totalQuizzesAndSurveys)}/${pluralize.plural('Survey', totalQuizzesAndSurveys)}`"
-          :icon-class="`fa-solid fa-spell-check ${colors.getTextClass(2)}`"
-          class="flex-1">
-          <Tag>{{ metricsData.numTotalQuizzes}}</Tag> {{pluralize.plural('Quiz', metricsData.numTotalQuizzes)}} and  <Tag>{{ metricsData.numTotalSurveys}}</Tag> {{ pluralize.plural('Survey', metricsData.numTotalSurveys)}}
-        </media-info-card>
-        <media-info-card
-          :title="`${metricsData.numTotalBadges} ${pluralize.plural('Badge', metricsData.numTotalBadges)}`"
-          :icon-class="`fa-solid fa-award ${colors.getTextClass(4)}`"
-          class="flex-1">
-          <Tag>{{ metricsData.numTotalGlobalBadges}}</Tag> Global {{ pluralize.plural('Badge', metricsData.numTotalGlobalBadges) }}
-        </media-info-card>
-      </div>
+      <OverallMetricsCards :data="metricsData" />
       <Card v-if="hasData" :pt="{ body: { class: 'p-0!' } }">
         <template #content>
           <div class="p-5">Metrics dashboard content will go here</div>

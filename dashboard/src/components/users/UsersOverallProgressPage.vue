@@ -30,6 +30,7 @@ import {useResponsiveBreakpoints} from "@/components/utils/misc/UseResponsiveBre
 import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 import ProgressBar from "primevue/progressbar";
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
+import OverallMetricsCards from "@/components/utils/cards/OverallMetricsCards.vue";
 
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
@@ -95,26 +96,7 @@ const totalQuizzesAndSurveys = computed(() => {
     </SubPageHeader>
     <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-6"/>
     <div v-if="!isLoading">
-      <div class="flex gap-2 mb-3">
-        <media-info-card
-            :title="`${userProgress.numTotalProjects} ${pluralize.plural('Project', userProgress.numTotalProjects)}`"
-            :icon-class="`fa-solid fa-tasks ${colors.getTextClass(1)}`"
-            class="flex-1">
-          <Tag>{{ userProgress.numTotalSkills}}</Tag> {{pluralize.plural('Skill', userProgress.numTotalSkills)}}
-        </media-info-card>
-        <media-info-card
-            :title="`${totalQuizzesAndSurveys} ${pluralize.plural('Quiz', totalQuizzesAndSurveys)}/${pluralize.plural('Survey', totalQuizzesAndSurveys)}`"
-            :icon-class="`fa-solid fa-spell-check ${colors.getTextClass(2)}`"
-            class="flex-1">
-          <Tag>{{ userProgress.numTotalQuizzes}}</Tag> {{pluralize.plural('Quiz', userProgress.numTotalQuizzes)}} and  <Tag>{{ userProgress.numTotalSurveys}}</Tag> {{ pluralize.plural('Survey', userProgress.numTotalSurveys)}}
-        </media-info-card>
-        <media-info-card
-            :title="`${userProgress.numTotalBadges} ${pluralize.plural('Badge', userProgress.numTotalBadges)}`"
-            :icon-class="`fa-solid fa-award ${colors.getTextClass(4)}`"
-            class="flex-1">
-          <Tag>{{ userProgress.numTotalGlobalBadges}}</Tag> Global {{ pluralize.plural('Badge', userProgress.numTotalGlobalBadges) }}
-        </media-info-card>
-      </div>
+      <OverallMetricsCards :data="userProgress" />
       <Card v-if="hasData"
             :pt="{ body: { class: 'p-0!' } }">
         <template #content>
