@@ -114,12 +114,12 @@ class MetricsParams {
         return achievementTypesStr.split(",").toList()
     }
 
-    static List<String> getProjectIds(String chartId, Map<String, String> props) {
-        String listStr = getParam(props, P_PROJECT_IDS, chartId)
+    static List<String> getProjectIds(String chartId, Map<String, String> props, boolean isOptional = false) {
+        String listStr = getParam(props, P_PROJECT_IDS, chartId, null, isOptional)
         return listStr.split(",").toList()
     }
-    static List<String> getQuizIds(String chartId, Map<String, String> props) {
-        String listStr = getParam(props, P_QUIZ_IDS, chartId)
+    static List<String> getQuizIds(String chartId, Map<String, String> props, boolean isOptional = false) {
+        String listStr = getParam(props, P_QUIZ_IDS, chartId, null, isOptional)
         return listStr.split(",").toList()
     }
 

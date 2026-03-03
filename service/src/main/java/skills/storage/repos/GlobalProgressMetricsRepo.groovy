@@ -214,7 +214,7 @@ FROM (
                 CASE 
                     WHEN :groupingType = 'week' THEN date_trunc('week', day + INTERVAL '1 day') - INTERVAL '1 day'
                     WHEN :groupingType = 'month' THEN date_trunc('month', day)
-                    ELSE day
+                    ELSE date_trunc('day', day)
                 END as grouped_day
             FROM combined_users
         )
