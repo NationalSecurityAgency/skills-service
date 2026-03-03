@@ -19,11 +19,8 @@ import { computed, onMounted, ref } from 'vue'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
-import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import MetricsService from '@/components/metrics/MetricsService.js'
 import OverallMetricsCards from '@/components/utils/cards/OverallMetricsCards.vue'
-
-const colors = useColors()
 
 onMounted(() => {
   loadData()

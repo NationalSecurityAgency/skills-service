@@ -20,7 +20,6 @@ import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import UsersService from "@/components/users/UsersService.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
-import MediaInfoCard from "@/components/utils/cards/MediaInfoCard.vue";
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 import InputText from "primevue/inputtext";
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
@@ -29,13 +28,11 @@ import Column from "primevue/column";
 import {useResponsiveBreakpoints} from "@/components/utils/misc/UseResponsiveBreakpoints.js";
 import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 import ProgressBar from "primevue/progressbar";
-import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 import OverallMetricsCards from "@/components/utils/cards/OverallMetricsCards.vue";
 
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
 const userInfo = useUserInfo()
-const pluralize = usePluralize()
 
 onMounted(() => {
   loadData()
