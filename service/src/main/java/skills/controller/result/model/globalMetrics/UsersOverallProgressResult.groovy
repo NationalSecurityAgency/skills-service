@@ -18,15 +18,8 @@ package skills.controller.result.model.globalMetrics
 import groovy.transform.Canonical
 
 @Canonical
-class GlobalMetricsResult {
-
-    Integer numTotalProjects
-
-    Integer numTotalSkills
-    Integer numTotalBadges
-    Integer numTotalGlobalBadges
-
-    Integer numTotalQuizzes
-    Integer numTotalSurveys
+class UsersOverallProgressResult extends GlobalMetricsResult {
+    Long numTotalMetricItems
+    List<GlobalMetricsUserItem> metricItemsPage
 }
 

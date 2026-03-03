@@ -182,6 +182,12 @@ FROM (
         where quiz_id in :quizIds''', nativeQuery = true)
     List<QuizInfo> getQuizInfo(@Param("quizIds") List<String> quizIds)
 
+    @Nullable
+    @Query(value = '''select  project_id as projectId, name as projectName
+        from project_definition
+        where project_id in :projectIds''', nativeQuery = true)
+    List<ProjectInfo> getProjectInfo(@Param("projectIds") List<String> projectIds)
+
     @Query(value="""
         WITH project_users AS (
             SELECT DISTINCT ups.user_id, ups.performed_on as day
