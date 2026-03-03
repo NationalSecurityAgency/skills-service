@@ -541,7 +541,7 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
                 testDates.getFirstOfMonth(1).plusDays(7).toDate(),
                 testDates.getFirstOfMonth(1).plusDays(14).toDate(),
                 testDates.getFirstOfMonth(1).plusDays(21).toDate(),
-                testDates.getFirstOfMonth(1).plusDays(28).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(27).toDate(),
                 testDates.getFirstOfMonth().toDate(),
         ]
 
@@ -625,7 +625,7 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
                 testDates.getFirstOfMonth(1).plusDays(7).toDate(),
                 testDates.getFirstOfMonth(1).plusDays(14).toDate(),
                 testDates.getFirstOfMonth(1).plusDays(21).toDate(),
-                testDates.getFirstOfMonth(1).plusDays(28).toDate(),
+                testDates.getFirstOfMonth(1).plusDays(27).toDate(),
                 testDates.getFirstOfMonth().toDate(),
         ]
 
