@@ -50,6 +50,7 @@ const projectDetailsState = useProjDetailsState()
 
 let filters = ref({
   user: '',
+  userTagFilter: '',
   progress: [0, 100],
 })
 
@@ -96,6 +97,9 @@ const applyFilters = () => {
     if (filters.value.progress < 100) {
       filterMessage += `${filters.value.user ? ' and' : ''} users with at most ${filters.value.progress[1]} percent complete`
     }
+    if (filters.value.userTagFilter) {
+      filterMessage += `${filters.value.user ? ' and' : ''} ${appConfig.usersTableAdditionalUserTagLabel} with value ${filters.value.userTagFilter}`
+    }
     nextTick(() => announcer.polite(filterMessage))
   })
 }
@@ -103,6 +107,7 @@ const applyFilters = () => {
 const reset = () => {
   filters.value.user = ''
   filters.value.progress = [0, 100]
+  filters.value.userTagFilter = ''
   currentPage.value = 1
   loadData().then(() => {
     nextTick(() => announcer.polite('Users table filters have been removed'))
@@ -128,6 +133,10 @@ const isProjectLevel = computed(() => {
   return !(route.params.skillId || route.params.badgeId || route.params.subjectId || (route.params.tagKey && route.params.tagFilter))
 })
 
+const isUserTagsMetricsPage = computed(() => {
+  return route.params.tagKey && route.params.tagFilter
+})
+
 const calculateClientDisplayRoute = (props) => {
   return {
     name: `SkillsDisplay${SkillsDisplayPathAppendValues.SkillsDisplayPreview}`,
@@ -151,6 +160,7 @@ const loadData = () => {
     orderBy: sortInfo.value.sortBy,
     minimumPoints: filters.value.progress[0],
     maximumPoints: filters.value.progress[1],
+    userTagFilter: filters.value.userTagFilter,
   }).then((res) => {
     data.value = res.data
     totalRows.value = res.count
@@ -190,6 +200,7 @@ const exportUsers = () => {
     orderBy: sortInfo.value.sortBy,
     minimumPoints: filters.value.progress[0],
     maximumPoints: filters.value.progress[1],
+    userTagFilter: filters.value.userTagFilter,
   }).then((res) => {
     isLoading.value = false
     isExporting.value = false
@@ -208,13 +219,23 @@ const archiveUsers = () => {
   <div class="w-full">
     <div class="px-6 py-4">
       <div class="flex flex-col lg:flex-row gap-6 my-2">
-        <div class="xl:flex-1">
-          <div>
-            <label for="userFilter">User Filter</label>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="xl:flex-none w-[14rem]">
+            <div>
+              <label for="userFilter">User Filter</label>
+            </div>
+            <InputText id="userFilter" v-model="filters.user" v-on:keydown.enter="applyFilters"
+                       class="w-full"
+                       data-cy="users-skillIdFilter" aria-label="user filter" />
           </div>
-          <InputText id="userFilter" v-model="filters.user" v-on:keydown.enter="applyFilters"
-                     class="w-full mt--3"
-                     data-cy="users-skillIdFilter" aria-label="user filter" />
+          <div v-if="showUserTagColumn && !isUserTagsMetricsPage" class="xl:flex-none w-[14rem]">
+            <div>
+              <label for="userTagFilter">{{ appConfig.usersTableAdditionalUserTagLabel }} Filter</label>
+            </div>
+            <InputText id="userTagFilter" v-model="filters.userTagFilter" v-on:keydown.enter="applyFilters"
+                       class="w-full"
+                       data-cy="users-userTagFilter" aria-label="user tag filter" />
+          </div>
         </div>
         <div class="flex-1">
           <div>

@@ -39,7 +39,7 @@ const isUserArchiveRoute = computed(() => {
         </router-link>
       </div>
     </sub-page-header>
-    <div style="width: 99%;">
+    <div style="width: 100%;">
       <router-view></router-view>
     </div>
   </div>

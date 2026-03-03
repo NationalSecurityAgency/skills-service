@@ -17,6 +17,10 @@ import moment from 'moment';
 const dateFormatter = value => moment.utc(value).format('YYYY-MM-DD HH:mm');
 describe('Users Tests', () => {
 
+    Cypress.Commands.add('addUserTag', (userId, tagKey, tags) => {
+        cy.request('POST', `/root/users/${userId}/tags/${tagKey}`, { tags });
+    });
+
     const tableSelector = '[data-cy=usersTable]'
     const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
 
@@ -362,13 +366,42 @@ describe('Users Tests', () => {
     it('filter by user information', () => {
         cy.intercept('/admin/projects/proj1/users?query=*').as('getUsers');
 
+        cy.logout();
+        cy.fixture('vars.json')
+          .then((vars) => {
+              cy.login(vars.defaultUser, vars.defaultPass);
+          });
+
+        cy.logout();
+        cy.fixture('vars.json')
+          .then((vars) => {
+              cy.login(vars.rootUser, vars.defaultPass);
+          });
+
         for (let i = 0; i < 7; i += 1) {
+            const userId = `user${(i < 3) ? 'a' : 'b'}${i}@skills.org`
             cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-                userId: `user${(i < 3) ? 'a' : 'b'}${i}@skills.org`,
+                userId: userId,
                 timestamp: m.clone().add(i, 'day')
-                    .format('x')
+                  .format('x')
             });
+
+            const tagKey = 'dutyOrganization'
+            const tags = [`tag${(i < 3) ? 'a' : 'b'}${i}`]
+            cy.addUserTag(userId, tagKey, tags)
         }
+
+        cy.logout();
+        cy.fixture('vars.json')
+          .then((vars) => {
+              if (!Cypress.env('oauthMode')) {
+                  cy.log('NOT in oauthMode, using form login');
+                  cy.login(vars.defaultUser, vars.defaultPass);
+              } else {
+                  cy.log('oauthMode, using loginBySingleSignOn');
+                  cy.loginBySingleSignOn();
+              }
+          });
 
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Users');
@@ -424,6 +457,19 @@ describe('Users Tests', () => {
             [{ colIndex: 1,  value: 'userb4@skills.org' }],
             [{ colIndex: 1,  value: 'userb5@skills.org' }],
             [{ colIndex: 1,  value: 'userb6@skills.org' }],
+        ], 5);
+
+        cy.get('[data-cy="users-resetBtn"]').click();
+        cy.wait('@getUsers')
+
+        cy.get('[data-cy="users-userTagFilter"]').type('taga');
+        cy.get('[data-cy="users-filterBtn"]').click();
+        cy.wait('@getUsers')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1,  value: 'usera0@skills.org' }],
+            [{ colIndex: 1,  value: 'usera1@skills.org' }],
+            [{ colIndex: 1,  value: 'usera2@skills.org' }],
         ], 5);
     });
 
@@ -1073,7 +1119,7 @@ describe('Users Tests', () => {
         cy.contains("Users for Org: tagA");
     });
 
-    it('do not show user tag in users table when not configured', () => {
+    it('do not show user tag column in users table and user tag filter when not configured', () => {
         const res = `
         {"data":
             [
@@ -1103,6 +1149,8 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
         cy.get(`${tableSelector} th`).should('have.length', 5)
         cy.get(`${tableSelector}`).should('not.contain', 'Org');
+
+        cy.get('[data-cy="users-userTagFilter"]').should('not.exist')
     });
 
     it('show user tag on users page', () => {
@@ -1145,6 +1193,9 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
 
         cy.get(`${tableSelector} th`).should('have.length', 6)
+        cy.get(`${tableSelector}`).should('contain', 'Org');
+
+        cy.get('[data-cy="users-userTagFilter"]').should('exist')
 
         cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
         cy.wait('@getUserTags')

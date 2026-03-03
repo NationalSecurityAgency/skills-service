@@ -897,17 +897,18 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 ) and 
                 up.skill_id is null and
                 up.points >= ?4 and up.points < ?5 and
+                (?6 = '' or lower(ut.value) like lower(CONCAT('%', ?6, '%'))) and
                 not exists (select 1 from archived_users au where au.user_id = up.user_id and au.project_id = ?1)
             GROUP BY up.user_id'''
 
     @Query(value = FIND_DISTINCT_USERS_SQL, nativeQuery = true)
-    Page<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, int maximumPoints, Pageable pageable)
+    Page<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, int maximumPoints, String userTagFilter, Pageable pageable)
 
     @QueryHints(
             @QueryHint(name = AvailableHints.HINT_FETCH_SIZE, value = "100")
     )
     @Query(value = FIND_DISTINCT_USERS_SQL, nativeQuery = true)
-    Stream<ProjectUser> streamDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, int maximumPoints, Pageable pageable)
+    Stream<ProjectUser> streamDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, int maximumPoints, String userTagFilter, Pageable pageable)
 
     @Query(value= '''
         WITH subj_skills AS (
@@ -928,16 +929,18 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             SELECT up.user_id, SUM(up.points) as total_points
             from user_points up
             INNER JOIN user_attrs usattr ON up.user_id = usattr.user_id 
+            LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.user_id) ut ON ut.user_id=up.user_id
             where 
                 up.user_id = usattr.user_id and
                 up.skill_ref_id in (select id from subj_skills) and 
+                (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) and
                 (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%')) OR
                  lower(usattr.user_id_for_display) like lower(CONCAT('%', :userId, '%'))) AND
                 not exists (select 1 from archived_users au where au.user_id = up.user_id and au.project_id = :projectId)
             group by up.user_id
         ) AS temp  WHERE total_points >= :minimumPoints and total_points < :maximumPoints
     ''', nativeQuery = true)
-    Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId, @Param("subjectId") String subjectId, @Param("userId") String userId, @Param("minimumPoints") int minimumPoints, @Param("maximumPoints") int maximumPoints)
+    Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId, @Param("subjectId") String subjectId, @Param("userId") String userId, @Param("minimumPoints") int minimumPoints, @Param("maximumPoints") int maximumPoints, @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey, @Param("userTagFilter") String userTagFilter)
 
     @Query(value = '''SELECT 
                 up.user_id as userId,
@@ -967,12 +970,13 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                 up.project_id=?1 and 
                 up.skill_id in (?3) and
                 up.points >= ?5 and up.points < ?6 and
+                (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) and
                 (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', ?4, '%'))  OR
                  lower(ua.user_id_for_display) like lower(CONCAT('%', ?4, '%'))
                 ) AND 
                 not exists (select 1 from archived_users au where au.user_id = ua.user_id and au.project_id = $1)
             GROUP BY up.user_id''', nativeQuery = true)
-    Page<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, List<String> skillIds, String userId, int minimumPoints, int maximumPoints, Pageable pageable)
+    Page<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, List<String> skillIds, String userId, int minimumPoints, int maximumPoints, String userTagFilter, Pageable pageable)
 
     @Query(value = '''SELECT 
                 up.user_id as userId, 
@@ -1063,6 +1067,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.user_id) ut ON ut.user_id=ua.user_id
         WHERE 
             up.skill_ref_id in (select s_s.id from subj_skills s_s) and 
+            (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) and
             (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%'))  OR
              lower(ua.user_id_for_display) like lower(CONCAT('%', :userId, '%'))
             ) AND not exists (select 1 from archived_users au where au.user_id = ua.user_id and au.project_id = :projectId)
@@ -1074,6 +1079,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                                                                                    @Param("userId") String userId,
                                                                                    @Param("minimumPoints") int minimumPoints,
                                                                                    @Param("maximumPoints") int maximumPoints,
+                                                                                   @Param("userTagFilter") String userTagFilter,
                                                                                    Pageable pageable)
 
     @Nullable
