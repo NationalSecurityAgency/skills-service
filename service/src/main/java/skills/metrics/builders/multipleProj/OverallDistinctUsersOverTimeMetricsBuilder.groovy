@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.auth.UserInfoService
+import skills.controller.exceptions.SkillException
 import skills.metrics.GlobalProgressMetricsService
 import skills.metrics.GlobalProgressMetricsService.GroupingType
 import skills.metrics.builders.GlobalMetricsBuilder
@@ -26,6 +27,7 @@ import skills.metrics.builders.MetricsParams
 import skills.services.StartDateUtil
 import skills.services.UserEventService
 import skills.services.admin.UserCommunityService
+import skills.controller.result.model.TimestampCountItem
 import skills.storage.model.DayCountItem
 import skills.storage.model.EventType
 import skills.storage.repos.GlobalProgressMetricsRepo
@@ -72,8 +74,11 @@ class OverallDistinctUsersOverTimeMetricsBuilder implements GlobalMetricsBuilder
             startDate = StartDateUtil.computeStartDate(startDate, eventType)
         }
 
-        List<String> projectIds = MetricsParams.getProjectIds(BUILDER_ID, props)
-        List<String> quizIds = MetricsParams.getQuizIds(BUILDER_ID, props)
+        List<String> projectIds = MetricsParams.getProjectIds(BUILDER_ID, props, true)
+        List<String> quizIds = MetricsParams.getQuizIds(BUILDER_ID, props, true)
+        if (!projectIds && !quizIds) {
+            throw new SkillException("Metrics[${BUILDER_ID}]: Must supply ${MetricsParams.P_PROJECT_IDS} or ${MetricsParams.P_QUIZ_IDS} param")
+        }
 
         if (!userCommunityService.isUserCommunityMember(userId)) {
             projectIds.removeAll { userCommunityService.isUserCommunityOnlyProject(it) }
@@ -88,7 +93,8 @@ class OverallDistinctUsersOverTimeMetricsBuilder implements GlobalMetricsBuilder
             startDate = StartDateUtil.computeStartDate(startDate, eventType)
             groupingType = GroupingType.WEEK
         }
-        List<DayCountItem> counts = globalProgressMetricsService.getDistinctUserCountForProjectsAndQuizzes(projectIds, quizIds, startDate, groupingType)
+        List<DayCountItem> dayCounts = globalProgressMetricsService.getDistinctUserCountForProjectsAndQuizzes(projectIds, quizIds, startDate, groupingType)
+        List<TimestampCountItem> counts = dayCounts.collect { new TimestampCountItem(value: it.day.time, count: it.count) }
 
         return [ users: counts ]
     }

@@ -14,30 +14,45 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-
 import { computed, onMounted, ref } from 'vue'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import MetricsService from '@/components/metrics/MetricsService.js'
 import OverallMetricsCards from '@/components/utils/cards/OverallMetricsCards.vue'
+import OverallNumUsersPerDay from '@/components/metrics/common/OverallNumUsersPerDay.vue'
 
 onMounted(() => {
   loadData()
 })
 
-const metricsData = ref({})
-const hasData = computed(() => metricsData.value?.totalMetrics > 0)
 const isLoading = ref(true)
+const metricsData = ref({})
+const hasData = computed(() => (metricsData.value?.numTotalProjects + metricsData.value?.numTotalQuizzes + metricsData.value?.numTotalSurveys) > 0)
+const projectIds = computed(()=> {
+  if (hasData.value) {
+    return metricsData.value.projectInfo.map(project => project.projectId);
+  } else {
+    return []
+  }
+})
+const quizIds = computed(()=> {
+  if (hasData.value) {
+    return metricsData.value.quizInfo.map(quiz => quiz.quizId);
+  } else {
+    return []
+  }
+})
 
 const loadData = () => {
-  MetricsService.getOverallMetrics().then((response) => {
-    metricsData.value = response
-  }).finally(() => {
-    isLoading.value = false
-  })
+  MetricsService.getOverallMetrics()
+    .then((response) => {
+      metricsData.value = response
+    })
+    .finally(() => {
+      isLoading.value = false
+    })
 }
-
 </script>
 
 <template>
@@ -48,7 +63,9 @@ const loadData = () => {
       <OverallMetricsCards :data="metricsData" />
       <Card v-if="hasData" :pt="{ body: { class: 'p-0!' } }">
         <template #content>
-          <div class="p-5">Metrics dashboard content will go here</div>
+          <div class="p-5">
+            <OverallNumUsersPerDay :project-ids="projectIds" :quiz-ids="quizIds"/>
+          </div>
         </template>
       </Card>
       <no-content2
