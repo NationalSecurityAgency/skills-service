@@ -51,7 +51,13 @@ const sortInfo = ref({sortOrder: -1, sortBy: 'skillsAccomplished'})
 const expandedRows = ref([])
 
 const loadData = () => {
-  return UsersService.getGlobalUserProgress().then((data) => {
+  const params = {
+    limit: pageSize.value,
+    ascending: sortInfo.value.sortOrder === 1,
+    page: currentPage.value,
+    orderBy: sortInfo.value.sortBy
+  }
+  return UsersService.getGlobalUserProgress(params).then((data) => {
     const metricItemsPage = data.metricItemsPage.map((item) => ({
       ...item,
       skillsEarnedPercent: Math.trunc((item.numSkillsEarned / data.numTotalSkills) * 100),
@@ -138,7 +144,7 @@ const totalQuizzesAndSurveys = computed(() => {
             >
               <Column field="userId" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
                 <template #header>
-                  <i class="fas fa-user skills-color-users mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
+                  <i class="fa-solid fa-user mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
                   {{ slotProps.data.userToShow }}
@@ -147,7 +153,7 @@ const totalQuizzesAndSurveys = computed(() => {
 
               <Column field="numSkillsEarned" header="Skills & Projects" :sortable="true" :class="{'flex': responsive.md.value }">
                 <template #header>
-                  <i class="fas fa-user skills-color-users mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
+                  <i class="fa-solid fa-tasks mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
                   <div class="flex flex-col">
@@ -173,21 +179,35 @@ const totalQuizzesAndSurveys = computed(() => {
                 </template>
               </Column>
 
-              <Column field="numQuizzes" header="# Quizzes/Surveys" :sortable="true" :class="{'flex': responsive.md.value }">
+              <Column field="numQuizzes" header="# Quizzes" :sortable="true" :class="{'flex': responsive.md.value }">
                 <template #header>
-                  <i class="fas fa-user skills-color-users mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
+                  <i class="fa-solid fa-spell-check mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  {{ slotProps.data.numQuizzes }} / {{ userProgress.numTotalQuizzes }}
+                  <div class="flex flex-col gap-2 mb-2">
+                    <div class="flex-1"><Tag>{{ slotProps.data.numQuizzes }}</Tag> / {{ userProgress.numTotalQuizzes }}</div>
+                  </div>
+                </template>
+              </Column>
+
+              <Column field="numSurveys" header="# Surveys" :sortable="true" :class="{'flex': responsive.md.value }">
+                <template #header>
+                  <i class="fa-solid fa-clipboard-question mr-1" :class="colors.getTextClass(4)" aria-hidden="true"></i>
+                </template>
+                <template #body="slotProps">
+                  <div class="flex flex-col gap-2 mb-2">
+                    <div class="flex-1"><Tag>{{ slotProps.data.numSurveys }}</Tag> / {{ userProgress.numTotalSurveys }}</div>
+                  </div>
                 </template>
               </Column>
 
               <Column field="numBadgesEarned" header="# Badges" :sortable="true" :class="{'flex': responsive.md.value }">
                 <template #header>
-                  <i class="fas fa-user skills-color-users mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
+                  <i class="fa-solid fa-award mr-1" :class="colors.getTextClass(5)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  {{ slotProps.data.numBadgesEarned }} / {{ userProgress.numTotalBadges}}
+                  <Tag>{{ slotProps.data.numBadgesEarned }}</Tag> / {{ userProgress.numTotalBadges}}
+                  <div>Global Badges: {{ slotProps.data.numGlobalBadgesEarned }}</div>
                 </template>
               </Column>
 

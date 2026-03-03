@@ -24,11 +24,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.DayCountItem
-import skills.storage.model.EventType
-import skills.storage.model.MonthlyCountItem
 import skills.storage.model.QuizDefParent
-import skills.storage.model.SkillDef
-import skills.storage.model.WeekCountItem
 
 import java.util.stream.Stream
 
@@ -45,8 +41,8 @@ interface GlobalProgressMetricsRepo extends JpaRepository<GlobalMetricsDummyEnti
         Integer getNumProjects()
         Integer getProjectLevelsEarned()
         Integer getSubjectLevelsEarned()
-        Integer getSkillsAccomplished()
-        Integer getBadgesEarned()
+        Integer getNumSkillsEarned()
+        Integer getNumBadgesEarned()
         Integer getGlobalBadgesEarned()
         Integer getNumQuizzes()
         Integer getNumQuizzesPassed()
@@ -58,13 +54,13 @@ interface GlobalProgressMetricsRepo extends JpaRepository<GlobalMetricsDummyEnti
     }
 
     @Query(value = '''SELECT
-    COALESCE(projectsAndAchievements.user_id) as userId,
-    COALESCE(userAttrs.user_id_for_display) as userIdForDisplay,
+    COALESCE(projectsAndAchievements.user_id, quizzes.user_id) as userId,
+    COALESCE(userAttrsFromProj.user_id_for_display, userAttrsFromQuiz.user_id_for_display) as userIdForDisplay,
     COALESCE(projectsAndAchievements.numProjects, 0) as numProjects,
     COALESCE(projectsAndAchievements.projectLevelsEarned, 0) as projectLevelsEarned,
     COALESCE(projectsAndAchievements.subjectLevelsEarned, 0) as subjectLevelsEarned,
-    COALESCE(projectsAndAchievements.skillsAccomplished, 0) as skillsAccomplished,
-    COALESCE(projectsAndAchievements.badgesEarned, 0) as badgesEarned,
+    COALESCE(projectsAndAchievements.skillsAccomplished, 0) as numSkillsEarned,
+    COALESCE(projectsAndAchievements.badgesEarned, 0) as numBadgesEarned,
     COALESCE(projectsAndAchievements.globalBadgesEarned, 0) as globalBadgesEarned,
     COALESCE(quizzes.quizTotal, 0) as numQuizzes,
     COALESCE(quizzes.quizPassed, 0) as numQuizzesPassed,
@@ -117,7 +113,6 @@ FROM (
              GROUP BY ua.user_id
          ) achievements ON projects.user_id = achievements.user_id
      ) projectsAndAchievements
-         JOIN user_attrs userAttrs ON (projectsAndAchievements.user_id = userAttrs.user_id)
          FULL OUTER JOIN (
     select uqa.user_id, 
            SUM(CASE WHEN qd.type = 'Quiz' THEN 1 ELSE 0 END) as quizTotal,
@@ -131,7 +126,9 @@ FROM (
              join quiz_definition qd on (uqa.quiz_definition_ref_id = qd.id)
     where qd.quiz_id in :quizIds
     group by uqa.user_id
-) quizzes ON projectsAndAchievements.user_id = quizzes.user_id''', nativeQuery = true)
+) quizzes ON projectsAndAchievements.user_id = quizzes.user_id
+ LEFT JOIN user_attrs userAttrsFromProj ON (projectsAndAchievements.user_id = userAttrsFromProj.user_id)
+ LEFT JOIN user_attrs userAttrsFromQuiz ON (quizzes.user_id = userAttrsFromQuiz.user_id)''', nativeQuery = true)
     Page<UserProgressMetric> findUsersOverallProgress(
             @Param("projectIds") List<String> projectIds,
             @Param("quizIds") List<String> quizIds,
@@ -169,16 +166,14 @@ FROM (
     static interface SingleUserAchievement {
         String getProjectId()
         Integer getNumAchievedSkills()
-        Integer getNumAchievedBadges()
         Integer getAchievedProjLevel()
     }
 
     @Query(value = '''select up.project_id as                                                         projectId,
-                   SUM(CASE WHEN ua.id is not null and sd.type = 'Skill' THEN 1 ELSE 0 END)                       numAchievedSkills,
-                   SUM(CASE WHEN ua.id is not null and sd.type = 'Badge' THEN 1 ELSE 0 END)                       numAchievedBadges,
+                   SUM(CASE WHEN ua.id is not null and sd.id is not null THEN 1 ELSE 0 END)                       numAchievedSkills,
                    COALESCE(MAX(projAchievement.level), 0)                                                        achievedProjLevel
             from user_points up
-                     left join skill_definition sd on (up.skill_ref_id = sd.id)
+                     left join skill_definition sd on (up.skill_ref_id = sd.id and sd.type = 'Skill')
                      left join user_achievement ua on (up.user_id = ua.user_id and ua.skill_ref_id = sd.id)
                      left join user_achievement projAchievement on (
                 up.user_id = projAchievement.user_id
@@ -188,8 +183,25 @@ FROM (
                     and projAchievement.level is not null)
             where up.user_id = :userId
               and up.project_id in :projectIds
-            group by up.project_id;''', nativeQuery = true)
+            group by up.project_id''', nativeQuery = true)
     List<SingleUserAchievement> findSingleUserAchievements(@Param("userId") String userId,  @Param("projectIds") List<String> projectIds)
+
+
+    static interface SingleUserAchievedBadgeCounts {
+        String getProjectId()
+        Integer getNumAchievedBadges()
+    }
+
+    @Query(value = '''select ua.project_id as projectId,
+                count(ua.id) as numAchievedBadges
+                from user_achievement ua
+                left join skill_definition sd on (ua.skill_ref_id = sd.id)
+                where ua.user_id = :userId
+                and ua.project_id IN :projectIds
+                and sd.type = 'Badge'
+                group by ua.project_id''', nativeQuery = true)
+    List<SingleUserAchievedBadgeCounts> findSingleUserAchievedBadgeCounts(@Param("userId") String userId,  @Param("projectIds") List<String> projectIds)
+
 
 
     static interface ProjDefCounts {

@@ -84,8 +84,8 @@ class GlobalProgressMetricsService {
                     numProjects: it.numProjects,
                     numProjectLevelsEarned: it.projectLevelsEarned,
                     numSubjectLevelsEarned: it.subjectLevelsEarned,
-                    numSkillsEarned: it.skillsAccomplished,
-                    numBadgesEarned: it.badgesEarned,
+                    numSkillsEarned: it.numSkillsEarned,
+                    numBadgesEarned: it.numBadgesEarned,
                     numGlobalBadgesEarned: it.globalBadgesEarned,
                     numQuizzes: it.numQuizzes,
                     numQuizzesPassed: it.numQuizzesPassed,
@@ -118,11 +118,16 @@ class GlobalProgressMetricsService {
         List<String> quizIds = projectIdsAndQuizIds.quizIds
 
         List<GlobalProgressMetricsRepo.SingleUserProjectProgress> projectProgress = globalProgressMetricsRepo.findSingleUserProjectsProgress(userId, projectIds)
+
         List<GlobalProgressMetricsRepo.SingleUserAchievement> achievements = globalProgressMetricsRepo.findSingleUserAchievements(userId, projectIds)
-        Map<String, List<GlobalProgressMetricsRepo.SingleUserAchievement>> achievementsByProject = achievements.groupBy { it.projectId}
+        Map<String, GlobalProgressMetricsRepo.SingleUserAchievement> achievementsByProject = achievements.collectEntries { [it.projectId, it] }
+
+        List<GlobalProgressMetricsRepo.SingleUserAchievedBadgeCounts> badgeCounts = globalProgressMetricsRepo.findSingleUserAchievedBadgeCounts(userId, projectIds)
+        Map<String, GlobalProgressMetricsRepo.SingleUserAchievedBadgeCounts> badgeCountsByProject = badgeCounts.collectEntries { [it.projectId, it] }
 
         List<SingleUserOverallProgress.ProjectProgress> projectsProgressRes = projectProgress.collect {
-            GlobalProgressMetricsRepo.SingleUserAchievement projAchievements = achievementsByProject[it.projectId]?.first()
+            GlobalProgressMetricsRepo.SingleUserAchievement projAchievements = achievementsByProject[it.projectId]
+            GlobalProgressMetricsRepo.SingleUserAchievedBadgeCounts badgeCount = badgeCountsByProject[it.projectId]
             new SingleUserOverallProgress.ProjectProgress(
                     projectId: it.projectId,
                     projectName: it.projectName,
@@ -133,7 +138,7 @@ class GlobalProgressMetricsService {
                     updated: it.updated,
                     numProjectLevels: it.numProjectLevels,
                     numAchievedSkills: projAchievements?.numAchievedSkills ?: 0,
-                    numAchievedBadges: projAchievements?.numAchievedBadges ?: 0,
+                    numAchievedBadges: badgeCount?.numAchievedBadges ?: 0,
                     achievedProjLevel: projAchievements?.achievedProjLevel ?: 0,
             )
         }

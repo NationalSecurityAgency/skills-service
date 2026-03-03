@@ -86,8 +86,8 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/users/${userId}/isArchived`)
         .then((res) => res.data.success)
   },
-  getGlobalUserProgress() {
-    return axios.get(`/app/progress-metrics`).then((response) => response.data)
+  getGlobalUserProgress(params) {
+    return axios.get(`/app/progress-metrics`, { params }).then((response) => response.data)
   },
   getGlobalSingleUserProgress(userId) {
     return axios.get(`/app/progress-metrics/${userId}`).then((response) => response.data)
