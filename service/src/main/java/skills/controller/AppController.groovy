@@ -31,6 +31,8 @@ import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
 import skills.controller.result.model.*
 import skills.controller.result.model.globalMetrics.GlobalMetricsResult
+import skills.controller.result.model.globalMetrics.SingleUserOverallProgress
+import skills.controller.result.model.globalMetrics.UsersOverallProgressResult
 import skills.dbupgrade.DBUpgradeSafe
 import skills.icons.CustomIconFacade
 import skills.metrics.GlobalProgressMetricsService
@@ -310,14 +312,19 @@ class AppController {
     }
 
     @RequestMapping(value = "/progress-metrics", method =  RequestMethod.GET, produces = "application/json")
-    GlobalMetricsResult getGlobalUserProgressMetrics(@RequestParam(required = false, defaultValue = "10") int limit,
-                                         @RequestParam(required = false, defaultValue = "1") int page,
-                                         @RequestParam(required = false, defaultValue = "userId") String orderBy,
-                                         @RequestParam(required = false, defaultValue = "true") Boolean ascending,
-                                         @RequestParam(required = false, defaultValue = "") String userQuery) {
+    UsersOverallProgressResult getGlobalUserProgressMetrics(@RequestParam(required = false, defaultValue = "10") int limit,
+                                                            @RequestParam(required = false, defaultValue = "1") int page,
+                                                            @RequestParam(required = false, defaultValue = "userId") String orderBy,
+                                                            @RequestParam(required = false, defaultValue = "true") Boolean ascending,
+                                                            @RequestParam(required = false, defaultValue = "") String userQuery) {
 
         PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(limit, page, orderBy, ascending);
-        return globalMetricsService.loadMetrics(userQuery, pageRequest)
+        return globalMetricsService.loadUsersOverallProgress(userQuery, pageRequest)
+    }
+
+    @RequestMapping(value = "/progress-metrics/{userId}", method =  RequestMethod.GET, produces = "application/json")
+    SingleUserOverallProgress getGlobalSingleUserProgressMetrics(@PathVariable("userId") String userId) {
+        return globalMetricsService.loadSingleUserProgress(userId)
     }
 
     @RequestMapping(value = "/overall-metrics", method = RequestMethod.GET, produces = "application/json")

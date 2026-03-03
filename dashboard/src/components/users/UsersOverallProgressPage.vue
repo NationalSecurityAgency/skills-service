@@ -29,6 +29,7 @@ import {useResponsiveBreakpoints} from "@/components/utils/misc/UseResponsiveBre
 import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 import ProgressBar from "primevue/progressbar";
 import OverallMetricsCards from "@/components/utils/cards/OverallMetricsCards.vue";
+import SingleUserOverallProgress from "@/components/users/SingleUserOverallProgress.vue";
 
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
@@ -53,7 +54,8 @@ const loadData = () => {
   return UsersService.getGlobalUserProgress().then((data) => {
     const metricItemsPage = data.metricItemsPage.map((item) => ({
       ...item,
-      skillsEarnedPercent: Math.trunc((item.numSkillsEarned / data.numTotalSkills) * 100)
+      skillsEarnedPercent: Math.trunc((item.numSkillsEarned / data.numTotalSkills) * 100),
+      userToShow: userInfo.getUserDisplay(item, true)
     }))
     userProgress.value = {...data, metricItemsPage}
     totalRows.value = data.numTotalMetricItems
@@ -125,7 +127,8 @@ const totalQuizzesAndSurveys = computed(() => {
                 @page="pageChanged"
                 :expander="true"
                 v-model:expandedRows="expandedRows"
-                tableStoredStateId="usersTable" data-cy="usersTable"
+                tableStoredStateId="userOverallProgressTable"
+                data-cy="userOverallProgressTable"
                 aria-label="Users"
                 :rowsPerPageOptions="possiblePageSizes"
                 v-model:sort-field="sortInfo.sortBy"
@@ -138,7 +141,7 @@ const totalQuizzesAndSurveys = computed(() => {
                   <i class="fas fa-user skills-color-users mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  {{ userInfo.getUserDisplay(slotProps.data, true) }}
+                  {{ slotProps.data.userToShow }}
                 </template>
               </Column>
 
@@ -189,7 +192,7 @@ const totalQuizzesAndSurveys = computed(() => {
               </Column>
 
               <template #expansion="slotProps">
-                <pre>{{ slotProps.data }}</pre>
+                <single-user-overall-progress :user-progress-meta="slotProps.data" />
               </template>
 
             </SkillsDataTable>
