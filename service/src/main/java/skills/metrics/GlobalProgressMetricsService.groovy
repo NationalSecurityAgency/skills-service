@@ -23,9 +23,9 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
-import skills.controller.result.model.globalMetrics.GlobalMetricsResult
 import skills.controller.result.model.globalMetrics.GlobalMetricsUserItem
-import skills.metrics.builders.multipleProj.OverallDistinctUsersOverTimeMetricsBuilder
+import skills.controller.result.model.globalMetrics.OverallMetricsResult
+import skills.controller.result.model.globalMetrics.UsersOverallProgressResult
 import skills.storage.model.DayCount
 import skills.storage.model.DayCountItem
 import skills.storage.model.QuizDefParent
@@ -71,7 +71,7 @@ class GlobalProgressMetricsService {
     @Autowired
     MetricsService metricsServiceNew
 
-    GlobalMetricsResult loadMetrics(String userQuery, PageRequest pageRequest) {
+    UsersOverallProgressResult loadMetrics(String userQuery, PageRequest pageRequest) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
         List<String> projectIds = projectIdsAndQuizIds.projectIds
         List<String> quizIds = projectIdsAndQuizIds.quizIds
@@ -99,7 +99,7 @@ class GlobalProgressMetricsService {
         GlobalProgressMetricsRepo.ProjDefCounts projDefCounts = globalProgressMetricsRepo.findProjectDefCounts(projectIds)
         Integer totalGlobalBadgeCount = globalProgressMetricsRepo.getTotalGlobalBadgeCountForProjects(projectIds)
         List<GlobalProgressMetricsRepo.QuizInfo> quizIdAndTypes = globalProgressMetricsRepo.getQuizInfo(quizIds)
-        return new GlobalMetricsResult(
+        return new UsersOverallProgressResult(
                 numTotalProjects: projectIds.size(),
                 numTotalSkills: projDefCounts?.numSkills ?: 0,
                 numTotalBadges: projDefCounts?.numBadges ?: 0,
@@ -111,7 +111,7 @@ class GlobalProgressMetricsService {
         )
     }
 
-    GlobalMetricsResult loadOverallMetrics(List<String> selectedProjectIds, List<String> selectedQuizIds) {
+    OverallMetricsResult loadOverallMetrics(List<String> selectedProjectIds, List<String> selectedQuizIds) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
         List<String> projectIds = projectIdsAndQuizIds.projectIds
         List<String> quizIds = projectIdsAndQuizIds.quizIds
@@ -121,16 +121,17 @@ class GlobalProgressMetricsService {
         GlobalProgressMetricsRepo.ProjDefCounts projDefCounts = globalProgressMetricsRepo.findProjectDefCounts(projectIds)
         Integer totalGlobalBadgeCount = globalProgressMetricsRepo.getTotalGlobalBadgeCountForProjects(projectIds)
         List<GlobalProgressMetricsRepo.QuizInfo> quizIdAndTypes = globalProgressMetricsRepo.getQuizInfo(quizIds)
+        List<GlobalProgressMetricsRepo.ProjectInfo> projectInfo = globalProgressMetricsRepo.getProjectInfo(projectIds)
 
-        return new GlobalMetricsResult(
+        return new OverallMetricsResult(
                 numTotalProjects: projectIds.size(),
                 numTotalSkills: projDefCounts?.numSkills ?: 0,
                 numTotalBadges: projDefCounts?.numBadges ?: 0,
                 numTotalGlobalBadges: totalGlobalBadgeCount,
                 numTotalQuizzes: countQuizzesByType(quizIdAndTypes, QuizDefParent.QuizType.Quiz),
                 numTotalSurveys: countQuizzesByType(quizIdAndTypes, QuizDefParent.QuizType.Survey),
-//                numTotalMetricItems: userProgressMetricPage.getTotalElements(),
-//                metricItemsPage: metricItemsPage
+                projectInfo: projectInfo,
+                quizInfo: quizIdAndTypes
         )
     }
 

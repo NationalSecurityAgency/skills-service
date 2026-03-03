@@ -16,17 +16,11 @@
 package skills.controller.result.model.globalMetrics
 
 import groovy.transform.Canonical
+import skills.storage.repos.GlobalProgressMetricsRepo
 
 @Canonical
-class GlobalMetricsResult {
-
-    Integer numTotalProjects
-
-    Integer numTotalSkills
-    Integer numTotalBadges
-    Integer numTotalGlobalBadges
-
-    Integer numTotalQuizzes
-    Integer numTotalSurveys
+class OverallMetricsResult extends GlobalMetricsResult {
+    List<GlobalProgressMetricsRepo.ProjectInfo> projectInfo
+    List<GlobalProgressMetricsRepo.QuizInfo> quizInfo
 }
 
