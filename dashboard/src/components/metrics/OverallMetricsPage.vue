@@ -22,8 +22,10 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import MetricsService from '@/components/metrics/MetricsService.js'
+import { usePluralize } from '@/components/utils/misc/UsePluralize.js'
 
 const colors = useColors()
+const pluralize = usePluralize()
 
 onMounted(() => {
   loadData()
@@ -32,6 +34,10 @@ onMounted(() => {
 const metricsData = ref({})
 const hasData = computed(() => metricsData.value?.totalMetrics > 0)
 const isLoading = ref(true)
+
+const totalQuizzesAndSurveys = computed(() => {
+  return metricsData.value ? metricsData.value.numTotalQuizzes + metricsData.value.numTotalSurveys : 0
+})
 
 const loadData = () => {
   MetricsService.getOverallMetrics().then((response) => {
@@ -50,17 +56,23 @@ const loadData = () => {
     <div v-if="!isLoading">
       <div class="flex gap-2 mb-3">
         <media-info-card
-          :title="`${metricsData.numTotalProjects} Projects`"
+          :title="`${metricsData.numTotalProjects} ${pluralize.plural('Project', metricsData.numTotalProjects)}`"
           :icon-class="`fa-solid fa-tasks ${colors.getTextClass(1)}`"
-          class="flex-1"/>
+          class="flex-1">
+          <Tag>{{ metricsData.numTotalSkills}}</Tag> {{pluralize.plural('Skill', metricsData.numTotalSkills)}}
+        </media-info-card>
         <media-info-card
-          :title="`${metricsData.numTotalQuizzes} Quizzes`"
+          :title="`${totalQuizzesAndSurveys} ${pluralize.plural('Quiz', totalQuizzesAndSurveys)}/${pluralize.plural('Survey', totalQuizzesAndSurveys)}`"
           :icon-class="`fa-solid fa-spell-check ${colors.getTextClass(2)}`"
-          class="flex-1"/>
+          class="flex-1">
+          <Tag>{{ metricsData.numTotalQuizzes}}</Tag> {{pluralize.plural('Quiz', metricsData.numTotalQuizzes)}} and  <Tag>{{ metricsData.numTotalSurveys}}</Tag> {{ pluralize.plural('Survey', metricsData.numTotalSurveys)}}
+        </media-info-card>
         <media-info-card
-          :title="`${metricsData.numTotalSurveys} Surveys`"
-          :icon-class="`fa-solid fa-clipboard-list ${colors.getTextClass(3)}`"
-          class="flex-1"/>
+          :title="`${metricsData.numTotalBadges} ${pluralize.plural('Badge', metricsData.numTotalBadges)}`"
+          :icon-class="`fa-solid fa-award ${colors.getTextClass(4)}`"
+          class="flex-1">
+          <Tag>{{ metricsData.numTotalGlobalBadges}}</Tag> Global {{ pluralize.plural('Badge', metricsData.numTotalGlobalBadges) }}
+        </media-info-card>
       </div>
       <Card v-if="hasData" :pt="{ body: { class: 'p-0!' } }">
         <template #content>
