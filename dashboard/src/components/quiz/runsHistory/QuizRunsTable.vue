@@ -118,18 +118,21 @@ fields.push(
     key: 'runtime',
     label: 'Runtime',
     sortable: false,
-    imageClass: 'fas fa-user-clock skills-color-access'
+    imageClass: 'fas fa-user-clock skills-color-access',
+    additionalColumn: true
+  },
+  {
+    key: 'results',
+    label: 'Results',
+    sortable: false,
+    additionalColumn: true,
+    imageClass: 'fa-solid fa-clipboard-check'
   },
   {
     key: 'started',
     label: 'Started',
     sortable: true,
     imageClass: 'fas fa-clock text-warning'
-  },
-  {
-    key: 'results',
-    label: 'Results',
-    sortable: false,
   }
 )
 if (props.showControls) {
@@ -155,14 +158,28 @@ const options = ref({
   }
 })
 
+const additionalColumns = ref(options.value.fields.filter((f) => f.additionalColumn))
+const additionalSelectedColumnKeys = useStorage(`${props.tableStoredStateId}-additionalSelectedColumns`, [])
+const additionalSelectedColumns = ref(options.value.fields.filter((f) => additionalSelectedColumnKeys.value.includes(f.key)))
+const displayedColumns = ref(options.value.fields.filter((f) => !f.additionalColumn || additionalSelectedColumnKeys.value.includes(f.key)))
+const onColumnToggle = (currentSelection) => {
+  additionalSelectedColumnKeys.value = currentSelection.map((c) => c.key)
+  updateDisplayedColumns()
+}
+const updateDisplayedColumns = () => {
+  displayedColumns.value = options.value.fields.filter((f) => additionalSelectedColumnKeys.value.includes(f.key) || !f.additionalColumn)
+}
+
 onMounted(() => {
   if (props.enableToShowUserTagColumn && userTagsUtils.showUserTagColumn()) {
     const position = props.showQuizNameAndTypeColumns ? 3 : 1
     options.value.fields.splice(position, 0, {
       key: 'userTag',
       label: userTagsUtils.userTagLabel(),
-      sortable: true
+      sortable: true,
+      imageClass: 'fa-solid fa-tag'
     })
+    updateDisplayedColumns()
   }
   loadData().then(() => {
     loadingDataInitially.value = false
@@ -275,7 +292,6 @@ const deleteRun = () => {
         v-model:sort-order="sortInfo.sortOrder">
       <template #header>
         <slot name="header"></slot>
-
         <div class="flex gap-5">
           <div v-if="!props.onlyRunsForUserId" class="flex gap-1 flex-1">
             <label class="flex gap-1 items-center"><i class="fas fa-user" aria-hidden="true"/>
@@ -318,6 +334,18 @@ const deleteRun = () => {
                         :aria-label="`Reset filter for results`"
                         data-cy="userResetBtn"/>
         </div>
+
+        <div class="mt-5">
+          <MultiSelect
+              class="w-full lg:w-auto"
+              v-model="additionalSelectedColumns"
+              :options="additionalColumns"
+              display="chip"
+              optionLabel="label"
+              @update:modelValue="onColumnToggle"
+              placeholder="Optional Fields"
+              data-cy="skillsTable-additionalColumns"/>
+        </div>
       </template>
 
       <template #paginatorstart>
@@ -328,7 +356,7 @@ const deleteRun = () => {
       <template #empty>
         <table-no-res :showResetFilter="filtering" @resetFilter="clearFilter"/>
       </template>
-      <Column v-for="(col, index) in options.fields" :key="col.key" :field="col.key" :sortable="col.sortable"
+      <Column v-for="(col, index) in displayedColumns" :key="col.key" :field="col.key" :sortable="col.sortable"
               :class="{'flex': responsive.lg.value }">
         <template #header>
           <span v-if="col.key === 'controls'" class="sr-only">Controls Heading - Not sortable</span>
