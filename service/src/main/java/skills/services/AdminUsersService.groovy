@@ -66,6 +66,9 @@ class AdminUsersService {
     UserEventService userEventService
 
     @Autowired
+    GlobalBadgesService globalBadgesService
+
+    @Autowired
     PostgresQlNativeRepo PostgresQlNativeRepo
 
     @Value('${skills.config.ui.usersTableAdditionalUserTagKey:}')
@@ -170,6 +173,33 @@ class AdminUsersService {
         Integer count = (Integer)PostgresQlNativeRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, query, minMax.left, minMax.right, usersTableAdditionalUserTagKey, userTagFilter)
         List<ProjectUser> usersData = userPointsRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectId, query, minMax.left, minMax.right, userTagFilter, pageRequest)
         return new TableResultWithTotalPoints(usersData, count, totalPoints)
+    }
+
+    TableResultWithTotalPoints loadUsersPageForSkillsAcrossProjects(String badgeId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent) {
+        List<SkillDefPartialRes> skills = globalBadgesService.getSkillsForBadge(badgeId)
+        query = query ? query.trim() : ''
+        Integer totalPoints = skills.sum(0) { skill -> skill.totalPoints } as Integer
+
+        Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)
+        List<GlobalBadgeLevelRes> levels = globalBadgesService.getGlobalBadgeLevels(badgeId)
+
+        Page<ProjectUser> usersPage = userPointsRepo.findDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query, minMax.left, minMax.right, pageRequest)
+        List<SimpleUserResult> currentUsers = usersPage.getContent().collect{ it -> return new SimpleUserResult(it)}
+
+        levels.forEach{ level ->
+            List<String> userIds = userAchievedRepo.getUsersWhoHaveAchievedLevelForProject(level.projectId, level.level)
+            userIds.forEach{ userId ->
+                def currentUser = currentUsers.find{ it.userId == userId }
+                if(currentUser) {
+                    if(!currentUser.levelProgress) {
+                        currentUser.levelProgress = new HashMap<String, Boolean>()
+                    }
+                    currentUser.levelProgress.put(level.projectId, true)
+                }
+            }
+        }
+
+        return new TableResultWithTotalPoints(currentUsers, currentUsers.size(), totalPoints)
     }
 
     private static Pair<Integer, Integer> calcMinMaxPointsQueryParams(Integer totalPoints, int minimumPointsPercent, int maximumPointsPercent) {

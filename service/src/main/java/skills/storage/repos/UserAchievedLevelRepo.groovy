@@ -1022,4 +1022,9 @@ select count(distinct ua) from UserAchievement ua where ua.projectId = :projectI
     @Modifying
     @Query('''delete from UserAchievement ua where not exists (select 1 from UserPoints up where up.userId = ua.userId and up.projectId = ua.projectId) and ua.projectId = :projectId''')
     void deleteAchievementsWithNoPoints(@Param("projectId") String projectId)
+
+    @Query('''
+        select distinct ua.userId from UserAchievement ua where ua.projectId = ?1 and ua.level >= ?2 and ua.skillId is null
+    ''')
+    List<String> getUsersWhoHaveAchievedLevelForProject(String projectId, Integer level)
 }

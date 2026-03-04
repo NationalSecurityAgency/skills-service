@@ -100,7 +100,6 @@ import SupportPage from "@/components/contact/SupportPage.vue";
 import {defineAsyncComponent} from "vue";
 import GlobalBadgeAccessPage from '@/components/badges/global/GlobalBadgeAccessPage.vue'
 import AdminGroupGlobalBadges from '@/components/access/groups/AdminGroupGlobalBadges.vue'
-import GlobalBadgeUsers from '@/components/badges/global/GlobalBadgeUsers.vue';
 
 const routes = [
   {
