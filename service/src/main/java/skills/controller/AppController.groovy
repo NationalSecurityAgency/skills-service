@@ -46,8 +46,10 @@ import skills.services.admin.ShareSkillsService
 import skills.services.admin.SkillsAdminService
 import skills.services.adminGroup.AdminGroupService
 import skills.services.quiz.QuizDefService
+import skills.storage.model.UserQuizAttempt
 import skills.utils.InputSanitizer
 import skills.utils.TablePageUtil
+import skills.utils.TimeRangeFormatterUtil
 
 import java.nio.charset.StandardCharsets
 
@@ -320,6 +322,22 @@ class AppController {
 
         PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(limit, page, orderBy, ascending);
         return globalMetricsService.loadUsersOverallProgress(userQuery, pageRequest)
+    }
+
+    @RequestMapping(value = "/quiz-runs", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    TableResult getQuizRuns(@RequestParam(name = "query") String userQuery,
+                            @RequestParam(name = "nameQuery", defaultValue = "") String nameQuery,
+                            @RequestParam(required = false) UserQuizAttempt.QuizAttemptStatus quizAttemptStatus,
+                            @RequestParam int limit,
+                            @RequestParam int page,
+                            @RequestParam String orderBy,
+                            @RequestParam Boolean ascending,
+                            @RequestParam(required = false) String startDate,
+                            @RequestParam(required = false) String endDate) {
+        PageRequest pageRequest = TablePageUtil.validateAndConstructQuizPageRequest(limit, page, orderBy, ascending)
+        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
+        return globalMetricsService.getQuizRuns(userQuery, nameQuery, quizAttemptStatus, pageRequest, dates[0], dates[1]);
     }
 
     @RequestMapping(value = "/progress-metrics/{userId}", method =  RequestMethod.GET, produces = "application/json")

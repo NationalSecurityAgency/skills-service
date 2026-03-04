@@ -141,6 +141,7 @@ const totalQuizzesAndSurveys = computed(() => {
                 v-model:sort-order="sortInfo.sortOrder"
                 @sort="sortField"
                 data-key="userId"
+                :auto-max-width="false"
             >
               <Column field="userId" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
                 <template #header>

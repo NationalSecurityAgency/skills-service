@@ -320,7 +320,7 @@ class QuizController {
                             @RequestParam(required = false) String endDate) {
         PageRequest pageRequest = TablePageUtil.validateAndConstructQuizPageRequest(limit, page, orderBy, ascending)
         List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
-        return quizDefService.getQuizRuns(quizId, query, quizAttemptStatus, pageRequest, dates[0], dates[1]);
+        return quizDefService.getQuizRuns([quizId], query, "",quizAttemptStatus, pageRequest, dates[0], dates[1]);
     }
 
     @RequestMapping(value = "/{quizId}/runs/{attemptId}", method = RequestMethod.DELETE, produces = "application/json")

@@ -92,6 +92,11 @@ export default {
       .get(`/admin/quiz-definitions/${quizId}/runs`, { params })
       .then((response) => response.data)
   },
+  getGlobalQuizRunsHistory(params) {
+    return axios
+        .get(`/app/quiz-runs`, { params })
+        .then((response) => response.data)
+  },
   getSingleQuizHistoryRun(quizId, attemptId) {
     return axios
       .get(`/admin/quiz-definitions/${quizId}/runs/${attemptId}`)

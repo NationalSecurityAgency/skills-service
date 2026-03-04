@@ -22,6 +22,7 @@ import GlobalBadges from '@/components/badges/global/GlobalBadges.vue'
 import AdminGroupsPage from '@/components/access/groups/AdminGroupsPage.vue'
 import UsersOverallProgressPage from "@/components/users/UsersOverallProgressPage.vue";
 import OverallMetricsPage from "@/components/metrics/OverallMetricsPage.vue";
+import GlobalQuizRunsHistoryPage from "@/components/quiz/runsHistory/GlobalQuizRunsHistoryPage.vue";
 
 const createAdminRoutes = () => {
   return {
@@ -72,6 +73,16 @@ const createAdminRoutes = () => {
           requiresAuth: true,
           announcer: {
             message: 'Cross-projects users',
+          },
+        },
+      }, {
+        name: 'GlobalQuizRunsHistoryPage',
+        path: 'quiz-runs',
+        component: GlobalQuizRunsHistoryPage,
+        meta: {
+          requiresAuth: true,
+          announcer: {
+            message: 'Quiz and Survey Runs',
           },
         },
       }, {

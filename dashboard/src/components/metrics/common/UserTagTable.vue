@@ -141,8 +141,12 @@ const filterRange = ref([]);
             </div>
           </div>
           <div class="flex flex-wrap flex-col gap-2">
-            Filter by Date(s):
-            <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" :disabled="isLoading" placeholder="Select a date range" :data-cy="`${tagKey}-metricsDateFilter`" />
+            <SkillsCalendarInput selectionMode="range"
+                                 :name="`filterRange${tagKey}`"
+                                 v-model="filterRange" :maxDate="new Date()"
+                                 label="Filter by Date(s):"
+                                 :label-on-same-line="true"
+                                 :disabled="isLoading" placeholder="Select a date range" :data-cy="`${tagKey}-metricsDateFilter`" />
           </div>
         </div>
         <SkillsDataTable :value="table.items"

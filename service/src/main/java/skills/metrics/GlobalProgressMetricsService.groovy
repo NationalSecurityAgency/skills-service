@@ -23,13 +23,16 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
+import skills.controller.result.model.TableResult
 import skills.controller.result.model.globalMetrics.GlobalMetricsUserItem
 import skills.controller.result.model.globalMetrics.OverallMetricsResult
-import skills.controller.result.model.globalMetrics.UsersOverallProgressResult
 import skills.controller.result.model.globalMetrics.SingleUserOverallProgress
+import skills.controller.result.model.globalMetrics.UsersOverallProgressResult
+import skills.services.quiz.QuizDefService
 import skills.storage.model.DayCount
 import skills.storage.model.DayCountItem
 import skills.storage.model.QuizDefParent
+import skills.storage.model.UserQuizAttempt
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.GlobalProgressMetricsRepo
@@ -71,6 +74,9 @@ class GlobalProgressMetricsService {
 
     @Autowired
     MetricsService metricsServiceNew
+
+    @Autowired
+    QuizDefService quizDefService
 
     UsersOverallProgressResult loadUsersOverallProgress(String userQuery, PageRequest pageRequest) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
@@ -145,6 +151,12 @@ class GlobalProgressMetricsService {
 
 
         return new SingleUserOverallProgress(projectsProgress: projectsProgressRes)
+    }
+
+    TableResult getQuizRuns( String userQuery, String nameQuery, UserQuizAttempt.QuizAttemptStatus quizAttemptStatus, PageRequest pageRequest, Date startDate, Date endDate) {
+        ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
+        List<String> quizIds = projectIdsAndQuizIds.quizIds
+        return quizDefService.getQuizRuns(quizIds, userQuery, nameQuery, quizAttemptStatus, pageRequest, startDate, endDate);
     }
 
     OverallMetricsResult loadOverallMetrics(List<String> selectedProjectIds, List<String> selectedQuizIds) {

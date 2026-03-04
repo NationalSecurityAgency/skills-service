@@ -174,12 +174,10 @@ const setChartOptions = () => {
     </template>
     <template #content>
       <div class="flex flex-wrap gap-2 items-center mb-2">
-        <div>
-          Filter by Date(s):
-        </div>
-        <div class="flex gap-2">
           <SkillsCalendarInput selectionMode="range"
-                               name="filterRange"
+                               :name="`filterRange${tagKey}`"
+                               label="Filter by Date(s):"
+                               :label-on-same-line="true"
                                v-model="filterRange"
                                :maxDate="new Date()"
                                :disabled="isLoading"
@@ -187,7 +185,6 @@ const setChartOptions = () => {
                                data-cy="metricsDateFilter" />
           <SkillsButton label="Filter" icon="fa-solid fa-search"  @click="applyDateFilter" :disabled="isLoading" data-cy="applyDateFilterButton" />
           <SkillsButton label="Clear" severity="danger" icon="fa-solid fa-eraser" @click="clearDateFilter" :disabled="isLoading" data-cy="clearDateFilterButton" />
-        </div>
       </div>
         <metrics-overlay :loading="isLoading" :has-data="!isEmpty" no-data-msg="No data yet...">
           <chart-download-controls :vue-chart-ref="userTagChart" />
