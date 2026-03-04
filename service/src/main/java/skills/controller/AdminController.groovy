@@ -1487,15 +1487,9 @@ class AdminController {
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", badgeId)
         SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", badgeId)
 
-        return null;
-//
-//        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-//        List<SkillDefRes> badgeSkills = getBadgeSkills(projectId, badgeId)
-//        List<String> skillIds = badgeSkills.collect { it.skillId }
-//        if (!skillIds) {
-//            return new TableResult()
-//        }
-//        return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest, minimumPoints, maximumPoints)
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+
+        return adminUsersService.loadUsersPageForSkillsAcrossProjects(badgeId, query, pageRequest, minimumPoints, maximumPoints)
     }
 
     @RequestMapping(value = "/projects/{projectId}/errors", method = [RequestMethod.GET], produces = "application/json")

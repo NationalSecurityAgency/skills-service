@@ -114,12 +114,15 @@ const reset = () => {
   })
 }
 
-const isGlobalAdminPage = (route) => route.path?.toLowerCase().startsWith('/administrator/globalbadges')
+const isGlobalBadgePage = computed(() => {
+  return route.path?.toLowerCase().startsWith('/administrator/globalbadges');
+})
 
 const getUrl = () => {
-  if(isGlobalAdminPage) {
+  if(isGlobalBadgePage.value === true) {
     return `/admin/globalBadges/${encodeURIComponent(route.params.badgeId)}/users`;
   }
+
   let url = `/admin/projects/${encodeURIComponent(route.params.projectId)}`
   if (route.params.skillId) {
     url += `/skills/${encodeURIComponent(route.params.skillId)}`
@@ -330,12 +333,13 @@ const archiveUsers = () => {
           </template>
           <template #body="slotProps">
             <router-link
+              v-if="route.params.projectId"
               :to="calculateClientDisplayRoute(slotProps.data)"
               aria-label="View user details"
-              data-cy="usersTable_viewDetailsLink"
-            >
+              data-cy="usersTable_viewDetailsLink">
               {{ userInfo.getUserDisplay(slotProps.data, true) }}
             </router-link>
+            <span v-else>{{ userInfo.getUserDisplay(slotProps.data, true) }}</span>
           </template>
         </Column>
         <Column v-if="showUserTagColumn"
@@ -388,6 +392,13 @@ const archiveUsers = () => {
                     }}</span>
                 </div>
               </div>
+            </div>
+          </template>
+        </Column>
+        <Column field="levelProgress" v-if="isGlobalBadgePage" header="Level Requirement Met">
+          <template #body="slotProps">
+            <div v-for="(level, project) in slotProps.data.levelProgress">
+              <i class="fas fa-check-circle" v-if="level" /> {{ project }}
             </div>
           </template>
         </Column>

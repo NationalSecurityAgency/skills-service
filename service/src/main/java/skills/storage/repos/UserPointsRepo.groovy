@@ -978,6 +978,39 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             GROUP BY up.user_id''', nativeQuery = true)
     Page<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, List<String> skillIds, String userId, int minimumPoints, int maximumPoints, String userTagFilter, Pageable pageable)
 
+    @Query(value = '''
+        SELECT
+            up.user_id               AS userId,
+            ua.user_id_for_display   AS userIdForDisplay,
+            ua.dn                    AS dn,
+            ua.first_name            AS firstName,
+            ua.last_name             AS lastName,
+            ua.email                 AS email,
+            upaAgg.firstPerformedOn  AS firstUpdated,
+            upaAgg.lastPerformedOn   AS lastUpdated,
+            SUM(CASE WHEN achievement.achieved_on IS NULL THEN up.points ELSE skill.total_points END) AS totalPoints
+        FROM skill_definition badge
+        JOIN skill_relationship_definition srd ON badge.id = srd.parent_ref_id
+        JOIN skill_definition skill ON srd.child_ref_id = skill.id
+        JOIN user_points up ON up.skill_ref_id = skill.id
+        JOIN user_attrs ua ON ua.user_id = up.user_id
+        LEFT JOIN user_achievement achievement ON achievement.skill_ref_id = skill.id AND achievement.user_id = up.user_id
+        LEFT JOIN (SELECT utCol.user_id, max(utCol.value) AS utColValue FROM user_tags utCol WHERE utCol.key = ?2 group by utCol.user_id) utCol ON utCol.user_id=up.user_id
+        LEFT JOIN (
+          SELECT upa.user_id, MIN(upa.performed_on) AS firstPerformedOn, MAX(upa.performed_on) AS lastPerformedOn FROM user_performed_skill upa
+          WHERE upa.skill_ref_id IN (
+          SELECT srd2.child_ref_id
+            FROM skill_definition badge2
+            JOIN skill_relationship_definition srd2 ON badge2.id = srd2.parent_ref_id
+            WHERE badge2.type = 'GlobalBadge' AND badge2.skill_id = ?1
+          ) GROUP BY upa.user_id
+        ) upaAgg ON upaAgg.user_id = up.user_id
+        WHERE badge.type = 'GlobalBadge' AND badge.skill_id = ?1
+          AND (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (', ua.user_id_for_display, ')')) LIKE lower(CONCAT('%', ?3, '%')) OR lower(ua.user_id_for_display) LIKE lower(CONCAT('%', ?3, '%')))
+        GROUP BY up.user_id, ua.user_id_for_display, ua.dn, ua.first_name, ua.last_name, ua.email, upaAgg.firstPerformedOn, upaAgg.lastPerformedOn
+        HAVING SUM(CASE WHEN achievement.achieved_on IS NULL THEN up.points ELSE skill.total_points END) >= ?4 AND SUM(CASE WHEN achievement.achieved_on IS NULL THEN up.points ELSE skill.total_points END) <= ?5''', nativeQuery = true)
+    Page<ProjectUser> findDistinctUsersForGlobalBadge(String badgeId, String usersTableAdditionalUserTagKey, String userId, int minimumPoints, int maximumPoints, Pageable pageable)
+
     @Query(value = '''SELECT 
                 up.user_id as userId, 
                 min(upa.firstPerformedOn) as firstUpdated,
