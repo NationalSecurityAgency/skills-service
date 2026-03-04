@@ -33,6 +33,8 @@ class QuizRunResult {
     String firstName
     String lastName
     String quizType
+    String quizId
+    String quizName
 
     @Canonical
     @ToString(includeNames = true)

@@ -140,6 +140,10 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
         String getLastName()
         @Nullable
         String getQuizType()
+        @Nullable
+        String getQuizName()
+        @Nullable
+        String getQuizId()
 
         @Nullable
         Integer getNumberCorrect()
@@ -157,6 +161,8 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                            userAttrs.first_name          as firstName,
                            userAttrs.last_name           as lastName,
                            quizDef.type                  as quizType,
+                           quizDef.quiz_id               as quizId,
+                           quizDef.name                  as quizName,
                            COALESCE(uqa.numberCorrect, 0) as numberCorrect,
                            COALESCE(uqa.totalAnswers, 0) as totalAnswers
                     from user_quiz_attempt quizAttempt
@@ -178,13 +184,15 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                       and quizAttempt.user_id = userAttrs.user_id
                       and (quizAttempt.status = :quizAttemptStatus OR :quizAttemptStatus IS NULL)
                       and (quizAttempt.started >= :startDate and quizAttempt.started <= :endDate)
+                      and (:nameQuery = '' OR lower(quizDef.name) like lower(CONCAT('%', :nameQuery, '%')))
                       and (lower(userAttrs.user_id_for_display) like lower(CONCAT('%', :userQuery, '%')) or
                       (lower(CONCAT(userAttrs.first_name, ' ', userAttrs.last_name, ' (',  userAttrs.user_id_for_display, ')')) like lower(CONCAT(\'%\', :userQuery, \'%\'))) OR
                       (lower(CONCAT(userAttrs.user_id_for_display, ' (', userAttrs.last_name, ', ', userAttrs.first_name,  ')')) like lower(CONCAT(\'%\', :userQuery, \'%\'))))
-                      and quizDef.quiz_id = :quizId
+                      and quizDef.quiz_id in :quizIds
      ''', nativeQuery = true)
-    Page<QuizRun> findQuizRuns(@Param('quizId')  String quizId,
+    Page<QuizRun> findQuizRuns(@Param('quizIds') List<String> quizIds,
                                @Param('userQuery') String userQuery,
+                               @Param('nameQuery') String nameQuery,
                                @Param('usersTableAdditionalUserTagKey') String usersTableAdditionalUserTagKey,
                                @Nullable@Param('quizAttemptStatus') String quizAttemptStatus,
                                @Param('startDate') Date startDate,

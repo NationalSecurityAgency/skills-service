@@ -16,12 +16,11 @@ limitations under the License.
 <script setup>
 import {computed, onMounted, ref} from "vue";
 import UsersService from "@/components/users/UsersService.js";
-import Column from "primevue/column";
 import DataView from 'primevue/dataview';
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import ProgressBar from "primevue/progressbar";
-import Avatar from "primevue/avatar";
+import QuizRunsTable from "@/components/quiz/runsHistory/QuizRunsTable.vue";
 
 
 const props = defineProps({
@@ -49,11 +48,6 @@ const loadData = () => {
   })
 }
 
-const highestLevelEarned = (projProgress) => {
-  const levels = projProgress?.achievements?.filter((a) => a.level > 0)
-  return levels ? levels.sort((a, b) => b.level - a.level)[0] : null
-}
-
 const title = computed(() => {
   const userId = props.userProgressMeta.userToShow
   return `${userId} Overall Progress`
@@ -77,6 +71,7 @@ const title = computed(() => {
           </div>
 
           <DataView :value="singleUserProjectProgress" class="mb-8">
+            <template #empty>This user hasn't made progress in any projects yet</template>
             <template #list="slotProps">
               <div class="flex flex-col">
                 <div v-for="(item, index) in slotProps.items" :key="index">
@@ -153,59 +148,20 @@ const title = computed(() => {
           </DataView>
 
 
-<!--          <SkillsDataTable-->
-<!--              tableStoredStateId="singleUserOverallProjProgressTable"-->
-<!--              aria-label="Single User Projects Progress"-->
-<!--              :value="singleUserProgress.projectsProgress"-->
-<!--              data-cy="singleUserOverallProjProgressTable"-->
-<!--              :showGridlines="false"-->
-<!--              :showHeaders="true"-->
-<!--              :stripedRows="false">-->
-<!--            &lt;!&ndash;            <template #header>&ndash;&gt;-->
-<!--            &lt;!&ndash;              <div class="pt-3 font-bold">&ndash;&gt;-->
-<!--            &lt;!&ndash;                User's Projects Progress&ndash;&gt;-->
-<!--            &lt;!&ndash;              </div>&ndash;&gt;-->
-<!--            &lt;!&ndash;            </template>&ndash;&gt;-->
-<!--            <Column field="projectName" header="Project" :sortable="false">-->
-<!--              <template #header>-->
-<!--                <i class="fas fa-user skills-color-users mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>-->
-<!--              </template>-->
-<!--              <template #body="slotProps">-->
-<!--                <div class="flex flex-col gap-2">-->
-<!--                  <div class="text-xl">-->
-<!--                    {{ slotProps.data.projectName }}-->
-<!--                  </div>-->
-<!--                  <div class="pl-2">-->
-<!--                    <div v-if="highestLevelEarned(slotProps.data)" class="flex gap-1">-->
-<!--                      <Tag>Level <span class="font-bold">{{ highestLevelEarned(slotProps.data).level }}</span></Tag>-->
-<!--                      achieved on-->
-<!--                      <date-cell :value="highestLevelEarned(slotProps.data).achievedOn" :exclude-time-from-now="true"-->
-<!--                                 class="italic"/>-->
-<!--                    </div>-->
-<!--                  </div>-->
-<!--                </div>-->
+          <div class="pt-4 pb-1 font-bold uppercase border-b-2">
+            Quiz and Survey Runs
+          </div>
 
-
-<!--              </template>-->
-<!--            </Column>-->
-<!--            <Column field="points" header="Points" :sortable="false">-->
-<!--              <template #header>-->
-<!--                <i class="fas fa-user skills-color-users mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>-->
-<!--              </template>-->
-<!--              <template #body="slotProps">-->
-<!--                {{ slotProps.data.points }}-->
-<!--              </template>-->
-<!--            </Column>-->
-<!--            <Column field="updated" header="Last Progress" :sortable="false">-->
-<!--              <template #header>-->
-<!--                <i class="fas fa-user skills-color-users mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>-->
-<!--              </template>-->
-<!--              <template #body="slotProps">-->
-<!--                <date-cell :value="slotProps.data.updated"/>-->
-<!--              </template>-->
-<!--            </Column>-->
-
-<!--          </SkillsDataTable>-->
+          <quiz-runs-table
+              table-stored-state-id="singleUserOverviewQuizRunsHistoryTable"
+              :only-runs-for-user-id="userProgressMeta.userId"
+              :show-controls="false"
+              :show-quiz-name-and-type-columns="true"
+              :enable-to-show-user-tag-column="false">
+            <template #noResults>
+              This user hasn't completed any quizzes or surveys yet
+            </template>
+          </quiz-runs-table>
         </template>
       </Card>
     </div>

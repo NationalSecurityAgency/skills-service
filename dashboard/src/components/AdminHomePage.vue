@@ -52,6 +52,11 @@ const items = computed(() => {
     page: 'UsersOverallProgressPage',
   });
   res.push({
+    name: 'Quiz/Survey Runs',
+    iconClass: 'fa-solid fa-person-running',
+    page: 'GlobalQuizRunsHistoryPage',
+  });
+  res.push({
     name: 'Metrics',
     iconClass: 'fa-solid fa-chart-line',
     page: 'OverallMetricsPage',
