@@ -30,17 +30,21 @@ import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 import ProgressBar from "primevue/progressbar";
 import OverallMetricsCards from "@/components/utils/cards/OverallMetricsCards.vue";
 import SingleUserOverallProgress from "@/components/users/SingleUserOverallProgress.vue";
+import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import HighlightedValue from "@/components/utils/table/HighlightedValue.vue";
 
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
 const userInfo = useUserInfo()
 
 onMounted(() => {
-  loadData()
+  loadData().then(() => {
+    hasData.value = userProgress.value?.numTotalMetricItems > 0
+  })
 })
 
 const userProgress = ref({})
-const hasData = computed(() => userProgress.value?.numTotalMetricItems > 0)
+const hasData = ref(false)
 const isLoading = ref(true)
 const isTableLoading = ref(false)
 const totalRows = ref(0)
@@ -51,11 +55,13 @@ const sortInfo = ref({sortOrder: -1, sortBy: 'skillsAccomplished'})
 const expandedRows = ref([])
 
 const loadData = () => {
+  isTableLoading.value = true
   const params = {
     limit: pageSize.value,
     ascending: sortInfo.value.sortOrder === 1,
     page: currentPage.value,
-    orderBy: sortInfo.value.sortBy
+    orderBy: sortInfo.value.sortBy,
+    userQuery: filters.value.user
   }
   return UsersService.getGlobalUserProgress(params).then((data) => {
     const metricItemsPage = data.metricItemsPage.map((item) => ({
@@ -67,6 +73,7 @@ const loadData = () => {
     totalRows.value = data.numTotalMetricItems
   }).finally(() => {
     isLoading.value = false
+    isTableLoading.value = false
   })
 }
 
@@ -74,10 +81,11 @@ const filters = ref({
   user: '',
 })
 const applyFilters = () => {
-
+  loadData()
 }
 const resetFilters = () => {
-
+  filters.value.user = ''
+  loadData()
 }
 const sortField = () => {
   // set to the first page
@@ -90,15 +98,11 @@ const pageChanged = (pagingInfo) => {
   loadData()
 }
 
-const totalQuizzesAndSurveys = computed(() => {
-  return userProgress.value ? userProgress.value.numTotalQuizzes + userProgress.value.numTotalSurveys : 0
-})
 </script>
 
 <template>
   <div>
-    <SubPageHeader title="Users Progress" :title-level="1">
-    </SubPageHeader>
+    <SubPageHeader title="Users Progress" :title-level="1" />
     <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-6"/>
     <div v-if="!isLoading">
       <OverallMetricsCards :data="userProgress" />
@@ -110,14 +114,26 @@ const totalQuizzesAndSurveys = computed(() => {
               <div>
                 <label for="userFilter">User Filter</label>
               </div>
-              <InputText id="userFilter" v-model="filters.user" v-on:keydown.enter="applyFilters"
+              <InputText id="userFilter"
+                         v-model="filters.user"
+                         v-on:keydown.enter="applyFilters"
+                         :disabled="isTableLoading"
                          class="w-full"
-                         data-cy="users-skillIdFilter" aria-label="user filter"/>
+                         data-cy="users-skillIdFilter"
+                         aria-label="user filter"/>
             </div>
             <div class="flex gap-2">
-              <SkillsButton icon="fa fa-filter" label="Filter" outlined @click="applyFilters" data-cy="users-filterBtn"
+              <SkillsButton icon="fa fa-filter"
+                            label="Filter"
+                            :disabled="isTableLoading"
+                            outlined @click="applyFilters"
+                            data-cy="users-filterBtn"
                             size="small"/>
-              <SkillsButton icon="fa fa-times" label="Reset" outlined @click="resetFilters" class="ml-1"
+              <SkillsButton icon="fa fa-times"
+                            label="Reset"
+                            :disabled="isTableLoading"
+                            outlined
+                            @click="resetFilters"
                             data-cy="users-resetBtn" size="small"/>
             </div>
           </div>
@@ -148,7 +164,7 @@ const totalQuizzesAndSurveys = computed(() => {
                   <i class="fa-solid fa-user mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  {{ slotProps.data.userToShow }}
+                  <highlighted-value :value="slotProps.data.userToShow" :filter="filters.user"/>
                 </template>
               </Column>
 
@@ -214,6 +230,9 @@ const totalQuizzesAndSurveys = computed(() => {
 
               <template #expansion="slotProps">
                 <single-user-overall-progress :user-progress-meta="slotProps.data" />
+              </template>
+              <template #empty>
+                <table-no-res :showResetFilter="true" @resetFilter="resetFilters"/>
               </template>
 
             </SkillsDataTable>
