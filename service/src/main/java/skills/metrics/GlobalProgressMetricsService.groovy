@@ -83,7 +83,7 @@ class GlobalProgressMetricsService {
         List<String> projectIds = projectIdsAndQuizIds.projectIds
         List<String> quizIds = projectIdsAndQuizIds.quizIds
 
-        Page<GlobalProgressMetricsRepo.UserProgressMetric> userProgressMetricPage = globalProgressMetricsRepo.findUsersOverallProgress(projectIds, quizIds, pageRequest)
+        Page<GlobalProgressMetricsRepo.UserProgressMetric> userProgressMetricPage = globalProgressMetricsRepo.findUsersOverallProgress(projectIds, quizIds, userQuery ?: '',pageRequest)
         List<GlobalMetricsUserItem> metricItemsPage = userProgressMetricPage.getContent().collect {
             new GlobalMetricsUserItem(
                     userId: it.userId,

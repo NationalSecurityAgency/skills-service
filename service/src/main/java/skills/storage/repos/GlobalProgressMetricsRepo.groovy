@@ -80,11 +80,13 @@ FROM (
              COALESCE(achievements.globalBadgesEarned, 0) as globalBadgesEarned
          FROM (
                   SELECT
-                      user_id,
+                      userAttrs.user_id,
                       count(distinct project_id) numProjects
                   FROM user_points
+                    JOIN user_attrs userAttrs ON (user_points.user_id = userAttrs.user_id)
                   WHERE project_id IN :projectIds
-                  GROUP BY user_id
+                   and (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
+                  GROUP BY userAttrs.user_id
               ) projects
                   LEFT JOIN (
              SELECT
@@ -124,7 +126,9 @@ FROM (
            SUM(CASE WHEN qd.type = 'Survey' and uqa.status = 'INPROGRESS' THEN 1 ELSE 0 END) as surveyInProgress
     from user_quiz_attempt uqa
              join quiz_definition qd on (uqa.quiz_definition_ref_id = qd.id)
+             join user_attrs userAttrs ON (uqa.user_id = userAttrs.user_id)
     where qd.quiz_id in :quizIds
+        and (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
     group by uqa.user_id
 ) quizzes ON projectsAndAchievements.user_id = quizzes.user_id
  LEFT JOIN user_attrs userAttrsFromProj ON (projectsAndAchievements.user_id = userAttrsFromProj.user_id)
@@ -132,6 +136,7 @@ FROM (
     Page<UserProgressMetric> findUsersOverallProgress(
             @Param("projectIds") List<String> projectIds,
             @Param("quizIds") List<String> quizIds,
+            @Param("userQuery") String userQuery,
             Pageable pageable)
 
     static interface SingleUserProjectProgress {
