@@ -75,13 +75,19 @@ class OverallDistinctUsersOverTimeMetricsBuilder implements GlobalMetricsBuilder
         }
 
         List<String> projectIds = MetricsParams.getProjectIds(BUILDER_ID, props, true)
+        projectIds?.removeAll { !it }
         List<String> quizIds = MetricsParams.getQuizIds(BUILDER_ID, props, true)
+        quizIds?.removeAll { !it }
         if (!projectIds && !quizIds) {
             throw new SkillException("Metrics[${BUILDER_ID}]: Must supply ${MetricsParams.P_PROJECT_IDS} or ${MetricsParams.P_QUIZ_IDS} param")
         }
 
-        if (!userCommunityService.isUserCommunityMember(userId)) {
+        Boolean isUserCommunityMember = userCommunityService.isUserCommunityMember(userId)
+        if (!isUserCommunityMember && projectIds) {
             projectIds.removeAll { userCommunityService.isUserCommunityOnlyProject(it) }
+        }
+        if (!isUserCommunityMember && quizIds) {
+            quizIds.removeAll { userCommunityService.isUserCommunityOnlyQuiz(it) }
         }
         log.debug("Retrieving event counts for user [{}], start date [{}], projectIds [{}], quizIds [{}]", userId, startDate, projectIds, quizIds)
 
