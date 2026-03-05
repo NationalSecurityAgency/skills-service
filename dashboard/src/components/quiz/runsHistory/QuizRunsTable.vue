@@ -202,7 +202,7 @@ const loadData = () => {
     query: props.onlyRunsForUserId || (userFilter.value ? userFilter.value.trim() : ''),
     nameQuery: quizNameFilter.value ? quizNameFilter.value.trim() : '',
     limit: pageSize.value,
-    ascending: sortInfo.value.sortOrder === 1 ? true : false,
+    ascending: sortInfo.value.sortOrder === 1,
     page: options.value.pagination.currentPage,
     orderBy: sortInfo.value.sortBy,
     startDate: dateRange.startDate,
@@ -271,7 +271,7 @@ const deleteRun = () => {
   <div>
     <skills-spinner v-if="loadingDataInitially" :is-loading="true" class="my-10" />
     <slot v-if="!loadingDataInitially && !hasDataToShow" name="noResults"><no-content2 title="No Quiz Runs Available" message="No quiz runs have been completed yet. Once users take quizzes, their results will appear here." class="my-10" /></slot>
-    <SkillsDataTable v-if="!loadingDataInitially && hasDataToShow"
+    <SkillsDataTable v-show="!loadingDataInitially && hasDataToShow"
         :tableStoredStateId="tableStoredStateId"
         aria-label="Quiz Run History"
         :value="runsHistory"
