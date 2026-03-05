@@ -1268,6 +1268,11 @@ class SkillsService {
         wsHelper.apiGet(endpoint, props)
     }
 
+    def getOverallMetricsData(String metricsId, Map props = null) {
+        String endpoint = "/overall-metrics/${metricsId}"
+        wsHelper.appGet(endpoint, props)
+    }
+
     def getGlobalUserProgressMetrics(String userQuery = '', int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true) {
         String endpoint = "/progress-metrics"
         Map props = [

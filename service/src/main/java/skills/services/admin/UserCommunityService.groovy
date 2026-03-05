@@ -112,7 +112,7 @@ class UserCommunityService {
     }
 
     @Transactional(readOnly = true)
-    Boolean isUserCommunityMember(String userId) {
+    boolean isUserCommunityMember(String userId) {
         Boolean belongsToUserCommunity = false
         if (isUserCommunityConfigured() && StringUtils.isNotBlank(userId)) {
             List<UserTag> userTags = userTagRepo.findAllByUserIdAndKey(userId, userCommunityUserTagKey)
