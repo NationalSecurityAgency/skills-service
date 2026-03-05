@@ -102,6 +102,84 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('be.visible')
     });
 
+    it('edit multiple levels', () => {
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { pointIncrement: 500})
+
+        cy.visit('/administrator/projects/proj1/levels');
+
+        const tableSelector = '[data-cy=levelsTable]';
+        let expected = [
+            [{colIndex: 0, value: 1}, {colIndex: 1, value: '10'}, {colIndex: 2, value: '100 to 250'}],
+            [{colIndex: 0, value: 2}, {colIndex: 1, value: '25'}, {colIndex: 2, value: '250 to 450'}],
+            [{colIndex: 0, value: 3}, {colIndex: 1, value: '45'}, {colIndex: 2, value: '450 to 670'}],
+            [{colIndex: 0, value: 4}, {colIndex: 1, value: '67'}, {colIndex: 2, value: '670 to 920'}],
+            [{colIndex: 0, value: 5}, {colIndex: 1, value: '92'}, {colIndex: 2, value: '920 to '}]
+        ];
+        cy.validateTable(tableSelector, expected, 5, true, null, false);
+        cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('be.visible')
+
+        cy.get('[data-cy="levelsTable"] [data-p-index="4"] [data-cy="editLevelButton"]').click()
+        cy.get('[data-cy="percent"] [data-pc-name="pcinputtext"]').should('have.value', '92')
+        cy.get('[data-cy="percentError"]').should('not.exist')
+        cy.get('[data-cy="closeDialogBtn"]').click()
+
+        cy.get('[data-cy="levelsTable"] [data-p-index="2"] [data-cy="editLevelButton"]').click()
+        cy.get('[data-cy="percent"] [data-pc-name="pcinputtext"]').should('have.value', '45')
+        cy.get('[data-cy="percentError"]').should('not.exist')
+        cy.get('[data-p="modal"] [data-cy="percent"]').should('be.visible')
+        cy.get('[data-p="modal"] [data-cy="percent"]').clear()
+        cy.get('[data-cy="percentError"]').contains('Percent is a required field')
+        cy.get('[data-p="modal"] [data-cy="percent"]').type('25')
+        cy.get('[data-cy="percentError"]').contains('Percent must not overlap with other levels')
+        cy.get('[data-p="modal"] [data-cy="percent"]').type('{backspace}6')
+        cy.get('[data-cy="percentError"]').should('not.exist')
+
+        cy.get('[data-p="modal"] [data-cy="percent"]').type('{backspace}{backspace}67')
+        cy.get('[data-cy="percentError"]').contains('Percent must not overlap with other levels')
+
+        cy.get('[data-p="modal"] [data-cy="percent"]').type('{backspace}6')
+        cy.get('[data-cy="percentError"]').should('not.exist')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        expected = [
+            [{colIndex: 0, value: 1}, {colIndex: 1, value: '10'}, {colIndex: 2, value: '100 to 250'}],
+            [{colIndex: 0, value: 2}, {colIndex: 1, value: '25'}, {colIndex: 2, value: '250 to 660'}],
+            [{colIndex: 0, value: 3}, {colIndex: 1, value: '66'}, {colIndex: 2, value: '660 to 670'}],
+            [{colIndex: 0, value: 4}, {colIndex: 1, value: '67'}, {colIndex: 2, value: '670 to 920'}],
+            [{colIndex: 0, value: 5}, {colIndex: 1, value: '92'}, {colIndex: 2, value: '920 to '}]
+        ];
+        cy.validateTable(tableSelector, expected, 5, true, null, false);
+
+
+        cy.get('[data-cy="levelsTable"] [data-p-index="3"] [data-cy="editLevelButton"]').click()
+        cy.get('[data-cy="percent"] [data-pc-name="pcinputtext"]').should('have.value', '67')
+        cy.get('[data-cy="percentError"]').should('not.exist')
+        cy.get('[data-p="modal"] [data-cy="percent"]').should('be.visible')
+        cy.get('[data-p="modal"] [data-cy="percent"]').clear()
+        cy.get('[data-cy="percentError"]').contains('Percent is a required field')
+        cy.get('[data-p="modal"] [data-cy="percent"]').type('66')
+        cy.get('[data-cy="percentError"]').contains('Percent must not overlap with other levels')
+        cy.get('[data-p="modal"] [data-cy="percent"]').type('{backspace}7')
+        cy.get('[data-cy="percentError"]').should('not.exist')
+
+        cy.get('[data-p="modal"] [data-cy="percent"]').type('{backspace}{backspace}92')
+        cy.get('[data-cy="percentError"]').contains('Percent must not overlap with other levels')
+
+        cy.get('[data-p="modal"] [data-cy="percent"]').type('{backspace}{backspace}68')
+        cy.get('[data-cy="percentError"]').should('not.exist')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        expected = [
+            [{colIndex: 0, value: 1}, {colIndex: 1, value: '10'}, {colIndex: 2, value: '100 to 250'}],
+            [{colIndex: 0, value: 2}, {colIndex: 1, value: '25'}, {colIndex: 2, value: '250 to 660'}],
+            [{colIndex: 0, value: 3}, {colIndex: 1, value: '66'}, {colIndex: 2, value: '660 to 680'}],
+            [{colIndex: 0, value: 4}, {colIndex: 1, value: '68'}, {colIndex: 2, value: '680 to 920'}],
+            [{colIndex: 0, value: 5}, {colIndex: 1, value: '92'}, {colIndex: 2, value: '920 to '}]
+        ];
+        cy.validateTable(tableSelector, expected, 5, true, null, false);
+    });
+
     it('once max levels are reached add level button should be disabled', () => {
         cy.intercept('POST', '/admin/projects/proj1/settings')
             .as('setSettings');
@@ -1098,5 +1176,174 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy="usePointsForLevelsSwitch"] input').should('be.checked')
         cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
     })
+
+    it('edit multiple point-based levels', () => {
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { pointIncrement: 500})
+        cy.enablePointBasedLevelsManagement()
+        cy.visit('/administrator/projects/proj1/levels');
+
+        const tableSelector = '[data-cy=levelsTable]';
+        let expected = [
+            [{colIndex: 0, value: 1}, {colIndex: 1, value: '100 to 250'}],
+            [{colIndex: 0, value: 2}, {colIndex: 1, value: '250 to 450'}],
+            [{colIndex: 0, value: 3}, {colIndex: 1, value: '450 to 670'}],
+            [{colIndex: 0, value: 4}, {colIndex: 1, value: '670 to 920'}],
+            [{colIndex: 0, value: 5}, {colIndex: 1, value: '920 to '}]
+        ];
+        cy.validateTable(tableSelector, expected, 5, true, null, false);
+        cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
+        cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('not.exist')
+
+        cy.get('[data-cy="levelsTable"] [data-p-index="4"] [data-cy="editLevelButton"]').click()
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '920')
+        cy.get('[data-p="modal"] [data-cy="pointsTo"]').should('not.exist')
+        cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('exist')
+        cy.get('[data-cy="pointsFromError"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').clear()
+        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').type('919')
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '919')
+        cy.get('[data-cy="pointsFromError"]').contains('Points From must not overlap with other levels')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="closeDialogBtn"]').click()
+
+        cy.get('[data-cy="levelsTable"] [data-p-index="2"] [data-cy="editLevelButton"]').click()
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '450')
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '670')
+        cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('not.exist')
+        cy.get('[data-cy="pointsFromError"]').should('not.exist')
+        cy.get('[data-cy="pointsToError"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').clear()
+        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').type('449')
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '449')
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '670')
+        cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('not.exist')
+        cy.get('[data-cy="pointsFromError"]').contains('Points From must not overlap with other levels')
+        cy.get('[data-cy="pointsToError"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').type('{backspace}{backspace}51')
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '451')
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '670')
+        cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('not.exist')
+        cy.get('[data-cy="pointsFromError"]').should('not.exist')
+        cy.get('[data-cy="pointsToError"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-p="modal"] [data-cy="pointsTo"]').clear()
+        cy.get('[data-p="modal"] [data-cy="pointsTo"]').type('671')
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '451')
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '671')
+        cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('not.exist')
+        cy.get('[data-cy="pointsFromError"]').should('not.exist')
+        cy.get('[data-cy="pointsToError"]').contains('Points To must not overlap with other levels')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-p="modal"] [data-cy="pointsTo"]').type('{backspace}{backspace}50')
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '451')
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '650')
+        cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('not.exist')
+        cy.get('[data-cy="pointsFromError"]').should('not.exist')
+        cy.get('[data-cy="pointsToError"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        expected = [
+            [{colIndex: 0, value: 1}, {colIndex: 1, value: '100 to 250'}],
+            [{colIndex: 0, value: 2}, {colIndex: 1, value: '250 to 451'}],
+            [{colIndex: 0, value: 3}, {colIndex: 1, value: '451 to 650'}],
+            [{colIndex: 0, value: 4}, {colIndex: 1, value: '650 to 920'}],
+            [{colIndex: 0, value: 5}, {colIndex: 1, value: '920 to '}]
+        ];
+        cy.validateTable(tableSelector, expected, 5, true, null, false);
+    });
+
+    it('edit last point-based level', () => {
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { pointIncrement: 500})
+        cy.enablePointBasedLevelsManagement()
+        cy.visit('/administrator/projects/proj1/levels');
+
+        const tableSelector = '[data-cy=levelsTable]';
+        let expected = [
+            [{colIndex: 0, value: 1}, {colIndex: 1, value: '100 to 250'}],
+            [{colIndex: 0, value: 2}, {colIndex: 1, value: '250 to 450'}],
+            [{colIndex: 0, value: 3}, {colIndex: 1, value: '450 to 670'}],
+            [{colIndex: 0, value: 4}, {colIndex: 1, value: '670 to 920'}],
+            [{colIndex: 0, value: 5}, {colIndex: 1, value: '920 to '}]
+        ];
+        cy.validateTable(tableSelector, expected, 5, true, null, false);
+        cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
+        cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('not.exist')
+
+        cy.get('[data-cy="levelsTable"] [data-p-index="4"] [data-cy="editLevelButton"]').click()
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '920')
+        cy.get('[data-p="modal"] [data-cy="pointsTo"]').should('not.exist')
+        cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('exist')
+        cy.get('[data-cy="pointsFromError"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').clear()
+        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').type('1000')
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '1,000')
+        cy.get('[data-cy="pointsFromError"]').should('not.exist')
+        cy.get('[data-cy="pointsToError"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        expected = [
+            [{colIndex: 0, value: 1}, {colIndex: 1, value: '100 to 250'}],
+            [{colIndex: 0, value: 2}, {colIndex: 1, value: '250 to 450'}],
+            [{colIndex: 0, value: 3}, {colIndex: 1, value: '450 to 670'}],
+            [{colIndex: 0, value: 4}, {colIndex: 1, value: '670 to 1,000'}],
+            [{colIndex: 0, value: 5}, {colIndex: 1, value: '1,000 to '}]
+        ];
+        cy.validateTable(tableSelector, expected, 5, true, null, false);
+    });
+
+    it('new point-based level', () => {
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { pointIncrement: 500})
+        cy.enablePointBasedLevelsManagement()
+        cy.visit('/administrator/projects/proj1/levels');
+
+        const tableSelector = '[data-cy=levelsTable]';
+        let expected = [
+            [{colIndex: 0, value: 1}, {colIndex: 1, value: '100 to 250'}],
+            [{colIndex: 0, value: 2}, {colIndex: 1, value: '250 to 450'}],
+            [{colIndex: 0, value: 3}, {colIndex: 1, value: '450 to 670'}],
+            [{colIndex: 0, value: 4}, {colIndex: 1, value: '670 to 920'}],
+            [{colIndex: 0, value: 5}, {colIndex: 1, value: '920 to '}]
+        ];
+        cy.validateTable(tableSelector, expected, 5, true, null, false);
+        cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
+        cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('not.exist')
+
+        cy.get('[data-cy="addLevel"]').click()
+        cy.get('[data-p="modal"] [data-cy="pointsInput"]').clear()
+        cy.get('[data-p="modal"] [data-cy="pointsInput"]').type('920')
+        cy.get('[data-p="modal"] [data-cy="pointsError"]').contains('Points must not overlap with other levels')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-p="modal"] [data-cy="pointsInput"]').type('{backspace}1')
+        cy.get('[data-p="modal"] [data-cy="pointsError"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        expected = [
+            [{colIndex: 0, value: 1}, {colIndex: 1, value: '100 to 250'}],
+            [{colIndex: 0, value: 2}, {colIndex: 1, value: '250 to 450'}],
+            [{colIndex: 0, value: 3}, {colIndex: 1, value: '450 to 670'}],
+            [{colIndex: 0, value: 4}, {colIndex: 1, value: '670 to 920'}],
+            [{colIndex: 0, value: 5}, {colIndex: 1, value: '920 to 921'}],
+            [{colIndex: 0, value: 5}, {colIndex: 1, value: '921'}]
+        ];
+        cy.validateTable(tableSelector, expected, 5, true, null, false);
+    });
 
 });
