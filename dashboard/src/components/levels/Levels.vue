@@ -24,9 +24,11 @@ import Column from 'primevue/column'
 import NewLevel from './NewLevel.vue'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 
 const dialogMessages = useDialogMessages()
 const announcer = useSkillsAnnouncer();
+const numberFormat = useNumberFormat()
 const route = useRoute();
 const props = defineProps({
   maxLevels: {
@@ -38,7 +40,7 @@ const props = defineProps({
 onMounted(() => {
   SettingService.getSetting(route.params.projectId, 'level.points.enabled')
       .then((data) => {
-        const fields = [
+        let fields = [
           {
             key: 'level',
             label: 'Level',
@@ -61,14 +63,16 @@ onMounted(() => {
             headerTitle: 'Edit Level',
           },
         ];
-        table.value.options.fields = fields;
-        table.value.options.tableDescription = computedTableDescription;
 
         const pointsEnabled = data && (data.value === true || data.value === 'true');
         if (pointsEnabled) {
           levelsAsPoints.value = true;
-          table.value.options.fields = fields.filter((item) => item.key !== 'percent');
+          fields = fields.filter((item) => item.key !== 'percent');
         }
+        table.value.options.fields = fields;
+        table.value.options.tableDescription = computedTableDescription;
+
+
       }).finally(() => {
     loading.value = false;
   });
@@ -81,7 +85,7 @@ const currentlyFocusedLevelId = ref('');
 const displayLevelModal = ref(false);
 const isEdit = ref(false);
 const levelsAsPoints = ref(false);
-let levelToEdit = { iconClass: 'fas fa-user-ninja' };
+const levelToEdit = ref({});
 const levels = ref([]);
 const table = ref({
   options: {
@@ -105,7 +109,7 @@ const computedTableDescription = computed(() => {
   return `Project ${project.name} Levels`;
 });
 
-const bounds = computed(() => {
+const createBounds = (levelInfo) => {
   const bounds = {
     previous: null,
     next: null,
@@ -113,7 +117,7 @@ const bounds = computed(() => {
 
   if (levels.value) {
     if (isEdit.value) {
-      const existingIdx = levels.value.findIndex((level) => levelToEdit.level === level.level);
+      const existingIdx = levels.value.findIndex((level) => levelInfo.level === level.level);
       const byIndex = new Map(levels.value.map((level, index) => [index, level]));
 
       const previous = byIndex.get(existingIdx - 1);
@@ -144,7 +148,7 @@ const bounds = computed(() => {
   }
 
   return bounds;
-});
+}
 
 const reachedMaxLevels = computed(() => {
   return levels.value.length >= props.maxLevels;
@@ -243,16 +247,21 @@ const getLastItemLevel = () => {
 const editLevel = (existingLevel) => {
   isEdit.value = !!existingLevel;
 
+  let levelToEditTmp = {}
   if (existingLevel) {
-    levelToEdit = { ...existingLevel };
+    levelToEditTmp = { ...existingLevel };
     if (levels.value[levels.value.length - 1].level === existingLevel.level) {
-      levelToEdit.isLast = true;
+      levelToEditTmp.isLast = true;
     }
     currentlyFocusedLevelId.value = existingLevel.level;
   } else if (!reachedMaxLevels.value) {
-    levelToEdit = { iconClass: 'fas fa-user-ninja' };
+    levelToEditTmp = {};
   }
 
+  const bounds = createBounds(levelToEditTmp)
+  levelToEdit.value = {
+    ...levelToEditTmp, bounds
+  }
   displayLevelModal.value = true;
 };
 
@@ -307,14 +316,14 @@ const isFlex = computed(() => responsive.sm.value)
               </InlineMessage>
             </template>
           </Column>
-          <Column field="percent" header="Percent" :class="{'flex': isFlex }">
+          <Column v-if="!levelsAsPoints" field="percent" header="Percent" :class="{'flex': isFlex }">
             {{ slotProps.data.percent }}
           </Column>
           <Column field="points" header="Points" :class="{'flex': isFlex }">
             <template #body="slotProps">
                 <span v-if="slotProps.data.pointsFrom !== null && slotProps.data.pointsFrom !== undefined">
-                  {{ slotProps.data.pointsFrom }} to
-                  <span v-if="slotProps.data.pointsTo">{{ slotProps.data.pointsTo }}</span>
+                  {{ numberFormat.pretty(slotProps.data.pointsFrom) }} to
+                  <span v-if="slotProps.data.pointsTo">{{ numberFormat.pretty(slotProps.data.pointsTo) }}</span>
                   <span v-else><i class="fas fa-infinity"/></span>
                 </span>
               <div v-else aria-label="Points cannot be calculated. Please create more skills first." class="flex items-center">N/A
@@ -333,7 +342,7 @@ const isFlex = computed(() => responsive.sm.value)
     <new-level v-if="displayLevelModal && levels"
                v-model="displayLevelModal"
                @load-levels="loadLevels"
-               :boundaries="bounds"
+               :boundaries="levelToEdit.bounds"
                :level="levelToEdit"
                :level-as-points="levelsAsPoints"
                :is-edit="isEdit"
