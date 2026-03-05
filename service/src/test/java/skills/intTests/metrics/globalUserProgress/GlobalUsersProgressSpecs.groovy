@@ -124,7 +124,7 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         res.metricItemsPage[0].numQuizzesPassed == 1
         res.metricItemsPage[0].numQuizzesFailed == 0
         res.metricItemsPage[0].numQuizzesInProgress == 0
-        res.metricItemsPage[0].surveysCompleted == 0
+        res.metricItemsPage[0].numSurveysCompleted == 0
 
         res.metricItemsPage[1].userId == users[1]
         res.metricItemsPage[1].numProjects == 0
@@ -136,7 +136,7 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         res.metricItemsPage[1].numQuizzesPassed == 0
         res.metricItemsPage[1].numQuizzesFailed == 0
         res.metricItemsPage[1].numQuizzesInProgress == 1
-        res.metricItemsPage[1].surveysCompleted == 0
+        res.metricItemsPage[1].numSurveysCompleted == 0
     }
 
 }

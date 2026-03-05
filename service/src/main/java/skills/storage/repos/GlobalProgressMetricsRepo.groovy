@@ -210,7 +210,9 @@ FROM (
 
 
     static interface ProjDefCounts {
+        @Nullable
         Integer getNumSkills()
+        @Nullable
         Integer getNumBadges()
     }
 
