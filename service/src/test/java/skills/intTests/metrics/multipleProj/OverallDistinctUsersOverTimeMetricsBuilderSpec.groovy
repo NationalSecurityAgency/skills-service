@@ -537,6 +537,7 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
     private Map getProps(int numDaysAgo, String projectIds = null, String quizIds = null, Boolean byMonth = false) {
         Map props = [:]
         use(TimeCategory) {
+            props[MetricsParams.P_START_TIMESTAMP] = numDaysAgo.days.ago.time
             if (projectIds) {
                 props[MetricsParams.P_PROJECT_IDS] = projectIds
             }
