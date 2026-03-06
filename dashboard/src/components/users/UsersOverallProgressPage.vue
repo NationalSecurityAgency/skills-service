@@ -32,10 +32,12 @@ import OverallMetricsCards from "@/components/utils/cards/OverallMetricsCards.vu
 import SingleUserOverallProgress from "@/components/users/SingleUserOverallProgress.vue";
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import HighlightedValue from "@/components/utils/table/HighlightedValue.vue";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
 const userInfo = useUserInfo()
+const appConfig = useAppConfig()
 
 onMounted(() => {
   loadData().then(() => {
@@ -56,12 +58,14 @@ const expandedRows = ref([])
 
 const loadData = () => {
   isTableLoading.value = true
+  const orderBy = sortInfo.value.sortBy === appConfig.usersTableAdditionalUserTagKey ? 'userTag' : sortInfo.value.sortBy
   const params = {
     limit: pageSize.value,
     ascending: sortInfo.value.sortOrder === 1,
     page: currentPage.value,
-    orderBy: sortInfo.value.sortBy,
-    userQuery: filters.value.user
+    orderBy,
+    userQuery: filters.value.user,
+    userTagFilter: filters.value.userTag,
   }
   return UsersService.getGlobalUserProgress(params).then((data) => {
     const metricItemsPage = data.metricItemsPage.map((item) => ({
@@ -79,12 +83,14 @@ const loadData = () => {
 
 const filters = ref({
   user: '',
+  userTag: '',
 })
 const applyFilters = () => {
   loadData()
 }
 const resetFilters = () => {
   filters.value.user = ''
+  filters.value.userTag = ''
   loadData()
 }
 const sortField = () => {
@@ -98,6 +104,9 @@ const pageChanged = (pagingInfo) => {
   loadData()
 }
 
+const showUserTagColumn = computed(() => {
+  return !!(appConfig.usersTableAdditionalUserTagKey && appConfig.usersTableAdditionalUserTagLabel);
+})
 </script>
 
 <template>
@@ -110,17 +119,27 @@ const pageChanged = (pagingInfo) => {
             :pt="{ body: { class: 'p-0!' } }">
         <template #content>
           <div class="flex flex-col gap-2 p-5">
-            <div class="flex flex-col gap-1">
-              <div>
-                <label for="userFilter">User Filter</label>
+            <div class="flex gap-3">
+              <div class="flex-1 flex flex-col gap-1">
+                <div>
+                  <label for="userFilter">User Filter</label>
+                </div>
+                <InputText id="userFilter"
+                           v-model="filters.user"
+                           v-on:keydown.enter="applyFilters"
+                           :disabled="isTableLoading"
+                           class="w-full"
+                           data-cy="users-skillIdFilter"
+                           aria-label="user filter"/>
               </div>
-              <InputText id="userFilter"
-                         v-model="filters.user"
-                         v-on:keydown.enter="applyFilters"
-                         :disabled="isTableLoading"
-                         class="w-full"
-                         data-cy="users-skillIdFilter"
-                         aria-label="user filter"/>
+              <div v-if="showUserTagColumn" class="flex-1 flex flex-col gap-1">
+                <div>
+                  <label for="userTagFilter">{{ appConfig.usersTableAdditionalUserTagLabel }} Filter</label>
+                </div>
+                <InputText id="userTagFilter" v-model="filters.userTag" v-on:keydown.enter="applyFilters"
+                           class="w-full"
+                           data-cy="users-userTagFilter" aria-label="user tag filter"/>
+              </div>
             </div>
             <div class="flex gap-2">
               <SkillsButton icon="fa fa-filter"
@@ -167,10 +186,22 @@ const pageChanged = (pagingInfo) => {
                   <highlighted-value :value="slotProps.data.userToShow" :filter="filters.user"/>
                 </template>
               </Column>
+              <Column v-if="showUserTagColumn"
+                      :field="appConfig.usersTableAdditionalUserTagKey"
+                      :header="appConfig.usersTableAdditionalUserTagLabel"
+                      :sortable="true"
+                      :class="{'flex': responsive.md.value }">
+                <template #header>
+                  <i class="fas fa-tag mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
+                </template>
+                <template #body="slotProps">
+                  <highlighted-value :value="slotProps.data.userTag" :filter="filters.userTag"/>
+                </template>
+              </Column>
 
               <Column field="numSkillsEarned" header="Skills & Projects" :sortable="true" :class="{'flex': responsive.md.value }">
                 <template #header>
-                  <i class="fa-solid fa-tasks mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
+                  <i class="fa-solid fa-tasks mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
                   <div class="flex flex-col">
@@ -198,7 +229,7 @@ const pageChanged = (pagingInfo) => {
 
               <Column field="numQuizzes" header="# Quizzes" :sortable="true" :class="{'flex': responsive.md.value }">
                 <template #header>
-                  <i class="fa-solid fa-spell-check mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
+                  <i class="fa-solid fa-spell-check mr-1" :class="colors.getTextClass(4)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
                   <div class="flex flex-col gap-2 mb-2">
@@ -209,7 +240,7 @@ const pageChanged = (pagingInfo) => {
 
               <Column field="numSurveys" header="# Surveys" :sortable="true" :class="{'flex': responsive.md.value }">
                 <template #header>
-                  <i class="fa-solid fa-clipboard-question mr-1" :class="colors.getTextClass(4)" aria-hidden="true"></i>
+                  <i class="fa-solid fa-clipboard-question mr-1" :class="colors.getTextClass(5)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
                   <div class="flex flex-col gap-2 mb-2">
@@ -220,7 +251,7 @@ const pageChanged = (pagingInfo) => {
 
               <Column field="numBadgesEarned" header="# Badges" :sortable="true" :class="{'flex': responsive.md.value }">
                 <template #header>
-                  <i class="fa-solid fa-award mr-1" :class="colors.getTextClass(5)" aria-hidden="true"></i>
+                  <i class="fa-solid fa-award mr-1" :class="colors.getTextClass(6)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
                   <Tag>{{ slotProps.data.numBadgesEarned }}</Tag> / {{ userProgress.numTotalBadges}}
