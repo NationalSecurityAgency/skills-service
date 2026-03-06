@@ -329,7 +329,6 @@ class AppController {
     @ResponseBody
     TableResult getQuizRuns(@RequestParam(name = "query") String userQuery,
                             @RequestParam(name = "nameQuery", defaultValue = "") String nameQuery,
-                            @RequestParam(required = false) UserQuizAttempt.QuizAttemptStatus quizAttemptStatus,
                             @RequestParam int limit,
                             @RequestParam int page,
                             @RequestParam String orderBy,
@@ -338,7 +337,7 @@ class AppController {
                             @RequestParam(required = false) String endDate) {
         PageRequest pageRequest = TablePageUtil.validateAndConstructQuizPageRequest(limit, page, orderBy, ascending)
         List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
-        return globalMetricsService.getQuizRuns(userQuery, nameQuery, quizAttemptStatus, pageRequest, dates[0], dates[1]);
+        return globalMetricsService.getQuizRuns(userQuery, nameQuery, null, pageRequest, dates[0], dates[1]);
     }
 
     @RequestMapping(value = "/progress-metrics/{userId}", method =  RequestMethod.GET, produces = "application/json")

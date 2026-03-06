@@ -1,0 +1,178 @@
+/**
+ * Copyright 2026 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package skills.intTests.metrics.globalUserProgress
+
+import groovy.json.JsonOutput
+import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsService
+import skills.services.quiz.QuizQuestionType
+import skills.storage.model.QuizDefParent
+import skills.storage.model.UserQuizAttempt
+
+import static skills.storage.model.UserQuizAttempt.QuizAttemptStatus.PASSED
+import static skills.storage.model.UserQuizAttempt.QuizAttemptStatus.FAILED
+import static skills.storage.model.UserQuizAttempt.QuizAttemptStatus.INPROGRESS
+
+
+class GlobalQuizRunsSpecs extends DefaultIntSpec {
+    List<SkillsService> users
+    List quizzes
+    List attempts
+
+    def setup() {
+        users = getRandomUsers(10).collect {createService(it) }
+        quizzes = (1..5).collect { createQuiz(it)}
+
+        attempts = []
+        attempts << runQuiz(users[9], quizzes[1])
+        attempts << runQuiz(users[4], quizzes[2], false)
+        attempts << runQuiz(users[1], quizzes[0], false)
+        attempts << runQuiz(users[6], quizzes[3], false)
+        attempts << runQuiz(users[0], quizzes[1])
+        attempts << runQuiz(users[3], quizzes[0], false)
+        attempts << runQuiz(users[5], quizzes[1])
+        attempts << runQuiz(users[1], quizzes[4], true)
+        attempts << runQuiz(users[7], quizzes[1])
+        attempts << runQuiz(users[2], quizzes[0], false)
+
+        attempts << runQuiz(users[3], quizzes[2])
+        attempts << runQuiz(users[4], quizzes[0], true)
+        attempts << runQuiz(users[8], quizzes[1])
+        attempts << runQuiz(users[1], quizzes[0], false)
+        attempts << runQuiz(users[5], quizzes[3], true, false)
+        attempts << runQuiz(users[0], quizzes[0])
+        attempts << runQuiz(users[6], quizzes[1])
+        attempts << runQuiz(users[3], quizzes[0], true)
+        attempts << runQuiz(users[2], quizzes[1])
+        attempts << runQuiz(users[4], quizzes[1])
+
+        attempts << runQuiz(users[1], quizzes[1])
+        attempts << runQuiz(users[0], quizzes[4], true, false)
+        attempts << runQuiz(users[1], quizzes[0], true)
+        attempts << runQuiz(users[3], quizzes[1])
+    }
+
+    def "get empty quiz runs progress"() {
+        quizDefRepo.deleteAll()
+        projDefRepo.deleteAll()
+        when:
+        def res = skillsService.getGlobalQuizRuns()
+        then:
+        res.data == []
+        res.count == 0
+        res.totalCount == 0
+    }
+
+    def "get quiz runs for multiple users and different quizzes"() {
+        when:
+        def resPage1 = skillsService.getGlobalQuizRuns()
+        def resPage2 = skillsService.getGlobalQuizRuns('', '', 10, 2)
+        def resPage3 = skillsService.getGlobalQuizRuns('', '', 10, 3)
+
+
+        assertQuiz(resPage1.data[0], new QValidInfo(attemptId: attempts[0].id, uId: users[9].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage1.data[1], new QValidInfo(attemptId: attempts[1].id, uId: users[4].userName, qId: quizzes[2].quizId, qName: quizzes[2].name, status: FAILED, numCorrect: 0))
+        assertQuiz(resPage1.data[2], new QValidInfo(attemptId: attempts[2].id, uId: users[1].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: FAILED, numCorrect: 0))
+        assertQuiz(resPage1.data[3], new QValidInfo(attemptId: attempts[3].id, uId: users[6].userName, qId: quizzes[3].quizId, qName: quizzes[3].name, status: FAILED, numCorrect: 0))
+        assertQuiz(resPage1.data[4], new QValidInfo(attemptId: attempts[4].id, uId: users[0].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage1.data[5], new QValidInfo(attemptId: attempts[5].id, uId: users[3].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: FAILED, numCorrect: 0))
+        assertQuiz(resPage1.data[6], new QValidInfo(attemptId: attempts[6].id, uId: users[5].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage1.data[7], new QValidInfo(attemptId: attempts[7].id, uId: users[1].userName, qId: quizzes[4].quizId, qName: quizzes[4].name, status: PASSED))
+        assertQuiz(resPage1.data[8], new QValidInfo(attemptId: attempts[8].id, uId: users[7].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage1.data[9], new QValidInfo(attemptId: attempts[9].id, uId: users[2].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: FAILED, numCorrect: 0))
+
+        assertQuiz(resPage2.data[0], new QValidInfo(attemptId: attempts[10].id, uId: users[3].userName, qId: quizzes[2].quizId, qName: quizzes[2].name, status: PASSED))
+        assertQuiz(resPage2.data[1], new QValidInfo(attemptId: attempts[11].id, uId: users[4].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: PASSED))
+        assertQuiz(resPage2.data[2], new QValidInfo(attemptId: attempts[12].id, uId: users[8].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage2.data[3], new QValidInfo(attemptId: attempts[13].id, uId: users[1].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: FAILED, numCorrect: 0))
+        assertQuiz(resPage2.data[4], new QValidInfo(attemptId: attempts[14].id, uId: users[5].userName, qId: quizzes[3].quizId, qName: quizzes[3].name, status: INPROGRESS, numCorrect: 0))
+        assertQuiz(resPage2.data[5], new QValidInfo(attemptId: attempts[15].id, uId: users[0].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: PASSED))
+        assertQuiz(resPage2.data[6], new QValidInfo(attemptId: attempts[16].id, uId: users[6].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage2.data[7], new QValidInfo(attemptId: attempts[17].id, uId: users[3].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: PASSED))
+        assertQuiz(resPage2.data[8], new QValidInfo(attemptId: attempts[18].id, uId: users[2].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage2.data[9], new QValidInfo(attemptId: attempts[19].id, uId: users[4].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+
+        assertQuiz(resPage3.data[0], new QValidInfo(attemptId: attempts[20].id, uId: users[1].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage3.data[1], new QValidInfo(attemptId: attempts[21].id, uId: users[0].userName, qId: quizzes[4].quizId, qName: quizzes[4].name, status: INPROGRESS, numCorrect: 0))
+        assertQuiz(resPage3.data[2], new QValidInfo(attemptId: attempts[22].id, uId: users[1].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: PASSED))
+        assertQuiz(resPage3.data[3], new QValidInfo(attemptId: attempts[23].id, uId: users[3].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        then:
+        resPage1.data.size() == 10
+        resPage2.data.size() == 10
+        resPage3.data.size() == 4
+
+        resPage1.count == 24
+        resPage1.totalCount == 24
+        resPage2.count == 24
+        resPage2.totalCount == 24
+        resPage3.count == 24
+        resPage3.totalCount == 24
+    }
+    static class QValidInfo {
+        Integer attemptId
+        String uId
+        String qId
+        String qName
+        UserQuizAttempt.QuizAttemptStatus status
+        QuizDefParent.QuizType type = QuizDefParent.QuizType.Quiz
+        String uTag = null
+        Integer numCorrect = 1
+        Integer totalAnswers = 1
+    }
+
+    private assertQuiz(def res, QValidInfo quizRunValidInfo) {
+        String userIdForDisplay = userAttrsRepo.findByUserIdIgnoreCase(quizRunValidInfo.uId).userIdForDisplay
+        assert res.attemptId == quizRunValidInfo.attemptId
+        assert res.userId == quizRunValidInfo.uId
+        assert res.userIdForDisplay == userIdForDisplay
+        assert res.quizId == quizRunValidInfo.qId
+        assert res.quizName == quizRunValidInfo.qName
+        assert res.status == quizRunValidInfo.status.toString()
+        assert res.quizType == quizRunValidInfo.type.toString()
+        assert res.userTag == quizRunValidInfo.uTag
+        assert res.numberCorrect == quizRunValidInfo.numCorrect
+        assert res.totalAnswers == quizRunValidInfo.totalAnswers
+    }
+
+
+    private def createQuiz(int num) {
+        def quiz = QuizDefFactory.createQuiz(num)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createChoiceQuestion(num, 1, 2)
+        skillsService.createQuizQuestionDef(question)
+
+        return quiz
+    }
+
+    private def runQuiz (SkillsService user, def quiz, boolean pass = true, boolean complete = true) {
+        def quizInfo = user.getQuizInfo(quiz.quizId)
+        def quizAttempt = user.startQuizAttempt(quiz.quizId).body
+        quizAttempt.questions.eachWithIndex { it, index ->
+            int answerIndex = 0
+            if (it.questionType == QuizQuestionType.SingleChoice.toString()) {
+                answerIndex = pass ? 0 : 1
+            }
+            user.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[index].answerOptions[answerIndex].id, [isSelected: true, answerText: 'This is user provided answer'])
+        }
+
+        if (complete) {
+            user.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        }
+
+        return quizAttempt
+    }
+}
