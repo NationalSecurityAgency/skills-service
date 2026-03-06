@@ -51,6 +51,7 @@ interface GlobalProgressMetricsRepo extends JpaRepository<GlobalMetricsDummyEnti
         Integer getNumSurveys()
         Integer getNumSurveyCompleted()
         Integer getNumSurveyInProgress()
+        @Nullable
         String getUserTag()
     }
 

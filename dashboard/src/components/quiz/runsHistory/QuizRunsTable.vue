@@ -344,7 +344,7 @@ const deleteRun = () => {
               optionLabel="label"
               @update:modelValue="onColumnToggle"
               placeholder="Optional Fields"
-              data-cy="skillsTable-additionalColumns"/>
+              data-cy="quizRunTable-additionalColumns"/>
         </div>
       </template>
 
@@ -401,7 +401,7 @@ const deleteRun = () => {
           <div v-else-if="slotProps.field === 'started'">
             <DateCell :value="slotProps.data[col.key]"/>
           </div>
-          <div v-else-if="slotProps.field === 'results'">
+          <div v-else-if="slotProps.field === 'results'"  :data-cy="`row${slotProps.index}-results`">
             <div>
               <Badge severity="success">{{ slotProps.data.numberCorrect }}</Badge>
               correct

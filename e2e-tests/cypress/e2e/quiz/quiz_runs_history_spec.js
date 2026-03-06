@@ -131,6 +131,8 @@ describe('Quiz Runs History Tests', () => {
         cy.runQuizForUser(1, 1, [{selectedIndex: [1]}]);
         cy.visit('/administrator/quizzes/quiz1/runs');
         cy.wait('@quizRuns')
+        cy.get('[data-cy="quizRunTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Runtime"]').click()
         cy.get(`${tableSelector} [data-pc-name="pcrowperpagedropdown"]`).click().get('[data-pc-section="option"]').contains('50').click();
 
         cy.get('[data-cy="row0-runtime"]').should('have.text', '0 ms')
@@ -594,18 +596,22 @@ describe('Quiz Runs History Tests', () => {
         cy.runQuizForUser(1, 10, [{selectedIndex: [0]}, {selectedIndex: [0, 2]}, {selectedIndex: [2]}, {selectedIndex: [0]}])
 
         cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.get('[data-cy="quizRunTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Results"]').click()
+        cy.realPress('Escape');
 
+        cy.get('[data-cy="row0-results"]').should('be.visible')
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Passed' }, { colIndex: 5, value: '4 correctout of 4 (100%)' }],
-            [{ colIndex: 0, value: 'user9' }, { colIndex: 2, value: 'Passed' }, { colIndex: 5, value: '4 correctout of 4 (100%)' }],
-            [{ colIndex: 0, value: 'user8' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '3 correctout of 4 (75%)' }],
-            [{ colIndex: 0, value: 'user7' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '3 correctout of 4 (75%)' }],
-            [{ colIndex: 0, value: 'user6' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '2 correctout of 4 (50%)' }],
-            [{ colIndex: 0, value: 'user5' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '2 correctout of 4 (50%)' }],
-            [{ colIndex: 0, value: 'user4' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '2 correctout of 4 (50%)' }],
-            [{ colIndex: 0, value: 'user3' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '1 correctout of 4 (25%)' }],
-            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '1 correctout of 4 (25%)' }],
-            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Failed' }, { colIndex: 5, value: '1 correctout of 4 (25%)' }],
+            [{ colIndex: 0, value: 'user10' }, { colIndex: 2, value: 'Passed' }, { colIndex: 3, value: '4 correct out of 4 (100%)' }],
+            [{ colIndex: 0, value: 'user9' }, { colIndex: 2, value: 'Passed' }, { colIndex: 3, value: '4 correct out of 4 (100%)' }],
+            [{ colIndex: 0, value: 'user8' }, { colIndex: 2, value: 'Failed' }, { colIndex: 3, value: '3 correct out of 4 (75%)' }],
+            [{ colIndex: 0, value: 'user7' }, { colIndex: 2, value: 'Failed' }, { colIndex: 3, value: '3 correct out of 4 (75%)' }],
+            [{ colIndex: 0, value: 'user6' }, { colIndex: 2, value: 'Failed' }, { colIndex: 3, value: '2 correct out of 4 (50%)' }],
+            [{ colIndex: 0, value: 'user5' }, { colIndex: 2, value: 'Failed' }, { colIndex: 3, value: '2 correct out of 4 (50%)' }],
+            [{ colIndex: 0, value: 'user4' }, { colIndex: 2, value: 'Failed' }, { colIndex: 3, value: '2 correct out of 4 (50%)' }],
+            [{ colIndex: 0, value: 'user3' }, { colIndex: 2, value: 'Failed' }, { colIndex: 3, value: '1 correct out of 4 (25%)' }],
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'Failed' }, { colIndex: 3, value: '1 correct out of 4 (25%)' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Failed' }, { colIndex: 3, value: '1 correct out of 4 (25%)' }],
         ], 10);
     });
 });
