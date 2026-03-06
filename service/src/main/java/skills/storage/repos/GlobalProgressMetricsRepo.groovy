@@ -51,11 +51,12 @@ interface GlobalProgressMetricsRepo extends JpaRepository<GlobalMetricsDummyEnti
         Integer getNumSurveys()
         Integer getNumSurveyCompleted()
         Integer getNumSurveyInProgress()
+        String getUserTag()
     }
 
     @Query(value = '''SELECT
     COALESCE(projectsAndAchievements.user_id, quizzes.user_id) as userId,
-    COALESCE(userAttrsFromProj.user_id_for_display, userAttrsFromQuiz.user_id_for_display) as userIdForDisplay,
+    userAttrs.user_id_for_display as userIdForDisplay,
     COALESCE(projectsAndAchievements.numProjects, 0) as numProjects,
     COALESCE(projectsAndAchievements.projectLevelsEarned, 0) as projectLevelsEarned,
     COALESCE(projectsAndAchievements.subjectLevelsEarned, 0) as subjectLevelsEarned,
@@ -68,7 +69,8 @@ interface GlobalProgressMetricsRepo extends JpaRepository<GlobalMetricsDummyEnti
     COALESCE(quizzes.quizInProgress, 0) as numQuizzesInProgress,
     COALESCE(quizzes.surveyTotal, 0) as numSurveys,
     COALESCE(quizzes.surveyCompleted, 0) as numSurveyCompleted,
-    COALESCE(quizzes.surveyInProgress, 0) as numSurveyInProgress
+    COALESCE(quizzes.surveyInProgress, 0) as numSurveyInProgress,
+    ut.value as userTag
 FROM (
          SELECT
              projects.user_id,
@@ -131,12 +133,15 @@ FROM (
         and (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
     group by uqa.user_id
 ) quizzes ON projectsAndAchievements.user_id = quizzes.user_id
- LEFT JOIN user_attrs userAttrsFromProj ON (projectsAndAchievements.user_id = userAttrsFromProj.user_id)
- LEFT JOIN user_attrs userAttrsFromQuiz ON (quizzes.user_id = userAttrsFromQuiz.user_id)''', nativeQuery = true)
+    LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :userTagKey group by ut.user_id) ut ON (ut.user_id=(COALESCE(projectsAndAchievements.user_id, quizzes.user_id)))
+    LEFT JOIN user_attrs userAttrs ON (COALESCE(projectsAndAchievements.user_id, quizzes.user_id) = userAttrs.user_id)
+    where (:userTagValueFilter = '' OR lower(ut.value) like lower(concat('%', :userTagValueFilter, '%')))''', nativeQuery = true)
     Page<UserProgressMetric> findUsersOverallProgress(
             @Param("projectIds") List<String> projectIds,
             @Param("quizIds") List<String> quizIds,
             @Param("userQuery") String userQuery,
+            @Param("userTagKey") String userTagKey,
+            @Param("userTagValueFilter") String userTagValueFilter,
             Pageable pageable)
 
     static interface SingleUserProjectProgress {

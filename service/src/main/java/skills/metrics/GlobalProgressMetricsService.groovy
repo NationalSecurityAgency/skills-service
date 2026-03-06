@@ -18,6 +18,7 @@ package skills.metrics
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
@@ -63,6 +64,9 @@ class GlobalProgressMetricsService {
         }
     }
 
+    @Value('${skills.config.ui.usersTableAdditionalUserTagKey:}')
+    String usersTableAdditionalUserTagKey
+
     @Autowired
     UserInfoService userInfoService
 
@@ -78,12 +82,18 @@ class GlobalProgressMetricsService {
     @Autowired
     QuizDefService quizDefService
 
-    UsersOverallProgressResult loadUsersOverallProgress(String userQuery, PageRequest pageRequest) {
+    UsersOverallProgressResult loadUsersOverallProgress(String userQuery, String userTagValueFilter, PageRequest pageRequest) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
         List<String> projectIds = projectIdsAndQuizIds.projectIds
         List<String> quizIds = projectIdsAndQuizIds.quizIds
 
-        Page<GlobalProgressMetricsRepo.UserProgressMetric> userProgressMetricPage = globalProgressMetricsRepo.findUsersOverallProgress(projectIds, quizIds, userQuery ?: '',pageRequest)
+        Page<GlobalProgressMetricsRepo.UserProgressMetric> userProgressMetricPage = globalProgressMetricsRepo.findUsersOverallProgress(
+                projectIds,
+                quizIds,
+                userQuery ?: '',
+                usersTableAdditionalUserTagKey ?: '',
+                userTagValueFilter ?: '',
+                pageRequest)
         List<GlobalMetricsUserItem> metricItemsPage = userProgressMetricPage.getContent().collect {
             new GlobalMetricsUserItem(
                     userId: it.userId,
@@ -99,7 +109,8 @@ class GlobalProgressMetricsService {
                     numQuizzesInProgress: it.numQuizzesInProgress,
                     numSurveys: it.numSurveys,
                     numSurveysCompleted: it.numSurveyCompleted,
-                    numSurveysInProgress: it.numSurveyInProgress
+                    numSurveysInProgress: it.numSurveyInProgress,
+                    userTag: it.userTag ?: ''
             )
         }
 

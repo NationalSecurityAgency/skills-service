@@ -318,10 +318,11 @@ class AppController {
                                                             @RequestParam(required = false, defaultValue = "1") int page,
                                                             @RequestParam(required = false, defaultValue = "userId") String orderBy,
                                                             @RequestParam(required = false, defaultValue = "true") Boolean ascending,
-                                                            @RequestParam(required = false, defaultValue = "") String userQuery) {
+                                                            @RequestParam(required = false, defaultValue = "") String userQuery,
+                                                            @RequestParam(required = false, defaultValue = "") String userTagFilter) {
 
         PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(limit, page, orderBy, ascending);
-        return globalMetricsService.loadUsersOverallProgress(userQuery, pageRequest)
+        return globalMetricsService.loadUsersOverallProgress(userQuery, userTagFilter, pageRequest)
     }
 
     @RequestMapping(value = "/quiz-runs", method = RequestMethod.GET, produces = "application/json")

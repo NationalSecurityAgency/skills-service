@@ -36,4 +36,6 @@ class GlobalMetricsUserItem {
 
     Integer numBadgesEarned
     Integer numGlobalBadgesEarned
+
+    String userTag
 }
