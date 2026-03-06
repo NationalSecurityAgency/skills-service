@@ -1297,7 +1297,9 @@ class SkillsService {
                 limit: limit,
                 page: page,
                 orderBy: orderBy,
-                ascending: ascending
+                ascending: ascending,
+                startDate: startDate,
+                endDate: endDate
         ]
         wsHelper.appGet(endpoint,props)
     }
