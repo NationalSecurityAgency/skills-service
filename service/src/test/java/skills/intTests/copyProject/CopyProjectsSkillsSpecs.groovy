@@ -338,6 +338,19 @@ class CopyProjectsSkillsSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId,
                 [[projectId: p1.projectId, skillId: p1Skills[1].skillId]])
 
+        def badge1 = createBadge(2, 5)
+        skillsService.createBadge(badge1)
+        skillsService.assignSkillToBadge(p2.projectId, badge1.badgeId, p1Skills[1].skillId)
+        badge1.enabled = true
+        skillsService.updateBadge(badge1)
+
+        def badge2 = createBadge(2, 6)
+        skillsService.createBadge(badge2)
+        skillsService.assignSkillToBadge(p2.projectId, badge2.badgeId, p1Skills[1].skillId)
+        skillsService.assignSkillToBadge(p2.projectId, badge2.badgeId, gSkill1.skillId)
+        badge2.enabled = true
+        skillsService.updateBadge(badge2)
+
         when:
         def projToCopy = createProject(3)
         skillsService.copyProject(p2.projectId, projToCopy)
@@ -351,6 +364,8 @@ class CopyProjectsSkillsSpecs extends DefaultIntSpec {
         def originalGroup = skillsService.getSkillsForGroup(p2.projectId, p2skillsGroup.skillId)
         def copiedGroup = skillsService.getSkillsForGroup(projToCopy.projectId, p2skillsGroup.skillId)
 
+        def copiedBadge1 = skillsService.getBadge([projectId: projToCopy.projectId, badgeId: badge1.badgeId])
+        def copiedBadge2 = skillsService.getBadge([projectId: projToCopy.projectId, badgeId: badge2.badgeId])
         then:
         origProjStats.numSkills == 4
         origProjStats.numSkillsDisabled == 0
@@ -363,6 +378,14 @@ class CopyProjectsSkillsSpecs extends DefaultIntSpec {
 
         originalGroup.skillId == [gSkill1.skillId, gSkill2.skillId, p1Skills[0].skillId]
         copiedGroup.skillId == [gSkill1.skillId, gSkill2.skillId]
+
+        copiedBadge1.numSkills == 0
+        copiedBadge1.totalPoints == 0
+        copiedBadge1.enabled == "false"
+
+        copiedBadge2.numSkills == 1
+        copiedBadge2.enabled == "true"
+        copiedBadge2.totalPoints == 500
     }
 
     def "validate reused skills were copied"() {

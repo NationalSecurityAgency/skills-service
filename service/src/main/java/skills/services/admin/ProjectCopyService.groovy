@@ -633,6 +633,8 @@ class ProjectCopyService {
                 }
                 badgeAdminService.saveBadge(toProj.projectId, fromBadge.skillId, badgeRequest)
                 List<SkillDefPartialRes> badgeSkills = skillsAdminService.getSkillsForBadge(fromProject.projectId, fromBadge.skillId)
+                // imported skills are not copied
+                badgeSkills = badgeSkills.findAll { !it.copiedFromProjectId}
                 badgeSkills.each { SkillDefPartialRes fromBadgeSkill ->
                     badgeAdminService.addSkillToBadge(toProj.projectId, badgeRequest.badgeId, fromBadgeSkill.skillId)
                 }
