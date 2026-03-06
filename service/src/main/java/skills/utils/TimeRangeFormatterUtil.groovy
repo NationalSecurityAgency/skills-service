@@ -15,8 +15,7 @@
  */
 package skills.utils
 
-import java.text.SimpleDateFormat
-import java.time.LocalDate
+
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -28,8 +27,8 @@ class TimeRangeFormatterUtil {
 
     static List<Date> formatTimeRange(String start, String end, Boolean exactTime = true) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        LocalDateTime startDate = start ? LocalDateTime.parse(start, formatter) : LocalDateTime.parse(defaultStart, formatter) //start ? format.parse(start) : format.parse(defaultStart)
-        LocalDateTime endDate = end ? LocalDateTime.parse(end, formatter) : LocalDateTime.parse(defaultEnd, formatter)
+        LocalDateTime startDate = start && !start.equalsIgnoreCase("null") ? LocalDateTime.parse(start, formatter) : LocalDateTime.parse(defaultStart, formatter) //start ? format.parse(start) : format.parse(defaultStart)
+        LocalDateTime endDate = end && !start.equalsIgnoreCase("null") ? LocalDateTime.parse(end, formatter) : LocalDateTime.parse(defaultEnd, formatter)
 
         if(!exactTime) {
             startDate = startDate.toLocalDate().atTime(LocalTime.MIN)
