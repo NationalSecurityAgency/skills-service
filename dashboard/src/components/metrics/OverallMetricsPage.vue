@@ -21,10 +21,24 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import MetricsService from '@/components/metrics/MetricsService.js'
 import OverallMetricsCards from '@/components/utils/cards/OverallMetricsCards.vue'
 import OverallNumUsersPerDay from '@/components/metrics/common/OverallNumUsersPerDay.vue'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import UserTagTable from '@/components/metrics/common/UserTagTable.vue'
+import UserTagChart from '@/components/metrics/common/UserTagChart.vue'
+
+const appConfig = useAppConfig();
+const tagCharts = ref(null);
 
 onMounted(() => {
   loadData()
+  buildTagCharts();
 })
+const buildTagCharts = () => {
+  if (appConfig.projectMetricsTagCharts) {
+    const json = appConfig.overallMetricsTagCharts;
+    tagCharts.value = JSON.parse(json);
+  }
+  return [];
+}
 
 const isLoading = ref(true)
 const metricsData = ref({})
@@ -65,6 +79,19 @@ const loadData = () => {
         <template #content>
           <div class="p-5">
             <OverallNumUsersPerDay :project-ids="projectIds" :quiz-ids="quizIds"/>
+            <div v-if="tagCharts"
+                 class="flex flex-col gap-4 mt-4"
+                 data-cy="userTagCharts">
+              <div v-for="(tagChart, index) in tagCharts" :key="`${tagChart.key}-${index}`" style="min-width: 30vw;">
+                <user-tag-table v-if="tagChart.type === 'table'"
+                                :tag-chart="tagChart" :project-ids="projectIds" :quiz-ids="quizIds" />
+                <user-tag-chart v-if="tagChart.type !== 'table'"
+                                :project-ids="projectIds" :quiz-ids="quizIds"
+                                :chart-type="tagChart.type"
+                                :tag-key="tagChart.key"
+                                :title="tagChart.title" />
+              </div>
+            </div>
           </div>
         </template>
       </Card>

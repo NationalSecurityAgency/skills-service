@@ -148,6 +148,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const approvalConfUserTagKey = computed(() => config.value.approvalConfUserTagKey)
   const approvalConfUserTagLabel = computed(() => config.value.approvalConfUserTagLabel)
   const projectMetricsTagCharts = computed(() => config.value.projectMetricsTagCharts)
+  const overallMetricsTagCharts = computed(() => config.value.overallMetricsTagCharts)
   const maxDailyUserEvents = computed(() => config.value.maxDailyUserEvents)
   const allowedVideoUploadMimeTypes = computed(() => config.value.allowedVideoUploadMimeTypes)
   const allowedSlidesUploadMimeTypes = computed(() => config.value.allowedSlidesUploadMimeTypes)
@@ -279,6 +280,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     approvalConfUserTagKey,
     approvalConfUserTagLabel,
     projectMetricsTagCharts,
+    overallMetricsTagCharts,
     maxDailyUserEvents,
     allowedSlidesUploadMimeTypes,
     allowedVideoUploadMimeTypes,

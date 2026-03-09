@@ -26,10 +26,24 @@ import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnounc
 import {useStorage} from "@vueuse/core";
 
 const props = defineProps({
-  tagChart: Object
+  tagChart: Object,
+  projectIds: {
+    type: Array,
+    required: false,
+    default: [],
+  },
+  quizIds: {
+    type: Array,
+    required: false,
+    default: [],
+  },
 })
 const route = useRoute();
 const numberFormat = useNumberFormat()
+
+const isOverallMetrics = computed(() => {
+  return (props.projectIds && props.projectIds.length > 0) || (props.quizIds && props.quizIds.length > 0);
+});
 
 onMounted(() => {
   loadData();
@@ -103,23 +117,28 @@ const loadData = (shouldHighlight = false) => {
     sortBy: table.value.options.sortBy === 'count' ? 'numUsers' : 'tag',
     fromDayFilter: dateRange.startDate,
     toDayFilter: dateRange.endDate,
+    projIds: props.projectIds,
+    quizIds: props.quizIds,
   };
-  MetricsService.loadChart(route.params.projectId, 'numUsersPerTagBuilder', params)
-      .then((dataFromServer) => {
-        let { items } = dataFromServer;
-        if (shouldHighlight && filters.value.tag && filters.value.tag.length > 0) {
-          items = items.map((item) => {
-            const searchStringNorm = filters.value.tag.trim().toLowerCase();
-            const index = item.value.toLowerCase().indexOf(searchStringNorm);
-            const htmlValue = `${item.value.substring(0, index)}<mark>${item.value.substring(index, index + searchStringNorm.length)}</mark>${item.value.substring(index + searchStringNorm.length)}`;
-            return { htmlValue, ...item };
-          });
-        }
-        table.value.items = items;
-        table.value.options.pagination.totalRows = dataFromServer.totalNumItems;
-        isLoading.value = false;
-        table.value.options.busy = false;
+  const metricsLoader = isOverallMetrics.value ?
+    MetricsService.getOverallMetricsChart('overallNumUsersPerTagBuilder', params) :
+    MetricsService.loadChart(route.params.projectId, 'numUsersPerTagBuilder', params);
+
+  metricsLoader.then((dataFromServer) => {
+    let { items } = dataFromServer;
+    if (shouldHighlight && filters.value.tag && filters.value.tag.length > 0) {
+      items = items.map((item) => {
+        const searchStringNorm = filters.value.tag.trim().toLowerCase();
+        const index = item.value.toLowerCase().indexOf(searchStringNorm);
+        const htmlValue = `${item.value.substring(0, index)}<mark>${item.value.substring(index, index + searchStringNorm.length)}</mark>${item.value.substring(index + searchStringNorm.length)}`;
+        return { htmlValue, ...item };
       });
+    }
+    table.value.items = items;
+    table.value.options.pagination.totalRows = dataFromServer.totalNumItems;
+    isLoading.value = false;
+    table.value.options.busy = false;
+  });
 };
 
 const filterRange = ref([]);
@@ -168,9 +187,12 @@ const filterRange = ref([]);
           <Column field="value" :header="tagChart.tagLabel ? tagChart.tagLabel : 'Tag'" sortable>
             <template #body="slotProps">
               <span :data-cy="`cell_tagValue-${slotProps.data.value}`">
-                <router-link :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: slotProps.data.value } }" :data-cy="`userTagTable-${tagKey}_viewMetricsLink`">
+                <router-link v-if="projectId" :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: slotProps.data.value } }" :data-cy="`userTagTable-${tagKey}_viewMetricsLink`">
                   <span v-if="slotProps.data.htmlValue" v-html="slotProps.data.htmlValue"></span><span v-else>{{ slotProps.data.value }}</span>
                 </router-link>
+                <span v-else>
+                  <span v-if="slotProps.data.htmlValue" v-html="slotProps.data.htmlValue"></span><span v-else>{{ slotProps.data.value }}</span>
+                </span>
               </span>
             </template>
           </Column>

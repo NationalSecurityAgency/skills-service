@@ -312,4 +312,102 @@ FROM (
             @Param("start") Date start,
             @Param("groupingType") String groupingType)
 
+    static interface UserTagCount {
+        Integer getNumUsers()
+        String getTag()
+    }
+
+    final static String SELECT_DISTINCT_USER_BY_TAG_SQL = '''WITH
+        project_users AS (
+            SELECT DISTINCT ups.user_id, ut.value as tag
+            FROM user_performed_skill ups
+            JOIN user_tags ut ON ups.user_id = ut.user_id
+            WHERE ups.project_id IN :projectIds 
+            AND ups.performed_on >= :startDate
+            AND ups.performed_on <= :endDate
+            AND ut.key = :tagKey
+            AND ut.value IS NOT NULL
+            AND (LOWER(ut.value) LIKE LOWER(CONCAT('%', :tagFilter, '%')) OR :tagFilter is null)
+            AND NOT EXISTS (SELECT 1 FROM archived_users au WHERE au.user_id = ups.user_id AND au.project_id IN :projectIds)
+        ),
+        quiz_users AS (
+            SELECT DISTINCT uqa.user_id, ut.value as tag
+            FROM user_quiz_attempt uqa
+            JOIN quiz_definition qd ON uqa.quiz_definition_ref_id = qd.id
+            JOIN user_tags ut ON uqa.user_id = ut.user_id
+            WHERE qd.quiz_id IN :quizIds
+            AND uqa.started >= :startDate
+            AND uqa.started <= :endDate
+            AND ut.key = :tagKey
+            AND ut.value IS NOT NULL
+            AND (LOWER(ut.value) LIKE LOWER(CONCAT('%', :tagFilter, '%')) OR :tagFilter is null)
+        ),
+        combined_users AS (
+            SELECT user_id, tag FROM project_users
+            UNION ALL
+            SELECT user_id, tag FROM quiz_users
+        ),
+        tag_counts AS (
+            SELECT COUNT(DISTINCT combined_users.user_id) as numUsers, combined_users.tag as tag
+            FROM combined_users
+            GROUP BY combined_users.tag
+        )
+        SELECT numUsers, tag from tag_counts'''
+
+    final static String COUNT_DISTINCT_USER_BY_TAG_SQL = '''WITH
+        project_users AS (
+            SELECT DISTINCT ups.user_id, ut.value as tag
+            FROM user_performed_skill ups
+            JOIN user_tags ut ON ups.user_id = ut.user_id
+            WHERE ups.project_id IN :projectIds 
+            AND ups.performed_on >= :startDate
+            AND ups.performed_on <= :endDate
+            AND ut.key = :tagKey
+            AND ut.value IS NOT NULL
+            AND (LOWER(ut.value) LIKE LOWER(CONCAT('%', :tagFilter, '%')) OR :tagFilter is null)
+            AND NOT EXISTS (SELECT 1 FROM archived_users au WHERE au.user_id = ups.user_id AND au.project_id IN :projectIds)
+        ),
+        quiz_users AS (
+            SELECT DISTINCT uqa.user_id, ut.value as tag
+            FROM user_quiz_attempt uqa
+            JOIN quiz_definition qd ON uqa.quiz_definition_ref_id = qd.id
+            JOIN user_tags ut ON uqa.user_id = ut.user_id
+            WHERE qd.quiz_id IN :quizIds
+            AND uqa.started >= :startDate
+            AND uqa.started <= :endDate
+            AND ut.key = :tagKey
+            AND ut.value IS NOT NULL
+            AND (LOWER(ut.value) LIKE LOWER(CONCAT('%', :tagFilter, '%')) OR :tagFilter is null)
+        ),
+        combined_users AS (
+            SELECT user_id, tag FROM project_users
+            UNION ALL
+            SELECT user_id, tag FROM quiz_users
+        ),
+        tag_counts AS (
+            SELECT COUNT(DISTINCT combined_users.user_id) as numUsers, combined_users.tag as tag
+            FROM combined_users
+            GROUP BY combined_users.tag
+        )
+        SELECT COUNT(*) from tag_counts'''
+
+    @Nullable
+    @Query(value = SELECT_DISTINCT_USER_BY_TAG_SQL, nativeQuery = true)
+    List<UserTagCount> findUserTagCountByProjectIdInAndUserTagFilter(@Param("projectIds") List<String> projectIds,
+                                                                     @Param("quizIds") List<String> quizIds,
+                                                                     @Param("tagKey") String tagKey,
+                                                                     @Nullable @Param("tagFilter") String tagFilter,
+                                                                     @Param("startDate") Date startDate,
+                                                                     @Param("endDate") Date endDate,
+                                                                     Pageable pageable)
+
+
+    @Query(value = COUNT_DISTINCT_USER_BY_TAG_SQL, nativeQuery = true)
+    Integer countUserTagCountByProjectIdInAndUserTagFilter(@Param("projectIds") List<String> projectIds,
+                                                           @Param("quizIds") List<String> quizIds,
+                                                           @Param("tagKey") String tagKey,
+                                                           @Nullable @Param("tagFilter") String tagFilter,
+                                                           @Param("startDate") Date startDate,
+                                                           @Param("endDate") Date endDate)
+
 }

@@ -32,11 +32,31 @@ describe('Global/Overall Metrics', () => {
         createProj(2)
         createProj(3)
 
-        cy.reportSkill(1, 1, 'user1@skills.org')
+        const users = ['user1', 'user2']
+        cy.reportSkill(1, 1, users[0])
 
-        cy.reportSkill(1, 1, 'user2@skills.org', 'yesterday')
-        cy.reportSkill(1, 1, 'user2@skills.org')
+        cy.reportSkill(1, 1, users[1], 'yesterday')
+        cy.reportSkill(1, 1, users[1])
 
+        cy.createQuizDef(1)
+        cy.createQuizQuestionDef(1, 1)
+        cy.runQuizForUser(1, users[0], [{selectedIndex: [0]}], true)
+
+        cy.addUserTag([{
+            tagKey: 'dutyOrganization',
+            tags: ['ABC']
+        }, {
+            tagKey: 'dutyOrganization',
+            tags: ['ABC1']
+        }]);
+
+        cy.addUserTag([{
+            tagKey: 'adminOrganization',
+            tags: ['XYZ']
+        }, {
+            tagKey: 'adminOrganization',
+            tags: ['XYZ1']
+        }]);
     });
 
     after(() => {
