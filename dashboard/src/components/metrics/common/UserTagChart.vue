@@ -47,7 +47,21 @@ const props = defineProps({
     required: false,
     default: 'Users',
   },
+  projectIds: {
+    type: Array,
+    required: false,
+    default: [],
+  },
+  quizIds: {
+    type: Array,
+    required: false,
+    default: [],
+  },
 })
+
+const isOverallMetrics = computed(() => {
+  return (props.projectIds && props.projectIds.length > 0) || (props.quizIds && props.quizIds.length > 0);
+});
 
 onMounted(() => {
   chartJsOptions.value = setChartOptions()
@@ -72,34 +86,39 @@ const loadData = () => {
     tagFilter: '',
     fromDayFilter: dateRange.startDate,
     toDayFilter: dateRange.endDate,
+    projIds: props.projectIds,
+    quizIds: props.quizIds,
   };
+  const metricsLoader = isOverallMetrics.value ?
+      MetricsService.getOverallMetricsChart('overallNumUsersPerTagBuilder', params) :
+      MetricsService.loadChart(route.params.projectId, 'numUsersPerTagBuilder', params);
 
-  MetricsService.loadChart(route.params.projectId, 'numUsersPerTagBuilder', params)
-      .then((dataFromServer) => {
-        if (dataFromServer) {
-          const { items } = dataFromServer;
-          isEmpty.value = items.find((item) => item.count > 0) === undefined;
 
-          chartData.value = {
-            labels: items.map((item) => item.value),
-            datasets: [{
-              label: 'Number of Users',
-              data: items.map((item) => item.count),
-              backgroundColor: chartSupportColors.getBackgroundColorArray(items.length),
-              borderColor: chartSupportColors.getBorderColorArray(items.length),
-              borderWidth: 1,
-              borderRadius: 6,
-              maxBarThickness: 15,
-              minBarLength: 4,
-            }]
-          }
+  metricsLoader.then((dataFromServer) => {
+    if (dataFromServer) {
+      const { items } = dataFromServer;
+      isEmpty.value = items.find((item) => item.count > 0) === undefined;
 
-          if (dataFromServer.totalNumItems > params.pageSize) {
-            titleInternal.value = `${titleInternal.value} (Top ${params.pageSize})`;
-          }
-        }
-        isLoading.value = false;
-      });
+      chartData.value = {
+        labels: items.map((item) => item.value),
+        datasets: [{
+          label: 'Number of Users',
+          data: items.map((item) => item.count),
+          backgroundColor: chartSupportColors.getBackgroundColorArray(items.length),
+          borderColor: chartSupportColors.getBorderColorArray(items.length),
+          borderWidth: 1,
+          borderRadius: 6,
+          maxBarThickness: 15,
+          minBarLength: 4,
+        }]
+      }
+
+      if (dataFromServer.totalNumItems > params.pageSize) {
+        titleInternal.value = `${titleInternal.value} (Top ${params.pageSize})`;
+      }
+    }
+    isLoading.value = false;
+  });
 };
 
 const applyDateFilter = () => {
