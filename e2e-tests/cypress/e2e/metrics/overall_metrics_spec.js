@@ -17,6 +17,8 @@ var moment = require('moment-timezone');
 
 describe('Global/Overall Metrics', () => {
 
+    const userTagsTableSelector = '[data-cy="userTagsTable-dutyOrganization"]';
+
     before(() => {
         cy.beforeTestSuiteThatReusesData()
 
@@ -64,7 +66,66 @@ describe('Global/Overall Metrics', () => {
     });
 
     it('user progress page', () => {
+        cy.intercept('/app/overall-metrics/overallDistinctUsersOverTimeMetricsBuilder**').as('overallDistinctUsersOverTime');
         cy.visit('/administrator/overall-metrics');
+        cy.wait('@overallDistinctUsersOverTime');
+
+        cy.get('[data-cy="overallMetricsProjectsCard"]').should('be.visible');
+        cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"]').should('be.visible');
+        cy.get('[data-cy="overallMetricsBadgesCard"]').should('be.visible');
+
+        // verify that the cards have the correct content
+        cy.get('[data-cy="overallMetricsProjectsCard"]').should('contain', '3 Projects');
+        cy.get('[data-cy="overallMetricsProjectsCard"]').should('contain', '15 Skills');
+
+        cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"]').should('contain', '1 Quiz');
+        cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"]').should('contain', '0 Surveys');
+
+        cy.get('[data-cy="overallMetricsBadgesCard"]').should('contain', '0 Badges');
+        cy.get('[data-cy="overallMetricsBadgesCard"]').should('contain', '0 Global Badges');
+
+        cy.get('[data-cy="overallDistinctNumUsersOverTime"]').should('contain.text', 'Overall Users per day')
+        cy.get('[data-cy=overallDistinctNumUsersOverTime] [data-cy=timeLengthSelector]')
+          .contains('6 months')
+          .click();
+        cy.wait('@overallDistinctUsersOverTime');
+
+        cy.get('[data-cy=overallDistinctNumUsersOverTime] [data-cy=timeLengthSelector]')
+          .contains('1 year')
+          .click();
+        cy.wait('@overallDistinctUsersOverTime');
+
+        cy.get('[data-cy="userTagTableCard"]').should('contain.text', 'Users by Org')
+        cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]')
+          .contains('Org');
+
+        const expected = [
+            [{
+                colIndex: 0,
+                value: 'ABC'
+            }],[{
+                colIndex: 0,
+                value: 'ABC1'
+            }],
+        ];
+        cy.validateTable(userTagsTableSelector, expected, 10)
+        cy.get('[data-cy="userTagTable-dutyOrganization-tagFilter"]')
+          .type('ABC1');
+        cy.get('[ data-cy="userTagTable-dutyOrganization-filterBtn"]')
+          .click();
+
+        const expected2 = [
+            [{
+                colIndex: 0,
+                value: 'ABC1'
+            }],
+        ];
+        cy.validateTable(userTagsTableSelector, expected2, 10)
+        cy.get('[data-cy="userTagTable-dutyOrganization-clearBtn"]').click();
+        cy.validateTable(userTagsTableSelector, expected, 10)
+
+        cy.get('[data-cy="userTagChart"] [data-pc-section="header"]')
+          .contains('Users by Agency');
     });
 
 });

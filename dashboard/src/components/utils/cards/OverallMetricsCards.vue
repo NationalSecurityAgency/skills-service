@@ -40,18 +40,21 @@ const totalQuizzesAndSurveys = computed(() => {
     <media-info-card
         :title="`${data.numTotalProjects} ${pluralize.plural('Project', data.numTotalProjects)}`"
         :icon-class="`fa-solid fa-tasks ${colors.getTextClass(1)}`"
+        data-cy="overallMetricsProjectsCard"
         class="flex-1">
       <Tag>{{ data.numTotalSkills}}</Tag> {{pluralize.plural('Skill', data.numTotalSkills)}}
     </media-info-card>
     <media-info-card
         :title="`${totalQuizzesAndSurveys} ${pluralize.plural('Quiz', totalQuizzesAndSurveys)}/${pluralize.plural('Survey', totalQuizzesAndSurveys)}`"
         :icon-class="`fa-solid fa-spell-check ${colors.getTextClass(2)}`"
+        data-cy="overallMetricsQuizzesAndSurveysCard"
         class="flex-1">
       <Tag>{{ data.numTotalQuizzes}}</Tag> {{pluralize.plural('Quiz', data.numTotalQuizzes)}} and  <Tag>{{ data.numTotalSurveys}}</Tag> {{ pluralize.plural('Survey', data.numTotalSurveys)}}
     </media-info-card>
     <media-info-card
         :title="`${data.numTotalBadges} ${pluralize.plural('Badge', data.numTotalBadges)}`"
         :icon-class="`fa-solid fa-award ${colors.getTextClass(4)}`"
+        data-cy="overallMetricsBadgesCard"
         class="flex-1">
       <Tag>{{ data.numTotalGlobalBadges}}</Tag> Global {{ pluralize.plural('Badge', data.numTotalGlobalBadges) }}
     </media-info-card>
