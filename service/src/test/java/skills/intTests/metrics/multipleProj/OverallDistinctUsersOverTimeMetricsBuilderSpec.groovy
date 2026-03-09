@@ -180,9 +180,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createSkills(skills2)
         skillsService.createSkills(skills3)
 
-        List<Date> days
         TestDates testDates = new TestDates()
-        days = [
+        List<Date> days = [
                 testDates.getDateInPreviousWeek().minusDays(28).toDate(),
                 testDates.getDateInPreviousWeek().minusDays(21).toDate(),
                 testDates.getDateInPreviousWeek().minusDays(14).toDate(),
@@ -270,13 +269,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createQuizQuestionDefs(questions2)
         skillsService.createQuizQuestionDefs(questions3)
 
-        def quizInfo1 = skillsService.getQuizInfo(quiz1.quizId)
-        def quizInfo2 = skillsService.getQuizInfo(quiz2.quizId)
-        def quizInfo3 = skillsService.getQuizInfo(quiz3.quizId)
-
-        List<Date> days
         TestDates testDates = new TestDates()
-        days = [
+        List<Date> days = [
                 testDates.getDateInPreviousWeek().minusDays(28).toDate(),
                 testDates.getDateInPreviousWeek().minusDays(21).toDate(),
                 testDates.getDateInPreviousWeek().minusDays(14).toDate(),
@@ -290,13 +284,13 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
             days.eachWithIndex { Date date, int index ->
                 users.subList(0, index).each { String user ->
                     if (index >= 1) {
-                        runQuiz(user, quiz1, quizInfo1, true, date)
+                        runQuiz(user, quiz1, true, date)
                     }
                     if (index >= 2) {
-                        runQuiz(user, quiz2, quizInfo2, true, date)
+                        runQuiz(user, quiz2, true, date)
                     }
                     if (index >= 3) {
-                        runQuiz(user, quiz3, quizInfo3, true, date)
+                        runQuiz(user, quiz3, true, date)
                     }
                 }
             }
@@ -347,13 +341,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         def questions1 = QuizDefFactory.createChoiceQuestions(1, 2, 2)
         skillsService.createQuizQuestionDefs(questions1)
 
-        def quizInfo1 = skillsService.getQuizInfo(quiz1.quizId)
-
-        List<Date> days
-
         TestDates testDates = new TestDates()
-
-        days = [
+        List<Date> days = [
                 testDates.getDateInPreviousWeek().minusDays(28).toDate(),
                 testDates.getDateInPreviousWeek().minusDays(21).toDate(),
                 testDates.getDateInPreviousWeek().minusDays(14).toDate(),
@@ -375,7 +364,7 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
                     }
                     // Add quiz for second half of users
                     if (index >= users.size() / 2) {
-                        runQuiz(user, quiz1, quizInfo1, true, date)
+                        runQuiz(user, quiz1, true, date)
                     }
                 }
             }
@@ -426,11 +415,9 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         def question1 = QuizDefFactory.createSingleChoiceSurveyQuestion(1, 1, 2)
         def question2 = QuizDefFactory.createSingleChoiceSurveyQuestion(1, 2, 2)
         skillsService.createQuizQuestionDefs([question1, question2])
-        def quizInfo1 = skillsService.getQuizInfo(survey1.quizId)
 
-        List<Date> days
         TestDates testDates = new TestDates()
-        days = [
+        List<Date> days = [
                 testDates.getDateInPreviousWeek().minusDays(28).toDate(),
                 testDates.getDateInPreviousWeek().minusDays(21).toDate(),
                 testDates.getDateInPreviousWeek().minusDays(14).toDate(),
@@ -452,7 +439,7 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
                     }
                     // Add quiz for second half of users
                     if (index >= users.size() / 2) {
-                        runQuiz(user, survey1, quizInfo1, true, date)
+                        runQuiz(user, survey1, true, date)
                     }
                 }
             }
@@ -493,11 +480,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createSkills(skills)
         skillsService.createSkills(skills2)
 
-        List<Date> days
-
         TestDates testDates = new TestDates()
-
-        days = [
+        List<Date> days = [
                 testDates.getFirstOfMonth(1).toDate(),
                 testDates.getFirstOfMonth(1).plusDays(7).toDate(),
                 testDates.getFirstOfMonth(1).plusDays(14).toDate(),
@@ -549,7 +533,7 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         return props
     }
 
-    void runQuiz(String userId, def quiz, def quizInfo, boolean pass, Date startDate = null) {
+    void runQuiz(String userId, def quiz, boolean pass, Date startDate = null) {
         def quizAttempt = skillsService.startQuizAttemptForUserId(quiz.quizId, userId).body
         skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, userId)
         skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[pass ? 0 : 1].id, userId)
