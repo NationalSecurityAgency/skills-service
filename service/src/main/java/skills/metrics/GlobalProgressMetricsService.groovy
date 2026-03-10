@@ -19,7 +19,6 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -87,23 +86,34 @@ class GlobalProgressMetricsService {
         List<String> projectIds = projectIdsAndQuizIds.projectIds
         List<String> quizIds = projectIdsAndQuizIds.quizIds
 
-        Page<GlobalProgressMetricsRepo.UserProgressMetric> userProgressMetricPage = globalProgressMetricsRepo.findUsersOverallProgress(
+        List<GlobalProgressMetricsRepo.UserProgressMetric> userProgressMetricPage = globalProgressMetricsRepo.findUsersOverallProgress(
                 projectIds,
                 quizIds,
                 userQuery ?: '',
                 usersTableAdditionalUserTagKey ?: '',
                 userTagValueFilter ?: '',
                 pageRequest)
-        List<GlobalMetricsUserItem> metricItemsPage = userProgressMetricPage.getContent().collect {
+
+        boolean isFirstAndSmallerThanPageSize = userProgressMetricPage.size() < pageRequest.pageSize && pageRequest.pageNumber == 0
+        Long numTotalMetricItems = isFirstAndSmallerThanPageSize ? userProgressMetricPage.size()
+                : globalProgressMetricsRepo.countUsersOverallProgress(
+                projectIds,
+                quizIds,
+                userQuery ?: '',
+                usersTableAdditionalUserTagKey ?: '',
+                userTagValueFilter ?: '')
+
+        List<GlobalMetricsUserItem> metricItemsPage = userProgressMetricPage.collect {
             new GlobalMetricsUserItem(
                     userId: it.userId,
+                    userIdForDisplay: it.userIdForDisplay,
                     numProjects: it.numProjects,
                     numProjectLevelsEarned: it.projectLevelsEarned,
                     numSubjectLevelsEarned: it.subjectLevelsEarned,
                     numSkillsEarned: it.numSkillsEarned,
                     numBadgesEarned: it.numBadgesEarned,
                     numGlobalBadgesEarned: it.globalBadgesEarned,
-                    numQuizzes: it.numQuizzes,
+                    numQuizAttempts: it.numQuizzes,
                     numQuizzesPassed: it.numQuizzesPassed,
                     numQuizzesFailed: it.numQuizzesFailed,
                     numQuizzesInProgress: it.numQuizzesInProgress,
@@ -124,7 +134,7 @@ class GlobalProgressMetricsService {
                 numTotalGlobalBadges: totalGlobalBadgeCount,
                 numTotalQuizzes: countQuizzesByType(quizIdAndTypes, QuizDefParent.QuizType.Quiz),
                 numTotalSurveys: countQuizzesByType(quizIdAndTypes, QuizDefParent.QuizType.Survey),
-                numTotalMetricItems: userProgressMetricPage.getTotalElements(),
+                numTotalMetricItems: numTotalMetricItems,
                 metricItemsPage: metricItemsPage
         )
     }

@@ -20,7 +20,7 @@ class GlobalMetricsUserItem {
     String userId
     String userIdForDisplay
 
-    Integer numQuizzes
+    Integer numQuizAttempts
     Integer numQuizzesPassed
     Integer numQuizzesFailed
     Integer numQuizzesInProgress

@@ -227,18 +227,31 @@ const showUserTagColumn = computed(() => {
                 </template>
               </Column>
 
-              <Column field="numQuizzes" header="# Quizzes" :sortable="true" :class="{'flex': responsive.md.value }">
+              <Column field="numQuizAttempts" header="# Quiz Runs" :sortable="true" :class="{'flex': responsive.md.value }">
                 <template #header>
                   <i class="fa-solid fa-spell-check mr-1" :class="colors.getTextClass(4)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  <div class="flex flex-col gap-2 mb-2">
-                    <div class="flex-1"><Tag>{{ slotProps.data.numQuizzes }}</Tag> / {{ userProgress.numTotalQuizzes }}</div>
+                  <div class="flex pr-2">
+                    <div class="flex flex-col gap-2 flex-1">
+                      <div class="flex-1"><Tag severity="secondary">{{ slotProps.data.numQuizAttempts }}</Tag></div>
+                    </div>
+                    <div v-if="slotProps.data.numQuizAttempts > 0">
+                      <div class="flex gap-2">
+                        <div class="flex-1">Passed:</div><div>{{ slotProps.data.numQuizzesPassed}}</div>
+                      </div>
+                      <div class="flex gap-2">
+                        <div class="flex-1">Failed:</div><div>{{ slotProps.data.numQuizzesFailed}}</div>
+                      </div>
+                      <div class="flex gap-1" v-if="slotProps.data.numQuizzesInProgress > 0">
+                        <div class="flex-2">In Progress:</div><div>{{ slotProps.data.numQuizzesInProgress}}</div>
+                      </div>
+                    </div>
                   </div>
                 </template>
               </Column>
 
-              <Column field="numSurveys" header="# Surveys" :sortable="true" :class="{'flex': responsive.md.value }">
+              <Column field="numSurveys" header="# Survey Runs" :sortable="true" :class="{'flex': responsive.md.value }">
                 <template #header>
                   <i class="fa-solid fa-clipboard-question mr-1" :class="colors.getTextClass(5)" aria-hidden="true"></i>
                 </template>
