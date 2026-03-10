@@ -38,6 +38,7 @@ interface GlobalProgressMetricsRepo extends JpaRepository<GlobalMetricsDummyEnti
 
     static interface UserProgressMetric {
         String getUserId()
+        String getUserIdForDisplay()
         Integer getNumProjects()
         Integer getProjectLevelsEarned()
         Integer getSubjectLevelsEarned()
@@ -55,71 +56,54 @@ interface GlobalProgressMetricsRepo extends JpaRepository<GlobalMetricsDummyEnti
         String getUserTag()
     }
 
-    @Query(value = '''SELECT
-    COALESCE(projectsAndAchievements.user_id, quizzes.user_id) as userId,
-    userAttrs.user_id_for_display as userIdForDisplay,
-    COALESCE(projectsAndAchievements.numProjects, 0) as numProjects,
-    COALESCE(projectsAndAchievements.projectLevelsEarned, 0) as projectLevelsEarned,
-    COALESCE(projectsAndAchievements.subjectLevelsEarned, 0) as subjectLevelsEarned,
-    COALESCE(projectsAndAchievements.skillsAccomplished, 0) as numSkillsEarned,
-    COALESCE(projectsAndAchievements.badgesEarned, 0) as numBadgesEarned,
-    COALESCE(projectsAndAchievements.globalBadgesEarned, 0) as globalBadgesEarned,
-    COALESCE(quizzes.quizTotal, 0) as numQuizzes,
-    COALESCE(quizzes.quizPassed, 0) as numQuizzesPassed,
-    COALESCE(quizzes.quizFailed, 0) as numQuizzesFailed,
-    COALESCE(quizzes.quizInProgress, 0) as numQuizzesInProgress,
-    COALESCE(quizzes.surveyTotal, 0) as numSurveys,
-    COALESCE(quizzes.surveyCompleted, 0) as numSurveyCompleted,
-    COALESCE(quizzes.surveyInProgress, 0) as numSurveyInProgress,
-    ut.value as userTag
-FROM (
-         SELECT
-             projects.user_id,
-             projects.numProjects,
-             COALESCE(achievements.projectLevelsEarned, 0) as projectLevelsEarned,
-             COALESCE(achievements.subjectLevelsEarned, 0) as subjectLevelsEarned,
-             COALESCE(achievements.skillsAccomplished, 0) as skillsAccomplished,
-             COALESCE(achievements.badgesEarned, 0) as badgesEarned,
-             COALESCE(achievements.globalBadgesEarned, 0) as globalBadgesEarned
-         FROM (
-                  SELECT
-                      userAttrs.user_id,
-                      count(distinct project_id) numProjects
-                  FROM user_points
-                    JOIN user_attrs userAttrs ON (user_points.user_id = userAttrs.user_id)
-                  WHERE project_id IN :projectIds
-                   and (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
-                  GROUP BY userAttrs.user_id
-              ) projects
-                  LEFT JOIN (
-             SELECT
-                 ua.user_id,
-                 count(distinct ua.project_id) numProjects,
-                 SUM(CASE WHEN ua.skill_ref_id is null and ua.level is not null THEN 1 ELSE 0 END) as projectLevelsEarned,
-                 SUM(CASE WHEN sd.type = 'Subject' and ua.level is not null THEN 1 ELSE 0 END) as subjectLevelsEarned,
-                 SUM(CASE WHEN sd.type = 'Skill' THEN 1 ELSE 0 END) as skillsAccomplished,
-                 SUM(CASE WHEN sd.type = 'Badge' THEN 1 ELSE 0 END) as badgesEarned,
-                 SUM(CASE WHEN sd.type = 'GlobalBadge' THEN 1 ELSE 0 END) as globalBadgesEarned
-             FROM user_achievement ua
-                      LEFT JOIN skill_definition sd ON (ua.skill_ref_id = sd.id)
-             WHERE (ua.project_id IN :projectIds 
-                    OR ua.skill_ref_id in (SELECT DISTINCT gbld.skill_ref_id as global_badge_id
-                                             FROM global_badge_level_definition gbld
-                                             WHERE gbld.project_id IN :projectIds
-                                    
-                                             UNION
-                                    
-                                             SELECT DISTINCT globalBadge.id as global_badge_id
-                                             FROM skill_relationship_definition srd
-                                                      JOIN skill_definition globalBadge ON (srd.parent_ref_id = globalBadge.id and srd.type = 'BadgeRequirement' and globalBadge.type = 'GlobalBadge')
-                                                      JOIN skill_definition skill ON (srd.child_ref_id = skill.id and srd.type = 'BadgeRequirement' and skill.type = 'Skill')
-                                             WHERE skill.project_id IN :projectIds)
-                    )
-             GROUP BY ua.user_id
-         ) achievements ON projects.user_id = achievements.user_id
-     ) projectsAndAchievements
-         FULL OUTER JOIN (
-    select uqa.user_id, 
+    @Query(value = '''
+with projects AS (
+    SELECT
+        user_id,
+        count(distinct project_id) numProjects
+    FROM user_points
+    WHERE project_id IN :projectIds
+    GROUP BY user_id
+),
+achievements AS (
+    SELECT
+        ua.user_id,
+        count(distinct ua.project_id) numProjects,
+        SUM(CASE WHEN ua.skill_ref_id is null and ua.level is not null THEN 1 ELSE 0 END) as projectLevelsEarned,
+        SUM(CASE WHEN sd.type = 'Subject' and ua.level is not null THEN 1 ELSE 0 END) as subjectLevelsEarned,
+        SUM(CASE WHEN sd.type = 'Skill' THEN 1 ELSE 0 END) as skillsAccomplished,
+        SUM(CASE WHEN sd.type = 'Badge' THEN 1 ELSE 0 END) as badgesEarned,
+        SUM(CASE WHEN sd.type = 'GlobalBadge' THEN 1 ELSE 0 END) as globalBadgesEarned
+    FROM user_achievement ua
+             LEFT JOIN skill_definition sd ON (ua.skill_ref_id = sd.id)
+    WHERE (ua.project_id IN :projectIds
+        OR ua.skill_ref_id in (SELECT DISTINCT gbld.skill_ref_id as global_badge_id
+                               FROM global_badge_level_definition gbld
+                               WHERE gbld.project_id IN :projectIds
+
+                               UNION
+
+                               SELECT DISTINCT globalBadge.id as global_badge_id
+                               FROM skill_relationship_definition srd
+                                        JOIN skill_definition globalBadge ON (srd.parent_ref_id = globalBadge.id and srd.type = 'BadgeRequirement' and globalBadge.type = 'GlobalBadge')
+                                        JOIN skill_definition skill ON (srd.child_ref_id = skill.id and srd.type = 'BadgeRequirement' and skill.type = 'Skill')
+                               WHERE skill.project_id IN :projectIds)
+              )
+    GROUP BY ua.user_id
+),
+projectsAndAchievements AS (
+    SELECT
+        projects.user_id,
+        projects.numProjects,
+        COALESCE(achievements.projectLevelsEarned, 0) as projectLevelsEarned,
+        COALESCE(achievements.subjectLevelsEarned, 0) as subjectLevelsEarned,
+        COALESCE(achievements.skillsAccomplished, 0) as skillsAccomplished,
+        COALESCE(achievements.badgesEarned, 0) as badgesEarned,
+        COALESCE(achievements.globalBadgesEarned, 0) as globalBadgesEarned
+    FROM projects LEFT JOIN achievements ON projects.user_id = achievements.user_id
+),
+quizzes AS (
+    select uqa.user_id,
            SUM(CASE WHEN qd.type = 'Quiz' THEN 1 ELSE 0 END) as quizTotal,
            SUM(CASE WHEN qd.type = 'Quiz' and uqa.status = 'PASSED' THEN 1 ELSE 0 END) as quizPassed,
            SUM(CASE WHEN qd.type = 'Quiz' and uqa.status = 'FAILED' THEN 1 ELSE 0 END) as quizFailed,
@@ -129,21 +113,109 @@ FROM (
            SUM(CASE WHEN qd.type = 'Survey' and uqa.status = 'INPROGRESS' THEN 1 ELSE 0 END) as surveyInProgress
     from user_quiz_attempt uqa
              join quiz_definition qd on (uqa.quiz_definition_ref_id = qd.id)
-             join user_attrs userAttrs ON (uqa.user_id = userAttrs.user_id)
     where qd.quiz_id in :quizIds
-        and (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
     group by uqa.user_id
-) quizzes ON projectsAndAchievements.user_id = quizzes.user_id
-    LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :userTagKey group by ut.user_id) ut ON (ut.user_id=(COALESCE(projectsAndAchievements.user_id, quizzes.user_id)))
-    LEFT JOIN user_attrs userAttrs ON (COALESCE(projectsAndAchievements.user_id, quizzes.user_id) = userAttrs.user_id)
-    where (:userTagValueFilter = '' OR lower(ut.value) like lower(concat('%', :userTagValueFilter, '%')))''', nativeQuery = true)
-    Page<UserProgressMetric> findUsersOverallProgress(
+),
+projectsAndQuizzes AS (
+    select
+        COALESCE(projectsAndAchievements.user_id, quizzes.user_id) as combinedUserId,
+        projectsAndAchievements.*,
+        quizzes.*
+        from projectsAndAchievements FULL OUTER JOIN quizzes ON projectsAndAchievements.user_id = quizzes.user_id
+),
+userTags as (
+    SELECT ut.user_id, max(ut.value) AS value
+    FROM user_tags ut
+    WHERE
+        ut.key = :userTagKey
+        and ut.user_id in (select combinedUserId from projectsAndQuizzes)
+    group by ut.user_id
+)
+SELECT
+    projectsAndQuizzes.combinedUserId as userId,
+    userAttrs.user_id_for_display as userIdForDisplay,
+    COALESCE(projectsAndQuizzes.numProjects, 0) as numProjects,
+    COALESCE(projectsAndQuizzes.projectLevelsEarned, 0) as projectLevelsEarned,
+    COALESCE(projectsAndQuizzes.subjectLevelsEarned, 0) as subjectLevelsEarned,
+    COALESCE(projectsAndQuizzes.skillsAccomplished, 0) as numSkillsEarned,
+    COALESCE(projectsAndQuizzes.badgesEarned, 0) as numBadgesEarned,
+    COALESCE(projectsAndQuizzes.globalBadgesEarned, 0) as globalBadgesEarned,
+    COALESCE(projectsAndQuizzes.quizTotal, 0) as numQuizzes,
+    COALESCE(projectsAndQuizzes.quizPassed, 0) as numQuizzesPassed,
+    COALESCE(projectsAndQuizzes.quizFailed, 0) as numQuizzesFailed,
+    COALESCE(projectsAndQuizzes.quizInProgress, 0) as numQuizzesInProgress,
+    COALESCE(projectsAndQuizzes.surveyTotal, 0) as numSurveys,
+    COALESCE(projectsAndQuizzes.surveyCompleted, 0) as numSurveyCompleted,
+    COALESCE(projectsAndQuizzes.surveyInProgress, 0) as numSurveyInProgress,
+    userTags.value as userTag
+FROM projectsAndQuizzes
+         JOIN user_attrs userAttrs ON projectsAndQuizzes.combinedUserId = userAttrs.user_id
+         LEFT JOIN userTags ON userTags.user_id = projectsAndQuizzes.combinedUserId
+WHERE (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
+''', nativeQuery = true)
+    List<UserProgressMetric> findUsersOverallProgress(
             @Param("projectIds") List<String> projectIds,
             @Param("quizIds") List<String> quizIds,
             @Param("userQuery") String userQuery,
             @Param("userTagKey") String userTagKey,
             @Param("userTagValueFilter") String userTagValueFilter,
             Pageable pageable)
+
+    @Query(value = '''
+with projects AS (
+    SELECT userAttrs.user_id
+    FROM user_points
+             JOIN user_attrs userAttrs ON (user_points.user_id = userAttrs.user_id)
+    WHERE project_id IN :projectIds
+      and (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
+    GROUP BY userAttrs.user_id
+),
+     achievements AS (
+         SELECT ua.user_id
+         FROM user_achievement ua
+                  LEFT JOIN skill_definition sd ON (ua.skill_ref_id = sd.id)
+         WHERE (ua.project_id IN :projectIds
+             OR ua.skill_ref_id in (SELECT DISTINCT gbld.skill_ref_id as global_badge_id
+                                    FROM global_badge_level_definition gbld
+                                    WHERE gbld.project_id IN :projectIds
+
+                                    UNION
+
+                                    SELECT DISTINCT globalBadge.id as global_badge_id
+                                    FROM skill_relationship_definition srd
+                                             JOIN skill_definition globalBadge ON (srd.parent_ref_id = globalBadge.id and srd.type = 'BadgeRequirement' and globalBadge.type = 'GlobalBadge')
+                                             JOIN skill_definition skill ON (srd.child_ref_id = skill.id and srd.type = 'BadgeRequirement' and skill.type = 'Skill')
+                                    WHERE skill.project_id IN :projectIds)
+                   )
+         GROUP BY ua.user_id
+     ),
+     projectsAndAchievements AS (
+         SELECT projects.user_id
+         FROM projects LEFT JOIN achievements ON projects.user_id = achievements.user_id
+     ),
+     quizzes AS (
+         select uqa.user_id
+         from user_quiz_attempt uqa
+                  join quiz_definition qd on (uqa.quiz_definition_ref_id = qd.id)
+                  join user_attrs userAttrs ON (uqa.user_id = userAttrs.user_id)
+         where qd.quiz_id in :quizIds
+           and (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
+         group by uqa.user_id
+     ),
+     projectsAndQuizzes AS (
+         select COALESCE(projectsAndAchievements.user_id, quizzes.user_id) as combinedUserId
+         from projectsAndAchievements FULL OUTER JOIN quizzes ON projectsAndAchievements.user_id = quizzes.user_id
+     )
+SELECT count(projectsAndQuizzes.combinedUserId)
+FROM projectsAndQuizzes
+    ''', nativeQuery = true)
+    Long countUsersOverallProgress(
+            @Param("projectIds") List<String> projectIds,
+            @Param("quizIds") List<String> quizIds,
+            @Param("userQuery") String userQuery,
+            @Param("userTagKey") String userTagKey,
+            @Param("userTagValueFilter") String userTagValueFilter)
+
 
     static interface SingleUserProjectProgress {
         String getProjectId()
