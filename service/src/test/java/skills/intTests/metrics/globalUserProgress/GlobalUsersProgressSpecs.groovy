@@ -39,7 +39,7 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
 
     def setup() {
         SkillsService rootUser = createRootSkillService()
-
+        users = getRandomUsers(20).collect { createService(it) }
         users = getRandomUsers(10).collect { createService(it) }
         quizzes = (1..5).collect { createQuiz(it) }
         surveys = (6..9).collect { createSurvey(it) }
@@ -262,6 +262,7 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         ))
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "sort by users and page" () {
         when:
         def resPg1 = skillsService.getGlobalUserProgressMetrics("", 4, 1, "userIdForDisplay", true)

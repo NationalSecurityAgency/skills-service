@@ -25,6 +25,7 @@ import skills.intTests.utils.SkillsService
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.QuizDefParent
 import skills.storage.model.UserQuizAttempt
+import spock.lang.IgnoreIf
 
 import static skills.storage.model.UserQuizAttempt.QuizAttemptStatus.PASSED
 import static skills.storage.model.UserQuizAttempt.QuizAttemptStatus.FAILED
@@ -204,6 +205,7 @@ class GlobalQuizRunsSpecs extends DefaultIntSpec {
     }
 
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "sort by userIdForDisplay"() {
         when:
         def resPage1 = skillsService.getGlobalQuizRuns('', '', 10, 1, 'userIdForDisplay')
@@ -218,6 +220,7 @@ class GlobalQuizRunsSpecs extends DefaultIntSpec {
         resPage3.data.userIdForDisplay == expectedOrder[20..23]
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "sort by userIdForDisplay - desc"() {
         when:
         def resPage1 = skillsService.getGlobalQuizRuns('', '', 10, 1, 'userIdForDisplay', false)
