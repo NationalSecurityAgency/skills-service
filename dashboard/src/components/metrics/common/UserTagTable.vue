@@ -145,27 +145,37 @@ const filterRange = ref([]);
 </script>
 
 <template>
-  <Card data-cy="userTagTableCard">
+  <Card data-cy="userTagTableCard" :pt="{ body: { class: 'p-0!' } }">
     <template #header>
       <SkillsCardHeader :title="titleInternal"></SkillsCardHeader>
     </template>
     <template #content>
       <div>
-        <div class="flex mb-3 gap-4">
+        <div class="flex m-5 gap-4">
           <div class="flex flex-3 flex-col">
-            <SkillsTextInput label="Filter by Tag" v-model="filters.tag" v-on:keydown.enter="filter" :disabled="isLoading" id="userTagTable-tagFilter" :name="`userTagTable-${tagKey}-tagFilter`"/>
-            <div class="flex gap-2">
-              <SkillsButton @click="filter" icon="fa-solid fa-search" label="Filter" :disabled="isLoading" :data-cy="`userTagTable-${tagKey}-filterBtn`" />
-              <SkillsButton severity="danger" icon="fa-solid fa-eraser" label="Clear" @click="clearFilter" :disabled="isLoading" :data-cy="`userTagTable-${tagKey}-clearBtn`" />
-            </div>
+            <SkillsTextInput
+                label="Filter by Tag:"
+                label-icon="fas fa-tag"
+                :label-on-same-line="true"
+                v-model="filters.tag"
+                v-on:keydown.enter="filter"
+                :disabled="isLoading"
+                id="userTagTable-tagFilter"
+                :name="`userTagTable-${tagKey}-tagFilter`"/>
           </div>
           <div class="flex flex-wrap flex-col gap-2">
             <SkillsCalendarInput selectionMode="range"
                                  :name="`filterRange${tagKey}`"
                                  v-model="filterRange" :maxDate="new Date()"
                                  label="Filter by Date(s):"
+                                 label-icon="fas fa-calendar-alt"
                                  :label-on-same-line="true"
                                  :disabled="isLoading" placeholder="Select a date range" :data-cy="`${tagKey}-metricsDateFilter`" />
+          </div>
+
+          <div class="flex gap-2 mb-6">
+            <SkillsButton @click="filter" icon="fa-solid fa-search" label="Filter" :disabled="isLoading" :data-cy="`userTagTable-${tagKey}-filterBtn`" />
+            <SkillsButton severity="danger" icon="fa-solid fa-eraser" label="Clear" @click="clearFilter" :disabled="isLoading" :data-cy="`userTagTable-${tagKey}-clearBtn`" />
           </div>
         </div>
         <SkillsDataTable :value="table.items"

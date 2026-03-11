@@ -196,6 +196,7 @@ const setChartOptions = () => {
           <SkillsCalendarInput selectionMode="range"
                                :name="`filterRange${tagKey}`"
                                label="Filter by Date(s):"
+                               label-icon="fas fa-calendar-alt"
                                :label-on-same-line="true"
                                v-model="filterRange"
                                :maxDate="new Date()"
