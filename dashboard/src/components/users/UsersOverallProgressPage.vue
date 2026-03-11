@@ -178,7 +178,7 @@ const showUserTagColumn = computed(() => {
                 data-key="userId"
                 :auto-max-width="false"
             >
-              <Column field="userId" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
+              <Column field="userIdForDisplay" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
                 <template #header>
                   <i class="fa-solid fa-user mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
                 </template>

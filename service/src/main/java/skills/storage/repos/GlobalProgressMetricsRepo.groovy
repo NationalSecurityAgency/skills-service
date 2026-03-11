@@ -17,7 +17,6 @@ package skills.storage.repos
 
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -45,7 +44,7 @@ interface GlobalProgressMetricsRepo extends JpaRepository<GlobalMetricsDummyEnti
         Integer getNumSkillsEarned()
         Integer getNumBadgesEarned()
         Integer getGlobalBadgesEarned()
-        Integer getNumQuizzes()
+        Integer getNumQuizAttempts()
         Integer getNumQuizzesPassed()
         Integer getNumQuizzesFailed()
         Integer getNumQuizzesInProgress()
@@ -140,7 +139,7 @@ SELECT
     COALESCE(projectsAndQuizzes.skillsAccomplished, 0) as numSkillsEarned,
     COALESCE(projectsAndQuizzes.badgesEarned, 0) as numBadgesEarned,
     COALESCE(projectsAndQuizzes.globalBadgesEarned, 0) as globalBadgesEarned,
-    COALESCE(projectsAndQuizzes.quizTotal, 0) as numQuizzes,
+    COALESCE(projectsAndQuizzes.quizTotal, 0) as numQuizAttempts,
     COALESCE(projectsAndQuizzes.quizPassed, 0) as numQuizzesPassed,
     COALESCE(projectsAndQuizzes.quizFailed, 0) as numQuizzesFailed,
     COALESCE(projectsAndQuizzes.quizInProgress, 0) as numQuizzesInProgress,

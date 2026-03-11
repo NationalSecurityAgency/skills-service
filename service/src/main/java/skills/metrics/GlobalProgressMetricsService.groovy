@@ -113,7 +113,7 @@ class GlobalProgressMetricsService {
                     numSkillsEarned: it.numSkillsEarned,
                     numBadgesEarned: it.numBadgesEarned,
                     numGlobalBadgesEarned: it.globalBadgesEarned,
-                    numQuizAttempts: it.numQuizzes,
+                    numQuizAttempts: it.numQuizAttempts,
                     numQuizzesPassed: it.numQuizzesPassed,
                     numQuizzesFailed: it.numQuizzesFailed,
                     numQuizzesInProgress: it.numQuizzesInProgress,
