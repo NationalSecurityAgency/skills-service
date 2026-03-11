@@ -1024,7 +1024,7 @@ select count(distinct ua) from UserAchievement ua where ua.projectId = :projectI
     void deleteAchievementsWithNoPoints(@Param("projectId") String projectId)
 
     @Query('''
-        select distinct ua.userId from UserAchievement ua where ua.projectId = ?1 and ua.level >= ?2 and ua.skillId is null
+        select distinct ua.userId as userId, max(ua.level) as level from UserAchievement ua where ua.projectId = ?1 and ua.skillId is null group by ua.userId
     ''')
-    List<String> getUsersWhoHaveAchievedLevelForProject(String projectId, Integer level)
+    List<Map<String, Integer>> getUsersWhoHaveAchievedLevelForProject(String projectId)
 }
