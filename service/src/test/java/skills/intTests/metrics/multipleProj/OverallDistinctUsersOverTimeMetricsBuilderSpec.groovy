@@ -33,7 +33,9 @@ import skills.storage.repos.UserQuizAttemptRepo
 
 import java.time.DayOfWeek
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 import java.time.temporal.TemporalField
 import java.time.temporal.WeekFields
@@ -516,6 +518,96 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
 
         resOver30days.users.size() == 3
         resOver30days.users.collect {it.count} == [0, 4, 5]
+    }
+
+    def "test empty result sets - no users in date range"() {
+        given:
+        def proj1 = createProject()
+        def proj2 = createProject(2)
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+
+        when:
+        def res = skillsService.getOverallMetricsData(metricsId, getProps(15, "${proj1.projectId},${proj2.projectId}", null))
+        then:
+        res.users.count == [0,0,0]
+
+        where:
+        "Query should return empty list when no users exist in date range"
+    }
+    
+    def "test boundary date conditions - start date exactly at today"() {
+        given:
+        def proj1 = createProject()
+        def proj2 = createProject(2)
+
+        List<Map> skills = createSkills(10)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 10 }
+        List<Map> skills2 = createSkills(10, 2)
+        skills2.each { it.pointIncrement = 100; it.numPerformToCompletion = 10 }
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(createSubject())
+        skillsService.createSubject(createSubject(2))
+        skillsService.createSkills(skills)
+        skillsService.createSkills(skills2)
+        // Create users exactly at boundary
+        LocalDate today = LocalDate.now()
+        Date startOfToday = Date.from(today.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant())
+        List<String> users = (1..5).collect { "user$it" }
+        users.each { String user ->
+            skillsService.addSkill([projectId: proj1.projectId, skillId: "skill1"], user, startOfToday)
+        }
+
+        when:
+        def res = skillsService.getOverallMetricsData(metricsId, getProps(0, "${proj1.projectId},${proj2.projectId}", null))
+        then:
+        res.users.size() == 1
+        res.users.count == [5]
+        res.users.value == [startOfToday.time]
+    }
+
+    def "test week boundary transition"() {
+        given:
+        def proj1 = createProject()
+        def proj2 = createProject(2)
+
+        List<Map> skills = createSkills(10)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 10 }
+        List<Map> skills2 = createSkills(10, 2)
+        skills2.each { it.pointIncrement = 100; it.numPerformToCompletion = 10 }
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(createSubject())
+        skillsService.createSubject(createSubject(2))
+        skillsService.createSkills(skills)
+        skillsService.createSkills(skills2)
+
+        // Create users on Saturday (end of week)
+        boolean isTodaySaturday = LocalDate.now().getDayOfWeek() == DayOfWeek.SATURDAY
+        LocalDate previousSaturday = isTodaySaturday ? 
+            LocalDate.now().with(TemporalAdjusters.previous(DayOfWeek.SATURDAY)) :
+            LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY))
+        Date startOfSaturday = Date.from(previousSaturday.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant())
+        Date previousSunday = startOfSaturday+1
+        List<String> users = (1..3).collect { "user$it" }
+        users.each { String user ->
+            skillsService.addSkill([projectId: proj1.projectId, skillId: "skill1"], user, startOfSaturday)
+        }
+
+        when:
+        def res = skillsService.getOverallMetricsData(metricsId, getProps(30, "${proj1.projectId},${proj2.projectId}", null))
+
+        res.users.each {
+            println "User: ${new Date(it.value)} | Count: ${it.count}"
+        }
+        then:
+        res.users.size() == 5
+        res.users.count == [0,0,0,3,0]
+        res.users.value == [(previousSunday-28).time, (previousSunday-21).time, (previousSunday-14).time, (previousSunday-7).time, (previousSunday).time]
     }
 
     private Map getProps(int numDaysAgo, String projectIds = null, String quizIds = null, Boolean byMonth = false) {
