@@ -19,6 +19,7 @@ package skills.intTests.metrics.globalUserProgress
 import groovy.transform.Canonical
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.quiz.QuizQuestionType
@@ -39,8 +40,9 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
 
     def setup() {
         SkillsService rootUser = createRootSkillService()
-        users = getRandomUsers(20).collect { createService(it) }
-        users = getRandomUsers(10).collect { createService(it) }
+        List<String> userNames = getRandomUsers(15)
+        users = userNames[0..9].collect { createService(it) }
+        List<SkillsService> otherUsers = userNames[10..14].collect { createService(it) }
         quizzes = (1..5).collect { createQuiz(it) }
         surveys = (6..9).collect { createSurvey(it) }
 
@@ -142,6 +144,24 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         // user 9
         runQuizOrSurvey(users[9], quizzes[1])
         rootUser.saveUserTag(users[9].userName, 'dutyOrganization', ['ABC1'])
+
+        // other project, quizzes and users that must not effect the result set
+        List p4Skills = createProject(4, 5, 4, otherUsers[0])
+        List p5Skills = createProject(5, 5, 4, otherUsers[0])
+        createGlobalBadge(20, [p4Skills[0], p5Skills[0]], [], otherUsers[0])
+        createGlobalBadge(21, [], [[projectId: p4Skills[0].projectId, level: 1]], otherUsers[0])
+        assert otherUsers[1].addSkill(p4Skills[0]).body.skillApplied
+        assert otherUsers[2].addSkill(p4Skills[1]).body.skillApplied
+        assert otherUsers[1].addSkill(p5Skills[0]).body.skillApplied
+        assert otherUsers[4].addSkill(p5Skills[1]).body.skillApplied
+        def otherQuiz1 = createQuiz(20, otherUsers[1] )
+        def otherQuiz2 = createQuiz(21, otherUsers[1] )
+        def otherSurvey = createSurvey(22, otherUsers[1] )
+        runQuizOrSurvey(otherUsers[1], otherQuiz1, false)
+        runQuizOrSurvey(otherUsers[1], otherQuiz1, true)
+        runQuizOrSurvey(otherUsers[2], otherQuiz1, true, false)
+        runQuizOrSurvey(otherUsers[2], otherQuiz2, true)
+        runQuizOrSurvey(otherUsers[3], otherSurvey, true)
     }
 
     def "get empty global users progress" () {
@@ -280,27 +300,21 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         List<String> userNamesReversed = userNames.collect { it }.reverse()
         then:
         resPg1.numTotalMetricItems == 10
-        resPg1.metricItemsPage.size() == 4
         resPg1.metricItemsPage.userIdForDisplay == userNames[0..3]
 
         resPg2.numTotalMetricItems == 10
-        resPg2.metricItemsPage.size() == 4
         resPg2.metricItemsPage.userIdForDisplay == userNames[4..7]
 
         resPg3.numTotalMetricItems == 10
-        resPg3.metricItemsPage.size() == 2
         resPg3.metricItemsPage.userIdForDisplay == userNames[8..9]
 
         resPg1_descending.numTotalMetricItems == 10
-        resPg1_descending.metricItemsPage.size() == 4
         resPg1_descending.metricItemsPage.userIdForDisplay == userNamesReversed[0..3]
 
         resPg2_descending.numTotalMetricItems == 10
-        resPg2_descending.metricItemsPage.size() == 4
         resPg2_descending.metricItemsPage.userIdForDisplay == userNamesReversed[4..7]
 
         resPg3_descending.numTotalMetricItems == 10
-        resPg3_descending.metricItemsPage.size() == 2
         resPg3_descending.metricItemsPage.userIdForDisplay == userNamesReversed[8..9]
     }
 
@@ -310,6 +324,7 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         def res = skillsService.getGlobalUserProgressMetrics("SeR1", 4, 1, "userIdForDisplay", true)
         def res1 = skillsService.getGlobalUserProgressMetrics("uSEr12", 4, 1, "userIdForDisplay", true)
         def res2 = skillsService.getGlobalUserProgressMetrics("USER", 4, 1, "userIdForDisplay", true)
+        def res3 = skillsService.getGlobalUserProgressMetrics("!@#%^&*(", 4, 1, "userIdForDisplay", true)
 
         List<String> userNames =
                 users.collect {
@@ -325,8 +340,189 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
 
         res2.numTotalMetricItems == 10
         res2.metricItemsPage.userIdForDisplay == userNames[0..3]
+
+        res3.numTotalMetricItems == 0
+        res3.metricItemsPage == []
     }
 
+    def "sort by user tag" () {
+        String orderBy = "userTag"
+        when:
+        def resPg1 = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
+        def resPg2 = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
+        def resPg3 = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
+
+        def resPg1_descending = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
+        def resPg2_descending = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
+        def resPg3_descending = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
+
+        List<String> tags =
+                ['ABC1', 'ABC1', 'KOO4', 'KOO5', 'KOO4', '', 'CBF2', 'XYZ1', 'ABC2', 'ABC1'].sort().sort { a, b ->
+                    if (a.isEmpty() && b.isEmpty()) return 0
+                    if (a.isEmpty()) return 1
+                    if (b.isEmpty()) return -1
+                    a <=> b
+                }
+        List<String> tagsReversed = tags.collect { it }.reverse()
+        then:
+        resPg1.numTotalMetricItems == 10
+        resPg1.metricItemsPage.userTag == tags[0..3]
+
+        resPg2.numTotalMetricItems == 10
+        resPg2.metricItemsPage.userTag == tags[4..7]
+
+        resPg3.numTotalMetricItems == 10
+        resPg3.metricItemsPage.userTag == tags[8..9]
+
+        resPg1_descending.numTotalMetricItems == 10
+        resPg1_descending.metricItemsPage.userTag == tagsReversed[0..3]
+
+        resPg2_descending.numTotalMetricItems == 10
+        resPg2_descending.metricItemsPage.userTag == tagsReversed[4..7]
+
+        resPg3_descending.numTotalMetricItems == 10
+        resPg3_descending.metricItemsPage.userTag == tagsReversed[8..9]
+    }
+
+    def "sort by numSkillsEarned" () {
+        String orderBy = "numSkillsEarned"
+        when:
+        def resPg1 = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
+        def resPg2 = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
+        def resPg3 = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
+
+        def resPg1_descending = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
+        def resPg2_descending = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
+        def resPg3_descending = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
+
+        List<Integer> numSkillsEarnedValues = [4, 1, 1, 2, 4, 31, 0, 2, 0, 0].sort()
+        List<Integer> numSkillsEarnedValuesReversed = numSkillsEarnedValues.collect { it }.reverse()
+        then:
+        resPg1.numTotalMetricItems == 10
+        resPg1.metricItemsPage.numSkillsEarned == numSkillsEarnedValues[0..3]
+
+        resPg2.numTotalMetricItems == 10
+        resPg2.metricItemsPage.numSkillsEarned == numSkillsEarnedValues[4..7]
+
+        resPg3.numTotalMetricItems == 10
+        resPg3.metricItemsPage.numSkillsEarned == numSkillsEarnedValues[8..9]
+
+        resPg1_descending.numTotalMetricItems == 10
+        resPg1_descending.metricItemsPage.numSkillsEarned == numSkillsEarnedValuesReversed[0..3]
+
+        resPg2_descending.numTotalMetricItems == 10
+        resPg2_descending.metricItemsPage.numSkillsEarned == numSkillsEarnedValuesReversed[4..7]
+
+        resPg3_descending.numTotalMetricItems == 10
+        resPg3_descending.metricItemsPage.numSkillsEarned == numSkillsEarnedValuesReversed[8..9]
+    }
+
+    def "sort by numQuizAttempts" () {
+        String orderBy = "numQuizAttempts"
+        when:
+        def resPg1 = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
+        def resPg2 = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
+        def resPg3 = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
+
+        def resPg1_descending = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
+        def resPg2_descending = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
+        def resPg3_descending = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
+
+        List<Integer> numQuizAttemptsValues = [2, 5, 2, 4, 3, 1, 2, 0, 1, 1].sort()
+        List<Integer> numQuizAttemptsValuesReversed = numQuizAttemptsValues.collect { it }.reverse()
+        then:
+        resPg1.numTotalMetricItems == 10
+        resPg1.metricItemsPage.numQuizAttempts == numQuizAttemptsValues[0..3]
+
+        resPg2.numTotalMetricItems == 10
+        resPg2.metricItemsPage.numQuizAttempts == numQuizAttemptsValues[4..7]
+
+        resPg3.numTotalMetricItems == 10
+        resPg3.metricItemsPage.numQuizAttempts == numQuizAttemptsValues[8..9]
+
+        resPg1_descending.numTotalMetricItems == 10
+        resPg1_descending.metricItemsPage.numQuizAttempts == numQuizAttemptsValuesReversed[0..3]
+
+        resPg2_descending.numTotalMetricItems == 10
+        resPg2_descending.metricItemsPage.numQuizAttempts == numQuizAttemptsValuesReversed[4..7]
+
+        resPg3_descending.numTotalMetricItems == 10
+        resPg3_descending.metricItemsPage.numQuizAttempts == numQuizAttemptsValuesReversed[8..9]
+    }
+
+    def "sort by numSurveys" () {
+        String orderBy = "numSurveys"
+        when:
+        def resPg1 = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
+        def resPg2 = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
+        def resPg3 = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
+
+        def resPg1_descending = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
+        def resPg2_descending = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
+        def resPg3_descending = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
+
+        List<Integer> numSurveysValues = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0].sort()
+        List<Integer> numSurveysValuesReversed = numSurveysValues.collect { it }.reverse()
+        then:
+        resPg1.numTotalMetricItems == 10
+        resPg1.metricItemsPage.numSurveys == numSurveysValues[0..3]
+
+        resPg2.numTotalMetricItems == 10
+        resPg2.metricItemsPage.numSurveys == numSurveysValues[4..7]
+
+        resPg3.numTotalMetricItems == 10
+        resPg3.metricItemsPage.numSurveys == numSurveysValues[8..9]
+
+        resPg1_descending.numTotalMetricItems == 10
+        resPg1_descending.metricItemsPage.numSurveys == numSurveysValuesReversed[0..3]
+
+        resPg2_descending.numTotalMetricItems == 10
+        resPg2_descending.metricItemsPage.numSurveys == numSurveysValuesReversed[4..7]
+
+        resPg3_descending.numTotalMetricItems == 10
+        resPg3_descending.metricItemsPage.numSurveys == numSurveysValuesReversed[8..9]
+    }
+
+    def "sort by numBadgesEarned" () {
+        String orderBy = "numBadgesEarned"
+        when:
+        def resPg1 = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
+        def resPg2 = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
+        def resPg3 = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
+
+        def resPg1_descending = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
+        def resPg2_descending = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
+        def resPg3_descending = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
+
+        List<Integer> numBadgesEarnedValues = [1, 0, 1, 0, 0, 2, 0, 0, 0, 0].sort()
+        List<Integer> numBadgesEarnedValuesReversed = numBadgesEarnedValues.collect { it }.reverse()
+        then:
+        resPg1.numTotalMetricItems == 10
+        resPg1.metricItemsPage.numBadgesEarned == numBadgesEarnedValues[0..3]
+
+        resPg2.numTotalMetricItems == 10
+        resPg2.metricItemsPage.numBadgesEarned == numBadgesEarnedValues[4..7]
+
+        resPg3.numTotalMetricItems == 10
+        resPg3.metricItemsPage.numBadgesEarned == numBadgesEarnedValues[8..9]
+
+        resPg1_descending.numTotalMetricItems == 10
+        resPg1_descending.metricItemsPage.numBadgesEarned == numBadgesEarnedValuesReversed[0..3]
+
+        resPg2_descending.numTotalMetricItems == 10
+        resPg2_descending.metricItemsPage.numBadgesEarned == numBadgesEarnedValuesReversed[4..7]
+
+        resPg3_descending.numTotalMetricItems == 10
+        resPg3_descending.metricItemsPage.numBadgesEarned == numBadgesEarnedValuesReversed[8..9]
+    }
+
+    def "must not be able to retrieve more than 200 items"() {
+        when:
+        skillsService.getGlobalUserProgressMetrics("", 501, 1, "numBadgesEarned", true)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.resBody.contains("Cannot ask for more than 200 items")
+    }
 
     @Canonical
     static class UserProgressMetric {
@@ -379,54 +575,58 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         return badgeREs
     }
 
-    private createGlobalBadge(int badgeNum, List skills, List levelsDef = []) {
+    private createGlobalBadge(int badgeNum, List skills, List levelsDef = [], SkillsService serviceToUse = null) {
+        serviceToUse = serviceToUse ?: skillsService
         def badgeRes = SkillsFactory.createBadge(3, badgeNum)
-        skillsService.createGlobalBadge(badgeRes)
+        serviceToUse.createGlobalBadge(badgeRes)
         skills.each {
-            skillsService.assignSkillToGlobalBadge([badgeId: badgeRes.badgeId, projectId: it.projectId, skillId: it.skillId])
+            serviceToUse.assignSkillToGlobalBadge([badgeId: badgeRes.badgeId, projectId: it.projectId, skillId: it.skillId])
         }
 
         levelsDef.each {
-            skillsService.assignProjectLevelToGlobalBadge(projectId: it.projectId, badgeId: badgeRes.badgeId, level: it.level.toString())
+            serviceToUse.assignProjectLevelToGlobalBadge(projectId: it.projectId, badgeId: badgeRes.badgeId, level: it.level.toString())
         }
 
         badgeRes.enabled = true
-        skillsService.updateGlobalBadge(badgeRes)
+        serviceToUse.updateGlobalBadge(badgeRes)
 
         return badgeRes
     }
 
-    private createProject(int projNum, int numSkillsFirstProj = 5, int numSkillsSecondSubj = 0) {
+    private createProject(int projNum, int numSkillsFirstProj = 5, int numSkillsSecondSubj = 0, SkillsService serviceToUse = null) {
+        serviceToUse = serviceToUse ?: skillsService
         List skillsRes = []
         def p1 = SkillsFactory.createProject(projNum)
         def p1_sub1 = SkillsFactory.createSubject(projNum, 1)
         def p1_sks1 = SkillsFactory.createSkills(numSkillsFirstProj, projNum, 1, 100)
         skillsRes.addAll(p1_sks1)
-        skillsService.createProjectAndSubjectAndSkills(p1, p1_sub1, p1_sks1)
+        serviceToUse.createProjectAndSubjectAndSkills(p1, p1_sub1, p1_sks1)
         if (numSkillsSecondSubj > 0) {
             def p1_sub2 = SkillsFactory.createSubject(projNum, 2)
             def p1_sks2 = SkillsFactory.createSkills(numSkillsSecondSubj, projNum, 2, 100)
             skillsRes.addAll(p1_sks2)
-            skillsService.createProjectAndSubjectAndSkills(null, p1_sub2, p1_sks2)
+            serviceToUse.createProjectAndSubjectAndSkills(null, p1_sub2, p1_sks2)
         }
         return skillsRes
     }
 
-    private def createQuiz(int num) {
+    private def createQuiz(int num, SkillsService serviceToUse = null) {
+        serviceToUse = serviceToUse ?: skillsService
         def quiz = QuizDefFactory.createQuiz(num)
         quiz.name = "My Quiz ${num}".toString()
-        skillsService.createQuizDef(quiz)
+        serviceToUse.createQuizDef(quiz)
         def question = QuizDefFactory.createChoiceQuestion(num, 1, 2)
-        skillsService.createQuizQuestionDef(question)
+        serviceToUse.createQuizQuestionDef(question)
         return quiz
     }
 
-    private def createSurvey(int num) {
+    private def createSurvey(int num, SkillsService serviceToUse = null) {
+        serviceToUse = serviceToUse ?: skillsService
         def survey = QuizDefFactory.createQuizSurvey(num)
         survey.name = "My Survey ${num}".toString()
-        skillsService.createQuizDef(survey)
+        serviceToUse.createQuizDef(survey)
         def question = QuizDefFactory.createSingleChoiceSurveyQuestion(num, 1, 2)
-        skillsService.createQuizQuestionDef(question)
+        serviceToUse.createQuizQuestionDef(question)
         return survey
     }
 
