@@ -24,6 +24,7 @@ import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
 import skills.storage.model.DayCountItem
 import skills.storage.model.QuizDefParent
+import skills.storage.model.SkillDef
 
 import java.util.stream.Stream
 
@@ -215,36 +216,6 @@ FROM projectsAndQuizzes
             @Param("userTagKey") String userTagKey,
             @Param("userTagValueFilter") String userTagValueFilter)
 
-
-    static interface SingleUserProjectProgress {
-        String getProjectId()
-        String getProjectName()
-        Integer getNumSkills()
-        Integer getProjectTotalPoints()
-        Integer getNumProjectLevels()
-        Integer getNumBadges()
-        Integer getPoints()
-        Date getUpdated()
-    }
-
-    @Query(value = '''SELECT up.project_id                                      as projectId,
-                   max(pd.name)                                       as projectName,
-                   SUM(CASE WHEN sd.type = 'Skill' THEN 1 ELSE 0 END) as numSkills,
-                   SUM(CASE WHEN sd.type = 'Skill' THEN sd.total_points ELSE 0 END) as projectTotalPoints,
-                   SUM(CASE WHEN sd.type = 'Badge' THEN 1 ELSE 0 END) as numBadges,
-                   max(up.points)                                     as points,
-                   max(ld.level)                                      as numProjectLevels,
-                   max(up.updated)                                    as updated
-            FROM user_points up
-                     join project_definition pd on (up.project_id = pd.project_id)
-                     left join skill_definition sd on (pd.project_id = sd.project_id)
-                     left join level_definition ld on (pd.id = ld.project_ref_id and ld.skill_ref_id is null)
-            WHERE up.project_id IN :projectIds
-              and up.user_id = :userId
-              and up.skill_ref_id is null
-            group by up.project_id''', nativeQuery = true)
-    List<SingleUserProjectProgress> findSingleUserProjectsProgress(@Param("userId") String userId,  @Param("projectIds") List<String> projectIds)
-
     static interface SingleUserAchievement {
         String getProjectId()
         Integer getNumAchievedSkills()
@@ -282,7 +253,7 @@ FROM projectsAndQuizzes
                 and ua.project_id IN :projectIds
                 and sd.type = 'Badge'
                 group by ua.project_id''', nativeQuery = true)
-    List<SingleUserAchievedBadgeCounts> findSingleUserAchievedBadgeCounts(@Param("userId") String userId,  @Param("projectIds") List<String> projectIds)
+    List<SingleUserAchievedBadgeCounts> findSingleUserAchievedBadgeCounts(@Param("userId") String userId, @Param("projectIds") List<String> projectIds)
 
 
 
