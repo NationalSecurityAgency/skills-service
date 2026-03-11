@@ -178,7 +178,7 @@ const showUserTagColumn = computed(() => {
                 data-key="userId"
                 :auto-max-width="false"
             >
-              <Column field="userIdForDisplay" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
+              <Column field="userIdForDisplay" header="User" :sortable="true" :class="{'flex': responsive.lg.value }">
                 <template #header>
                   <i class="fa-solid fa-user mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
                 </template>
@@ -190,7 +190,7 @@ const showUserTagColumn = computed(() => {
                       :field="appConfig.usersTableAdditionalUserTagKey"
                       :header="appConfig.usersTableAdditionalUserTagLabel"
                       :sortable="true"
-                      :class="{'flex': responsive.md.value }">
+                      :class="{'flex': responsive.lg.value }">
                 <template #header>
                   <i class="fas fa-tag mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
                 </template>
@@ -199,7 +199,7 @@ const showUserTagColumn = computed(() => {
                 </template>
               </Column>
 
-              <Column field="numSkillsEarned" header="Skills & Projects" :sortable="true" :class="{'flex': responsive.md.value }">
+              <Column field="numSkillsEarned" header="Skills & Projects" :sortable="true" :class="{'flex': responsive.lg.value }">
                 <template #header>
                   <i class="fa-solid fa-tasks mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
                 </template>
@@ -219,20 +219,21 @@ const showUserTagColumn = computed(() => {
                                  :aria-label="`Progress for ${slotProps.data.userId} user`" />
                   </div>
                   <div class="flex flex-col gap-1 mt-2">
-                    <div>Started:
-                      <Tag>{{ slotProps.data.numProjects }}</Tag>
-                      / {{ userProgress.numTotalProjects }} Projects
+                    <div class="flex gap-1 flex-wrap items-center"><div>Started:</div>
+                      <div>
+                        <Tag>{{ slotProps.data.numProjects }}</Tag>/ {{ userProgress.numTotalProjects }} Projects
+                      </div>
                     </div>
                   </div>
                 </template>
               </Column>
 
-              <Column field="numQuizAttempts" header="# Quiz Runs" :sortable="true" :class="{'flex': responsive.md.value }">
+              <Column field="numQuizAttempts" header="# Quiz Runs" :sortable="true" :class="{'flex': responsive.lg.value }">
                 <template #header>
                   <i class="fa-solid fa-spell-check mr-1" :class="colors.getTextClass(4)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  <div class="flex pr-2">
+                  <div class="flex pr-2 flex-wrap">
                     <div class="flex flex-col gap-2 flex-1">
                       <div class="flex-1"><Tag severity="secondary">{{ slotProps.data.numQuizAttempts }}</Tag></div>
                     </div>
@@ -251,7 +252,7 @@ const showUserTagColumn = computed(() => {
                 </template>
               </Column>
 
-              <Column field="numSurveys" header="# Survey Runs" :sortable="true" :class="{'flex': responsive.md.value }">
+              <Column field="numSurveys" header="# Survey Runs" :sortable="true" :class="{'flex': responsive.lg.value }">
                 <template #header>
                   <i class="fa-solid fa-clipboard-question mr-1" :class="colors.getTextClass(5)" aria-hidden="true"></i>
                 </template>
@@ -262,7 +263,7 @@ const showUserTagColumn = computed(() => {
                 </template>
               </Column>
 
-              <Column field="numBadgesEarned" header="# Badges" :sortable="true" :class="{'flex': responsive.md.value }">
+              <Column field="numBadgesEarned" header="# Badges" :sortable="true" :class="{'flex': responsive.lg.value }">
                 <template #header>
                   <i class="fa-solid fa-award mr-1" :class="colors.getTextClass(6)" aria-hidden="true"></i>
                 </template>
