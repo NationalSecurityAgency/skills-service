@@ -175,31 +175,16 @@ class AdminUsersService {
         return new TableResultWithTotalPoints(usersData, count, totalPoints)
     }
 
-    TableResultWithTotalPoints loadUsersPageForSkillsAcrossProjects(String badgeId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent) {
+    TableResultWithTotalPoints loadUsersPageForSkillsAcrossProjects(String badgeId, String query, PageRequest pageRequest) {
         List<SkillDefPartialRes> skills = globalBadgesService.getSkillsForBadge(badgeId)
         query = query ? query.trim() : ''
-        Integer totalPoints = skills.sum(0) { skill -> skill.totalPoints } as Integer
 
-        Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)
         List<GlobalBadgeLevelRes> levels = globalBadgesService.getGlobalBadgeLevels(badgeId)
+        Integer totalLevels = levels.sum(0) { level -> level.level } as Integer
+        List<GlobalBadgeUser> usersPage = userPointsRepo.findDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query, pageRequest)
+        Integer count = userPointsRepo.countDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query)
 
-        Page<ProjectUser> usersPage = userPointsRepo.findDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query, minMax.left, minMax.right, pageRequest)
-        List<SimpleUserResult> currentUsers = usersPage.getContent().collect{ it -> return new SimpleUserResult(it)}
-
-        levels.forEach{ level ->
-            List<String> userIds = userAchievedRepo.getUsersWhoHaveAchievedLevelForProject(level.projectId, level.level)
-            userIds.forEach{ userId ->
-                def currentUser = currentUsers.find{ it.userId == userId }
-                if(currentUser) {
-                    if(!currentUser.levelProgress) {
-                        currentUser.levelProgress = new HashMap<String, Boolean>()
-                    }
-                    currentUser.levelProgress.put(level.projectId, true)
-                }
-            }
-        }
-
-        return new TableResultWithTotalPoints(currentUsers, currentUsers.size(), totalPoints)
+        return new TableResultWithTotalPointsAndLevel(usersPage, count, skills.size(), totalLevels)
     }
 
     private static Pair<Integer, Integer> calcMinMaxPointsQueryParams(Integer totalPoints, int minimumPointsPercent, int maximumPointsPercent) {

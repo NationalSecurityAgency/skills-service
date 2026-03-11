@@ -58,12 +58,17 @@ const data = ref([])
 const isLoading = ref(true)
 const isExporting = ref(false)
 const totalPoints = ref(0)
+const totalLevels = ref(0)
 const currentPage = ref(1)
 const totalRows = ref(1)
 const pageSize = useStorage('usersTable-pageSize', 5)
 const possiblePageSizes = [5, 10, 15, 20]
 const sortInfo = ref({ sortOrder: -1, sortBy: 'lastUpdated' })
 const selectedRows = ref([])
+
+const totalProgress = computed(() => {
+  return totalPoints.value + totalLevels.value;
+})
 
 const showUserTagColumn = computed(() => {
  return !!(appConfig.usersTableAdditionalUserTagKey && appConfig.usersTableAdditionalUserTagLabel);
@@ -173,6 +178,9 @@ const loadData = () => {
     data.value = res.data
     totalRows.value = res.count
     totalPoints.value = res.totalPoints
+    if(isGlobalBadgePage.value) {
+      totalLevels.value = res.totalLevels;
+    }
     selectedRows.value = []
     isLoading.value = false
   })
@@ -183,6 +191,21 @@ const calcPercent = (userPoints) => {
     return 'N/A'
   }
   return Math.trunc((userPoints / totalPoints.value) * 100)
+}
+
+const calcLevelPercent = (userLevel) => {
+  if (!totalPoints.value) {
+    return 'N/A'
+  }
+  return Math.trunc((userLevel / totalLevels.value) * 100)
+}
+
+const calcTotalPercent = (userPoints, userLevel) => {
+  if (!totalPoints.value && !totalLevels.value) {
+    return 'N/A'
+  }
+
+  return Math.trunc((userLevel + userPoints) / totalProgress.value * 100)
 }
 
 const pageChanged = (pagingInfo) => {
@@ -245,7 +268,7 @@ const archiveUsers = () => {
                        data-cy="users-userTagFilter" aria-label="user tag filter" />
           </div>
         </div>
-        <div class="flex-1">
+        <div class="flex-1" v-if="!isGlobalBadgePage">
           <div>
             <label for="minimumProgress">User Progress Filter</label>
           </div>
@@ -287,7 +310,7 @@ const archiveUsers = () => {
       <SkillsDataTable
         :value="data" :loading="isLoading" size="small" stripedRows showGridlines paginator lazy
         :totalRecords="totalRows" :rows="pageSize" @page="pageChanged"
-        tableStoredStateId="usersTable" data-cy="usersTable"
+        :tableStoredStateId="`usersTable${isGlobalBadgePage ? 'Global' : ''}`" data-cy="usersTable"
         aria-label="Users"
         :rowsPerPageOptions="possiblePageSizes"
         v-model:sort-field="sortInfo.sortBy"
@@ -361,7 +384,7 @@ const archiveUsers = () => {
             </router-link>
           </template>
         </Column>
-        <Column field="totalPoints" header="Progress" :sortable="true" :class="{'flex': responsive.md.value }">
+        <Column field="totalPoints" header="Progress" :sortable="true" :class="{'flex': responsive.md.value }" v-if="!isGlobalBadgePage">
           <template #header>
             <i class="far fa-arrow-alt-circle-up mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
           </template>
@@ -395,10 +418,38 @@ const archiveUsers = () => {
             </div>
           </template>
         </Column>
-        <Column field="levelProgress" v-if="isGlobalBadgePage" header="Level Requirement Met">
+        <Column v-if="isGlobalBadgePage" header="Badge Progress" :sortable="false" :class="{'flex': responsive.md.value }">
           <template #body="slotProps">
-            <div v-for="(level, project) in slotProps.data.levelProgress">
-              <i class="fas fa-check-circle" v-if="level" /> {{ project }}
+            <div :data-cy="`usr_progress-${slotProps.data.userId}`" class="w-full">
+              <div class="flex">
+                <div class="flex flex-auto">
+                  <span class="font-weight-bold text-primary"
+                        :aria-label="`${calcTotalPercent(slotProps.data.numLevelsAchieved, slotProps.data.skillsAchieved)} percent completed`"
+                        data-cy="progressPercent">{{ calcTotalPercent(slotProps.data.numLevelsAchieved, slotProps.data.skillsAchieved) }}%</span>
+                </div>
+                <div class="flex flex-auto justify-end">
+                  <span class="text-primary font-weight-bold"
+                        :aria-label="`${slotProps.data.numLevelsAchieved} out of ${totalLevels} total points`"
+                        data-cy="progressCurrentPoints">{{ slotProps.data.numLevelsAchieved?.toLocaleString() }}</span> /
+                  <span class="italic" data-cy="progressTotalPoints">{{ totalLevels?.toLocaleString() }} levels</span>
+                  <span class="text-primary font-weight-bold ml-3"
+                        :aria-label="`${slotProps.data.skillsAchieved} out of ${totalPoints} total points`"
+                        data-cy="progressCurrentPoints">{{ slotProps.data.skillsAchieved?.toLocaleString() }}</span> /
+                  <span class="italic" data-cy="progressTotalPoints">{{ totalPoints?.toLocaleString() }} skills</span>
+                </div>
+              </div>
+              <ProgressBar style="height: 5px;" :value="calcTotalPercent(slotProps.data.numLevelsAchieved, slotProps.data.skillsAchieved)" :showValue="false"
+                           class="lg:min-w-[12rem] xl:min-w-[20rem]"
+                           :aria-label="`Progress for ${slotProps.data.userId} user`" />
+              <!--              <div v-if="slotProps.data.userMaxLevel || slotProps.data.userMaxLevel === 0" class="row"-->
+              <!--                   data-cy="progressLevels">-->
+              <!--                <div class="col">-->
+              <!--                  <i class="fas fa-trophy skills-color-levels" aria-hidden="true" /> <span class="italic">Current Level: </span>-->
+              <!--                  <span v-if="slotProps.data.userMaxLevel === 0" data-cy="progressCurrentLevel">None</span>-->
+              <!--                  <span v-else class="font-weight-bold" data-cy="progressCurrentLevel">{{ slotProps.data.userMaxLevel-->
+              <!--                    }}</span>-->
+              <!--                </div>-->
+              <!--              </div>-->
             </div>
           </template>
         </Column>

@@ -1480,16 +1480,11 @@ class AdminController {
                               @RequestParam int limit,
                               @RequestParam int page,
                               @RequestParam String orderBy,
-                              @RequestParam Boolean ascending,
-                              @RequestParam int minimumPoints,
-                              @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
+                              @RequestParam Boolean ascending) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id", badgeId)
-        SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", badgeId)
-        SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", badgeId)
-
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
 
-        return adminUsersService.loadUsersPageForSkillsAcrossProjects(badgeId, query, pageRequest, minimumPoints, maximumPoints)
+        return adminUsersService.loadUsersPageForSkillsAcrossProjects(badgeId, query, pageRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/errors", method = [RequestMethod.GET], produces = "application/json")

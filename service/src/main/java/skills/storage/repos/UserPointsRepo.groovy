@@ -26,6 +26,7 @@ import org.springframework.data.jpa.repository.QueryHints
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
+import skills.controller.result.model.GlobalBadgeUser
 import skills.controller.result.model.ProjectUser
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserPoints
@@ -979,37 +980,138 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     Page<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, List<String> skillIds, String userId, int minimumPoints, int maximumPoints, String userTagFilter, Pageable pageable)
 
     @Query(value = '''
+WITH globalBadgeSkills AS (
+    SELECT DISTINCT skill.id as skillRefId
+    FROM skill_relationship_definition srd
+             JOIN skill_definition globalBadge ON (srd.parent_ref_id = globalBadge.id and srd.type = 'BadgeRequirement' and globalBadge.type = 'GlobalBadge')
+             JOIN skill_definition skill ON (srd.child_ref_id = skill.id and srd.type = 'BadgeRequirement' and skill.type = 'Skill')
+    where globalBadge.skill_id = ?1 and globalBadge.project_id is null
+    UNION
+    SELECT DISTINCT skilDef.id as skillRefId
+    FROM global_badge_level_definition gbld
+             JOIN skill_definition skilDef ON (gbld.project_id = skilDef.project_id and skilDef.type = 'Skill')
+    where gbld.skill_id = ?1
+),
+     users AS (
+         select DISTINCT (user_id)
+         from user_points
+         where skill_ref_id in (select globalBadgeSkills.skillRefId from globalBadgeSkills)
+     ),
+     projectMaxLevelAchievements AS (
+         select user_id, project_id, max(level) as maxLevel from user_achievement
+         where
+             project_id in (select gbld.project_id FROM global_badge_level_definition gbld where gbld.skill_id = ?1)
+           and skill_ref_id is null
+           and level > 0
+         group by user_id, project_id
+     ),
+     levelAchievements AS (
+         select user_id, SUM(maxLevel) maxLevel from projectMaxLevelAchievements
+         group by user_id
+     ),
+     skillAchievements AS (
         SELECT
-            up.user_id               AS userId,
-            ua.user_id_for_display   AS userIdForDisplay,
-            ua.dn                    AS dn,
-            ua.first_name            AS firstName,
-            ua.last_name             AS lastName,
-            ua.email                 AS email,
+            achievement.user_id      AS userId,
             upaAgg.firstPerformedOn  AS firstUpdated,
             upaAgg.lastPerformedOn   AS lastUpdated,
-            SUM(CASE WHEN achievement.achieved_on IS NULL THEN up.points ELSE skill.total_points END) AS totalPoints
+            count(achievement.skill_id) AS skillsAchieved
         FROM skill_definition badge
-        JOIN skill_relationship_definition srd ON badge.id = srd.parent_ref_id
-        JOIN skill_definition skill ON srd.child_ref_id = skill.id
-        JOIN user_points up ON up.skill_ref_id = skill.id
-        JOIN user_attrs ua ON ua.user_id = up.user_id
-        LEFT JOIN user_achievement achievement ON achievement.skill_ref_id = skill.id AND achievement.user_id = up.user_id
-        LEFT JOIN (SELECT utCol.user_id, max(utCol.value) AS utColValue FROM user_tags utCol WHERE utCol.key = ?2 group by utCol.user_id) utCol ON utCol.user_id=up.user_id
-        LEFT JOIN (
-          SELECT upa.user_id, MIN(upa.performed_on) AS firstPerformedOn, MAX(upa.performed_on) AS lastPerformedOn FROM user_performed_skill upa
-          WHERE upa.skill_ref_id IN (
-          SELECT srd2.child_ref_id
-            FROM skill_definition badge2
-            JOIN skill_relationship_definition srd2 ON badge2.id = srd2.parent_ref_id
-            WHERE badge2.type = 'GlobalBadge' AND badge2.skill_id = ?1
-          ) GROUP BY upa.user_id
-        ) upaAgg ON upaAgg.user_id = up.user_id
-        WHERE badge.type = 'GlobalBadge' AND badge.skill_id = ?1
-          AND (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (', ua.user_id_for_display, ')')) LIKE lower(CONCAT('%', ?3, '%')) OR lower(ua.user_id_for_display) LIKE lower(CONCAT('%', ?3, '%')))
-        GROUP BY up.user_id, ua.user_id_for_display, ua.dn, ua.first_name, ua.last_name, ua.email, upaAgg.firstPerformedOn, upaAgg.lastPerformedOn
-        HAVING SUM(CASE WHEN achievement.achieved_on IS NULL THEN up.points ELSE skill.total_points END) >= ?4 AND SUM(CASE WHEN achievement.achieved_on IS NULL THEN up.points ELSE skill.total_points END) <= ?5''', nativeQuery = true)
-    Page<ProjectUser> findDistinctUsersForGlobalBadge(String badgeId, String usersTableAdditionalUserTagKey, String userId, int minimumPoints, int maximumPoints, Pageable pageable)
+                 JOIN skill_relationship_definition srd ON badge.id = srd.parent_ref_id
+                 JOIN skill_definition skill ON srd.child_ref_id = skill.id
+                 LEFT JOIN user_achievement achievement ON achievement.skill_ref_id = skill.id
+                 LEFT JOIN (
+            SELECT upa.user_id, MIN(upa.performed_on) AS firstPerformedOn, MAX(upa.performed_on) AS lastPerformedOn FROM user_performed_skill upa
+            WHERE upa.skill_ref_id IN (
+                SELECT srd2.child_ref_id
+                FROM skill_definition badge2
+                         JOIN skill_relationship_definition srd2 ON badge2.id = srd2.parent_ref_id
+                WHERE badge2.type = 'GlobalBadge' AND badge2.skill_id = ?1
+            ) GROUP BY upa.user_id
+        ) upaAgg ON upaAgg.user_id = achievement.user_id
+        WHERE badge.type = 'GlobalBadge' AND badge.skill_id = ?1 AND achievement.user_id IS NOT NULL
+        GROUP BY achievement.user_id, upaAgg.firstPerformedOn, upaAgg.lastPerformedOn
+     )
+    select
+        users.user_id            as userId,
+        ua.user_id_for_display   AS userIdForDisplay,
+        ua.dn                    AS dn,
+        ua.first_name            AS firstName,
+        ua.last_name             AS lastName,
+        ua.email                 AS email,
+        COALESCE(levelAchievements.maxLevel, 0) as numLevelsAchieved,
+        COALESCE(skillAchievements.skillsAchieved, 0) as skillsAchieved,
+        skillAchievements.firstUpdated as firstUpdated,
+        skillAchievements.lastUpdated as lastUpdated
+    from users
+             left join levelAchievements on levelAchievements.user_id = users.user_id
+             left join skillAchievements on skillAchievements.userId = users.user_id
+             JOIN user_attrs ua ON ua.user_id = users.user_id
+             LEFT JOIN (SELECT utCol.user_id, max(utCol.value) AS utColValue FROM user_tags utCol WHERE utCol.key = ?2 group by utCol.user_id) utCol ON utCol.user_id= users.user_id
+    WHERE (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (', ua.user_id_for_display, ')')) LIKE lower(CONCAT('%', ?3, '%')) OR lower(ua.user_id_for_display) LIKE lower(CONCAT('%', ?3, '%')))
+    GROUP BY users.user_id, ua.user_id_for_display, ua.dn, ua.first_name, ua.last_name, ua.email, levelAchievements.maxLevel, skillAchievements.skillsAchieved, skillAchievements.firstUpdated, skillAchievements.lastUpdated''', nativeQuery = true)
+    List<GlobalBadgeUser> findDistinctUsersForGlobalBadge(String badgeId, String usersTableAdditionalUserTagKey, String userId, Pageable pageable)
+
+    @Query(value = '''
+WITH globalBadgeSkills AS (
+    SELECT DISTINCT skill.id as skillRefId
+    FROM skill_relationship_definition srd
+             JOIN skill_definition globalBadge ON (srd.parent_ref_id = globalBadge.id and srd.type = 'BadgeRequirement' and globalBadge.type = 'GlobalBadge')
+             JOIN skill_definition skill ON (srd.child_ref_id = skill.id and srd.type = 'BadgeRequirement' and skill.type = 'Skill')
+    where globalBadge.skill_id = ?1 and globalBadge.project_id is null
+    UNION
+    SELECT DISTINCT skilDef.id as skillRefId
+    FROM global_badge_level_definition gbld
+             JOIN skill_definition skilDef ON (gbld.project_id = skilDef.project_id and skilDef.type = 'Skill')
+    where gbld.skill_id = ?1
+),
+     users AS (
+         select DISTINCT (user_id)
+         from user_points
+         where skill_ref_id in (select globalBadgeSkills.skillRefId from globalBadgeSkills)
+     ),
+     projectMaxLevelAchievements AS (
+         select user_id, project_id, max(level) as maxLevel from user_achievement
+         where
+             project_id in (select gbld.project_id FROM global_badge_level_definition gbld where gbld.skill_id = ?1)
+           and skill_ref_id is null
+           and level > 0
+         group by user_id, project_id
+     ),
+     levelAchievements AS (
+         select user_id, SUM(maxLevel) maxLevel from projectMaxLevelAchievements
+         group by user_id
+     ),
+     skillAchievements AS (
+        SELECT
+            achievement.user_id      AS userId,
+            upaAgg.firstPerformedOn  AS firstUpdated,
+            upaAgg.lastPerformedOn   AS lastUpdated,
+            count(achievement.skill_id) AS skillsAchieved
+        FROM skill_definition badge
+                 JOIN skill_relationship_definition srd ON badge.id = srd.parent_ref_id
+                 JOIN skill_definition skill ON srd.child_ref_id = skill.id
+                 LEFT JOIN user_achievement achievement ON achievement.skill_ref_id = skill.id
+                 LEFT JOIN (
+            SELECT upa.user_id, MIN(upa.performed_on) AS firstPerformedOn, MAX(upa.performed_on) AS lastPerformedOn FROM user_performed_skill upa
+            WHERE upa.skill_ref_id IN (
+                SELECT srd2.child_ref_id
+                FROM skill_definition badge2
+                         JOIN skill_relationship_definition srd2 ON badge2.id = srd2.parent_ref_id
+                WHERE badge2.type = 'GlobalBadge' AND badge2.skill_id = ?1
+            ) GROUP BY upa.user_id
+        ) upaAgg ON upaAgg.user_id = achievement.user_id
+        WHERE badge.type = 'GlobalBadge' AND badge.skill_id = ?1 AND achievement.user_id IS NOT NULL
+        GROUP BY achievement.user_id, upaAgg.firstPerformedOn, upaAgg.lastPerformedOn
+     )
+    select
+        count(users.user_id)
+    from users
+             left join levelAchievements on levelAchievements.user_id = users.user_id
+             left join skillAchievements on skillAchievements.userId = users.user_id
+             JOIN user_attrs ua ON ua.user_id = users.user_id
+             LEFT JOIN (SELECT utCol.user_id, max(utCol.value) AS utColValue FROM user_tags utCol WHERE utCol.key = ?2 group by utCol.user_id) utCol ON utCol.user_id= users.user_id
+    WHERE (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (', ua.user_id_for_display, ')')) LIKE lower(CONCAT('%', ?3, '%')) OR lower(ua.user_id_for_display) LIKE lower(CONCAT('%', ?3, '%')))''', nativeQuery = true)
+    Integer countDistinctUsersForGlobalBadge(String badgeId, String usersTableAdditionalUserTagKey, String userId)
 
     @Query(value = '''SELECT 
                 up.user_id as userId, 

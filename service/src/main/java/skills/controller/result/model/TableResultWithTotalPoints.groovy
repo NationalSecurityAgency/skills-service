@@ -24,7 +24,7 @@ class TableResultWithTotalPoints extends TableResult{
 
     final static TableResultWithTotalPoints EMPTY = new TableResultWithTotalPoints()
 
-    private TableResultWithTotalPoints() {
+    TableResultWithTotalPoints() {
         super()
     }
 
