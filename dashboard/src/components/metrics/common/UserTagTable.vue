@@ -151,8 +151,8 @@ const filterRange = ref([]);
     </template>
     <template #content>
       <div>
-        <div class="flex m-5 gap-4">
-          <div class="flex flex-3 flex-col">
+        <div class="flex flex-wrap gap-2 m-5">
+          <div class="flex flex-1 flex-col min-w-[20rem]">
             <SkillsTextInput
                 label="Filter by Tag:"
                 label-icon="fas fa-tag"
@@ -163,7 +163,7 @@ const filterRange = ref([]);
                 id="userTagTable-tagFilter"
                 :name="`userTagTable-${tagKey}-tagFilter`"/>
           </div>
-          <div class="flex flex-wrap flex-col gap-2">
+          <div class="flex-col min-w-[20rem]">
             <SkillsCalendarInput selectionMode="range"
                                  :name="`filterRange${tagKey}`"
                                  v-model="filterRange" :maxDate="new Date()"
@@ -173,7 +173,7 @@ const filterRange = ref([]);
                                  :disabled="isLoading" placeholder="Select a date range" :data-cy="`${tagKey}-metricsDateFilter`" />
           </div>
 
-          <div class="flex gap-2 mb-6">
+          <div class="flex flex-1 gap-2 mb-6">
             <SkillsButton @click="filter" icon="fa-solid fa-search" label="Filter" :disabled="isLoading" :data-cy="`userTagTable-${tagKey}-filterBtn`" />
             <SkillsButton severity="danger" icon="fa-solid fa-eraser" label="Clear" @click="clearFilter" :disabled="isLoading" :data-cy="`userTagTable-${tagKey}-clearBtn`" />
           </div>
