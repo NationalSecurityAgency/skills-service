@@ -70,31 +70,27 @@ const loadData = () => {
 </script>
 
 <template>
-  <div>
+  <div style="width: 99%;">
     <SubPageHeader title="Overall Metrics" :title-level="1"> </SubPageHeader>
     <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-6" />
     <div v-if="!isLoading">
       <OverallMetricsCards :data="metricsData" />
-      <Card v-if="hasData" :pt="{ body: { class: 'p-0!' } }">
-        <template #content>
-          <div class="p-5">
-            <NumUsersPerDay :title="'Overall Users per day'" :project-ids="projectIds" :quiz-ids="quizIds"/>
-            <div v-if="tagCharts"
-                 class="flex flex-col gap-4 mt-4"
-                 data-cy="userTagCharts">
-              <div v-for="(tagChart, index) in tagCharts" :key="`${tagChart.key}-${index}`" style="min-width: 30vw;">
-                <user-tag-table v-if="tagChart.type === 'table'"
-                                :tag-chart="tagChart" :project-ids="projectIds" :quiz-ids="quizIds" />
-                <user-tag-chart v-if="tagChart.type !== 'table'"
-                                :project-ids="projectIds" :quiz-ids="quizIds"
-                                :chart-type="tagChart.type"
-                                :tag-key="tagChart.key"
-                                :title="tagChart.title" />
-              </div>
-            </div>
-          </div>
-        </template>
-      </Card>
+      <div class="flex">
+        <NumUsersPerDay :title="'Overall Users per day'" :project-ids="projectIds" :quiz-ids="quizIds"/>
+      </div>
+      <div v-if="tagCharts"
+           class="flex flex-col gap-4 mt-4"
+           data-cy="userTagCharts">
+        <div v-for="(tagChart, index) in tagCharts" :key="`${tagChart.key}-${index}`" style="min-width: 30vw;">
+          <user-tag-table v-if="tagChart.type === 'table'"
+                          :tag-chart="tagChart" :project-ids="projectIds" :quiz-ids="quizIds" />
+          <user-tag-chart v-if="tagChart.type !== 'table'"
+                          :project-ids="projectIds" :quiz-ids="quizIds"
+                          :chart-type="tagChart.type"
+                          :tag-key="tagChart.key"
+                          :title="tagChart.title" />
+        </div>
+      </div>
       <no-content2
         v-if="!hasData"
         class="mt-6"
