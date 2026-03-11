@@ -348,7 +348,7 @@ FROM projectsAndQuizzes
         GROUP BY grouped_day
         ORDER BY day DESC
     """, nativeQuery = true)
-    Stream<DayCountItem> getDistinctUserCountForProjectsAndQuizzes(
+    List<DayCountItem> getDistinctUserCountForProjectsAndQuizzes(
             @Param("projectIds") List<String> projectIds,
             @Param("quizIds") List<String> quizIds,
             @Param("start") Date start,

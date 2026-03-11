@@ -219,9 +219,7 @@ class GlobalProgressMetricsService {
 
     @Transactional
     List<DayCountItem> getDistinctUserCountForProjectsAndQuizzes(List<String> projectIds, List<String> quizIds, Date startDate, GroupingType groupingType) {
-        Stream<DayCountItem> stream = globalProgressMetricsRepo.getDistinctUserCountForProjectsAndQuizzes(projectIds, quizIds, startDate, groupingType.value)
-        List<DayCountItem> counts = stream.collect(Collectors.toList())
-        stream.close()
+        List<DayCountItem> counts = globalProgressMetricsRepo.getDistinctUserCountForProjectsAndQuizzes(projectIds, quizIds, startDate, groupingType.value)
 
         // Fill in gaps with zero counts
         List<DayCountItem> filledCounts = fillGapsWithZeroCounts(counts, startDate, groupingType)
