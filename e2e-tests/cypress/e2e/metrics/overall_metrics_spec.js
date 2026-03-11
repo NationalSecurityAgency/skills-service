@@ -84,13 +84,13 @@ describe('Global/Overall Metrics', () => {
         cy.get('[data-cy="overallMetricsBadgesCard"]').should('contain', '0 Badges');
         cy.get('[data-cy="overallMetricsBadgesCard"]').should('contain', '0 Global Badges');
 
-        cy.get('[data-cy="overallDistinctNumUsersOverTime"]').should('contain.text', 'Overall Users per day')
-        cy.get('[data-cy=overallDistinctNumUsersOverTime] [data-cy=timeLengthSelector]')
+        cy.get('[data-cy="distinctNumUsersOverTime"]').should('contain.text', 'Overall Users per day')
+        cy.get('[data-cy="distinctNumUsersOverTime"] [data-cy="timeLengthSelector"]')
           .contains('6 months')
           .click();
         cy.wait('@overallDistinctUsersOverTime');
 
-        cy.get('[data-cy=overallDistinctNumUsersOverTime] [data-cy=timeLengthSelector]')
+        cy.get('[data-cy="distinctNumUsersOverTime"] [data-cy="timeLengthSelector"]')
           .contains('1 year')
           .click();
         cy.wait('@overallDistinctUsersOverTime');

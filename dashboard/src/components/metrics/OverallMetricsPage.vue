@@ -20,7 +20,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import MetricsService from '@/components/metrics/MetricsService.js'
 import OverallMetricsCards from '@/components/utils/cards/OverallMetricsCards.vue'
-import OverallNumUsersPerDay from '@/components/metrics/common/OverallNumUsersPerDay.vue'
+import NumUsersPerDay from '@/components/metrics/common/NumUsersPerDay.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import UserTagTable from '@/components/metrics/common/UserTagTable.vue'
 import UserTagChart from '@/components/metrics/common/UserTagChart.vue'
@@ -78,7 +78,7 @@ const loadData = () => {
       <Card v-if="hasData" :pt="{ body: { class: 'p-0!' } }">
         <template #content>
           <div class="p-5">
-            <OverallNumUsersPerDay :project-ids="projectIds" :quiz-ids="quizIds"/>
+            <NumUsersPerDay :title="'Overall Users per day'" :project-ids="projectIds" :quiz-ids="quizIds"/>
             <div v-if="tagCharts"
                  class="flex flex-col gap-4 mt-4"
                  data-cy="userTagCharts">
