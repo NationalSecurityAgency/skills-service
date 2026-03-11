@@ -32,6 +32,15 @@ const props = defineProps({
     type: String,
     required: false,
   },
+  labelIcon: {
+    type: String,
+    required: false
+  },
+  labelOnSameLine: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
   isRequired: {
     type: Boolean,
     default: false,
@@ -65,8 +74,8 @@ const fallthroughAttributes = useSkillsInputFallthroughAttributes()
 </script>
 
 <template>
-  <div class="flex flex-col gap-2" v-bind="fallthroughAttributes.rootAttrs.value">
-    <label v-if="label" :for="name"><span v-if="isRequired">*</span> {{ label }} </label>
+  <div class="flex gap-1" v-bind="fallthroughAttributes.rootAttrs.value" :class="{ 'flex-col' : !labelOnSameLine, 'items-center': labelOnSameLine}">
+    <label v-if="label" :for="name" class="whitespace-nowrap"><span v-if="isRequired">*</span><i v-if="labelIcon" :class="labelIcon" aria-hidden="true"/> {{ label }} </label>
     <InputGroup>
       <InputGroupAddon v-if="slots.addOnBefore">
         <slot name="addOnBefore"></slot>
