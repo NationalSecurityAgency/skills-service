@@ -1316,4 +1316,6 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                                                 )''')
     void removeOrphanedProjectPointsForUser(@Param("projectId") String projectId, @Param("userId") String userId)
 
+    List<UserPoints> findByUserIdAndProjectIdInAndSkillRefIdIsNull(String userId, List<String> projectIds)
+
 }

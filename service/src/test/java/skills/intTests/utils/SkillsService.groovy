@@ -1285,6 +1285,11 @@ class SkillsService {
         wsHelper.appGet(endpoint,props)
     }
 
+    def getGlobalSingleUserProgressMetrics(String userId) {
+        String endpoint = "/progress-metrics/${userId}"
+        wsHelper.appGet(endpoint)
+    }
+
     def getGlobalQuizRuns(String userQuery = '', String nameQuery = '', int limit = 10, int page = 1, String orderBy = 'started', boolean ascending = true, String startDate = null, String endDate = null) {
         String endpoint = "/quiz-runs"
         Map props = [

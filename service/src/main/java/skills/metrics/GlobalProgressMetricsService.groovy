@@ -29,14 +29,10 @@ import skills.controller.result.model.globalMetrics.OverallMetricsResult
 import skills.controller.result.model.globalMetrics.SingleUserOverallProgress
 import skills.controller.result.model.globalMetrics.UsersOverallProgressResult
 import skills.services.quiz.QuizDefService
-import skills.storage.model.DayCount
-import skills.storage.model.DayCountItem
-import skills.storage.model.QuizDefParent
-import skills.storage.model.UserQuizAttempt
+import skills.storage.model.*
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
-import skills.storage.repos.GlobalProgressMetricsRepo
-import skills.storage.repos.UserRoleRepo
+import skills.storage.repos.*
 
 import java.util.stream.Collectors
 import java.util.stream.Stream
@@ -74,6 +70,15 @@ class GlobalProgressMetricsService {
 
     @Autowired
     GlobalProgressMetricsRepo globalProgressMetricsRepo
+
+    @Autowired
+    ProjDefRepo projDefRepo
+
+    @Autowired
+    LevelDefRepo levelDefRepo
+
+    @Autowired
+    UserPointsRepo userPointsRepo
 
     @Autowired
     MetricsService metricsServiceNew
@@ -142,28 +147,36 @@ class GlobalProgressMetricsService {
     SingleUserOverallProgress loadSingleUserProgress(String userId) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
         List<String> projectIds = projectIdsAndQuizIds.projectIds
-        List<String> quizIds = projectIdsAndQuizIds.quizIds
 
-        List<GlobalProgressMetricsRepo.SingleUserProjectProgress> projectProgress = globalProgressMetricsRepo.findSingleUserProjectsProgress(userId, projectIds)
+        List<UserPoints> projectUserPoints = userPointsRepo.findByUserIdAndProjectIdInAndSkillRefIdIsNull(userId, projectIds)
+        List<String> projectsThatUserHasProgressIn = projectUserPoints.collect { it.projectId }.unique()
 
-        List<GlobalProgressMetricsRepo.SingleUserAchievement> achievements = globalProgressMetricsRepo.findSingleUserAchievements(userId, projectIds)
+        List<ProjSummaryResult> projDefInfoList = projDefRepo.getAllSummariesByProjectIdIn(projectsThatUserHasProgressIn)
+        Map<String, ProjSummaryResult> projDefInfoMap = projDefInfoList.collectEntries { [it.projectId, it] }
+
+        List<LevelDefRepo.ProjectLevelCount> projectLevelCountList = levelDefRepo.countNumLevelsForProjects(projectsThatUserHasProgressIn)
+        Map<String, LevelDefRepo.ProjectLevelCount> projectLevelCountMap = projectLevelCountList.collectEntries { [it.projectId, it] }
+
+        List<GlobalProgressMetricsRepo.SingleUserAchievement> achievements = globalProgressMetricsRepo.findSingleUserAchievements(userId, projectsThatUserHasProgressIn)
         Map<String, GlobalProgressMetricsRepo.SingleUserAchievement> achievementsByProject = achievements.collectEntries { [it.projectId, it] }
 
-        List<GlobalProgressMetricsRepo.SingleUserAchievedBadgeCounts> badgeCounts = globalProgressMetricsRepo.findSingleUserAchievedBadgeCounts(userId, projectIds)
+        List<GlobalProgressMetricsRepo.SingleUserAchievedBadgeCounts> badgeCounts = globalProgressMetricsRepo.findSingleUserAchievedBadgeCounts(userId, projectsThatUserHasProgressIn)
         Map<String, GlobalProgressMetricsRepo.SingleUserAchievedBadgeCounts> badgeCountsByProject = badgeCounts.collectEntries { [it.projectId, it] }
 
-        List<SingleUserOverallProgress.ProjectProgress> projectsProgressRes = projectProgress.collect {
-            GlobalProgressMetricsRepo.SingleUserAchievement projAchievements = achievementsByProject[it.projectId]
-            GlobalProgressMetricsRepo.SingleUserAchievedBadgeCounts badgeCount = badgeCountsByProject[it.projectId]
+        List<SingleUserOverallProgress.ProjectProgress> projectsProgressRes = projectUserPoints.collect { UserPoints userPoints->
+            GlobalProgressMetricsRepo.SingleUserAchievement projAchievements = achievementsByProject[userPoints.projectId]
+            GlobalProgressMetricsRepo.SingleUserAchievedBadgeCounts badgeCount = badgeCountsByProject[userPoints.projectId]
+            ProjSummaryResult projDefInfo = projDefInfoMap[userPoints.projectId]
+            LevelDefRepo.ProjectLevelCount levelCount = projectLevelCountMap[userPoints.projectId]
             new SingleUserOverallProgress.ProjectProgress(
-                    projectId: it.projectId,
-                    projectName: it.projectName,
-                    numSkills: it.numSkills,
-                    projectTotalPoints: it.projectTotalPoints,
-                    numBadges: it.numBadges,
-                    points: it.points,
-                    updated: it.updated,
-                    numProjectLevels: it.numProjectLevels,
+                    projectId: userPoints.projectId,
+                    projectName: projDefInfo.name,
+                    numSkills: projDefInfo.numSkills,
+                    projectTotalPoints: projDefInfo.totalPoints,
+                    numBadges: projDefInfo.numBadges,
+                    points: userPoints.points,
+                    updated: userPoints.updated,
+                    numProjectLevels: levelCount.numberLevels,
                     numAchievedSkills: projAchievements?.numAchievedSkills ?: 0,
                     numAchievedBadges: badgeCount?.numAchievedBadges ?: 0,
                     achievedProjLevel: projAchievements?.achievedProjLevel ?: 0,

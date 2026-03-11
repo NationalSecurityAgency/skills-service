@@ -41,5 +41,20 @@ interface LevelDefRepo extends CrudRepository<LevelDef, Integer>{
            ''')
     List<SubjectLevelCount> countNumLevelsPerSubject(String projectId)
 
+    static interface ProjectLevelCount {
+        String getProjectId()
+        Long getNumberLevels()
+    }
+
+    @Query('''select pd.projectId as projectId, count(ld.id) as numberLevels 
+            from LevelDef ld
+             join ProjDef pd on ld.projectRefId = pd.id 
+            where 
+                pd.projectId in ?1 and
+                ld.skillRefId is null
+            group by pd.projectId    
+           ''')
+    List<ProjectLevelCount> countNumLevelsForProjects(List<String> projectIds)
+
 
 }
