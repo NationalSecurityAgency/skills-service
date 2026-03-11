@@ -36,7 +36,7 @@ const totalQuizzesAndSurveys = computed(() => {
 </script>
 
 <template>
-  <div class="flex gap-2 mb-3">
+  <div class="flex flex-col lg:flex-row gap-2 mb-3 flex-wrap">
     <media-info-card
         :title="`${data.numTotalProjects} ${pluralize.plural('Project', data.numTotalProjects)}`"
         :icon-class="`fa-solid fa-tasks ${colors.getTextClass(1)}`"
