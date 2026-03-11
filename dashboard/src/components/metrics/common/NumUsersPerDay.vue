@@ -37,15 +37,35 @@ const props = defineProps({
     required: false,
     default: 'Users per day',
   },
+  projectIds: {
+    type: Array,
+    required: false,
+    default: null
+  },
+  quizIds: {
+    type: Array,
+    required: false,
+    default: null
+  },
 });
+
+const isOverallMode = computed(() => {
+  return props.projectIds || props.quizIds
+})
+
+const overallPrefix = computed(() => {
+  return isOverallMode.value ? 'Overall ' : ''
+})
 
 const layoutSizes = useLayoutSizesState()
 
 onMounted(() => {
-  if (route.params.skillId) {
-    localProps.value.skillId = route.params.skillId;
-  } else if (route.params.subjectId) {
-    localProps.value.skillId = route.params.subjectId;
+  if (!isOverallMode.value) {
+    if (route.params.skillId) {
+      localProps.value.skillId = route.params.skillId;
+    } else if (route.params.subjectId) {
+      localProps.value.skillId = route.params.subjectId;
+    }
   }
   loadData();
   chartJsOptions.value = setChartOptions();
@@ -59,6 +79,10 @@ const byMonth = ref(false);
 const localProps = ref({
   start: dayjs().subtract(30, 'day').valueOf(),
   byMonth: false,
+  ...(isOverallMode.value ? {
+    projIds: props.projectIds,
+    quizIds: props.quizIds
+  } : {})
 });
 const timeSelectorOptions = ref([
   {
@@ -85,12 +109,12 @@ const updateTimeRange = (timeEvent) => {
     const oldestDaily = dayjs().subtract(appConfig.maxDailyUserEvents, 'day');
     if (!byMonth.value) {
       if (timeEvent.startTime < oldestDaily) {
-        mutableTitle.value = 'Users per week';
+        mutableTitle.value = `${overallPrefix.value}Users per week`;
       } else {
         mutableTitle.value = props.title;
       }
     } else {
-      mutableTitle.value = 'Users per month';
+      mutableTitle.value = `${overallPrefix.value}Users per month`;
     }
   }
   localProps.value.start = timeEvent.startTime.valueOf();
@@ -104,62 +128,71 @@ const allZeros = (data) => {
 
 const loadData = () => {
   loading.value = true;
-  MetricsService.loadChart(route.params.projectId, 'distinctUsersOverTimeForProject', localProps.value)
-      .then((response) => {
+  
+  const metricsLoader = isOverallMode.value
+    ? MetricsService.getOverallMetricsChart('overallDistinctUsersOverTimeMetricsBuilder', localProps.value)
+    : MetricsService.loadChart(route.params.projectId, 'distinctUsersOverTimeForProject', localProps.value)
 
-        if (response && response.users?.length > 1 && !allZeros(response.users)) {
-          hasDataEnoughData.value = true;
-          const formatTimestamp = (timestamp) => {
-            const format = localProps.value.byMonth ? 'YYYY-MM' : 'YYYY-MM-DD';
-            return dayjs(timestamp).format(format)
-          }
+  metricsLoader.then((response) => {
+    if (response && response.users?.length > 1 && !allZeros(response.users)) {
+      hasDataEnoughData.value = true;
+      const formatTimestamp = (timestamp) => {
+        const format = localProps.value.byMonth ? 'YYYY-MM' : 'YYYY-MM-DD';
+        return dayjs(timestamp).format(format)
+      }
 
-          const addZeroPointAtStart = (data) => {
-            if (data && data.length > 0) {
-              const earliestDate = data[0].value
-              const prevDay = dayjs(earliestDate).subtract(1, 'day').toDate()
-              data.unshift({
-                value: formatTimestamp(prevDay),
-                count: 0
-              })
-            }
-
-            return data
-          }
-
-          const usersData = addZeroPointAtStart(response.users)
-          const usersSeriesData = usersData.map((item) => {
-            return {x: formatTimestamp(item.value), y: item.count}
+      const addZeroPointAtStart = (data) => {
+        if (data && data.length > 0) {
+          const earliestDate = data[0].value
+          const prevDay = dayjs(earliestDate).subtract(1, 'day').toDate()
+          data.unshift({
+            value: formatTimestamp(prevDay),
+            count: 0
           })
-
-          const newUsersData = addZeroPointAtStart(response.newUsers)
-          const newUsersSeriesData = newUsersData.map((item) => {
-            return {x: formatTimestamp(item.value), y: item.count}
-          })
-          distinctUsersOverTimeChartData.value = {
-            datasets: [{
-              label: 'Users',
-              data: usersSeriesData,
-              cubicInterpolationMode: 'monotone',
-              order: 2, // Lower order means it will be drawn first (in the background)
-              borderColor: getComputedStyle(document.documentElement).getPropertyValue('--p-cyan-500'),
-              backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--p-cyan-100'),
-            }, {
-              label: 'New Users',
-              data: newUsersSeriesData,
-              cubicInterpolationMode: 'monotone',
-              order: 1,  // Higher order means it will be drawn last (on top)
-              borderColor: getComputedStyle(document.documentElement).getPropertyValue('--p-green-500'),
-              backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--p-green-100'),
-            }]
-          }
-          chartJsOptions.value.scales.x.time.unit = byMonth.value ? 'month' : 'day';
-        } else {
-          distinctUsersOverTimeChartData.value = [];
-          hasDataEnoughData.value = false;
         }
-        loading.value = false;
-      });
+
+        return data
+      }
+
+      const usersData = addZeroPointAtStart(response.users)
+      const usersSeriesData = usersData.map((item) => {
+        return {x: formatTimestamp(item.value), y: item.count}
+      })
+
+      const datasets = [{
+        label: 'Users',
+        data: usersSeriesData,
+        cubicInterpolationMode: 'monotone',
+              order: 2, // Lower order means it will be drawn first (in the background)
+        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--p-cyan-500'),
+        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--p-cyan-100'),
+      }]
+      
+      if (response.newUsers) {
+        const newUsersData = addZeroPointAtStart(response.newUsers)
+        const newUsersSeriesData = newUsersData.map((item) => {
+          return {x: formatTimestamp(item.value), y: item.count}
+        })
+        datasets.push({
+          label: 'New Users',
+          data: newUsersSeriesData,
+          cubicInterpolationMode: 'monotone',
+              order: 1,  // Higher order means it will be drawn last (on top)
+          borderColor: getComputedStyle(document.documentElement).getPropertyValue('--p-green-500'),
+          backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--p-green-100'),
+        })
+      }
+      
+      distinctUsersOverTimeChartData.value = {
+        datasets: datasets
+      }
+      chartJsOptions.value.scales.x.time.unit = byMonth.value ? 'month' : 'day';
+    } else {
+      distinctUsersOverTimeChartData.value = [];
+      hasDataEnoughData.value = false;
+    }
+    loading.value = false;
+  });
 };
 
 const timeRangeSelector = ref(null);
@@ -169,9 +202,9 @@ const dateOptionChanged = (option) => {
   localProps.value.byMonth = option
 
   if(byMonth.value) {
-    mutableTitle.value = 'Users per month';
+    mutableTitle.value = `${overallPrefix.value}Users per month`;
   } else {
-    mutableTitle.value = 'Users per week';
+    mutableTitle.value = `${overallPrefix.value}Users per week`;
   }
 
   if(isUsingDays.value && byMonth.value) {
