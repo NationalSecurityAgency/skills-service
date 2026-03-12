@@ -441,15 +441,6 @@ const archiveUsers = () => {
               <ProgressBar style="height: 5px;" :value="calcTotalPercent(slotProps.data.numLevelsAchieved, slotProps.data.skillsAchieved)" :showValue="false"
                            class="lg:min-w-[12rem] xl:min-w-[20rem]"
                            :aria-label="`Progress for ${slotProps.data.userId} user`" />
-              <!--              <div v-if="slotProps.data.userMaxLevel || slotProps.data.userMaxLevel === 0" class="row"-->
-              <!--                   data-cy="progressLevels">-->
-              <!--                <div class="col">-->
-              <!--                  <i class="fas fa-trophy skills-color-levels" aria-hidden="true" /> <span class="italic">Current Level: </span>-->
-              <!--                  <span v-if="slotProps.data.userMaxLevel === 0" data-cy="progressCurrentLevel">None</span>-->
-              <!--                  <span v-else class="font-weight-bold" data-cy="progressCurrentLevel">{{ slotProps.data.userMaxLevel-->
-              <!--                    }}</span>-->
-              <!--                </div>-->
-              <!--              </div>-->
             </div>
           </template>
         </Column>
