@@ -560,6 +560,36 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         res3.metricItemsPage == []
     }
 
+    def "filter by user tag" () {
+        when:
+        def res = admins[0].getGlobalUserProgressMetrics('', 4, 1, "userTag", true, "kOo4")
+        def res1 = admins[0].getGlobalUserProgressMetrics('', 4, 1, "userTag", true, "kO")
+        def res2 = admins[0].getGlobalUserProgressMetrics('', 4, 1, "userTag", true, "bc1")
+        def res3 = admins[0].getGlobalUserProgressMetrics('', 4, 1, "userTag", true, "bc")
+        def res4_pg1 = admins[0].getGlobalUserProgressMetrics('', 3, 1, "userTag", true, "bc")
+        def res4_pg2 = admins[0].getGlobalUserProgressMetrics('', 3, 2, "userTag", true, "bc")
+
+        then:
+        res.metricItemsPage.userTag == ['KOO4', 'KOO4']
+        res.numTotalMetricItems == 2
+
+        res1.metricItemsPage.userTag == ['KOO4', 'KOO4', 'KOO5']
+        res1.numTotalMetricItems == 3
+
+        res2.metricItemsPage.userTag == ['ABC1', 'ABC1', 'ABC1']
+        res2.numTotalMetricItems == 3
+
+        res3.metricItemsPage.userTag == ['ABC1', 'ABC1', 'ABC1', 'ABC2']
+        res3.numTotalMetricItems == 4
+
+        res4_pg1.metricItemsPage.userTag == ['ABC1', 'ABC1', 'ABC1']
+        res4_pg1.numTotalMetricItems == 4
+
+        res4_pg2.metricItemsPage.userTag == ['ABC2']
+        res4_pg2.numTotalMetricItems == 4
+
+    }
+
     def "sort by user tag" () {
         String orderBy = "userTag"
         when:

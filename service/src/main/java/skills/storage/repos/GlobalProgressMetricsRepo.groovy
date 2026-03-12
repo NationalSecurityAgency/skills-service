@@ -151,7 +151,9 @@ SELECT
 FROM projectsAndQuizzes
          JOIN user_attrs userAttrs ON projectsAndQuizzes.combinedUserId = userAttrs.user_id
          LEFT JOIN userTags ON userTags.user_id = projectsAndQuizzes.combinedUserId
-WHERE (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
+WHERE 
+    (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
+    AND (:userTagValueFilter = '' OR lower(userTags.value) like lower(concat('%', :userTagValueFilter, '%')))
 ''', nativeQuery = true)
     List<UserProgressMetric> findUsersOverallProgress(
             @Param("projectIds") List<String> projectIds,
@@ -163,12 +165,10 @@ WHERE (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat
 
     @Query(value = '''
 with projects AS (
-    SELECT userAttrs.user_id
+    SELECT user_points.user_id
     FROM user_points
-             JOIN user_attrs userAttrs ON (user_points.user_id = userAttrs.user_id)
     WHERE project_id IN :projectIds
-      and (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
-    GROUP BY userAttrs.user_id
+    GROUP BY user_points.user_id
 ),
      achievements AS (
          SELECT ua.user_id
@@ -197,17 +197,28 @@ with projects AS (
          select uqa.user_id
          from user_quiz_attempt uqa
                   join quiz_definition qd on (uqa.quiz_definition_ref_id = qd.id)
-                  join user_attrs userAttrs ON (uqa.user_id = userAttrs.user_id)
          where qd.quiz_id in :quizIds
-           and (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
          group by uqa.user_id
      ),
      projectsAndQuizzes AS (
          select COALESCE(projectsAndAchievements.user_id, quizzes.user_id) as combinedUserId
          from projectsAndAchievements FULL OUTER JOIN quizzes ON projectsAndAchievements.user_id = quizzes.user_id
-     )
+     ),
+    userTags as (
+        SELECT ut.user_id, max(ut.value) AS value
+        FROM user_tags ut
+        WHERE
+            ut.key = :userTagKey
+            and ut.user_id in (select combinedUserId from projectsAndQuizzes)
+        group by ut.user_id
+    )
 SELECT count(projectsAndQuizzes.combinedUserId)
 FROM projectsAndQuizzes
+    JOIN user_attrs userAttrs ON projectsAndQuizzes.combinedUserId = userAttrs.user_id
+    LEFT JOIN userTags ON userTags.user_id = projectsAndQuizzes.combinedUserId
+WHERE
+    (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
+    AND (:userTagValueFilter = '' OR lower(userTags.value) like lower(concat('%', :userTagValueFilter, '%')))
     ''', nativeQuery = true)
     Long countUsersOverallProgress(
             @Param("projectIds") List<String> projectIds,
