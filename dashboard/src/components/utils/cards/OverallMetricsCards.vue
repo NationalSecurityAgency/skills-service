@@ -45,7 +45,7 @@ const totalQuizzesAndSurveys = computed(() => {
       <Tag>{{ data.numTotalSkills}}</Tag> {{pluralize.plural('Skill', data.numTotalSkills)}}
     </media-info-card>
     <media-info-card
-        :title="`${totalQuizzesAndSurveys} ${pluralize.plural('Quiz', totalQuizzesAndSurveys)}/${pluralize.plural('Survey', totalQuizzesAndSurveys)}`"
+        :title="`${totalQuizzesAndSurveys} ${pluralize.plural('Assessment', totalQuizzesAndSurveys)}`"
         :icon-class="`fa-solid fa-spell-check ${colors.getTextClass(2)}`"
         data-cy="overallMetricsQuizzesAndSurveysCard"
         class="flex-1">
@@ -56,7 +56,8 @@ const totalQuizzesAndSurveys = computed(() => {
         :icon-class="`fa-solid fa-award ${colors.getTextClass(4)}`"
         data-cy="overallMetricsBadgesCard"
         class="flex-1">
-      <Tag>{{ data.numTotalGlobalBadges}}</Tag> Global {{ pluralize.plural('Badge', data.numTotalGlobalBadges) }}
+      <Tag>{{ data.numTotalProjectBadges}}</Tag> Project {{ pluralize.plural('Badge', data.numTotalProjectBadges) }}
+      and <Tag>{{ data.numTotalGlobalBadges}}</Tag> Global {{ pluralize.plural('Badge', data.numTotalGlobalBadges) }}
     </media-info-card>
   </div>
 </template>

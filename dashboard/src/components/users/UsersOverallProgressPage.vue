@@ -107,6 +107,10 @@ const pageChanged = (pagingInfo) => {
 const showUserTagColumn = computed(() => {
   return !!(appConfig.usersTableAdditionalUserTagKey && appConfig.usersTableAdditionalUserTagLabel);
 })
+
+const hasBadges = computed(() => userProgress.value.numTotalBadges > 0 || userProgress.value.numTotalGlobalBadges > 0)
+const hasQuizzes = computed(() => userProgress.value.numTotalQuizzes > 0)
+const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
 </script>
 
 <template>
@@ -138,7 +142,7 @@ const showUserTagColumn = computed(() => {
                 </div>
                 <InputText id="userTagFilter" v-model="filters.userTag" v-on:keydown.enter="applyFilters"
                            class="w-full"
-                           data-cy="users-userTagFilter" aria-label="user tag filter"/>
+                           data-cy="userTagFilter" aria-label="user tag filter"/>
               </div>
             </div>
             <div class="flex gap-2">
@@ -228,7 +232,8 @@ const showUserTagColumn = computed(() => {
                 </template>
               </Column>
 
-              <Column field="numQuizAttempts" header="# Quiz Runs" :sortable="true" :class="{'flex': responsive.lg.value }">
+              <Column v-if="hasQuizzes"
+                  field="numQuizAttempts" header="# Quiz Runs" :sortable="true" :class="{'flex': responsive.lg.value }">
                 <template #header>
                   <i class="fa-solid fa-spell-check mr-1" :class="colors.getTextClass(4)" aria-hidden="true"></i>
                 </template>
@@ -252,7 +257,8 @@ const showUserTagColumn = computed(() => {
                 </template>
               </Column>
 
-              <Column field="numSurveys" header="# Survey Runs" :sortable="true" :class="{'flex': responsive.lg.value }">
+              <Column v-if="hasSurveys"
+                      field="numSurveys" header="# Survey Runs" :sortable="true" :class="{'flex': responsive.lg.value }">
                 <template #header>
                   <i class="fa-solid fa-clipboard-question mr-1" :class="colors.getTextClass(5)" aria-hidden="true"></i>
                 </template>
@@ -263,13 +269,14 @@ const showUserTagColumn = computed(() => {
                 </template>
               </Column>
 
-              <Column field="numBadgesEarned" header="# Badges" :sortable="true" :class="{'flex': responsive.lg.value }">
+              <Column v-if="hasBadges"
+                  field="numBadgesEarned" header="# Badges" :sortable="true" :class="{'flex': responsive.lg.value }">
                 <template #header>
                   <i class="fa-solid fa-award mr-1" :class="colors.getTextClass(6)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
                   <Tag>{{ slotProps.data.numBadgesEarned }}</Tag> / {{ userProgress.numTotalBadges}}
-                  <div>Global Badges: {{ slotProps.data.numGlobalBadgesEarned }}</div>
+                  <div>Global: {{ slotProps.data.numGlobalBadgesEarned }}</div>
                 </template>
               </Column>
 
@@ -284,7 +291,8 @@ const showUserTagColumn = computed(() => {
           </div>
         </template>
       </Card>
-      <no-content2 v-if="!hasData" class="mt-6"
+      <no-content2 v-if="!hasData" class="my-10"
+                   data-cy="noUserOverallProgress"
                    title="No User Data Available"
                    message="Cross-project user activity and progress data will display here once users start completing skills and taking quizzes across your administered projects"></no-content2>
     </div>

@@ -346,10 +346,8 @@ class AppController {
     }
 
     @RequestMapping(value = "/overall-metrics", method = RequestMethod.GET, produces = "application/json")
-    GlobalMetricsResult getOverallMetrics(@RequestParam(required = false, defaultValue = "") List<String> projectIds,
-                                          @RequestParam(required = false, defaultValue = "") List<String> quizIds) {
-
-        return globalMetricsService.loadOverallMetrics(projectIds, quizIds)
+    GlobalMetricsResult getOverallMetrics() {
+        return globalMetricsService.loadOverallMetrics()
     }
 
     @RequestMapping(value = "/overall-metrics/{metricsId}", method =  RequestMethod.GET, produces = "application/json")

@@ -204,7 +204,8 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         res.numTotalProjects == 3
         res.numTotalQuizzes == 5
         res.numTotalSurveys == 4
-        res.numTotalBadges == 2
+        res.numTotalBadges == 5
+        res.numTotalProjectBadges == 2
         res.numTotalGlobalBadges == 3
 
         res.numTotalMetricItems == 10
@@ -310,7 +311,8 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         res.numTotalProjects == 2
         res.numTotalQuizzes == 4
         res.numTotalSurveys == 3
-        res.numTotalBadges == 1
+        res.numTotalBadges == 4
+        res.numTotalProjectBadges == 1
         res.numTotalGlobalBadges == 3
 
         res.numTotalMetricItems == 10
@@ -416,7 +418,8 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         res.numTotalProjects == 1
         res.numTotalQuizzes == 3
         res.numTotalSurveys == 2
-        res.numTotalBadges == 0
+        res.numTotalBadges == 1
+        res.numTotalProjectBadges == 0
         res.numTotalGlobalBadges == 1
 
         res.numTotalMetricItems == 7
