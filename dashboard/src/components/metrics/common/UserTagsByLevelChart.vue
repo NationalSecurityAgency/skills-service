@@ -140,7 +140,7 @@ const heightInRem = computed(() => {
 </script>
 
 <template>
-  <Card :data-cy="`numUsersByTag-${tag.key}`" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
+  <Card :data-cy="`numUsersByTag-${tag.key}`">
     <template #header>
       <SkillsCardHeader :title="`Top 20 ${tag.label} ${skillsDisplayAttributesState.levelDisplayName} Breakdown`">
         <template #headerContent>

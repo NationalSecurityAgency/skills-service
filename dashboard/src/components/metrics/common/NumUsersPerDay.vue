@@ -298,7 +298,7 @@ const usersChartAnimationCompleted = ref(false)
 </script>
 
 <template>
-  <Card data-cy="distinctNumUsersOverTime" class="w-full" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
+  <Card data-cy="distinctNumUsersOverTime" class="w-full">
     <template #header>
       <SkillsCardHeader :title="mutableTitle">
         <template #headerContent>
@@ -321,15 +321,15 @@ const usersChartAnimationCompleted = ref(false)
       </SkillsCardHeader>
     </template>
     <template #content>
-      <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity.">
-        <Chart ref="usersChartRef"
-               id="usersTimeChart"
-               type="line"
-               :data="distinctUsersOverTimeChartData"
-               :options="chartJsOptions"
-               class="h-[30rem]" />
-        <div v-if="usersChartAnimationCompleted" data-cy="usersTimeChart_animationCompleted" />
-      </metrics-overlay>
+          <metrics-overlay :loading="loading" :has-data="hasDataEnoughData" no-data-msg="This chart needs at least 2 days of user activity.">
+            <Chart ref="usersChartRef"
+                   id="usersTimeChart"
+                   type="line"
+                   :data="distinctUsersOverTimeChartData"
+                   :options="chartJsOptions"
+                   class="h-[30rem]" />
+            <div v-if="usersChartAnimationCompleted" data-cy="usersTimeChart_animationCompleted" />
+          </metrics-overlay>
     </template>
   </Card>
 </template>

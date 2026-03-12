@@ -127,7 +127,7 @@ const topUserCountsChartRef = ref(null)
 </script>
 
 <template>
-  <Card data-cy="numUsersByTag" :style="`max-width: ${layoutSizes.tableMaxWidth}px;`">
+  <Card data-cy="numUsersByTag">
     <template #header>
       <SkillsCardHeader :title="`Top 20 ${tag.label} User Counts`">
         <template #headerContent>
