@@ -45,7 +45,7 @@ const clearDateFilter = () => {
 </script>
 
 <template>
-  <div class="flex flex-col flex-wrap">
+  <div class="flex flex-col">
     <SubPageHeader title="Runs"
                    aria-label="Runs">
       <template #underTitle>
@@ -60,18 +60,15 @@ const clearDateFilter = () => {
         </div>
       </template>
     </SubPageHeader>
-    <div class="relative">
-      <div class="absolute inset-0">
-        <QuizAttemptsTimeChart class="flex-1 w-full my-4" :dateRange="subFilter" />
-        <QuizUserTagsChart v-if="userTagsUtils.showUserTagColumn()" class="flex-1 w-full mb-4" :style="`width: ${layoutSizes.tableMaxWidth}px;`" :dateRange="subFilter"/>
-        <Card :pt="{ body: { class: 'p-0!' } }">
-          <template #content>
-            <quiz-runs-table table-stored-state-id="quizAdminRunsHistoryTable" :dateRange="subFilter"/>
-          </template>
-        </Card>
-      </div>
+    <div>
+      <QuizAttemptsTimeChart class="flex-1 w-full my-4" :dateRange="subFilter" />
+      <QuizUserTagsChart v-if="userTagsUtils.showUserTagColumn()" class="flex-1 w-full mb-4" :dateRange="subFilter"/>
+      <Card :pt="{ body: { class: 'p-0!' } }">
+        <template #content>
+          <quiz-runs-table table-stored-state-id="quizAdminRunsHistoryTable" :dateRange="subFilter"/>
+        </template>
+      </Card>
     </div>
-
   </div>
 </template>
 

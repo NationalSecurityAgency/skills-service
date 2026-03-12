@@ -45,11 +45,9 @@ const navCards = [{
       <project-metrics-small-nav :nav-cards="navCards" />
     </sub-page-header>
 
-    <div class="relative">
-      <div class="absolute inset-0">
-        <router-view id="mainContent3" tabindex="-1" aria-label="Main content area, click tab to navigate" ></router-view>
-        <project-metrics-nav-cards :nav-cards="navCards"/>
-      </div>
+    <div>
+      <router-view id="mainContent3" tabindex="-1" aria-label="Main content area, click tab to navigate" ></router-view>
+      <project-metrics-nav-cards :nav-cards="navCards"/>
     </div>
   </div>
 </template>
