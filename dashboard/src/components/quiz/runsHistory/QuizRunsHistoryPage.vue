@@ -60,16 +60,17 @@ const clearDateFilter = () => {
         </div>
       </template>
     </SubPageHeader>
-    <div :style="`width: ${layoutSizes.tableMaxWidth}px;`">
-      <QuizAttemptsTimeChart class="flex-1 w-full my-4" :dateRange="subFilter" />
-      <QuizUserTagsChart v-if="userTagsUtils.showUserTagColumn()" class="flex-1 w-full mb-4" :style="`width: ${layoutSizes.tableMaxWidth}px;`" :dateRange="subFilter"/>
+    <div class="relative">
+      <div class="absolute inset-0">
+        <QuizAttemptsTimeChart class="flex-1 w-full my-4" :dateRange="subFilter" />
+        <QuizUserTagsChart v-if="userTagsUtils.showUserTagColumn()" class="flex-1 w-full mb-4" :style="`width: ${layoutSizes.tableMaxWidth}px;`" :dateRange="subFilter"/>
+        <Card :pt="{ body: { class: 'p-0!' } }">
+          <template #content>
+            <quiz-runs-table table-stored-state-id="quizAdminRunsHistoryTable" :dateRange="subFilter"/>
+          </template>
+        </Card>
+      </div>
     </div>
-
-    <Card :pt="{ body: { class: 'p-0!' } }">
-      <template #content>
-        <quiz-runs-table table-stored-state-id="quizAdminRunsHistoryTable" :dateRange="subFilter"/>
-      </template>
-    </Card>
 
   </div>
 </template>
