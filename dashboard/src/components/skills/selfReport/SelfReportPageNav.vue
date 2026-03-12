@@ -36,7 +36,8 @@ const isSelfReportConfigureRoute = computed(() => {
       </router-link>
     </sub-page-header>
 
-    <div style="width: 99%;">
+    <div>
+      <div>Self Report Navigation</div>
       <router-view></router-view>
     </div>
   </div>

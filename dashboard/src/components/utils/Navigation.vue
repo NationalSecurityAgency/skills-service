@@ -126,7 +126,7 @@ watch(() => props.navItems, () => {
         </Card>
       </div>
 
-      <div class="flex-1" ref="content">
+      <div class="flex-1 min-w-0" ref="content">
         <div class="md:pl-4" id="mainContent2"
              tabindex="-1"
              aria-label="Main content area, click tab to navigate">
