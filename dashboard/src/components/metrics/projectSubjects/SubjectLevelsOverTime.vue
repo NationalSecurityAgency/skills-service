@@ -172,7 +172,7 @@ const setChartOptions = () => {
 </script>
 
 <template>
-  <Card data-cy="subjectNumUsersPerLevelOverTime" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
+  <Card data-cy="subjectNumUsersPerLevelOverTime">
     <template #header>
       <SkillsCardHeader title="Number of users for each level over time"></SkillsCardHeader>
     </template>

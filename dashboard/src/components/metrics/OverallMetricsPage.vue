@@ -70,10 +70,10 @@ const loadData = () => {
 </script>
 
 <template>
-  <div style="width: 99%;">
+  <div class="relative">
     <SubPageHeader title="Overall Metrics" :title-level="1"> </SubPageHeader>
     <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-6" />
-    <div v-if="!isLoading">
+    <div v-if="!isLoading" class="absolute inset-0">
       <OverallMetricsCards :data="metricsData" />
       <div class="flex">
         <NumUsersPerDay :title="'Overall Users per day'" :project-ids="projectIds" :quiz-ids="quizIds"/>

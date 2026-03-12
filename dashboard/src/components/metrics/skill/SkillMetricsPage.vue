@@ -70,7 +70,7 @@ onMounted(() => {
     <skills-spinner :is-loading="loading" />
 
     <!-- on FF charts end up pushing column to the next row; this is a workaround -->
-    <div v-if="!loading" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
+    <div v-if="!loading">
       <div class="flex flex-col lg:flex-row mb-4 gap-6">
         <stats-card class="flex flex-1" title="Achieved" :statNum="numUsersAchieved" :icon="`fa fa-trophy ${colors.getTextClass(0)}`" data-cy="numUserAchievedStatCard">
           Number of users that achieved this skill

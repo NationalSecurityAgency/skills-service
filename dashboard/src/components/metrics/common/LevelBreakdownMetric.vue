@@ -131,7 +131,7 @@ const setChartOptions = () => {
 </script>
 
 <template>
-  <Card data-cy="levelsChart" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
+  <Card data-cy="levelsChart">
     <template #header>
       <SkillsCardHeader :title="title">
         <template #headerContent>
