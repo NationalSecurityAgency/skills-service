@@ -24,6 +24,7 @@ class GlobalMetricsResult {
 
     Integer numTotalSkills
     Integer numTotalBadges
+    Integer numTotalProjectBadges
     Integer numTotalGlobalBadges
 
     Integer numTotalQuizzes
