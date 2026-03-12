@@ -1273,10 +1273,11 @@ class SkillsService {
         wsHelper.appGet(endpoint, props)
     }
 
-    def getGlobalUserProgressMetrics(String userQuery = '', int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true) {
+    def getGlobalUserProgressMetrics(String userQuery = '', int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String userTagFilter = '') {
         String endpoint = "/progress-metrics"
         Map props = [
                 userQuery: userQuery,
+                userTagFilter: userTagFilter,
                 limit: limit,
                 page: page,
                 orderBy: orderBy,
