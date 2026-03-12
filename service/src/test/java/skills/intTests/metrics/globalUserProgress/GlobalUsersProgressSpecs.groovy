@@ -23,9 +23,11 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.quiz.QuizQuestionType
+import skills.storage.model.auth.RoleName
 import spock.lang.IgnoreIf
 
 class GlobalUsersProgressSpecs extends DefaultIntSpec {
+    List<SkillsService> admins
     List<SkillsService> users
     List quizzes
     List surveys
@@ -40,36 +42,55 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
 
     def setup() {
         SkillsService rootUser = createRootSkillService()
-        List<String> userNames = getRandomUsers(15)
-        users = userNames[0..9].collect { createService(it) }
-        List<SkillsService> otherUsers = userNames[10..14].collect { createService(it) }
-        quizzes = (1..5).collect { createQuiz(it) }
-        surveys = (6..9).collect { createSurvey(it) }
+        List<String> userNames = getRandomUsers(18)
+        admins = userNames[0..2].collect { createService(it) }
+        users = userNames[3..12].collect { createService(it) }
+        List<SkillsService> otherUsers = userNames[13..17].collect { createService(it) }
+        quizzes = (1..5).collect { createQuiz(it, admins[0]) }
+        quizzes[1..4].each {
+            admins[0].addQuizUserRole(it.quizId, admins[1].userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        }
+        quizzes[2..4].each {
+            admins[0].addQuizUserRole(it.quizId, admins[2].userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        }
+
+        surveys = (6..9).collect { createSurvey(it, admins[0]) }
+        surveys[1..3].each {
+            admins[0].addQuizUserRole(it.quizId, admins[1].userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        }
+        surveys[2..3].each {
+            admins[0].addQuizUserRole(it.quizId, admins[2].userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        }
 
         attempts = []
         attemptsUsers = []
         attemptsQuizzes = []
 
         // projects
-        p1Skills = createProject(1, 5, 10)
-        p2Skills = createProject(2, 5, 2)
-        p3Skills = createProject(3, 5, 4)
+        p1Skills = createProject(1, 5, 10, admins[0])
+        p2Skills = createProject(2, 5, 2, admins[0])
+        p3Skills = createProject(3, 5, 4, admins[0])
 
-        def p1_badge1 = createBadge(1, 1, [p1Skills[0]])
-        def p2_badge1 = createBadge(2, 1, [p2Skills[0]])
+        admins[0].addProjectAdmin(p2Skills[1].projectId, admins[1].userName)
+        admins[0].addProjectAdmin(p3Skills[1].projectId, admins[1].userName)
 
-        def globalBadge1 = createGlobalBadge(10, [p1Skills[0], p2Skills[3]])
-        def globalBadge2 = createGlobalBadge(11, [p3Skills[0], p2Skills[4]])
+        admins[0].addProjectAdmin(p3Skills[1].projectId, admins[2].userName)
+
+        def p1_badge1 = createBadge(1, 1, [p1Skills[0]], admins[0])
+        def p2_badge1 = createBadge(2, 1, [p2Skills[0]], admins[0])
+
+        def globalBadge1 = createGlobalBadge(10, [p1Skills[0], p2Skills[3]], [], admins[0])
+        def globalBadge2 = createGlobalBadge(11, [p3Skills[0], p2Skills[4]], [], admins[0])
         def globalBadge3 = createGlobalBadge(12, [], [
                 [projectId: p1Skills[0].projectId, level: 1],
                 [projectId: p2Skills[3].projectId, level: 1],
-        ])
+        ], admins[0])
 
         // user 0
-        assert skillsService.addSkill(p1Skills[0], users[0].userName, new Date() - 4).body.skillApplied
-        assert skillsService.addSkill(p1Skills[5], users[0].userName, new Date() - 4).body.skillApplied
-        assert skillsService.addSkill(p1Skills[6], users[0].userName, new Date() - 4).body.skillApplied
-        assert skillsService.addSkill(p2Skills[3], users[0].userName, new Date() - 4).body.skillApplied
+        assert users[0].addSkill(p1Skills[0]).body.skillApplied
+        assert users[0].addSkill(p1Skills[5]).body.skillApplied
+        assert users[0].addSkill(p1Skills[6]).body.skillApplied
+        assert users[0].addSkill(p2Skills[3]).body.skillApplied
 
         runQuizOrSurvey(users[0], quizzes[1])
         runQuizOrSurvey(users[0], surveys[0], true, false)
@@ -78,7 +99,7 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         rootUser.saveUserTag(users[0].userName, 'dutyOrganization', ['ABC1'])
 
         // user 1
-        assert skillsService.addSkill(p1Skills[2], users[1].userName, new Date() - 1).body.skillApplied
+        assert users[1].addSkill(p1Skills[2]).body.skillApplied
 
         runQuizOrSurvey(users[1], quizzes[0], false)
         runQuizOrSurvey(users[1], quizzes[4], true)
@@ -89,15 +110,15 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         rootUser.saveUserTag(users[1].userName, 'dutyOrganization', ['ABC1'])
 
         // user 2 - achieved project badge but not a global badge
-        assert skillsService.addSkill(p1Skills[0], users[2].userName, new Date()).body.skillApplied
+        assert users[2].addSkill(p1Skills[0]).body.skillApplied
         runQuizOrSurvey(users[2], quizzes[0], false)
         runQuizOrSurvey(users[2], quizzes[1])
 
         rootUser.saveUserTag(users[2].userName, 'dutyOrganization', ['KOO4'])
 
         // user 3 - achieved global badge that only has skills but not project badge
-        assert skillsService.addSkill(p3Skills[0], users[3].userName, new Date()).body.skillApplied
-        assert skillsService.addSkill(p2Skills[4], users[3].userName, new Date()).body.skillApplied
+        assert users[3].addSkill(p3Skills[0]).body.skillApplied
+        assert users[3].addSkill(p2Skills[4]).body.skillApplied
         runQuizOrSurvey(users[3], quizzes[0], false)
         runQuizOrSurvey(users[3], quizzes[2])
         runQuizOrSurvey(users[3], quizzes[0], true)
@@ -108,23 +129,23 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         runQuizOrSurvey(users[4], quizzes[2], false)
         runQuizOrSurvey(users[4], quizzes[0], true)
         runQuizOrSurvey(users[4], quizzes[1])
-        assert skillsService.addSkill(p1Skills[4], users[4].userName, new Date()).body.skillApplied
-        assert skillsService.addSkill(p1Skills[5], users[4].userName, new Date()).body.skillApplied
-        assert skillsService.addSkill(p1Skills[6], users[4].userName, new Date()).body.skillApplied
-        assert skillsService.addSkill(p1Skills[7], users[4].userName, new Date()).body.skillApplied
+        assert users[4].addSkill(p1Skills[4]).body.skillApplied
+        assert users[4].addSkill(p1Skills[5]).body.skillApplied
+        assert users[4].addSkill(p1Skills[6]).body.skillApplied
+        assert users[4].addSkill(p1Skills[7]).body.skillApplied
         rootUser.saveUserTag(users[4].userName, 'dutyOrganization', ['KOO4'])
 
         // user 5 - achieved every project level
         runQuizOrSurvey(users[5], surveys[1])
         runQuizOrSurvey(users[5], quizzes[3], true, false)
         p1Skills.each {
-            assert skillsService.addSkill(it, users[5].userName, new Date()).body.skillApplied
+            assert users[5].addSkill(it).body.skillApplied
         }
         p2Skills.each {
-            assert skillsService.addSkill(it, users[5].userName, new Date()).body.skillApplied
+            assert users[5].addSkill(it).body.skillApplied
         }
         p3Skills.each {
-            assert skillsService.addSkill(it, users[5].userName, new Date()).body.skillApplied
+            assert users[5].addSkill(it).body.skillApplied
         }
 
         // users 6 - no project achievements
@@ -133,8 +154,8 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         rootUser.saveUserTag(users[6].userName, 'dutyOrganization', ['CBF2'])
 
         // users 7 - no quiz or surveys
-        assert skillsService.addSkill(p3Skills[0], users[7].userName, new Date()).body.skillApplied
-        assert skillsService.addSkill(p3Skills[1], users[7].userName, new Date()).body.skillApplied
+        assert users[7].addSkill(p3Skills[0]).body.skillApplied
+        assert users[7].addSkill(p3Skills[1]).body.skillApplied
         rootUser.saveUserTag(users[7].userName, 'dutyOrganization', ['XYZ1'])
 
         // user 8
@@ -168,7 +189,7 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         quizDefRepo.deleteAll()
         projDefRepo.deleteAll()
         when:
-        def res = skillsService.getGlobalUserProgressMetrics()
+        def res = admins[0].getGlobalUserProgressMetrics()
         then:
         res.numTotalProjects == 0
         res.numTotalQuizzes == 0
@@ -176,9 +197,9 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         res.metricItemsPage == []
     }
 
-    def "users progress" () {
+    def "users progress from admins[0] point of view" () {
         when:
-        def res = skillsService.getGlobalUserProgressMetrics("", 15, 1, "numSkillsEarned", false)
+        def res = admins[0].getGlobalUserProgressMetrics("", 15, 1, "numSkillsEarned", false)
         then:
         res.numTotalProjects == 3
         res.numTotalQuizzes == 5
@@ -282,16 +303,201 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         ))
     }
 
+    def "users progress from admins[1] point of view" () {
+        when:
+        def res = admins[1].getGlobalUserProgressMetrics("", 15, 1, "numSkillsEarned", false)
+        then:
+        res.numTotalProjects == 2
+        res.numTotalQuizzes == 4
+        res.numTotalSurveys == 3
+        res.numTotalBadges == 1
+        res.numTotalGlobalBadges == 3
+
+        res.numTotalMetricItems == 10
+        res.metricItemsPage.size() == 10
+
+        def user0 = res.metricItemsPage.find { it.userId == users[0].userName}
+        assertMetric(user0, new UserProgressMetric(
+                userId: users[0].userName,
+                numQuizAttempts: 2, numQuizzesPassed: 1, numQuizzesFailed: 0, numQuizzesInProgress: 1,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 1, numProjectLevelsEarned: 1, numSubjectLevelsEarned: 1, numSkillsEarned: 1,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 2,
+                userTag: "ABC1"
+        ))
+
+        def user1 = res.metricItemsPage.find { it.userId == users[1].userName}
+        assertMetric(user1, new UserProgressMetric(
+                userId: users[1].userName,
+                numQuizAttempts: 2, numQuizzesPassed: 2, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "ABC1"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[2].userName}, new UserProgressMetric(
+                userId: users[2].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 1, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "KOO4"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[3].userName}, new UserProgressMetric(
+                userId: users[3].userName,
+                numQuizAttempts: 2, numQuizzesPassed: 2, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 2, numProjectLevelsEarned: 2, numSubjectLevelsEarned: 2, numSkillsEarned: 2,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 1,
+                userTag: "KOO5"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[4].userName}, new UserProgressMetric(
+                userId: users[4].userName,
+                numQuizAttempts: 2, numQuizzesPassed: 1, numQuizzesFailed: 1, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "KOO4"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[5].userName}, new UserProgressMetric(
+                userId: users[5].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 0, numQuizzesFailed: 0, numQuizzesInProgress: 1,
+                numSurveys: 1, numSurveysCompleted: 1, numSurveysInProgress: 0,
+                numProjects: 2, numProjectLevelsEarned: 10, numSubjectLevelsEarned: 20, numSkillsEarned: 16,
+                numBadgesEarned: 1, numGlobalBadgesEarned: 3,
+                userTag: ""
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[6].userName}, new UserProgressMetric(
+                userId: users[6].userName,
+                numQuizAttempts: 2, numQuizzesPassed: 1, numQuizzesFailed: 1, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "CBF2"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[7].userName}, new UserProgressMetric(
+                userId: users[7].userName,
+                numQuizAttempts: 0, numQuizzesPassed: 0, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 1, numProjectLevelsEarned: 1, numSubjectLevelsEarned: 2, numSkillsEarned: 2,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "XYZ1"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[8].userName}, new UserProgressMetric(
+                userId: users[8].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 1, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "ABC2"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[9].userName}, new UserProgressMetric(
+                userId: users[9].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 1, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "ABC1"
+        ))
+    }
+
+    def "users progress from admins[2] point of view" () {
+        when:
+        def res = admins[2].getGlobalUserProgressMetrics("", 15, 1, "numSkillsEarned", false)
+        then:
+        res.numTotalProjects == 1
+        res.numTotalQuizzes == 3
+        res.numTotalSurveys == 2
+        res.numTotalBadges == 0
+        res.numTotalGlobalBadges == 1
+
+        res.numTotalMetricItems == 7
+        res.metricItemsPage.size() == 7
+
+        def user0 = res.metricItemsPage.find { it.userId == users[0].userName}
+        assertMetric(user0, new UserProgressMetric(
+                userId: users[0].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 0, numQuizzesFailed: 0, numQuizzesInProgress: 1,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "ABC1"
+        ))
+
+        def user1 = res.metricItemsPage.find { it.userId == users[1].userName}
+        assertMetric(user1, new UserProgressMetric(
+                userId: users[1].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 1, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "ABC1"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[3].userName}, new UserProgressMetric(
+                userId: users[3].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 1, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 1, numProjectLevelsEarned: 1, numSubjectLevelsEarned: 1, numSkillsEarned: 1,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 1,
+                userTag: "KOO5"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[4].userName}, new UserProgressMetric(
+                userId: users[4].userName,
+                numQuizAttempts:1, numQuizzesPassed: 0, numQuizzesFailed: 1, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "KOO4"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[5].userName}, new UserProgressMetric(
+                userId: users[5].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 0, numQuizzesFailed: 0, numQuizzesInProgress: 1,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 1, numProjectLevelsEarned: 5, numSubjectLevelsEarned: 10, numSkillsEarned: 9,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 1,
+                userTag: ""
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[6].userName}, new UserProgressMetric(
+                userId: users[6].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 0, numQuizzesFailed: 1, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "CBF2"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[7].userName}, new UserProgressMetric(
+                userId: users[7].userName,
+                numQuizAttempts: 0, numQuizzesPassed: 0, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 1, numProjectLevelsEarned: 1, numSubjectLevelsEarned: 2, numSkillsEarned: 2,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "XYZ1"
+        ))
+    }
+
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "sort by users and page" () {
         when:
-        def resPg1 = skillsService.getGlobalUserProgressMetrics("", 4, 1, "userIdForDisplay", true)
-        def resPg2 = skillsService.getGlobalUserProgressMetrics("", 4, 2, "userIdForDisplay", true)
-        def resPg3 = skillsService.getGlobalUserProgressMetrics("", 4, 3, "userIdForDisplay", true)
+        def resPg1 = admins[0].getGlobalUserProgressMetrics("", 4, 1, "userIdForDisplay", true)
+        def resPg2 = admins[0].getGlobalUserProgressMetrics("", 4, 2, "userIdForDisplay", true)
+        def resPg3 = admins[0].getGlobalUserProgressMetrics("", 4, 3, "userIdForDisplay", true)
 
-        def resPg1_descending = skillsService.getGlobalUserProgressMetrics("", 4, 1, "userIdForDisplay", false)
-        def resPg2_descending = skillsService.getGlobalUserProgressMetrics("", 4, 2, "userIdForDisplay", false)
-        def resPg3_descending = skillsService.getGlobalUserProgressMetrics("", 4, 3, "userIdForDisplay", false)
+        def resPg1_descending = admins[0].getGlobalUserProgressMetrics("", 4, 1, "userIdForDisplay", false)
+        def resPg2_descending = admins[0].getGlobalUserProgressMetrics("", 4, 2, "userIdForDisplay", false)
+        def resPg3_descending = admins[0].getGlobalUserProgressMetrics("", 4, 3, "userIdForDisplay", false)
 
         List<String> userNames =
                 users.collect {
@@ -321,20 +527,29 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "filter by user id" () {
         when:
-        def res = skillsService.getGlobalUserProgressMetrics("SeR1", 4, 1, "userIdForDisplay", true)
-        def res1 = skillsService.getGlobalUserProgressMetrics("uSEr12", 4, 1, "userIdForDisplay", true)
-        def res2 = skillsService.getGlobalUserProgressMetrics("USER", 4, 1, "userIdForDisplay", true)
-        def res3 = skillsService.getGlobalUserProgressMetrics("!@#%^&*(", 4, 1, "userIdForDisplay", true)
+        def res = admins[0].getGlobalUserProgressMetrics("SeR1", 4, 1, "userIdForDisplay", true)
+        def res_page2 = admins[0].getGlobalUserProgressMetrics("SeR1", 4, 2, "userIdForDisplay", true)
+        def res1 = admins[0].getGlobalUserProgressMetrics("uSEr12", 4, 1, "userIdForDisplay", true)
+        def res2 = admins[0].getGlobalUserProgressMetrics("USER", 4, 1, "userIdForDisplay", true)
+        def res3 = admins[0].getGlobalUserProgressMetrics("!@#%^&*(", 4, 1, "userIdForDisplay", true)
 
         List<String> userNames =
                 users.collect {
                     userAttrsRepo.findByUserIdIgnoreCase(it.userName)
                 }.collect { it.userIdForDisplay }.sort()
         then:
-        res.numTotalMetricItems == 3
-        res.metricItemsPage.userIdForDisplay == ["user10 for display",
-                                                 "user11 for display",
-                                                 "user12 for display"]
+        List<String> userIds =  ["user10 for display",
+                                 "user11 for display",
+                                 "user12 for display",
+                                 "user13 for display",
+                                 "user14 for display",
+                                 "user15 for display"]
+        res.metricItemsPage.userIdForDisplay == userIds[0..3]
+        res.numTotalMetricItems == 6
+
+        res_page2.metricItemsPage.userIdForDisplay == userIds[4..5]
+        res_page2.numTotalMetricItems == 6
+
         res1.numTotalMetricItems == 1
         res1.metricItemsPage.userIdForDisplay == ["user12 for display"]
 
@@ -348,13 +563,13 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
     def "sort by user tag" () {
         String orderBy = "userTag"
         when:
-        def resPg1 = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
-        def resPg2 = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
-        def resPg3 = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
+        def resPg1 = admins[0].getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
+        def resPg2 = admins[0].getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
+        def resPg3 = admins[0].getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
 
-        def resPg1_descending = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
-        def resPg2_descending = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
-        def resPg3_descending = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
+        def resPg1_descending = admins[0].getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
+        def resPg2_descending = admins[0].getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
+        def resPg3_descending = admins[0].getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
 
         List<String> tags =
                 ['ABC1', 'ABC1', 'KOO4', 'KOO5', 'KOO4', '', 'CBF2', 'XYZ1', 'ABC2', 'ABC1'].sort().sort { a, b ->
@@ -387,13 +602,13 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
     def "sort by numSkillsEarned" () {
         String orderBy = "numSkillsEarned"
         when:
-        def resPg1 = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
-        def resPg2 = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
-        def resPg3 = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
+        def resPg1 = admins[0].getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
+        def resPg2 = admins[0].getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
+        def resPg3 = admins[0].getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
 
-        def resPg1_descending = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
-        def resPg2_descending = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
-        def resPg3_descending = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
+        def resPg1_descending = admins[0].getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
+        def resPg2_descending = admins[0].getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
+        def resPg3_descending = admins[0].getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
 
         List<Integer> numSkillsEarnedValues = [4, 1, 1, 2, 4, 31, 0, 2, 0, 0].sort()
         List<Integer> numSkillsEarnedValuesReversed = numSkillsEarnedValues.collect { it }.reverse()
@@ -420,13 +635,13 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
     def "sort by numQuizAttempts" () {
         String orderBy = "numQuizAttempts"
         when:
-        def resPg1 = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
-        def resPg2 = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
-        def resPg3 = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
+        def resPg1 = admins[0].getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
+        def resPg2 = admins[0].getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
+        def resPg3 = admins[0].getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
 
-        def resPg1_descending = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
-        def resPg2_descending = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
-        def resPg3_descending = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
+        def resPg1_descending = admins[0].getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
+        def resPg2_descending = admins[0].getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
+        def resPg3_descending = admins[0].getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
 
         List<Integer> numQuizAttemptsValues = [2, 5, 2, 4, 3, 1, 2, 0, 1, 1].sort()
         List<Integer> numQuizAttemptsValuesReversed = numQuizAttemptsValues.collect { it }.reverse()
@@ -453,13 +668,13 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
     def "sort by numSurveys" () {
         String orderBy = "numSurveys"
         when:
-        def resPg1 = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
-        def resPg2 = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
-        def resPg3 = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
+        def resPg1 = admins[0].getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
+        def resPg2 = admins[0].getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
+        def resPg3 = admins[0].getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
 
-        def resPg1_descending = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
-        def resPg2_descending = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
-        def resPg3_descending = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
+        def resPg1_descending = admins[0].getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
+        def resPg2_descending = admins[0].getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
+        def resPg3_descending = admins[0].getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
 
         List<Integer> numSurveysValues = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0].sort()
         List<Integer> numSurveysValuesReversed = numSurveysValues.collect { it }.reverse()
@@ -486,13 +701,13 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
     def "sort by numBadgesEarned" () {
         String orderBy = "numBadgesEarned"
         when:
-        def resPg1 = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
-        def resPg2 = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
-        def resPg3 = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
+        def resPg1 = admins[0].getGlobalUserProgressMetrics("", 4, 1, orderBy, true)
+        def resPg2 = admins[0].getGlobalUserProgressMetrics("", 4, 2, orderBy, true)
+        def resPg3 = admins[0].getGlobalUserProgressMetrics("", 4, 3, orderBy, true)
 
-        def resPg1_descending = skillsService.getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
-        def resPg2_descending = skillsService.getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
-        def resPg3_descending = skillsService.getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
+        def resPg1_descending = admins[0].getGlobalUserProgressMetrics("", 4, 1, orderBy, false)
+        def resPg2_descending = admins[0].getGlobalUserProgressMetrics("", 4, 2, orderBy, false)
+        def resPg3_descending = admins[0].getGlobalUserProgressMetrics("", 4, 3, orderBy, false)
 
         List<Integer> numBadgesEarnedValues = [1, 0, 1, 0, 0, 2, 0, 0, 0, 0].sort()
         List<Integer> numBadgesEarnedValuesReversed = numBadgesEarnedValues.collect { it }.reverse()
@@ -518,7 +733,7 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
 
     def "must not be able to retrieve more than 200 items"() {
         when:
-        skillsService.getGlobalUserProgressMetrics("", 501, 1, "numBadgesEarned", true)
+        admins[0].getGlobalUserProgressMetrics("", 501, 1, "numBadgesEarned", true)
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.resBody.contains("Cannot ask for more than 200 items")
@@ -563,14 +778,15 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         assert row.userTag == toValidate.userTag
     }
 
-    private createBadge(int projNum, int badgeNum, List skills) {
+    private createBadge(int projNum, int badgeNum, List skills, SkillsService serviceToUse = null) {
+        serviceToUse = serviceToUse ?: skillsService
         def badgeREs = SkillsFactory.createBadge(projNum, badgeNum)
-        skillsService.createBadge(badgeREs)
+        serviceToUse.createBadge(badgeREs)
         skills.each {
-            skillsService.assignSkillToBadge(it.projectId, badgeREs.badgeId, it.skillId)
+            serviceToUse.assignSkillToBadge(it.projectId, badgeREs.badgeId, it.skillId)
         }
         badgeREs.enabled = true
-        skillsService.updateBadge(badgeREs)
+        serviceToUse.updateBadge(badgeREs)
 
         return badgeREs
     }
