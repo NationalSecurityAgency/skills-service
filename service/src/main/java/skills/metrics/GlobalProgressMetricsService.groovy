@@ -94,12 +94,15 @@ class GlobalProgressMetricsService {
         List<String> projectIds = projectIdsAndQuizIds.projectIds
         List<String> quizIds = projectIdsAndQuizIds.quizIds
 
+        userQuery = userQuery ? userQuery?.trim() : ''
+        userTagValueFilter = userTagValueFilter ? userTagValueFilter?.trim() : ''
+
         List<GlobalProgressMetricsRepo.UserProgressMetric> userProgressMetricPage = globalProgressMetricsRepo.findUsersOverallProgress(
                 projectIds,
                 quizIds,
-                userQuery ?: '',
+                userQuery,
                 usersTableAdditionalUserTagKey ?: '',
-                userTagValueFilter ?: '',
+                userTagValueFilter,
                 pageRequest)
 
         boolean isFirstAndSmallerThanPageSize = userProgressMetricPage.size() < pageRequest.pageSize && pageRequest.pageNumber == 0
@@ -107,9 +110,9 @@ class GlobalProgressMetricsService {
                 : globalProgressMetricsRepo.countUsersOverallProgress(
                 projectIds,
                 quizIds,
-                userQuery ?: '',
+                userQuery,
                 usersTableAdditionalUserTagKey ?: '',
-                userTagValueFilter ?: '')
+                userTagValueFilter)
 
         List<GlobalMetricsUserItem> metricItemsPage = userProgressMetricPage.collect {
             new GlobalMetricsUserItem(
@@ -126,8 +129,8 @@ class GlobalProgressMetricsService {
                     numQuizzesFailed: it.numQuizzesFailed,
                     numQuizzesInProgress: it.numQuizzesInProgress,
                     numSurveys: it.numSurveys,
-                    numSurveysCompleted: it.numSurveyCompleted,
-                    numSurveysInProgress: it.numSurveyInProgress,
+                    numSurveysCompleted: it.numSurveysCompleted,
+                    numSurveysInProgress: it.numSurveysInProgress,
                     userTag: it.userTag ?: ''
             )
         }

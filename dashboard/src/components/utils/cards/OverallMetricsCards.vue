@@ -56,8 +56,8 @@ const totalQuizzesAndSurveys = computed(() => {
         :icon-class="`fa-solid fa-award ${colors.getTextClass(4)}`"
         data-cy="overallMetricsBadgesCard"
         class="flex-1">
-      <Tag>{{ data.numTotalProjectBadges}}</Tag> Project {{ pluralize.plural('Badge', data.numTotalProjectBadges) }}
-      and <Tag>{{ data.numTotalGlobalBadges}}</Tag> Global {{ pluralize.plural('Badge', data.numTotalGlobalBadges) }}
+      <Tag>{{ data.numTotalProjectBadges}}</Tag> Project
+      and <Tag>{{ data.numTotalGlobalBadges}}</Tag> Global Badges
     </media-info-card>
   </div>
 </template>

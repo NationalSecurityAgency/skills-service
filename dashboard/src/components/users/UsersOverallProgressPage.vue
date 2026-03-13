@@ -33,11 +33,13 @@ import SingleUserOverallProgress from "@/components/users/SingleUserOverallProgr
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import HighlightedValue from "@/components/utils/table/HighlightedValue.vue";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
 const userInfo = useUserInfo()
 const appConfig = useAppConfig()
+const numFormat = useNumberFormat()
 
 onMounted(() => {
   loadData().then(() => {
@@ -53,7 +55,7 @@ const totalRows = ref(0)
 const currentPage = ref(1)
 const pageSize = useStorage('usersOverallProgressTable-pageSize', 10)
 const possiblePageSizes = [10, 20, 50, 100]
-const sortInfo = ref({sortOrder: -1, sortBy: 'skillsAccomplished'})
+const sortInfo = ref({sortOrder: -1, sortBy: 'numSkillsEarned'})
 const expandedRows = ref([])
 
 const loadData = () => {
@@ -117,9 +119,9 @@ const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
   <div>
     <SubPageHeader title="Users Progress" :title-level="1" />
     <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-6"/>
-    <div v-if="!isLoading">
+    <div v-show="!isLoading">
       <OverallMetricsCards :data="userProgress" />
-      <Card v-if="hasData"
+      <Card v-show="hasData"
             :pt="{ body: { class: 'p-0!' } }">
         <template #content>
           <div class="flex flex-col gap-2 p-5">
@@ -133,7 +135,7 @@ const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
                            v-on:keydown.enter="applyFilters"
                            :disabled="isTableLoading"
                            class="w-full"
-                           data-cy="users-skillIdFilter"
+                           data-cy="userFilter"
                            aria-label="user filter"/>
               </div>
               <div v-if="showUserTagColumn" class="flex-1 flex flex-col gap-1">
@@ -150,14 +152,14 @@ const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
                             label="Filter"
                             :disabled="isTableLoading"
                             outlined @click="applyFilters"
-                            data-cy="users-filterBtn"
+                            data-cy="filterBtn"
                             size="small"/>
               <SkillsButton icon="fa fa-times"
                             label="Reset"
                             :disabled="isTableLoading"
                             outlined
                             @click="resetFilters"
-                            data-cy="users-resetBtn" size="small"/>
+                            data-cy="resetBtn" size="small"/>
             </div>
           </div>
 
@@ -187,7 +189,7 @@ const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
                   <i class="fa-solid fa-user mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  <highlighted-value :value="slotProps.data.userToShow" :filter="filters.user"/>
+                  <highlighted-value :value="slotProps.data.userToShow" :filter="filters.user" data-cy="userIdForDisplay"/>
                 </template>
               </Column>
               <Column v-if="showUserTagColumn"
@@ -199,7 +201,7 @@ const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
                   <i class="fas fa-tag mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  <highlighted-value :value="slotProps.data.userTag" :filter="filters.userTag"/>
+                  <highlighted-value :value="slotProps.data.userTag" :filter="filters.userTag" data-cy="userTag"/>
                 </template>
               </Column>
 
@@ -208,24 +210,29 @@ const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
                   <i class="fa-solid fa-tasks mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  <div class="flex flex-col">
-                    <div class="flex gap-2">
-                      <div class="text-primary flex-1"
-                           :aria-label="`${slotProps.data.skillsEarnedPercent} percent completed`"
-                           data-cy="progressPercent">{{ slotProps.data.skillsEarnedPercent }}%
+                  <div data-cy="skillAndProjProgress">
+                    <div class="flex flex-col">
+                      <div class="flex gap-2">
+                        <div class="text-primary flex-1"
+                             :aria-label="`${slotProps.data.skillsEarnedPercent} percent completed`"
+                             data-cy="progressPercent">{{ slotProps.data.skillsEarnedPercent }}%</div>
+                        <div
+                            :aria-label="`${slotProps.data.numSkillsEarned} out of ${userProgress.numTotalSkills} total skills`"
+                            data-cy="skillCount"
+                        ><span>{{ slotProps.data.numSkillsEarned }}</span> /
+                          {{ userProgress.numTotalSkills }} Skills</div>
                       </div>
-                      <div
-                          :aria-label="`${slotProps.data.numSkillsEarned} out of ${userProgress.numTotalSkills} total skills`"
-                      ><span class="text-primary">{{ slotProps.data.numSkillsEarned }}</span> / {{ userProgress.numTotalSkills }} Skills</div>
+                      <ProgressBar style="height: 5px;" :value="slotProps.data.skillsEarnedPercent" :showValue="false"
+                                   class="lg:min-w-[12rem] xl:min-w-[20rem]"
+                                   :aria-label="`Progress for ${slotProps.data.userId} user`"/>
                     </div>
-                    <ProgressBar style="height: 5px;" :value="slotProps.data.skillsEarnedPercent" :showValue="false"
-                                 class="lg:min-w-[12rem] xl:min-w-[20rem]"
-                                 :aria-label="`Progress for ${slotProps.data.userId} user`" />
-                  </div>
-                  <div class="flex flex-col gap-1 mt-2">
-                    <div class="flex gap-1 flex-wrap items-center"><div>Started:</div>
-                      <div>
-                        <Tag>{{ slotProps.data.numProjects }}</Tag>/ {{ userProgress.numTotalProjects }} Projects
+                    <div class="flex flex-col gap-1 mt-2">
+                      <div class="flex gap-1 flex-wrap items-center">
+                        <div>Started:</div>
+                        <div data-cy="projectCount">
+                          <span><Tag>{{ slotProps.data.numProjects }}</Tag>
+                          / {{ userProgress.numTotalProjects }} Projects</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -238,19 +245,22 @@ const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
                   <i class="fa-solid fa-spell-check mr-1" :class="colors.getTextClass(4)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  <div class="flex pr-2 flex-wrap">
-                    <div class="flex flex-col gap-2 flex-1">
-                      <div class="flex-1"><Tag severity="secondary">{{ slotProps.data.numQuizAttempts }}</Tag></div>
+                  <div class="flex-1 flex pr-2 flex-wrap items-center">
+                    <div class="flex-1">
+                      <Tag severity="success" data-cy="quizAttempts">{{ slotProps.data.numQuizAttempts }}</Tag>
                     </div>
                     <div v-if="slotProps.data.numQuizAttempts > 0">
-                      <div class="flex gap-2">
-                        <div class="flex-1">Passed:</div><div>{{ slotProps.data.numQuizzesPassed}}</div>
+                      <div class="flex gap-3">
+                        <div class="flex-1">Passed:</div>
+                        <div data-cy="quizAttemptsPassed">{{ slotProps.data.numQuizzesPassed }}</div>
                       </div>
                       <div class="flex gap-2">
-                        <div class="flex-1">Failed:</div><div>{{ slotProps.data.numQuizzesFailed}}</div>
+                        <div class="flex-1">Failed:</div>
+                        <div data-cy="quizAttemptsFailed">{{ slotProps.data.numQuizzesFailed }}</div>
                       </div>
                       <div class="flex gap-1" v-if="slotProps.data.numQuizzesInProgress > 0">
-                        <div class="flex-2">In Progress:</div><div>{{ slotProps.data.numQuizzesInProgress}}</div>
+                        <div class="flex-2">In-Progress:</div>
+                        <div data-cy="quizAttemptsInProgress">{{ slotProps.data.numQuizzesInProgress }}</div>
                       </div>
                     </div>
                   </div>
@@ -258,13 +268,16 @@ const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
               </Column>
 
               <Column v-if="hasSurveys"
-                      field="numSurveys" header="# Survey Runs" :sortable="true" :class="{'flex': responsive.lg.value }">
+                      field="numSurveysCompleted" header="# Survey Runs" :sortable="true" :class="{'flex': responsive.lg.value }">
                 <template #header>
                   <i class="fa-solid fa-clipboard-question mr-1" :class="colors.getTextClass(5)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  <div class="flex flex-col gap-2 mb-2">
-                    <div class="flex-1"><Tag>{{ slotProps.data.numSurveys }}</Tag> / {{ userProgress.numTotalSurveys }}</div>
+                  <div class="flex items-center">
+                  <div class="flex flex-col gap-2">
+                    <div data-cy="surveyRuns"><Tag severity="success">{{ slotProps.data.numSurveysCompleted }}</Tag> / {{ userProgress.numTotalSurveys }}</div>
+                    <div v-if="slotProps.data.numSurveysInProgress > 0"><Tag severity="secondary" data-cy="surveyRunsInProgress">{{ slotProps.data.numSurveysInProgress }}</Tag> In-Progress</div>
+                  </div>
                   </div>
                 </template>
               </Column>
@@ -275,8 +288,8 @@ const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
                   <i class="fa-solid fa-award mr-1" :class="colors.getTextClass(6)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  <Tag>{{ slotProps.data.numBadgesEarned }}</Tag> / {{ userProgress.numTotalBadges}}
-                  <div>Global: {{ slotProps.data.numGlobalBadgesEarned }}</div>
+                  <div data-cy="badges"><Tag>{{ slotProps.data.numBadgesEarned }}</Tag> / {{ userProgress.numTotalBadges}}</div>
+                  <div data-cy="globalBadges">Global: {{ slotProps.data.numGlobalBadgesEarned }}</div>
                 </template>
               </Column>
 

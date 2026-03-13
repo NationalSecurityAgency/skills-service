@@ -50,8 +50,8 @@ interface GlobalProgressMetricsRepo extends JpaRepository<GlobalMetricsDummyEnti
         Integer getNumQuizzesFailed()
         Integer getNumQuizzesInProgress()
         Integer getNumSurveys()
-        Integer getNumSurveyCompleted()
-        Integer getNumSurveyInProgress()
+        Integer getNumSurveysCompleted()
+        Integer getNumSurveysInProgress()
         @Nullable
         String getUserTag()
     }
@@ -145,8 +145,8 @@ SELECT
     COALESCE(projectsAndQuizzes.quizFailed, 0) as numQuizzesFailed,
     COALESCE(projectsAndQuizzes.quizInProgress, 0) as numQuizzesInProgress,
     COALESCE(projectsAndQuizzes.surveyTotal, 0) as numSurveys,
-    COALESCE(projectsAndQuizzes.surveyCompleted, 0) as numSurveyCompleted,
-    COALESCE(projectsAndQuizzes.surveyInProgress, 0) as numSurveyInProgress,
+    COALESCE(projectsAndQuizzes.surveyCompleted, 0) as numSurveysCompleted,
+    COALESCE(projectsAndQuizzes.surveyInProgress, 0) as numSurveysInProgress,
     userTags.value as userTag
 FROM projectsAndQuizzes
          JOIN user_attrs userAttrs ON projectsAndQuizzes.combinedUserId = userAttrs.user_id
