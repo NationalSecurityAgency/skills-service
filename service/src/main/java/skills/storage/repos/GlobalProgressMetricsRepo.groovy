@@ -280,7 +280,8 @@ WHERE
         SUM(CASE WHEN type = 'Skill' THEN 1 ELSE 0 END) as numSkills,
         SUM(CASE WHEN type = 'Badge' THEN 1 ELSE 0 END) as numBadges
         from skill_definition
-        where project_id in :projectIds''', nativeQuery = true)
+        where enabled = 'true'
+              and project_id in :projectIds''', nativeQuery = true)
     ProjDefCounts findProjectDefCounts(@Param("projectIds") List<String> projectIds)
 
 
@@ -288,7 +289,8 @@ WHERE
         FROM (
                  SELECT DISTINCT gbld.skill_ref_id as global_badge_id
                  FROM global_badge_level_definition gbld
-                 WHERE gbld.project_id IN :projectIds
+                        JOIN skill_definition globalBadge ON (gbld.skill_ref_id = globalBadge.id and globalBadge.type = 'GlobalBadge')
+                 WHERE gbld.project_id IN :projectIds and globalBadge.enabled = 'true'
         
                  UNION
         
@@ -296,7 +298,7 @@ WHERE
                  FROM skill_relationship_definition srd
                           JOIN skill_definition globalBadge ON (srd.parent_ref_id = globalBadge.id and srd.type = 'BadgeRequirement' and globalBadge.type = 'GlobalBadge')
                           JOIN skill_definition skill ON (srd.child_ref_id = skill.id and srd.type = 'BadgeRequirement' and skill.type = 'Skill')
-                 WHERE skill.project_id IN :projectIds
+                 WHERE skill.project_id IN :projectIds and globalBadge.enabled = 'true'
              ) combined_badges''', nativeQuery = true)
     Integer getTotalGlobalBadgeCountForProjects(@Param("projectIds") List<String> projectIds)
 
