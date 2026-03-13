@@ -529,4 +529,133 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         availableSkills.suggestedSkills.find { it.skillId == skills[2].skillId }
         availableSkills.suggestedSkills.find { it.skillId == regularSkill.skillId }
     }
+
+    def "retrieve users for global badge"() {
+
+        def proj = createProject()
+        def subj2 = createSubject(1, 2)
+        def subj3 = createSubject(1, 3)
+        def subj = createSubject()
+        def badge = createBadge()
+
+        //subj1 skills
+        // 1500 total points
+        // 150 for level 1
+        // 375 for level 2
+        List<Map> skills = createSkills(5, 1, 1, 100)
+        List<Map> subj2Skills = createSkills(5, 1, 2, 100)
+        List<Map> subj3Skills = createSkills(5, 1, 3, 100)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSubject(subj2)
+        skillsService.createSubject(subj3)
+        skillsService.createSkills(skills)
+        skillsService.createSkills(subj2Skills)
+        skillsService.createSkills(subj3Skills)
+
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "3")
+        skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+
+        badge.enabled = "true"
+        skillsService.updateGlobalBadge(badge)
+
+        when:
+        skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user1", new Date()).body.completed
+
+        // User that does not get level 1 but does get the skill achievement
+        skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user2", new Date()).body.completed
+
+        // User that gets a different skill and should NOT get the global badge
+        skillsService.addSkill(['projectId': proj.projectId, skillId: skills[1].skillId], "user3", new Date()).body.completed
+        //triggers level 1
+        def addSkillRes = skillsService.addSkill(['projectId': proj.projectId, skillId: skills[1].skillId], "user1", new Date()).body.completed
+
+        def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId)
+
+        then:
+        badgeUsers
+        badgeUsers.count == 3
+        badgeUsers.totalCount == 3
+        badgeUsers.totalPoints == 1
+        badgeUsers.totalLevels == 3
+        badgeUsers.data[0].skillsAchieved == 1
+        badgeUsers.data[0].numLevelsAchieved == 1
+        badgeUsers.data[0].totalProgress == 2
+        badgeUsers.data[0].userId == "user1"
+        badgeUsers.data[1].skillsAchieved == 1
+        badgeUsers.data[1].numLevelsAchieved == 0
+        badgeUsers.data[1].totalProgress == 1
+        badgeUsers.data[1].userId == "user2"
+        badgeUsers.data[2].skillsAchieved == 0
+        badgeUsers.data[2].numLevelsAchieved == 0
+        badgeUsers.data[2].totalProgress == 0
+        badgeUsers.data[2].userId == "user3"
+    }
+
+    def "get total levels for badge with multiple projects"() {
+
+        def proj = createProject()
+        def subj2 = createSubject(1, 2)
+        def subj3 = createSubject(1, 3)
+        def subj = createSubject()
+        def proj2 = createProject(2)
+        def proj2subj = createSubject(2, 1)
+        def proj2subj2 = createSubject(2, 2)
+        def badge = createBadge()
+
+        //subj1 skills
+        // 1500 total points
+        // 150 for level 1
+        // 375 for level 2
+        List<Map> skills = createSkills(5, 1, 1, 100)
+        List<Map> subj2Skills = createSkills(5, 1, 2, 100)
+        List<Map> subj3Skills = createSkills(5, 1, 3, 100)
+        List<Map> proj2skills = createSkills(5, 2, 1, 100)
+        List<Map> proj2subj2Skills = createSkills(5, 2, 2, 100)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSubject(subj2)
+        skillsService.createSubject(subj3)
+        skillsService.createSkills(skills)
+        skillsService.createSkills(subj2Skills)
+        skillsService.createSkills(subj3Skills)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(proj2subj)
+        skillsService.createSubject(proj2subj2)
+        skillsService.createSkills(proj2skills)
+        skillsService.createSkills(proj2subj2Skills)
+
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "3")
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj2.projectId, badgeId: badge.badgeId, level: "1")
+        skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+
+        badge.enabled = "true"
+        skillsService.updateGlobalBadge(badge)
+
+        when:
+        for(def x = 0; x < 5; x++) {
+            skillsService.addSkill(['projectId': proj.projectId, skillId: skills[x].skillId], "user1", new Date()).body.completed
+            skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[x].skillId], "user1", new Date()).body.completed
+            skillsService.addSkill(['projectId': proj.projectId, skillId: subj3Skills[x].skillId], "user1", new Date()).body.completed
+            skillsService.addSkill(['projectId': proj.projectId, skillId: proj2skills[x].skillId], "user1", new Date()).body.completed
+            skillsService.addSkill(['projectId': proj.projectId, skillId: proj2subj2Skills[x].skillId], "user1", new Date()).body.completed
+        }
+
+        def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId)
+
+        then:
+        badgeUsers
+        badgeUsers.count == 1
+        badgeUsers.totalCount == 1
+        badgeUsers.totalPoints == 1
+        badgeUsers.totalLevels == 4
+        badgeUsers.data[0].skillsAchieved == 1
+        badgeUsers.data[0].numLevelsAchieved == 5
+        badgeUsers.data[0].totalProgress == 6
+        badgeUsers.data[0].userId == "user1"
+    }
 }

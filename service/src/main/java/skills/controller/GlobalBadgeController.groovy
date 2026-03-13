@@ -18,6 +18,7 @@ package skills.controller
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -38,6 +39,8 @@ import skills.services.adminGroup.AdminGroupService
 import skills.storage.model.auth.RoleName
 import skills.utils.InputSanitizer
 
+import static org.springframework.data.domain.Sort.Direction.ASC
+import static org.springframework.data.domain.Sort.Direction.DESC
 import static skills.services.GlobalBadgesService.AvailableSkillsResult
 
 @RestController
@@ -295,4 +298,20 @@ class GlobalBadgesController {
                                             @PathVariable("badgeId") String badgeId) {
         return attachmentService.saveAttachment(file, null, null, badgeId);
     }
+
+
+    @GetMapping(value = "/{badgeId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    TableResult getGlobalBadgeUsers(@PathVariable("badgeId") String badgeId,
+                                    @RequestParam String query,
+                                    @RequestParam int limit,
+                                    @RequestParam int page,
+                                    @RequestParam String orderBy,
+                                    @RequestParam Boolean ascending) {
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", badgeId)
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+
+        return adminUsersService.loadUsersPageForSkillsAcrossProjects(badgeId, query, pageRequest)
+    }
+
 }
