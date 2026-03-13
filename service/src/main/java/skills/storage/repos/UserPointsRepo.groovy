@@ -980,7 +980,10 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     Page<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, List<String> skillIds, String userId, int minimumPoints, int maximumPoints, String userTagFilter, Pageable pageable)
 
     @Query(value = '''
-WITH globalBadgeSkills AS (
+WITH levelsConf AS (
+    SELECT project_id, level FROM global_badge_level_definition where skill_id = ?1
+),
+globalBadgeSkills AS (
     SELECT DISTINCT skill.id as skillRefId
     FROM skill_relationship_definition srd
              JOIN skill_definition globalBadge ON (srd.parent_ref_id = globalBadge.id and srd.type = 'BadgeRequirement' and globalBadge.type = 'GlobalBadge')
@@ -998,12 +1001,14 @@ WITH globalBadgeSkills AS (
          where skill_ref_id in (select globalBadgeSkills.skillRefId from globalBadgeSkills)
      ),
      projectMaxLevelAchievements AS (
-         select user_id, project_id, max(level) as maxLevel from user_achievement
+         select ua.user_id, ua.project_id, max(LEAST(ua.level,levelsConf.level)) as maxLevel
+         from user_achievement ua
+                  join levelsConf levelsConf on (levelsConf.project_id = ua.project_id)
          where
-             project_id in (select gbld.project_id FROM global_badge_level_definition gbld where gbld.skill_id = ?1)
-           and skill_ref_id is null
-           and level > 0
-         group by user_id, project_id
+             ua.project_id in (select gbld.project_id FROM global_badge_level_definition gbld where gbld.skill_id = ?1)
+           and ua.skill_ref_id is null
+           and ua.level > 0
+         group by ua.user_id, ua.project_id
      ),
      levelAchievements AS (
          select user_id, SUM(maxLevel) maxLevel from projectMaxLevelAchievements
