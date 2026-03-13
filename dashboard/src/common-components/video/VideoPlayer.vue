@@ -66,6 +66,25 @@ const resolution = computed(() => {
 const isResizing = ref(false);
 
 const isPlaying = ref(false)
+
+const getVideoDuration = (player) => {
+  try {
+    const duration = player.duration();
+    return (duration && !isNaN(duration) && duration > 0) ? duration : -1;
+  } catch (e) {
+    console.error('Error getting video duration:', e);
+    return -1;
+  }
+}
+const getVideoCurrentTime = (player) => {
+  try {
+    const currentTime = player.currentTime();
+    return (currentTime && !isNaN(currentTime) && currentTime >= 0) ? currentTime : -1;
+  } catch (e) {
+    console.error('Error getting video current time:', e);
+    return -1;
+  }
+}
 onMounted(() => {
   if (props.options.width && props.options.height) {
     playerWidth.value = props.options.width;
@@ -82,15 +101,25 @@ onMounted(() => {
     audioOnlyMode: props.options.isAudio,
   }, () => {
     player.on('durationchange', () => {
-      watchProgress.value.videoDuration = player.duration();
-      updateProgress(player.currentTime());
+      const videoDuration = getVideoDuration(player)
+      const videoCurrentTime = getVideoCurrentTime(player)
+      if (videoDuration > 0 && videoCurrentTime > 0) {
+        watchProgress.value.videoDuration = videoDuration
+        updateProgress(videoCurrentTime);
+      }
     });
     player.on('loadedmetadata', () => {
-      watchProgress.value.videoDuration = player.duration();
-      emit('watched-progress', watchProgress.value);
+      const videoDuration = getVideoDuration(player)
+      if (videoDuration > 0) {
+        watchProgress.value.videoDuration = videoDuration;
+        emit('watched-progress', watchProgress.value);
+      }
     });
     player.on('timeupdate', () => {
-      updateProgress(player.currentTime());
+      const videoCurrentTime = getVideoCurrentTime(player)
+      if (videoCurrentTime > 0) {
+        updateProgress(videoCurrentTime);
+      }
     });
     player.on('play', () => {
       if(watchProgress.value.percentWatched === 100) {
