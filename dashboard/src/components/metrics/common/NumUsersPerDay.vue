@@ -37,30 +37,21 @@ const props = defineProps({
     required: false,
     default: 'Users per day',
   },
-  projectIds: {
-    type: Array,
+  isOverall: {
+    type: Boolean,
     required: false,
-    default: null
-  },
-  quizIds: {
-    type: Array,
-    required: false,
-    default: null
-  },
+    default: false
+  }
 });
 
-const isOverallMode = computed(() => {
-  return props.projectIds || props.quizIds
-})
-
 const overallPrefix = computed(() => {
-  return isOverallMode.value ? 'Overall ' : ''
+  return props.isOverall ? 'Overall ' : ''
 })
 
 const layoutSizes = useLayoutSizesState()
 
 onMounted(() => {
-  if (!isOverallMode.value) {
+  if (!props.isOverall) {
     if (route.params.skillId) {
       localProps.value.skillId = route.params.skillId;
     } else if (route.params.subjectId) {
@@ -78,11 +69,7 @@ const mutableTitle = ref(props.title);
 const byMonth = ref(false);
 const localProps = ref({
   start: dayjs().subtract(30, 'day').valueOf(),
-  byMonth: false,
-  ...(isOverallMode.value ? {
-    projIds: props.projectIds,
-    quizIds: props.quizIds
-  } : {})
+  byMonth: false
 });
 const timeSelectorOptions = ref([
   {
@@ -129,7 +116,7 @@ const allZeros = (data) => {
 const loadData = () => {
   loading.value = true;
   
-  const metricsLoader = isOverallMode.value
+  const metricsLoader = props.isOverall
     ? MetricsService.getOverallMetricsChart('overallDistinctUsersOverTimeMetricsBuilder', localProps.value)
     : MetricsService.loadChart(route.params.projectId, 'distinctUsersOverTimeForProject', localProps.value)
 

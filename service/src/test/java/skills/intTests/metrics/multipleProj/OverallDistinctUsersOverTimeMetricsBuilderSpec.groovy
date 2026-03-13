@@ -72,26 +72,6 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         body.explanation == "Metrics[${metricsId}]: Must supply start param"
     }
 
-    def "must supply projectIds or quizIds param"() {
-        def proj1 = createProject()
-        def proj2 = createProject(2)
-
-        skillsService.createProject(proj1)
-        skillsService.createProject(proj2)
-
-        Map props = [:]
-        use(TimeCategory) {
-            props[MetricsParams.P_START_TIMESTAMP] = 30.days.ago.time
-        }
-
-        when:
-        skillsService.getOverallMetricsData(metricsId, props)
-        then:
-        SkillsClientException e = thrown()
-        def body = new JsonSlurper().parseText(e.resBody)
-        body.explanation == "Metrics[${metricsId}]: Must supply ${MetricsParams.P_PROJECT_IDS} or ${MetricsParams.P_QUIZ_IDS} param"
-    }
-
     def "start param must be within last 3 years"() {
         def proj1 = createProject()
         def proj2 = createProject(2)
