@@ -1472,21 +1472,6 @@ class AdminController {
         return globalBadgesService.isProjectLevelUsedInGlobalBadge(InputSanitizer.sanitize(projectId), level)
     }
 
-
-    @GetMapping(value = "/globalBadges/{badgeId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    TableResult getGlobalBadgeUsers(@PathVariable("badgeId") String badgeId,
-                              @RequestParam String query,
-                              @RequestParam int limit,
-                              @RequestParam int page,
-                              @RequestParam String orderBy,
-                              @RequestParam Boolean ascending) {
-        SkillsValidator.isNotBlank(badgeId, "Badge Id", badgeId)
-        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-
-        return adminUsersService.loadUsersPageForSkillsAcrossProjects(badgeId, query, pageRequest)
-    }
-
     @RequestMapping(value = "/projects/{projectId}/errors", method = [RequestMethod.GET], produces = "application/json")
     @ResponseBody
     TableResult getErrors(@PathVariable("projectId") String projectId,

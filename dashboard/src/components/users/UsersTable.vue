@@ -124,7 +124,7 @@ const isGlobalBadgePage = computed(() => {
 
 const getUrl = () => {
   if(isGlobalBadgePage.value === true) {
-    return `/admin/globalBadges/${encodeURIComponent(route.params.badgeId)}/users`;
+    return `/admin/badges/${encodeURIComponent(route.params.badgeId)}/users`;
   }
 
   let url = `/admin/projects/${encodeURIComponent(route.params.projectId)}`
