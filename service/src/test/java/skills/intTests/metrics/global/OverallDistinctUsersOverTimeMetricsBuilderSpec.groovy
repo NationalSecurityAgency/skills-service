@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.intTests.metrics.multipleProj
+package skills.intTests.metrics.global
 
 import groovy.json.JsonSlurper
 import groovy.time.TimeCategory

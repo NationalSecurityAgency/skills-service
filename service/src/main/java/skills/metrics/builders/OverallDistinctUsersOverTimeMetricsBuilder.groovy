@@ -13,20 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.metrics.builders.multipleProj
+package skills.metrics.builders
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import skills.auth.UserInfoService
-import skills.controller.exceptions.SkillException
 import skills.metrics.GlobalProgressMetricsService
 import skills.metrics.GlobalProgressMetricsService.GroupingType
-import skills.metrics.builders.GlobalMetricsBuilder
-import skills.metrics.builders.MetricsParams
 import skills.services.StartDateUtil
 import skills.services.UserEventService
-import skills.services.admin.UserCommunityService
 import skills.controller.result.model.TimestampCountItem
 import skills.storage.model.DayCountItem
 import skills.storage.model.EventType
