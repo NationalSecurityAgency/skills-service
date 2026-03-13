@@ -15,14 +15,13 @@
  */
 package skills.intTests
 
-import org.apache.commons.lang3.RandomUtils
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
-import skills.services.LockingService
 import skills.services.StartDateUtil
 import skills.services.UserEventService
 import skills.storage.model.DayCountItem
@@ -30,15 +29,11 @@ import skills.storage.model.EventType
 import skills.storage.model.SkillDef
 import skills.storage.model.UserEvent
 import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserEventsRepo
+import skills.utils.TestDates
 
 import java.text.DateFormat
-import java.time.DayOfWeek
 import java.time.LocalDateTime
-import java.time.temporal.TemporalAdjusters
-import java.time.temporal.TemporalField
-import java.time.temporal.WeekFields
 import java.util.stream.Stream
 
 class UserEventSpec extends DefaultIntSpec {
@@ -1587,43 +1582,6 @@ class UserEventSpec extends DefaultIntSpec {
         distinctUserCountsForSubject2[1].count == 0
         distinctUserCountsForSubject2[1].projectId == proj.projectId
         distinctUserCountsForSubject2[1].day.getDateString() == DateFormat.getDateInstance(DateFormat.SHORT).format(testDates.startOfTwoWeeksAgo.toDate())
-    }
-
-
-    private static class TestDates {
-        LocalDateTime now;
-        LocalDateTime startOfCurrentWeek;
-        LocalDateTime startOfTwoWeeksAgo;
-
-        public TestDates() {
-            now = LocalDateTime.now()
-            startOfCurrentWeek = LocalDateTime.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
-            startOfTwoWeeksAgo = startOfCurrentWeek.minusWeeks(1)
-        }
-
-        LocalDateTime getDateWithinCurrentWeek(boolean allowFutureDate=false) {
-            if(now.getDayOfWeek() == DayOfWeek.SUNDAY) {
-                if (allowFutureDate) {
-                    return now.plusDays(RandomUtils.nextInt(1, 6))
-                }
-                return now//nothing we can do
-            } else {
-                //us days of week are sun-saturday as 1-7
-                TemporalField dayOfWeekField = WeekFields.of(Locale.US).dayOfWeek()
-                int currentDayOfWeek = now.get(dayOfWeekField)
-
-                if (allowFutureDate) {
-                    int randomDay = -1
-                    while ((randomDay = RandomUtils.nextInt(1, 7)) == currentDayOfWeek) {
-                        //
-                    }
-                    return now.with(dayOfWeekField, randomDay)
-                }
-
-                return now.with(dayOfWeekField, RandomUtils.nextInt(1,currentDayOfWeek))
-            }
-        }
-
     }
 
 }

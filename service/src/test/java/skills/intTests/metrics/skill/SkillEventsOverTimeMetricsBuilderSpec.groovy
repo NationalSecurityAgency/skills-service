@@ -15,22 +15,17 @@
  */
 package skills.intTests.metrics.skill
 
-
 import groovy.json.JsonSlurper
 import groovy.time.TimeCategory
-import org.apache.commons.lang3.RandomUtils
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsParams
 import skills.services.StartDateUtil
 import skills.storage.model.EventType
+import skills.utils.TestDates
 
-import java.time.DayOfWeek
 import java.time.LocalDateTime
-import java.time.temporal.TemporalAdjusters
-import java.time.temporal.TemporalField
-import java.time.temporal.WeekFields
 
 class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
 
@@ -611,41 +606,4 @@ class SkillEventsOverTimeMetricsBuilderSpec  extends DefaultIntSpec {
         res[0].countsByDay.sort { it.day }.last().num == 0
         new Date(res[0].countsByDay.sort { it.day }.last().timestamp) == StartDateUtil.computeStartDate(new Date(), EventType.DAILY)
     }
-
-    private static class TestDates {
-        LocalDateTime now;
-        LocalDateTime startOfCurrentWeek;
-        LocalDateTime startOfTwoWeeksAgo;
-
-        public TestDates() {
-            now = LocalDateTime.now()
-            startOfCurrentWeek = StartDateUtil.computeStartDate(now.toDate(), EventType.DAILY).toLocalDateTime().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
-            startOfTwoWeeksAgo = startOfCurrentWeek.minusWeeks(1)
-        }
-
-        LocalDateTime getDateWithinCurrentWeek(boolean allowFutureDate=false) {
-            if(now.getDayOfWeek() == DayOfWeek.SUNDAY) {
-                if (allowFutureDate) {
-                    return now.plusDays(RandomUtils.nextInt(1, 6))
-                }
-                return now//nothing we can do
-            } else {
-                //us days of week are sun-saturday as 1-7
-                TemporalField dayOfWeekField = WeekFields.of(Locale.US).dayOfWeek()
-                int currentDayOfWeek = now.get(dayOfWeekField)
-
-                if (allowFutureDate) {
-                    int randomDay = -1
-                    while ((randomDay = RandomUtils.nextInt(1, 7)) == currentDayOfWeek) {
-                        //
-                    }
-                    return now.with(dayOfWeekField, randomDay)
-                }
-
-                return now.with(dayOfWeekField, RandomUtils.nextInt(1,currentDayOfWeek))
-            }
-        }
-
-    }
-
 }
