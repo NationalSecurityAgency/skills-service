@@ -59,28 +59,24 @@ class OverallMetricsReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
         Map props = [:]
         use(TimeCategory) {
             props[MetricsParams.P_START_TIMESTAMP] = 30.days.ago.time
-            props[MetricsParams.P_PROJECT_IDS] = admin0ProjectIds.join(',')
-            props[MetricsParams.P_QUIZ_IDS] = admin0QuizAndSurveyIds.join(',')
         }
-        def usersPerDay = skillsService.getOverallMetricsData('overallDistinctUsersOverTimeMetricsBuilder', props)
+        def usersPerDay = admins[0].getOverallMetricsData('overallDistinctUsersOverTimeMetricsBuilder', props)
 
         // users by duty organization
         props = [
-                projIds: admin0ProjectIds.join(','),
-                quizIds: admin0QuizAndSurveyIds.join(','),
                 tagKey: 'dutyOrganization',
                 currentPage: 1,
                 pageSize: 5,
                 sortDesc: true
         ]
-        def usersByDutyOrg = skillsService.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+        def usersByDutyOrg = admins[0].getOverallMetricsData('overallNumUsersPerTagBuilder', props)
         props.currentPage = 2
-        def usersByDutyOrgPage2 = skillsService.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+        def usersByDutyOrgPage2 = admins[0].getOverallMetricsData('overallNumUsersPerTagBuilder', props)
 
         // users by admin organization
         props.currentPage = 1
         props.tagKey = 'adminOrganization'
-        def usersByAdminOrg = skillsService.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+        def usersByAdminOrg = admins[0].getOverallMetricsData('overallNumUsersPerTagBuilder', props)
 
         then:
         res.numTotalProjects == 3
@@ -121,28 +117,24 @@ class OverallMetricsReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
         Map props = [:]
         use(TimeCategory) {
             props[MetricsParams.P_START_TIMESTAMP] = 30.days.ago.time
-            props[MetricsParams.P_PROJECT_IDS] = admin1ProjectIds.join(',')
-            props[MetricsParams.P_QUIZ_IDS] = admin1QuizAndSurveyIds.join(',')
         }
-        def usersPerDay = skillsService.getOverallMetricsData('overallDistinctUsersOverTimeMetricsBuilder', props)
+        def usersPerDay = admins[1].getOverallMetricsData('overallDistinctUsersOverTimeMetricsBuilder', props)
 
         // users by duty organization
         props = [
-                projIds: admin1ProjectIds.join(','),
-                quizIds: admin1QuizAndSurveyIds.join(','),
                 tagKey: 'dutyOrganization',
                 currentPage: 1,
                 pageSize: 5,
                 sortDesc: true
         ]
-        def usersByDutyOrg = skillsService.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+        def usersByDutyOrg = admins[1].getOverallMetricsData('overallNumUsersPerTagBuilder', props)
         props.currentPage = 2
-        def usersByDutyOrgPage2 = skillsService.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+        def usersByDutyOrgPage2 = admins[1].getOverallMetricsData('overallNumUsersPerTagBuilder', props)
 
         // users by admin organization
         props.currentPage = 1
         props.tagKey = 'adminOrganization'
-        def usersByAdminOrg = skillsService.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+        def usersByAdminOrg = admins[1].getOverallMetricsData('overallNumUsersPerTagBuilder', props)
 
         then:
         res.numTotalProjects == 2
@@ -183,10 +175,8 @@ class OverallMetricsReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
         Map props = [:]
         use(TimeCategory) {
             props[MetricsParams.P_START_TIMESTAMP] = 30.days.ago.time
-            props[MetricsParams.P_PROJECT_IDS] = admin2ProjectIds.join(',')
-            props[MetricsParams.P_QUIZ_IDS] = admin2QuizAndSurveyIds.join(',')
         }
-        def usersPerDay = skillsService.getOverallMetricsData('overallDistinctUsersOverTimeMetricsBuilder', props)
+        def usersPerDay = admins[2].getOverallMetricsData('overallDistinctUsersOverTimeMetricsBuilder', props)
 
         // users by duty organization
         props = [
@@ -197,11 +187,11 @@ class OverallMetricsReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
                 pageSize: 5,
                 sortDesc: true
         ]
-        def usersByDutyOrg = skillsService.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+        def usersByDutyOrg = admins[2].getOverallMetricsData('overallNumUsersPerTagBuilder', props)
 
         // users by admin organization
         props.tagKey = 'adminOrganization'
-        def usersByAdminOrg = skillsService.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+        def usersByAdminOrg = admins[2].getOverallMetricsData('overallNumUsersPerTagBuilder', props)
 
         then:
         res.numTotalProjects == 1
