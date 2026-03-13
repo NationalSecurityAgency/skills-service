@@ -641,8 +641,8 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
             skillsService.addSkill(['projectId': proj.projectId, skillId: skills[x].skillId], "user1", new Date()).body.completed
             skillsService.addSkill(['projectId': proj.projectId, skillId: subj2Skills[x].skillId], "user1", new Date()).body.completed
             skillsService.addSkill(['projectId': proj.projectId, skillId: subj3Skills[x].skillId], "user1", new Date()).body.completed
-            skillsService.addSkill(['projectId': proj.projectId, skillId: proj2skills[x].skillId], "user1", new Date()).body.completed
-            skillsService.addSkill(['projectId': proj.projectId, skillId: proj2subj2Skills[x].skillId], "user1", new Date()).body.completed
+            skillsService.addSkill(['projectId': proj2.projectId, skillId: proj2skills[x].skillId], "user1", new Date()).body.completed
+            skillsService.addSkill(['projectId': proj2.projectId, skillId: proj2subj2Skills[x].skillId], "user1", new Date()).body.completed
         }
 
         def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId)
@@ -655,7 +655,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsers.totalLevels == 3
         badgeUsers.data[0].skillsAchieved == 1
         badgeUsers.data[0].numLevelsAchieved == badgeUsers.totalLevels
-        badgeUsers.data[0].totalProgress == 6
+        badgeUsers.data[0].totalProgress == 4 // 3 levels + 1 skill
         badgeUsers.data[0].userId == "user1"
     }
 
