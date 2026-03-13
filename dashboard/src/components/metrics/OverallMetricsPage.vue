@@ -76,7 +76,7 @@ const loadData = () => {
     <div v-if="!isLoading">
       <OverallMetricsCards :data="metricsData" />
       <div class="flex">
-        <NumUsersPerDay :title="'Overall Users per day'" :project-ids="projectIds" :quiz-ids="quizIds"/>
+        <NumUsersPerDay :title="'Overall Users per day'" :is-overall="true"/>
       </div>
       <div v-if="tagCharts"
            class="flex flex-col gap-4 mt-4"

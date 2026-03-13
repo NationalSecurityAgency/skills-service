@@ -29,6 +29,7 @@ import skills.controller.result.model.globalMetrics.GlobalMetricsUserItem
 import skills.controller.result.model.globalMetrics.OverallMetricsResult
 import skills.controller.result.model.globalMetrics.SingleUserOverallProgress
 import skills.controller.result.model.globalMetrics.UsersOverallProgressResult
+import skills.services.admin.UserCommunityService
 import skills.services.quiz.QuizDefService
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
@@ -86,6 +87,9 @@ class GlobalProgressMetricsService {
 
     @Autowired
     QuizDefService quizDefService
+
+    @Autowired
+    UserCommunityService userCommunityService
 
     UsersOverallProgressResult loadUsersOverallProgress(String userQuery, String userTagValueFilter, PageRequest pageRequest) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
@@ -191,8 +195,6 @@ class GlobalProgressMetricsService {
                     achievedProjLevel: projAchievements?.achievedProjLevel ?: 0,
             )
         }
-
-
         return new SingleUserOverallProgress(projectsProgress: projectsProgressRes)
     }
 
@@ -218,7 +220,12 @@ class GlobalProgressMetricsService {
     }
 
     @Transactional
-    List<DayCountItem> getDistinctUserCountForProjectsAndQuizzes(List<String> projectIds, List<String> quizIds, Date startDate, GroupingType groupingType) {
+    List<DayCountItem> getDistinctUserCountForProjectsAndQuizzes(Date startDate, GroupingType groupingType) {
+        ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
+        List<String> projectIds = projectIdsAndQuizIds.projectIds
+        List<String> quizIds = projectIdsAndQuizIds.quizIds
+        String userId = userInfoService.getCurrentUserId()
+        log.debug("Retrieving event counts for user [{}], start date [{}], projectIds [{}], quizIds [{}]", userId, startDate, projectIds, quizIds)
         List<DayCountItem> counts = globalProgressMetricsRepo.getDistinctUserCountForProjectsAndQuizzes(projectIds, quizIds, startDate, groupingType.value)
 
         // Fill in gaps with zero counts
@@ -305,11 +312,19 @@ class GlobalProgressMetricsService {
         return dates
     }
 
-    private ProjectIdsAndQuizIds getProjectIdsAndQuizIdsForCurrentUser() {
+    ProjectIdsAndQuizIds getProjectIdsAndQuizIdsForCurrentUser() {
         String userId = userInfoService.currentUser.username
         List<UserRole> allUserRoles = userRoleRepo.findAllByUserId(userId)
         List<String> projectIds = allUserRoles?.findAll({ it.roleName == RoleName.ROLE_PROJECT_ADMIN})?.projectId
         List<String> quizIds = allUserRoles?.findAll({ it.roleName == RoleName.ROLE_QUIZ_ADMIN})?.quizId
+
+        Boolean isUserCommunityMember = userCommunityService.isUserCommunityMember(userId)
+        if (!isUserCommunityMember && projectIds) {
+            projectIds.removeAll { userCommunityService.isUserCommunityOnlyProject(it) }
+        }
+        if (!isUserCommunityMember && quizIds) {
+            quizIds.removeAll { userCommunityService.isUserCommunityOnlyQuiz(it) }
+        }
         return new ProjectIdsAndQuizIds(projectIds: projectIds, quizIds: quizIds)
     }
 
