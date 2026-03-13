@@ -1,24 +1,24 @@
-/*
-
- Copyright 2026 SkillTree
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-     https://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
-
+/**
+ * Copyright 2026 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package skills.utils
 
 import org.apache.commons.lang3.RandomUtils
+import skills.services.StartDateUtil
+import skills.storage.model.EventType
 
 import java.time.DayOfWeek
 import java.time.LocalDateTime
@@ -29,11 +29,14 @@ import java.time.temporal.WeekFields
 class TestDates {
     LocalDateTime now;
     LocalDateTime startOfCurrentWeek;
+    LocalDateTime startOfPreviousWeek;
     LocalDateTime startOfTwoWeeksAgo;
 
     TestDates() {
         now = LocalDateTime.now()
-        startOfCurrentWeek = LocalDateTime.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+//        startOfCurrentWeek = LocalDateTime.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+        startOfCurrentWeek = StartDateUtil.computeStartDate(now.toDate(), EventType.DAILY).toLocalDateTime().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+        startOfPreviousWeek = startOfCurrentWeek.minusWeeks(1)
         startOfTwoWeeksAgo = startOfCurrentWeek.minusWeeks(1)
     }
 
@@ -81,4 +84,25 @@ class TestDates {
             return startOfTwoWeeksAgo.with(dayOfWeekField, RandomUtils.nextInt(1, 7))
         }
     }
+    LocalDateTime getDateWithinWeek(Date target, boolean afterOrSame=false){
+        Date startOfWeek = StartDateUtil.computeStartDate(target, EventType.WEEKLY)
+        TemporalField dayOfWeekField = WeekFields.of(Locale.US).dayOfWeek()
+        int targetDayOfWeek = target.toLocalDateTime().get(dayOfWeekField)
+
+        if (afterOrSame) {
+            if (targetDayOfWeek == 7) {
+                //end of the week already, we can't return a later date and stay within the target week
+                return target
+            } else {
+                return target.toLocalDateTime().with(dayOfWeekField, RandomUtils.nextInt(targetDayOfWeek+1, 8))
+            }
+        } else {
+            int randomDay = -1
+            while ((randomDay = RandomUtils.nextInt(1, 8)) == targetDayOfWeek) {
+                //continue
+            }
+            return target.toLocalDateTime().with(dayOfWeekField, randomDay)
+        }
+    }
+
 }
