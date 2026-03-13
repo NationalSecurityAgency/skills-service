@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.metrics.builders.multipleProj
+package skills.metrics.builders
 
 
 import groovy.util.logging.Slf4j
@@ -21,9 +21,6 @@ import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.metrics.GlobalProgressMetricsService
-import skills.metrics.builders.GlobalMetricsBuilder
-import skills.metrics.builders.MetricsPagingParamsHelper
-import skills.metrics.builders.MetricsParams
 import skills.storage.repos.GlobalProgressMetricsRepo
 import skills.utils.TimeRangeFormatterUtil
 

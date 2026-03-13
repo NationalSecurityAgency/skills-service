@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.intTests.metrics.multipleProj
+package skills.intTests.metrics.global
 
-import groovy.json.JsonSlurper
+
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
-import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.storage.model.UserTag
 import skills.storage.repos.UserQuizAttemptRepo
