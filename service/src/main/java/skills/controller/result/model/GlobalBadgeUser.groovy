@@ -18,4 +18,5 @@ package skills.controller.result.model
 interface GlobalBadgeUser extends ProjectUser {
     Integer getNumLevelsAchieved()
     Integer getSkillsAchieved()
+    Integer getTotalProgress()
 }

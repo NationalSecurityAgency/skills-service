@@ -46,7 +46,6 @@ const userInfo = useUserInfo()
 const exportUtil = useExportUtil()
 const numberFormat = useNumberFormat()
 const projConfig = useProjConfig()
-const projectDetailsState = useProjDetailsState()
 
 let filters = ref({
   user: '',
@@ -66,7 +65,7 @@ const possiblePageSizes = [5, 10, 15, 20]
 const sortInfo = ref({ sortOrder: -1, sortBy: 'lastUpdated' })
 const selectedRows = ref([])
 
-const totalProgress = computed(() => {
+const maximumProgress = computed(() => {
   return totalPoints.value + totalLevels.value;
 })
 
@@ -193,19 +192,8 @@ const calcPercent = (userPoints) => {
   return Math.trunc((userPoints / totalPoints.value) * 100)
 }
 
-const calcLevelPercent = (userLevel) => {
-  if (!totalPoints.value) {
-    return 'N/A'
-  }
-  return Math.trunc((userLevel / totalLevels.value) * 100)
-}
-
-const calcTotalPercent = (userPoints, userLevel) => {
-  if (!totalPoints.value && !totalLevels.value) {
-    return 'N/A'
-  }
-
-  return Math.trunc((userLevel + userPoints) / totalProgress.value * 100)
+const calcTotalPercent = (totalProgress) => {
+  return Math.trunc(totalProgress / maximumProgress.value * 100)
 }
 
 const pageChanged = (pagingInfo) => {
@@ -418,13 +406,13 @@ const archiveUsers = () => {
             </div>
           </template>
         </Column>
-        <Column v-if="isGlobalBadgePage" header="Badge Progress" :sortable="false" :class="{'flex': responsive.md.value }">
+        <Column v-if="isGlobalBadgePage" field="totalProgress" header="Badge Progress" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #body="slotProps">
             <div :data-cy="`usr_progress-${slotProps.data.userId}`" class="w-full">
               <div class="flex">
                 <div class="flex flex-auto">
                   <span class="font-weight-bold text-primary"
-                        :aria-label="`${calcTotalPercent(slotProps.data.numLevelsAchieved, slotProps.data.skillsAchieved)} percent completed`"
+                        :aria-label="`${calcTotalPercent(slotProps.data.totalProgress)} percent completed`"
                         data-cy="progressPercent">{{ calcTotalPercent(slotProps.data.numLevelsAchieved, slotProps.data.skillsAchieved) }}%</span>
                 </div>
                 <div class="flex flex-auto justify-end">
@@ -444,7 +432,7 @@ const archiveUsers = () => {
             </div>
           </template>
         </Column>
-        <Column field="firstUpdated" header="Points First Earned" :sortable="true" :class="{'flex': responsive.md.value }">
+        <Column v-if="!isGlobalBadgePage" field="firstUpdated" header="Points First Earned" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="far fa-clock mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
           </template>
@@ -452,7 +440,7 @@ const archiveUsers = () => {
             <date-cell :value="slotProps.data.firstUpdated" />
           </template>
         </Column>
-        <Column field="lastUpdated" header="Points Last Earned" :sortable="true" :class="{'flex': responsive.md.value }">
+        <Column field="lastUpdated" :header="isGlobalBadgePage ? 'Skill Last Earned' : 'Points Last Earned'" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="far fa-clock mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
           </template>

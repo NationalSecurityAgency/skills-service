@@ -1012,7 +1012,6 @@ WITH globalBadgeSkills AS (
      skillAchievements AS (
         SELECT
             achievement.user_id      AS userId,
-            upaAgg.firstPerformedOn  AS firstUpdated,
             upaAgg.lastPerformedOn   AS lastUpdated,
             count(achievement.skill_id) AS skillsAchieved
         FROM skill_definition badge
@@ -1029,7 +1028,7 @@ WITH globalBadgeSkills AS (
             ) GROUP BY upa.user_id
         ) upaAgg ON upaAgg.user_id = achievement.user_id
         WHERE badge.type = 'GlobalBadge' AND badge.skill_id = ?1 AND achievement.user_id IS NOT NULL
-        GROUP BY achievement.user_id, upaAgg.firstPerformedOn, upaAgg.lastPerformedOn
+        GROUP BY achievement.user_id, upaAgg.lastPerformedOn
      )
     select
         users.user_id            as userId,
@@ -1040,15 +1039,15 @@ WITH globalBadgeSkills AS (
         ua.email                 AS email,
         COALESCE(levelAchievements.maxLevel, 0) as numLevelsAchieved,
         COALESCE(skillAchievements.skillsAchieved, 0) as skillsAchieved,
-        skillAchievements.firstUpdated as firstUpdated,
-        skillAchievements.lastUpdated as lastUpdated
+        skillAchievements.lastUpdated as lastUpdated,
+        (COALESCE(levelAchievements.maxLevel, 0) + COALESCE(skillAchievements.skillsAchieved, 0)) as totalProgress
     from users
              left join levelAchievements on levelAchievements.user_id = users.user_id
              left join skillAchievements on skillAchievements.userId = users.user_id
              JOIN user_attrs ua ON ua.user_id = users.user_id
              LEFT JOIN (SELECT utCol.user_id, max(utCol.value) AS utColValue FROM user_tags utCol WHERE utCol.key = ?2 group by utCol.user_id) utCol ON utCol.user_id= users.user_id
     WHERE (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (', ua.user_id_for_display, ')')) LIKE lower(CONCAT('%', ?3, '%')) OR lower(ua.user_id_for_display) LIKE lower(CONCAT('%', ?3, '%')))
-    GROUP BY users.user_id, ua.user_id_for_display, ua.dn, ua.first_name, ua.last_name, ua.email, levelAchievements.maxLevel, skillAchievements.skillsAchieved, skillAchievements.firstUpdated, skillAchievements.lastUpdated''', nativeQuery = true)
+    GROUP BY users.user_id, ua.user_id_for_display, ua.dn, ua.first_name, ua.last_name, ua.email, levelAchievements.maxLevel, skillAchievements.skillsAchieved, skillAchievements.lastUpdated''', nativeQuery = true)
     List<GlobalBadgeUser> findDistinctUsersForGlobalBadge(String badgeId, String usersTableAdditionalUserTagKey, String userId, Pageable pageable)
 
     @Query(value = '''
