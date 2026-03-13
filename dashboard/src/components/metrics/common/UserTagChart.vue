@@ -47,21 +47,12 @@ const props = defineProps({
     required: false,
     default: 'Users',
   },
-  projectIds: {
-    type: Array,
+  isOverall: {
+    type: Boolean,
     required: false,
-    default: [],
-  },
-  quizIds: {
-    type: Array,
-    required: false,
-    default: [],
-  },
+    default: false
+  }
 })
-
-const isOverallMetrics = computed(() => {
-  return (props.projectIds && props.projectIds.length > 0) || (props.quizIds && props.quizIds.length > 0);
-});
 
 onMounted(() => {
   chartJsOptions.value = setChartOptions()
@@ -86,13 +77,10 @@ const loadData = () => {
     tagFilter: '',
     fromDayFilter: dateRange.startDate,
     toDayFilter: dateRange.endDate,
-    projIds: props.projectIds,
-    quizIds: props.quizIds,
   };
-  const metricsLoader = isOverallMetrics.value ?
+  const metricsLoader = props.isOverall ?
       MetricsService.getOverallMetricsChart('overallNumUsersPerTagBuilder', params) :
       MetricsService.loadChart(route.params.projectId, 'numUsersPerTagBuilder', params);
-
 
   metricsLoader.then((dataFromServer) => {
     if (dataFromServer) {
