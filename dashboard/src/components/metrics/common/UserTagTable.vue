@@ -27,23 +27,14 @@ import {useStorage} from "@vueuse/core";
 
 const props = defineProps({
   tagChart: Object,
-  projectIds: {
-    type: Array,
+  isOverall: {
+    type: Boolean,
     required: false,
-    default: [],
-  },
-  quizIds: {
-    type: Array,
-    required: false,
-    default: [],
-  },
+    default: false
+  }
 })
 const route = useRoute();
 const numberFormat = useNumberFormat()
-
-const isOverallMetrics = computed(() => {
-  return (props.projectIds && props.projectIds.length > 0) || (props.quizIds && props.quizIds.length > 0);
-});
 
 onMounted(() => {
   loadData();
@@ -117,10 +108,8 @@ const loadData = (shouldHighlight = false) => {
     sortBy: table.value.options.sortBy === 'count' ? 'numUsers' : 'tag',
     fromDayFilter: dateRange.startDate,
     toDayFilter: dateRange.endDate,
-    projIds: props.projectIds,
-    quizIds: props.quizIds,
   };
-  const metricsLoader = isOverallMetrics.value ?
+  const metricsLoader = props.isOverall ?
     MetricsService.getOverallMetricsChart('overallNumUsersPerTagBuilder', params) :
     MetricsService.loadChart(route.params.projectId, 'numUsersPerTagBuilder', params);
 

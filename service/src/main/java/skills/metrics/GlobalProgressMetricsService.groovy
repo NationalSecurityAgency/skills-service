@@ -15,6 +15,7 @@
  */
 package skills.metrics
 
+import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,12 +24,9 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
+import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.TableResult
-import skills.controller.result.model.globalMetrics.GlobalMetricsResult
-import skills.controller.result.model.globalMetrics.GlobalMetricsUserItem
-import skills.controller.result.model.globalMetrics.OverallMetricsResult
-import skills.controller.result.model.globalMetrics.SingleUserOverallProgress
-import skills.controller.result.model.globalMetrics.UsersOverallProgressResult
+import skills.controller.result.model.globalMetrics.*
 import skills.services.admin.UserCommunityService
 import skills.services.quiz.QuizDefService
 import skills.storage.model.*
@@ -36,8 +34,8 @@ import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.*
 
-import java.util.stream.Collectors
-import java.util.stream.Stream
+import static org.springframework.data.domain.Sort.Direction.ASC
+import static org.springframework.data.domain.Sort.Direction.DESC
 
 @CompileStatic
 @Service
@@ -220,6 +218,7 @@ class GlobalProgressMetricsService {
     }
 
     @Transactional
+    @Profile
     List<DayCountItem> getDistinctUserCountForProjectsAndQuizzes(Date startDate, GroupingType groupingType) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
         List<String> projectIds = projectIdsAndQuizIds.projectIds
@@ -231,6 +230,23 @@ class GlobalProgressMetricsService {
         // Fill in gaps with zero counts
         List<DayCountItem> filledCounts = fillGapsWithZeroCounts(counts, startDate, groupingType)
         return filledCounts
+    }
+
+    @Profile
+    UsersPerTagRes getUserCountsForTag(String tagKey, Date startDate, Date endDate, int currentPage, int pageSize, Boolean sortDesc, String sortBy, String tagFilter) {
+        ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
+        List<String> projectIds = projectIdsAndQuizIds.projectIds
+        List<String> quizIds = projectIdsAndQuizIds.quizIds
+        String userId = userInfoService.getCurrentUserId()
+        PageRequest pageRequest = PageRequest.of(currentPage, pageSize, sortDesc ? DESC : ASC, sortBy)
+        log.debug("Retrieving user tag counts for user [{}], start date [{}], projectIds [{}], quizIds [{}]", userId, startDate, projectIds, quizIds)
+        List<GlobalProgressMetricsRepo.UserTagCount> userTagCounts = globalProgressMetricsRepo.findUserTagCountByProjectIdInAndUserTagFilter(projectIds, quizIds, tagKey, tagFilter ?: null, startDate, endDate, pageRequest)
+        Integer numDistinctTags = (pageSize > userTagCounts.size() && currentPage == 0) ? userTagCounts.size() : globalProgressMetricsRepo.countUserTagCountByProjectIdInAndUserTagFilter(projectIds, quizIds, tagKey, tagFilter ?: null, startDate, endDate)
+
+        List<LabelCountItem> items = userTagCounts.collect {
+            new LabelCountItem(value: it.tag, count: it.numUsers)
+        }
+        return new UsersPerTagRes(totalNumItems: numDistinctTags, items: items)
     }
 
     private static List<DayCountItem> fillGapsWithZeroCounts(List<DayCountItem> existingCounts, Date startDate, GroupingType groupingType) {
@@ -335,5 +351,10 @@ class GlobalProgressMetricsService {
     static final class ProjectIdsAndQuizIds {
         List<String> projectIds
         List<String> quizIds
+    }
+
+    static class UsersPerTagRes {
+        Integer totalNumItems
+        List<LabelCountItem> items
     }
 }

@@ -83,9 +83,9 @@ const loadData = () => {
            data-cy="userTagCharts">
         <div v-for="(tagChart, index) in tagCharts" :key="`${tagChart.key}-${index}`" style="min-width: 30vw;">
           <user-tag-table v-if="tagChart.type === 'table'"
-                          :tag-chart="tagChart" :project-ids="projectIds" :quiz-ids="quizIds" />
+                          :tag-chart="tagChart" :is-overall="true" />
           <user-tag-chart v-if="tagChart.type !== 'table'"
-                          :project-ids="projectIds" :quiz-ids="quizIds"
+                          :is-overall="true"
                           :chart-type="tagChart.type"
                           :tag-key="tagChart.key"
                           :title="tagChart.title" />

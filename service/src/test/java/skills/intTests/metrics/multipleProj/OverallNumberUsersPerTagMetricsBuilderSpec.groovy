@@ -422,16 +422,6 @@ class OverallNumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
         ]
     }
 
-    def "validates required parameters"() {
-        when:
-        skillsService.getOverallMetricsData(metricsId, [tagKey: "someKey", currentPage: 1, pageSize: 5, sortDesc: true])
-        then:
-
-        SkillsClientException e = thrown()
-        def body = new JsonSlurper().parseText(e.resBody)
-        body.explanation == "Metrics[${metricsId}]: Must supply projIds or quizIds param"
-    }
-
     def "quiz only metrics"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         def quiz2 = QuizDefFactory.createQuiz(2)
