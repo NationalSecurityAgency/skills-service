@@ -125,7 +125,7 @@ class GlobalReusedDataBaseIntSpec extends DefaultIntSpec {
         runQuizOrSurvey(users[2], quizzes[1])
 
         rootUser.saveUserTag(users[2].userName, 'dutyOrganization', ['KOO4'])
-        rootUser.saveUserTag(users[1].userName, 'adminOrganization', ['SKTR'])
+        rootUser.saveUserTag(users[2].userName, 'adminOrganization', ['SKTR'])
 
 
         // user 3 - achieved global badge that only has skills but not project badge
@@ -136,7 +136,7 @@ class GlobalReusedDataBaseIntSpec extends DefaultIntSpec {
         runQuizOrSurvey(users[3], quizzes[0], true)
         runQuizOrSurvey(users[3], quizzes[1])
         rootUser.saveUserTag(users[3].userName, 'dutyOrganization', ['KOO5'])
-        rootUser.saveUserTag(users[1].userName, 'adminOrganization', ['SKTR'])
+        rootUser.saveUserTag(users[3].userName, 'adminOrganization', ['SKTR'])
 
         // user 4 - achieved global badge with level configs but not project badge
         runQuizOrSurvey(users[4], quizzes[2], false)
@@ -147,7 +147,7 @@ class GlobalReusedDataBaseIntSpec extends DefaultIntSpec {
         assert users[4].addSkill(p1Skills[6]).body.skillApplied
         assert users[4].addSkill(p1Skills[7]).body.skillApplied
         rootUser.saveUserTag(users[4].userName, 'dutyOrganization', ['KOO4'])
-        rootUser.saveUserTag(users[1].userName, 'adminOrganization', ['SKTR'])
+        rootUser.saveUserTag(users[4].userName, 'adminOrganization', ['SKTR'])
 
         // user 5 - achieved every project level
         runQuizOrSurvey(users[5], surveys[1])
@@ -166,24 +166,24 @@ class GlobalReusedDataBaseIntSpec extends DefaultIntSpec {
         runQuizOrSurvey(users[6], quizzes[3], false)
         runQuizOrSurvey(users[6], quizzes[1])
         rootUser.saveUserTag(users[6].userName, 'dutyOrganization', ['CBF2'])
-        rootUser.saveUserTag(users[1].userName, 'adminOrganization', ['SKTR'])
+        rootUser.saveUserTag(users[6].userName, 'adminOrganization', ['SKTR'])
 
         // users 7 - no quiz or surveys
         assert users[7].addSkill(p3Skills[0]).body.skillApplied
         assert users[7].addSkill(p3Skills[1]).body.skillApplied
         rootUser.saveUserTag(users[7].userName, 'dutyOrganization', ['XYZ1'])
-        rootUser.saveUserTag(users[1].userName, 'adminOrganization', ['XYZ'])
+        rootUser.saveUserTag(users[7].userName, 'adminOrganization', ['XYZ'])
 
         // user 8
         runQuizOrSurvey(users[8], quizzes[1])
         rootUser.saveUserTag(users[8].userName, 'dutyOrganization', ['ABC2'])
-        rootUser.saveUserTag(users[1].userName, 'adminOrganization', ['XYZ'])
+        rootUser.saveUserTag(users[8].userName, 'adminOrganization', ['XYZ'])
 
 
         // user 9
         runQuizOrSurvey(users[9], quizzes[1])
         rootUser.saveUserTag(users[9].userName, 'dutyOrganization', ['ABC1'])
-        rootUser.saveUserTag(users[1].userName, 'adminOrganization', ['XYZ'])
+        rootUser.saveUserTag(users[9].userName, 'adminOrganization', ['XYZ'])
 
 
         // other project, quizzes and users that must not effect the result set
