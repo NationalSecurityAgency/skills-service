@@ -43,20 +43,6 @@ const buildTagCharts = () => {
 const isLoading = ref(true)
 const metricsData = ref({})
 const hasData = computed(() => (metricsData.value?.numTotalProjects + metricsData.value?.numTotalQuizzes + metricsData.value?.numTotalSurveys) > 0)
-const projectIds = computed(()=> {
-  if (hasData.value) {
-    return metricsData.value.projectInfo.map(project => project.projectId);
-  } else {
-    return []
-  }
-})
-const quizIds = computed(()=> {
-  if (hasData.value) {
-    return metricsData.value.quizInfo.map(quiz => quiz.quizId);
-  } else {
-    return []
-  }
-})
 
 const loadData = () => {
   MetricsService.getOverallMetrics()
