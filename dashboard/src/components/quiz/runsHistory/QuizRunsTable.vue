@@ -68,14 +68,18 @@ const props = defineProps({
   showQuizNameAndTypeColumns: {
     type: Boolean,
     default: false,
-  }
+  },
+  defaultPageSize: {
+    type: Number,
+    default: 10,
+  },
 })
 
 const loadingDataInitially = ref(true)
 const hasDataToShow = ref(false)
 const internalDateRange = ref([])
 const runsHistory = ref([])
-const pageSize = useStorage('quizRunsHistory-tablePageSize', 10)
+const pageSize = useStorage(`${props.tableStoredStateId}-tablePageSize`, props.defaultPageSize)
 const sortInfo = ref({ sortOrder: -1, sortBy: 'started' })
 const deleteQuizRunInfo = ref({
   showDialog: false,
@@ -154,7 +158,7 @@ const options = ref({
     server: true,
     currentPage: 1,
     totalRows: 0,
-    possiblePageSizes: [10, 20, 50]
+    possiblePageSizes: [5, 10, 20, 50]
   }
 })
 
@@ -304,14 +308,14 @@ const deleteRun = () => {
                        placeholder="User Filter"
                        aria-label="User Filter"/>
           </div>
-          <div v-if="props.showQuizNameAndTypeColumns" class="flex gap-1 flex-1">
+          <div v-if="props.showQuizNameAndTypeColumns" class="flex gap-2 flex-1">
             <label class="flex gap-1 items-center"><i class="fas fa-tag" aria-hidden="true"/>
-              <div>Name:</div>
+              <span>Name:</span>
             </label>
             <InputText class="flex grow"
                        v-model="quizNameFilter"
                        v-on:keydown.enter="onFilter"
-                       data-cy="userNameFilter"
+                       data-cy="quizNameFilter"
                        placeholder="Name Filter"
                        aria-label="Name Filter"/>
           </div>

@@ -109,7 +109,7 @@ describe('Global Users Progress With Reused Data', () => {
         cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"] [data-cy="mediaInfoCardSubTitle"]').contains('2 Quizzes and 1 Survey')
 
         cy.get('[data-cy="overallMetricsBadgesCard"] [data-cy="mediaInfoCardTitle"]').contains('4 Badges')
-        cy.get('[data-cy="overallMetricsBadgesCard"] [data-cy="mediaInfoCardSubTitle"]').contains('3 Project and 1 Global Badges')
+        cy.get('[data-cy="overallMetricsBadgesCard"] [data-cy="mediaInfoCardSubTitle"]').contains('3 Project and 1 Global')
 
         const expectedHeaders = ['User', 'Org', 'Skills & Projects', '# Quiz Runs', '# Survey Runs', "# Badges"]
         cy.get('[data-cy="userOverallProgressTable"] [data-pc-name="headercell"] [data-pc-section="columntitle"]')
@@ -119,6 +119,8 @@ describe('Global Users Progress With Reused Data', () => {
                 const expectedText = expectedHeaders[index]
                 expect(actualText, `Header at index ${index}`).to.equal(expectedText)
             })
+        cy.get('[data-cy="userOverallProgressTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '3')
+
 
         verifyUserDataAtRow(0, 'user3', '', 53, '8 / 15 Skills', '3 / 3 Projects'
             , 3, 1,1, 1,
@@ -446,5 +448,136 @@ describe('Global Users Progress With Reused Data', () => {
         cy.get('[data-cy="userOverallProgressTable"] [data-pc-section="bodyrow"]').should('have.length', 3)
     })
 
+    it('expand user progress - user with 1 project and 2 quizzes', () => {
+        cy.intercept('/app/progress-metrics**').as('progressMetrics')
+        cy.visit('/administrator/users-progress');
+        cy.wait('@progressMetrics')
+
+        cy.get('[data-cy="userOverallProgressTable"] [data-p-index="2"] [data-pc-group-section="rowactionbutton"]').click()
+
+        cy.get('[data-cy="usrOverallProgress-user1"]').should('be.visible')
+        cy.get('[data-cy="usrOverallProgress-user2"]').should('not.exist')
+        cy.get('[data-cy="usrOverallProgress-user3"]').should('not.exist')
+        cy.get('[data-cy="usrOverallProgress-user1"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="projName"]').contains('This is project 1')
+        cy.get('[data-cy="usrOverallProgress-user1"] [data-cy="projectsProgress"] [data-cy="projProgress-proj2"]').should('not.exist')
+        cy.get('[data-cy="usrOverallProgress-user1"] [data-cy="projectsProgress"] [data-cy="projProgress-proj3"]').should('not.exist')
+
+        cy.get('[data-cy="usrOverallProgress-user1"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="progressPercent"]').should('have.text', '20%')
+        cy.get('[data-cy="usrOverallProgress-user1"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="pointsProgress"]').should('have.text', '100 / 500 Points')
+
+        cy.get('[data-cy="usrOverallProgress-user1"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="level"]').should('have.text', 'Level 1 out of 5')
+        cy.get('[data-cy="usrOverallProgress-user1"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="skills"]').should('have.text', '1 out of 5')
+        cy.get('[data-cy="usrOverallProgress-user1"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="badges"]').should('have.text', '1 out of 3')
+
+        const quizTableSelector = '[data-cy="quizRunsHistoryTable"]'
+        const expected = [
+            [{
+                colIndex: 0,
+                value: 'This is quiz 2'
+            }, {
+                colIndex: 1,
+                value: 'Quiz'
+            }, {
+                colIndex: 2,
+                value: 'Passed'
+            }],
+            [{
+                colIndex: 0,
+                value: 'This is quiz 1'
+            }, {
+                colIndex: 1,
+                value: 'Quiz'
+            }, {
+                colIndex: 2,
+                value: 'Passed'
+            }],
+        ];
+        cy.validateTable(quizTableSelector, expected);
+    })
+
+    it('expand user progress - user with 2 projects, 0 quizzes and 1 survey', () => {
+        cy.intercept('/app/progress-metrics**').as('progressMetrics')
+        cy.visit('/administrator/users-progress');
+        cy.wait('@progressMetrics')
+
+        cy.get('[data-cy="userOverallProgressTable"] [data-p-index="1"] [data-pc-group-section="rowactionbutton"]').click()
+
+        cy.get('[data-cy="usrOverallProgress-user2"]').should('be.visible')
+        cy.get('[data-cy="usrOverallProgress-user1"]').should('not.exist')
+        cy.get('[data-cy="usrOverallProgress-user3"]').should('not.exist')
+        cy.get('[data-cy="usrOverallProgress-user2"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="projName"]').contains('This is project 1')
+        cy.get('[data-cy="usrOverallProgress-user2"] [data-cy="projectsProgress"] [data-cy="projProgress-proj2"]').contains('This is project 2')
+        cy.get('[data-cy="usrOverallProgress-user2"] [data-cy="projectsProgress"] [data-cy="projProgress-proj3"]').should('not.exist')
+
+        cy.get('[data-cy="usrOverallProgress-user2"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="progressPercent"]').should('have.text', '20%')
+        cy.get('[data-cy="usrOverallProgress-user2"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="pointsProgress"]').should('have.text', '100 / 500 Points')
+        cy.get('[data-cy="usrOverallProgress-user2"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="level"]').should('have.text', 'Level 1 out of 5')
+        cy.get('[data-cy="usrOverallProgress-user2"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="skills"]').should('have.text', '1 out of 5')
+        cy.get('[data-cy="usrOverallProgress-user2"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="badges"]').should('have.text', '1 out of 3')
+
+        cy.get('[data-cy="usrOverallProgress-user2"] [data-cy="projectsProgress"] [data-cy="projProgress-proj2"] [data-cy="progressPercent"]').should('have.text', '20%')
+        cy.get('[data-cy="usrOverallProgress-user2"] [data-cy="projectsProgress"] [data-cy="projProgress-proj2"] [data-cy="pointsProgress"]').should('have.text', '100 / 500 Points')
+        cy.get('[data-cy="usrOverallProgress-user2"] [data-cy="projectsProgress"] [data-cy="projProgress-proj2"] [data-cy="level"]').should('have.text', 'Level 1 out of 5')
+        cy.get('[data-cy="usrOverallProgress-user2"] [data-cy="projectsProgress"] [data-cy="projProgress-proj2"] [data-cy="skills"]').should('have.text', '1 out of 5')
+        cy.get('[data-cy="usrOverallProgress-user2"] [data-cy="projectsProgress"] [data-cy="projProgress-proj2"] [data-cy="badges"]').should('have.text', '0 out of 0')
+
+        const quizTableSelector = '[data-cy="usrOverallProgress-user2"] [data-cy="quizRunsHistoryTable"]'
+        const expected = [
+            [{
+                colIndex: 0,
+                value: 'This is survey 3'
+            }, {
+                colIndex: 1,
+                value: 'Survey'
+            }, {
+                colIndex: 2,
+                value: 'In Progress'
+            }],
+        ];
+        cy.validateTable(quizTableSelector, expected);
+    })
+
+    it('expand user progress - user with 3 projects, 3 quizzes, 1 survey and 2 badges', () => {
+        cy.intercept('/app/progress-metrics**').as('progressMetrics')
+        cy.visit('/administrator/users-progress');
+        cy.wait('@progressMetrics')
+
+        cy.get('[data-cy="userOverallProgressTable"] [data-p-index="0"] [data-pc-group-section="rowactionbutton"]').click()
+
+        cy.get('[data-cy="usrOverallProgress-user3"]').should('be.visible')
+        cy.get('[data-cy="usrOverallProgress-user1"]').should('not.exist')
+        cy.get('[data-cy="usrOverallProgress-user2"]').should('not.exist')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="projName"]').contains('This is project 1')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj2"]').contains('This is project 2')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj3"]').contains('This is project 3')
+
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="progressPercent"]').should('have.text', '40%')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="pointsProgress"]').should('have.text', '200 / 500 Points')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="level"]').should('have.text', 'Level 2 out of 5')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="skills"]').should('have.text', '2 out of 5')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj1"] [data-cy="badges"]').should('have.text', '2 out of 3')
+
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj2"] [data-cy="progressPercent"]').should('have.text', '60%')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj2"] [data-cy="pointsProgress"]').should('have.text', '300 / 500 Points')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj2"] [data-cy="level"]').should('have.text', 'Level 3 out of 5')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj2"] [data-cy="skills"]').should('have.text', '3 out of 5')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj2"] [data-cy="badges"]').should('have.text', '0 out of 0')
+
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj3"] [data-cy="progressPercent"]').should('have.text', '60%')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj3"] [data-cy="pointsProgress"]').should('have.text', '300 / 500 Points')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj3"] [data-cy="level"]').should('have.text', 'Level 3 out of 5')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj3"] [data-cy="skills"]').should('have.text', '3 out of 5')
+        cy.get('[data-cy="usrOverallProgress-user3"] [data-cy="projectsProgress"] [data-cy="projProgress-proj3"] [data-cy="badges"]').should('have.text', '0 out of 0')
+
+        const quizTableSelector = '[data-cy="usrOverallProgress-user3"] [data-cy="quizRunsHistoryTable"]'
+        const expected = [
+            [{ colIndex: 0, value: 'This is survey 3'}, { colIndex: 1, value: 'Survey'}, { colIndex: 2, value: 'Completed'}],
+            [{ colIndex: 0, value: 'This is quiz 2'}, { colIndex: 1, value: 'Quiz'}, { colIndex: 2, value: 'In Progress'}],
+            [{ colIndex: 0, value: 'This is quiz 1'}, { colIndex: 1, value: 'Quiz'}, { colIndex: 2, value: 'Passed'}],
+            [{ colIndex: 0, value: 'This is quiz 1'}, { colIndex: 1, value: 'Quiz'}, { colIndex: 2, value: 'Failed'}],
+        ];
+        cy.validateTable(quizTableSelector, expected);
+
+    })
 
 });

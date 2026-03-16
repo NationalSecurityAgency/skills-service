@@ -39,7 +39,7 @@ const colors = useColors()
 const responsive = useResponsiveBreakpoints()
 const userInfo = useUserInfo()
 const appConfig = useAppConfig()
-const numFormat = useNumberFormat()
+const numberFormat = useNumberFormat()
 
 onMounted(() => {
   loadData().then(() => {
@@ -300,6 +300,10 @@ const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
                 <table-no-res :showResetFilter="true" @resetFilter="resetFilters"/>
               </template>
 
+              <template #paginatorstart>
+                <span>Total Rows:</span> <span class="font-semibold"
+                                               data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
+              </template>
             </SkillsDataTable>
           </div>
         </template>

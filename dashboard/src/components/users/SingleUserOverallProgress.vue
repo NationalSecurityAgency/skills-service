@@ -48,14 +48,12 @@ const loadData = () => {
   })
 }
 
-const title = computed(() => {
-  const userId = props.userProgressMeta.userToShow
-  return `${userId} Overall Progress`
-})
+const userId = computed(() => props.userProgressMeta.userToShow)
+const title = computed(() => `${userId.value} Overall Progress`)
 </script>
 
 <template>
-  <div class="py-5 pl-5">
+  <div class="py-5 pl-5" :data-cy="`usrOverallProgress-${userId}`">
     <div v-if="isLoading" class="flex">
       <skills-spinner :is-loading="isLoading"/>
     </div>
@@ -70,15 +68,15 @@ const title = computed(() => {
             Projects Progress
           </div>
 
-          <DataView :value="singleUserProjectProgress" class="mb-8">
+          <DataView :value="singleUserProjectProgress" class="mb-8" data-cy="projectsProgress">
             <template #empty>This user hasn't made progress in any projects yet</template>
             <template #list="slotProps">
               <div class="flex flex-col">
                 <div v-for="(item, index) in slotProps.items" :key="index">
-                  <div class="flex gap-4 border-b py-7 px-2 bg-surface-50">
-                    <div class="flex-1 flex flex-col">
+                  <div class="flex flex-col xl:flex-row gap-4 border-b py-7 px-2 bg-surface-50 dark:bg-surface-800" :data-cy="`projProgress-${item.projectId}`">
+                    <div class="flex flex-1 flex-col">
                       <div class="flex gap-2 mb-2">
-                        <div class="text-xl font-bold text-primary flex-1"><i class="fa-solid fa-tasks" aria-hidden="true" /> {{ item.projectName }}</div>
+                        <div class="text-xl font-bold text-primary flex-1" data-cy="projName"><i class="fa-solid fa-tasks" aria-hidden="true" /> {{ item.projectName }}</div>
                         <router-link :to="`/administrator/projects/${item.projectId}/users/${userProgressMeta.userId}`" tabindex="-1">
                           <SkillsButton label="View in Project" size="small"/>
                         </router-link>
@@ -88,11 +86,12 @@ const title = computed(() => {
                         <div class="flex gap-3">
                           <div class="text-primary flex-1"
                                :aria-label="`${item.pointsProgressPercent} percent completed`"
-                               data-cy="progressPercent">{{ item.pointsProgressPercent }}%
+                               data-cy="progressPercent"><span>{{ item.pointsProgressPercent }}%</span>
                           </div>
 
                           <div
                               :aria-label="`${item.points} out of ${item.projectTotalPoints} total points`"
+                              data-cy="pointsProgress"
                           ><span class="text-primary">{{ item.points }}</span> / {{ item.projectTotalPoints }} Points</div>
                         </div>
                         <div>
@@ -103,50 +102,50 @@ const title = computed(() => {
                         <div class="flex gap-1 mt-1">Last Progress: <date-cell :value="item.updated" :exclude-time-from-now="true"/></div>
                       </div>
                     </div>
-                    <Card>
-                      <template #content>
-                        <div class="flex">
-                          <div class="flex flex-col gap-2 items-center">
-                            <div>
-                              Level
-                              <Tag>{{ item.achievedProjLevel }}</Tag>
-                              out of
-                              <Tag severity="secondary">{{ item.numProjectLevels }}</Tag>
+                    <div class="flex gap-2 justify-end">
+                      <Card>
+                        <template #content>
+                          <div class="flex">
+                            <div class="flex flex-col gap-2 items-center">
+                              <div data-cy="level">
+                                <span>Level <Tag>{{ item.achievedProjLevel }}</Tag>
+                                out of
+                                <Tag severity="secondary">{{ item.numProjectLevels }}</Tag></span>
+                              </div>
+                              <Rating
+                                  v-model="item.achievedProjLevel"
+                                  :stars="item.numProjectLevels"
+                                  readonly
+                                  disabled
+                                  :cancel="false"
+                                  aria-hidden="true"
+                                  class="override-readonly-opacity"/>
                             </div>
-                            <Rating
-                                v-model="item.achievedProjLevel"
-                                :stars="item.numProjectLevels"
-                                readonly
-                                disabled
-                                :cancel="false"
-                                aria-hidden="true"
-                                class="override-readonly-opacity"/>
                           </div>
-                        </div>
-                      </template>
-                    </Card>
-                    <Card>
+                        </template>
+                      </Card>
+                      <Card>
+                        <template #content>
+                          <div class="flex flex-col gap-2 items-center">
+                            <div data-cy="skills"><Tag>{{ item.numAchievedSkills }}</Tag> out of <Tag severity="secondary">{{ item.numSkills }}</Tag></div>
+                            <div class="uppercase">Skills</div>
+                          </div>
+                        </template>
+                      </Card>
+                      <Card>
                       <template #content>
                         <div class="flex flex-col gap-2 items-center">
-                          <div><Tag>{{ item.numAchievedSkills }}</Tag> out of <Tag severity="secondary">{{ item.numSkills }}</Tag></div>
-                          <div class="uppercase">Skills</div>
-                        </div>
-                      </template>
-                    </Card>
-                    <Card>
-                      <template #content>
-                        <div class="flex flex-col gap-2 items-center">
-                          <div><Tag>{{ item.numAchievedBadges }}</Tag> out of <Tag severity="secondary">{{ item.numBadges }}</Tag></div>
+                          <div data-cy="badges"><Tag>{{ item.numAchievedBadges }}</Tag> out of <Tag severity="secondary">{{ item.numBadges }}</Tag></div>
                           <div class="uppercase">Badges</div>
                         </div>
                       </template>
                     </Card>
+                    </div>
                   </div>
                 </div>
               </div>
             </template>
           </DataView>
-
 
           <div class="pt-4 pb-1 font-bold uppercase border-b-2">
             Quiz and Survey Runs
@@ -156,6 +155,7 @@ const title = computed(() => {
               table-stored-state-id="singleUserOverviewQuizRunsHistoryTable"
               :only-runs-for-user-id="userProgressMeta.userId"
               :show-controls="false"
+              :default-page-size="5"
               :show-quiz-name-and-type-columns="true"
               :enable-to-show-user-tag-column="false">
             <template #noResults>
