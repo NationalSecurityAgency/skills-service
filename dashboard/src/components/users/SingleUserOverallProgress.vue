@@ -61,7 +61,7 @@ const title = computed(() => `${userId.value} Overall Progress`)
     <div v-if="!isLoading">
       <Card>
         <template #header>
-          <SkillsCardHeader :title="title"></SkillsCardHeader>
+          <SkillsCardHeader :title="title" title-tag="h2" />
         </template>
         <template #content>
           <div class="pt-4 pb-1 font-bold uppercase border-b-2">

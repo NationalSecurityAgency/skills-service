@@ -34,6 +34,7 @@ const clearDateFilter = () => {
 <template>
   <div class="flex flex-col flex-wrap">
     <SubPageHeader title="Quiz and Survey Runs"
+                   :title-level="1"
                    aria-label="Quiz and Survey Runs" />
 
     <Card :pt="{ body: { class: 'p-0!' } }">

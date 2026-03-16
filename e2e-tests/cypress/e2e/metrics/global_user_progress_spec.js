@@ -246,7 +246,6 @@ describe('Global Users Progress', () => {
         cy.createQuizDef(1)
         cy.reportSkill(1, 1, 'user1')
 
-        cy.visit('/administrator/users-progress');
         cy.intercept('/app/progress-metrics**').as('progressMetrics')
         cy.visit('/administrator/users-progress');
         cy.wait('@progressMetrics')
@@ -269,7 +268,6 @@ describe('Global Users Progress', () => {
         cy.createQuizQuestionDef(1, 1)
         cy.runQuizForUser(1, 'user1', [{selectedIndex: [1]}], true)
 
-        cy.visit('/administrator/users-progress');
         cy.intercept('/app/progress-metrics**').as('progressMetrics')
         cy.visit('/administrator/users-progress');
         cy.wait('@progressMetrics')
@@ -297,7 +295,6 @@ describe('Global Users Progress', () => {
         cy.runQuizForUser(1, 'user1', [{selectedIndex: [1]}], true)
         cy.runQuizForUser(2, 'user1', [{selectedIndex: [0]}], true)
 
-        cy.visit('/administrator/users-progress');
         cy.intercept('/app/progress-metrics**').as('progressMetrics')
         cy.visit('/administrator/users-progress');
         cy.wait('@progressMetrics')
@@ -345,7 +342,6 @@ describe('Global Users Progress', () => {
         cy.runQuizForUser(1, 'user1', [{selectedIndex: [1]}], true)
         cy.runQuizForUser(2, 'user1', [{selectedIndex: [0]}], true)
 
-        cy.visit('/administrator/users-progress');
         cy.intercept('/app/progress-metrics**').as('progressMetrics')
         cy.visit('/administrator/users-progress');
         cy.wait('@progressMetrics')
@@ -398,7 +394,6 @@ describe('Global Users Progress', () => {
         cy.reportSkill(1, 2, 'user1')
         cy.reportSkill(1, 1, 'user2')
 
-        cy.visit('/administrator/users-progress');
         cy.intercept('/app/progress-metrics**').as('progressMetrics')
         cy.visit('/administrator/users-progress');
         cy.wait('@progressMetrics')
