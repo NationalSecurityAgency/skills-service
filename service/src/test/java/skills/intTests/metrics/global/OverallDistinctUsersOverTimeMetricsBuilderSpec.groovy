@@ -569,17 +569,25 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         users.each { String user ->
             skillsService.addSkill([projectId: proj1.projectId, skillId: "skill1"], user, startOfSaturday)
         }
+        Map props = getProps(30)
+        Date startDate = StartDateUtil.computeStartDate(new Date(props[MetricsParams.P_START_TIMESTAMP]), EventType.WEEKLY)
+        List<Integer> counts = [0,0,0,3,0]
+        List<Long> dates = [(previousSunday-28).time, (previousSunday-21).time, (previousSunday-14).time, (previousSunday-7).time, (previousSunday).time]
+        if (startDate < new Date(dates[0])) {
+            counts.push(0)
+            dates.push((new Date(dates[0])-7).time)
+        }
 
         when:
-        def res = skillsService.getOverallMetricsData(metricsId, getProps(30))
+        def res = skillsService.getOverallMetricsData(metricsId, props)
 
         res.users.each {
             println "User: ${new Date(it.value)} | Count: ${it.count}"
         }
         then:
-        res.users.size() == 5
-        res.users.count == [0,0,0,3,0]
-        res.users.value == [(previousSunday-28).time, (previousSunday-21).time, (previousSunday-14).time, (previousSunday-7).time, (previousSunday).time]
+        res.users.size() == counts.size()
+        res.users.count == counts
+        res.users.value == dates
     }
 
     private Map getProps(int numDaysAgo, Boolean byMonth = false) {

@@ -23,9 +23,13 @@ import skills.utils.TestDates
 
 class OverallMetricsReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
 
+    Date startDate
     List<Date> days
 
     def setup() {
+        use(TimeCategory) {
+            startDate = StartDateUtil.computeStartDate(30.days.ago, EventType.WEEKLY)
+        }
         TestDates testDates = new TestDates()
         days = [
                 testDates.getDateInPreviousWeek().minusDays(21).toDate(),
@@ -34,6 +38,9 @@ class OverallMetricsReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
                 testDates.getDateInPreviousWeek().toDate(),
                 testDates.getDateWithinCurrentWeek().toDate(),
         ]
+        if (startDate < StartDateUtil.computeStartDate(days.first, EventType.WEEKLY)) {
+            days.push(startDate)
+        }
     }
 
     def "get empty global users progress" () {
@@ -94,8 +101,8 @@ class OverallMetricsReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
         res.quizInfo.quizId.size() == admin0QuizAndSurveyIds.size()
         res.quizInfo.quizId.containsAll(admin0QuizAndSurveyIds)
 
-        usersPerDay.users.size() == 5
-        usersPerDay.users.collect {it.count} == [0, 0, 0, 0, 10]
+        usersPerDay.users.size() == days.size()
+        usersPerDay.users.collect {it.count} == (days.size() == 5 ? [0, 0, 0, 0, 10] : [0, 0, 0, 0, 0, 10])
         usersPerDay.users.collect {it.value} == days.collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
         usersByDutyOrg.totalNumItems == 6
@@ -152,8 +159,8 @@ class OverallMetricsReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
         res.quizInfo.quizId.size() == admin1QuizAndSurveyIds.size()
         res.quizInfo.quizId.containsAll(admin1QuizAndSurveyIds)
 
-        usersPerDay.users.size() == 5
-        usersPerDay.users.collect {it.count} == [0, 0, 0, 0, 10]
+        usersPerDay.users.size() == days.size()
+        usersPerDay.users.collect {it.count} == (days.size() == 5 ? [0, 0, 0, 0, 10] : [0, 0, 0, 0, 0, 10])
         usersPerDay.users.collect {it.value} == days.collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
         usersByDutyOrg.totalNumItems == 6
@@ -209,8 +216,8 @@ class OverallMetricsReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
         res.quizInfo.quizId.size() == admin2QuizAndSurveyIds.size()
         res.quizInfo.quizId.containsAll(admin2QuizAndSurveyIds)
 
-        usersPerDay.users.size() == 5
-        usersPerDay.users.collect {it.count} == [0, 0, 0, 0, 7]
+        usersPerDay.users.size() == days.size()
+        usersPerDay.users.collect {it.count} == (days.size() == 5 ? [0, 0, 0, 0, 7] : [0, 0, 0, 0, 0, 7])
         usersPerDay.users.collect {it.value} == days.collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
 
         usersByDutyOrg.totalNumItems == 5
