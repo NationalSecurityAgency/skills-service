@@ -125,13 +125,13 @@ const loadData = () => {
       hasDataEnoughData.value = true;
       const formatTimestamp = (timestamp) => {
         const format = localProps.value.byMonth ? 'YYYY-MM' : 'YYYY-MM-DD';
-        return dayjs(timestamp).format(format)
+        return dayjs.utc(timestamp).format(format)
       }
 
       const addZeroPointAtStart = (data) => {
         if (data && data.length > 0) {
           const earliestDate = data[0].value
-          const prevDay = dayjs(earliestDate).subtract(1, 'day').toDate()
+          const prevDay = dayjs.utc(earliestDate).subtract(1, 'day').toDate()
           data.unshift({
             value: formatTimestamp(prevDay),
             count: 0
@@ -216,6 +216,7 @@ const setChartOptions = () => {
         type: 'time',
         time: {
           unit: 'day',
+          timezone: 'UTC',
           displayFormats: {
             'day': 'MMM D, YYYY', // Example: Jan 1, 2023
             'month': 'MMM YYYY', // Example: Jan 2023
@@ -267,7 +268,7 @@ const setChartOptions = () => {
           title: (context) => {
             const date = new Date(context[0].parsed.x)
             const formatStr = byMonth.value ? 'MMM YYYY' :'MMM D, YYYY'
-            return dayjs(date).format(formatStr)
+            return dayjs.utc(date).format(formatStr)
           },
         },
       }
