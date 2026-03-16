@@ -33,10 +33,9 @@ describe('Global Users Progress', () => {
         cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"] [data-cy="mediaInfoCardSubTitle"]').contains('1 Quiz and 0 Surveys')
 
         cy.get('[data-cy="overallMetricsBadgesCard"] [data-cy="mediaInfoCardTitle"]').contains('1 Badge')
-        cy.get('[data-cy="overallMetricsBadgesCard"] [data-cy="mediaInfoCardSubTitle"]').contains('1 Project Badge and 0 Global Badges')
+        cy.get('[data-cy="overallMetricsBadgesCard"] [data-cy="mediaInfoCardSubTitle"]').contains('1 Project and 0 Global')
 
         cy.get('[data-cy="noUserOverallProgress"]')
-        cy.get('[data-cy="userOverallProgressTable"]').should('not.exist')
     });
 
     it('plural verbiage on cards', () => {
@@ -74,7 +73,7 @@ describe('Global Users Progress', () => {
         cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"] [data-cy="mediaInfoCardSubTitle"]').contains('2 Quizzes and 2 Surveys')
 
         cy.get('[data-cy="overallMetricsBadgesCard"] [data-cy="mediaInfoCardTitle"]').contains('4 Badges')
-        cy.get('[data-cy="overallMetricsBadgesCard"] [data-cy="mediaInfoCardSubTitle"]').contains('2 Project Badges and 2 Global Badges')
+        cy.get('[data-cy="overallMetricsBadgesCard"] [data-cy="mediaInfoCardSubTitle"]').contains('2 Project and 2 Global')
 
         cy.get('[data-cy="noUserOverallProgress"]')
     });

@@ -57,7 +57,7 @@ const totalQuizzesAndSurveys = computed(() => {
         data-cy="overallMetricsBadgesCard"
         class="flex-1">
       <Tag>{{ data.numTotalProjectBadges}}</Tag> Project
-      and <Tag>{{ data.numTotalGlobalBadges}}</Tag> Global Badges
+      and <Tag>{{ data.numTotalGlobalBadges}}</Tag> Global
     </media-info-card>
   </div>
 </template>

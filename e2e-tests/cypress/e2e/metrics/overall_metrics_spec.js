@@ -81,8 +81,8 @@ describe('Global/Overall Metrics', () => {
         cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"]').should('contain', '1 Quiz');
         cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"]').should('contain', '0 Surveys');
 
-        cy.get('[data-cy="overallMetricsBadgesCard"]').should('contain', '0 Badges');
-        cy.get('[data-cy="overallMetricsBadgesCard"]').should('contain', '0 Global Badges');
+        cy.get('[data-cy="overallMetricsBadgesCard"]').should('contain', '0 Project');
+        cy.get('[data-cy="overallMetricsBadgesCard"]').should('contain', '0 Global');
 
         cy.get('[data-cy="distinctNumUsersOverTime"]').should('contain.text', 'Overall Users per day')
         cy.get('[data-cy="distinctNumUsersOverTime"] [data-cy="timeLengthSelector"]')
