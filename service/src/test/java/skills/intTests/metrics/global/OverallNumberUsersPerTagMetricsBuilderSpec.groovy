@@ -52,7 +52,7 @@ class OverallNumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createSkills(skills)
 
         when:
-        def res = skillsService.getOverallMetricsData(metricsId, [tagKey: "someVal", projIds: "${proj1.projectId},${proj2.projectId}", currentPage: 1, pageSize: 5, sortDesc: true])
+        def res = skillsService.getOverallMetricsData(metricsId, [tagKey: "someVal",  currentPage: 1, pageSize: 5, sortDesc: true])
         then:
         res.totalNumItems == 0
         !res.items
@@ -98,7 +98,6 @@ class OverallNumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
         userTagRepo.save(new UserTag(userId: users[4], key: key, value: "blah2" ))
 
         Map props = [
-                projIds: "${proj1.projectId},${proj2.projectId}",
                 tagKey: key,
                 currentPage: 1,
                 pageSize: 5,
@@ -184,8 +183,6 @@ class OverallNumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
         userTagRepo.save(new UserTag(userId: users[12], key: key, value: "blah2" ))
 
         Map props = [
-                projIds: "${proj1.projectId},${proj2.projectId}",
-                quizIds: "${quiz1.quizId},${quiz2.quizId}",
                 tagKey: key,
                 currentPage: 1,
                 pageSize: 5,
@@ -235,10 +232,10 @@ class OverallNumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
         }
 
         when:
-        def res = skillsService.getOverallMetricsData(metricsId, [projIds: "${proj1.projectId},${proj2.projectId}", tagKey: key, currentPage: 1, pageSize: 5, sortDesc: true])
-        def res_pg2 = skillsService.getOverallMetricsData(metricsId, [projIds: "${proj1.projectId},${proj2.projectId}", tagKey: key, currentPage: 2, pageSize: 5, sortDesc: true])
-        def res_pg3 = skillsService.getOverallMetricsData(metricsId, [projIds: "${proj1.projectId},${proj2.projectId}", tagKey: key, currentPage: 3, pageSize: 5, sortDesc: true])
-        def res_pg4 = skillsService.getOverallMetricsData(metricsId, [projIds: "${proj1.projectId},${proj2.projectId}", tagKey: key, currentPage: 4, pageSize: 5, sortDesc: true])
+        def res = skillsService.getOverallMetricsData(metricsId, [tagKey: key, currentPage: 1, pageSize: 5, sortDesc: true])
+        def res_pg2 = skillsService.getOverallMetricsData(metricsId, [tagKey: key, currentPage: 2, pageSize: 5, sortDesc: true])
+        def res_pg3 = skillsService.getOverallMetricsData(metricsId, [tagKey: key, currentPage: 3, pageSize: 5, sortDesc: true])
+        def res_pg4 = skillsService.getOverallMetricsData(metricsId, [tagKey: key, currentPage: 4, pageSize: 5, sortDesc: true])
         then:
         res.totalNumItems == 19
         res.items.size() == 5
@@ -286,13 +283,13 @@ class OverallNumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
         }
 
         String tagFilter = "LAh1"
-        def resAll = skillsService.getOverallMetricsData(metricsId, [projIds: "${proj1.projectId},${proj2.projectId}", tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true])
+        def resAll = skillsService.getOverallMetricsData(metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true])
         def filterdRes = resAll.items.findAll({ it.value.toLowerCase().contains(tagFilter.toLowerCase())}).sort({ it.count }).reverse()
 
         when:
-        def res = skillsService.getOverallMetricsData(metricsId, [projIds: "${proj1.projectId},${proj2.projectId}", tagKey: key, currentPage: 1, pageSize: 5, sortDesc: true, tagFilter: tagFilter])
-        def res_pg2 = skillsService.getOverallMetricsData(metricsId, [projIds: "${proj1.projectId},${proj2.projectId}", tagKey: key, currentPage: 2, pageSize: 5, sortDesc: true, tagFilter: tagFilter])
-        def res1 = skillsService.getOverallMetricsData(metricsId, [projIds: "${proj1.projectId},${proj2.projectId}", tagKey: key, currentPage: 1, pageSize: 5, sortDesc: true, tagFilter: "13"])
+        def res = skillsService.getOverallMetricsData(metricsId, [tagKey: key, currentPage: 1, pageSize: 5, sortDesc: true, tagFilter: tagFilter])
+        def res_pg2 = skillsService.getOverallMetricsData(metricsId, [tagKey: key, currentPage: 2, pageSize: 5, sortDesc: true, tagFilter: tagFilter])
+        def res1 = skillsService.getOverallMetricsData(metricsId, [tagKey: key, currentPage: 1, pageSize: 5, sortDesc: true, tagFilter: "13"])
         then:
 
         filterdRes.size() == 10
@@ -342,12 +339,12 @@ class OverallNumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
         String fiveDaysAgo = format.format(format.parse('2020-08-16 00:00:00'))
         String tenDaysAgo = format.format(format.parse('2020-08-11 00:00:00'))
         String twentyDaysAgo = format.format(format.parse('2020-08-01 00:00:00'))
-        def resAll = skillsService.getOverallMetricsData(metricsId, [projIds: "${proj1.projectId},${proj2.projectId}", tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true])
+        def resAll = skillsService.getOverallMetricsData(metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true])
 
         when:
-        def res_5days = skillsService.getOverallMetricsData(metricsId, [projIds: "${proj1.projectId},${proj2.projectId}", tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: fiveDaysAgo, toDayFilter: today])
-        def res_10days = skillsService.getOverallMetricsData(metricsId, [projIds: "${proj1.projectId},${proj2.projectId}", tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: tenDaysAgo, toDayFilter: today])
-        def res_20days = skillsService.getOverallMetricsData(metricsId, [projIds: "${proj1.projectId},${proj2.projectId}", tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: twentyDaysAgo, toDayFilter: today])
+        def res_5days = skillsService.getOverallMetricsData(metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: fiveDaysAgo, toDayFilter: today])
+        def res_10days = skillsService.getOverallMetricsData(metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: tenDaysAgo, toDayFilter: today])
+        def res_20days = skillsService.getOverallMetricsData(metricsId, [tagKey: key, currentPage: 1, pageSize: 20, sortDesc: true, fromDayFilter: twentyDaysAgo, toDayFilter: today])
 
         then:
         resAll.items.size() == 19
@@ -453,7 +450,6 @@ class OverallNumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
         userTagRepo.save(new UserTag(userId: users[7], key: key, value: "blah2" ))
 
         Map props = [
-                quizIds: "${quiz1.quizId},${quiz2.quizId}",
                 tagKey: key,
                 currentPage: 1,
                 pageSize: 5,

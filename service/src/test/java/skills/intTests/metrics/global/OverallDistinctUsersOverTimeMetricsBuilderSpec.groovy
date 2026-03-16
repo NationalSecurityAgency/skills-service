@@ -82,7 +82,6 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Map props = [:]
         use(TimeCategory) {
             props[MetricsParams.P_START_TIMESTAMP] = (3.years.ago - 1.day).time
-            props[MetricsParams.P_PROJECT_IDS] = "${proj1.projectId},${proj2.projectId}"
         }
 
         when:
@@ -125,7 +124,6 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Map props = [:]
         use(TimeCategory) {
             props[MetricsParams.P_START_TIMESTAMP] = 1.day.from.now.time
-            props[MetricsParams.P_PROJECT_IDS] = "${proj1.projectId},${proj2.projectId}"
         }
 
         when:
@@ -188,13 +186,13 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger(), "${proj1.projectId},${proj2.projectId},${proj3.projectId}", null))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14, "${proj1.projectId},${proj2.projectId},${proj3.projectId}", null))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
 
         skillsService.archiveUsers([users[2]], proj1.projectId)
 
-        def res30daysAfterArchive = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger(), "${proj1.projectId},${proj2.projectId},${proj3.projectId}", null))
-        def resOver30daysAfterArchive = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14, "${proj1.projectId},${proj2.projectId},${proj3.projectId}", null))
+        def res30daysAfterArchive = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
+        def resOver30daysAfterArchive = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
 
         then:
         res30days.users.size() == 6
@@ -278,8 +276,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger(), null, "${quiz1.quizId},${quiz2.quizId},${quiz3.quizId}"))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14, null, "${quiz1.quizId},${quiz2.quizId},${quiz3.quizId}"))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
 
         then:
         res30days.users.size() == 6
@@ -352,8 +350,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger(), "${proj1.projectId},${proj2.projectId}", quiz1.quizId))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14, "${proj1.projectId},${proj2.projectId}", quiz1.quizId))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
 
         then:
         res30days.users.size() == 6
@@ -427,8 +425,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger(), "${proj1.projectId},${proj2.projectId}", survey1.quizId))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14, "${proj1.projectId},${proj2.projectId}", survey1.quizId))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
 
         then:
         res30days.users.size() == 6
@@ -483,8 +481,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Duration duration = Duration.between(testDates.getFirstOfMonth(1), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger(), "${proj1.projectId},${proj2.projectId}", null, true))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14, "${proj1.projectId},${proj2.projectId}", null, true))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger(), true))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14, true))
 
         then:
         res30days.users.size() == 2
@@ -503,7 +501,7 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.createProject(proj2)
 
         when:
-        def res = skillsService.getOverallMetricsData(metricsId, getProps(15, "${proj1.projectId},${proj2.projectId}", null))
+        def res = skillsService.getOverallMetricsData(metricsId, getProps(15))
         then:
         res.users.count == [0,0,0]
 
@@ -536,7 +534,7 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         }
 
         when:
-        def res = skillsService.getOverallMetricsData(metricsId, getProps(0, "${proj1.projectId},${proj2.projectId}", null))
+        def res = skillsService.getOverallMetricsData(metricsId, getProps(0))
         then:
         res.users.size() == 1
         res.users.count == [5]
@@ -573,7 +571,7 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         }
 
         when:
-        def res = skillsService.getOverallMetricsData(metricsId, getProps(30, "${proj1.projectId},${proj2.projectId}", null))
+        def res = skillsService.getOverallMetricsData(metricsId, getProps(30))
 
         res.users.each {
             println "User: ${new Date(it.value)} | Count: ${it.count}"
@@ -584,17 +582,13 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         res.users.value == [(previousSunday-28).time, (previousSunday-21).time, (previousSunday-14).time, (previousSunday-7).time, (previousSunday).time]
     }
 
-    private Map getProps(int numDaysAgo, String projectIds = null, String quizIds = null, Boolean byMonth = false) {
+    private Map getProps(int numDaysAgo, Boolean byMonth = false) {
         Map props = [:]
         use(TimeCategory) {
             props[MetricsParams.P_START_TIMESTAMP] = numDaysAgo.days.ago.time
-            if (projectIds) {
-                props[MetricsParams.P_PROJECT_IDS] = projectIds
+            if (byMonth) {
+                props[MetricsParams.P_BY_MONTH] = byMonth
             }
-            if (quizIds) {
-                props[MetricsParams.P_QUIZ_IDS] = quizIds
-            }
-            props[MetricsParams.P_BY_MONTH] = byMonth
         }
         return props
     }
