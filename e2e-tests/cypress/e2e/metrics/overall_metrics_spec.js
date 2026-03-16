@@ -128,4 +128,21 @@ describe('Global/Overall Metrics', () => {
           .contains('Users by Agency');
     });
 
+    it('user tag charts are not shown when overallMetricsTagCharts prop is not configured', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.overallMetricsTagCharts = null;
+                res.send(conf);
+            });
+        })
+          .as('loadConfig');
+
+        cy.visit('/administrator/overall-metrics');
+
+        cy.get('[data-cy="distinctNumUsersOverTime"]').should('contain.text', 'Overall Users per day')
+        cy.get('[data-cy="userTagTableCard"]').should('not.exist')
+        cy.get('[data-cy="userTagChart"]').should('not.exist')
+    });
+
 });

@@ -33,7 +33,7 @@ onMounted(() => {
   buildTagCharts();
 })
 const buildTagCharts = () => {
-  if (appConfig.projectMetricsTagCharts) {
+  if (appConfig.overallMetricsTagCharts) {
     const json = appConfig.overallMetricsTagCharts;
     tagCharts.value = JSON.parse(json);
   }
