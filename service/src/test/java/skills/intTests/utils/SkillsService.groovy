@@ -1300,7 +1300,7 @@ class SkillsService {
         wsHelper.appGet(endpoint)
     }
 
-    def getGlobalQuizRuns(String userQuery = '', String nameQuery = '', int limit = 10, int page = 1, String orderBy = 'started', boolean ascending = true, String startDate = null, String endDate = null) {
+    def getGlobalQuizRuns(String userQuery = '', String nameQuery = '', int limit = 10, int page = 1, String orderBy = 'started', boolean ascending = true, String startDate = null, String endDate = null, String userIdFilter = null) {
         String endpoint = "/quiz-runs"
         Map props = [
                 query: userQuery,
@@ -1310,7 +1310,8 @@ class SkillsService {
                 orderBy: orderBy,
                 ascending: ascending,
                 startDate: startDate,
-                endDate: endDate
+                endDate: endDate,
+                userIdFilter: userIdFilter
         ]
         wsHelper.appGet(endpoint,props)
     }

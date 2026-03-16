@@ -327,17 +327,19 @@ class AppController {
 
     @RequestMapping(value = "/quiz-runs", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    TableResult getQuizRuns(@RequestParam(name = "query") String userQuery,
+    TableResult getQuizRuns(@RequestParam(name = "query", defaultValue = "") String userQuery,
                             @RequestParam(name = "nameQuery", defaultValue = "") String nameQuery,
                             @RequestParam int limit,
                             @RequestParam int page,
                             @RequestParam String orderBy,
                             @RequestParam Boolean ascending,
+                            @RequestParam(name = "userIdFilter", defaultValue = "") String userIdFilter,
                             @RequestParam(required = false) String startDate,
                             @RequestParam(required = false) String endDate) {
         PageRequest pageRequest = TablePageUtil.validateAndConstructQuizPageRequest(limit, page, orderBy, ascending)
         List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
-        return globalMetricsService.getQuizRuns(userQuery, nameQuery, null, pageRequest, dates[0], dates[1]);
+        userIdFilter = "null" == userIdFilter ? "" : userIdFilter
+        return globalMetricsService.getQuizRuns(userQuery, userIdFilter, nameQuery, null, pageRequest, dates[0], dates[1]);
     }
 
     @RequestMapping(value = "/progress-metrics/{userId}", method =  RequestMethod.GET, produces = "application/json")

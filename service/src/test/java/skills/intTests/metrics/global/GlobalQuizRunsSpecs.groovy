@@ -162,10 +162,30 @@ class GlobalQuizRunsSpecs extends DefaultIntSpec {
         resPage2.count == 7
     }
 
-    def "filter by user id for display"() {
+    def "filter by user name for display"() {
         when:
         def resPage1 = skillsService.getGlobalQuizRuns(userAttrsRepo.findByUserIdIgnoreCase(users[1].userName).userIdForDisplay, '', 4, 1)
         def resPage2 = skillsService.getGlobalQuizRuns(userAttrsRepo.findByUserIdIgnoreCase(users[1].userName).userIdForDisplay, '', 4, 2)
+
+        assertQuiz(resPage1.data[0], new QValidInfo(attemptId: attempts[2].id, uId: users[1].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: FAILED, numCorrect: 0))
+        assertQuiz(resPage1.data[1], new QValidInfo(attemptId: attempts[7].id, uId: users[1].userName, qId: quizzes[4].quizId, qName: quizzes[4].name, status: PASSED))
+        assertQuiz(resPage1.data[2], new QValidInfo(attemptId: attempts[13].id, uId: users[1].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: FAILED, numCorrect: 0))
+        assertQuiz(resPage1.data[3], new QValidInfo(attemptId: attempts[20].id, uId: users[1].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage2.data[0], new QValidInfo(attemptId: attempts[22].id, uId: users[1].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: PASSED))
+        then:
+        resPage1.data.size() == 4
+        resPage2.data.size() == 1
+
+        resPage1.count == 5
+        resPage1.totalCount == 5
+        resPage2.count == 5
+        resPage2.totalCount == 5
+    }
+
+    def "filter by user id"() {
+        when:
+        def resPage1 = skillsService.getGlobalQuizRuns("", '', 4, 1, 'started', true, null, null, users[1].userName)
+        def resPage2 = skillsService.getGlobalQuizRuns("", '', 4, 2, 'started', true, null, null, users[1].userName)
 
         assertQuiz(resPage1.data[0], new QValidInfo(attemptId: attempts[2].id, uId: users[1].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: FAILED, numCorrect: 0))
         assertQuiz(resPage1.data[1], new QValidInfo(attemptId: attempts[7].id, uId: users[1].userName, qId: quizzes[4].quizId, qName: quizzes[4].name, status: PASSED))

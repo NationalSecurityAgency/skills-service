@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
+import skills.controller.exceptions.SkillException
 import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.TableResult
 import skills.controller.result.model.globalMetrics.*
@@ -67,6 +68,9 @@ class GlobalProgressMetricsService {
 
     @Autowired
     UserRoleRepo userRoleRepo
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     @Autowired
     GlobalProgressMetricsRepo globalProgressMetricsRepo
@@ -199,10 +203,10 @@ class GlobalProgressMetricsService {
         return new SingleUserOverallProgress(projectsProgress: projectsProgressRes)
     }
 
-    TableResult getQuizRuns( String userQuery, String nameQuery, UserQuizAttempt.QuizAttemptStatus quizAttemptStatus, PageRequest pageRequest, Date startDate, Date endDate) {
+    TableResult getQuizRuns( String userQuery, String userIdFilter, String nameQuery, UserQuizAttempt.QuizAttemptStatus quizAttemptStatus, PageRequest pageRequest, Date startDate, Date endDate) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
         List<String> quizIds = projectIdsAndQuizIds.quizIds
-        return quizDefService.getQuizRuns(quizIds, userQuery, nameQuery, quizAttemptStatus, pageRequest, startDate, endDate);
+        return quizDefService.getQuizRuns(quizIds, userQuery, userIdFilter, nameQuery, quizAttemptStatus, pageRequest, startDate, endDate);
     }
 
     OverallMetricsResult loadOverallMetrics() {

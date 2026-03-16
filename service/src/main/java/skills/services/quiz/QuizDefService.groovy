@@ -813,9 +813,9 @@ class QuizDefService {
     }
 
     @Transactional
-    TableResult getQuizRuns(List<String> quizIds, String userQuery, String nameQuery, UserQuizAttempt.QuizAttemptStatus quizAttemptStatus, PageRequest pageRequest, Date startDate, Date endDate) {
+    TableResult getQuizRuns(List<String> quizIds, String userQuery, String userIdFilter, String nameQuery, UserQuizAttempt.QuizAttemptStatus quizAttemptStatus, PageRequest pageRequest, Date startDate, Date endDate) {
         userQuery = userQuery ?: ''
-        Page<UserQuizAttemptRepo.QuizRun> quizRunsPage = userQuizAttemptRepo.findQuizRuns(quizIds, userQuery, nameQuery, usersTableAdditionalUserTagKey, quizAttemptStatus?.toString(), startDate, endDate, pageRequest)
+        Page<UserQuizAttemptRepo.QuizRun> quizRunsPage = userQuizAttemptRepo.findQuizRuns(quizIds, userQuery, userIdFilter ?: '', nameQuery, usersTableAdditionalUserTagKey, quizAttemptStatus?.toString(), startDate, endDate, pageRequest)
         long count = quizRunsPage.getTotalElements()
         List<UserQuizAttemptRepo.QuizRun> quizRuns = quizRunsPage.getContent()
 

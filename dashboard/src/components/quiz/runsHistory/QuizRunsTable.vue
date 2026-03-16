@@ -203,7 +203,8 @@ const loadData = () => {
   options.value.busy = true
   const dateRange = timeUtils.prepareDateRange(internalDateRange.value)
   const params = {
-    query: props.onlyRunsForUserId || (userFilter.value ? userFilter.value.trim() : ''),
+    query: userFilter.value ? userFilter.value.trim() : '',
+    userIdFilter: props.onlyRunsForUserId || '',
     nameQuery: quizNameFilter.value ? quizNameFilter.value.trim() : '',
     limit: pageSize.value,
     ascending: sortInfo.value.sortOrder === 1,

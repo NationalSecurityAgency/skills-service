@@ -184,6 +184,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                       and quizAttempt.user_id = userAttrs.user_id
                       and (quizAttempt.status = :quizAttemptStatus OR :quizAttemptStatus IS NULL)
                       and (quizAttempt.started >= :startDate and quizAttempt.started <= :endDate)
+                      and (:userIdFilter = '' OR quizAttempt.user_id = :userIdFilter)
                       and (:nameQuery = '' OR lower(quizDef.name) like lower(CONCAT('%', :nameQuery, '%')))
                       and (lower(userAttrs.user_id_for_display) like lower(CONCAT('%', :userQuery, '%')) or
                       (lower(CONCAT(userAttrs.first_name, ' ', userAttrs.last_name, ' (',  userAttrs.user_id_for_display, ')')) like lower(CONCAT(\'%\', :userQuery, \'%\'))) OR
@@ -192,6 +193,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
      ''', nativeQuery = true)
     Page<QuizRun> findQuizRuns(@Param('quizIds') List<String> quizIds,
                                @Param('userQuery') String userQuery,
+                               @Param('userIdFilter') String userIdFilter,
                                @Param('nameQuery') String nameQuery,
                                @Param('usersTableAdditionalUserTagKey') String usersTableAdditionalUserTagKey,
                                @Nullable@Param('quizAttemptStatus') String quizAttemptStatus,
