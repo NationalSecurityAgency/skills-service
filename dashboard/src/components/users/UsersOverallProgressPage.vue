@@ -113,6 +113,15 @@ const showUserTagColumn = computed(() => {
 const hasBadges = computed(() => userProgress.value.numTotalBadges > 0 || userProgress.value.numTotalGlobalBadges > 0)
 const hasQuizzes = computed(() => userProgress.value.numTotalQuizzes > 0)
 const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
+
+const onRowExpanded = (expandEvent) => {
+  const userId = expandEvent.data.userId
+  Object.keys(expandedRows.value).forEach(key => {
+    if (key !== userId) {
+      delete expandedRows.value[key]
+    }
+  })
+}
 </script>
 
 <template>
@@ -174,6 +183,8 @@ const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
                 @page="pageChanged"
                 :expander="true"
                 v-model:expandedRows="expandedRows"
+                dataKey="userId"
+                @row-expand="onRowExpanded"
                 tableStoredStateId="userOverallProgressTable"
                 data-cy="userOverallProgressTable"
                 aria-label="Users"
@@ -294,7 +305,9 @@ const hasSurveys = computed(() => userProgress.value.numTotalSurveys > 0)
               </Column>
 
               <template #expansion="slotProps">
-                <single-user-overall-progress :user-progress-meta="slotProps.data" />
+                <single-user-overall-progress
+                    :id="`userOverallProgress-${slotProps.data.userId}`"
+                    :user-progress-meta="slotProps.data" />
               </template>
               <template #empty>
                 <table-no-res :showResetFilter="true" @resetFilter="resetFilters"/>

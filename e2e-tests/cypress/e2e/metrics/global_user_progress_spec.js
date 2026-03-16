@@ -387,4 +387,32 @@ describe('Global Users Progress', () => {
         cy.validateTable(quizTableSelector, expectedFull);
     });
 
+    it('expand user progress - only 1 user can be expanded at a time', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { numPerformToCompletion: 1 })
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1 })
+        cy.createProject(2)
+        cy.createQuizDef(1)
+        cy.reportSkill(1, 1, 'user1')
+        cy.reportSkill(1, 2, 'user1')
+        cy.reportSkill(1, 1, 'user2')
+
+        cy.visit('/administrator/users-progress');
+        cy.intercept('/app/progress-metrics**').as('progressMetrics')
+        cy.visit('/administrator/users-progress');
+        cy.wait('@progressMetrics')
+
+        cy.get('[data-cy="userOverallProgressTable"] [data-p-index="0"] [data-pc-group-section="rowactionbutton"]').click()
+
+        cy.get('[data-cy="usrOverallProgress-user1"]').should('be.visible')
+        cy.get('[data-cy="usrOverallProgress-user2"]').should('not.exist')
+
+        cy.get('[data-cy="userOverallProgressTable"] [data-p-index="1"] [data-pc-group-section="rowactionbutton"]').click()
+
+        cy.get('[data-cy="usrOverallProgress-user2"]').should('be.visible')
+        cy.get('[data-cy="usrOverallProgress-user1"]').should('not.exist')
+
+    });
+
 });

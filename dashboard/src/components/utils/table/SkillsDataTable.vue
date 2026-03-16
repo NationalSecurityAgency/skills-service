@@ -24,7 +24,7 @@ import { useLayoutSizesState } from '@/stores/UseLayoutSizesState.js'
 
 const sortField = defineModel('sortField')
 const sortOrder = defineModel('sortOrder')
-const emit = defineEmits(['sort', 'filter', 'page', 'table-ready'])
+const emit = defineEmits(['sort', 'filter', 'page', 'table-ready', 'row-expand', 'row-collapse'])
 const props = defineProps({
   tableStoredStateId: {
     type: String,
@@ -92,6 +92,16 @@ const onPage = (pageEvent) => {
   announcer.polite(`Showing up to ${pageEvent.rows} rows on page ${pageEvent.page + 1}`)
 }
 
+const onRowExpanded = (expandEvent) => {
+  emit('row-expand', expandEvent)
+  announcer.polite(`Row was expanded`)
+}
+const onRowCollapsed = (expandEvent) => {
+  emit('row-collapse', expandEvent)
+  console.log(expandEvent)
+  announcer.polite(`Row was expanded`)
+}
+
 const maxWidthStyle = computed(() => {
   if (props.autoMaxWidth && layoutSizesState.tableMaxWidth > 0) {
     return `max-width: ${layoutSizesState.tableMaxWidth}px !important;`
@@ -108,6 +118,8 @@ const maxWidthStyle = computed(() => {
     @sort="onColumnSort"
     @filter="onFilter"
     @page="onPage"
+    @row-expand="onRowExpanded"
+    @row-collapse="onRowCollapsed"
     :tableProps="tableProps"
     :style="maxWidthStyle"
     :pt="{ pcPaginator: {paginatorContainer: { 'aria-label': `Pagination Controls for table with id of ${tableStoredStateId}`}}}"
