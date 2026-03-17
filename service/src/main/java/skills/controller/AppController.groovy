@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.ModelAndView
 import skills.PublicProps
 import skills.auth.UserInfoService
 import skills.auth.aop.ExcludeFromLimitDashboardAccess
@@ -46,7 +47,6 @@ import skills.services.admin.ShareSkillsService
 import skills.services.admin.SkillsAdminService
 import skills.services.adminGroup.AdminGroupService
 import skills.services.quiz.QuizDefService
-import skills.storage.model.UserQuizAttempt
 import skills.utils.InputSanitizer
 import skills.utils.TablePageUtil
 import skills.utils.TimeRangeFormatterUtil
@@ -92,6 +92,9 @@ class AppController {
 
     @Autowired
     MetricsService metricsServiceNew
+
+    @Autowired
+    GlobalProgressExportResult globalProgressExportResult
 
     static final RESERVERED_PROJECT_ID = ShareSkillsService.ALL_SKILLS_PROJECTS
 
@@ -323,6 +326,20 @@ class AppController {
 
         PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(limit, page, orderBy, ascending);
         return globalMetricsService.loadUsersOverallProgress(userQuery, userTagFilter, pageRequest)
+    }
+
+    @GetMapping(value = "/progress-metrics/export/excel")
+    ModelAndView exportGlobalUserProgressMetrics(@RequestParam(required = false, defaultValue = "userId") String orderBy,
+                                                 @RequestParam(required = false, defaultValue = "true") Boolean ascending,
+                                                 @RequestParam(required = false, defaultValue = "") String userQuery,
+                                                 @RequestParam(required = false, defaultValue = "") String userTagFilter) {
+        
+        PageRequest pageRequest = TablePageUtil.createPagingRequest(Integer.MAX_VALUE, 1, orderBy, ascending)
+        ModelAndView mav = new ModelAndView(globalProgressExportResult)
+        mav.addObject(GlobalProgressExportResult.QUERY, userQuery)
+        mav.addObject(GlobalProgressExportResult.USER_TAG_FILTER, userTagFilter)
+        mav.addObject(GlobalProgressExportResult.PAGE_REQUEST, pageRequest)
+        return mav
     }
 
     @RequestMapping(value = "/quiz-runs", method = RequestMethod.GET, produces = "application/json")

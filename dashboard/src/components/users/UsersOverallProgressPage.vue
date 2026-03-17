@@ -34,12 +34,15 @@ import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import HighlightedValue from "@/components/utils/table/HighlightedValue.vue";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
+import {useExportUtil} from "@/components/utils/UseExportUtil.js";
+import Message from "primevue/message";
 
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
 const userInfo = useUserInfo()
 const appConfig = useAppConfig()
 const numberFormat = useNumberFormat()
+const exportUtil = useExportUtil()
 
 onMounted(() => {
   loadData().then(() => {
@@ -50,6 +53,7 @@ onMounted(() => {
 const userProgress = ref({})
 const hasData = ref(false)
 const isLoading = ref(true)
+const isExporting = ref(false)
 const isTableLoading = ref(false)
 const totalRows = ref(0)
 const currentPage = ref(1)
@@ -104,6 +108,19 @@ const pageChanged = (pagingInfo) => {
   pageSize.value = pagingInfo.rows
   currentPage.value = pagingInfo.page + 1
   loadData()
+}
+
+const exportGlobalProgress = () => {
+  const orderBy = sortInfo.value.sortBy === appConfig.usersTableAdditionalUserTagKey ? 'userTag' : sortInfo.value.sortBy
+  isExporting.value = true
+  return exportUtil.ajaxDownload('/app/progress-metrics/export/excel', {
+    userQuery: filters.value.user,
+    userTagFilter: filters.value.userTag,
+    orderBy,
+    ascending: sortInfo.value.sortOrder === 1,
+  }).then((res) => {
+    isExporting.value = false
+  })
 }
 
 const showUserTagColumn = computed(() => {
@@ -175,7 +192,7 @@ const onRowExpanded = (expandEvent) => {
           <div class="mt-3">
             <SkillsDataTable
                 :value="userProgress.metricItemsPage"
-                :loading="isTableLoading"
+                :loading="isTableLoading || isExporting"
                 size="small"
                 stripedRows showGridlines paginator lazy
                 :totalRecords="totalRows"
@@ -195,6 +212,22 @@ const onRowExpanded = (expandEvent) => {
                 data-key="userId"
                 :auto-max-width="false"
             >
+              <template #loading>
+                <div>
+                  <Message v-if="isExporting" icon="fas fa-download" severity="contrast" :closable="false">Exporting, please wait...</Message>
+                  <SkillsSpinner :is-loading="true"></SkillsSpinner>
+                </div>
+              </template>
+              <template #header>
+                <div class="flex justify-end flex-wrap">
+                  <SkillsButton icon="fa fa-download"
+                                label="Export"
+                                :disabled="totalRows <= 0 || isTableLoading"
+                                outlined
+                                @click="exportGlobalProgress"
+                                data-cy="exportBtn" size="small"/>
+                </div>
+              </template>
               <Column field="userIdForDisplay" header="User" :sortable="true" :class="{'flex': responsive.lg.value }">
                 <template #header>
                   <i class="fa-solid fa-user mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
