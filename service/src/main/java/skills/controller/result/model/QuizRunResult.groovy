@@ -28,7 +28,7 @@ class QuizRunResult {
     Date started
     Date completed
 
-    UserQuizAttempt.QuizAttemptStatus status
+    String status
     String userTag
     String firstName
     String lastName

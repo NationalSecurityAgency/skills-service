@@ -22,7 +22,7 @@ import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import InputText from "primevue/inputtext";
 import HighlightedValue from "@/components/utils/table/HighlightedValue.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
-import {onMounted, ref, watch} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {useStorage} from "@vueuse/core";
 import QuizService from "@/components/quiz/QuizService.js";
 import {useRoute} from "vue-router";
@@ -37,6 +37,7 @@ import {useUserTagsUtils} from "@/components/utils/UseUserTagsUtils.js";
 import RemovalValidation from "@/components/utils/modal/RemovalValidation.vue";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
+import QuizType from "@/skills-display/components/quiz/QuizType.js";
 
 const route = useRoute()
 const userInfo = useUserInfo()
@@ -68,6 +69,14 @@ const props = defineProps({
   showQuizNameAndTypeColumns: {
     type: Boolean,
     default: false,
+  },
+  linkQuizNameColumnsToTheRun: {
+    type: Boolean,
+    default: false,
+  },
+  showRuntimeColumn: {
+    type: Boolean,
+    default: true,
   },
   defaultPageSize: {
     type: Number,
@@ -125,20 +134,23 @@ fields.push(
     imageClass: 'fas fa-user-clock skills-color-access',
     additionalColumn: true
   },
-  {
+)
+if (props.showRuntimeColumn) {
+  fields.push({
     key: 'results',
     label: 'Results',
     sortable: false,
     additionalColumn: true,
     imageClass: 'fa-solid fa-clipboard-check'
-  },
-  {
-    key: 'started',
-    label: 'Started',
-    sortable: true,
-    imageClass: 'fas fa-clock text-warning'
-  }
-)
+  })
+}
+
+fields.push({
+  key: 'started',
+  label: 'Started',
+  sortable: true,
+  imageClass: 'fas fa-clock text-warning'
+})
 if (props.showControls) {
   fields.push({
     key: 'controls',
@@ -270,6 +282,16 @@ const deleteRun = () => {
         })
       })
 }
+const calculateAttemptIdLink = (quizId, attemptId) => {
+  return { name: 'QuizSingleRunPage', params: { quizId, runId: attemptId } }
+}
+
+const calculateQuizNameLink = (quizId, attemptId) => {
+  if (props.linkQuizNameColumnsToTheRun) {
+    return calculateAttemptIdLink(quizId, attemptId)
+  }
+  return {name: 'Questions', params: { quizId}}
+}
 </script>
 
 <template>
@@ -374,11 +396,12 @@ const deleteRun = () => {
                :data-cy="`row${slotProps.index}-userCell`">
             <div class="flex items-start justify-start">
               <highlighted-value :value="userInfo.getUserDisplay(slotProps.data, true)"
+                                 data-cy="userIdForDisplay"
                                  :filter="userFilter"/>
             </div>
             <div class="flex grow items-start justify-end">
               <router-link :data-cy="`row${slotProps.index}-viewRun`" tabindex="-1"
-                           :to="{ name: 'QuizSingleRunPage', params: { quizId: slotProps.data.quizId, runId: slotProps.data.attemptId } }">
+                           :to="calculateAttemptIdLink(slotProps.data.quizId, slotProps.data.attemptId)">
                 <SkillsButton icon="fas fa-list-ul"
                               class="ml-2"
                               outlined
@@ -389,7 +412,7 @@ const deleteRun = () => {
           </div>
           <div v-else-if="slotProps.field === 'quizName'">
             <router-link :data-cy="`row${slotProps.index}-quizPageLink`"
-                         :to="{ name: 'Questions', params: { quizId: slotProps.data.quizId } }"
+                         :to="calculateQuizNameLink(slotProps.data.quizId, slotProps.data.attemptId)"
                          class="underline">
               <highlighted-value :value="slotProps.data.quizName" :filter="quizNameFilter"/>
             </router-link>
@@ -407,13 +430,16 @@ const deleteRun = () => {
             <DateCell :value="slotProps.data[col.key]"/>
           </div>
           <div v-else-if="slotProps.field === 'results'"  :data-cy="`row${slotProps.index}-results`">
-            <div>
-              <Badge severity="success">{{ slotProps.data.numberCorrect }}</Badge>
-              correct
+            <div v-if="QuizType.isSurvey(slotProps.data.quizType)">N/A</div>
+              <div v-else>
+              <div>
+                <Badge severity="success">{{ slotProps.data.numberCorrect }}</Badge>
+                correct
+              </div>
+              <div>out of {{ slotProps.data.totalAnswers }} <span class="text-gray-500 dark:text-gray-200">({{
+                  Math.trunc(100 * (slotProps.data.numberCorrect / slotProps.data.totalAnswers))
+                }}%)</span></div>
             </div>
-            <div>out of {{ slotProps.data.totalAnswers }} <span class="text-gray-500 dark:text-gray-200">({{
-                Math.trunc(100 * (slotProps.data.numberCorrect / slotProps.data.totalAnswers))
-              }}%)</span></div>
           </div>
           <div v-else-if="slotProps.field === 'controls'">
             <SkillsButton :data-cy="`row${slotProps.index}-deleteBtn`"

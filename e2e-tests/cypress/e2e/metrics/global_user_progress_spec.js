@@ -410,4 +410,95 @@ describe('Global Users Progress', () => {
 
     });
 
+    it('paging', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createProject(2)
+        cy.createQuizDef(1)
+        const users = ['user1', 'user2', 'user3', 'user4', 'user5', 'user6', 'user7', 'user8', 'user9', 'user10', 'user11', 'user12'].sort()
+        users.forEach(user => cy.reportSkill(1, 1, user))
+
+        cy.intercept('/app/progress-metrics**').as('progressMetrics')
+        cy.visit('/administrator/users-progress');
+        cy.wait('@progressMetrics')
+        cy.get('[data-cy="userOverallProgressTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '12')
+
+
+        cy.get('[data-pc-name="headercell"] [data-pc-section="columntitle"]').contains('User').click();
+        cy.wait('@progressMetrics')
+        cy.get('[data-cy="userOverallProgressTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '12')
+        const expected = users.map((user) => {
+            return [{colIndex: 1, value: user}]
+        })
+        cy.validateTable('[data-cy="userOverallProgressTable"]', expected, 10);
+
+    });
+
+    it('navigate to user project progress', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createProject(2)
+        cy.createQuizDef(1)
+        cy.reportSkill(1, 1, 'user1')
+        cy.reportSkill(1, 2, 'user1')
+        cy.reportSkill(1, 1, 'user2')
+
+        cy.intercept('/app/progress-metrics**').as('progressMetrics')
+        cy.visit('/administrator/users-progress');
+        cy.wait('@progressMetrics')
+        cy.get('[data-cy="userOverallProgressTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2')
+
+        cy.get('[data-pc-name="headercell"] [data-pc-section="columntitle"]').contains('User').click();
+        cy.wait('@progressMetrics')
+        cy.get('[data-cy="userOverallProgressTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2')
+
+        cy.get('[data-cy="userOverallProgressTable"] [data-p-index="0"] [data-pc-group-section="rowactionbutton"]').click()
+        cy.get('[data-cy="usrOverallProgress-user1"] [data-cy="viewInProject"]').click()
+
+        cy.get('[data-cy="subTitle"]').contains('ID: user1')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="earnedPoints"]').should('have.text', '200')
+    });
+
+    it('navigate to quiz run', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createProject(2)
+        cy.createQuizDef(1)
+        cy.createQuizQuestionDef(1, 1)
+
+        cy.reportSkill(1, 1, 'user1')
+        cy.reportSkill(1, 2, 'user1')
+        cy.reportSkill(1, 1, 'user2')
+
+        cy.runQuizForUser(1, 'user1', [{selectedIndex: [1]}], true)
+        cy.runQuizForUser(1, 'user1', [{selectedIndex: [0]}], true)
+
+        cy.runQuizForUser(1, 'user2', [{selectedIndex: [1]}], true)
+        cy.runQuizForUser(1, 'user2', [{selectedIndex: [0]}], true)
+
+        cy.intercept('/app/progress-metrics**').as('progressMetrics')
+        cy.visit('/administrator/users-progress');
+        cy.wait('@progressMetrics')
+
+        cy.get('[data-pc-name="headercell"] [data-pc-section="columntitle"]').contains('User').click();
+        cy.wait('@progressMetrics')
+        cy.get('[data-cy="userOverallProgressTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2')
+
+        cy.get('[data-cy="userOverallProgressTable"] [data-p-index="0"] [data-pc-group-section="rowactionbutton"]').click()
+
+        cy.get('[data-cy="usrOverallProgress-user1"]').should('be.visible')
+        cy.get('[data-cy="usrOverallProgress-user1"] [data-cy="quizRunsHistoryTable"]').should("be.visible")
+        cy.get('[data-cy="usrOverallProgress-user1"] [data-cy="quizRunsHistoryTable"] [data-cy="row1-quizPageLink"]').click()
+
+        cy.get('[data-cy="subPageHeader"]').contains('User Run')
+        cy.get('[data-cy="userInfoCard"]').contains('user1')
+        cy.get('[data-cy="quizRunStatus"]').contains('Failed')
+    });
+
 });

@@ -15,19 +15,22 @@ limitations under the License.
 */
 <script setup>
 
-import {ref} from 'vue'
+import {onMounted, ref} from 'vue'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import QuizAttemptsTimeChart from '@/components/quiz/metrics/QuizAttemptsTimeChart.vue'
 import QuizUserTagsChart from '@/components/quiz/metrics/QuizUserTagsChart.vue'
-import {useLayoutSizesState} from "@/stores/UseLayoutSizesState.js";
 import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
 import QuizRunsTable from "@/components/quiz/runsHistory/QuizRunsTable.vue";
 import {useUserTagsUtils} from "@/components/utils/UseUserTagsUtils.js";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import QuizService from "@/components/quiz/QuizService.js";
+import {useRoute} from "vue-router";
+import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
+import QuizType from "@/skills-display/components/quiz/QuizType.js";
 
-const layoutSizes = useLayoutSizesState()
 const userTagsUtils = useUserTagsUtils()
 const announcer = useSkillsAnnouncer()
+const route = useRoute()
 
 const filterRange = ref([]);
 const subFilter = ref([]);
@@ -42,6 +45,18 @@ const clearDateFilter = () => {
   filterRange.value = [];
   subFilter.value = [];
 };
+
+const quizDef = ref({})
+const loadingQuizDef = ref(true)
+onMounted(() => {
+  QuizService.getQuizDef(route.params.quizId)
+      .then((res) => {
+        quizDef.value = res
+      }).finally(() => {
+        loadingQuizDef.value = false
+      })
+})
+
 </script>
 
 <template>
@@ -65,7 +80,11 @@ const clearDateFilter = () => {
       <QuizUserTagsChart v-if="userTagsUtils.showUserTagColumn()" class="flex-1 w-full mb-4" :dateRange="subFilter"/>
       <Card :pt="{ body: { class: 'p-0!' } }">
         <template #content>
-          <quiz-runs-table table-stored-state-id="quizAdminRunsHistoryTable" :dateRange="subFilter"/>
+          <skills-spinner v-if="loadingQuizDef" :is-loading="loadingQuizDef" class="my-10"/>
+          <quiz-runs-table v-if="!loadingQuizDef"
+                           table-stored-state-id="quizAdminRunsHistoryTable"
+                           :show-runtime-column="!QuizType.isSurvey(quizDef.type)"
+                           :dateRange="subFilter"/>
         </template>
       </Card>
     </div>

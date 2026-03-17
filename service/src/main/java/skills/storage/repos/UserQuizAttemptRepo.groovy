@@ -131,7 +131,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
         Date getStarted()
         @Nullable
         Date getCompleted()
-        QuizAttemptStatus getStatus()
+        String getStatus()
         @Nullable
         String getUserTag()
         @Nullable
@@ -154,7 +154,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
     @Query(value = '''select quizAttempt.id                as attemptId,
                            quizAttempt.started           as started,
                            quizAttempt.completed         as completed,
-                           quizAttempt.status            as status,
+                           case when quizDef.type = 'Survey' and quizAttempt.status = 'PASSED' then 'COMPLETED' else quizAttempt.status end as status,
                            userAttrs.user_id             as userId,
                            userAttrs.user_id_for_display as userIdForDisplay,
                            ut.value                      as userTag, 

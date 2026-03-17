@@ -78,7 +78,7 @@ const title = computed(() => `${userId.value} Overall Progress`)
                       <div class="flex gap-2 mb-2">
                         <div class="text-xl font-bold text-primary flex-1" data-cy="projName"><i class="fa-solid fa-tasks" aria-hidden="true" /> {{ item.projectName }}</div>
                         <router-link :to="`/administrator/projects/${item.projectId}/users/${userProgressMeta.userId}`" tabindex="-1">
-                          <SkillsButton label="View in Project" size="small"/>
+                          <SkillsButton label="View in Project" size="small" data-cy="viewInProject"/>
                         </router-link>
                       </div>
 
@@ -157,7 +157,8 @@ const title = computed(() => `${userId.value} Overall Progress`)
               :show-controls="false"
               :default-page-size="5"
               :show-quiz-name-and-type-columns="true"
-              :enable-to-show-user-tag-column="false">
+              :enable-to-show-user-tag-column="false"
+              :link-quiz-name-columns-to-the-run="true">
             <template #noResults>
               This user hasn't completed any quizzes or surveys yet
             </template>

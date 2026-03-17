@@ -109,7 +109,7 @@ class GlobalQuizRunsSpecs extends DefaultIntSpec {
         assertQuiz(resPage1.data[3], new QValidInfo(attemptId: attempts[3].id, uId: users[6].userName, qId: quizzes[3].quizId, qName: quizzes[3].name, status: FAILED, numCorrect: 0))
         assertQuiz(resPage1.data[4], new QValidInfo(attemptId: attempts[4].id, uId: users[0].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
         assertQuiz(resPage1.data[5], new QValidInfo(attemptId: attempts[5].id, uId: users[3].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: FAILED, numCorrect: 0))
-        assertQuiz(resPage1.data[6], new QValidInfo(attemptId: attempts[6].id, uId: users[5].userName, qId: surveys[1].quizId, qName: surveys[1].name, status: PASSED, type: Survey))
+        assertQuiz(resPage1.data[6], new QValidInfo(attemptId: attempts[6].id, uId: users[5].userName, qId: surveys[1].quizId, qName: surveys[1].name, status: "COMPLETED", type: Survey))
         assertQuiz(resPage1.data[7], new QValidInfo(attemptId: attempts[7].id, uId: users[1].userName, qId: quizzes[4].quizId, qName: quizzes[4].name, status: PASSED))
         assertQuiz(resPage1.data[8], new QValidInfo(attemptId: attempts[8].id, uId: users[7].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
         assertQuiz(resPage1.data[9], new QValidInfo(attemptId: attempts[9].id, uId: users[2].userName, qId: quizzes[0].quizId, qName: quizzes[0].name, status: FAILED, numCorrect: 0))
@@ -291,7 +291,7 @@ class GlobalQuizRunsSpecs extends DefaultIntSpec {
 
         List<String> expectedOrder = [PASSED, FAILED, FAILED, FAILED, PASSED, FAILED, PASSED, PASSED, PASSED, FAILED,
                                       PASSED, PASSED, PASSED, FAILED, INPROGRESS, INPROGRESS, PASSED, PASSED, PASSED, PASSED,
-                                      PASSED, INPROGRESS, PASSED, PASSED].collect{it.toString()}.sort()
+                                      PASSED, INPROGRESS, PASSED, "COMPLETED"].collect{it.toString()}.sort()
 
         then:
         resPage1.data.status == expectedOrder[0..9]
@@ -304,7 +304,7 @@ class GlobalQuizRunsSpecs extends DefaultIntSpec {
         String uId
         String qId
         String qName
-        UserQuizAttempt.QuizAttemptStatus status
+        def status
         QuizDefParent.QuizType type = QuizDefParent.QuizType.Quiz
         String uTag = null
         Integer numCorrect = 1
