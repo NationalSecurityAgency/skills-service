@@ -981,79 +981,87 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
 
     @Query(value = '''
 WITH levelsConf AS (
-    SELECT project_id, level FROM global_badge_level_definition where skill_id = ?1
+    SELECT project_id, level FROM global_badge_level_definition where skill_id = :badgeId
 ),
-globalBadgeSkills AS (
+skillsConfiguredForGlobalBadge AS (
     SELECT DISTINCT skill.id as skillRefId
     FROM skill_relationship_definition srd
              JOIN skill_definition globalBadge ON (srd.parent_ref_id = globalBadge.id and srd.type = 'BadgeRequirement' and globalBadge.type = 'GlobalBadge')
              JOIN skill_definition skill ON (srd.child_ref_id = skill.id and srd.type = 'BadgeRequirement' and skill.type = 'Skill')
-    where globalBadge.skill_id = ?1 and globalBadge.project_id is null
-    UNION
-    SELECT DISTINCT skilDef.id as skillRefId
-    FROM global_badge_level_definition gbld
-             JOIN skill_definition skilDef ON (gbld.project_id = skilDef.project_id and skilDef.type = 'Skill')
-    where gbld.skill_id = ?1
+    where globalBadge.skill_id = :badgeId and globalBadge.project_id is null
 ),
-     users AS (
-         select DISTINCT (user_id)
-         from user_points
-         where skill_ref_id in (select globalBadgeSkills.skillRefId from globalBadgeSkills)
-     ),
-     projectMaxLevelAchievements AS (
-         select ua.user_id, ua.project_id, max(LEAST(ua.level,levelsConf.level)) as maxLevel
-         from user_achievement ua
-                  join levelsConf levelsConf on (levelsConf.project_id = ua.project_id)
-         where
-             ua.project_id in (select gbld.project_id FROM global_badge_level_definition gbld where gbld.skill_id = ?1)
-           and ua.skill_ref_id is null
-           and ua.level > 0
-         group by ua.user_id, ua.project_id
-     ),
-     levelAchievements AS (
-         select user_id, SUM(maxLevel) maxLevel from projectMaxLevelAchievements
-         group by user_id
-     ),
-     skillAchievements AS (
-        SELECT
-            achievement.user_id      AS userId,
-            upaAgg.lastPerformedOn   AS lastUpdated,
-            count(achievement.skill_id) AS skillsAchieved
-        FROM skill_definition badge
-                 JOIN skill_relationship_definition srd ON badge.id = srd.parent_ref_id
-                 JOIN skill_definition skill ON srd.child_ref_id = skill.id
-                 LEFT JOIN user_achievement achievement ON achievement.skill_ref_id = skill.id
-                 LEFT JOIN (
-            SELECT upa.user_id, MIN(upa.performed_on) AS firstPerformedOn, MAX(upa.performed_on) AS lastPerformedOn FROM user_performed_skill upa
-            WHERE upa.skill_ref_id IN (
-                SELECT srd2.child_ref_id
-                FROM skill_definition badge2
-                         JOIN skill_relationship_definition srd2 ON badge2.id = srd2.parent_ref_id
-                WHERE badge2.type = 'GlobalBadge' AND badge2.skill_id = ?1
-            ) GROUP BY upa.user_id
-        ) upaAgg ON upaAgg.user_id = achievement.user_id
-        WHERE badge.type = 'GlobalBadge' AND badge.skill_id = ?1 AND achievement.user_id IS NOT NULL
-        GROUP BY achievement.user_id, upaAgg.lastPerformedOn
-     )
-    select
-        users.user_id            as userId,
-        ua.user_id_for_display   AS userIdForDisplay,
-        ua.dn                    AS dn,
-        ua.first_name            AS firstName,
-        ua.last_name             AS lastName,
-        ua.email                 AS email,
-        COALESCE(levelAchievements.maxLevel, 0) as numLevelsAchieved,
-        COALESCE(skillAchievements.skillsAchieved, 0) as skillsAchieved,
-        skillAchievements.lastUpdated as lastUpdated,
-        (COALESCE(levelAchievements.maxLevel, 0) + COALESCE(skillAchievements.skillsAchieved, 0)) as totalProgress
-    from users
-             left join levelAchievements on levelAchievements.user_id = users.user_id
-             left join skillAchievements on skillAchievements.userId = users.user_id
-             JOIN user_attrs ua ON ua.user_id = users.user_id
-             LEFT JOIN (SELECT utCol.user_id, max(utCol.value) AS utColValue FROM user_tags utCol WHERE utCol.key = ?2 group by utCol.user_id) utCol ON utCol.user_id= users.user_id
-    WHERE (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (', ua.user_id_for_display, ')')) LIKE lower(CONCAT('%', ?3, '%')) OR lower(ua.user_id_for_display) LIKE lower(CONCAT('%', ?3, '%')))
-    GROUP BY users.user_id, ua.user_id_for_display, ua.dn, ua.first_name, ua.last_name, ua.email, levelAchievements.maxLevel, skillAchievements.skillsAchieved, skillAchievements.lastUpdated''', nativeQuery = true)
-    List<GlobalBadgeUser> findDistinctUsersForGlobalBadge(String badgeId, String usersTableAdditionalUserTagKey, String userId, Pageable pageable)
+globalBadgeSkills AS (
+     SELECT skillRefId from skillsConfiguredForGlobalBadge
+     UNION
+     SELECT DISTINCT skilDef.id as skillRefId
+     FROM global_badge_level_definition gbld
+              JOIN skill_definition skilDef ON (gbld.project_id = skilDef.project_id and skilDef.type = 'Skill')
+     where gbld.skill_id = :badgeId
+ ),
+ users AS (
+     select user_id, max(updated) as lastUpdated
+     from user_points
+     where skill_ref_id in (select globalBadgeSkills.skillRefId from globalBadgeSkills)
+     group by user_id
+ ),
+ projectMaxLevelAchievements AS (
+     select ua.user_id, ua.project_id, max(LEAST(ua.level,levelsConf.level)) as maxLevel
+     from user_achievement ua
+              join levelsConf levelsConf on (levelsConf.project_id = ua.project_id)
+     where
+         ua.project_id in (select gbld.project_id FROM global_badge_level_definition gbld where gbld.skill_id = :badgeId)
+       and ua.skill_ref_id is null
+       and ua.level > 0
+     group by ua.user_id, ua.project_id
+ ),
+ levelAchievements AS (
+     select user_id, SUM(maxLevel) maxLevel from projectMaxLevelAchievements
+     group by user_id
+ ),
+ skillAchievements AS (
+     SELECT
+         achievement.user_id      AS userId,
+         count(skillsConfiguredForGlobalBadge.skillRefId) AS skillsAchieved
+     FROM user_achievement achievement
+        join skillsConfiguredForGlobalBadge on skillsConfiguredForGlobalBadge.skillRefId = achievement.skill_ref_id
+     GROUP BY achievement.user_id
+),
+allAchievements AS (
+    select * from skillAchievements
+    full outer join levelAchievements on levelAchievements.user_id = skillAchievements.userId
+),
+userTags as (
+ SELECT ut.user_id,
+        max(ut.value) AS value
+ FROM user_tags ut
+ WHERE
+     ut.key = :userTagKey
+   and ut.user_id in (select users.user_id from users)
+ group by ut.user_id
+)
+select usersAlias.user_id as userId,
+       usersAlias.lastUpdated                                                                as lastUpdated,
+       ua.user_id_for_display                                                                AS userIdForDisplay,
+       ua.dn                                                                                 AS dn,
+       ua.first_name                                                                         AS firstName,
+       ua.last_name                                                                          AS lastName,
+       ua.email                                                                              AS email,
+       COALESCE(allAchievements.maxLevel, 0)                                                 as numLevelsAchieved,
+       COALESCE(allAchievements.skillsAchieved, 0)                                           as skillsAchieved,
+       (COALESCE(allAchievements.maxLevel, 0) + COALESCE(allAchievements.skillsAchieved, 0)) as totalProgress,
+       userTags.value                                                                        as userTag
+from users usersAlias
+         JOIN user_attrs ua ON ua.user_id = usersAlias.user_id
+         LEFT JOIN allAchievements on allAchievements.user_id = usersAlias.user_id
+         LEFT JOIN userTags ON userTags.user_id = usersAlias.user_id
+WHERE
+     (:userQuery = '' OR lower(ua.user_id_for_display) like lower(concat('%', :userQuery, '%')))
+''', nativeQuery = true)
+    List<GlobalBadgeUser> findDistinctUsersForGlobalBadge(
+            @Param("badgeId") String badgeId,
+            @Param("userTagKey") String usersTableAdditionalUserTagKey,
+            @Param("userQuery") String userQuery,
+            Pageable pageable)
 
     @Query(value = '''
 WITH globalBadgeSkills AS (

@@ -700,20 +700,20 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
             skillsService.addSkill(['projectId': proj.projectId, skillId: skills[x].skillId], "user3", new Date()).body.completed
         }
 
-        def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'totalProgress', true)
-        def badgeUsersDesc = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'totalProgress', false)
+        def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'totalProgress', false)
+        def badgeUsersDesc = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'totalProgress', true)
 
         then:
         badgeUsers
         badgeUsersDesc
         badgeUsers.count == 3
         badgeUsers.data[0].userId == "user1"
-        badgeUsers.data[0].userId == "user2"
-        badgeUsers.data[0].userId == "user3"
+        badgeUsers.data[1].userId == "user2"
+        badgeUsers.data[2].userId == "user3"
         badgeUsersDesc.count == 3
         badgeUsersDesc.data[0].userId == "user3"
-        badgeUsersDesc.data[0].userId == "user2"
-        badgeUsersDesc.data[0].userId == "user1"
+        badgeUsersDesc.data[1].userId == "user2"
+        badgeUsersDesc.data[2].userId == "user1"
     }
 
     def "get badge users with combo of skills, levels and both"() {
