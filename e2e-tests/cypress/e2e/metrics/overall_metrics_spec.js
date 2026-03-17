@@ -65,7 +65,7 @@ describe('Global/Overall Metrics', () => {
         cy.afterTestSuiteThatReusesData()
     });
 
-    it('user progress page', () => {
+    it('overall metrics page', () => {
         cy.intercept('/app/overall-metrics/overallDistinctUsersOverTimeMetricsBuilder**').as('overallDistinctUsersOverTime');
         cy.visit('/administrator/overall-metrics');
         cy.wait('@overallDistinctUsersOverTime');

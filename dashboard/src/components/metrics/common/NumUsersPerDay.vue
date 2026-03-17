@@ -288,7 +288,7 @@ const usersChartAnimationCompleted = ref(false)
 <template>
   <Card data-cy="distinctNumUsersOverTime" class="w-full">
     <template #header>
-      <SkillsCardHeader :title="mutableTitle">
+      <SkillsCardHeader :title="mutableTitle" :title-tag="props.isOverall ? 'h2' : undefined">
         <template #headerContent>
           <div class="flex gap-2 items-center">
           <div class="flex gap-1">
