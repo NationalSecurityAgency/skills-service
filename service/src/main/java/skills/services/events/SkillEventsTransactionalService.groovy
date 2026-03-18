@@ -128,7 +128,7 @@ class SkillEventsTransactionalService {
                 if(it.projectId && it.skillId) {
                     skill = skillEventsSupportRepo.findByProjectIdAndSkillId(it.projectId, it.skillId)
                 } else if (it.skillId) {
-                    skill = skillEventsSupportRepo.findBySkillIdWhereProjectIdIsNull(it.skillId)
+                    skill = skillEventsSupportRepo.findBySkillRefId(it.skillRefId)
                 }
 
                 if (!ser) {
@@ -145,7 +145,7 @@ class SkillEventsTransactionalService {
                             id: points?.skillId ?: "OVERALL",
                             type: points?.skillId ? CompletionItemType.Subject : CompletionItemType.Overall)
                 } else {
-                    if(SkillDef.ContainerType.Skill == skill.type) {
+                    if(skill && SkillDef.ContainerType.Skill == skill.type) {
                         completionItem = new CompletionItem(type: CompletionItemType.Skill, id: skill.skillId, name: skill.name)
                     } else {
                         //why doesn't CompletionTypeUtil support Skill?

@@ -21,6 +21,7 @@ import org.springframework.http.*
 import skills.controller.result.model.TableResult
 import skills.intTests.utils.*
 import skills.storage.model.SkillDef
+import skills.storage.model.UserAchievement
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 
@@ -1530,4 +1531,97 @@ class AdminEditSpecs extends DefaultIntSpec {
         !userTagUsersAfterArchive.data.find { it.userId == user1 }
         userTagUsersAfterArchive.data.find { it.userId == user2 && it.totalPoints == 60 }
     }
+
+    def "editing skill's skill_id updates skill_id in achievement"() {
+        given:
+        def proj = createProject(5)
+        def subj = createSubject(5, 1)
+        def skills = createSkills(5, 5, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<SkillsService> users = getRandomUsers(5).collect { createService(it) }
+
+        users[0].addSkill(skills[0])
+        users[1].addSkill(skills[0])
+
+        when:
+        String origSkillId = skills[0].skillId
+        String newSkillId = "otherId"
+        skills[0].skillId = newSkillId
+
+        List<UserAchievement> skillAchievements = userAchievedRepo.findAll().findAll { it.skillId == origSkillId }
+
+        skillsService.updateSkill(skills[0], origSkillId)
+
+        List<UserAchievement> skillAchievementsAfter = userAchievedRepo.findAll().findAll { it.skillId == newSkillId}
+        then:
+        skillAchievements.userId == [users[0].userName, users[1].userName]
+        skillAchievementsAfter.userId == [users[0].userName, users[1].userName]
+    }
+
+    def "editing badges's id updates skill_id in the achievement"() {
+        given:
+        def proj = createProject(5)
+        def subj = createSubject(5, 1)
+        def skills = createSkills(5, 5, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        def badge = createBadge(5, 1)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+        badge.enabled = true
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        List<SkillsService> users = getRandomUsers(5).collect { createService(it) }
+
+        users[0].addSkill(skills[0])
+        users[1].addSkill(skills[0])
+
+        when:
+        String origId = badge.badgeId
+        String newId = "otherId"
+        badge.badgeId = newId
+
+        List<UserAchievement> skillAchievements = userAchievedRepo.findAll().findAll { it.skillId == origId }
+
+        skillsService.updateBadge(badge, origId)
+
+        List<UserAchievement> skillAchievementsAfter = userAchievedRepo.findAll().findAll { it.skillId == newId }
+        then:
+        skillAchievements.userId == [users[0].userName, users[1].userName]
+        skillAchievementsAfter.userId == [users[0].userName, users[1].userName]
+    }
+
+    def "editing skill group's id updates skill_id in the achievement"() {
+        given:
+        def proj = createProject(5)
+        def subj = createSubject(5, 1)
+        def skills = createSkills(5, 5, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills[1..4])
+
+        def group = createSkillsGroup(5, 1, 10)
+        group.enabled = true
+        skillsService.createSkill(group)
+        skillsService.assignSkillToSkillsGroup(group.skillId, skills[0])
+
+        List<SkillsService> users = getRandomUsers(5).collect { createService(it) }
+
+        users[0].addSkill(skills[0])
+        users[1].addSkill(skills[0])
+
+        when:
+        String origId = group.skillId
+        String newId = "otherId"
+        group.skillId = newId
+
+        List<UserAchievement> skillAchievements = userAchievedRepo.findAll().findAll { it.skillId == origId }
+
+        skillsService.updateSkill(group, origId)
+
+        List<UserAchievement> skillAchievementsAfter = userAchievedRepo.findAll().findAll { it.skillId == newId }
+        then:
+        skillAchievements.userId == [users[0].userName, users[1].userName]
+        skillAchievementsAfter.userId == [users[0].userName, users[1].userName]
+    }
+
 }
