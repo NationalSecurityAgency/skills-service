@@ -302,7 +302,9 @@ class GlobalBadgesService {
         removeGraphRelationship(badgeId, ContainerType.GlobalBadge, projectId, skillId, RelationshipType.BadgeRequirement)
 
         SkillDef badgeSkillDef = skillDefRepo.findGlobalBadgeByBadgeId(badgeId)
-        badgeAdminService.awardBadgeToUsersMeetingRequirements(badgeSkillDef)
+        if (badgeSkillDef.enabled?.equalsIgnoreCase("true")) {
+            badgeAdminService.awardBadgeToUsersMeetingRequirements(badgeSkillDef)
+        }
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: DashboardAction.RemoveSkillAssignment,

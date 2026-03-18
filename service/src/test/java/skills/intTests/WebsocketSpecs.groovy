@@ -43,6 +43,7 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.RestTemplateWrapper
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.intTests.utils.TestUtils
 import skills.services.events.CompletionItem
 import skills.services.events.SkillEventResult
@@ -56,6 +57,11 @@ import java.lang.reflect.Type
 import java.security.KeyStore
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSkills
+import static skills.intTests.utils.SkillsFactory.createSubject
+import static skills.intTests.utils.SkillsFactory.getBadgeId
 
 @Slf4j
 class WebsocketSpecs extends DefaultIntSpec {
@@ -287,6 +293,44 @@ class WebsocketSpecs extends DefaultIntSpec {
         validateResults(subjSummaryRes, wsResults)
     }
 
+    def "achieved global badge notification"() {
+        given:
+        def proj = createProject(5)
+        def subj = createSubject(5, 1)
+        def skills = createSkills(5, 5, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<SkillsService> users = getRandomUsers(5).collect { createService(it)}
+
+        Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[1].skillId)
+        badge.enabled = true
+        skillsService.updateGlobalBadge(badge)
+
+        users[0].addSkill(skills[0])
+        users[1].addSkill(skills[0])
+
+        // achieve GB for both users
+        skillsService.removeSkillFromGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[1].skillId)
+
+        String origId = badge.badgeId
+        badge.badgeId = 'other'
+        skillsService.updateGlobalBadge(badge, origId)
+
+        List<SkillEventResult> wsResults = []
+        CountDownLatch messagesReceived = setupWebsocketConnection(wsResults, true, true, 1, users[0].userName)
+
+        when:
+
+        messagesReceived.await(30, TimeUnit.SECONDS)
+
+        then:
+        wsResults.size() == 1
+        wsResults[0].name == badge.name
+        wsResults[0].explanation == 'Achieved due to a modification in the training profile (such as: skill deleted, occurrences modified, badge published, etc..)'
+    }
 
     private CountDownLatch setupWebsocketConnection(List<SkillEventResult> wsResults, boolean xhr = false, boolean xhrPolling = false, int count = 5, String userId = null) {
         CountDownLatch messagesReceived = new CountDownLatch(count)
