@@ -372,8 +372,6 @@ class AppController {
     @RequestMapping(value = "/overall-metrics/{metricsId}", method =  RequestMethod.GET, produces = "application/json")
     def getChartData(@PathVariable("metricsId") String metricsId,
                      @RequestParam Map<String,String> metricsProps) {
-
-        // props: start, projIds, quizIds
         return metricsServiceNew.loadGlobalMetrics(metricsId, metricsProps)
     }
 }
