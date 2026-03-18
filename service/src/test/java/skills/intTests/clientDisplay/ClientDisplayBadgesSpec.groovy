@@ -1338,6 +1338,73 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         earnedBadge3.isGlobalBadge
     }
 
+    def "recently achieved global badges" () {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(10, 1, 1, 100, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        def theBadge = SkillsFactory.createBadge(1, 1)
+        skillsService.createGlobalBadge(theBadge)
+        skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: theBadge.badgeId, skillId: proj1_skills.get(0).skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: theBadge.badgeId, skillId: proj1_skills.get(1).skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: proj1.projectId, badgeId: theBadge.badgeId, skillId: proj1_skills.get(2).skillId])
+        theBadge.enabled  = 'true'
+        skillsService.updateGlobalBadge(theBadge, theBadge.badgeId)
+
+        def theBadge1 = SkillsFactory.createBadge(1, 2)
+        skillsService.createGlobalBadge(theBadge1)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj1.projectId, badgeId: theBadge1.badgeId, level: "4")
+        theBadge1.enabled  = 'true'
+        skillsService.updateGlobalBadge(theBadge1, theBadge1.badgeId)
+
+        List<SkillsService> users = getRandomUsers(4).collect { createService(it) }
+
+        users[0].addSkill( proj1_skills.get(0))
+        users[0].addSkill( proj1_skills.get(1))
+        users[0].addSkill( proj1_skills.get(2))
+
+        users[1].addSkill( proj1_skills.get(0))
+        users[1].addSkill( proj1_skills.get(1))
+        users[1].addSkill( proj1_skills.get(2))
+
+        users[2].addSkill( proj1_skills.get(0))
+        users[2].addSkill( proj1_skills.get(1))
+
+        proj1_skills[1..9].each {
+            users[3].addSkill(it)
+        }
+
+        when:
+        def user1Summary = users[0].getSkillSummary(null, proj1.projectId)
+        def user2Summary = users[1].getSkillSummary(null, proj1.projectId)
+        def user3Summary = users[2].getSkillSummary(null, proj1.projectId)
+        def user4Summary = users[3].getSkillSummary(null, proj1.projectId)
+        then:
+        user1Summary.badges.recentlyAwardedBadges.badgeId == [theBadge.badgeId]
+        def u1GbEarnedBadged = user1Summary.badges.recentlyAwardedBadges.find { it.badgeId == theBadge.badgeId }
+        u1GbEarnedBadged.badgeName == theBadge.name
+        u1GbEarnedBadged.achievedOn
+        u1GbEarnedBadged.isGlobalBadge
+
+        user2Summary.badges.recentlyAwardedBadges.badgeId == [theBadge.badgeId]
+        def u2GbEarnedBadged = user2Summary.badges.recentlyAwardedBadges.find { it.badgeId == theBadge.badgeId }
+        u2GbEarnedBadged.badgeName == theBadge.name
+        u2GbEarnedBadged.achievedOn
+        u2GbEarnedBadged.isGlobalBadge
+
+        user3Summary.badges.recentlyAwardedBadges == []
+
+        user4Summary.badges.recentlyAwardedBadges.badgeId == [theBadge1.badgeId]
+        def u4GbEarnedBadged = user4Summary.badges.recentlyAwardedBadges.find { it.badgeId == theBadge1.badgeId }
+        u4GbEarnedBadged.badgeName == theBadge1.name
+        u4GbEarnedBadged.achievedOn
+        u4GbEarnedBadged.isGlobalBadge
+    }
+
     String datePattern = "yyyy-MM-dd'T'HH:mm:ss"
     private String reformatStrDate(String str) {
         return formatDate(Date.parse(datePattern, str))
