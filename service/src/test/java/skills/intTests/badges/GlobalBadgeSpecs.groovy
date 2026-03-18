@@ -15,9 +15,11 @@
  */
 package skills.intTests.badges
 
+import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsService
 import skills.storage.model.UserAchievement
 import skills.storage.repos.UserAchievedLevelRepo
 
@@ -561,18 +563,22 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badge.enabled = "true"
         skillsService.updateGlobalBadge(badge)
 
+        List<SkillsService> users = getRandomUsers(3).collect { createService(it)}
+
         when:
-        skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user1", new Date()).body.completed
+        assert users[0].addSkill(skills[0]).body.skillApplied
 
         // User that does not get level 1 but does get the skill achievement
-        skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], "user2", new Date()).body.completed
+        assert users[1].addSkill(skills[0]).body.skillApplied
 
         // User that gets a different skill and should NOT get the global badge
-        skillsService.addSkill(['projectId': proj.projectId, skillId: skills[1].skillId], "user3", new Date()).body.completed
+        assert users[2].addSkill(skills[1]).body.skillApplied
+
         //triggers level 1
-        def addSkillRes = skillsService.addSkill(['projectId': proj.projectId, skillId: skills[1].skillId], "user1", new Date()).body.completed
+        assert users[0].addSkill(skills[1]).body.completed.find { it.id == "OVERALL"}.level == 1
 
         def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId)
+        println JsonOutput.prettyPrint(JsonOutput.toJson(badgeUsers))
 
         then:
         badgeUsers
@@ -580,18 +586,18 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsers.totalCount == 3
         badgeUsers.totalPoints == 1
         badgeUsers.totalLevels == 3
+        badgeUsers.data[0].userId == users[0].userName
         badgeUsers.data[0].skillsAchieved == 1
         badgeUsers.data[0].numLevelsAchieved == 1
         badgeUsers.data[0].totalProgress == 2
-        badgeUsers.data[0].userId == "user1"
+        badgeUsers.data[1].userId == users[1].userName
         badgeUsers.data[1].skillsAchieved == 1
         badgeUsers.data[1].numLevelsAchieved == 0
         badgeUsers.data[1].totalProgress == 1
-        badgeUsers.data[1].userId == "user2"
+        badgeUsers.data[2].userId == users[2].userName
         badgeUsers.data[2].skillsAchieved == 0
         badgeUsers.data[2].numLevelsAchieved == 0
         badgeUsers.data[2].totalProgress == 0
-        badgeUsers.data[2].userId == "user3"
     }
 
     def "get total levels for badge with multiple projects"() {
@@ -818,7 +824,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
     }
 
-    def "retrieve users for global badge with paging"() {
+    def "retrieve users for global badge - sort by userId and page"() {
 
         def proj = createProject()
         def subj2 = createSubject(1, 2)
@@ -830,13 +836,9 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         List<Map> subj2Skills = createSkills(5, 1, 2, 100)
         List<Map> subj3Skills = createSkills(5, 1, 3, 100)
 
-        skillsService.createProject(proj)
-        skillsService.createSubject(subj)
-        skillsService.createSubject(subj2)
-        skillsService.createSubject(subj3)
-        skillsService.createSkills(skills)
-        skillsService.createSkills(subj2Skills)
-        skillsService.createSkills(subj3Skills)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        skillsService.createProjectAndSubjectAndSkills(null, subj2, subj2Skills)
+        skillsService.createProjectAndSubjectAndSkills(null, subj3, subj3Skills)
 
         skillsService.createGlobalBadge(badge)
         skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "3")
@@ -845,30 +847,55 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badge.enabled = "true"
         skillsService.updateGlobalBadge(badge)
 
+        List<SkillsService> users = getRandomUsers(9).collect { createService(it) }
+
         when:
-        for(def x = 1; x <= 9; x++) {
-            skillsService.addSkill(['projectId': proj.projectId, skillId: skills[0].skillId], 'user' + x, new Date()).body.completed
+        users.each {
+            assert it.addSkill(skills[0]).body.skillApplied
         }
 
-        def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId, 5, 1)
-        def badgeUsersPg2 = skillsService.getGlobalBadgeUsers(badge.badgeId, 5, 2)
+        def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId, 5, 1,  'userId', true)
+        def badgeUsersPg2 = skillsService.getGlobalBadgeUsers(badge.badgeId, 5, 2,  'userId', true)
 
+        def badgeUsersDesc = skillsService.getGlobalBadgeUsers(badge.badgeId, 5, 1,  'userId', false)
+        def badgeUsersPg2Desc = skillsService.getGlobalBadgeUsers(badge.badgeId, 5, 2,  'userId', false)
+
+        def badgeUsers_smallPg = skillsService.getGlobalBadgeUsers(badge.badgeId, 3, 1,  'userId', true)
+        def badgeUsersPg2_smallPg = skillsService.getGlobalBadgeUsers(badge.badgeId, 3, 2,  'userId', true)
+        def badgeUsersPg3_smallPg = skillsService.getGlobalBadgeUsers(badge.badgeId, 3, 3,  'userId', true)
+
+        List<String> userNames = users.collect { it.userName }.sort()
+        List<String> userNamesReversed = userNames.reverse()
         then:
         badgeUsers
         badgeUsersPg2
         badgeUsers.count == 9
-        badgeUsersPg2.count == 9
         badgeUsers.totalCount == 9
+        badgeUsers.data.userId == userNames[0..4]
+
+        badgeUsersPg2.count == 9
         badgeUsersPg2.totalCount == 9
-        badgeUsers.data[0].userId == "user1"
-        badgeUsers.data[1].userId == "user2"
-        badgeUsers.data[2].userId == "user3"
-        badgeUsers.data[3].userId == "user4"
-        badgeUsers.data[4].userId == "user5"
-        badgeUsersPg2.data[0].userId == "user6"
-        badgeUsersPg2.data[1].userId == "user7"
-        badgeUsersPg2.data[2].userId == "user8"
-        badgeUsersPg2.data[3].userId == "user9"
+        badgeUsersPg2.data.userId == userNames[5..8]
+
+        badgeUsersDesc.count == 9
+        badgeUsersDesc.totalCount == 9
+        badgeUsersDesc.data.userId == userNamesReversed[0..4]
+
+        badgeUsersPg2Desc.count == 9
+        badgeUsersPg2Desc.totalCount == 9
+        badgeUsersPg2Desc.data.userId == userNamesReversed[5..8]
+
+        badgeUsers_smallPg.count == 9
+        badgeUsers_smallPg.totalCount == 9
+        badgeUsers_smallPg.data.userId == userNames[0..2]
+
+        badgeUsersPg2_smallPg.count == 9
+        badgeUsersPg2_smallPg.totalCount == 9
+        badgeUsersPg2_smallPg.data.userId == userNames[3..5]
+
+        badgeUsersPg3_smallPg.count == 9
+        badgeUsersPg3_smallPg.totalCount == 9
+        badgeUsersPg3_smallPg.data.userId == userNames[6..8]
     }
 
 

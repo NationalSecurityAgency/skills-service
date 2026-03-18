@@ -182,7 +182,8 @@ class AdminUsersService {
         List<GlobalBadgeLevelRes> levels = globalBadgesService.getGlobalBadgeLevels(badgeId)
         Integer totalLevels = levels.sum(0) { level -> level.level } as Integer
         List<GlobalBadgeUser> usersPage = userPointsRepo.findDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query, pageRequest)
-        Integer count = userPointsRepo.countDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query)
+        Integer count = usersPage.size() < pageRequest.pageSize && pageRequest.pageNumber == 0 ? usersPage.size()
+                : userPointsRepo.countDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query)
 
         return new TableResultWithTotalPointsAndLevel(usersPage, count, skills.size(), totalLevels)
     }
