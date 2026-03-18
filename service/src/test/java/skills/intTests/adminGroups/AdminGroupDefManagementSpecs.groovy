@@ -155,7 +155,6 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
 
         when:
 
-        skillsService.createAdminGroupDef(adminGroup)
         skillsService.addAdminGroupMember(adminGroup.adminGroupId, otherUserId)
         def adminGroupRes = skillsService.getAdminGroupDef(adminGroup.adminGroupId)
         def adminGroupMembers = skillsService.getAdminGroupMembers(adminGroup.adminGroupId)
