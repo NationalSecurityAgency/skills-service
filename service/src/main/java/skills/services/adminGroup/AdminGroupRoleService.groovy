@@ -124,7 +124,7 @@ class AdminGroupRoleService {
             }
             List<String> globalBadgeIds = userRoleRepo.findGlobalBadgeIdsByAdminGroupId(adminGroupDef.adminGroupId)
             globalBadgeIds.each { globalBadgeId ->
-                globalBadgeRoleService.addGlobalBadgeAdminRole(userId, globalBadgeId, RoleName.ROLE_GLOBAL_BADGE_ADMIN, adminGroupDef.adminGroupId)
+                globalBadgeRoleService.addGlobalBadgeAdminRole(userIdParam, globalBadgeId, RoleName.ROLE_GLOBAL_BADGE_ADMIN, adminGroupDef.adminGroupId)
             }
         }
 
