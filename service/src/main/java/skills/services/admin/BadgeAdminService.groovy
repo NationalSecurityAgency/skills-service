@@ -114,6 +114,9 @@ class BadgeAdminService {
     AccessSettingsStorageService accessSettingsStorageService
 
     @Autowired
+    UserAchievedLevelRepo userAchievedRepo
+
+    @Autowired
     UserInfoService userInfoService
 
     @Autowired
@@ -206,6 +209,7 @@ class BadgeAdminService {
         }
         if (savedSkill && type == SkillDef.ContainerType.GlobalBadge && isEdit && isIdUpdate) {
             accessSettingsStorageService.updateGlobalBadgeIdForBadgeAdmins(originalBadgeId, savedSkill.skillId)
+            userAchievedRepo.updateSkillIdForSkillRefId(savedSkill.skillId, savedSkill.id)
         }
 
         if (savedSkill && type == SkillDef.ContainerType.GlobalBadge && badgeRequest.enableProtectedUserCommunity) {
