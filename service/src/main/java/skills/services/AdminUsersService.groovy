@@ -175,15 +175,15 @@ class AdminUsersService {
         return new TableResultWithTotalPoints(usersData, count, totalPoints)
     }
 
-    TableResultWithTotalPoints loadUsersPageForSkillsAcrossProjects(String badgeId, String query, PageRequest pageRequest) {
+    TableResultWithTotalPoints loadUsersPageForSkillsAcrossProjects(String badgeId, String query, String userTagFilter, PageRequest pageRequest) {
         List<SkillDefPartialRes> skills = globalBadgesService.getSkillsForBadge(badgeId)
         query = query ? query.trim() : ''
 
         List<GlobalBadgeLevelRes> levels = globalBadgesService.getGlobalBadgeLevels(badgeId)
         Integer totalLevels = levels.sum(0) { level -> level.level } as Integer
-        List<GlobalBadgeUser> usersPage = userPointsRepo.findDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query, pageRequest)
+        List<GlobalBadgeUser> usersPage = userPointsRepo.findDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query, userTagFilter, pageRequest)
         Integer count = usersPage.size() < pageRequest.pageSize && pageRequest.pageNumber == 0 ? usersPage.size()
-                : userPointsRepo.countDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query)
+                : userPointsRepo.countDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query, userTagFilter)
 
         return new TableResultWithTotalPointsAndLevel(usersPage, count, skills.size(), totalLevels)
     }

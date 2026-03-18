@@ -308,11 +308,12 @@ class GlobalBadgesController {
                                     @RequestParam int limit,
                                     @RequestParam int page,
                                     @RequestParam String orderBy,
+                                    @RequestParam String userTagFilter,
                                     @RequestParam Boolean ascending) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id", badgeId)
         PageRequest pageRequest = PageRequest.of(page - 1, limit, JpaSort.unsafe(ascending ? ASC : DESC, "(${orderBy})"))
 
-        return adminUsersService.loadUsersPageForSkillsAcrossProjects(badgeId, query, pageRequest)
+        return adminUsersService.loadUsersPageForSkillsAcrossProjects(badgeId, query, userTagFilter, pageRequest)
     }
 
 }

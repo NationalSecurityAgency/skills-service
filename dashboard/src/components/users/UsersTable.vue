@@ -413,7 +413,7 @@ const archiveUsers = () => {
                 <div class="flex flex-auto">
                   <span class="font-weight-bold text-primary"
                         :aria-label="`${calcTotalPercent(slotProps.data.totalProgress)} percent completed`"
-                        data-cy="progressPercent">{{ calcTotalPercent(slotProps.data.numLevelsAchieved, slotProps.data.skillsAchieved) }}%</span>
+                        data-cy="progressPercent">{{ calcTotalPercent(slotProps.data.totalProgress) }}%</span>
                 </div>
                 <div class="flex flex-auto justify-end">
                   <span class="text-primary font-weight-bold"
@@ -426,7 +426,7 @@ const archiveUsers = () => {
                   <span class="italic" data-cy="progressTotalPoints">{{ totalPoints?.toLocaleString() }} skills</span>
                 </div>
               </div>
-              <ProgressBar style="height: 5px;" :value="calcTotalPercent(slotProps.data.numLevelsAchieved, slotProps.data.skillsAchieved)" :showValue="false"
+              <ProgressBar style="height: 5px;" :value="calcTotalPercent(slotProps.data.totalProgress)" :showValue="false"
                            class="lg:min-w-[12rem] xl:min-w-[20rem]"
                            :aria-label="`Progress for ${slotProps.data.userId} user`" />
             </div>

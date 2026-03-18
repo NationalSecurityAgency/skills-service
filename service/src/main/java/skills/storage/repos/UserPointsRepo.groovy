@@ -1053,11 +1053,13 @@ from users usersAlias
          LEFT JOIN userTags ON userTags.user_id = usersAlias.user_id
 WHERE
      (:userQuery = '' OR lower(ua.user_id_for_display) like lower(concat('%', :userQuery, '%')))
+     and (:userTagFilter = '' OR lower(userTags.value) like lower(concat('%', :userTagFilter, '%')))
 ''', nativeQuery = true)
     List<GlobalBadgeUser> findDistinctUsersForGlobalBadge(
             @Param("badgeId") String badgeId,
             @Param("userTagKey") String usersTableAdditionalUserTagKey,
             @Param("userQuery") String userQuery,
+            @Param("userTagFilter") String userTagFilter,
             Pageable pageable)
 
     @Query(value = '''
@@ -1098,11 +1100,13 @@ from users usersAlias
          LEFT JOIN userTags ON userTags.user_id = usersAlias.user_id
 WHERE
     (:userQuery = '' OR lower(ua.user_id_for_display) like lower(concat('%', :userQuery, '%')))
+    and (:userTagFilter = '' OR lower(userTags.value) like lower(concat('%', :userTagFilter, '%')))
 ''', nativeQuery = true)
     Integer countDistinctUsersForGlobalBadge(
             @Param("badgeId") String badgeId,
             @Param("userTagKey") String usersTableAdditionalUserTagKey,
-            @Param("userQuery") String userQuery
+            @Param("userQuery") String userQuery,
+            @Param("userTagFilter") String userTagFilter
     )
 
     @Query(value = '''SELECT 
