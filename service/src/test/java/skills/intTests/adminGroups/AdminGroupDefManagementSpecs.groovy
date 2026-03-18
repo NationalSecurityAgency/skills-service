@@ -134,6 +134,25 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         def otherUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
         createService(otherUserId)
         def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        // add project to admin group
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        // add badge to admin group
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup.adminGroupId, badge.badgeId)
+
+        // add quiz to admin group
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
+
         when:
 
         skillsService.createAdminGroupDef(adminGroup)
