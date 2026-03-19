@@ -579,6 +579,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
         def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId)
         println JsonOutput.prettyPrint(JsonOutput.toJson(badgeUsers))
+        List<String> userNames = users.collect { it.userName }.sort()
 
         then:
         badgeUsers
@@ -586,15 +587,15 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsers.totalCount == 3
         badgeUsers.totalPoints == 1
         badgeUsers.totalLevels == 3
-        badgeUsers.data[0].userId == users[0].userName
+        badgeUsers.data[0].userId == userNames[0]
         badgeUsers.data[0].skillsAchieved == 1
         badgeUsers.data[0].numLevelsAchieved == 1
         badgeUsers.data[0].totalProgress == 2
-        badgeUsers.data[1].userId == users[1].userName
+        badgeUsers.data[1].userId == userNames[1]
         badgeUsers.data[1].skillsAchieved == 1
         badgeUsers.data[1].numLevelsAchieved == 0
         badgeUsers.data[1].totalProgress == 1
-        badgeUsers.data[2].userId == users[2].userName
+        badgeUsers.data[2].userId == userNames[2]
         badgeUsers.data[2].skillsAchieved == 0
         badgeUsers.data[2].numLevelsAchieved == 0
         badgeUsers.data[2].totalProgress == 0
@@ -795,7 +796,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
             assert users[5].addSkill(proj5Skills[x]).body.skillApplied
         }
 
-        def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId)
+        def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'totalProgress', false)
 
         then:
         badgeUsers
@@ -807,26 +808,31 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsers.data[0].numLevelsAchieved == 10
         badgeUsers.data[0].totalProgress == 18
         badgeUsers.data[0].userId == users[0].userName
+
         badgeUsers.data[1].skillsAchieved == 2
-        badgeUsers.data[1].numLevelsAchieved == 0
-        badgeUsers.data[1].totalProgress == 2
-        badgeUsers.data[1].userId == users[1].userName
-        badgeUsers.data[2].skillsAchieved == 4
-        badgeUsers.data[2].numLevelsAchieved == 0
-        badgeUsers.data[2].totalProgress == 4
-        badgeUsers.data[2].userId == users[2].userName
-        badgeUsers.data[3].skillsAchieved == 2
-        badgeUsers.data[3].numLevelsAchieved == 3
-        badgeUsers.data[3].totalProgress == 5
-        badgeUsers.data[3].userId == users[3].userName
-        badgeUsers.data[4].skillsAchieved == 0
-        badgeUsers.data[4].numLevelsAchieved == 2
+        badgeUsers.data[1].numLevelsAchieved == 3
+        badgeUsers.data[1].totalProgress == 5
+        badgeUsers.data[1].userId == users[3].userName
+
+        badgeUsers.data[2].skillsAchieved == 0
+        badgeUsers.data[2].numLevelsAchieved == 5
+        badgeUsers.data[2].totalProgress == 5
+        badgeUsers.data[2].userId == users[5].userName
+
+        badgeUsers.data[3].skillsAchieved == 4
+        badgeUsers.data[3].numLevelsAchieved == 0
+        badgeUsers.data[3].totalProgress == 4
+        badgeUsers.data[3].userId == users[2].userName
+
+        badgeUsers.data[4].skillsAchieved == 2
+        badgeUsers.data[4].numLevelsAchieved == 0
         badgeUsers.data[4].totalProgress == 2
-        badgeUsers.data[4].userId == users[4].userName
+        badgeUsers.data[4].userId == users[1].userName
+
         badgeUsers.data[5].skillsAchieved == 0
-        badgeUsers.data[5].numLevelsAchieved == 5
-        badgeUsers.data[5].totalProgress == 5
-        badgeUsers.data[5].userId == users[5].userName
+        badgeUsers.data[5].numLevelsAchieved == 2
+        badgeUsers.data[5].totalProgress == 2
+        badgeUsers.data[5].userId == users[4].userName
 
     }
 
