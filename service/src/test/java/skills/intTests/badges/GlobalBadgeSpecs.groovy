@@ -938,10 +938,10 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
             assert users[x].addSkill(skills[0]).body.skillApplied
         }
 
-        def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1)
-        def badgeUsersFiltered = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'userId', true, users[4].userName)
-
         def sortedUsers = users.sort{ it.userName }
+
+        def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1)
+        def badgeUsersFiltered = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'userId', true, sortedUsers[4].userName)
 
         then:
         badgeUsers
@@ -955,7 +955,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsers.data[2].userId == sortedUsers[2].userName
         badgeUsers.data[3].userId == sortedUsers[3].userName
         badgeUsers.data[4].userId == sortedUsers[4].userName
-        badgeUsersFiltered.data[0].userId == users[4].userName
+        badgeUsersFiltered.data[0].userId == sortedUsers[4].userName
     }
 
     def "filter users for global badge by tag"() {
