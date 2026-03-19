@@ -941,6 +941,8 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1)
         def badgeUsersFiltered = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'userId', true, users[4].userName)
 
+        def sortedUsers = users.sort{ it.userName }
+
         then:
         badgeUsers
         badgeUsersFiltered
@@ -948,11 +950,11 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsersFiltered.count == 1
         badgeUsers.totalCount == 5
         badgeUsersFiltered.totalCount == 1
-        badgeUsers.data[0].userId == users[0].userName
-        badgeUsers.data[1].userId == users[1].userName
-        badgeUsers.data[2].userId == users[2].userName
-        badgeUsers.data[3].userId == users[3].userName
-        badgeUsers.data[4].userId == users[4].userName
+        badgeUsers.data[0].userId == sortedUsers[0].userName
+        badgeUsers.data[1].userId == sortedUsers[1].userName
+        badgeUsers.data[2].userId == sortedUsers[2].userName
+        badgeUsers.data[3].userId == sortedUsers[3].userName
+        badgeUsers.data[4].userId == sortedUsers[4].userName
         badgeUsersFiltered.data[0].userId == users[4].userName
     }
 
@@ -997,6 +999,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
         def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1)
         def badgeUsersFiltered = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'userId', true, '', 'tag4')
+        def sortedUsers = users.sort{ it.userName }
 
         then:
         badgeUsers
@@ -1005,11 +1008,11 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsersFiltered.count == 1
         badgeUsers.totalCount == 5
         badgeUsersFiltered.totalCount == 1
-        badgeUsers.data[0].userId == users[0].userName
-        badgeUsers.data[1].userId == users[1].userName
-        badgeUsers.data[2].userId == users[2].userName
-        badgeUsers.data[3].userId == users[3].userName
-        badgeUsers.data[4].userId == users[4].userName
+        badgeUsers.data[0].userId == sortedUsers[0].userName
+        badgeUsers.data[1].userId == sortedUsers[1].userName
+        badgeUsers.data[2].userId == sortedUsers[2].userName
+        badgeUsers.data[3].userId == sortedUsers[3].userName
+        badgeUsers.data[4].userId == sortedUsers[4].userName
         badgeUsersFiltered.data[0].userId == users[4].userName
     }
 
@@ -1042,9 +1045,13 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
         List<SkillsService> users = getRandomUsers(30).collect { createService(it) }
         skillsService.grantRoot()
+        List<String> userIdsWithTag = []
         users[0..29].eachWithIndex { user, idx ->
             String tagValue = "tag${idx}"
             skillsService.saveUserTag(user.userName, "dutyOrganization", [tagValue]);
+            if(tagValue.contains('tag2')) {
+                userIdsWithTag.add(user.userName)
+            }
         }
 
         when:
@@ -1060,6 +1067,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         def badgeUsersFilteredDescPg2 = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 2, 'userId', false, '', 'tag2')
 
         def usersSorted = users.sort{ it.userName }
+        def sortedTagUsers = userIdsWithTag.sort()
 
         then:
         badgeUsers
@@ -1071,12 +1079,12 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsers.data[0].userId == usersSorted[0].userName
         badgeUsersPg2.data[0].userId == usersSorted[10].userName
         badgeUsersFiltered.data[0].userTag.contains('tag2')
-        badgeUsersFiltered.data[0].userId == users[13].userName
+        badgeUsersFiltered.data[0].userId == sortedTagUsers[0]
         badgeUsersFilteredPg2.data[0].userTag.contains('tag2')
-        badgeUsersFilteredPg2.data[0].userId == users[25].userName
+        badgeUsersFilteredPg2.data[0].userId == sortedTagUsers[10]
         badgeUsersFilteredDesc.data[0].userTag.contains('tag2')
-        badgeUsersFilteredDesc.data[0].userId == users[25].userName
-        badgeUsersFilteredDescPg2.data[0].userId == users[13].userName
+        badgeUsersFilteredDesc.data[0].userId == sortedTagUsers[10]
+        badgeUsersFilteredDescPg2.data[0].userId == sortedTagUsers[0]
     }
 
     def "filter users for global badge by tag and user with paging"() {
