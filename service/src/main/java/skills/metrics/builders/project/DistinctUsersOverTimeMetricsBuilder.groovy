@@ -15,7 +15,7 @@
  */
 package skills.metrics.builders.project
 
-
+import callStack.profiler.Profile
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.result.model.CountItem
@@ -36,6 +36,7 @@ class DistinctUsersOverTimeMetricsBuilder implements ProjectMetricsBuilder {
     }
 
     @Override
+    @Profile
     def build(String projectId, String chartId, Map<String, String> props) {
         Date start = MetricsParams.getStart(projectId, chartId, props)
         String skillId = props.containsKey(MetricsParams.P_SKILL_ID) ? MetricsParams.getSkillId(projectId, chartId, props) : null

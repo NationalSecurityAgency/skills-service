@@ -93,6 +93,7 @@ class GlobalProgressMetricsService {
     @Autowired
     UserCommunityService userCommunityService
 
+    @Profile
     UsersOverallProgressResult loadUsersOverallProgress(String userQuery, String userTagValueFilter, PageRequest pageRequest) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
         List<String> projectIds = projectIdsAndQuizIds.projectIds
@@ -146,6 +147,7 @@ class GlobalProgressMetricsService {
         return res
     }
 
+    @Profile
     private <T extends GlobalMetricsResult> T populateGlobalMetricsResult(List<String> projectIds, List<String> quizIds, T globalMetricsResult) {
         GlobalProgressMetricsRepo.ProjDefCounts projDefCounts = globalProgressMetricsRepo.findProjectDefCounts(projectIds)
         Integer totalGlobalBadgeCount = globalProgressMetricsRepo.getTotalGlobalBadgeCountForProjects(projectIds)
@@ -162,6 +164,7 @@ class GlobalProgressMetricsService {
         return globalMetricsResult
     }
 
+    @Profile
     SingleUserOverallProgress loadSingleUserProgress(String userId) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
         List<String> projectIds = projectIdsAndQuizIds.projectIds
@@ -203,12 +206,14 @@ class GlobalProgressMetricsService {
         return new SingleUserOverallProgress(projectsProgress: projectsProgressRes)
     }
 
+    @Profile
     TableResult getQuizRuns( String userQuery, String userIdFilter, String nameQuery, UserQuizAttempt.QuizAttemptStatus quizAttemptStatus, PageRequest pageRequest, Date startDate, Date endDate) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
         List<String> quizIds = projectIdsAndQuizIds.quizIds
         return quizDefService.getQuizRuns(quizIds, userQuery, userIdFilter, nameQuery, quizAttemptStatus, pageRequest, startDate, endDate);
     }
 
+    @Profile
     OverallMetricsResult loadOverallMetrics() {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
         List<String> projectIds = projectIdsAndQuizIds.projectIds
@@ -256,6 +261,7 @@ class GlobalProgressMetricsService {
         return new UsersPerTagRes(totalNumItems: numDistinctTags, items: items)
     }
 
+    @Profile
     private static List<DayCountItem> fillGapsWithZeroCounts(List<DayCountItem> existingCounts, Date startDate, GroupingType groupingType) {
         // Sort existing counts by date
         existingCounts.sort { a, b -> a.day <=> b.day }
@@ -278,6 +284,7 @@ class GlobalProgressMetricsService {
         return result
     }
 
+    @Profile
     private static List<Date> generateExpectedDates(Date startDate, Date endDate, GroupingType groupingType) {
         List<Date> dates = []
         Calendar calendar = Calendar.getInstance()
@@ -335,6 +342,7 @@ class GlobalProgressMetricsService {
         return dates
     }
 
+    @Profile
     ProjectIdsAndQuizIds getProjectIdsAndQuizIdsForCurrentUser() {
         String userId = userInfoService.currentUser.username
         List<UserRole> allUserRoles = userRoleRepo.findAllByUserId(userId)

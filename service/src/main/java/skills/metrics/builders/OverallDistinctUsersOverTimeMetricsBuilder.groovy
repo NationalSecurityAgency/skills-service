@@ -15,6 +15,7 @@
  */
 package skills.metrics.builders
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -51,6 +52,7 @@ class OverallDistinctUsersOverTimeMetricsBuilder implements GlobalMetricsBuilder
     }
 
     @Override
+    @Profile
     Object build(Map<String, String> props) {
         Date startDate = MetricsParams.getStart(null, BUILDER_ID, props)
         startDate = LocalDateTime.of(startDate.toLocalDate(), LocalTime.MIN).toDate()

@@ -15,6 +15,7 @@
  */
 package skills.services
 
+import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import jakarta.persistence.EntityManager
@@ -125,6 +126,7 @@ class UserEventService {
      * @return
      */
     @Transactional(readOnly = true)
+    @Profile
     List<DayCountItem> getDistinctUserCountForSkillId(String projectId, String skillId, Date start, Boolean newUsersOnly = false) {
         EventType eventType = determineAppropriateEventType(start)
 
@@ -161,6 +163,7 @@ class UserEventService {
     }
 
     @Transactional(readOnly = true)
+    @Profile
     List<MonthlyCountItem> getDistinctUserCountForSubjectByMonth(String projectId, String skillId, Date start, Boolean newUsersOnly = false) {
 
         SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(projectId, skillId)
@@ -219,6 +222,7 @@ class UserEventService {
      * @return
      */
     @Transactional(readOnly = true)
+    @Profile
     List<DayCountItem> getDistinctUserCountsForProject(String projectId, Date start, Boolean newUsersOnly = false) {
         EventType eventType = determineAppropriateEventType(start)
         List<DayCountItem> results
@@ -235,6 +239,7 @@ class UserEventService {
     }
 
     @Transactional(readOnly = true)
+    @Profile
     List<MonthlyCountItem> getDistinctUserCountsForProjectByMonth(String projectId, Date start, Boolean newUsersOnly = false) {
         List<MonthlyCountItem> results
         Stream<MonthlyCountItem> stream = userEventsRepo.getDistinctUserCountForProjectGroupedByMonth(projectId, start, newUsersOnly)
@@ -341,6 +346,7 @@ class UserEventService {
     }
 
     @CompileStatic
+    @Profile
     List<MonthlyCountItem> convertMonthlyResults(Stream<MonthlyCountItem> stream, Date startOfQueryRange) {
         List<MonthlyCountItem> items = new ArrayList<MonthlyCountItem>()
 
@@ -365,6 +371,7 @@ class UserEventService {
     }
 
     @CompileStatic
+    @Profile
     List<DayCountItem> convertResults(Stream<DayCountItem> stream, EventType eventType, Date startOfQueryRange, List<String> projectIds=[]) {
         // initialize counts for all passed in project id's so there will be zero counts added for projects with no events yet
         Map<String, PerProjectCounts> perProjectCounts = projectIds.collectEntries {projectId ->
@@ -415,6 +422,7 @@ class UserEventService {
     }
 
     @CompileStatic
+    @Profile
     List<DayCountItem> convertResults(Stream<WeekCountItem> stream, Date startOfQueryRange, List<String> projectIds=[]) {
         // initialize counts for all passed in project id's so there will be zero counts added for projects with no events yet
         Map<String, PerProjectCounts> perProjectCounts = projectIds.collectEntries {projectId ->

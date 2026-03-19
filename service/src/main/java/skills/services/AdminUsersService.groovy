@@ -74,6 +74,7 @@ class AdminUsersService {
     @Value('${skills.config.ui.usersTableAdditionalUserTagKey:}')
     String usersTableAdditionalUserTagKey
 
+    @Profile
     List<TimestampCountItem> getUsage(String projectId, String skillId, Date start, Boolean newUsersOnly = false) {
         Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
         List<DayCountItem> res
@@ -92,6 +93,7 @@ class AdminUsersService {
         return countsPerDay
     }
 
+    @Profile
     List<TimestampCountItem> getUsagePerMonth(String projectId, String subjectId, Date start, Boolean newUsersOnly = false) {
         Date startDate = LocalDateTime.of(start.toLocalDate(), LocalTime.MIN).toDate()
         List<MonthlyCountItem> users
