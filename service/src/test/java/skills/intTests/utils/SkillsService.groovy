@@ -1183,6 +1183,10 @@ class SkillsService {
         return downloadAttachment("/admin${getProjectUrl(projectId)}/users/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}&userTagFilter=${userTagFilter}".toString())
     }
 
+    def getGlobalUserProgressExcelExport(String orderBy = 'userIdForDisplay', boolean ascending = true, String query = "", String userTagFilter = "") {
+        return downloadAttachment("/app/progress-metrics/export/excel?&ascending=${ascending}&orderBy=${orderBy}&userQuery=${query}&userTagFilter=${userTagFilter}".toString())
+    }
+
     def getUserAchievementsExcelExport(String projectId, Map params=null) {
         return downloadAttachment("/admin${getProjectUrl(projectId)}/achievements/export/excel".toString(), params)
     }

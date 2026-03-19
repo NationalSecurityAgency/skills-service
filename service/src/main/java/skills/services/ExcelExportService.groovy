@@ -268,7 +268,7 @@ class ExcelExportService {
                        "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
                        "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"]
         }
-        Integer rowNum = initializeSheet(sheet, headers, null)
+        Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
 
         userQuery = userQuery ? userQuery?.trim() : ''
         userTagValueFilter = userTagValueFilter ? userTagValueFilter?.trim() : ''
