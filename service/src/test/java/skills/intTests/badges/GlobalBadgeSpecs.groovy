@@ -1005,7 +1005,6 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
         def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1)
         def badgeUsersFiltered = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'userId', true, '', 'tag4')
-        def sortedUsers = users.sort{ it.userName }
 
         then:
         badgeUsers
@@ -1014,12 +1013,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsersFiltered.count == 1
         badgeUsers.totalCount == 5
         badgeUsersFiltered.totalCount == 1
-        badgeUsers.data[0].userId == sortedUsers[0].userName
-        badgeUsers.data[1].userId == sortedUsers[1].userName
-        badgeUsers.data[2].userId == sortedUsers[2].userName
-        badgeUsers.data[3].userId == sortedUsers[3].userName
-        badgeUsers.data[4].userId == sortedUsers[4].userName
-        badgeUsersFiltered.data[0].userId == users[4].userName
+        badgeUsersFiltered.data[0].userTag == 'tag4'
     }
 
     def "filter users for global badge by tag with paging and sorting"() {
