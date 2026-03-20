@@ -575,7 +575,6 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
         def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'totalProgress', false)
         println JsonOutput.prettyPrint(JsonOutput.toJson(badgeUsers))
-        List<String> userNames = users.collect { it.userName }.sort()
 
         then:
         badgeUsers
@@ -583,15 +582,15 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsers.totalCount == 3
         badgeUsers.totalPoints == 1
         badgeUsers.totalLevels == 3
-        badgeUsers.data[0].userId == userNames[0]
+        badgeUsers.data[0].userId == users[0].userName
         badgeUsers.data[0].skillsAchieved == 1
         badgeUsers.data[0].numLevelsAchieved == 1
         badgeUsers.data[0].totalProgress == 2
-        badgeUsers.data[1].userId == userNames[1]
+        badgeUsers.data[1].userId == users[1].userName
         badgeUsers.data[1].skillsAchieved == 1
         badgeUsers.data[1].numLevelsAchieved == 0
         badgeUsers.data[1].totalProgress == 1
-        badgeUsers.data[2].userId == userNames[2]
+        badgeUsers.data[2].userId == users[2].userName
         badgeUsers.data[2].skillsAchieved == 0
         badgeUsers.data[2].numLevelsAchieved == 0
         badgeUsers.data[2].totalProgress == 0
