@@ -38,6 +38,7 @@ import skills.storage.model.SkillRelDef
 import skills.storage.repos.GlobalProgressMetricsRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.UserQuizAttemptRepo
 import skills.utils.InputSanitizer
 
 import java.util.stream.Stream
@@ -78,6 +79,9 @@ class ExcelExportService {
 
     @Autowired
     GlobalProgressMetricsRepo globalProgressMetricsRepo
+
+    @Autowired
+    UserQuizAttemptRepo userQuizAttemptRepo
 
     @Transactional(readOnly = true)
     void exportUsersProgress(Workbook workbook, String projectId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter) {
@@ -310,6 +314,76 @@ class ExcelExportService {
             }
         } finally {
             userProgressMetrics.close()
+        }
+    }
+
+    @Transactional(readOnly = true)
+    void exportQuizRuns(Workbook workbook, String userQuery, String nameQuery, String userIdFilter, PageRequest pageRequest, Date startDate, Date endDate) {
+        GlobalProgressMetricsService.ProjectIdsAndQuizIds projectIdsAndQuizIds = globalProgressMetricsService.getProjectIdsAndQuizIdsForCurrentUser()
+        List<String> quizIds = projectIdsAndQuizIds.quizIds
+        Boolean hasAnyUserCommunityOnlyQuizzes = userCommunityService.hasAnyUserCommunityOnlyProjectsOrQuizzes([], quizIds)
+        String userCommunityValue = userCommunityService.getCommunityNameBasedOnConfAndItemStatus(hasAnyUserCommunityOnlyQuizzes)
+
+        String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityValue)
+        Sheet sheet = workbook.createSheet()
+        List<String> headers
+        if (userTagLabel) {
+            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Quiz Name", "Type", "Status", "Number Correct", "Number of Questions", "Date Started (UTC)", "Date Completed (UTC)", "Runtime (seconds)"]
+        } else {
+            headers = ["User ID", "Last Name", "First Name", "Quiz Name", "Type", "Status", "Number Correct", "Number of Questions", "Date Started (UTC)", "Date Completed (UTC)", "Runtime (seconds)"]
+        }
+        Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
+        CellStyle dateStyle = workbook.createCellStyle()
+        dateStyle.setDataFormat((short) 22) // NOTE: 14 = "mm/dd/yyyy"
+
+        Cell cell = null
+        userQuery = userQuery ? userQuery?.trim() : ''
+        nameQuery = nameQuery ? nameQuery?.trim() : ''
+        userIdFilter = userIdFilter ? userIdFilter?.trim() : ''
+
+        Stream<UserQuizAttemptRepo.QuizRun> quizRunInfoStream = userQuizAttemptRepo.streamQuizRuns(
+                quizIds,
+                userQuery,
+                userIdFilter,
+                nameQuery,
+                usersTableAdditionalUserTagKey ?: '',
+                null,
+                startDate,
+                endDate,
+                pageRequest)
+        try {
+            quizRunInfoStream.each { quizRunInfo ->
+                Row row = sheet.createRow(rowNum++)
+                Integer colNum = 0
+
+                row.createCell(colNum++).setCellValue(quizRunInfo.userIdForDisplay ?: '')
+                row.createCell(colNum++).setCellValue(quizRunInfo.lastName ?: '')
+                row.createCell(colNum++).setCellValue(quizRunInfo.firstName ?: '')
+                if (userTagLabel) {
+                    row.createCell(colNum++).setCellValue(quizRunInfo.userTag ?: '')
+                }
+                row.createCell(colNum++).setCellValue(quizRunInfo.quizName ?: '')
+                row.createCell(colNum++).setCellValue(quizRunInfo.quizType ?: '')
+                row.createCell(colNum++).setCellValue(quizRunInfo.status ?: '')
+                row.createCell(colNum++).setCellValue(quizRunInfo.numberCorrect ?: 0)
+                row.createCell(colNum++).setCellValue(quizRunInfo.totalAnswers ?: 0)
+
+                cell = row.createCell(colNum++)
+                cell.setCellStyle(dateStyle)
+                cell.setCellValue(quizRunInfo.started)
+                cell = row.createCell(colNum++)
+                cell.setCellStyle(dateStyle)
+                cell.setCellValue(quizRunInfo.completed)
+
+                Long runtime = quizRunInfo.completed ? (quizRunInfo.completed.time - quizRunInfo.started.time) / 1000 : null
+                row.createCell(colNum++).setCellValue(runtime)
+
+            }
+            if (projectExportHeaderAndFooter) {
+                addDataHeaderOrFooter(sheet, rowNum++, headers.size(), projectExportHeaderAndFooter)
+            }
+        } finally {
+            quizRunInfoStream.close()
         }
     }
 

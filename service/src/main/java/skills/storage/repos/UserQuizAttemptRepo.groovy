@@ -26,6 +26,8 @@ import skills.controller.result.model.MyQuizAttempt
 import skills.storage.model.UserQuizAttempt
 import skills.storage.model.UserQuizAttempt.QuizAttemptStatus
 
+import java.util.stream.Stream
+
 interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
 
     static interface QuizCounts {
@@ -150,8 +152,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
         @Nullable
         Integer getTotalAnswers()
     }
-
-    @Query(value = '''select quizAttempt.id                as attemptId,
+    final static String FIND_QUIZ_RUNS_SQL = '''select quizAttempt.id                as attemptId,
                            quizAttempt.started           as started,
                            quizAttempt.completed         as completed,
                            case when quizDef.type = 'Survey' and quizAttempt.status = 'PASSED' then 'COMPLETED' else quizAttempt.status end as status,
@@ -190,7 +191,9 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                       (lower(CONCAT(userAttrs.first_name, ' ', userAttrs.last_name, ' (',  userAttrs.user_id_for_display, ')')) like lower(CONCAT(\'%\', :userQuery, \'%\'))) OR
                       (lower(CONCAT(userAttrs.user_id_for_display, ' (', userAttrs.last_name, ', ', userAttrs.first_name,  ')')) like lower(CONCAT(\'%\', :userQuery, \'%\'))))
                       and quizDef.quiz_id in :quizIds
-     ''', nativeQuery = true)
+     '''
+
+    @Query(value = FIND_QUIZ_RUNS_SQL, nativeQuery = true)
     Page<QuizRun> findQuizRuns(@Param('quizIds') List<String> quizIds,
                                @Param('userQuery') String userQuery,
                                @Param('userIdFilter') String userIdFilter,
@@ -200,6 +203,17 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                                @Param('startDate') Date startDate,
                                @Param('endDate') Date endDate,
                                PageRequest pageRequest)
+
+    @Query(value = FIND_QUIZ_RUNS_SQL, nativeQuery = true)
+    Stream<QuizRun> streamQuizRuns(@Param('quizIds') List<String> quizIds,
+                                   @Param('userQuery') String userQuery,
+                                   @Param('userIdFilter') String userIdFilter,
+                                   @Param('nameQuery') String nameQuery,
+                                   @Param('usersTableAdditionalUserTagKey') String usersTableAdditionalUserTagKey,
+                                   @Nullable@Param('quizAttemptStatus') String quizAttemptStatus,
+                                   @Param('startDate') Date startDate,
+                                   @Param('endDate') Date endDate,
+                                   PageRequest pageRequest)
 
     @Query(value = '''
         select attempts.id as attemptId,

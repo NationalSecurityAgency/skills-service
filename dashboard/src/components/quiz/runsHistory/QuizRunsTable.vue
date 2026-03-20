@@ -22,7 +22,7 @@ import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import InputText from "primevue/inputtext";
 import HighlightedValue from "@/components/utils/table/HighlightedValue.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
-import {computed, onMounted, ref, watch} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {useStorage} from "@vueuse/core";
 import QuizService from "@/components/quiz/QuizService.js";
 import {useRoute} from "vue-router";
@@ -34,6 +34,8 @@ import {useResponsiveBreakpoints} from "@/components/utils/misc/UseResponsiveBre
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 import {useUserTagsUtils} from "@/components/utils/UseUserTagsUtils.js";
+import { useExportUtil } from '@/components/utils/UseExportUtil.js'
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import RemovalValidation from "@/components/utils/modal/RemovalValidation.vue";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
@@ -48,6 +50,8 @@ const responsive = useResponsiveBreakpoints()
 const colors = useColors()
 const numberFormat = useNumberFormat()
 const userTagsUtils = useUserTagsUtils()
+const exportUtil = useExportUtil()
+const appConfig = useAppConfig()
 
 const emits = defineEmits(['on-clear-filter'])
 const props = defineProps({
@@ -95,6 +99,7 @@ const deleteQuizRunInfo = ref({
   quizRun: {},
 })
 
+const isExporting = ref(false)
 const totalRows = ref(0)
 const filtering = ref(false)
 const fields = []
@@ -236,6 +241,27 @@ const loadData = () => {
         options.value.busy = false
       })
 }
+const exportQuizRuns = () => {
+  const orderBy =
+      sortInfo.value.sortBy === appConfig.usersTableAdditionalUserTagKey
+          ? 'userTag'
+          : sortInfo.value.sortBy
+  isExporting.value = true
+
+  const dateRange = timeUtils.prepareDateRange(internalDateRange.value)
+  const params = {
+    userQuery: userFilter.value ? userFilter.value.trim() : '',
+    nameQuery: quizNameFilter.value ? quizNameFilter.value.trim() : '',
+    orderBy,
+    ascending: sortInfo.value.sortOrder === 1,
+    startDate: dateRange.startDate,
+    endDate: dateRange.endDate
+  }
+
+  return exportUtil.ajaxDownload('/app/quiz-runs/export/excel', params).then((res) => {
+    isExporting.value = false
+  })
+}
 
 const getQuizRunHistory = (params) => {
   return route.params.quizId ? QuizService.getQuizRunsHistory(route.params.quizId, params) : QuizService.getGlobalQuizRunsHistory(params)
@@ -362,16 +388,26 @@ const calculateQuizNameLink = (quizId, attemptId) => {
                         data-cy="userResetBtn"/>
         </div>
 
-        <div class="mt-5">
-          <MultiSelect
-              class="w-full lg:w-auto"
-              v-model="additionalSelectedColumns"
-              :options="additionalColumns"
-              display="chip"
-              optionLabel="label"
-              @update:modelValue="onColumnToggle"
-              placeholder="Optional Fields"
-              data-cy="quizRunTable-additionalColumns"/>
+        <div class="mt-5 flex mb-2 justify-between items-center">
+          <div class="flex gap-2">
+            <MultiSelect
+                class="w-full lg:w-auto"
+                v-model="additionalSelectedColumns"
+                :options="additionalColumns"
+                display="chip"
+                optionLabel="label"
+                @update:modelValue="onColumnToggle"
+                placeholder="Optional Fields"
+                data-cy="quizRunTable-additionalColumns"/>
+          </div>
+          <div class="flex justify-end flex-wrap">
+            <SkillsButton icon="fa fa-download"
+                          label="Export"
+                          :disabled="totalRows <= 0 || options.busy || isExporting"
+                          outlined
+                          @click="exportQuizRuns"
+                          data-cy="exportBtn" size="small"/>
+          </div>
         </div>
       </template>
 

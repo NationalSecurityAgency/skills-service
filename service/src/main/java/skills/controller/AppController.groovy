@@ -96,6 +96,9 @@ class AppController {
     @Autowired
     GlobalProgressExportResult globalProgressExportResult
 
+    @Autowired
+    GlobalQuizRunsExportResult globalQuizRunsExportResult
+
     static final RESERVERED_PROJECT_ID = ShareSkillsService.ALL_SKILLS_PROJECTS
 
     @RequestMapping(value = "/projects", method = RequestMethod.GET, produces = "application/json")
@@ -357,6 +360,28 @@ class AppController {
         List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
         userIdFilter = "null" == userIdFilter ? "" : userIdFilter
         return globalMetricsService.getQuizRuns(userQuery, userIdFilter, nameQuery, null, pageRequest, dates[0], dates[1]);
+    }
+
+    @RequestMapping(value = "/quiz-runs/export/excel", method = RequestMethod.GET)
+    ModelAndView exportQuizRuns(@RequestParam(name = "query", defaultValue = "") String userQuery,
+                                   @RequestParam(name = "nameQuery", defaultValue = "") String nameQuery,
+                                   @RequestParam String orderBy,
+                                   @RequestParam Boolean ascending,
+                                   @RequestParam(name = "userIdFilter", defaultValue = "") String userIdFilter,
+                                   @RequestParam(required = false) String startDate,
+                                   @RequestParam(required = false) String endDate) {
+        PageRequest pageRequest = TablePageUtil.createPagingRequest(Integer.MAX_VALUE, 1, orderBy, ascending)
+        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
+        userIdFilter = "null" == userIdFilter ? "" : userIdFilter
+        
+        ModelAndView mav = new ModelAndView(globalQuizRunsExportResult)
+        mav.addObject("userQuery", userQuery)
+        mav.addObject("nameQuery", nameQuery)
+        mav.addObject("userIdFilter", userIdFilter)
+        mav.addObject("pageRequest", pageRequest)
+        mav.addObject("startDate", dates[0])
+        mav.addObject("endDate", dates[1])
+        return mav
     }
 
     @RequestMapping(value = "/progress-metrics/{userId}", method =  RequestMethod.GET, produces = "application/json")

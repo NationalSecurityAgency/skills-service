@@ -480,4 +480,53 @@ WHERE
                                                            @Param("startDate") Date startDate,
                                                            @Param("endDate") Date endDate)
 
+    static interface QuizRunInfo {
+        String getUserId()
+        String getUserIdForDisplay()
+        String getFirstName()
+        String getLastName()
+        String getQuizName()
+        String getQuizType()
+        String getStatus()
+        Integer getRuntimeInSeconds()
+        Integer getNumQuestions()
+        String getDateStarted()
+        String getDateCompleted()
+    }
+
+    @Query(value = """
+        SELECT DISTINCT 
+            ua.user_id as userId,
+            userAttrs.user_id_for_display as userIdForDisplay,
+            userAttrs.first_name as firstName,
+            userAttrs.last_name as lastName,
+            qd.quiz_id as quizName,
+            qd.type as quizType,
+            uqa.status as status,
+            EXTRACT(EPOCH FROM (uqa.started - TIMESTAMP '1970-01-01 00:00:00')) as runtimeInSeconds,
+            (SELECT COUNT(*) FROM user_quiz_answer uqans WHERE uqans.user_quiz_attempt_id = uqa.id) as numQuestions,
+            TO_CHAR(uqa.started AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS') as dateStarted,
+            CASE 
+                WHEN uqa.completed IS NOT NULL THEN TO_CHAR(uqa.completed AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS')
+                ELSE NULL 
+            END as dateCompleted
+        FROM user_quiz_attempt uqa
+        JOIN quiz_definition qd ON uqa.quiz_definition_ref_id = qd.id
+        JOIN user_attrs userAttrs ON uqa.user_id = userAttrs.user_id
+        WHERE (:userQuery = '' OR lower(userAttrs.user_id_for_display) like lower(concat('%', :userQuery, '%')))
+            AND (:userIdFilter = '' OR uqa.user_id = :userIdFilter)
+            AND (:nameQuery = '' OR lower(qd.quiz_id) like lower(concat('%', :nameQuery, '%')))
+            AND qd.quiz_id IN :quizIds
+            AND (:startDate IS NULL OR uqa.started >= :startDate)
+            AND (:endDate IS NULL OR uqa.started <= :endDate)
+        ORDER BY uqa.started DESC
+    """, nativeQuery = true)
+    Stream<QuizRunInfo> streamQuizRuns(@Param("userQuery") String userQuery,
+                                       @Param("userIdFilter") String userIdFilter,
+                                       @Param("nameQuery") String nameQuery,
+                                       @Param("quizIds") List<String> quizIds,
+                                       Pageable pageable,
+                                       @Param("startDate") Date startDate,
+                                       @Param("endDate") Date endDate)
+
 }

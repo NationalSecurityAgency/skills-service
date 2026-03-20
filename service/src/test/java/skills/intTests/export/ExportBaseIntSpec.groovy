@@ -84,12 +84,17 @@ class ExportBaseIntSpec extends DefaultIntSpec {
         printSheet(sheet)
         assert sheet.getPhysicalNumberOfRows() == data.size()
 
-        data.eachWithIndex { dataRow, rowIndex ->
+        data.eachWithIndex { expectedDataRow, rowIndex ->
             Row row = sheet.getRow(rowIndex)
-            for (int i = 0; i < dataRow.size(); i++) {
-                assert normalize(row.getCell(i).toString()) == normalize(dataRow.get(i)), "row: ${rowIndex} col: ${i} expected: ${dataRow.get(i)} actual: ${row.getCell(i).toString()}"
+            List<String> actualDataRow = getDataRow(row)
+            for (int i = 0; i < expectedDataRow.size(); i++) {
+                assert normalize(actualDataRow.get(i)) == normalize(expectedDataRow.get(i)), "row: ${rowIndex} col: ${i} expected: ${expectedDataRow.get(i)} actual: ${actualDataRow.get(i)}"
             }
         }
+    }
+
+    List<String> getDataRow(Row row) {
+        return row.collect { it.toString() }
     }
 
     void printSheet(Sheet sheet) {
