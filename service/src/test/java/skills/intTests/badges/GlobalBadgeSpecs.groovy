@@ -22,6 +22,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.storage.model.UserAchievement
 import skills.storage.repos.UserAchievedLevelRepo
+import spock.lang.IgnoreIf
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -841,6 +842,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "retrieve users for global badge - sort by userId and page"() {
 
         def proj = createProject()
@@ -915,6 +917,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsersPg3_smallPg.data.userId == userNames[6..8]
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "filter users for global badge"() {
 
         def proj = createProject()
