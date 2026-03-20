@@ -15,20 +15,38 @@ limitations under the License.
 */
 <script setup>
 
-import {ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
 import QuizRunsTable from "@/components/quiz/runsHistory/QuizRunsTable.vue";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import OverallMetricsCards from "@/components/utils/cards/OverallMetricsCards.vue";
+import MetricsService from "@/components/metrics/MetricsService.js";
 
 const announcer = useSkillsAnnouncer()
 
 const filterRange = ref([]);
+const isLoading = ref(true)
+const metricsData = ref({})
 
+onMounted(() => {
+  loadMetrics()
+})
 const clearDateFilter = () => {
   announcer.polite("Clearing the date range filter")
   filterRange.value = [];
 };
+
+const loadMetrics = () => {
+  isLoading.value = true
+  MetricsService.getOverallMetrics()
+      .then((response) => {
+        metricsData.value = response
+      })
+      .finally(() => {
+        isLoading.value = false
+      })
+}
 </script>
 
 <template>
@@ -37,7 +55,15 @@ const clearDateFilter = () => {
                    :title-level="1"
                    aria-label="Quiz and Survey Runs" />
 
-    <Card :pt="{ body: { class: 'p-0!' } }">
+    <skills-spinner v-if="isLoading" :is-loading="isLoading" class="my-10"/>
+
+    <OverallMetricsCards v-if="!isLoading"
+                         :data="metricsData"
+                         :show-project-card="false"
+                         :show-badge-card="false"
+                         @on-settings-changed="loadMetrics"/>
+
+    <Card v-if="!isLoading" :pt="{ body: { class: 'p-0!' } }">
       <template #content>
 
         <quiz-runs-table

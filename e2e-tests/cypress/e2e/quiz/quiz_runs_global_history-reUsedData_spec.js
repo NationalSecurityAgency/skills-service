@@ -93,6 +93,10 @@ describe('Global Quiz Runs History Tests', () => {
         cy.afterTestSuiteThatReusesData()
     });
 
+    beforeEach(() => {
+        cy.execSql('delete from settings where setting = \'globalMetricsExcludedProjectsIds\' or setting = \'globalMetricsExcludedQuizIds\'', true)
+    })
+
     it('view runs', function () {
         cy.intercept('/app/quiz-runs**').as('quizRuns')
         cy.visit('/administrator/quiz-runs');
@@ -487,6 +491,53 @@ describe('Global Quiz Runs History Tests', () => {
         cy.get('[data-cy="quizRunsHistoryTable"] [data-cy="row1-quizPageLink"]').click()
         cy.get('[data-cy="title"]').contains('This is quiz 1')
         cy.get('[data-cy="subPageHeader"]').contains('Questions')
+    });
+
+    it('filter quizzes', function () {
+        cy.intercept('/app/quiz-runs**').as('quizRuns')
+        cy.visit('/administrator/quiz-runs');
+        cy.wait('@quizRuns')
+        cy.get('[data-cy="quizRunsHistoryTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '14')
+
+        cy.get('[data-cy="overallMetricsCards"] [data-cy="numExcludedAssessments"]').should('not.exist')
+        cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"] [data-cy="mediaInfoCardTitle"]').contains('3 Assessments')
+        cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"] [data-cy="mediaInfoCardSubTitle"]').contains('2 Quizzes and 1 Survey')
+
+        cy.get('[data-cy="confQuizExclusionBtn"]').click()
+
+        cy.get('[data-pc-name="dialog"] [data-pc-section="title"]').contains('Configure Included Assessments')
+
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="sourcelistcontainer"] [data-pc-section="header"]').contains("Included Assessments")
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="targetlistcontainer"] [data-pc-section="header"]').contains("Excluded Assessments")
+
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="sourcelistcontainer"] [data-pc-section="option"][aria-posinset="1"]').contains("This is survey 3")
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="sourcelistcontainer"] [data-pc-section="option"][aria-posinset="1"]').contains("(Survey)")
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="sourcelistcontainer"] [data-pc-section="option"][aria-posinset="2"]').contains("This is quiz 2")
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="sourcelistcontainer"] [data-pc-section="option"][aria-posinset="2"]').contains("(Quiz)")
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="sourcelistcontainer"] [data-pc-section="option"][aria-posinset="3"]').contains("This is quiz 1")
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="sourcelistcontainer"] [data-pc-section="option"][aria-posinset="3"]').contains("(Quiz)")
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="sourcelistcontainer"] [data-pc-section="option"][aria-posinset="4"]').should('not.exist')
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="targetlistcontainer"] [data-pc-section="option"][aria-posinset="1"]').should('not.exist')
+
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="sourcelistcontainer"] [data-pc-section="option"][aria-posinset="1"]').click()
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="sourcelistcontainer"] [data-pc-section="option"][aria-posinset="2"]').click()
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-name="pcmovetotargetbutton"]').click()
+
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="sourcelistcontainer"] [data-pc-section="option"][aria-posinset="1"]').contains("This is quiz 1")
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="sourcelistcontainer"] [data-pc-section="option"][aria-posinset="2"]').should('not.exist')
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="targetlistcontainer"] [data-pc-section="option"][aria-posinset="1"]').contains("This is survey 3")
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="targetlistcontainer"] [data-pc-section="option"][aria-posinset="2"]').contains("This is quiz 2")
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="targetlistcontainer"] [data-pc-section="option"][aria-posinset="3"]').should('not.exist')
+
+        cy.get('[data-pc-name="dialog"] [data-cy="saveDialogBtn"]').click()
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1, value: 'This is quiz 1'}],
+            [{ colIndex: 1, value: 'This is quiz 1'}],
+            [{ colIndex: 1, value: 'This is quiz 1'}],
+            [{ colIndex: 1, value: 'This is quiz 1'}],
+            [{ colIndex: 1, value: 'This is quiz 1'}],
+        ], 10);
     });
 
 });

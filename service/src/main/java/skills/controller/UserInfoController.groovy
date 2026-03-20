@@ -178,6 +178,16 @@ class UserInfoController {
         return settingsService.getUserSettingsForGroup(currentUser.username, USER_PREFS_GROUP)
     }
 
+    @RequestMapping(value = "/userInfo/settings/{settingName}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult getSingleUserSetting(@PathVariable("settingName") String settingName) {
+        SkillsValidator.isNotBlank(settingName, "settingName")
+        UserInfo currentUser = loadCurrentUser(true)
+        SettingsResult settingsResult = settingsService.getUserSetting(currentUser.username, settingName, USER_PREFS_GROUP, false)
+
+        return settingsResult ? RequestResult.success(settingsResult)
+                : RequestResult.success(null, "Setting not found")
+    }
+
     @RequestMapping(value = "/userInfo/settings", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult saveUserSettings(@RequestBody List<UserSettingsRequest> values) {
         SkillsValidator.isNotNull(values, "Settings")

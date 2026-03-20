@@ -21,8 +21,9 @@ import groovy.transform.Canonical
 class RequestResult {
     boolean success
     String  explanation
+    Object data
 
-    static RequestResult success() {
-        return new RequestResult(success: true)
+    static RequestResult success(Object data = null, String explanation = null) {
+        return new RequestResult(success: true, explanation: explanation, data: data)
     }
 }

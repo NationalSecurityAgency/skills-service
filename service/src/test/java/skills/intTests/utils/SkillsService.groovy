@@ -1337,6 +1337,10 @@ class SkillsService {
         return wsHelper.appGet(getUserSettingsUrl())
     }
 
+    def getSingleUserSetting(String setting){
+        return wsHelper.appGet("${getUserSettingsUrl()}/${setting}")
+    }
+
     def getPublicConfigs() {
         wsHelper.get("/public/config", "", [:])
     }

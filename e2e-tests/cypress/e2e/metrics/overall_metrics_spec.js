@@ -65,6 +65,10 @@ describe('Global/Overall Metrics', () => {
         cy.afterTestSuiteThatReusesData()
     });
 
+    beforeEach(() => {
+        cy.execSql('delete from settings where setting = \'globalMetricsExcludedProjectsIds\' or setting = \'globalMetricsExcludedQuizIds\'', true)
+    })
+
     it('overall metrics page', () => {
         cy.intercept('/app/overall-metrics/overallDistinctUsersOverTimeMetricsBuilder**').as('overallDistinctUsersOverTime');
         cy.visit('/administrator/overall-metrics');
@@ -127,6 +131,84 @@ describe('Global/Overall Metrics', () => {
         cy.get('[data-cy="userTagChart"] [data-pc-section="header"]')
           .contains('Users by Agency');
     });
+
+    it('overall metrics page with project filter', () => {
+        cy.intercept('/app/overall-metrics/overallDistinctUsersOverTimeMetricsBuilder**').as('overallDistinctUsersOverTime');
+        cy.visit('/administrator/overall-metrics');
+        cy.wait('@overallDistinctUsersOverTime');
+
+        cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]')
+            .contains('Org');
+
+        const expected = [
+            [{
+                colIndex: 0,
+                value: 'ABC'
+            }],[{
+                colIndex: 0,
+                value: 'ABC1'
+            }],
+        ];
+        cy.validateTable(userTagsTableSelector, expected, 10)
+
+        cy.get('[data-cy="overallMetricsCards"] [data-cy="numExcludedProjects"]').should('not.exist')
+        cy.get('[data-cy="overallMetricsProjectsCard"] [data-cy="mediaInfoCardTitle"]').contains('3 Projects')
+        cy.get('[data-cy="overallMetricsProjectsCard"] [data-cy="mediaInfoCardSubTitle"]').contains('15 Skills')
+        cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"] [data-cy="mediaInfoCardTitle"]').contains('1 Assessment')
+        cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"] [data-cy="mediaInfoCardSubTitle"]').contains('1 Quiz and 0 Surveys')
+
+        cy.get('[data-cy="confIncludedProjectsBtn"]').click()
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-section="sourcelistcontainer"] [data-pc-section="option"][aria-posinset="1"]').click()
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-name="pcmovetotargetbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-cy="saveDialogBtn"]').click()
+
+        cy.get('[data-cy="overallMetricsCards"] [data-cy="numExcludedProjects"]').contains('1 Project Excluded')
+        cy.get('[data-cy="overallMetricsProjectsCard"] [data-cy="mediaInfoCardTitle"]').contains('2 Projects')
+        cy.get('[data-cy="overallMetricsProjectsCard"] [data-cy="mediaInfoCardSubTitle"]').contains('10 Skills')
+        cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"] [data-cy="mediaInfoCardTitle"]').contains('1 Assessment')
+        cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"] [data-cy="mediaInfoCardSubTitle"]').contains('1 Quiz and 0 Surveys')
+
+        cy.validateTable(userTagsTableSelector, [
+            [{ colIndex: 0, value: 'ABC' }]
+        ], 10)
+    })
+
+    it('overall metrics page with project filter - no results', () => {
+        cy.intercept('/app/overall-metrics/overallDistinctUsersOverTimeMetricsBuilder**').as('overallDistinctUsersOverTime');
+        cy.visit('/administrator/overall-metrics');
+        cy.wait('@overallDistinctUsersOverTime');
+
+        cy.get('[data-cy="distinctNumUsersOverTime"]')
+        cy.get('[data-cy="userTagTableCard"]')
+        cy.get('[data-cy="userTagsTable-dutyOrganization"]')
+        cy.get('[data-cy="noContent"]').should('not.exist')
+
+        cy.get('[data-cy="overallMetricsCards"] [data-cy="numExcludedProjects"]').should('not.exist')
+        cy.get('[data-cy="overallMetricsProjectsCard"] [data-cy="mediaInfoCardTitle"]').contains('3 Projects')
+        cy.get('[data-cy="overallMetricsProjectsCard"] [data-cy="mediaInfoCardSubTitle"]').contains('15 Skills')
+        cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"] [data-cy="mediaInfoCardTitle"]').contains('1 Assessment')
+        cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"] [data-cy="mediaInfoCardSubTitle"]').contains('1 Quiz and 0 Surveys')
+
+        cy.get('[data-cy="confIncludedProjectsBtn"]').click()
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-name="pcmovealltotargetbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-cy="saveDialogBtn"]').click()
+
+        cy.get('[data-cy="confQuizExclusionBtn"]').click()
+        cy.get('[data-cy="confIncludedMetricsDialog"] [data-pc-name="pcmovealltotargetbutton"]').click()
+        cy.get('[data-pc-name="dialog"] [data-cy="saveDialogBtn"]').click()
+
+        cy.get('[data-cy="overallMetricsCards"] [data-cy="numExcludedProjects"]').contains('3 Projects Excluded')
+        cy.get('[data-cy="overallMetricsProjectsCard"] [data-cy="mediaInfoCardTitle"]').contains('0 Projects')
+        cy.get('[data-cy="overallMetricsProjectsCard"] [data-cy="mediaInfoCardSubTitle"]').contains('0 Skills')
+        cy.get('[data-cy="overallMetricsCards"] [data-cy="numExcludedAssessments"]').contains('1 Assessment Excluded')
+        cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"] [data-cy="mediaInfoCardTitle"]').contains('0 Assessments')
+        cy.get('[data-cy="overallMetricsQuizzesAndSurveysCard"] [data-cy="mediaInfoCardSubTitle"]').contains('0 Quizzes and 0 Surveys')
+
+        cy.get('[data-cy="distinctNumUsersOverTime"]').should('not.exist')
+        cy.get('[data-cy="userTagTableCard"]').should('not.exist')
+        cy.get('[data-cy="userTagsTable-dutyOrganization"]').should('not.exist')
+        cy.get('[data-cy="noContent"]')
+    })
 
     it('user tag charts are not shown when overallMetricsTagCharts prop is not configured', () => {
         cy.intercept('GET', '/public/config', (req) => {

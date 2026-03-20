@@ -57,29 +57,30 @@ describe('Global Users Progress With Reused Data', () => {
         cy.createSurveyDef(3)
         cy.createSurveyMultipleChoiceQuestionDef(3, 1)
 
-        const users = ['user1', 'user2', 'user3']
+        const users = ['user1', 'user2', 'user3', 'user4']
 
         // user 1
-        cy.reportSkill(1, 1, users[0])
+        cy.reportSkill(1, 1, users[0], 'now')
         cy.runQuizForUser(1, users[0], [{selectedIndex: [0]}], true)
         cy.runQuizForUser(2, users[0], [{selectedIndex: [0]}], true)
 
 
         // user 2
-        cy.reportSkill(1, 1, users[1])
-        cy.reportSkill(2, 1, users[1])
+        cy.reportSkill(1, 1, users[1], 'now')
+        cy.reportSkill(2, 1, users[1], 'now')
         cy.runQuizForUser(3, users[1], [{selectedIndex: [0]}], false)
 
         // user 3
-        cy.reportSkill(1, 1, users[2])
-        cy.reportSkill(1, 2, users[2])
-        cy.reportSkill(2, 1, users[2])
-        cy.reportSkill(2, 2, users[2])
-        cy.reportSkill(2, 3, users[2])
-        cy.reportSkill(3, 1, users[2])
-        cy.reportSkill(3, 2, users[2])
-        cy.reportSkill(3, 3, users[2])
-        cy.reportSkill(3, 3, users[2])
+        cy.reportSkill(1, 1, users[2], 'now')
+        cy.reportSkill(1, 2, users[2], 'now')
+        cy.reportSkill(2, 1, users[2], 'now')
+        cy.reportSkill(2, 2, users[2], 'now')
+        cy.reportSkill(2, 3, users[2], 'now')
+        cy.reportSkill(3, 1, users[2], 'now')
+        cy.reportSkill(3, 2, users[2], 'now')
+        cy.reportSkill(3, 3, users[2], 'now')
+        cy.reportSkill(3, 3, users[2], 'now')
+
 
         cy.runQuizForUser(1, users[2], [{selectedIndex: [1]}], true)
         cy.runQuizForUser(1, users[2], [{selectedIndex: [0]}], true)

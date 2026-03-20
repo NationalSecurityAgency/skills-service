@@ -45,9 +45,7 @@ const numberFormat = useNumberFormat()
 const exportUtil = useExportUtil()
 
 onMounted(() => {
-  loadData().then(() => {
-    hasData.value = userProgress.value?.numTotalMetricItems > 0
-  })
+  initialDataLoad()
 })
 
 const userProgress = ref({})
@@ -61,6 +59,15 @@ const pageSize = useStorage('usersOverallProgressTable-pageSize', 10)
 const possiblePageSizes = [10, 20, 50, 100]
 const sortInfo = ref({sortOrder: -1, sortBy: 'numSkillsEarned'})
 const expandedRows = ref([])
+
+const initialDataLoad = () => {
+  isLoading.value = true
+  loadData().then(() => {
+    hasData.value = userProgress.value?.numTotalMetricItems > 0
+  }).finally(() => {
+    isLoading.value = false
+  })
+}
 
 const loadData = () => {
   isTableLoading.value = true
@@ -82,7 +89,6 @@ const loadData = () => {
     userProgress.value = {...data, metricItemsPage}
     totalRows.value = data.numTotalMetricItems
   }).finally(() => {
-    isLoading.value = false
     isTableLoading.value = false
   })
 }
@@ -146,7 +152,7 @@ const onRowExpanded = (expandEvent) => {
     <SubPageHeader title="Users Progress" :title-level="1" />
     <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-6"/>
     <div v-show="!isLoading">
-      <OverallMetricsCards :data="userProgress" />
+      <OverallMetricsCards :data="userProgress" @on-settings-changed="initialDataLoad"/>
       <Card v-show="hasData"
             :pt="{ body: { class: 'p-0!' } }">
         <template #content>

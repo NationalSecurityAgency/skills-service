@@ -21,6 +21,7 @@ import groovy.transform.Canonical
 class GlobalMetricsResult {
 
     Integer numTotalProjects
+    Integer numExcludedProjects
 
     Integer numTotalSkills
     Integer numTotalBadges
@@ -29,5 +30,6 @@ class GlobalMetricsResult {
 
     Integer numTotalQuizzes
     Integer numTotalSurveys
+    Integer numExcludedQuizzesAndSurveys
 }
 

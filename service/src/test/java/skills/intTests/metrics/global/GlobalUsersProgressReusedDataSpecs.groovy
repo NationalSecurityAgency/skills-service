@@ -18,6 +18,7 @@ package skills.intTests.metrics.global
 import groovy.transform.Canonical
 import groovy.transform.ToString
 import skills.intTests.utils.SkillsClientException
+import skills.metrics.GlobalProgressMetricsService
 import spock.lang.IgnoreIf
 
 class GlobalUsersProgressReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
@@ -323,6 +324,235 @@ class GlobalUsersProgressReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
                 numBadgesEarned: 0, numGlobalBadgesEarned: 0,
                 userTag: "XYZ1"
         ))
+    }
+
+    def "admins[0] point of view - filter one project, one quiz and one survey" () {
+        admins[0].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, "${p1Skills[0].projectId}")
+        admins[0].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_QUIZ_IDS, "${quizzes[0].quizId}, ${surveys[0].quizId}")
+        admins[1].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, "${p1Skills[0].projectId},${p2Skills[0].projectId}")
+        admins[1].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, quizzes.quizId.join(","))
+        when:
+        def res = admins[0].getGlobalUserProgressMetrics("", 15, 1, "numSkillsEarned", false)
+        then:
+        res.numTotalProjects == 2
+        res.numExcludedProjects == 1
+        res.numTotalSkills == 16
+
+        res.numExcludedQuizzesAndSurveys == 2
+        res.numTotalQuizzes == 4
+        res.numTotalSurveys == 3
+
+        res.numTotalBadges == 4
+        res.numTotalProjectBadges == 1
+        res.numTotalGlobalBadges == 3
+
+        res.numTotalMetricItems == 10
+        res.metricItemsPage.size() == 10
+
+        def user0 = res.metricItemsPage.find { it.userId == users[0].userName}
+        assertMetric(user0, new UserProgressMetric(
+                userId: users[0].userName,
+                numQuizAttempts: 2, numQuizzesPassed: 1, numQuizzesFailed: 0, numQuizzesInProgress: 1,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 1, numProjectLevelsEarned: 1, numSubjectLevelsEarned: 1, numSkillsEarned: 1,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 2,
+                userTag: "ABC1"
+        ))
+
+        def user1 = res.metricItemsPage.find { it.userId == users[1].userName}
+        assertMetric(user1, new UserProgressMetric(
+                userId: users[1].userName,
+                numQuizAttempts: 2, numQuizzesPassed: 2, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "ABC1"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[2].userName}, new UserProgressMetric(
+                userId: users[2].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 1, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "KOO4"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[3].userName}, new UserProgressMetric(
+                userId: users[3].userName,
+                numQuizAttempts: 2, numQuizzesPassed: 2, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 2, numProjectLevelsEarned: 2, numSubjectLevelsEarned: 2, numSkillsEarned: 2,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 1,
+                userTag: "KOO5"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[4].userName}, new UserProgressMetric(
+                userId: users[4].userName,
+                numQuizAttempts: 2, numQuizzesPassed: 1, numQuizzesFailed: 1, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "KOO4"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[5].userName}, new UserProgressMetric(
+                userId: users[5].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 0, numQuizzesFailed: 0, numQuizzesInProgress: 1,
+                numSurveys: 1, numSurveysCompleted: 1, numSurveysInProgress: 0,
+                numProjects: 2, numProjectLevelsEarned: 10, numSubjectLevelsEarned: 20, numSkillsEarned: 16,
+                numBadgesEarned: 1, numGlobalBadgesEarned: 3,
+                userTag: ""
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[6].userName}, new UserProgressMetric(
+                userId: users[6].userName,
+                numQuizAttempts: 2, numQuizzesPassed: 1, numQuizzesFailed: 1, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "CBF2"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[7].userName}, new UserProgressMetric(
+                userId: users[7].userName,
+                numQuizAttempts: 0, numQuizzesPassed: 0, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 1, numProjectLevelsEarned: 1, numSubjectLevelsEarned: 2, numSkillsEarned: 2,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "XYZ1"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[8].userName}, new UserProgressMetric(
+                userId: users[8].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 1, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "ABC2"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[9].userName}, new UserProgressMetric(
+                userId: users[9].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 1, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "ABC1"
+        ))
+    }
+
+    def "admins[0] point of view - filter two projects, two quizzes and two surveys" () {
+        admins[0].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, "${p1Skills[0].projectId},${p2Skills[0].projectId}")
+        admins[0].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_QUIZ_IDS, "${quizzes[0].quizId},${quizzes[1].quizId},${surveys[0].quizId},${surveys[1].quizId}")
+        admins[1].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, "${p1Skills[0].projectId},${p2Skills[0].projectId},${p3Skills[0].projectId}")
+        admins[1].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, quizzes.quizId.join(","))
+        when:
+        def res = admins[0].getGlobalUserProgressMetrics("", 15, 1, "numSkillsEarned", false)
+        then:
+        res.numTotalProjects == 1
+        res.numExcludedProjects == 2
+        res.numTotalSkills == 9
+
+        res.numExcludedQuizzesAndSurveys == 4
+        res.numTotalQuizzes == 3
+        res.numTotalSurveys == 2
+
+        res.numTotalBadges == 1
+        res.numTotalProjectBadges == 0
+        res.numTotalGlobalBadges == 1
+
+        res.numTotalMetricItems == 7
+        res.metricItemsPage.size() == 7
+
+        def user0 = res.metricItemsPage.find { it.userId == users[0].userName}
+        assertMetric(user0, new UserProgressMetric(
+                userId: users[0].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 0, numQuizzesFailed: 0, numQuizzesInProgress: 1,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "ABC1"
+        ))
+
+        def user1 = res.metricItemsPage.find { it.userId == users[1].userName}
+        assertMetric(user1, new UserProgressMetric(
+                userId: users[1].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 1, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "ABC1"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[3].userName}, new UserProgressMetric(
+                userId: users[3].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 1, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 1, numProjectLevelsEarned: 1, numSubjectLevelsEarned: 1, numSkillsEarned: 1,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 1,
+                userTag: "KOO5"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[4].userName}, new UserProgressMetric(
+                userId: users[4].userName,
+                numQuizAttempts:1, numQuizzesPassed: 0, numQuizzesFailed: 1, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "KOO4"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[5].userName}, new UserProgressMetric(
+                userId: users[5].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 0, numQuizzesFailed: 0, numQuizzesInProgress: 1,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 1, numProjectLevelsEarned: 5, numSubjectLevelsEarned: 10, numSkillsEarned: 9,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 1,
+                userTag: ""
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[6].userName}, new UserProgressMetric(
+                userId: users[6].userName,
+                numQuizAttempts: 1, numQuizzesPassed: 0, numQuizzesFailed: 1, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 0, numProjectLevelsEarned: 0, numSubjectLevelsEarned: 0, numSkillsEarned: 0,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "CBF2"
+        ))
+
+        assertMetric(res.metricItemsPage.find { it.userId == users[7].userName}, new UserProgressMetric(
+                userId: users[7].userName,
+                numQuizAttempts: 0, numQuizzesPassed: 0, numQuizzesFailed: 0, numQuizzesInProgress: 0,
+                numSurveys: 0, numSurveysCompleted: 0, numSurveysInProgress: 0,
+                numProjects: 1, numProjectLevelsEarned: 1, numSubjectLevelsEarned: 2, numSkillsEarned: 2,
+                numBadgesEarned: 0, numGlobalBadgesEarned: 0,
+                userTag: "XYZ1"
+        ))
+    }
+
+    def "admins[0] point of view - filter all projects, quizzes and surveys" () {
+        admins[0].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, "${p1Skills[0].projectId},${p2Skills[0].projectId},${p3Skills[0].projectId}")
+        admins[0].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_QUIZ_IDS, [quizzes.quizId, surveys.quizId].flatten().join(","))
+        admins[1].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, "${p1Skills[0].projectId},${p2Skills[0].projectId},${p3Skills[0].projectId}")
+        admins[1].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, quizzes.quizId.join(","))
+        when:
+        def res = admins[0].getGlobalUserProgressMetrics("", 15, 1, "numSkillsEarned", false)
+        then:
+        res.numTotalProjects == 0
+        res.numExcludedProjects == 3
+        res.numTotalSkills == 0
+
+        res.numExcludedQuizzesAndSurveys == 9
+        res.numTotalQuizzes == 0
+        res.numTotalSurveys == 0
+
+        res.numTotalBadges == 0
+        res.numTotalProjectBadges == 0
+        res.numTotalGlobalBadges == 0
+
+        res.numTotalMetricItems == 0
+        !res.metricItemsPage
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })

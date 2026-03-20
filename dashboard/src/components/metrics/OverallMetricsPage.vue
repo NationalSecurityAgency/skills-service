@@ -45,6 +45,7 @@ const metricsData = ref({})
 const hasData = computed(() => (metricsData.value?.numTotalProjects + metricsData.value?.numTotalQuizzes + metricsData.value?.numTotalSurveys) > 0)
 
 const loadData = () => {
+  isLoading.value = true
   MetricsService.getOverallMetrics()
     .then((response) => {
       metricsData.value = response
@@ -60,11 +61,11 @@ const loadData = () => {
     <SubPageHeader title="Overall Metrics" :title-level="1"> </SubPageHeader>
     <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-6" />
     <div v-if="!isLoading">
-      <OverallMetricsCards :data="metricsData" />
-      <div class="flex">
+      <OverallMetricsCards :data="metricsData" @on-settings-changed="loadData" />
+      <div v-if="hasData" class="flex">
         <NumUsersPerDay :title="'Overall Users per day'" :is-overall="true"/>
       </div>
-      <div v-if="tagCharts"
+      <div v-if="tagCharts && hasData"
            class="flex flex-col gap-4 mt-4"
            data-cy="userTagCharts">
         <div v-for="(tagChart, index) in tagCharts" :key="`${tagChart.key}-${index}`" style="min-width: 30vw;">
@@ -79,7 +80,7 @@ const loadData = () => {
       </div>
       <no-content2
         v-if="!hasData"
-        class="mt-6"
+        class="mt-10"
         title="No Metrics Data Available"
         message="Cross-project metrics and analytics data will display here once there is sufficient activity across your administered projects, quizzes and surveys"></no-content2>
     </div>

@@ -24,12 +24,15 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
+import skills.controller.UserInfoController
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.LabelCountItem
+import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.TableResult
 import skills.controller.result.model.globalMetrics.*
 import skills.services.admin.UserCommunityService
 import skills.services.quiz.QuizDefService
+import skills.services.settings.SettingsService
 import skills.storage.model.*
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
@@ -42,6 +45,8 @@ import static org.springframework.data.domain.Sort.Direction.DESC
 @Service
 @Slf4j
 class GlobalProgressMetricsService {
+    static final String USER_PREF_FILTER_PROJ_IDS = "globalMetricsExcludedProjectsIds"
+    static final String USER_PREF_FILTER_QUIZ_IDS = "globalMetricsExcludedQuizIds"
 
     enum GroupingType {
         DAY('day'),
@@ -70,6 +75,9 @@ class GlobalProgressMetricsService {
     UserRoleRepo userRoleRepo
 
     @Autowired
+    SettingsService settingsService
+
+    @Autowired
     UserAttrsRepo userAttrsRepo
 
     @Autowired
@@ -96,15 +104,13 @@ class GlobalProgressMetricsService {
     @Profile
     UsersOverallProgressResult loadUsersOverallProgress(String userQuery, String userTagValueFilter, PageRequest pageRequest) {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
-        List<String> projectIds = projectIdsAndQuizIds.projectIds
-        List<String> quizIds = projectIdsAndQuizIds.quizIds
 
         userQuery = userQuery ? userQuery?.trim() : ''
         userTagValueFilter = userTagValueFilter ? userTagValueFilter?.trim() : ''
 
         List<GlobalProgressMetricsRepo.UserProgressMetric> userProgressMetricPage = globalProgressMetricsRepo.findUsersOverallProgress(
-                projectIds,
-                quizIds,
+                projectIdsAndQuizIds.projectIds,
+                projectIdsAndQuizIds.quizIds,
                 userQuery,
                 usersTableAdditionalUserTagKey ?: '',
                 userTagValueFilter,
@@ -113,8 +119,8 @@ class GlobalProgressMetricsService {
         boolean isFirstAndSmallerThanPageSize = userProgressMetricPage.size() < pageRequest.pageSize && pageRequest.pageNumber == 0
         Long numTotalMetricItems = isFirstAndSmallerThanPageSize ? userProgressMetricPage.size()
                 : globalProgressMetricsRepo.countUsersOverallProgress(
-                projectIds,
-                quizIds,
+                projectIdsAndQuizIds.projectIds,
+                projectIdsAndQuizIds.quizIds,
                 userQuery,
                 usersTableAdditionalUserTagKey ?: '',
                 userTagValueFilter)
@@ -140,7 +146,7 @@ class GlobalProgressMetricsService {
             )
         }
 
-        UsersOverallProgressResult res = populateGlobalMetricsResult(projectIds, quizIds, new UsersOverallProgressResult(
+        UsersOverallProgressResult res = populateGlobalMetricsResult(projectIdsAndQuizIds, new UsersOverallProgressResult(
                 numTotalMetricItems: numTotalMetricItems,
                 metricItemsPage: metricItemsPage
         ))
@@ -148,18 +154,20 @@ class GlobalProgressMetricsService {
     }
 
     @Profile
-    private <T extends GlobalMetricsResult> T populateGlobalMetricsResult(List<String> projectIds, List<String> quizIds, T globalMetricsResult) {
-        GlobalProgressMetricsRepo.ProjDefCounts projDefCounts = globalProgressMetricsRepo.findProjectDefCounts(projectIds)
-        Integer totalGlobalBadgeCount = globalProgressMetricsRepo.getTotalGlobalBadgeCountForProjects(projectIds)
+    private <T extends GlobalMetricsResult> T populateGlobalMetricsResult(ProjectIdsAndQuizIds projectIdsAndQuizIds, T globalMetricsResult) {
+        GlobalProgressMetricsRepo.ProjDefCounts projDefCounts = globalProgressMetricsRepo.findProjectDefCounts(projectIdsAndQuizIds.projectIds)
+        Integer totalGlobalBadgeCount = globalProgressMetricsRepo.getTotalGlobalBadgeCountForProjects(projectIdsAndQuizIds.projectIds)
         int numTotalProjectBadges = projDefCounts?.numBadges ?: 0
-        List<GlobalProgressMetricsRepo.QuizInfo> quizIdAndTypes = globalProgressMetricsRepo.getQuizInfo(quizIds)
-        globalMetricsResult.numTotalProjects = projectIds.size()
+        List<GlobalProgressMetricsRepo.QuizInfo> quizIdAndTypes = globalProgressMetricsRepo.getQuizInfo(projectIdsAndQuizIds.quizIds)
+        globalMetricsResult.numTotalProjects = projectIdsAndQuizIds.projectIds.size()
+        globalMetricsResult.numExcludedProjects = projectIdsAndQuizIds.excludedProjectIds.size()
         globalMetricsResult.numTotalSkills = projDefCounts?.numSkills ?: 0
         globalMetricsResult.numTotalBadges = (numTotalProjectBadges + totalGlobalBadgeCount)
         globalMetricsResult.numTotalProjectBadges = numTotalProjectBadges
         globalMetricsResult.numTotalGlobalBadges = totalGlobalBadgeCount
         globalMetricsResult.numTotalQuizzes = countQuizzesByType(quizIdAndTypes, QuizDefParent.QuizType.Quiz)
         globalMetricsResult.numTotalSurveys = countQuizzesByType(quizIdAndTypes, QuizDefParent.QuizType.Survey)
+        globalMetricsResult.numExcludedQuizzesAndSurveys = projectIdsAndQuizIds.excludedQuizIds.size()
 
         return globalMetricsResult
     }
@@ -216,13 +224,11 @@ class GlobalProgressMetricsService {
     @Profile
     OverallMetricsResult loadOverallMetrics() {
         ProjectIdsAndQuizIds projectIdsAndQuizIds = getProjectIdsAndQuizIdsForCurrentUser()
-        List<String> projectIds = projectIdsAndQuizIds.projectIds
-        List<String> quizIds = projectIdsAndQuizIds.quizIds
 
-        List<GlobalProgressMetricsRepo.QuizInfo> quizIdAndTypes = globalProgressMetricsRepo.getQuizInfo(quizIds)
-        List<GlobalProgressMetricsRepo.ProjectInfo> projectInfo = globalProgressMetricsRepo.getProjectInfo(projectIds)
+        List<GlobalProgressMetricsRepo.QuizInfo> quizIdAndTypes = globalProgressMetricsRepo.getQuizInfo(projectIdsAndQuizIds.quizIds)
+        List<GlobalProgressMetricsRepo.ProjectInfo> projectInfo = globalProgressMetricsRepo.getProjectInfo(projectIdsAndQuizIds.projectIds)
 
-        OverallMetricsResult res = populateGlobalMetricsResult(projectIds, quizIds, new OverallMetricsResult(
+        OverallMetricsResult res = populateGlobalMetricsResult(projectIdsAndQuizIds, new OverallMetricsResult(
                 projectInfo: projectInfo,
                 quizInfo: quizIdAndTypes
         ))
@@ -356,7 +362,23 @@ class GlobalProgressMetricsService {
         if (!isUserCommunityMember && quizIds) {
             quizIds.removeAll { userCommunityService.isUserCommunityOnlyQuiz(it) }
         }
-        return new ProjectIdsAndQuizIds(projectIds: projectIds, quizIds: quizIds)
+
+        List<String> excludedProjectIds = getExcludeSetting(userId, USER_PREF_FILTER_PROJ_IDS)
+        if (excludedProjectIds) {
+            projectIds.removeAll { excludedProjectIds.contains(it) }
+        }
+
+        List<String> excludedQuizIds = getExcludeSetting(userId, USER_PREF_FILTER_QUIZ_IDS)
+        if (excludedQuizIds) {
+            quizIds.removeAll { excludedQuizIds.contains(it) }
+        }
+
+        return new ProjectIdsAndQuizIds(projectIds: projectIds, quizIds: quizIds, excludedProjectIds: excludedProjectIds, excludedQuizIds: excludedQuizIds)
+    }
+    private List<String> getExcludeSetting(String userId, String settingName) {
+        SettingsResult excludedProjectsSettings = settingsService.getUserSetting(userId, settingName, UserInfoController.USER_PREFS_GROUP, false)
+        List<String> res = excludedProjectsSettings ? excludedProjectsSettings.value?.split(",")?.collect({ it.trim() }) : []
+        return res
     }
 
     private static int countQuizzesByType(List<GlobalProgressMetricsRepo.QuizInfo> quizIdAndTypes, QuizDefParent.QuizType quizType) {
@@ -366,6 +388,8 @@ class GlobalProgressMetricsService {
     static final class ProjectIdsAndQuizIds {
         List<String> projectIds
         List<String> quizIds
+        List<String> excludedProjectIds
+        List<String> excludedQuizIds
     }
 
     static class UsersPerTagRes {
