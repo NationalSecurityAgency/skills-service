@@ -362,7 +362,7 @@ const archiveUsers = () => {
           </template>
           <template #body="slotProps">
             <router-link
-                v-if="showUserTagColumn && slotProps.data.userTag"
+                v-if="showUserTagColumn && slotProps.data.userTag && !isGlobalBadgePage"
                 :to="{ name: 'UserTagMetrics', params: { projectId: route.params.projectId, tagKey: tagKey, tagFilter: slotProps.data.userTag } }"
                 class="text-info mb-0 pb-0 preview-card-title"
                 :aria-label="`View metrics for ${slotProps.data.userTag}`"
@@ -370,6 +370,7 @@ const archiveUsers = () => {
                 data-cy="usersTable_viewUserTagMetricLink">
               {{ slotProps.data.userTag }}
             </router-link>
+            <span v-if="isGlobalBadgePage">{{ slotProps.data.userTag }}</span>
           </template>
         </Column>
         <Column field="totalPoints" header="Progress" :sortable="true" :class="{'flex': responsive.md.value }" v-if="!isGlobalBadgePage">
