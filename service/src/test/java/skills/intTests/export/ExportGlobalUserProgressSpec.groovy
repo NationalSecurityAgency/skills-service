@@ -39,7 +39,7 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         def quiz1 = createQuiz(1)
         def survey1 = createSurvey(2)
 
-        def users = getRandomUsers(5)
+        def users = getRandomUsers(5).sort()
         def user1 = users[0]
         def user2 = users[1]
         def user3 = users[2]
@@ -96,7 +96,7 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
 
         def quiz1 = createQuiz(1)
 
-        List<String> users = getRandomUsers(3)
+        List<String> users = getRandomUsers(3).sort()
         skillsService.addSkill(skill1, users[0])
         skillsService.addSkill(skill2, users[1])
         skillsService.addSkill(skill3, users[2])
@@ -134,7 +134,7 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
 
         skillsService.createProjectAndSubjectAndSkills(project1, subject1, [skill1])
 
-        List<String> users = getRandomUsers(3)
+        List<String> users = getRandomUsers(3).sort()
         users.each { userId ->
             skillsService.addSkill(skill1, userId)
         }
@@ -166,7 +166,7 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
 
         skillsService.createProjectAndSubjectAndSkills(project1, subject1, [skill1])
 
-        List<String> users = getRandomUsers(3)
+        List<String> users = getRandomUsers(3).sort()
         users.each { userId ->
             skillsService.addSkill(skill1, userId)
         }
@@ -200,7 +200,7 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         badge1.enabled = true
         skillsService.updateBadge(badge1)
 
-        def users = getRandomUsers(2)
+        def users = getRandomUsers(2).sort()
         def user1 = users[0]
         def user2 = users[1]
 
@@ -251,7 +251,7 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         def quiz1 = createQuiz(1)
         def quiz2 = createQuiz(2)
 
-        def users = getRandomUsers(2)
+        def users = getRandomUsers(2).sort()
         def user1 = users[0]
         def user2 = users[1]
 
@@ -280,7 +280,7 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
     }
 
     def "export users progress for UC protected project"() {
-        def users = getRandomUsers(3)
+        def users = getRandomUsers(3).sort()
         def user1 = users[0]
         def user2 = users[1]
 
@@ -319,7 +319,7 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
     }
 
     def "export users progress for UC protected global badge"() {
-        def users = getRandomUsers(3)
+        def users = getRandomUsers(3).sort()
         def user1 = users[0]
         def user2 = users[1]
 
@@ -378,7 +378,7 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
     }
 
     def "export users progress for UC protected quiz"() {
-        def users = getRandomUsers(3)
+        def users = getRandomUsers(3).sort()
         def user1 = users[0]
         def user2 = users[1]
 
