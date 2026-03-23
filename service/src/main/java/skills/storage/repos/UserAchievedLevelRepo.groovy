@@ -1033,6 +1033,7 @@ select count(distinct ua) from UserAchievement ua where ua.projectId = :projectI
     void deleteAchievementsWithNoPoints(@Param("projectId") String projectId)
 
 
+
     @Modifying
     @Query('''update UserAchievement set skillId = :newSkillId where skillRefId = :skillRefId''')
     void updateSkillIdForSkillRefId(@Param("newSkillId") String newSkillId, @Param("skillRefId") Integer skillRefId)
