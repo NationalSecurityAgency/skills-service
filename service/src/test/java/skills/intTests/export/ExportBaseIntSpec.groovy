@@ -16,20 +16,12 @@
 package skills.intTests.export
 
 import groovy.time.TimeCategory
-import org.apache.poi.ss.usermodel.Cell
-import org.apache.poi.ss.usermodel.Row
-import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.ss.usermodel.Workbook
-import org.apache.poi.ss.usermodel.WorkbookFactory
+import org.apache.poi.ss.usermodel.*
 import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.MockUserInfoService
 import skills.intTests.utils.SkillsService
-import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 import skills.storage.model.SkillDef
 import spock.lang.Shared
-
-import static skills.intTests.utils.SkillsFactory.*
 
 class ExportBaseIntSpec extends DefaultIntSpec {
     String ultimateRoot = 'jh@dojo.com'
@@ -144,16 +136,11 @@ class ExportBaseIntSpec extends DefaultIntSpec {
     }
 
     protected String getUserIdForDisplay(String userId) {
-        return isPkiMode ? "${mockUserInfoService.getUserIdWithCase(userId)} for display" : userId
+        userAttrsRepo.findByUserIdIgnoreCase(userId).userIdForDisplay
     }
 
     protected String getName(String userId, firstName = true) {
-        if (!isPkiMode) {
-            return firstName ? "${userId.toUpperCase()}_first" : "${userId.toUpperCase()}_last"
-        } else {
-            MockUserInfoService.FirstnameLastname firstnameLastname = mockUserInfoService.getFirstNameLastnameForUserId(userId)
-            return firstnameLastname ? (firstName ? firstnameLastname.firstname : firstnameLastname.lastname) : 'Fake'
-        }
+        return firstName ? userAttrsRepo.findByUserIdIgnoreCase(userId).firstName : userAttrsRepo.findByUserIdIgnoreCase(userId).lastName
 
     }
     protected void achieveLevelForUsers(List<String> users, List<Map> skills, int numUsers, int level, String type = "Overall") {
