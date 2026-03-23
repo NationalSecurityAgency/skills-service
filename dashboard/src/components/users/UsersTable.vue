@@ -238,8 +238,8 @@ const archiveUsers = () => {
   <div class="w-full">
     <div class="px-6 py-4">
       <div class="flex flex-col lg:flex-row gap-6 my-2">
-        <div class="flex flex-col sm:flex-row gap-3">
-          <div class="xl:flex-none w-[14rem]">
+        <div class="flex flex-col sm:flex-row gap-3" :class="isGlobalBadgePage ? 'w-full' : ''">
+          <div :class="isGlobalBadgePage ? 'w-full' : 'xl:flex-none w-56'">
             <div>
               <label for="userFilter">User Filter</label>
             </div>
@@ -247,7 +247,7 @@ const archiveUsers = () => {
                        class="w-full"
                        data-cy="users-skillIdFilter" aria-label="user filter" />
           </div>
-          <div v-if="showUserTagColumn && !isUserTagsMetricsPage" class="xl:flex-none w-[14rem]">
+          <div v-if="showUserTagColumn && !isUserTagsMetricsPage" :class="isGlobalBadgePage ? 'w-full' : 'xl:flex-none w-56'">
             <div>
               <label for="userTagFilter">{{ appConfig.usersTableAdditionalUserTagLabel }} Filter</label>
             </div>
