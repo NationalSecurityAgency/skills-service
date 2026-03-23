@@ -1188,7 +1188,7 @@ class SkillsService {
     }
 
     def getGlobalQuizRunsExcelExport(String orderBy = 'started', boolean ascending = true, String userQuery = "", String nameQuery = "", String userIdFilter = "", String startDate = "", String endDate = "") {
-        return downloadAttachment("/app/quiz-runs/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&query=${userQuery}&nameQuery=${nameQuery}&userIdFilter=${userIdFilter}&startDate=${startDate}&endDate=${endDate}".toString())
+        return downloadAttachment("/app/quiz-runs/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&userQuery=${userQuery}&nameQuery=${nameQuery}&userIdFilter=${userIdFilter}&startDate=${startDate}&endDate=${endDate}".toString())
     }
 
     def getUserAchievementsExcelExport(String projectId, Map params=null) {

@@ -50,10 +50,10 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
         def user3 = users[2]
 
         when:
-        runQuizOrSurvey(quiz1, user1, true, true)
-        runQuizOrSurvey(quiz1, user2, true, false)
-        runQuizOrSurvey(quiz2, user3, false, true)
-        runQuizOrSurvey(survey1, user1, false, true)
+        runQuizOrSurvey(quiz1, user1, true, true, today)
+        runQuizOrSurvey(quiz1, user2, true, false, new Date(today.time+1))
+        runQuizOrSurvey(quiz2, user3, false, true, new Date(today.time+2))
+        runQuizOrSurvey(survey1, user1, false, true, new Date(today.time+3))
 
         def excelExport = skillsService.getGlobalQuizRunsExcelExport()
 
@@ -81,7 +81,7 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
         runQuizOrSurvey(quiz1, user1, true, true, fiveDaysAgo)
         runQuizOrSurvey(quiz2, user2, false, true, today)
 
-        def excelExport = skillsService.getGlobalQuizRunsExcelExport('started', true, '', '', '', fiveDaysAgo.format("yyyy-MM-dd HH:mm:ss"), today.format("yyyy-MM-dd HH:mm:ss"))
+        def excelExport = skillsService.getGlobalQuizRunsExcelExport('userIdForDisplay', true, '', '', '', fiveDaysAgo.format("yyyy-MM-dd HH:mm:ss"), today.format("yyyy-MM-dd HH:mm:ss"))
 
         then:
         validateExport(excelExport.file, [
@@ -155,7 +155,7 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
         runQuizOrSurvey(quiz, user1, true, true, today, pristineDragonsUser)
         runQuizOrSurvey(quiz, user2, false, true, today, pristineDragonsUser)
 
-        def excelExport = pristineDragonsUser.getGlobalQuizRunsExcelExport()
+        def excelExport = pristineDragonsUser.getGlobalQuizRunsExcelExport('userIdForDisplay')
 
         then:
         validateExport(excelExport.file, [
