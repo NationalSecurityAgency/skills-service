@@ -20,6 +20,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.UserAchievement
 
 class GlobalBadgeEditSpecs extends DefaultIntSpec {
 
@@ -576,5 +577,93 @@ class GlobalBadgeEditSpecs extends DefaultIntSpec {
         skillsService.deleteGlobalBadge(badgeId)
     }
 
+    def 'removing skill from a disabled badge must not try to achieve badge'() {
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        def skills = SkillsFactory.createSkills(5, 1, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
 
+        List<SkillsService> users = getRandomUsers(5).collect { createService(it)}
+
+        Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[1].skillId)
+
+        users[0].addSkill(skills[0])
+        users[0].addSkill(skills[1])
+        users[1].addSkill(skills[0])
+        users[1].addSkill(skills[1])
+        users[2].addSkill(skills[0])
+
+        when:
+        List<UserAchievement> gbAchievements = userAchievedRepo.findAll().findAll { it.skillId == badge.badgeId }
+        skillsService.removeSkillFromGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[1].skillId)
+        List<UserAchievement> gbAchievementsAfterRemove = userAchievedRepo.findAll().findAll { it.skillId == badge.badgeId }
+        then:
+        !gbAchievements
+        !gbAchievementsAfterRemove
+    }
+
+    def 'removing skill from an enabled badge must check for badge achievements'() {
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        def skills = SkillsFactory.createSkills(5, 1, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<SkillsService> users = getRandomUsers(5).collect { createService(it)}
+
+        Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[1].skillId)
+        badge.enabled = true
+        skillsService.updateGlobalBadge(badge)
+
+        users[0].addSkill(skills[0])
+        users[1].addSkill(skills[0])
+        users[2].addSkill(skills[2])
+
+        when:
+        List<UserAchievement> gbAchievements = userAchievedRepo.findAll().findAll { it.skillId == badge.badgeId }
+        skillsService.removeSkillFromGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[1].skillId)
+        List<UserAchievement> gbAchievementsAfterRemove = userAchievedRepo.findAll().findAll { it.skillId == badge.badgeId }
+        then:
+        !gbAchievements
+        gbAchievementsAfterRemove.size() == 2
+        gbAchievementsAfterRemove.userId.sort() == [users[0].userName, users[1].userName].sort()
+    }
+
+    def 'editing badges\'s id updates skill_id in the achievement'() {
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        def skills = SkillsFactory.createSkills(5, 1, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        List<SkillsService> users = getRandomUsers(5).collect { createService(it)}
+
+        Map badge = [badgeId: badgeId, name: 'Test Global Badge 1']
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignSkillToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId)
+        badge.enabled = true
+        skillsService.updateGlobalBadge(badge)
+
+        users[0].addSkill(skills[0])
+        users[1].addSkill(skills[0])
+        users[2].addSkill(skills[2])
+
+        when:
+        String origId = badge.badgeId
+        String newId = "otherId"
+        badge.badgeId = newId
+
+        List<UserAchievement> skillAchievements = userAchievedRepo.findAll().findAll { it.skillId == origId }
+
+        skillsService.updateGlobalBadge(badge, origId)
+
+        List<UserAchievement> skillAchievementsAfter = userAchievedRepo.findAll().findAll { it.skillId == newId }
+        then:
+        skillAchievements.userId == [users[0].userName, users[1].userName]
+        skillAchievementsAfter.userId == [users[0].userName, users[1].userName]
+    }
 }

@@ -218,23 +218,32 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
         skillDef.type in ?3''')
     List<AchievementInfo> getUserAchievementsAfterDate(String userId, String projectId, List<SkillDef.ContainerType> containerTypes, Date mustBeAfterThisDate)
 
-    @Query('''select badgeDef.name as name, 
-        badgeDef.skillId as id, 
-        ua.achievedOn as achievedOn,
+    @Query(value = '''
+select badgeDef.name as name, 
+        badgeDef.skill_id as id, 
+        ua.achieved_on as achievedOn,
         badgeDef.type as type
-      from SkillDef badgeDef, SkillDef skillDef, SkillRelDef rel, UserAchievement ua
+      from user_achievement ua
+        join skill_definition badgeDef on ua.skill_ref_id = badgeDef.id
       where 
-        ua.level is null and 
-        ua.userId=?1 and
-        ua.achievedOn > ?3 and 
-        badgeDef = rel.parent and
-        skillDef = rel.child and 
-        rel.type = 'BadgeRequirement' and
-        ua.projectId is null and
-        ua.skillRefId = badgeDef.id and 
-        skillDef.projectId=?2 and 
-        badgeDef.type = 'GlobalBadge' ''')
-    List<AchievementInfo> getUserGlobalBadgeAchievementsAfterDate(String userId, String projectId, Date mustBeAfterThisDate)
+        ua.skill_ref_id in (SELECT DISTINCT gbld.skill_ref_id as global_badge_id
+                                    FROM global_badge_level_definition gbld
+                                    WHERE gbld.project_id = :projectId
+
+                                    UNION
+
+                                    SELECT DISTINCT globalBadge.id as global_badge_id
+                                    FROM skill_relationship_definition srd
+                                             JOIN skill_definition globalBadge ON (srd.parent_ref_id = globalBadge.id and srd.type = 'BadgeRequirement' and globalBadge.type = 'GlobalBadge')
+                                             JOIN skill_definition skill ON (srd.child_ref_id = skill.id and srd.type = 'BadgeRequirement' and skill.type = 'Skill')
+                                    WHERE skill.project_id = :projectId)  
+        AND ua.user_id=:userId 
+        AND ua.achieved_on > :mustBeAfterThisDate
+    ''', nativeQuery = true)
+    List<AchievementInfo> getUserGlobalBadgeAchievementsAfterDate(
+            @Param("userId") String userId,
+            @Param("projectId") String projectId,
+            @Param("mustBeAfterThisDate") Date mustBeAfterThisDate)
 
     @Query('''select count(ua)
       from SkillDef skillDef, UserAchievement ua 
@@ -1022,4 +1031,9 @@ select count(distinct ua) from UserAchievement ua where ua.projectId = :projectI
     @Modifying
     @Query('''delete from UserAchievement ua where not exists (select 1 from UserPoints up where up.userId = ua.userId and up.projectId = ua.projectId) and ua.projectId = :projectId''')
     void deleteAchievementsWithNoPoints(@Param("projectId") String projectId)
+
+
+    @Modifying
+    @Query('''update UserAchievement set skillId = :newSkillId where skillRefId = :skillRefId''')
+    void updateSkillIdForSkillRefId(@Param("newSkillId") String newSkillId, @Param("skillRefId") Integer skillRefId)
 }
