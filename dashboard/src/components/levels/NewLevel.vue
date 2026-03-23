@@ -20,7 +20,7 @@ import {number} from "yup";
 import LevelService from "@/components/levels/LevelService.js";
 import {useRoute} from 'vue-router';
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
-import {computed} from "vue";
+import {computed, ref} from "vue";
 
 const announcer = useSkillsAnnouncer()
 const route = useRoute();
@@ -36,6 +36,8 @@ const props = defineProps({
 const emit = defineEmits(['load-levels']);
 
 const model = defineModel()
+const newLevelDialog = ref();
+
 const saveLevel = (values) => {
   if (props.isEdit === true) {
     return doEditLevel({
@@ -122,6 +124,17 @@ const boundsValidator = (value) => {
   return valid;
 }
 
+const rangeValidator = () => {
+  let valid = true;
+  let { pointsFrom, pointsTo } = newLevelDialog.value.getFieldValues()
+
+  if(props.boundaries && !isLastLevel.value && pointsFrom >= pointsTo ) {
+      valid = false;
+  }
+
+  return valid;
+}
+
 const isLastLevel = computed(() => props.boundaries?.next === null)
 // levelAsPoints
 
@@ -134,12 +147,22 @@ if (props.isEdit) {
   if (props.levelAsPoints) {
     schema = {
       ...schema,
-      'pointsFrom': number().required().min(0).test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator).label('Points From'),
+      'pointsFrom': number()
+          .required()
+          .min(0)
+          .test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator)
+          .test('validRange', ({ label }) => `${label} must be less than Points To.`, rangeValidator)
+          .label('Points From'),
     }
     if (!isLastLevel.value) {
       schema = {
         ...schema,
-        'pointsTo': number().required().min(0).test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator).label('Points To'),
+        'pointsTo': number()
+            .required()
+            .min(0)
+            .test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator)
+            .test('validRange', ({ label }) => `${label} must be greater than Points From.`, rangeValidator)
+            .label('Points To'),
       }
     }
   } else {
@@ -166,6 +189,7 @@ if (props.isEdit) {
 
 <template>
   <SkillsInputFormDialog
+      ref="newLevelDialog"
       :id="formId"
       v-model="model"
       :is-edit="isEdit"
