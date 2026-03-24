@@ -20,7 +20,7 @@ import groovy.transform.ToString
 import skills.intTests.utils.SkillsClientException
 import spock.lang.IgnoreIf
 
-import static skills.metrics.GlobalProgressMetricsService.USER_PREF_GLOBAL_METRICS_EXCLUSION
+import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
 
 class GlobalUsersProgressReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
 
