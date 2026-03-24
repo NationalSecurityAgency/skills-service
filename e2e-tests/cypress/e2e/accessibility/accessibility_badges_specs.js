@@ -266,6 +266,12 @@ describe('Accessibility Badges Tests', () => {
             cy.get('[data-cy="simpleLevelsTable"] [data-cy="skillsBTableTotalRows"]')
                 .should('have.text', '1');
             cy.customA11y();
+
+            cy.get('[data-cy=nav-Users]')
+                .click();
+            cy.contains('There are no records to show');
+            cy.customLighthouse();
+            cy.customA11y();
         });
 
     })

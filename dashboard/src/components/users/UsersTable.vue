@@ -60,8 +60,8 @@ const totalPoints = ref(0)
 const totalLevels = ref(0)
 const currentPage = ref(1)
 const totalRows = ref(1)
-const pageSize = useStorage('usersTable-pageSize', 5)
-const possiblePageSizes = [5, 10, 15, 20]
+const pageSize = useStorage('usersTable-pageSize', 10)
+const possiblePageSizes = [5, 10, 15, 20, 50]
 const sortInfo = ref({ sortOrder: -1, sortBy: 'lastUpdated' })
 const selectedRows = ref([])
 
@@ -408,6 +408,9 @@ const archiveUsers = () => {
           </template>
         </Column>
         <Column v-if="isGlobalBadgePage" field="totalProgress" header="Badge Progress" :sortable="true" :class="{'flex': responsive.md.value }">
+          <template #header>
+            <i class="far fa-arrow-alt-circle-up mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
+          </template>
           <template #body="slotProps">
             <div :data-cy="`usr_progress-${slotProps.data.userId}`" class="w-full">
               <div class="flex">
@@ -420,11 +423,11 @@ const archiveUsers = () => {
                   <span class="text-primary font-weight-bold"
                         :aria-label="`${slotProps.data.numLevelsAchieved} out of ${totalLevels} total points`"
                         data-cy="progressCurrentPoints">{{ slotProps.data.numLevelsAchieved?.toLocaleString() }}</span> /
-                  <span class="italic" data-cy="progressTotalPoints">{{ totalLevels?.toLocaleString() }} levels</span>
+                  <span data-cy="progressTotalPoints">{{ totalLevels?.toLocaleString() }} Levels</span>
                   <span class="text-primary font-weight-bold ml-3"
                         :aria-label="`${slotProps.data.skillsAchieved} out of ${totalPoints} total points`"
                         data-cy="progressCurrentPoints">{{ slotProps.data.skillsAchieved?.toLocaleString() }}</span> /
-                  <span class="italic" data-cy="progressTotalPoints">{{ totalPoints?.toLocaleString() }} skills</span>
+                  <span data-cy="progressTotalPoints">{{ totalPoints?.toLocaleString() }} Skills</span>
                 </div>
               </div>
               <ProgressBar style="height: 5px;" :value="calcTotalPercent(slotProps.data.totalProgress)" :showValue="false"

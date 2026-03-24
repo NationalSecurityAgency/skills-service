@@ -39,6 +39,7 @@ import skills.services.admin.ProjAdminService
 import skills.services.adminGroup.AdminGroupService
 import skills.storage.model.auth.RoleName
 import skills.utils.InputSanitizer
+import skills.utils.TablePageUtil
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
@@ -311,7 +312,7 @@ class GlobalBadgesController {
                                     @RequestParam String userTagFilter,
                                     @RequestParam Boolean ascending) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id", badgeId)
-        PageRequest pageRequest = PageRequest.of(page - 1, limit, JpaSort.unsafe(ascending ? ASC : DESC, "(${orderBy})"))
+        PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(badgeId, limit, page, orderBy, ascending)
 
         return adminUsersService.loadUsersPageForSkillsAcrossProjects(badgeId, query, userTagFilter, pageRequest)
     }
