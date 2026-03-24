@@ -21,6 +21,8 @@ import skills.intTests.utils.SkillsService
 import skills.storage.model.UserQuizAttempt
 import skills.storage.repos.UserQuizAttemptRepo
 
+import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
+
 class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
 
     @Autowired
@@ -64,6 +66,39 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
                 [ "User ID", "Last Name", "First Name", "Org", "Quiz Name", "Type", "Status", "Number Correct", "Number of Questions", "Date Started (UTC)", "Date Completed (UTC)", "Runtime (seconds)"],
                 [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", quiz1.name, "Quiz", "PASSED", "2.0", "2.0", formatDate(today),  formatDate(today), "5.0"],
                 [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", quiz1.name, "Quiz", "INPROGRESS", "0.0", "2.0", formatDate(today), "", ""],
+                [getUserIdForDisplay(user3), getName(user3, false), getName(user3), "", quiz2.name, "Quiz", "FAILED", "1.0", "2.0", formatDate(today),  formatDate(today), "5.0"],
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", survey1.name, "Survey", "COMPLETED", "2.0", "2.0", formatDate(today),  formatDate(today), "5.0"],
+                ["For All Dragons Only"],
+        ])
+    }
+
+    def "export global quiz runs - quiz excluded via global metrics setting"() {
+        def quiz1 = createQuiz(1)
+        def quiz2 = createQuiz(2)
+        def survey1 = createSurvey(3)
+
+        def users = getRandomUsers(3)
+        def user1 = users[0]
+        def user2 = users[1]
+        def user3 = users[2]
+
+        when:
+        runQuizOrSurvey(quiz1, user1, true, true, today)
+        runQuizOrSurvey(quiz1, user2, true, false, new Date(today.time+1))
+        runQuizOrSurvey(quiz2, user3, false, true, new Date(today.time+2))
+        runQuizOrSurvey(survey1, user1, false, true, new Date(today.time+3))
+
+        skillsService.addOrUpdateGlobalMetricsUserSettings([
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, quizId: quiz1.quizId ],
+        ])
+
+
+        def excelExport = skillsService.getGlobalQuizRunsExcelExport()
+
+        then:
+        validateExport(excelExport.file, [
+                ["For All Dragons Only"],
+                [ "User ID", "Last Name", "First Name", "Org", "Quiz Name", "Type", "Status", "Number Correct", "Number of Questions", "Date Started (UTC)", "Date Completed (UTC)", "Runtime (seconds)"],
                 [getUserIdForDisplay(user3), getName(user3, false), getName(user3), "", quiz2.name, "Quiz", "FAILED", "1.0", "2.0", formatDate(today),  formatDate(today), "5.0"],
                 [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", survey1.name, "Survey", "COMPLETED", "2.0", "2.0", formatDate(today),  formatDate(today), "5.0"],
                 ["For All Dragons Only"],

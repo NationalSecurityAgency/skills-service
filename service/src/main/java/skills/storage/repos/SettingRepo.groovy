@@ -44,6 +44,9 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     List<Setting> findAllByTypeAndSetting(Setting.SettingType type, String setting)
 
     @Nullable
+    List<Setting> findAllByTypeAndSettingAndUserRefId(Setting.SettingType type, String setting, Integer userRefId)
+
+    @Nullable
     Setting findAllByTypeAndSettingGroupAndSettingAndProjectId(Setting.SettingType type, String settingGroup, String setting, String projectId)
 
     @Nullable
@@ -118,6 +121,9 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
 
     @Modifying
     void deleteBySettingAndSettingGroupAndProjectIdAndTypeAndUserRefId(String setting, String settingGroup, String projectId, Setting.SettingType type, Integer userRefId)
+
+    @Modifying
+    void deleteBySettingAndProjectIdAndTypeAndUserRefId(String setting, String projectId, Setting.SettingType type, Integer userRefId)
 
     @Query('''select s from Setting s where s.settingGroup=?1''')
     Stream<Setting> scanSettingsByGroup(String settingsGroup)

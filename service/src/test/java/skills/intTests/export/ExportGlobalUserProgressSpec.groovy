@@ -19,6 +19,9 @@ import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsService
 
 import static skills.intTests.utils.SkillsFactory.*
+import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
+import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
+import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
 
 class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
 
@@ -274,6 +277,118 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
                 [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "1.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "0.0"],
                 [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "2.0", "1.0", "0.0", "1.0",
+                 "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "0.0"],
+                ["For All Dragons Only"],
+        ])
+    }
+
+    def "export global users progress with multiple projects and quizzes - project excluded via global metrics setting"() {
+        def project1 = createProject(1)
+        def subject1 = createSubject(1, 1)
+        def skill1 = createSkill(1, 1, 1, 0)
+        skill1.pointIncrement = 100
+
+        def project2 = createProject(2)
+        def subject2 = createSubject(2, 1)
+        def skill2 = createSkill(2, 1, 1, 0)
+        skill2.pointIncrement = 100
+
+        skillsService.createProjectAndSubjectAndSkills(project1, subject1, [skill1])
+        skillsService.createProjectAndSubjectAndSkills(project2, subject2, [skill2])
+
+        def globalBadge = createBadge(3, 1)
+        skillsService.createGlobalBadge(globalBadge)
+        skillsService.assignSkillToGlobalBadge([badgeId: globalBadge.badgeId, projectId: project1.projectId, skillId: skill1.skillId])
+        skillsService.assignProjectLevelToGlobalBadge(badgeId: globalBadge.badgeId, projectId: project2.projectId, level: '5')
+        globalBadge.enabled = true
+        skillsService.updateGlobalBadge(globalBadge)
+
+        def quiz1 = createQuiz(1)
+        def quiz2 = createQuiz(2)
+
+        def users = getRandomUsers(2).sort()
+        def user1 = users[0]
+        def user2 = users[1]
+
+        when:
+        skillsService.addSkill(skill1, user1)
+        skillsService.addSkill(skill2, user2)
+
+        runQuizOrSurvey(quiz1, user1, true, true)
+        runQuizOrSurvey(quiz1, user2, true, false)
+        runQuizOrSurvey(quiz2, user2, true, true)
+
+        skillsService.addOrUpdateGlobalMetricsUserSettings([
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: project1.projectId ],
+        ])
+
+        def excelExport = skillsService.getGlobalUserProgressExcelExport()
+
+        then:
+        validateExport(excelExport.file, [
+                ["For All Dragons Only"],
+                ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
+                 "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
+                 "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"],
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "1.0", "0.0", "0.0",
+                 "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"],
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "2.0", "1.0", "0.0", "1.0",
+                 "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "0.0"],
+                ["For All Dragons Only"],
+        ])
+    }
+
+    def "export global users progress with multiple projects and quizzes - quiz excluded via global metrics setting"() {
+        def project1 = createProject(1)
+        def subject1 = createSubject(1, 1)
+        def skill1 = createSkill(1, 1, 1, 0)
+        skill1.pointIncrement = 100
+
+        def project2 = createProject(2)
+        def subject2 = createSubject(2, 1)
+        def skill2 = createSkill(2, 1, 1, 0)
+        skill2.pointIncrement = 100
+
+        skillsService.createProjectAndSubjectAndSkills(project1, subject1, [skill1])
+        skillsService.createProjectAndSubjectAndSkills(project2, subject2, [skill2])
+
+        def globalBadge = createBadge(3, 1)
+        skillsService.createGlobalBadge(globalBadge)
+        skillsService.assignSkillToGlobalBadge([badgeId: globalBadge.badgeId, projectId: project1.projectId, skillId: skill1.skillId])
+        skillsService.assignProjectLevelToGlobalBadge(badgeId: globalBadge.badgeId, projectId: project2.projectId, level: '5')
+        globalBadge.enabled = true
+        skillsService.updateGlobalBadge(globalBadge)
+
+        def quiz1 = createQuiz(1)
+        def quiz2 = createQuiz(2)
+
+        def users = getRandomUsers(2).sort()
+        def user1 = users[0]
+        def user2 = users[1]
+
+        when:
+        skillsService.addSkill(skill1, user1)
+        skillsService.addSkill(skill2, user2)
+
+        runQuizOrSurvey(quiz1, user1, true, true)
+        runQuizOrSurvey(quiz1, user2, true, false)
+        runQuizOrSurvey(quiz2, user2, true, true)
+
+        skillsService.addOrUpdateGlobalMetricsUserSettings([
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, quizId: quiz1.quizId ],
+        ])
+
+        def excelExport = skillsService.getGlobalUserProgressExcelExport()
+
+        then:
+        validateExport(excelExport.file, [
+                ["For All Dragons Only"],
+                ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
+                 "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
+                 "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"],
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "0.0", "0.0", "0.0", "0.0",
+                 "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "0.0"],
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "1.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "0.0"],
                 ["For All Dragons Only"],
         ])

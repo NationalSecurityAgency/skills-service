@@ -27,28 +27,39 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import skills.auth.*
 import skills.auth.pki.PkiUserLookup
+import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.GlobalMetricsSettingsRequest
 import skills.controller.request.model.SuggestRequest
 import skills.controller.request.model.UserSettingsRequest
+import skills.controller.result.model.GlobalMetricsSettingsResult
 import skills.controller.result.model.RequestResult
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.UserInfoRes
 import skills.dbupgrade.DBUpgradeSafe
+import skills.metrics.GlobalProgressMetricsService
 import skills.services.AccessSettingsStorageService
 import skills.services.UserAdminService
 import skills.services.UserAgreementResult
 import skills.services.UserAgreementService
 import skills.services.admin.UserCommunityService
+import skills.services.quiz.QuizSettingsService
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
+import skills.storage.accessors.UserRoleAccessor
+import skills.storage.model.QuizSetting
 import skills.storage.model.UserTag
 import skills.storage.model.auth.RoleName
+import skills.storage.model.auth.User
+import skills.storage.model.auth.UserRole
+import skills.storage.repos.QuizSettingsRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
+import skills.storage.repos.UserRoleRepo
 import skills.storage.repos.UserTagRepo
 
 @RestController
@@ -65,6 +76,12 @@ class UserInfoController {
 
     @Autowired
     UserInfoService userInfoService
+
+    @Autowired
+    GlobalProgressMetricsService globalProgressMetricsService
+
+    @Autowired
+    UserRoleAccessor userRoleAccessor
 
     @Autowired
     UserAuthService userAuthService
@@ -92,6 +109,9 @@ class UserInfoController {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    QuizSettingsService quizSettingsService
 
     @Autowired
     UserAgreementService userAgreementService
@@ -238,6 +258,17 @@ class UserInfoController {
                 valid: validationRes.isValid,
                 explanation: validationRes.explanation
         ]
+    }
+
+    @GetMapping(value = "/userGlobalMetricsInfo/settings/{setting}", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<GlobalMetricsSettingsResult> getGlobalMetricsUserSettings(@PathVariable("setting") String setting) {
+        return globalProgressMetricsService.getGlobalMetricsUserSettings(setting)
+    }
+
+    @RequestMapping(value = "/userGlobalMetricsInfo/settings", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult saveGlobalMetricsUserSettings(@RequestBody List<GlobalMetricsSettingsRequest> values) {
+        globalProgressMetricsService.saveGlobalMetricsUserSettings(values)
+        return new RequestResult(success: true)
     }
 
     @RequestMapping(value = "/userInfo/hasRole/{role}", method = RequestMethod.GET, produces = "application/json")

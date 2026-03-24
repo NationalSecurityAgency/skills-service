@@ -60,7 +60,8 @@ describe('Project and Quiz Filtering for Global Users Progress', () => {
     });
 
     beforeEach(() => {
-        cy.execSql('delete from settings where setting = \'globalMetricsExcludedProjectsIds\' or setting = \'globalMetricsExcludedQuizIds\'', true)
+        cy.execSql('delete from settings where setting = \'globalMetricsExcludedItem\'', true)
+        cy.execSql('delete from quiz_settings where setting = \'globalMetricsExcludedItem\'', true)
     })
 
     it('exclude a project', () => {

@@ -212,37 +212,6 @@ class SettingsSpecs extends DefaultIntSpec {
         user3_t1.find { it.setting == setting }.value == "3"
     }
 
-    def "get individual user setting for multiple users"() {
-        List<String> users = getRandomUsers(4)
-        List<SkillsService> services = users.collect { createService(it) }
-        String setting = "mysetting1"
-        services[0].addOrUpdateUserSetting(setting, "one")
-        services[1].addOrUpdateUserSetting(setting, "two")
-        services[2].addOrUpdateUserSetting(setting, "three")
-
-        when:
-        def user1 = services[0].getSingleUserSetting(setting)
-        def user2 = services[1].getSingleUserSetting(setting)
-        def user3 = services[2].getSingleUserSetting(setting)
-        def user4 = services[3].getSingleUserSetting(setting)
-
-        then:
-        user1.data.value == "one"
-        !user1.data.projectId
-        user1.data.userId == services[0].userName
-
-        user2.data.value == "two"
-        !user2.data.projectId
-        user2.data.userId == services[1].userName
-
-        user3.data.value == "three"
-        !user3.data.projectId
-        user3.data.userId == services[2].userName
-
-        !user4.data
-        user4.explanation == "Setting not found"
-    }
-
     def "save the same quiz setting for multiple quizzes"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)

@@ -18,8 +18,9 @@ package skills.intTests.metrics.global
 import groovy.transform.Canonical
 import groovy.transform.ToString
 import skills.intTests.utils.SkillsClientException
-import skills.metrics.GlobalProgressMetricsService
 import spock.lang.IgnoreIf
+
+import static skills.metrics.GlobalProgressMetricsService.USER_PREF_GLOBAL_METRICS_EXCLUSION
 
 class GlobalUsersProgressReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
 
@@ -327,10 +328,17 @@ class GlobalUsersProgressReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
     }
 
     def "admins[0] point of view - filter one project, one quiz and one survey" () {
-        admins[0].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, "${p1Skills[0].projectId}")
-        admins[0].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_QUIZ_IDS, "${quizzes[0].quizId}, ${surveys[0].quizId}")
-        admins[1].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, "${p1Skills[0].projectId},${p2Skills[0].projectId}")
-        admins[1].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, quizzes.quizId.join(","))
+        admins[0].addOrUpdateGlobalMetricsUserSettings([
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: p1Skills[0].projectId ],
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: quizzes[0].quizId ],
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: surveys[0].quizId ],
+        ])
+        admins[1].addOrUpdateGlobalMetricsUserSettings([
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: p2Skills[1].projectId ],
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: p3Skills[1].projectId ],
+                quizzes[1..4].collect { [ setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: it.quizId ] }
+        ].flatten())
+
         when:
         def res = admins[0].getGlobalUserProgressMetrics("", 15, 1, "numSkillsEarned", false)
         then:
@@ -443,10 +451,20 @@ class GlobalUsersProgressReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
     }
 
     def "admins[0] point of view - filter two projects, two quizzes and two surveys" () {
-        admins[0].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, "${p1Skills[0].projectId},${p2Skills[0].projectId}")
-        admins[0].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_QUIZ_IDS, "${quizzes[0].quizId},${quizzes[1].quizId},${surveys[0].quizId},${surveys[1].quizId}")
-        admins[1].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, "${p1Skills[0].projectId},${p2Skills[0].projectId},${p3Skills[0].projectId}")
-        admins[1].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, quizzes.quizId.join(","))
+        admins[0].addOrUpdateGlobalMetricsUserSettings([
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: p1Skills[0].projectId ],
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: p2Skills[0].projectId ],
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: quizzes[0].quizId ],
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: quizzes[1].quizId ],
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: surveys[0].quizId ],
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: surveys[1].quizId ],
+        ])
+        admins[1].addOrUpdateGlobalMetricsUserSettings([
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: p2Skills[1].projectId ],
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: p3Skills[1].projectId ],
+                quizzes[1..4].collect { [ setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: it.quizId ] }
+        ].flatten())
+
         when:
         def res = admins[0].getGlobalUserProgressMetrics("", 15, 1, "numSkillsEarned", false)
         then:
@@ -532,10 +550,13 @@ class GlobalUsersProgressReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
     }
 
     def "admins[0] point of view - filter all projects, quizzes and surveys" () {
-        admins[0].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, "${p1Skills[0].projectId},${p2Skills[0].projectId},${p3Skills[0].projectId}")
-        admins[0].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_QUIZ_IDS, [quizzes.quizId, surveys.quizId].flatten().join(","))
-        admins[1].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, "${p1Skills[0].projectId},${p2Skills[0].projectId},${p3Skills[0].projectId}")
-        admins[1].addOrUpdateUserSetting(GlobalProgressMetricsService.USER_PREF_FILTER_PROJ_IDS, quizzes.quizId.join(","))
+        admins[0].addOrUpdateGlobalMetricsUserSettings([
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: p1Skills[0].projectId ],
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: p2Skills[0].projectId ],
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: p3Skills[0].projectId ],
+                quizzes.collect { [ setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: it.quizId ] },
+                surveys.collect { [ setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: it.quizId ] }
+        ].flatten())
         when:
         def res = admins[0].getGlobalUserProgressMetrics("", 15, 1, "numSkillsEarned", false)
         then:

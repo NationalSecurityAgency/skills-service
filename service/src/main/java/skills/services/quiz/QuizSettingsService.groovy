@@ -17,6 +17,7 @@ package skills.services.quiz
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.math.NumberUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -26,20 +27,19 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
-import skills.controller.request.model.QuizDefRequest
+import skills.controller.request.model.GlobalMetricsSettingsRequest
 import skills.controller.request.model.QuizPreference
 import skills.controller.request.model.QuizSettingsRequest
 import skills.controller.result.model.QuizPreferenceRes
 import skills.controller.result.model.QuizSettingsRes
-import skills.controller.result.model.SettingsResult
 import skills.quizLoading.QuizSettings
 import skills.quizLoading.QuizUserPreferences
 import skills.services.admin.UserCommunityService
-import skills.services.settings.Settings
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
+import skills.storage.model.QuizDef
 import skills.storage.model.QuizSetting
 import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
@@ -217,6 +217,49 @@ class QuizSettingsService {
         }
 
         return res.sort({ it.setting })
+    }
+
+    @Transactional()
+    void updateGlobalMetricsUserSettings(List<GlobalMetricsSettingsRequest> quizSettings) {
+        UserAttrs currentUserAttrs = getCurrentUserAttrs()
+        Integer userRefId = currentUserAttrs.id
+
+        QuizValidator.isNotNull(userRefId, "userRefId", null)
+        List<QuizSetting> toRemove = []
+        List<QuizSetting> toSave = []
+        quizSettings.each {
+            QuizValidator.isNotNull(it.quizId, "quizId", null)
+            QuizValidator.isNotNull(it.setting, "setting", null)
+            QuizSetting setting = quizSettingsRepo.findBySettingAndQuizIdAndUserIdRef(it.setting, it.quizId, userRefId)
+            if (StringUtils.isBlank(it.value)) {
+                if (setting) {
+                    toRemove.add(setting)
+                }
+            } else {
+                if (setting) {
+                    setting.value = it.value
+                } else {
+                    QuizDef quizDef = quizDefRepo.findByQuizIdIgnoreCase(it.quizId)
+
+                    setting = new QuizSetting()
+                    setting.setting = it.setting
+                    setting.value = it.value
+                    setting.quizRefId = quizDef.id
+                    setting.userRefId = userRefId
+                }
+                toSave.add(setting)
+            }
+        }
+
+        quizSettingsRepo.deleteAll(toRemove)
+        quizSettingsRepo.saveAll(toSave)
+    }
+
+    @Transactional(readOnly = true)
+    List<QuizSettingsRepo.SimpleQuizRes> getGlobalMetricsUserSettings(String setting) {
+        UserAttrs currentUserAttrs = getCurrentUserAttrs()
+        List<QuizSettingsRepo.SimpleQuizRes> quizSettings = quizSettingsRepo.findAllBySettingAndUserRefId(setting, currentUserAttrs.id)
+        return quizSettings
     }
 
     @Profile

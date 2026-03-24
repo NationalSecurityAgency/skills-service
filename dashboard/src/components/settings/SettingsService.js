@@ -53,6 +53,12 @@ export default {
   saveUserSettings(settings) {
     return axios.post('/app/userInfo/settings', settings).then((response) => response.data)
   },
+  getUserGlobalMetricsSettings(setting) {
+    return axios.get(`/app/userGlobalMetricsInfo/settings/${setting}`).then((remoteRes) => remoteRes.data)
+  },
+  saveUserGlobalMetricsSettings(settings) {
+    return axios.post(`/app/userGlobalMetricsInfo/settings`, settings).then((remoteRes) => remoteRes.data)
+  },
   checkUserSettingsValidity(settings) {
     return axios
       .post('/app/userInfo/settings/checkValidity', settings)

@@ -1192,7 +1192,7 @@ class SkillsService {
     }
 
     def getGlobalQuizRunsExcelExport(String orderBy = 'started', boolean ascending = true, String userQuery = "", String nameQuery = "", String userIdFilter = "", String startDate = "", String endDate = "") {
-        return downloadAttachment("/app/quiz-runs/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&userQuery=${userQuery}&nameQuery=${nameQuery}&userIdFilter=${userIdFilter}&startDate=${startDate}&endDate=${endDate}".toString())
+        return downloadAttachment("/app/quiz-runs/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&query=${userQuery}&nameQuery=${nameQuery}&userIdFilter=${userIdFilter}&startDate=${startDate}&endDate=${endDate}".toString())
     }
 
     def getUserAchievementsExcelExport(String projectId, Map params=null) {
@@ -1618,6 +1618,25 @@ class SkillsService {
                 projectId: projectId,
         ]
         return wsHelper.adminPost("/projects/${projectId}/settings", [params])
+    }
+
+    /**
+     * @param projectId either projectId or quizId must be provided but never both
+     * @param quizId either projectId or quizId must be provided but never both
+     */
+    def addOrUpdateGlobalMetricsUserSettings(List settings) {
+        // example of a setting:
+        //       [
+        //                setting  : setting,
+        //                value    : value,
+        //                projectId: projectId,
+        //                quizId: quizId
+        //       ]
+        return wsHelper.appPost("/userGlobalMetricsInfo/settings", settings)
+    }
+
+    def getGlobalMetricsUserSettings(String setting) {
+        return wsHelper.appGet("/userGlobalMetricsInfo/settings/${setting}")
     }
 
     def getProjectSettings(String projectId) {

@@ -83,7 +83,7 @@ const loadData = () => {
   return UsersService.getGlobalUserProgress(params).then((data) => {
     const metricItemsPage = data.metricItemsPage.map((item) => ({
       ...item,
-      skillsEarnedPercent: Math.trunc((item.numSkillsEarned / data.numTotalSkills) * 100),
+      skillsEarnedPercent: data.numTotalSkills > 0 ? Math.trunc((item.numSkillsEarned / data.numTotalSkills) * 100) : 0,
       userToShow: userInfo.getUserDisplay(item, true)
     }))
     userProgress.value = {...data, metricItemsPage}

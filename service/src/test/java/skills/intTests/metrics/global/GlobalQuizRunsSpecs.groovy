@@ -27,6 +27,11 @@ import skills.storage.model.QuizDefParent
 import skills.storage.model.UserQuizAttempt
 import spock.lang.IgnoreIf
 
+import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
+import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
+import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
+import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
+import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
 import static skills.storage.model.UserQuizAttempt.QuizAttemptStatus.PASSED
 import static skills.storage.model.UserQuizAttempt.QuizAttemptStatus.FAILED
 import static skills.storage.model.UserQuizAttempt.QuizAttemptStatus.INPROGRESS
@@ -140,6 +145,60 @@ class GlobalQuizRunsSpecs extends DefaultIntSpec {
         resPage2.totalCount == 24
         resPage3.count == 24
         resPage3.totalCount == 24
+    }
+
+    def "get quiz runs for multiple users and different quizzes - user global metrics setting to not show quizzes"() {
+        when:
+        skillsService.addOrUpdateGlobalMetricsUserSettings([
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: quizzes[0].quizId ],
+        ].flatten())
+        def resPage1 = skillsService.getGlobalQuizRuns()
+        def resPage2 = skillsService.getGlobalQuizRuns('', '', 10, 2)
+
+        assertQuiz(resPage1.data[0], new QValidInfo(attemptId: attempts[0].id, uId: users[9].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage1.data[1], new QValidInfo(attemptId: attempts[1].id, uId: users[4].userName, qId: quizzes[2].quizId, qName: quizzes[2].name, status: FAILED, numCorrect: 0))
+        assertQuiz(resPage1.data[2], new QValidInfo(attemptId: attempts[3].id, uId: users[6].userName, qId: quizzes[3].quizId, qName: quizzes[3].name, status: FAILED, numCorrect: 0))
+        assertQuiz(resPage1.data[3], new QValidInfo(attemptId: attempts[4].id, uId: users[0].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage1.data[4], new QValidInfo(attemptId: attempts[6].id, uId: users[5].userName, qId: surveys[1].quizId, qName: surveys[1].name, status: "COMPLETED", type: Survey))
+        assertQuiz(resPage1.data[5], new QValidInfo(attemptId: attempts[7].id, uId: users[1].userName, qId: quizzes[4].quizId, qName: quizzes[4].name, status: PASSED))
+        assertQuiz(resPage1.data[6], new QValidInfo(attemptId: attempts[8].id, uId: users[7].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage1.data[7], new QValidInfo(attemptId: attempts[10].id, uId: users[3].userName, qId: quizzes[2].quizId, qName: quizzes[2].name, status: PASSED))
+        assertQuiz(resPage1.data[8], new QValidInfo(attemptId: attempts[12].id, uId: users[8].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage1.data[9], new QValidInfo(attemptId: attempts[14].id, uId: users[5].userName, qId: quizzes[3].quizId, qName: quizzes[3].name, status: INPROGRESS, numCorrect: 0))
+
+        assertQuiz(resPage2.data[0], new QValidInfo(attemptId: attempts[15].id, uId: users[0].userName, qId: surveys[0].quizId, qName: surveys[0].name, status: INPROGRESS, type: Survey, numCorrect: 0))
+        assertQuiz(resPage2.data[1], new QValidInfo(attemptId: attempts[16].id, uId: users[6].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage2.data[2], new QValidInfo(attemptId: attempts[18].id, uId: users[2].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage2.data[3], new QValidInfo(attemptId: attempts[19].id, uId: users[4].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage2.data[4], new QValidInfo(attemptId: attempts[20].id, uId: users[1].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+        assertQuiz(resPage2.data[5], new QValidInfo(attemptId: attempts[21].id, uId: users[0].userName, qId: quizzes[4].quizId, qName: quizzes[4].name, status: INPROGRESS, numCorrect: 0))
+        assertQuiz(resPage2.data[6], new QValidInfo(attemptId: attempts[23].id, uId: users[3].userName, qId: quizzes[1].quizId, qName: quizzes[1].name, status: PASSED))
+
+        skillsService.addOrUpdateGlobalMetricsUserSettings([
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: quizzes[0].quizId ],
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: quizzes[1].quizId ],
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: quizzes[2].quizId ],
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: surveys[0].quizId ],
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: surveys[1].quizId ],
+        ])
+
+        def resPage1_t0 = skillsService.getGlobalQuizRuns()
+        assertQuiz(resPage1_t0.data[0], new QValidInfo(attemptId: attempts[3].id, uId: users[6].userName, qId: quizzes[3].quizId, qName: quizzes[3].name, status: FAILED, numCorrect: 0))
+        assertQuiz(resPage1_t0.data[1], new QValidInfo(attemptId: attempts[7].id, uId: users[1].userName, qId: quizzes[4].quizId, qName: quizzes[4].name, status: PASSED))
+        assertQuiz(resPage1_t0.data[2], new QValidInfo(attemptId: attempts[14].id, uId: users[5].userName, qId: quizzes[3].quizId, qName: quizzes[3].name, status: INPROGRESS, numCorrect: 0))
+        assertQuiz(resPage1_t0.data[3], new QValidInfo(attemptId: attempts[21].id, uId: users[0].userName, qId: quizzes[4].quizId, qName: quizzes[4].name, status: INPROGRESS, numCorrect: 0))
+        then:
+        resPage1.data.size() == 10
+        resPage2.data.size() == 7
+
+        resPage1.count == 17
+        resPage1.totalCount == 17
+        resPage2.count == 17
+        resPage2.totalCount == 17
+
+        resPage1_t0.data.size() == 4
+        resPage1_t0.count == 4
+        resPage1_t0.totalCount == 4
     }
 
     def "filter by quiz name"() {
@@ -325,7 +384,6 @@ class GlobalQuizRunsSpecs extends DefaultIntSpec {
         assert res.totalAnswers == quizRunValidInfo.totalAnswers
     }
 
-
     private def createQuiz(int num) {
         def quiz = QuizDefFactory.createQuiz(num)
         quiz.name = "My Quiz ${num}".toString()
@@ -363,6 +421,5 @@ class GlobalQuizRunsSpecs extends DefaultIntSpec {
 
         return quizAttempt
     }
-
 
 }

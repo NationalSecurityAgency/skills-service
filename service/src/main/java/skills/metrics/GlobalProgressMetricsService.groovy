@@ -18,24 +18,30 @@ package skills.metrics
 import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfo
 import skills.auth.UserInfoService
-import skills.controller.UserInfoController
-import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.QuizValidator
+import skills.controller.exceptions.SkillsValidator
+import skills.controller.request.model.GlobalMetricsSettingsRequest
+import skills.controller.request.model.SettingsRequest
+import skills.controller.result.model.GlobalMetricsSettingsResult
 import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.TableResult
 import skills.controller.result.model.globalMetrics.*
 import skills.services.admin.UserCommunityService
 import skills.services.quiz.QuizDefService
+import skills.services.quiz.QuizSettingsService
 import skills.services.settings.SettingsService
+import skills.storage.accessors.UserRoleAccessor
 import skills.storage.model.*
-import skills.storage.model.auth.RoleName
-import skills.storage.model.auth.UserRole
+import skills.storage.model.auth.User
 import skills.storage.repos.*
 
 import static org.springframework.data.domain.Sort.Direction.ASC
@@ -45,8 +51,7 @@ import static org.springframework.data.domain.Sort.Direction.DESC
 @Service
 @Slf4j
 class GlobalProgressMetricsService {
-    static final String USER_PREF_FILTER_PROJ_IDS = "globalMetricsExcludedProjectsIds"
-    static final String USER_PREF_FILTER_QUIZ_IDS = "globalMetricsExcludedQuizIds"
+    static final String USER_PREF_GLOBAL_METRICS_EXCLUSION = "globalMetricsExcludedItem"
 
     enum GroupingType {
         DAY('day'),
@@ -72,10 +77,16 @@ class GlobalProgressMetricsService {
     UserInfoService userInfoService
 
     @Autowired
-    UserRoleRepo userRoleRepo
+    UserRoleAccessor userRoleAccessor
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    UserRepo userRepo
+
+    @Autowired
+    QuizSettingsService quizSettingsService
 
     @Autowired
     UserAttrsRepo userAttrsRepo
@@ -351,9 +362,9 @@ class GlobalProgressMetricsService {
     @Profile
     ProjectIdsAndQuizIds getProjectIdsAndQuizIdsForCurrentUser() {
         String userId = userInfoService.currentUser.username
-        List<UserRole> allUserRoles = userRoleRepo.findAllByUserId(userId)
-        List<String> projectIds = allUserRoles?.findAll({ it.roleName == RoleName.ROLE_PROJECT_ADMIN})?.projectId
-        List<String> quizIds = allUserRoles?.findAll({ it.roleName == RoleName.ROLE_QUIZ_ADMIN})?.quizId
+        UserRoleAccessor.ProjectsAndQuizzes projectsAndQuizzes = userRoleAccessor.getCurrentUserAdminProjectsAndQuizzes()
+        List<String> projectIds = projectsAndQuizzes.projectIds
+        List<String> quizIds = projectsAndQuizzes.quizIds
 
         Boolean isUserCommunityMember = userCommunityService.isUserCommunityMember(userId)
         if (!isUserCommunityMember && projectIds) {
@@ -363,22 +374,81 @@ class GlobalProgressMetricsService {
             quizIds.removeAll { userCommunityService.isUserCommunityOnlyQuiz(it) }
         }
 
-        List<String> excludedProjectIds = getExcludeSetting(userId, USER_PREF_FILTER_PROJ_IDS)
+
+        List<GlobalMetricsSettingsResult> exclusionSettings = getGlobalMetricsUserSettings(USER_PREF_GLOBAL_METRICS_EXCLUSION)
+        List<String> excludedProjectIds = exclusionSettings ? exclusionSettings.findAll { it.projectId }.collect { it.projectId } : []
         if (excludedProjectIds) {
             projectIds.removeAll { excludedProjectIds.contains(it) }
         }
 
-        List<String> excludedQuizIds = getExcludeSetting(userId, USER_PREF_FILTER_QUIZ_IDS)
+        List<String> excludedQuizIds = exclusionSettings ? exclusionSettings.findAll { it.quizId }.collect { it.quizId } : []
         if (excludedQuizIds) {
             quizIds.removeAll { excludedQuizIds.contains(it) }
         }
 
         return new ProjectIdsAndQuizIds(projectIds: projectIds, quizIds: quizIds, excludedProjectIds: excludedProjectIds, excludedQuizIds: excludedQuizIds)
     }
-    private List<String> getExcludeSetting(String userId, String settingName) {
-        SettingsResult excludedProjectsSettings = settingsService.getUserSetting(userId, settingName, UserInfoController.USER_PREFS_GROUP, false)
-        List<String> res = excludedProjectsSettings ? excludedProjectsSettings.value?.split(",")?.collect({ it.trim() }) : []
+
+    List<GlobalMetricsSettingsResult> getGlobalMetricsUserSettings(String setting) {
+        UserInfo currentUser = userInfoService.currentUser
+        UserRoleAccessor.ProjectsAndQuizzes projectsAndQuizzes = userRoleAccessor.getCurrentUserAdminProjectsAndQuizzes()
+
+        List<GlobalMetricsSettingsResult> res = []
+        List<SettingsResult> settingsResults = settingsService.getUserProjectSettingsForAllProjects(setting, currentUser.username)
+        if (settingsResults) {
+            settingsResults.findAll { it.projectId in projectsAndQuizzes.projectIds }.each {
+                res.add(new GlobalMetricsSettingsResult(
+                        projectId: it.projectId,
+                        setting: it.setting,
+                        value: it.value
+                ))
+            }
+        }
+
+        List<QuizSettingsRepo.SimpleQuizRes> quizSettings = quizSettingsService.getGlobalMetricsUserSettings(setting)
+        if (quizSettings) {
+            quizSettings.findAll { it.quizId in projectsAndQuizzes.quizIds }.each {
+                res.add(new GlobalMetricsSettingsResult(
+                        quizId: it.quizId,
+                        setting: it.setting,
+                        value: it.value
+                ))
+            }
+        }
+
         return res
+    }
+
+    void saveGlobalMetricsUserSettings(List<GlobalMetricsSettingsRequest> values) {
+        SkillsValidator.isNotNull(values, "Settings")
+
+        UserRoleAccessor.ProjectsAndQuizzes projectsAndQuizzes = userRoleAccessor.getCurrentUserAdminProjectsAndQuizzes()
+        values.each {
+            SkillsValidator.isTrue((it.projectId && !it.quizId) || (!it.projectId && it.quizId), "Exactly one of projectId or quizId must be specified (not both, not neither)")
+            if (it.projectId) {
+                SkillsValidator.isTrue(it.projectId in projectsAndQuizzes.projectIds, "User must be an admin in order to save settings for this project", it.projectId)
+            }
+            if (it.quizId) {
+                QuizValidator.isTrue(it.quizId in projectsAndQuizzes.quizIds, "User must be an admin in order to save settings for this quiz", it.quizId)
+            }
+        }
+
+        List<GlobalMetricsSettingsRequest> projSettings = values.findAll { it.projectId }
+
+        List<GlobalMetricsSettingsRequest> projSettingToDelete = projSettings.findAll { StringUtils.isBlank(it.value)}
+        if (projSettingToDelete) {
+            settingsService.deleteGlobalMetricsUserSettings(projSettingToDelete)
+        }
+
+        List<? extends SettingsRequest> projSettingsToSave = projSettings.findAll { !StringUtils.isBlank(it.value)}
+        if (projSettingsToSave) {
+            String userId = userInfoService.currentUser.username
+            User user = userRepo.findByUserId(userId.toLowerCase())
+            settingsService.saveSettings(projSettingsToSave as List<SettingsRequest>, user, false)
+        }
+
+        List<GlobalMetricsSettingsRequest> quizSettings = values.findAll { it.quizId }
+        quizSettingsService.updateGlobalMetricsUserSettings(quizSettings)
     }
 
     private static int countQuizzesByType(List<GlobalProgressMetricsRepo.QuizInfo> quizIdAndTypes, QuizDefParent.QuizType quizType) {

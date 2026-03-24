@@ -38,17 +38,18 @@ const isQuiz = props.type === 'Quiz'
 const isProj = !isQuiz
 const itemsName = isQuiz ? 'Assessments' : 'Projects'
 
-const settingGroupName = 'user.prefs'
-const settingName = isProj ? 'globalMetricsExcludedProjectsIds' : 'globalMetricsExcludedQuizIds'
+const settingName = 'globalMetricsExcludedItem'
 onMounted(() => {
-  SettingsService.getUserSettings().then((settings) => {
-    const existingExcludedProjects = settings?.find(setting => setting.setting === settingName)
-    let excludedProjIds = existingExcludedProjects ? existingExcludedProjects.value.split(',').map(id => id.trim()) : []
+  SettingsService.getUserGlobalMetricsSettings(settingName).then((excludedItems) => {
+    let excludedIds = isProj ?
+        excludedItems?.filter((item) => item.projectId)?.map(item => item.projectId)
+        : excludedItems?.filter((item) => item.quizId)?.map(item => item.quizId)
 
+    excludedIds = excludedIds || []
     const dataLoader = isProj ? loadProjects : loadQuizzes
     dataLoader().then((resItems) => {
-      const excludedItems = resItems.filter(item => excludedProjIds.includes(item.itemId))
-      const includedItems = resItems.filter(item => !excludedProjIds.includes(item.itemId))
+      const excludedItems = resItems.filter(item => excludedIds.includes(item.itemId))
+      const includedItems = resItems.filter(item => !excludedIds.includes(item.itemId))
       pickListArray.value = [includedItems, excludedItems]
     }).finally(() => {
       loading.value = false
@@ -72,14 +73,11 @@ const close = () => {
 
 const onOk = () => {
   submitting.value = true
-  const excludedItemsIds = pickListArray.value[1].map(project => project.itemId).sort().join(',')
-  const excludedItemsIdsParam = excludedItemsIds || ''
-  const excludedProSetting = {
-    settingGroup: settingGroupName,
-    setting: settingName,
-    value: excludedItemsIdsParam
-  }
-  SettingsService.saveUserSettings([excludedProSetting]).finally(() => {
+
+  const toSave = []
+  toSave.push(...pickListArray.value[0].map(item => ({projectId: isProj ? item.itemId : null, quizId: isQuiz ? item.itemId : null, setting: settingName})))
+  toSave.push(...pickListArray.value[1].map(item => ({projectId: isProj ? item.itemId : null, quizId: isQuiz ? item.itemId : null, setting: settingName, value: true})))
+  SettingsService.saveUserGlobalMetricsSettings(toSave).finally(() => {
     submitting.value = false
     emits('on-saved')
     close()
