@@ -40,7 +40,7 @@ class GlobalProgressExportResult extends AbstractXlsxStreamingView {
         PageRequest pageRequest = model.get(PAGE_REQUEST) as PageRequest
 
         // define excel file name to be exported
-        response.addHeader("Content-Disposition", "attachment;fileName=global-users-${new Date().format("yyyy-MM-dd")}.xlsx")
+        response.addHeader("Content-Disposition", "attachment;fileName=global-user-progress-${new Date().format("yyyy-MM-dd")}.xlsx")
         excelExportService.exportGlobalUserProgress(workbook, userQuery, pageRequest, userTagFilter)
     }
 }

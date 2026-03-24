@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.servlet.ModelAndView
 import skills.PublicProps
 import skills.controller.request.model.TextInputAIGradingRequest
 import skills.services.openai.OpenAIService
@@ -113,6 +114,9 @@ class QuizController {
 
     @Autowired
     OpenAIService openAIService
+
+    @Autowired
+    QuizRunsExportResult quizRunsExportResult
 
     @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -321,6 +325,26 @@ class QuizController {
         PageRequest pageRequest = TablePageUtil.validateAndConstructQuizPageRequest(limit, page, orderBy, ascending)
         List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
         return quizDefService.getQuizRuns([quizId], query, "", "", quizAttemptStatus, pageRequest, dates[0], dates[1]);
+    }
+
+    @RequestMapping(value = "/{quizId}/runs/export/excel", method = RequestMethod.GET)
+    ModelAndView exportQuizRuns(@PathVariable("quizId") String quizId,
+                                @RequestParam String userQuery,
+                                @RequestParam String orderBy,
+                                @RequestParam Boolean ascending,
+                                @RequestParam(required = false) String startDate,
+                                @RequestParam(required = false) String endDate) {
+        PageRequest pageRequest = TablePageUtil.createPagingRequest(Integer.MAX_VALUE, 1, orderBy, ascending)
+        List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
+
+        ModelAndView mav = new ModelAndView(quizRunsExportResult)
+        mav.addObject(QuizRunsExportResult.QUIZ_IDS, [quizId])
+        mav.addObject(QuizRunsExportResult.USER_QUERY, userQuery)
+        mav.addObject(QuizRunsExportResult.NAME_QUERY, '')
+        mav.addObject(QuizRunsExportResult.PAGE_REQUEST, pageRequest)
+        mav.addObject(QuizRunsExportResult.START_DATE, dates[0])
+        mav.addObject(QuizRunsExportResult.END_DATE, dates[1])
+        return mav
     }
 
     @RequestMapping(value = "/{quizId}/runs/{attemptId}", method = RequestMethod.DELETE, produces = "application/json")

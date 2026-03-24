@@ -289,7 +289,7 @@ class ExcelExportService {
                 Row row = sheet.createRow(rowNum++)
                 Integer colNum = 0
 
-                row.createCell(colNum++).setCellValue(userItem.userId ?: '')
+                row.createCell(colNum++).setCellValue(userItem.userIdForDisplay ?: '')
                 row.createCell(colNum++).setCellValue(userItem.lastName ?: '')
                 row.createCell(colNum++).setCellValue(userItem.firstName ?: '')
                 if (userTagLabel) {
@@ -318,9 +318,7 @@ class ExcelExportService {
     }
 
     @Transactional(readOnly = true)
-    void exportQuizRuns(Workbook workbook, String userQuery, String nameQuery, String userIdFilter, PageRequest pageRequest, Date startDate, Date endDate) {
-        GlobalProgressMetricsService.ProjectIdsAndQuizIds projectIdsAndQuizIds = globalProgressMetricsService.getProjectIdsAndQuizIdsForCurrentUser()
-        List<String> quizIds = projectIdsAndQuizIds.quizIds
+    void exportQuizRuns(Workbook workbook, List<String> quizIds, String userQuery, String nameQuery, String userIdFilter, PageRequest pageRequest, Date startDate, Date endDate) {
         Boolean hasAnyUserCommunityOnlyQuizzes = userCommunityService.hasAnyUserCommunityOnlyProjectsOrQuizzes([], quizIds)
         String userCommunityValue = userCommunityService.getCommunityNameBasedOnConfAndItemStatus(hasAnyUserCommunityOnlyQuizzes)
 

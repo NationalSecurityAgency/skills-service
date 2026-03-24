@@ -1187,6 +1187,10 @@ class SkillsService {
         return downloadAttachment("/app/progress-metrics/export/excel?&ascending=${ascending}&orderBy=${orderBy}&userQuery=${query}&userTagFilter=${userTagFilter}".toString())
     }
 
+    def getQuizRunsExcelExport(String quizId, String orderBy = 'started', boolean ascending = true, String userQuery = "", String nameQuery = "", String userIdFilter = "", String startDate = "", String endDate = "") {
+        return downloadAttachment("/admin${getQuizDefUrl(quizId)}/runs/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&userQuery=${userQuery}&nameQuery=${nameQuery}&userIdFilter=${userIdFilter}&startDate=${startDate}&endDate=${endDate}".toString())
+    }
+
     def getGlobalQuizRunsExcelExport(String orderBy = 'started', boolean ascending = true, String userQuery = "", String nameQuery = "", String userIdFilter = "", String startDate = "", String endDate = "") {
         return downloadAttachment("/app/quiz-runs/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&userQuery=${userQuery}&nameQuery=${nameQuery}&userIdFilter=${userIdFilter}&startDate=${startDate}&endDate=${endDate}".toString())
     }

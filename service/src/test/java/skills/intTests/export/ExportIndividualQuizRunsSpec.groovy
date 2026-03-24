@@ -21,7 +21,7 @@ import skills.intTests.utils.SkillsService
 import skills.storage.model.UserQuizAttempt
 import skills.storage.repos.UserQuizAttemptRepo
 
-class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
+class ExportIndividualQuizRunsSpec extends ExportBaseIntSpec {
 
     @Autowired
     UserQuizAttemptRepo userQuizAttemptRepo
@@ -29,9 +29,12 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
     def "get empty quiz runs progress"() {
         quizDefRepo.deleteAll()
         projDefRepo.deleteAll()
+        def quiz1 = createQuiz(1)
         when:
-        def excelExport = skillsService.getGlobalQuizRunsExcelExport()
+        def excelExport = skillsService.getQuizRunsExcelExport(quiz1.quizId)
         then:
+
+        excelExport.headers['Content-Disposition'].toString().contains("fileName=${quiz1.quizId}-quiz-runs")
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
                 ["User ID", "Last Name", "First Name", "Org", "Quiz Name", "Type", "Status", "Number Correct", "Number of Questions", "Date Started (UTC)", "Date Completed (UTC)", "Runtime (seconds)"],
@@ -55,16 +58,27 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
         runQuizOrSurvey(quiz2, user3, false, true, new Date(today.time+2))
         runQuizOrSurvey(survey1, user1, false, true, new Date(today.time+3))
 
-        def excelExport = skillsService.getGlobalQuizRunsExcelExport()
+        def quiz1ExcelExport = skillsService.getQuizRunsExcelExport(quiz1.quizId)
+        def quiz2ExcelExport = skillsService.getQuizRunsExcelExport(quiz2.quizId)
+        def survey1ExcelExport = skillsService.getQuizRunsExcelExport(survey1.quizId)
 
         then:
-        excelExport.headers['Content-Disposition'].toString().contains('fileName=global-quiz-runs')
-        validateExport(excelExport.file, [
+        validateExport(quiz1ExcelExport.file, [
                 ["For All Dragons Only"],
                 [ "User ID", "Last Name", "First Name", "Org", "Quiz Name", "Type", "Status", "Number Correct", "Number of Questions", "Date Started (UTC)", "Date Completed (UTC)", "Runtime (seconds)"],
                 [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", quiz1.name, "Quiz", "PASSED", "2.0", "2.0", formatDate(today),  formatDate(today), "5.0"],
                 [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", quiz1.name, "Quiz", "INPROGRESS", "0.0", "2.0", formatDate(today), "", ""],
+                ["For All Dragons Only"],
+        ])
+        validateExport(quiz2ExcelExport.file, [
+                ["For All Dragons Only"],
+                [ "User ID", "Last Name", "First Name", "Org", "Quiz Name", "Type", "Status", "Number Correct", "Number of Questions", "Date Started (UTC)", "Date Completed (UTC)", "Runtime (seconds)"],
                 [getUserIdForDisplay(user3), getName(user3, false), getName(user3), "", quiz2.name, "Quiz", "FAILED", "1.0", "2.0", formatDate(today),  formatDate(today), "5.0"],
+                ["For All Dragons Only"],
+        ])
+        validateExport(survey1ExcelExport.file, [
+                ["For All Dragons Only"],
+                [ "User ID", "Last Name", "First Name", "Org", "Quiz Name", "Type", "Status", "Number Correct", "Number of Questions", "Date Started (UTC)", "Date Completed (UTC)", "Runtime (seconds)"],
                 [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", survey1.name, "Survey", "COMPLETED", "2.0", "2.0", formatDate(today),  formatDate(today), "5.0"],
                 ["For All Dragons Only"],
         ])
@@ -82,19 +96,25 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
         runQuizOrSurvey(quiz1, user1, true, true, fiveDaysAgo)
         runQuizOrSurvey(quiz2, user2, false, true, today)
 
-        def excelExport = skillsService.getGlobalQuizRunsExcelExport('userIdForDisplay', true, '', '', '', fiveDaysAgo.format("yyyy-MM-dd HH:mm:ss"), today.format("yyyy-MM-dd HH:mm:ss"))
+        def quiz1ExcelExport = skillsService.getQuizRunsExcelExport(quiz1.quizId, 'userIdForDisplay', true, '', '', '', fiveDaysAgo.format("yyyy-MM-dd HH:mm:ss"), today.format("yyyy-MM-dd HH:mm:ss"))
+        def quiz2ExcelExport = skillsService.getQuizRunsExcelExport(quiz2.quizId, 'userIdForDisplay', true, '', '', '', fiveDaysAgo.format("yyyy-MM-dd HH:mm:ss"), today.format("yyyy-MM-dd HH:mm:ss"))
 
         then:
-        validateExport(excelExport.file, [
+        validateExport(quiz1ExcelExport.file, [
                 ["For All Dragons Only"],
                 [ "User ID", "Last Name", "First Name", "Org", "Quiz Name", "Type", "Status", "Number Correct", "Number of Questions", "Date Started (UTC)", "Date Completed (UTC)", "Runtime (seconds)"],
                 [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", quiz1.name, "Quiz", "PASSED", "2.0", "2.0", formatDate(fiveDaysAgo),  formatDate(fiveDaysAgo), "5.0"],
+                ["For All Dragons Only"],
+        ])
+        validateExport(quiz2ExcelExport.file, [
+                ["For All Dragons Only"],
+                [ "User ID", "Last Name", "First Name", "Org", "Quiz Name", "Type", "Status", "Number Correct", "Number of Questions", "Date Started (UTC)", "Date Completed (UTC)", "Runtime (seconds)"],
                 [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", quiz2.name, "Quiz", "FAILED", "1.0", "2.0", formatDate(today),  formatDate(today), "5.0"],
                 ["For All Dragons Only"],
         ])
     }
 
-    def "export global quiz runs with name filter"() {
+    def "export global quiz runs with name filter - ignored for individual quiz runs export"() {
         def quiz1 = createQuiz(1)
         def quiz2 = createQuiz(2)
 
@@ -106,13 +126,13 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
         runQuizOrSurvey(quiz1, user1, true, true)
         runQuizOrSurvey(quiz2, user2, false, true)
 
-        def excelExport = skillsService.getGlobalQuizRunsExcelExport('started', true, '', 'Quiz 2', '', '', '')
+        def quiz1ExcelExport = skillsService.getQuizRunsExcelExport(quiz1.quizId, 'started', true, '', 'Quiz 2', '', '', '')
 
         then:
-        validateExport(excelExport.file, [
+        validateExport(quiz1ExcelExport.file, [
                 ["For All Dragons Only"],
                 [ "User ID", "Last Name", "First Name", "Org", "Quiz Name", "Type", "Status", "Number Correct", "Number of Questions", "Date Started (UTC)", "Date Completed (UTC)", "Runtime (seconds)"],
-                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", quiz2.name, "Quiz", "FAILED", "1.0", "2.0", formatDate(today),  formatDate(today), "5.0"],
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", quiz1.name, "Quiz", "PASSED", "2.0", "2.0", formatDate(today),  formatDate(today), "5.0"],
                 ["For All Dragons Only"],
         ])
     }
@@ -128,7 +148,7 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
         runQuizOrSurvey(quiz1, user1, true, true)
         runQuizOrSurvey(quiz1, user2, false, true)
 
-        def excelExport = skillsService.getGlobalQuizRunsExcelExport('started', true, getUserIdForDisplay(user1), '', '', '')
+        def excelExport = skillsService.getQuizRunsExcelExport(quiz1.quizId, 'started', true, getUserIdForDisplay(user1), '', '', '')
 
         then:
         validateExport(excelExport.file, [
@@ -156,7 +176,7 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
         runQuizOrSurvey(quiz, user1, true, true, today, pristineDragonsUser)
         runQuizOrSurvey(quiz, user2, false, true, today, pristineDragonsUser)
 
-        def excelExport = pristineDragonsUser.getGlobalQuizRunsExcelExport('userIdForDisplay')
+        def excelExport = pristineDragonsUser.getQuizRunsExcelExport(quiz.quizId, 'userIdForDisplay')
 
         then:
         validateExport(excelExport.file, [

@@ -94,10 +94,13 @@ class AppController {
     MetricsService metricsServiceNew
 
     @Autowired
+    GlobalProgressMetricsService globalProgressMetricsService
+
+    @Autowired
     GlobalProgressExportResult globalProgressExportResult
 
     @Autowired
-    GlobalQuizRunsExportResult globalQuizRunsExportResult
+    QuizRunsExportResult quizRunsExportResult
 
     static final RESERVERED_PROJECT_ID = ShareSkillsService.ALL_SKILLS_PROJECTS
 
@@ -363,24 +366,26 @@ class AppController {
     }
 
     @RequestMapping(value = "/quiz-runs/export/excel", method = RequestMethod.GET)
-    ModelAndView exportQuizRuns(@RequestParam(name = "query", defaultValue = "") String userQuery,
+    ModelAndView exportGlobalQuizRuns(@RequestParam(name = "userQuery", defaultValue = "") String userQuery,
                                    @RequestParam(name = "nameQuery", defaultValue = "") String nameQuery,
                                    @RequestParam String orderBy,
                                    @RequestParam Boolean ascending,
-                                   @RequestParam(name = "userIdFilter", defaultValue = "") String userIdFilter,
                                    @RequestParam(required = false) String startDate,
                                    @RequestParam(required = false) String endDate) {
         PageRequest pageRequest = TablePageUtil.createPagingRequest(Integer.MAX_VALUE, 1, orderBy, ascending)
         List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
-        userIdFilter = "null" == userIdFilter ? "" : userIdFilter
-        
-        ModelAndView mav = new ModelAndView(globalQuizRunsExportResult)
-        mav.addObject("userQuery", userQuery)
-        mav.addObject("nameQuery", nameQuery)
-        mav.addObject("userIdFilter", userIdFilter)
-        mav.addObject("pageRequest", pageRequest)
-        mav.addObject("startDate", dates[0])
-        mav.addObject("endDate", dates[1])
+
+        GlobalProgressMetricsService.ProjectIdsAndQuizIds projectIdsAndQuizIds = globalProgressMetricsService.getProjectIdsAndQuizIdsForCurrentUser()
+        List<String> quizIds = projectIdsAndQuizIds.quizIds
+
+        ModelAndView mav = new ModelAndView(quizRunsExportResult)
+        mav.addObject(QuizRunsExportResult.QUIZ_IDS, quizIds)
+        mav.addObject(QuizRunsExportResult.USER_QUERY, userQuery)
+        mav.addObject(QuizRunsExportResult.NAME_QUERY, nameQuery)
+        mav.addObject(QuizRunsExportResult.PAGE_REQUEST, pageRequest)
+        mav.addObject(QuizRunsExportResult.START_DATE, dates[0])
+        mav.addObject(QuizRunsExportResult.END_DATE, dates[1])
+        mav.addObject(QuizRunsExportResult.IS_GLOBAL, true)
         return mav
     }
 

@@ -581,4 +581,24 @@ describe('Global Users Progress With Reused Data', () => {
 
     })
 
+    it('export global user progress table', function () {
+        cy.visit('/administrator/users-progress');
+
+        cy.intercept('/app/progress-metrics**').as('progressMetrics')
+        cy.get('[data-cy="userOverallProgressTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '3')
+        cy.get('[data-cy="exportBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="userFilter"]').type('ThisUserDoesNotExist{enter}')
+        cy.get('[data-cy="userOverallProgressTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '0')
+        cy.get('[data-cy="exportBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="resetBtn"]').click()
+        cy.get('[data-cy="exportBtn"]').should('be.enabled')
+
+        // export skill metrics and verify that the file exists
+        const exportedFileName = `cypress/downloads/global-user-progress-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
+        cy.readFile(exportedFileName).should('not.exist');
+        cy.get('[data-cy="exportBtn"]').click();
+        cy.readFile(exportedFileName).should('exist');
+    });
 });

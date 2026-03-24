@@ -25,29 +25,33 @@ import org.springframework.web.servlet.view.document.AbstractXlsxStreamingView
 import skills.services.ExcelExportService
 
 @Component
-class GlobalQuizRunsExportResult extends AbstractXlsxStreamingView {
+class QuizRunsExportResult extends AbstractXlsxStreamingView {
 
+    static final String QUIZ_IDS = "quizIds"
     static final String USER_QUERY = "userQuery"
     static final String NAME_QUERY = "nameQuery"
-    static final String USER_ID_FILTER = "userIdFilter"
     static final String PAGE_REQUEST = "pageRequest"
     static final String START_DATE = "startDate"
     static final String END_DATE = "endDate"
+    static final String IS_GLOBAL = "isGlobal"
 
     @Autowired
     private ExcelExportService excelExportService
 
     @Override
     protected void buildExcelDocument(Map<String, Object> model, Workbook workbook, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        List<String> quizIds = model.get(QUIZ_IDS) as List<String>
         String userQuery = model.get(USER_QUERY) as String
         String nameQuery = model.get(NAME_QUERY) as String
-        String userIdFilter = model.get(USER_ID_FILTER) as String
+        String userIdFilter = ''
         PageRequest pageRequest = model.get(PAGE_REQUEST) as PageRequest
         Date startDate = model.get(START_DATE) as Date
         Date endDate = model.get(END_DATE) as Date
+        boolean isGlobal = model.get(IS_GLOBAL) as boolean
 
         // define excel file name to be exported
-        response.addHeader("Content-Disposition", "attachment;fileName=global-quiz-runs-${new Date().format("yyyy-MM-dd")}.xlsx")
-        excelExportService.exportQuizRuns(workbook, userQuery, nameQuery, userIdFilter, pageRequest, startDate, endDate)
+        String exportType = quizIds.size() == 1 && !isGlobal ? "${quizIds[0]}" : "global"
+        response.addHeader("Content-Disposition", "attachment;fileName=${exportType}-quiz-runs-${new Date().format("yyyy-MM-dd")}.xlsx")
+        excelExportService.exportQuizRuns(workbook, quizIds, userQuery, nameQuery, userIdFilter, pageRequest, startDate, endDate)
     }
 }

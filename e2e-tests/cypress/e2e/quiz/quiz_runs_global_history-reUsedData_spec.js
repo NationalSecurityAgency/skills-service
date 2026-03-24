@@ -481,7 +481,6 @@ describe('Global Quiz Runs History Tests', () => {
         cy.get('[data-cy="quizRunStatus"]').contains('Passed')
     });
 
-
     it('navigate to quiz def via name', function () {
         cy.intercept('/app/quiz-runs**').as('quizRuns')
         cy.visit('/administrator/quiz-runs');
@@ -540,4 +539,24 @@ describe('Global Quiz Runs History Tests', () => {
         ], 10);
     });
 
+    it('export global quiz runs', function () {
+        cy.intercept('/app/quiz-runs**').as('quizRuns')
+        cy.visit('/administrator/quiz-runs');
+        cy.wait('@quizRuns')
+        cy.get('[data-cy="quizRunsHistoryTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '14')
+        cy.get('[data-cy="exportBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="userNameFilter"]').type('ThisUserDoesNotExist{enter}')
+        cy.get('[data-cy="quizRunsHistoryTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '0')
+        cy.get('[data-cy="exportBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="userResetBtn"]').click()
+        cy.get('[data-cy="exportBtn"]').should('be.enabled')
+
+        // export skill metrics and verify that the file exists
+        const exportedFileName = `cypress/downloads/global-quiz-runs-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
+        cy.readFile(exportedFileName).should('not.exist');
+        cy.get('[data-cy="exportBtn"]').click();
+        cy.readFile(exportedFileName).should('exist');
+    });
 });

@@ -22,7 +22,7 @@ import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import InputText from "primevue/inputtext";
 import HighlightedValue from "@/components/utils/table/HighlightedValue.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
-import {onMounted, ref, watch} from "vue";
+import { computed, onMounted, ref, watch } from 'vue'
 import {useStorage} from "@vueuse/core";
 import QuizService from "@/components/quiz/QuizService.js";
 import {useRoute} from "vue-router";
@@ -258,14 +258,23 @@ const exportQuizRuns = () => {
     endDate: dateRange.endDate
   }
 
-  return exportUtil.ajaxDownload('/app/quiz-runs/export/excel', params).then((res) => {
+  const exportEndpoint = isGlobal.value ? '/app/quiz-runs/export/excel' : `/admin/quiz-definitions/${route.params.quizId}/runs/export/excel`
+  return exportUtil.ajaxDownload(exportEndpoint, params).then((res) => {
     isExporting.value = false
   })
 }
 
 const getQuizRunHistory = (params) => {
-  return route.params.quizId ? QuizService.getQuizRunsHistory(route.params.quizId, params) : QuizService.getGlobalQuizRunsHistory(params)
+  return isGlobal.value ? QuizService.getGlobalQuizRunsHistory(params) : QuizService.getQuizRunsHistory(route.params.quizId, params)
 }
+
+const isGlobal = computed(() => {
+  return !route.params.quizId
+})
+
+const isOnlyForSingleUser = computed(() => {
+  return !!props.onlyRunsForUserId
+})
 
 const userFilter = ref(null)
 const quizNameFilter = ref(null)
@@ -400,7 +409,7 @@ const calculateQuizNameLink = (quizId, attemptId) => {
                 placeholder="Optional Fields"
                 data-cy="quizRunTable-additionalColumns"/>
           </div>
-          <div class="flex justify-end flex-wrap">
+          <div v-if="!isOnlyForSingleUser" class="flex justify-end flex-wrap">
             <SkillsButton icon="fa fa-download"
                           label="Export"
                           :disabled="totalRows <= 0 || options.busy || isExporting"
