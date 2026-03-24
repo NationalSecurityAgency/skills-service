@@ -169,7 +169,7 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
 
         skillsService.createProjectAndSubjectAndSkills(project1, subject1, [skill1])
 
-        List<String> users = getRandomUsers(3).sort()
+        List<String> users = getRandomUsers(3, true, [DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME, 'service', 'skills', 'bob', 'user-info-service.test', 'user-skill1', 'user-skill2']).sort()
         users.each { userId ->
             skillsService.addSkill(skill1, userId)
         }

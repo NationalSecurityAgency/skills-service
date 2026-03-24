@@ -46,7 +46,7 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
         def quiz2 = createQuiz(2)
         def survey1 = createSurvey(3)
 
-        def users = getRandomUsers(3)
+        def users = getRandomUsers(3).sort()
         def user1 = users[0]
         def user2 = users[1]
         def user3 = users[2]
@@ -77,7 +77,7 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
         def quiz2 = createQuiz(2)
         def survey1 = createSurvey(3)
 
-        def users = getRandomUsers(3)
+        def users = getRandomUsers(3).sort()
         def user1 = users[0]
         def user2 = users[1]
         def user3 = users[2]
@@ -109,7 +109,7 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
         def quiz1 = createQuiz(1)
         def quiz2 = createQuiz(2)
 
-        def users = getRandomUsers(2)
+        def users = getRandomUsers(2).sort()
         def user1 = users[0]
         def user2 = users[1]
 
@@ -133,7 +133,7 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
         def quiz1 = createQuiz(1)
         def quiz2 = createQuiz(2)
 
-        def users = getRandomUsers(2)
+        def users = getRandomUsers(2).sort()
         def user1 = users[0]
         def user2 = users[1]
 
@@ -155,7 +155,7 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
     def "export global quiz runs with user filter"() {
         def quiz1 = createQuiz(1)
 
-        def users = getRandomUsers(2)
+        def users = getRandomUsers(2, true, [DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME, 'service', 'skills', 'bob', 'user-info-service.test', 'user-skill1', 'user-skill2']).sort()
         def user1 = users[0]
         def user2 = users[1]
 
@@ -175,7 +175,7 @@ class ExportGlobalQuizRunsSpec extends ExportBaseIntSpec {
     }
 
     def "export global quiz runs for UC protected quiz"() {
-        def users = getRandomUsers(3)
+        def users = getRandomUsers(3).sort()
         def user1 = users[0]
         def user2 = users[1]
 
