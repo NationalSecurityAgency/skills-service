@@ -22,6 +22,8 @@ import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.auth.RoleName
 
+import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
+
 class GlobalUserSettingsSpecs extends DefaultIntSpec {
 
     def "one user with settings and with none" () {
@@ -30,16 +32,16 @@ class GlobalUserSettingsSpecs extends DefaultIntSpec {
 
         users[0].createProject(proj1)
         users[0].addOrUpdateGlobalMetricsUserSettings([
-                [setting: getUSER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: proj1.projectId ],
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: proj1.projectId ],
         ])
         users[0].addProjectAdmin(proj1.projectId, users[1].userName)
         when:
-        def u1REs = users[0].getGlobalMetricsUserSettings(getUSER_PREF_GLOBAL_METRICS_EXCLUSION)
-        def u2Res = users[1].getGlobalMetricsUserSettings(getUSER_PREF_GLOBAL_METRICS_EXCLUSION)
+        def u1REs = users[0].getGlobalMetricsUserSettings(USER_PREF_GLOBAL_METRICS_EXCLUSION)
+        def u2Res = users[1].getGlobalMetricsUserSettings(USER_PREF_GLOBAL_METRICS_EXCLUSION)
         then:
         u1REs.projectId == [proj1.projectId]
         u1REs.quizId == [null]
-        u1REs.setting == [getUSER_PREF_GLOBAL_METRICS_EXCLUSION]
+        u1REs.setting == [USER_PREF_GLOBAL_METRICS_EXCLUSION]
         u1REs.value == ["true"]
 
         u2Res == []
