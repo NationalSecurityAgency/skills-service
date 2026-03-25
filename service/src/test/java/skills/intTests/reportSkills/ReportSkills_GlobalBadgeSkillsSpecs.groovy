@@ -325,4 +325,163 @@ class ReportSkills_GlobalBadgeSkillsSpecs extends DefaultIntSpec {
         ex.message.contains('cannot be deleted as it is currently referenced by one or more global badges')
     }
 
+    def "consider number of global badges where some are achieved and some are not - 1 project"(){
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        def skills = SkillsFactory.createSkills(5, 1, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        def badge1 = SkillsFactory.createBadge(1, 10)
+        skillsService.createGlobalBadge(badge1)
+        skillsService.assignSkillToGlobalBadge([badgeId: badge1.badgeId, projectId: proj.projectId, skillId: skills[0].skillId])
+        skillsService.assignSkillToGlobalBadge([badgeId: badge1.badgeId, projectId: proj.projectId, skillId: skills[4].skillId])
+        badge1.enabled = true
+        skillsService.updateGlobalBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 11)
+        skillsService.createGlobalBadge(badge2)
+        skillsService.assignSkillToGlobalBadge([badgeId: badge2.badgeId, projectId: proj.projectId, skillId: skills[0].skillId])
+        skillsService.assignSkillToGlobalBadge([badgeId: badge2.badgeId, projectId: proj.projectId, skillId: skills[1].skillId])
+        badge2.enabled = true
+        skillsService.updateGlobalBadge(badge2)
+
+        def badge3 = SkillsFactory.createBadge(1, 12)
+        skillsService.createGlobalBadge(badge3)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge3.badgeId, level: "5")
+        badge3.enabled = true
+        skillsService.updateGlobalBadge(badge3)
+
+        def badge4 = SkillsFactory.createBadge(1, 13)
+        skillsService.createGlobalBadge(badge4)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge4.badgeId, level: "2")
+        badge4.enabled = true
+        skillsService.updateGlobalBadge(badge4)
+
+        List<SkillsService> users = getRandomUsers(3).collect { createService(it)}
+
+        when:
+        // user events are mixed
+        def u1_res1 = users[0].addSkill(skills[0]).body
+        def u2_res1 = users[1].addSkill(skills[0]).body
+        def u1_res2 = users[0].addSkill(skills[1]).body
+        def u2_res2 = users[1].addSkill(skills[4]).body
+        def u2_res3 = users[1].addSkill(skills[2]).body
+        def u1_res3 = users[0].addSkill(skills[2]).body
+        def u2_res4 = users[1].addSkill(skills[3]).body
+        def u2_res5 = users[1].addSkill(skills[1]).body
+
+        then:
+        u1_res1.skillApplied == true
+        u1_res1.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u1_res2.skillApplied == true
+        u1_res2.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id }?.sort() == [badge2.badgeId, badge4.badgeId].sort()
+        u1_res3.skillApplied == true
+        u1_res3.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+
+
+        u2_res1.skillApplied == true
+        u2_res1.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u2_res2.skillApplied == true
+        u2_res2.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id }?.sort() == [badge1.badgeId, badge4.badgeId].sort()
+        u2_res3.skillApplied == true
+        u2_res3.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u2_res4.skillApplied == true
+        u2_res4.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u2_res5.skillApplied == true
+        u2_res5.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id }?.sort() == [badge2.badgeId, badge3.badgeId].sort()
+    }
+
+    def "consider number of global badges where some are achieved and some are not - multiple projects"(){
+        def proj = SkillsFactory.createProject(1)
+        def subj = SkillsFactory.createSubject(1, 1)
+        def skills = SkillsFactory.createSkills(5, 1, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        def proj2 = SkillsFactory.createProject(2)
+        def subj2 = SkillsFactory.createSubject(2, 1)
+        def skills_p2 = SkillsFactory.createSkills(5, 2, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj2, subj2, skills_p2)
+
+        def badge1 = SkillsFactory.createBadge(1, 10)
+        skillsService.createGlobalBadge(badge1)
+        skillsService.assignSkillToGlobalBadge([badgeId: badge1.badgeId, projectId: proj.projectId, skillId: skills[0].skillId])
+        skillsService.assignSkillToGlobalBadge([badgeId: badge1.badgeId, projectId: proj.projectId, skillId: skills[4].skillId])
+        skillsService.assignSkillToGlobalBadge([badgeId: badge1.badgeId, projectId: proj2.projectId, skillId: skills[0].skillId])
+        badge1.enabled = true
+        skillsService.updateGlobalBadge(badge1)
+
+        def badge2 = SkillsFactory.createBadge(1, 11)
+        skillsService.createGlobalBadge(badge2)
+        skillsService.assignSkillToGlobalBadge([badgeId: badge2.badgeId, projectId: proj.projectId, skillId: skills[0].skillId])
+        skillsService.assignSkillToGlobalBadge([badgeId: badge2.badgeId, projectId: proj.projectId, skillId: skills[1].skillId])
+        skillsService.assignSkillToGlobalBadge([badgeId: badge2.badgeId, projectId: proj2.projectId, skillId: skills[0].skillId])
+        badge2.enabled = true
+        skillsService.updateGlobalBadge(badge2)
+
+        def badge3 = SkillsFactory.createBadge(1, 12)
+        skillsService.createGlobalBadge(badge3)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge3.badgeId, level: "5")
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj2.projectId, badgeId: badge3.badgeId, level: "5")
+        badge3.enabled = true
+        skillsService.updateGlobalBadge(badge3)
+
+        def badge4 = SkillsFactory.createBadge(1, 13)
+        skillsService.createGlobalBadge(badge4)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge4.badgeId, level: "2")
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj2.projectId, badgeId: badge4.badgeId, level: "1")
+        badge4.enabled = true
+        skillsService.updateGlobalBadge(badge4)
+
+        List<SkillsService> users = getRandomUsers(3).collect { createService(it)}
+
+        when:
+        def u1_res1 = users[0].addSkill(skills[0]).body
+        def u1_res2 = users[0].addSkill(skills[1]).body
+        def u1_res3 = users[0].addSkill(skills_p2[0]).body
+        def u1_res4 = users[0].addSkill(skills[2]).body
+
+        def u2_res1 = users[1].addSkill(skills[0]).body
+        def u2_res2 = users[1].addSkill(skills[4]).body
+        def u2_res3 = users[1].addSkill(skills_p2[0]).body
+        def u2_res4 = users[1].addSkill(skills[2]).body
+        def u2_res5 = users[1].addSkill(skills[3]).body
+        def u2_res6 = users[1].addSkill(skills_p2[1]).body
+        def u2_res7 = users[1].addSkill(skills_p2[2]).body
+        def u2_res8 = users[1].addSkill(skills_p2[3]).body
+        def u2_res9 = users[1].addSkill(skills_p2[4]).body
+        def u2_res10 = users[1].addSkill(skills[1]).body
+
+        then:
+        u1_res1.skillApplied == true
+        u1_res1.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u1_res2.skillApplied == true
+        u1_res2.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u1_res3.skillApplied == true
+        u1_res3.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id }?.sort() == [badge2.badgeId, badge4.badgeId].sort()
+        u1_res4.skillApplied == true
+        u1_res4.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+
+        u2_res1.skillApplied == true
+        u2_res1.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u2_res2.skillApplied == true
+        u2_res2.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u2_res3.skillApplied == true
+        u2_res3.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id }?.sort() == [badge1.badgeId, badge4.badgeId].sort()
+        u2_res4.skillApplied == true
+        u2_res4.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u2_res5.skillApplied == true
+        u2_res5.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u2_res6.skillApplied == true
+        u2_res6.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u2_res7.skillApplied == true
+        u2_res7.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u2_res8.skillApplied == true
+        u2_res8.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u2_res9.skillApplied == true
+        u2_res9.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id } == []
+        u2_res10.skillApplied == true
+        u2_res10.completed.findAll { it.type == "GlobalBadge" }?.collect { it.id }?.sort() == [badge2.badgeId, badge3.badgeId].sort()
+    }
+
+
 }

@@ -60,6 +60,28 @@ interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>
     @Query('''select ua from UserAchievement ua where ua.userId= ?1 and ua.level is not null''')
     List<UserAchievement> findAllLevelsByUserId(String userId)
 
+    @Query(value = '''
+            WITH userLevelAchievements as (
+                select project_id, max(level) level
+                from user_achievement
+                where user_id = :userId
+                 AND skill_id is null
+                 AND project_id in (select distinct project_id
+                                    from global_badge_level_definition
+                                    where skill_id = :globalBadgeId)
+                group by project_id
+            )
+            SELECT NOT EXISTS (
+               select 1
+               from global_badge_level_definition badgeDef
+                        left join userLevelAchievements on badgeDef.project_id = userLevelAchievements.project_id
+               where badgeDef.skill_id = :globalBadgeId
+                 and (userLevelAchievements.level is null OR userLevelAchievements.level < badgeDef.level)
+            )''', nativeQuery = true)
+    boolean didUserAchieveAllGlobalBadgeLevels(@Param("globalBadgeId") String globalBadgeId, @Param("userId") String userId)
+
+    boolean existsByUserIdAndSkillIdAndProjectIdIsNull(String userId, String skillId)
+
     @Query('''select ua from UserAchievement ua where ua.userId= ?1 and ua.level is not null and ua.skillId is null''')
     List<UserAchievement> findAllProjectLevelsByUserId(String userId)
 
