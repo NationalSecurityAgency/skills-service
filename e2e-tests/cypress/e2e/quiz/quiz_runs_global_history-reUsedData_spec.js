@@ -93,8 +93,8 @@ describe('Global Quiz Runs History Tests', () => {
         cy.afterTestSuiteThatReusesData()
     });
 
-    beforeEach(() => {
-        cy.execSql('delete from settings where setting = \'globalMetricsExcludedProjectsIds\' or setting = \'globalMetricsExcludedQuizIds\'', true)
+    afterEach(() => {
+        cy.clearGlobalMetricsExcludedItems()
     })
 
     it('view runs', function () {

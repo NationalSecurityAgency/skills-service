@@ -1868,3 +1868,8 @@ Cypress.Commands.add('suppressChartInitError', ()  => {
         return true;
     });
 })
+
+Cypress.Commands.add('clearGlobalMetricsExcludedItems', ()  => {
+    cy.execSql('delete from settings where setting = \'globalMetricsExcludedItem\'', true)
+    cy.execSql('delete from quiz_settings where setting = \'globalMetricsExcludedItem\'', true)
+})
