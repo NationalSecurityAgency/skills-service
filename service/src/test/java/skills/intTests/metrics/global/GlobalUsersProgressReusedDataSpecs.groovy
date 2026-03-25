@@ -617,7 +617,7 @@ class GlobalUsersProgressReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
         when:
         def res = admins[0].getGlobalUserProgressMetrics("SeR1", 4, 1, "userIdForDisplay", true)
         def res_page2 = admins[0].getGlobalUserProgressMetrics("SeR1", 4, 2, "userIdForDisplay", true)
-        def res1 = admins[0].getGlobalUserProgressMetrics("uSEr12", 4, 1, "userIdForDisplay", true)
+        def res1 = admins[0].getGlobalUserProgressMetrics("uSEr13", 4, 1, "userIdForDisplay", true)
         def res2 = admins[0].getGlobalUserProgressMetrics("USER", 4, 1, "userIdForDisplay", true)
         def res3 = admins[0].getGlobalUserProgressMetrics("!@#%^&*(", 4, 1, "userIdForDisplay", true)
 
@@ -626,20 +626,21 @@ class GlobalUsersProgressReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
                     userAttrsRepo.findByUserIdIgnoreCase(it.userName)
                 }.collect { it.userIdForDisplay }.sort()
         then:
-        List<String> userIds =  ["user10 for display",
-                                 "user11 for display",
-                                 "user12 for display",
-                                 "user13 for display",
+        List<String> userIds =  ["user13 for display",
                                  "user14 for display",
-                                 "user15 for display"]
+                                 "user15 for display",
+                                 "user16 for display",
+                                 "user17 for display",
+                                 "user18 for display",
+                                 "user19 for display"]
         res.metricItemsPage.userIdForDisplay == userIds[0..3]
-        res.numTotalMetricItems == 6
+        res.numTotalMetricItems == 7
 
-        res_page2.metricItemsPage.userIdForDisplay == userIds[4..5]
-        res_page2.numTotalMetricItems == 6
+        res_page2.metricItemsPage.userIdForDisplay == userIds[4..6]
+        res_page2.numTotalMetricItems == 7
 
         res1.numTotalMetricItems == 1
-        res1.metricItemsPage.userIdForDisplay == ["user12 for display"]
+        res1.metricItemsPage.userIdForDisplay == ["user13 for display"]
 
         res2.numTotalMetricItems == 10
         res2.metricItemsPage.userIdForDisplay == userNames[0..3]
