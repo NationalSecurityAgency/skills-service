@@ -208,10 +208,13 @@ describe('Accessibility Badges Tests', () => {
         });
 
         it(`badge users${darkMode}`, () => {
+            cy.intercept('/admin/projects/MyNewtestProject/badges/badge1/users?query=*').as('getUsers');
+            cy.request('POST', '/admin/projects/MyNewtestProject/badge/badge1/skills/skill1');
+
             cy.setDarkModeIfNeeded(darkMode)
             cy.visit('/administrator/projects/MyNewtestProject/badges/badge1/users');
+            cy.wait('@getUsers')
             cy.injectAxe();
-            cy.contains('There are no records to show');
             cy.customLighthouse();
             cy.customA11y();
         });
@@ -224,6 +227,7 @@ describe('Accessibility Badges Tests', () => {
             cy.intercept('/admin/badges/globalbadgeBadge/skills/available?query=').as('getAvailableSkills')
             cy.intercept('/admin/badges/globalbadgeBadge/projects/available?query=').as('getAvailableProjects')
             cy.intercept('/admin/projects/MyNewtestProject/levels').as('getProjectLevels')
+            cy.intercept('/admin/badges/globalbadgeBadge/users?query=*').as('getUsers');
             cy.visit('/administrator/globalBadges');
             cy.injectAxe();
             cy.get('[data-cy="noContent"]').contains('No Badges Yet')
@@ -267,9 +271,8 @@ describe('Accessibility Badges Tests', () => {
                 .should('have.text', '1');
             cy.customA11y();
 
-            cy.get('[data-cy=nav-Users]')
-                .click();
-            cy.contains('There are no records to show');
+            cy.get('[data-cy=nav-Users]').click();
+            cy.wait('@getUsers')
             cy.customLighthouse();
             cy.customA11y();
         });
