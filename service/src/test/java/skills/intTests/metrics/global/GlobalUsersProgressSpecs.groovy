@@ -107,7 +107,7 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
     }
 
     def "filter projects" () {
-        List<SkillsService> users = getRandomUsers(2).collect { createService(it)}
+        List<SkillsService> users = getRandomUsers(2).sort().collect { createService(it)}
         def p1 = SkillsFactory.createProject(1)
         def p1_sub1 = SkillsFactory.createSubject(1, 1)
         def p1_sks1 = SkillsFactory.createSkills(5, 1, 1, 100)
