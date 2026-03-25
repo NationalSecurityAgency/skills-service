@@ -108,7 +108,7 @@ class SkillsServiceFactory {
                     try {
                         UserAttrs userAttrs = new UserAttrs()
                         userAttrs.userId = it.toLowerCase()
-                        userAttrs.userIdForDisplay = it
+                        userAttrs.userIdForDisplay = "${it} for display"
                         userAttrs.email = it.contains('@') ? it : EmailUtils.generateEmaillAddressFor(it)
                         userAttrs.firstName = "${it.toUpperCase()}_first"
                         userAttrs.lastName = "${it.toUpperCase()}_last"
