@@ -45,7 +45,7 @@ class UserRoleSpecs extends DefaultIntSpec {
         res.count == 1
         res.data.size() == 1
         res.data.get(0).userId.contains(user.toLowerCase())
-        res.data.get(0).userIdForDisplay.contains(user)
+        res.data.get(0).userIdForDisplay.equalsIgnoreCase("$user for display")
         res.data.get(0).firstName == "John"
         res.data.get(0).lastName == "Smith"
         res.data.get(0).projectId == proj.projectId
