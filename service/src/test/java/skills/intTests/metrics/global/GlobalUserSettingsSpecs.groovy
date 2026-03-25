@@ -483,5 +483,233 @@ class GlobalUserSettingsSpecs extends DefaultIntSpec {
         SkillsClientException e = thrown(SkillsClientException)
         e.message.contains("User must be an admin in order to save settings for this quiz")
     }
+
+    def "settings with empty value are removed" () {
+        List<SkillsService> users = getRandomUsers(3).collect { createService(it)}
+
+        List projects = (1..4).collect {
+            def proj = SkillsFactory.createProject(it)
+            users[0].createProject(proj)
+
+            users[0].addProjectAdmin(proj.projectId, users[1].userName)
+            users[0].addProjectAdmin(proj.projectId, users[2].userName)
+            return proj
+        }
+
+        List<String> settingNames = ["one", "two", "three", "four"]
+        List<String> settingValues = ["five", "six", "seven", "eight"]
+        users[0].addOrUpdateGlobalMetricsUserSettings([
+                [ setting  : settingNames[0], value    : settingValues[0], projectId: projects[0].projectId ],
+                [ setting  : settingNames[1], value    : settingValues[1], projectId: projects[0].projectId ],
+                [ setting  : settingNames[0], value    : settingValues[1], projectId: projects[1].projectId ],
+                [ setting  : settingNames[0], value    : settingValues[2], projectId: projects[2].projectId ],
+        ])
+
+        users[1].addOrUpdateGlobalMetricsUserSettings([
+                [ setting  : settingNames[0], value    : settingValues[2], projectId: projects[0].projectId ],
+                [ setting  : settingNames[0], value    : settingValues[3], projectId: projects[2].projectId ],
+        ])
+
+
+        def u1REs_setting1 = users[0].getGlobalMetricsUserSettings(settingNames[0]).sort { it.projectId }
+        def u1REs_setting2 = users[0].getGlobalMetricsUserSettings(settingNames[1]).sort { it.projectId }
+
+        def u2REs_setting1 = users[1].getGlobalMetricsUserSettings(settingNames[0]).sort { it.projectId }
+        def u2REs_setting2 = users[1].getGlobalMetricsUserSettings(settingNames[1]).sort { it.projectId }
+        when:
+        // will remove 2 settings
+        users[0].addOrUpdateGlobalMetricsUserSettings([
+                [ setting  : settingNames[0], value    : null, projectId: projects[0].projectId ],
+                [ setting  : settingNames[0], value    : '', projectId: projects[2].projectId ],
+        ])
+
+        def u1REs_setting1_t1 = users[0].getGlobalMetricsUserSettings(settingNames[0]).sort { it.projectId }
+        def u1REs_setting2_t1 = users[0].getGlobalMetricsUserSettings(settingNames[1]).sort { it.projectId }
+
+        def u2REs_setting1_t1 = users[1].getGlobalMetricsUserSettings(settingNames[0]).sort { it.projectId }
+        def u2REs_setting2_t1 = users[1].getGlobalMetricsUserSettings(settingNames[1]).sort { it.projectId }
+
+        then:
+        // user 1
+        u1REs_setting1.projectId == [projects[0].projectId, projects[1].projectId, projects[2].projectId]
+        u1REs_setting1.quizId == [null, null, null]
+        u1REs_setting1.setting == [settingNames[0], settingNames[0], settingNames[0]]
+        u1REs_setting1.value == [settingValues[0], settingValues[1], settingValues[2]]
+
+        u1REs_setting2.projectId == [projects[0].projectId]
+        u1REs_setting2.quizId == [null]
+        u1REs_setting2.setting == [settingNames[1]]
+        u1REs_setting2.value == [settingValues[1]]
+
+        // user 2
+        u2REs_setting1.projectId == [projects[0].projectId, projects[2].projectId]
+        u2REs_setting1.quizId == [null, null]
+        u2REs_setting1.setting == [settingNames[0], settingNames[0]]
+        u2REs_setting1.value == [settingValues[2], settingValues[3]]
+
+        u2REs_setting2 == []
+
+        // user 1
+        u1REs_setting1_t1.projectId == [projects[1].projectId]
+        u1REs_setting1_t1.quizId == [null]
+        u1REs_setting1_t1.setting == [settingNames[0]]
+        u1REs_setting1_t1.value == [settingValues[1]]
+
+        u1REs_setting2_t1.projectId == [projects[0].projectId]
+        u1REs_setting2_t1.quizId == [null]
+        u1REs_setting2_t1.setting == [settingNames[1]]
+        u1REs_setting2_t1.value == [settingValues[1]]
+
+        // user 2
+        u2REs_setting1_t1.projectId == [projects[0].projectId, projects[2].projectId]
+        u2REs_setting1_t1.quizId == [null, null]
+        u2REs_setting1_t1.setting == [settingNames[0], settingNames[0]]
+        u2REs_setting1_t1.value == [settingValues[2], settingValues[3]]
+
+        u2REs_setting2_t1 == []
+    }
+
+    def "quiz settings with empty value are removed" () {
+        List<SkillsService> users = getRandomUsers(3).collect { createService(it)}
+
+        List quizzes = (1..4).collect {
+            def quiz = QuizDefFactory.createQuiz(it)
+            users[0].createQuizDef(quiz)
+
+            users[0].addQuizUserRole(quiz.quizId, users[1].userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+            users[0].addQuizUserRole(quiz.quizId, users[2].userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+            return quiz
+        }
+
+        List<String> settingNames = ["one", "two", "three", "four"]
+        List<String> settingValues = ["five", "six", "seven", "eight"]
+        users[0].addOrUpdateGlobalMetricsUserSettings([
+                [ setting  : settingNames[0], value    : settingValues[0], quizId: quizzes[0].quizId ],
+                [ setting  : settingNames[1], value    : settingValues[1], quizId: quizzes[0].quizId ],
+                [ setting  : settingNames[0], value    : settingValues[1], quizId: quizzes[1].quizId ],
+                [ setting  : settingNames[0], value    : settingValues[2], quizId: quizzes[2].quizId ],
+        ])
+
+        users[1].addOrUpdateGlobalMetricsUserSettings([
+                [ setting  : settingNames[0], value    : settingValues[2], quizId: quizzes[0].quizId ],
+                [ setting  : settingNames[0], value    : settingValues[3], quizId: quizzes[2].quizId ],
+        ])
+
+
+        def u1REs_setting1 = users[0].getGlobalMetricsUserSettings(settingNames[0]).sort { it.quizId }
+        def u1REs_setting2 = users[0].getGlobalMetricsUserSettings(settingNames[1]).sort { it.quizId }
+
+        def u2REs_setting1 = users[1].getGlobalMetricsUserSettings(settingNames[0]).sort { it.quizId }
+        def u2REs_setting2 = users[1].getGlobalMetricsUserSettings(settingNames[1]).sort { it.quizId }
+        when:
+        // will remove 2 settings
+        users[0].addOrUpdateGlobalMetricsUserSettings([
+                [ setting  : settingNames[0], value    : null, quizId: quizzes[0].quizId ],
+                [ setting  : settingNames[0], value    : '', quizId: quizzes[2].quizId ],
+        ])
+
+        def u1REs_setting1_t1 = users[0].getGlobalMetricsUserSettings(settingNames[0]).sort { it.quizId }
+        def u1REs_setting2_t1 = users[0].getGlobalMetricsUserSettings(settingNames[1]).sort { it.quizId }
+
+        def u2REs_setting1_t1 = users[1].getGlobalMetricsUserSettings(settingNames[0]).sort { it.quizId }
+        def u2REs_setting2_t1 = users[1].getGlobalMetricsUserSettings(settingNames[1]).sort { it.quizId }
+
+        then:
+        // user 1
+        u1REs_setting1.quizId == [quizzes[0].quizId, quizzes[1].quizId, quizzes[2].quizId]
+        u1REs_setting1.projectId == [null, null, null]
+        u1REs_setting1.setting == [settingNames[0], settingNames[0], settingNames[0]]
+        u1REs_setting1.value == [settingValues[0], settingValues[1], settingValues[2]]
+
+        u1REs_setting2.quizId == [quizzes[0].quizId]
+        u1REs_setting2.projectId == [null]
+        u1REs_setting2.setting == [settingNames[1]]
+        u1REs_setting2.value == [settingValues[1]]
+
+        // user 2
+        u2REs_setting1.quizId == [quizzes[0].quizId, quizzes[2].quizId]
+        u2REs_setting1.projectId == [null, null]
+        u2REs_setting1.setting == [settingNames[0], settingNames[0]]
+        u2REs_setting1.value == [settingValues[2], settingValues[3]]
+
+        u2REs_setting2 == []
+
+        // user 1 after removal
+        u1REs_setting1_t1.quizId == [quizzes[1].quizId]
+        u1REs_setting1_t1.projectId == [null]
+        u1REs_setting1_t1.setting == [settingNames[0]]
+        u1REs_setting1_t1.value == [settingValues[1]]
+
+        u1REs_setting2_t1.quizId == [quizzes[0].quizId]
+        u1REs_setting2_t1.projectId == [null]
+        u1REs_setting2_t1.setting == [settingNames[1]]
+        u1REs_setting2_t1.value == [settingValues[1]]
+
+        // user 2 (unchanged)
+        u2REs_setting1_t1.quizId == [quizzes[0].quizId, quizzes[2].quizId]
+        u2REs_setting1_t1.projectId == [null, null]
+        u2REs_setting1_t1.setting == [settingNames[0], settingNames[0]]
+        u2REs_setting1_t1.value == [settingValues[2], settingValues[3]]
+
+        u2REs_setting2_t1 == []
+    }
+
+    def "delete all settings for single user" () {
+        List<SkillsService> users = getRandomUsers(2).collect { createService(it)}
+
+        List projects = (1..2).collect {
+            def proj = SkillsFactory.createProject(it)
+            users[0].createProject(proj)
+            users[0].addProjectAdmin(proj.projectId, users[1].userName)
+            return proj
+        }
+
+        List quizzes = (1..2).collect {
+            def quiz = QuizDefFactory.createQuiz(it)
+            users[0].createQuizDef(quiz)
+            users[0].addQuizUserRole(quiz.quizId, users[1].userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+            return quiz
+        }
+
+        List<String> settingNames = ["one", "two"]
+        List<String> settingValues = ["five", "six"]
+
+        // user 0 - mixed project and quiz settings
+        users[0].addOrUpdateGlobalMetricsUserSettings([
+                [ setting  : settingNames[0], value    : settingValues[0], projectId: projects[0].projectId ],
+                [ setting  : settingNames[0], value    : settingValues[1], projectId: projects[1].projectId ],
+                [ setting  : settingNames[0], value    : settingValues[0], quizId: quizzes[0].quizId ],
+                [ setting  : settingNames[0], value    : settingValues[1], quizId: quizzes[1].quizId ],
+        ])
+
+        // user 1 - only project settings (unchanged)
+        users[1].addOrUpdateGlobalMetricsUserSettings([
+                [ setting  : settingNames[0], value    : settingValues[1], projectId: projects[0].projectId ],
+        ])
+
+        def u1REs_before = users[0].getGlobalMetricsUserSettings(settingNames[0])
+        def u2REs_before = users[1].getGlobalMetricsUserSettings(settingNames[0])
+
+        when:
+        // delete all settings for user 0 only
+        users[0].addOrUpdateGlobalMetricsUserSettings([
+                [ setting  : settingNames[0], value    : null, projectId: projects[0].projectId ],
+                [ setting  : settingNames[0], value    : null, projectId: projects[1].projectId ],
+                [ setting  : settingNames[0], value    : null, quizId: quizzes[0].quizId ],
+                [ setting  : settingNames[0], value    : null, quizId: quizzes[1].quizId ],
+        ])
+
+        def u1REs_after = users[0].getGlobalMetricsUserSettings(settingNames[0])
+        def u2REs_after = users[1].getGlobalMetricsUserSettings(settingNames[0])
+
+        then:
+        // verify settings existed before deletion
+        u1REs_before.size() == 4
+        u2REs_before.size() == 1
+
+        // verify user 0 settings are deleted, user 1 unchanged
+        u1REs_after == []
+        u2REs_after.size() == 1
+    }
 }
 
