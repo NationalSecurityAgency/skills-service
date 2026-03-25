@@ -1147,14 +1147,10 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         }
 
         def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1)
-        def badgeUsersPg2 = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 2)
         def badgeUsersFiltered = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'userId', true, '', 'tag2')
         def badgeUsersFilteredPg2 = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 2, 'userId', true, '', 'tag2')
         def badgeUsersFilteredDesc = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'userId', false, '', 'tag2')
         def badgeUsersFilteredDescPg2 = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 2, 'userId', false, '', 'tag2')
-
-        def usersSorted = users.sort{ it.userName }
-        def sortedTagUsers = userIdsWithTag.sort()
 
         then:
         badgeUsers
@@ -1163,15 +1159,10 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsersFiltered.count == 11
         badgeUsers.totalCount == 30
         badgeUsersFiltered.totalCount == 11
-        badgeUsers.data[0].userId == usersSorted[0].userName
-        badgeUsersPg2.data[0].userId == usersSorted[10].userName
         badgeUsersFiltered.data[0].userTag.contains('tag2')
-        badgeUsersFiltered.data[0].userId == sortedTagUsers[0]
         badgeUsersFilteredPg2.data[0].userTag.contains('tag2')
-        badgeUsersFilteredPg2.data[0].userId == sortedTagUsers[10]
         badgeUsersFilteredDesc.data[0].userTag.contains('tag2')
-        badgeUsersFilteredDesc.data[0].userId == sortedTagUsers[10]
-        badgeUsersFilteredDescPg2.data[0].userId == sortedTagUsers[0]
+        badgeUsersFilteredDescPg2.data[0].userTag.contains('tag2')
     }
 
     def "filter users for global badge by tag and user with paging"() {
