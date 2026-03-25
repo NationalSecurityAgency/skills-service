@@ -122,7 +122,7 @@ class SkillsServiceFactory {
 
         }
 
-        return userIds
+        return userIds.sort()
     }
 
 }
