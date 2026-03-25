@@ -26,7 +26,6 @@ import spock.lang.Shared
 class ExportBaseIntSpec extends DefaultIntSpec {
     String ultimateRoot = 'jh@dojo.com'
     SkillsService rootSkillsService
-    Boolean isPkiMode = false;
 
     Date today = new Date()
     Date oneDayAgo = new Date()-1
@@ -53,7 +52,6 @@ class ExportBaseIntSpec extends DefaultIntSpec {
         if (!rootSkillsService.isRoot()) {
             rootSkillsService.grantRoot()
         }
-        isPkiMode = mockUserInfoService != null
         users = new ArrayList<>(getRandomUsers(4))
 
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));

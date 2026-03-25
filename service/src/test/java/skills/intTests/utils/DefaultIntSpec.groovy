@@ -48,6 +48,8 @@ class DefaultIntSpec extends Specification {
     SkillsService skillsService
     SkillsService localRootSkillsService
 
+    Boolean isPkiMode = false;
+
     GreenMail greenMail
 
     @LocalServerPort
@@ -145,6 +147,8 @@ class DefaultIntSpec extends Specification {
         dataResetHelper.resetData()
 
         skillsService = createService()
+
+        isPkiMode = mockUserInfoService != null
     }
 
     def cleanup() {
