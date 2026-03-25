@@ -58,6 +58,8 @@ describe('Users Tests', () => {
 
         cy.visit('/administrator/projects/proj1/users');
 
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('5').click();
+
         // default sort order is 'Points Last Earned' desc
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(7, 'day')) }],
@@ -139,6 +141,8 @@ describe('Users Tests', () => {
 
         cy.visit('/administrator/projects/proj1/users');
         cy.wait('@getUsers')
+
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('5').click();
 
         // default sort order is 'Points Last Earned' desc
         cy.validateTable(tableSelector, [
@@ -322,6 +326,7 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Users');
         cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '12')
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('5').click();
 
         cy.get(`${tableSelector}`).contains('User').click();
         cy.validateTable(tableSelector, [
@@ -406,6 +411,8 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Users');
         cy.wait('@getUsers')
+
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('5').click();
 
         cy.get(`${tableSelector}`).contains('User').click();
         cy.validateTable(tableSelector, [
@@ -577,6 +584,7 @@ describe('Users Tests', () => {
         }
         cy.visit('/administrator/projects/proj1/users');
         cy.wait('@getUsers')
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('5').click();
 
         cy.get(`${tableSelector}`).contains('User').click();
         cy.get('[data-pc-section="page"]').contains('2').click();
@@ -1249,6 +1257,7 @@ describe('Users Tests', () => {
 
         cy.visit('/administrator/projects/proj1/');
         cy.clickNav('Users');
+        cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('5').click();
 
         // default sort order is 'Points Last Earned' desc
         cy.validateTable(tableSelector, [

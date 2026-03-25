@@ -707,6 +707,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
             assert users[2].addSkill(skills[x]).body.skillApplied
         }
 
+        assert users[2].addSkill(subj2Skills[0]).body.skillApplied
         assert users[3].addSkill(skills[0]).body.skillApplied
         assert users[3].addSkill(skills[1]).body.skillApplied
         assert users[3].addSkill(skills[2]).body.skillApplied
