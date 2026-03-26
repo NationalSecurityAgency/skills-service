@@ -16,26 +16,22 @@
 package skills.controller.result.model
 
 import groovy.transform.Canonical
-import org.springframework.data.domain.Page
 
 @Canonical
-class TableResultWithTotalPoints extends TableResult{
-    Integer totalPoints = 0
+class TableResultWithTotalPointsAndLevel extends TableResultWithTotalPoints {
+    Integer totalLevels = 0
 
-    final static TableResultWithTotalPoints EMPTY = new TableResultWithTotalPoints()
+    final static TableResultWithTotalPointsAndLevel EMPTY = new TableResultWithTotalPointsAndLevel()
 
-    TableResultWithTotalPoints() {
+    TableResultWithTotalPointsAndLevel() {
         super()
     }
 
-    TableResultWithTotalPoints(Page<ProjectUser> usersPage, Integer totalPoints) {
-        this( usersPage.getContent(), (Integer)usersPage.getTotalElements(), totalPoints)
-    }
-
-    TableResultWithTotalPoints(List<ProjectUser> users, Integer count, Integer totalPoints) {
+    TableResultWithTotalPointsAndLevel(List<ProjectUser> users, Integer count, Integer totalPoints, Integer totalLevels) {
         this.totalPoints = totalPoints
         this.count = count
         this.totalCount =  count
         this.data = users
+        this.totalLevels = totalLevels
     }
 }

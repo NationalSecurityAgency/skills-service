@@ -66,6 +66,9 @@ class AdminUsersService {
     UserEventService userEventService
 
     @Autowired
+    GlobalBadgesService globalBadgesService
+
+    @Autowired
     PostgresQlNativeRepo PostgresQlNativeRepo
 
     @Value('${skills.config.ui.usersTableAdditionalUserTagKey:}')
@@ -170,6 +173,19 @@ class AdminUsersService {
         Integer count = (Integer)PostgresQlNativeRepo.countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, subjectId, query, minMax.left, minMax.right, usersTableAdditionalUserTagKey, userTagFilter)
         List<ProjectUser> usersData = userPointsRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectId, query, minMax.left, minMax.right, userTagFilter, pageRequest)
         return new TableResultWithTotalPoints(usersData, count, totalPoints)
+    }
+
+    TableResultWithTotalPoints loadUsersPageForSkillsAcrossProjects(String badgeId, String query, String userTagFilter, PageRequest pageRequest) {
+        List<SkillDefPartialRes> skills = globalBadgesService.getSkillsForBadge(badgeId)
+        query = query ? query.trim() : ''
+
+        List<GlobalBadgeLevelRes> levels = globalBadgesService.getGlobalBadgeLevels(badgeId)
+        Integer totalLevels = levels.sum(0) { level -> level.level } as Integer
+        List<GlobalBadgeUser> usersPage = userPointsRepo.findDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query, userTagFilter, pageRequest)
+        Integer count = usersPage.size() < pageRequest.pageSize && pageRequest.pageNumber == 0 ? usersPage.size()
+                : userPointsRepo.countDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query, userTagFilter)
+
+        return new TableResultWithTotalPointsAndLevel(usersPage, count, skills.size(), totalLevels)
     }
 
     private static Pair<Integer, Integer> calcMinMaxPointsQueryParams(Integer totalPoints, int minimumPointsPercent, int maximumPointsPercent) {

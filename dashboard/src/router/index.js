@@ -871,7 +871,24 @@ const routes = [
           message: 'Global Badge Access',
         },
       },
-    }],
+    },
+      {
+        path: 'users',
+        component: Users,
+        meta: { requiresAuth: true },
+        children: [{
+          component: UsersTablePage,
+          name: 'GlobalBadgeUsers',
+          path: '',
+          meta: {
+            requiresAuth: true,
+            announcer: {
+              message: 'Global Badge Users',
+            },
+          },
+        }],
+      },
+    ],
   },
   {
     path: '/administrator/adminGroups/:adminGroupId',

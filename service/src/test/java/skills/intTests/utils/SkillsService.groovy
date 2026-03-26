@@ -1218,6 +1218,10 @@ class SkillsService {
         return wsHelper.adminGet("${getBadgeUrl(projectId, badgeId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}&userTagFilter=${userTagFilter}".toString())
     }
 
+    def getGlobalBadgeUsers(String badgeId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', String userTagFilter = '') {
+        return wsHelper.globalBadgeGet("${getGlobalBadgeUrl(badgeId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&userTagFilter=${userTagFilter}".toString())
+    }
+
     def getUserTagUsers(String projectId, String tagKey, String tagValue, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100) {
         return wsHelper.adminGet("${getProjectUrl(projectId)}/userTags/${tagKey}/${tagValue}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}".toString())
     }
