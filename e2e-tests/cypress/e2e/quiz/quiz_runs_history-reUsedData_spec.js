@@ -15,6 +15,7 @@
  */
 import dayjs from 'dayjs';
 import utcPlugin from 'dayjs/plugin/utc';
+import moment from 'moment-timezone'
 
 dayjs.extend(utcPlugin);
 
@@ -229,4 +230,22 @@ describe('Quiz Runs History With Reused Data Tests', () => {
         ], 10);
     });
 
+    it('export individual quiz runs', function () {
+        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.get('[data-cy="quizRunsHistoryTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '12')
+        cy.get('[data-cy="exportBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="userNameFilter"]').type('ThisUserDoesNotExist{enter}')
+        cy.get('[data-cy="quizRunsHistoryTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '0')
+        cy.get('[data-cy="exportBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="userResetBtn"]').click()
+        cy.get('[data-cy="exportBtn"]').should('be.enabled')
+
+        // export skill metrics and verify that the file exists
+        const exportedFileName = `cypress/downloads/quiz1-quiz-runs-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
+        cy.readFile(exportedFileName).should('not.exist');
+        cy.get('[data-cy="exportBtn"]').click();
+        cy.readFile(exportedFileName).should('exist');
+    });
 });

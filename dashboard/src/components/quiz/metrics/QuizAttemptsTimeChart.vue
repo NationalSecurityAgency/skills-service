@@ -16,7 +16,6 @@ limitations under the License.
 <script setup>
 import {onMounted, ref, watch} from 'vue'
 import {useRoute} from 'vue-router';
-import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 import QuizService from '@/components/quiz/QuizService.js';
 import MetricsOverlay from '@/components/metrics/utils/MetricsOverlay.vue';
 import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
@@ -30,7 +29,6 @@ const props = defineProps({
 })
 
 const route = useRoute()
-const numberFormat = useNumberFormat()
 const chartSupportColors = useChartSupportColors()
 const timeUtils = useTimeUtils()
 

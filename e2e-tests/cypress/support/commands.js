@@ -484,7 +484,7 @@ Cypress.Commands.add("setHideAnswers", (quizNum = 1, enabled) => {
     }]);
 });
 
-Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAttemptInfo, shouldComplete = true, userAnswerTxt = null) => {
+Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAttemptInfo, shouldComplete = true, userAnswerTxt = null, setStartDateTo = null) => {
     const userId =  Number.isInteger(userIdOrUserNumber) ? `user${userIdOrUserNumber}` : userIdOrUserNumber;
     cy.register(userId, 'password');
 
@@ -497,7 +497,7 @@ Cypress.Commands.add("runQuizForUser", (quizNum = 1, userIdOrUserNumber, quizAtt
             cy.log('oauthMode, using loginBySingleSignOn')
             cy.loginBySingleSignOn()
         }
-        cy.runQuiz(quizNum, userId, quizAttemptInfo, shouldComplete, userAnswerTxt)
+        cy.runQuiz(quizNum, userId, quizAttemptInfo, shouldComplete, userAnswerTxt, setStartDateTo)
     });
 });
 
@@ -541,7 +541,7 @@ Cypress.Commands.add('gradeQuizAttempt', (quizNum = 1, isCorrect = true, feedbac
 });
 
 
-Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldComplete = true, userAnswerTxt = null) => {
+Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldComplete = true, userAnswerTxt = null, setStartDateTo = null) => {
     const quizId = `quiz${quizNum}`;
     cy.request(`/admin/quiz-definitions/${quizId}/questions`)
         .then((response) => {
@@ -591,6 +591,9 @@ Cypress.Commands.add('runQuiz', (quizNum = 1, userId, quizAttemptInfo, shouldCom
                         })
                     if (shouldComplete) {
                         cy.request('POST', `/admin/quiz-definitions/${quizId}/users/${userId}/attempt/${attemptId}/complete`);
+                    }
+                    if (setStartDateTo !== null) {
+                        cy.execSql(`UPDATE user_quiz_attempt SET started = '${setStartDateTo}' WHERE id = '${attemptId}'`, true)
                     }
                 });
         });
@@ -1491,10 +1494,11 @@ Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, on
             cy.get(rowSelector).should('have.length', nextPageSize).as('cyRows');
         }
 
-        cy.get('@cyRows').eq(rowIndex).find('td').as('row1');
+        const alias = `row${i}`
+        cy.get('@cyRows').eq(rowIndex).find('td').as(alias);
         const toValidate = expected[i];
         toValidate.forEach((item) => {
-            cy.get('@row1').eq(item.colIndex).should('contain.text', item.value);
+            cy.get(`@${alias}`).eq(item.colIndex).should('contain.text', item.value);
         })
     }
 
@@ -1863,4 +1867,9 @@ Cypress.Commands.add('suppressChartInitError', ()  => {
         }
         return true;
     });
+})
+
+Cypress.Commands.add('clearGlobalMetricsExcludedItems', ()  => {
+    cy.execSql('delete from settings where setting = \'globalMetricsExcludedItem\'', true)
+    cy.execSql('delete from quiz_settings where setting = \'globalMetricsExcludedItem\'', true)
 })

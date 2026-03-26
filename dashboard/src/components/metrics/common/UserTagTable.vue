@@ -26,7 +26,12 @@ import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnounc
 import {useStorage} from "@vueuse/core";
 
 const props = defineProps({
-  tagChart: Object
+  tagChart: Object,
+  isOverall: {
+    type: Boolean,
+    required: false,
+    default: false
+  }
 })
 const route = useRoute();
 const numberFormat = useNumberFormat()
@@ -104,45 +109,62 @@ const loadData = (shouldHighlight = false) => {
     fromDayFilter: dateRange.startDate,
     toDayFilter: dateRange.endDate,
   };
-  MetricsService.loadChart(route.params.projectId, 'numUsersPerTagBuilder', params)
-      .then((dataFromServer) => {
-        let { items } = dataFromServer;
-        if (shouldHighlight && filters.value.tag && filters.value.tag.length > 0) {
-          items = items.map((item) => {
-            const searchStringNorm = filters.value.tag.trim().toLowerCase();
-            const index = item.value.toLowerCase().indexOf(searchStringNorm);
-            const htmlValue = `${item.value.substring(0, index)}<mark>${item.value.substring(index, index + searchStringNorm.length)}</mark>${item.value.substring(index + searchStringNorm.length)}`;
-            return { htmlValue, ...item };
-          });
-        }
-        table.value.items = items;
-        table.value.options.pagination.totalRows = dataFromServer.totalNumItems;
-        isLoading.value = false;
-        table.value.options.busy = false;
+  const metricsLoader = props.isOverall ?
+    MetricsService.getOverallMetricsChart('overallNumUsersPerTagBuilder', params) :
+    MetricsService.loadChart(route.params.projectId, 'numUsersPerTagBuilder', params);
+
+  metricsLoader.then((dataFromServer) => {
+    let { items } = dataFromServer;
+    if (shouldHighlight && filters.value.tag && filters.value.tag.length > 0) {
+      items = items.map((item) => {
+        const searchStringNorm = filters.value.tag.trim().toLowerCase();
+        const index = item.value.toLowerCase().indexOf(searchStringNorm);
+        const htmlValue = `${item.value.substring(0, index)}<mark>${item.value.substring(index, index + searchStringNorm.length)}</mark>${item.value.substring(index + searchStringNorm.length)}`;
+        return { htmlValue, ...item };
       });
+    }
+    table.value.items = items;
+    table.value.options.pagination.totalRows = dataFromServer.totalNumItems;
+    isLoading.value = false;
+    table.value.options.busy = false;
+  });
 };
 
 const filterRange = ref([]);
 </script>
 
 <template>
-  <Card data-cy="userTagTableCard">
+  <Card data-cy="userTagTableCard" :pt="{ body: { class: 'p-0!' } }">
     <template #header>
       <SkillsCardHeader :title="titleInternal"></SkillsCardHeader>
     </template>
     <template #content>
       <div>
-        <div class="flex mb-3 gap-4">
-          <div class="flex flex-3 flex-col">
-            <SkillsTextInput label="Filter by Tag" v-model="filters.tag" v-on:keydown.enter="filter" :disabled="isLoading" id="userTagTable-tagFilter" :name="`userTagTable-${tagKey}-tagFilter`"/>
-            <div class="flex gap-2">
-              <SkillsButton @click="filter" icon="fa-solid fa-search" label="Filter" :disabled="isLoading" :data-cy="`userTagTable-${tagKey}-filterBtn`" />
-              <SkillsButton severity="danger" icon="fa-solid fa-eraser" label="Clear" @click="clearFilter" :disabled="isLoading" :data-cy="`userTagTable-${tagKey}-clearBtn`" />
-            </div>
+        <div class="flex flex-wrap gap-2 m-5">
+          <div class="flex flex-1 flex-col min-w-[20rem]">
+            <SkillsTextInput
+                label="Filter by Tag:"
+                label-icon="fas fa-tag"
+                :label-on-same-line="true"
+                v-model="filters.tag"
+                v-on:keydown.enter="filter"
+                :disabled="isLoading"
+                id="userTagTable-tagFilter"
+                :name="`userTagTable-${tagKey}-tagFilter`"/>
           </div>
-          <div class="flex flex-wrap flex-col gap-2">
-            Filter by Date(s):
-            <SkillsCalendarInput selectionMode="range" name="filterRange" v-model="filterRange" :maxDate="new Date()" :disabled="isLoading" placeholder="Select a date range" :data-cy="`${tagKey}-metricsDateFilter`" />
+          <div class="flex-col min-w-[20rem]">
+            <SkillsCalendarInput selectionMode="range"
+                                 :name="`filterRange${tagKey}`"
+                                 v-model="filterRange" :maxDate="new Date()"
+                                 label="Filter by Date(s):"
+                                 label-icon="fas fa-calendar-alt"
+                                 :label-on-same-line="true"
+                                 :disabled="isLoading" placeholder="Select a date range" :data-cy="`${tagKey}-metricsDateFilter`" />
+          </div>
+
+          <div class="flex flex-1 gap-2 mb-6">
+            <SkillsButton @click="filter" icon="fa-solid fa-search" label="Filter" :disabled="isLoading" :data-cy="`userTagTable-${tagKey}-filterBtn`" />
+            <SkillsButton severity="danger" icon="fa-solid fa-eraser" label="Clear" @click="clearFilter" :disabled="isLoading" :data-cy="`userTagTable-${tagKey}-clearBtn`" />
           </div>
         </div>
         <SkillsDataTable :value="table.items"
@@ -164,9 +186,12 @@ const filterRange = ref([]);
           <Column field="value" :header="tagChart.tagLabel ? tagChart.tagLabel : 'Tag'" sortable>
             <template #body="slotProps">
               <span :data-cy="`cell_tagValue-${slotProps.data.value}`">
-                <router-link :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: slotProps.data.value } }" :data-cy="`userTagTable-${tagKey}_viewMetricsLink`">
+                <router-link v-if="projectId" :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: slotProps.data.value } }" :data-cy="`userTagTable-${tagKey}_viewMetricsLink`">
                   <span v-if="slotProps.data.htmlValue" v-html="slotProps.data.htmlValue"></span><span v-else>{{ slotProps.data.value }}</span>
                 </router-link>
+                <span v-else>
+                  <span v-if="slotProps.data.htmlValue" v-html="slotProps.data.htmlValue"></span><span v-else>{{ slotProps.data.value }}</span>
+                </span>
               </span>
             </template>
           </Column>

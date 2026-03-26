@@ -48,4 +48,11 @@ export default {
     const url = buildUrl(`/admin/projects/${encodeURIComponent(projectId)}/skills/export/excel`);
     return exportUtil.ajaxDownload(url)
   },
+  getOverallMetrics(projectIds = [], quizIds = []) {
+    return axios.get(`/app/overall-metrics`, { params: { projectIds, quizIds } }).then((response) => response.data)
+  },
+  getOverallMetricsChart(metricsId, params = {}) {
+    const url = buildUrl(`/app/overall-metrics/${encodeURIComponent(metricsId)}`, params)
+    return axios.get(url).then((response) => response.data)
+  }
 };

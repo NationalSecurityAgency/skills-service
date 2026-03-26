@@ -112,7 +112,7 @@ const setChartOptions = () => {
 </script>
 
 <template>
-  <Card data-cy="userCountsBySubjectMetric" :style="`width: ${layoutSizes.tableMaxWidth}px;`">
+  <Card data-cy="userCountsBySubjectMetric">
     <template #header>
       <SkillsCardHeader title="Number of users for each level for each subject">
         <template #headerContent>

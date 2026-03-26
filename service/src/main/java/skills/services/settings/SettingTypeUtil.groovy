@@ -18,6 +18,7 @@ package skills.services.settings
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import skills.controller.exceptions.SkillException
+import skills.controller.request.model.GlobalMetricsSettingsRequest
 import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.request.model.RootUserProjectSettingsRequest
@@ -32,7 +33,7 @@ import skills.storage.model.Setting.SettingType
 class SettingTypeUtil {
 
     static SettingType getType(SettingsRequest request) {
-        if(request instanceof UserProjectSettingsRequest){
+        if(request instanceof UserProjectSettingsRequest || request instanceof GlobalMetricsSettingsRequest){
             return SettingType.UserProject
         } else if(request instanceof UserSettingsRequest){
             return SettingType.User

@@ -30,6 +30,10 @@ interface QuizSettingsRepo extends CrudRepository<QuizSetting, Long> {
     QuizSetting findBySettingAndQuizId(String setting, String quizId)
 
     @Nullable
+    @Query('''select qS from QuizSetting qS, QuizDef quiz where quiz.id = qS.quizRefId and qS.setting = ?1 and lower(quiz.quizId) = lower(?2) and qS.userRefId = ?3''')
+    QuizSetting findBySettingAndQuizIdAndUserIdRef(String setting, String quizId, Integer userRefId)
+
+    @Nullable
     List<QuizSetting> findAllByQuizRefIdAndSettingIn(Integer quizRefId, List<String> settings)
 
     @Nullable
@@ -41,4 +45,17 @@ interface QuizSettingsRepo extends CrudRepository<QuizSetting, Long> {
     @Nullable
     QuizSetting findBySettingAndQuizRefIdAndUserRefId(String setting, Integer quizRefId, Integer userRefId)
 
+
+    static interface SimpleQuizRes {
+        String getQuizId()
+        String getSetting()
+        String getValue()
+    }
+    @Nullable
+    @Query('''select 
+            quiz.quizId as quizId,
+            qS.setting as setting,
+            qS.value as value
+        from QuizSetting qS, QuizDef quiz where quiz.id = qS.quizRefId and qS.setting = ?1 and qS.userRefId = ?2''')
+    List<SimpleQuizRes> findAllBySettingAndUserRefId(String setting,  Integer userRefId)
 }

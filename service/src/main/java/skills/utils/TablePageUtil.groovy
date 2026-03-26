@@ -24,10 +24,19 @@ import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
 
 class TablePageUtil {
+
     static PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
         SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]", projectId)
+        return createPagingRequest(limit, page, orderBy, ascending, useUnsafeSort)
+    }
+    static PageRequest createPagingRequestWithValidation(int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
+        SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]")
+        SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]")
+        return createPagingRequest(limit, page, orderBy, ascending, useUnsafeSort)
+    }
+    static PageRequest createPagingRequest(int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
         PageRequest pageRequest
         if (useUnsafeSort) {
             pageRequest = PageRequest.of(page - 1, limit, JpaSort.unsafe(ascending ? ASC : DESC, "(${orderBy})"))

@@ -1549,11 +1549,11 @@ class AdminEditSpecs extends DefaultIntSpec {
         String newSkillId = "otherId"
         skills[0].skillId = newSkillId
 
-        List<UserAchievement> skillAchievements = userAchievedRepo.findAll().findAll { it.skillId == origSkillId }
+        List<UserAchievement> skillAchievements = userAchievedRepo.findAll().findAll { it.skillId == origSkillId }.sort { it.userId }
 
         skillsService.updateSkill(skills[0], origSkillId)
 
-        List<UserAchievement> skillAchievementsAfter = userAchievedRepo.findAll().findAll { it.skillId == newSkillId}
+        List<UserAchievement> skillAchievementsAfter = userAchievedRepo.findAll().findAll { it.skillId == newSkillId}.sort { it.userId }
         then:
         skillAchievements.userId == [users[0].userName, users[1].userName]
         skillAchievementsAfter.userId == [users[0].userName, users[1].userName]
@@ -1582,11 +1582,11 @@ class AdminEditSpecs extends DefaultIntSpec {
         String newId = "otherId"
         badge.badgeId = newId
 
-        List<UserAchievement> skillAchievements = userAchievedRepo.findAll().findAll { it.skillId == origId }
+        List<UserAchievement> skillAchievements = userAchievedRepo.findAll().findAll { it.skillId == origId }.sort { it.userId }
 
         skillsService.updateBadge(badge, origId)
 
-        List<UserAchievement> skillAchievementsAfter = userAchievedRepo.findAll().findAll { it.skillId == newId }
+        List<UserAchievement> skillAchievementsAfter = userAchievedRepo.findAll().findAll { it.skillId == newId }.sort { it.userId }
         then:
         skillAchievements.userId == [users[0].userName, users[1].userName]
         skillAchievementsAfter.userId == [users[0].userName, users[1].userName]
@@ -1614,11 +1614,11 @@ class AdminEditSpecs extends DefaultIntSpec {
         String newId = "otherId"
         group.skillId = newId
 
-        List<UserAchievement> skillAchievements = userAchievedRepo.findAll().findAll { it.skillId == origId }
+        List<UserAchievement> skillAchievements = userAchievedRepo.findAll().findAll { it.skillId == origId }.sort { it.userId }
 
         skillsService.updateSkill(group, origId)
 
-        List<UserAchievement> skillAchievementsAfter = userAchievedRepo.findAll().findAll { it.skillId == newId }
+        List<UserAchievement> skillAchievementsAfter = userAchievedRepo.findAll().findAll { it.skillId == newId }.sort { it.userId }
         then:
         skillAchievements.userId == [users[0].userName, users[1].userName]
         skillAchievementsAfter.userId == [users[0].userName, users[1].userName]

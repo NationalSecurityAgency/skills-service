@@ -294,7 +294,11 @@ class QuizRunsSpecs extends DefaultIntSpec {
 
         def quizInfo = skillsService.getQuizInfo(quiz.quizId)
 
-        List<Date> dates = (0..3).collect { new Date() - it }.reverse()
+        List<Date> dates = (0..3).collect {
+            def date = new Date() - it
+            date.set(hours: 14, minutes: 0, seconds: 0)
+            return date
+        }.reverse()
 
         List<String> users = getRandomUsers(10, true)
 

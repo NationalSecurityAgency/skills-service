@@ -22,6 +22,7 @@ class UserInfoSpecs extends DefaultIntSpec {
 
     def "get user info"() {
         String user = "UserInfoSpecsUserA"
+        String userIdForDisplay = "${isPkiMode ? user.toLowerCase() : user} for display"
         createService(user)
 
         def proj1 = SkillsFactory.createProject(1)
@@ -39,7 +40,7 @@ class UserInfoSpecs extends DefaultIntSpec {
         then:
         userInfo
         userInfo.userId == user.toLowerCase()
-        userInfo.userIdForDisplay == "$user for display"
+        userInfo.userIdForDisplay == userIdForDisplay
     }
 
 }

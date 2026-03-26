@@ -57,10 +57,8 @@ class AchievedGlobalBadgeHandler {
     void checkForGlobalBadges(SkillEventResult res, String userId, String projectId, SkillDefMin currentSkillDef) {
         List<SkillDefMin> globalBadges = skillEventsSupportRepo.findGlobalBadgesForProjectIdAndSkillId(projectId, currentSkillDef.skillId)
         if (globalBadges) {
-
-            List<UserAchievement> achievements = achievedLevelRepo.findAllLevelsByUserId(userId)
-            Map<String, Integer> userProjectLevels = (Map<String, Integer>)achievements?.findAll {!it.skillId}?.groupBy { it.projectId }
-                    ?.collectEntries {String key, List<UserAchievement> val -> [key,val.collect{it.level}.max()]}
+            // make the processing order predictable
+            globalBadges = globalBadges.sort { it.skillId }
 
             badgeCheckLoop: for (SkillDefMin globalBadge : globalBadges) {
                 if(globalBadge.enabled != null && !Boolean.valueOf(globalBadge.enabled)) {
@@ -68,24 +66,15 @@ class AchievedGlobalBadgeHandler {
                     continue;
                 }
                 // first check required project levels
-                List<GlobalBadgeLevelRes> requiredLevels = globalBadgesService.getGlobalBadgeLevels(globalBadge.skillId)
-                for (GlobalBadgeLevelRes requiredLevel : requiredLevels) {
-                    if (userProjectLevels.containsKey(requiredLevel.projectId)) {
-                        Integer achievedProjectLevel = userProjectLevels.get(requiredLevel.projectId)
-                        if (!(achievedProjectLevel >= requiredLevel.level)) {
-                            break badgeCheckLoop
-                        }
-                    } else {
-                        break badgeCheckLoop
-                    }
+                if (!achievedLevelRepo.didUserAchieveAllGlobalBadgeLevels(globalBadge.skillId, userId)){
+                    continue badgeCheckLoop
                 }
 
                 // all project level requirements met, check required skills
                 Long nonAchievedChildren = achievedLevelRepo.countNonAchievedGlobalSkills(userId, globalBadge.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
                 if (nonAchievedChildren == 0) {
-                    List<UserAchievement> badges = achievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, globalBadge.projectId, globalBadge.skillId)
-                    if (!badges) {
-                        UserAchievement groupAchievement = new UserAchievement(userId: userId.toLowerCase(), projectId: globalBadge.projectId,
+                    if (!achievedLevelRepo.existsByUserIdAndSkillIdAndProjectIdIsNull(userId, globalBadge.skillId)) {
+                        UserAchievement groupAchievement = new UserAchievement(userId: userId.toLowerCase(), projectId: null,
                                 skillId: globalBadge.skillId, skillRefId: globalBadge?.id, achievedOn: new Date())
                         achievedLevelRepo.save(groupAchievement)
                         res.completed.add(new CompletionItem(type: CompletionTypeUtil.getCompletionType(globalBadge.type), id: globalBadge.skillId, name: globalBadge.name))

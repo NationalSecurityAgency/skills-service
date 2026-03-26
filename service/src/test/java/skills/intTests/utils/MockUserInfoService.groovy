@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Component
 import skills.auth.SecurityMode
+import skills.storage.model.UserAttrs
 import skills.storage.repos.UserAttrsRepo
 
 import jakarta.annotation.PostConstruct
@@ -140,12 +141,13 @@ public class MockUserInfoService {
                         .build()
             }
 
-            String fname = "Fake"
-            String lname = "Fake"
-
-            String usernamified = DnUsernameHelper.getUsername(dnQuery)
-            String usernamifiedForDisplay = "${usernamified} for display"
+            String usernamified = DnUsernameHelper.getUsername(dnQuery).toLowerCase()
+            UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(usernamified)
+            String usernamifiedForDisplay = userAttrs?.userIdForDisplay ?: "${usernamified} for display"
 //            String usernamified = dnQuery.replaceAll(" ", "_").replaceAll(",","").replaceAll("=","-")
+
+            String fname = userAttrs?.firstName ?: "${usernamified.toUpperCase()}_first"
+            String lname = userAttrs?.lastName ?: "${usernamified.toUpperCase()}_last"
 
             log.info("looking up firstname/lastname for ${dnQuery}")
             FirstnameLastname configuredNames = DN_TO_NAME.get(dnQuery.toLowerCase())
@@ -155,12 +157,7 @@ public class MockUserInfoService {
                 lname = configuredNames.lastname
             }
 
-            String email = EmailUtils.generateEmaillAddressFor(usernamified)
-
-            def existingEmail = userAttrsRepo.findEmailByUserId(usernamified.toLowerCase())
-            if (existingEmail) {
-                email = existingEmail
-            }
+            String email = userAttrs?.email ?: EmailUtils.generateEmaillAddressFor(usernamified)
 
             return new ResponseDefinitionBuilder()
                     .withHeader(CONTENT_TYPE, "application/json")
@@ -168,7 +165,6 @@ public class MockUserInfoService {
                     {
                         "firstName" : "${fname}",
                         "lastName": "${lname}",
-                        "nickname": "Fake",
                         "email": "${email.toLowerCase()}",
                         "username": "${usernamified}",
                         "usernameForDisplay": "${usernamifiedForDisplay}",

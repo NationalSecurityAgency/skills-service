@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.result.model.ProjectUser
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.UserProgressExportResult
+import skills.metrics.GlobalProgressMetricsService
 import skills.metrics.builders.project.UserAchievementsMetricsBuilder
 import skills.metrics.builders.project.UserAchievementsMetricsBuilder.QueryParams
 import skills.services.admin.SkillsAdminService
@@ -34,8 +35,10 @@ import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.attributes.ExpirationAttrs
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
+import skills.storage.repos.GlobalProgressMetricsRepo
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.UserQuizAttemptRepo
 import skills.utils.InputSanitizer
 
 import java.util.stream.Stream
@@ -70,6 +73,15 @@ class ExcelExportService {
 
     @Autowired
     ProjDefRepo projDefRepo
+
+    @Autowired
+    GlobalProgressMetricsService globalProgressMetricsService
+
+    @Autowired
+    GlobalProgressMetricsRepo globalProgressMetricsRepo
+
+    @Autowired
+    UserQuizAttemptRepo userQuizAttemptRepo
 
     @Transactional(readOnly = true)
     void exportUsersProgress(Workbook workbook, String projectId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter) {
@@ -223,7 +235,6 @@ class ExcelExportService {
 
     @Transactional(readOnly = true)
     void exportSubjectSkills(Workbook workbook, String projectId, String subjectId) {
-
         String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getProjectUserCommunity(projectId))
         Sheet sheet = workbook.createSheet()
         List<String> headers = ["Skill Name", "Skill ID", "Group Name", "Tags", "Date Created (UTC)",  "Total Points", "Point Increment", "Repetitions", "Self Report", "Catalog", "Expiration", "Time Window", "Version", "Date Last Updated (UTC)",]
@@ -238,6 +249,139 @@ class ExcelExportService {
         }
         if (projectExportHeaderAndFooter) {
             addDataHeaderOrFooter(sheet, rowNum++,  headers.size(), projectExportHeaderAndFooter)
+        }
+    }
+
+    @Transactional(readOnly = true)
+    void exportGlobalUserProgress(Workbook workbook, String userQuery, PageRequest pageRequest, String userTagValueFilter) {
+        GlobalProgressMetricsService.ProjectIdsAndQuizIds projectIdsAndQuizIds = globalProgressMetricsService.getProjectIdsAndQuizIdsForCurrentUser()
+        List<String> projectIds = projectIdsAndQuizIds.projectIds
+        List<String> quizIds = projectIdsAndQuizIds.quizIds
+        Boolean hasAnyUserCommunityOnlyProjectsOrQuizzes = userCommunityService.hasAnyUserCommunityOnlyProjectsOrQuizzes(projectIds, quizIds)
+        String userCommunityValue = userCommunityService.getCommunityNameBasedOnConfAndItemStatus(hasAnyUserCommunityOnlyProjectsOrQuizzes)
+
+        String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityValue)
+        Sheet sheet = workbook.createSheet()
+        List<String> headers
+        if (userTagLabel) {
+            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
+                       "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
+                       "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"]
+        } else {
+            headers = ["User ID", "Last Name", "First Name", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
+                       "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
+                       "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"]
+        }
+        Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
+
+        userQuery = userQuery ? userQuery?.trim() : ''
+        userTagValueFilter = userTagValueFilter ? userTagValueFilter?.trim() : ''
+
+        Stream<GlobalProgressMetricsRepo.UserProgressMetric> userProgressMetrics = globalProgressMetricsRepo.streamUsersOverallProgress(
+                projectIds,
+                quizIds,
+                userQuery,
+                usersTableAdditionalUserTagKey ?: '',
+                userTagValueFilter,
+                pageRequest)
+        try {
+            userProgressMetrics.each {userItem ->
+                Row row = sheet.createRow(rowNum++)
+                Integer colNum = 0
+
+                row.createCell(colNum++).setCellValue(userItem.userIdForDisplay ?: '')
+                row.createCell(colNum++).setCellValue(userItem.lastName ?: '')
+                row.createCell(colNum++).setCellValue(userItem.firstName ?: '')
+                if (userTagLabel) {
+                    row.createCell(colNum++).setCellValue(userItem.userTag ?: '')
+                }
+                row.createCell(colNum++).setCellValue(userItem.numQuizAttempts ?: 0)
+                row.createCell(colNum++).setCellValue(userItem.numQuizzesPassed ?: 0)
+                row.createCell(colNum++).setCellValue(userItem.numQuizzesFailed ?: 0)
+                row.createCell(colNum++).setCellValue(userItem.numQuizzesInProgress ?: 0)
+                row.createCell(colNum++).setCellValue(userItem.numSurveys ?: 0)
+                row.createCell(colNum++).setCellValue(userItem.numSurveysCompleted ?: 0)
+                row.createCell(colNum++).setCellValue(userItem.numSurveysInProgress ?: 0)
+                row.createCell(colNum++).setCellValue(userItem.numProjects ?: 0)
+                row.createCell(colNum++).setCellValue(userItem.projectLevelsEarned ?: 0)
+                row.createCell(colNum++).setCellValue(userItem.subjectLevelsEarned ?: 0)
+                row.createCell(colNum++).setCellValue(userItem.numSkillsEarned ?: 0)
+                row.createCell(colNum++).setCellValue(userItem.numBadgesEarned ?: 0)
+                row.createCell(colNum++).setCellValue(userItem.globalBadgesEarned ?: 0)
+            }
+            if (projectExportHeaderAndFooter) {
+                addDataHeaderOrFooter(sheet, rowNum++,  headers.size(), projectExportHeaderAndFooter)
+            }
+        } finally {
+            userProgressMetrics.close()
+        }
+    }
+
+    @Transactional(readOnly = true)
+    void exportQuizRuns(Workbook workbook, List<String> quizIds, String userQuery, String nameQuery, String userIdFilter, PageRequest pageRequest, Date startDate, Date endDate) {
+        Boolean hasAnyUserCommunityOnlyQuizzes = userCommunityService.hasAnyUserCommunityOnlyProjectsOrQuizzes([], quizIds)
+        String userCommunityValue = userCommunityService.getCommunityNameBasedOnConfAndItemStatus(hasAnyUserCommunityOnlyQuizzes)
+
+        String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityValue)
+        Sheet sheet = workbook.createSheet()
+        List<String> headers
+        if (userTagLabel) {
+            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Quiz Name", "Type", "Status", "Number Correct", "Number of Questions", "Date Started (UTC)", "Date Completed (UTC)", "Runtime (seconds)"]
+        } else {
+            headers = ["User ID", "Last Name", "First Name", "Quiz Name", "Type", "Status", "Number Correct", "Number of Questions", "Date Started (UTC)", "Date Completed (UTC)", "Runtime (seconds)"]
+        }
+        Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
+        CellStyle dateStyle = workbook.createCellStyle()
+        dateStyle.setDataFormat((short) 22) // NOTE: 14 = "mm/dd/yyyy"
+
+        Cell cell = null
+        userQuery = userQuery ? userQuery?.trim() : ''
+        nameQuery = nameQuery ? nameQuery?.trim() : ''
+        userIdFilter = userIdFilter ? userIdFilter?.trim() : ''
+
+        Stream<UserQuizAttemptRepo.QuizRun> quizRunInfoStream = userQuizAttemptRepo.streamQuizRuns(
+                quizIds,
+                userQuery,
+                userIdFilter,
+                nameQuery,
+                usersTableAdditionalUserTagKey ?: '',
+                null,
+                startDate,
+                endDate,
+                pageRequest)
+        try {
+            quizRunInfoStream.each { quizRunInfo ->
+                Row row = sheet.createRow(rowNum++)
+                Integer colNum = 0
+
+                row.createCell(colNum++).setCellValue(quizRunInfo.userIdForDisplay ?: '')
+                row.createCell(colNum++).setCellValue(quizRunInfo.lastName ?: '')
+                row.createCell(colNum++).setCellValue(quizRunInfo.firstName ?: '')
+                if (userTagLabel) {
+                    row.createCell(colNum++).setCellValue(quizRunInfo.userTag ?: '')
+                }
+                row.createCell(colNum++).setCellValue(quizRunInfo.quizName ?: '')
+                row.createCell(colNum++).setCellValue(quizRunInfo.quizType ?: '')
+                row.createCell(colNum++).setCellValue(quizRunInfo.status ?: '')
+                row.createCell(colNum++).setCellValue(quizRunInfo.numberCorrect ?: 0)
+                row.createCell(colNum++).setCellValue(quizRunInfo.totalAnswers ?: 0)
+
+                cell = row.createCell(colNum++)
+                cell.setCellStyle(dateStyle)
+                cell.setCellValue(quizRunInfo.started)
+                cell = row.createCell(colNum++)
+                cell.setCellStyle(dateStyle)
+                cell.setCellValue(quizRunInfo.completed)
+
+                Long runtime = quizRunInfo.completed ? (quizRunInfo.completed.time - quizRunInfo.started.time) / 1000 : null
+                row.createCell(colNum++).setCellValue(runtime)
+
+            }
+            if (projectExportHeaderAndFooter) {
+                addDataHeaderOrFooter(sheet, rowNum++, headers.size(), projectExportHeaderAndFooter)
+            }
+        } finally {
+            quizRunInfoStream.close()
         }
     }
 

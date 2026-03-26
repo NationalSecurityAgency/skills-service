@@ -19,7 +19,7 @@ export default {
     InProgress: 'INPROGRESS',
     NeedsGrading: 'NEEDS_GRADING',
     isFailed: (status) => status === 'FAILED',
-    isPassed: (status) => status === 'PASSED',
+    isPassed: (status) => status === 'PASSED' || status === 'COMPLETED',
     isInProgress: (status) => status === 'INPROGRESS',
     isNeedsGrading: (status) => status === 'NEEDS_GRADING',
 };

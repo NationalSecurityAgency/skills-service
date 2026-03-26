@@ -57,7 +57,7 @@ const titleTag = computed(() => props.headingTagToUse || 'div')
         <div class="text-center sm:min-w-20">
           <i class="fa-3x" :class="iconClass" :style="styleObject" aria-hidden="true"/>
         </div>
-        <div>
+        <div class="flex-1">
           <div class="text-2xl mb-2 uppercase flex gap-2 min-h-[2.5rem]"
                data-cy="mediaInfoCardTitle"
                style="overflow-wrap: break-word; text-wrap: wrap;">

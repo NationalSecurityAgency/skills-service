@@ -112,7 +112,7 @@ class UserCommunityService {
     }
 
     @Transactional(readOnly = true)
-    Boolean isUserCommunityMember(String userId) {
+    boolean isUserCommunityMember(String userId) {
         Boolean belongsToUserCommunity = false
         if (isUserCommunityConfigured() && StringUtils.isNotBlank(userId)) {
             List<UserTag> userTags = userTagRepo.findAllByUserIdAndKey(userId, userCommunityUserTagKey)
@@ -285,14 +285,43 @@ class UserCommunityService {
     }
 
     /**
-     * Checks if the specified projectId is configured as a user community only project
-     * @param projectId - not null
+     * Checks if the specified quizId is configured as a user community only quiz
+     * @param quizId - not null
      * @return true if the quiz exists and has been configured as a user community only project
      */
     @Transactional(readOnly = true)
     boolean isUserCommunityOnlyQuiz(String quizId) {
         QuizValidator.isNotBlank(quizId, "quizId")
         return quizSettingsRepo.findBySettingAndQuizId(QuizSettings.UserCommunityOnlyQuiz.setting, quizId)?.isEnabled()
+    }
+
+    /**
+     * Checks if any of the specified projectIds or quizIds are configured as user community only
+     * @param projectIds - list of project IDs, can be null or empty
+     * @param quizIds - list of quiz IDs, can be null or empty
+     * @return true if any project or quiz has been configured as user community only
+     */
+    @Transactional(readOnly = true)
+    boolean hasAnyUserCommunityOnlyProjectsOrQuizzes(List<String> projectIds, List<String> quizIds) {
+        // Check projects
+        if (projectIds) {
+            for (String projectId : projectIds) {
+                if (isUserCommunityOnlyProject(projectId)) {
+                    return true
+                }
+            }
+        }
+        
+        // Check quizzes
+        if (quizIds) {
+            for (String quizId : quizIds) {
+                if (isUserCommunityOnlyQuiz(quizId)) {
+                    return true
+                }
+            }
+        }
+        
+        return false
     }
 
     /**

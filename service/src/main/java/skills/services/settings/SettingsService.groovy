@@ -96,6 +96,15 @@ class SettingsService {
     }
 
     @Transactional
+    void deleteGlobalMetricsUserSettings(List<GlobalMetricsSettingsRequest> requests) {
+        UserInfo currentUser = loadCurrentUser()
+        Integer userRefId = getUserRefId(currentUser?.username)
+        requests.each { GlobalMetricsSettingsRequest request ->
+            settingsDataAccessor.deleteGlobalMetricsUserSetting(request.setting, request.projectId, Setting.SettingType.UserProject, userRefId)
+        }
+    }
+
+    @Transactional
     void deleteUserSettings(List<UserSettingsRequest> request) {
         request.each {
             deleteUserProjectSetting(it.setting, getUserRefId(request))
@@ -176,11 +185,13 @@ class SettingsService {
             lockingService.lockUser(userId)
         } else if(request instanceof GlobalSettingsRequest){
             lockingService.lockGlobalSettings()
-        }else if(request instanceof ProjectSettingsRequest){
+        } else if(request instanceof ProjectSettingsRequest){
             lockingService.lockProject(request.projectId)
-        }else if(request instanceof SkillSettingsRequest){
+        } else if(request instanceof SkillSettingsRequest){
             lockingService.lockGlobalSettings() // lock global settings for skill settings since it us used for global badges
-        } else{
+        }  else if (request instanceof GlobalMetricsSettingsRequest) {
+            lockingService.lockUser(userId)
+        }else{
             log.error("unable SettingRequest [${request.getClass()}]")
             throw new SkillException("Unrecognized Setting type")
         }
@@ -202,7 +213,7 @@ class SettingsService {
     }
 
     private boolean isUserSettingRequest(SettingsRequest request) {
-        return request instanceof UserSettingsRequest || request instanceof UserProjectSettingsRequest
+        return request instanceof UserSettingsRequest || request instanceof UserProjectSettingsRequest || request instanceof GlobalMetricsSettingsRequest
     }
 
     private Integer getUserRefId(String userId, boolean failIfNotFound = true) {
@@ -326,6 +337,13 @@ class SettingsService {
     @Transactional()
     List<SettingsResult> getProjectSettingsForAllProjects(String setting){
         List<Setting> settings = settingsDataAccessor.getProjectSettingsForAllProjectsBySettings(setting)
+        return convertToResList(settings)
+    }
+
+    @Transactional()
+    List<SettingsResult> getUserProjectSettingsForAllProjects(String setting, String userId){
+        Integer userRefId = getUserRefId(userId)
+        List<Setting> settings = settingsDataAccessor.getAllUserProjectSettings(setting, userRefId)
         return convertToResList(settings)
     }
 

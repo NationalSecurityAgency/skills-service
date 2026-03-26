@@ -207,6 +207,7 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
 
     def "cannot enable UC protection on admin group if it contains a non-UC owner"() {
         SkillsService rootUser = createRootSkillService()
+        String userIdForDisplay = "${isPkiMode ? rootUser.userName.toLowerCase() : rootUser.userName} for display"
         String userCommunityUserId =  skillsService.userName
         rootUser.saveUserTag(userCommunityUserId, 'dragons', ['DivineDragon'])
 
@@ -220,7 +221,7 @@ class EnableCommunityValidationSpecs extends DefaultIntSpec {
 
         then:
         res.isAllowed == false
-        res.unmetRequirements == ["This admin group has the user ${rootUser.userName} for display who is not authorized"]
+        res.unmetRequirements == ["This admin group has the user ${userIdForDisplay} who is not authorized"]
     }
 
     def "cannot enable UC protection on admin group if it contains a non-UC member"() {

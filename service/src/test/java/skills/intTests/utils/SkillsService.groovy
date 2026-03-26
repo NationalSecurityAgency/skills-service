@@ -1183,6 +1183,18 @@ class SkillsService {
         return downloadAttachment("/admin${getProjectUrl(projectId)}/users/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}&userTagFilter=${userTagFilter}".toString())
     }
 
+    def getGlobalUserProgressExcelExport(String orderBy = 'userIdForDisplay', boolean ascending = true, String query = "", String userTagFilter = "") {
+        return downloadAttachment("/app/progress-metrics/export/excel?&ascending=${ascending}&orderBy=${orderBy}&userQuery=${query}&userTagFilter=${userTagFilter}".toString())
+    }
+
+    def getQuizRunsExcelExport(String quizId, String orderBy = 'started', boolean ascending = true, String userQuery = "", String nameQuery = "", String userIdFilter = "", String startDate = "", String endDate = "") {
+        return downloadAttachment("/admin${getQuizDefUrl(quizId)}/runs/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&userQuery=${userQuery}&nameQuery=${nameQuery}&userIdFilter=${userIdFilter}&startDate=${startDate}&endDate=${endDate}".toString())
+    }
+
+    def getGlobalQuizRunsExcelExport(String orderBy = 'started', boolean ascending = true, String userQuery = "", String nameQuery = "", String userIdFilter = "", String startDate = "", String endDate = "") {
+        return downloadAttachment("/app/quiz-runs/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&userQuery=${userQuery}&nameQuery=${nameQuery}&userIdFilter=${userIdFilter}&startDate=${startDate}&endDate=${endDate}".toString())
+    }
+
     def getUserAchievementsExcelExport(String projectId, Map params=null) {
         return downloadAttachment("/admin${getProjectUrl(projectId)}/achievements/export/excel".toString(), params)
     }
@@ -1267,28 +1279,55 @@ class SkillsService {
         wsHelper.adminGet(endpoint, props)
     }
 
-    def getGlobalMetricsData(String metricsId, Map props=null) {
-        String endpoint = "/metrics/${metricsId}"
-        wsHelper.globalBadgeGet(endpoint, props)
-    }
-
     def getApiGlobalMetricsData(String metricsId, Map props = null) {
         String endpoint = "/metrics/${metricsId}"
         wsHelper.apiGet(endpoint, props)
     }
 
-    def getAllMetricsChartsForSection(String projectId, String section, String sectionId, Map props=null) {
-        String endpoint = "/projects/${projectId}/${section}/${sectionId}/metrics"
-        wsHelper.adminGet(endpoint, props)
+    def getOverallMetricsSummary(Map props = null) {
+        String endpoint = "/overall-metrics"
+        wsHelper.appGet(endpoint, props)
     }
 
-    def getAllGlobalMetricsChartsForSection(String section, Map props=null) {
-        wsHelper.get("/${section}", "metrics", props)
+    def getOverallMetricsData(String metricsId, Map props = null) {
+        String endpoint = "/overall-metrics/${metricsId}"
+        wsHelper.appGet(endpoint, props)
     }
 
-    def getGlobalMetricsChart(String chartBuilderId, String section, String sectionId, Map props = null) {
-        wsHelper.get("/${section}/${sectionId}/metric/${chartBuilderId}", "metrics", props)
+    def getGlobalUserProgressMetrics(String userQuery = '', int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String userTagFilter = '') {
+        String endpoint = "/progress-metrics"
+        Map props = [
+                userQuery: userQuery,
+                userTagFilter: userTagFilter,
+                limit: limit,
+                page: page,
+                orderBy: orderBy,
+                ascending: ascending
+        ]
+        wsHelper.appGet(endpoint,props)
     }
+
+    def getGlobalSingleUserProgressMetrics(String userId) {
+        String endpoint = "/progress-metrics/${userId}"
+        wsHelper.appGet(endpoint)
+    }
+
+    def getGlobalQuizRuns(String userQuery = '', String nameQuery = '', int limit = 10, int page = 1, String orderBy = 'started', boolean ascending = true, String startDate = null, String endDate = null, String userIdFilter = null) {
+        String endpoint = "/quiz-runs"
+        Map props = [
+                query: userQuery,
+                nameQuery: nameQuery,
+                limit: limit,
+                page: page,
+                orderBy: orderBy,
+                ascending: ascending,
+                startDate: startDate,
+                endDate: endDate,
+                userIdFilter: userIdFilter
+        ]
+        wsHelper.appGet(endpoint,props)
+    }
+
 
     def getSetting(String projectId, String setting){
         return wsHelper.adminGet(getSettingUrl(projectId, setting))
@@ -1300,6 +1339,10 @@ class SkillsService {
 
     def getUserSettings(){
         return wsHelper.appGet(getUserSettingsUrl())
+    }
+
+    def getSingleUserSetting(String setting){
+        return wsHelper.appGet("${getUserSettingsUrl()}/${setting}")
     }
 
     def getPublicConfigs() {
@@ -1575,6 +1618,25 @@ class SkillsService {
                 projectId: projectId,
         ]
         return wsHelper.adminPost("/projects/${projectId}/settings", [params])
+    }
+
+    /**
+     * @param projectId either projectId or quizId must be provided but never both
+     * @param quizId either projectId or quizId must be provided but never both
+     */
+    def addOrUpdateGlobalMetricsUserSettings(List settings) {
+        // example of a setting:
+        //       [
+        //                setting  : setting,
+        //                value    : value,
+        //                projectId: projectId,
+        //                quizId: quizId
+        //       ]
+        return wsHelper.appPost("/userGlobalMetricsInfo/settings", settings)
+    }
+
+    def getGlobalMetricsUserSettings(String setting) {
+        return wsHelper.appGet("/userGlobalMetricsInfo/settings/${setting}")
     }
 
     def getProjectSettings(String projectId) {

@@ -20,7 +20,7 @@ import { useTimeUtils } from '@/common-components/utilities/UseTimeUtils.js'
 
 const timeUtils = useTimeUtils();
 
-const props = defineProps(['value', 'excludeTime']);
+const props = defineProps(['value', 'excludeTime', 'excludeTimeFromNow']);
 
 const timeFromNow = computed(() => {
   return timeUtils.timeFromNow(props.value);
@@ -41,7 +41,7 @@ const isToday = (timestamp) => {
       <span>{{ formattedDate }}</span>
       <Badge v-if="isToday(value)" severity="info" class="ml-2">Today</Badge>
     </div>
-    <div class="font-light text-sm">
+    <div v-if="!excludeTimeFromNow" class="font-light text-sm">
       {{ timeFromNow }}
     </div>
   </div>

@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 SkillTree
+ * Copyright 2026 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.intTests
+
+package skills.utils
 
 import org.apache.commons.lang3.RandomUtils
 import skills.services.StartDateUtil
@@ -29,11 +30,23 @@ class TestDates {
     LocalDateTime now;
     LocalDateTime startOfCurrentWeek;
     LocalDateTime startOfPreviousWeek;
+    LocalDateTime startOfTwoWeeksAgo;
 
-    public TestDates() {
+    TestDates() {
         now = LocalDateTime.now()
+//        startOfCurrentWeek = LocalDateTime.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
         startOfCurrentWeek = StartDateUtil.computeStartDate(now.toDate(), EventType.DAILY).toLocalDateTime().with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
         startOfPreviousWeek = startOfCurrentWeek.minusWeeks(1)
+        startOfTwoWeeksAgo = startOfCurrentWeek.minusWeeks(1)
+    }
+
+    LocalDateTime getFirstOfMonth(Integer monthsAgo = 0) {
+        if(now.month.value > monthsAgo) {
+            return now.withMonth(now.month.value - monthsAgo).withDayOfMonth(1)
+        } else {
+            def monthDifference = (now.month.value - monthsAgo) + 12
+            return now.withYear(now.getYear() - 1).withMonth(monthDifference).withDayOfMonth(1)
+        }
     }
 
     LocalDateTime getDateWithinCurrentWeek(boolean allowFutureDate=false) {
@@ -59,24 +72,18 @@ class TestDates {
         }
     }
 
-    LocalDateTime getDateWithinPreviousWeek(Date excludeMe){
+    LocalDateTime getDateInPreviousWeek(Date olderThan=null){
         TemporalField dayOfWeekField = WeekFields.of(Locale.US).dayOfWeek()
-        int dayToReturn = -1
-
-        if (excludeMe) {
-            int excludeThisDay = excludeMe.toLocalDateTime().get(dayOfWeekField)
-            int randomDay = -1
-            while ((randomDay = RandomUtils.nextInt(1, 8)) == excludeThisDay) {
-                //continue
+        if (olderThan) {
+            LocalDateTime retVal
+            while((retVal = startOfTwoWeeksAgo.with(dayOfWeekField, RandomUtils.nextInt(1,7))).isAfter(olderThan.toLocalDateTime())){
+                //loop until we get a date that is before the target
             }
-            dayToReturn = randomDay
+            return retVal
         } else {
-            dayToReturn = RandomUtils.nextInt(1, 8)
+            return startOfTwoWeeksAgo.with(dayOfWeekField, RandomUtils.nextInt(1, 7))
         }
-
-        return startOfCurrentWeek.with(dayOfWeekField, dayToReturn)
     }
-
     LocalDateTime getDateWithinWeek(Date target, boolean afterOrSame=false){
         Date startOfWeek = StartDateUtil.computeStartDate(target, EventType.WEEKLY)
         TemporalField dayOfWeekField = WeekFields.of(Locale.US).dayOfWeek()
