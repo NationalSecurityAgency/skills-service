@@ -1582,11 +1582,11 @@ class AdminEditSpecs extends DefaultIntSpec {
         String newId = "otherId"
         badge.badgeId = newId
 
-        List<UserAchievement> skillAchievements = userAchievedRepo.findAll().findAll { it.skillId == origId }
+        List<UserAchievement> skillAchievements = userAchievedRepo.findAll().findAll { it.skillId == origId }.sort { it.userId }
 
         skillsService.updateBadge(badge, origId)
 
-        List<UserAchievement> skillAchievementsAfter = userAchievedRepo.findAll().findAll { it.skillId == newId }
+        List<UserAchievement> skillAchievementsAfter = userAchievedRepo.findAll().findAll { it.skillId == newId }.sort { it.userId }
         then:
         skillAchievements.userId == [users[0].userName, users[1].userName]
         skillAchievementsAfter.userId == [users[0].userName, users[1].userName]
