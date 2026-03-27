@@ -285,4 +285,21 @@ describe('Global Badge Users Tests', () => {
         cy.get(tableSelector).should('not.exist')
         cy.get('[data-cy="badgeNotActive"]').should('exist')
     })
+
+    it('Disabled badge does not show users table even with data', () => {
+        cy.createGlobalBadge(3)
+        cy.assignSkillToGlobalBadge(3, 1, 1);
+        cy.assignSkillToGlobalBadge(3, 2, 1);
+
+        cy.visit('/administrator/globalBadges/globalBadge3/users');
+
+        cy.get(tableSelector).should('not.exist')
+        cy.get('[data-cy="badgeNotActive"]').should('exist')
+
+        cy.enableGlobalBadge(3);
+
+        cy.visit('/administrator/globalBadges/globalBadge3/users');
+        cy.get('[data-cy="badgeNotActive"]').should('not.exist')
+        cy.get(tableSelector).should('exist')
+    })
 })
