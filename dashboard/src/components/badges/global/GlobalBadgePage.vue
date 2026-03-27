@@ -208,6 +208,12 @@ const toDate = (value) => {
       </template>
     </page-header>
 
+    <Message v-if="badge && badge.enabled !== 'true'"
+             :closable="false"
+             severity="warn">
+      This badge cannot be achieved until it is live
+    </Message>
+
     <navigation :nav-items="[
           {name: 'Skills', iconClass: 'fa-graduation-cap skills-color-skills', page: 'GlobalBadgeSkills'},
           {name: 'Levels', iconClass: 'fa-trophy skills-color-levels', page: 'GlobalBadgeLevels'},
