@@ -76,6 +76,7 @@ const options = ref({
   },
 });
 const pageSize = useStorage('quizDefinitions-tablePageSize', 5)
+
 const deleteQuizInfo = ref( {
   showDialog: false,
       quizDef: {},
@@ -173,6 +174,10 @@ const showCopyModal = (quizDef, isCopy = true) => {
   editQuizInfo.value.showDialog = true;
 };
 
+const pageChanged = (pagingInfo) => {
+  pageSize.value = pagingInfo.rows
+}
+
 defineExpose({
   showUpdateModal,
 })
@@ -195,6 +200,7 @@ defineExpose({
         v-model:filters="filters"
         :globalFilterFields="['name']"
         @filter="onFilter"
+        @page="pageChanged"
         v-model:sort-field="sortInfo.sortBy"
         v-model:sort-order="sortInfo.sortOrder"
         paginator :rows="pageSize" :rowsPerPageOptions="[5, 10, 15, 20]"
