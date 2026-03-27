@@ -36,6 +36,7 @@ import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 import {useExportUtil} from "@/components/utils/UseExportUtil.js";
 import Message from "primevue/message";
+import UsersOverallProgressQuizCell from "@/components/users/UsersOverallProgressQuizCell.vue";
 
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
@@ -295,25 +296,7 @@ const onRowExpanded = (expandEvent) => {
                   <i class="fa-solid fa-spell-check mr-1" :class="colors.getTextClass(4)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  <div class="flex-1 flex pr-2 flex-wrap items-center">
-                    <div class="flex-1">
-                      <Tag severity="success" data-cy="quizAttempts">{{ slotProps.data.numQuizAttempts }}</Tag>
-                    </div>
-                    <div v-if="slotProps.data.numQuizAttempts > 0">
-                      <div class="flex gap-3">
-                        <div class="flex-1">Passed:</div>
-                        <div data-cy="quizAttemptsPassed">{{ slotProps.data.numQuizzesPassed }}</div>
-                      </div>
-                      <div class="flex gap-2">
-                        <div class="flex-1">Failed:</div>
-                        <div data-cy="quizAttemptsFailed">{{ slotProps.data.numQuizzesFailed }}</div>
-                      </div>
-                      <div class="flex gap-1" v-if="slotProps.data.numQuizzesInProgress > 0">
-                        <div class="flex-2">In-Progress:</div>
-                        <div data-cy="quizAttemptsInProgress">{{ slotProps.data.numQuizzesInProgress }}</div>
-                      </div>
-                    </div>
-                  </div>
+                  <users-overall-progress-quiz-cell :user-progress="slotProps.data" />
                 </template>
               </Column>
 

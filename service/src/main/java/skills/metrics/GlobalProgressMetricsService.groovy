@@ -150,6 +150,7 @@ class GlobalProgressMetricsService {
                     numQuizzesPassed: it.numQuizzesPassed,
                     numQuizzesFailed: it.numQuizzesFailed,
                     numQuizzesInProgress: it.numQuizzesInProgress,
+                    numQuizzesNeedsGrading: it.numQuizzesNeedsGrading,
                     numSurveys: it.numSurveys,
                     numSurveysCompleted: it.numSurveysCompleted,
                     numSurveysInProgress: it.numSurveysInProgress,

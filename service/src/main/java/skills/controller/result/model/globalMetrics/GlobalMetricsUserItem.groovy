@@ -24,6 +24,7 @@ class GlobalMetricsUserItem {
     Integer numQuizzesPassed
     Integer numQuizzesFailed
     Integer numQuizzesInProgress
+    Integer numQuizzesNeedsGrading
 
     Integer numSurveys
     Integer numSurveysCompleted

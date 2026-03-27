@@ -206,5 +206,98 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         res.metricItemsPage.userId == [users[1].userName]
     }
 
+    def "quiz counts for all the status types" () {
+        List<SkillsService> allUsers = getRandomUsers(4).collect { createService(it)}
+        SkillsService admin = allUsers[0]
+        List<SkillsService> users = allUsers[1..3]
+
+        def createQuiz = { int num, boolean isTextInput = false ->
+            def quiz = QuizDefFactory.createQuiz(num)
+            admin.createQuizDef(quiz)
+            def question = isTextInput ? QuizDefFactory.createTextInputQuestion(num, 1) :
+                    QuizDefFactory.createChoiceQuestion(num, 1, 2)
+            admin.createQuizQuestionDef(question)
+            return quiz
+        }
+        def runQuiz = { SkillsService user, def Quiz, boolean isComplete = true, boolean isFailed = false ->
+            def quizAttempt = user.startQuizAttempt(Quiz.quizId).body
+            int answerOptionId = isFailed ? 1 : 0
+            user.reportQuizAnswer(Quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[answerOptionId].id, [isSelected: true, answerText: "My Answer"])
+            if (isComplete) {
+                user.completeQuizAttempt(Quiz.quizId, quizAttempt.id).body
+            }
+        }
+
+        def quiz1 = createQuiz(1)
+        def quiz2 = createQuiz(2)
+        def quiz3 = createQuiz(3, true)
+        def quiz4 = createQuiz(4, true)
+        def quiz5 = createQuiz(5, true)
+
+        // user1
+        runQuiz(users[0], quiz1, true, true)
+        runQuiz(users[0], quiz1, true, true)
+        runQuiz(users[0], quiz1)
+        runQuiz(users[0], quiz2, true, true)
+        runQuiz(users[0], quiz2, true, true)
+        runQuiz(users[0], quiz2, true, true)
+        runQuiz(users[0], quiz2)
+        runQuiz(users[0], quiz3)
+        runQuiz(users[0], quiz4)
+        runQuiz(users[0], quiz5)
+
+        // user2
+        runQuiz(users[1], quiz1, false)
+        runQuiz(users[1], quiz3)
+        runQuiz(users[1], quiz4)
+
+        // user3
+        runQuiz(users[2], quiz1, true, true)
+        runQuiz(users[2], quiz1, true, true)
+        runQuiz(users[2], quiz1, false)
+        runQuiz(users[2], quiz2, true, true)
+        runQuiz(users[2], quiz2, true, true)
+        runQuiz(users[2], quiz2, false)
+        runQuiz(users[2], quiz5)
+
+        when:
+        def res = admin.getGlobalUserProgressMetrics()
+        then:
+        res.numTotalProjects == 0
+        res.numExcludedProjects == 0
+        res.numTotalSkills == 0
+        res.numTotalBadges == 0
+        res.numTotalProjectBadges == 0
+        res.numTotalGlobalBadges == 0
+        res.numExcludedQuizzesAndSurveys == 0
+        res.numTotalQuizzes == 5
+        res.numTotalSurveys == 0
+
+        res.numTotalMetricItems == 3
+        res.metricItemsPage.userId == [users[0].userName, users[1].userName, users[2].userName]
+        def user1Metric = res.metricItemsPage.find { it.userId == users[0].userName }
+        def user2Metric = res.metricItemsPage.find { it.userId == users[1].userName }
+        def user3Metric = res.metricItemsPage.find { it.userId == users[2].userName }
+        
+        user1Metric.numQuizAttempts == 10
+        user1Metric.numQuizzesPassed == 2
+        user1Metric.numQuizzesFailed == 5
+        user1Metric.numQuizzesInProgress == 0
+        user1Metric.numQuizzesNeedsGrading == 3
+        
+        user2Metric.numQuizAttempts == 3
+        user2Metric.numQuizzesPassed == 0
+        user2Metric.numQuizzesFailed == 0
+        user2Metric.numQuizzesInProgress == 1
+        user2Metric.numQuizzesNeedsGrading == 2
+        
+        user3Metric.numQuizAttempts == 7
+        user3Metric.numQuizzesPassed == 0
+        user3Metric.numQuizzesFailed == 4
+        user3Metric.numQuizzesInProgress == 2
+        user3Metric.numQuizzesNeedsGrading == 1
+    }
+
+
 }
 

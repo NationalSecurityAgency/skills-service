@@ -49,6 +49,7 @@ interface GlobalProgressMetricsRepo extends JpaRepository<GlobalMetricsDummyEnti
         Integer getNumQuizzesPassed()
         Integer getNumQuizzesFailed()
         Integer getNumQuizzesInProgress()
+        Integer getNumQuizzesNeedsGrading()
         Integer getNumSurveys()
         Integer getNumSurveysCompleted()
         Integer getNumSurveysInProgress()
@@ -279,6 +280,7 @@ quizzes AS (
            SUM(CASE WHEN qd.type = 'Quiz' and uqa.status = 'PASSED' THEN 1 ELSE 0 END) as quizPassed,
            SUM(CASE WHEN qd.type = 'Quiz' and uqa.status = 'FAILED' THEN 1 ELSE 0 END) as quizFailed,
            SUM(CASE WHEN qd.type = 'Quiz' and uqa.status = 'INPROGRESS' THEN 1 ELSE 0 END) as quizInProgress,
+           SUM(CASE WHEN qd.type = 'Quiz' and uqa.status = 'NEEDS_GRADING' THEN 1 ELSE 0 END) as quizNeedsGrading,
            SUM(CASE WHEN qd.type = 'Survey' THEN 1 ELSE 0 END) as surveyTotal,
            SUM(CASE WHEN qd.type = 'Survey' and uqa.status = 'PASSED' THEN 1 ELSE 0 END) as surveyCompleted,
            SUM(CASE WHEN qd.type = 'Survey' and uqa.status = 'INPROGRESS' THEN 1 ELSE 0 END) as surveyInProgress
@@ -317,6 +319,7 @@ SELECT
     COALESCE(projectsAndQuizzes.quizPassed, 0) as numQuizzesPassed,
     COALESCE(projectsAndQuizzes.quizFailed, 0) as numQuizzesFailed,
     COALESCE(projectsAndQuizzes.quizInProgress, 0) as numQuizzesInProgress,
+    COALESCE(projectsAndQuizzes.quizNeedsGrading, 0) as numQuizzesNeedsGrading,
     COALESCE(projectsAndQuizzes.surveyTotal, 0) as numSurveys,
     COALESCE(projectsAndQuizzes.surveyCompleted, 0) as numSurveysCompleted,
     COALESCE(projectsAndQuizzes.surveyInProgress, 0) as numSurveysInProgress,

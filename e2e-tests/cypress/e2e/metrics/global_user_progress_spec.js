@@ -501,4 +501,54 @@ describe('Global Users Progress', () => {
         cy.get('[data-cy="quizRunStatus"]').contains('Failed')
     });
 
+    it('all quiz status types', () => {
+        cy.createQuizDef(1)
+        cy.createQuizQuestionDef(1, 1)
+
+        cy.createQuizDef(2);
+        cy.createTextInputQuestionDef(2, 1)
+
+        cy.createQuizDef(3)
+        cy.createQuizQuestionDef(3, 1)
+
+        cy.createQuizDef(4);
+        cy.createTextInputQuestionDef(4, 1)
+
+        cy.runQuizForUser(1, 'user1', [{selectedIndex: [1]}], true)
+        cy.runQuizForUser(1, 'user1', [{selectedIndex: [1]}], true)
+        cy.runQuizForUser(1, 'user1', [{selectedIndex: [0]}], true)
+        cy.runQuizForUser(2, 'user1', [{selectedIndex: [0]}], true, 'Pass me please')
+        cy.runQuizForUser(3, 'user1', [{selectedIndex: [0]}], false)
+
+        cy.runQuizForUser(1, 'user2', [{selectedIndex: [1]}], true)
+        cy.runQuizForUser(1, 'user2', [{selectedIndex: [0]}], true)
+        cy.runQuizForUser(2, 'user2', [{selectedIndex: [0]}], true, 'My answer')
+        cy.runQuizForUser(4, 'user2', [{selectedIndex: [0]}], true, 'My answer1')
+
+        cy.intercept('/app/progress-metrics**').as('progressMetrics')
+        cy.visit('/administrator/users-progress');
+        cy.wait('@progressMetrics')
+
+        cy.get('[data-cy="userOverallProgressTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2')
+
+        cy.get('[data-pc-name="headercell"] [data-pc-section="columntitle"]').contains('User').click();
+        cy.wait('@progressMetrics')
+
+        // First user (index 0) quiz status checks
+        cy.get(`[data-p-index="0"] [data-cy="userIdForDisplay"]`).contains('user1')
+        cy.get(`[data-p-index="0"] [data-cy="quizAttempts"]`).should('contain.text', '5')
+        cy.get(`[data-p-index="0"] [data-cy="quizAttemptsPassed"]`).should('have.text', '1')
+        cy.get(`[data-p-index="0"] [data-cy="quizAttemptsFailed"]`).should('have.text', '2')
+        cy.get(`[data-p-index="0"] [data-cy="quizAttemptsInProgress"]`).should('have.text', '1')
+        cy.get(`[data-p-index="0"] [data-cy="quizAttemptsNeedsGrading"]`).should('have.text', '1')
+
+        // Second user (index 1) quiz status checks
+        cy.get(`[data-p-index="1"] [data-cy="userIdForDisplay"]`).contains('user2')
+        cy.get(`[data-p-index="1"] [data-cy="quizAttempts"]`).should('contain.text', '4')
+        cy.get(`[data-p-index="1"] [data-cy="quizAttemptsPassed"]`).should('have.text', '1')
+        cy.get(`[data-p-index="1"] [data-cy="quizAttemptsFailed"]`).should('have.text', '1')
+        cy.get(`[data-p-index="1"] [data-cy="quizAttemptsInProgress"]`).should('not.exist')
+        cy.get(`[data-p-index="1"] [data-cy="quizAttemptsNeedsGrading"]`).should('have.text', '2')
+    });
+
 });

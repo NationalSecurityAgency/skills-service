@@ -41,7 +41,7 @@ class QuizDefFactory {
         return [quizId: getDefaultQuizId(quizNumber), name: getDefaultQuizName(quizNumber), type: QuizDefParent.QuizType.Survey.toString(), description: description]
     }
 
-    static createChoiceQuestions(int quizNumber = 1, int numberOfQuestions = 1, int numberOfAnswers = 2, QuizQuestionType questionType = QuizQuestionType.SingleChoice, QuizType quizType = QuizType.Quiz) {
+    static List createChoiceQuestions(int quizNumber = 1, int numberOfQuestions = 1, int numberOfAnswers = 2, QuizQuestionType questionType = QuizQuestionType.SingleChoice, QuizType quizType = QuizType.Quiz) {
         return (1..numberOfQuestions).collect {
             createChoiceQuestion(quizNumber, it, numberOfAnswers, questionType, quizType)
         }

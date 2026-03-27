@@ -262,15 +262,12 @@ class ExcelExportService {
 
         String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityValue)
         Sheet sheet = workbook.createSheet()
-        List<String> headers
+        List<String> baseHeaders = ["User ID", "Last Name", "First Name", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress", "Quizzes Needs Grading",
+                                   "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
+                                   "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"]
+        List<String> headers = new ArrayList<>(baseHeaders)
         if (userTagLabel) {
-            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
-                       "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
-                       "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"]
-        } else {
-            headers = ["User ID", "Last Name", "First Name", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
-                       "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
-                       "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"]
+            headers.add(3, userTagLabel)
         }
         Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
 
@@ -299,6 +296,7 @@ class ExcelExportService {
                 row.createCell(colNum++).setCellValue(userItem.numQuizzesPassed ?: 0)
                 row.createCell(colNum++).setCellValue(userItem.numQuizzesFailed ?: 0)
                 row.createCell(colNum++).setCellValue(userItem.numQuizzesInProgress ?: 0)
+                row.createCell(colNum++).setCellValue(userItem.numQuizzesNeedsGrading ?: 0)
                 row.createCell(colNum++).setCellValue(userItem.numSurveys ?: 0)
                 row.createCell(colNum++).setCellValue(userItem.numSurveysCompleted ?: 0)
                 row.createCell(colNum++).setCellValue(userItem.numSurveysInProgress ?: 0)
