@@ -214,7 +214,7 @@ const handleFocus = () => {
     <sub-page-header ref="subPageHeader" title="Global Badges" action="Badge" @add-action="newBadge" aria-label="new global badge" :title-level="1"/>
 <!--      <transition name="projectContainer" enter-active-class="animated fadeIn">-->
       <div>
-        <div v-if="(!badges || badges.length === 0) && isLoading">
+        <div v-if="(!badges || badges.length === 0) && isLoading" class="flex justify-center items-center h-full">
           <skills-spinner :is-loading="isLoading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
         </div>
         <div v-if="badges && badges.length" id="badgeCards" class="flex flex-wrap gap-4 items-stretch justify-center">
