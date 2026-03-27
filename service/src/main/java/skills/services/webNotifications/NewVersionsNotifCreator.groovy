@@ -49,6 +49,19 @@ class NewVersionsNotifCreator {
         assert docsRootHost // must have it configured
         List<WebNotifWrapper> newVersionsNotifications = [
                 new WebNotifWrapper(
+                        releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-04-19'),
+                        notif: new WebNotification(
+                                notifiedOn: new Date(),
+                                showUntil: Date.parse('yyyy-MM-dd', '2026-05-19'),
+                                lookupId: "new-versions-7",
+                                title: "Version 4.2 Released",
+                                notification: """- Holistic User Progress Views across all projects, quizzes, and surveys that you administer
+- Global Quiz Runs and Global Metrics Displays
+- User Progress Display for Global Badges
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)
+""")
+                ),
+                new WebNotifWrapper(
                         releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-03-12'),
                         notif: new WebNotification(
                                 notifiedOn: new Date(),
