@@ -1244,6 +1244,29 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy="pointsToError"]').contains('Points To must not overlap with other levels')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').clear()
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').type('670')
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '451')
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '670')
+        cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('not.exist')
+        cy.get('[data-cy="pointsToError"]').should('not.exist')
+
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').clear()
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').type('670')
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '670')
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '670')
+        cy.get('[data-cy="pointsFromError"]').contains('Points From must be less than Points To');
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').clear()
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').type('451')
+
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').clear()
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').type('451')
+        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '451')
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '451')
+        cy.get('[data-cy="pointsToError"]').contains('Points To must be greater than Points From');
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').clear()
+        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').type('670')
+
         cy.get('[data-p="modal"] [data-cy="pointsTo"]').type('{backspace}{backspace}50')
         cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '451')
         cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '650')

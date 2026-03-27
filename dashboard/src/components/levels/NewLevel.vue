@@ -16,11 +16,11 @@ limitations under the License.
 <script setup>
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
 import SkillsNumberInput from '@/components/utils/inputForm/SkillsNumberInput.vue'
-import {number} from "yup";
+import {number, object} from "yup";
 import LevelService from "@/components/levels/LevelService.js";
 import {useRoute} from 'vue-router';
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
-import {computed} from "vue";
+import {computed, ref} from "vue";
 
 const announcer = useSkillsAnnouncer()
 const route = useRoute();
@@ -36,6 +36,8 @@ const props = defineProps({
 const emit = defineEmits(['load-levels']);
 
 const model = defineModel()
+const newLevelDialog = ref();
+
 const saveLevel = (values) => {
   if (props.isEdit === true) {
     return doEditLevel({
@@ -125,47 +127,66 @@ const boundsValidator = (value) => {
 const isLastLevel = computed(() => props.boundaries?.next === null)
 // levelAsPoints
 
-let schema = {};
+let schemaTmp = {};
 
 if (props.isEdit) {
-  schema = {
+  schemaTmp = {
     'level': number().required().min(1).label('Level'),
   }
   if (props.levelAsPoints) {
-    schema = {
-      ...schema,
-      'pointsFrom': number().required().min(0).test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator).label('Points From'),
+    schemaTmp = {
+      ...schemaTmp,
+      'pointsFrom': number()
+          .required()
+          .min(0)
+          .test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator)
+          .test(
+              'validRange',
+              ({ label }) => `${label} must be less than Points To.`,
+              async (value, testContext) => isLastLevel.value || testContext.parent.pointsTo > value)
+          .label('Points From'),
     }
     if (!isLastLevel.value) {
-      schema = {
-        ...schema,
-        'pointsTo': number().required().min(0).test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator).label('Points To'),
+      schemaTmp = {
+        ...schemaTmp,
+        'pointsTo': number()
+            .required()
+            .min(0)
+            .test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator)
+            .test(
+                'validRange',
+                ({ label }) => `${label} must be greater than Points From.`,
+                async (value, testContext) => testContext.parent.pointsFrom < value)
+            .label('Points To'),
       }
     }
   } else {
-    schema = {
-      ...schema,
+    schemaTmp = {
+      ...schemaTmp,
       'percent': number().required().min(0).max(100).label('Percent').test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator),
     }
   }
 } else {
   if (props.levelAsPoints) {
-    schema = {
-      ...schema,
+    schemaTmp = {
+      ...schemaTmp,
       'points': number().required().min(0).test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator).label('Points'),
     }
   } else {
-    schema = {
-      ...schema,
+    schemaTmp = {
+      ...schemaTmp,
       'percent': number().required().min(0).max(100).label('Percent').test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator),
     }
   }
 }
 
+const schema = object(schemaTmp);
+
 </script>
 
 <template>
   <SkillsInputFormDialog
+      ref="newLevelDialog"
       :id="formId"
       v-model="model"
       :is-edit="isEdit"
