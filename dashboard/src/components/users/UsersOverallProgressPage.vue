@@ -42,7 +42,7 @@ const colors = useColors()
 const responsive = useResponsiveBreakpoints()
 const userInfo = useUserInfo()
 const appConfig = useAppConfig()
-const numberFormat = useNumberFormat()
+const nF = useNumberFormat()
 const exportUtil = useExportUtil()
 
 onMounted(() => {
@@ -270,8 +270,8 @@ const onRowExpanded = (expandEvent) => {
                         <div
                             :aria-label="`${slotProps.data.numSkillsEarned} out of ${userProgress.numTotalSkills} total skills`"
                             data-cy="skillCount"
-                        ><span>{{ slotProps.data.numSkillsEarned }}</span> /
-                          {{ userProgress.numTotalSkills }} Skills</div>
+                        ><span>{{ nF.pretty(slotProps.data.numSkillsEarned) }}</span> /
+                          {{ nF.pretty(userProgress.numTotalSkills) }} Skills</div>
                       </div>
                       <ProgressBar style="height: 5px;" :value="slotProps.data.skillsEarnedPercent" :showValue="false"
                                    class="lg:min-w-[12rem] xl:min-w-[20rem]"
@@ -281,8 +281,8 @@ const onRowExpanded = (expandEvent) => {
                       <div class="flex gap-1 flex-wrap items-center">
                         <div>Started:</div>
                         <div data-cy="projectCount">
-                          <span><Tag>{{ slotProps.data.numProjects }}</Tag>
-                          / {{ userProgress.numTotalProjects }} Projects</span>
+                          <span><Tag>{{ nF.pretty(slotProps.data.numProjects) }}</Tag>
+                          / {{ nF.pretty(userProgress.numTotalProjects) }} Projects</span>
                         </div>
                       </div>
                     </div>
@@ -308,8 +308,8 @@ const onRowExpanded = (expandEvent) => {
                 <template #body="slotProps">
                   <div class="flex items-center">
                   <div class="flex flex-col gap-2">
-                    <div data-cy="surveyRuns"><Tag severity="success">{{ slotProps.data.numSurveysCompleted }}</Tag> / {{ userProgress.numTotalSurveys }}</div>
-                    <div v-if="slotProps.data.numSurveysInProgress > 0"><Tag severity="secondary" data-cy="surveyRunsInProgress">{{ slotProps.data.numSurveysInProgress }}</Tag> In-Progress</div>
+                    <div data-cy="surveyRuns"><Tag severity="success">{{ nF.pretty(slotProps.data.numSurveysCompleted) }}</Tag> / {{ nF.pretty(userProgress.numTotalSurveys) }}</div>
+                    <div v-if="slotProps.data.numSurveysInProgress > 0"><Tag severity="secondary" data-cy="surveyRunsInProgress">{{ nF.pretty(slotProps.data.numSurveysInProgress) }}</Tag> In-Progress</div>
                   </div>
                   </div>
                 </template>
@@ -321,8 +321,8 @@ const onRowExpanded = (expandEvent) => {
                   <i class="fa-solid fa-award mr-1" :class="colors.getTextClass(6)" aria-hidden="true"></i>
                 </template>
                 <template #body="slotProps">
-                  <div data-cy="badges"><Tag>{{ slotProps.data.numBadgesEarned }}</Tag> / {{ userProgress.numTotalBadges}}</div>
-                  <div data-cy="globalBadges">Global: {{ slotProps.data.numGlobalBadgesEarned }}</div>
+                  <div data-cy="badges"><Tag>{{ nF.pretty(slotProps.data.numBadgesEarned) }}</Tag> / {{ nF.pretty(userProgress.numTotalBadges)}}</div>
+                  <div data-cy="globalBadges">Global: {{ nF.pretty(slotProps.data.numGlobalBadgesEarned) }}</div>
                 </template>
               </Column>
 
@@ -337,7 +337,7 @@ const onRowExpanded = (expandEvent) => {
 
               <template #paginatorstart>
                 <span>Total Rows:</span> <span class="font-semibold"
-                                               data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
+                                               data-cy=skillsBTableTotalRows>{{ nF.pretty(totalRows) }}</span>
               </template>
             </SkillsDataTable>
           </div>
