@@ -55,6 +55,8 @@ describe('Global Badge Users Tests', () => {
         cy.assignProjectToGlobalBadge(1, 2, 3)
         cy.assignProjectToGlobalBadge(1, 3, 5)
 
+        cy.enableGlobalBadge(1)
+
     });
 
     it('Global Badge users updates as user achieves levels and completes skills', () => {
