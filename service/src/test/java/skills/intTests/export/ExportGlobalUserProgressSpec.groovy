@@ -25,6 +25,9 @@ import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_ME
 
 class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
 
+    List<String> headers = ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress", "Quizzes Needs Grading",
+                            "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
+                            "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"]
     def "export global users progress"() {
         def project1 = createProject(1)
         def subject1 = createSubject(1, 1)
@@ -41,6 +44,9 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
 
         def quiz1 = createQuiz(1)
         def survey1 = createSurvey(2)
+        def quiz2 = createQuiz(3, skillsService, true)
+        def quiz3 = createQuiz(4, skillsService, true)
+        def quiz4 = createQuiz(5, skillsService, true)
 
         def users = getRandomUsers(5).sort()
         def user1 = users[0]
@@ -62,26 +68,33 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         runQuizOrSurvey(survey1, user4, false, true)
         runQuizOrSurvey(survey1, user5, false, false)
 
+        answerTextInputQuiz(quiz2, user1, "Answer 1")
+        answerTextInputQuiz(quiz3, user1, "Answer 2")
+        answerTextInputQuiz(quiz4, user1, "Answer 3")
+
+        answerTextInputQuiz(quiz2, user3, "Answer 1")
+        answerTextInputQuiz(quiz3, user3, "Answer 1")
+
+        answerTextInputQuiz(quiz2, user4, "Answer 1")
+
         def excelExport = skillsService.getGlobalUserProgressExcelExport()
 
         List dataRows =  [
-                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "1.0", "0.0", "0.0",
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "4.0", "1.0", "0.0", "0.0", "3.0",
                  "0.0", "0.0", "0.0", "1.0", "2.0", "2.0", "0.0", "0.0", "0.0"],
-                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "0.0", "0.0", "1.0",
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "0.0", "0.0", "1.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "1.0", "1.0", "0.0", "0.0", "0.0"],
-                [getUserIdForDisplay(user3), getName(user3, false), getName(user3), "", "1.0", "0.0", "1.0", "0.0",
+                [getUserIdForDisplay(user3), getName(user3, false), getName(user3), "", "3.0", "0.0", "1.0", "0.0", "2.0",
                  "0.0", "0.0", "0.0", "1.0", "1.0", "1.0", "0.0", "0.0", "0.0"],
-                [getUserIdForDisplay(user4), getName(user4, false), getName(user4), "", "0.0", "0.0", "0.0", "0.0",
+                [getUserIdForDisplay(user4), getName(user4, false), getName(user4), "", "1.0", "0.0", "0.0", "0.0", "1.0",
                  "1.0", "1.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"],
-                [getUserIdForDisplay(user5), getName(user5, false), getName(user5), "", "0.0", "0.0", "0.0", "0.0",
+                [getUserIdForDisplay(user5), getName(user5, false), getName(user5), "", "0.0", "0.0", "0.0", "0.0", "0.0",
                  "1.0", "0.0", "1.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"],
         ].sort { it[0] }
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
-                 "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
-                 "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"],
+                headers,
                 dataRows[0],
                 dataRows[1],
                 dataRows[2],
@@ -122,19 +135,17 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         def excelExport = skillsService.getGlobalUserProgressExcelExport()
 
         List dataRows = [
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "1.0", "1.0", "0.0", "0.0",
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "1.0", "1.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "0.0", "0.0", "0.0", "0.0", "0.0"],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "0.0", "0.0", "0.0", "0.0",
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "0.0", "0.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "0.0", "0.0", "0.0", "0.0", "0.0"],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "0.0", "0.0", "0.0", "0.0",
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "0.0", "0.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "1.0", "1.0", "0.0", "0.0", "0.0"],
         ].sort { it[0] }
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
-                 "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
-                 "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"],
+                headers,
                 dataRows[0],
                 dataRows[1],
                 dataRows[2],
@@ -165,10 +176,8 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
-                 "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
-                 "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "0.0", "0.0", "0.0", "0.0",
+                headers,
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "0.0", "0.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "1.0", "1.0", "0.0", "0.0", "0.0"],
                 ["For All Dragons Only"],
         ])
@@ -192,10 +201,8 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
-                 "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
-                 "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "0.0", "0.0", "0.0", "0.0",
+                headers,
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "0.0", "0.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "1.0", "1.0", "0.0", "0.0", "0.0"],
                 ["For All Dragons Only"],
         ])
@@ -229,17 +236,15 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         def excelExport = skillsService.getGlobalUserProgressExcelExport()
 
         List dataRows = [
-                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "0.0", "0.0", "0.0", "0.0",
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "0.0", "0.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "2.0", "2.0", "1.0", "1.0", "0.0"],
-                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "0.0", "0.0", "0.0", "0.0",
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "0.0", "0.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "0.0", "0.0", "0.0", "0.0", "0.0"],
         ].sort { it[0] }
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
-                 "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
-                 "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"],
+                headers,
                 dataRows[0],
                 dataRows[1],
                 ["For All Dragons Only"],
@@ -285,17 +290,15 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         def excelExport = skillsService.getGlobalUserProgressExcelExport()
 
         List dataRows = [
-                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "1.0", "0.0", "0.0",
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "1.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "0.0"],
-                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "2.0", "1.0", "0.0", "1.0",
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "2.0", "1.0", "0.0", "1.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "0.0"],
         ].sort { it[0] }
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
-                 "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
-                 "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"],
+                headers,
                 dataRows[0],
                 dataRows[1],
                 ["For All Dragons Only"],
@@ -345,17 +348,15 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         def excelExport = skillsService.getGlobalUserProgressExcelExport()
 
         List dataRows = [
-                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "1.0", "0.0", "0.0",
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "1.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "0.0"],
-                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "2.0", "1.0", "0.0", "1.0",
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "2.0", "1.0", "0.0", "1.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "0.0"],
         ].sort { it[0] }
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
-                 "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
-                 "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"],
+                headers,
                 dataRows[0],
                 dataRows[1],
                 ["For All Dragons Only"],
@@ -405,17 +406,15 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         def excelExport = skillsService.getGlobalUserProgressExcelExport()
 
         List dataRows = [
-                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "0.0", "0.0", "0.0", "0.0",
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "0.0", "0.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "0.0"],
-                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "1.0", "0.0", "0.0",
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "1.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "0.0"],
         ].sort { it[0] }
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
-                 "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
-                 "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"],
+                headers,
                 dataRows[0],
                 dataRows[1],
                 ["For All Dragons Only"],
@@ -448,17 +447,15 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         def excelExport = pristineDragonsUser.getGlobalUserProgressExcelExport()
 
         List dataRows = [
-                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "0.0", "0.0", "0.0", "0.0",
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "0.0", "0.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "2.0", "2.0", "0.0", "0.0", "0.0"],
-                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "0.0", "0.0", "0.0", "0.0",
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "0.0", "0.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "1.0", "1.0", "0.0", "0.0", "0.0"],
         ].sort { it[0] }
         then:
         validateExport(excelExport.file, [
                 ["For Divine Dragon Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
-                 "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
-                 "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"],
+                headers,
                 dataRows[0],
                 dataRows[1],
                 ["For Divine Dragon Only"],
@@ -511,17 +508,15 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         def excelExport = pristineDragonsUser.getGlobalUserProgressExcelExport()
 
         List dataRows =  [
-                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "1.0", "0.0", "0.0",
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "1.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "1.0"],
-                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "2.0", "1.0", "0.0", "1.0",
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "2.0", "1.0", "0.0", "1.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "0.0"]
         ].sort { it[0] }
         then:
         validateExport(excelExport.file, [
                 ["For Divine Dragon Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
-                 "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
-                 "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"],
+                headers,
                 dataRows[0],
                 dataRows[1],
                 ["For Divine Dragon Only"],
@@ -573,30 +568,34 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         def excelExport = pristineDragonsUser.getGlobalUserProgressExcelExport()
 
         List dataRows = [
-                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "1.0", "0.0", "0.0",
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "1.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "1.0"],
-                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "2.0", "1.0", "0.0", "1.0",
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "2.0", "1.0", "0.0", "1.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "5.0", "5.0", "1.0", "0.0", "0.0"],
         ].sort { it[0] }
         then:
         validateExport(excelExport.file, [
                 ["For Divine Dragon Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Quiz Attempts", "Quizzes Passed", "Quizzes Failed", "Quizzes In Progress",
-                 "Surveys", "Surveys Completed", "Surveys In Progress", "Projects", "Project Levels Earned",
-                 "Subject Levels Earned", "Skills Earned", "Project Badges Earned", "Global Badges Earned"],
+                headers,
                 dataRows[0],
                 dataRows[1],
                 ["For Divine Dragon Only"],
         ])
     }
 
-    def createQuiz(int num, SkillsService serviceToUse = null) {
+    def createQuiz(int num, SkillsService serviceToUse = null, boolean isTextInputQuestion = false) {
         serviceToUse = serviceToUse ?: skillsService
         def quiz = QuizDefFactory.createQuiz(num)
         quiz.name = "My Quiz ${num}".toString()
         serviceToUse.createQuizDef(quiz)
-        def questions = QuizDefFactory.createChoiceQuestions(num, 2, 2)
-        serviceToUse.createQuizQuestionDefs(questions)
+        if (isTextInputQuestion) {
+            def questions = [QuizDefFactory.createTextInputQuestion(num, 1)]
+            serviceToUse.createQuizQuestionDefs(questions)
+        } else {
+            def questions = QuizDefFactory.createChoiceQuestions(num, 2, 2)
+            serviceToUse.createQuizQuestionDefs(questions)
+        }
+
         return quiz
     }
 
@@ -616,6 +615,16 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         def quizAttempt =  serviceToUse.startQuizAttemptForUserId(quiz.quizId, userId).body
         serviceToUse.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, userId)
         serviceToUse.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[pass ? 0 : 1].id, userId)
+        if (complete) {
+            serviceToUse.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, userId).body
+        }
+    }
+
+    def answerTextInputQuiz(def quiz, String userId, String answer, boolean complete = true, SkillsService serviceToUse = null) {
+        serviceToUse = serviceToUse ?: skillsService
+        def quizAttempt =  serviceToUse.startQuizAttemptForUserId(quiz.quizId, userId).body
+        serviceToUse.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, userId,
+                [isSelected: true, answerText: answer])
         if (complete) {
             serviceToUse.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, userId).body
         }
