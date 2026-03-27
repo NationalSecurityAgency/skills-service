@@ -143,7 +143,7 @@ if (props.isEdit) {
           .test(
               'validRange',
               ({ label }) => `${label} must be less than Points To.`,
-              async (value, testContext) => testContext.parent.pointsTo > value)
+              async (value, testContext) => isLastLevel.value || testContext.parent.pointsTo > value)
           .label('Points From'),
     }
     if (!isLastLevel.value) {
