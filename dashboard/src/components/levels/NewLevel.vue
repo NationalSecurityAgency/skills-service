@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
 import SkillsNumberInput from '@/components/utils/inputForm/SkillsNumberInput.vue'
-import {number} from "yup";
+import {number, object} from "yup";
 import LevelService from "@/components/levels/LevelService.js";
 import {useRoute} from 'vue-router';
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
@@ -124,66 +124,63 @@ const boundsValidator = (value) => {
   return valid;
 }
 
-const rangeValidator = () => {
-  let valid = true;
-  let { pointsFrom, pointsTo } = newLevelDialog.value.getFieldValues()
-
-  if(props.boundaries && !isLastLevel.value && pointsFrom >= pointsTo ) {
-      valid = false;
-  }
-
-  return valid;
-}
-
 const isLastLevel = computed(() => props.boundaries?.next === null)
 // levelAsPoints
 
-let schema = {};
+let schemaTmp = {};
 
 if (props.isEdit) {
-  schema = {
+  schemaTmp = {
     'level': number().required().min(1).label('Level'),
   }
   if (props.levelAsPoints) {
-    schema = {
-      ...schema,
+    schemaTmp = {
+      ...schemaTmp,
       'pointsFrom': number()
           .required()
           .min(0)
           .test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator)
-          .test('validRange', ({ label }) => `${label} must be less than Points To.`, rangeValidator)
+          .test(
+              'validRange',
+              ({ label }) => `${label} must be less than Points To.`,
+              async (value, testContext) => testContext.parent.pointsTo > value)
           .label('Points From'),
     }
     if (!isLastLevel.value) {
-      schema = {
-        ...schema,
+      schemaTmp = {
+        ...schemaTmp,
         'pointsTo': number()
             .required()
             .min(0)
             .test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator)
-            .test('validRange', ({ label }) => `${label} must be greater than Points From.`, rangeValidator)
+            .test(
+                'validRange',
+                ({ label }) => `${label} must be greater than Points From.`,
+                async (value, testContext) => testContext.parent.pointsFrom < value)
             .label('Points To'),
       }
     }
   } else {
-    schema = {
-      ...schema,
+    schemaTmp = {
+      ...schemaTmp,
       'percent': number().required().min(0).max(100).label('Percent').test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator),
     }
   }
 } else {
   if (props.levelAsPoints) {
-    schema = {
-      ...schema,
+    schemaTmp = {
+      ...schemaTmp,
       'points': number().required().min(0).test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator).label('Points'),
     }
   } else {
-    schema = {
-      ...schema,
+    schemaTmp = {
+      ...schemaTmp,
       'percent': number().required().min(0).max(100).label('Percent').test('overlap', ({ label }) => `${label} must not overlap with other levels`, boundsValidator),
     }
   }
 }
+
+const schema = object(schemaTmp);
 
 </script>
 
