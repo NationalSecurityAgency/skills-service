@@ -271,6 +271,9 @@ describe('Accessibility Badges Tests', () => {
                 .should('have.text', '1');
             cy.customA11y();
 
+            cy.get('[data-cy="goLive"]').click()
+            cy.get('[data-pc-name="pcacceptbutton"]').click()
+
             cy.get('[data-cy=nav-Users]').click();
             cy.wait('@getUsers')
             cy.customLighthouse();
