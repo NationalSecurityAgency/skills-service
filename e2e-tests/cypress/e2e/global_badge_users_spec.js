@@ -277,4 +277,12 @@ describe('Global Badge Users Tests', () => {
         ], 5);
 
     })
+
+    it('Disabled badge does not show users table', () => {
+        cy.createGlobalBadge(2)
+        cy.visit('/administrator/globalBadges/globalBadge2/users');
+
+        cy.get(tableSelector).should('not.exist')
+        cy.get('[data-cy="badgeNotActive"]').should('exist')
+    })
 })
