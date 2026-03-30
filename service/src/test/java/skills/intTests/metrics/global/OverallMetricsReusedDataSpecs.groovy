@@ -21,6 +21,8 @@ import skills.services.StartDateUtil
 import skills.storage.model.EventType
 import skills.utils.TestDates
 
+import static skills.intTests.utils.AdminGroupDefFactory.createAdminGroup
+import static skills.intTests.utils.AdminGroupDefFactory.createAdminGroup
 import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
 import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
 import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
@@ -420,6 +422,45 @@ class OverallMetricsReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
         usersByAdminOrg.items.size() == 0
         usersByAdminOrg.items == []
 
+    }
+
+    def "admin groups do not effect counts"() {
+
+        def adminGroup1 = createAdminGroup(1)
+        def adminGroup2 = createAdminGroup(2)
+        skillsService.createAdminGroupDef(adminGroup1)
+        skillsService.createAdminGroupDef(adminGroup2)
+
+        skillsService.addProjectToAdminGroup(adminGroup1.adminGroupId, admin0ProjectIds[0])
+        skillsService.addProjectToAdminGroup(adminGroup2.adminGroupId, admin0ProjectIds[0])
+
+        skillsService.addQuizToAdminGroup(adminGroup1.adminGroupId, admin0QuizAndSurveyIds[0])
+        skillsService.addQuizToAdminGroup(adminGroup2.adminGroupId, admin0QuizAndSurveyIds[0])
+
+
+        skillsService.addAdminGroupMember(adminGroup1.adminGroupId, admins[0].userName)
+        skillsService.addAdminGroupMember(adminGroup2.adminGroupId, admins[0].userName)
+//        skillsService.addGlobalBadgeToAdminGroup(adminGroup1.adminGroupId, admin0ProjectIds[0])
+//        skillsService.addGlobalBadgeToAdminGroup(adminGroup2.adminGroupId, admin0ProjectIds[0])
+
+        when:
+        def res = admins[0].getOverallMetricsSummary()
+
+        then:
+        res.numTotalProjects == 3
+
+        res.numTotalSkills == 31
+        res.numTotalBadges == 5
+        res.numTotalProjectBadges == 2
+        res.numTotalGlobalBadges == 3
+
+        res.numTotalQuizzes == 5
+        res.numTotalSurveys == 4
+
+        res.projectInfo.projectId.size() == admin0ProjectIds.size()
+        res.projectInfo.projectId.containsAll(admin0ProjectIds)
+        res.quizInfo.quizId.size() == admin0QuizAndSurveyIds.size()
+        res.quizInfo.quizId.containsAll(admin0QuizAndSurveyIds)
     }
 }
 
