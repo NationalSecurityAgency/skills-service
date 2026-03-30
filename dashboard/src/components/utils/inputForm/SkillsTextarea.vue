@@ -52,7 +52,9 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
-  maxNumChars: Number
+  maxNumChars: {
+    type: Number,
+}
 })
 const emit = defineEmits(['input', 'keydown-enter'])
 

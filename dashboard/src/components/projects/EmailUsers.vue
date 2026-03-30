@@ -631,6 +631,7 @@ const previewEmail = () => {
             <SkillsTextarea v-else data-cy="emailUsers_body"
                             label="Email Body"
                             class="w-full"
+                            :max-num-chars="appConfig.descriptionMaxLength"
                             disabled
                             rows="5"
                             name="emailBody">

@@ -32,9 +32,11 @@ const checkDependentValue = (value, dependency, ctx) => {
   }
 }
 
+const maximumLength = 3000
+
 const schema = object({
   htmlHeader: string()
-      .max(3000)
+      .max(maximumLength)
       .noScript()
       .label('HTML Header')
       .test({
@@ -48,7 +50,7 @@ const schema = object({
         }
       }),
   plainTextHeader: string()
-      .max(3000)
+      .max(maximumLength)
       .noScript()
       .label('Plaintext Header')
       .test({
@@ -62,7 +64,7 @@ const schema = object({
         }
       }),
   htmlFooter: string()
-      .max(3000)
+      .max(maximumLength)
       .noScript()
       .label('HTML Footer')
       .test({
@@ -76,7 +78,7 @@ const schema = object({
         }
       }),
   plainTextFooter: string()
-      .max(3000)
+      .max(maximumLength)
       .noScript()
       .label('Plaintext Footer')
       .test({
@@ -181,11 +183,11 @@ const loadEmailSettings = () => {
 <template>
   <div data-cy="emailTemplateSettings">
 
-    <SkillsTextarea name="htmlHeader" label="HTML Header" />
-    <SkillsTextarea name="plainTextHeader" label="Plain Text Header" />
+    <SkillsTextarea name="htmlHeader" label="HTML Header" :max-num-chars="maximumLength" />
+    <SkillsTextarea name="plainTextHeader" label="Plain Text Header" :max-num-chars="maximumLength" />
 
-    <SkillsTextarea name="htmlFooter" label="HTML Footer" />
-    <SkillsTextarea name="plainTextFooter" label="Plain Text Footer" />
+    <SkillsTextarea name="htmlFooter" label="HTML Footer" :max-num-chars="maximumLength" />
+    <SkillsTextarea name="plainTextFooter" label="Plain Text Footer" :max-num-chars="maximumLength" />
 
     <Message v-if="saveMessage" :sticky="false" :life="10000">{{saveMessage}}</Message>
 
