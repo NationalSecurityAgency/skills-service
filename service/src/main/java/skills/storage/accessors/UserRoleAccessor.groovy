@@ -42,8 +42,8 @@ class UserRoleAccessor {
     ProjectsAndQuizzes getCurrentUserAdminProjectsAndQuizzes() {
         String userId = userInfoService.currentUser.username
         List<UserRole> allUserRoles = userRoleRepo.findAllByUserId(userId)
-        List<String> projectIds = allUserRoles?.findAll({ it.roleName == RoleName.ROLE_PROJECT_ADMIN})?.projectId
-        List<String> quizIds = allUserRoles?.findAll({ it.roleName == RoleName.ROLE_QUIZ_ADMIN})?.quizId
+        List<String> projectIds = allUserRoles?.findAll({ it.roleName == RoleName.ROLE_PROJECT_ADMIN})?.projectId?.unique()
+        List<String> quizIds = allUserRoles?.findAll({ it.roleName == RoleName.ROLE_QUIZ_ADMIN})?.quizId?.unique()
 
         return new ProjectsAndQuizzes(projectIds: projectIds, quizIds: quizIds)
     }
