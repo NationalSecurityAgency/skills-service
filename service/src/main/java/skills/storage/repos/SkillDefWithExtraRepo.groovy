@@ -237,4 +237,13 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
 
     @Query('''SELECT s FROM SkillDefWithExtra s WHERE s.type not in (?1)''')
     Stream<SkillDefWithExtra> findAllExcludingTypes(List<ContainerType> types)
+
+    @Query("""
+           select s.id
+           from SkillDefWithExtra s
+           where s.projectId is null
+             and lower(s.skillId) = lower(:skillId)
+             and s.type = :type
+           """)
+    Long findIdByProjectIdIsNullAndSkillIdIgnoreCaseAndType(@Param("skillId") String skillId, @Param("type") ContainerType type);
 }

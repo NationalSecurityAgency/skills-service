@@ -163,13 +163,14 @@ const calculateClientDisplayRoute = (props) => {
 const loadData = () => {
   const url = getUrl()
   isLoading.value = true
+  const orderBy = sortInfo.value.sortBy === appConfig.usersTableAdditionalUserTagKey ? 'userTag' : sortInfo.value.sortBy
   return UsersService.ajaxCall(url, {
     query: filters.value.user,
     limit: pageSize.value,
     ascending: sortInfo.value.sortOrder !== -1,
     page: currentPage.value,
     byColumn: 0,
-    orderBy: sortInfo.value.sortBy,
+    orderBy: orderBy,
     minimumPoints: filters.value.progress[0],
     maximumPoints: filters.value.progress[1],
     userTagFilter: filters.value.userTagFilter,
@@ -313,10 +314,10 @@ const archiveUsers = () => {
             <SkillsSpinner :is-loading="true"></SkillsSpinner>
           </div>
         </template>
-        <template v-if="isProjectLevel" #header>
+        <template v-if="isProjectLevel || isGlobalBadgePage" #header>
           <div class="flex justify-end flex-wrap">
             <SkillsButton
-                v-if="!projConfig.isReadOnlyProj"
+                v-if="!projConfig.isReadOnlyProj && isProjectLevel"
                 class="mr-2"
                 :disabled="selectedRows <= 0"
                 size="small"
@@ -354,6 +355,7 @@ const archiveUsers = () => {
           </template>
         </Column>
         <Column v-if="showUserTagColumn"
+                :sortable="true"
                 :field="appConfig.usersTableAdditionalUserTagKey"
                 :header="appConfig.usersTableAdditionalUserTagLabel"
                 :class="{'flex': responsive.md.value }">
