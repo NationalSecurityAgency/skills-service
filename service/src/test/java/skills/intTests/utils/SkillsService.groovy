@@ -1205,6 +1205,10 @@ class SkillsService {
         return downloadAttachment("/admin${getSubjectUrl(projectId, subjectId)}/skills/export/excel".toString())
     }
 
+    def getGlobalBadgeUserProgressExcelExport(String badgeId, String orderBy = 'totalProgress', boolean ascending = true, String query = "", String userTagFilter = "") {
+        return downloadAttachment("/admin${getGlobalBadgeUrl(badgeId)}/users/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&query=${query}&userTagFilter=${userTagFilter}".toString())
+    }
+
     def getSubjectUsers(String projectId, String subjectId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = '') {
         return wsHelper.adminGet("${getSubjectUrl(projectId, subjectId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}&userTagFilter=${userTagFilter}".toString())
     }
