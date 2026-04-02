@@ -63,6 +63,18 @@ const numQuestionsAnswered = computed(() => {
   return nums.reduce((partialSum, a) => partialSum + a, 0);
 });
 const numQuestionsRight = computed(() => props.runInfo.numQuestionsPassed);
+const isLastestAttempt = computed(() => {
+  return props.runInfo.completed === props.runInfo.userLastQuizAttemptDate;
+})
+const unlimitedAttempts = computed(() => {
+  return props.runInfo.maxAttemptsAllowed <= 0;
+})
+const numAttemptsLeft = computed(() => {
+  return props.runInfo.maxAttemptsAllowed - props.runInfo.userNumPreviousQuizAttempts - 1  > 0;
+})
+const canTryAgain = computed(() => {
+  return (unlimitedAttempts.value || numAttemptsLeft.value > 0) && (isLastestAttempt.value || !props.runInfo.userQuizPassed);
+})
 
 const reloadRunInfo = () => {
   emit('need-to-reload')
@@ -90,10 +102,30 @@ const reloadRunInfo = () => {
               /
               <Tag>{{ runInfo.numQuestions }}</Tag>
             </div>
-            <div v-if="QuizStatus.isFailed(runInfo.status)">Missed by <span
+          <div v-if="QuizStatus.isFailed(runInfo.status)" class="flex justify-between items-center">
+            <div>Missed by <span
                 class="text-danger italic">{{ runInfo.numQuestionsToPass - numQuestionsRight }}</span>
               questions
             </div>
+            <router-link class="ml-1"
+                         :to="{ name: 'QuizRun', params: { quizId: runInfo.quizId } }"
+                         target="_blank"
+                         rel="noopener"
+                         tabindex="-1">
+              <SkillsButton target="_blank"
+                            v-if="canTryAgain"
+                            outlined
+                            severity="warn"
+                            size="small"
+                            class="text-uppercase font-bold skills-theme-btn whitespace-nowrap"
+                            label="Try Again"
+                            icon="fas fa-redo"
+                            data-cy="runQuizAgainBtn"
+                            :aria-label="`Retry Quiz ${runInfo.quizName}`">
+              </SkillsButton>
+            </router-link>
+          </div>
+
         </quiz-single-run-card>
       </div>
       <div v-if="QuizType.isQuiz(runInfo.quizType) && showQuestionCard" class="flex-1 w-min-12rem"

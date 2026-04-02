@@ -1051,8 +1051,6 @@ class QuizDefService {
         )
     }
 
-
-
     UserGradedQuizQuestionsResult getAttemptGradedResult(QuizDef quizDef, UserQuizAttempt userQuizAttempt, boolean alwaysReturnQuestions = true) {
         String quizId = quizDef.quizId
         boolean isSurvey = quizDef.type == QuizDefParent.QuizType.Survey
@@ -1168,6 +1166,7 @@ class QuizDefService {
         }
 
         boolean isPassed = userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED
+        boolean isFailed = userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.FAILED
         boolean shouldReturnAllQuestions = (alwaysReturnQuestions || isPassed) ?: quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.AlwaysShowCorrectAnswers.setting, quizDef.id)
         List<UserGradedQuizQuestionResult> questionsToReturn = questions
         if (!shouldReturnAllQuestions) {
@@ -1179,7 +1178,9 @@ class QuizDefService {
         }
         Integer numQuestionsPassed = questions.count { it.isCorrect }
 
-        return new UserGradedQuizQuestionsResult(quizType: quizDef.type,
+        UserGradedQuizQuestionsResult res = new UserGradedQuizQuestionsResult(
+                quizId: quizDef.quizId,
+                quizType: quizDef.type,
                 quizName: quizDef.name,
                 userId: userAttrs.userId,
                 userIdForDisplay: userAttrs.userIdForDisplay,
@@ -1194,6 +1195,18 @@ class QuizDefService {
                 userTag: userTag,
                 questionsHidden: shouldHideQuestions
         )
+        if (isFailed) {
+            QuizSetting maxNumAttemptsSetting = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.MaxNumAttempts.setting, quizDef.id)
+            QuizSetting multipleTakes = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.MultipleTakes.setting, quizDef.id)
+            UserQuizAttemptRepo.UserQuizAttemptStats userAttemptsStats = userQuizAttemptRepo.getUserAttemptsStats(userQuizAttempt.userId, quizDef.id, UserQuizAttempt.QuizAttemptStatus.INPROGRESS, UserQuizAttempt.QuizAttemptStatus.PASSED)
+            res.isAttemptAlreadyInProgress = userAttemptsStats?.getIsAttemptAlreadyInProgress() ?: false
+            res.userNumPreviousQuizAttempts = userAttemptsStats?.getUserNumPreviousQuizAttempts() ?: 0
+            res.userQuizPassed = userAttemptsStats?.getUserQuizPassed() ?: false
+            res.userLastQuizAttemptDate = userAttemptsStats?.getUserLastQuizAttemptCompleted() ?: null
+            res.maxAttemptsAllowed = maxNumAttemptsSetting ? Integer.valueOf(maxNumAttemptsSetting.value) : -1
+            res.multipleTakes = multipleTakes ? Boolean.valueOf(multipleTakes.value) : false
+        }
+        return res
     }
 
     @Profile
