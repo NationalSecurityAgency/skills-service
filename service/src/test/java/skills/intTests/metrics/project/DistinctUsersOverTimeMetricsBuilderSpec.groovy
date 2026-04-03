@@ -773,7 +773,7 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         assert maxDailyDays == 3, "test data constructed with the assumption that skills.config.compactDailyEventsOlderThan is set to 3"
         userEventService.compactDailyEvents()
 
-        Duration duration = Duration.between(testDates.getFirstOfMonth(3), LocalDateTime.now())
+        Duration duration = Duration.between(testDates.getFirstOfMonth(3), testDates.getFirstOfMonth())
 
         when:
         def res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(duration.toDays().toInteger(), subj.subjectId, true))
@@ -786,24 +786,24 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
 
         then:
         res30days.users.size() == 4
-        res30days.users.collect {it.count} == [5, 4, 0, 0]
+        res30days.users.collect {it.count} == [0, 5, 1, 0]
         res30days.newUsers.size() == 4
-        res30days.newUsers.collect {it.count} == [5, 0, 0, 0]
+        res30days.newUsers.collect {it.count} == [0, 5, 0, 0]
 
         resOver30days.users.size() == 5
-        resOver30days.users.collect {it.count} == [0, 5, 4, 0, 0]
+        resOver30days.users.collect {it.count} == [0, 0, 5, 1, 0]
         resOver30days.newUsers.size() == 5
-        resOver30days.newUsers.collect {it.count} == [0, 5, 0, 0, 0]
+        resOver30days.newUsers.collect {it.count} == [0, 0, 5, 0, 0]
 
         res30daysAfterArchive.users.size() == 4
-        res30daysAfterArchive.users.collect {it.count} ==[4, 3, 0, 0]
+        res30daysAfterArchive.users.collect {it.count} ==[0, 4, 1, 0]
         res30daysAfterArchive.newUsers.size() == 4
-        res30daysAfterArchive.newUsers.collect {it.count} ==[4, 0, 0, 0]
+        res30daysAfterArchive.newUsers.collect {it.count} ==[0, 4, 0, 0]
 
         resOver30daysAfterArchive.users.size() == 5
-        resOver30daysAfterArchive.users.collect {it.count} == [0, 4, 3, 0, 0]
+        resOver30daysAfterArchive.users.collect {it.count} == [0, 0, 4, 1, 0]
         resOver30daysAfterArchive.newUsers.size() == 5
-        resOver30daysAfterArchive.newUsers.collect {it.count} == [0, 4, 0, 0, 0]
+        resOver30daysAfterArchive.newUsers.collect {it.count} == [0, 0, 4, 0, 0]
     }
 
     private Map getProps(int numDaysAgo, String skillId = null, Boolean byMonth = false) {
