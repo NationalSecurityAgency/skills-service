@@ -201,6 +201,42 @@ describe('Display History of My quiz attempts Tests', () => {
       cy.get('[data-cy="runQuizAgainBtn"]').should('not.be.exist')
     });
 
+    it('failed quiz will NOT show "try again" button when max attempts have been exhausted', () => {
+      cy.createQuizDef(1)
+      cy.createQuizQuestionDef(1, 1)
+      cy.setQuizMaxNumAttempts(1, 2)
+      cy.runQuizForUser(1, defaultUser, [{ selectedIndex: [1] }], true, 'My Answer')
+      cy.runQuizForUser(1, defaultUser, [{ selectedIndex: [1] }], true, 'My Answer')
+
+      cy.visit('/progress-and-rankings/my-quiz-attempts')
+
+      cy.get(`${tableSelector} [data-p-index="0"] [data-cy="viewQuizAttempt"]`).first().click()
+      cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 1')
+      cy.get('[data-cy="quizRunStatus"]').contains('Failed')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('not.be.exist')
+
+      cy.get('[data-cy="backToQuizzesBtn"]').click()
+
+      cy.get(`${tableSelector} [data-p-index="1"] [data-cy="viewQuizAttempt"]`).first().click()
+      cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 1')
+      cy.get('[data-cy="quizRunStatus"]').contains('Failed')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('not.be.exist')
+
+    });
+
+    it('failed quiz will NOT show "try again" button on for surveys', () => {
+      cy.createSurveyDef(1)
+      cy.createSurveyMultipleChoiceQuestionDef(1, 1, { questionType: 'SingleChoice' });
+      cy.runQuizForUser(1, defaultUser, [{ selectedIndex: [1] }], true, 'My Answer')
+
+      cy.visit('/progress-and-rankings/my-quiz-attempts')
+
+      cy.get(`${tableSelector} [data-p-index="0"] [data-cy="viewQuizAttempt"]`).first().click()
+      cy.get('[data-cy="quizName"]').should('have.text', 'This is survey 1')
+      cy.get('[data-cy="quizRunStatus"]').contains('Completed')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('not.be.exist')
+    });
+
 });
 
 
