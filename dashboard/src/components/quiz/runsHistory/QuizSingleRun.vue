@@ -115,9 +115,9 @@ const reloadRunInfo = () => {
               <SkillsButton target="_blank"
                             v-if="canTryAgain"
                             outlined
-                            severity="warn"
+                            severity="success"
                             size="small"
-                            class="text-uppercase font-bold skills-theme-btn whitespace-nowrap"
+                            class="uppercase font-bold skills-theme-btn whitespace-nowrap"
                             label="Try Again"
                             icon="fas fa-redo"
                             data-cy="runQuizAgainBtn"
