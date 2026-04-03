@@ -188,7 +188,7 @@ class ExcelExportService {
                     row.createCell(columnNumber++).setCellValue(user.userTag)
                 }
                 row.createCell(columnNumber++).setCellValue(user.skillsAchieved)
-                row.createCell(columnNumber++).setCellValue(user.totalPoints)
+                row.createCell(columnNumber++).setCellValue(user.numLevelsAchieved)
                 Double percentage = (user.totalProgress / (numberOfSkills + totalLevels))
                 cell = row.createCell(columnNumber++)
                 cell.setCellStyle(percentStyle)

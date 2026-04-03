@@ -36,6 +36,7 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         skillsService.createGlobalBadge(globalBadge)
         skillsService.assignSkillToGlobalBadge([projectId: project.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId])
         skillsService.assignSkillToGlobalBadge([projectId: project.projectId, badgeId: globalBadge.badgeId, skillId: skill2.skillId])
+        skillsService.assignProjectLevelToGlobalBadge([badgeId: globalBadge.badgeId, projectId: project.projectId, level: "3"])
 
         globalBadge.enabled = "true"
         skillsService.updateGlobalBadge(globalBadge)
@@ -61,9 +62,9 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
                 ["User ID", "Last Name", "First Name", "Org", "Skills Achieved", "Levels Achieved", "Percent Complete", "Skill Last Earned (UTC)"],
-                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "0.0", "", "0.0", formatDate(today)],
-                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "", "0.5", formatDate(today)],
-                [getUserIdForDisplay(user3), getName(user3, false), getName(user3), "", "2.0", "", "1.0", formatDate(today)],
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "0.0", "3.0", "0.6", formatDate(today)],
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "3.0", "0.8", formatDate(today)],
+                [getUserIdForDisplay(user3), getName(user3, false), getName(user3), "", "2.0", "3.0", "1.0", formatDate(today)],
                 ["For All Dragons Only"],
         ])
 
@@ -86,6 +87,7 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         skillsService.createGlobalBadge(globalBadge)
         skillsService.assignSkillToGlobalBadge([projectId: p2.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId])
         skillsService.assignSkillToGlobalBadge([projectId: p2.projectId, badgeId: globalBadge.badgeId, skillId: skill2.skillId])
+        skillsService.assignProjectLevelToGlobalBadge([badgeId: globalBadge.badgeId, projectId: p2.projectId, level: "5"])
         globalBadge.enabled = "true"
         skillsService.updateGlobalBadge(globalBadge)
 
@@ -119,11 +121,11 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
                 ["User ID", "Last Name", "First Name", "Org", "Skills Achieved", "Levels Achieved", "Percent Complete", "Skill Last Earned (UTC)"],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "0.0", "", "0.0", formatDate(today)],
-                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag3", "0.0", "", "0.0", formatDate(today)],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "1.0", "", "0.5", formatDate(today)],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "1.0", "", "0.5", formatDate(today)],
-                [getUserIdForDisplay(users[4]), getName(users[4], false), getName(users[4]), "tag4", "2.0", "", "1.0", formatDate(today)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "0.0", "2.0", "0.2857142857", formatDate(today)],
+                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag3", "0.0", "2.0", "0.2857142857", formatDate(today)],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "1.0", "3.0", "0.5714285714", formatDate(today)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "1.0", "3.0", "0.5714285714", formatDate(today)],
+                [getUserIdForDisplay(users[4]), getName(users[4], false), getName(users[4]), "tag4", "2.0", "5.0", "1.0", formatDate(today)],
                 ["For All Dragons Only"],
         ])
     }
@@ -145,6 +147,7 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         skillsService.createGlobalBadge(globalBadge)
         skillsService.assignSkillToGlobalBadge([projectId: p2.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId])
         skillsService.assignSkillToGlobalBadge([projectId: p2.projectId, badgeId: globalBadge.badgeId, skillId: skill2.skillId])
+        skillsService.assignProjectLevelToGlobalBadge([badgeId: globalBadge.badgeId, projectId: p2.projectId, level: "5"])
         globalBadge.enabled = "true"
         skillsService.updateGlobalBadge(globalBadge)
 
@@ -168,7 +171,7 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
                 ["User ID", "Last Name", "First Name", "Org", "Skills Achieved", "Levels Achieved", "Percent Complete", "Skill Last Earned (UTC)"],
-                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag3", "2.0", "", "1.0", formatDate(today)],
+                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag3", "2.0", "5.0", "1.0", formatDate(today)],
                 ["For All Dragons Only"],
         ])
     }
@@ -196,6 +199,7 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         skillsService.assignSkillToGlobalBadge([projectId: p2.projectId, badgeId: globalBadge.badgeId, skillId: skill2.skillId])
         skillsService.assignSkillToGlobalBadge([projectId: p2.projectId, badgeId: globalBadge.badgeId, skillId: subj1skill2.skillId])
         skillsService.assignSkillToGlobalBadge([projectId: p2.projectId, badgeId: globalBadge.badgeId, skillId: subj1skill3.skillId])
+        skillsService.assignProjectLevelToGlobalBadge([badgeId: globalBadge.badgeId, projectId: p2.projectId, level: "5"])
         globalBadge.enabled = "true"
         skillsService.updateGlobalBadge(globalBadge)
 
@@ -241,27 +245,27 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         List<List<String>> expectedDataForSortAsc = [
                 ["For All Dragons Only"],
                 ["User ID", "Last Name", "First Name", "Org", "Skills Achieved", "Levels Achieved", "Percent Complete", "Skill Last Earned (UTC)"],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag00", "0.0", "", "0.0", formatDate(today)],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag01", "1.0", "", "0.25", formatDate(today)],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag02", "2.0", "", "0.5", formatDate(today)],
-                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag03", "3.0", "", "0.75", formatDate(today)],
-                [getUserIdForDisplay(users[4]), getName(users[4], false), getName(users[4]), "tag04", "4.0", "", "1.0", formatDate(today)],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag00", "0.0", "1.0", "0.1111111111", formatDate(today)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag01", "1.0", "2.0", "0.3333333333", formatDate(today)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag02", "2.0", "3.0", "0.5555555556", formatDate(today)],
+                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag03", "3.0", "4.0", "0.7777777778", formatDate(today)],
+                [getUserIdForDisplay(users[4]), getName(users[4], false), getName(users[4]), "tag04", "4.0", "5.0", "1.0", formatDate(today)],
                 ["For All Dragons Only"],
         ]
         List<List<String>> expectedDataForSortDesc = [
                 ["For All Dragons Only"],
                 ["User ID", "Last Name", "First Name", "Org", "Skills Achieved", "Levels Achieved", "Percent Complete", "Skill Last Earned (UTC)"],
-                [getUserIdForDisplay(users[4]), getName(users[4], false), getName(users[4]), "tag04", "4.0", "", "1.0",  formatDate(today)],
-                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag03", "3.0", "", "0.75",  formatDate(today)],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag02", "2.0", "", "0.5", formatDate(today)],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag01", "1.0", "", "0.25", formatDate(today)],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag00", "0.0", "", "0.0", formatDate(today)],
+                [getUserIdForDisplay(users[4]), getName(users[4], false), getName(users[4]), "tag04", "4.0", "5.0", "1.0",  formatDate(today)],
+                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag03", "3.0", "4.0", "0.7777777778",  formatDate(today)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag02", "2.0", "3.0", "0.5555555556", formatDate(today)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag01", "1.0", "2.0", "0.3333333333", formatDate(today)],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag00", "0.0", "1.0", "0.1111111111", formatDate(today)],
                 ["For All Dragons Only"],
         ]
         List<List<String>> expectedDataForQuery = [
                 ["For All Dragons Only"],
                 ["User ID", "Last Name", "First Name", "Org", "Skills Achieved", "Levels Achieved", "Percent Complete", "Skill Last Earned (UTC)"],
-                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag00", "0.0", "", "0.0", formatDate(today)],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag00", "0.0", "1.0", "0.1111111111", formatDate(today)],
                 ["For All Dragons Only"],
         ]
 
