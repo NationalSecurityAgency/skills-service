@@ -20,6 +20,7 @@ import skills.storage.model.QuizDefParent
 import skills.storage.model.UserQuizAttempt
 
 class UserGradedQuizQuestionsResult {
+    String quizId
     String quizName
     String userId
     String userIdForDisplay
@@ -34,4 +35,12 @@ class UserGradedQuizQuestionsResult {
     Date completed
     String userTag
     Boolean questionsHidden
+
+    // only used for failed quiz attempts to determine if retake is allowed
+    Boolean isAttemptAlreadyInProgress
+    Integer userNumPreviousQuizAttempts
+    Boolean userQuizPassed
+    Date userLastQuizAttemptDate
+    Integer maxAttemptsAllowed
+    Boolean multipleTakes
 }

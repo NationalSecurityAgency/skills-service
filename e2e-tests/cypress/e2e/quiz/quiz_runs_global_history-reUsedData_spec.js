@@ -433,7 +433,8 @@ describe('Global Quiz Runs History Tests', () => {
         cy.get('[data-cy="quizRunsHistoryTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '14')
 
         Cypress.Commands.add('setDay', (dayNum) => {
-            let re = new RegExp(String.raw`^${dayNum}$`)
+            const dayNumClean = Number(dayNum).toString()
+            let re = new RegExp(String.raw`^${dayNumClean}$`)
             cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="day"]').contains(re).click()
         });
 
