@@ -21,6 +21,7 @@ import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.metrics.GlobalProgressMetricsService
+import skills.services.inception.InceptionProjectService
 
 class GlobalUsersProgressSpecs extends DefaultIntSpec {
 
@@ -298,6 +299,149 @@ class GlobalUsersProgressSpecs extends DefaultIntSpec {
         user3Metric.numQuizzesNeedsGrading == 1
     }
 
+    def "root role only returns metrics for pinned projects" () {
+        List<SkillsService> users = getRandomUsers(5).sort().collect { createService(it)}
+        List<SkillsService> admins = users[0..1]
+        List<SkillsService> rootUsers = users[2..4]
+
+        SkillsService root1 = createRootSkillService()
+        rootUsers.each {
+            root1.grantRootRole(it.userName)
+        }
+
+        def p1 = SkillsFactory.createProject(1)
+        def p1_sub1 = SkillsFactory.createSubject(1, 1)
+        def p1_sks1 = SkillsFactory.createSkills(5, 1, 1, 100)
+        admins[0].createProjectAndSubjectAndSkills(p1, p1_sub1, p1_sks1)
+
+        def p2 = SkillsFactory.createProject(2)
+        def p2_sub1 = SkillsFactory.createSubject(2, 1)
+        def p2_sks1 = SkillsFactory.createSkills(5, 2, 1, 100)
+        admins[1].createProjectAndSubjectAndSkills(p2, p2_sub1, p2_sks1)
+
+        assert users[0].addSkill(p1_sks1[0]).body.skillApplied
+        assert users[0].addSkill(p1_sks1[1]).body.skillApplied
+        assert users[1].addSkill(p2_sks1[0]).body.skillApplied
+
+        rootUsers[0].unpinProject(InceptionProjectService.inceptionProjectId)
+        rootUsers[0].pinProject(p1.projectId)
+        rootUsers[0].pinProject(p2.projectId)
+
+        rootUsers[1].unpinProject(InceptionProjectService.inceptionProjectId)
+        rootUsers[1].pinProject(p2.projectId)
+
+        when:
+        def rootUser1Res = rootUsers[0].getGlobalUserProgressMetrics()
+        def rootUser2Res = rootUsers[1].getGlobalUserProgressMetrics()
+        def rootUser3Res = rootUsers[2].getGlobalUserProgressMetrics()
+        then:
+        rootUser1Res.numTotalProjects == 2
+        rootUser1Res.numExcludedProjects == 0
+        rootUser1Res.numTotalSkills == 10
+        rootUser1Res.numTotalBadges == 0
+        rootUser1Res.numTotalProjectBadges == 0
+        rootUser1Res.numTotalGlobalBadges == 0
+        rootUser1Res.numExcludedQuizzesAndSurveys == 0
+        rootUser1Res.numTotalQuizzes == 0
+        rootUser1Res.numTotalSurveys == 0
+
+        rootUser1Res.numTotalMetricItems == 2
+        rootUser1Res.metricItemsPage.userId == [users[0].userName, users[1].userName]
+
+        rootUser2Res.numTotalProjects == 1
+        rootUser2Res.numExcludedProjects == 0
+        rootUser2Res.numTotalSkills == 5
+        rootUser2Res.numTotalBadges == 0
+        rootUser2Res.numTotalProjectBadges == 0
+        rootUser2Res.numTotalGlobalBadges == 0
+        rootUser2Res.numExcludedQuizzesAndSurveys == 0
+        rootUser2Res.numTotalQuizzes == 0
+        rootUser2Res.numTotalSurveys == 0
+
+        rootUser2Res.numTotalMetricItems == 1
+        rootUser2Res.metricItemsPage.userId == [users[1].userName]
+
+        rootUser3Res.numTotalProjects == 0
+        rootUser3Res.numExcludedProjects == 0
+        rootUser3Res.numTotalSkills == 0
+        rootUser3Res.numTotalBadges == 0
+        rootUser3Res.numTotalProjectBadges == 0
+        rootUser3Res.numTotalGlobalBadges == 0
+        rootUser3Res.numExcludedQuizzesAndSurveys == 0
+        rootUser3Res.numTotalQuizzes == 0
+        rootUser3Res.numTotalSurveys == 0
+
+        rootUser3Res.numTotalMetricItems == 0
+        rootUser3Res.metricItemsPage.userId == []
+    }
+
+    def "filter projects - root role" () {
+        SkillsService root1 = createRootSkillService()
+        List<SkillsService> users = getRandomUsers(5).sort().collect { createService(it)}
+        List<SkillsService> admins = users[0..1]
+        List<SkillsService> rootUsers = users[2..4]
+
+        def p1 = SkillsFactory.createProject(1)
+        def p1_sub1 = SkillsFactory.createSubject(1, 1)
+        def p1_sks1 = SkillsFactory.createSkills(5, 1, 1, 100)
+        admins[0].createProjectAndSubjectAndSkills(p1, p1_sub1, p1_sks1)
+
+        def p2 = SkillsFactory.createProject(2)
+        def p2_sub1 = SkillsFactory.createSubject(2, 1)
+        def p2_sks1 = SkillsFactory.createSkills(5, 2, 1, 100)
+        admins[1].createProjectAndSubjectAndSkills(p2, p2_sub1, p2_sks1)
+
+        assert users[0].addSkill(p1_sks1[0]).body.skillApplied
+        assert users[0].addSkill(p1_sks1[1]).body.skillApplied
+        assert users[1].addSkill(p2_sks1[0]).body.skillApplied
+
+        rootUsers.each {
+            root1.grantRootRole(it.userName)
+            it.unpinProject(InceptionProjectService.inceptionProjectId)
+            it.pinProject(p1.projectId)
+            it.pinProject(p2.projectId)
+        }
+
+        when:
+        def res_before = rootUsers[0].getGlobalUserProgressMetrics()
+        rootUsers[0].addOrUpdateGlobalMetricsUserSettings([
+                [
+                        setting  : GlobalProgressMetricsService.USER_PREF_GLOBAL_METRICS_EXCLUSION,
+                        value    : true,
+                        projectId: p1.projectId,
+                        quizId: null
+                ]
+        ])
+        def res = rootUsers[0].getGlobalUserProgressMetrics()
+        then:
+        res_before.numTotalProjects == 2
+        res_before.numExcludedProjects == 0
+        res_before.numTotalSkills == 10
+        res_before.numTotalBadges == 0
+        res_before.numTotalProjectBadges == 0
+        res_before.numTotalGlobalBadges == 0
+        res_before.numExcludedQuizzesAndSurveys == 0
+        res_before.numTotalQuizzes == 0
+        res_before.numTotalSurveys == 0
+
+        res_before.numTotalMetricItems == 2
+        res_before.metricItemsPage.userId == [users[0].userName, users[1].userName]
+
+        res.numTotalProjects == 1
+        res.numExcludedProjects == 1
+        res.numTotalSkills == 5
+        res.numTotalBadges == 0
+        res.numTotalProjectBadges == 0
+        res.numTotalGlobalBadges == 0
+        res.numExcludedQuizzesAndSurveys == 0
+        res.numTotalQuizzes == 0
+        res.numTotalSurveys == 0
+
+        res.numTotalMetricItems == 1
+        res.metricItemsPage.userId == [users[1].userName]
+
+    }
 
 }
+
 

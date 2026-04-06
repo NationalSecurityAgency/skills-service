@@ -472,9 +472,7 @@ class ProjAdminService {
     @Transactional(readOnly = true)
     List<ProjectResult> getProjects() {
         UserInfo userInfo = userInfoService.getCurrentUser()
-        boolean isRoot = userInfo.authorities?.find() {
-            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
-        }
+        boolean isRoot = userInfoService.isCurrentUserASuperDuperUser()
 
         String userId = userInfo.username
         Map<String, Integer> projectIdSortOrder = sortingService.getUserProjectsOrder(userId)

@@ -16,9 +16,12 @@
 package skills.intTests.metrics.global
 
 import groovy.time.TimeCategory
+import skills.intTests.utils.SkillsService
 import skills.metrics.builders.MetricsParams
 import skills.services.StartDateUtil
+import skills.services.inception.InceptionProjectService
 import skills.storage.model.EventType
+import skills.storage.model.auth.RoleName
 import skills.utils.TestDates
 
 import static skills.intTests.utils.AdminGroupDefFactory.createAdminGroup
@@ -461,6 +464,149 @@ class OverallMetricsReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
         res.projectInfo.projectId.containsAll(admin0ProjectIds)
         res.quizInfo.quizId.size() == admin0QuizAndSurveyIds.size()
         res.quizInfo.quizId.containsAll(admin0QuizAndSurveyIds)
+    }
+
+    def "users progress from root user's point of view" () {
+        SkillsService rootUser = createRootSkillService()
+        rootUser.unpinProject(InceptionProjectService.inceptionProjectId)
+        rootUser.pinProject(p2Skills[0].projectId)
+        rootUser.pinProject(p3Skills[0].projectId)
+        quizzes[1..4].each {
+            admins[0].addQuizUserRole(it.quizId, rootUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        }
+        surveys[1..3].each {
+            admins[0].addQuizUserRole(it.quizId, rootUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        }
+        when:
+        def res = rootUser.getOverallMetricsSummary()
+
+        Map props = [:]
+        use(TimeCategory) {
+            props[MetricsParams.P_START_TIMESTAMP] = 30.days.ago.time
+        }
+        def usersPerDay = rootUser.getOverallMetricsData('overallDistinctUsersOverTimeMetricsBuilder', props)
+
+        // users by duty organization
+        props = [
+                tagKey: 'dutyOrganization',
+                currentPage: 1,
+                pageSize: 5,
+                sortDesc: true
+        ]
+        def usersByDutyOrg = rootUser.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+        props.currentPage = 2
+        def usersByDutyOrgPage2 = rootUser.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+
+        // users by admin organization
+        props.currentPage = 1
+        props.tagKey = 'adminOrganization'
+        def usersByAdminOrg = rootUser.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+
+        then:
+        res.numTotalProjects == 2
+
+        res.numTotalSkills == 16
+        res.numTotalBadges == 4
+        res.numTotalProjectBadges == 1
+        res.numTotalGlobalBadges == 3
+
+        res.numTotalQuizzes == 4
+        res.numTotalSurveys == 3
+
+        res.projectInfo.projectId.size() == admin1ProjectIds.size()
+        res.projectInfo.projectId.containsAll(admin1ProjectIds)
+        res.quizInfo.quizId.size() == admin1QuizAndSurveyIds.size()
+        res.quizInfo.quizId.containsAll(admin1QuizAndSurveyIds)
+
+        usersPerDay.users.size() == days.size()
+        usersPerDay.users.collect {it.count} == (days.size() == 5 ? [0, 0, 0, 0, 10] : [0, 0, 0, 0, 0, 10])
+        usersPerDay.users.collect {it.value} == days.collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+
+        usersByDutyOrg.totalNumItems == 6
+        usersByDutyOrg.items.size() == 5
+        usersByDutyOrg.items.sort { it.value } == [[value:'ABC1', count:3], [value:'ABC2', count:1], [value:'CBF2', count:1], [value:'KOO4', count:2], [value:'KOO5', count:1]]
+        usersByDutyOrgPage2.totalNumItems == 6
+        usersByDutyOrgPage2.items.size() == 1
+        usersByDutyOrgPage2.items.sort { it.value } == [[value:'XYZ1', count:1]]
+
+        usersByAdminOrg.totalNumItems == 2
+        usersByAdminOrg.items.size() == 2
+        usersByAdminOrg.items.sort { it.value } == [[value:'SKTR', count:4], [value:'XYZ', count:4]]
+    }
+
+    def "users progress from root point of view - filter one project, one quiz and one survey" () {
+        SkillsService rootUser = createRootSkillService()
+        rootUser.unpinProject(InceptionProjectService.inceptionProjectId)
+        rootUser.pinProject(p2Skills[0].projectId)
+        rootUser.pinProject(p3Skills[0].projectId)
+        quizzes[0..4].each {
+            admins[0].addQuizUserRole(it.quizId, rootUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        }
+        surveys[0..3].each {
+            admins[0].addQuizUserRole(it.quizId, rootUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+        }
+
+        rootUser.addOrUpdateGlobalMetricsUserSettings([
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: p1Skills[0].projectId ],
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: quizzes[0].quizId ],
+                [setting  : USER_PREF_GLOBAL_METRICS_EXCLUSION, value    : true, quizId: surveys[0].quizId ],
+        ])
+
+        when:
+        def res = rootUser.getOverallMetricsSummary()
+
+        Map props = [:]
+        use(TimeCategory) {
+            props[MetricsParams.P_START_TIMESTAMP] = 30.days.ago.time
+        }
+        def usersPerDay = rootUser.getOverallMetricsData('overallDistinctUsersOverTimeMetricsBuilder', props)
+
+        // users by duty organization
+        props = [
+                tagKey: 'dutyOrganization',
+                currentPage: 1,
+                pageSize: 5,
+                sortDesc: true
+        ]
+        def usersByDutyOrg = rootUser.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+        props.currentPage = 2
+        def usersByDutyOrgPage2 = rootUser.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+
+        // users by admin organization
+        props.currentPage = 1
+        props.tagKey = 'adminOrganization'
+        def usersByAdminOrg = rootUser.getOverallMetricsData('overallNumUsersPerTagBuilder', props)
+
+        then:
+        res.numTotalProjects == 2
+
+        res.numTotalSkills == 16
+        res.numTotalBadges == 4
+        res.numTotalProjectBadges == 1
+        res.numTotalGlobalBadges == 3
+
+        res.numTotalQuizzes == 4
+        res.numTotalSurveys == 3
+
+        res.projectInfo.projectId.size() == admin1ProjectIds.size()
+        res.projectInfo.projectId.containsAll(admin1ProjectIds)
+        res.quizInfo.quizId.size() == admin1QuizAndSurveyIds.size()
+        res.quizInfo.quizId.containsAll(admin1QuizAndSurveyIds)
+
+        usersPerDay.users.size() == days.size()
+        usersPerDay.users.collect {it.count} == (days.size() == 5 ? [0, 0, 0, 0, 10] : [0, 0, 0, 0, 0, 10])
+        usersPerDay.users.collect {it.value} == days.collect { StartDateUtil.computeStartDate(it, EventType.WEEKLY).time}
+
+        usersByDutyOrg.totalNumItems == 6
+        usersByDutyOrg.items.size() == 5
+        usersByDutyOrg.items.sort { it.value } == [[value:'ABC1', count:3], [value:'ABC2', count:1], [value:'CBF2', count:1], [value:'KOO4', count:2], [value:'KOO5', count:1]]
+        usersByDutyOrgPage2.totalNumItems == 6
+        usersByDutyOrgPage2.items.size() == 1
+        usersByDutyOrgPage2.items.sort { it.value } == [[value:'XYZ1', count:1]]
+
+        usersByAdminOrg.totalNumItems == 2
+        usersByAdminOrg.items.size() == 2
+        usersByAdminOrg.items.sort { it.value } == [[value:'SKTR', count:4], [value:'XYZ', count:4]]
     }
 }
 

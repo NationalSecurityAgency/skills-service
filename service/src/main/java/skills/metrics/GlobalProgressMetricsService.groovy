@@ -35,13 +35,15 @@ import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.TableResult
 import skills.controller.result.model.globalMetrics.*
+import skills.services.admin.ProjAdminService
 import skills.services.admin.UserCommunityService
 import skills.services.quiz.QuizDefService
 import skills.services.quiz.QuizSettingsService
 import skills.services.settings.SettingsService
-import skills.storage.accessors.UserRoleAccessor
 import skills.storage.model.*
+import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
+import skills.storage.model.auth.UserRole
 import skills.storage.repos.*
 
 import static org.springframework.data.domain.Sort.Direction.ASC
@@ -77,7 +79,7 @@ class GlobalProgressMetricsService {
     UserInfoService userInfoService
 
     @Autowired
-    UserRoleAccessor userRoleAccessor
+    UserRoleRepo userRoleRepo
 
     @Autowired
     SettingsService settingsService
@@ -362,8 +364,9 @@ class GlobalProgressMetricsService {
 
     @Profile
     ProjectIdsAndQuizIds getProjectIdsAndQuizIdsForCurrentUser() {
-        String userId = userInfoService.currentUser.username
-        UserRoleAccessor.ProjectsAndQuizzes projectsAndQuizzes = userRoleAccessor.getCurrentUserAdminProjectsAndQuizzes()
+        String userId = userInfoService.currentUserId
+
+        ProjectsAndQuizzes projectsAndQuizzes = getCurrentUserAdminProjectsAndQuizzes()
         List<String> projectIds = projectsAndQuizzes.projectIds
         List<String> quizIds = projectsAndQuizzes.quizIds
 
@@ -392,7 +395,7 @@ class GlobalProgressMetricsService {
 
     List<GlobalMetricsSettingsResult> getGlobalMetricsUserSettings(String setting) {
         UserInfo currentUser = userInfoService.currentUser
-        UserRoleAccessor.ProjectsAndQuizzes projectsAndQuizzes = userRoleAccessor.getCurrentUserAdminProjectsAndQuizzes()
+        ProjectsAndQuizzes projectsAndQuizzes = getCurrentUserAdminProjectsAndQuizzes()
 
         List<GlobalMetricsSettingsResult> res = []
         List<SettingsResult> settingsResults = settingsService.getUserProjectSettingsForAllProjects(setting, currentUser.username)
@@ -423,14 +426,16 @@ class GlobalProgressMetricsService {
     void saveGlobalMetricsUserSettings(List<GlobalMetricsSettingsRequest> values) {
         SkillsValidator.isNotNull(values, "Settings")
 
-        UserRoleAccessor.ProjectsAndQuizzes projectsAndQuizzes = userRoleAccessor.getCurrentUserAdminProjectsAndQuizzes()
-        values.each {
-            SkillsValidator.isTrue((it.projectId && !it.quizId) || (!it.projectId && it.quizId), "Exactly one of projectId or quizId must be specified (not both, not neither)")
-            if (it.projectId) {
-                SkillsValidator.isTrue(it.projectId in projectsAndQuizzes.projectIds, "User must be an admin in order to save settings for this project", it.projectId)
-            }
-            if (it.quizId) {
-                QuizValidator.isTrue(it.quizId in projectsAndQuizzes.quizIds, "User must be an admin in order to save settings for this quiz", it.quizId)
+        if (!userInfoService.isCurrentUserASuperDuperUser()) {
+            ProjectsAndQuizzes projectsAndQuizzes = getCurrentUserAdminProjectsAndQuizzes()
+            values.each {
+                SkillsValidator.isTrue((it.projectId && !it.quizId) || (!it.projectId && it.quizId), "Exactly one of projectId or quizId must be specified (not both, not neither)")
+                if (it.projectId) {
+                    SkillsValidator.isTrue(it.projectId in projectsAndQuizzes.projectIds, "User must be an admin in order to save settings for this project", it.projectId)
+                }
+                if (it.quizId) {
+                    QuizValidator.isTrue(it.quizId in projectsAndQuizzes.quizIds, "User must be an admin in order to save settings for this quiz", it.quizId)
+                }
             }
         }
 
@@ -450,6 +455,25 @@ class GlobalProgressMetricsService {
 
         List<GlobalMetricsSettingsRequest> quizSettings = values.findAll { it.quizId }
         quizSettingsService.updateGlobalMetricsUserSettings(quizSettings)
+    }
+
+    static class ProjectsAndQuizzes {
+        List<String> projectIds
+        List<String> quizIds
+    }
+
+    private ProjectsAndQuizzes getCurrentUserAdminProjectsAndQuizzes() {
+        String userId = userInfoService.currentUser.username
+        boolean isRoot = userInfoService.isCurrentUserASuperDuperUser()
+
+        List<UserRole> allUserRoles = userRoleRepo.findAllByUserId(userId)
+
+        List<String> projectIds = isRoot ?
+                settingsService.getUserProjectSettingsForGroup(userId, ProjAdminService.rootUserPinnedProjectGroup)?.collect { it.projectId }
+                : allUserRoles?.findAll({ it.roleName == RoleName.ROLE_PROJECT_ADMIN})?.projectId?.unique()
+        List<String> quizIds = allUserRoles?.findAll({ it.roleName == RoleName.ROLE_QUIZ_ADMIN})?.quizId?.unique()
+
+        return new ProjectsAndQuizzes(projectIds: projectIds, quizIds: quizIds)
     }
 
     private static int countQuizzesByType(List<GlobalProgressMetricsRepo.QuizInfo> quizIdAndTypes, QuizDefParent.QuizType quizType) {
