@@ -104,10 +104,13 @@ describe('Configure Video Validation Tests', () => {
         cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
         const invalidValue = Array(51).fill('a').join('');
         cy.get('[data-cy="videoTranscript"]').type(invalidValue, { delay: 0 })
-        cy.get('[data-cy="videoTranscriptError"]').contains('Video Transcript must be at most 50 characters')
-        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="videoTranscript"]').type('{backspace}');
-        cy.get('[data-cy="videoTranscriptError"]').should('not.be.visible')
+        cy.get('#videoTranscript').then(($input) => {
+            const text = $input.val();
+            const textLength = text.length;
+
+            expect(textLength).to.be.equal(50);
+        })
+        cy.get('[data-cy="videoTranscriptNumCharsRemaining"]').should('have.text', '0 characters remaining ')
     });
 
     it('captions max chars validation', () => {
