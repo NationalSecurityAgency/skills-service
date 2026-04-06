@@ -36,12 +36,14 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.result.model.MyQuizAttempt
+import skills.controller.result.model.QuizAttemptRowResult
 import skills.controller.result.model.QuizSkillResult
 import skills.controller.result.model.TableResult
 import skills.quizLoading.model.*
 import skills.services.CustomValidationResult
 import skills.services.CustomValidator
 import skills.services.LockingService
+import skills.services.admin.InviteOnlyProjectService
 import skills.services.admin.UserCommunityService
 import skills.services.attributes.*
 import skills.services.events.SkillEventResult
@@ -83,6 +85,9 @@ class QuizRunService {
 
     @Autowired
     UserQuizAttemptRepo quizAttemptRepo
+
+    @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
 
     @Autowired
     LockingService lockingService
@@ -1062,12 +1067,56 @@ class QuizRunService {
 
     @Transactional
     TableResult getCurrentUserQuizRuns(String quizNameQuery, PageRequest pageRequest) {
-        UserInfo currentUser = userInfoService.currentUser
-        Boolean isUCMember = userCommunityService.isUserCommunityMember(currentUser.username) ?: false
-        Page<MyQuizAttempt> quizAttemptsPage = quizAttemptRepo.findUserQuizAttempts(currentUser.username, quizNameQuery ?: "", isUCMember, pageRequest)
+        String userId = userInfoService.currentUserId
+        Boolean isUCMember = userCommunityService.isUserCommunityMember(userId) ?: false
+        Page<MyQuizAttempt> quizAttemptsPage = quizAttemptRepo.findUserQuizAttempts(userId, quizNameQuery ?: "", isUCMember, pageRequest)
         long count = quizAttemptsPage.getTotalElements()
         List<MyQuizAttempt> quizAttempts = quizAttemptsPage.getContent()
-        return new TableResult(totalCount: count, data: quizAttempts, count: count)
+        List<QuizAttemptRowResult> quizAttemptRowResults = quizAttempts.collect {
+            new QuizAttemptRowResult(
+                attemptId: it.attemptId,
+                started: it.started,
+                completed: it.completed,
+                status: it.status,
+                quizName: it.quizName,
+                quizId: it.quizId,
+                quizType: it.quizType
+            )
+        }
+
+        List<String> quizIds = quizAttempts.collect { it.quizId }.unique()
+        List<QuizToSkillDefRepo.AssociatedSkill> associatedSkills = quizToSkillDefRepo.findAssociatedSkillsWhereQuizIdIn(quizIds)
+
+        if (associatedSkills) {
+            List<String> userCommunityProjects = associatedSkills.findAll {it.userCommunity }.collect { it.projectId }.unique()
+            if (userCommunityProjects) {
+                Boolean isUserCommunityMember = userCommunityService.isUserCommunityMember(userId)
+                if (!isUserCommunityMember) {
+                    List<String> projectsUserCannotAccess = userCommunityProjects.findAll { userCommunityService.isUserCommunityOnlyProject(it) }
+                    associatedSkills = associatedSkills.findAll { !projectsUserCannotAccess.contains(it.projectId) }
+                }
+            }
+
+            List<String> inviteOnlyProjectIds = associatedSkills.findAll {it.inviteOnly }.collect { it.projectId }.unique()
+            if (inviteOnlyProjectIds) {
+                List<String> projectsUserCannotAccess = inviteOnlyProjectIds.findAll { !inviteOnlyProjectService.canUserAccess(it, userId) }
+                associatedSkills = associatedSkills.findAll { !projectsUserCannotAccess.contains(it.projectId) }
+            }
+
+            Map<String, List<QuizToSkillDefRepo.AssociatedSkill>> associatedSkillsByQuizId = associatedSkills.groupBy { it.quizId }
+            quizAttemptRowResults.each { quizAttemptRowResult ->
+                quizAttemptRowResult.associatedSkills = associatedSkillsByQuizId.get(quizAttemptRowResult.quizId)?.collect {
+                    new QuizAttemptRowResult.AssociatedSkill(
+                            skillId: it.skillId,
+                            skillName: it.skillName,
+                            projectId: it.projectId,
+                            projectName: it.projectName
+                    )
+                }
+            }
+        }
+
+        return new TableResult(totalCount: count, data: quizAttemptRowResults, count: count)
     }
 
     QuizDef getQuizDef(String quizId) {
