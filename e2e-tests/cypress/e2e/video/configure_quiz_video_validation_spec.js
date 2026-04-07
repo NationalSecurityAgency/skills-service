@@ -124,10 +124,14 @@ describe('Configure Video Validation Tests', () => {
         cy.get('[data-cy="videoUrl"]').type('http://some.vid', { delay: 0 })
         const invalidValue = Array(101).fill('a').join('');
         cy.get('[data-cy="videoCaptions"]').type(invalidValue, { delay: 0 })
-        cy.get('[data-cy="videoCaptionsError"]').contains('Captions must be at most 100 characters')
-        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
-        cy.get('[data-cy="videoCaptions"]').type('{backspace}');
-        cy.get('[data-cy="videoCaptionsError"]').should('not.have.text', 'Captions must be at most 100 characters')
+        cy.get('#videoCaptions').then(($input) => {
+            const text = $input.val();
+            const textLength = text.length;
+
+            expect(textLength).to.be.equal(100);
+        })
+        cy.get('[data-cy="videoCaptionsNumCharsRemaining"]').should('have.text', '0 characters remaining ')
+
     });
 
     it('only allow upload of valid video mime types', () => {
