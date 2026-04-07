@@ -74,7 +74,7 @@ class GlobalSingleUserOverallProgressSpecs extends DefaultIntSpec {
 
     def "get single user progress - user with achievements across multiple projects"() {
         when:
-        def res = admins[0].getGlobalSingleUserProgressMetrics(users[4].userName)
+        def res = admins[0].getGlobalSingleUserProgressMetrics(users[4].userName).sort { it.projectId }
         def res_viaAdmin2 = admins[1].getGlobalSingleUserProgressMetrics(users[4].userName)
         def res_viaAdmin3 = admins[2].getGlobalSingleUserProgressMetrics(users[4].userName)
         then:

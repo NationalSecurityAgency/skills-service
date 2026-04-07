@@ -47,6 +47,25 @@ class GlobalUserSettingsSpecs extends DefaultIntSpec {
         u2Res == []
     }
 
+    def "root user with settings" () {
+        SkillsService root1 = createRootSkillService()
+        List<SkillsService> users = getRandomUsers(2).collect { createService(it)}
+
+        def proj1 = SkillsFactory.createProject(1)
+        users[0].createProject(proj1)
+        root1.addOrUpdateGlobalMetricsUserSettings([
+                [setting: USER_PREF_GLOBAL_METRICS_EXCLUSION, value: true, projectId: proj1.projectId ],
+        ])
+        root1.pinProject(proj1.projectId)
+        when:
+        def u1REs = root1.getGlobalMetricsUserSettings(USER_PREF_GLOBAL_METRICS_EXCLUSION)
+        then:
+        u1REs.projectId == [proj1.projectId]
+        u1REs.quizId == [null]
+        u1REs.setting == [USER_PREF_GLOBAL_METRICS_EXCLUSION]
+        u1REs.value == ["true"]
+    }
+
     def "users with multiple project settings" () {
         List<SkillsService> users = getRandomUsers(3).collect { createService(it)}
 

@@ -27,7 +27,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import skills.auth.*
 import skills.auth.pki.PkiUserLookup
-import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.GlobalMetricsSettingsRequest
 import skills.controller.request.model.SuggestRequest
@@ -50,16 +49,10 @@ import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
-import skills.storage.accessors.UserRoleAccessor
-import skills.storage.model.QuizSetting
 import skills.storage.model.UserTag
 import skills.storage.model.auth.RoleName
-import skills.storage.model.auth.User
-import skills.storage.model.auth.UserRole
-import skills.storage.repos.QuizSettingsRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
-import skills.storage.repos.UserRoleRepo
 import skills.storage.repos.UserTagRepo
 
 @RestController
@@ -79,9 +72,6 @@ class UserInfoController {
 
     @Autowired
     GlobalProgressMetricsService globalProgressMetricsService
-
-    @Autowired
-    UserRoleAccessor userRoleAccessor
 
     @Autowired
     UserAuthService userAuthService
