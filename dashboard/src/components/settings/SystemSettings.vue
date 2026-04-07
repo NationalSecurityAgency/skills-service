@@ -25,6 +25,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 const appConfig = useAppConfig();
 const timePeriodRegex = /^(PT)?(?=(?:0\.)?\d+[HMS])((?:0\.)?\d+H)?((?:0\.)?\d+M)?((?:0\.)?\d+S)?$/;
 
+const maximumLength = 3000;
 const schema = object({
   resetTokenExpiration: string()
       .required()
@@ -35,8 +36,8 @@ const schema = object({
         }
         return false;
       }),
-  customHeader: string().label('Custom Header').max(3000).noScript(),
-  customFooter: string().label('Custom Footer').max(3000).noScript(),
+  customHeader: string().label('Custom Header').max(maximumLength).noScript(),
+  customFooter: string().label('Custom Footer').max(maximumLength).noScript(),
   userAgreement: string().label('User Agreement').noScript()
 });
 
@@ -117,8 +118,8 @@ function loadSystemSettings() {
           </div>
         </template>
       </SkillsTextInput>
-      <SkillsTextarea name="customHeader" label="Custom Header" />
-      <SkillsTextarea name="customFooter" label="Custom Footer" />
+      <SkillsTextarea name="customHeader" label="Custom Header" :max-num-chars="maximumLength" />
+      <SkillsTextarea name="customFooter" label="Custom Footer" :max-num-chars="maximumLength" />
       <markdown-editor class="mt-8" name="userAgreement" label="User Agreement" :allow-attachments="false" :disable-ai-prompt="true"/>
 
       <SkillsButton label="Save" :icon="isSaving ? 'fa fa-circle-notch fa-spin fa-3x-fa-fw' : 'fas fa-arrow-circle-right'"

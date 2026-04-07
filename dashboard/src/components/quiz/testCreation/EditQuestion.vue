@@ -478,6 +478,7 @@ const startAiAssistant = () => {
             max-rows="3"
             name="answerHint"
             data-cy="answerHint"
+            :max-num-chars="appConfig.maxQuizAnswerHintLength"
             :submit-on-enter="false"
             :disabled="!showHint"
         />
