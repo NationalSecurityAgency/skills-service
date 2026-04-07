@@ -74,7 +74,7 @@
     "prettier": "3.6.2",
     "rollup-plugin-visualizer": "6.0.5",
     "tailwindcss": "4.1.17",
-    "vite": "7.2.2",
+    "vite": "7.3.2",
     "vitest": "4.0.8",
     "vue-eslint-parser": "10.2.0"
   }
