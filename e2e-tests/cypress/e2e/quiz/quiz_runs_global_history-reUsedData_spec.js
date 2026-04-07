@@ -450,7 +450,7 @@ describe('Global Quiz Runs History Tests', () => {
         cy.get('[data-cy="metricsDateFilter"]').click()
         cy.filterSetYear(threeDaysAgo.format('YYYY'))
         cy.filterSetMonth(threeDaysAgo.format('MMM'))
-        cy.setDay(threeDaysAgo.format('D'))
+        cy.setDay(threeDaysAgo.format('DD'))
         cy.get('[data-cy="userFilterBtn"]').click()
 
         const expected = [
