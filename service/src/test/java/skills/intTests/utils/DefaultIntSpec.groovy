@@ -217,6 +217,10 @@ class DefaultIntSpec extends Specification {
         return skillsServiceFactory.getRandomUsers(numUsers, createEmail, exclude)
     }
 
+    List<SkillsService> getRandomUserServices(int numUsers, boolean createEmail = true, List<String> exclude=[DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME]) {
+        return skillsServiceFactory.getRandomUsers(numUsers, createEmail, exclude).collect { createService(it)}
+    }
+
 
 
     protected <T> T runInTransaction(Closure<T> inTransactionLogic) {

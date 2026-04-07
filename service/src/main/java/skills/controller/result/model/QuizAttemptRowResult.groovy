@@ -24,6 +24,7 @@ class QuizAttemptRowResult {
         String skillName
         String projectId
         String projectName
+        String subjectId
     }
 
     Integer attemptId

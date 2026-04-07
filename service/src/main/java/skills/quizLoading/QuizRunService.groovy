@@ -1088,7 +1088,7 @@ class QuizRunService {
         List<QuizToSkillDefRepo.AssociatedSkill> associatedSkills = quizToSkillDefRepo.findAssociatedSkillsWhereQuizIdIn(quizIds)
 
         if (associatedSkills) {
-            List<String> userCommunityProjects = associatedSkills.findAll {it.userCommunity }.collect { it.projectId }.unique()
+            List<String> userCommunityProjects = associatedSkills.findAll {it.userCommunityProj }?.collect { it.projectId }?.unique()
             if (userCommunityProjects) {
                 Boolean isUserCommunityMember = userCommunityService.isUserCommunityMember(userId)
                 if (!isUserCommunityMember) {
@@ -1097,7 +1097,7 @@ class QuizRunService {
                 }
             }
 
-            List<String> inviteOnlyProjectIds = associatedSkills.findAll {it.inviteOnly }.collect { it.projectId }.unique()
+            List<String> inviteOnlyProjectIds = associatedSkills.findAll {it.inviteOnlyProj }.collect { it.projectId }.unique()
             if (inviteOnlyProjectIds) {
                 List<String> projectsUserCannotAccess = inviteOnlyProjectIds.findAll { !inviteOnlyProjectService.canUserAccess(it, userId) }
                 associatedSkills = associatedSkills.findAll { !projectsUserCannotAccess.contains(it.projectId) }
@@ -1110,9 +1110,10 @@ class QuizRunService {
                             skillId: it.skillId,
                             skillName: it.skillName,
                             projectId: it.projectId,
-                            projectName: it.projectName
+                            projectName: it.projectName,
+                            subjectId: it.subjectId
                     )
-                }
+                }?.sort { it.skillName }
             }
         }
 
