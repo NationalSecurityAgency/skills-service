@@ -986,58 +986,58 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     ),
     skillsConfiguredForGlobalBadge AS (
             SELECT DISTINCT skill.id as skillRefId
-    FROM skill_relationship_definition srd
-    JOIN skill_definition globalBadge ON (srd.parent_ref_id = globalBadge.id and srd.type = 'BadgeRequirement' and globalBadge.type = 'GlobalBadge')
-    JOIN skill_definition skill ON (srd.child_ref_id = skill.id and srd.type = 'BadgeRequirement' and skill.type = 'Skill')
-    where globalBadge.skill_id = :badgeId and globalBadge.project_id is null
+            FROM skill_relationship_definition srd
+            JOIN skill_definition globalBadge ON (srd.parent_ref_id = globalBadge.id and srd.type = 'BadgeRequirement' and globalBadge.type = 'GlobalBadge')
+            JOIN skill_definition skill ON (srd.child_ref_id = skill.id and srd.type = 'BadgeRequirement' and skill.type = 'Skill')
+            where globalBadge.skill_id = :badgeId and globalBadge.project_id is null
     ),
     globalBadgeSkills AS (
             SELECT skillRefId from skillsConfiguredForGlobalBadge
     UNION
             SELECT DISTINCT skilDef.id as skillRefId
-    FROM global_badge_level_definition gbld
-    JOIN skill_definition skilDef ON (gbld.project_id = skilDef.project_id and skilDef.type = 'Skill')
-    where gbld.skill_id = :badgeId
+            FROM global_badge_level_definition gbld
+            JOIN skill_definition skilDef ON (gbld.project_id = skilDef.project_id and skilDef.type = 'Skill')
+            where gbld.skill_id = :badgeId
     ),
     users AS (
             select user_id, max(updated) as lastUpdated
-    from user_points
-    where skill_ref_id in (select globalBadgeSkills.skillRefId from globalBadgeSkills)
-    group by user_id
+            from user_points
+            where skill_ref_id in (select globalBadgeSkills.skillRefId from globalBadgeSkills)
+            group by user_id
     ),
     projectMaxLevelAchievements AS (
             select ua.user_id, ua.project_id, max(LEAST(ua.level,levelsConf.level)) as maxLevel
-    from user_achievement ua
-    join levelsConf levelsConf on (levelsConf.project_id = ua.project_id)
-    where
-    ua.project_id in (select gbld.project_id FROM global_badge_level_definition gbld where gbld.skill_id = :badgeId)
-    and ua.skill_ref_id is null
-    and ua.level > 0
-    group by ua.user_id, ua.project_id
+            from user_achievement ua
+            join levelsConf levelsConf on (levelsConf.project_id = ua.project_id)
+            where
+            ua.project_id in (select gbld.project_id FROM global_badge_level_definition gbld where gbld.skill_id = :badgeId)
+            and ua.skill_ref_id is null
+            and ua.level > 0
+            group by ua.user_id, ua.project_id
     ),
     levelAchievements AS (
             select user_id, SUM(maxLevel) maxLevel from projectMaxLevelAchievements
-    group by user_id
+            group by user_id
     ),
     skillAchievements AS (
             SELECT
-    achievement.user_id AS user_id,
-    count(skillsConfiguredForGlobalBadge.skillRefId) AS skillsAchieved
-    FROM user_achievement achievement
-    join skillsConfiguredForGlobalBadge on skillsConfiguredForGlobalBadge.skillRefId = achievement.skill_ref_id
+            achievement.user_id AS user_id,
+            count(skillsConfiguredForGlobalBadge.skillRefId) AS skillsAchieved,
+            max(achievement.achieved_on) AS mostRecentAchievedOn
+            FROM user_achievement achievement
+            join skillsConfiguredForGlobalBadge on skillsConfiguredForGlobalBadge.skillRefId = achievement.skill_ref_id
             GROUP BY achievement.user_id
     ),
     userTags as (
-    SELECT ut.user_id,
-    max(ut.value) AS value
-    FROM user_tags ut
-    WHERE
-            ut.key = :userTagKey
-    and ut.user_id in (select users.user_id from users)
-    group by ut.user_id
+        SELECT ut.user_id,
+        max(ut.value) AS value
+        FROM user_tags ut
+        WHERE ut.key = :userTagKey
+        and ut.user_id in (select users.user_id from users)
+        group by ut.user_id
     )
     select usersAlias.user_id as userId,
-    usersAlias.lastUpdated                                                                   as lastUpdated,
+    COALESCE(skillAchievements.mostRecentAchievedOn, ua.updated)                             as lastUpdated,
     ua.user_id_for_display                                                                   as userIdForDisplay,
     ua.dn                                                                                    as dn,
     ua.first_name                                                                            as firstName,

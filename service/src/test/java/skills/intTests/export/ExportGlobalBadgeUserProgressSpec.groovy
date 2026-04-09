@@ -63,7 +63,7 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
                 ["For All Dragons Only"],
                 ["User ID", "Last Name", "First Name", "Org", "Skills Achieved", "Levels Achieved", "Percent Complete", "Skill Last Earned (UTC)"],
                 [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "0.0", "3.0", "0.6", formatDate(today)],
-                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "3.0", "0.8", formatDate(today)],
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "3.0", "0.8", formatDate(oneDayAgo)],
                 [getUserIdForDisplay(user3), getName(user3, false), getName(user3), "", "2.0", "3.0", "1.0", formatDate(today)],
                 ["For All Dragons Only"],
         ])
@@ -92,21 +92,21 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         skillsService.updateGlobalBadge(globalBadge)
 
         List<String> users = getRandomUsers(6)
-        skillsService.addSkill(skill1, users[0], new Date() - 2)
-        skillsService.addSkill(skill1, users[0], new Date() - 1)
+        skillsService.addSkill(skill1, users[0], twoDayAgo)
+        skillsService.addSkill(skill1, users[0], oneDayAgo)
         skillsService.addSkill(skill1, users[0])
-        skillsService.addSkill(skill1, users[1], new Date() - 1)
+        skillsService.addSkill(skill1, users[1], oneDayAgo)
         skillsService.addSkill(skill1, users[1])
-        skillsService.addSkill(skill2, users[2], new Date() - 2)
-        skillsService.addSkill(skill2, users[2], new Date() - 1)
+        skillsService.addSkill(skill2, users[2], twoDayAgo)
+        skillsService.addSkill(skill2, users[2], oneDayAgo)
         skillsService.addSkill(skill2, users[2])
-        skillsService.addSkill(skill2, users[3], new Date() - 1)
+        skillsService.addSkill(skill2, users[3], oneDayAgo)
         skillsService.addSkill(skill2, users[3])
-        skillsService.addSkill(skill1, users[4], new Date() - 2)
-        skillsService.addSkill(skill1, users[4], new Date() - 1)
+        skillsService.addSkill(skill1, users[4], twoDayAgo)
+        skillsService.addSkill(skill1, users[4], oneDayAgo)
         skillsService.addSkill(skill1, users[4])
-        skillsService.addSkill(skill2, users[4], new Date() - 2)
-        skillsService.addSkill(skill2, users[4], new Date() - 1)
+        skillsService.addSkill(skill2, users[4], twoDayAgo)
+        skillsService.addSkill(skill2, users[4], oneDayAgo)
         skillsService.addSkill(skill2, users[4])
 
         users.eachWithIndex { userId, idx ->
@@ -153,10 +153,10 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
 
         List<String> users = getRandomUsers(6)
         for(var x = 0; x < 6; x++) {
-            skillsService.addSkill(skill1, users[x], new Date() - 1)
-            skillsService.addSkill(skill1, users[x], new Date())
-            skillsService.addSkill(skill2, users[x], new Date() - 1)
-            skillsService.addSkill(skill2, users[x], new Date())
+            skillsService.addSkill(skill1, users[x], oneDayAgo)
+            skillsService.addSkill(skill1, users[x], today)
+            skillsService.addSkill(skill2, users[x], oneDayAgo)
+            skillsService.addSkill(skill2, users[x], today)
         }
 
         users.eachWithIndex { userId, idx ->
@@ -176,7 +176,7 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         ])
     }
 
-    def "export users progress with user tags and sort and filter"() {
+    def "export users progress with user tags and sort by total progress and filter by user"() {
         def p2 = createProject(2)
         def p2subj1 = createSubject(2, 1)
         def skill1 = createSkill(2, 1, 1, 0, 2)
@@ -204,31 +204,31 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         skillsService.updateGlobalBadge(globalBadge)
 
         List<String> users = getRandomUsers(5)
-        skillsService.addSkill(skill1, users[0], new Date())
+        skillsService.addSkill(skill1, users[0], today)
 
-        skillsService.addSkill(skill1, users[1], new Date())
-        skillsService.addSkill(skill1, users[1], new Date() - 1)
+        skillsService.addSkill(skill1, users[1], today)
+        skillsService.addSkill(skill1, users[1], oneDayAgo)
 
-        skillsService.addSkill(skill1, users[2], new Date())
-        skillsService.addSkill(skill1, users[2], new Date() - 1)
-        skillsService.addSkill(skill2, users[2], new Date())
-        skillsService.addSkill(skill2, users[2], new Date() - 1)
+        skillsService.addSkill(skill1, users[2], today)
+        skillsService.addSkill(skill1, users[2], oneDayAgo)
+        skillsService.addSkill(skill2, users[2], today)
+        skillsService.addSkill(skill2, users[2], oneDayAgo)
 
-        skillsService.addSkill(skill1, users[3], new Date())
-        skillsService.addSkill(skill1, users[3], new Date() - 1)
-        skillsService.addSkill(skill2, users[3], new Date())
-        skillsService.addSkill(skill2, users[3], new Date() - 1)
-        skillsService.addSkill(subj1skill2, users[3], new Date())
-        skillsService.addSkill(subj1skill2, users[3], new Date() - 1)
+        skillsService.addSkill(skill1, users[3], today)
+        skillsService.addSkill(skill1, users[3], oneDayAgo)
+        skillsService.addSkill(skill2, users[3], today)
+        skillsService.addSkill(skill2, users[3], oneDayAgo)
+        skillsService.addSkill(subj1skill2, users[3], today)
+        skillsService.addSkill(subj1skill2, users[3], oneDayAgo)
 
-        skillsService.addSkill(skill1, users[4], new Date())
-        skillsService.addSkill(skill1, users[4], new Date() - 1)
-        skillsService.addSkill(skill2, users[4], new Date())
-        skillsService.addSkill(skill2, users[4], new Date() - 1)
-        skillsService.addSkill(subj1skill2, users[4], new Date())
-        skillsService.addSkill(subj1skill2, users[4], new Date() - 1)
-        skillsService.addSkill(subj1skill3, users[4], new Date())
-        skillsService.addSkill(subj1skill3, users[4], new Date() - 1)
+        skillsService.addSkill(skill1, users[4], today)
+        skillsService.addSkill(skill1, users[4], oneDayAgo)
+        skillsService.addSkill(skill2, users[4], today)
+        skillsService.addSkill(skill2, users[4], oneDayAgo)
+        skillsService.addSkill(subj1skill2, users[4], today)
+        skillsService.addSkill(subj1skill2, users[4], oneDayAgo)
+        skillsService.addSkill(subj1skill3, users[4], today)
+        skillsService.addSkill(subj1skill3, users[4], oneDayAgo)
 
 
         users.eachWithIndex { userId, idx ->
@@ -273,6 +273,92 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         validateExport(excelExportSortPointsAsc.file, expectedDataForSortAsc)
         validateExport(excelExportSortPointsDesc.file, expectedDataForSortDesc)
         validateExport(excelExportQueryFilter.file, expectedDataForQuery)
+    }
+
+
+    def "export users progress with user tags and sort by date"() {
+        def p2 = createProject(3)
+        def p2subj1 = createSubject(3, 1)
+        def skill1 = createSkill(3, 1, 1, 0, 2)
+        def subj1skill2 = createSkill(3, 1, 2, 0, 2)
+        def subj1skill3 = createSkill(3, 1, 3, 0, 2)
+        skill1.pointIncrement = 50
+        subj1skill2.pointIncrement = 50
+        subj1skill3.pointIncrement = 50
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [skill1, subj1skill2, subj1skill3])
+
+        def p2subj2 = createSubject(3, 2)
+        def skill2 = createSkill(3, 2, 2, 0, 2)
+        skill2.pointIncrement = 50
+        skillsService.createSubject(p2subj2)
+        skillsService.createSkill(skill2)
+
+        def globalBadge = createBadge()
+        skillsService.createGlobalBadge(globalBadge)
+        skillsService.assignSkillToGlobalBadge([projectId: p2.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: p2.projectId, badgeId: globalBadge.badgeId, skillId: skill2.skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: p2.projectId, badgeId: globalBadge.badgeId, skillId: subj1skill2.skillId])
+        skillsService.assignSkillToGlobalBadge([projectId: p2.projectId, badgeId: globalBadge.badgeId, skillId: subj1skill3.skillId])
+        skillsService.assignProjectLevelToGlobalBadge([badgeId: globalBadge.badgeId, projectId: p2.projectId, level: "5"])
+        globalBadge.enabled = "true"
+        skillsService.updateGlobalBadge(globalBadge)
+
+        List<String> users = getRandomUsers(5)
+        skillsService.addSkill(skill1, users[0], today)
+
+        skillsService.addSkill(skill1, users[1], oneDayAgo)
+        skillsService.addSkill(skill1, users[1], twoDayAgo)
+
+        skillsService.addSkill(skill1, users[2], twoDayAgo)
+        skillsService.addSkill(skill1, users[2], threeDayAgo)
+        skillsService.addSkill(skill2, users[2], twoDayAgo)
+        skillsService.addSkill(skill2, users[2], threeDayAgo)
+
+        skillsService.addSkill(skill1, users[3], threeDayAgo)
+        skillsService.addSkill(skill1, users[3], fourDayAgo)
+        skillsService.addSkill(skill2, users[3], threeDayAgo)
+        skillsService.addSkill(skill2, users[3], fourDayAgo)
+        skillsService.addSkill(subj1skill2, users[3], threeDayAgo)
+        skillsService.addSkill(subj1skill2, users[3], fourDayAgo)
+
+        skillsService.addSkill(skill1, users[4], fourDayAgo)
+        skillsService.addSkill(skill1, users[4], fiveDaysAgo)
+        skillsService.addSkill(skill2, users[4], fourDayAgo)
+        skillsService.addSkill(skill2, users[4], fiveDaysAgo)
+        skillsService.addSkill(subj1skill2, users[4], fourDayAgo)
+        skillsService.addSkill(subj1skill2, users[4], fiveDaysAgo)
+        skillsService.addSkill(subj1skill3, users[4], fourDayAgo)
+        skillsService.addSkill(subj1skill3, users[4], fiveDaysAgo)
+
+        when:
+        boolean ascending = true
+        def excelExportSortPointsDesc = skillsService.getGlobalBadgeUserProgressExcelExport(globalBadge.badgeId, 'lastUpdated', !ascending)
+        def excelExportSortPointsAsc = skillsService.getGlobalBadgeUserProgressExcelExport(globalBadge.badgeId, 'lastUpdated', ascending)
+
+        List<List<String>> expectedDataForSortDesc = [
+                ["For All Dragons Only"],
+                ["User ID", "Last Name", "First Name", "Org", "Skills Achieved", "Levels Achieved", "Percent Complete", "Skill Last Earned (UTC)"],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "0.0", "1.0", "0.1111111111", formatDate(today)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "1.0", "2.0", "0.3333333333", formatDate(oneDayAgo)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "2.0", "3.0", "0.5555555556", formatDate(twoDayAgo)],
+                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "", "3.0", "4.0", "0.7777777778", formatDate(threeDayAgo)],
+                [getUserIdForDisplay(users[4]), getName(users[4], false), getName(users[4]), "", "4.0", "5.0", "1.0", formatDate(fourDayAgo)],
+                ["For All Dragons Only"],
+        ]
+        List<List<String>> expectedDataForSortAsc = [
+                ["For All Dragons Only"],
+                ["User ID", "Last Name", "First Name", "Org", "Skills Achieved", "Levels Achieved", "Percent Complete", "Skill Last Earned (UTC)"],
+                [getUserIdForDisplay(users[4]), getName(users[4], false), getName(users[4]), "", "4.0", "5.0", "1.0",  formatDate(fourDayAgo)],
+                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "", "3.0", "4.0", "0.7777777778",  formatDate(threeDayAgo)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "2.0", "3.0", "0.5555555556", formatDate(twoDayAgo)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "1.0", "2.0", "0.3333333333", formatDate(oneDayAgo)],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "0.0", "1.0", "0.1111111111", formatDate(today)],
+                ["For All Dragons Only"],
+        ]
+
+        then:
+        validateExport(excelExportSortPointsDesc.file, expectedDataForSortDesc)
+        validateExport(excelExportSortPointsAsc.file, expectedDataForSortAsc)
     }
 
 }
