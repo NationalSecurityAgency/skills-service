@@ -43,4 +43,6 @@ class UserGradedQuizQuestionsResult {
     Date userLastQuizAttemptDate
     Integer maxAttemptsAllowed
     Boolean multipleTakes
+
+    List<QuizAttemptRowResult.AssociatedSkill> associatedSkills
 }

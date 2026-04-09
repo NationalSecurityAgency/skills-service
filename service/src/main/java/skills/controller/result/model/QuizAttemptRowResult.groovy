@@ -20,6 +20,7 @@ import skills.storage.model.UserQuizAttempt
 class QuizAttemptRowResult {
 
     static class AssociatedSkill {
+        String quizId
         String skillId
         String skillName
         String projectId

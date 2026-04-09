@@ -61,7 +61,8 @@ onMounted(() => {
       <Card class="my-6">
         <template #content>
           <div class="text-2xl mb-4 font-medium" data-cy="quizName">{{ attempt.quizName }}</div>
-          <quiz-single-run :run-info="attempt"  :show-user-card="false" :show-question-card="!QuizStatus.isNeedsGrading(attempt.status)"/>
+          <quiz-single-run :run-info="attempt"  :show-user-card="false" :show-question-card="!QuizStatus.isNeedsGrading(attempt.status)"
+                           :show-associated-skills="true"/>
         </template>
       </Card>
     </div>

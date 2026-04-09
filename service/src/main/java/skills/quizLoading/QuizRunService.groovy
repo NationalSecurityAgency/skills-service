@@ -29,7 +29,6 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.PublicProps
-import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.controller.PublicPropsBasedValidator
 import skills.controller.exceptions.ErrorCode
@@ -43,7 +42,6 @@ import skills.quizLoading.model.*
 import skills.services.CustomValidationResult
 import skills.services.CustomValidator
 import skills.services.LockingService
-import skills.services.admin.InviteOnlyProjectService
 import skills.services.admin.UserCommunityService
 import skills.services.attributes.*
 import skills.services.events.SkillEventResult
@@ -87,7 +85,7 @@ class QuizRunService {
     UserQuizAttemptRepo quizAttemptRepo
 
     @Autowired
-    InviteOnlyProjectService inviteOnlyProjectService
+    QuizAssociatedSkillsService quizAssociatedSkillsService
 
     @Autowired
     LockingService lockingService
@@ -1085,35 +1083,12 @@ class QuizRunService {
         }
 
         List<String> quizIds = quizAttempts.collect { it.quizId }.unique()
-        List<QuizToSkillDefRepo.AssociatedSkill> associatedSkills = quizToSkillDefRepo.findAssociatedSkillsWhereQuizIdIn(quizIds)
+        List<QuizAttemptRowResult.AssociatedSkill> associatedSkills = quizAssociatedSkillsService.getAssociatedSkills(quizIds)
 
         if (associatedSkills) {
-            List<String> userCommunityProjects = associatedSkills.findAll {it.userCommunityProj }?.collect { it.projectId }?.unique()
-            if (userCommunityProjects) {
-                Boolean isUserCommunityMember = userCommunityService.isUserCommunityMember(userId)
-                if (!isUserCommunityMember) {
-                    List<String> projectsUserCannotAccess = userCommunityProjects.findAll { userCommunityService.isUserCommunityOnlyProject(it) }
-                    associatedSkills = associatedSkills.findAll { !projectsUserCannotAccess.contains(it.projectId) }
-                }
-            }
-
-            List<String> inviteOnlyProjectIds = associatedSkills.findAll {it.inviteOnlyProj }.collect { it.projectId }.unique()
-            if (inviteOnlyProjectIds) {
-                List<String> projectsUserCannotAccess = inviteOnlyProjectIds.findAll { !inviteOnlyProjectService.canUserAccess(it, userId) }
-                associatedSkills = associatedSkills.findAll { !projectsUserCannotAccess.contains(it.projectId) }
-            }
-
-            Map<String, List<QuizToSkillDefRepo.AssociatedSkill>> associatedSkillsByQuizId = associatedSkills.groupBy { it.quizId }
+            Map<String, List<QuizAttemptRowResult.AssociatedSkill>> associatedSkillsByQuizId = associatedSkills.groupBy { it.quizId }
             quizAttemptRowResults.each { quizAttemptRowResult ->
-                quizAttemptRowResult.associatedSkills = associatedSkillsByQuizId.get(quizAttemptRowResult.quizId)?.collect {
-                    new QuizAttemptRowResult.AssociatedSkill(
-                            skillId: it.skillId,
-                            skillName: it.skillName,
-                            projectId: it.projectId,
-                            projectName: it.projectName,
-                            subjectId: it.subjectId
-                    )
-                }?.sort { it.skillName }
+                quizAttemptRowResult.associatedSkills = associatedSkillsByQuizId.get(quizAttemptRowResult.quizId)?.sort { it.skillName }
             }
         }
 

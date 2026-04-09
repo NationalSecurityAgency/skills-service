@@ -33,6 +33,7 @@ import HighlightedValue from "@/components/utils/table/HighlightedValue.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import BackToMyProgressBtn from "@/components/myProgress/BackToMyProgressBtn.vue";
 import {useStorage} from "@vueuse/core";
+import QuizAssociatedSkills from "@/components/quiz/runsHistory/QuizAssociatedSkills.vue";
 
 const responsive = useResponsiveBreakpoints()
 const colors = useColors()
@@ -94,16 +95,7 @@ const onFilter = (filterEvent) => {
 }
 
 const hasAttempts = computed(() => attemptHistory.value.length > 0)
-const expandedSkills = ref(new Map())
 
-const toggleSkillsExpansion = (attemptId) => {
-  const current = expandedSkills.value.get(attemptId) || false
-  expandedSkills.value.set(attemptId, !current)
-}
-
-const isSkillsExpanded = (attemptId) => {
-  return expandedSkills.value.get(attemptId) || false
-}
 </script>
 
 <template>
@@ -217,30 +209,9 @@ const isSkillsExpanded = (attemptId) => {
                                      aria-hidden="true"></i></div>
               </template>
               <template #body="slotProps">
-                <div v-if="slotProps.data.associatedSkills" data-cy="associatedSkills">
-                  <div v-for="(skill, index) in (isSkillsExpanded(slotProps.data.attemptId) ? slotProps.data.associatedSkills : slotProps.data.associatedSkills.slice(0, 2))" 
-                       :key="`${skill.projectId}-${skill.skillId}`">
-                    <router-link :data-cy="`viewAssociatedSkill-${skill.projectId}-${skill.skillId}`"
-                                 :to="{ name:'skillDetailsLocal',
-                                 params: { projectId: skill.projectId, skillId: skill.skillId, subjectId: skill.subjectId }}"
-                                 class="underline"
-                                 :aria-label="`View attempt for ${slotProps.data.quizName} quiz`">{{ skill.skillName }}</router-link>
-                    <div class="pl-2"><span class="text-sm">in</span> <span class="text-gray-600 dark:text-gray-400 italic">{{ skill.projectName }}</span></div>
-                  </div>
-                  <div v-if="slotProps.data.associatedSkills.length > 2" class="">
-                    <SkillsButton
-                        data-cy="expandOrCollapseSkills"
-                        @click="toggleSkillsExpansion(slotProps.data.attemptId)"
-                        link
-                        class="p-0! text-blue-600!  dark:text-blue-400! underline"
-                            :aria-label="isSkillsExpanded(slotProps.data.attemptId) ? 'Show fewer skills' : `Show ${slotProps.data.associatedSkills.length - 2} more skills`">
-                      {{ isSkillsExpanded(slotProps.data.attemptId) ? 'Show Less' : `View ${slotProps.data.associatedSkills.length - 2} More` }}
-                    </SkillsButton>
-                  </div>
-                </div>
-                <div v-else>
-                  <span>N/A</span>
-                </div>
+                <quiz-associated-skills v-if="slotProps.data.associatedSkills"
+                                        :associated-skills="slotProps.data.associatedSkills" :vertically-compact="false"/>
+                <div v-else><span>N/A</span></div>
               </template>
             </Column>
             <Column header="Runtime" field="completed"

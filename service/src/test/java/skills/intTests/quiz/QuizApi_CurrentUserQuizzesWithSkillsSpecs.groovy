@@ -86,7 +86,7 @@ class QuizApi_CurrentUserQuizzesWithSkillsSpecs extends InviteOnlyBaseSpec {
         service.updateSkill(skill)
     }
 
-    def "get quiz attempts with quizzes and surveys some associated with multiple skills"() {
+    def "get quiz attempts - multiple associated skills"() {
         List<SkillsService> allUsers = getRandomUserServices(5)
         List<SkillsService> admins = allUsers[0..1]
         List<SkillsService> users = allUsers[2..4]
@@ -160,7 +160,7 @@ class QuizApi_CurrentUserQuizzesWithSkillsSpecs extends InviteOnlyBaseSpec {
         user1ResRecord1Skills.skillName == [proj1Skills[0].name, proj1Skills[6].name, proj2Skills[3].name]
     }
 
-    def "community protected skills are not returned for non-community users"() {
+    def "get quiz attempts - community protected skills are not returned for non-community users"() {
         SkillsService rootSkillsService = createRootSkillService()
 
         List<SkillsService> allUsers = getRandomUserServices(3)
@@ -275,7 +275,7 @@ class QuizApi_CurrentUserQuizzesWithSkillsSpecs extends InviteOnlyBaseSpec {
 
     }
 
-    def "invite-only project skills are not returned for unauthorized users"() {
+    def "get quiz attempts - invite-only project skills are not returned for unauthorized users"() {
         SkillsService rootSkillsService = createRootSkillService()
 
         List<SkillsService> allUsers = getRandomUserServices(4)
@@ -457,7 +457,7 @@ class QuizApi_CurrentUserQuizzesWithSkillsSpecs extends InviteOnlyBaseSpec {
 
     }
 
-    def "invite-only project skills and community protected skills are not returned for unauthorized users"() {
+    def "get quiz attempts - invite-only project skills and community protected skills are not returned for unauthorized users"() {
         SkillsService rootSkillsService = createRootSkillService()
 
         List<SkillsService> allUsers = getRandomUserServices(6)
@@ -707,6 +707,354 @@ class QuizApi_CurrentUserQuizzesWithSkillsSpecs extends InviteOnlyBaseSpec {
 
     }
 
+    def "get current user single attempt - multiple associated skills"() {
+        List<SkillsService> allUsers = getRandomUserServices(5)
+        List<SkillsService> admins = allUsers[0..1]
+        List<SkillsService> users = allUsers[2..4]
+
+        def survey1 = createSimpleSurvey(admins[0], 1)
+        def quiz1 = createSimpleQuiz(admins[0], 2)
+
+        def proj1Skills = createSimpleProject(admins[0], 1)
+        def proj2Skills = createSimpleProject(admins[0], 2)
+        def proj3Skills = createSimpleProject(admins[0], 3)
+
+        associate(admins[0], proj1Skills[0], quiz1)
+        associate(admins[0], proj1Skills[6], quiz1)
+        associate(admins[0], proj2Skills[3], quiz1)
+
+        associate(admins[0], proj3Skills[2], survey1)
+        associate(admins[0], proj3Skills[3], survey1)
+        associate(admins[0], proj3Skills[9], survey1)
+        associate(admins[0], proj2Skills[0], survey1)
+
+        def user1Attempt1Id = runQuizOrSurvey(users[0], 1)
+        def user1Attempt2Id = runQuizOrSurvey(users[0], 2)
+        def user1Attempt3Id = runQuizOrSurvey(users[0], 2, 1 )
+
+        def user2Attempt1Id = runQuizOrSurvey(users[1], 2, 1)
+
+        when:
+        def user1Attempt1Res = users[0].getCurrentUserSingleQuizAttempt(user1Attempt1Id)
+        def user1Attempt2Res = users[0].getCurrentUserSingleQuizAttempt(user1Attempt2Id)
+        def user1Attempt3Res = users[0].getCurrentUserSingleQuizAttempt(user1Attempt3Id)
+        def user2Attempt1Res = users[1].getCurrentUserSingleQuizAttempt(user2Attempt1Id)
+        then:
+        user1Attempt1Res.associatedSkills
+        def user1Atttemp1Skills = user1Attempt1Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        user1Atttemp1Skills.projectId == [proj2Skills[0].projectId, proj3Skills[0].projectId, proj3Skills[0].projectId, proj3Skills[0].projectId]
+        user1Atttemp1Skills.subjectId == [getSubjectId(1), getSubjectId(1), getSubjectId(1), getSubjectId(2)]
+        user1Atttemp1Skills.projectName == [getDefaultProjName(2), getDefaultProjName(3), getDefaultProjName(3), getDefaultProjName(3)]
+        user1Atttemp1Skills.skillId == [proj2Skills[0].skillId, proj3Skills[2].skillId, proj3Skills[3].skillId, proj3Skills[9].skillId]
+        user1Atttemp1Skills.skillName == [proj2Skills[0].name, proj3Skills[2].name, proj3Skills[3].name, proj3Skills[9].name]
+
+        user1Attempt2Res.associatedSkills
+        def user1Attempt2Skills = user1Attempt2Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        user1Attempt2Skills.projectId == [proj1Skills[0].projectId, proj1Skills[0].projectId, proj2Skills[0].projectId]
+        user1Attempt2Skills.projectName == [getDefaultProjName(1), getDefaultProjName(1), getDefaultProjName(2)]
+        user1Attempt2Skills.subjectId == [getSubjectId(1), getSubjectId(2), getSubjectId(1)]
+        user1Attempt2Skills.skillId == [proj1Skills[0].skillId, proj1Skills[6].skillId, proj1Skills[3].skillId]
+        user1Attempt2Skills.skillName == [proj1Skills[0].name, proj1Skills[6].name, proj1Skills[3].name]
+
+        def user1Attempt3Skills = user1Attempt3Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        user1Attempt3Skills.projectId == [proj1Skills[0].projectId, proj1Skills[0].projectId, proj2Skills[0].projectId]
+        user1Attempt3Skills.projectName == [getDefaultProjName(1), getDefaultProjName(1), getDefaultProjName(2)]
+        user1Attempt3Skills.subjectId == [getSubjectId(1), getSubjectId(2), getSubjectId(1)]
+        user1Attempt3Skills.skillId == [proj1Skills[0].skillId, proj1Skills[6].skillId, proj1Skills[3].skillId]
+        user1Attempt3Skills.skillName == [proj1Skills[0].name, proj1Skills[6].name, proj1Skills[3].name]
+
+        // user 1
+        user2Attempt1Res.associatedSkills
+        def user2Attemp1Skills = user2Attempt1Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        user2Attemp1Skills.projectId == [proj1Skills[0].projectId, proj1Skills[0].projectId, proj2Skills[0].projectId]
+        user2Attemp1Skills.subjectId == [getSubjectId(1), getSubjectId(2), getSubjectId(1)]
+        user2Attemp1Skills.projectName == [getDefaultProjName(1), getDefaultProjName(1), getDefaultProjName(2)]
+        user2Attemp1Skills.skillId == [proj1Skills[0].skillId, proj1Skills[6].skillId, proj2Skills[3].skillId]
+        user2Attemp1Skills.skillName == [proj1Skills[0].name, proj1Skills[6].name, proj2Skills[3].name]
+    }
+
+    def "get current user single attempt - community protected skills are not returned for non-community users"() {
+        SkillsService rootSkillsService = createRootSkillService()
+
+        List<SkillsService> allUsers = getRandomUserServices(3)
+        SkillsService admin = allUsers[0]
+        rootSkillsService.saveUserTag(admin.userName, 'dragons', ['DivineDragon'])
+        SkillsService dragonUser = allUsers[1]
+        SkillsService otherUser = allUsers[2]
+        rootSkillsService.saveUserTag(dragonUser.userName, 'dragons', ['DivineDragon'])
+
+        def survey1 = createSimpleSurvey(admin, 1)
+        def quiz1 = createSimpleQuiz(admin, 2)
+
+        def proj1Skills = createSimpleProject(admin, 1, true)
+        def proj2Skills = createSimpleProject(admin, 2)
+        def proj3Skills = createSimpleProject(admin, 3, true)
+        def proj4Skills = createSimpleProject(admin, 4)
+
+        associate(admin, proj1Skills[0], quiz1)
+        associate(admin, proj1Skills[1], quiz1)
+        associate(admin, proj2Skills[0], quiz1)
+        associate(admin, proj2Skills[1], quiz1)
+        associate(admin, proj3Skills[0], quiz1)
+        associate(admin, proj3Skills[1], quiz1)
+        associate(admin, proj4Skills[0], quiz1)
+        associate(admin, proj4Skills[1], quiz1)
+
+        associate(admin, proj1Skills[3], survey1)
+        associate(admin, proj2Skills[3], survey1)
+        associate(admin, proj3Skills[3], survey1)
+        associate(admin, proj4Skills[3], survey1)
+
+        def dragonUserAttempt1Id = runQuizOrSurvey(dragonUser, 1)
+        def dragonUserAttempt2Id = runQuizOrSurvey(dragonUser, 2)
+
+        def otherUserAttempt1Id = runQuizOrSurvey(otherUser, 1)
+        def otherUserAttempt2Id = runQuizOrSurvey(otherUser, 2)
+
+        when:
+        def dragonUserAttempt1Res = dragonUser.getCurrentUserSingleQuizAttempt(dragonUserAttempt1Id)
+        def dragonUserAttempt2Res = dragonUser.getCurrentUserSingleQuizAttempt(dragonUserAttempt2Id)
+        def otherUserAttempt1Res = otherUser.getCurrentUserSingleQuizAttempt(otherUserAttempt1Id)
+        def otherUserAttempt2Res = otherUser.getCurrentUserSingleQuizAttempt(otherUserAttempt2Id)
+
+        then:
+        def record1Skills = dragonUserAttempt1Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        record1Skills.projectId == [
+                proj1Skills[0].projectId,
+                proj2Skills[0].projectId,
+                proj3Skills[0].projectId,
+                proj4Skills[0].projectId,
+        ]
+        record1Skills.skillId == [
+                proj1Skills[3].skillId,
+                proj2Skills[3].skillId,
+                proj3Skills[3].skillId,
+                proj4Skills[3].skillId,
+        ]
+
+        dragonUserAttempt2Res.associatedSkills
+        def record2Skills = dragonUserAttempt2Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        record2Skills.projectId == [
+                proj1Skills[0].projectId,
+                proj1Skills[0].projectId,
+                proj2Skills[0].projectId,
+                proj2Skills[0].projectId,
+                proj3Skills[0].projectId,
+                proj3Skills[0].projectId,
+                proj4Skills[0].projectId,
+                proj4Skills[0].projectId,
+        ]
+        record2Skills.skillId == [
+                proj1Skills[0].skillId,
+                proj1Skills[1].skillId,
+                proj2Skills[0].skillId,
+                proj2Skills[1].skillId,
+                proj3Skills[0].skillId,
+                proj3Skills[1].skillId,
+                proj4Skills[0].skillId,
+                proj4Skills[1].skillId,
+        ]
+
+        // other user
+        def otherUserRecord1Skills = otherUserAttempt1Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        otherUserRecord1Skills.projectId == [
+                proj2Skills[0].projectId,
+                proj4Skills[0].projectId,
+        ]
+        otherUserRecord1Skills.skillId == [
+                proj2Skills[3].skillId,
+                proj4Skills[3].skillId,
+        ]
+
+        def otherUserRecord2Skills = otherUserAttempt2Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        otherUserRecord2Skills.projectId == [
+                proj2Skills[0].projectId,
+                proj2Skills[0].projectId,
+                proj4Skills[0].projectId,
+                proj4Skills[0].projectId,
+        ]
+        otherUserRecord2Skills.skillId == [
+                proj2Skills[0].skillId,
+                proj2Skills[1].skillId,
+                proj4Skills[0].skillId,
+                proj4Skills[1].skillId,
+        ]
+
+    }
+
+    def "get current user single attempt - invite-only project skills are not returned for unauthorized users"() {
+        SkillsService rootSkillsService = createRootSkillService()
+
+        List<SkillsService> allUsers = getRandomUserServices(4)
+        SkillsService admin = allUsers[0]
+        SkillsService invitedToAllProjects = allUsers[1]
+        SkillsService invitedToOneProject = allUsers[2]
+        SkillsService otherUser = allUsers[3]
+
+        def survey1 = createSimpleSurvey(admin, 1)
+        def quiz1 = createSimpleQuiz(admin, 2)
+
+        def proj1Skills = createSimpleProject(admin, 1)
+        admin.changeSetting(proj1Skills[0].projectId, Settings.INVITE_ONLY_PROJECT.settingName,
+                [projectId: proj1Skills[0].projectId, setting: Settings.INVITE_ONLY_PROJECT.settingName, value: "true"])
+        def proj2Skills = createSimpleProject(admin, 2)
+        def proj3Skills = createSimpleProject(admin, 3)
+        admin.changeSetting(proj3Skills[0].projectId, Settings.INVITE_ONLY_PROJECT.settingName,
+                [projectId: proj3Skills[0].projectId, setting: Settings.INVITE_ONLY_PROJECT.settingName, value: "true"])
+        def proj4Skills = createSimpleProject(admin, 4)
+
+        String invite1Email = 'invite1@email.foo'
+        String invite2Email = 'invite2@email.foo'
+        String invite3Email = 'invite3@email.foo'
+        admin.inviteUsersToProject(proj1Skills[0].projectId, [validityDuration: "PT5M", recipients: [invite1Email]])
+        admin.inviteUsersToProject(proj3Skills[0].projectId, [validityDuration: "PT5M", recipients: [invite2Email]])
+        admin.inviteUsersToProject(proj1Skills[0].projectId, [validityDuration: "PT5M", recipients: [invite3Email]])
+
+        WaitFor.wait { greenMail.getReceivedMessages().length > 2
+                && EmailUtils.getEmails(greenMail).find { it.recipients.contains(invite1Email) }
+                && EmailUtils.getEmails(greenMail).find { it.recipients.contains(invite2Email) }
+                && EmailUtils.getEmails(greenMail).find { it.recipients.contains(invite3Email) }
+        }
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+        EmailUtils.EmailRes invite1EmailRes = emails.find { it.recipients.contains(invite1Email) }
+        EmailUtils.EmailRes invite2EmailRes = emails.find { it.recipients.contains(invite2Email) }
+        EmailUtils.EmailRes invite3EmailRes = emails.find { it.recipients.contains(invite3Email) }
+        def invite1 = extractInviteFromEmail(invite1EmailRes.html)
+        def invite2 = extractInviteFromEmail(invite2EmailRes.html)
+        def invite3 = extractInviteFromEmail(invite3EmailRes.html)
+        invitedToAllProjects.joinProject(proj1Skills[0].projectId, invite1)
+        invitedToAllProjects.joinProject(proj3Skills[0].projectId, invite2)
+        invitedToOneProject.joinProject(proj1Skills[0].projectId, invite3)
+
+        associate(admin, proj1Skills[0], quiz1)
+        associate(admin, proj1Skills[1], quiz1)
+        associate(admin, proj2Skills[0], quiz1)
+        associate(admin, proj2Skills[1], quiz1)
+        associate(admin, proj3Skills[0], quiz1)
+        associate(admin, proj3Skills[1], quiz1)
+        associate(admin, proj4Skills[0], quiz1)
+        associate(admin, proj4Skills[1], quiz1)
+
+        associate(admin, proj1Skills[3], survey1)
+        associate(admin, proj2Skills[3], survey1)
+        associate(admin, proj3Skills[3], survey1)
+        associate(admin, proj4Skills[3], survey1)
+
+        def invitedToAllProjectsAttempt1Id = runQuizOrSurvey(invitedToAllProjects, 1)
+        def invitedToAllProjectsAttempt2Id = runQuizOrSurvey(invitedToAllProjects, 2)
+
+        def invitedToOneProjectAttempt1Id = runQuizOrSurvey(invitedToOneProject, 1)
+        def invitedToOneProjectAttempt2Id = runQuizOrSurvey(invitedToOneProject, 2)
+
+        def otherUserAttempt1Id = runQuizOrSurvey(otherUser, 1)
+        def otherUserAttempt2Id = runQuizOrSurvey(otherUser, 2)
+
+        when:
+        def invitedToAllProjectsAttempt1Res = invitedToAllProjects.getCurrentUserSingleQuizAttempt(invitedToAllProjectsAttempt1Id)
+        def invitedToAllProjectsAttempt2Res = invitedToAllProjects.getCurrentUserSingleQuizAttempt(invitedToAllProjectsAttempt2Id)
+        def invitedToOneProjectAttempt1Res = invitedToOneProject.getCurrentUserSingleQuizAttempt(invitedToOneProjectAttempt1Id)
+        def invitedToOneProjectAttempt2Res = invitedToOneProject.getCurrentUserSingleQuizAttempt(invitedToOneProjectAttempt2Id)
+        def otherUserAttempt1Res = otherUser.getCurrentUserSingleQuizAttempt(otherUserAttempt1Id)
+        def otherUserAttempt2Res = otherUser.getCurrentUserSingleQuizAttempt(otherUserAttempt2Id)
+
+        def invitedToAllRes = invitedToAllProjects.getCurrentUserQuizAttempts()
+        def invitedToOneProjectRes = invitedToOneProject.getCurrentUserQuizAttempts()
+        def otherUserRes = otherUser.getCurrentUserQuizAttempts()
+        then:
+        def record1Skills = invitedToAllProjectsAttempt1Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        record1Skills.projectId == [
+                proj1Skills[0].projectId,
+                proj2Skills[0].projectId,
+                proj3Skills[0].projectId,
+                proj4Skills[0].projectId,
+        ]
+        record1Skills.skillId == [
+                proj1Skills[3].skillId,
+                proj2Skills[3].skillId,
+                proj3Skills[3].skillId,
+                proj4Skills[3].skillId,
+        ]
+
+        def record2Skills = invitedToAllProjectsAttempt2Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        record2Skills.projectId == [
+                proj1Skills[0].projectId,
+                proj1Skills[0].projectId,
+                proj2Skills[0].projectId,
+                proj2Skills[0].projectId,
+                proj3Skills[0].projectId,
+                proj3Skills[0].projectId,
+                proj4Skills[0].projectId,
+                proj4Skills[0].projectId,
+        ]
+        record2Skills.skillId == [
+                proj1Skills[0].skillId,
+                proj1Skills[1].skillId,
+                proj2Skills[0].skillId,
+                proj2Skills[1].skillId,
+                proj3Skills[0].skillId,
+                proj3Skills[1].skillId,
+                proj4Skills[0].skillId,
+                proj4Skills[1].skillId,
+        ]
+
+        // invitedToOneProject user
+        def invitedToOneProjRecord1Skills = invitedToOneProjectAttempt1Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        invitedToOneProjRecord1Skills.projectId == [
+                proj1Skills[0].projectId,
+                proj2Skills[0].projectId,
+                proj4Skills[0].projectId,
+        ]
+        invitedToOneProjRecord1Skills.skillId == [
+                proj1Skills[3].skillId,
+                proj2Skills[3].skillId,
+                proj4Skills[3].skillId,
+        ]
+
+        def invitedToOneProjRecord2Skills = invitedToOneProjectAttempt2Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        invitedToOneProjRecord2Skills.projectId == [
+                proj1Skills[0].projectId,
+                proj1Skills[0].projectId,
+                proj2Skills[0].projectId,
+                proj2Skills[0].projectId,
+                proj4Skills[0].projectId,
+                proj4Skills[0].projectId,
+        ]
+        invitedToOneProjRecord2Skills.skillId == [
+                proj1Skills[0].skillId,
+                proj1Skills[1].skillId,
+                proj2Skills[0].skillId,
+                proj2Skills[1].skillId,
+                proj4Skills[0].skillId,
+                proj4Skills[1].skillId,
+        ]
+
+
+        // other user
+        def otherUserRecord1Skills = otherUserAttempt1Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        otherUserRecord1Skills.projectId == [
+                proj2Skills[0].projectId,
+                proj4Skills[0].projectId,
+        ]
+        otherUserRecord1Skills.skillId == [
+                proj2Skills[3].skillId,
+                proj4Skills[3].skillId,
+        ]
+
+        def otherUserRecord2Skills = otherUserAttempt2Res.associatedSkills.sort { "${it.projectId}-${it.skillId}" }
+        otherUserRecord2Skills.projectId == [
+                proj2Skills[0].projectId,
+                proj2Skills[0].projectId,
+                proj4Skills[0].projectId,
+                proj4Skills[0].projectId,
+        ]
+        otherUserRecord2Skills.skillId == [
+                proj2Skills[0].skillId,
+                proj2Skills[1].skillId,
+                proj4Skills[0].skillId,
+                proj4Skills[1].skillId,
+        ]
+
+    }
 }
 
 
