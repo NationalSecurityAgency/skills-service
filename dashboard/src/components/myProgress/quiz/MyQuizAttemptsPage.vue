@@ -33,6 +33,7 @@ import HighlightedValue from "@/components/utils/table/HighlightedValue.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import BackToMyProgressBtn from "@/components/myProgress/BackToMyProgressBtn.vue";
 import {useStorage} from "@vueuse/core";
+import QuizAssociatedSkills from "@/components/quiz/runsHistory/QuizAssociatedSkills.vue";
 
 const responsive = useResponsiveBreakpoints()
 const colors = useColors()
@@ -94,6 +95,7 @@ const onFilter = (filterEvent) => {
 }
 
 const hasAttempts = computed(() => attemptHistory.value.length > 0)
+
 </script>
 
 <template>
@@ -173,6 +175,7 @@ const hasAttempts = computed(() => attemptHistory.value.length > 0)
               <template #body="slotProps">
                 <router-link data-cy="viewQuizAttempt"
                              :to="{ name:'MySingleQuizAttemptPage', params: { attemptId: slotProps.data.attemptId }}"
+                             class="underline"
                              :aria-label="`View attempt for ${slotProps.data.quizName} quiz`">
                   <highlighted-value :value="slotProps.data.quizName"
                                      :filter="filters.global.value"/>
@@ -199,10 +202,22 @@ const hasAttempts = computed(() => attemptHistory.value.length > 0)
                 <QuizRunStatus :quiz-type="slotProps.data.quizType" :status="slotProps.data.status"/>
               </template>
             </Column>
+            <Column header="Skills" field="associatedSkills" :sortable="false"
+                    :class="{'flex': responsive.md.value }">
+              <template #header>
+                <div class="mr-2"><i class="fa-solid fa-graduation-cap" :class="colors.getTextClass(3)"
+                                     aria-hidden="true"></i></div>
+              </template>
+              <template #body="slotProps">
+                <quiz-associated-skills v-if="slotProps.data.associatedSkills"
+                                        :associated-skills="slotProps.data.associatedSkills" :vertically-compact="false"/>
+                <div v-else><span>N/A</span></div>
+              </template>
+            </Column>
             <Column header="Runtime" field="completed"
                     :class="{'flex': responsive.md.value }">
               <template #header>
-                <div class="mr-2"><i class="fas fa-user-clock" :class="colors.getTextClass(3)"
+                <div class="mr-2"><i class="fas fa-user-clock" :class="colors.getTextClass(4)"
                                      aria-hidden="true"></i></div>
               </template>
               <template #body="slotProps">
@@ -215,7 +230,7 @@ const hasAttempts = computed(() => attemptHistory.value.length > 0)
             <Column header="Started" field="started" :sortable="true"
                     :class="{'flex': responsive.md.value }">
               <template #header>
-                <div class="mr-2"><i class="fas fa-clock" :class="colors.getTextClass(3)"
+                <div class="mr-2"><i class="fas fa-clock" :class="colors.getTextClass(5)"
                                      aria-hidden="true"></i></div>
               </template>
               <template #body="slotProps">

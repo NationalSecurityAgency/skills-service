@@ -155,5 +155,45 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
               and qToSToOrigProj.quiz_ref_id = qToSToOtherProj.quiz_ref_id
             and otherProjSkill.id = qToSToOtherProj.skill_ref_id;''', nativeQuery = true)
     List<ProjectIdAndSkillId> getOtherProjectsSkillRefIdsWithQuizzesInThisProject(String projectId)
+
+
+    static interface AssociatedSkill {
+        String getQuizId()
+        String getSkillId()
+        String getSkillName()
+        String getProjectId()
+        String getProjectName()
+        String getSubjectId()
+        boolean isInviteOnlyProj()
+        boolean isUserCommunityProj()
+    }
+
+    @Nullable
+    @Query(value='''select qd.quiz_id as quizId, 
+                       sd.skill_id as skillId,
+                       sd.name as skillName,
+                       pd.project_id as projectId,
+                       pd.name as projectName,
+                       subject.skill_id as subjectId,
+                       COALESCE(bool(exists(select 1
+                              from settings s
+                              where pd.project_id = s.project_id
+                                and s.setting = 'invite_only'
+                                and s.value = 'true'
+                                and s.type = 'Project')), false) as inviteOnlyProj,
+                       COALESCE(bool(exists(select 1
+                              from settings s
+                              where pd.project_id = s.project_id
+                                and s.setting = 'user_community'
+                                and s.value = 'true'
+                                and s.type = 'Project')), false) as userCommunityProj
+                from skill_definition sd
+                         join quiz_to_skill_definition qtsd on sd.id = qtsd.skill_ref_id
+                         join quiz_definition qd on qd.id = qtsd.quiz_ref_id
+                         join project_definition pd on sd.project_id = pd.project_id
+                         join skill_relationship_definition srd on sd.id = srd.child_ref_id and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+                         join skill_definition subject on srd.parent_ref_id = subject.id and subject.type = 'Subject'
+                where qd.quiz_id in ?1''', nativeQuery = true)
+    List<AssociatedSkill> findAssociatedSkillsWhereQuizIdIn(List<String> quizIds)
 }
 

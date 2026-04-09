@@ -37,6 +37,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.request.model.*
 import skills.controller.result.model.*
+import skills.quizLoading.QuizAssociatedSkillsService
 import skills.quizLoading.QuizSettings
 import skills.services.*
 import skills.services.admin.DataIntegrityExceptionHandlers
@@ -148,6 +149,9 @@ class QuizDefService {
 
     @Autowired
     UserCommunityService userCommunityService
+
+    @Autowired
+    QuizAssociatedSkillsService quizAssociatedSkillsService
 
     @Autowired
     QuizVideoService quizVideoService
@@ -1033,7 +1037,9 @@ class QuizDefService {
             throw new SkillQuizException("User [${currentUser.username}] does not have access to quiz [${quizAttemptId}]", quizDef.quizId, ErrorCode.AccessDenied)
         }
 
-        return getAttemptGradedResult(quizDef, userQuizAttempt, false)
+        UserGradedQuizQuestionsResult res =  getAttemptGradedResult(quizDef, userQuizAttempt, false)
+        res.associatedSkills = quizAssociatedSkillsService.getAssociatedSkills([quizDef.quizId])
+        return res
     }
 
 

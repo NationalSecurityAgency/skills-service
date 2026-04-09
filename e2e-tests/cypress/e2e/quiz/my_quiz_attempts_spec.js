@@ -49,9 +49,151 @@ describe('Display History of My quiz attempts Tests', () => {
             }, {
                 colIndex: 2,
                 value: 'Needs Grading'
+            }, {
+                colIndex: 3,
+                value: 'N/A'
             }],
         ], 5);
 
+    });
+
+    it('quiz and surveys with associated skills', () => {
+        cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
+        cy.createQuizQuestionDef(1, 1)
+
+        cy.createQuizDef(2, {name: 'Science Knowledge'});
+        cy.createQuizQuestionDef(2, 1)
+
+        cy.createQuizDef(3, {name: 'Lonely Duck'});
+        cy.createQuizQuestionDef(3, 1)
+
+        cy.createQuizDef(4, {name: 'Natural Sciences'});
+        cy.createQuizQuestionDef(4, 1)
+
+        cy.createProject(1, {name: 'Learn lots of Trivia'})
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, {
+            name: 'Fun Facts', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz1',
+        });
+        cy.createSkill(1, 1, 2, {
+            name: 'Research Skills', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz2',
+        });
+        cy.createSkill(1, 1, 3, {
+            name: 'Data Analysis', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz2',
+        });
+        cy.createSkill(1, 1, 4, {
+            name: 'Logical Reasoning', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+
+        cy.createProject(2, {name: 'Critical Thinking'})
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 1, {
+            name: 'Hypothesis Testing', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+        cy.createSkill(2, 1, 2, {
+            name: 'Research Skills', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+        cy.createSkill(2, 1, 3, {
+            name: 'Experimental Design', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+        cy.createSkill(2, 1, 4, {
+            name: 'Applied Science', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+        cy.createSkill(2, 1, 5, {
+            name: 'Natural Sciences', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+        cy.createSkill(2, 1, 6, {
+            name: 'Empirical Analysis', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+
+        cy.runQuizForUser(4, defaultUser, [{selectedIndex: [1]}], true)
+        cy.runQuizForUser(1, defaultUser, [{selectedIndex: [0]}], true)
+        cy.runQuizForUser(2, defaultUser, [{selectedIndex: [0]}], true)
+        cy.runQuizForUser(3, defaultUser, [{selectedIndex: [1]}], true)
+        cy.runQuizForUser(4, defaultUser, [{selectedIndex: [0]}], true)
+
+        cy.visit('/progress-and-rankings/my-quiz-attempts');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'Natural Sciences'},
+                { colIndex: 3, value: 'Applied Science'}, { colIndex: 3, value: 'in Critical Thinking'},
+                { colIndex: 3, value: 'Empirical Analysis'}, { colIndex: 3, value: 'View 5 More'}],
+            [{ colIndex: 0, value: 'Lonely Duck'},  { colIndex: 3, value: 'N/A'}],
+            [{ colIndex: 0, value: 'Science Knowledge'},
+                { colIndex: 3, value: 'Data Analysis'}, { colIndex: 3, value: 'in Learn lots of Trivia'},
+                { colIndex: 3, value: 'Research Skills'}],
+            [{ colIndex: 0, value: 'Test Your Trivia Knowledge'},
+                { colIndex: 3, value: 'Fun Facts'}, { colIndex: 3, value: 'in Learn lots of Trivia'}, ],
+            [{ colIndex: 0, value: 'Natural Sciences'},
+                { colIndex: 3, value: 'Applied Science'}, { colIndex: 3, value: 'in Critical Thinking'},
+                { colIndex: 3, value: 'Empirical Analysis'}, { colIndex: 3, value: 'View 5 More'}],
+        ], 5);
+
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="expandOrCollapseSkills"]')
+        cy.get('[data-p-index="1"] [data-cy="associatedSkills"] [data-cy="expandOrCollapseSkills"]').should('not.exist')
+        cy.get('[data-p-index="2"] [data-cy="associatedSkills"] [data-cy="expandOrCollapseSkills"]').should('not.exist')
+        cy.get('[data-p-index="3"] [data-cy="associatedSkills"] [data-cy="expandOrCollapseSkills"]').should('not.exist')
+        cy.get('[data-p-index="4"] [data-cy="associatedSkills"] [data-cy="expandOrCollapseSkills"]')
+
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="expandOrCollapseSkills"]').contains('View 5 More')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill4"] [data-cy="viewSkillLink"]').should( 'have.text','Applied Science')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill6"] [data-cy="viewSkillLink"]').should( 'have.text','Empirical Analysis')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill3"]').should('not.exist')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill1"]').should('not.exist')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill2"]').should('not.exist')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill5"]').should('not.exist')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj1-skill4"]').should('not.exist')
+
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="expandOrCollapseSkills"]').click()
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="expandOrCollapseSkills"]').contains('Show Less')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill4"] [data-cy="viewSkillLink"]').should( 'have.text', 'Applied Science')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill4"] [data-cy="projectName"]').should( 'have.text','Critical Thinking')
+
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill6"] [data-cy="viewSkillLink"]').should('have.text', 'Empirical Analysis')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill6"] [data-cy="projectName"]').should('have.text','Critical Thinking')
+
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill3"] [data-cy="viewSkillLink"]').should('have.text', 'Experimental Design')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill3"] [data-cy="projectName"]').should('have.text','Critical Thinking')
+
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill1"] [data-cy="viewSkillLink"]').should('have.text', 'Hypothesis Testing')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill1"] [data-cy="projectName"]').should('have.text','Critical Thinking')
+
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj1-skill4"] [data-cy="viewSkillLink"]').should('have.text', 'Logical Reasoning')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj1-skill4"] [data-cy="projectName"]').should('have.text','Learn lots of Trivia')
+
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill5"] [data-cy="viewSkillLink"]').should('have.text', 'Natural Sciences')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill5"] [data-cy="projectName"]').should('have.text','Critical Thinking')
+
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill2"] [data-cy="viewSkillLink"]').should('have.text', 'Research Skills')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill2"] [data-cy="projectName"]').should('have.text','Critical Thinking')
+
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="expandOrCollapseSkills"]').click()
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="expandOrCollapseSkills"]').contains('View 5 More')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill3"]').should('not.exist')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill1"]').should('not.exist')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill2"]').should('not.exist')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill5"]').should('not.exist')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj1-skill4"]').should('not.exist')
+
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill4"]  [data-cy="viewSkillLink"]').click()
+        cy.get('[data-cy="title"]').contains('Skill Overview')
+        cy.get('[data-cy="skillProgressTitle"]').contains('Applied Science')
+        cy.go('back')
+
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="expandOrCollapseSkills"]').click()
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="expandOrCollapseSkills"]').contains('Show Less')
+        cy.get('[data-p-index="0"] [data-cy="associatedSkills"] [data-cy="associatedSkill-proj1-skill4"] [data-cy="viewSkillLink"]').click()
+        cy.get('[data-cy="title"]').contains('Skill Overview')
+        cy.get('[data-cy="skillProgressTitle"]').contains('Logical Reasoning')
     });
 
     it('paging with quizzes and surveys', () => {
@@ -235,6 +377,139 @@ describe('Display History of My quiz attempts Tests', () => {
       cy.get('[data-cy="quizName"]').should('have.text', 'This is survey 1')
       cy.get('[data-cy="quizRunStatus"]').contains('Completed')
       cy.get('[data-cy="runQuizAgainBtn"]').should('not.be.exist')
+    });
+
+    it('single quiz run with associated skills', () => {
+        cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
+        cy.createQuizQuestionDef(1, 1)
+
+        cy.createQuizDef(2, {name: 'Science Knowledge'});
+        cy.createQuizQuestionDef(2, 1)
+
+        cy.createQuizDef(3, {name: 'Lonely Duck'});
+        cy.createQuizQuestionDef(3, 1)
+
+        cy.createQuizDef(4, {name: 'Natural Sciences'});
+        cy.createQuizQuestionDef(4, 1)
+
+        cy.createProject(1, {name: 'Learn lots of Trivia'})
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, {
+            name: 'Fun Facts', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz1',
+        });
+        cy.createSkill(1, 1, 2, {
+            name: 'Research Skills', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz2',
+        });
+        cy.createSkill(1, 1, 3, {
+            name: 'Data Analysis', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz2',
+        });
+        cy.createSkill(1, 1, 4, {
+            name: 'Logical Reasoning', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+
+        cy.createProject(2, {name: 'Critical Thinking'})
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1, 1, {
+            name: 'Hypothesis Testing', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+        cy.createSkill(2, 1, 2, {
+            name: 'Research Skills', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+        cy.createSkill(2, 1, 3, {
+            name: 'Experimental Design', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+        cy.createSkill(2, 1, 4, {
+            name: 'Applied Science', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+        cy.createSkill(2, 1, 5, {
+            name: 'Natural Sciences', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+        cy.createSkill(2, 1, 6, {
+            name: 'Empirical Analysis', pointIncrement: '150', numPerformToCompletion: 1,
+            selfReportingType: 'Quiz', quizId: 'quiz4',
+        });
+
+        cy.runQuizForUser(4, defaultUser, [{selectedIndex: [1]}], true)
+        cy.runQuizForUser(1, defaultUser, [{selectedIndex: [0]}], true)
+        cy.runQuizForUser(2, defaultUser, [{selectedIndex: [0]}], true)
+        cy.runQuizForUser(3, defaultUser, [{selectedIndex: [1]}], true)
+
+        cy.visit('/progress-and-rankings/my-quiz-attempts');
+        cy.get(`${tableSelector} [data-p-index="1"] [data-cy="viewQuizAttempt"]`).first().click()
+        cy.get('[data-cy="quizName"]').should('have.text', 'Science Knowledge')
+        cy.get('[data-cy="quizRunStatus"]').contains('Passed')
+
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj1-skill2"] [data-cy="viewSkillLink"]')
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj1-skill3"] [data-cy="viewSkillLink"]')
+        cy.get('[data-cy="associatedSkills"] a').should('have.length', 2)
+        cy.get('[data-cy="expandOrCollapseSkills"]').should('not.exist')
+
+        cy.go('back')
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="viewQuizAttempt"]`).first().click()
+        cy.get('[data-cy="quizName"]').should('have.text', 'Lonely Duck')
+        cy.get('[data-cy="quizRunStatus"]').contains('Failed')
+        cy.get('[data-cy="associatedSkills"]').should('not.exist')
+        cy.get('[data-cy="expandOrCollapseSkills"]').should('not.exist')
+
+        cy.go('back')
+        cy.get(`${tableSelector} [data-p-index="2"] [data-cy="viewQuizAttempt"]`).first().click()
+        cy.get('[data-cy="quizName"]').should('have.text', 'Test Your Trivia Knowledge')
+        cy.get('[data-cy="quizRunStatus"]').contains('Passed')
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj1-skill1"]')
+        cy.get('[data-cy="associatedSkills"] a').should('have.length', 1)
+        cy.get('[data-cy="expandOrCollapseSkills"]').should('not.exist')
+
+        cy.go('back')
+        cy.get(`${tableSelector} [data-p-index="3"] [data-cy="viewQuizAttempt"]`).first().click()
+        cy.get('[data-cy="quizName"]').should('have.text', 'Natural Sciences')
+        cy.get('[data-cy="quizRunStatus"]').contains('Failed')
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill4"]')
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill6"]')
+        cy.get('[data-cy="associatedSkills"] a').should('have.length', 2)
+        cy.get('[data-cy="expandOrCollapseSkills"]').contains('View 5 More')
+
+        cy.get('[data-cy="expandOrCollapseSkills"]').click()
+        cy.get('[data-cy="expandOrCollapseSkills"]').contains('Show Less')
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill4"] [data-cy="viewSkillLink"]').should( 'have.text', 'Applied Science')
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill4"] [data-cy="projectName"]').should( 'have.text','Critical Thinking')
+
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill6"] [data-cy="viewSkillLink"]').should('have.text', 'Empirical Analysis')
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill6"] [data-cy="projectName"]').should('have.text','Critical Thinking')
+
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill3"] [data-cy="viewSkillLink"]').should('have.text', 'Experimental Design')
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill3"] [data-cy="projectName"]').should('have.text','Critical Thinking')
+
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill1"] [data-cy="viewSkillLink"]').should('have.text', 'Hypothesis Testing')
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill1"] [data-cy="projectName"]').should('have.text','Critical Thinking')
+
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj1-skill4"] [data-cy="viewSkillLink"]').should('have.text', 'Logical Reasoning')
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj1-skill4"] [data-cy="projectName"]').should('have.text','Learn lots of Trivia')
+
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill5"] [data-cy="viewSkillLink"]').should('have.text', 'Natural Sciences')
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill5"] [data-cy="projectName"]').should('have.text','Critical Thinking')
+
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill2"] [data-cy="viewSkillLink"]').should('have.text', 'Research Skills')
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill2"] [data-cy="projectName"]').should('have.text','Critical Thinking')
+
+        cy.get('[data-cy="associatedSkills"] a').should('have.length', 7)
+
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj1-skill4"] [data-cy="viewSkillLink"]').click()
+        cy.get('[data-cy="title"]').contains('Skill Overview')
+        cy.get('[data-cy="skillProgressTitle"]').contains('Logical Reasoning')
+        cy.go('back')
+
+        cy.get('[data-cy="associatedSkills"] [data-cy="associatedSkill-proj2-skill6"] [data-cy="viewSkillLink"]').click()
+        cy.get('[data-cy="title"]').contains('Skill Overview')
+        cy.get('[data-cy="skillProgressTitle"]').contains('Empirical Analysis')
     });
 
 });

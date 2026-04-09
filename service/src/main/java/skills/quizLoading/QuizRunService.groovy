@@ -29,13 +29,13 @@ import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.PublicProps
-import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.controller.PublicPropsBasedValidator
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.result.model.MyQuizAttempt
+import skills.controller.result.model.QuizAttemptRowResult
 import skills.controller.result.model.QuizSkillResult
 import skills.controller.result.model.TableResult
 import skills.quizLoading.model.*
@@ -83,6 +83,9 @@ class QuizRunService {
 
     @Autowired
     UserQuizAttemptRepo quizAttemptRepo
+
+    @Autowired
+    QuizAssociatedSkillsService quizAssociatedSkillsService
 
     @Autowired
     LockingService lockingService
@@ -1062,12 +1065,34 @@ class QuizRunService {
 
     @Transactional
     TableResult getCurrentUserQuizRuns(String quizNameQuery, PageRequest pageRequest) {
-        UserInfo currentUser = userInfoService.currentUser
-        Boolean isUCMember = userCommunityService.isUserCommunityMember(currentUser.username) ?: false
-        Page<MyQuizAttempt> quizAttemptsPage = quizAttemptRepo.findUserQuizAttempts(currentUser.username, quizNameQuery ?: "", isUCMember, pageRequest)
+        String userId = userInfoService.currentUserId
+        Boolean isUCMember = userCommunityService.isUserCommunityMember(userId) ?: false
+        Page<MyQuizAttempt> quizAttemptsPage = quizAttemptRepo.findUserQuizAttempts(userId, quizNameQuery ?: "", isUCMember, pageRequest)
         long count = quizAttemptsPage.getTotalElements()
         List<MyQuizAttempt> quizAttempts = quizAttemptsPage.getContent()
-        return new TableResult(totalCount: count, data: quizAttempts, count: count)
+        List<QuizAttemptRowResult> quizAttemptRowResults = quizAttempts.collect {
+            new QuizAttemptRowResult(
+                attemptId: it.attemptId,
+                started: it.started,
+                completed: it.completed,
+                status: it.status,
+                quizName: it.quizName,
+                quizId: it.quizId,
+                quizType: it.quizType
+            )
+        }
+
+        List<String> quizIds = quizAttempts.collect { it.quizId }.unique()
+        List<QuizAttemptRowResult.AssociatedSkill> associatedSkills = quizAssociatedSkillsService.getAssociatedSkills(quizIds)
+
+        if (associatedSkills) {
+            Map<String, List<QuizAttemptRowResult.AssociatedSkill>> associatedSkillsByQuizId = associatedSkills.groupBy { it.quizId }
+            quizAttemptRowResults.each { quizAttemptRowResult ->
+                quizAttemptRowResult.associatedSkills = associatedSkillsByQuizId.get(quizAttemptRowResult.quizId)?.sort { it.skillName }
+            }
+        }
+
+        return new TableResult(totalCount: count, data: quizAttemptRowResults, count: count)
     }
 
     QuizDef getQuizDef(String quizId) {

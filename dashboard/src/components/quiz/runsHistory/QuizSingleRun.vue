@@ -17,13 +17,14 @@ limitations under the License.
 
 import QuizRunQuestionCard from "@/components/quiz/runsHistory/QuizRunQuestionCard.vue";
 import QuizRunStatus from "@/components/quiz/runsHistory/QuizRunStatus.vue";
-import {computed} from "vue";
+import {computed, ref} from "vue";
 import {useUserTagsUtils} from "@/components/utils/UseUserTagsUtils.js";
 import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 import QuizType from "@/skills-display/components/quiz/QuizType.js";
 import QuizSingleRunCard from "@/components/quiz/runsHistory/QuizSingleRunCard.vue";
 import QuizCompletedMessage from "@/skills-display/components/quiz/QuizCompletedMessage.vue";
+import QuizAssociatedSkills from "@/components/quiz/runsHistory/QuizAssociatedSkills.vue";
 
 const props = defineProps({
   runInfo: Object,
@@ -46,7 +47,11 @@ const props = defineProps({
   showAiGradingMeta: {
     type: Boolean,
     default: false,
-  }
+  },
+  showAssociatedSkills: {
+    type: Boolean,
+    default: false,
+  },
 })
 const emit = defineEmits(['need-to-reload'])
 const userTagsUtils = useUserTagsUtils();
@@ -79,6 +84,8 @@ const canTryAgain = computed(() => {
 const reloadRunInfo = () => {
   emit('need-to-reload')
 }
+
+
 </script>
 
 <template>
@@ -154,6 +161,14 @@ const reloadRunInfo = () => {
       </div>
     </div>
 
+    <Card v-if="showAssociatedSkills && runInfo.associatedSkills && runInfo.associatedSkills.length > 0" class="my-4">
+      <template #title>
+        <span class="uppercase text-muted-color text-md">Associated Skill(s)</span>
+      </template>
+      <template #content>
+        <quiz-associated-skills :associatedSkills="runInfo.associatedSkills" class="ml-2"/>
+      </template>
+    </Card>
     <div v-if="runInfo.questions" v-for="(q, index) in runInfo.questions" :key="q.id">
       <div :class="{ 'mt-4' : showCards }">
         <QuizRunQuestionCard :question="q" :question-num="q.questionNum" :quiz-type="runInfo.quizType" :show-ai-grading-meta="showAiGradingMeta" @need-to-reload="reloadRunInfo"/>
