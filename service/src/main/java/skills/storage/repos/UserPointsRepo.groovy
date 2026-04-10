@@ -1037,7 +1037,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         group by ut.user_id
     )
     select usersAlias.user_id as userId,
-    COALESCE(skillAchievements.mostRecentAchievedOn, levelAchievements.mostRecentAchievedOn) as lastUpdated,
+    GREATEST(skillAchievements.mostRecentAchievedOn, levelAchievements.mostRecentAchievedOn) as lastUpdated,
     ua.user_id_for_display                                                                   as userIdForDisplay,
     ua.dn                                                                                    as dn,
     ua.first_name                                                                            as firstName,
