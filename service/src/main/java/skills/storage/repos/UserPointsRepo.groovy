@@ -1006,7 +1006,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             group by user_id
     ),
     projectMaxLevelAchievements AS (
-            select ua.user_id, ua.project_id, max(LEAST(ua.level,levelsConf.level)) as maxLevel, max(ua.achieved_on) AS mostRecentAchievedOn
+            select ua.user_id, ua.project_id, max(LEAST(ua.level,levelsConf.level)) as maxLevel, max(ua.achieved_on) as mostRecentLevelAchievedOn
             from user_achievement ua
             join levelsConf levelsConf on (levelsConf.project_id = ua.project_id)
             where
@@ -1016,8 +1016,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             group by ua.user_id, ua.project_id
     ),
     levelAchievements AS (
-            select user_id, SUM(maxLevel) maxLevel, mostRecentAchievedOn from projectMaxLevelAchievements
-            group by user_id, mostRecentAchievedOn
+            select user_id, SUM(maxLevel) maxLevel, max(mostRecentLevelAchievedOn) as mostRecentLevelAchievedOn from projectMaxLevelAchievements
+            group by user_id
     ),
     skillAchievements AS (
             SELECT
@@ -1037,7 +1037,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
         group by ut.user_id
     )
     select usersAlias.user_id as userId,
-    GREATEST(skillAchievements.mostRecentAchievedOn, levelAchievements.mostRecentAchievedOn) as lastUpdated,
+    GREATEST(skillAchievements.mostRecentAchievedOn, levelAchievements.mostRecentLevelAchievedOn) as lastUpdated,
     ua.user_id_for_display                                                                   as userIdForDisplay,
     ua.dn                                                                                    as dn,
     ua.first_name                                                                            as firstName,
