@@ -331,7 +331,7 @@ const updatedWatchProgress = (progress) => {
 }
 const fillInCaptionsExample = () => {
   if (!videoConf.value.captions) {
-    videoConf.value.captions = 'WEBVTT\n'
+    const exampleCaptions = 'WEBVTT\n'
         + '\n'
         + '1\n'
         + '00:00:00.500 --> 00:00:04.000\n'
@@ -344,6 +344,8 @@ const fillInCaptionsExample = () => {
         + '3\n'
         + '00:00:08.100 --> 00:00:12.500\n'
         + 'Last caption';
+    videoConf.value.captions = exampleCaptions;
+    setFieldValue('videoCaptions', exampleCaptions);
     announcer.polite('Example captions were added');
     nextTick(() => validate());
   }
@@ -428,7 +430,7 @@ const schema = yup.object().shape({
       .label('Video Transcript'),
 })
 
-const { values, meta, handleSubmit, resetForm, validate, errors } = useForm({ validationSchema: schema, })
+const { values, meta, handleSubmit, resetForm, validate, errors, setFieldValue } = useForm({ validationSchema: schema, })
 const hasBeenResized = ref(false);
 const unsavedVideoSizeChanges = ref(false)
 
@@ -567,7 +569,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
                   aria-label="Enter captions using The Web Video Text Tracks (WebVTT) format (optional)"
                   rows="6"
                   max-rows="6"
-                  :max-num-chars="appConfig.maxVideoCaptionsLength"
+                  :max-num-chars="parseInt(appConfig.maxVideoCaptionsLength)"
                   name="videoCaptions"
                   data-cy="videoCaptions"
                   :disabled="isReadOnly"
@@ -587,7 +589,7 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
                   aria-label="Please enter the transcript here. The transcript will be available for download (optional)"
                   rows="6"
                   max-rows="6"
-                  :max-num-chars="appConfig.maxVideoTranscriptLength"
+                  :max-num-chars="parseInt(appConfig.maxVideoTranscriptLength)"
                   name="videoTranscript"
                   data-cy="videoTranscript"
                   :disabled="isReadOnly"
