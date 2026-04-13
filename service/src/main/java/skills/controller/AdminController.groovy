@@ -1121,13 +1121,14 @@ class AdminController {
                                 @RequestParam Boolean ascending,
                                 @RequestParam int minimumPoints,
                                 @RequestParam(required = false, defaultValue = "100") int maximumPoints,
+                                @RequestParam(required = false, defaultValue = "true") boolean includeImported,
                                 @RequestParam String userTagFilter) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
         SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest, minimumPoints, maximumPoints, userTagFilter)
+        return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest, minimumPoints, maximumPoints, userTagFilter, includeImported)
     }
 
     @GetMapping(value = "/projects/{projectId}/users/count")
@@ -1145,6 +1146,7 @@ class AdminController {
                                     @RequestParam Boolean ascending,
                                     @RequestParam int minimumPoints,
                                     @RequestParam(required = false, defaultValue = "100") int maximumPoints,
+                                    @RequestParam(required = false, defaultValue = "true") boolean includeImported,
                                     @RequestParam String userTagFilter) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
@@ -1158,6 +1160,7 @@ class AdminController {
         mav.addObject(UserProgressExportResult.MINIMUM_POINTS, minimumPoints)
         mav.addObject(UserProgressExportResult.MAXIMUM_POINTS, maximumPoints)
         mav.addObject(UserProgressExportResult.PAGE_REQUEST, pageRequest)
+        mav.addObject(UserProgressExportResult.INCLUDE_IMPORTED, includeImported)
         return mav;
     }
 

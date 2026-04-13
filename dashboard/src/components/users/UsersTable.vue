@@ -64,6 +64,7 @@ const pageSize = useStorage('usersTable-pageSize', 10)
 const possiblePageSizes = [5, 10, 15, 20, 50]
 const sortInfo = ref({ sortOrder: -1, sortBy: 'lastUpdated' })
 const selectedRows = ref([])
+const excludeImported = useStorage('usersTable-excludeImported', false)
 
 const maximumProgress = computed(() => {
   return totalPoints.value + totalLevels.value;
@@ -174,6 +175,7 @@ const loadData = () => {
     minimumPoints: filters.value.progress[0],
     maximumPoints: filters.value.progress[1],
     userTagFilter: filters.value.userTagFilter,
+    includeImported: !excludeImported.value,
   }).then((res) => {
     data.value = res.data
     totalRows.value = res.count
@@ -315,23 +317,28 @@ const archiveUsers = () => {
           </div>
         </template>
         <template v-if="isProjectLevel || isGlobalBadgePage" #header>
-          <div class="flex justify-end flex-wrap">
-            <SkillsButton
-                v-if="!projConfig.isReadOnlyProj && isProjectLevel"
-                class="mr-2"
-                :disabled="selectedRows <= 0"
-                size="small"
-                icon="fas fa-archive"
-                label="Archive"
-                @click="archiveUsers"
-                data-cy="archiveUsersTableBtn" />
-            <SkillsButton
-                :disabled="totalRows <= 0"
-                size="small"
-                icon="fas fa-download"
-                label="Export"
-                @click="exportUsers"
-                data-cy="exportUsersTableBtn" />
+          <div class="flex gap-2 flex-wrap">
+            <div class="flex-1 flex gap-1 items-center">
+              <ToggleSwitch inputId="excludeImported" v-model="excludeImported" @change="loadData" data-cy="excludeImportedToggle"/><label for="excludeImported">Exclude Users that only earned points in imported skills</label>
+            </div>
+            <div>
+              <SkillsButton
+                  v-if="!projConfig.isReadOnlyProj && isProjectLevel"
+                  class="mr-2"
+                  :disabled="selectedRows <= 0"
+                  size="small"
+                  icon="fas fa-archive"
+                  label="Archive"
+                  @click="archiveUsers"
+                  data-cy="archiveUsersTableBtn" />
+              <SkillsButton
+                  :disabled="totalRows <= 0"
+                  size="small"
+                  icon="fas fa-download"
+                  label="Export"
+                  @click="exportUsers"
+                  data-cy="exportUsersTableBtn" />
+            </div>
           </div>
         </template>
         <Column v-if="isProjectLevel && !projConfig.isReadOnlyProj" selectionMode="multiple" :class="{'flex': responsive.md.value }">

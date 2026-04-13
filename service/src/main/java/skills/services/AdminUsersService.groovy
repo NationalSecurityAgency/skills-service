@@ -121,22 +121,22 @@ class AdminUsersService {
     }
 
     @Transactional(readOnly = true)
-    TableResultWithTotalPoints loadUsersPageForProject(String projectId, String userFilter, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter) {
+    TableResultWithTotalPoints loadUsersPageForProject(String projectId, String userFilter, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter, boolean includeImported) {
         userFilter = userFilter ? userFilter.trim() : ''
         Integer totalPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
         Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)
-        Page<ProjectUser> usersPage = findDistinctUsersForProject(projectId, userFilter, pageRequest, minMax.left, minMax.right, userTagFilter)
+        Page<ProjectUser> usersPage = findDistinctUsersForProject(projectId, userFilter, pageRequest, minMax.left, minMax.right, userTagFilter, includeImported)
         return new TableResultWithTotalPoints(usersPage, totalPoints)
     }
 
     @Profile
-    private Page<ProjectUser> findDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints, String userTagFilter) {
-        return userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, userTagFilter, pageRequest)
+    private Page<ProjectUser> findDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints, String userTagFilter, boolean includeImported) {
+        return userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, userTagFilter, includeImported, pageRequest)
     }
 
     @Profile
-    Stream<ProjectUser> streamAllDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints, String userTagFilter) {
-        return userPointsRepo.streamDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, userTagFilter, pageRequest)
+    Stream<ProjectUser> streamAllDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints, String userTagFilter, boolean includeImported) {
+        return userPointsRepo.streamDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, userTagFilter, includeImported, pageRequest)
     }
 
     @Profile

@@ -164,7 +164,8 @@ const hasAttempts = computed(() => attemptHistory.value.length > 0)
               :rowsPerPageOptions="possiblePageSizes"
               :total-records="totalRows"
               v-model:sort-field="sortInfo.sortBy"
-              v-model:sort-order="sortInfo.sortOrder">
+              v-model:sort-order="sortInfo.sortOrder"
+              :auto-max-width="false">
 
             <Column header="Name" field="quizName" :sortable="true"
                     :class="{'flex': responsive.md.value }">
