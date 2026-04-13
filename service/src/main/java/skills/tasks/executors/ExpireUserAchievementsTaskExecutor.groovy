@@ -58,7 +58,7 @@ class ExpireUserAchievementsTaskExecutor implements VoidExecutionHandler<ExpireU
         List<SkillAttributesDef> skillAttributesDefList = userAchievementExpirationService.getSkillAttributesForExpirationCheck()
         for (SkillAttributesDef skillAttributesDef: skillAttributesDefList) {
             try {
-                userAchievementExpirationService.checkAndExpireIfNecessary(skillAttributesDef)
+                userAchievementExpirationService.expireSkillsAndNotify()
             } catch (Exception ex) {
                 log.error("Unexpected error expiring skill - ${skillAttributesDef}", ex)
             }

@@ -36,8 +36,9 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
         DELETE FROM user_achievement
         WHERE
             skill_ref_id = :skillRefId
-        RETURNING *)
-        INSERT INTO expired_user_achievement SELECT * FROM expired_rows;
+        RETURNING user_id, project_id, skill_id, skill_ref_id, level, points_when_achieved, created, updated, expiration_notification_state)
+                        INSERT INTO expired_user_achievement (user_id, project_id, skill_id, skill_ref_id, level, points_when_achieved, created, updated, expiration_notification_state)
+                        SELECT user_id, project_id, skill_id, skill_ref_id, level, points_when_achieved, created, updated, expiration_notification_state FROM expired_rows;
     ''', nativeQuery = true)
     void expireAchievementsForSkill(@Param("skillRefId") Integer skillRefId)
 
@@ -46,8 +47,9 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
         WITH expired_row AS (
         DELETE FROM user_achievement ua
         WHERE ua.id = ?1
-        RETURNING *)
-        INSERT INTO expired_user_achievement SELECT * FROM expired_row;
+        RETURNING user_id, project_id, skill_id, skill_ref_id, level, points_when_achieved, created, updated, expiration_notification_state)
+                INSERT INTO expired_user_achievement (user_id, project_id, skill_id, skill_ref_id, level, points_when_achieved, created, updated, expiration_notification_state)
+                SELECT user_id, project_id, skill_id, skill_ref_id, level, points_when_achieved, created, updated, expiration_notification_state FROM expired_row;
     ''', nativeQuery = true)
     void expireAchievementById(Integer id)
 
@@ -110,4 +112,11 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
     ''')
     @Nullable
     List<ExpiredUserAchievement> findMostRecentExpirationForAllSkills(@Param("projectId") String projectId, @Param("userId") String userId, @Param("skills") List<String> skills)
+
+    @Query(value = '''
+        SELECT DISTINCT ua.userId
+        FROM UserAchievement ua
+        WHERE ua.skillRefId = :skillRefId
+    ''')
+    List<String> findUserIdsWithSkillRefId(@Param("skillRefId") Integer skillRefId)
 }

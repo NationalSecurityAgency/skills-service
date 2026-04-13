@@ -201,7 +201,7 @@ class SkillsAdminService {
         final boolean isEnabledSkillInRequest = Boolean.valueOf(skillRequest.enabled)
         final boolean isJustificationRequiredInRequest = Boolean.valueOf(skillRequest.justificationRequired)
         final boolean isSkillCatalogImport = skillRequest instanceof SkillImportRequest;
-        final boolean isReplicationRequest = skillRequest instanceof ReplicatedSkillUpdateRequest
+        final boolean isReplicationRequest = skillRequest instanceof ReplicatedSkillUpdateRequest;
         String description = skillRequest.description
 
         SkillDef skillsGroupSkillDef = null

@@ -56,4 +56,6 @@ class UserAchievementParent {
     Date updated
 
     String notified
+
+    String expirationNotificationState
 }
