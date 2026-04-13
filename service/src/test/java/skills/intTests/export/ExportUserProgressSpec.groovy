@@ -373,4 +373,47 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
         ])
 
     }
+
+
+    def 'ability to exclude users that only earned points in imported skills'() {
+        List<String> users = getRandomUsers(5)
+
+        def p1 = createProject(10)
+        def p1_subj1 = createSubject(10, 1)
+        def p1_skills = createSkills(5, 10, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1_subj1, p1_skills)
+
+        def p2 = createProject(11)
+        def p2_subj1 = createSubject(11, 1)
+        def p2_skills = createSkills(6, 11, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2_subj1, p2_skills[2..5])
+
+
+        skillsService.exportSkillToCatalog(p1_skills[0].projectId, p1_skills[0].skillId)
+        skillsService.exportSkillToCatalog(p1_skills[0].projectId, p1_skills[1].skillId)
+        skillsService.importSkillFromCatalog(p2.projectId, p2_subj1.subjectId, p1_skills[0].projectId, p1_skills[0].skillId)
+        skillsService.importSkillFromCatalog(p2.projectId, p2_subj1.subjectId, p1_skills[0].projectId, p1_skills[1].skillId)
+        skillsService.finalizeSkillsImportFromCatalog(p2.projectId)
+
+        skillsService.addSkill(p1_skills[0], users[0], today)
+        skillsService.addSkill(p1_skills[1], users[0], today)
+        skillsService.addSkill(p1_skills[0], users[1], today)
+        skillsService.addSkill(p1_skills[0], users[2], today)
+        skillsService.addSkill(p1_skills[1], users[2], today)
+
+        skillsService.addSkill(p2_skills[2], users[2], today)
+        skillsService.addSkill(p2_skills[2], users[3], today)
+
+        when:
+        def excelExport = skillsService.getUserProgressExcelExport(p2.projectId, 'totalPoints', true, '', 0, 100, '', false)
+
+        then:
+        validateExport(excelExport.file, [
+                ["For All Dragons Only"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
+                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "", "1.0", "100.0", "0.1666666667", formatDate(today), formatDate(today)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "1.0", "300.0", "0.5", formatDate(today), formatDate(today)],
+                ["For All Dragons Only"],
+        ])
+    }
 }
