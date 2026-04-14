@@ -70,7 +70,7 @@ describe('Users Tests', () => {
             [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(2, 'day')) }],
         ], 5);
 
-        cy.get(`${tableSelector}`).contains('Points Last Earned').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('Points Last Earned').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(2, 'day')) }],
             [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(3, 'day')) }],
@@ -80,7 +80,7 @@ describe('Users Tests', () => {
             [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(7, 'day')) }],
         ], 5);
 
-        cy.get(`${tableSelector}`).contains('User').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 3,  value: '4,500' }],
             [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 3,  value: '6,000' }],
@@ -90,7 +90,7 @@ describe('Users Tests', () => {
             [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 3,  value: '12,000' }],
         ], 5);
 
-        cy.get(`${tableSelector}`).contains('User').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 3,  value: '12,000' }],
             [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 3,  value: '10,500' }],
@@ -100,7 +100,7 @@ describe('Users Tests', () => {
             [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 3,  value: '4,500' }],
         ], 5);
 
-        cy.get(`${tableSelector}`).contains('Progress').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('Progress').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'user0@skills.org' }, { colIndex: 3,  value: '4,500' }],
             [{ colIndex: 1,  value: 'user1@skills.org' }, { colIndex: 3,  value: '6,000' }],
@@ -110,7 +110,7 @@ describe('Users Tests', () => {
             [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 3,  value: '12,000' }],
         ], 5);
 
-        cy.get(`${tableSelector}`).contains('Progress').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('Progress').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'user5@skills.org' }, { colIndex: 3,  value: '12,000' }],
             [{ colIndex: 1,  value: 'user4@skills.org' }, { colIndex: 3,  value: '10,500' }],
@@ -328,7 +328,7 @@ describe('Users Tests', () => {
         cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '12')
         cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('5').click();
 
-        cy.get(`${tableSelector}`).contains('User').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'usera@skills.org' }],
             [{ colIndex: 1,  value: 'userb@skills.org' }],
@@ -414,7 +414,7 @@ describe('Users Tests', () => {
 
         cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('5').click();
 
-        cy.get(`${tableSelector}`).contains('User').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'usera0@skills.org' }],
             [{ colIndex: 1,  value: 'usera1@skills.org' }],
@@ -499,7 +499,7 @@ describe('Users Tests', () => {
         cy.clickNav('Users');
         cy.wait('@getUsers')
 
-        cy.get(`${tableSelector}`).contains('User').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
         const rowSelector = `${tableSelector} tbody tr`
         cy.get(rowSelector).should('have.length', 2).as('cyRows');
 
@@ -586,7 +586,7 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
         cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('5').click();
 
-        cy.get(`${tableSelector}`).contains('User').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
         cy.get('[data-pc-section="page"]').contains('2').click();
         cy.wait('@getUsers')
 
@@ -631,7 +631,7 @@ describe('Users Tests', () => {
         cy.visit('/administrator/projects/proj1/users');
         cy.wait('@getProjectUsers')
 
-        cy.get(`${tableSelector}`).contains('User').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'usera@skills.org' }],
             [{ colIndex: 1,  value: 'userb@skills.org' }],
@@ -703,7 +703,7 @@ describe('Users Tests', () => {
         }
 
         cy.visit('/administrator/projects/proj1/users');
-        cy.get(`${tableSelector}`).contains('User').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'usera@skills.org' }],
             [{ colIndex: 1,  value: 'userb@skills.org' }],
@@ -1002,7 +1002,7 @@ describe('Users Tests', () => {
         cy.wait('@getUsers')
         cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('10').click();
         cy.wait('@getUsers')
-        cy.get(`${tableSelector}`).contains('User').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
         cy.wait('@getUsers')
 
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '12%')
@@ -1025,7 +1025,7 @@ describe('Users Tests', () => {
         cy.wait('@getSubjUsers');
         cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('20').click();
         cy.wait('@getSubjUsers');
-        cy.get(`${tableSelector}`).contains('User').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
         cy.wait('@getSubjUsers');
 
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '38%')
@@ -1045,7 +1045,7 @@ describe('Users Tests', () => {
         cy.wait('@getSkill1Users')
         cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('10').click();
         cy.wait('@getSkill1Users')
-        cy.get(`${tableSelector}`).contains('User').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
         cy.wait('@getSkill1Users')
 
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '100%')
@@ -1063,7 +1063,7 @@ describe('Users Tests', () => {
         cy.wait('@getBadgeUsers');
         cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('20').click();
         cy.wait('@getBadgeUsers');
-        cy.get(`${tableSelector}`).contains('User').click();
+        cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
         cy.wait('@getBadgeUsers');
 
         cy.get('[data-cy="usr_progress-user0@skills.org"] [data-cy="progressPercent"]').should('have.text', '20%')

@@ -388,7 +388,7 @@ const archiveUsers = () => {
           </template>
           <template #body="slotProps">
             <div :data-cy="`usr_progress-${slotProps.data.userId}`" class="w-full">
-              <div class="flex">
+              <div class="flex gap-2">
                 <div class="flex flex-auto">
                   <span class="font-weight-bold text-primary"
                         :aria-label="`${calcPercent(slotProps.data.totalPoints)} percent completed`"
