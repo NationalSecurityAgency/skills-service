@@ -344,8 +344,9 @@ const fillInCaptionsExample = () => {
         + '3\n'
         + '00:00:08.100 --> 00:00:12.500\n'
         + 'Last caption';
-    videoConf.value.captions = exampleCaptions;
-    setFieldValue('videoCaptions', exampleCaptions);
+    const adjustedCaptions = exampleCaptions.slice(0, appConfig.maxVideoCaptionsLength);
+    videoConf.value.captions = adjustedCaptions;
+    setFieldValue('videoCaptions', adjustedCaptions);
     announcer.polite('Example captions were added');
     nextTick(() => validate());
   }
