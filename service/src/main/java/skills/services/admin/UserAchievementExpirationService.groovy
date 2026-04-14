@@ -21,19 +21,16 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import skills.UIConfigProperties
-import skills.controller.request.model.GlobalSettingsRequest
 import skills.controller.result.model.ExpiredSkillRes
-import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.TableResult
 import skills.notify.Notifier
 import skills.services.FeatureService
-import skills.services.LockingService
 import skills.services.SkillEventAdminService
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
-import skills.services.settings.SettingsService
 import skills.storage.model.Notification
 import skills.storage.model.SkillAttributesDef
 import skills.storage.model.UserAchievement
@@ -42,7 +39,6 @@ import skills.storage.repos.SkillAttributesDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -53,9 +49,6 @@ import static skills.storage.model.SkillAttributesDef.SkillAttributesType.Achiev
 @Service
 @Slf4j
 class UserAchievementExpirationService {
-
-    public static final String SCHEDULED_SETTING_GROUP = "scheduled"
-    public static final String SKILL_EXPIRATION_LAST_RUN_DATE = "skill_expiration_last_run"
 
     static final String EXPIRATION_WARNING_NOTIFICATION_SENT = "EXPIRATION_WARNING_NOTIFICATION_SENT"
 
@@ -81,12 +74,6 @@ class UserAchievementExpirationService {
     FeatureService featureService
 
     @Autowired
-    SettingsService settingService
-
-    @Autowired
-    LockingService lockingService
-
-    @Autowired
     Notifier notifier
 
     @Autowired
@@ -103,45 +90,12 @@ class UserAchievementExpirationService {
         return new TableResult(data: data, count: data.size(), totalCount: totalExpirations)
     }
 
-    @Transactional
-    void expireSkillsAndNotify() {
-            lockingService.lockForSkillExpiration()
-
-            final LocalDate todayLd = LocalDate.now()
-            final String today = todayLd.format(DateTimeFormatter.BASIC_ISO_DATE)
-
-            SettingsResult expirationLastRan = settingService.getGlobalSetting(SKILL_EXPIRATION_LAST_RUN_DATE, SCHEDULED_SETTING_GROUP)
-
-            if (expirationLastRan && !LocalDate.parse(expirationLastRan.getValue(), DateTimeFormatter.BASIC_ISO_DATE).isBefore(todayLd)) {
-                log.info("skill expiration was already run today (potentially by another node), will not run again today")
-                return
-            }
-
-            try {
-                log.info("Checking for expiring user achievements.")
-                List<SkillAttributesDef> skillAttributesDefList = getSkillAttributesForExpirationCheck()
-                for (SkillAttributesDef skillAttributesDef: skillAttributesDefList) {
-                    try {
-                        checkAndExpireIfNecessary(skillAttributesDef)
-                    } catch (Exception ex) {
-                        log.error("Unexpected error expiring skill - ${skillAttributesDef}", ex)
-                    }
-                }
-            } finally {
-                GlobalSettingsRequest lastRunSettingRequest = new GlobalSettingsRequest()
-                lastRunSettingRequest.value = today
-                lastRunSettingRequest.setting = SKILL_EXPIRATION_LAST_RUN_DATE
-                lastRunSettingRequest.settingGroup = SCHEDULED_SETTING_GROUP
-                settingService.saveSetting(lastRunSettingRequest)
-            }
-    }
-
     @Transactional(readOnly = true)
     List<SkillAttributesDef> getSkillAttributesForExpirationCheck() {
         return skillAttributesDefRepo.findAllByType(AchievementExpiration)
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     void checkAndExpireIfNecessary(SkillAttributesDef skillAttributesDef) {
         LocalDateTime now = LocalDateTime.now()
         ExpirationAttrs expirationAttrs = skillAttributeService.convertAttrs(skillAttributesDef, ExpirationAttrs)
