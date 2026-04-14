@@ -70,6 +70,62 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
 
     }
 
+    def "export global badge users progress for UC protected badge"() {
+        List<String> adminUsers = getRandomUsers(1)
+        SkillsService pristineDragonsUser = createService(adminUsers[0])
+        rootSkillsService.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def project = createProject()
+        def subject = createSubject()
+        def skill1 = createSkill(1, 1, 1, 0, 2)
+        skill1.pointIncrement = 50
+        def skill2 = createSkill(1, 1, 2, 0, 2)
+
+        project.enableProtectedUserCommunity = true
+        pristineDragonsUser.createProject(project)
+        pristineDragonsUser.createSubject(subject)
+        pristineDragonsUser.createSkill(skill1)
+        pristineDragonsUser.createSkill(skill2)
+
+        def globalBadge = createBadge()
+        globalBadge.enableProtectedUserCommunity = true
+        pristineDragonsUser.createGlobalBadge(globalBadge)
+        pristineDragonsUser.assignSkillToGlobalBadge([projectId: project.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId])
+        pristineDragonsUser.assignSkillToGlobalBadge([projectId: project.projectId, badgeId: globalBadge.badgeId, skillId: skill2.skillId])
+        pristineDragonsUser.assignProjectLevelToGlobalBadge([badgeId: globalBadge.badgeId, projectId: project.projectId, level: "3"])
+
+        globalBadge.enabled = "true"
+        pristineDragonsUser.updateGlobalBadge(globalBadge)
+
+        def users = getRandomUsers(3)
+        def user1 = users[0]
+        def user2 = users[1]
+        def user3 = users[2]
+
+        when:
+        pristineDragonsUser.addSkill(skill1, user1, fiveDaysAgo)
+        pristineDragonsUser.addSkill(skill1, user1, oneDayAgo)
+        pristineDragonsUser.addSkill(skill1, user2, today)
+        pristineDragonsUser.addSkill(skill2, user2, today)
+        pristineDragonsUser.addSkill(skill1, user3, fiveDaysAgo)
+        pristineDragonsUser.addSkill(skill1, user3, today)
+        pristineDragonsUser.addSkill(skill2, user3, fiveDaysAgo)
+        pristineDragonsUser.addSkill(skill2, user3, today)
+
+        def excelExport = pristineDragonsUser.getGlobalBadgeUserProgressExcelExport(globalBadge.badgeId)
+
+        then:
+        validateExport(excelExport.file, [
+                ["For Divine Dragon Only"],
+                ["User ID", "Last Name", "First Name", "Org", "Skills Achieved", "Levels Achieved", "Percent Complete", "Skill Last Earned (UTC)"],
+                [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "0.0", "3.0", "0.6", formatDate(today)],
+                [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "1.0", "3.0", "0.8", formatDate(oneDayAgo)],
+                [getUserIdForDisplay(user3), getName(user3, false), getName(user3), "", "2.0", "3.0", "1.0", formatDate(today)],
+                ["For Divine Dragon Only"],
+        ])
+
+    }
+
     def "export global badge users progress with user tags"() {
         def p2 = createProject(2)
         def p2subj1 = createSubject(2, 1)
