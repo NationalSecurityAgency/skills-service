@@ -43,9 +43,23 @@ const contentCard = ref(null)
 const displayBottomNavigation = ref(false)
 let contentCardResizeObserver = null
 
+const getContentCard = () => {
+  return contentCard.value?.$el ?? null;
+}
+
 const updateBottomNavigationVisibility = () => {
-  const contentCardEl = contentCard.value?.$el ?? null
+  const contentCardEl = getContentCard()
   displayBottomNavigation.value = !!contentCardEl && contentCardEl.getBoundingClientRect().height > window.innerHeight
+}
+const beginResizeObserver = () => {
+
+  const contentCardEl = getContentCard()
+  if (contentCardEl && typeof ResizeObserver !== 'undefined') {
+    contentCardResizeObserver = new ResizeObserver(() => updateBottomNavigationVisibility())
+    contentCardResizeObserver.observe(contentCardEl)
+  }
+
+  window.addEventListener('resize', updateBottomNavigationVisibility)
 }
 
 onMounted( () => {
@@ -54,14 +68,9 @@ onMounted( () => {
     updateBottomNavigationVisibility()
   })
 
-  const contentCardEl = contentCard.value?.$el ?? null
-  if (contentCardEl && typeof ResizeObserver !== 'undefined') {
-    contentCardResizeObserver = new ResizeObserver(() => updateBottomNavigationVisibility())
-    contentCardResizeObserver.observe(contentCardEl)
-  }
-
-  window.addEventListener('resize', updateBottomNavigationVisibility)
+  beginResizeObserver()
 })
+
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateBottomNavigationVisibility)
   if (contentCardResizeObserver) {
