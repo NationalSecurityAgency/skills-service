@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, defineAsyncComponent, onMounted, ref, watch} from 'vue'
+import {computed, defineAsyncComponent, nextTick, onMounted, onBeforeUnmount, ref, watch} from 'vue'
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
 import {useRoute} from 'vue-router'
 import {useSkillsDisplayService} from '@/skills-display/services/UseSkillsDisplayService.js'
@@ -39,9 +39,34 @@ const loadingSkill = ref(true)
 const displayGroupDescription = ref(false);
 const groupDescription = ref(null);
 const loadingDescription = ref(true);
+const contentCard = ref(null)
+const displayBottomNavigation = ref(false)
+let contentCardResizeObserver = null
 
-onMounted(() => {
+const updateBottomNavigationVisibility = () => {
+  const contentCardEl = contentCard.value?.$el ?? null
+  displayBottomNavigation.value = !!contentCardEl && contentCardEl.getBoundingClientRect().height > window.innerHeight
+}
+
+onMounted( () => {
   loadSkillSummary()
+  nextTick(() => {
+    updateBottomNavigationVisibility()
+  })
+
+  const contentCardEl = contentCard.value?.$el ?? null
+  if (contentCardEl && typeof ResizeObserver !== 'undefined') {
+    contentCardResizeObserver = new ResizeObserver(() => updateBottomNavigationVisibility())
+    contentCardResizeObserver.observe(contentCardEl)
+  }
+
+  window.addEventListener('resize', updateBottomNavigationVisibility)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateBottomNavigationVisibility)
+  if (contentCardResizeObserver) {
+    contentCardResizeObserver.disconnect()
+  }
 })
 watch( () => route.params.skillId, () => {
   loadSkillSummary()
@@ -63,6 +88,10 @@ const loadSkillSummary = () => {
       if(!groupDescription.value && skill.value.groupSkillId && attributes.groupDescriptionsOn) {
         descriptionToggled();
       }
+
+      nextTick(() => {
+        updateBottomNavigationVisibility()
+      })
     })
 }
 
@@ -91,13 +120,14 @@ const descriptionToggled = () => {
     })
   }
 }
+
 </script>
 
 <template>
   <div>
     <div v-if="!isLoading">
       <skills-title>{{ attributes.skillDisplayName }} Overview</skills-title>
-      <Card class="mt-4" :pt="{ content: { class: 'p-0' }}">
+      <Card ref="contentCard" class="mt-4" :pt="{ content: { class: 'p-0' }}">
         <template #content>
           <skill-navigation class="mb-6" :skill="skill" @prevButtonClicked="prevButtonClicked" @nextButtonClicked="nextButtonClicked" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !skillsDisplayInfo.isCrossProject()" />
           <div v-if="!attributes.groupInfoOnSkillPage && skill.groupName" class="mt-4 p-1 mb-4" data-cy="groupInformationSection">
@@ -126,15 +156,23 @@ const descriptionToggled = () => {
           <div class="card-body text-center text-sm-left">
             <skill-progress :skill="skill" />
           </div>
+
+          <skill-navigation
+            v-if="displayBottomNavigation && skill && (skill.prevSkillId || skill.nextSkillId) && !skillsDisplayInfo.isCrossProject()"
+            class="mt-4"
+            :skill="skill"
+            @prevButtonClicked="prevButtonClicked"
+            @nextButtonClicked="nextButtonClicked" />
         </template>
+
       </Card>
 
       <prerequisites />
     </div>
     <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-8" />
+
   </div>
 </template>
 
 <style scoped>
-
 </style>
