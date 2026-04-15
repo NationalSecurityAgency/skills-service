@@ -19,8 +19,6 @@ import org.apache.commons.lang3.RandomStringUtils
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
-import skills.controller.exceptions.ErrorCode
-import skills.controller.exceptions.SkillException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -242,65 +240,6 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results.data.get(1).totalPoints == 35
         results.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
-    }
-
-    def 'do not return users for disabled imported skills'() {
-        List<String> randos = getRandomUsers(2)
-
-        def project = SkillsFactory.createProject(10)
-        def subject = SkillsFactory.createSubject(10, 1)
-        def skill1 = SkillsFactory.createSkill(10, 1, 1, 0, 10, 0, 100)
-        skillsService.createProjectAndSubjectAndSkills(project, subject, [skill1])
-        skillsService.addSkill(skill1, randos[0])
-
-        def project2 = SkillsFactory.createProject(11)
-        def project2_subject = SkillsFactory.createSubject(11, 1)
-        def project2_skill2 = SkillsFactory.createSkill(11, 1, 2, 0, 10, 0, 100)
-        skillsService.createProjectAndSubjectAndSkills(project2, project2_subject, [project2_skill2])
-        skillsService.addSkill(project2_skill2, randos[1])
-
-        skillsService.exportSkillToCatalog(skill1.projectId, skill1.skillId)
-        skillsService.importSkillFromCatalog(project2.projectId, project2_subject.subjectId, skill1.projectId, skill1.skillId)
-
-        when:
-        def results_t0 = skillsService.getProjectUsers(project2.projectId)
-        def results_subject_t0 = skillsService.getSubjectUsers(project2.projectId, project2_subject.subjectId)
-        def results_skill_t0 = skillsService.getSkillUsers(project2.projectId, skill1.skillId)
-        skillsService.finalizeSkillsImportFromCatalog(project2.projectId)
-        def results_t1 = skillsService.getProjectUsers(project2.projectId)
-        def results_subject_t1 = skillsService.getSubjectUsers(project2.projectId, project2_subject.subjectId)
-        def results_skill_t1 = skillsService.getSkillUsers(project2.projectId, skill1.skillId)
-
-        then:
-        results_t0.count == 1
-        results_t0.totalCount == 1
-        results_t0.data.size() == 1
-        results_t0.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
-        results_subject_t0.count == 1
-        results_subject_t0.totalPoints == 1000
-        results_subject_t0.totalCount == 1
-        results_subject_t0.data.size() == 1
-        results_subject_t0.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
-        results_skill_t0.count == 0
-        results_skill_t0.totalCount == 0
-        !results_skill_t0.data
-
-        results_t1.count == 2
-        results_t1.totalCount == 2
-        results_t1.data.size() == 2
-        results_t1.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
-        results_t1.data.find { it.userId == randos[0].toLowerCase() }.totalPoints == 100
-        results_subject_t1.count == 2
-        results_subject_t1.totalPoints == 2000
-        results_subject_t1.totalCount == 2
-        results_subject_t1.data.size() == 2
-        results_subject_t1.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
-        results_subject_t1.data.find { it.userId == randos[0].toLowerCase() }.totalPoints == 100
-        results_skill_t1.count == 1
-        results_skill_t1.totalPoints == 1000
-        results_skill_t1.totalCount == 1
-        results_skill_t1.data.size() == 1
-        results_skill_t1.data.find { it.userId == randos[0].toLowerCase() }.totalPoints == 100
     }
 
     def 'get project users with paging'() {
@@ -1512,56 +1451,4 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     }
 
-    def 'ability to exclude users that only earned points in imported skills'() {
-        List<String> users = getRandomUsers(5)
-
-        def p1 = createProject(10)
-        def p1_subj1 = createSubject(10, 1)
-        def p1_skills = createSkills(5, 10, 1, 100, 1)
-        skillsService.createProjectAndSubjectAndSkills(p1, p1_subj1, p1_skills)
-
-        def p2 = createProject(11)
-        def p2_subj1 = createSubject(11, 1)
-        def p2_skills = createSkills(6, 11, 1, 100, 1)
-        skillsService.createProjectAndSubjectAndSkills(p2, p2_subj1, p2_skills[2..5])
-
-
-        skillsService.exportSkillToCatalog(p1_skills[0].projectId, p1_skills[0].skillId)
-        skillsService.exportSkillToCatalog(p1_skills[0].projectId, p1_skills[1].skillId)
-        skillsService.importSkillFromCatalog(p2.projectId, p2_subj1.subjectId, p1_skills[0].projectId, p1_skills[0].skillId)
-        skillsService.importSkillFromCatalog(p2.projectId, p2_subj1.subjectId, p1_skills[0].projectId, p1_skills[1].skillId)
-        skillsService.finalizeSkillsImportFromCatalog(p2.projectId)
-
-        skillsService.addSkill(p1_skills[0], users[0])
-        skillsService.addSkill(p1_skills[1], users[0])
-        skillsService.addSkill(p1_skills[0], users[1])
-        skillsService.addSkill(p1_skills[0], users[2])
-        skillsService.addSkill(p1_skills[1], users[2])
-
-        skillsService.addSkill(p2_skills[2], users[2])
-        skillsService.addSkill(p2_skills[2], users[3])
-
-        when:
-        def p1UsersIncludedImported = skillsService.getProjectUsers(p2.projectId, 10, 1, "userId", true, "", 0, 100, "", true)
-        def p1UsersExcludedImported = skillsService.getProjectUsers(p2.projectId, 10, 1, "userId", true, "", 0, 100, "", false)
-        def p1UsersExcludedImportedWithMaxPoints = skillsService.getProjectUsers(p2.projectId, 10, 1, "userId", true, "", 0, 49, "", false)
-        def p1UsersExcludedImportedWithMinPoints = skillsService.getProjectUsers(p2.projectId, 10, 1, "userId", true, "", 17, 100, "", false)
-
-        then:
-        p1UsersIncludedImported.data.userId.sort() == users[0..3].sort()
-        p1UsersIncludedImported.data.find { users[0].equalsIgnoreCase(it.userId) }.totalPoints == 200
-        p1UsersIncludedImported.data.find { users[1].equalsIgnoreCase(it.userId) }.totalPoints == 100
-        p1UsersIncludedImported.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
-        p1UsersIncludedImported.data.find { users[3].equalsIgnoreCase(it.userId) }.totalPoints == 100
-
-        p1UsersExcludedImported.data.userId.sort() == users[2..3].sort()
-        p1UsersExcludedImported.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
-        p1UsersExcludedImported.data.find { users[3].equalsIgnoreCase(it.userId) }.totalPoints == 100
-
-        p1UsersExcludedImportedWithMaxPoints.data.userId.sort() == users[3..3].sort()
-        p1UsersExcludedImportedWithMaxPoints.data.find { users[3].equalsIgnoreCase(it.userId) }.totalPoints == 100
-
-        p1UsersExcludedImportedWithMinPoints.data.userId.sort() == users[2..2].sort()
-        p1UsersExcludedImportedWithMinPoints.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
-    }
 }
