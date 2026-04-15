@@ -305,6 +305,9 @@ describe('Display History of My quiz attempts Tests', () => {
       cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 2')
       cy.get('[data-cy="quizRunStatus"]').contains('Failed')
 
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('be.visible')
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('be.enabled')
+
       cy.get('[data-cy="runQuizAgainBtn"]').should('be.visible')
       cy.get('[data-cy="runQuizAgainBtn"]').should('be.enabled')
 
@@ -324,6 +327,8 @@ describe('Display History of My quiz attempts Tests', () => {
       cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 1')
       cy.get('[data-cy="quizRunStatus"]').contains('Failed')
 
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('be.exist')
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('be.enabled')
       cy.get('[data-cy="runQuizAgainBtn"]').should('be.exist')
       cy.get('[data-cy="runQuizAgainBtn"]').should('be.enabled')
     });
@@ -340,7 +345,8 @@ describe('Display History of My quiz attempts Tests', () => {
       cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 1')
       cy.get('[data-cy="quizRunStatus"]').contains('Failed')
 
-      cy.get('[data-cy="runQuizAgainBtn"]').should('not.be.exist')
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('not.exist')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('not.exist')
     });
 
     it('failed quiz will NOT show "try again" button when max attempts have been exhausted', () => {
@@ -355,14 +361,16 @@ describe('Display History of My quiz attempts Tests', () => {
       cy.get(`${tableSelector} [data-p-index="0"] [data-cy="viewQuizAttempt"]`).first().click()
       cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 1')
       cy.get('[data-cy="quizRunStatus"]').contains('Failed')
-      cy.get('[data-cy="runQuizAgainBtn"]').should('not.be.exist')
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('not.exist')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('not.exist')
 
       cy.get('[data-cy="backToQuizzesBtn"]').click()
 
       cy.get(`${tableSelector} [data-p-index="1"] [data-cy="viewQuizAttempt"]`).first().click()
       cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 1')
       cy.get('[data-cy="quizRunStatus"]').contains('Failed')
-      cy.get('[data-cy="runQuizAgainBtn"]').should('not.be.exist')
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('not.exist')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('not.exist')
 
     });
 
@@ -376,7 +384,8 @@ describe('Display History of My quiz attempts Tests', () => {
       cy.get(`${tableSelector} [data-p-index="0"] [data-cy="viewQuizAttempt"]`).first().click()
       cy.get('[data-cy="quizName"]').should('have.text', 'This is survey 1')
       cy.get('[data-cy="quizRunStatus"]').contains('Completed')
-      cy.get('[data-cy="runQuizAgainBtn"]').should('not.be.exist')
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('not.exist')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('not.exist')
     });
 
     it('single quiz run with associated skills', () => {
