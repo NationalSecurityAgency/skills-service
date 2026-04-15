@@ -148,6 +148,8 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="fillCaptionsExamples"]').click()
         cy.get('[data-cy="videoCaptions"]').should('contain.value', 'WEBVTT')
         cy.get('[data-cy="fillCaptionsExamples"]').should('not.exist')
+
+        cy.get('[data-cy="videoCaptionsNumCharsRemaining"]').should('have.text', '0 characters remaining ')
     });
 
     it('preview video with Video URL', () => {
