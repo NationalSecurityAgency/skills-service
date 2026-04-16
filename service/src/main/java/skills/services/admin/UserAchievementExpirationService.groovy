@@ -131,7 +131,7 @@ class UserAchievementExpirationService {
                                         communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
                                 ]
                         )
-                        log.info("Sending skill expiration notification to user [${userId}] for skill [${skillProjectAndSubjectIdsAndNames.skillId}]")
+                        log.info("Sending skill expiration notification to user [${userId}] for skill [${skillProjectAndSubjectIdsAndNames.skillId}] - expiring on [${nextExpirationDate.format(DateTimeFormatter.ISO_DATE)}]")
                         notifier.sendNotification(request)
                     }
                 }
@@ -167,7 +167,7 @@ class UserAchievementExpirationService {
                                         communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
                                 ]
                         )
-                        log.info("Sending daily skill expiration warning to user [${achievement.userId}] for skill [${achievement.skillId}]")
+                        log.info("Sending daily skill expiration warning to user [${achievement.userId}] for skill [${achievement.skillId}] - expiring on [${retentionDeadline.format(DateTimeFormatter.ISO_DATE)}]")
                         notifier.sendNotification(request)
 
                         achievement.expirationNotificationState = EXPIRATION_WARNING_NOTIFICATION_SENT
