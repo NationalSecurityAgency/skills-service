@@ -20,7 +20,14 @@ import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkills
 import {useUserPreferences} from "@/stores/UseUserPreferences.js";
 import {useLog} from "@/components/utils/misc/useLog.js";
 
-const props = defineProps(['skill', 'buttonSeverity'])
+const props = defineProps({
+  'skill': Object,
+  'buttonSeverity' : String,
+  'showPagingInfo' : {
+    type: Boolean,
+    default: true
+  }
+})
 const emit = defineEmits(['prevButtonClicked', 'nextButtonClicked'])
 const attributes = useSkillsDisplayAttributesState()
 const keys = useMagicKeys()
@@ -76,12 +83,14 @@ const nextButtonClicked = () => {
                     data-cy="prevSkill"
                     @click="prevButtonClicked"
                     aria-label="previous skill"
-                    v-if="skill.prevSkillId">
+                    :disabled="!skill.prevSkillId">
         <i class="fas fa-arrow-alt-circle-left mr-1" aria-hidden="true"></i> Previous
       </SkillsButton>
     </div>
     <div class="flex-1 text-center " style="font-size: 0.9rem;" data-cy="skillOrder">
-      <span class="italic">{{ attributes.skillDisplayName }}</span> <span class="font-semibold">{{ skill.orderInGroup }}</span> <span class="italic">of</span> <span class="font-semibold">{{ skill.totalSkills }}</span>
+      <div v-if="showPagingInfo">
+        <span class="italic">{{ attributes.skillDisplayName }}</span> <span class="font-semibold">{{ skill.orderInGroup }}</span> <span class="italic">of</span> <span class="font-semibold">{{ skill.totalSkills }}</span>
+      </div>
     </div>
     <div class="w-28 text-right">
       <SkillsButton size="small"
@@ -93,7 +102,7 @@ const nextButtonClicked = () => {
                     aria-label="next skill"
                     :title="`Next ${attributes.skillDisplayName} (${nextButtonShortcut})`"
                     @click="nextButtonClicked"
-                    v-if="skill.nextSkillId">
+                    :disabled="!skill.nextSkillId">
         Next <i class="fas fa-arrow-alt-circle-right ml-1" aria-hidden="true"></i>
       </SkillsButton>
     </div>

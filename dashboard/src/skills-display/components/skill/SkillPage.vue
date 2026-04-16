@@ -130,15 +130,25 @@ const descriptionToggled = () => {
   }
 }
 
+const showNav = computed(() => {
+  return skill.value && (skill.value.prevSkillId || skill.value.nextSkillId) && !skillsDisplayInfo.isCrossProject()
+})
 </script>
 
 <template>
   <div>
     <div v-if="!isLoading">
       <skills-title>{{ attributes.skillDisplayName }} Overview</skills-title>
-      <Card ref="contentCard" class="mt-4" :pt="{ content: { class: 'p-0' }}">
+      <Card ref="contentCard" class="mt-4" :pt="{
+        content: { class: 'px-5 pt-5 pb-2' },
+        header: { class: 'border-b-1 px-5 py-4' },
+        footer: { class: 'border-t-1 px-5 py-4' },
+        body: { class: 'p-0!' }
+      }">
+        <template v-if="showNav" #header>
+          <skill-navigation :skill="skill" @prevButtonClicked="prevButtonClicked" @nextButtonClicked="nextButtonClicked" />
+        </template>
         <template #content>
-          <skill-navigation class="mb-6" :skill="skill" @prevButtonClicked="prevButtonClicked" @nextButtonClicked="nextButtonClicked" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !skillsDisplayInfo.isCrossProject()" />
           <div v-if="!attributes.groupInfoOnSkillPage && skill.groupName" class="mt-4 p-1 mb-4" data-cy="groupInformationSection">
             <div class="flex">
               <div class="mr-2 mt-1 text-xl">
@@ -166,10 +176,12 @@ const descriptionToggled = () => {
             <skill-progress :skill="skill" />
           </div>
 
+
+        </template>
+        <template v-if="showNav" #footer>
           <skill-navigation
-            v-if="displayBottomNavigation && skill && (skill.prevSkillId || skill.nextSkillId) && !skillsDisplayInfo.isCrossProject()"
-            class="mt-4"
             :skill="skill"
+            :show-paging-info="false"
             @prevButtonClicked="prevButtonClicked"
             @nextButtonClicked="nextButtonClicked" />
         </template>
