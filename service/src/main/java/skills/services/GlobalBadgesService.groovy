@@ -380,6 +380,10 @@ class GlobalBadgesService {
         return skillsAdminService.getSkillsByProjectSkillAndType(null, badgeId, ContainerType.GlobalBadge, RelationshipType.BadgeRequirement)
     }
 
+    @Transactional(readOnly = true)
+    Integer countSkillsForBadge(String badgeId) {
+        return skillsAdminService.countSkillsByProjectSkillAndType(badgeId)
+    }
 
     @Transactional(readOnly = true)
     AvailableProjectResult getAvailableProjectsForBadge(String badgeId, String query) {

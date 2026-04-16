@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.result.model.GlobalBadgeLevelRes
+import skills.controller.result.model.GlobalBadgeUser
 import skills.controller.result.model.ProjectUser
 import skills.controller.result.model.SkillDefPartialRes
 import skills.controller.result.model.UserProgressExportResult
@@ -83,6 +85,9 @@ class ExcelExportService {
     @Autowired
     UserQuizAttemptRepo userQuizAttemptRepo
 
+    @Autowired
+    GlobalBadgesService globalBadgesService
+
     @Transactional(readOnly = true)
     void exportUsersProgress(Workbook workbook, String projectId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter) {
         String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getProjectUserCommunity(projectId))
@@ -139,6 +144,62 @@ class ExcelExportService {
             }
         } finally {
             projectUsers.close()
+        }
+
+        if (projectExportHeaderAndFooter) {
+            addDataHeaderOrFooter(sheet, rowNum++, headers.size(), projectExportHeaderAndFooter)
+        }
+    }
+
+    @Transactional(readOnly = true)
+    void exportGlobalBadgeUserProgress(Workbook workbook, String badgeId, Integer id, String query, PageRequest pageRequest, String userTagFilter) {
+        String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getGlobalBadgeUserCommunity(id))
+        Sheet sheet = workbook.createSheet()
+        List<String> headers
+        if (userTagLabel) {
+            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Skills Achieved", "Levels Achieved", "Percent Complete", "Skill Last Earned (UTC)"]
+        } else {
+            headers = ["User ID", "Last Name", "First Name", "Skills Achieved", "Levels Achieved", "Percent Complete", "Skill Last Earned (UTC)"]
+        }
+        Integer columnNumber = 0
+        Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
+
+        CellStyle dateStyle = workbook.createCellStyle()
+        dateStyle.setDataFormat((short) 22) // NOTE: 14 = "mm/dd/yyyy"
+
+        CellStyle percentStyle = workbook.createCellStyle()
+        percentStyle.setDataFormat((short) 9)
+
+        Cell cell = null
+
+        Integer numberOfSkills = globalBadgesService.countSkillsForBadge(badgeId)
+        List<GlobalBadgeLevelRes> levels = globalBadgesService.getGlobalBadgeLevels(badgeId)
+        Integer totalLevels = levels.sum(0) { level -> level.level } as Integer
+        Stream<GlobalBadgeUser> badgeUsers = adminUsersService.streamAllDistinctUsersForGlobalBadge(badgeId, query, pageRequest, userTagFilter)
+
+        try {
+            badgeUsers.each { GlobalBadgeUser user ->
+                columnNumber = 0
+                Row row = sheet.createRow(rowNum++)
+                row.createCell(columnNumber++).setCellValue(user.userIdForDisplay)
+                row.createCell(columnNumber++).setCellValue(user.lastName ?: '')
+                row.createCell(columnNumber++).setCellValue(user.firstName ?: '')
+                if (userTagLabel) {
+                    row.createCell(columnNumber++).setCellValue(user.userTag)
+                }
+                row.createCell(columnNumber++).setCellValue(user.skillsAchieved)
+                row.createCell(columnNumber++).setCellValue(user.numLevelsAchieved)
+                Double percentage = (user.totalProgress / (numberOfSkills + totalLevels))
+                cell = row.createCell(columnNumber++)
+                cell.setCellStyle(percentStyle)
+                cell.setCellValue(percentage)
+
+                cell = row.createCell(columnNumber++)
+                cell.setCellStyle(dateStyle)
+                cell.setCellValue(user.lastUpdated)
+            }
+        } finally {
+            badgeUsers.close()
         }
 
         if (projectExportHeaderAndFooter) {

@@ -24,6 +24,7 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.servlet.ModelAndView
 import skills.PublicProps
 import skills.controller.exceptions.InvalidContentTypeException
 import skills.controller.exceptions.MaxIconSizeExceeded
@@ -37,7 +38,10 @@ import skills.profile.EnableCallStackProf
 import skills.services.*
 import skills.services.admin.ProjAdminService
 import skills.services.adminGroup.AdminGroupService
+import skills.storage.model.SkillDef
+import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.auth.RoleName
+import skills.storage.repos.SkillDefWithExtraRepo
 import skills.utils.InputSanitizer
 import skills.utils.TablePageUtil
 
@@ -80,6 +84,12 @@ class GlobalBadgesController {
 
     @Autowired
     AttachmentService attachmentService
+
+    @Autowired
+    GlobalBadgeUserProgressExportResult globalBadgeUserProgressExportResult
+
+    @Autowired
+    SkillDefWithExtraRepo skillDefWithExtraRepo
 
     @RequestMapping(value = "/{badgeId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -315,6 +325,28 @@ class GlobalBadgesController {
         PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(badgeId, limit, page, orderBy, ascending)
 
         return adminUsersService.loadUsersPageForSkillsAcrossProjects(badgeId, query, userTagFilter, pageRequest)
+    }
+
+    @GetMapping(value = "/{badgeId}/users/export/excel")
+    @ResponseBody
+    ModelAndView exportGlobalBadgeUsers(@PathVariable("badgeId") String badgeId,
+                                        @RequestParam String query,
+                                        @RequestParam String orderBy,
+                                        @RequestParam String userTagFilter,
+                                        @RequestParam Boolean ascending) {
+        SkillsValidator.isNotBlank(badgeId, "Badge Id", badgeId)
+        PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE, ascending ? ASC : DESC, orderBy)
+        ModelAndView mav = new ModelAndView(globalBadgeUserProgressExportResult);
+
+        Long badgeRefId = skillDefWithExtraRepo.findIdByProjectIdIsNullAndSkillIdIgnoreCaseAndType(badgeId, SkillDef.ContainerType.GlobalBadge)
+
+        mav.addObject(GlobalBadgeUserProgressExportResult.BADGE_ID, badgeId)
+        mav.addObject(GlobalBadgeUserProgressExportResult.ID, badgeRefId)
+        mav.addObject(GlobalBadgeUserProgressExportResult.QUERY, query)
+        mav.addObject(GlobalBadgeUserProgressExportResult.USER_TAG_FILTER, userTagFilter)
+        mav.addObject(GlobalBadgeUserProgressExportResult.PAGE_REQUEST, pageRequest)
+        return mav;
+
     }
 
 }

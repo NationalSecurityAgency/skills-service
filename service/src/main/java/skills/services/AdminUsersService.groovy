@@ -190,6 +190,11 @@ class AdminUsersService {
         return new TableResultWithTotalPointsAndLevel(usersPage, count, skills.size(), totalLevels)
     }
 
+    @Profile
+    Stream<GlobalBadgeUser> streamAllDistinctUsersForGlobalBadge(String badgeId, String query, PageRequest pageRequest, String userTagFilter) {
+        return userPointsRepo.streamDistinctUsersForGlobalBadge(badgeId, usersTableAdditionalUserTagKey, query, userTagFilter, pageRequest)
+    }
+
     private static Pair<Integer, Integer> calcMinMaxPointsQueryParams(Integer totalPoints, int minimumPointsPercent, int maximumPointsPercent) {
         int minimumPoints = (int)Math.floor((minimumPointsPercent / 100) * totalPoints)
         int maximumPoints = (int)Math.ceil((maximumPointsPercent / 100) * totalPoints)

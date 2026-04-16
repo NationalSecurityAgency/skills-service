@@ -316,6 +316,13 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
               and sd1.projectId is null and sd1.skillId=?1''')
     List<SkillDefPartial> getGlobalChildrenPartial(String parentSkillId, SkillRelDef.RelationshipType type)
 
+    @Query('''SELECT 
+        count(sd2.skillId)
+        from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
+        where sd1 = srd.parent and sd2 = srd.child and srd.type='BadgeRequirement' and srd.parent.type = 'GlobalBadge'
+              and sd1.projectId is null and sd1.skillId=?1''')
+    Integer countSkillsForGlobalBadge(String badgeId)
+
     @Query('''SELECT sd2 
         from SkillDef sd1, SkillDef sd2, SkillRelDef srd 
         where sd1 = srd.parent and sd2 = srd.child and srd.type in ?3 

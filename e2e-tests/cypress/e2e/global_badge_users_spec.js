@@ -190,10 +190,12 @@ describe('Global Badge Users Tests', () => {
       cy.visit('/administrator/globalBadges/globalBadge1/users');
       cy.wait('@getUsers')
 
+      cy.get(`${tableSelector} thead th`).contains('User').click();
+
       cy.validateTable(tableSelector, [
-          [{ colIndex: 0,  value: userId3 }],
-          [{ colIndex: 0,  value: userId2 }],
           [{ colIndex: 0,  value: userId }],
+          [{ colIndex: 0,  value: userId2 }],
+          [{ colIndex: 0,  value: userId3 }],
       ], 5);
 
       cy.get('[data-cy="users-skillIdFilter"]').type('user1');
@@ -208,9 +210,9 @@ describe('Global Badge Users Tests', () => {
       cy.wait('@getUsers')
 
       cy.validateTable(tableSelector, [
-          [{ colIndex: 0,  value: userId3 }],
-          [{ colIndex: 0,  value: userId2 }],
           [{ colIndex: 0,  value: userId }],
+          [{ colIndex: 0,  value: userId2 }],
+          [{ colIndex: 0,  value: userId3 }],
       ], 5);
 
   })
@@ -253,10 +255,12 @@ describe('Global Badge Users Tests', () => {
         cy.visit('/administrator/globalBadges/globalBadge1/users');
         cy.wait('@getUsers')
 
+        cy.get(`${tableSelector} thead th`).contains('User').click();
+
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: userId3 }],
-            [{ colIndex: 0,  value: userId2 }],
             [{ colIndex: 0,  value: userId }],
+            [{ colIndex: 0,  value: userId2 }],
+            [{ colIndex: 0,  value: userId3 }],
         ], 5);
 
         cy.get('[data-cy="users-userTagFilter"]').type('tag1');
@@ -271,9 +275,9 @@ describe('Global Badge Users Tests', () => {
         cy.wait('@getUsers')
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0,  value: userId3 }],
-            [{ colIndex: 0,  value: userId2 }],
             [{ colIndex: 0,  value: userId }],
+            [{ colIndex: 0,  value: userId2 }],
+            [{ colIndex: 0,  value: userId3 }],
         ], 5);
 
     })

@@ -637,6 +637,10 @@ class SkillsAdminService {
         return res.collect { convertToSkillDefPartialRes(it, projectHasSkillTags) }.sort({ it.displayOrder })
     }
 
+    @Transactional(readOnly = true)
+    Integer countSkillsByProjectSkillAndType(String badgeId) {
+        return skillRelDefRepo.countSkillsForGlobalBadge(badgeId)
+    }
     /**
      * Return sthe skills for a subject to include a status indiciating whether or not the skill has been exported to the skill catalog
      * @param projectId projectId
