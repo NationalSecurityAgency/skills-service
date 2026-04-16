@@ -181,6 +181,7 @@ const showNav = computed(() => {
         <template v-if="showNav" #footer>
           <skill-navigation
             :skill="skill"
+            identifier="navFooter"
             :show-paging-info="false"
             @prevButtonClicked="prevButtonClicked"
             @nextButtonClicked="nextButtonClicked" />

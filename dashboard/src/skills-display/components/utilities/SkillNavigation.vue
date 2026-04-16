@@ -26,6 +26,10 @@ const props = defineProps({
   'showPagingInfo' : {
     type: Boolean,
     default: true
+  },
+  'identifier': {
+    type: String,
+    default: ''
   }
 })
 const emit = defineEmits(['prevButtonClicked', 'nextButtonClicked'])
@@ -80,7 +84,7 @@ const nextButtonClicked = () => {
                     :title="`Previous ${attributes.skillDisplayName} (${previousButtonShortcut})`"
                     class="skills-theme-btn"
                     :severity="buttonSeverity"
-                    data-cy="prevSkill"
+                    :data-cy="`prevSkill${identifier}`"
                     @click="prevButtonClicked"
                     aria-label="previous skill"
                     :disabled="!skill.prevSkillId">
@@ -96,7 +100,7 @@ const nextButtonClicked = () => {
       <SkillsButton size="small"
                     outlined
                     id="nextSkillButton"
-                    data-cy="nextSkill"
+                    :data-cy="`nextSkill${identifier}`"
                     :severity="buttonSeverity"
                     class="skills-theme-btn"
                     aria-label="next skill"
