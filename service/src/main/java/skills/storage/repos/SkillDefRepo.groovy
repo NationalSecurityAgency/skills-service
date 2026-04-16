@@ -626,7 +626,12 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     @Query('''
         select count(sd.id) as numberOfSkills, 
         count(distinct sd.copiedFromProjectId) as numberOfProjects
-        from SkillDef sd where sd.copiedFromProjectId is not null
+        from SkillDef sd 
+        where sd.copiedFromProjectId is not null
+            and sd.projectId <> sd.copiedFromProjectId
+            and sd.enabled = 'true'
+            and sd.type = 'Skill'
+            and sd.projectId = ?1
     ''')
     ImportExportStats getImportedSKillStats(String projectId)
 

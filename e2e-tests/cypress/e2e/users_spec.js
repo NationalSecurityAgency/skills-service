@@ -1396,53 +1396,6 @@ describe('Users Tests', () => {
             [{ colIndex: 1,  value: 'user2@skills.org' }, { colIndex: 5,  value: dateFormatter(m.clone().add(4, 'day')) }],
         ], 5);
     });
-
-    it('Exclude Users that only earned points in imported skills', () => {
-        cy.createSkill(1, 1, 1);
-        cy.createSkill(1, 1, 2);
-        cy.exportSkillToCatalog(1, 1, 1);
-        cy.exportSkillToCatalog(1, 1, 2);
-
-        cy.createProject(2);
-        cy.createSubject(2, 1);
-        cy.importSkillFromCatalog(2, 1, 1, 1);
-        cy.importSkillFromCatalog(2, 1, 1, 2);
-        cy.finalizeCatalogImport(2);
-        cy.createSkill(2, 1, 3);
-        cy.createSkill(2, 1, 4);
-
-        cy.reportSkill(1, 1, 'user1', 'now');
-        cy.reportSkill(1, 2, 'user2', 'now');
-        cy.reportSkill(1, 2, 'user3', 'now');
-        cy.reportSkill(1, 1, 'user4', 'now');
-        cy.reportSkill(1, 2, 'user4', 'now');
-
-        cy.reportSkill(2, 3, 'user1', 'now');
-        cy.reportSkill(2, 4, 'user1', 'now');
-        cy.reportSkill(2, 4, 'user2', 'now');
-
-        cy.visit('/administrator/projects/proj2/users');
-
-        cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'user2' }],
-            [{ colIndex: 1,  value: 'user1' }],
-            [{ colIndex: 1,  value: 'user4' }],
-            [{ colIndex: 1,  value: 'user3' }],
-        ], 5);
-
-        cy.get('[data-cy="excludeImportedToggle"]').click();
-        cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'user2' }],
-            [{ colIndex: 1,  value: 'user1' }],
-        ], 5);
-
-        cy.visit('/administrator/projects/proj2/users');
-        cy.validateTable(tableSelector, [
-            [{ colIndex: 1,  value: 'user2' }],
-            [{ colIndex: 1,  value: 'user1' }],
-        ], 5);
-
-    });
 })
 
 

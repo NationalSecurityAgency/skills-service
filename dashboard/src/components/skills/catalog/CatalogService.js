@@ -40,6 +40,10 @@ export default {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/exported/stats`
     return axios.get(url).then((response) => response.data)
   },
+  getImportedStatsForProject(projectId) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/imported/stats`
+    return axios.get(url).then((response) => response.data)
+  },
   removeExportedSkill(projectId, skillId) {
     return axios
       .delete(
