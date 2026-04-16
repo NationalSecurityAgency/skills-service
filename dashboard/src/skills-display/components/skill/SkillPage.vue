@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, defineAsyncComponent, nextTick, onMounted, onBeforeUnmount, ref, watch} from 'vue'
+import {computed, defineAsyncComponent, onMounted, ref, watch} from 'vue'
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
 import {useRoute} from 'vue-router'
 import {useSkillsDisplayService} from '@/skills-display/services/UseSkillsDisplayService.js'
@@ -39,44 +39,11 @@ const loadingSkill = ref(true)
 const displayGroupDescription = ref(false);
 const groupDescription = ref(null);
 const loadingDescription = ref(true);
-const contentCard = ref(null)
-const displayBottomNavigation = ref(false)
-let contentCardResizeObserver = null
-
-const getContentCard = () => {
-  return contentCard.value?.$el ?? null;
-}
-
-const updateBottomNavigationVisibility = () => {
-  const contentCardEl = getContentCard()
-  displayBottomNavigation.value = !!contentCardEl && contentCardEl.getBoundingClientRect().height > window.innerHeight
-}
-const beginResizeObserver = () => {
-
-  const contentCardEl = getContentCard()
-  if (contentCardEl && typeof ResizeObserver !== 'undefined') {
-    contentCardResizeObserver = new ResizeObserver(() => updateBottomNavigationVisibility())
-    contentCardResizeObserver.observe(contentCardEl)
-  }
-
-  window.addEventListener('resize', updateBottomNavigationVisibility)
-}
 
 onMounted( () => {
   loadSkillSummary()
-  nextTick(() => {
-    updateBottomNavigationVisibility()
-  })
-
-  beginResizeObserver()
 })
 
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateBottomNavigationVisibility)
-  if (contentCardResizeObserver) {
-    contentCardResizeObserver.disconnect()
-  }
-})
 watch( () => route.params.skillId, () => {
   loadSkillSummary()
 });
@@ -98,9 +65,6 @@ const loadSkillSummary = () => {
         descriptionToggled();
       }
 
-      nextTick(() => {
-        updateBottomNavigationVisibility()
-      })
     })
 }
 
@@ -139,7 +103,7 @@ const showNav = computed(() => {
   <div>
     <div v-if="!isLoading">
       <skills-title>{{ attributes.skillDisplayName }} Overview</skills-title>
-      <Card ref="contentCard" class="mt-4" :pt="{
+      <Card class="mt-4" :pt="{
         content: { class: 'px-5 pt-5 pb-2' },
         header: { class: 'border-b-1 px-5 py-4' },
         footer: { class: 'border-t-1 px-5 py-4' },
