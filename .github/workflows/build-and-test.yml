@@ -89,7 +89,7 @@ jobs:
     services:
       postgres:
         # Docker Hub image
-        image: postgres:17
+        image: postgres:17-alpine
         env:
           POSTGRES_PASSWORD: skillsPassword
           POSTGRES_DB: skills
@@ -247,7 +247,7 @@ jobs:
     services:
       postgres:
         # Docker Hub image
-        image: postgres:17
+        image: postgres:17-alpine
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: skillsPassword
@@ -339,7 +339,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:17
+        image: postgres:17-alpine
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: skillsPassword
