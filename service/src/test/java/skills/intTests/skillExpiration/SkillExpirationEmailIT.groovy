@@ -24,7 +24,9 @@ import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.admin.UserAchievementExpirationService
 import skills.services.attributes.ExpirationAttrs
+import skills.services.attributes.SkillAttributeService
 import skills.settings.EmailSettingsService
+import skills.storage.model.SkillAttributesDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserAttrs
 import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
@@ -44,6 +46,9 @@ class SkillExpirationEmailIT extends DefaultIntSpec {
 
     @Autowired
     ExpireUserAchievementsTaskExecutor expireUserAchievementsTaskExecutor
+
+    @Autowired
+    SkillAttributeService skillAttributeService
 
     def setup() {
         startEmailServer()
@@ -624,5 +629,94 @@ class SkillExpirationEmailIT extends DefaultIntSpec {
             UserAchievement updatedAchievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skill.skillId)[0]
             updatedAchievement.expirationNotificationState == EXPIRATION_WARNING_NOTIFICATION_SENT
         }
+    }
+
+    def "handle failures in isolation and do not fail the entire batch"() {
+        Map settingRequest = [
+                settingGroup : EmailSettingsService.settingsGroup,
+                setting : EmailSettingsService.htmlHeader,
+                value : 'For {{ community.descriptor }} Only'
+        ]
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextHeader
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.htmlFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj2 = SkillsFactory.createProject(2)
+        def subj1 = SkillsFactory.createSubject(1, 1)
+        def subj2 = SkillsFactory.createSubject(2, 2)
+
+        def skill1 = SkillsFactory.createSkill(1, 1, 1, 1, 1, 0, 100)
+        def skill2 = SkillsFactory.createSkill(1, 1, 2, 1, 1, 0, 100)
+        def skill3_imported = SkillsFactory.createSkill(2, 2, 3, 1, 1, 0, 100)
+        def skill4 = SkillsFactory.createSkill(1, 1, 4, 1, 1, 0, 100)
+        def skill5 = SkillsFactory.createSkill(1, 1, 5, 1, 1, 0, 100)
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.createSubject(subj1)
+        skillsService.createSubject(subj2)
+        skillsService.createSkill(skill1)
+        skillsService.createSkill(skill2)
+        skillsService.createSkill(skill3_imported)
+        skillsService.createSkill(skill4)
+        skillsService.createSkill(skill5)
+
+        skillsService.exportSkillToCatalog(proj2.projectId, skill3_imported.skillId)
+        skillsService.importSkillFromCatalog(proj1.projectId, subj1.subjectId, proj2.projectId, skill3_imported.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(proj1.projectId, true)
+
+        String userId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID]).first()
+        Date date = new Date()
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill1.skillId], userId, date)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], userId, date)
+        skillsService.addSkill([projectId: proj2.projectId, skillId: skill3_imported.skillId], userId, date)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill4.skillId], userId, date)
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill5.skillId], userId, date)
+
+        // bypass endpoint validation for testing purposes, show never get in this state though
+        LocalDateTime expirationDate = (new Date() - 1).toLocalDateTime() // yesterday
+        skillAttributeService.saveAttrs(proj1.projectId, skill3_imported.skillId, SkillAttributesDef.SkillAttributesType.AchievementExpiration, new ExpirationAttrs(
+                expirationType    : ExpirationAttrs.YEARLY,
+                every             : 1,
+                monthlyDay        : expirationDate.dayOfMonth,
+                nextExpirationDate: expirationDate.toDate(),
+        ))
+        def nonImportedSkills = [skill1, skill2, skill4, skill5]
+        nonImportedSkills.each { skill ->
+            skillsService.saveSkillExpirationAttributes(proj1.projectId, skill.skillId.toString(), [
+                    expirationType: ExpirationAttrs.YEARLY,
+                    every: 1,
+                    monthlyDay: expirationDate.dayOfMonth,
+                    nextExpirationDate: expirationDate.toDate(),
+                    emailNotificationsEnabled: true
+            ])
+        }
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
+
+        when:
+        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 4 }
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+
+        then:
+        emails.size() == 4
+        emails.every { it.recipients == [userAttrs.email] }
+        emails.every { it.subj == "Your Skill Achievement Has Expired" }
+
+        // Verify all non-imported skills notifications were sent
+        nonImportedSkills.each { skill ->
+            emails.find { it.html.contains(skill.name) }
+        }
+
+        // verify imported skill notifications were not sent
+        !emails.find { it.html.contains(skill3_imported.name) }
     }
 }
