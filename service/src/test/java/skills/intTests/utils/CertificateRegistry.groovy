@@ -100,7 +100,7 @@ class CertificateRegistry {
                 cn = subjectArray[0].split("=")[1]
             }
 
-            return cn?.replace('-', '')
+            return cn
         }
     }
 
