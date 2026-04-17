@@ -40,9 +40,10 @@ const displayGroupDescription = ref(false);
 const groupDescription = ref(null);
 const loadingDescription = ref(true);
 
-onMounted(() => {
+onMounted( () => {
   loadSkillSummary()
 })
+
 watch( () => route.params.skillId, () => {
   loadSkillSummary()
 });
@@ -63,6 +64,7 @@ const loadSkillSummary = () => {
       if(!groupDescription.value && skill.value.groupSkillId && attributes.groupDescriptionsOn) {
         descriptionToggled();
       }
+
     })
 }
 
@@ -91,15 +93,26 @@ const descriptionToggled = () => {
     })
   }
 }
+
+const showNav = computed(() => {
+  return skill.value && (skill.value.prevSkillId || skill.value.nextSkillId) && !skillsDisplayInfo.isCrossProject()
+})
 </script>
 
 <template>
   <div>
     <div v-if="!isLoading">
       <skills-title>{{ attributes.skillDisplayName }} Overview</skills-title>
-      <Card class="mt-4" :pt="{ content: { class: 'p-0' }}">
+      <Card class="mt-4" :pt="{
+        content: { class: 'px-5 pt-5 pb-2' },
+        header: { class: 'border-b-1 px-5 py-4' },
+        footer: { class: 'border-t-1 px-5 py-4' },
+        body: { class: 'p-0!' }
+      }">
+        <template v-if="showNav" #header>
+          <skill-navigation :skill="skill" @prevButtonClicked="prevButtonClicked" @nextButtonClicked="nextButtonClicked" />
+        </template>
         <template #content>
-          <skill-navigation class="mb-6" :skill="skill" @prevButtonClicked="prevButtonClicked" @nextButtonClicked="nextButtonClicked" v-if="skill && (skill.prevSkillId || skill.nextSkillId) && !skillsDisplayInfo.isCrossProject()" />
           <div v-if="!attributes.groupInfoOnSkillPage && skill.groupName" class="mt-4 p-1 mb-4" data-cy="groupInformationSection">
             <div class="flex">
               <div class="mr-2 mt-1 text-xl">
@@ -126,15 +139,26 @@ const descriptionToggled = () => {
           <div class="card-body text-center text-sm-left">
             <skill-progress :skill="skill" />
           </div>
+
+
         </template>
+        <template v-if="showNav" #footer>
+          <skill-navigation
+            :skill="skill"
+            identifier="navFooter"
+            :show-paging-info="false"
+            @prevButtonClicked="prevButtonClicked"
+            @nextButtonClicked="nextButtonClicked" />
+        </template>
+
       </Card>
 
       <prerequisites />
     </div>
     <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-8" />
+
   </div>
 </template>
 
 <style scoped>
-
 </style>
