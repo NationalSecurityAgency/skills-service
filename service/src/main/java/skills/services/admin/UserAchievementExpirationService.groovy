@@ -18,12 +18,15 @@ package skills.services.admin
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import skills.UIConfigProperties
+import skills.auth.UserAuthService
 import skills.controller.result.model.ExpiredSkillRes
 import skills.controller.result.model.TableResult
 import skills.notify.Notifier
@@ -34,10 +37,13 @@ import skills.services.attributes.SkillAttributeService
 import skills.storage.model.Notification
 import skills.storage.model.SkillAttributesDef
 import skills.storage.model.UserAchievement
+import skills.storage.model.auth.RoleName
+import skills.storage.model.auth.UserRole
 import skills.storage.repos.ExpiredUserAchievementRepo
 import skills.storage.repos.SkillAttributesDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.UserRoleRepo
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -60,6 +66,20 @@ class UserAchievementExpirationService {
 
     @Autowired
     SkillEventAdminService skillEventAdminService
+
+    @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
+
+    @Autowired
+    @Lazy
+    UserAuthService userAuthService
+
+    @Autowired
+    @Lazy
+    UserCommunityService userCommunityService
+
+    @Autowired
+    UserRoleRepo userRoleRepo
 
     @Autowired
     ExpiredUserAchievementRepo expiredUserAchievementRepo
@@ -118,6 +138,9 @@ class UserAchievementExpirationService {
                 if (expirationAttrs.emailNotificationsEnabled && featureService.isEmailServiceFeatureEnabled()) {
                     SkillDefRepo.SkillProjectAndSubjectIdsAndNames skillProjectAndSubjectIdsAndNames = skillDefRepo.getSkillProjectAndSubjectIdsAndNamesBySkillRefId(skillAttributesDef.skillRefId)
                     usersWithExpiredAchievements.each { userId ->
+                        if (!isUserStillPermitted(skillProjectAndSubjectIdsAndNames.projectId, userId)) {
+                            return
+                        }
                         String publicUrl = featureService.getPublicUrl()
                         Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                                 userIds: [userId],
@@ -150,7 +173,7 @@ class UserAchievementExpirationService {
                     skillAttributesDef.skillRefId, expirationThreshold.toDate()
                 )
                 achievementsThatWillExpire.each { achievement ->
-                    if (achievement.expirationNotificationState != EXPIRATION_WARNING_NOTIFICATION_SENT) {
+                    if (achievement.expirationNotificationState != EXPIRATION_WARNING_NOTIFICATION_SENT && isUserStillPermitted(achievement.projectId, achievement.userId)) {
                         String publicUrl = featureService.getPublicUrl()
                         LocalDateTime retentionDeadline = achievedOnOlderThan.plusDays(expirationAttrs.every)
                         int daysUntilExpiration = Math.abs(ChronoUnit.DAYS.between(now, retentionDeadline))
@@ -217,5 +240,25 @@ class UserAchievementExpirationService {
     private int calculateNotificationDays(int daysBeforeExpiring) {
         int notificationDays = (int) Math.round(daysBeforeExpiring * dailySkillExpirationNotificationThreshold)
         return Math.max(1, Math.min(7, notificationDays))
+    }
+
+    private Boolean isUserStillPermitted(String projectId, String userId) {
+        Boolean isInviteOnly = inviteOnlyProjectService.isInviteOnlyProject(projectId)
+        if (isInviteOnly) {
+            List<UserRole> userRoles = userRoleRepo.findAllByUserId(userId?.toLowerCase())
+            Boolean isAuthorized = userRoles.find { it.roleName == RoleName.ROLE_SUPER_DUPER_USER || (it.projectId  && projectId.equalsIgnoreCase(projectId) && it.roleName in [RoleName.ROLE_PRIVATE_PROJECT_USER, RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER])}
+            if (!isAuthorized) {
+                log.warn("User [${userId}] is not authorized to access private project [${projectId}]")
+                return false
+            }
+        }
+
+        Boolean isUserCommunityOnlyProject = userCommunityService.isUserCommunityOnlyProject(projectId)
+        Boolean belongsToUserCommunity = userCommunityService.isUserCommunityMember(userId)
+        if (isUserCommunityOnlyProject && !belongsToUserCommunity) {
+            log.warn("User [${userId}] is not a member of the user community for project [${projectId}]")
+            return false
+        }
+        return true
     }
 }

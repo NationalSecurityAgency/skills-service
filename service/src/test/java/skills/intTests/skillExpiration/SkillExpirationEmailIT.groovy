@@ -17,8 +17,9 @@ package skills.intTests.skillExpiration
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.JdbcTemplate
 import skills.SpringBootApp
-import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.inviteOnly.InviteOnlyBaseSpec
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
@@ -39,7 +40,7 @@ import static skills.services.admin.UserAchievementExpirationService.getEXPIRATI
 
 @SpringBootTest(properties = ['skills.config.expirationGracePeriod=0'],
         webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
-class SkillExpirationEmailIT extends DefaultIntSpec {
+class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
 
     @Autowired
     UserAchievementExpirationService userAchievementExpirationService
@@ -50,9 +51,8 @@ class SkillExpirationEmailIT extends DefaultIntSpec {
     @Autowired
     SkillAttributeService skillAttributeService
 
-    def setup() {
-        startEmailServer()
-    }
+    @Autowired
+    JdbcTemplate jdbcTemplate
 
     def "send expiration warning email notifications for DAILY"() {
         Map settingRequest = [
@@ -201,6 +201,208 @@ class SkillExpirationEmailIT extends DefaultIntSpec {
         updatedAchievement.expirationNotificationState == EXPIRATION_WARNING_NOTIFICATION_SENT
     }
 
+    def "do not send expiration warning email notifications for user community protected project if user is not a member of the protected community any more"() {
+        Map settingRequest = [
+                settingGroup : EmailSettingsService.settingsGroup,
+                setting : EmailSettingsService.htmlHeader,
+                value : 'For {{ community.descriptor }} Only'
+        ]
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextHeader
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.htmlFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+
+        List<String> users = getRandomUsers(2, false, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
+        SkillsService divineDragonUser1SkillsService = createService(users.first())
+        SkillsService divineDragonUser2SkillsService = createService(users.last())
+        divineDragonUser1SkillsService.getPublicConfigs() // will create user_attrs entry
+        divineDragonUser2SkillsService.getPublicConfigs() // will create user_attrs entry
+        rootSkillsService.saveUserTag(divineDragonUser1SkillsService.userName, 'dragons', ['DivineDragon'])
+        rootSkillsService.saveUserTag(divineDragonUser2SkillsService.userName, 'dragons', ['DivineDragon'])
+
+        def proj = SkillsFactory.createProject()
+        proj.enableProtectedUserCommunity = true
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+
+        divineDragonUser1SkillsService.createProject(proj)
+        divineDragonUser1SkillsService.createSubject(subj)
+        divineDragonUser1SkillsService.createSkills(skills)
+
+        String userId = divineDragonUser1SkillsService.userName
+        Date achievementDate = new Date() - 6 // 6 days ago
+
+        // Configure skill expiration
+        divineDragonUser1SkillsService.saveSkillExpirationAttributes(proj.projectId, skills[0].skillId.toString(), [
+                expirationType: ExpirationAttrs.DAILY,
+                every: 7,
+                emailNotificationsEnabled: true
+        ])
+
+        // Create user achievement
+        divineDragonUser1SkillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], userId, achievementDate)
+
+        // Set expiration notification state to NONE
+        UserAchievement achievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
+        achievement.expirationNotificationState = 'NONE'
+        userAchievedRepo.save(achievement)
+
+        jdbcTemplate.execute("delete from user_tags where user_id='${userId}' and key='dragons'")
+
+        when:
+        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+
+        then:
+        greenMail.getReceivedMessages().size() == 0
+    }
+
+    def "send skill expired email notifications for user community protected project"() {
+        Map settingRequest = [
+                settingGroup : EmailSettingsService.settingsGroup,
+                setting : EmailSettingsService.htmlHeader,
+                value : 'For {{ community.descriptor }} Only'
+        ]
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextHeader
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.htmlFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+
+
+        List<String> users = getRandomUsers(2, false, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
+        SkillsService divineDragonUser1SkillsService = createService(users.first())
+        SkillsService divineDragonUser2SkillsService = createService(users.last())
+        divineDragonUser1SkillsService.getPublicConfigs() // will create user_attrs entry
+        divineDragonUser2SkillsService.getPublicConfigs() // will create user_attrs entry
+        rootSkillsService.saveUserTag(divineDragonUser1SkillsService.userName, 'dragons', ['DivineDragon'])
+        rootSkillsService.saveUserTag(divineDragonUser2SkillsService.userName, 'dragons', ['DivineDragon'])
+
+        def proj = SkillsFactory.createProject()
+        proj.enableProtectedUserCommunity = true
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+
+        divineDragonUser1SkillsService.createProject(proj)
+        divineDragonUser1SkillsService.createSubject(subj)
+        divineDragonUser1SkillsService.createSkills(skills)
+
+        String userId = divineDragonUser1SkillsService.userName
+        Date achievementDate = new Date() - 10 // 10 days ago
+
+        // Configure skill expiration
+        LocalDateTime expirationDate = (new Date()-1).toLocalDateTime() // yesterday
+        divineDragonUser1SkillsService.saveSkillExpirationAttributes(proj.projectId, skills[0].skillId.toString(), [
+                expirationType: ExpirationAttrs.MONTHLY,
+                every: 1,
+                monthlyDay: expirationDate.dayOfMonth,
+                nextExpirationDate: expirationDate.toDate(),
+                emailNotificationsEnabled: true
+        ])
+
+        // Create user achievement
+        divineDragonUser1SkillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], userId, achievementDate)
+
+        // Set expiration notification state to EXPIRATION_WARNING_NOTIFICATION_SENT
+        UserAchievement achievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
+        achievement.expirationNotificationState = EXPIRATION_WARNING_NOTIFICATION_SENT
+        userAchievedRepo.save(achievement)
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
+
+        when:
+        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+
+        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*We're writing to inform you that your achievement for the skill ${skills[0].name} in project ${proj.name} has expired.*Expiration Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Expired On: \d{4}-\d{2}-\d{2}.*For All Dragons Only/
+
+        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your Skill Achievement Has Expired<\/h1>.+?/
+        Pattern p1 = ~/(?s)<p>We're writing to inform you that your achievement for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> has expired.<\/p>.+?/
+        Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Expired On:<\/strong>.*\d{4}-\d{2}-\d{2}/
+
+        then:
+        emails.size() == 1
+        emails[0].recipients == [userAttrs.email]
+        emails[0].subj == "Your Skill Achievement Has Expired"
+        plaintTextMatch.matcher(emails[0].plainText).find()
+        h1.matcher(emails[0].html).find()
+        p1.matcher(emails[0].html).find()
+        p2.matcher(emails[0].html).find()
+
+        // Verify notification state was updated
+        UserAchievement updatedAchievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
+    }
+
+    def "do not send skill expired email notifications for user community protected project if user is not a member of the protected community any more"() {
+        Map settingRequest = [
+                settingGroup : EmailSettingsService.settingsGroup,
+                setting : EmailSettingsService.htmlHeader,
+                value : 'For {{ community.descriptor }} Only'
+        ]
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextHeader
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.htmlFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+
+        List<String> users = getRandomUsers(2, false, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
+        SkillsService divineDragonUser1SkillsService = createService(users.first())
+        SkillsService divineDragonUser2SkillsService = createService(users.last())
+        divineDragonUser1SkillsService.getPublicConfigs() // will create user_attrs entry
+        divineDragonUser2SkillsService.getPublicConfigs() // will create user_attrs entry
+        rootSkillsService.saveUserTag(divineDragonUser1SkillsService.userName, 'dragons', ['DivineDragon'])
+        rootSkillsService.saveUserTag(divineDragonUser2SkillsService.userName, 'dragons', ['DivineDragon'])
+
+        def proj = SkillsFactory.createProject()
+        proj.enableProtectedUserCommunity = true
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+
+        divineDragonUser1SkillsService.createProject(proj)
+        divineDragonUser1SkillsService.createSubject(subj)
+        divineDragonUser1SkillsService.createSkills(skills)
+
+        String userId = divineDragonUser1SkillsService.userName
+        Date achievementDate = new Date() - 6 // 6 days ago
+
+        // Configure skill expiration
+        LocalDateTime expirationDate = (new Date()-1).toLocalDateTime() // yesterday
+        divineDragonUser1SkillsService.saveSkillExpirationAttributes(proj.projectId, skills[0].skillId.toString(), [
+                expirationType: ExpirationAttrs.YEARLY,
+                every: 1,
+                monthlyDay: expirationDate.dayOfMonth,
+                nextExpirationDate: expirationDate.toDate(),
+                emailNotificationsEnabled: true
+        ])
+
+        // Create user achievement
+        divineDragonUser1SkillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], userId, achievementDate)
+
+        // Set expiration notification state to NONE
+        UserAchievement achievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
+        achievement.expirationNotificationState = 'NONE'
+        userAchievedRepo.save(achievement)
+
+        jdbcTemplate.execute("delete from user_tags where user_id='${userId}' and key='dragons'")
+
+        when:
+        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+
+        then:
+        greenMail.getReceivedMessages().size() == 0
+    }
+
     def "send skill expired email notifications for YEARLY"() {
         Map settingRequest = [
                 settingGroup : EmailSettingsService.settingsGroup,
@@ -310,86 +512,6 @@ class SkillExpirationEmailIT extends DefaultIntSpec {
 
         // Create user achievement
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], userId, achievementDate)
-
-        // Set expiration notification state to EXPIRATION_WARNING_NOTIFICATION_SENT
-        UserAchievement achievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
-        achievement.expirationNotificationState = EXPIRATION_WARNING_NOTIFICATION_SENT
-        userAchievedRepo.save(achievement)
-
-        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
-
-        when:
-        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
-
-        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
-        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
-
-        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*We're writing to inform you that your achievement for the skill ${skills[0].name} in project ${proj.name} has expired.*Expiration Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Expired On: \d{4}-\d{2}-\d{2}.*For All Dragons Only/
-
-        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your Skill Achievement Has Expired<\/h1>.+?/
-        Pattern p1 = ~/(?s)<p>We're writing to inform you that your achievement for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> has expired.<\/p>.+?/
-        Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Expired On:<\/strong>.*\d{4}-\d{2}-\d{2}/
-
-        then:
-        emails.size() == 1
-        emails[0].recipients == [userAttrs.email]
-        emails[0].subj == "Your Skill Achievement Has Expired"
-        plaintTextMatch.matcher(emails[0].plainText).find()
-        h1.matcher(emails[0].html).find()
-        p1.matcher(emails[0].html).find()
-        p2.matcher(emails[0].html).find()
-
-        // Verify notification state was updated
-        UserAchievement updatedAchievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
-    }
-    def "send skill expired email notifications for user community protected project"() {
-        Map settingRequest = [
-                settingGroup : EmailSettingsService.settingsGroup,
-                setting : EmailSettingsService.htmlHeader,
-                value : 'For {{ community.descriptor }} Only'
-        ]
-        SkillsService rootSkillsService = createRootSkillService()
-        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
-        settingRequest.setting = EmailSettingsService.plaintextHeader
-        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
-        settingRequest.setting = EmailSettingsService.htmlFooter
-        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
-        settingRequest.setting = EmailSettingsService.plaintextFooter
-        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
-
-
-        List<String> users = getRandomUsers(2, false, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
-        SkillsService divineDragonUser1SkillsService = createService(users.first())
-        SkillsService divineDragonUser2SkillsService = createService(users.last())
-        divineDragonUser1SkillsService.getPublicConfigs() // will create user_attrs entry
-        divineDragonUser2SkillsService.getPublicConfigs() // will create user_attrs entry
-        rootSkillsService.saveUserTag(divineDragonUser1SkillsService.userName, 'dragons', ['DivineDragon'])
-        rootSkillsService.saveUserTag(divineDragonUser2SkillsService.userName, 'dragons', ['DivineDragon'])
-
-        def proj = SkillsFactory.createProject()
-        proj.enableProtectedUserCommunity = true
-        def subj = SkillsFactory.createSubject()
-        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
-
-        divineDragonUser1SkillsService.createProject(proj)
-        divineDragonUser1SkillsService.createSubject(subj)
-        divineDragonUser1SkillsService.createSkills(skills)
-
-        String userId = divineDragonUser1SkillsService.userName
-        Date achievementDate = new Date() - 10 // 10 days ago
-
-        // Configure skill expiration
-        LocalDateTime expirationDate = (new Date()-1).toLocalDateTime() // yesterday
-        divineDragonUser1SkillsService.saveSkillExpirationAttributes(proj.projectId, skills[0].skillId.toString(), [
-                expirationType: ExpirationAttrs.MONTHLY,
-                every: 1,
-                monthlyDay: expirationDate.dayOfMonth,
-                nextExpirationDate: expirationDate.toDate(),
-                emailNotificationsEnabled: true
-        ])
-
-        // Create user achievement
-        divineDragonUser1SkillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], userId, achievementDate)
 
         // Set expiration notification state to EXPIRATION_WARNING_NOTIFICATION_SENT
         UserAchievement achievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
@@ -631,6 +753,101 @@ class SkillExpirationEmailIT extends DefaultIntSpec {
         }
     }
 
+    def "handle multiple users with some hitting expiration threshold and others not"() {
+        Map settingRequest = [
+                settingGroup : EmailSettingsService.settingsGroup,
+                setting : EmailSettingsService.htmlHeader,
+                value : 'For {{ community.descriptor }} Only'
+        ]
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextHeader
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.htmlFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2, 1, 1, 100)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        // Create multiple users with different achievement dates
+        List<String> userIds = getRandomUsers(4, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
+        
+        // User 1: Achievement 6 days ago - should get email (within 7-day threshold)
+        Date user1Date = new Date() - 6
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userIds[0], user1Date)
+        
+        // User 2: Achievement 8 days ago - should not get email (outside 7-day threshold)
+        Date user2Date = new Date() - 8
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], userIds[1], user2Date)
+        
+        // User 3: Achievement 6 days ago - should get email (within 7-day threshold)
+        Date user3Date = new Date() - 6
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], userIds[2], user3Date)
+        
+        // User 4: Achievement 10 days ago - should not get email (outside 7-day threshold)
+        Date user4Date = new Date() - 10
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], userIds[3], user4Date)
+
+        // Configure skills for expiration with 7-day warning threshold
+        skills.each { skill ->
+            skillsService.saveSkillExpirationAttributes(proj.projectId, skill.skillId, [
+                    expirationType: ExpirationAttrs.DAILY,
+                    every: 7,
+                    emailNotificationsEnabled: true
+            ])
+            
+            // Reset notification states to NONE
+            userIds.each { userId ->
+                UserAchievement achievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skill.skillId)[0]
+                if (achievement) {
+                    achievement.expirationNotificationState = 'NONE'
+                    userAchievedRepo.save(achievement)
+                }
+            }
+        }
+
+        List<UserAttrs> userAttrs = userIds.collect { userId -> 
+            userAttrsRepo.findByUserIdIgnoreCase(userId)
+        }
+
+        when:
+        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+
+        then:
+        emails.size() == 2
+        
+        // Verify users 1 and 3 received emails (within threshold)
+        emails.any { it.recipients == [userAttrs[0].email] } // User 1 should get email
+        emails.any { it.recipients == [userAttrs[2].email] } // User 3 should get email
+        
+        // Verify users 2 and 4 did not receive emails (outside threshold)
+        !emails.any { it.recipients == [userAttrs[1].email] } // User 2 should not get email
+        !emails.any { it.recipients == [userAttrs[3].email] } // User 4 should not get email
+        
+        emails.every { it.subj == "Skill Achievement Expiring Soon" }
+        
+        // Verify notification states were updated correctly
+        UserAchievement user1Achievement = userAchievedRepo.findAllByUserIdAndSkillId(userIds[0], skills[0].skillId)[0]
+        user1Achievement.expirationNotificationState == EXPIRATION_WARNING_NOTIFICATION_SENT
+        
+        !userAchievedRepo.findAllByUserIdAndSkillId(userIds[1], skills[0].skillId)[0]  // this user achievement was expired
+
+        UserAchievement user3Achievement = userAchievedRepo.findAllByUserIdAndSkillId(userIds[2], skills[1].skillId)[0]
+        user3Achievement.expirationNotificationState == EXPIRATION_WARNING_NOTIFICATION_SENT
+        
+        !userAchievedRepo.findAllByUserIdAndSkillId(userIds[3], skills[1].skillId)[0]  // this user achievement was expired
+    }
+
     def "handle failures in isolation and do not fail the entire batch"() {
         Map settingRequest = [
                 settingGroup : EmailSettingsService.settingsGroup,
@@ -718,5 +935,102 @@ class SkillExpirationEmailIT extends DefaultIntSpec {
 
         // verify imported skill notifications were not sent
         !emails.find { it.html.contains(skill3_imported.name) }
+    }
+
+    def "do send skill expired emails for invite only project for permitted user"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        String userId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID]).first()
+        def newService = createService(userId)
+        Date achievementDate = new Date() - 10 // 10 days ago
+
+        // Configure skill expiration
+        LocalDateTime expirationDate = (new Date()-1).toLocalDateTime() // yesterday
+        skillsService.saveSkillExpirationAttributes(proj.projectId, skills[0].skillId.toString(), [
+                expirationType: ExpirationAttrs.MONTHLY,
+                every: 1,
+                monthlyDay: expirationDate.dayOfMonth,
+                nextExpirationDate: expirationDate.toDate(),
+                emailNotificationsEnabled: true
+        ])
+
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
+        WaitFor.wait {
+            greenMail.getReceivedMessages().length > 0
+        }
+
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def invite = extractInviteFromEmail(email.html)
+        greenMail.reset()
+
+        newService.joinProject(proj.projectId, invite)
+
+        // Create user achievement
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], userId, achievementDate)
+
+        when:
+        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+
+        then:
+        emails.size() == 1
+        emails[0].subj == "Your Skill Achievement Has Expired"
+        emails[0].html.contains(skills[0].name)
+    }
+
+    def "do not send skill expired emails for invite only project after user access is revoked"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+        skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
+
+        String userId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID]).first()
+        def newService = createService(userId)
+        Date achievementDate = new Date() - 10 // 10 days ago
+
+        // Configure skill expiration
+        LocalDateTime expirationDate = (new Date()-1).toLocalDateTime() // yesterday
+        skillsService.saveSkillExpirationAttributes(proj.projectId, skills[0].skillId.toString(), [
+                expirationType: ExpirationAttrs.MONTHLY,
+                every: 1,
+                monthlyDay: expirationDate.dayOfMonth,
+                nextExpirationDate: expirationDate.toDate(),
+                emailNotificationsEnabled: true
+        ])
+
+        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
+        WaitFor.wait {
+            greenMail.getReceivedMessages().length > 0
+        }
+
+        def email = EmailUtils.getEmail(greenMail, 0)
+        def invite = extractInviteFromEmail(email.html)
+        greenMail.reset()
+
+        newService.joinProject(proj.projectId, invite)
+
+        // Create user achievement
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], userId, achievementDate)
+
+        skillsService.revokeInviteOnlyProjectAccess(proj.projectId, userId)
+
+        when:
+        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+
+        then:
+        greenMail.getReceivedMessages().size() == 0
     }
 }
