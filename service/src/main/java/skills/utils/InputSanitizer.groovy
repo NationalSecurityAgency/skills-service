@@ -39,7 +39,8 @@ class InputSanitizer {
     private static final Pattern PURE_AMP = ~/\s&amp;\s/
     private static final Pattern SPACE = ~/\s/
     private static final Pattern CAPTION_ARROW = ~/--&gt;/
-
+    private static final Pattern CODE_BLOCK = ~/```([\s\S]*?)```/
+    private static final Pattern INLINE_CODE_BLOCK = ~/(?<!\\)(?<!`)(?!___CODE_BLOCK_)(?!___MULTILINE_CODE_BLOCK_)(?!___INLINE_CODE_BLOCK_)`([^`\n]+)`(?!`)/
     private static final SAFE_LIST_FOR_DESC = Safelist.relaxed()
             .addTags('del', 'skills-display')
             .addAttributes('skills-display', 'version')
@@ -62,7 +63,70 @@ class InputSanitizer {
             return input;
         }
 
-        return Jsoup.clean(input, "", SAFE_LIST_FOR_DESC, print)
+        // Find all code blocks (both inline and multiline) in order
+        List<String> codeBlocks = []
+        String processedInput = input
+        
+        // Collect all code blocks with their positions
+        List<Map> codeBlockMatches = []
+        
+        // Find multi-line code blocks first
+        Matcher multilineMatcher = CODE_BLOCK.matcher(input)
+        while (multilineMatcher.find()) {
+            codeBlocks.add(multilineMatcher.group(0))
+            codeBlockMatches.add([
+                start: multilineMatcher.start(),
+                end: multilineMatcher.end(),
+                type: 'MULTILINE',
+                index: codeBlocks.size() - 1
+            ])
+        }
+        
+        // Find inline code blocks, avoiding those inside multi-line blocks
+        Matcher inlineMatcher = INLINE_CODE_BLOCK.matcher(input)
+        while (inlineMatcher.find()) {
+            String inlineBlock = inlineMatcher.group(0)
+            int inlineStart = inlineMatcher.start()
+            int inlineEnd = inlineMatcher.end()
+            
+            // Check if this inline block is inside any multi-line block
+            boolean insideMultiline = codeBlockMatches.any { match ->
+                inlineStart >= match.start && inlineEnd <= match.end
+            }
+            
+            if (!insideMultiline) {
+                codeBlocks.add(inlineBlock)
+                codeBlockMatches.add([
+                    start: inlineStart,
+                    end: inlineEnd,
+                    type: 'INLINE',
+                    index: codeBlocks.size() - 1
+                ])
+            }
+        }
+        
+        // Sort matches by position and replace from end to beginning
+        codeBlockMatches.sort { a, b -> a.start <=> b.start }
+        Collections.reverse(codeBlockMatches)
+        
+        // Replace all code blocks with placeholders
+        for (Map match : codeBlockMatches) {
+            String placeholder = "___${match.type}_${match.index}___"
+            processedInput = processedInput.substring(0, match.start) + placeholder + 
+                           processedInput.substring(match.end)
+        }
+
+        // Sanitize the content without code blocks
+        String sanitized = Jsoup.clean(processedInput, "", SAFE_LIST_FOR_DESC, print)
+
+        // Restore code blocks in original order
+        Collections.reverse(codeBlockMatches)
+        for (Map match : codeBlockMatches) {
+            String placeholder = "___${match.type}_${match.index}___"
+            sanitized = sanitized.replace(placeholder, codeBlocks[match.index])
+        }
+
+        return sanitized
     }
 
     static String unSanitizeCaption(String input) {
