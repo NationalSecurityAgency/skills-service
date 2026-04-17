@@ -42,7 +42,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:17
+        image: postgres:17-alpine
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: skillsPassword
