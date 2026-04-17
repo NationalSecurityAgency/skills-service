@@ -857,127 +857,112 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             nativeQuery = true)
     Long countDistinctUserIdByProjectId(String projectId)
 
-    static final String FIND_DISTINCT_USERS_SQL = '''SELECT 
-                up.user_id as userId, 
-                min(upa.firstPerformedOn) as firstUpdated, 
-                max(upa.lastPerformedOn) as lastUpdated, 
-                sum(up.points) as totalPoints,
-                max(ua.first_name) as firstName,
-                max(ua.last_name) as lastName,
-                max(ua.dn) as dn,
-                max(ua.email) as email,
-                max(ua.user_id_for_display) as userIdForDisplay,
-                case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel, 
-                max(ut.value) as userTag
-            FROM user_points up
-            JOIN (
-                SELECT upa.user_id, 
-                min(upa.performed_on) AS firstPerformedOn, 
-                max(upa.performed_on) AS lastPerformedOn 
-                FROM user_performed_skill upa 
-                WHERE upa.skill_ref_id in (
-                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition where type = 'Skill' and project_id = ?1 and enabled = 'true'
-                )
-                GROUP BY upa.user_id
-            ) upa ON upa.user_id = up.user_id
-            LEFT JOIN (
-                SELECT uAchievement.user_id, max(uAchievement.level) as level
-                FROM user_achievement uAchievement 
-                WHERE uAchievement.project_id = ?1
-                    and uAchievement.skill_id is null
-                    and uAchievement.level is not null
-                GROUP BY uAchievement.user_id
-            ) uAchievement ON uAchievement.user_id = up.user_id
-            JOIN user_attrs ua ON ua.user_id=up.user_id
-            LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = ?2 group by ut.user_id) ut ON ut.user_id=ua.user_id
-            WHERE 
-                up.project_id=?1 and 
-                ((lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT(\'%\', ?3, \'%\'))) OR
-                (lower(CONCAT(ua.user_id_for_display, ' (', ua.last_name, ', ', ua.first_name,  ')')) like lower(CONCAT(\'%\', ?3, \'%\'))) OR
-                 (lower(ua.user_id_for_display) like lower(CONCAT('%', ?3, '%')))
-                ) and 
-                up.skill_id is null and
-                up.points >= ?4 and up.points < ?5 and
-                (?6 = '' or lower(ut.value) like lower(CONCAT('%', ?6, '%'))) and
-                not exists (select 1 from archived_users au where au.user_id = up.user_id and au.project_id = ?1)
-            GROUP BY up.user_id'''
+    static final String FIND_DISTINCT_USERS_SQL = '''SELECT
+    upa.user_id as userId,
+    min(upa.performed_on) as firstUpdated,
+    max(upa.performed_on) as lastUpdated,
+    sum(skill.point_increment) as totalPoints,
+    max(ua.first_name) as firstName,
+    max(ua.last_name) as lastName,
+    max(ua.dn) as dn,
+    max(ua.email) as email,
+    max(ua.user_id_for_display) as userIdForDisplay,
+    case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel,
+    max(ut.value) as userTag
+FROM user_performed_skill upa
+    JOIN skill_definition skill on (
+        upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end
+        and type = 'Skill' and skill.project_id = :projectId
+    )
+    LEFT JOIN (
+        SELECT uAchievement.user_id, max(uAchievement.level) as level
+        FROM user_achievement uAchievement
+        WHERE uAchievement.project_id = :projectId
+          and uAchievement.skill_id is null
+          and uAchievement.level is not null
+        GROUP BY uAchievement.user_id
+    ) uAchievement ON uAchievement.user_id = upa.user_id
+         JOIN user_attrs ua ON ua.user_id=upa.user_id
+         LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.user_id) ut ON ut.user_id=ua.user_id
+WHERE
+    skill.enabled = 'true' and
+    ((lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', :query, '%'))) OR
+     (lower(CONCAT(ua.user_id_for_display, ' (', ua.last_name, ', ', ua.first_name,  ')')) like lower(CONCAT('%', :query, '%'))) OR
+     (lower(ua.user_id_for_display) like lower(CONCAT('%', :query, '%')))
+        ) and
+    (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) and
+    not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId)
+GROUP BY upa.user_id
+HAVING
+   sum(skill.point_increment) >= :minimumPoints
+   and sum(skill.point_increment) < :maximumPoints
+   and (:includeImported = true or sum(CASE when skill.copied_from_skill_ref is null then skill.point_increment else 0 end) > 0)'''
 
     @Query(value = FIND_DISTINCT_USERS_SQL, nativeQuery = true)
-    Page<ProjectUser> findDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, int maximumPoints, String userTagFilter, Pageable pageable)
+    Page<ProjectUser> findDistinctProjectUsersAndUserIdLike(@Param("projectId") String projectId,
+                                                            @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
+                                                            @Param("query") String query,
+                                                            @Param("minimumPoints") int minimumPoints,
+                                                            @Param("maximumPoints") int maximumPoints,
+                                                            @Param("userTagFilter") String userTagFilter,
+                                                            @Param("includeImported") boolean includeImported,
+                                                            Pageable pageable)
 
     @QueryHints(
             @QueryHint(name = AvailableHints.HINT_FETCH_SIZE, value = "100")
     )
     @Query(value = FIND_DISTINCT_USERS_SQL, nativeQuery = true)
-    Stream<ProjectUser> streamDistinctProjectUsersAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, String query, int minimumPoints, int maximumPoints, String userTagFilter, Pageable pageable)
+    Stream<ProjectUser> streamDistinctProjectUsersAndUserIdLike(@Param("projectId") String projectId,
+                                                                @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
+                                                                @Param("query") String query,
+                                                                @Param("minimumPoints") int minimumPoints,
+                                                                @Param("maximumPoints") int maximumPoints,
+                                                                @Param("userTagFilter") String userTagFilter,
+                                                                @Param("includeImported") boolean includeImported,
+                                                                Pageable pageable)
 
-    @Query(value= '''
-        WITH subj_skills AS (
-            select child.id as id
-            from skill_definition parent,
-                 skill_relationship_definition rel,
-                 skill_definition child
-            where parent.project_id = :projectId
-              and parent.skill_id = :subjectId
-              and rel.parent_ref_id = parent.id
-              and rel.child_ref_id = child.id
-              and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
-              and child.type = 'Skill'
-              and child.enabled = 'true'
-        )
-        SELECT COUNT(*)
-        FROM (
-            SELECT up.user_id, SUM(up.points) as total_points
-            from user_points up
-            INNER JOIN user_attrs usattr ON up.user_id = usattr.user_id 
-            LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.user_id) ut ON ut.user_id=up.user_id
-            where 
-                up.user_id = usattr.user_id and
-                up.skill_ref_id in (select id from subj_skills) and 
-                (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) and
-                (lower(CONCAT(usattr.first_name, ' ', usattr.last_name, ' (', usattr.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%')) OR
-                 lower(usattr.user_id_for_display) like lower(CONCAT('%', :userId, '%'))) AND
-                not exists (select 1 from archived_users au where au.user_id = up.user_id and au.project_id = :projectId)
-            group by up.user_id
-        ) AS temp  WHERE total_points >= :minimumPoints and total_points < :maximumPoints
-    ''', nativeQuery = true)
-    Long countDistinctUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId, @Param("subjectId") String subjectId, @Param("userId") String userId, @Param("minimumPoints") int minimumPoints, @Param("maximumPoints") int maximumPoints, @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey, @Param("userTagFilter") String userTagFilter)
-
-    @Query(value = '''SELECT 
-                up.user_id as userId,
-                max(upa.firstPerformedOn) as firstUpdated, 
-                max(upa.lastPerformedOn) as lastUpdated, 
-                sum(up.points) as totalPoints,
-                max(ua.first_name) as firstName,
-                max(ua.last_name) as lastName,
-                max(ua.dn) as dn,
-                max(ua.email) as email,
-                max(ua.user_id_for_display) as userIdForDisplay,
-                max(ut.value) as userTag
-            FROM user_points up
-            LEFT JOIN (
-                SELECT upa.user_id, 
-                min(upa.performed_on) AS firstPerformedOn,
-                max(upa.performed_on) AS lastPerformedOn 
-                FROM user_performed_skill upa 
-                WHERE upa.skill_ref_id in (
-                    select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition sd where type = 'Skill' and sd.project_id = ?1 and sd.skill_id in (?3)
-                )
-                GROUP BY upa.user_id
-            ) upa ON upa.user_id = up.user_id
-            JOIN user_attrs ua ON ua.user_id=up.user_id
-            LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = ?2 group by ut.user_id) ut ON ut.user_id=ua.user_id
-            WHERE 
-                up.project_id=?1 and 
-                up.skill_id in (?3) and
-                up.points >= ?5 and up.points < ?6 and
-                (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) and
-                (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', ?4, '%'))  OR
-                 lower(ua.user_id_for_display) like lower(CONCAT('%', ?4, '%'))
-                ) AND 
-                not exists (select 1 from archived_users au where au.user_id = ua.user_id and au.project_id = $1)
-            GROUP BY up.user_id''', nativeQuery = true)
-    Page<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(String projectId, String usersTableAdditionalUserTagKey, List<String> skillIds, String userId, int minimumPoints, int maximumPoints, String userTagFilter, Pageable pageable)
+    @Query(value = '''
+SELECT
+    upa.user_id as userId,
+    min(upa.performed_on) as firstUpdated,
+    max(upa.performed_on) as lastUpdated,
+    sum(skill.point_increment) as totalPoints,
+    max(ua.first_name) as firstName,
+    max(ua.last_name) as lastName,
+    max(ua.dn) as dn,
+    max(ua.email) as email,
+    max(ua.user_id_for_display) as userIdForDisplay,
+    max(ut.value) as userTag
+FROM user_performed_skill upa
+    JOIN skill_definition skill on (
+        upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end
+        and type = 'Skill' and skill.project_id = :projectId and skill.skill_id in :skillIds
+    )
+    JOIN user_attrs ua ON ua.user_id=upa.user_id
+    LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.user_id) ut ON ut.user_id=ua.user_id
+WHERE
+    skill.enabled = 'true' and
+    ((lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', :query, '%'))) OR
+     (lower(CONCAT(ua.user_id_for_display, ' (', ua.last_name, ', ', ua.first_name,  ')')) like lower(CONCAT('%', :query, '%'))) OR
+     (lower(ua.user_id_for_display) like lower(CONCAT('%', :query, '%')))
+        ) and
+    (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%')))
+    and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId)
+    and (:includeImported = true OR exists( select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id) )
+GROUP BY upa.user_id
+HAVING
+    sum(skill.point_increment) >= :minimumPoints
+   and sum(skill.point_increment) < :maximumPoints
+            ''', nativeQuery = true)
+    Page<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(@Param("projectId") String projectId,
+                                                                                   @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
+                                                                                   @Param("skillIds") List<String> skillIds,
+                                                                                   @Param("query") String query,
+                                                                                   @Param("minimumPoints") int minimumPoints,
+                                                                                   @Param("maximumPoints") int maximumPoints,
+                                                                                   @Param("userTagFilter") String userTagFilter,
+                                                                                   @Param("includeImported") boolean includeImported,
+                                                                                   Pageable pageable)
 
 
     static final String FIND_DISTINCT_GLOBAL_BADGE_USERS_SQL = '''
@@ -1159,69 +1144,67 @@ WHERE
 
     @Nullable
     @Query(value= '''
-        SELECT * FROM (
-         WITH subj_skills AS (
-            select child.id as id
+SELECT
+    upa.user_id as userId,
+    min(upa.performed_on) as firstUpdated,
+    max(upa.performed_on) as lastUpdated,
+    sum(skill.point_increment) as totalPoints,
+    max(ua.first_name) as firstName,
+    max(ua.last_name) as lastName,
+    max(ua.dn) as dn,
+    max(ua.email) as email,
+    max(ua.user_id_for_display) as userIdForDisplay,
+    case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel,
+    max(ut.value) as userTag
+FROM user_performed_skill upa
+     JOIN (
+            select child.*
             from skill_definition parent,
-                 skill_relationship_definition rel,
-                 skill_definition child
+                                      skill_relationship_definition rel,
+                                      skill_definition child
             where parent.project_id = :projectId
               and parent.skill_id = :subjectId
               and rel.parent_ref_id = parent.id
               and rel.child_ref_id = child.id
               and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
-              and child.type = 'Skill'
-              and child.enabled = 'true'
-        )
-        SELECT 
-            up.user_id as userId, 
-            min(upa.firstPerformedOn) as firstUpdated,
-            max(upa.lastPerformedOn) as lastUpdated, 
-            sum(up.points) as totalPoints,
-            max(ua.first_name) as firstName,
-            max(ua.last_name) as lastName,
-            max(ua.dn) as dn,
-            max(ua.email) as email,
-            max(ua.user_id_for_display) as userIdForDisplay,
-            case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel, 
-            max(ut.value) as userTag 
-        FROM user_points up
-        LEFT JOIN (
-            SELECT upa.user_id, 
-            min(upa.performed_on) AS firstPerformedOn,
-            max(upa.performed_on) AS lastPerformedOn 
-            FROM user_performed_skill upa 
-            WHERE upa.skill_ref_id in (
-                select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id from skill_definition
-                where type = 'Skill' and project_id = :projectId and id in (select s_s.id from subj_skills s_s where s_s.id = id)
-            )
-            GROUP BY upa.user_id
-        ) upa ON upa.user_id = up.user_id
-        LEFT JOIN (
-            SELECT uAchievement.user_id, max(uAchievement.level) as level
-            FROM user_achievement uAchievement 
-            WHERE uAchievement.project_id = :projectId
-                and uAchievement.skill_id = :subjectId
-                and uAchievement.level is not null
-            GROUP BY uAchievement.user_id
-        ) uAchievement ON uAchievement.user_id = up.user_id    
-        JOIN user_attrs ua ON ua.user_id=up.user_id
-        LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.user_id) ut ON ut.user_id=ua.user_id
-        WHERE 
-            up.skill_ref_id in (select s_s.id from subj_skills s_s) and 
-            (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) and
-            (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', :userId, '%'))  OR
-             lower(ua.user_id_for_display) like lower(CONCAT('%', :userId, '%'))
-            ) AND not exists (select 1 from archived_users au where au.user_id = ua.user_id and au.project_id = :projectId)
-        GROUP BY up.user_id) AS projectUser WHERE projectUser.totalPoints >= :minimumPoints AND projectUser.totalPoints < :maximumPoints
+              and child.type = 'Skill\'
+              and child.enabled = 'true\'
+    ) skill on ( upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end)
+    LEFT JOIN (
+        SELECT uAchievement.user_id, max(uAchievement.level) as level
+        FROM user_achievement uAchievement
+        WHERE uAchievement.project_id = :projectId
+          and uAchievement.skill_id = :subjectId
+          and uAchievement.level is not null
+        GROUP BY uAchievement.user_id
+    ) uAchievement ON uAchievement.user_id = upa.user_id
+    JOIN user_attrs ua ON ua.user_id = upa.user_id
+    LEFT JOIN (
+        SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.user_id
+    ) ut ON ut.user_id = ua.user_id
+WHERE
+    skill.enabled = 'true'
+    and (
+        (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', :query, '%'))) OR
+        (lower(CONCAT(ua.user_id_for_display, ' (', ua.last_name, ', ', ua.first_name,  ')')) like lower(CONCAT('%', :query, '%'))) OR
+        (lower(ua.user_id_for_display) like lower(CONCAT('%', :query, '%')))
+    ) 
+    and (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) 
+    and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId)
+    and (:includeImported = true OR exists( select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id) )
+GROUP BY upa.user_id
+HAVING
+    sum(skill.point_increment) >= :minimumPoints
+   and sum(skill.point_increment) < :maximumPoints
     ''', nativeQuery = true)
-    List<ProjectUser> findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId,
+    Page<ProjectUser> findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId,
                                                                                    @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
                                                                                    @Param("subjectId") String subjectId,
-                                                                                   @Param("userId") String userId,
+                                                                                   @Param("query") String userId,
                                                                                    @Param("minimumPoints") int minimumPoints,
                                                                                    @Param("maximumPoints") int maximumPoints,
                                                                                    @Param("userTagFilter") String userTagFilter,
+                                                                                   @Param("includeImported") Boolean includeImported,
                                                                                    Pageable pageable)
 
     @Nullable

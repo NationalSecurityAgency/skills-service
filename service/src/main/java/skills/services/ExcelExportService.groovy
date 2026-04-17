@@ -89,7 +89,7 @@ class ExcelExportService {
     GlobalBadgesService globalBadgesService
 
     @Transactional(readOnly = true)
-    void exportUsersProgress(Workbook workbook, String projectId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter) {
+    void exportUsersProgress(Workbook workbook, String projectId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter, boolean includeImported) {
         String projectExportHeaderAndFooter = userCommunityService.replaceProjectDescriptorVar(exportHeaderAndFooter, userCommunityService.getProjectUserCommunity(projectId))
         Sheet sheet = workbook.createSheet()
         List<String> headers
@@ -117,7 +117,7 @@ class ExcelExportService {
         if (maximumPointsPercent == 100) {
             maximumPoints = maximumPoints + 1
         }
-        Stream<ProjectUser> projectUsers = adminUsersService.streamAllDistinctUsersForProject(projectId, query, pageRequest, minimumPoints, maximumPoints, userTagFilter)
+        Stream<ProjectUser> projectUsers = adminUsersService.streamAllDistinctUsersForProject(projectId, query, pageRequest, minimumPoints, maximumPoints, userTagFilter, includeImported)
         try {
             projectUsers.each { ProjectUser user ->
                 columnNumber = 0

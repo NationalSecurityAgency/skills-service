@@ -1427,12 +1427,20 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.createSkill(skill7)
         skillsService.createSkill(p2subj2skill1)
 
-        when:
-
         skillsService.exportSkillToCatalog(project1.projectId, skill.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill2.skillId)
         skillsService.exportSkillToCatalog(project1.projectId, skill3.skillId)
         skillsService.exportSkillToCatalog(project3.projectId, skill7.skillId)
+
+        def proj4 = createProject(4)
+        def proj4_subj1 = createSubject(4, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj4, proj4_subj1, [])
+        skillsService.bulkImportSkillsFromCatalogAndFinalize(proj4.projectId, proj4_subj1.subjectId, [
+                [projectId: project1.projectId, skillId: skill.skillId],
+                [projectId: project1.projectId, skillId: skill2.skillId],
+        ])
+
+        when:
         def noImports = skillsService.getImportedSkillsStats(project2.projectId)
         skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill.skillId)
         def oneImport = skillsService.getImportedSkillsStats(project2.projectId)
@@ -1440,7 +1448,10 @@ class CatalogSkillTests extends CatalogIntSpec {
         skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, project1.projectId, skill3.skillId)
         def threeImportsDifferentSubjects = skillsService.getImportedSkillsStats(project2.projectId)
         skillsService.importSkillFromCatalogAndFinalize(project2.projectId, p2subj2.subjectId, project3.projectId, skill7.skillId)
+
         def fourImporstTwoProjectsTwoSubjects = skillsService.getImportedSkillsStats(project2.projectId)
+
+        def proj4Stats = skillsService.getImportedSkillsStats(proj4.projectId)
 
         then:
         noImports.numberOfProjectsImportedFrom == 0
@@ -1451,6 +1462,9 @@ class CatalogSkillTests extends CatalogIntSpec {
         threeImportsDifferentSubjects.numberOfSkillsImported == 3
         fourImporstTwoProjectsTwoSubjects.numberOfProjectsImportedFrom == 2
         fourImporstTwoProjectsTwoSubjects.numberOfSkillsImported == 4
+
+        proj4Stats.numberOfProjectsImportedFrom == 1
+        proj4Stats.numberOfSkillsImported == 2
     }
 
     def "get exported skill usage stats - skill not exported or reused"() {

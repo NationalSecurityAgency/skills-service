@@ -30,6 +30,7 @@ class UserProgressExportResult extends AbstractXlsxStreamingView {
     static final String QUERY = "query"
     static final String MINIMUM_POINTS = "minimumPoints"
     static final String MAXIMUM_POINTS = "maximumPoints"
+    static final String INCLUDE_IMPORTED = "includeImported"
     static final String PAGE_REQUEST = "pageRequest"
     static final String USER_TAG_FILTER = "userTagFilter"
 
@@ -43,10 +44,11 @@ class UserProgressExportResult extends AbstractXlsxStreamingView {
         String userTagFilter = model.get(USER_TAG_FILTER) as String
         Integer minimumPoints = model.get(MINIMUM_POINTS) as Integer
         Integer maximumPoints = model.get(MAXIMUM_POINTS) as Integer
+        Boolean includeImported = model.get(INCLUDE_IMPORTED) as Boolean
         PageRequest pageRequest = model.get(PAGE_REQUEST) as PageRequest
 
         // define excel file name to be exported
         response.addHeader("Content-Disposition", "attachment;fileName=${projectId}-users-${new Date().format("yyyy-MM-dd")}.xlsx")
-        excelExportService.exportUsersProgress(workbook, projectId, userQuery, pageRequest, minimumPoints, maximumPoints, userTagFilter)
+        excelExportService.exportUsersProgress(workbook, projectId, userQuery, pageRequest, minimumPoints, maximumPoints, userTagFilter, includeImported)
     }
 }

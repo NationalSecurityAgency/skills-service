@@ -14,28 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { nextTick, onMounted, ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import {computed, nextTick, onMounted, ref} from 'vue'
+import {useRoute} from 'vue-router'
 import InputText from 'primevue/inputtext'
 import Slider from 'primevue/slider'
 import Column from 'primevue/column'
 import ProgressBar from 'primevue/progressbar'
 import UsersService from './UsersService.js'
 import DateCell from '@/components/utils/table/DateCell.vue'
-import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
-import { useColors } from '@/skills-display/components/utilities/UseColors.js'
-import { useExportUtil } from '@/components/utils/UseExportUtil.js';
+import {useSkillsAnnouncer} from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import {useResponsiveBreakpoints} from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import {useColors} from '@/skills-display/components/utilities/UseColors.js'
+import {useExportUtil} from '@/components/utils/UseExportUtil.js';
 import SkillsDisplayPathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
 import {useUserInfo} from "@/components/utils/UseUserInfo.js";
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
-import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
-import { useProjConfig } from '@/stores/UseProjConfig.js';
-import {useProjDetailsState} from "@/stores/UseProjDetailsState.js";
+import {useNumberFormat} from '@/common-components/filter/UseNumberFormat.js'
+import {useProjConfig} from '@/stores/UseProjConfig.js';
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useStorage} from "@vueuse/core";
+import CatalogService from "@/components/skills/catalog/CatalogService.js";
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
@@ -64,6 +64,8 @@ const pageSize = useStorage('usersTable-pageSize', 10)
 const possiblePageSizes = [5, 10, 15, 20, 50]
 const sortInfo = ref({ sortOrder: -1, sortBy: 'lastUpdated' })
 const selectedRows = ref([])
+const excludeImported = route.params.projectId ? useStorage(`usersTable-excludeImported-${route.params.projectId}`, false) : ref(false)
+const showExcludeImportedUsersToggle = ref(false)
 
 const maximumProgress = computed(() => {
   return totalPoints.value + totalLevels.value;
@@ -78,6 +80,11 @@ const tagKey = computed(() => {
 });
 
 onMounted(() => {
+  if (eligibleForExcludeImportedUsersToggle.value) {
+    CatalogService.getImportedStatsForProject(route.params.projectId).then((stats) => {
+      showExcludeImportedUsersToggle.value = stats.numberOfSkillsImported > 0
+    })
+  }
   loadData()
 })
 
@@ -144,6 +151,8 @@ const getUrl = () => {
 const isProjectLevel = computed(() => {
   return !(route.params.skillId || route.params.badgeId || route.params.subjectId || (route.params.tagKey && route.params.tagFilter))
 })
+const isProjectPage = computed(() => route.params.projectId)
+const eligibleForExcludeImportedUsersToggle = computed(() => isProjectPage.value)
 
 const isUserTagsMetricsPage = computed(() => {
   return route.params.tagKey && route.params.tagFilter
@@ -174,6 +183,7 @@ const loadData = () => {
     minimumPoints: filters.value.progress[0],
     maximumPoints: filters.value.progress[1],
     userTagFilter: filters.value.userTagFilter,
+    includeImported: !excludeImported.value,
   }).then((res) => {
     data.value = res.data
     totalRows.value = res.count
@@ -314,24 +324,31 @@ const archiveUsers = () => {
             <SkillsSpinner :is-loading="true"></SkillsSpinner>
           </div>
         </template>
-        <template v-if="isProjectLevel || isGlobalBadgePage" #header>
-          <div class="flex justify-end flex-wrap">
-            <SkillsButton
-                v-if="!projConfig.isReadOnlyProj && isProjectLevel"
-                class="mr-2"
-                :disabled="selectedRows <= 0"
-                size="small"
-                icon="fas fa-archive"
-                label="Archive"
-                @click="archiveUsers"
-                data-cy="archiveUsersTableBtn" />
-            <SkillsButton
-                :disabled="totalRows <= 0"
-                size="small"
-                icon="fas fa-download"
-                label="Export"
-                @click="exportUsers"
-                data-cy="exportUsersTableBtn" />
+        <template v-if="isProjectPage && (showExcludeImportedUsersToggle || isProjectLevel) || isGlobalBadgePage" #header>
+          <div class="flex gap-2 flex-wrap py-1">
+            <div class="flex-1">
+              <div v-if="showExcludeImportedUsersToggle" class="flex gap-1 items-center">
+                <ToggleSwitch inputId="excludeImported" v-model="excludeImported" @change="loadData" data-cy="excludeImportedToggle"/><label for="excludeImported">Exclude Users that only earned points in imported skills</label>
+              </div>
+            </div>
+            <div>
+              <SkillsButton
+                  v-if="!projConfig.isReadOnlyProj && isProjectLevel"
+                  class="mr-2"
+                  :disabled="selectedRows <= 0"
+                  size="small"
+                  icon="fas fa-archive"
+                  label="Archive"
+                  @click="archiveUsers"
+                  data-cy="archiveUsersTableBtn" />
+              <SkillsButton v-if="isProjectLevel || isGlobalBadgePage"
+                  :disabled="totalRows <= 0"
+                  size="small"
+                  icon="fas fa-download"
+                  label="Export"
+                  @click="exportUsers"
+                  data-cy="exportUsersTableBtn" />
+            </div>
           </div>
         </template>
         <Column v-if="isProjectLevel && !projConfig.isReadOnlyProj" selectionMode="multiple" :class="{'flex': responsive.md.value }">
@@ -381,7 +398,7 @@ const archiveUsers = () => {
           </template>
           <template #body="slotProps">
             <div :data-cy="`usr_progress-${slotProps.data.userId}`" class="w-full">
-              <div class="flex">
+              <div class="flex gap-2">
                 <div class="flex flex-auto">
                   <span class="font-weight-bold text-primary"
                         :aria-label="`${calcPercent(slotProps.data.totalPoints)} percent completed`"
