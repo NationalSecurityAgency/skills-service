@@ -101,6 +101,27 @@ const reloadRunInfo = () => {
       </div>
       <div class="flex-1 w-min-12rem" data-cy="quizRunStatus">
         <quiz-single-run-card title="Status">
+          <template #nextToTitle>
+            <div v-if="QuizStatus.isFailed(runInfo.status) && canTryAgain">
+              <router-link class="ml-1"
+                           :to="{ name: 'QuizRun', params: { quizId: runInfo.quizId } }"
+                           target="_blank"
+                           rel="noopener"
+                           tabindex="-1">
+                <SkillsButton target="_blank"
+                              v-if="canTryAgain"
+                              outlined
+                              severity="success"
+                              size="small"
+                              class="uppercase font-bold skills-theme-btn whitespace-nowrap"
+                              label="Try Again"
+                              icon="fas fa-redo"
+                              data-cy="runQuizAgainBtnInCard"
+                              :aria-label="`Retry Quiz ${runInfo.quizName}`">
+                </SkillsButton>
+              </router-link>
+            </div>
+          </template>
             <div class="text-primary font-bold">
               <QuizRunStatus :quiz-type="runInfo.quizType" :status="runInfo.status"/>
             </div>
@@ -114,23 +135,6 @@ const reloadRunInfo = () => {
                 class="text-danger italic">{{ runInfo.numQuestionsToPass - numQuestionsRight }}</span>
               questions
             </div>
-            <router-link class="ml-1"
-                         :to="{ name: 'QuizRun', params: { quizId: runInfo.quizId } }"
-                         target="_blank"
-                         rel="noopener"
-                         tabindex="-1">
-              <SkillsButton target="_blank"
-                            v-if="canTryAgain"
-                            outlined
-                            severity="success"
-                            size="small"
-                            class="uppercase font-bold skills-theme-btn whitespace-nowrap"
-                            label="Try Again"
-                            icon="fas fa-redo"
-                            data-cy="runQuizAgainBtn"
-                            :aria-label="`Retry Quiz ${runInfo.quizName}`">
-              </SkillsButton>
-            </router-link>
           </div>
 
         </quiz-single-run-card>
@@ -184,6 +188,25 @@ const reloadRunInfo = () => {
     <Message v-if="!runInfo.questionsHidden && runInfo.questions && !runInfo.allQuestionsReturned" severity="warn" :closable="false" class="mt-8" data-cy="someQuestionsNotDisplayedMsg">
       The rest of the questions and answers are not displayed so not to give away the correct answers.
     </Message>
+    <div v-if="QuizStatus.isFailed(runInfo.status)" && canTryAgain>
+      <router-link class="ml-1"
+                   :to="{ name: 'QuizRun', params: { quizId: runInfo.quizId } }"
+                   target="_blank"
+                   rel="noopener"
+                   tabindex="-1">
+        <SkillsButton target="_blank"
+                      v-if="canTryAgain"
+                      outlined
+                      severity="success"
+                      size="small"
+                      class="uppercase font-bold skills-theme-btn whitespace-nowrap"
+                      label="Try Again"
+                      icon="fas fa-redo"
+                      data-cy="runQuizAgainBtn"
+                      :aria-label="`Retry Quiz ${runInfo.quizName}`">
+        </SkillsButton>
+      </router-link>
+    </div>
   </div>
 </template>
 
