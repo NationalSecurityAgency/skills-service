@@ -122,6 +122,12 @@ class LockingService {
         return res
     }
 
+    SkillsDBLock lockForSkillExpiration() {
+        SkillsDBLock res = skillsDBLockRepo.findByLock("skill_expiration_lock")
+        assert res
+        return res
+    }
+
     SkillsDBLock lockForCreateOrUpdateUser() {
         SkillsDBLock res = skillsDBLockRepo.findByLock("create_or_update_user")
         assert res

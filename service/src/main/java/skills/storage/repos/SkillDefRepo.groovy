@@ -951,11 +951,30 @@ ORDER BY s.name ASC
             @Param('userId') String userId
     )
 
+    static interface SkillProjectAndSubjectIdsAndNames {
+        String getProjectId()
+        String getProjectName()
+        String getSkillId()
+        String getSkillName()
+        String getSubjectId()
+        String getSubjectName()
+    }
+
+    @Nullable
+    @Query('''select pd.projectId as projectId, pd.name as projectName, sdChild.skillId as skillId, sdChild.name as skillName, sdParent.skillId as subjectId, sdParent.name as subjectName
+                from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, ProjDef pd
+                where 
+                    srd.parent=sdParent and 
+                    srd.child=sdChild and 
+                    pd.projectId = sdChild.projectId and
+                    srd.parent.type = 'Subject' and
+                    sdChild.id = :skillRefId''')
+    SkillProjectAndSubjectIdsAndNames getSkillProjectAndSubjectIdsAndNamesBySkillRefId(Integer skillRefId)
+
     static interface SkillNameAndSubjectId {
         String getSkillName()
         String getSubjectId()
     }
-
     @Nullable
     @Query('''select sdChild.name as skillName, sdParent.skillId as subjectId
             from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild

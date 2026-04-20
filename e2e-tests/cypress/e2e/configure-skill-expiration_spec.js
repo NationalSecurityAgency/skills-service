@@ -483,4 +483,34 @@ describe('Configure Skill Expiration Tests', () => {
         ], 1, false, null, false);
     });
 
+    it('Email Notifications Enabled checkbox is visible and disabled by default', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+
+        cy.visitExpirationConfPage();
+
+        // Verify the Email Notifications Enabled checkbox is visible
+        cy.get('[data-cy="emailNotificationsEnabledCheckbox"]').should('be.visible');
+        
+        // Verify the Email Notifications Enabled checkbox is disabled by default
+        cy.get('[data-cy="emailNotificationsEnabledCheckbox"]').should('have.class', 'p-disabled');
+    });
+
+    it('warn if email service is not configured', () => {
+        cy.intercept('/public/isFeatureSupported?feature=emailservice', 'false');
+
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+
+        cy.visitExpirationConfPage();
+
+      cy.get('[data-cy="emailNotificationsEnabledCheckbox"]').should('not.exist');
+
+        cy.get('[data-cy="emailServiceWarning"]')
+            .contains('Please note that email notifications are currently disabled');
+    });
+
+
 });

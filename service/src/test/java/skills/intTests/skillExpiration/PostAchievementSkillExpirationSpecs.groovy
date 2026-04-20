@@ -23,15 +23,9 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
-import skills.quizLoading.QuizSettings
 import skills.services.attributes.ExpirationAttrs
-import skills.storage.model.ExpiredUserAchievement
-import skills.storage.model.SkillDef
-import skills.storage.model.UserAchievement
-import skills.storage.model.UserPerformedSkill
-import skills.storage.model.UserPoints
-import skills.storage.model.UserQuizAttempt
+import skills.services.settings.SettingsService
+import skills.storage.model.*
 import skills.storage.repos.ExpiredUserAchievementRepo
 import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
 
@@ -55,6 +49,9 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
 
     @Autowired
     ExpireUserAchievementsTaskExecutor expireUserAchievementsTaskExecutor
+
+    @Autowired
+    SettingsService settingService
 
     def setup() {
         skillsService.deleteProjectIfExist(projId)
@@ -1761,6 +1758,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
             ])
         }
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+        settingService.deleteGlobalSetting(ExpireUserAchievementsTaskExecutor.SKILL_EXPIRATION_LAST_RUN_DATE)
     }
 
     def "get list of expired skills for project"() {

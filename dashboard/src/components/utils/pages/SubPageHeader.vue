@@ -27,6 +27,7 @@ const props = defineProps({
   'ariaLabel': String,
   'isLoading': Boolean,
   'marginBottom': String,
+  'helpDocsUrl': String,
   titleLevel: {
     type: Number,
     default: 2
@@ -73,8 +74,14 @@ function addClicked() {
 <template>
   <div class="flex flex-wrap pb-2" data-cy="subPageHeader" :class="`mb-${marginBottom}`">
     <div class="flex-1 text-left">
-      <h1 v-if="titleLevel === 1" class="text-2xl uppercase font-normal my-0 flex items-center">{{ title }} <slot name="nextToTitle" /></h1>
-      <h2 v-if="titleLevel === 2" class="text-2xl uppercase font-normal my-0 flex items-center">{{ title }} <slot name="nextToTitle" /></h2>
+      <h1 v-if="titleLevel === 1" class="text-2xl uppercase font-normal my-0 flex items-center">{{ title }}
+        <a v-if="helpDocsUrl" :href="helpDocsUrl" target="_blank" aria-label="Learn More link"
+           class="ml-2 italic text-primary" style="font-size: 1.1em;"><i class="fas fa-question-circle"></i></a>
+        <slot name="nextToTitle" /></h1>
+      <h2 v-if="titleLevel === 2" class="text-2xl uppercase font-normal my-0 flex items-center">{{ title }}
+        <a v-if="helpDocsUrl" :href="helpDocsUrl" target="_blank" aria-label="Learn More link"
+           class="ml-2 italic text-primary" style="font-size: 1.1em;"><i class="fas fa-question-circle"></i></a>
+        <slot name="nextToTitle" /></h2>
     </div>
     <div class="flex pt-0 text-right" data-cy="subPageHeaderControls">
       <div v-if="!isLoading">

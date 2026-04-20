@@ -3072,4 +3072,16 @@
             </column>
         </addColumn>
     </changeSet>
+
+    <changeSet id="59" author="skills team">
+        <addColumn tableName="user_achievement">
+            <column name="expiration_notification_state" type="varchar(50)" defaultValue="NONE"/>
+        </addColumn>
+        <addColumn tableName="expired_user_achievement">
+            <column name="expiration_notification_state" type="varchar(50)" defaultValue="NONE"/>
+        </addColumn>
+        <insert tableName="skills_db_locks">
+            <column name="lock" type="varchar(255)" value="skill_expiration_lock" />
+        </insert>
+    </changeSet>
 </databaseChangeLog>

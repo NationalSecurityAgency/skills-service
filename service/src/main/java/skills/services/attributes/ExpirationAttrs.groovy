@@ -33,4 +33,5 @@ class ExpirationAttrs {
     Integer every
     String monthlyDay
     Date nextExpirationDate
+    Boolean emailNotificationsEnabled = false
 }

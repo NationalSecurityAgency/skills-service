@@ -17,22 +17,37 @@ package skills.services.admin
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import skills.UIConfigProperties
+import skills.auth.UserAuthService
 import skills.controller.result.model.ExpiredSkillRes
 import skills.controller.result.model.TableResult
+import skills.notify.Notifier
+import skills.services.FeatureService
 import skills.services.SkillEventAdminService
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
-import skills.storage.model.ExpiredUserAchievement
+import skills.storage.model.Notification
 import skills.storage.model.SkillAttributesDef
 import skills.storage.model.UserAchievement
+import skills.storage.model.auth.RoleName
+import skills.storage.model.auth.UserRole
 import skills.storage.repos.ExpiredUserAchievementRepo
 import skills.storage.repos.SkillAttributesDefRepo
+import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.UserRoleRepo
 
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 import static java.time.temporal.TemporalAdjusters.lastDayOfMonth
 import static skills.storage.model.SkillAttributesDef.SkillAttributesType.AchievementExpiration
@@ -40,6 +55,8 @@ import static skills.storage.model.SkillAttributesDef.SkillAttributesType.Achiev
 @Service
 @Slf4j
 class UserAchievementExpirationService {
+
+    static final String EXPIRATION_WARNING_NOTIFICATION_SENT = "EXPIRATION_WARNING_NOTIFICATION_SENT"
 
     @Autowired
     SkillAttributesDefRepo skillAttributesDefRepo
@@ -51,7 +68,40 @@ class UserAchievementExpirationService {
     SkillEventAdminService skillEventAdminService
 
     @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
+
+    @Autowired
+    @Lazy
+    UserAuthService userAuthService
+
+    @Autowired
+    @Lazy
+    UserCommunityService userCommunityService
+
+    @Autowired
+    UserRoleRepo userRoleRepo
+
+    @Autowired
     ExpiredUserAchievementRepo expiredUserAchievementRepo
+
+    @Autowired
+    UserAchievedLevelRepo userAchievementRepo
+
+    @Autowired
+    SkillDefRepo skillDefRepo
+
+    @Autowired
+    FeatureService featureService
+
+    @Autowired
+    Notifier notifier
+
+    @Autowired
+    UIConfigProperties uiConfigProperties
+
+    @Value('#{"${skills.config.dailySkillExpirationNotificationThreshold:0.1}"}')
+    Double dailySkillExpirationNotificationThreshold = 0.1
+
 
     TableResult findAllExpiredAchievements(String projectId, String userId, String skillName, PageRequest pageRequest) {
         Page<ExpiredSkillRes> results = expiredUserAchievementRepo.findAllExpiredAchievements(projectId, userId, skillName, pageRequest)
@@ -65,23 +115,89 @@ class UserAchievementExpirationService {
         return skillAttributesDefRepo.findAllByType(AchievementExpiration)
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     void checkAndExpireIfNecessary(SkillAttributesDef skillAttributesDef) {
         LocalDateTime now = LocalDateTime.now()
         ExpirationAttrs expirationAttrs = skillAttributeService.convertAttrs(skillAttributesDef, ExpirationAttrs)
         if (expirationAttrs.expirationType == ExpirationAttrs.YEARLY || expirationAttrs.expirationType == ExpirationAttrs.MONTHLY) {
             LocalDateTime nextExpirationDate = expirationAttrs.nextExpirationDate.toLocalDateTime()
             if (nextExpirationDate.isBefore(now)) {
+                List<String> usersWithExpiredAchievements = []
+                if (expirationAttrs.emailNotificationsEnabled) {
+                    // if notification is enabled, get users with expired achievements before moving them to expired
+                    usersWithExpiredAchievements = expiredUserAchievementRepo.findUserIdsWithSkillRefId(skillAttributesDef.skillRefId)
+                }
                 expireAchievementsForSkill(skillAttributesDef.skillRefId)
 
                 // update nextExpirationDate
                 expirationAttrs.nextExpirationDate = getNextExpirationDate(expirationAttrs)?.toDate()
                 skillAttributesDef.attributes = skillAttributeService.mapper.writeValueAsString(expirationAttrs)
                 skillAttributesDefRepo.save(skillAttributesDef)
+
+                // notify users about expired achievements
+                if (expirationAttrs.emailNotificationsEnabled && featureService.isEmailServiceFeatureEnabled()) {
+                    SkillDefRepo.SkillProjectAndSubjectIdsAndNames skillProjectAndSubjectIdsAndNames = skillDefRepo.getSkillProjectAndSubjectIdsAndNamesBySkillRefId(skillAttributesDef.skillRefId)
+                    usersWithExpiredAchievements.each { userId ->
+                        if (!isUserStillPermitted(skillProjectAndSubjectIdsAndNames.projectId, userId)) {
+                            return
+                        }
+                        String publicUrl = featureService.getPublicUrl()
+                        Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                                userIds: [userId],
+                                type: Notification.Type.SkillExpiration.toString(),
+                                keyValParams: [
+                                        skillName        : skillProjectAndSubjectIdsAndNames.skillName,
+                                        projectName      : skillProjectAndSubjectIdsAndNames.projectName,
+                                        expirationType   : expirationAttrs.expirationType,
+                                        expirationDate   : nextExpirationDate.format(DateTimeFormatter.ISO_DATE),
+                                        skillTrainingUrl : "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}/subjects/${skillProjectAndSubjectIdsAndNames.subjectId}/skills/${skillProjectAndSubjectIdsAndNames.skillId}",
+                                        communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
+                                ]
+                        )
+                        log.info("Sending skill expiration notification to user [${userId}] for skill [${skillProjectAndSubjectIdsAndNames.skillId}] - expiring on [${nextExpirationDate.format(DateTimeFormatter.ISO_DATE)}]")
+                        notifier.sendNotification(request)
+                    }
+                }
             }
         } else if (expirationAttrs.expirationType == ExpirationAttrs.DAILY) {
             LocalDateTime achievedOnOlderThan = now.minusDays(expirationAttrs.every)
             expireAchievementsForSkillAchievedBefore(skillAttributesDef.skillRefId, achievedOnOlderThan?.toDate())
+
+            // notify users about expiring achievements
+            if (expirationAttrs.emailNotificationsEnabled && featureService.isEmailServiceFeatureEnabled()) {
+                SkillDefRepo.SkillProjectAndSubjectIdsAndNames skillProjectAndSubjectIdsAndNames = skillDefRepo.getSkillProjectAndSubjectIdsAndNamesBySkillRefId(skillAttributesDef.skillRefId)
+                // For daily expiration, find achievements that will expire within N days
+                int days = calculateNotificationDays(expirationAttrs.every)
+                LocalDateTime expirationThreshold = achievedOnOlderThan.plusDays(days)
+                List<UserAchievement> achievementsThatWillExpire = expiredUserAchievementRepo.findUserAchievementsBySkillRefIdWithMostRecentUserPerformedSkillBefore(
+                    skillAttributesDef.skillRefId, expirationThreshold.toDate()
+                )
+                achievementsThatWillExpire.each { achievement ->
+                    if (achievement.expirationNotificationState != EXPIRATION_WARNING_NOTIFICATION_SENT && isUserStillPermitted(achievement.projectId, achievement.userId)) {
+                        String publicUrl = featureService.getPublicUrl()
+                        LocalDateTime retentionDeadline = achievedOnOlderThan.plusDays(expirationAttrs.every)
+                        int daysUntilExpiration = Math.abs(ChronoUnit.DAYS.between(now, retentionDeadline))
+                        
+                        Notifier.NotificationRequest request = new Notifier.NotificationRequest(
+                                userIds: [achievement.userId],
+                                type: Notification.Type.SkillDailyExpirationWarning.toString(),
+                                keyValParams: [
+                                        skillName           : skillProjectAndSubjectIdsAndNames.skillName,
+                                        projectName         : skillProjectAndSubjectIdsAndNames.projectName,
+                                        retentionDeadline   : retentionDeadline.format(DateTimeFormatter.ISO_DATE),
+                                        daysUntilExpiration : "${daysUntilExpiration}",
+                                        skillTrainingUrl    : "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}/subjects/${skillProjectAndSubjectIdsAndNames.subjectId}/skills/${skillProjectAndSubjectIdsAndNames.skillId}",
+                                        communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
+                                ]
+                        )
+                        log.info("Sending daily skill expiration warning to user [${achievement.userId}] for skill [${achievement.skillId}] - expiring on [${retentionDeadline.format(DateTimeFormatter.ISO_DATE)}]")
+                        notifier.sendNotification(request)
+
+                        achievement.expirationNotificationState = EXPIRATION_WARNING_NOTIFICATION_SENT
+                        userAchievementRepo.save(achievement)
+                    }
+                }
+            }
         } else if (expirationAttrs.expirationType != ExpirationAttrs.NEVER) {
             log.error("Unexpected expirationType [${expirationAttrs?.expirationType}] - ${expirationAttrs}")
         }
@@ -119,5 +235,30 @@ class UserAchievementExpirationService {
             }
         }
         nextExpirationDate
+    }
+
+    private int calculateNotificationDays(int daysBeforeExpiring) {
+        int notificationDays = (int) Math.round(daysBeforeExpiring * dailySkillExpirationNotificationThreshold)
+        return Math.max(1, Math.min(7, notificationDays))
+    }
+
+    private Boolean isUserStillPermitted(String projectId, String userId) {
+        Boolean isInviteOnly = inviteOnlyProjectService.isInviteOnlyProject(projectId)
+        if (isInviteOnly) {
+            List<UserRole> userRoles = userRoleRepo.findAllByUserId(userId?.toLowerCase())
+            Boolean isAuthorized = userRoles.find { it.roleName == RoleName.ROLE_SUPER_DUPER_USER || (it.projectId  && projectId.equalsIgnoreCase(projectId) && it.roleName in [RoleName.ROLE_PRIVATE_PROJECT_USER, RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER])}
+            if (!isAuthorized) {
+                log.warn("User [${userId}] is not authorized to access private project [${projectId}]")
+                return false
+            }
+        }
+
+        Boolean isUserCommunityOnlyProject = userCommunityService.isUserCommunityOnlyProject(projectId)
+        Boolean belongsToUserCommunity = userCommunityService.isUserCommunityMember(userId)
+        if (isUserCommunityOnlyProject && !belongsToUserCommunity) {
+            log.warn("User [${userId}] is not a member of the user community for project [${projectId}]")
+            return false
+        }
+        return true
     }
 }
