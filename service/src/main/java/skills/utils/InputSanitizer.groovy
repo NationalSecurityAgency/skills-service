@@ -15,6 +15,7 @@
  */
 package skills.utils
 
+import groovy.util.logging.Slf4j
 import org.apache.hc.core5.http.NameValuePair
 import org.apache.hc.core5.net.URLEncodedUtils
 import org.jsoup.Jsoup
@@ -28,6 +29,7 @@ import java.nio.charset.Charset
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+@Slf4j
 class InputSanitizer {
 
     private static final Pattern ALLOWED_PROTOCOLS = ~/^(?:https?:\/\/|\/).*$/
@@ -39,8 +41,10 @@ class InputSanitizer {
     private static final Pattern PURE_AMP = ~/\s&amp;\s/
     private static final Pattern SPACE = ~/\s/
     private static final Pattern CAPTION_ARROW = ~/--&gt;/
+    private static final String CODE_BLOCK_TYPE_MULTILINE = "MULTILINE"
+    private static final String CODE_BLOCK_TYPE_INLINE = "INLINE"
     private static final Pattern CODE_BLOCK = ~/```([\s\S]*?)```/
-    private static final Pattern INLINE_CODE_BLOCK = ~/(?<!\\)(?<!`)(?!___CODE_BLOCK_)(?!___MULTILINE_CODE_BLOCK_)(?!___INLINE_CODE_BLOCK_)`([^`\n]+)`(?!`)/
+    private static final Pattern INLINE_CODE_BLOCK = ~/(?<!\\)(?<!`)(?!___MULTILINE_CODE_BLOCK_)(?!___INLINE_CODE_BLOCK_)`([^`\n]+)`(?!`)/
     private static final SAFE_LIST_FOR_DESC = Safelist.relaxed()
             .addTags('del', 'skills-display')
             .addAttributes('skills-display', 'version')
@@ -58,28 +62,35 @@ class InputSanitizer {
         return Jsoup.clean(input, "", SAFE_LIST, print)
     }
 
+    private static class CodeBlockMatch {
+        int start
+        int end
+        String type
+        int index
+    }
     static String sanitizeDescription(String input) {
         if (!input) {
             return input;
         }
+        log.trace("Input: {}", input)
 
         // Find all code blocks (both inline and multiline) in order
         List<String> codeBlocks = []
         String processedInput = input
         
         // Collect all code blocks with their positions
-        List<Map> codeBlockMatches = []
+        List<CodeBlockMatch> codeBlockMatches = []
         
         // Find multi-line code blocks first
         Matcher multilineMatcher = CODE_BLOCK.matcher(input)
         while (multilineMatcher.find()) {
             codeBlocks.add(multilineMatcher.group(0))
-            codeBlockMatches.add([
+            codeBlockMatches.add(new CodeBlockMatch(
                 start: multilineMatcher.start(),
                 end: multilineMatcher.end(),
-                type: 'MULTILINE',
+                type: CODE_BLOCK_TYPE_MULTILINE,
                 index: codeBlocks.size() - 1
-            ])
+            ))
         }
         
         // Find inline code blocks, avoiding those inside multi-line blocks
@@ -90,18 +101,18 @@ class InputSanitizer {
             int inlineEnd = inlineMatcher.end()
             
             // Check if this inline block is inside any multi-line block
-            boolean insideMultiline = codeBlockMatches.any { match ->
+            boolean insideMultiline = codeBlockMatches.any { CodeBlockMatch match ->
                 inlineStart >= match.start && inlineEnd <= match.end
             }
             
             if (!insideMultiline) {
                 codeBlocks.add(inlineBlock)
-                codeBlockMatches.add([
+                codeBlockMatches.add(new CodeBlockMatch(
                     start: inlineStart,
                     end: inlineEnd,
-                    type: 'INLINE',
+                    type: CODE_BLOCK_TYPE_INLINE,
                     index: codeBlocks.size() - 1
-                ])
+                ))
             }
         }
         
@@ -110,22 +121,25 @@ class InputSanitizer {
         Collections.reverse(codeBlockMatches)
         
         // Replace all code blocks with placeholders
-        for (Map match : codeBlockMatches) {
+        for (CodeBlockMatch match : codeBlockMatches) {
             String placeholder = "___${match.type}_${match.index}___"
             processedInput = processedInput.substring(0, match.start) + placeholder + 
                            processedInput.substring(match.end)
         }
+        log.trace("After code blocks replacement: {}", processedInput)
 
         // Sanitize the content without code blocks
         String sanitized = Jsoup.clean(processedInput, "", SAFE_LIST_FOR_DESC, print)
+        log.trace("After sanitization: {}", sanitized)
 
         // Restore code blocks in original order
         Collections.reverse(codeBlockMatches)
-        for (Map match : codeBlockMatches) {
+        for (CodeBlockMatch match : codeBlockMatches) {
             String placeholder = "___${match.type}_${match.index}___"
             sanitized = sanitized.replace(placeholder, codeBlocks[match.index])
         }
 
+        log.trace("Result: {}", sanitized)
         return sanitized
     }
 
