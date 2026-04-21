@@ -150,7 +150,7 @@ const doImport = () => {
           SkillsReporter.reportSkill('ImportSkillfromCatalog')
         }
         if (props.groupId && props.groupId.length > 0) {
-          CatalogService.bulkImportIntoGroup(route.params.projectId, route.params.subjectId, props.groupId, projAndSkillIds)
+          return CatalogService.bulkImportIntoGroup(route.params.projectId, route.params.subjectId, props.groupId, projAndSkillIds)
             .then(() => {
               skillsState.loadGroupSkills(route.params.projectId, props.groupId)
               commonActionsAfterImport()
@@ -159,7 +159,7 @@ const doImport = () => {
           })
 
         } else {
-          CatalogService.bulkImport(route.params.projectId, route.params.subjectId, projAndSkillIds)
+          return CatalogService.bulkImport(route.params.projectId, route.params.subjectId, projAndSkillIds)
             .then(() => {
               skillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
               commonActionsAfterImport()

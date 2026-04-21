@@ -207,6 +207,8 @@ const handleFocus = () => {
 
   })
 }
+
+const hasBadges = computed(() => badges.value && badges.value.length > 0)
 </script>
 
 <template>
@@ -214,10 +216,10 @@ const handleFocus = () => {
     <sub-page-header ref="subPageHeader" title="Global Badges" action="Badge" @add-action="newBadge" aria-label="new global badge" :title-level="1"/>
 <!--      <transition name="projectContainer" enter-active-class="animated fadeIn">-->
       <div>
-        <div v-if="(!badges || badges.length === 0) && isLoading" class="flex justify-center items-center h-full">
-          <skills-spinner :is-loading="isLoading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info"/>
+        <div v-if="!hasBadges && isLoading" class="flex justify-center items-center h-full">
+          <skills-spinner :is-loading="isLoading" label="Loading..." style="width: 3rem; height: 3rem;" variant="info" class="my-10"/>
         </div>
-        <div v-if="badges && badges.length" id="badgeCards" class="flex flex-wrap gap-4 items-stretch justify-center">
+        <div v-if="hasBadges && !isLoading" id="badgeCards" class="flex flex-wrap gap-4 items-stretch justify-center">
           <div v-for="(badge) of badges" :id="badge.badgeId" :key="badge.badgeId" style="min-width: 23rem;">
             <BlockUI :blocked="sortOrder.loading">
               <div class="absolute z-50 top-1/2 w-full text-center" v-if="sortOrder.loading" :data-cy="`${badge.badgeId}_overlayShown`">
@@ -240,7 +242,7 @@ const handleFocus = () => {
           </div>
         </div>
 
-        <no-content2 v-else title="No Badges Yet" class="mt-6"
+        <no-content2 v-if="!hasBadges && !isLoading" title="No Badges Yet" class="mt-6"
                        message="Global Badges are a special kind of badge that is made up of a collection of skills and/or levels that span across project boundaries."/>
       </div>
 <!--      </transition>-->
