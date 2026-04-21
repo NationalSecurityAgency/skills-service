@@ -1022,7 +1022,7 @@ HAVING
         group by ut.user_id
     )
     select usersAlias.user_id as userId,
-    GREATEST(skillAchievements.mostRecentAchievedOn, levelAchievements.mostRecentLevelAchievedOn) as lastUpdated,
+    GREATEST(skillAchievements.mostRecentAchievedOn, levelAchievements.mostRecentLevelAchievedOn, users.lastUpdated) as lastUpdated,
     ua.user_id_for_display                                                                   as userIdForDisplay,
     ua.dn                                                                                    as dn,
     ua.first_name                                                                            as firstName,
@@ -1037,6 +1037,7 @@ HAVING
             LEFT JOIN skillAchievements on skillAchievements.user_id = usersAlias.user_id
             LEFT JOIN levelAchievements on levelAchievements.user_id = usersAlias.user_id
             LEFT JOIN userTags ON userTags.user_id = usersAlias.user_id
+            LEFT JOIN users on users.user_id = usersAlias.user_id
             WHERE
     (:userQuery = '' OR lower(ua.user_id_for_display) like lower(concat('%', :userQuery, '%')))
     and (:userTagFilter = '' OR lower(userTags.value) like lower(concat('%', :userTagFilter, '%')))
