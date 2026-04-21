@@ -16,6 +16,8 @@
 package skills.intTests.badges
 
 import groovy.json.JsonOutput
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
@@ -31,6 +33,8 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
     @Autowired
     UserAchievedLevelRepo userAchievedLevelRepo
+
+    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     def "removing level satisfies global badge for some of the existing users"() {
 
@@ -919,6 +923,47 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsers.data[5].totalProgress == 2
         badgeUsers.data[5].userId == users[4].userName
 
+    }
+
+    def "get users who have progress but no achievements"() {
+
+        def proj = createProject()
+        def subj = createSubject()
+        def badge = createBadge()
+
+        List<Map> skills = createSkills(1, 1, 1, 100)
+        skills[0].numPerformToCompletion = 100
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: proj.projectId, badgeId: badge.badgeId, level: "3")
+        skillsService.assignSkillToGlobalBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+
+        badge.enabled = "true"
+        skillsService.updateGlobalBadge(badge)
+
+        List<SkillsService> users = getRandomUsers(3).collect { createService(it)}
+
+        when:
+        def twoDaysAgo = new Date() - 2
+        assert skillsService.addSkill(skills[0], users[0].userName, twoDaysAgo).body.skillApplied
+
+        def badgeUsers = skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 1, 'totalProgress', false)
+
+        then:
+        badgeUsers
+        badgeUsers.count == 1
+        badgeUsers.totalCount == 1
+        badgeUsers.totalPoints == 1
+        badgeUsers.totalLevels == 3
+        badgeUsers.data[0].userId == users[0].userName
+        badgeUsers.data[0].skillsAchieved == 0
+        badgeUsers.data[0].numLevelsAchieved == 0
+        badgeUsers.data[0].totalProgress == 0
+        badgeUsers.data[0].lastUpdated == DTF.print(twoDaysAgo.time)
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
