@@ -541,6 +541,8 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
                                  placeholder="Please enter audio/video external URL"
                                  :disabled="isReadOnly"
                 />
+                <Message v-if="appConfig.audioAndVideoConfigExternalUrlWarningMsg"
+                    data-cy="externalUrlWarningMsg">{{ appConfig.audioAndVideoConfigExternalUrlWarningMsg }}</Message>
               </div>
             </div>
 

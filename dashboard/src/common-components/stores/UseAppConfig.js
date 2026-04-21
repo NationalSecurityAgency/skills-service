@@ -198,7 +198,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const openAiAnnounceGenStatusInterval = computed(() => config.value.openAiAnnounceGenStatusInterval || 6000)
 
   const sdPointHistoryChartAchievementsCombinePct = computed(() => config.value.sdPointHistoryChartAchievementsCombinePct || 0.05)
-
+  const audioAndVideoConfigExternalUrlWarningMsg = computed(() => config.value.audioAndVideoConfigExternalUrlWarningMsg || 'Video URL must link directly to WebM or MP4 files (no streaming or web pages).')
 
   return {
     loadConfigState,
@@ -329,6 +329,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxAiPromptLength,
     delayBetweenScreenReaderAnnouncements,
     openAiAnnounceGenStatusInterval,
-    sdPointHistoryChartAchievementsCombinePct
+    sdPointHistoryChartAchievementsCombinePct,
+    audioAndVideoConfigExternalUrlWarningMsg,
   }
 })

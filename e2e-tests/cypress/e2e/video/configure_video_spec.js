@@ -38,9 +38,11 @@ describe('Configure Video Tests', () => {
         cy.createSkill(1, 1, 1)
         cy.visitVideoConfPage();
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="externalUrlWarningMsg"]').should('not.exist')
         cy.get('[data-cy="showExternalUrlBtn"]').click()
         cy.get('[data-cy="showFileUploadBtn"]').should('be.visible')
         cy.get('[data-cy="showExternalUrlBtn"]').should('not.exist')
+        cy.get('[data-cy="externalUrlWarningMsg"]').contains('Video URL must link directly to WebM or MP4 files')
         cy.get('[data-cy="videoUrl"]').type('http://some.vid')
         cy.get('[data-cy="videoCaptions"]').type(defaultCaption)
         cy.get('[data-cy="videoTranscript"]').type('transcript')
@@ -53,6 +55,24 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="externalUrlWarningMsg"]').contains('Video URL must link directly to WebM or MP4 files')
+    });
+
+    it('ability to configure external url warning message', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.audioAndVideoConfigExternalUrlWarningMsg = 'External URL Warning Message';
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1)
+        cy.visitVideoConfPage();
+        cy.get('[data-cy="externalUrlWarningMsg"]').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').click()
+        cy.get('[data-cy="externalUrlWarningMsg"]').contains('External URL Warning Message')
     });
 
     it('upload a video, set transcript and captions, preview the video', () => {
