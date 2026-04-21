@@ -39,6 +39,7 @@ import skills.auth.inviteOnly.InviteOnlyAccessDeniedException;
 import skills.controller.exceptions.AttachmentValidator;
 import skills.controller.exceptions.SkillException;
 import skills.controller.exceptions.SkillsValidator;
+import skills.controller.request.model.BatchSkillEventRequest;
 import skills.controller.request.model.PageVisitRequest;
 import skills.controller.request.model.SkillEventRequest;
 import skills.controller.request.model.SkillsClientVersionRequest;
@@ -50,6 +51,7 @@ import skills.icons.CustomIconFacade;
 import skills.services.*;
 import skills.services.admin.InviteOnlyProjectService;
 import skills.services.admin.SkillsDepsService;
+import skills.services.events.BatchSkillEventResult;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
 import skills.skillLoading.RankingLoader;
@@ -414,6 +416,14 @@ class UserSkillsController {
                                      @PathVariable("skillId") String skillId,
                                      @RequestBody(required = false) SkillEventRequest skillEventRequest) {
         return addSkillHelper.addSkill(projectId, skillId, skillEventRequest);
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
+    @ResponseBody
+    @Profile
+    public BatchSkillEventResult addBatchSkillsForBatchUsers(@PathVariable("projectId") String projectId,
+                                                             @RequestBody(required = false) BatchSkillEventRequest skillEventRequest) {
+        return addSkillHelper.addBatchSkillsForBatchUsers(projectId, skillEventRequest);
     }
 
     @RequestMapping(value = "/projects/{projectId}/crossProject/{crossProjectId}/skills/{skillId}", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")

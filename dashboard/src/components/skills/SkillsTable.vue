@@ -360,6 +360,13 @@ const actionsMenu = ref(addWidthToIcon([
     }
   },
   {
+    label: 'Add Skill Events',
+    icon: 'fas fa-user',
+    command: () => {
+      showAddEventsModal.value = true
+    }
+  },
+  {
     label: 'Skill Tags',
     items: addWidthToIcon([
       {
@@ -390,6 +397,7 @@ const expandedRows = ref([])
 const showMoveSkillsInfoModal = ref(false)
 const showSkillsReuseModal = ref(false)
 const showCopySkillsModal = ref(false)
+const showAddEventsModal = ref(false)
 const showExportToCatalogDialog = ref(false)
 const showAddSkillsToBadgeDialog = ref(false)
 const showAddSkillsTag = ref(false)
@@ -991,6 +999,7 @@ const pageChanged = (pagingInfo) => {
       :group-id="groupId"
       @removed-tag="removeSelectedRows"
     />
+<!--    <add-events-dialog />-->
   </div>
 </template>
 

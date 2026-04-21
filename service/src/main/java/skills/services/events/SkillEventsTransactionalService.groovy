@@ -204,7 +204,7 @@ class SkillEventsTransactionalService {
             skillId = skillDefinition.skillId
         }
         Boolean isMotivationalSkill = skillAttributeService.isMotivationalSkill(projectId, skillId)
-        SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name, selfReportType: skillDefinition.getSelfReportingType()?.toString())
+        SkillEventResult res = new SkillEventResult(projectId: projectId, skillId: skillId, name: skillDefinition.name, selfReportType: skillDefinition.getSelfReportingType()?.toString(), userId: userId)
 
         long numExistingSkills = getNumExistingSkills(userId, projectId, skillId)
         AppliedCheckRes checkRes = checkIfSkillApplied(userId, numExistingSkills, skillDate.date, skillDefinition, isMotivationalSkill)
