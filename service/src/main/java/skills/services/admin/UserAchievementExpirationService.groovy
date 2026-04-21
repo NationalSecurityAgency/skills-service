@@ -123,6 +123,7 @@ class UserAchievementExpirationService {
     void checkAndExpireIfNecessary(SkillAttributesDef skillAttributesDef) {
         LocalDateTime now = LocalDateTime.now()
         ExpirationAttrs expirationAttrs = skillAttributeService.convertAttrs(skillAttributesDef, ExpirationAttrs)
+        log.info("Checking expiration for skill: ${skillAttributesDef.skillRefId}, expiration attributes: ${expirationAttrs}")
         if (expirationAttrs.expirationType == ExpirationAttrs.YEARLY || expirationAttrs.expirationType == ExpirationAttrs.MONTHLY) {
             LocalDateTime nextExpirationDate = expirationAttrs.nextExpirationDate.toLocalDateTime()
             if (nextExpirationDate.isBefore(now)) {
@@ -137,10 +138,12 @@ class UserAchievementExpirationService {
                 expirationAttrs.nextExpirationDate = getNextExpirationDate(expirationAttrs)?.toDate()
                 skillAttributesDef.attributes = skillAttributeService.mapper.writeValueAsString(expirationAttrs)
                 skillAttributesDefRepo.save(skillAttributesDef)
+                log.info("Expired achievements for skill: ${skillAttributesDef.skillRefId}, next expiration date: ${expirationAttrs.nextExpirationDate}")
 
                 // notify users about expired achievements
                 if (expirationAttrs.emailNotificationsEnabled && featureService.isEmailServiceFeatureEnabled()) {
                     SkillDefRepo.SkillProjectAndSubjectIdsAndNames skillProjectAndSubjectIdsAndNames = skillDefRepo.getSkillProjectAndSubjectIdsAndNamesBySkillRefId(skillAttributesDef.skillRefId)
+                    log.info("Sending expiration emails for [${usersWithExpiredAchievements.size()}] users for skill: ${skillAttributesDef.skillRefId}")
                     usersWithExpiredAchievements.each { userId ->
                         if (!isUserStillPermitted(skillProjectAndSubjectIdsAndNames.projectId, userId)) {
                             return
@@ -176,6 +179,7 @@ class UserAchievementExpirationService {
                 List<UserAchievement> achievementsThatWillExpire = expiredUserAchievementRepo.findUserAchievementsBySkillRefIdWithMostRecentUserPerformedSkillBefore(
                     skillAttributesDef.skillRefId, expirationThreshold.toDate()
                 )
+                log.info("Sending warning emails for [${achievementsThatWillExpire.size()}] achievements for skill: ${skillAttributesDef.skillRefId}")
                 achievementsThatWillExpire.each { UserAchievement achievement ->
                     if (achievement.expirationNotificationState != EXPIRATION_WARNING_NOTIFICATION_SENT && isUserStillPermitted(achievement.projectId, achievement.userId)) {
                         String publicUrl = featureService.getPublicUrl()
@@ -220,6 +224,7 @@ class UserAchievementExpirationService {
         // find any UserAchievement's for this skill where the most recent associated UserPerformedSkill.performedOn is older than the expiration date
         List<UserAchievement> expiredUserAchievements = expiredUserAchievementRepo.findUserAchievementsBySkillRefIdWithMostRecentUserPerformedSkillBefore(skillRefId, expirationDate)
 
+        log.info("Expiring [${expiredUserAchievements.size()}] achievements for skill: ${skillRefId}, expiration date: ${expirationDate}")
         expiredUserAchievements.each { ua ->
             // move this user_achievement record to the expired_user_achievements table
             expiredUserAchievementRepo.expireAchievementById(ua.id)
