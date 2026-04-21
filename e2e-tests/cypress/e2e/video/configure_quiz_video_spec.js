@@ -40,9 +40,11 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
         cy.get('[data-cy="add-video-question-1"]').click()
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="externalUrlWarningMsg"]').should('not.exist')
         cy.get('[data-cy="showExternalUrlBtn"]').click()
         cy.get('[data-cy="showFileUploadBtn"]').should('be.visible')
         cy.get('[data-cy="showExternalUrlBtn"]').should('not.exist')
+        cy.get('[data-cy="externalUrlWarningMsg"]').contains('Video URL must link directly to WebM or MP4 files')
         cy.get('[data-cy="videoUrl"]').type('http://some.vid')
         cy.get('[data-cy="videoCaptions"]').type(defaultCaption)
         cy.get('[data-cy="videoTranscript"]').type('transcript')
@@ -58,6 +60,7 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="videoTranscript"]').should('have.value','transcript')
         cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.enabled')
         cy.get('[data-cy="clearVideoSettingsBtn"]').should('be.enabled')
+        cy.get('[data-cy="externalUrlWarningMsg"]').contains('Video URL must link directly to WebM or MP4 files')
     });
 
     it('upload a video, set transcript and captions, preview the video', () => {
