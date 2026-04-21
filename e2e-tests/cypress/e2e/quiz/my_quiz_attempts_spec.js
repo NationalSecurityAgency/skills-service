@@ -307,12 +307,24 @@ describe('Display History of My quiz attempts Tests', () => {
 
       cy.get('[data-cy="runQuizAgainBtnInCard"]').should('be.visible')
       cy.get('[data-cy="runQuizAgainBtnInCard"]').should('be.enabled')
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('have.text', 'Try Again')
 
       cy.get('[data-cy="runQuizAgainBtn"]').should('be.visible')
       cy.get('[data-cy="runQuizAgainBtn"]').should('be.enabled')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('have.text', 'Try Again')
 
-      cy.get('[data-cy="runQuizAgainBtn"]').click()
-      cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 2')
+      // Get initial window count
+      cy.window().then((win) => {
+        const initialWindowCount = win.length;
+
+        cy.get('[data-cy="runQuizAgainBtn"]').click()
+        cy.get('[data-cy="quizSplashScreen"]').should('contain.text', 'This is quiz 2')
+
+        // Assert no new window was opened
+        cy.window().should((win) => {
+          expect(win.length).to.equal(initialWindowCount);
+        });
+      });
     });
 
     it('failed quiz will show "try again" button on earlier attempt if quiz has NOT already passed', () => {
@@ -327,10 +339,12 @@ describe('Display History of My quiz attempts Tests', () => {
       cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 1')
       cy.get('[data-cy="quizRunStatus"]').contains('Failed')
 
-      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('be.exist')
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('be.visible')
       cy.get('[data-cy="runQuizAgainBtnInCard"]').should('be.enabled')
-      cy.get('[data-cy="runQuizAgainBtn"]').should('be.exist')
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('have.text', 'Try Again')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('be.visible')
       cy.get('[data-cy="runQuizAgainBtn"]').should('be.enabled')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('have.text', 'Try Again')
     });
 
     it('failed quiz will NOT show "try again" button on earlier attempt if quiz has already passed', () => {
@@ -384,6 +398,60 @@ describe('Display History of My quiz attempts Tests', () => {
       cy.get(`${tableSelector} [data-p-index="0"] [data-cy="viewQuizAttempt"]`).first().click()
       cy.get('[data-cy="quizName"]').should('have.text', 'This is survey 1')
       cy.get('[data-cy="quizRunStatus"]').contains('Completed')
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('not.exist')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('not.exist')
+    });
+
+    it('passed quiz will NOT show "try again" button', () => {
+      cy.createQuizDef(1)
+      cy.createQuizQuestionDef(1, 1)
+      cy.runQuizForUser(1, defaultUser, [{ selectedIndex: [0] }], true, 'My Answer')
+
+      cy.visit('/progress-and-rankings/my-quiz-attempts')
+
+      cy.get(`${tableSelector} [data-p-index="0"] [data-cy="viewQuizAttempt"]`).first().click()
+      cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 1')
+      cy.get('[data-cy="quizRunStatus"]').contains('Passed')
+
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('not.exist')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('not.exist')
+    });
+
+    it('passed quiz will show "try again" button when multipleTakes setting is enabled and more attempts are left', () => {
+      cy.createQuizDef(1)
+      cy.createQuizQuestionDef(1, 1)
+      cy.setQuizMaxNumAttempts(1, 2)
+      cy.setQuizMultipleTakes(1, true)
+      cy.runQuizForUser(1, defaultUser, [{ selectedIndex: [0] }], true, 'My Answer')
+
+      cy.visit('/progress-and-rankings/my-quiz-attempts')
+
+      cy.get(`${tableSelector} [data-p-index="0"] [data-cy="viewQuizAttempt"]`).first().click()
+      cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 1')
+      cy.get('[data-cy="quizRunStatus"]').contains('Passed')
+
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('be.visible')
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('be.enabled')
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('have.text', 'Retake')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('be.visible')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('be.enabled')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('have.text', 'Retake')
+    });
+
+    it('passed quiz will NOT show "try again" button when multipleTakes setting is enabled and no more attempts are left', () => {
+      cy.createQuizDef(1)
+      cy.createQuizQuestionDef(1, 1)
+      cy.setQuizMaxNumAttempts(1, 2)
+      cy.setQuizMultipleTakes(1, true)
+      cy.runQuizForUser(1, defaultUser, [{ selectedIndex: [0] }], true, 'My Answer')
+      cy.runQuizForUser(1, defaultUser, [{ selectedIndex: [0] }], true, 'My Answer')
+
+      cy.visit('/progress-and-rankings/my-quiz-attempts')
+
+      cy.get(`${tableSelector} [data-p-index="0"] [data-cy="viewQuizAttempt"]`).first().click()
+      cy.get('[data-cy="quizName"]').should('have.text', 'This is quiz 1')
+      cy.get('[data-cy="quizRunStatus"]').contains('Passed')
+
       cy.get('[data-cy="runQuizAgainBtnInCard"]').should('not.exist')
       cy.get('[data-cy="runQuizAgainBtn"]').should('not.exist')
     });

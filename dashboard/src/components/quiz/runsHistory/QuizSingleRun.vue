@@ -75,10 +75,13 @@ const unlimitedAttempts = computed(() => {
   return props.runInfo.maxAttemptsAllowed <= 0;
 })
 const numAttemptsLeft = computed(() => {
-  return props.runInfo.maxAttemptsAllowed - props.runInfo.userNumPreviousQuizAttempts - 1  > 0;
+  return props.runInfo.maxAttemptsAllowed - props.runInfo.userNumPreviousQuizAttempts;
 })
 const canTryAgain = computed(() => {
   return (unlimitedAttempts.value || numAttemptsLeft.value > 0) && (isLastestAttempt.value || !props.runInfo.userQuizPassed);
+})
+const tryAgainButtonText = computed(() => {
+  return QuizStatus.isFailed(props.runInfo.status) ? 'Try Again' : 'Retake';
 })
 
 const reloadRunInfo = () => {
@@ -102,19 +105,17 @@ const reloadRunInfo = () => {
       <div class="flex-1 w-min-12rem" data-cy="quizRunStatus">
         <quiz-single-run-card title="Status">
           <template #nextToTitle>
-            <div v-if="QuizStatus.isFailed(runInfo.status) && canTryAgain">
+            <div v-if="(QuizStatus.isFailed(runInfo.status) || runInfo.multipleTakes) && canTryAgain">
               <router-link class="ml-1"
                            :to="{ name: 'QuizRun', params: { quizId: runInfo.quizId } }"
-                           target="_blank"
-                           rel="noopener"
                            tabindex="-1">
-                <SkillsButton target="_blank"
+                <SkillsButton
                               v-if="canTryAgain"
                               outlined
                               severity="success"
                               size="small"
                               class="uppercase font-bold skills-theme-btn whitespace-nowrap"
-                              label="Try Again"
+                              :label="tryAgainButtonText"
                               icon="fas fa-redo"
                               data-cy="runQuizAgainBtnInCard"
                               :aria-label="`Retry Quiz ${runInfo.quizName}`">
@@ -188,19 +189,16 @@ const reloadRunInfo = () => {
     <Message v-if="!runInfo.questionsHidden && runInfo.questions && !runInfo.allQuestionsReturned" severity="warn" :closable="false" class="mt-8" data-cy="someQuestionsNotDisplayedMsg">
       The rest of the questions and answers are not displayed so not to give away the correct answers.
     </Message>
-    <div v-if="QuizStatus.isFailed(runInfo.status)" && canTryAgain>
+    <div v-if="(QuizStatus.isFailed(runInfo.status) || runInfo.multipleTakes) && canTryAgain">
       <router-link class="ml-1"
                    :to="{ name: 'QuizRun', params: { quizId: runInfo.quizId } }"
-                   target="_blank"
-                   rel="noopener"
                    tabindex="-1">
-        <SkillsButton target="_blank"
-                      v-if="canTryAgain"
+        <SkillsButton v-if="canTryAgain"
                       outlined
                       severity="success"
                       size="small"
                       class="uppercase font-bold skills-theme-btn whitespace-nowrap"
-                      label="Try Again"
+                      :label="tryAgainButtonText"
                       icon="fas fa-redo"
                       data-cy="runQuizAgainBtn"
                       :aria-label="`Retry Quiz ${runInfo.quizName}`">
