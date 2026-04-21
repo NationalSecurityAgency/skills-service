@@ -184,11 +184,16 @@ interface GlobalProgressMetricsRepo extends JpaRepository<GlobalMetricsDummyEnti
 
     @Query(value="""
         WITH project_users AS (
-            SELECT DISTINCT ups.user_id, ups.performed_on as day
-            FROM user_performed_skill ups
-            WHERE ups.project_id IN :projectIds 
-            AND ups.performed_on >= :start
-            AND NOT EXISTS (SELECT 1 FROM archived_users au WHERE au.user_id = ups.user_id AND au.project_id IN :projectIds)
+            SELECT DISTINCT ue.user_id, 
+                   CASE 
+                       WHEN ue.event_type = 'DAILY' THEN ue.event_time
+                       WHEN ue.event_type = 'WEEKLY' THEN ue.event_time + INTERVAL '6 days'
+                   END as day
+            FROM user_events ue
+            WHERE ue.project_id IN :projectIds 
+            AND ue.event_time >= :start
+            AND ue.event_type IN ('DAILY', 'WEEKLY')
+            AND NOT EXISTS (SELECT 1 FROM archived_users au WHERE au.user_id = ue.user_id AND au.project_id IN :projectIds)
         ),
         quiz_users AS (
             SELECT DISTINCT uqa.user_id, uqa.started as day
