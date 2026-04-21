@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
-import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -37,15 +36,14 @@ import skills.services.attributes.SkillAttributeService
 import skills.storage.model.Notification
 import skills.storage.model.SkillAttributesDef
 import skills.storage.model.UserAchievement
+import skills.storage.model.UserPerformedSkill
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
-import skills.storage.repos.ExpiredUserAchievementRepo
-import skills.storage.repos.SkillAttributesDefRepo
-import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.UserAchievedLevelRepo
-import skills.storage.repos.UserRoleRepo
+import skills.storage.repos.*
+import skills.tasks.config.TaskConfig
 
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
@@ -88,7 +86,13 @@ class UserAchievementExpirationService {
     UserAchievedLevelRepo userAchievementRepo
 
     @Autowired
+    UserPerformedSkillRepo userPerformedSkillRepo
+
+    @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    TaskConfig taskConfig
 
     @Autowired
     FeatureService featureService
@@ -172,10 +176,11 @@ class UserAchievementExpirationService {
                 List<UserAchievement> achievementsThatWillExpire = expiredUserAchievementRepo.findUserAchievementsBySkillRefIdWithMostRecentUserPerformedSkillBefore(
                     skillAttributesDef.skillRefId, expirationThreshold.toDate()
                 )
-                achievementsThatWillExpire.each { achievement ->
+                achievementsThatWillExpire.each { UserAchievement achievement ->
                     if (achievement.expirationNotificationState != EXPIRATION_WARNING_NOTIFICATION_SENT && isUserStillPermitted(achievement.projectId, achievement.userId)) {
                         String publicUrl = featureService.getPublicUrl()
-                        LocalDateTime retentionDeadline = achievedOnOlderThan.plusDays(expirationAttrs.every)
+                        UserPerformedSkill mostRecentUPS = userPerformedSkillRepo.findTopBySkillRefIdAndUserIdOrderByPerformedOnDesc(skillAttributesDef.skillRefId, achievement.userId)
+                        LocalDateTime retentionDeadline = LocalDateTime.ofInstant(taskConfig.getExpireUserAchievementsTaskExecutionTime((mostRecentUPS.performedOn + expirationAttrs.every).toInstant()), ZoneId.systemDefault())
                         int daysUntilExpiration = Math.abs(ChronoUnit.DAYS.between(now, retentionDeadline))
                         
                         Notifier.NotificationRequest request = new Notifier.NotificationRequest(

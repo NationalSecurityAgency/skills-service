@@ -30,10 +30,14 @@ import skills.settings.EmailSettingsService
 import skills.storage.model.SkillAttributesDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserAttrs
+import skills.tasks.config.TaskConfig
 import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
 import skills.utils.WaitFor
 
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 import static skills.services.admin.UserAchievementExpirationService.getEXPIRATION_WARNING_NOTIFICATION_SENT
@@ -50,6 +54,9 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
 
     @Autowired
     SkillAttributeService skillAttributeService
+
+    @Autowired
+    TaskConfig taskConfig
 
     @Autowired
     JdbcTemplate jdbcTemplate
@@ -78,12 +85,12 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         skillsService.createSkills(skills)
 
         String userId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID]).first()
-        Date achievementDate = new Date() - 6 // 6 days ago
+        Date achievementDate = new Date() - 45 // 45 days ago
 
         // Configure skill expiration
         skillsService.saveSkillExpirationAttributes(proj.projectId, skills[0].skillId.toString(), [
                 expirationType: ExpirationAttrs.DAILY,
-                every: 7,
+                every: 47,
                 emailNotificationsEnabled: true
         ])
 
@@ -97,17 +104,21 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
 
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
 
+        LocalDateTime now = LocalDateTime.now()
+        LocalDateTime retentionDeadline = LocalDateTime.ofInstant(taskConfig.getExpireUserAchievementsTaskExecutionTime((achievementDate + 47).toInstant()), ZoneId.systemDefault())
+        int daysUntilExpiration = Math.abs(ChronoUnit.DAYS.between(now, retentionDeadline))
+
         when:
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
 
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
 
-        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*This is a reminder that your achievement for the skill ${skills[0].name} in project ${proj.name} is approaching its expiration deadline.*Skill Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Retention Deadline: \d{4}-\d{2}-\d{2}.*- Days Until Expiration:.*For All Dragons Only/
+        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*This is a reminder that your achievement for the skill ${skills[0].name} in project ${proj.name} is approaching its expiration deadline.*Skill Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Retention Deadline: \d{4}-\d{2}-\d{2}.*- Days Until Expiration: ${daysUntilExpiration}.*For All Dragons Only/
 
         Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Action Required: Retain Your Skill Achievement<\/h1>.+?/
         Pattern p1 = ~/(?s)<p>This is a reminder that your achievement for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> is approaching its expiration deadline.<\/p>.+?/
-        Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Retention Deadline:<\/strong>.*\d{4}-\d{2}-\d{2}/
+        Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Retention Deadline:<\/strong>.*${retentionDeadline.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}/
 
         then:
         emails.size() == 1
@@ -455,11 +466,11 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
 
-        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*We're writing to inform you that your achievement for the skill ${skills[0].name} in project ${proj.name} has expired.*Expiration Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Expired On: \d{4}-\d{2}-\d{2}.*For All Dragons Only/
+        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*We're writing to inform you that your achievement for the skill ${skills[0].name} in project ${proj.name} has expired.*Expiration Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Expired On: ${expirationDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}.*For All Dragons Only/
 
         Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your Skill Achievement Has Expired<\/h1>.+?/
         Pattern p1 = ~/(?s)<p>We're writing to inform you that your achievement for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> has expired.<\/p>.+?/
-        Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Expired On:<\/strong>.*\d{4}-\d{2}-\d{2}/
+        Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Expired On:<\/strong>.*${expirationDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}/
 
         then:
         emails.size() == 1
@@ -526,11 +537,11 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
 
-        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*We're writing to inform you that your achievement for the skill ${skills[0].name} in project ${proj.name} has expired.*Expiration Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Expired On: \d{4}-\d{2}-\d{2}.*For All Dragons Only/
+        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*We're writing to inform you that your achievement for the skill ${skills[0].name} in project ${proj.name} has expired.*Expiration Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Expired On: ${expirationDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}.*For All Dragons Only/
 
         Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your Skill Achievement Has Expired<\/h1>.+?/
         Pattern p1 = ~/(?s)<p>We're writing to inform you that your achievement for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> has expired.<\/p>.+?/
-        Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Expired On:<\/strong>.*\d{4}-\d{2}-\d{2}/
+        Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Expired On:<\/strong>.*${expirationDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}/
 
         then:
         emails.size() == 1
