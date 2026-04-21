@@ -110,6 +110,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
 
         when:
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+        ExpirationAttrs expirationAttrsAfter = skillAttributeService.getExpirationAttrs(proj.projectId, skills[0].skillId.toString())
 
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
@@ -132,6 +133,12 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         // Verify notification state was updated
         UserAchievement updatedAchievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
         updatedAchievement.expirationNotificationState == EXPIRATION_WARNING_NOTIFICATION_SENT
+
+        // Verify expiration attributes were updated properly
+        expirationAttrsAfter.nextExpirationDate == null // null for DAILY expiration type
+        expirationAttrsAfter.expirationType == ExpirationAttrs.DAILY
+        expirationAttrsAfter.every == 47
+        expirationAttrsAfter.emailNotificationsEnabled == true
     }
 
     def "send expiration warning email notifications for user community protected project"() {
@@ -462,6 +469,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
 
         when:
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+        ExpirationAttrs expirationAttrsAfter = skillAttributeService.getExpirationAttrs(proj.projectId, skills[0].skillId.toString())
 
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
@@ -481,8 +489,12 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         p1.matcher(emails[0].html).find()
         p2.matcher(emails[0].html).find()
 
-        // Verify notification state was updated
-        UserAchievement updatedAchievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
+        // Verify expiration attributes were updated properly
+        expirationAttrsAfter.nextExpirationDate == expirationDate.plusYears(1).toDate()
+        expirationAttrsAfter.expirationType == ExpirationAttrs.YEARLY
+        expirationAttrsAfter.every == 1
+        expirationAttrsAfter.monthlyDay == "${expirationDate.dayOfMonth}"
+        expirationAttrsAfter.emailNotificationsEnabled == true
     }
 
     def "send skill expired email notifications for MONTHLY"() {
@@ -533,6 +545,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
 
         when:
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+        ExpirationAttrs expirationAttrsAfter = skillAttributeService.getExpirationAttrs(proj.projectId, skills[0].skillId.toString())
 
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
@@ -552,8 +565,12 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         p1.matcher(emails[0].html).find()
         p2.matcher(emails[0].html).find()
 
-        // Verify notification state was updated
-        UserAchievement updatedAchievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
+        // Verify expiration attributes were updated properly
+        expirationAttrsAfter.nextExpirationDate == expirationDate.plusMonths(1).toDate()
+        expirationAttrsAfter.expirationType == ExpirationAttrs.MONTHLY
+        expirationAttrsAfter.every == 1
+        expirationAttrsAfter.monthlyDay == "${expirationDate.dayOfMonth}"
+        expirationAttrsAfter.emailNotificationsEnabled == true
     }
 
     def "do not send skill expired email notifications for DAILY"() {
