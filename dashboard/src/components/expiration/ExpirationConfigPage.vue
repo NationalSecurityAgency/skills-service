@@ -112,6 +112,45 @@ const isReadOnly = computed(() => {
   return isReused.value || isImported.value;
 });
 
+const nextMonthlyExpirationDate = computed(() => {
+  let nextExpirationDate = null
+  if (expirationType.value === MONTHLY) {
+    // calculate next expiration date
+    const now = dayjs().utc();
+    const currentDayOfMonth = now.date();
+    let incrementMonthBy = monthlyMonths.value
+    if (monthlyDayOption.value === LAST_DAY_OF_MONTH || (monthlyDayOption.value === SET_DAY_OF_MONTH && currentDayOfMonth <= monthlyDay.value)) {
+      incrementMonthBy -= 1
+    }
+    nextExpirationDate = dayjs(new Date(now.year(), now.month(), now.day())).date(1).add(incrementMonthBy, 'month');
+    if (monthlyDayOption.value === FIRST_DAY_OF_MONTH) {
+      nextExpirationDate = nextExpirationDate.date(1)
+    } else if (monthlyDayOption.value === LAST_DAY_OF_MONTH) {
+      nextExpirationDate = nextExpirationDate.endOf('month')
+    } else if (monthlyDayOption.value === SET_DAY_OF_MONTH) {
+      const nextExpirationDateDay = monthlyDay.value <= nextExpirationDate.daysInMonth() ? monthlyDay.value : nextExpirationDate.endOf('month').date();
+      nextExpirationDate = nextExpirationDate.date(nextExpirationDateDay)
+    }
+  }
+  return nextExpirationDate
+})
+
+const nextYearlyExpirationDate = computed(() => {
+  let nextExpirationDate = null
+  if (expirationType.value === YEARLY) {
+    // calculate next expiration date
+    const now = dayjs()
+    const currentMonth = now.month()
+    const currentDayOfMonth = now.date()
+    let incrementYearBy = yearlyYears.value
+    if (currentMonth < yearlyMonth.value || (currentMonth === yearlyMonth.value && currentDayOfMonth <= yearlyDayOfMonth.value)) {
+      incrementYearBy -= 1;
+    }
+    nextExpirationDate = dayjs(new Date(now.year() + incrementYearBy, yearlyMonth.value, yearlyDayOfMonth.value))
+  }
+  return nextExpirationDate
+})
+
 onMounted(() => {
   const now = dayjs();
   yearlyMonth.value = now.month();
@@ -133,7 +172,8 @@ const loadSettings = () => {
           monthlyMonths.value = expirationSettings.every;
           if (expirationSettings.monthlyDay !== FIRST_DAY_OF_MONTH && expirationSettings.monthlyDay !== LAST_DAY_OF_MONTH) {
             monthlyDayOption.value = SET_DAY_OF_MONTH;
-            monthlyDay.value = expirationSettings.monthlyDay; // in this case, monthly day is the actual day of the month
+            expirationSettings.monthlyDay = isNaN(parseInt(expirationSettings.monthlyDay)) ? 1 : parseInt(expirationSettings.monthlyDay); // convert to integer, default to 1 if not a number
+            monthlyDay.value =expirationSettings.monthlyDay; // in this case, monthly day is the actual day of the month
           } else {
             monthlyDayOption.value = expirationSettings.monthlyDay;
           }
@@ -261,32 +301,11 @@ const saveSettings = handleSubmit((values) => {
     expirationSettings.emailNotificationsEnabled = emailNotificationsEnabled.value;
     if (expirationType.value === YEARLY) {
       expirationSettings.every = yearlyYears.value;
-
-      // calculate next expiration date
-      let incrementYearBy = yearlyYears.value;
-      if (currentMonth < yearlyMonth.value || (currentMonth === yearlyMonth.value && currentDayOfMonth <= yearlyDayOfMonth.value)) {
-        incrementYearBy -= 1;
-      }
-      expirationSettings.nextExpirationDate = dayjs(new Date(now.year() + incrementYearBy, yearlyMonth.value, yearlyDayOfMonth.value));
+      expirationSettings.nextExpirationDate = nextYearlyExpirationDate.value;
     } else if (expirationType.value === MONTHLY) {
       expirationSettings.every = monthlyMonths.value;
-      expirationSettings.monthlyDay = monthlyDayOption.value;
-
-      // calculate next expiration date
-      let incrementMonthBy = monthlyMonths.value;
-      if (monthlyDayOption.value === LAST_DAY_OF_MONTH || (monthlyDayOption.value === SET_DAY_OF_MONTH && currentDayOfMonth <= monthlyDay.value)) {
-        incrementMonthBy -= 1;
-      }
-      const nextExpirationDate = dayjs(new Date(now.year(), now.month(), now.day())).date(1).add(incrementMonthBy, 'month');
-      if (monthlyDayOption.value === FIRST_DAY_OF_MONTH) {
-        expirationSettings.nextExpirationDate = nextExpirationDate.date(1);
-      } else if (monthlyDayOption.value === LAST_DAY_OF_MONTH) {
-        expirationSettings.nextExpirationDate = nextExpirationDate.endOf('month');
-      } else if (monthlyDayOption.value === SET_DAY_OF_MONTH) {
-        const nextExpirationDateDay = monthlyDay.value <= nextExpirationDate.daysInMonth() ? monthlyDay.value : nextExpirationDate.endOf('month').date();
-        expirationSettings.nextExpirationDate = nextExpirationDate.date(nextExpirationDateDay);
-        expirationSettings.monthlyDay = monthlyDay.value;
-      }
+      expirationSettings.monthlyDay = monthlyDayOption.value === SET_DAY_OF_MONTH ? monthlyDay.value : monthlyDayOption.value;
+      expirationSettings.nextExpirationDate = nextMonthlyExpirationDate.value;
     } else if (expirationType.value === DAILY) {
       expirationSettings.every = dailyDays.value;
       // any user achievement achievedOn before this date
@@ -333,8 +352,8 @@ const resetYearlyDayOfMonth = () => {
 <template>
   <div>
     <SubPageHeader title="Configure Expiration" :helpDocsUrl="`${appConfig.docsHost}/dashboard/user-guide/skills.html#expire-points-and-achievements`" />
-    <SkillsOverlay :show="loading || skillsState.loadingSkill">
-      <Card v-if="saving || (!loading && !skillsState.loadingSkill)">
+    <SkillsOverlay :show="!!loading || !!skillsState.loadingSkill || !!saving">
+      <Card>
         <template #content>
           <Message v-if="isReadOnly" severity="info" icon="fas fa-exclamation-triangle" data-cy="readOnlyAlert" :closable="false">
             Expiration attributes of
@@ -432,6 +451,9 @@ const resetYearlyDayOfMonth = () => {
                                       data-cy="yearlyDayOfMonth"/>
                     </div>
                   </div>
+                  <div v-if="nextYearlyExpirationDate" data-cy="nextYearlyExpirationDate"class="ml-8 mt-2">
+                    Next expiration date: <Tag>{{ nextYearlyExpirationDate.format('YYYY-MM-DD') }}</Tag>
+                  </div>
                 </div>
 
                 <div class="rounded-border p-4" :class="{ 'surface-100' : expirationType === MONTHLY}" data-cy="monthlyFormGroup">
@@ -488,6 +510,9 @@ const resetYearlyDayOfMonth = () => {
                                       data-cy="monthlyDay"/>
                     </div>
                   </div>
+                  <div v-if="nextMonthlyExpirationDate" data-cy="nextMonthlyExpirationDate"class="ml-8 mt-2">
+                    Next expiration date: <Tag>{{ nextMonthlyExpirationDate.format('YYYY-MM-DD') }}</Tag>
+                  </div>
                 </div>
 
                 <Divider/>
@@ -527,9 +552,9 @@ const resetYearlyDayOfMonth = () => {
                   </div>
                 </div>
               </Fieldset>
-  
+
               <Divider />
-  
+
               <div class="flex flex-row">
                 <div class="flex gap-1">
                   <SkillsButton variant="outline-success"
@@ -540,7 +565,7 @@ const resetYearlyDayOfMonth = () => {
                                 aria-label="Save Settings"
                                 data-cy="saveSettingsBtn">
                   </SkillsButton>
-  
+
                   <InlineMessage v-if="isDirty"
                                  severity="warn"
                                  class="ml-2"

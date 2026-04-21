@@ -41,6 +41,10 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="expirationTypeSelector"] [data-cy="expirationNeverRadio"] [data-pc-section="input"]').should('be.checked')
         cy.get('[data-cy="yearlyFormGroup"]').find('input').should('be.disabled')
         cy.get('[data-cy="monthlyFormGroup"]').find('input').should('be.disabled')
+
+        // Verify expiration date Message components are not present when expiration type is NONE
+        cy.get('[data-cy="nextYearlyExpirationDate"]').should('not.exist');
+        cy.get('[data-cy="nextMonthlyExpirationDate"]').should('not.exist');
     });
 
     it('expiration type of YEARLY defaults to current date', () => {
@@ -76,6 +80,10 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+        // Verify yearly expiration date Message component is present and shows correct date
+        cy.get('[data-cy="nextYearlyExpirationDate"]').should('be.visible');
+        cy.get('[data-cy="nextYearlyExpirationDate"]').should('contain.text', `Next expiration date: ${today.format('YYYY-MM-DD')}`);
     });
 
     it('expiration type of MONTHLY defaults to first day of next month', () => {
@@ -113,6 +121,10 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+        // Verify monthly expiration date Message component is present and shows correct date
+        cy.get('[data-cy="nextMonthlyExpirationDate"]').should('be.visible');
+        cy.get('[data-cy="nextMonthlyExpirationDate"]').should('contain.text', `Next expiration date: ${startOfNextMonth.format('YYYY-MM-DD')}`);
     });
 
     it('expiration type of MONTHLY, select last day of month', () => {
@@ -150,6 +162,10 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+        // Verify monthly expiration date Message component is present and shows correct date
+        cy.get('[data-cy="nextMonthlyExpirationDate"]').should('be.visible');
+        cy.get('[data-cy="nextMonthlyExpirationDate"]').should('contain.text', `Next expiration date: ${endOfThisMonth.format('YYYY-MM-DD')}`);
     });
 
     it('expiration type of MONTHLY, select specific day of month', () => {
@@ -192,6 +208,17 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+        // Verify monthly expiration date Message component is present and shows correct date
+        cy.get('[data-cy="nextMonthlyExpirationDate"]').should('be.visible');
+        cy.get('[data-cy="nextMonthlyExpirationDate"]').should('contain.text', `Next expiration date: ${theFifteenth.format('YYYY-MM-DD')}`);
+
+        // Reload page and validate settings persist
+        cy.reload();
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"] [data-pc-section="input"]').should('be.checked')
+        cy.get('[data-cy="monthlyMonths-sb"] [data-pc-name="pcinputtext"]').should('have.value', '1 month')
+        cy.get('[data-cy="monthlyDayOption"] [value="SET_DAY_OF_MONTH"]').should('be.checked');
+        cy.get('[data-cy="monthlyDay"]').should('contain.text', '15')
     });
 
     it('expiration type of DAILY defaults to 90 days after achievement', () => {
@@ -221,6 +248,10 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+        // Verify expiration date Message components are not present when expiration type is DAILY
+        cy.get('[data-cy="nextYearlyExpirationDate"]').should('not.exist');
+        cy.get('[data-cy="nextMonthlyExpirationDate"]').should('not.exist');
     });
 
     it('changing expiration type back to NEVER after configuring to something else calls DELETE', () => {

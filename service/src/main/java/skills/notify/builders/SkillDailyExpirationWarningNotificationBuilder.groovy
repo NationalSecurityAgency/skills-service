@@ -88,7 +88,7 @@ class SkillDailyExpirationWarningNotificationBuilder implements NotificationEmai
                 "\nIf you don't perform the skill by ${parsed.retentionDeadline}, your achievement will expire and you'll lose the points. However, you can always re-achieve the skill by completing the required activities again." +
                 "\n" +
                 "\nNeed Help?" +
-                "\nIf you have any questions about retaining your skill or need assistance, please use the 'Contact' button in the SkillTree dashboard to reach out to your project administrators." +
+                "\nEach training is managed by dedicated administrators who have specialized knowledge of that training. To reach them, click the 'Contact' button in the top right of the training page title." +
                 "\n\n" +
                 "\nBest regards," +
                 "\nThe SkillTree Team"

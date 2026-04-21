@@ -85,7 +85,7 @@ class SkillExpirationNotificationBuilder implements NotificationEmailBuilder {
                 "\n${parsed.skillTrainingUrl}" +
                 "\n" +
                 "\nHave Questions?" +
-                "\nIf you have any questions about your skill expiration or need assistance with re-achieving this skill, please use the 'Contact' button in the SkillTree dashboard to reach out to your project administrators." +
+                "\nEach training is managed by dedicated administrators who have specialized knowledge of that training. To reach them, click the 'Contact' button in the top right of the training page title." +
                 "\n\n" +
                 "\nBest regards," +
                 "\nThe SkillTree Team"
