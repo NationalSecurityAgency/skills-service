@@ -133,7 +133,8 @@ const loadSettings = () => {
           monthlyMonths.value = expirationSettings.every;
           if (expirationSettings.monthlyDay !== FIRST_DAY_OF_MONTH && expirationSettings.monthlyDay !== LAST_DAY_OF_MONTH) {
             monthlyDayOption.value = SET_DAY_OF_MONTH;
-            monthlyDay.value = expirationSettings.monthlyDay; // in this case, monthly day is the actual day of the month
+            expirationSettings.monthlyDay = isNaN(parseInt(expirationSettings.monthlyDay)) ? 1 : parseInt(expirationSettings.monthlyDay); // convert to integer, default to 1 if not a number
+            monthlyDay.value =expirationSettings.monthlyDay; // in this case, monthly day is the actual day of the month
           } else {
             monthlyDayOption.value = expirationSettings.monthlyDay;
           }

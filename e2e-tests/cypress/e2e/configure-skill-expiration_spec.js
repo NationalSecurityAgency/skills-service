@@ -192,6 +192,13 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
         cy.get('[data-cy="unsavedChangesAlert"]').should('not.exist');
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
+
+        // Reload page and validate settings persist
+        cy.reload();
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"] [data-pc-section="input"]').should('be.checked')
+        cy.get('[data-cy="monthlyMonths-sb"] [data-pc-name="pcinputtext"]').should('have.value', '1 month')
+        cy.get('[data-cy="monthlyDayOption"] [value="SET_DAY_OF_MONTH"]').should('be.checked');
+        cy.get('[data-cy="monthlyDay"]').should('contain.text', '15')
     });
 
     it('expiration type of DAILY defaults to 90 days after achievement', () => {
