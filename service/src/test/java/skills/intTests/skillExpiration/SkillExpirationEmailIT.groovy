@@ -104,9 +104,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
 
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
 
-        LocalDateTime now = LocalDateTime.now()
-        LocalDateTime retentionDeadline = LocalDateTime.ofInstant(taskConfig.getExpireUserAchievementsTaskExecutionTime((achievementDate + 47).toInstant()), ZoneId.systemDefault())
-        int daysUntilExpiration = Math.abs(ChronoUnit.DAYS.between(now, retentionDeadline))
+        LocalDateTime retentionDeadline = LocalDateTime.ofInstant((achievementDate + 47).toInstant(), ZoneId.systemDefault())
 
         when:
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
@@ -115,11 +113,11 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
 
-        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*This is a reminder that your achievement for the skill ${skills[0].name} in project ${proj.name} is approaching its expiration deadline.*Skill Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Retention Deadline: \d{4}-\d{2}-\d{2}.*- Days Until Expiration: ${daysUntilExpiration}.*For All Dragons Only/
+        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*This is a reminder that your achievement for the skill ${skills[0].name} in project ${proj.name} is approaching its expiration deadline.*For All Dragons Only/
 
         Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Action Required: Retain Your Skill Achievement<\/h1>.+?/
         Pattern p1 = ~/(?s)<p>This is a reminder that your achievement for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> is approaching its expiration deadline.<\/p>.+?/
-        Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Retention Deadline:<\/strong>.*${retentionDeadline.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}/
+        Pattern p2 = ~/(?s)<p>You need to perform the skill activity again before the deadline to <strong>retain your achievement and points<\/strong>. If you don't take action by <strong>${UserAchievementExpirationService.formatWithOrdinal(retentionDeadline)}<\/strong>/
 
         then:
         emails.size() == 1
@@ -193,17 +191,19 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
 
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
 
+        LocalDateTime retentionDeadline = LocalDateTime.ofInstant((achievementDate + 7).toInstant(), ZoneId.systemDefault())
+
         when:
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
 
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
 
-        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*This is a reminder that your achievement for the skill ${skills[0].name} in project ${proj.name} is approaching its expiration deadline.*Skill Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Retention Deadline: \d{4}-\d{2}-\d{2}.*- Days Until Expiration:.*For All Dragons Only/
+        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*This is a reminder that your achievement for the skill ${skills[0].name} in project ${proj.name} is approaching its expiration deadline.*For All Dragons Only/
 
         Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Action Required: Retain Your Skill Achievement<\/h1>.+?/
         Pattern p1 = ~/(?s)<p>This is a reminder that your achievement for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> is approaching its expiration deadline.<\/p>.+?/
-        Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Retention Deadline:<\/strong>.*\d{4}-\d{2}-\d{2}/
+        Pattern p2 = ~/(?s)<p>You need to perform the skill activity again before the deadline to <strong>retain your achievement and points<\/strong>. If you don't take action by <strong>${UserAchievementExpirationService.formatWithOrdinal(retentionDeadline)}<\/strong>/
 
         then:
         emails.size() == 1

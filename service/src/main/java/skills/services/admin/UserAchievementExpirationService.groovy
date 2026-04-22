@@ -184,17 +184,14 @@ class UserAchievementExpirationService {
                     if (achievement.expirationNotificationState != EXPIRATION_WARNING_NOTIFICATION_SENT && isUserStillPermitted(achievement.projectId, achievement.userId)) {
                         String publicUrl = featureService.getPublicUrl()
                         UserPerformedSkill mostRecentUPS = userPerformedSkillRepo.findTopBySkillRefIdAndUserIdOrderByPerformedOnDesc(skillAttributesDef.skillRefId, achievement.userId)
-                        LocalDateTime retentionDeadline = LocalDateTime.ofInstant(taskConfig.getExpireUserAchievementsTaskExecutionTime((mostRecentUPS.performedOn + expirationAttrs.every).toInstant()), ZoneId.systemDefault())
-                        int daysUntilExpiration = Math.abs(ChronoUnit.DAYS.between(now, retentionDeadline))
-                        
+                        LocalDateTime retentionDeadline = LocalDateTime.ofInstant((mostRecentUPS.performedOn + expirationAttrs.every).toInstant(), ZoneId.systemDefault())
                         Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                                 userIds: [achievement.userId],
                                 type: Notification.Type.SkillDailyExpirationWarning.toString(),
                                 keyValParams: [
                                         skillName           : skillProjectAndSubjectIdsAndNames.skillName,
                                         projectName         : skillProjectAndSubjectIdsAndNames.projectName,
-                                        retentionDeadline   : retentionDeadline.format(DateTimeFormatter.ISO_DATE),
-                                        daysUntilExpiration : "${daysUntilExpiration}",
+                                        retentionDeadline   : formatWithOrdinal(retentionDeadline),
                                         skillTrainingUrl    : "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}/subjects/${skillProjectAndSubjectIdsAndNames.subjectId}/skills/${skillProjectAndSubjectIdsAndNames.skillId}",
                                         communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
                                 ]
@@ -271,4 +268,21 @@ class UserAchievementExpirationService {
         }
         return true
     }
+
+    static String formatWithOrdinal(LocalDateTime dateTime) {
+        int day = dateTime.dayOfMonth
+        String suffix
+        if (day >= 11 && day <= 13) {
+            suffix = "th"
+        } else {
+            switch (day % 10) {
+                case 1: suffix = "st"; break
+                case 2: suffix = "nd"; break
+                case 3: suffix = "rd"; break
+                default: suffix = "th"; break
+            }
+        }
+        return dateTime.format(DateTimeFormatter.ofPattern("MMMM d'" + suffix + "', yyyy"))
+    }
+
 }
