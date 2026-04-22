@@ -58,18 +58,18 @@ class PointsAndAchievementsBuilder {
         dataToSave.toAddPointsTo.addAll(loadedData.tinyUserPoints)
 
         // create user points for this skill if it doesn't already exist
-        dataToSave.toSave.addAll(createUserPointsIfNeeded(skillRefId, skillId))
+        dataToSave.toSave.addAll(createUserPointsIfNeeded(skillRefId, skillId, incomingSkillDate))
 
         loadedData.parentDefs.each { SkillEventsSupportRepo.TinySkillDef parentSkillDef ->
             // if needed, create user points for parents
             if (parentSkillDef.type != SkillDef.ContainerType.SkillsGroup) {
-                dataToSave.toSave.addAll(createUserPointsIfNeeded(parentSkillDef.id, parentSkillDef.skillId))
+                dataToSave.toSave.addAll(createUserPointsIfNeeded(parentSkillDef.id, parentSkillDef.skillId, incomingSkillDate))
             }
         }
         handleSubjectAchievement(loadedData.parentDefs)
 
         // if needed, created user points for project
-        dataToSave.toSave.addAll(createUserPointsIfNeeded(null, null))
+        dataToSave.toSave.addAll(createUserPointsIfNeeded(null, null, incomingSkillDate))
 
         handleOverallAchievement()
 
@@ -167,25 +167,27 @@ class PointsAndAchievementsBuilder {
     }
 
 
-    private List<UserPoints> createUserPointsIfNeeded(Integer skillRefId, String skillId) {
+    private List<UserPoints> createUserPointsIfNeeded(Integer skillRefId, String skillId, SkillDate incomingSkillDate = null) {
         List<UserPoints> toSave = []
         List<SkillEventsSupportRepo.TinyUserPoints> myExistingPoints = loadedData.getUserPoints(skillRefId)
 
         // add overall user points if it's the first time
         if (!myExistingPoints) {
-            toSave << constructUserPoints(userId, projectId, skillRefId, skillId, pointIncrement)
+            toSave << constructUserPoints(userId, projectId, skillRefId, skillId, pointIncrement, incomingSkillDate?.date)
         }
 
         return toSave
     }
 
 
-    private UserPoints constructUserPoints(String userId, String projectId, Integer skillRefId, String skillId, Integer pointIncrement) {
+    private UserPoints constructUserPoints(String userId, String projectId, Integer skillRefId, String skillId, Integer pointIncrement, Date incomingDate = new Date()) {
         return new UserPoints(
                 userId: userId.toLowerCase(),
                 projectId: projectId,
                 skillId: skillId,
                 skillRefId: skillRefId,
+                created: incomingDate,
+                updated: incomingDate,
                 points: pointIncrement)
     }
 

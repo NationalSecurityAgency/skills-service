@@ -1022,7 +1022,7 @@ HAVING
         group by ut.user_id
     )
     select usersAlias.user_id as userId,
-    GREATEST(skillAchievements.mostRecentAchievedOn, levelAchievements.mostRecentLevelAchievedOn) as lastUpdated,
+    GREATEST(skillAchievements.mostRecentAchievedOn, levelAchievements.mostRecentLevelAchievedOn, usersAlias.lastUpdated) as lastUpdated,
     ua.user_id_for_display                                                                   as userIdForDisplay,
     ua.dn                                                                                    as dn,
     ua.first_name                                                                            as firstName,
