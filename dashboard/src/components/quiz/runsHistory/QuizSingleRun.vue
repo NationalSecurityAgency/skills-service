@@ -17,9 +17,10 @@ limitations under the License.
 
 import QuizRunQuestionCard from "@/components/quiz/runsHistory/QuizRunQuestionCard.vue";
 import QuizRunStatus from "@/components/quiz/runsHistory/QuizRunStatus.vue";
-import {computed, ref} from "vue";
-import {useUserTagsUtils} from "@/components/utils/UseUserTagsUtils.js";
-import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
+import { computed } from "vue";
+import { useUserTagsUtils } from "@/components/utils/UseUserTagsUtils.js";
+import { useTimeUtils } from "@/common-components/utilities/UseTimeUtils.js";
+import { usePagePath } from '@/components/utils/UsePageLocation.js'
 import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
 import QuizType from "@/skills-display/components/quiz/QuizType.js";
 import QuizSingleRunCard from "@/components/quiz/runsHistory/QuizSingleRunCard.vue";
@@ -56,6 +57,7 @@ const props = defineProps({
 const emit = defineEmits(['need-to-reload'])
 const userTagsUtils = useUserTagsUtils();
 const timeUtils = useTimeUtils();
+const pathPath = usePagePath()
 
 const numQuestionsAnswered = computed(() => {
   const nums = props.runInfo.questions.map((q) => {
@@ -78,7 +80,7 @@ const numAttemptsLeft = computed(() => {
   return props.runInfo.maxAttemptsAllowed - props.runInfo.userNumPreviousQuizAttempts;
 })
 const canTryAgain = computed(() => {
-  return (unlimitedAttempts.value || numAttemptsLeft.value > 0) && (isLastestAttempt.value || !props.runInfo.userQuizPassed);
+  return !pathPath.isAdminPage.value && (unlimitedAttempts.value || numAttemptsLeft.value > 0) && (isLastestAttempt.value || !props.runInfo.userQuizPassed);
 })
 const tryAgainButtonText = computed(() => {
   return QuizStatus.isFailed(props.runInfo.status) ? 'Try Again' : 'Retake';

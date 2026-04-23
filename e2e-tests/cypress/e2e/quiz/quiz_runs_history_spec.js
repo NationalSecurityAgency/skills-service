@@ -614,4 +614,18 @@ describe('Quiz Runs History Tests', () => {
             [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Failed' }, { colIndex: 3, value: '1 correct out of 4 (25%)' }],
         ], 10);
     });
+
+    it.only('admin view single failed quiz run does not show "try again" button', function () {
+      cy.createQuizDef(1);
+      cy.createQuizQuestionDef(1, 1);
+      cy.runQuizForUser(1, 1, [{ selectedIndex: [1] }], true, 'My Answer')
+
+      cy.visit('/administrator/quizzes/quiz1/runs');
+
+      cy.get('[data-cy="row0-viewRun"]').click()
+      cy.get('[data-cy="quizRunStatus"]').contains('Failed')
+
+      cy.get('[data-cy="runQuizAgainBtnInCard"]').should('not.exist')
+      cy.get('[data-cy="runQuizAgainBtn"]').should('not.exist')
+    });
 });
