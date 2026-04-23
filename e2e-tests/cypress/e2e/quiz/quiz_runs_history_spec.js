@@ -615,7 +615,7 @@ describe('Quiz Runs History Tests', () => {
         ], 10);
     });
 
-    it.only('admin view single failed quiz run does not show "try again" button', function () {
+    it('admin view single failed quiz run does not show "try again" button', function () {
       cy.createQuizDef(1);
       cy.createQuizQuestionDef(1, 1);
       cy.runQuizForUser(1, 1, [{ selectedIndex: [1] }], true, 'My Answer')
