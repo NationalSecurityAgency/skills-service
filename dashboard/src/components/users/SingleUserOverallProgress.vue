@@ -17,16 +17,16 @@ limitations under the License.
 import {computed, onMounted, ref} from "vue";
 import UsersService from "@/components/users/UsersService.js";
 import DataView from 'primevue/dataview';
-import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import ProgressBar from "primevue/progressbar";
 import QuizRunsTable from "@/components/quiz/runsHistory/QuizRunsTable.vue";
+import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 
 
 const props = defineProps({
   userProgressMeta: Object,
 })
-const colors = useColors()
+const nF = useNumberFormat()
 
 const isLoading = ref(true)
 const singleUserProjectProgress = ref({})
@@ -92,7 +92,7 @@ const title = computed(() => `${userId.value} Overall Progress`)
                           <div
                               :aria-label="`${item.points} out of ${item.projectTotalPoints} total points`"
                               data-cy="pointsProgress"
-                          ><span class="text-primary">{{ item.points }}</span> / {{ item.projectTotalPoints }} Points</div>
+                          ><span class="text-primary">{{ nF.pretty(item.points) }}</span> / {{ nF.pretty(item.projectTotalPoints) }} Points</div>
                         </div>
                         <div>
                           <ProgressBar style="height: 5px;" :value="item.pointsProgressPercent" :showValue="false"
@@ -108,9 +108,9 @@ const title = computed(() => `${userId.value} Overall Progress`)
                           <div class="flex">
                             <div class="flex flex-col gap-2 items-center">
                               <div data-cy="level">
-                                <span>Level <Tag>{{ item.achievedProjLevel }}</Tag>
+                                <span>Level <Tag>{{ nF.pretty(item.achievedProjLevel) }}</Tag>
                                 out of
-                                <Tag severity="secondary">{{ item.numProjectLevels }}</Tag></span>
+                                <Tag severity="secondary">{{ nF.pretty(item.numProjectLevels) }}</Tag></span>
                               </div>
                               <Rating
                                   v-model="item.achievedProjLevel"
@@ -127,7 +127,7 @@ const title = computed(() => `${userId.value} Overall Progress`)
                       <Card>
                         <template #content>
                           <div class="flex flex-col gap-2 items-center">
-                            <div data-cy="skills"><Tag>{{ item.numAchievedSkills }}</Tag> out of <Tag severity="secondary">{{ item.numSkills }}</Tag></div>
+                            <div data-cy="skills"><Tag>{{ nF.pretty(item.numAchievedSkills) }}</Tag> out of <Tag severity="secondary">{{ nF.pretty(item.numSkills) }}</Tag></div>
                             <div class="uppercase">Skills</div>
                           </div>
                         </template>
@@ -135,7 +135,7 @@ const title = computed(() => `${userId.value} Overall Progress`)
                       <Card>
                       <template #content>
                         <div class="flex flex-col gap-2 items-center">
-                          <div data-cy="badges"><Tag>{{ item.numAchievedBadges }}</Tag> out of <Tag severity="secondary">{{ item.numBadges }}</Tag></div>
+                          <div data-cy="badges"><Tag>{{ nF.pretty(item.numAchievedBadges) }}</Tag> out of <Tag severity="secondary">{{ nF.pretty(item.numBadges) }}</Tag></div>
                           <div class="uppercase">Badges</div>
                         </div>
                       </template>

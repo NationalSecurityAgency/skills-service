@@ -49,6 +49,19 @@ class NewVersionsNotifCreator {
         assert docsRootHost // must have it configured
         List<WebNotifWrapper> newVersionsNotifications = [
                 new WebNotifWrapper(
+                        releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-05-19'),
+                        notif: new WebNotification(
+                                notifiedOn: new Date(),
+                                showUntil: Date.parse('yyyy-MM-dd', '2026-06-19'),
+                                lookupId: "new-versions-8",
+                                title: "Version 4.3 Released",
+                                notification: """- Enhanced quiz experience with project association visibility and try again functionality for failed attempts
+- Project users pages toggle to display only users with points from native (non-imported) skills
+- Automated email notifications for skill expiration reminders and removal notifications
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)
+""")
+                ),
+                new WebNotifWrapper(
                         releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-04-19'),
                         notif: new WebNotification(
                                 notifiedOn: new Date(),
