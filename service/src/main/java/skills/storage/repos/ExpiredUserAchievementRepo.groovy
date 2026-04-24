@@ -114,9 +114,9 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
     List<ExpiredUserAchievement> findMostRecentExpirationForAllSkills(@Param("projectId") String projectId, @Param("userId") String userId, @Param("skills") List<String> skills)
 
     @Query(value = '''
-        SELECT DISTINCT ua.userId
-        FROM UserAchievement ua
-        WHERE ua.skillRefId = :skillRefId
+        SELECT DISTINCT ups.userId
+        FROM UserPerformedSkill ups
+        WHERE ups.skillRefId = :skillRefId
     ''')
     List<String> findUserIdsWithSkillRefId(@Param("skillRefId") Integer skillRefId)
 }

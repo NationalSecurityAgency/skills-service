@@ -36,8 +36,6 @@ import skills.utils.WaitFor
 
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 
 import static skills.services.admin.UserAchievementExpirationService.getEXPIRATION_WARNING_NOTIFICATION_SENT
@@ -1061,5 +1059,72 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
 
         then:
         greenMail.getReceivedMessages().size() == 0
+    }
+
+    def "users that fully and partially achieve a skill receive expired email notifications for MONTHLY"() {
+        Map settingRequest = [
+                settingGroup : EmailSettingsService.settingsGroup,
+                setting : EmailSettingsService.htmlHeader,
+                value : 'For {{ community.descriptor }} Only'
+        ]
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextHeader
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.htmlFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100, 2)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> userIds = getRandomUsers(2, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
+        String user1 = userIds[0]
+        String user2 = userIds[1]
+        Date achievementDate = new Date() - 10 // 10 days ago
+
+        // Configure skill expiration
+        LocalDateTime expirationDate = (new Date()-1).toLocalDateTime() // yesterday
+        skillsService.saveSkillExpirationAttributes(proj.projectId, skills[0].skillId.toString(), [
+                expirationType: ExpirationAttrs.MONTHLY,
+                every: 1,
+                monthlyDay: expirationDate.dayOfMonth,
+                nextExpirationDate: expirationDate.toDate(),
+                emailNotificationsEnabled: true
+        ])
+
+        // Create user achievement for user 1
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], user1, achievementDate-1)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], user1, achievementDate)
+
+        // Create partial achievement for user 2
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], user2, achievementDate-1)
+
+        List<UserAttrs> userAttrs = userIds.collect { userId ->
+            userAttrsRepo.findByUserIdIgnoreCase(userId)
+        }
+
+        when:
+        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+
+        then:
+        emails.size() == 2
+
+        // Verify users 1 and 3 received emails (within threshold)
+        emails.any { it.recipients == [userAttrs[0].email] } // User 1 should get email
+        emails.any { it.recipients == [userAttrs[1].email] } // User 3 should get email
+
+        userPerformedSkillRepo.findAll().size() == 0
+        userAchievedRepo.findAll().size() == 0
+        userEventsRepo.findAll().size() == 0
     }
 }
