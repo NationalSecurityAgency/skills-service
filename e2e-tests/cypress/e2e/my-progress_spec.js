@@ -638,6 +638,15 @@ describe('My Progress Tests', () => {
         cy.get('[data-cy="contactProjectOwnerDialog"]').should('not.exist');
     });
 
+    it('ability to open contact dialog with query param', () => {
+        cy.visit('/progress-and-rankings/projects/proj1?openContact=true');
+        cy.get('[data-cy="contactProjectOwnerDialog"]').should('exist');
+        cy.get('[data-cy="contactProjectOwnerDialog"]').contains('Send your message to the administrators of This is project 1 training')
+        cy.get('[data-cy="contactProjectOwnerDialog"] [data-cy="messageNumCharsRemaining"]').should('contain.text', '2,500 characters remaining');
+        cy.get('[data-cy="saveDialogBtn"]').should('contain.text', 'Submit');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+    })
+
     it('do not show contact project admins button if email service is diabled', () => {
         cy.intercept('/public/isFeatureSupported?feature=emailservice', 'false').as('isEmailServiceSupported');
         cy.visit('/progress-and-rankings/projects/proj1');

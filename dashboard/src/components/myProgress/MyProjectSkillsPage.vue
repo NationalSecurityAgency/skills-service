@@ -87,7 +87,7 @@ const isContactButtonInline = computed(() => {
   return currentWidth.value > titleWidthPx
 })
 
-const showContact = ref(false)
+const showContact = ref(route.query.openContact === 'true')
 
 themeState.theme.disableSkillTreeBrand = true
 themeState.theme.disableBreadcrumb = true
