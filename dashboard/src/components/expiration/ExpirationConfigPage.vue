@@ -66,35 +66,6 @@ const loading = ref(true);
 const saving = ref(false);
 const showSavedMsg = ref(false);
 const loadedSettings = ref({});
-const overallErrMsg = ref(null);
-
-const isDirty = computed(()  => {
-  if (loading.value) {
-    return false;
-  }
-  if (loadedSettings.value.expirationType !== expirationType.value) {
-    return true;
-  }
-  if (emailNotificationsEnabled.value !== loadedSettings.value.emailNotificationsEnabled) {
-    return true;
-  }
-  const nextExpirationDate = dayjs(loadedSettings.value.nextExpirationDate);
-  if (expirationType.value === YEARLY) {
-    return loadedSettings.value.every !== yearlyYears.value
-        || nextExpirationDate.month() !== yearlyMonth.value
-        || nextExpirationDate.date() !== yearlyDayOfMonth.value;
-  }
-  if (expirationType.value === MONTHLY) {
-    const loadedMonthlyDay = loadedSettings.value.monthlyDay;
-    return loadedSettings.value.every !== monthlyMonths.value
-        || (monthlyDayOption.value === SET_DAY_OF_MONTH && loadedMonthlyDay !== monthlyDay.value)
-        || ((monthlyDayOption.value === FIRST_DAY_OF_MONTH || monthlyDayOption.value === LAST_DAY_OF_MONTH) && loadedMonthlyDay !== monthlyDayOption.value);
-  }
-  if (expirationType.value === DAILY) {
-    return loadedSettings.value.every !== dailyDays.value;
-  }
-  return false;
-});
 const monthsOptions = computed(() => {
   return dayjs.months().map((m, index) => ({ value: index, text: m }));
 });
@@ -561,19 +532,19 @@ const resetYearlyDayOfMonth = () => {
                                 label="Save"
                                 icon="fas fa-arrow-circle-right"
                                 @click="saveSettings"
-                                :disabled="!meta.valid || !isDirty || isReadOnly"
+                                :disabled="!meta.valid || !meta.dirty || isReadOnly"
                                 aria-label="Save Settings"
                                 data-cy="saveSettingsBtn">
                   </SkillsButton>
 
-                  <InlineMessage v-if="isDirty"
+                  <InlineMessage v-if="meta.dirty"
                                  severity="warn"
                                  class="ml-2"
                                  data-cy="unsavedChangesAlert"
                                  aria-label="Settings have been changed, do not forget to save">
                     Unsaved Changes
                   </InlineMessage>
-                  <InlineMessage v-if="!isDirty && showSavedMsg"
+                  <InlineMessage v-if="!meta.dirty && showSavedMsg"
                                  severity="success"
                                  class="ml-2"
                                  data-cy="settingsSavedAlert">
