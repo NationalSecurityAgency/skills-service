@@ -43,7 +43,7 @@ class SkillExpirationNotificationBuilder implements NotificationEmailBuilder {
             String htmlBody = thymeleafTemplateEngine.process("skill_expiration.html", context)
             String plainText = buildPlainText(parsed, formatParams)
             return new Res(
-                    subject: "Your Skill Achievement Has Expired",
+                    subject: "Your Skill Achievements Have Expired",
                     html: htmlBody,
                     plainText: plainText
             )
@@ -70,7 +70,7 @@ class SkillExpirationNotificationBuilder implements NotificationEmailBuilder {
     private String buildPlainText(Object parsed, Formatting formatting) {
 
         String pt = "Hello ${parsed.userName},\n" +
-                "\nWe're writing to inform you that your achievement for the skill ${parsed.skillName} in project ${parsed.projectName} has expired." +
+                "\nWe're writing to inform you that your achievements for the skill ${parsed.skillName} in project ${parsed.projectName} have expired." +
                 "\n" +
                 "\nExpiration Details:" +
                 "\n- Skill: ${parsed.skillName}" +
@@ -79,7 +79,7 @@ class SkillExpirationNotificationBuilder implements NotificationEmailBuilder {
                 "\n- Expired On: ${parsed.expirationDate}" +
                 "\n" +
                 "\nWhat happens next?" +
-                "\nDon't worry! You can re-achieve this skill at any time. Simply visit the training materials and complete the required activities again to regain your achievement." +
+                "\nDon't worry! You can re-achieve this skill at any time. Simply visit the training materials and complete the required activities again to regain your achievements." +
                 "\n" +
                 "\nGet Started:" +
                 "\n${parsed.skillTrainingUrl}" +

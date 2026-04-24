@@ -113,16 +113,16 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
 
-        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*This is a reminder that your achievement for the skill ${skills[0].name} in project ${proj.name} is approaching its expiration deadline.*For All Dragons Only/
+        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*This is a reminder that your achievements for the skill ${skills[0].name} in project ${proj.name} is approaching its expiration deadline.*For All Dragons Only/
 
-        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Action Required: Retain Your Skill Achievement<\/h1>.+?/
-        Pattern p1 = ~/(?s)<p>This is a reminder that your achievement for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> is approaching its expiration deadline.<\/p>.+?/
-        Pattern p2 = ~/(?s)<p>You need to perform the skill activity again before the deadline to <strong>retain your achievement and points<\/strong>. If you don't take action by <strong>${UserAchievementExpirationService.formatWithOrdinal(retentionDeadline)}<\/strong>/
+        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Action Required: Retain Your Skill Achievements<\/h1>.+?/
+        Pattern p1 = ~/(?s)<p>This is a reminder that your achievements for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> is approaching its expiration deadline.<\/p>.+?/
+        Pattern p2 = ~/(?s)<p>You need to perform the skill activity again before the deadline to <strong>retain your achievements and points<\/strong>. If you don't take action by <strong>${UserAchievementExpirationService.formatWithOrdinal(retentionDeadline)}<\/strong>/
 
         then:
         emails.size() == 1
         emails[0].recipients == [userAttrs.email]
-        emails[0].subj == "Skill Achievement Expiring Soon"
+        emails[0].subj == "Skill Achievements Expiring Soon"
         plaintTextMatch.matcher(emails[0].plainText).find()
         h1.matcher(emails[0].html).find()
         p1.matcher(emails[0].html).find()
@@ -199,16 +199,16 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
 
-        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*This is a reminder that your achievement for the skill ${skills[0].name} in project ${proj.name} is approaching its expiration deadline.*For All Dragons Only/
+        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*This is a reminder that your achievements for the skill ${skills[0].name} in project ${proj.name} is approaching its expiration deadline.*For All Dragons Only/
 
-        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Action Required: Retain Your Skill Achievement<\/h1>.+?/
-        Pattern p1 = ~/(?s)<p>This is a reminder that your achievement for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> is approaching its expiration deadline.<\/p>.+?/
-        Pattern p2 = ~/(?s)<p>You need to perform the skill activity again before the deadline to <strong>retain your achievement and points<\/strong>. If you don't take action by <strong>${UserAchievementExpirationService.formatWithOrdinal(retentionDeadline)}<\/strong>/
+        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Action Required: Retain Your Skill Achievements<\/h1>.+?/
+        Pattern p1 = ~/(?s)<p>This is a reminder that your achievements for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> is approaching its expiration deadline.<\/p>.+?/
+        Pattern p2 = ~/(?s)<p>You need to perform the skill activity again before the deadline to <strong>retain your achievements and points<\/strong>. If you don't take action by <strong>${UserAchievementExpirationService.formatWithOrdinal(retentionDeadline)}<\/strong>/
 
         then:
         emails.size() == 1
         emails[0].recipients == [userAttrs.email]
-        emails[0].subj == "Skill Achievement Expiring Soon"
+        emails[0].subj == "Skill Achievements Expiring Soon"
         plaintTextMatch.matcher(emails[0].plainText).find()
         h1.matcher(emails[0].html).find()
         p1.matcher(emails[0].html).find()
@@ -340,16 +340,16 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
 
-        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*We're writing to inform you that your achievement for the skill ${skills[0].name} in project ${proj.name} has expired.*Expiration Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Expired On: \d{4}-\d{2}-\d{2}.*For All Dragons Only/
+        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*We're writing to inform you that your achievements for the skill ${skills[0].name} in project ${proj.name} have expired.*Expiration Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Expired On: \d{4}-\d{2}-\d{2}.*For All Dragons Only/
 
-        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your Skill Achievement Has Expired<\/h1>.+?/
-        Pattern p1 = ~/(?s)<p>We're writing to inform you that your achievement for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> has expired.<\/p>.+?/
+        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your Skill Achievements Have Expired<\/h1>.+?/
+        Pattern p1 = ~/(?s)<p>We're writing to inform you that your achievements for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> have expired.<\/p>.+?/
         Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Expired On:<\/strong>.*\d{4}-\d{2}-\d{2}/
 
         then:
         emails.size() == 1
         emails[0].recipients == [userAttrs.email]
-        emails[0].subj == "Your Skill Achievement Has Expired"
+        emails[0].subj == "Your Skill Achievements Have Expired"
         plaintTextMatch.matcher(emails[0].plainText).find()
         h1.matcher(emails[0].html).find()
         p1.matcher(emails[0].html).find()
@@ -474,16 +474,16 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
 
-        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*We're writing to inform you that your achievement for the skill ${skills[0].name} in project ${proj.name} has expired.*Expiration Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Expired On: ${expirationDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}.*For All Dragons Only/
+        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*We're writing to inform you that your achievements for the skill ${skills[0].name} in project ${proj.name} have expired.*Expiration Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Expired On: ${expirationDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}.*For All Dragons Only/
 
-        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your Skill Achievement Has Expired<\/h1>.+?/
-        Pattern p1 = ~/(?s)<p>We're writing to inform you that your achievement for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> has expired.<\/p>.+?/
+        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your Skill Achievements Have Expired<\/h1>.+?/
+        Pattern p1 = ~/(?s)<p>We're writing to inform you that your achievements for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> have expired.<\/p>.+?/
         Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Expired On:<\/strong>.*${expirationDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}/
 
         then:
         emails.size() == 1
         emails[0].recipients == [userAttrs.email]
-        emails[0].subj == "Your Skill Achievement Has Expired"
+        emails[0].subj == "Your Skill Achievements Have Expired"
         plaintTextMatch.matcher(emails[0].plainText).find()
         h1.matcher(emails[0].html).find()
         p1.matcher(emails[0].html).find()
@@ -550,16 +550,16 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
         List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
 
-        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*We're writing to inform you that your achievement for the skill ${skills[0].name} in project ${proj.name} has expired.*Expiration Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Expired On: ${expirationDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}.*For All Dragons Only/
+        Pattern plaintTextMatch = ~/(?s)For All Dragons Only.*Hello.*We're writing to inform you that your achievements for the skill ${skills[0].name} in project ${proj.name} have expired.*Expiration Details:.*- Skill: ${skills[0].name}.*- Project: ${proj.name}.*- Expired On: ${expirationDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}.*For All Dragons Only/
 
-        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your Skill Achievement Has Expired<\/h1>.+?/
-        Pattern p1 = ~/(?s)<p>We're writing to inform you that your achievement for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> has expired.<\/p>.+?/
+        Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your Skill Achievements Have Expired<\/h1>.+?/
+        Pattern p1 = ~/(?s)<p>We're writing to inform you that your achievements for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> have expired.<\/p>.+?/
         Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Expired On:<\/strong>.*${expirationDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}/
 
         then:
         emails.size() == 1
         emails[0].recipients == [userAttrs.email]
-        emails[0].subj == "Your Skill Achievement Has Expired"
+        emails[0].subj == "Your Skill Achievements Have Expired"
         plaintTextMatch.matcher(emails[0].plainText).find()
         h1.matcher(emails[0].html).find()
         p1.matcher(emails[0].html).find()
@@ -772,7 +772,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         then:
         emails.size() == 3
         emails.every { it.recipients == [userAttrs.email] }
-        emails.every { it.subj == "Skill Achievement Expiring Soon" }
+        emails.every { it.subj == "Skill Achievements Expiring Soon" }
         
         // Verify all notification states were updated
         skills.each { skill ->
@@ -862,7 +862,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         !emails.any { it.recipients == [userAttrs[1].email] } // User 2 should not get email
         !emails.any { it.recipients == [userAttrs[3].email] } // User 4 should not get email
         
-        emails.every { it.subj == "Skill Achievement Expiring Soon" }
+        emails.every { it.subj == "Skill Achievements Expiring Soon" }
         
         // Verify notification states were updated correctly
         UserAchievement user1Achievement = userAchievedRepo.findAllByUserIdAndSkillId(userIds[0], skills[0].skillId)[0]
@@ -954,7 +954,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         then:
         emails.size() == 4
         emails.every { it.recipients == [userAttrs.email] }
-        emails.every { it.subj == "Your Skill Achievement Has Expired" }
+        emails.every { it.subj == "Your Skill Achievements Have Expired" }
 
         // Verify all non-imported skills notifications were sent
         nonImportedSkills.each { skill ->
@@ -1012,7 +1012,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
 
         then:
         emails.size() == 1
-        emails[0].subj == "Your Skill Achievement Has Expired"
+        emails[0].subj == "Your Skill Achievements Have Expired"
         emails[0].html.contains(skills[0].name)
     }
 
