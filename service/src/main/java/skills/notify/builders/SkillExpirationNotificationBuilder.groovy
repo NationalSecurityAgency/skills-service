@@ -69,14 +69,8 @@ class SkillExpirationNotificationBuilder implements NotificationEmailBuilder {
 
     private String buildPlainText(Object parsed, Formatting formatting) {
 
-        String pt = "Hello ${parsed.userName},\n" +
-                "\nWe're writing to inform you that your achievements for the skill ${parsed.skillName} in project ${parsed.projectName} have expired." +
-                "\n" +
-                "\nExpiration Details:" +
-                "\n- Skill: ${parsed.skillName}" +
-                "\n- Project: ${parsed.projectName}" +
-                "\n- Expiration Type: ${parsed.expirationType}" +
-                "\n- Expired On: ${parsed.expirationDate}" +
+        String pt = "Hello,\n" +
+                "\nWe're writing to inform you that your achievements for the skill ${parsed.skillName} in project ${parsed.projectName} expired on ${parsed.expirationDate}." +
                 "\n" +
                 "\nWhat happens next?" +
                 "\nDon't worry! You can re-achieve this skill at any time. Simply visit the training materials and complete the required activities again to regain your achievements." +

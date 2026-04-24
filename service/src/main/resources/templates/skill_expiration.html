@@ -28,15 +28,7 @@ limitations under the License.
 
 <p>Hello,</p>
 
-<p>We're writing to inform you that your achievements for the skill <strong>[[${skillName}]]</strong> in project <strong>[[${projectName}]]</strong> have expired.</p>
-
-<p><strong>Expiration Details:</strong></p>
-<ul>
-    <li><strong>Skill:</strong> [[${skillName}]]</li>
-    <li><strong>Project:</strong> [[${projectName}]]</li>
-    <li><strong>Expiration Type:</strong> <span th:if="${expirationType == 'MONTHLY'}">Monthly</span><span th:if="${expirationType == 'YEARLY'}">Yearly</span><span th:if="${expirationType == 'DAILY'}">Daily</span></li>
-    <li><strong>Expired On:</strong> [[${expirationDate}]]</li>
-</ul>
+<p>We're writing to inform you that your achievements for the skill <strong>[[${skillName}]]</strong> in project <strong>[[${projectName}]]</strong> expired on <strong>[[${expirationDate}]]</strong>.</p>
 
 <p><strong>What happens next?</strong></p>
 <p>Don't worry! You can re-achieve this skill at any time. Simply visit the training materials and complete the required activities again to regain your achievements.</p>

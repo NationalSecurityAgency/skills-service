@@ -156,7 +156,7 @@ class UserAchievementExpirationService {
                                         skillName        : skillProjectAndSubjectIdsAndNames.skillName,
                                         projectName      : skillProjectAndSubjectIdsAndNames.projectName,
                                         expirationType   : expirationAttrs.expirationType,
-                                        expirationDate   : nextExpirationDate.format(DateTimeFormatter.ISO_DATE),
+                                        expirationDate   : formatWithOrdinal(nextExpirationDate),
                                         skillTrainingUrl : "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}/subjects/${skillProjectAndSubjectIdsAndNames.subjectId}/skills/${skillProjectAndSubjectIdsAndNames.skillId}",
                                         contactProjectUrl: "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}?openContact=true",
                                         communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
