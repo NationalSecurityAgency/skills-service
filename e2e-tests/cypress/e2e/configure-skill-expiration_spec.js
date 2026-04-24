@@ -54,7 +54,7 @@ describe('Configure Skill Expiration Tests', () => {
         cy.visitExpirationConfPage();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        const today = moment.utc();
+        const oneYearFromToday = moment.utc().add(1, 'years');
 
         cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').click();
 
@@ -64,8 +64,8 @@ describe('Configure Skill Expiration Tests', () => {
 
         cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"] [data-pc-section="input"]').should('be.checked')
         cy.get('[data-cy="yearlyYears-sb"] [data-pc-name="pcinputtext"]').should('have.value', '1 year')
-        cy.get('[data-cy="yearlyMonth"]').contains(today.format('MMMM'))
-        cy.get('[data-cy="yearlyDayOfMonth"]').contains(today.date())
+        cy.get('[data-cy="yearlyMonth"]').contains(oneYearFromToday.format('MMMM'))
+        cy.get('[data-cy="yearlyDayOfMonth"]').contains(oneYearFromToday.date())
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings').then((xhr) => {
@@ -74,7 +74,7 @@ describe('Configure Skill Expiration Tests', () => {
             expect(requestBody.every).to.eq(1)
             expect(requestBody.expirationType).to.eq('YEARLY')
             expect(requestBody.monthlyDay).to.eq(null)
-            expect(requestBody.nextExpirationDate).to.eq(today.startOf('day').toISOString())
+            expect(requestBody.nextExpirationDate).to.eq(oneYearFromToday.startOf('day').toISOString())
         })
 
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
@@ -83,7 +83,7 @@ describe('Configure Skill Expiration Tests', () => {
 
         // Verify yearly expiration date Message component is present and shows correct date
         cy.get('[data-cy="nextYearlyExpirationDate"]').should('be.visible');
-        cy.get('[data-cy="nextYearlyExpirationDate"]').should('contain.text', `Next expiration date: ${today.format('YYYY-MM-DD')}`);
+        cy.get('[data-cy="nextYearlyExpirationDate"]').should('contain.text', `Next expiration date: ${oneYearFromToday.format('YYYY-MM-DD')}`);
     });
 
     it('expiration type of MONTHLY defaults to first day of next month', () => {
@@ -261,7 +261,7 @@ describe('Configure Skill Expiration Tests', () => {
         cy.visitExpirationConfPage();
         cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
 
-        const today = moment.utc();
+        const oneYearFromToday = moment.utc().add(1, 'years');
 
         cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"]').click();
 
@@ -271,8 +271,8 @@ describe('Configure Skill Expiration Tests', () => {
 
         cy.get('[data-cy="expirationTypeSelector"] [data-cy="yearlyRadio"] [data-pc-section="input"]').should('be.checked')
         cy.get('[data-cy="yearlyYears-sb"] [data-pc-name="pcinputtext"]').should('have.value', '1 year')
-        cy.get('[data-cy="yearlyMonth"]').contains(today.format('MMMM'))
-        cy.get('[data-cy="yearlyDayOfMonth"]').contains(today.date())
+        cy.get('[data-cy="yearlyMonth"]').contains(oneYearFromToday.format('MMMM'))
+        cy.get('[data-cy="yearlyDayOfMonth"]').contains(oneYearFromToday.date())
 
         cy.get('[data-cy="saveSettingsBtn"]').click()
         cy.wait('@saveExpirationSettings').then((xhr) => {
@@ -281,7 +281,7 @@ describe('Configure Skill Expiration Tests', () => {
             expect(requestBody.every).to.eq(1)
             expect(requestBody.expirationType).to.eq('YEARLY')
             expect(requestBody.monthlyDay).to.eq(null)
-            expect(requestBody.nextExpirationDate).to.eq(today.startOf('day').toISOString())
+            expect(requestBody.nextExpirationDate).to.eq(oneYearFromToday.startOf('day').toISOString())
         })
 
         cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');

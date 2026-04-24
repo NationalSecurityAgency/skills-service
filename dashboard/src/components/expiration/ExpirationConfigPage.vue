@@ -143,7 +143,7 @@ const nextYearlyExpirationDate = computed(() => {
     const currentMonth = now.month()
     const currentDayOfMonth = now.date()
     let incrementYearBy = yearlyYears.value
-    if (currentMonth < yearlyMonth.value || (currentMonth === yearlyMonth.value && currentDayOfMonth <= yearlyDayOfMonth.value)) {
+    if (currentMonth < yearlyMonth.value || (currentMonth === yearlyMonth.value && currentDayOfMonth < yearlyDayOfMonth.value)) {
       incrementYearBy -= 1;
     }
     nextExpirationDate = dayjs(new Date(now.year() + incrementYearBy, yearlyMonth.value, yearlyDayOfMonth.value))
