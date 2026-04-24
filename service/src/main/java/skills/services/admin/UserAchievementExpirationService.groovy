@@ -45,7 +45,6 @@ import skills.tasks.config.TaskConfig
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 
 import static java.time.temporal.TemporalAdjusters.lastDayOfMonth
 import static skills.storage.model.SkillAttributesDef.SkillAttributesType.AchievementExpiration
@@ -156,8 +155,9 @@ class UserAchievementExpirationService {
                                         skillName        : skillProjectAndSubjectIdsAndNames.skillName,
                                         projectName      : skillProjectAndSubjectIdsAndNames.projectName,
                                         expirationType   : expirationAttrs.expirationType,
-                                        expirationDate   : nextExpirationDate.format(DateTimeFormatter.ISO_DATE),
+                                        expirationDate   : formatWithOrdinal(nextExpirationDate),
                                         skillTrainingUrl : "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}/subjects/${skillProjectAndSubjectIdsAndNames.subjectId}/skills/${skillProjectAndSubjectIdsAndNames.skillId}",
+                                        contactProjectUrl: "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}?openContact=true",
                                         communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
                                 ]
                         )
@@ -193,6 +193,7 @@ class UserAchievementExpirationService {
                                         projectName         : skillProjectAndSubjectIdsAndNames.projectName,
                                         retentionDeadline   : formatWithOrdinal(retentionDeadline),
                                         skillTrainingUrl    : "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}/subjects/${skillProjectAndSubjectIdsAndNames.subjectId}/skills/${skillProjectAndSubjectIdsAndNames.skillId}",
+                                        contactProjectUrl   : "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}?openContact=true",
                                         communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
                                 ]
                         )

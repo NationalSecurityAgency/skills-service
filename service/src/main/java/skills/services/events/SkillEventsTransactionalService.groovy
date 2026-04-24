@@ -86,6 +86,9 @@ class SkillEventsTransactionalService {
     UserPointsRepo userPointsRepo
 
     @Autowired
+    ExpiredUserAchievementRepo expiredUserAchievementRepo
+
+    @Autowired
     UserEventService userEventService
 
     @Autowired
@@ -260,6 +263,7 @@ class SkillEventsTransactionalService {
                 userPerformedSkill.performedOn = skillDate.date
                 performedSkillRepository.save(userPerformedSkill)
                 scheduleImportedSkills(skillDefinition, userId, skillDate, hasReachedMaxPoints(numExistingSkills, skillDefinition), true)
+                expiredUserAchievementRepo.resetExpirationNotificationState(skillDefinition.id) // update expiration notification state
                 res.skillApplied = true
                 res.explanation = 'Skill Achievement retained'
                 return res

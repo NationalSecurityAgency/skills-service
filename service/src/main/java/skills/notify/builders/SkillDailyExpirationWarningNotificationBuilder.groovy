@@ -43,7 +43,7 @@ class SkillDailyExpirationWarningNotificationBuilder implements NotificationEmai
             String htmlBody = thymeleafTemplateEngine.process("skill_daily_expiration_warning.html", context)
             String plainText = buildPlainText(parsed, formatParams)
             return new Res(
-                    subject: "Skill Achievement Expiring Soon",
+                    subject: "Skill Achievements Expiring Soon",
                     html: htmlBody,
                     plainText: plainText
             )
@@ -55,12 +55,12 @@ class SkillDailyExpirationWarningNotificationBuilder implements NotificationEmai
 
     private Context buildThymeleafContext(Object parsed, Formatting formatting) {
         Context templateContext = new Context()
-        templateContext.setVariable("userName", parsed.userName)
         templateContext.setVariable("skillName", parsed.skillName)
         templateContext.setVariable("projectName", parsed.projectName)
         templateContext.setVariable("retentionDeadline", parsed.retentionDeadline)
         templateContext.setVariable("daysUntilExpiration", parsed.daysUntilExpiration)
         templateContext.setVariable("skillTrainingUrl", parsed.skillTrainingUrl)
+        templateContext.setVariable("contactProjectUrl", parsed.contactProjectUrl)
         templateContext.setVariable("htmlHeader", formatting.htmlHeader)
         templateContext.setVariable("htmlFooter", formatting.htmlFooter)
 
@@ -69,23 +69,17 @@ class SkillDailyExpirationWarningNotificationBuilder implements NotificationEmai
 
     private String buildPlainText(Object parsed, Formatting formatting) {
 
-        String pt = "Hello ${parsed.userName},\n" +
-                "\nThis is a reminder that your achievement for the skill ${parsed.skillName} in project ${parsed.projectName} is approaching its expiration deadline." +
+        String pt = "Hello,\n" +
+                "\nThis is a reminder that your achievements for the skill ${parsed.skillName} in project ${parsed.projectName} is approaching its expiration deadline." +
                 "\n" +
-                "\nSkill Details:" +
-                "\n- Skill: ${parsed.skillName}" +
-                "\n- Project: ${parsed.projectName}" +
-                "\n- Retention Deadline: ${parsed.retentionDeadline}" +
-                "\n- Days Until Expiration: ${parsed.daysUntilExpiration}" +
-                "\n" +
-                "\nHow to Keep Your Achievement:" +
-                "\nYou need to perform the skill activity again before the deadline to retain your achievement and points. If you don't take action by the deadline, you will lose the achievement and associated points, but you'll be able to re-achieve the skill afterward." +
+                "\nHow to Keep Your Achievements:" +
+                "\nYou need to perform the skill activity again before the deadline to retain your achievements and points. If you don't take action by ${parsed.retentionDeadline}, you will lose the achievements and associated points, but you'll be able to re-achieve the skill afterward." +
                 "\n" +
                 "\nTake Action Now:" +
                 "\n${parsed.skillTrainingUrl}" +
                 "\n" +
                 "\nWhat Happens If You Miss the Deadline?" +
-                "\nIf you don't perform the skill by ${parsed.retentionDeadline}, your achievement will expire and you'll lose the points. However, you can always re-achieve the skill by completing the required activities again." +
+                "\nIf you don't perform the skill by ${parsed.retentionDeadline}, your achievements will expire and you'll lose the points. However, you can always re-achieve the skill by completing the required activities again." +
                 "\n" +
                 "\nNeed Help?" +
                 "\nEach training is managed by dedicated administrators who have specialized knowledge of that training. To reach them, click the 'Contact' button in the top right of the training page title." +
