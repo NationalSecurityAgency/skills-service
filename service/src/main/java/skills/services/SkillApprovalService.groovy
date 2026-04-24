@@ -17,6 +17,7 @@ package skills.services
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.tuple.Pair
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
@@ -141,11 +142,11 @@ class SkillApprovalService {
 
     }
 
-    TableResult getApprovals(String projectId, String userFilter, String skillFilter, PageRequest pageRequest) {
+    TableResult getApprovals(String projectId, String userFilter, String skillFilter, boolean allRequests, PageRequest pageRequest) {
         String currentApproverId = userInfoService.currentUser.username
         ConfExistInfo confExistInfo = getConfExistForApprover(projectId, currentApproverId)
 
-        if (confExistInfo.projConfExist) {
+        if (!allRequests && confExistInfo.projConfExist) {
             if (confExistInfo.fallBackApprover) {
                 Page<SkillApprovalRepo.SimpleSkillApproval> approvalPage = skillApprovalRepo.findFallbackApproverConf(projectId, userFilter, skillFilter, pageRequest)
                 return buildApprovalsResult(projectId, approvalPage)
@@ -157,7 +158,29 @@ class SkillApprovalService {
         }
 
         Page<SkillApprovalRepo.SimpleSkillApproval> approvalPage = skillApprovalRepo.findToApproveByProjectIdAndNotRejectedOrApproved(projectId, userFilter, skillFilter, pageRequest)
-        return buildApprovalsResult(projectId, approvalPage)
+
+        ApproversInfo approversInfo = null
+        if (allRequests) {
+            if (!userInfoService.isCurrentUserAProjectAdmin() && !userInfoService.isCurrentUserASuperDuperUser()) {
+                throw new SkillException("Only admins can view all requests", projectId, null, ErrorCode.AccessDenied)
+            }
+
+            List<String> fallbackApprovers = skillApprovalConfRepo.getUsersConfiguredForFallback(projectId)
+            if (!fallbackApprovers) {
+                fallbackApprovers = skillApprovalConfRepo.getImplicitFallbackApprovers(projectId)
+            }
+
+            List<Integer> approvalRequestIds = approvalPage.getContent().collect { it.getApprovalId() }
+            List<SkillApprovalRepo.ApproversForRequest> approversForRequests = skillApprovalRepo.findApproversForRequests(projectId, approvalRequestIds)
+
+            approversInfo = new ApproversInfo(approversForRequests: approversForRequests, fallbackApprovers: fallbackApprovers)
+        }
+        return buildApprovalsResult(projectId, approvalPage, approversInfo)
+    }
+
+    static class ApproversInfo {
+        List<String> fallbackApprovers
+        List<SkillApprovalRepo.ApproversForRequest> approversForRequests
     }
 
     TableResult getApprovalsHistory(String projectId, String skillNameFilter, String userIdFilter, String approverUserIdFilter, PageRequest pageRequest) {
@@ -171,9 +194,44 @@ class SkillApprovalService {
         buildApprovalsResult(projectId, approvalPage)
     }
 
-    private static TableResult buildApprovalsResult(String projectId, Page<SkillApprovalRepo.SimpleSkillApproval> skillApprovalPage) {
+    private static TableResult buildApprovalsResult(String projectId, Page<SkillApprovalRepo.SimpleSkillApproval> skillApprovalPage, ApproversInfo approversInfo = null) {
         List<SkillApprovalRepo.SimpleSkillApproval> approvalsFromDB = skillApprovalPage.getContent()
+
+
+        Map<Integer, List<SkillApprovalRepo.ApproversForRequest>> approversByApprovalId = null
+        if (approversInfo) {
+            approversByApprovalId = approversInfo.approversForRequests.groupBy { SkillApprovalRepo.ApproversForRequest it -> it.getApprovalRequestId() }
+        }
+
         List<SkillApprovalResult> approvals = approvalsFromDB.collect { SkillApprovalRepo.SimpleSkillApproval simpleSkillApproval ->
+            List<SkillApprovalResult.ApproverForRequest> configuredApprovers = null
+            if (approversInfo) {
+                List<SkillApprovalRepo.ApproversForRequest> requestForThisRequest = approversByApprovalId[simpleSkillApproval.getApprovalId()]
+                if (requestForThisRequest) {
+                    List<Pair> allApproveItems = []
+                    requestForThisRequest.each {
+                        if (it.skillConfApproverUserId) {
+                            allApproveItems.add(Pair.of(it.skillConfApproverUserId, 'Skill'))
+                        }
+                        if (it.userConfApproverUserId) {
+                            allApproveItems.add(Pair.of(it.userConfApproverUserId, 'User'))
+                        }
+                        if (it.tagConfigApproverId) {
+                            allApproveItems.add(Pair.of(it.tagConfigApproverId, it.tagConfigUserTagKey))
+                        }
+                    }
+                    Map<String, List<Pair>> byApproverId = allApproveItems.groupBy { Pair it -> it.left?.toString() }
+                    configuredApprovers = byApproverId.collect {
+                        new SkillApprovalResult.ApproverForRequest(
+                                approverUserId: it.key,
+                                configuredTypes: it.value.collect { it.right.toString() }
+                        )
+                    }
+                } else {
+                    configuredApprovers = approversInfo.fallbackApprovers.collect { new SkillApprovalResult.ApproverForRequest(approverUserId: it, configuredTypes: ['Fallback']) }
+                }
+            }
+
             new SkillApprovalResult(
                     id: simpleSkillApproval.getApprovalId(),
                     userId: simpleSkillApproval.getUserId(),
@@ -190,6 +248,7 @@ class SkillApprovalService {
                     points: simpleSkillApproval.getPoints(),
                     approverUserId: simpleSkillApproval.getApproverUserId(),
                     approverUserIdForDisplay: simpleSkillApproval.getApproverUserIdForDisplay(),
+                    configuredApprovers: configuredApprovers,
             )
         }
 
