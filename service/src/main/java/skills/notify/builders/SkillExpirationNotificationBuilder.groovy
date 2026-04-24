@@ -55,12 +55,12 @@ class SkillExpirationNotificationBuilder implements NotificationEmailBuilder {
 
     private Context buildThymeleafContext(Object parsed, Formatting formatting) {
         Context templateContext = new Context()
-        templateContext.setVariable("userName", parsed.userName)
         templateContext.setVariable("skillName", parsed.skillName)
         templateContext.setVariable("projectName", parsed.projectName)
         templateContext.setVariable("expirationType", parsed.expirationType)
         templateContext.setVariable("expirationDate", parsed.expirationDate)
         templateContext.setVariable("skillTrainingUrl", parsed.skillTrainingUrl)
+        templateContext.setVariable("contactProjectUrl", parsed.contactProjectUrl)
         templateContext.setVariable("htmlHeader", formatting.htmlHeader)
         templateContext.setVariable("htmlFooter", formatting.htmlFooter)
 

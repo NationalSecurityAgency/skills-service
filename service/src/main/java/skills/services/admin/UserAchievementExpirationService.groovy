@@ -158,6 +158,7 @@ class UserAchievementExpirationService {
                                         expirationType   : expirationAttrs.expirationType,
                                         expirationDate   : nextExpirationDate.format(DateTimeFormatter.ISO_DATE),
                                         skillTrainingUrl : "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}/subjects/${skillProjectAndSubjectIdsAndNames.subjectId}/skills/${skillProjectAndSubjectIdsAndNames.skillId}",
+                                        contactProjectUrl: "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}?openContact=true",
                                         communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
                                 ]
                         )
@@ -193,6 +194,7 @@ class UserAchievementExpirationService {
                                         projectName         : skillProjectAndSubjectIdsAndNames.projectName,
                                         retentionDeadline   : formatWithOrdinal(retentionDeadline),
                                         skillTrainingUrl    : "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}/subjects/${skillProjectAndSubjectIdsAndNames.subjectId}/skills/${skillProjectAndSubjectIdsAndNames.skillId}",
+                                        contactProjectUrl   : "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}?openContact=true",
                                         communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
                                 ]
                         )

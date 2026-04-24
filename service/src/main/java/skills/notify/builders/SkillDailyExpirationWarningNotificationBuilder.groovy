@@ -55,12 +55,12 @@ class SkillDailyExpirationWarningNotificationBuilder implements NotificationEmai
 
     private Context buildThymeleafContext(Object parsed, Formatting formatting) {
         Context templateContext = new Context()
-        templateContext.setVariable("userName", parsed.userName)
         templateContext.setVariable("skillName", parsed.skillName)
         templateContext.setVariable("projectName", parsed.projectName)
         templateContext.setVariable("retentionDeadline", parsed.retentionDeadline)
         templateContext.setVariable("daysUntilExpiration", parsed.daysUntilExpiration)
         templateContext.setVariable("skillTrainingUrl", parsed.skillTrainingUrl)
+        templateContext.setVariable("contactProjectUrl", parsed.contactProjectUrl)
         templateContext.setVariable("htmlHeader", formatting.htmlHeader)
         templateContext.setVariable("htmlFooter", formatting.htmlFooter)
 

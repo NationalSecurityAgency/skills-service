@@ -118,6 +118,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Action Required: Retain Your Skill Achievements<\/h1>.+?/
         Pattern p1 = ~/(?s)<p>This is a reminder that your achievements for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> is approaching its expiration deadline.<\/p>.+?/
         Pattern p2 = ~/(?s)<p>You need to perform the skill activity again before the deadline to <strong>retain your achievements and points<\/strong>. If you don't take action by <strong>${UserAchievementExpirationService.formatWithOrdinal(retentionDeadline)}<\/strong>/
+        Pattern p3 = ~/(?s)<p>Each training is managed by dedicated administrators who have specialized knowledge of that training. To reach them, <a href="http:\/\/localhost:\d+\/progress-and-rankings\/projects\/${proj.projectId}\?openContact=true">click here<\/a> to contact the training administrators.<\/p>.+?/
 
         then:
         emails.size() == 1
@@ -127,6 +128,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         h1.matcher(emails[0].html).find()
         p1.matcher(emails[0].html).find()
         p2.matcher(emails[0].html).find()
+        p3.matcher(emails[0].html).find()
 
         // Verify notification state was updated
         UserAchievement updatedAchievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
@@ -479,6 +481,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your Skill Achievements Have Expired<\/h1>.+?/
         Pattern p1 = ~/(?s)<p>We're writing to inform you that your achievements for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> have expired.<\/p>.+?/
         Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Expired On:<\/strong>.*${expirationDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}/
+        Pattern p3 = ~/(?s)<p>Each training is managed by dedicated administrators who have specialized knowledge of that training. To reach them, <a href="http:\/\/localhost:\d+\/progress-and-rankings\/projects\/${proj.projectId}\?openContact=true">click here<\/a> to contact the training administrators.<\/p>.+?/
 
         then:
         emails.size() == 1
@@ -488,6 +491,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         h1.matcher(emails[0].html).find()
         p1.matcher(emails[0].html).find()
         p2.matcher(emails[0].html).find()
+        p3.matcher(emails[0].html).find()
 
         // Verify expiration attributes were updated properly
         expirationAttrsAfter.nextExpirationDate == expirationDate.plusYears(1).toDate()
@@ -555,6 +559,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         Pattern h1 = ~/(?s)For All Dragons Only.*<h1>Your Skill Achievements Have Expired<\/h1>.+?/
         Pattern p1 = ~/(?s)<p>We're writing to inform you that your achievements for the skill <strong>${skills[0].name}<\/strong> in project <strong>${proj.name}<\/strong> have expired.<\/p>.+?/
         Pattern p2 = ~/(?s)<strong>Skill:<\/strong>.*${skills[0].name}.*<strong>Project:<\/strong>.*${proj.name}.*<strong>Expired On:<\/strong>.*${expirationDate.format(DateTimeFormatter.ofPattern('yyyy-MM-dd'))}/
+        Pattern p3 = ~/(?s)<p>Each training is managed by dedicated administrators who have specialized knowledge of that training. To reach them, <a href="http:\/\/localhost:\d+\/progress-and-rankings\/projects\/${proj.projectId}\?openContact=true">click here<\/a> to contact the training administrators.<\/p>.+?/
 
         then:
         emails.size() == 1
@@ -564,6 +569,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         h1.matcher(emails[0].html).find()
         p1.matcher(emails[0].html).find()
         p2.matcher(emails[0].html).find()
+        p3.matcher(emails[0].html).find()
 
         // Verify expiration attributes were updated properly
         expirationAttrsAfter.nextExpirationDate == expirationDate.plusMonths(1).toDate()
