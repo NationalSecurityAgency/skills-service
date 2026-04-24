@@ -775,7 +775,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         // Verify all notification states were updated
         skills.each { skill ->
             UserAchievement updatedAchievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skill.skillId)[0]
-            updatedAchievement.expirationNotificationState == EXPIRATION_WARNING_NOTIFICATION_SENT
+            assert updatedAchievement.expirationNotificationState == EXPIRATION_WARNING_NOTIFICATION_SENT
         }
     }
 
@@ -1126,5 +1126,73 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         userPerformedSkillRepo.findAll().size() == 0
         userAchievedRepo.findAll().size() == 0
         userEventsRepo.findAll().size() == 0
+    }
+
+    def "email notifications state is reset to NONE after user performs skill activity for DAILY"() {
+        Map settingRequest = [
+                settingGroup : EmailSettingsService.settingsGroup,
+                setting : EmailSettingsService.htmlHeader,
+                value : 'For {{ community.descriptor }} Only'
+        ]
+        SkillsService rootSkillsService = createRootSkillService()
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextHeader
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.htmlFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+        settingRequest.setting = EmailSettingsService.plaintextFooter
+        rootSkillsService.addOrUpdateGlobalSetting(settingRequest.setting, settingRequest)
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        String userId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID]).first()
+        Date achievementDate = new Date() - 45 // 45 days ago
+
+        // Configure skill expiration
+        skillsService.saveSkillExpirationAttributes(proj.projectId, skills[0].skillId.toString(), [
+                expirationType: ExpirationAttrs.DAILY,
+                every: 47,
+                emailNotificationsEnabled: true
+        ])
+
+        // Create user achievement
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], userId, achievementDate)
+
+        // Set expiration notification state to NONE
+        UserAchievement achievement = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
+        achievement.expirationNotificationState = 'NONE'
+        userAchievedRepo.save(achievement)
+
+        UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
+
+        when:
+        expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 1 }
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+
+        UserAchievement achievementAfterNotification = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
+
+        // perform skills again before expiration
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], userId, new Date())
+
+        UserAchievement achievementAfterPerformingSkillAgain = userAchievedRepo.findAllByUserIdAndSkillId(userId, skills[0].skillId.toString())[0]
+
+        then:
+        emails.size() == 1
+        emails[0].recipients == [userAttrs.email]
+        emails[0].subj == "Skill Achievements Expiring Soon"
+
+        // Verify notification state was updated
+        achievementAfterNotification.expirationNotificationState == EXPIRATION_WARNING_NOTIFICATION_SENT
+
+        achievementAfterPerformingSkillAgain.expirationNotificationState != EXPIRATION_WARNING_NOTIFICATION_SENT
+        achievementAfterPerformingSkillAgain.expirationNotificationState == 'NONE'
     }
 }

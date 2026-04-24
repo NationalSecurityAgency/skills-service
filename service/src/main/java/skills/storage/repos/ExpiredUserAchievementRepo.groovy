@@ -119,4 +119,9 @@ interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchieveme
         WHERE ups.skillRefId = :skillRefId
     ''')
     List<String> findUserIdsWithSkillRefId(@Param("skillRefId") Integer skillRefId)
+
+
+    @Modifying
+    @Query('''update UserAchievement set expirationNotificationState = 'NONE' where skillRefId = :skillRefId''')
+    void resetExpirationNotificationState(@Param("skillRefId") Integer skillRefId)
 }

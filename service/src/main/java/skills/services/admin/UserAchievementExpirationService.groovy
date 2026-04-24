@@ -45,7 +45,6 @@ import skills.tasks.config.TaskConfig
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 
 import static java.time.temporal.TemporalAdjusters.lastDayOfMonth
 import static skills.storage.model.SkillAttributesDef.SkillAttributesType.AchievementExpiration
