@@ -54,10 +54,13 @@
         <pretty-time.version>5.0.3.Final</pretty-time.version>
         <surefire.version>3.5.1</surefire.version>
 
-        <bouncycastle.version>1.80</bouncycastle.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
         <velocity.version>2.4.1</velocity.version>
 
         <commonmark.version>0.26.0</commonmark.version>
+
+        <maven.artifact.version>3.9.15</maven.artifact.version>
+        <plexus.utils.override.version>4.0.3</plexus.utils.override.version>
     </properties>
 
     <parent>
