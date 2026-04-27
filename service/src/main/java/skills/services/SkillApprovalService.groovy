@@ -224,7 +224,7 @@ class SkillApprovalService {
                     configuredApprovers = byApproverId.collect {
                         new SkillApprovalResult.ApproverForRequest(
                                 approverUserId: it.key,
-                                configuredTypes: it.value.collect { it.right.toString() }
+                                configuredTypes: it.value.collect { it.right.toString() }.unique()
                         )
                     }
                 } else {
