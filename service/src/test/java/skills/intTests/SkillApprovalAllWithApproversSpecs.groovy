@@ -20,6 +20,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.SkillDef
+import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 
 class SkillApprovalAllWithApproversSpecs extends DefaultIntSpec {
@@ -66,21 +67,21 @@ class SkillApprovalAllWithApproversSpecs extends DefaultIntSpec {
         then:
         res.data.size() == 2
         res.data[0].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[1].userName, admins[2].userName].sort()
-        res.data[0].configuredApprovers.configuredTypes == [['Fallback'], ['Fallback'], ['Fallback']]
+        res.data[0].configuredApprovers.configuredTypes == [['Default Fallback'], ['Default Fallback'], ['Default Fallback']]
         res.data[1].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[1].userName, admins[2].userName].sort()
-        res.data[1].configuredApprovers.configuredTypes == [['Fallback'], ['Fallback'], ['Fallback']]
+        res.data[1].configuredApprovers.configuredTypes == [['Default Fallback'], ['Default Fallback'], ['Default Fallback']]
 
         res_1Fallback.data.size() == 2
         res_1Fallback.data[0].configuredApprovers.approverUserId == [admins[1].userName]
-        res_1Fallback.data[0].configuredApprovers.configuredTypes == [['Fallback']]
+        res_1Fallback.data[0].configuredApprovers.configuredTypes == [['Assigned Fallback']]
         res_1Fallback.data[1].configuredApprovers.approverUserId == [admins[1].userName]
-        res_1Fallback.data[1].configuredApprovers.configuredTypes == [['Fallback']]
+        res_1Fallback.data[1].configuredApprovers.configuredTypes == [['Assigned Fallback']]
 
         res_2Fallback.data.size() == 2
         res_2Fallback.data[0].configuredApprovers.approverUserId.sort() == [admins[1].userName, admins[2].userName,].sort()
-        res_2Fallback.data[0].configuredApprovers.configuredTypes == [['Fallback'], ['Fallback']]
+        res_2Fallback.data[0].configuredApprovers.configuredTypes == [['Assigned Fallback'], ['Assigned Fallback']]
         res_2Fallback.data[1].configuredApprovers.approverUserId.sort() == [admins[1].userName, admins[2].userName,].sort()
-        res_2Fallback.data[1].configuredApprovers.configuredTypes == [['Fallback'], ['Fallback']]
+        res_2Fallback.data[1].configuredApprovers.configuredTypes == [['Assigned Fallback'], ['Assigned Fallback']]
     }
 
     void "approver based on skill conf"() {
@@ -125,70 +126,83 @@ class SkillApprovalAllWithApproversSpecs extends DefaultIntSpec {
 
         admins[0].configureApproverForSkillId(proj.projectId, admins[0].userName, skills1[0].skillId)
         def res_2 = admins[0].getApprovals(proj.projectId, 5, 1, 'requestedOn', false, '', '', true)
+
+        List<UserAttrs> adminUserAttrs = admins.collect { userAttrsRepo.findByUserIdIgnoreCase(it.userName)}
         then:
         res.data.size() == 4
         res.data[0].skillId == skills1[0].skillId
         res.data[0].userId == users[1].userName
-        res.data[0].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[2].userName].sort()
-        res.data[0].configuredApprovers.configuredTypes == [['Fallback'], ['Fallback']]
+        res.data[0].configuredApprovers.approverUserId.sort() == [adminUserAttrs[0].userId, adminUserAttrs[2].userId].sort()
+        res.data[0].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[0].userIdForDisplay, adminUserAttrs[2].userIdForDisplay].sort()
+        res.data[0].configuredApprovers.configuredTypes == [['Default Fallback'], ['Default Fallback']]
 
         res.data[1].skillId == skills1[1].skillId
         res.data[1].userId == users[0].userName
         res.data[1].configuredApprovers.approverUserId.sort() == [admins[1].userName].sort()
+        res.data[1].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[1].userIdForDisplay].sort()
         res.data[1].configuredApprovers.configuredTypes == [['Skill']]
 
         res.data[2].skillId == skills1[0].skillId
         res.data[2].userId == users[0].userName
         res.data[2].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[2].userName].sort()
-        res.data[2].configuredApprovers.configuredTypes == [['Fallback'], ['Fallback']]
+        res.data[2].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[0].userIdForDisplay, adminUserAttrs[2].userIdForDisplay].sort()
+        res.data[2].configuredApprovers.configuredTypes == [['Default Fallback'], ['Default Fallback']]
 
         res.data[3].skillId == skills[0].skillId
         res.data[3].userId == users[0].userName
         res.data[3].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[2].userName].sort()
-        res.data[3].configuredApprovers.configuredTypes == [['Fallback'], ['Fallback']]
+        res.data[3].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[0].userIdForDisplay, adminUserAttrs[2].userIdForDisplay].sort()
+        res.data[3].configuredApprovers.configuredTypes == [['Default Fallback'], ['Default Fallback']]
 
         res_1.data.size() == 4
         res_1.data[0].skillId == skills1[0].skillId
         res_1.data[0].userId == users[1].userName
         res_1.data[0].configuredApprovers.approverUserId.sort() == [admins[2].userName].sort()
-        res_1.data[0].configuredApprovers.configuredTypes == [['Fallback']]
+        res_1.data[0].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[2].userIdForDisplay].sort()
+        res_1.data[0].configuredApprovers.configuredTypes == [['Default Fallback']]
 
         res_1.data[1].skillId == skills1[1].skillId
         res_1.data[1].userId == users[0].userName
         res_1.data[1].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[1].userName].sort()
+        res_1.data[1].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[0].userIdForDisplay, adminUserAttrs[1].userIdForDisplay].sort()
         res_1.data[1].configuredApprovers.configuredTypes == [['Skill'], ['Skill']]
 
         res_1.data[2].skillId == skills1[0].skillId
         res_1.data[2].userId == users[0].userName
         res_1.data[2].configuredApprovers.approverUserId.sort() == [admins[2].userName].sort()
-        res_1.data[2].configuredApprovers.configuredTypes == [['Fallback']]
+        res_1.data[2].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[2].userIdForDisplay].sort()
+        res_1.data[2].configuredApprovers.configuredTypes == [['Default Fallback']]
 
         res_1.data[3].skillId == skills[0].skillId
         res_1.data[3].userId == users[0].userName
         res_1.data[3].configuredApprovers.approverUserId.sort() == [admins[2].userName].sort()
-        res_1.data[3].configuredApprovers.configuredTypes == [['Fallback']]
-
+        res_1.data[3].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[2].userIdForDisplay].sort()
+        res_1.data[3].configuredApprovers.configuredTypes == [['Default Fallback']]
 
         res_2.data.size() == 4
         res_2.data[0].skillId == skills1[0].skillId
         res_2.data[0].userId == users[1].userName
         res_2.data[0].configuredApprovers.approverUserId.sort() == [admins[0].userName].sort()
+        res_2.data[0].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[0].userIdForDisplay].sort()
         res_2.data[0].configuredApprovers.configuredTypes == [['Skill']]
 
         res_2.data[1].skillId == skills1[1].skillId
         res_2.data[1].userId == users[0].userName
         res_2.data[1].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[1].userName].sort()
+        res_2.data[1].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[0].userIdForDisplay, adminUserAttrs[1].userIdForDisplay].sort()
         res_2.data[1].configuredApprovers.configuredTypes == [['Skill'], ['Skill']]
 
         res_2.data[2].skillId == skills1[0].skillId
         res_2.data[2].userId == users[0].userName
         res_2.data[2].configuredApprovers.approverUserId.sort() == [admins[0].userName].sort()
+        res_2.data[2].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[0].userIdForDisplay].sort()
         res_2.data[2].configuredApprovers.configuredTypes == [['Skill']]
 
         res_2.data[3].skillId == skills[0].skillId
         res_2.data[3].userId == users[0].userName
         res_2.data[3].configuredApprovers.approverUserId.sort() == [admins[2].userName].sort()
-        res_2.data[3].configuredApprovers.configuredTypes == [['Fallback']]
+        res_2.data[3].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[2].userIdForDisplay].sort()
+        res_2.data[3].configuredApprovers.configuredTypes == [['Default Fallback']]
     }
 
     void "approver based on user conf"() {
@@ -244,17 +258,17 @@ class SkillApprovalAllWithApproversSpecs extends DefaultIntSpec {
         res.data[1].skillId == skills1[1].skillId
         res.data[1].userId == users[0].userName
         res.data[1].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[2].userName].sort()
-        res.data[1].configuredApprovers.configuredTypes == [['Fallback'], ['Fallback']]
+        res.data[1].configuredApprovers.configuredTypes == [['Default Fallback'], ['Default Fallback']]
 
         res.data[2].skillId == skills1[0].skillId
         res.data[2].userId == users[0].userName
         res.data[2].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[2].userName].sort()
-        res.data[2].configuredApprovers.configuredTypes == [['Fallback'], ['Fallback']]
+        res.data[2].configuredApprovers.configuredTypes == [['Default Fallback'], ['Default Fallback']]
 
         res.data[3].skillId == skills[0].skillId
         res.data[3].userId == users[0].userName
         res.data[3].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[2].userName].sort()
-        res.data[3].configuredApprovers.configuredTypes == [['Fallback'], ['Fallback']]
+        res.data[3].configuredApprovers.configuredTypes == [['Default Fallback'], ['Default Fallback']]
 
         res_1.data.size() == 4
         res_1.data[0].skillId == skills1[0].skillId
@@ -265,17 +279,17 @@ class SkillApprovalAllWithApproversSpecs extends DefaultIntSpec {
         res_1.data[1].skillId == skills1[1].skillId
         res_1.data[1].userId == users[0].userName
         res_1.data[1].configuredApprovers.approverUserId.sort() == [admins[2].userName].sort()
-        res_1.data[1].configuredApprovers.configuredTypes == [['Fallback']]
+        res_1.data[1].configuredApprovers.configuredTypes == [['Default Fallback']]
 
         res_1.data[2].skillId == skills1[0].skillId
         res_1.data[2].userId == users[0].userName
         res_1.data[2].configuredApprovers.approverUserId.sort() == [admins[2].userName].sort()
-        res_1.data[2].configuredApprovers.configuredTypes == [['Fallback']]
+        res_1.data[2].configuredApprovers.configuredTypes == [['Default Fallback']]
 
         res_1.data[3].skillId == skills[0].skillId
         res_1.data[3].userId == users[0].userName
         res_1.data[3].configuredApprovers.approverUserId.sort() == [admins[2].userName].sort()
-        res_1.data[3].configuredApprovers.configuredTypes == [['Fallback']]
+        res_1.data[3].configuredApprovers.configuredTypes == [['Default Fallback']]
 
         res_2.data.size() == 4
         res_2.data[0].skillId == skills1[0].skillId
@@ -357,17 +371,17 @@ class SkillApprovalAllWithApproversSpecs extends DefaultIntSpec {
         res.data[1].skillId == skills1[1].skillId
         res.data[1].userId == users[0].userName
         res.data[1].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[2].userName].sort()
-        res.data[1].configuredApprovers.configuredTypes == [['Fallback'], ['Fallback']]
+        res.data[1].configuredApprovers.configuredTypes == [['Default Fallback'], ['Default Fallback']]
 
         res.data[2].skillId == skills1[0].skillId
         res.data[2].userId == users[0].userName
         res.data[2].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[2].userName].sort()
-        res.data[2].configuredApprovers.configuredTypes == [['Fallback'], ['Fallback']]
+        res.data[2].configuredApprovers.configuredTypes == [['Default Fallback'], ['Default Fallback']]
 
         res.data[3].skillId == skills[0].skillId
         res.data[3].userId == users[0].userName
         res.data[3].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[2].userName].sort()
-        res.data[3].configuredApprovers.configuredTypes == [['Fallback'], ['Fallback']]
+        res.data[3].configuredApprovers.configuredTypes == [['Default Fallback'], ['Default Fallback']]
 
         res_1.data.size() == 4
         res_1.data[0].skillId == skills1[0].skillId
@@ -378,17 +392,17 @@ class SkillApprovalAllWithApproversSpecs extends DefaultIntSpec {
         res_1.data[1].skillId == skills1[1].skillId
         res_1.data[1].userId == users[0].userName
         res_1.data[1].configuredApprovers.approverUserId.sort() == [admins[2].userName].sort()
-        res_1.data[1].configuredApprovers.configuredTypes == [['Fallback']]
+        res_1.data[1].configuredApprovers.configuredTypes == [['Default Fallback']]
 
         res_1.data[2].skillId == skills1[0].skillId
         res_1.data[2].userId == users[0].userName
         res_1.data[2].configuredApprovers.approverUserId.sort() == [admins[2].userName].sort()
-        res_1.data[2].configuredApprovers.configuredTypes == [['Fallback']]
+        res_1.data[2].configuredApprovers.configuredTypes == [['Default Fallback']]
 
         res_1.data[3].skillId == skills[0].skillId
         res_1.data[3].userId == users[0].userName
         res_1.data[3].configuredApprovers.approverUserId.sort() == [admins[2].userName].sort()
-        res_1.data[3].configuredApprovers.configuredTypes == [['Fallback']]
+        res_1.data[3].configuredApprovers.configuredTypes == [['Default Fallback']]
 
         res_2.data.size() == 4
         res_2.data[0].skillId == skills1[0].skillId
@@ -475,6 +489,7 @@ class SkillApprovalAllWithApproversSpecs extends DefaultIntSpec {
         users[1].addSkill([projectId: proj.projectId, skillId: skills[0].skillId])
         users[0].addSkill([projectId: proj.projectId, skillId: skills[0].skillId])
 
+        List<UserAttrs> adminUserAttrs = admins.collect { userAttrsRepo.findByUserIdIgnoreCase(it.userName)}
         when:
         def res = admins[0].getApprovals(proj.projectId, 5, 1, 'requestedOn', false, '', '', true)
         def res_page1 = admins[0].getApprovals(proj.projectId, 5, 2, 'requestedOn', false, '', '', true)
@@ -488,16 +503,19 @@ class SkillApprovalAllWithApproversSpecs extends DefaultIntSpec {
         res.data[0].skillId == skills[0].skillId
         res.data[0].userId == users[0].userName
         res.data[0].configuredApprovers.approverUserId.sort() == [admins[0].userName].sort()
+        res.data[0].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[0].userIdForDisplay].sort()
         res.data[0].configuredApprovers.configuredTypes.collect { it.sort() } == [[userTagKey.toLowerCase(), 'User', 'Skill'].sort()]
 
         res.data[1].skillId == skills[0].skillId
         res.data[1].userId == users[1].userName
         res.data[1].configuredApprovers.approverUserId.sort() == [admins[0].userName].sort()
+        res.data[1].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[0].userIdForDisplay].sort()
         res.data[1].configuredApprovers.configuredTypes.collect { it.sort() } == [['User', 'Skill'].sort()]
 
         res.data[2].skillId == skills[1].skillId
         res.data[2].userId == users[2].userName
         res.data[2].configuredApprovers.approverUserId.sort() == [admins[0].userName, admins[1].userName, admins[2].userName, admins[3].userName].sort()
+        res.data[2].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[0].userIdForDisplay, adminUserAttrs[1].userIdForDisplay, adminUserAttrs[2].userIdForDisplay, adminUserAttrs[3].userIdForDisplay].sort()
         res.data[2].configuredApprovers.find { it.approverUserId == admins[0].userName}.configuredTypes.sort() == [userTagKey.toLowerCase()].sort()
         res.data[2].configuredApprovers.find { it.approverUserId == admins[1].userName}.configuredTypes.sort() == [userTagKey.toLowerCase(), 'Skill'].sort()
         res.data[2].configuredApprovers.find { it.approverUserId == admins[2].userName}.configuredTypes.sort() == [userTagKey.toLowerCase(), 'User'].sort()
@@ -506,18 +524,21 @@ class SkillApprovalAllWithApproversSpecs extends DefaultIntSpec {
         res.data[3].skillId == skills[2].skillId
         res.data[3].userId == users[3].userName
         res.data[3].configuredApprovers.approverUserId.sort() == [admins[4].userName, admins[5].userName].sort()
+        res.data[3].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[4].userIdForDisplay, adminUserAttrs[5].userIdForDisplay].sort()
         res.data[3].configuredApprovers.find { it.approverUserId == admins[4].userName}.configuredTypes.sort() == ['Skill'].sort()
         res.data[3].configuredApprovers.find { it.approverUserId == admins[5].userName}.configuredTypes.sort() == [userTagKey.toLowerCase()].sort()
 
         res.data[4].skillId == skills[3].skillId
         res.data[4].userId == users[4].userName
         res.data[4].configuredApprovers.approverUserId.sort() == [admins[6].userName].sort()
+        res.data[4].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[6].userIdForDisplay].sort()
         res.data[4].configuredApprovers.find { it.approverUserId == admins[6].userName}.configuredTypes.sort() == ['User'].sort()
 
         res_page1.data[0].skillId == skills[4].skillId
         res_page1.data[0].userId == users[5].userName
         res_page1.data[0].configuredApprovers.approverUserId.sort() == [admins[7].userName].sort()
-        res_page1.data[0].configuredApprovers.configuredTypes == [['Fallback']]
+        res_page1.data[0].configuredApprovers.approverUserIdForDisplay.sort() == [adminUserAttrs[7].userIdForDisplay].sort()
+        res_page1.data[0].configuredApprovers.configuredTypes == [['Default Fallback']]
     }
 
     void "only project admin and root roles can get all requests with approvers"() {

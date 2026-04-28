@@ -667,9 +667,9 @@ describe('Approval Requests Management Tests', () => {
         // row 2
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="userId"]').should('have.text', 'user1@email.org')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-0"] [data-cy="approverId"]').should('have.text', 'approver3@email.org')
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-0"] [data-cy="approverConfTypes"]').should('have.text', 'Fallback')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-0"] [data-cy="approverConfTypes"]').should('have.text', 'Default Fallback')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-1"] [data-cy="approverId"]').should('have.text', 'approver4@email.org')
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-1"] [data-cy="approverConfTypes"]').should('have.text', 'Fallback')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-1"] [data-cy="approverConfTypes"]').should('have.text', 'Default Fallback')
 
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-2"]').should('not.exist')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="expandOrCollapse"]').contains('View 4 More')
@@ -678,13 +678,13 @@ describe('Approval Requests Management Tests', () => {
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="expandOrCollapse"]').contains('Show Less')
 
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-2"] [data-cy="approverId"]').should('have.text', 'approver5@email.org')
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-2"] [data-cy="approverConfTypes"]').should('have.text', 'Fallback')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-2"] [data-cy="approverConfTypes"]').should('have.text', 'Default Fallback')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-3"] [data-cy="approverId"]').should('have.text', 'approver6@email.org')
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-3"] [data-cy="approverConfTypes"]').should('have.text', 'Fallback')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-3"] [data-cy="approverConfTypes"]').should('have.text', 'Default Fallback')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-4"] [data-cy="approverId"]').should('have.text', 'approver7@email.org')
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-4"] [data-cy="approverConfTypes"]').should('have.text', 'Fallback')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-4"] [data-cy="approverConfTypes"]').should('have.text', 'Default Fallback')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-5"] [data-cy="approverId"]').should('have.text', 'skills@skills.org')
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-5"] [data-cy="approverConfTypes"]').should('have.text', 'Fallback')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-5"] [data-cy="approverConfTypes"]').should('have.text', 'Default Fallback')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-6"]').should('not.exist')
 
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="expandOrCollapse"]').click()

@@ -165,21 +165,21 @@ class SkillApprovalService {
                 throw new SkillException("Only admins can view all requests", projectId, null, ErrorCode.AccessDenied)
             }
 
-            List<String> fallbackApprovers = skillApprovalConfRepo.getUsersConfiguredForFallback(projectId)
-            if (!fallbackApprovers) {
-                fallbackApprovers = skillApprovalConfRepo.getImplicitFallbackApprovers(projectId)
-            }
+            List<String> assignedFallbackApprovers = skillApprovalConfRepo.getUsersConfiguredForFallback(projectId)
+            List<String> implicitFallbackApprovers = assignedFallbackApprovers ? null : skillApprovalConfRepo.getImplicitFallbackApprovers(projectId)
+            boolean areFallbackApproversAssigned = assignedFallbackApprovers?.size() > 0
 
             List<Integer> approvalRequestIds = approvalPage.getContent().collect { it.getApprovalId() }
             List<SkillApprovalRepo.ApproversForRequest> approversForRequests = skillApprovalRepo.findApproversForRequests(projectId, approvalRequestIds)
 
-            approversInfo = new ApproversInfo(approversForRequests: approversForRequests, fallbackApprovers: fallbackApprovers)
+            approversInfo = new ApproversInfo(approversForRequests: approversForRequests, fallbackApprovers: areFallbackApproversAssigned ? assignedFallbackApprovers : implicitFallbackApprovers, areFallbackApproversAssigned: areFallbackApproversAssigned)
         }
         return buildApprovalsResult(projectId, approvalPage, approversInfo)
     }
 
     static class ApproversInfo {
         List<String> fallbackApprovers
+        boolean areFallbackApproversAssigned
         List<SkillApprovalRepo.ApproversForRequest> approversForRequests
     }
 
@@ -194,7 +194,7 @@ class SkillApprovalService {
         buildApprovalsResult(projectId, approvalPage)
     }
 
-    private static TableResult buildApprovalsResult(String projectId, Page<SkillApprovalRepo.SimpleSkillApproval> skillApprovalPage, ApproversInfo approversInfo = null) {
+    private TableResult buildApprovalsResult(String projectId, Page<SkillApprovalRepo.SimpleSkillApproval> skillApprovalPage, ApproversInfo approversInfo = null) {
         List<SkillApprovalRepo.SimpleSkillApproval> approvalsFromDB = skillApprovalPage.getContent()
 
 
@@ -228,7 +228,8 @@ class SkillApprovalService {
                         )
                     }
                 } else {
-                    configuredApprovers = approversInfo.fallbackApprovers.collect { new SkillApprovalResult.ApproverForRequest(approverUserId: it, configuredTypes: ['Fallback']) }
+                    List<String> fallbackTypes = approversInfo.areFallbackApproversAssigned ? ['Assigned Fallback'] : ['Default Fallback']
+                    configuredApprovers = approversInfo.fallbackApprovers.collect { new SkillApprovalResult.ApproverForRequest(approverUserId: it, configuredTypes: fallbackTypes) }
                 }
             }
 
@@ -252,6 +253,8 @@ class SkillApprovalService {
             )
         }
 
+        enrichApproversWithUserIdForDisplay(approvals)
+
         Integer count = (Integer)skillApprovalPage.getTotalElements()
         TableResult tableResult = new TableResult(
                 data: approvals,
@@ -260,6 +263,22 @@ class SkillApprovalService {
         )
 
         return tableResult
+    }
+
+    private void enrichApproversWithUserIdForDisplay(List<SkillApprovalResult> approvals) {
+        Set<String> approverIds = new HashSet<>();
+        approvals.each {
+            it.configuredApprovers?.each {
+                approverIds.add(it.approverUserId)
+            }
+        }
+        List<UserAttrsRepo.UserIdForDisplayPair> userIdForDisplayPairs = userAttrsRepo.findUserNameForDisplayByUserIds(approverIds.toList())
+        Map<String, String> userIdForDisplayMap = userIdForDisplayPairs.collectEntries { [it.userId, it.userIdForDisplay] }
+        approvals.each {
+            it.configuredApprovers?.each {
+                it.approverUserIdForDisplay = userIdForDisplayMap[it.approverUserId]
+            }
+        }
     }
 
     void approve(String projectId, List<Integer> approvalRequestIds, String approvalMsg) {
@@ -319,7 +338,7 @@ class SkillApprovalService {
             )
         }
 
-        int numOfWorkLoadConf = skillApprovalConfRepo.countConfForProject(projectId)
+        int numOfWorkLoadConf = skillApprovalConfRepo.countConfForProjectIncludingFallbackConf(projectId)
         res.add(new LabelCountItem(value: 'WorkloadConfig', count: numOfWorkLoadConf))
 
         return res

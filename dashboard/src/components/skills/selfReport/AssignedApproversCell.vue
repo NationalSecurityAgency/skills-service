@@ -35,7 +35,7 @@ const expanded = ref(false);
          :key="approver.approverUserId"
          :data-cy="`approver-${index}`">
       <div class="flex flex-col">
-        <div data-cy="approverId">{{ approver.approverUserId }}</div>
+        <div data-cy="approverId">{{ approver.approverUserIdForDisplay }}</div>
         <div class="flex items-center gap-1 pl-2 font-light text-sm">
           <div>Conf:</div>
           <div data-cy="approverConfTypes">{{ approver.configuredTypes.sort().join(', ') }}</div>
