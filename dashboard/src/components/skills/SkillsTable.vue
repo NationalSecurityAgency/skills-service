@@ -52,6 +52,7 @@ import skillsService from '@/components/skills/SkillsService.js';
 import CopySubjectOrSkillsDialog from "@/components/subjects/CopySubjectOrSkillsDialog.vue";
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import { useSkillsState } from '@/stores/UseSkillsState.js';
+import AddSkillEventBatch from "@/components/skills/AddSkillEventBatch.vue";
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -999,7 +1000,13 @@ const pageChanged = (pagingInfo) => {
       :group-id="groupId"
       @removed-tag="removeSelectedRows"
     />
-<!--    <add-events-dialog />-->
+    <add-skill-event-batch
+      id="addSkillEventBatchModal"
+      v-if="showAddEventsModal"
+      v-model="showAddEventsModal"
+      :skills="selectedSkills"
+      :projectId="route.params.projectId"
+    />
   </div>
 </template>
 

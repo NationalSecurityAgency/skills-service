@@ -292,6 +292,10 @@ export default {
       .get(`/admin/projects/${encodeURIComponent(projectId)}/latestVersion`)
       .then((remoteRes) => remoteRes.data)
   },
+  saveSkillEventBatch(projectId, skillIds, users, timestamp, doNotRequireApproval) {
+    return axios.put(`/api/projects/${encodeURIComponent(projectId)}/skills`, { skillIds: skillIds, userIds: users, timestamp: timestamp, doNotRequireApproval: doNotRequireApproval })
+        .then((remoteRes) => remoteRes.data)
+  },
   saveSkillEvent(projectId, skillId, user, timestamp, doNotRequireApproval) {
     const userId = user.dn ? user.dn : user.userId
     return axios

@@ -84,7 +84,6 @@ public class AddSkillHelper {
                 throw new SkillException("Only project admins can apply approval-based skills without approval", projectId, skillBatchString, ErrorCode.AccessDenied);
             }
         }
-//        boolean forAnotherUser = requestedUserId != null && currentUser != null && !requestedUserId.equalsIgnoreCase(currentUser);
 
         BatchSkillEventResult batchResults = new BatchSkillEventResult();
         ArrayList<SkillEventResult> results = new ArrayList<>();

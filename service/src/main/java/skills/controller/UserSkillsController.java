@@ -418,12 +418,12 @@ class UserSkillsController {
         return addSkillHelper.addSkill(projectId, skillId, skillEventRequest);
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills/", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/skills", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
     @ResponseBody
     @Profile
     public BatchSkillEventResult addBatchSkillsForBatchUsers(@PathVariable("projectId") String projectId,
-                                                             @RequestBody(required = false) BatchSkillEventRequest skillEventRequest) {
-        return addSkillHelper.addBatchSkillsForBatchUsers(projectId, skillEventRequest);
+                                                             @RequestBody BatchSkillEventRequest batchSkillEventRequest) {
+        return addSkillHelper.addBatchSkillsForBatchUsers(projectId, batchSkillEventRequest);
     }
 
     @RequestMapping(value = "/projects/{projectId}/crossProject/{crossProjectId}/skills/{skillId}", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
