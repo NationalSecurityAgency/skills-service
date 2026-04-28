@@ -599,5 +599,156 @@ describe('Approval Requests Management Tests', () => {
             }],
         ], 5, true, null, false);
     });
+
+    it('show all requests with assigned approvers', () => {
+        cy.createSkill(1, 1, 1, {selfReportingType: 'Approval'});
+        cy.createSkill(1, 1, 2, {selfReportingType: 'Approval'});
+        cy.createSkill(1, 1, 3, {selfReportingType: 'Approval'});
+
+        const createUsers = (alias, num) => {
+            const res = [];
+            for (let i = 0; i < num; i++) {
+                const uName = `${alias}${i}@email.org`
+                res.push(uName);
+                cy.register(uName, 'password')
+            }
+            return res
+        }
+
+        const approvers = createUsers('approver', 8)
+        const users = createUsers('user', 3)
+        cy.loginAsRootUser()
+        cy.request('POST', `/root/users/${users[0]}/tags/org`, { tags: ['ABCDE'] });
+        cy.loginAsAdminUser()
+        approvers.forEach((a) => {
+            cy.request('POST', `/admin/projects/proj1/users/${a}/roles/ROLE_PROJECT_APPROVER`);
+        })
+
+        cy.configureApproverForSkillId(1, approvers[0], 1)
+        cy.configureApproverForUser(1, approvers[0], users[0])
+        cy.configureApproverForUserTag(1, approvers[0], 'Org', 'ABC')
+
+        cy.configureApproverForSkillId(1, approvers[1], 1)
+        cy.configureApproverForSkillId(1, approvers[1], 2)
+
+        cy.configureApproverForSkillId(1, approvers[2], 1)
+
+        cy.reportSkill(1, 2, users[2], '2020-09-16 11:00');
+        cy.reportSkill(1, 3, users[1], '2020-09-17 11:00');
+        cy.reportSkill(1, 1, users[0], '2020-09-18 11:00');
+
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('featureSupported');
+        cy.intercept('GET', '/admin/projects/proj1/approvals?*').as('loadApprovals');
+        cy.intercept('GET', '/admin/projects/proj1/approvals/history?*').as('loadApprovalHistory');
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@featureSupported');
+        cy.wait('@loadApprovalHistory');
+        cy.wait('@loadApprovals');
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-section="columnheadercontent"]').should('not.contain', 'Assigned Approvers')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="userId"]').should('have.text', 'user1@email.org')
+
+        cy.get('[data-cy="requestOptionSelect"] [data-pc-name="pctogglebutton"][aria-pressed="false"]').click()
+        cy.wait('@loadApprovals');
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '3')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-section="columnheadercontent"]').contains( 'Assigned Approvers')
+
+        // row 1
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="userId"]').should('have.text', 'user0@email.org')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="assignedApprovers"] [data-cy="approver-0"] [data-cy="approverId"]').should('have.text', 'approver0@email.org')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="assignedApprovers"] [data-cy="approver-0"] [data-cy="approverConfTypes"]').should('have.text', 'Org, Skill, User')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="assignedApprovers"] [data-cy="approver-1"] [data-cy="approverId"]').should('have.text', 'approver1@email.org')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="assignedApprovers"] [data-cy="approver-1"] [data-cy="approverConfTypes"]').should('have.text', 'Skill')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="assignedApprovers"] [data-cy="approver-2"] [data-cy="approverId"]').should('have.text', 'approver2@email.org')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="assignedApprovers"] [data-cy="approver-2"] [data-cy="approverConfTypes"]').should('have.text', 'Skill')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="assignedApprovers"] [data-cy="approver-3"]').should('not.exist')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="assignedApprovers"] [data-cy="expandOrCollapse"]').should('not.exist')
+
+        // row 2
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="userId"]').should('have.text', 'user1@email.org')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-0"] [data-cy="approverId"]').should('have.text', 'approver3@email.org')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-0"] [data-cy="approverConfTypes"]').should('have.text', 'Fallback')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-1"] [data-cy="approverId"]').should('have.text', 'approver4@email.org')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-1"] [data-cy="approverConfTypes"]').should('have.text', 'Fallback')
+
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-2"]').should('not.exist')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="expandOrCollapse"]').contains('View 4 More')
+
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="expandOrCollapse"]').click()
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="expandOrCollapse"]').contains('Show Less')
+
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-2"] [data-cy="approverId"]').should('have.text', 'approver5@email.org')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-2"] [data-cy="approverConfTypes"]').should('have.text', 'Fallback')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-3"] [data-cy="approverId"]').should('have.text', 'approver6@email.org')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-3"] [data-cy="approverConfTypes"]').should('have.text', 'Fallback')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-4"] [data-cy="approverId"]').should('have.text', 'approver7@email.org')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-4"] [data-cy="approverConfTypes"]').should('have.text', 'Fallback')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-5"] [data-cy="approverId"]').should('have.text', 'skills@skills.org')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-5"] [data-cy="approverConfTypes"]').should('have.text', 'Fallback')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-6"]').should('not.exist')
+
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="expandOrCollapse"]').click()
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="expandOrCollapse"]').contains('View 4 More')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-2"]').should('not.exist')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-3"]').should('not.exist')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-4"]').should('not.exist')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-5"]').should('not.exist')
+
+        // row 3
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="2"] [data-cy="userId"]').should('have.text', 'user2@email.org')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="2"] [data-cy="assignedApprovers"] [data-cy="approver-0"] [data-cy="approverId"]').should('have.text', 'approver1@email.org')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="2"] [data-cy="assignedApprovers"] [data-cy="approver-0"] [data-cy="approverConfTypes"]').should('have.text', 'Skill')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="2"] [data-cy="assignedApprovers"] [data-cy="approver-1"]').should('not.exist')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="2"] [data-cy="assignedApprovers"] [data-cy="expandOrCollapse"]').should('not.exist')
+    })
+
+    it('all requests select button is not shown when approval workload is not configured', () => {
+        cy.createSkill(1, 1, 1, {selfReportingType: 'Approval'});
+        cy.createSkill(1, 1, 2, {selfReportingType: 'Approval'});
+        cy.createSkill(1, 1, 3, {selfReportingType: 'Approval'});
+
+        cy.reportSkill(1, 2, 'user1', '2020-09-16 11:00');
+
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('featureSupported');
+        cy.intercept('GET', '/admin/projects/proj1/approvals?*').as('loadApprovals');
+        cy.intercept('GET', '/admin/projects/proj1/approvals/history?*').as('loadApprovalHistory');
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@featureSupported');
+        cy.wait('@loadApprovalHistory');
+        cy.wait('@loadApprovals');
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-section="columnheadercontent"]').should('not.contain', 'Assigned Approvers')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="userId"]').should('have.text', 'user1')
+        cy.get('[data-cy="requestOptionSelect"]').should('not.exist')
+    })
+
+    it('all requests select button is not shown for the approver role', () => {
+        cy.createSkill(1, 1, 1, {selfReportingType: 'Approval'});
+        cy.createSkill(1, 1, 2, {selfReportingType: 'Approval'});
+        cy.createSkill(1, 1, 3, {selfReportingType: 'Approval'});
+
+        cy.reportSkill(1, 1, 'user1', '2020-09-16 11:00');
+
+        const approverId = 'approver@skills.org'
+        cy.register(approverId, 'password', false)
+        cy.loginAsAdminUser()
+        cy.request('POST', `/admin/projects/proj1/users/${approverId}/roles/ROLE_PROJECT_APPROVER`);
+        cy.configureApproverForSkillId(1, approverId, 1)
+
+        cy.logout()
+        cy.login(approverId)
+
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('featureSupported');
+        cy.intercept('GET', '/admin/projects/proj1/approvals?*').as('loadApprovals');
+        cy.intercept('GET', '/admin/projects/proj1/approvals/history?*').as('loadApprovalHistory');
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@featureSupported');
+        cy.wait('@loadApprovalHistory');
+        cy.wait('@loadApprovals');
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-section="columnheadercontent"]').should('not.contain', 'Assigned Approvers')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="userId"]').should('have.text', 'user1')
+        cy.get('[data-cy="requestOptionSelect"]').should('not.exist')
+    })
 });
 

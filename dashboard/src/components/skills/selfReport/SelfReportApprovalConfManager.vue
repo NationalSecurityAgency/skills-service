@@ -349,7 +349,7 @@ const collapseRow = (row) => {
         </template>
       </SkillsDataTable>
 
-      <no-content2 v-if="!shouldLoadTable && !loading" title="Not Available" class="py-20" icon="fas fa-cogs" data-cy="approvalConfNotAvailable">
+      <no-content2 v-if="!shouldLoadTable && !loading" title="Not Available" class="p-9" icon="fas fa-cogs" data-cy="approvalConfNotAvailable">
         The ability to split the approval workload is unavailable because <span v-if="roleCount === 1">there is only <Badge variant="info">1</Badge> Admin</span><span v-else>there are no admins</span> for this project.
         Please add <b>Admins</b> or <b>Approvers</b> on the <router-link :to="{ name: 'ProjectAccess' }" style="text-decoration: underline" class="font-bold" data-cy="navToAccessPage"><i class="fas fa-shield-alt skills-color-access" aria-hidden="true"/>Access</router-link> page in order to start using this feature.
       </no-content2>

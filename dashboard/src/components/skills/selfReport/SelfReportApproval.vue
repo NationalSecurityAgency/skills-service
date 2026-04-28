@@ -27,6 +27,8 @@ import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveB
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import {useStorage} from "@vueuse/core";
+import AssignedApproversCell from "@/components/skills/selfReport/AssignedApproversCell.vue";
+import {useProjConfig} from "@/stores/UseProjConfig.js";
 
 
 const route = useRoute();
@@ -36,6 +38,12 @@ const announcer = useSkillsAnnouncer();
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
 const numberFormat = useNumberFormat()
+const projConfig = useProjConfig()
+
+const props = defineProps({
+  selfReportStats: []
+})
+
 
 const approvals = ref([]);
 const loading = ref(true);
@@ -51,6 +59,13 @@ const emailSubscribed = ref(true);
 const isEmailEnabled = computed(() => appInfo.emailEnabled)
 const showApproveOrRejectModal = ref(false);
 const requestType = ref('Reject');
+
+const allRequestsOption = 'All Requests'
+const myRequestsOptions = 'My Requests'
+const requestOptions = ref([myRequestsOptions, allRequestsOption]);
+const selectedRequestOption = ref(myRequestsOptions);
+const allRequestsEnabled = computed(() => selectedRequestOption.value === allRequestsOption)
+const hasApprovalConfigsDefined = computed(() => !projConfig.isReadOnlyProj && props.selfReportStats?.find((item) => item.value === 'WorkloadConfig')?.count > 0)
 
 onMounted(() => {
   loadApprovals();
@@ -89,6 +104,7 @@ const loadApprovals = () => {
     orderBy: sortBy.value,
     userFilter: filters.value.userId,
     skillFilter: filters.value.skillName,
+    allRequests: selectedRequestOption.value === allRequestsOption,
   };
   return SelfReportService.getApprovals(route.params.projectId, pageParams)
       .then((res) => {
@@ -200,17 +216,14 @@ const reset = () => {
                      v-on:keydown.enter="loadApprovals" data-cy="selfReportApproval-userIdFilter" />
         </div>
       </div>
-      <div class="flex gap-2 mt-6 mb-6 px-4">
-        <div class="flex flex-1 justify-center sm:justify-start">
-          <SkillsButton size="small" @click="loadApprovals" aria-label="Sync Records" data-cy="syncApprovalsBtn" class="" icon="fas fa-sync-alt" />
-          <SkillsButton size="small" @click="loadApprovals" data-cy="selfReportApproval-filterBtn" icon="fa fa-filter" label="Filter" class="ml-1"/>
-          <SkillsButton size="small" @click="reset" class="ml-1" data-cy="selfReportApproval-resetBtn" label="Reset" icon="fa fa-times" />
-        </div>
-        <div class="flex flex-1 justify-center sm:justify-end">
-          <SkillsButton size="small" @click="showRejectModal" data-cy="rejectBtn" class="" :disabled="selectedItems.length === 0 || loading" icon="fa fa-times-circle" label="Reject" />
-          <SkillsButton size="small" @click="showApproveModal" data-cy="approveBtn" class="ml-2" :disabled="selectedItems.length === 0 || loading" icon="fa fa-check" label="Approve" />
-        </div>
+      <div class="flex gap-1 mx-4 mt-3 mb-3">
+        <SkillsButton size="small" @click="loadApprovals" aria-label="Sync Records" data-cy="syncApprovalsBtn" class="" icon="fas fa-sync-alt" />
+        <SkillsButton size="small" @click="loadApprovals" data-cy="selfReportApproval-filterBtn" icon="fa fa-filter" label="Filter" />
+        <SkillsButton size="small" @click="reset" data-cy="selfReportApproval-resetBtn" label="Reset" icon="fa fa-times" />
       </div>
+
+      <hr />
+
 
       <SkillsDataTable :value="approvals"
                        v-model:selection="selectedItems"
@@ -228,6 +241,21 @@ const reset = () => {
                        data-key="id"
                        pt:pcPaginator:paginatorContainer:aria-label="Approval Paginator"
                        @sort="sortTable">
+        <template #header>
+          <div class="flex gap-2 items-end flex-wrap">
+            <div class="flex flex-1  items-center gap-1 w-min-20rem">
+              <SelectButton v-if="hasApprovalConfigsDefined"
+                            v-model="selectedRequestOption"
+                            :options="requestOptions"
+                            @update:modelValue="loadApprovals"
+                            data-cy="requestOptionSelect"/>
+            </div>
+            <div class="flex justify-center sm:justify-end">
+              <SkillsButton size="small" @click="showRejectModal" data-cy="rejectBtn" class="" :disabled="selectedItems.length === 0 || loading" icon="fa fa-times-circle" label="Reject" />
+              <SkillsButton size="small" @click="showApproveModal" data-cy="approveBtn" class="ml-2" :disabled="selectedItems.length === 0 || loading" icon="fa fa-check" label="Approve" />
+            </div>
+          </div>
+        </template>
         <Column selectionMode="multiple" :class="{'flex': responsive.md.value }">
           <template #header>
             <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-check-double"
@@ -236,7 +264,7 @@ const reset = () => {
         </Column>
         <Column field="request" :class="{'flex': responsive.md.value }">
           <template #header>
-            <span class="mr-1"><i class="fas fa-user-plus" :class="colors.getTextClass(1)"/> Requested</span>
+            <span class="mr-1"><i class="fas fa-user-plus" :class="colors.getTextClass(0)"/> Requested</span>
           </template>
           <template #body="slotProps">
             <div>
@@ -261,18 +289,26 @@ const reset = () => {
         </Column>
         <Column field="userId" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
-            <span class="mr-1"><i class="fas fa-hand-pointer" :class="colors.getTextClass(2)"/> For User</span>
+            <span class="mr-1"><i class="fas fa-hand-pointer" :class="colors.getTextClass(1)"/> For User</span>
           </template>
           <template #body="slotProps">
-            {{ slotProps.data.userIdForDisplay }}
+            <span data-cy="userId">{{ slotProps.data.userIdForDisplay }}</span>
           </template>
         </Column>
         <Column field="requestedOn" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
-            <span class="mr-1"><i class="fas fa-clock" :class="colors.getTextClass(3)" /> Requested On</span>
+            <span class="mr-1"><i class="fas fa-clock" :class="colors.getTextClass(2)" /> Requested On</span>
           </template>
           <template #body="slotProps">
             <date-cell :value="slotProps.data.requestedOn" />
+          </template>
+        </Column>
+        <Column v-if="allRequestsEnabled" field="configuredApprovers" :class="{'flex': responsive.md.value }">
+          <template #header>
+            <span class="mr-1"><i class="fas fa-user-shield" :class="colors.getTextClass(3)"/> Assigned Approvers</span>
+          </template>
+          <template #body="slotProps">
+            <assigned-approvers-cell v-if="slotProps.data.configuredApprovers" :approvers="slotProps.data.configuredApprovers" />
           </template>
         </Column>
 

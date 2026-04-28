@@ -311,12 +311,18 @@ class SkillApprovalService {
 
     List<LabelCountItem> getSelfReportStats(String projectId) {
         List<SkillApprovalRepo.SkillReportingTypeAndCount> drRes = skillApprovalRepo.skillCountsGroupedByApprovalType(projectId)
-        return drRes.collect {
+
+        List<LabelCountItem> res = drRes.collect {
             new LabelCountItem(
                     value: it.getType() ?: 'Disabled',
                     count: it.getCount()
             )
         }
+
+        int numOfWorkLoadConf = skillApprovalConfRepo.countConfForProject(projectId)
+        res.add(new LabelCountItem(value: 'WorkloadConfig', count: numOfWorkLoadConf))
+
+        return res
     }
 
     List<LabelCountItem> getSkillApprovalsStats(String projectId, String skillId) {
