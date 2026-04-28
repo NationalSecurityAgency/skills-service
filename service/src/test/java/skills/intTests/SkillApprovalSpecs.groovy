@@ -531,7 +531,7 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        List<SkillsService> otherAdmins = (1..4).collect { createService("other${it}")}
+        List<SkillsService> otherAdmins = getRandomUsers(4).collect { createService(it)}
         skillsService.addProjectAdmin(proj.projectId, otherAdmins[0].userName)
         skillsService.addProjectAdmin(proj.projectId, otherAdmins[1].userName)
         skillsService.addProjectAdmin(proj.projectId, otherAdmins[2].userName)
