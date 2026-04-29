@@ -164,6 +164,7 @@ jobs:
             ./font-list.txt
 
       - name: merge mochawesome results
+        if: ${{ always() }}
         run: |
           cd e2e-tests
           npx mochawesome-merge "cypress/results/*.json" > mochawesome.json
