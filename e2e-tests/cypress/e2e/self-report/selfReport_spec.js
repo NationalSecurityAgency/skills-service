@@ -683,7 +683,8 @@ describe('Approval Requests Management Tests', () => {
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-3"] [data-cy="approverConfTypes"]').should('have.text', 'Default Fallback')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-4"] [data-cy="approverId"]').should('have.text', 'approver7@email.org')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-4"] [data-cy="approverConfTypes"]').should('have.text', 'Default Fallback')
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-5"] [data-cy="approverId"]').should('have.text', 'skills@skills.org')
+        const defaultUser = Cypress.env('oauthMode') ? 'foo' : Cypress.env('proxyUser')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-5"] [data-cy="approverId"]').should('have.text', defaultUser)
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-5"] [data-cy="approverConfTypes"]').should('have.text', 'Default Fallback')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="1"] [data-cy="assignedApprovers"] [data-cy="approver-6"]').should('not.exist')
 
