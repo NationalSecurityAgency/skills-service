@@ -135,6 +135,43 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
             @Param("skillFilter") String skillFilter,
             Pageable pageable)
 
+    static interface ApproversForRequest {
+        Integer getApprovalRequestId()
+        @Nullable
+        String getSkillConfApproverUserId()
+        @Nullable
+        String getUserConfApproverUserId()
+        @Nullable
+        String getTagConfigApproverId()
+        @Nullable
+        String getTagConfigUserTagKey()
+    }
+    @Query(value='''
+select
+    request.id as approvalRequestId,
+    skillConf.approver_user_id as skillConfApproverUserId,
+    userConf.approver_user_id as userConfApproverUserId,
+    tagConfig.approver_user_id as tagConfigApproverId,
+    tagConfig.user_tag_key as tagConfigUserTagKey
+from skill_approval request
+         left join skill_approval_conf skillConf
+                   on request.project_id = skillConf.project_id and request.skill_ref_id = skillConf.skill_ref_id
+         left join skill_approval_conf userConf
+                   on request.project_id = userConf.project_id and request.user_id = userConf.user_id
+         left join (select ut.user_id, sac.approver_user_id, sac.user_tag_key from skill_approval_conf sac, user_tags ut
+                    where
+                        lower(ut.key) = lower(sac.user_tag_key)
+                      and sac.project_id = :projectId
+                      and sac.user_tag_value is not null
+                      and lower(ut.value) like CONCAT(lower(sac.user_tag_value), '%')) tagConfig on tagConfig.user_id = request.user_id
+where request.id in :approvalRequestIds
+      and (skillConf.approver_user_id is not null or userConf.approver_user_id is not null or tagConfig.approver_user_id is not null)
+''', nativeQuery = true)
+    List<ApproversForRequest> findApproversForRequests(
+            @Param("projectId") String projectId,
+            @Param("approvalRequestIds") List<Integer> approvalRequestIds)
+
+
     @Query('''SELECT
         s.id as approvalId,
         sd.skillId as skillId,

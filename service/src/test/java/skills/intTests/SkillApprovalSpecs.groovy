@@ -487,11 +487,10 @@ class SkillApprovalSpecs extends DefaultIntSpec {
 
         when:
         def res = skillsService.getSelfReportStats(proj.projectId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
         then:
-        res.size() == 1
-        res[0].value == "Disabled"
-        res[0].count == 4
+        res.size() == 2
+        res.find { it.value == "Disabled" }.count == 4
+        res.find { it.value == "WorkloadConfig" }.count == 0
     }
 
     void "get self reporting stats"() {
@@ -510,12 +509,55 @@ class SkillApprovalSpecs extends DefaultIntSpec {
 
         when:
         def res = skillsService.getSelfReportStats(proj.projectId)
-        println JsonOutput.prettyPrint(JsonOutput.toJson(res))
         then:
-        res.size() == 3
+        res.size() == 4
         res.find { it.value == "Disabled"}.count == 5
         res.find { it.value == "HonorSystem"}.count == 3
         res.find { it.value == "Approval"}.count == 2
+        res.find { it.value == "WorkloadConfig"}.count == 0
+    }
+
+    void "get self reporting stats - with working config"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10,)
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[2].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skills[3].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skills[4].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<SkillsService> otherAdmins = getRandomUsers(4).collect { createService(it)}
+        skillsService.addProjectAdmin(proj.projectId, otherAdmins[0].userName)
+        skillsService.addProjectAdmin(proj.projectId, otherAdmins[1].userName)
+        skillsService.addProjectAdmin(proj.projectId, otherAdmins[2].userName)
+        skillsService.addProjectAdmin(proj.projectId, otherAdmins[3].userName)
+
+        // explicit fallback counts
+        skillsService.configureFallbackApprover(proj.projectId, otherAdmins[0].userName)
+
+        when:
+        def res = skillsService.getSelfReportStats(proj.projectId)
+        skillsService.configureApproverForSkillId(proj.projectId, otherAdmins[1].userName, skills[1].skillId.toString())
+        def res1 = skillsService.getSelfReportStats(proj.projectId)
+        skillsService.configureApproverForUserTag(proj.projectId, otherAdmins[2].userName, "tag", "val")
+        def res2 = skillsService.getSelfReportStats(proj.projectId)
+        skillsService.configureApproverForUser(proj.projectId, otherAdmins[3].userName, otherAdmins[0].userName)
+        def res3 = skillsService.getSelfReportStats(proj.projectId)
+        then:
+        res.size() == 4
+        res.find { it.value == "Disabled"}.count == 5
+        res.find { it.value == "HonorSystem"}.count == 3
+        res.find { it.value == "Approval"}.count == 2
+        res.find { it.value == "WorkloadConfig"}.count == 1
+
+        res1.find { it.value == "WorkloadConfig"}.count == 2
+        res2.find { it.value == "WorkloadConfig"}.count == 3
+        res3.find { it.value == "WorkloadConfig"}.count == 4
     }
 
     void "remove existing approval requests if the skill's self approval type to be 'disabled'"() {

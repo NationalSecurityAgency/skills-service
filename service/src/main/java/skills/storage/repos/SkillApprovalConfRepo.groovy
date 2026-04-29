@@ -47,9 +47,11 @@ interface SkillApprovalConfRepo extends CrudRepository<SkillApprovalConf, Intege
     ''')
     SkillApprovalConf findByProjectIdAndApproverUserIdAndRestAttributesAreNull(String projectId, String approverId)
 
-
     @Query('''select count(distinct(sac.approverUserId)) from SkillApprovalConf sac where sac.projectId = ?1 and (sac.skillRefId is not null or sac.userId is not null or sac.userTagKey is not null)''')
     Integer countConfForProject(String projectId)
+
+    @Query('''select count(distinct(sac.approverUserId)) from SkillApprovalConf sac where sac.projectId = ?1''')
+    Integer countConfForProjectIncludingFallbackConf(String projectId)
 
     @Query('''select count(sac.id) > 0 from SkillApprovalConf sac where sac.projectId = ?1''')
     Boolean confExistForProject(String projectId)
@@ -66,6 +68,14 @@ interface SkillApprovalConfRepo extends CrudRepository<SkillApprovalConf, Intege
                 and sac.userTagValue is null
                 and sac.userId is null''')
     List<String> getUsersConfiguredForFallback(String projectId)
+
+    @Query('''select role.userId 
+        from UserRole role 
+        where role.projectId = ?1 
+            and role.roleName in ('ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER')
+            and role.userId not in (select sac.approverUserId from SkillApprovalConf sac where sac.projectId = ?1)
+    ''')
+    List<String> getImplicitFallbackApprovers(String projectId)
 
     static interface ApproverConfResult {
         Integer getId()

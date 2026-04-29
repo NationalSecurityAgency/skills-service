@@ -37,4 +37,11 @@ class SkillApprovalResult {
     Long rejectedOn
     String message
     Integer points
+
+    static class ApproverForRequest {
+        String approverUserId
+        String approverUserIdForDisplay
+        List<String> configuredTypes
+    }
+    List<ApproverForRequest> configuredApprovers
 }
