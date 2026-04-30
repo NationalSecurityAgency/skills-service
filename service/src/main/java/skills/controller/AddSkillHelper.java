@@ -114,10 +114,19 @@ public class AddSkillHelper {
                     SkillEventResult result = (SkillEventResult) RetryUtil.withRetry(3, false, closure);
                     results.add(result);
                 } catch(SkillException ske) {
+
+                    SkillEventResult res = new SkillEventResult();
+                    res.setSkillApplied(false);
+                    res.setExplanation(ske.getMessage());
+                    res.setProjectId(projectId);
+                    res.setSkillId(skillId);
+                    res.setUserId(userId);
+                    results.add(res);
+                    log.error("Error applying skill [{}], user [{}], error [{}]", skillId, userId, ske.getMessage());
+
                     if (ske.getErrorCode() == ErrorCode.SkillNotFound) {
                         projectErrorService.invalidSkillReported(projectId, skillId);
                     }
-                    throw ske;
                 }finally {
                     CProf.stop(prof);
                 }
