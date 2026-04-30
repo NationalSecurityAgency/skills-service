@@ -250,6 +250,17 @@ class UserSkillsController {
         return skillsLoader.loadSubjectDescriptions(projectId, subjectId, userId, getProvidedVersionOrReturnDefault(version));
     }
 
+    @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public SkillsGroupSummary getSkillsGroupSummary(@PathVariable("projectId") String projectId,
+                                                     @PathVariable("groupId") String groupId,
+                                                     @RequestParam(name = "userId", required = false) String userIdParam,
+                                                     @RequestParam(name = "version", required = false) Integer version,
+                                                     @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        return skillsLoader.loadSkillsGroupSummary(projectId, groupId, userId, getProvidedVersionOrReturnDefault(version));
+    }
+
     /**
      * Note: skill version is not applicable to a single skill;
      * there is no reason exclude dependency skills as the system will not allow to dependent skills with later version

@@ -26,6 +26,7 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
 
     const loadingSubjectSummary = ref(true)
     const loadingBadgeSummary = ref(true)
+    const loadingSkillsGroupSummary = ref(true)
     const subjectSummary = ref({})
     const loadingSkillSummary = ref(true)
     const skillSummary = ref({})
@@ -62,6 +63,17 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
         }).finally(() => {
           loadingSkillSummary.value = false
         })
+    }
+
+    const loadSkillsGroupSummary = (groupId) => {
+      loadingSkillsGroupSummary.value = true
+      return skillsDisplayService.getSkillsGroupSummary(groupId)
+          .then((res) => {
+            subjectSummary.value = res
+            return res
+          }).finally(() => {
+            loadingSkillsGroupSummary.value = false
+          })
     }
 
     const updateSingleSkillPoints = (skill, pts) => {
@@ -163,7 +175,9 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
       nullifyExpirationDate,
       updateDescription,
       loadingBadgeSummary,
-      loadBadgeSummary
+      loadBadgeSummary,
+      loadSkillsGroupSummary,
+      loadingSkillsGroupSummary,
     }
 
   }

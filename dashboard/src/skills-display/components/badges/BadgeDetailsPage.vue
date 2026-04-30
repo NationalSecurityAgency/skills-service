@@ -79,7 +79,6 @@ const badgeTitle = computed(() => skillsDisplayInfo.isGlobalBadgePage.value ? 'G
       </Card>
       <skills-progress-list
         v-if="badge && !(skillsDisplayInfo.isGlobalBadgePage.value && !(summaryAndSkillsState.subjectSummary?.skills?.length > 0))"
-        :subject="badge"
         type="badge"
         class="mt-4"
         :badge-is-locked="locked"/>

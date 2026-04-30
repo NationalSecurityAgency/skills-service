@@ -89,14 +89,17 @@ const attributes = useSkillsDisplayAttributesState()
 const skillOverviewFooter = ref(null)
 
 const buildToRoute = () => {
-  if (!props.enableDrillDown || !props.skill.isSkillType) {
+  if (!props.enableDrillDown || !(props.skill.isSkillType || props.skill.isSkillsGroupType)) {
     return null
   }
   let name = 'skillDetails'
   const query = {}
-  const params = { skillId: props.skill.skillId }
+  const params = props.skill.isSkillsGroupType ? { groupId: props.skill.skillId } : { skillId: props.skill.skillId }
   if (route.params.subjectId) {
     params.subjectId = route.params.subjectId
+    if (props.skill.isSkillsGroupType) {
+      name = 'skillsGroupDetails'
+    }
   } else if (route.params.badgeId) {
     params.badgeId = route.params.badgeId
     name = (skillsDisplayInfo.isGlobalBadgePage.value) ? 'globalBadgeSkillDetails' : 'badgeSkillDetails'
