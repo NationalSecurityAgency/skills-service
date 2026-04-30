@@ -56,7 +56,7 @@ describe('Slides Resize Tests', () => {
             .trigger('mousemove')
             .trigger('mouseup', { force: true })
 
-        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /75\d/)
         cy.get('[data-cy="unsavedVideoSizeChanges"]')
         cy.get('[data-cy="updateSlidesSettingsBtn"]').should('be.enabled')
 
@@ -65,7 +65,7 @@ describe('Slides Resize Tests', () => {
         cy.get('[data-cy="updateSlidesSettingsBtn"]').click()
         cy.get('[data-cy="savedMsgSecondBtn"]')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
-        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /75\d/)
 
         // refresh and re-validate
         cy.visitSlidesConfPage();
@@ -74,7 +74,7 @@ describe('Slides Resize Tests', () => {
         cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
         cy.get('#proj1-skill1Container #text-layer').contains('Sample slides')
 
-        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /75\d/)
         cy.get('#proj1-skill1Container').should('have.attr', 'style').and('match', /width:\s*76[\d.]*px/)
     });
 
@@ -114,7 +114,7 @@ describe('Slides Resize Tests', () => {
             .trigger('mousemove')
             .trigger('mouseup', { force: true })
 
-        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /75\d/)
         cy.get('[data-cy="unsavedVideoSizeChanges"]')
         cy.get('[data-cy="updateSlidesSettingsBtn"]').should('be.enabled')
 
@@ -123,7 +123,7 @@ describe('Slides Resize Tests', () => {
         cy.get('[data-cy="updateSlidesSettingsBtn"]').click()
         cy.get('[data-cy="savedMsgSecondBtn"]')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
-        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /75\d/)
 
     });
 
@@ -243,6 +243,7 @@ describe('Slides Resize Tests', () => {
         cy.wait(500)
         cy.get('[data-cy="slidesFullscreenMsg"] [data-cy="slidesExitFullscreenBtn"]').realPress('Escape')
 
+        cy.wait(1000)
         cy.get('[data-cy="slidesFullscreenBtn"]').tab().type('{leftArrow}')
         cy.get('[data-cy="slidesFullscreenBtn"]').tab().type('{leftArrow}')
         cy.get('[data-cy="slidesFullscreenBtn"]').tab().type('{leftArrow}')

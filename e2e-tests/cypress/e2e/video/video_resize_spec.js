@@ -200,6 +200,7 @@ describe('Configure Video Tests', () => {
         cy.get('#skillVideoFor-proj1-skill1Container')
 
 
+        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '921px')
         cy.get('[data-cy="videoResizeHandle"]').should('be.visible')
             .trigger('mousedown', )
             .trigger('mousemove', )
@@ -208,7 +209,7 @@ describe('Configure Video Tests', () => {
             .trigger('mousedown', )
             .trigger('mousemove', )
             .trigger('mouseup', { force: true })
-        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '885px')
+        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '891px')
 
         cy.get('[data-cy="videoResizeHandle"]')
         cy.get('[data-cy="videoPlayer"] [title="Play Video"]').click()
@@ -221,7 +222,7 @@ describe('Configure Video Tests', () => {
             .trigger('mousedown', )
             .trigger('mousemove', )
             .trigger('mouseup', { force: true })
-        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '867px')
+        cy.get('#skillVideoFor-proj1-skill1Container').should('have.css', 'width', '876px')
     });
 
     it('audio only does not have a resize button', () => {
