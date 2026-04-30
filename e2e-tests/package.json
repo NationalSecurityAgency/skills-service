@@ -82,7 +82,7 @@
     "@bahmutov/print-env": "2.1.2",
     "axe-core": "4.11.4",
     "badge-maker": "5.0.2",
-    "cypress": "15.14.1",
+    "cypress": "15.14.2",
     "cypress-audit": "1.1.0",
     "cypress-axe": "1.7.0",
     "cypress-file-upload": "5.0.8",

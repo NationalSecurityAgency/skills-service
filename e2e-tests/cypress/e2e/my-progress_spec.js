@@ -427,10 +427,8 @@ describe('My Progress Tests', () => {
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 3', 'This is project 2', 'This is project 1']);
 
         // move down
-        cy.get('[data-cy="project-link-proj3"] button')
-          .should('be.visible')
-          .tab({ shift: true })
-          .tab({ shift: true })
+        cy.get('[data-cy="viewBadges"]')
+          .tab()
           .type('{downArrow}')
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 3', 'This is project 1']);
         cy.get('[data-cy="project-link-card-proj3"] [data-cy="sortControlHandle"]')
