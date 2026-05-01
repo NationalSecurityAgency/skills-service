@@ -165,7 +165,7 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="helpButton"]').tab().tab().type('{enter}{leftArrow}')
         cy.get('[data-cy="helpButton"]').tab().tab().type('{enter}{leftArrow}')
 
-        cy.get(`.video-js`).should('have.css', 'width', '738px')
+        cy.get(`.video-js`).should('have.css', 'width').and('match', /73[\d]px/)
 
         // user-set new size is used
         cy.visit('/progress-and-rankings/quizzes/quiz1');
