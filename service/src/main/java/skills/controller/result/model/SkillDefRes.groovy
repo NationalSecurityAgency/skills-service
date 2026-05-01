@@ -33,7 +33,9 @@ class SkillDefRes extends SkillDefPartialRes {
     String iconClass
 
     String prevSkillId
+    String prevSkillGroupId  // optional, if the previous skill is part of a group
     String nextSkillId
+    String nextSkillGroupId  // optional, if the next skill is part of a group
     int totalSkills
     int orderInGroup
 }

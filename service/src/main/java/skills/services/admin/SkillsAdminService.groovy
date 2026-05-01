@@ -729,6 +729,8 @@ class SkillsAdminService {
         if(orderInfo) {
             finalRes.prevSkillId = orderInfo.previousSkillId
             finalRes.nextSkillId = orderInfo.nextSkillId
+            finalRes.prevSkillGroupId = orderInfo.previousSkillGroupId
+            finalRes.nextSkillGroupId = orderInfo.nextSkillGroupId
             finalRes.totalSkills = orderInfo.totalCount
             finalRes.orderInGroup = orderInfo.overallOrder
         }

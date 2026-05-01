@@ -18,7 +18,9 @@ package skills.storage.model
 interface DisplayOrderRes {
     String getSkillId();
     String getPreviousSkillId();
+    String getPreviousSkillGroupId();
     String getNextSkillId();
+    String getNextSkillGroupId();
     Integer getOverallOrder();
     Integer getTotalCount();
 }

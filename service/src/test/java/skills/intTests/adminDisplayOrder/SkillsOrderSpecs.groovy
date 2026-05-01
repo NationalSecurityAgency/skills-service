@@ -298,6 +298,30 @@ class SkillsOrderSpecs extends DefaultIntSpec {
                 9,
                 10
         ]
+        summaries.prevSkillGroupId == [
+                null,
+                null,
+                null,
+                null,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                null,
+                null,
+                null,
+                null
+        ]
+        summaries.nextSkillGroupId == [
+                null,
+                null,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        ]
     }
 
     def "skills with groups - loading prev/last skillIds"() {
@@ -368,6 +392,30 @@ class SkillsOrderSpecs extends DefaultIntSpec {
                 8,
                 9,
                 10
+        ]
+        summaries.prevSkillGroupId == [
+                null,
+                null,
+                null,
+                null,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                null,
+                null,
+                null,
+                null
+        ]
+        summaries.nextSkillGroupId == [
+                null,
+                null,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
         ]
     }
 
@@ -446,6 +494,30 @@ class SkillsOrderSpecs extends DefaultIntSpec {
                 9,
                 10
         ]
+        summaries.prevSkillGroupId == [
+                null,
+                null,
+                null,
+                null,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId,
+                null
+        ]
+        summaries.nextSkillGroupId == [
+                null,
+                null,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId,
+                null,
+                null,
+                null
+        ]
     }
 
     def "skills with multiple groups (not adjacent) - loading prev/last skillIds"() {
@@ -523,6 +595,30 @@ class SkillsOrderSpecs extends DefaultIntSpec {
                 9,
                 10
         ]
+        summaries.prevSkillGroupId == [
+                null,
+                null,
+                null,
+                null,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                null,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId
+        ]
+        summaries.nextSkillGroupId == [
+                null,
+                null,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                null,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId,
+                null,
+                null
+        ]
     }
 
     def "skills are all in groups - loading prev/last skillIds"() {
@@ -596,6 +692,30 @@ class SkillsOrderSpecs extends DefaultIntSpec {
                 8,
                 9,
                 10
+        ]
+        summaries.prevSkillGroupId == [
+                null,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId
+        ]
+        summaries.nextSkillGroupId == [
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                p1subj1g1.skillId,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId,
+                p1subj1g2.skillId,
+                null
         ]
     }
 
