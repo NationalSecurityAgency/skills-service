@@ -41,7 +41,7 @@ const numberFormat = useNumberFormat()
 const projConfig = useProjConfig()
 
 const props = defineProps({
-  selfReportStats: []
+  selfReportStats: Array
 })
 
 
@@ -60,12 +60,9 @@ const isEmailEnabled = computed(() => appInfo.emailEnabled)
 const showApproveOrRejectModal = ref(false);
 const requestType = ref('Reject');
 
-const allRequestsOption = 'All Requests'
-const myRequestsOptions = 'My Requests'
-const requestOptions = ref([myRequestsOptions, allRequestsOption]);
-const selectedRequestOption = ref(myRequestsOptions);
-const allRequestsEnabled = computed(() => selectedRequestOption.value === allRequestsOption)
+const myRequestsOnly = useStorage(`selfReportApproval-MyRequestsOnlyFilter-${route.params.projectId}`, false)
 const hasApprovalConfigsDefined = computed(() => !projConfig.isReadOnlyProj && props.selfReportStats?.find((item) => item.value === 'WorkloadConfig')?.count > 0)
+const allRequestsEnabled = computed(() => hasApprovalConfigsDefined.value && !myRequestsOnly.value)
 
 onMounted(() => {
   loadApprovals();
@@ -104,7 +101,7 @@ const loadApprovals = () => {
     orderBy: sortBy.value,
     userFilter: filters.value.userId,
     skillFilter: filters.value.skillName,
-    allRequests: selectedRequestOption.value === allRequestsOption,
+    allRequests: allRequestsEnabled.value,
   };
   return SelfReportService.getApprovals(route.params.projectId, pageParams)
       .then((res) => {
@@ -243,12 +240,14 @@ const reset = () => {
                        @sort="sortTable">
         <template #header>
           <div class="flex gap-2 items-end flex-wrap">
-            <div class="flex flex-1  items-center gap-1 w-min-20rem">
-              <SelectButton v-if="hasApprovalConfigsDefined"
-                            v-model="selectedRequestOption"
-                            :options="requestOptions"
-                            @update:modelValue="loadApprovals"
-                            data-cy="requestOptionSelect"/>
+            <div class="flex-1">
+              <div v-if="hasApprovalConfigsDefined" class="flex items-center gap-2 w-min-20rem">
+                <ToggleSwitch inputId="myRequestsOnlyToggle"
+                              v-model="myRequestsOnly"
+                              @change="loadApprovals"
+                              data-cy="myRequestsOnlyToggle"/>
+                <label for="myRequestsOnlyToggle">My Requests Only</label>
+              </div>
             </div>
             <div class="flex justify-center sm:justify-end">
               <SkillsButton size="small" @click="showRejectModal" data-cy="rejectBtn" class="" :disabled="selectedItems.length === 0 || loading" icon="fa fa-times-circle" label="Reject" />
