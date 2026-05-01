@@ -600,20 +600,20 @@ describe('Approval Requests Management Tests', () => {
         ], 5, true, null, false);
     });
 
+    const myRequestOnlyToggleSelector = '[data-cy="skillsReportApprovalTable"] [data-cy="myRequestsOnlyToggle"]'
+    const createUsers = (alias, num) => {
+        const res = [];
+        for (let i = 0; i < num; i++) {
+            const uName = `${alias}${i}@email.org`
+            res.push(uName);
+            cy.register(uName, 'password')
+        }
+        return res
+    }
     it('show all requests with assigned approvers', () => {
         cy.createSkill(1, 1, 1, {selfReportingType: 'Approval'});
         cy.createSkill(1, 1, 2, {selfReportingType: 'Approval'});
         cy.createSkill(1, 1, 3, {selfReportingType: 'Approval'});
-
-        const createUsers = (alias, num) => {
-            const res = [];
-            for (let i = 0; i < num; i++) {
-                const uName = `${alias}${i}@email.org`
-                res.push(uName);
-                cy.register(uName, 'password')
-            }
-            return res
-        }
 
         const approvers = createUsers('approver', 8)
         const users = createUsers('user', 3)
@@ -644,12 +644,8 @@ describe('Approval Requests Management Tests', () => {
         cy.wait('@featureSupported');
         cy.wait('@loadApprovalHistory');
         cy.wait('@loadApprovals');
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-section="columnheadercontent"]').should('not.contain', 'Assigned Approvers')
-        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="userId"]').should('have.text', 'user1@email.org')
 
-        cy.get('[data-cy="requestOptionSelect"] [data-pc-name="pctogglebutton"][aria-pressed="false"]').click()
-        cy.wait('@loadApprovals');
+        // defaults to all requests
         cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '3')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-section="columnheadercontent"]').contains( 'Assigned Approvers')
 
@@ -701,6 +697,14 @@ describe('Approval Requests Management Tests', () => {
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="2"] [data-cy="assignedApprovers"] [data-cy="approver-0"] [data-cy="approverConfTypes"]').should('have.text', 'Skill')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="2"] [data-cy="assignedApprovers"] [data-cy="approver-1"]').should('not.exist')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="2"] [data-cy="assignedApprovers"] [data-cy="expandOrCollapse"]').should('not.exist')
+
+        // my requests only
+        cy.get(myRequestOnlyToggleSelector).click()
+        cy.wait('@loadApprovals');
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-section="columnheadercontent"]').should('not.contain', 'Assigned Approvers')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="userId"]').should('have.text', 'user1@email.org')
+
     })
 
     it('all requests select button is not shown when approval workload is not configured', () => {
@@ -720,7 +724,7 @@ describe('Approval Requests Management Tests', () => {
         cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-section="columnheadercontent"]').should('not.contain', 'Assigned Approvers')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="userId"]').should('have.text', 'user1')
-        cy.get('[data-cy="requestOptionSelect"]').should('not.exist')
+        cy.get(myRequestOnlyToggleSelector).should('not.exist')
     })
 
     it('all requests select button is not shown for the approver role', () => {
@@ -749,7 +753,58 @@ describe('Approval Requests Management Tests', () => {
         cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-section="columnheadercontent"]').should('not.contain', 'Assigned Approvers')
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="userId"]').should('have.text', 'user1')
-        cy.get('[data-cy="requestOptionSelect"]').should('not.exist')
+        cy.get(myRequestOnlyToggleSelector).should('not.exist')
+    })
+
+    it('my requests toggle state is saved in local storage for each project', () => {
+        cy.createSkill(1, 1, 1, {selfReportingType: 'Approval'});
+        cy.reportSkill(1, 1, 'user1', 'now');
+        const approvers = createUsers('approver', 1)
+        cy.loginAsAdminUser()
+        cy.request('POST', `/admin/projects/proj1/users/${approvers[0]}/roles/ROLE_PROJECT_APPROVER`);
+        cy.configureApproverForSkillId(1, approvers[0], 1)
+
+        cy.createProject(2)
+        cy.createSubject(2, 1)
+        cy.createSkill(2, 1,1, {selfReportingType: 'Approval'})
+        cy.request('POST', `/admin/projects/proj2/users/${approvers[0]}/roles/ROLE_PROJECT_APPROVER`);
+        cy.configureApproverForSkillId(2, approvers[0], 1)
+        cy.reportSkill(2, 1, 'user1', 'now');
+
+        cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice').as('featureSupported');
+        cy.intercept('GET', '/admin/projects/proj*/approvals?*').as('loadApprovals');
+        cy.intercept('GET', '/admin/projects/proj*/approvals/history?*').as('loadApprovalHistory');
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@featureSupported');
+        cy.wait('@loadApprovalHistory');
+        cy.wait('@loadApprovals');
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-section="columnheadercontent"]').contains( 'Assigned Approvers')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="userId"]').should('have.text', 'user1')
+        cy.get(`${myRequestOnlyToggleSelector} [data-pc-section="input"]`).should('not.be.checked')
+        cy.get(myRequestOnlyToggleSelector).click()
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-section="columnheadercontent"]').should('not.contain', 'Assigned Approvers')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '0')
+        cy.get(`${myRequestOnlyToggleSelector} [data-pc-section="input"]`).should('be.checked')
+
+        // saved for project 1
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@featureSupported');
+        cy.wait('@loadApprovalHistory');
+        cy.wait('@loadApprovals');
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-section="columnheadercontent"]').should('not.contain', 'Assigned Approvers')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '0')
+        cy.get(`${myRequestOnlyToggleSelector} [data-pc-section="input"]`).should('be.checked')
+
+        // should not be saved for project 2
+        cy.visit('/administrator/projects/proj2/self-report');
+        cy.wait('@featureSupported');
+        cy.wait('@loadApprovalHistory');
+        cy.wait('@loadApprovals');
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-pc-section="columnheadercontent"]').contains( 'Assigned Approvers')
+        cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="userId"]').should('have.text', 'user1')
+        cy.get(`${myRequestOnlyToggleSelector} [data-pc-section="input"]`).should('not.be.checked')
     })
 });
 
