@@ -240,15 +240,17 @@ const createResizeSupport = () => {
     <div :class="{ 'flex-1' : !isConfiguredVideoSize }">
       <div :id="`${vidPlayerId}Container`" data-cy="videoPlayer"  :style="playerWidth ? `width: ${playerWidth}px;` : ''"
            class="videoPlayerContainer p-0 border rounded-sm border-surface-200 dark:border-surface-600">
-          <i v-if="!isPlaying && !options.isAudio"
-             class="fas fa-expand-alt fa-rotate-90 handle border border-surface-500 dark:border-surface-300 p-1 text-primary bg-primary-contrast rounded-border"
+        <div v-if="!isPlaying && !options.isAudio"
              :id="`${vidPlayerId}ResizeHandle`"
              data-cy="videoResizeHandle"
              role="button"
              aria-label="Resize video dimensions control. Press right or left to resize the video player."
              @keyup.right="resizePlayerBigger"
              @keyup.left="resizePlayerSmaller"
-             tabindex="0"></i>
+             tabindex="0"
+             class="handle border border-surface-500 dark:border-surface-300 text-primary bg-primary-contrast rounded-border">
+          <i class="fas fa-expand-alt fa-rotate-90" />
+        </div>
         <div v-if="isResizing" class="text-center flex items-center justify-center ">
           <div class="absolute z-40 top-0 left-0 right-0 bottom-0 bg-gray-600 opacity-50 text-center flex items-center justify-center " >
           </div>
@@ -279,10 +281,11 @@ const createResizeSupport = () => {
 
 .handle{
   font-size: 1.1rem;
-  right: 3px;
-  bottom: 0px;
+  right: 0;
+  bottom: 0;
   position: absolute;
   z-index: 500;
+  padding: 1px 2px 0px 1px;
 }
 
 .handle:hover{

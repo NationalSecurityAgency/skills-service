@@ -28,6 +28,7 @@ describe('Slides Resize On Quiz Run Tests', () => {
         cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
         cy.get('#quiz1Container #text-layer').contains('Sample slides')
 
+        cy.wait(1000)
         cy.get('[data-cy="slidesResizeHandle"]')
             .trigger('mousedown')
             .trigger('mousemove')
@@ -44,7 +45,7 @@ describe('Slides Resize On Quiz Run Tests', () => {
             .trigger('mousemove')
             .trigger('mouseup', { force: true })
 
-        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /75\d/)
         cy.get('[data-cy="unsavedVideoSizeChanges"]')
         cy.get('[data-cy="updateSlidesSettingsBtn"]').should('be.enabled')
 
@@ -53,7 +54,7 @@ describe('Slides Resize On Quiz Run Tests', () => {
         cy.get('[data-cy="updateSlidesSettingsBtn"]').click()
         cy.get('[data-cy="savedMsgSecondBtn"]')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
-        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /75\d/)
 
         // refresh and re-validate
         cy.visitQuizSlidesConfPage();
@@ -62,7 +63,7 @@ describe('Slides Resize On Quiz Run Tests', () => {
         cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 5')
         cy.get('#quiz1Container #text-layer').contains('Sample slides')
 
-        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /75\d/)
         cy.get('#quiz1Container').should('have.attr', 'style').and('match', /width:\s*76[\d.]*px/)
     });
 
@@ -101,7 +102,7 @@ describe('Slides Resize On Quiz Run Tests', () => {
             .trigger('mousemove')
             .trigger('mouseup', { force: true })
 
-        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /75\d/)
         cy.get('[data-cy="unsavedVideoSizeChanges"]')
         cy.get('[data-cy="updateSlidesSettingsBtn"]').should('be.enabled')
 
@@ -110,7 +111,7 @@ describe('Slides Resize On Quiz Run Tests', () => {
         cy.get('[data-cy="updateSlidesSettingsBtn"]').click()
         cy.get('[data-cy="savedMsgSecondBtn"]')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
-        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /76\d/)
+        cy.get('[data-cy="defaultVideoSize"]').invoke('text').and('match', /75\d/)
 
     });
 

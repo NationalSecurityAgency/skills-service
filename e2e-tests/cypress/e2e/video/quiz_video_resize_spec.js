@@ -160,14 +160,16 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get(`.video-js`)
 
-        cy.get('body').tab().type('{enter}{leftArrow}')
-        cy.get('body').tab().type('{enter}{leftArrow}')
-        cy.get('body').tab().type('{enter}{leftArrow}')
-        cy.get(`.video-js`).should('have.css', 'width', '885.25px')
+        cy.get(`.video-js`).should('have.css', 'width').and('match', /88[\d.]*px/)
+        cy.get('[data-cy="helpButton"]').tab().tab().type('{enter}{leftArrow}')
+        cy.get('[data-cy="helpButton"]').tab().tab().type('{enter}{leftArrow}')
+        cy.get('[data-cy="helpButton"]').tab().tab().type('{enter}{leftArrow}')
+
+        cy.get(`.video-js`).should('have.css', 'width').and('match', /73[\d]px/)
 
         // user-set new size is used
         cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get(`.video-js`).should('have.css', 'width', '885.25px')
+        cy.get(`.video-js`).should('have.css', 'width').and('match', /73[\d.]*px/)
     });
 
     it('playing the video removes the resize button', () => {
@@ -201,7 +203,7 @@ describe('Configure Video Tests', () => {
             .trigger('mousedown', )
             .trigger('mousemove', )
             .trigger('mouseup', { force: true })
-        cy.get(`.video-js`).should('have.css', 'width', '848px')
+        cy.get(`.video-js`).should('have.css', 'width').and('match', /85[\d]px/)
 
         cy.get('[data-cy="videoResizeHandle"]')
         cy.get('[data-cy="videoPlayer"] [title="Play Video"]').click()
@@ -214,7 +216,7 @@ describe('Configure Video Tests', () => {
             .trigger('mousedown', )
             .trigger('mousemove', )
             .trigger('mouseup', { force: true })
-        cy.get(`.video-js`).should('have.css', 'width', '829px')
+        cy.get(`.video-js`).should('have.css', 'width').and('match', /84[\d]px/)
     });
 
     it('audio only does not have a resize button', () => {

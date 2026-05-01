@@ -115,7 +115,7 @@ watch(() => props.navItems, () => {
                     <div class="flex justify-start items-center w-full"
                          :class="{'mr-4': !showCollapsed, 'text-zinc-100 dark:text-slate-900': isExactActive }">
                       <i :class="`${navItem.iconClass} ${colors.getTextClass(index)}${isExactActive ? ' text-primary bg-primary-contrast rounded-border border py-1' : ''}${!showCollapsed ? ' mr-2' : ' text-[1.3rem]'} `"
-                         class="fas w-8"
+                         class="fas w-8!"
                          aria-hidden="true"/> <span v-if="!showCollapsed" class="">{{ navItem.name }}</span>
                     </div>
                   </Button>
