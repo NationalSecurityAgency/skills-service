@@ -24,6 +24,7 @@ import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import SkillReuseIdUtil from "@/components/utils/SkillReuseIdUtil.js";
+import SkillType from "@/skills-display/components/skill/SkillType.js";
 
 const emit = defineEmits(['hidden']);
 const props = defineProps({
@@ -82,24 +83,33 @@ const focusOnFilterInput = () => {
 }
 const navToSkill = (skill) => {
   const { skillType } = skill
-  if (skillType === 'Subject') {
+  if (SkillType.isSubject(skillType)) {
     skillDisplayInfo.routerPush(
         'SubjectDetailsPage',
         {
           subjectId: skill.skillId
         })
-  } else if (skillType === 'Badge') {
+  } else if (SkillType.isBadge(skillType)) {
     skillDisplayInfo.routerPush(
         'badgeDetails',
         {
           badgeId: skill.skillId
         })
-  } else {
+  } else if (SkillType.isSkillsGroup(skillType)) {
     skillDisplayInfo.routerPush(
-        'skillDetails',
+        'skillsGroupDetails',
         {
           subjectId: skill.subjectId,
-          skillId: skill.skillId
+          groupId: skill.skillId
+        })
+  } else {
+    const pageName = skill.skillsGroupId ? 'skillDetailsUnderGroup' : 'skillDetails'
+    skillDisplayInfo.routerPush(
+        pageName,
+        {
+          subjectId: skill.subjectId,
+          skillId: skill.skillId,
+          groupId: skill.skillsGroupId,
         })
   }
   closeMe()
@@ -119,15 +129,21 @@ const filterEvent = (event) => {
 }
 
 const isSkill = (skill) => {
-  return skill.skillType === 'Skill'
+  return SkillType.isSkill(skill.skillType)
+}
+const isSkillOrGroup = (skill) => {
+  return isSkill(skill) || SkillType.isSkillsGroup(skill.skillType)
 }
 const getIconClass = (skill) => {
   const { skillType } = skill
-  if (skillType === 'Subject') {
+  if (SkillType.isSubject(skillType)) {
     return 'fa-solid fa-cubes skills-color-subjects text-blue-500'
   }
-  if (skillType === 'Badge') {
+  if (SkillType.isBadge(skillType)) {
     return 'fas fa-award skills-color-badges text-indigo-500'
+  }
+  if (SkillType.isSkillsGroup(skillType)) {
+    return 'fa-solid fa-layer-group text-purple-500'
   }
   return 'fas fa-graduation-cap skills-color-skills text-green-500'
 }
@@ -163,7 +179,7 @@ const dialogPosition = computed(() => {
     <div class="card flex justify-center">
       <Listbox class="w-full border-none!"
                data-cy="trainingSearchListBox"
-               :aria-label="`Search for ${attributes.subjectDisplayName}s, ${attributes.skillDisplayName}s or Badges`"
+               :aria-label="`Search for ${attributes.subjectDisplayNamePlural}, ${attributes.skillDisplayNamePlural}, ${attributes.groupDisplayNamePlural} or Badges`"
                :pt="{ listContainer: { tabindex: '0'}, header: { class: 'p-0! pb-1!' }, list: { class: 'p-0!' } }"
                @filter="filterEvent"
                @update:modelValue="navToSkill"
@@ -174,7 +190,7 @@ const dialogPosition = computed(() => {
                :autofocus="true"
                :auto-option-focus="false"
                filter
-               :filterPlaceholder="`Search for ${attributes.subjectDisplayName}s, ${attributes.skillDisplayName}s or Badges`"
+               :filterPlaceholder="`Search for ${attributes.subjectDisplayNamePlural}, ${attributes.skillDisplayNamePlural}, ${attributes.groupDisplayNamePlural} or Badges`"
       >
         <template #option="slotProps">
           <div class="py-0 w-full sd-theme-primary-color" :data-cy="`searchRes-${slotProps.option.skillId}`">
@@ -194,7 +210,7 @@ const dialogPosition = computed(() => {
               </div>
             </div>
 
-            <div v-if="isSkill(slotProps.option)" data-cy="subjectName" aria-hidden="true" class="mt-1">
+            <div v-if="isSkillOrGroup(slotProps.option)" data-cy="subjectName" aria-hidden="true" class="mt-1">
               <span class="italic ">{{ attributes.subjectDisplayName }}:</span> <span
                 class="text-info skills-theme-primary-color alt-color-handle-hover">{{ slotProps.option.subjectName
               }}</span>

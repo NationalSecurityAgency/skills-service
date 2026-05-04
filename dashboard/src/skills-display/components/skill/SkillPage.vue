@@ -65,19 +65,16 @@ const loadSkillSummary = () => {
     })
 }
 
+const prevNextNavigation = (skillId, groupId) => {
+  const params = { skillId, projectId: route.params.projectId, groupId }
+  const pageName = groupId ? 'skillDetailsUnderGroup' : 'skillDetails'
+  skillsDisplayInfo.routerPush(pageName, params)
+}
 const prevButtonClicked = () => {
-  const params = { skillId: skillState.skillSummary.prevSkillId, projectId: route.params.projectId }
-  skillsDisplayInfo.routerPush(
-    'skillDetails',
-    params
-  )
+  prevNextNavigation(skillState.skillSummary.prevSkillId, skillState.skillSummary.prevSkillGroupId)
 }
 const nextButtonClicked = () => {
-  const params = { skillId: skillState.skillSummary.nextSkillId, projectId: route.params.projectId }
-  skillsDisplayInfo.routerPush(
-    'skillDetails',
-    params
-  )
+  prevNextNavigation(skillState.skillSummary.nextSkillId, skillState.skillSummary.nextSkillGroupId)
 }
 
 const isLoading = computed(() => loadingSkill.value || skillState.loadingSkillSummary)

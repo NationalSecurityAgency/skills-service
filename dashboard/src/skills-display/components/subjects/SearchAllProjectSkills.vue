@@ -83,7 +83,7 @@ const navToSkill = (event) => {
       fluid
       data-cy="searchSkillsAcrossSubjects"
       :pt="{ dropdown: { 'aria-label': 'click to select a skill' } }"
-      :placeholder="`Search for a ${attributes.skillDisplayName} across ${attributes.subjectDisplayNamePlural}...`"
+      :placeholder="`Search for ${attributes.skillDisplayNamePlural} or ${attributes.groupDisplayNamePlural} across ${attributes.subjectDisplayNamePlural}...`"
       optionLabel="skillName"
     >
       <template #option="slotProps">
