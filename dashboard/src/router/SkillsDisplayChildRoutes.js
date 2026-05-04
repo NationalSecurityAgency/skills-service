@@ -132,6 +132,13 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
       }
     }
   }, {
+    path: `${prependToPath}subjects/:subjectId/groups/:groupId/skills/:skillId`,
+    component: SkillPage,
+    name: `skillDetailsUnderGroup${appendToName}`,
+    meta: {
+      title: `${skillPlaceholder} Details`
+    }
+  }, {
     path: `${prependToPath}subjects/:subjectId/skills/:skillId`,
     component: SkillPage,
     name: `skillDetails${appendToName}`,

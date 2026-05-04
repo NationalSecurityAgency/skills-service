@@ -55,6 +55,7 @@ class SkillSummary extends SkillSummaryParent {
 
     String groupName
     String groupSkillId
+    Boolean groupHasDescription
 
     List<ApprovalEvent> approvalHistory = []
 

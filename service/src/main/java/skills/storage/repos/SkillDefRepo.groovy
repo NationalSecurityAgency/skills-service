@@ -988,6 +988,17 @@ ORDER BY s.name ASC
                 sdChild.skillId = ?2''')
     SkillNameAndSubjectId getSkillNameByProjectIdAndSkillId(String projectId, String skillId)
 
+    static interface SkillNameAndPresenceOfDescription {
+        String getSkillName()
+        Boolean getHasDescription()
+    }
+    @Nullable
+    @Query(value ='''select sd.name as skillName,
+       case when sd.description::oid is not null and length(convert_from(lo_get(sd.description::oid), 'UTF8'))>0 then true else false end as hasDescription
+            from skill_definition sd
+            where sd.project_id = ?1 and sd.skill_id = ?2''', nativeQuery = true)
+    SkillNameAndPresenceOfDescription getGroupNameAndPresenceOfDescription(String project, String skillId)
+
     @Modifying
     @Transactional
     @Query('''update SkillDef set selfReportingType=null where projectId=?1 and skillId=?2 and selfReportingType=?3''')

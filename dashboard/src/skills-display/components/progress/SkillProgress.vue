@@ -99,6 +99,9 @@ const buildToRoute = () => {
     params.subjectId = route.params.subjectId
     if (props.skill.isSkillsGroupType) {
       name = 'skillsGroupDetails'
+    } else if (props.skill.groupSkillId) {
+      params.groupId = props.skill.groupSkillId
+      name = 'skillDetailsUnderGroup'
     }
   } else if (route.params.badgeId) {
     params.badgeId = route.params.badgeId

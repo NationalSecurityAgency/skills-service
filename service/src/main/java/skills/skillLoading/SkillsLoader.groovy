@@ -555,8 +555,11 @@ class SkillsLoader {
         def badges = skillDefRepo.findAllBadgesForSkill([processedSkillId], crossProjectId ?: projectId);
 
         String groupName = null
+        Boolean groupHasDescription = false
         if(skillDef.groupId) {
-            groupName = skillDefRepo.getSkillNameByProjectIdAndSkillId(projectId, skillDef.groupId)?.skillName
+            SkillDefRepo.SkillNameAndPresenceOfDescription nameAndDescPresence = skillDefRepo.getGroupNameAndPresenceOfDescription(skillDef.projectId, skillDef.groupId)
+            groupName = nameAndDescPresence?.skillName
+            groupHasDescription = nameAndDescPresence?.hasDescription
         }
 
         boolean isCrossProjectSkill = crossProjectId && crossProjectId != projectId
@@ -675,6 +678,7 @@ class SkillsLoader {
                 lastExpirationDate: lastExpirationDate,
                 groupName: InputSanitizer.unsanitizeName(groupName),
                 groupSkillId: skillDef.groupId,
+                groupHasDescription: groupHasDescription,
                 approvalHistory: approvalHistory,
                 iconClass: skillDef.iconClass,
         )

@@ -47,10 +47,7 @@ onMounted( () => {
 watch( () => route.params.skillId, () => {
   loadSkillSummary()
 });
-watch(() => skill.value.groupSkillId, () => {
-  groupDescription.value = null;
-  displayGroupDescription.value = false;
-})
+const groupDescriptionExist = computed(() => skill.value.groupSkillId && skill.value.groupHasDescription === true)
 const loadSkillSummary = () => {
   const skillId = skillsDisplayInfo.isDependency() ? route.params.dependentSkillId : route.params.skillId
   skillState.loadSkillSummary(skillId, route.params.crossProjectId, route.params.subjectId)
@@ -121,7 +118,7 @@ const showNav = computed(() => {
               <div class="flex flex-1">
                 <span class="text-2xl sd-theme-primary-color font-medium flex">{{ skill.groupName }}</span>
               </div>
-              <div v-if="!attributes.groupDescriptionsOn">
+              <div v-if="!attributes.groupDescriptionsOn && groupDescriptionExist">
                 <div class="flex flex-row content-center">
                   <label for="groupDescriptionToggleSwitch">
                     <span class="text-muted pr-1 content-center">Group Description:</span>
