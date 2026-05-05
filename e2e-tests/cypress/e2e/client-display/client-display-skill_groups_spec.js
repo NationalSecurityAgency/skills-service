@@ -395,7 +395,7 @@ describe('Client Display Skills Groups Tests', () => {
             .contains('200 / 200 Points');
     });
 
-    it.only('multiple groups', () => {
+    it('multiple groups', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 1, {
             pointIncrement: 10,
