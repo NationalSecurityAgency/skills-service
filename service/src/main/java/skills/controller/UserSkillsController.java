@@ -177,24 +177,6 @@ class UserSkillsController {
         return skillsLoader.getUserLevel(projectId, userId);
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    @Profile
-    public TableResult getProjectSkills(HttpServletRequest request,
-                                        @PathVariable("projectId") String projectId,
-                                        @RequestParam(name = "userId", required = false) String userIdParam,
-                                        @RequestParam(name = "idType", required = false) String idType,
-                                        @RequestParam(required = false, defaultValue = "10") int limit,
-                                        @RequestParam(required = false, defaultValue = "1") int page,
-                                        @RequestParam(required = false, defaultValue = "skillName") String orderBy,
-                                        @RequestParam(required = false, defaultValue = "true") Boolean ascending,
-                                        @RequestParam(required = false, defaultValue = "") String query) {
-
-        PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending);
-        String userId = userInfoService.getUserName(userIdParam, true, idType);
-
-        return skillsService.getSkillsForProject(userId, projectId, query, pageRequest);
-    }
     @RequestMapping(value = "/projects/{projectId}/skillsSubjectsAndBadges", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @Profile
