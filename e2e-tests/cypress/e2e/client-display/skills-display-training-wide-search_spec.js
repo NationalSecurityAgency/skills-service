@@ -223,6 +223,11 @@ describe('Training Keyboard Shortcuts Tests', () => {
                 setting: 'skill.displayName',
                 projectId: 'proj1',
             },
+            {
+                value: 'Cluster',
+                setting: 'group.displayName',
+                projectId: 'proj1',
+            },
         ]);
 
         cy.visit('/progress-and-rankings/projects/proj1');
@@ -230,7 +235,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
 
         cy.get('input.p-listbox-filter')
           .invoke('attr', 'placeholder')
-          .should('contain', 'Search for Courses, Assessments or Badges');
+          .should('contain', 'Search for Courses, Assessments, Clusters or Badges');
         cy.get('[data-cy="subjectName"]').first().should('have.text', "Course: Subject 1");
     });
 

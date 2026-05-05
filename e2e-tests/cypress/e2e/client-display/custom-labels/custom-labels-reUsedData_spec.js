@@ -128,7 +128,7 @@ describe('Custom Label with Reused Data Tests', () => {
         cy.get('[data-cy="achievedSkillsProgress"]').contains('Achieved Courses');
         cy.get('[data-cy="downloadTranscriptCard"]').contains('You have Completed 0 out of 6 courses!')
         cy.get('[data-cy="searchSkillsAcrossSubjects"] input')
-            .should('have.attr', 'placeholder', 'Search for a Course across Competencies...');
+            .should('have.attr', 'placeholder', 'Search for Courses or KSAS across Competencies...');
 
         cy.get('[data-cy="skillsDisplayHome"]').contains('Level', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Skill', { matchCase: false }).should('not.exist');
@@ -156,7 +156,7 @@ describe('Custom Label with Reused Data Tests', () => {
         cy.get('[data-cy="achievedSkillsProgress"]').contains('Achieved Courses');
         cy.get('[data-cy="downloadTranscriptCard"]').contains('You have Completed 0 out of 6 courses!')
         cy.get('[data-cy="searchSkillsAcrossSubjects"] input')
-            .should('have.attr', 'placeholder', 'Search for a Course across Competencies...');
+            .should('have.attr', 'placeholder', 'Search for Courses or KSAS across Competencies...');
 
         cy.get('[data-cy="skillsDisplayHome"]').contains('Level', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Skill', { matchCase: false }).should('not.exist');
