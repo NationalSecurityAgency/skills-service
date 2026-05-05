@@ -25,7 +25,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import skills.PublicProps;
+import skills.auth.UserInfo;
 import skills.auth.UserInfoService;
+import skills.auth.pki.PkiUserLookup;
 import skills.controller.exceptions.ErrorCode;
 import skills.controller.exceptions.SkillException;
 import skills.controller.exceptions.SkillsValidator;
@@ -55,6 +57,9 @@ public class AddSkillHelper {
     SkillEventsService skillsManagementFacade;
     @Autowired
     ProjectErrorService projectErrorService;
+
+    @Autowired(required = false)
+    PkiUserLookup pkiUserLookup;
 
     public BatchSkillEventResult addBatchSkillsForBatchUsers(String projectId, BatchSkillEventRequest batchSkillEventRequest) {
 
@@ -89,8 +94,27 @@ public class AddSkillHelper {
         ArrayList<SkillEventResult> results = new ArrayList<>();
 
         for(String userIdToProcess : batchSkillEventRequest.getUserIds()) {
-            String idType = (batchSkillEventRequest != null && StringUtils.isNotBlank(userIdToProcess)) ? batchSkillEventRequest.getIdType() : null;
-            String userId = userInfoService.getUserName(userIdToProcess, false, idType);
+            String userId = "";
+
+            try {
+                userId = userInfoService.getUserName(userIdToProcess, false, "ID");
+            } catch (SkillException e) {
+                try {
+                    userId = userInfoService.getUserName(userIdToProcess, false, "DN");
+                }
+                catch (SkillException se) {
+                    SkillEventResult res = new SkillEventResult();
+                    res.setSkillApplied(false);
+                    res.setExplanation("User [" + userIdToProcess + "] not found");
+                    res.setProjectId(projectId);
+                    res.setSkillId("");
+                    res.setUserId(userIdToProcess);
+                    results.add(res);
+                    log.error("Error applying skills, user [{}], error [{}]", userIdToProcess, res.getExplanation());
+                    continue;
+                }
+            }
+
             if (log.isInfoEnabled()) {
                 log.info("ReportSkills (ProjectId=[{}], SkillIds=[{}], CurrentUser=[{}], UserId=[{}], RequestDate=[{}], IsRetry=[{}])",
                         projectId, skillBatchString, userInfoService.getCurrentUserId(), userIdToProcess, toDateString(requestedTimestamp), isRetry.toString());
@@ -101,6 +125,7 @@ public class AddSkillHelper {
                 CProf.start(prof);
                 try {
                     final Date dataParam = incomingDate;
+                    final String userIdToReport = userId;
                     Closure<SkillEventResult> closure = new Closure<>(null) {
                         @Override
                         public SkillEventResult call() {
@@ -108,7 +133,7 @@ public class AddSkillHelper {
                                     new SkillEventsService.SkillApprovalParams(batchSkillEventRequest.getApprovalRequestedMsg()) : SkillEventsService.getDefaultSkillApprovalParams();
                             skillApprovalParams.setForAnotherUser(forAnotherUser);
                             skillApprovalParams.setDoNotRequireApproval(batchSkillEventRequest.getDoNotRequireApproval() != null ? batchSkillEventRequest.getDoNotRequireApproval() : false);
-                            return skillsManagementFacade.reportSkill(projectId, skillId, userId, notifyIfSkillNotApplied, dataParam, skillApprovalParams);
+                            return skillsManagementFacade.reportSkill(projectId, skillId, userIdToReport, notifyIfSkillNotApplied, dataParam, skillApprovalParams);
                         }
                     };
                     SkillEventResult result = (SkillEventResult) RetryUtil.withRetry(3, false, closure);

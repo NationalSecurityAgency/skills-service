@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import AddSkillEventForm from "@/components/skills/AddSkillEventForm.vue";
 import {ref} from "vue";
 import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
 import SkillsService from "@/components/skills/SkillsService.js";
@@ -40,23 +39,19 @@ const props = defineProps({
   }
 })
 
-const usersToAdd = ref([]);
+const usersToAdd = ref("");
 const dateAdded = ref(new Date());
 const results = ref([]);
 
 const saveEvents = () => {
-  const userIds = usersToAdd.value.map((user) => user.userId);
+  const userIds = usersToAdd.value.split('\n').filter(user => user.trim() !== '');
   const skillIds = props.skills.map((skill) => skill.skillId);
 
   return SkillsService.saveSkillEventBatch(props.projectId, skillIds, userIds, dateAdded.value.getTime(), true).then((result) => {
-    usersToAdd.value = [];
+    usersToAdd.value = '';
     results.value = result.results;
   })
 
-}
-
-const addUser = (user) => {
-  usersToAdd.value.push(user);
 }
 
 const closeMe = () => {
@@ -106,14 +101,18 @@ const closeMe = () => {
         </StepPanel>
         <StepPanel value="2" v-slot="{ activateCallback }">
           <Message class="mb-2" data-cy="skillsToAdd" :closable="false" severity="info">
-            Select the users that have performed the skill(s).
+            Add the users that have performed the skill(s), one user per line.
           </Message>
           <div class="mb-2">
-            <add-skill-event-form :project-id="projectId" @userAdded="addUser" :usersToAdd="usersToAdd" />
-
-            <div class="mt-2 mb-2 flex gap-2" v-if="usersToAdd.length > 0">
-              <Chip v-for="(user) of usersToAdd" :key="user.userId" :label="user.userId" data-cy="usersToAdd" removable @remove="usersToAdd.splice(usersToAdd.indexOf(user), 1)" />
-            </div>
+            <SkillsTextarea
+                label="Users to add skill events for"
+                :is-required="true"
+                :submit-on-enter="false"
+                v-model="usersToAdd"
+                data-cy="batchUserList"
+                rows="10"
+                name="usersToAdd">
+            </SkillsTextarea>
           </div>
 
           <div class="flex pt-6 justify-between">
@@ -124,7 +123,7 @@ const closeMe = () => {
         <StepPanel value="3" v-slot="{ activateCallback }">
           <Message>
             Skill events for <span class="font-bold">{{ skills.map( skill => skill.name ).join(', ')}}</span> will be added for the
-            user(s) <span class="font-bold">{{ usersToAdd.map( user => user.userIdForDisplay ? user.userIdForDisplay : user.userId ).join(', ') }}</span> on {{ dayjs(dateAdded).format('YYYY-MM-DD') }}.
+            user(s) <span class="font-bold">{{ usersToAdd.split( '\n' ).filter(user => user.trim() !== '').join(', ') }}</span> on {{ dayjs(dateAdded).format('YYYY-MM-DD') }}.
             Please click "Add Events" to confirm.
           </Message>
           <div class="flex pt-6 justify-between">
