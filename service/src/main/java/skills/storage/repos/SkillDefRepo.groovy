@@ -830,6 +830,8 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         Integer getTotalChildCount()
         @Nullable
         String getSkillsGroupId()
+        @Nullable
+        String getSkillsGroupName()
     }
 
     @Query(value = '''
@@ -875,6 +877,7 @@ SELECT DISTINCT
     s.point_increment AS pointIncrement,
     s.total_points AS totalPoints,
     s.group_id as skillsGroupId,
+    skillsGroup.name as skillsGroupName,
     ss.name AS subjectName,
     ss.skill_id AS subjectId,
     CASE WHEN ua.id IS NOT NULL OR COALESCE(cac.ua_count, 0) >= COALESCE(cac.child_skill_count, 1) THEN true ELSE false END AS userAchieved,
@@ -890,6 +893,7 @@ FROM
         LEFT JOIN user_points up ON s.id = up.skill_ref_id
         AND up.user_id = :userId
         LEFT JOIN child_achievement_counts cac ON s.id = cac.parent_ref_id
+        LEFT JOIN skill_definition skillsGroup ON (s.group_id = skillsGroup.skill_id and s.project_id = skillsGroup.project_id)
 WHERE
     s.enabled = 'true'
   AND s.type in ('Skill', 'Subject', 'Badge', 'SkillsGroup')

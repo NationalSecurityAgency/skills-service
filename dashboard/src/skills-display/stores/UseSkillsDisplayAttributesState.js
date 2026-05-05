@@ -20,6 +20,7 @@ import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useRoute } from 'vue-router'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
+import SkillType from "@/skills-display/components/skill/SkillType.js";
 
 export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttributesState', () => {
   const loadingConfig = ref(true)
@@ -82,6 +83,18 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const pointDisplayName = computed(() => config.value.pointDisplayName || 'Point')
   const pointDisplayNameLower = computed(() => pointDisplayName.value.toLowerCase())
   const pointDisplayNamePlural = computed(() => pluralize.plural(pointDisplayName.value))
+  const displayNameBySkillType = (type) => {
+    if (SkillType.isBadge(type)) {
+      return 'Badge'
+    }
+    if (SkillType.isSkillsGroup(type)) {
+      return groupDisplayName.value
+    }
+    if (SkillType.isSubject(type)) {
+      return subjectDisplayName.value
+    }
+    return skillDisplayName.value
+  }
   const projectName = computed(() => config.value.projectName || route.params.projectId)
   const projectUserCommunityDescriptor = computed(() => {
     return config.value.projectUserCommunityDescriptor || null
@@ -133,6 +146,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     pointDisplayName,
     pointDisplayNameLower,
     pointDisplayNamePlural,
+    displayNameBySkillType,
     internalBackButton,
     isSummaryOnly,
     userId,

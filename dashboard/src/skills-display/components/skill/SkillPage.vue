@@ -91,6 +91,11 @@ const descriptionToggled = () => {
 const showNav = computed(() => {
   return skill.value && (skill.value.prevSkillId || skill.value.nextSkillId) && !skillsDisplayInfo.isCrossProject()
 })
+const groupLink = computed(() => {
+  const name = skillsDisplayInfo.getContextSpecificRouteName('skillsGroupDetails')
+  const params = { groupId: skill.value.groupId }
+  return { name, params }
+})
 </script>
 
 <template>
@@ -112,13 +117,16 @@ const showNav = computed(() => {
               <div class="mr-2 mt-1 text-xl">
                 <i class="fas fa-layer-group" aria-hidden="true"></i>
               </div>
-              <div class="flex flex-1">
-                <span class="text-2xl sd-theme-primary-color font-medium flex">{{ skill.groupName }}</span>
+              <div class="flex-1 flex gap-1 items-center text-2xl">
+                <div class="items-center">{{ attributes.groupDisplayName }}:</div>
+                <router-link :to="groupLink" class="sd-theme-primary-color font-medium">
+                  {{ skill.groupName }}
+                </router-link>
               </div>
               <div v-if="!attributes.groupDescriptionsOn && groupDescriptionExist">
                 <div class="flex flex-row content-center">
                   <label for="groupDescriptionToggleSwitch">
-                    <span class="text-muted pr-1 content-center">Group Description:</span>
+                    <span class="text-muted pr-1 content-center">{{ attributes.groupDisplayName }} Description:</span>
                   </label>
                   <ToggleSwitch v-model="displayGroupDescription" data-cy="toggleGroupDescription" @change="descriptionToggled" inputId="groupDescriptionToggleSwitch" />
                 </div>

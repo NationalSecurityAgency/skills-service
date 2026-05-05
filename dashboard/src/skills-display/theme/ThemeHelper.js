@@ -125,7 +125,8 @@ export default {
       styleName: 'color'
     }, {
       selector: '.toastui-editor-popup [data-type="Heading"]:hover,' +
-          '.p-popover.p-component .p-panelmenu.p-component .p-panelmenu-header:focus .p-panelmenu-header-content .sd-theme-menu-header',
+          '.p-popover.p-component .p-panelmenu.p-component .p-panelmenu-header:focus .p-panelmenu-header-content .sd-theme-menu-header,' +
+          '.p-listbox:not(.p-disabled) .p-listbox-list .p-listbox-option:hover',
       styleName: 'background-color'
     }, {
       selector: '.sd-theme-home .p-avatar.p-component, ' +
