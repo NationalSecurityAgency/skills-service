@@ -943,6 +943,18 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    def getSkillsGroupSummary(String projId, String groupId, String userId = null, Integer version = -1) {
+        String url = "/projects/${projId}/groups/${groupId}/summary"
+        if (userId) {
+            url = "${url}?userId=${userId}"
+        }
+        if (version >= 0) {
+            String joinChar = url.contains("?") ? "&" : "?"
+            url += "${joinChar}version=${version}"
+        }
+        wsHelper.apiGet(url)
+    }
+
     def getSubjectSummaryForCurrentUser(String projId, String subjectId, int version = -1) {
         String url = "/projects/${projId}/subjects/${subjectId}/summary"
         if (version >= 0) {
