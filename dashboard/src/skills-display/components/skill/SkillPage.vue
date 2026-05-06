@@ -93,7 +93,7 @@ const showNav = computed(() => {
 })
 const groupLink = computed(() => {
   const name = skillsDisplayInfo.getContextSpecificRouteName('skillsGroupDetails')
-  const params = { groupId: skill.value.groupId }
+  const params = { groupId: skill.value.groupSkillId }
   return { name, params }
 })
 </script>
@@ -119,7 +119,7 @@ const groupLink = computed(() => {
               </div>
               <div class="flex-1 flex gap-1 items-center text-2xl">
                 <div class="items-center">{{ attributes.groupDisplayName }}:</div>
-                <router-link :to="groupLink" class="sd-theme-primary-color font-medium">
+                <router-link :to="groupLink" class="sd-theme-primary-color font-medium" data-cy="groupName">
                   {{ skill.groupName }}
                 </router-link>
               </div>

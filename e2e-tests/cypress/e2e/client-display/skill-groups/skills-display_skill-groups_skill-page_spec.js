@@ -29,7 +29,7 @@ describe('Client Display Skills Groups Tests', () => {
     });
 
     it('group info is shown on skill page if not toggled off', () => {
-        let groupDescription = "This is where cool description"
+        const groupDescription = "This is where cool description"
         cy.createSkillsGroup(1, 1, 1, {
             numSkillsRequired: 1,
             description: groupDescription
@@ -46,9 +46,28 @@ describe('Client Display Skills Groups Tests', () => {
         cy.cdVisit('/subjects/subj1/skills/skill1', true);
 
         cy.get('[data-cy="groupInformationSection"]').should('exist');
-        cy.get('[data-cy="toggleGroupDescription"]').click();
-        cy.get('[data-cy="groupDescriptionSection"]').should('exist');
-        cy.get('[data-cy="groupDescriptionSection"]').contains(groupDescription);
+        cy.get('[data-cy="groupInformationSection"] [data-cy="toggleGroupDescription"]').click();
+        cy.get('[data-cy="groupInformationSection"] [data-cy="groupDescriptionSection"]').should('exist');
+        cy.get('[data-cy="groupInformationSection"] [data-cy="groupDescriptionSection"]').contains(groupDescription);
+    });
+
+    it('description toggle is not shown if group does not have a description', () => {
+        cy.createSkillsGroup(1, 1, 1, {
+            numSkillsRequired: 1,
+        });
+        cy.addSkillToGroup(1, 1, 1, 1, {
+            pointIncrement: 100,
+            numPerformToCompletion: 2
+        });
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: 150,
+            numPerformToCompletion: 2
+        });
+
+        cy.cdVisit('/subjects/subj1/skills/skill1', true);
+
+        cy.get('[data-cy="groupInformationSection"]').should('exist');
+        cy.get('[data-cy="groupInformationSection"] [data-cy="toggleGroupDescription"]').should('not.exist');
     });
 
     it('group info is not shown on skill page if setting is toggled', () => {

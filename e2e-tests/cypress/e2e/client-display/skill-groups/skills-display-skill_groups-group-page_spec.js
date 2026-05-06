@@ -483,4 +483,104 @@ describe('Skills Display Skills Groups Page Tests', () => {
         cy.get('[data-cy="nextSkill"]').should('be.enabled')
     });
 
+    it('navigate from skill page to parent group by clicking on group name', () => {
+        const groupDescription = "Test group for skill-to-group navigation";
+        
+        // Create a skills group with skills
+        cy.createSkillsGroup(1, 1, 1, {
+            description: groupDescription
+        });
+        cy.addSkillToGroup(1, 1, 1, 1, {
+            pointIncrement: 100,
+            numPerformToCompletion: 2
+        });
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: 150,
+            numPerformToCompletion: 1
+        });
+
+        // Navigate directly to a skill page within the group
+        cy.cdVisit('/subjects/subj1/groups/group1/skills/skill1');
+
+        // Verify we're on the skill page
+        cy.get('[data-cy="skillsTitle"]').should('contain', 'Skill Overview');
+        cy.get('[data-cy="skillProgressTitle-skill1"]').should('contain', 'Very Great Skill 1');
+
+        // Verify group information is displayed
+        cy.get('[data-cy="groupInformationSection"] [data-cy="groupName"]').should('contain', 'Awesome Group 1');
+
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill1]').should('be.visible');
+
+        // Click on the group name link to navigate to the parent group
+        cy.get('[data-cy="groupInformationSection"] [data-cy="groupName"]').click();
+
+        // Verify we're now on the group page
+        cy.url().should('include', '/subjects/subj1/groups/group1');
+        cy.get('[data-cy="skillsTitle"]').should('contain', 'Group Overview');
+        cy.get('[data-cy="skillsGroupName"]').should('contain', 'Awesome Group 1');
+        cy.get('[data-cy="skillsGroupDescription"]').should('contain', groupDescription);
+
+        // Verify both skills are displayed on the group page
+        cy.get('[data-cy="skillProgressTitle-skill1"]').should('exist');
+        cy.get('[data-cy="skillProgressTitle-skill2"]').should('exist');
+
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill1]').should('not.exist');
+    });
+
+    it('navigate from skill page to parent group by clicking on group breadcrumb', () => {
+        const groupDescription = "Test group for skill-to-group navigation";
+
+        // Create a skills group with skills
+        cy.createSkillsGroup(1, 1, 1, {
+            description: groupDescription
+        });
+        cy.addSkillToGroup(1, 1, 1, 1, {
+            pointIncrement: 100,
+            numPerformToCompletion: 2
+        });
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: 150,
+            numPerformToCompletion: 1
+        });
+
+        // Navigate directly to a skill page within the group
+        cy.cdVisit('/subjects/subj1/groups/group1/skills/skill1');
+
+        // Verify we're on the skill page
+        cy.get('[data-cy="skillsTitle"]').should('contain', 'Skill Overview');
+        cy.get('[data-cy="skillProgressTitle-skill1"]').should('contain', 'Very Great Skill 1');
+
+        // Verify group information is displayed
+        cy.get('[data-cy="groupInformationSection"] [data-cy="groupName"]').should('contain', 'Awesome Group 1');
+
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill1]').should('be.visible');
+
+        // Click on the group breadcrumb item
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group1]').click();
+
+        // Verify we're now on the group page
+        cy.url().should('include', '/subjects/subj1/groups/group1');
+        cy.get('[data-cy="skillsTitle"]').should('contain', 'Group Overview');
+        cy.get('[data-cy="skillsGroupName"]').should('contain', 'Awesome Group 1');
+        cy.get('[data-cy="skillsGroupDescription"]').should('contain', groupDescription);
+
+        // Verify both skills are displayed on the group page
+        cy.get('[data-cy="skillProgressTitle-skill1"]').should('exist');
+        cy.get('[data-cy="skillProgressTitle-skill2"]').should('exist');
+
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill1]').should('not.exist');
+    });
+
 })
