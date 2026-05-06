@@ -295,4 +295,48 @@ describe('Training Keyboard Shortcuts Tests', () => {
         });
     })
 
+    it('navigate to skills group using training-wide search dialog', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkillsGroup(1, 1, 1)
+        cy.addSkillToGroup(1, 1, 1, 1)
+        cy.addSkillToGroup(1, 1, 1, 2)
+        cy.addSkillToGroup(1, 1, 1, 3)
+
+        cy.visit('/progress-and-rankings/projects/proj1');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').should('have.text', 'Project: This is project 1');
+
+        // navigate to skills group 1
+        cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
+        cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
+        cy.get('input.p-listbox-filter').type('awesome group 1')
+        cy.realPress('ArrowDown');
+        cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', 'Awesome Group 1');
+        cy.realPress('Enter');
+        cy.url().should('include', '/subjects/subj1/groups/group1');
+        cy.get('[data-cy="skillsGroupName"]').contains('Awesome Group 1')
+        cy.get('[data-cy="skillsGroupProgress"]').contains(/0 \/ 3 Skills/)
+    })
+
+    it('client-display: navigate to skills group using training-wide search dialog', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkillsGroup(1, 1, 1)
+        cy.addSkillToGroup(1, 1, 1, 1)
+        cy.addSkillToGroup(1, 1, 1, 2)
+        cy.addSkillToGroup(1, 1, 1, 3)
+
+        cy.cdVisit('/');
+        cy.contains('Overall Point');
+
+        // navigate to skills group 1
+        cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
+        cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
+        cy.get('input.p-listbox-filter').type('awesome group 1')
+        cy.realPress('ArrowDown');
+        cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', 'Awesome Group 1');
+        cy.realPress('Enter');
+        cy.get('[data-cy="skillsGroupName"]').contains('Awesome Group 1')
+        cy.get('[data-cy="skillsGroupProgress"]').contains(/0 \/ 3 Skills/)
+    })
 })

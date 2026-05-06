@@ -354,5 +354,54 @@ describe('Client Display Accessibility tests', () => {
             cy.customA11y();
             cy.customLighthouse();
         });
+
+        it(`Skills group page${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.createSkillsGroup(1, 2, 1);
+            cy.addSkillToGroup(1, 2, 1, 11, {
+                pointIncrement: 50,
+                numPerformToCompletion: 2
+            });
+            cy.addSkillToGroup(1, 2, 1, 12, {
+                pointIncrement: 50,
+                numPerformToCompletion: 2
+            });
+            cy.doReportSkill({
+                project: 1,
+                skill: 11,
+                subjNum: 2,
+                userId: Cypress.env('proxyUser'),
+                date: 'yesterday',
+                failOnError: true,
+                approvalRequestedMsg: null
+            });
+            cy.doReportSkill({
+                project: 1,
+                skill: 11,
+                subjNum: 2,
+                userId: Cypress.env('proxyUser'),
+                date: 'now',
+                failOnError: true,
+                approvalRequestedMsg: null
+            });
+            cy.doReportSkill({
+                project: 1,
+                skill: 12,
+                subjNum: 2,
+                userId: Cypress.env('proxyUser'),
+                date: 'yesterday',
+                failOnError: true,
+                approvalRequestedMsg: null
+            });
+
+            cy.visit('/progress-and-rankings/projects/proj1/subjects/subj2/groups/group1Subj2');
+            cy.injectAxe();
+            cy.get('[data-cy="skillsTitle"]').contains('Group Overview');
+            cy.get('[data-cy="skillsGroupName"]').should('contain', 'Awesome Group 1');
+            cy.get('[data-cy="skillsGroupProgress"]').contains(/1 \/ 2 Skills/);
+
+            cy.customA11y();
+            cy.customLighthouse();
+        });
     })
 });
