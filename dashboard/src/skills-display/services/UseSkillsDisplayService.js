@@ -17,6 +17,7 @@ import axios from 'axios'
 import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import {useRoute} from 'vue-router'
 import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
+import SkillType from "@/skills-display/components/skill/SkillType.js";
 
 export const useSkillsDisplayService = () => {
   const servicePath = '/api/projects'
@@ -164,16 +165,18 @@ export const useSkillsDisplayService = () => {
 
   const getDescriptions = (parentId, type = 'subject') => {
     let url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/subjects/${encodeURIComponent(parentId)}/descriptions`
+    if (SkillType.isSkillsGroup(type)) {
+      url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/groups/${encodeURIComponent(parentId)}/descriptions`
+    }
     if (type === 'badge' || type === 'global-badge') {
       url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/badges/${encodeURIComponent(parentId)}/descriptions`
     }
-    const response = axios.get(url, {
+    return axios.get(url, {
       params: {
         ...getUserIdAndVersionParams(),
         global: type === 'global-badge'
       }
     }).then((result) => result.data)
-    return response
   }
 
   const reportSkill = (skillId, approvalRequestedMsg, crossProjectId) => {

@@ -23,6 +23,7 @@ import SkillsProgressList from "@/skills-display/components/progress/SkillsProgr
 import VerticalProgressBar from "@/skills-display/components/progress/VerticalProgressBar.vue";
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
+import SkillType from "@/skills-display/components/skill/SkillType.js";
 
 const route = useRoute()
 const attributes = useSkillsDisplayAttributesState()
@@ -38,19 +39,8 @@ onMounted(() => {
 
 const loadGroupSummary = () => {
   summaryAndSkillsState.loadSkillsGroupSummary(route.params.groupId)
-      .then(() => {
-        // if (skillId && skill.value.projectId && !skillsDisplayInfo.isCrossProject() && !skillsDisplayInfo.isGlobalBadgeSkillDetails()) {
-        //   skillsDisplayService.updateSkillHistory(skill.value.projectId, skillId)
-        // }
-        // scrollIntoViewState.setLastViewedSkillId(skillId)
-        //
-        // if(!groupDescription.value && skill.value.groupSkillId && attributes.groupDescriptionsOn) {
-        //   descriptionToggled();
-        // }
-
-      })
 }
-const progressPercent = computed(() => group.totalSkills > 0 ? Math.trunc(group.skillsAchieved / group.totalSkills) * 100 : 0)
+const progressPercent = computed(() => group.value.totalSkills > 0 ? Math.trunc((group.value.skillsAchieved / group.value.totalSkills) * 100)  : 0)
 </script>
 
 <template>
@@ -71,26 +61,25 @@ const progressPercent = computed(() => group.totalSkills > 0 ? Math.trunc(group.
               <div class="flex-1 flex flex-col gap-2">
                 <div class="flex items-end gap-1">
                   <div class="flex-1">
-                    <span class="text-3xl">{{ group.group}}</span>
+                    <span class="text-3xl" data-cy="skillsGroupName">{{ group.group}}</span>
                   </div>
-                  <div>
+                  <div data-cy="skillsGroupProgress">
                     <span>{{ nF.pretty(group.skillsAchieved) }}</span> / <span>{{ nF.pretty(group.totalSkills) }}</span> {{ attributes.skillDisplayNamePlural }}
                   </div>
                 </div>
                 <div>
-                  <vertical-progress-bar :total-progress="progressPercent" />
+                  <vertical-progress-bar :total-progress="progressPercent" :disable-daily-color="true"/>
                 </div>
               </div>
             </div>
             <div v-if="group.description">
-              <markdown-text :text="group.description" />
+              <markdown-text :text="group.description" data-cy="skillsGroupDescription"/>
             </div>
           </div>
         </template>
       </Card>
 
-      <skills-progress-list
-          type="group"/>
+      <skills-progress-list :type="SkillType.SkillsGroup"/>
     </div>
   </div>
 </template>

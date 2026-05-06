@@ -824,6 +824,10 @@ class SkillsLoader {
         return loadDescriptions(projectId, subjectId, userId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
     }
     @Transactional(readOnly = true)
+    List<SkillDescription> loadGroupDescriptions(String projectId, String groupId, String userId, Integer version = -1) {
+        return loadDescriptions(projectId, groupId, userId, SkillRelDef.RelationshipType.SkillsGroupRequirement, version)
+    }
+    @Transactional(readOnly = true)
     List<SkillDescription> loadBadgeDescriptions(String projectId, String badgeId, String userId, Integer version = -1) {
         return loadDescriptions(projectId, badgeId, userId, SkillRelDef.RelationshipType.BadgeRequirement, version)
     }
