@@ -482,6 +482,198 @@ class GroupSummarySpec extends DefaultIntSpec {
         ]
     }
 
-    // badges
-    // self report such as quizzes?
+    def "group summary with badge info"() {
+        List<SkillsService> users = getRandomUsers(2).collect { createService(it) }
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(6, 1, 1)
+        proj1_skills.each { it.numPerformToCompletion = 2; it.pointIncrementInterval = 0; it.description = "skill description" }
+        def group1 = SkillsFactory.createSkillsGroup(1, 1, 10)
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj, [proj1_skills[0], group1, proj1_skills[5]])
+
+        // Assign skills to group
+        proj1_skills[1..4].each {
+            skillsService.assignSkillToSkillsGroup(group1.skillId.toString(), it)
+        }
+
+        // Create badges and assign skills to badges
+        def badge1 = SkillsFactory.createBadge(1, 1)
+        def badge2 = SkillsFactory.createBadge(1, 2)
+        skillsService.createBadge(badge1)
+        skillsService.createBadge(badge2)
+        
+        // Assign some skills to badges
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1.badgeId, skillId: proj1_skills[1].skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1.badgeId, skillId: proj1_skills[2].skillId])
+        skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge2.badgeId, skillId: proj1_skills[3].skillId])
+        // proj1_skills[4] is not assigned to any badge
+
+        // Enable badges
+        badge1.enabled = true
+        badge2.enabled = true
+        skillsService.createBadge(badge1)
+        skillsService.createBadge(badge2)
+
+        // User achieves some skills
+        users[0].addSkill(proj1_skills[1])
+        users[0].addSkill(proj1_skills[1])
+        users[0].addSkill(proj1_skills[2])
+        users[0].addSkill(proj1_skills[2])
+        users[0].addSkill(proj1_skills[3])
+        users[0].addSkill(proj1_skills[3])
+        users[0].addSkill(proj1_skills[4])
+
+        when:
+        def groupSummary = users[0].getSkillsGroupSummary(proj1.projectId, group1.skillId.toString())
+
+        then:
+        groupSummary.group == group1.name.toString()
+        groupSummary.groupId == group1.skillId.toString()
+        groupSummary.totalSkills == 4
+        groupSummary.skillsAchieved == 3
+        
+        // Validate badge information is present in skill objects
+        groupSummary.skills.size() == 4
+        
+        // Skill 1 - belongs to badge1
+        def skill1 = groupSummary.skills.find { it.skillId == proj1_skills[1].skillId }
+        skill1.badges.size() == 1
+        skill1.badges[0].badgeId == badge1.badgeId
+        skill1.badges[0].name == badge1.name
+        skill1.badges[0].skillId == proj1_skills[1].skillId
+        skill1.badges[0].skillType == "Badge"
+        
+        // Skill 2 - belongs to badge1
+        def skill2 = groupSummary.skills.find { it.skillId == proj1_skills[2].skillId }
+        skill2.badges.size() == 1
+        skill2.badges[0].badgeId == badge1.badgeId
+        skill2.badges[0].name == badge1.name
+        skill2.badges[0].skillId == proj1_skills[2].skillId
+        skill2.badges[0].skillType == "Badge"
+        
+        // Skill 3 - belongs to badge2
+        def skill3 = groupSummary.skills.find { it.skillId == proj1_skills[3].skillId }
+        skill3.badges.size() == 1
+        skill3.badges[0].badgeId == badge2.badgeId
+        skill3.badges[0].name == badge2.name
+        skill3.badges[0].skillId == proj1_skills[3].skillId
+        skill3.badges[0].skillType == "Badge"
+        
+        // Skill 4 - does not belong to any badge
+        def skill4 = groupSummary.skills.find { it.skillId == proj1_skills[4].skillId }
+       ! skill4.badges
+    }
+
+    def "group summary with self reporting attributes"() {
+        List<SkillsService> users = getRandomUsers(2).collect { createService(it) }
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        
+        // Create quiz first for quiz-based skill
+        def quiz = skillsService.createQuizDef(skills.intTests.utils.QuizDefFactory.createQuiz(1))
+        
+        List<Map> proj1_skills = SkillsFactory.createSkills(6, 1, 1)
+        proj1_skills.each { it.numPerformToCompletion = 2; it.pointIncrementInterval = 0; it.description = "skill description" }
+        
+        // Quiz-based skill must have numPerformToCompletion = 1
+        proj1_skills[3].numPerformToCompletion = 1
+        
+        // Set different self reporting types for skills
+        proj1_skills[1].selfReportingType = skills.storage.model.SkillDef.SelfReportingType.HonorSystem.toString()
+        proj1_skills[2].selfReportingType = skills.storage.model.SkillDef.SelfReportingType.Approval.toString()
+        proj1_skills[2].justificationRequired = true
+        proj1_skills[3].selfReportingType = skills.storage.model.SkillDef.SelfReportingType.Quiz.toString()
+        proj1_skills[3].quizId = quiz.body.quizId
+        
+        def group1 = SkillsFactory.createSkillsGroup(1, 1, 10)
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj, [proj1_skills[0], group1, proj1_skills[5]])
+
+        // Assign skills to group
+        proj1_skills[1..4].each {
+            skillsService.assignSkillToSkillsGroup(group1.skillId.toString(), it)
+        }
+
+        // User performs skills
+        users[0].addSkill(proj1_skills[1])
+        users[0].addSkill(proj1_skills[1])
+        users[0].addSkill(proj1_skills[4])
+
+        // Submit approval request for approval-based skill
+        users[0].addSkill(proj1_skills[2], null, null, "Please approve my skill")
+
+        // Note: quiz-based skill (proj1_skills[3]) is not reported - can only be achieved via quiz completion
+
+        when:
+        def groupSummary = users[0].getSkillsGroupSummary(proj1.projectId, group1.skillId.toString())
+
+        then:
+        groupSummary.group == group1.name.toString()
+        groupSummary.groupId == group1.skillId.toString()
+        groupSummary.totalSkills == 4
+        groupSummary.skillsAchieved == 1
+        
+        // Validate self reporting attributes are present in skill objects
+        groupSummary.skills.size() == 4
+        
+        // Skill 1 - HonorSystem self reporting
+        def skill1 = groupSummary.skills.find { it.skillId == proj1_skills[1].skillId }
+        skill1.selfReporting != null
+        skill1.selfReporting.enabled == true
+        skill1.selfReporting.type == "HonorSystem"
+        skill1.selfReporting.justificationRequired == false
+        skill1.selfReporting.approvalId == null
+        skill1.selfReporting.requestedOn == null
+        skill1.selfReporting.rejectedOn == null
+        skill1.selfReporting.message == null
+        skill1.selfReporting.quizId == null
+        skill1.selfReporting.quizName == null
+        skill1.selfReporting.numQuizQuestions == 0
+        
+        // Skill 2 - Approval self reporting
+        def skill2 = groupSummary.skills.find { it.skillId == proj1_skills[2].skillId }
+        skill2.selfReporting != null
+        skill2.selfReporting.enabled == true
+        skill2.selfReporting.type == "Approval"
+        skill2.selfReporting.justificationRequired == true
+        skill2.selfReporting.approvalId != null
+        skill2.selfReporting.requestedOn != null
+        skill2.selfReporting.approved == false
+        skill2.selfReporting.approvedBy == ""
+        skill2.selfReporting.quizId == null
+        skill2.selfReporting.quizName == null
+        
+        // Skill 3 - Quiz self reporting (not achieved)
+        def skill3 = groupSummary.skills.find { it.skillId == proj1_skills[3].skillId }
+        skill3.selfReporting != null
+        skill3.selfReporting.enabled == true
+        skill3.selfReporting.type == "Quiz"
+        skill3.selfReporting.justificationRequired == false
+        skill3.selfReporting.quizId == quiz.body.quizId
+        skill3.selfReporting.quizName != null
+        skill3.selfReporting.numQuizQuestions != null
+        skill3.selfReporting.quizOrSurveyPassed == false
+        skill3.selfReporting.quizAttemptId == null
+        
+        // Skill 4 - Default (no self reporting)
+        def skill4 = groupSummary.skills.find { it.skillId == proj1_skills[4].skillId }
+        skill4.selfReporting != null
+        skill4.selfReporting.approvalId == null
+        skill4.selfReporting.approved == false
+        skill4.selfReporting.approvedBy == null
+        skill4.selfReporting.enabled == false
+        skill4.selfReporting.justificationRequired == false
+        skill4.selfReporting.message == null
+        skill4.selfReporting.numQuizQuestions == null
+        skill4.selfReporting.quizAttemptId == null
+        skill4.selfReporting.quizId == null
+        skill4.selfReporting.quizName == null
+        skill4.selfReporting.quizNeedsGrading == false
+        skill4.selfReporting.quizNeedsGradingAttemptDate == null
+        skill4.selfReporting.quizOrSurveyPassed == false
+        skill4.selfReporting.rejectedOn == null
+        skill4.selfReporting.requestedOn == null
+        skill4.selfReporting.type == null
+    }
 }
