@@ -1473,4 +1473,45 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         then:
         description == "This skill [skill5] belongs to project [TestProject1]"
     }
+
+    def "skill summary indicates whether parent group has description"() {
+        SkillsService user = createService(getRandomUsers(1).first())
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3)
+        
+        // Create two groups - one with description, one without
+        def groupWithDescription = SkillsFactory.createSkillsGroup(1, 1, 5)
+        groupWithDescription.description = "This group contains important skills for the project"
+        
+        def groupWithoutDescription = SkillsFactory.createSkillsGroup(1, 1, 6)
+        groupWithoutDescription.description = null
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(groupWithDescription)
+        skillsService.createSkill(groupWithoutDescription)
+        
+        // Assign skills to groups
+        skillsService.assignSkillToSkillsGroup(groupWithDescription.skillId, skills[0])
+        skillsService.assignSkillToSkillsGroup(groupWithDescription.skillId, skills[1])
+        skillsService.assignSkillToSkillsGroup(groupWithoutDescription.skillId, skills[2])
+
+        when:
+        def summaryWithGroupDescription = user.getSingleSkillSummaryForCurrentUser(proj.projectId, skills[0].skillId.toString())
+        def summaryWithoutGroupDescription = user.getSingleSkillSummaryForCurrentUser(proj.projectId, skills[2].skillId.toString())
+
+        then:
+        // Validate skill in group with description
+        summaryWithGroupDescription.groupName == groupWithDescription.name
+        summaryWithGroupDescription.groupSkillId == groupWithDescription.skillId
+        summaryWithGroupDescription.groupHasDescription == true
+        
+        // Validate skill in group without description
+        summaryWithoutGroupDescription.groupName == groupWithoutDescription.name
+        summaryWithoutGroupDescription.groupSkillId == groupWithoutDescription.skillId
+        summaryWithoutGroupDescription.groupHasDescription == false
+    }
+
+
 }
