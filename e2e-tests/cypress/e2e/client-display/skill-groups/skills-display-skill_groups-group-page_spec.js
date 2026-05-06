@@ -375,4 +375,112 @@ describe('Skills Display Skills Groups Page Tests', () => {
 
     });
 
+    it('navigate between skill pages using the previous button', () => {
+        const groupDescription = "Test group for skill navigation";
+
+        cy.createSkill(1, 1, 1)
+        // Create first group with 1 skill
+        cy.createSkillsGroup(1, 1, 1, {
+            description: groupDescription
+        });
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: 100,
+            numPerformToCompletion: 2
+        });
+
+        // Create second group with 2 skills
+        cy.createSkillsGroup(1, 1, 2, {
+            description: groupDescription
+        });
+        cy.addSkillToGroup(1, 1, 2, 3, {
+            pointIncrement: 150,
+            numPerformToCompletion: 1
+        });
+        cy.addSkillToGroup(1, 1, 2, 4, {
+            pointIncrement: 200,
+            numPerformToCompletion: 1
+        });
+
+        cy.createSkill(1, 1, 5)
+
+        // Start from the last skill
+        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill5');
+        cy.get('[data-cy="skillsTitle"]').should('contain', 'Skill Overview');
+        cy.get('[data-cy="skillProgressTitle-skill5"]').contains('Very Great Skill 5');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group2]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill5]').should('be.visible');
+        cy.get('[data-cy="groupInformationSection"]').should('not.exist');
+        cy.get('[data-cy="skillOrder"]').contains('Skill 5 of 5')
+
+        // Navigate to previous skill using previous button
+        cy.get('[data-cy="prevSkill"]').should('be.enabled')
+        cy.get('[data-cy="nextSkill"]').should('be.disabled')
+        cy.get('[data-cy="prevSkill"]').click();
+        
+        // Verify we're on fourth skill and breadcrumb updated
+        cy.url().should('include', '/subjects/subj1/groups/group2/skills/skill4');
+        cy.get('[data-cy="skillsTitle"]').should('contain', 'Skill Overview');
+        cy.get('[data-cy="skillProgressTitle-skill4"]').contains('Very Great Skill 4');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group2]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill4]').should('be.visible');
+        cy.get('[data-cy="groupInformationSection"]').contains('Awesome Group 2')
+        cy.get('[data-cy="skillOrder"]').contains('Skill 4 of 5')
+
+        // Navigate to previous skill using previous button
+        cy.get('[data-cy="prevSkill"]').should('be.enabled')
+        cy.get('[data-cy="nextSkill"]').should('be.enabled')
+        cy.get('[data-cy="prevSkill"]').click();
+        
+        // Verify we're on third skill and breadcrumb updated
+        cy.url().should('include', '/subjects/subj1/groups/group2/skills/skill3');
+        cy.get('[data-cy="skillsTitle"]').should('contain', 'Skill Overview');
+        cy.get('[data-cy="skillProgressTitle-skill3"]').contains('Very Great Skill 3');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group2]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill3]').should('be.visible');
+        cy.get('[data-cy="groupInformationSection"]').contains('Awesome Group 2')
+        cy.get('[data-cy="skillOrder"]').contains('Skill 3 of 5')
+
+        // Navigate to previous skill using previous button
+        cy.get('[data-cy="prevSkill"]').should('be.enabled')
+        cy.get('[data-cy="nextSkill"]').should('be.enabled')
+        cy.get('[data-cy="prevSkill"]').click();
+        
+        // Verify we're on second skill and breadcrumb updated
+        cy.url().should('include', '/subjects/subj1/groups/group1/skills/skill2');
+        cy.get('[data-cy="skillsTitle"]').should('contain', 'Skill Overview');
+        cy.get('[data-cy="skillProgressTitle-skill2"]').contains('Very Great Skill 2');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill2]').should('be.visible');
+        cy.get('[data-cy="groupInformationSection"]').contains('Awesome Group 1')
+        cy.get('[data-cy="skillOrder"]').contains('Skill 2 of 5')
+
+        // Navigate to previous skill using previous button
+        cy.get('[data-cy="prevSkill"]').should('be.enabled')
+        cy.get('[data-cy="nextSkill"]').should('be.enabled')
+        cy.get('[data-cy="prevSkill"]').click();
+        
+        // Verify we're on first skill and breadcrumb updated
+        cy.url().should('include', '/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillsTitle"]').should('contain', 'Skill Overview');
+        cy.get('[data-cy="skillProgressTitle-skill1"]').contains('Very Great Skill 1');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group1]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill1]').should('be.visible');
+        cy.get('[data-cy="groupInformationSection"]').should('not.exist');
+        cy.get('[data-cy="skillOrder"]').contains('Skill 1 of 5')
+
+        // Verify button states at the first skill
+        cy.get('[data-cy="prevSkill"]').should('be.disabled')
+        cy.get('[data-cy="nextSkill"]').should('be.enabled')
+    });
+
 })
