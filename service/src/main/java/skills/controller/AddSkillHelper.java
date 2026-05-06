@@ -23,8 +23,11 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import skills.PublicProps;
+import skills.auth.AuthMode;
+import skills.auth.UserAuthService;
 import skills.auth.UserInfo;
 import skills.auth.UserInfoService;
 import skills.auth.pki.PkiUserLookup;
@@ -58,8 +61,11 @@ public class AddSkillHelper {
     @Autowired
     ProjectErrorService projectErrorService;
 
-    @Autowired(required = false)
-    PkiUserLookup pkiUserLookup;
+    @Autowired
+    UserAuthService userAuthService;
+
+    @Value("${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}")
+    AuthMode authMode;
 
     public BatchSkillEventResult addBatchSkillsForBatchUsers(String projectId, BatchSkillEventRequest batchSkillEventRequest) {
 
@@ -97,22 +103,27 @@ public class AddSkillHelper {
             String userId = "";
 
             try {
-                userId = userInfoService.getUserName(userIdToProcess, false, "ID");
+                String mode = "ID";
+                if(userIdToProcess.substring(0, 3).equalsIgnoreCase("CN=")) {
+                    mode = "DN";
+                }
+                userId = userInfoService.getUserName(userIdToProcess, false, mode);
+                if(authMode == AuthMode.PKI) {
+                    boolean userExists = userAuthService.userExists(userId);
+                    if (!userExists) {
+                        throw new SkillException("User [" + userIdToProcess + "] does not exist");
+                    }
+                }
             } catch (SkillException e) {
-                try {
-                    userId = userInfoService.getUserName(userIdToProcess, false, "DN");
-                }
-                catch (SkillException se) {
-                    SkillEventResult res = new SkillEventResult();
-                    res.setSkillApplied(false);
-                    res.setExplanation("User [" + userIdToProcess + "] not found");
-                    res.setProjectId(projectId);
-                    res.setSkillId("");
-                    res.setUserId(userIdToProcess);
-                    results.add(res);
-                    log.error("Error applying skills, user [{}], error [{}]", userIdToProcess, res.getExplanation());
-                    continue;
-                }
+                SkillEventResult res = new SkillEventResult();
+                res.setSkillApplied(false);
+                res.setExplanation("User [" + userIdToProcess + "] could not be processed: " + e.getMessage());
+                res.setProjectId(projectId);
+                res.setSkillId("");
+                res.setUserId(userIdToProcess);
+                results.add(res);
+                log.error("Error applying skills, user [{}], error [{}]", userIdToProcess, res.getExplanation());
+                continue;
             }
 
             if (log.isInfoEnabled()) {
