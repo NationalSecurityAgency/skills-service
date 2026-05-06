@@ -236,7 +236,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.get('input.p-listbox-filter')
           .invoke('attr', 'placeholder')
           .should('contain', 'Search for Courses, Assessments, Clusters or Badges');
-        cy.get('[data-cy="subjectName"]').first().should('have.text', "Course: Subject 1");
+        cy.get('[data-cy="subjectName"]').first().should('have.text', "Course:Subject 1");
     });
 
     it('client-display: training-wide search dialog is visible and displayed with position=top when in client-display iframe', () => {
