@@ -271,8 +271,6 @@ describe('Client Display Tests', () => {
         // summaries should not be displayed at all
         cy.get('[data-cy="subjectTile-subj1"]')
         cy.get('[data-cy="subjectTileBtn"]').should('not.exist');
-
-        cy.get('[data-cy="searchSkillsAcrossSubjects"]').should('not.exist')
     });
 
     it('skills-client: components should not be clickable in the summary only option', () => {
@@ -300,8 +298,6 @@ describe('Client Display Tests', () => {
         // summaries should not be displayed at all
         cy.wrapIframe().find('[data-cy="subjectTile-subj1"]')
         cy.wrapIframe().find('[data-cy="subjectTileBtn"]').should('not.exist')
-
-        cy.wrapIframe().find('[data-cy="searchSkillsAcrossSubjects"]').should('not.exist')
     });
 
     it('skilltree brand should link to docs', () => {

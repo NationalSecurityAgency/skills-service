@@ -177,24 +177,6 @@ class UserSkillsController {
         return skillsLoader.getUserLevel(projectId, userId);
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills", method = RequestMethod.GET, produces = "application/json")
-    @ResponseBody
-    @Profile
-    public TableResult getProjectSkills(HttpServletRequest request,
-                                        @PathVariable("projectId") String projectId,
-                                        @RequestParam(name = "userId", required = false) String userIdParam,
-                                        @RequestParam(name = "idType", required = false) String idType,
-                                        @RequestParam(required = false, defaultValue = "10") int limit,
-                                        @RequestParam(required = false, defaultValue = "1") int page,
-                                        @RequestParam(required = false, defaultValue = "skillName") String orderBy,
-                                        @RequestParam(required = false, defaultValue = "true") Boolean ascending,
-                                        @RequestParam(required = false, defaultValue = "") String query) {
-
-        PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(projectId, limit, page, orderBy, ascending);
-        String userId = userInfoService.getUserName(userIdParam, true, idType);
-
-        return skillsService.getSkillsForProject(userId, projectId, query, pageRequest);
-    }
     @RequestMapping(value = "/projects/{projectId}/skillsSubjectsAndBadges", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @Profile
@@ -248,6 +230,28 @@ class UserSkillsController {
                                                                @RequestParam(name = "idType", required = false) String idType) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
         return skillsLoader.loadSubjectDescriptions(projectId, subjectId, userId, getProvidedVersionOrReturnDefault(version));
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public SkillsGroupSummary getSkillsGroupSummary(@PathVariable("projectId") String projectId,
+                                                     @PathVariable("groupId") String groupId,
+                                                     @RequestParam(name = "userId", required = false) String userIdParam,
+                                                     @RequestParam(name = "version", required = false) Integer version,
+                                                     @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        return skillsLoader.loadSkillsGroupSummary(projectId, groupId, userId, getProvidedVersionOrReturnDefault(version));
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/descriptions", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public List<SkillDescription> getGroupSkillsDescriptions(@PathVariable("projectId") String projectId,
+                                                               @PathVariable("groupId") String groupId,
+                                                               @RequestParam(name = "userId", required = false) String userIdParam,
+                                                               @RequestParam(name = "version", required = false) Integer version,
+                                                               @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        return skillsLoader.loadGroupDescriptions(projectId, groupId, userId, getProvidedVersionOrReturnDefault(version));
     }
 
     /**

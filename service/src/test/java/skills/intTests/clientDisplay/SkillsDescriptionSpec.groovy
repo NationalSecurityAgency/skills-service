@@ -16,7 +16,9 @@
 package skills.intTests.clientDisplay
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 
 class SkillsDescriptionSpec extends DefaultIntSpec {
 
@@ -518,5 +520,158 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
             assert !it.description
             assert !it.href
         }
+    }
+
+    void "get descriptions for a SkillsGroup with multiple skills"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        
+        // Create skills for group
+        List<Map> childSkills = SkillsFactory.createSkills(5, 1, 1, 100)
+        
+        // Create a skills group
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 10)
+
+        // Set descriptions and help URLs for child skills
+        childSkills.each { skill ->
+            skill.description = "Desc [${skill.skillId}]".toString()
+            skill.helpUrl = "http://${skill.skillId}".toString()
+        }
+        
+        // Set one skill to have no description
+        childSkills[2].description = null
+        childSkills[3].helpUrl = null
+        
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj1, [skillsGroup])
+
+        // Assign skills to group
+        String skillsGroupId = skillsGroup.skillId
+        childSkills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        
+
+        // Create multiple users
+        List<SkillsService> users = getRandomUsers(3).collect {createService(it) }
+
+        // Give some users achievements
+        users[0].addSkill([projectId: proj1.projectId, skillId: childSkills[0].skillId])
+        users[1].addSkill([projectId: proj1.projectId, skillId: childSkills[1].skillId])
+        users[2].addSkill([projectId: proj1.projectId, skillId: childSkills[0].skillId])
+
+        when:
+        def res =  users[0].getGroupDescriptions(proj1.projectId, skillsGroupId).sort { it.skillId }
+
+        then:
+        res.description == [childSkills[0].description,
+                                     childSkills[1].description,
+                                     null,
+                                     childSkills[3].description,
+                                     childSkills[4].description]
+        res.href == [childSkills[0].helpUrl,
+                     childSkills[1].helpUrl,
+                     childSkills[2].helpUrl,
+                     null,
+                     childSkills[4].helpUrl]
+    }
+
+    void "cannot add skills to a disabled SkillsGroup"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        // Create skills for group
+        List<Map> childSkills = SkillsFactory.createSkills(3, 1, 1, 100)
+
+        // Create a disabled skills group
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 10)
+        skillsGroup.enabled = 'false'
+        // Set descriptions and help URLs for child skills
+        childSkills.each { skill ->
+            skill.description = "Desc [${skill.skillId}]".toString()
+            skill.helpUrl = "http://${skill.skillId}".toString()
+        }
+
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj1, [skillsGroup])
+
+        String skillsGroupId = skillsGroup.skillId
+        when:
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, childSkills[0])
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("Cannot enable Skill [${childSkills[0].skillId}] because it's SkillsGroup [${skillsGroupId}]")
+    }
+
+    void "get descriptions for SkillsGroup where every skill is disabled should return empty"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        
+        // Create skills for group
+        List<Map> childSkills = SkillsFactory.createSkills(3, 1, 1, 100)
+        
+        // Create a disabled skills group
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 10)
+
+        // Set descriptions and help URLs for child skills
+        childSkills.each { skill ->
+            skill.description = "Desc [${skill.skillId}]".toString()
+            skill.helpUrl = "http://${skill.skillId}".toString()
+            skill.enabled = 'false'
+        }
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj1, [skillsGroup])
+
+        String skillsGroupId = skillsGroup.skillId
+        childSkills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        SkillsService user = createService(getRandomUsers(1).first())
+        when:
+        def res = user.getGroupDescriptions(proj1.projectId, skillsGroupId)
+        childSkills[1].enabled = 'true'
+        skillsService.updateSkill(childSkills[1], null)
+        def res1 = user.getGroupDescriptions(proj1.projectId, skillsGroupId)
+        
+        then:
+        !res
+        res1.description == [childSkills[1].description]
+        res1.href == [childSkills[1].helpUrl]
+    }
+
+    void "get descriptions for SkillsGroup with no skills should return empty"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj1, [skillsGroup])
+
+        when:
+        def res = skillsService.getGroupDescriptions(proj1.projectId, skillsGroup.skillId)
+        then:
+        !res
+    }
+
+    void "on project admin is allowed to provide userId param"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        List<Map> childSkills = SkillsFactory.createSkills(5, 1, 1, 100)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 10)
+
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj1, [skillsGroup])
+        childSkills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, skill)
+        }
+
+        SkillsService otherAdmin = createService(getRandomUsers(1).first())
+        otherAdmin.createProject(SkillsFactory.createProject(2))
+
+        def res = skillsService.getGroupDescriptions(proj1.projectId, skillsGroup.skillId, otherAdmin.userName)
+        when:
+        otherAdmin.getGroupDescriptions(proj1.projectId, skillsGroup.skillId, skillsService.userName)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.resBody.contains("Access Denied")
+
+        res.size() == 5
     }
 }

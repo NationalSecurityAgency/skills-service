@@ -387,6 +387,13 @@ class SkillsService {
         wsHelper.apiGet(url, params)
     }
 
+    def getGroupDescriptions(String projectId, String groupId, String userId = null) {
+        userId = getUserId(userId)
+        String url = "/projects/${projectId}/groups/${groupId}/descriptions".toString()
+        Map params = userId ? [userId: userId] : null
+        wsHelper.apiGet(url, params)
+    }
+
     def getBadgeDescriptions(String projectId, String badgeId, boolean isGlobal = false, String userId = null) {
         userId = getUserId(userId)
         String url = "/projects/${projectId}/badges/${badgeId}/descriptions"
@@ -842,26 +849,6 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
-    def getApiSkills(String projectId, String query = null, String userId = null, Integer limit = null, Integer page = null, String orderBy = null, Boolean ascending = null) {
-        String url = "/projects/${projectId}/skills?query=${query ?: ''}"
-        if (userId != null) {
-            url = "${url}&userId=${userId}"
-        }
-        if (limit != null) {
-            url = "${url}&limit=${limit}"
-        }
-        if (ascending != null) {
-            url = "${url}&ascending=${ascending}"
-        }
-        if (orderBy != null) {
-            url = "${url}&orderBy=${orderBy}"
-        }
-        if (page != null) {
-            url = "${url}&page=${page}"
-        }
-        wsHelper.apiGet(url)
-    }
-
     def getApiAllSubjectsBadgesAndSkills(String projectId) {
         String url = "/projects/${projectId}/skillsSubjectsAndBadges"
         wsHelper.apiGet(url)
@@ -959,6 +946,18 @@ class SkillsService {
         String url = "/projects/${projId}/subjects/${subjectId}/summary?userId=${userId}"
         if (version >= 0) {
             url += "&version=${version}"
+        }
+        wsHelper.apiGet(url)
+    }
+
+    def getSkillsGroupSummary(String projId, String groupId, String userId = null, Integer version = -1) {
+        String url = "/projects/${projId}/groups/${groupId}/summary"
+        if (userId) {
+            url = "${url}?userId=${userId}"
+        }
+        if (version >= 0) {
+            String joinChar = url.contains("?") ? "&" : "?"
+            url += "${joinChar}version=${version}"
         }
         wsHelper.apiGet(url)
     }
@@ -2447,15 +2446,6 @@ class SkillsService {
         } else {
             return "${getProjectUrl(project)}/skills/${skill}".toString()
         }
-    }
-
-    private static String getSyncSkillPointsUrl(String project, String subject, String groupId) {
-        return "${getSubjectUrl(project, subject)}/groups/${groupId}/skills".toString()
-    }
-
-    private static String getSkillEventUrl(String project, String skill) {
-        // /projects/{projectId}/skills/{skillEventId}
-        return "${getProjectUrl(project)}/skills/${skill}".toString()
     }
 
     private static String getBadgeUrl(String project, String badge) {

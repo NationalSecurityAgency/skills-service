@@ -32,21 +32,6 @@ class SkillsService {
     @Autowired
     SkillDefRepo skillDefRepo
 
-    TableResult getSkillsForProject(String userId, String projectId, String query, PageRequest pageRequest) {
-
-        long totalCount = skillDefRepo.countSkillPreviewItems(projectId)
-        long count = totalCount
-        String cleanedUpQuery = query ? query.trim() : ''
-        if (query) {
-            count = skillDefRepo.countSkillPreviewItems(projectId, query)
-        }
-        List<SkillDefRepo.SkillPreviewItemDbRes> items = skillDefRepo.findSkillPreviewItems(projectId, userId, cleanedUpQuery, pageRequest)
-        return new TableResult(
-                count: count,
-                totalCount: totalCount,
-                data: items,
-        )
-    }
     List<SkillDefRepo.SkillWithAchievementDetails> getAllSkillsSubjectsAndBadgesWithAchievementDetails(String projectId, String userId) {
         return skillDefRepo.findAllSkillsSubjectsAndBadgesWithAchievementDetails(projectId, userId)
     }

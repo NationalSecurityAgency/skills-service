@@ -47,10 +47,7 @@ onMounted( () => {
 watch( () => route.params.skillId, () => {
   loadSkillSummary()
 });
-watch(() => skill.value.groupSkillId, () => {
-  groupDescription.value = null;
-  displayGroupDescription.value = false;
-})
+const groupDescriptionExist = computed(() => skill.value.groupSkillId && skill.value.groupHasDescription === true)
 const loadSkillSummary = () => {
   const skillId = skillsDisplayInfo.isDependency() ? route.params.dependentSkillId : route.params.skillId
   skillState.loadSkillSummary(skillId, route.params.crossProjectId, route.params.subjectId)
@@ -68,19 +65,16 @@ const loadSkillSummary = () => {
     })
 }
 
+const prevNextNavigation = (skillId, groupId) => {
+  const params = { skillId, projectId: route.params.projectId, groupId }
+  const pageName = groupId ? 'skillDetailsUnderGroup' : 'skillDetails'
+  skillsDisplayInfo.routerPush(pageName, params)
+}
 const prevButtonClicked = () => {
-  const params = { skillId: skillState.skillSummary.prevSkillId, projectId: route.params.projectId }
-  skillsDisplayInfo.routerPush(
-    'skillDetails',
-    params
-  )
+  prevNextNavigation(skillState.skillSummary.prevSkillId, skillState.skillSummary.prevSkillGroupId)
 }
 const nextButtonClicked = () => {
-  const params = { skillId: skillState.skillSummary.nextSkillId, projectId: route.params.projectId }
-  skillsDisplayInfo.routerPush(
-    'skillDetails',
-    params
-  )
+  prevNextNavigation(skillState.skillSummary.nextSkillId, skillState.skillSummary.nextSkillGroupId)
 }
 
 const isLoading = computed(() => loadingSkill.value || skillState.loadingSkillSummary)
@@ -96,6 +90,11 @@ const descriptionToggled = () => {
 
 const showNav = computed(() => {
   return skill.value && (skill.value.prevSkillId || skill.value.nextSkillId) && !skillsDisplayInfo.isCrossProject()
+})
+const groupLink = computed(() => {
+  const name = skillsDisplayInfo.getContextSpecificRouteName('skillsGroupDetails')
+  const params = { groupId: skill.value.groupSkillId }
+  return { name, params }
 })
 </script>
 
@@ -118,13 +117,16 @@ const showNav = computed(() => {
               <div class="mr-2 mt-1 text-xl">
                 <i class="fas fa-layer-group" aria-hidden="true"></i>
               </div>
-              <div class="flex flex-1">
-                <span class="text-2xl sd-theme-primary-color font-medium flex">{{ skill.groupName }}</span>
+              <div class="flex-1 flex gap-1 items-center text-2xl">
+                <div class="items-center">{{ attributes.groupDisplayName }}:</div>
+                <router-link :to="groupLink" class="sd-theme-primary-color font-medium" data-cy="groupName">
+                  {{ skill.groupName }}
+                </router-link>
               </div>
-              <div v-if="!attributes.groupDescriptionsOn">
+              <div v-if="!attributes.groupDescriptionsOn && groupDescriptionExist">
                 <div class="flex flex-row content-center">
                   <label for="groupDescriptionToggleSwitch">
-                    <span class="text-muted pr-1 content-center">Group Description:</span>
+                    <span class="text-muted pr-1 content-center">{{ attributes.groupDisplayName }} Description:</span>
                   </label>
                   <ToggleSwitch v-model="displayGroupDescription" data-cy="toggleGroupDescription" @change="descriptionToggled" inputId="groupDescriptionToggleSwitch" />
                 </div>

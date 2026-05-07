@@ -84,7 +84,7 @@ const scrollToLastViewedSkill = (timeout = null) => {
     }
   } else {
     // set it if backend provided
-    skillsInternal.value.forEach((item) => {
+    skillsInternal.value?.forEach((item) => {
       if (item.isLastViewed === true) {
         scrollIntoViewState.setLastViewedSkillId(item.skillId)
       } else if (item.type === 'SkillsGroup') {
@@ -118,7 +118,7 @@ const descriptions = ref([])
 const onDetailsToggle = () => {
   if (!descriptionsLoaded.value) {
     loading.value = true
-    skillsDisplayService.getDescriptions(subject.value.subjectId || route.params.badgeId, props.type)
+    skillsDisplayService.getDescriptions(subject.value.subjectId || route.params.badgeId || route.params.groupId, props.type)
       .then((res) => {
         descriptions.value = res
         res.forEach((desc) => {

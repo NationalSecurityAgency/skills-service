@@ -555,8 +555,11 @@ class SkillsLoader {
         def badges = skillDefRepo.findAllBadgesForSkill([processedSkillId], crossProjectId ?: projectId);
 
         String groupName = null
+        Boolean groupHasDescription = false
         if(skillDef.groupId) {
-            groupName = skillDefRepo.getSkillNameByProjectIdAndSkillId(projectId, skillDef.groupId)?.skillName
+            SkillDefRepo.SkillNameAndPresenceOfDescription nameAndDescPresence = skillDefRepo.getGroupNameAndPresenceOfDescription(skillDef.projectId, skillDef.groupId)
+            groupName = nameAndDescPresence?.skillName
+            groupHasDescription = nameAndDescPresence?.hasDescription
         }
 
         boolean isCrossProjectSkill = crossProjectId && crossProjectId != projectId
@@ -643,7 +646,9 @@ class SkillsLoader {
                 skillId: skillDef.skillId,
                 subjectId: skillSubjectId,
                 prevSkillId: orderInfo?.previousSkillId,
+                prevSkillGroupId: orderInfo?.previousSkillGroupId,
                 nextSkillId: orderInfo?.nextSkillId,
+                nextSkillGroupId: orderInfo?.nextSkillGroupId,
                 orderInGroup: orderInfo?.overallOrder ?: 0,
                 totalSkills: orderInfo?.totalCount ?: 0,
                 skill: isReusedSkill ? SkillReuseIdUtil.removeTag(unsanitizedName) : unsanitizedName,
@@ -675,6 +680,7 @@ class SkillsLoader {
                 lastExpirationDate: lastExpirationDate,
                 groupName: InputSanitizer.unsanitizeName(groupName),
                 groupSkillId: skillDef.groupId,
+                groupHasDescription: groupHasDescription,
                 approvalHistory: approvalHistory,
                 iconClass: skillDef.iconClass,
         )
@@ -816,6 +822,10 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     List<SkillDescription> loadSubjectDescriptions(String projectId, String subjectId, String userId, Integer version = -1) {
         return loadDescriptions(projectId, subjectId, userId, SkillRelDef.RelationshipType.RuleSetDefinition, version)
+    }
+    @Transactional(readOnly = true)
+    List<SkillDescription> loadGroupDescriptions(String projectId, String groupId, String userId, Integer version = -1) {
+        return loadDescriptions(projectId, groupId, userId, SkillRelDef.RelationshipType.SkillsGroupRequirement, version)
     }
     @Transactional(readOnly = true)
     List<SkillDescription> loadBadgeDescriptions(String projectId, String badgeId, String userId, Integer version = -1) {
@@ -1114,10 +1124,48 @@ class SkillsLoader {
         return res ?: 0
     }
 
+    @Transactional(readOnly = true)
+    SkillsGroupSummary loadSkillsGroupSummary(String projectId, String groupId, String userId, Integer version = -1) {
+        ProjDef projDef = getProjDef(userId, projectId)
+        SkillDefWithExtra groupSkillDef = getSkillDefWithExtra(userId, projectId, groupId, [ContainerType.SkillsGroup])
+
+        if (version == -1 || groupSkillDef.version <= version) {
+            return doLoadSkillsGroupSummary(projDef, userId, groupSkillDef, version)
+        } else {
+            return null
+        }
+    }
+
     @Profile
-    private Integer calculatePointsForProject(ProjDef projDef, String userId, int version) {
-        Integer res = userPointsRepo.getPointsByProjectIdAndUserId(projDef.projectId, userId)
-        return res ?: 0
+    private SkillsGroupSummary doLoadSkillsGroupSummary(ProjDef projDef, String userId, SkillDefWithExtra groupSkillDef, Integer version) {
+        List<SkillRelDef.RelationshipType> relTypes = [ SkillRelDef.RelationshipType.SkillsGroupRequirement]
+        SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, groupSkillDef, version, relTypes)
+
+        List<SkillSummaryParent> skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, false, userId, version)
+        int totalPoints = skillsRes ? skillsRes.collect({it.totalPoints}).sum() as Integer : 0
+
+        Integer points = skillsRes ? skillsRes.collect({ it.points }).sum() as Integer : 0
+        Integer skillsAchieved = skillsRes ? skillsRes.collect({it.points == it.totalPoints ? 1 : 0 }).sum() as Integer : 0
+        Integer totalSkills = skillsRes ? skillsRes.size() : 0
+
+        // convert null result to 0
+        points = points ?: 0
+
+        String description = groupSkillDef.description
+        description = InputSanitizer.unsanitizeForMarkdown(description)
+
+        return new SkillsGroupSummary(
+                group: InputSanitizer.unsanitizeName(groupSkillDef.name),
+                groupId: groupSkillDef.skillId,
+                description: description,
+                points: points,
+                totalPoints: totalPoints,
+
+                skillsAchieved: skillsAchieved,
+                totalSkills: totalSkills,
+
+                skills: skillsRes,
+        )
     }
 
     @Profile
@@ -1421,6 +1469,7 @@ class SkillsLoader {
                         selfReporting: loadSelfReportingFromApproval(skillDefAndUserPoints),
                         subjectName: subjectName,
                         subjectId: subjectId,
+                        groupSkillId: skillDef.groupId,
                         type: skillDef.type,
                         copiedFromProjectId: !isReusedSkill ? skillDef.copiedFromProjectId : null,
                         copiedFromProjectName: !isReusedSkill ? InputSanitizer.unsanitizeName(skillDefAndUserPoints.copiedFromProjectName) : null,

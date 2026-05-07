@@ -24,6 +24,7 @@ import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import SkillReuseIdUtil from "@/components/utils/SkillReuseIdUtil.js";
+import SkillType from "@/common-components/utilities/SkillType.js";
 
 const emit = defineEmits(['hidden']);
 const props = defineProps({
@@ -82,24 +83,33 @@ const focusOnFilterInput = () => {
 }
 const navToSkill = (skill) => {
   const { skillType } = skill
-  if (skillType === 'Subject') {
+  if (SkillType.isSubject(skillType)) {
     skillDisplayInfo.routerPush(
         'SubjectDetailsPage',
         {
           subjectId: skill.skillId
         })
-  } else if (skillType === 'Badge') {
+  } else if (SkillType.isBadge(skillType)) {
     skillDisplayInfo.routerPush(
         'badgeDetails',
         {
           badgeId: skill.skillId
         })
-  } else {
+  } else if (SkillType.isSkillsGroup(skillType)) {
     skillDisplayInfo.routerPush(
-        'skillDetails',
+        'skillsGroupDetails',
         {
           subjectId: skill.subjectId,
-          skillId: skill.skillId
+          groupId: skill.skillId
+        })
+  } else {
+    const pageName = skill.skillsGroupId ? 'skillDetailsUnderGroup' : 'skillDetails'
+    skillDisplayInfo.routerPush(
+        pageName,
+        {
+          subjectId: skill.subjectId,
+          skillId: skill.skillId,
+          groupId: skill.skillsGroupId,
         })
   }
   closeMe()
@@ -119,17 +129,23 @@ const filterEvent = (event) => {
 }
 
 const isSkill = (skill) => {
-  return skill.skillType === 'Skill'
+  return SkillType.isSkill(skill.skillType)
+}
+const isSkillOrGroup = (skill) => {
+  return isSkill(skill) || SkillType.isSkillsGroup(skill.skillType)
 }
 const getIconClass = (skill) => {
   const { skillType } = skill
-  if (skillType === 'Subject') {
-    return 'fa-solid fa-cubes skills-color-subjects text-blue-500'
+  if (SkillType.isSubject(skillType)) {
+    return 'fa-solid fa-cubes skills-color-subjects text-slate-500'
   }
-  if (skillType === 'Badge') {
+  if (SkillType.isBadge(skillType)) {
     return 'fas fa-award skills-color-badges text-indigo-500'
   }
-  return 'fas fa-graduation-cap skills-color-skills text-green-500'
+  if (SkillType.isSkillsGroup(skillType)) {
+    return 'fa-solid fa-layer-group text-purple-500'
+  }
+  return 'fas fa-graduation-cap skills-color-skills text-sky-500'
 }
 const getUserProgress = (skill) => {
   return isSkill(skill) ? skill.userCurrentPoints : skill.childAchievementCount
@@ -157,14 +173,13 @@ const dialogPosition = computed(() => {
       :show-header="false"
       :show-ok-button="false"
       :show-cancel-button="false"
-      :maximizable="false"
-      :style="{ width: '40rem !important' }">
+      :maximizable="false">
 
     <div class="card flex justify-center">
-      <Listbox class="w-full border-none!"
+      <Listbox class="w-full h-full border-none!"
                data-cy="trainingSearchListBox"
-               :aria-label="`Search for ${attributes.subjectDisplayName}s, ${attributes.skillDisplayName}s or Badges`"
-               :pt="{ listContainer: { tabindex: '0'}, header: { class: 'p-0! pb-1!' }, list: { class: 'p-0!' } }"
+               :aria-label="`Search for ${attributes.subjectDisplayNamePlural}, ${attributes.skillDisplayNamePlural}, ${attributes.groupDisplayNamePlural} or Badges`"
+               :pt="{ listContainer: { tabindex: '0', style: 'max-height: 20rem !important' }, header: { class: 'p-0! pb-1!' }, list: { class: 'p-0!' } }"
                @filter="filterEvent"
                @update:modelValue="navToSkill"
                ref="trainingSearchListBoxRef"
@@ -174,32 +189,55 @@ const dialogPosition = computed(() => {
                :autofocus="true"
                :auto-option-focus="false"
                filter
-               :filterPlaceholder="`Search for ${attributes.subjectDisplayName}s, ${attributes.skillDisplayName}s or Badges`"
+               striped
+               :filterPlaceholder="`Search for ${attributes.subjectDisplayNamePlural}, ${attributes.skillDisplayNamePlural}, ${attributes.groupDisplayNamePlural} or Badges`"
       >
         <template #option="slotProps">
-          <div class="py-0 w-full sd-theme-primary-color" :data-cy="`searchRes-${slotProps.option.skillId}`">
-            <div class="flex flex-nowrap">
-              <div class="flex-1 flex items-center"
-                   data-cy="skillName"
-                   :aria-label="`Selected ${slotProps.option.skillName} ${slotProps.option.skillType}${slotProps.option.subjectName ? ` from ${slotProps.option.subjectName} ${attributes.subjectDisplayName}` : ''}. You have earned ${getUserProgress(slotProps.option)} ${getProgressLabel(slotProps.option)} out of ${getTotalProgress(slotProps.option)} for this ${slotProps.option.skillType}. Click to navigate to the ${slotProps.option.skillType}.`">
-                <i :class="`${getIconClass(slotProps.option)} mr-1 text-xl`" style="min-width: 25px" aria-hidden="true" />
-                <highlighted-value :value="SkillReuseIdUtil.removeTag(slotProps.option.skillName)" :filter="query" class="text-xl" />
-              </div>
-              <div
-                  class=""
-                  data-cy="points"
-                  :class="{'text-green-700 dark:text-green-500': slotProps.option.userAchieved}" aria-hidden="true">
-                <i v-if="slotProps.option.userAchieved" class="fas fa-check mr-1" aria-hidden="" />
-                <span class="text-orange-700 font-medium">{{ getUserProgress(slotProps.option) }}</span> / {{ getTotalProgress(slotProps.option) }} <span class="italic">{{ getProgressLabel(slotProps.option) }}</span>
+          <div class="py-0 w-full sd-theme-primary-color flex gap-2 items-center"
+               :data-cy="`searchRes-${slotProps.option.skillId}`">
+
+            <div class="border rounded p-2 min-w-6">
+              <i :class="getIconClass(slotProps.option)" class="text-2xl" aria-hidden="true" />
+            </div>
+
+            <div class="flex-1 flex flex-col"
+                 data-cy="skillName"
+                 :aria-label="`Selected ${slotProps.option.skillName} ${slotProps.option.skillType}${slotProps.option.subjectName ? ` from ${slotProps.option.subjectName} ${attributes.subjectDisplayName}` : ''}. You have earned ${getUserProgress(slotProps.option)} ${getProgressLabel(slotProps.option)} out of ${getTotalProgress(slotProps.option)} for this ${slotProps.option.skillType}. Click to navigate to the ${slotProps.option.skillType}.`">
+              <highlighted-value :value="SkillReuseIdUtil.removeTag(slotProps.option.skillName)" :filter="query" class="text-xl font-medium text-primary sd-theme-primary-color" />
+
+              <div class="flex gap-2 items-center sd-theme-primary-color" aria-hidden="true">
+                <div class="flex gap-2 items-center">
+                  <div class="italic sd-theme-primary-color">Type:</div>
+                  <div>{{ attributes.displayNameBySkillType(slotProps.option.skillType) }}</div>
+                </div>
+
+                <div v-if="slotProps.option.skillsGroupName" class="flex gap-2 items-center ">
+                  <div class="text-gray-400">|</div>
+                  <div data-cy="subjectName" class="flex gap-2 items-center">
+                    <div class="italic ">{{ attributes.groupDisplayName }}:</div>
+                    <div class="skills-theme-primary-color">{{ slotProps.option.skillsGroupName }}</div>
+                  </div>
+                </div>
+
+                <div v-if="isSkillOrGroup(slotProps.option)" class="flex gap-2 items-center">
+                  <div class="text-gray-400">|</div>
+                  <div data-cy="subjectName" class="flex gap-2 items-center">
+                    <div class="italic ">{{ attributes.subjectDisplayName }}:</div>
+                    <div class="text-info skills-theme-primary-color alt-color-handle-hover">{{ slotProps.option.subjectName }}</div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div v-if="isSkill(slotProps.option)" data-cy="subjectName" aria-hidden="true" class="mt-1">
-              <span class="italic ">{{ attributes.subjectDisplayName }}:</span> <span
-                class="text-info skills-theme-primary-color alt-color-handle-hover">{{ slotProps.option.subjectName
-              }}</span>
+            <div data-cy="points"
+                :class="{'text-green-700 dark:text-green-500': slotProps.option.userAchieved}"
+                 aria-hidden="true">
+              <i v-if="slotProps.option.userAchieved" class="fas fa-check mr-1" aria-hidden="" />
+              <span class="text-orange-700 dark:text-orange-500 font-medium">{{ getUserProgress(slotProps.option) }}</span> / {{ getTotalProgress(slotProps.option) }} <span class="italic">{{ getProgressLabel(slotProps.option) }}</span>
             </div>
           </div>
+
+
         </template>
         <template #empty>
           <div v-if="!isSearching" class="p-4">No results found</div>

@@ -31,7 +31,7 @@ const items = ref([])
 const smallScreenMode = computed(() => responsive.sm.value)
 const skillsDisplayInfo = useSkillsDisplayInfo()
 
-const idsToExcludeFromPath = ['subjects', 'skills', 'projects', 'crossProject', 'dependency', 'global']
+const idsToExcludeFromPath = ['subjects', 'skills', 'groups', 'projects', 'crossProject', 'dependency', 'global']
 const keysToExcludeFromPath = ['questions']
 
 const build = () => {

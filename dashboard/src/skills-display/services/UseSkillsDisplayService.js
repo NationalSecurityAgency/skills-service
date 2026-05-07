@@ -17,6 +17,7 @@ import axios from 'axios'
 import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import {useRoute} from 'vue-router'
 import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
+import SkillType from "@/common-components/utilities/SkillType.js";
 
 export const useSkillsDisplayService = () => {
   const servicePath = '/api/projects'
@@ -70,7 +71,7 @@ export const useSkillsDisplayService = () => {
 
   const addMetaToSummary = (summary) => {
     const res = summary
-    res.skills = res.skills.map((item) => {
+    res.skills = res.skills?.map((item) => {
       const skillRes = addMeta(item)
       const isSkillsGroupType = item.type === 'SkillsGroup'
       if (isSkillsGroupType) {
@@ -139,10 +140,12 @@ export const useSkillsDisplayService = () => {
     }).then((result) => addMeta(result.data))
   }
 
-  const searchSkills = (query) => {
-    return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skills`, {
-      params: ({ ...getUserIdAndVersionParams(), query, limit: 5 })
-    }).then((result) => result.data)
+  const getSkillsGroupSummary = (groupId) => {
+    let url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/groups/${encodeURIComponent(groupId)}/summary`
+    return axios.get(url, {
+      params: getUserIdAndVersionParams(),
+      withCredentials: true
+    }).then((result) => addMetaToSummary(result.data))
   }
 
   const getAllProjectSkillsSubjectsAndBadges = () => {
@@ -162,16 +165,18 @@ export const useSkillsDisplayService = () => {
 
   const getDescriptions = (parentId, type = 'subject') => {
     let url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/subjects/${encodeURIComponent(parentId)}/descriptions`
+    if (SkillType.isSkillsGroup(type)) {
+      url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/groups/${encodeURIComponent(parentId)}/descriptions`
+    }
     if (type === 'badge' || type === 'global-badge') {
       url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/badges/${encodeURIComponent(parentId)}/descriptions`
     }
-    const response = axios.get(url, {
+    return axios.get(url, {
       params: {
         ...getUserIdAndVersionParams(),
         global: type === 'global-badge'
       }
     }).then((result) => result.data)
-    return response
   }
 
   const reportSkill = (skillId, approvalRequestedMsg, crossProjectId) => {
@@ -276,8 +281,8 @@ export const useSkillsDisplayService = () => {
     loadUserSkillsRanking,
     updateSkillHistory,
     getSkillSummary,
+    getSkillsGroupSummary,
     getAllProjectSkillsSubjectsAndBadges,
-    searchSkills,
     getDescriptions,
     getDescriptionForSkill,
     reportSkill,

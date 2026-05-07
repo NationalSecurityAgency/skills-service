@@ -814,61 +814,6 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     @Query('''update SkillDef set displayOrder=?2 where skillId=?1''')
     void setSkillDisplayOrder(String skillId, Integer displayOrder)
 
-    static interface SkillPreviewItemDbRes {
-        String getSkillId()
-        String getSkillName()
-        String getSubjectName()
-        String getSubjectId()
-        Integer getPointIncrement()
-        Integer getTotalPoints()
-
-        Integer getUserCurrentPoints()
-        Boolean getUserAchieved()
-    }
-
-    @Query(value = '''select count(skill.id)
-                    from skill_definition skill
-                    where skill.enabled = 'true'
-                      and skill.type = 'Skill'
-                      and skill.project_id = :projectId
-    ''', nativeQuery = true)
-    long countSkillPreviewItems(@Param('projectId') String projectId)
-
-    @Query(value = '''select count(skill.id)
-                    from skill_definition skill
-                    where skill.enabled = 'true'
-                      and skill.type = 'Skill'
-                      and skill.project_id = :projectId
-                      and LOWER(skill.name) LIKE LOWER(CONCAT('%',:query,'%'))
-    ''', nativeQuery = true)
-    long countSkillPreviewItems(@Param('projectId') String projectId, @Param('query') String query)
-
-    @Query(value = '''select skill.skill_id        as skillId,
-                           skill.name            as skillName,
-                           subject.name          as subjectName,
-                           subject.skill_id      as subjectId,
-                           skill.point_increment as pointIncrement,
-                           skill.total_points    as totalPoints,
-                           case when ua.id is not null then true else false end as userAchieved,
-                           case when up.points is not null then up.points else 0 end userCurrentPoints
-                    from skill_relationship_definition relationship,
-                         skill_definition subject,
-                         skill_definition skill
-                            left join user_achievement ua on skill.id = ua.skill_ref_id and ua.user_id = :userId
-                            left join user_points up on skill.id = up.skill_ref_id and up.user_id = :userId
-                    where skill.enabled = 'true'
-                      and skill.id = relationship.child_ref_id
-                      and subject.id = relationship.parent_ref_id
-                      and subject.type = 'Subject'
-                      and skill.type = 'Skill'
-                      and skill.project_id = :projectId
-                      and LOWER(skill.name) LIKE LOWER(CONCAT('%',:query,'%'))
-    ''', nativeQuery = true)
-    List<SkillPreviewItemDbRes> findSkillPreviewItems(@Param('projectId') String projectId,
-                                                      @Param('userId') String userId,
-                                                      @Param('query') String query,
-                                                      PageRequest pageRequest)
-
     static interface SkillWithAchievementDetails {
         String getSkillId()
         String getSkillName()
@@ -883,6 +828,10 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         Integer getUserCurrentPoints()
         Integer getChildAchievementCount()
         Integer getTotalChildCount()
+        @Nullable
+        String getSkillsGroupId()
+        @Nullable
+        String getSkillsGroupName()
     }
 
     @Query(value = '''
@@ -916,7 +865,7 @@ child_achievement_counts AS (
          WHERE parent_skill.project_id = :projectId
              AND child_skill.project_id = :projectId
              AND child_skill.type = 'Skill'
-             AND srd.type IN ('RuleSetDefinition', 'BadgeRequirement', 'GroupSkillToSubject')
+             AND srd.type IN ('RuleSetDefinition', 'BadgeRequirement', 'GroupSkillToSubject', 'SkillsGroupRequirement')
          GROUP BY
              srd.parent_ref_id
      )
@@ -927,6 +876,8 @@ SELECT DISTINCT
     s.type as skillType,
     s.point_increment AS pointIncrement,
     s.total_points AS totalPoints,
+    s.group_id as skillsGroupId,
+    skillsGroup.name as skillsGroupName,
     ss.name AS subjectName,
     ss.skill_id AS subjectId,
     CASE WHEN ua.id IS NOT NULL OR COALESCE(cac.ua_count, 0) >= COALESCE(cac.child_skill_count, 1) THEN true ELSE false END AS userAchieved,
@@ -942,9 +893,10 @@ FROM
         LEFT JOIN user_points up ON s.id = up.skill_ref_id
         AND up.user_id = :userId
         LEFT JOIN child_achievement_counts cac ON s.id = cac.parent_ref_id
+        LEFT JOIN skill_definition skillsGroup ON (s.group_id = skillsGroup.skill_id and s.project_id = skillsGroup.project_id)
 WHERE
     s.enabled = 'true'
-  AND s.type in ('Skill', 'Subject', 'Badge')
+  AND s.type in ('Skill', 'Subject', 'Badge', 'SkillsGroup')
   AND s.project_id = :projectId
 ORDER BY s.name ASC
     ''', nativeQuery = true)
@@ -987,6 +939,17 @@ ORDER BY s.name ASC
                 sdChild.projectId = ?1 and
                 sdChild.skillId = ?2''')
     SkillNameAndSubjectId getSkillNameByProjectIdAndSkillId(String projectId, String skillId)
+
+    static interface SkillNameAndPresenceOfDescription {
+        String getSkillName()
+        Boolean getHasDescription()
+    }
+    @Nullable
+    @Query(value ='''select sd.name as skillName,
+       case when sd.description::oid is not null and length(convert_from(lo_get(sd.description::oid), 'UTF8'))>0 then true else false end as hasDescription
+            from skill_definition sd
+            where sd.project_id = ?1 and sd.skill_id = ?2''', nativeQuery = true)
+    SkillNameAndPresenceOfDescription getGroupNameAndPresenceOfDescription(String project, String skillId)
 
     @Modifying
     @Transactional

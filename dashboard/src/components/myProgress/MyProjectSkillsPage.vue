@@ -119,6 +119,9 @@ const handleProjInvitation = () => {
 const toTitleCase = (str) => {
   return str.toLowerCase().split('+').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
+const searchTrainingButtonShortcutForDisplay = computed(() => {
+  return toTitleCase(searchTrainingButtonShortcut.value)
+})
 </script>
 
 <template>
@@ -132,9 +135,17 @@ const toTitleCase = (str) => {
         :track-for-focus="true"
         @click="showSkillsDisplaySearchDialog = true"
         data-cy="skillsDisplaySearchBtn"
-        label="Search"
-        :title="`Search Project (${toTitleCase(searchTrainingButtonShortcut)})`"
-        icon="fa-solid fa-magnifying-glass" />
+        :title="`Search Project (${searchTrainingButtonShortcutForDisplay})`">
+        <div class="flex gap-1 items-center">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <div>Search</div>
+          <div class="ml-1 inline-flex items-center rounded border border-gray-200 bg-gray-50 dark:bg-gray-800 px-1.5 font-sans text-sm font-medium text-gray-500 dark:text-gray-200"
+               aria-label="Search training shortcut">
+            {{  searchTrainingButtonShortcutForDisplay }}
+          </div>
+        </div>
+
+      </SkillsButton>
 
       <SkillsButton
           v-if="appInfo.emailEnabled"
@@ -142,9 +153,12 @@ const toTitleCase = (str) => {
           id="contactProjectAdminsBtn"
           :track-for-focus="true"
           @click="showContact = true"
-          data-cy="contactOwnerBtn"
-          label="Contact"
-          icon="fas fa-mail-bulk" />
+          data-cy="contactOwnerBtn">
+        <div class="flex gap-1 items-center">
+          <i class="fa-solid fa-mail-bulk"></i>
+          <div>Contact</div>
+        </div>
+      </SkillsButton>
     </div>
     <skills-display-home :id="projectId" class="my-4" />
 
