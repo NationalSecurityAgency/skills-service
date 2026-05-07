@@ -53,6 +53,9 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         skillsService.createBadge(badge)
         skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, skill.skillId)
 
+        def skillGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillGroup)
+
         def nonUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
         SkillsService nonUserCommunityUser = createService(nonUserCommunityUserId)
 
@@ -83,6 +86,8 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         validateForbidden { nonUserCommunityUser.getRankDistribution(null, proj.projectId, subj.subjectId)}
         validateForbidden { nonUserCommunityUser.getPointHistory(null, proj.projectId)}
         validateForbidden { nonUserCommunityUser.getPointHistory(null, proj.projectId, subj.subjectId)}
+        validateForbidden { nonUserCommunityUser.getGroupDescriptions(proj.projectId, skillGroup.skillId)}
+        validateForbidden { nonUserCommunityUser.getSkillsGroupSummary(proj.projectId, skillGroup.skillId)}
     }
 
     def "can access project endpoints with UC protection enabled when the user does belong to the user community"() {
@@ -98,6 +103,9 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         Map badge = SkillsFactory.createBadge(1, 1)
         skillsService.createBadge(badge)
         skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, skill.skillId)
+
+        def skillGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillGroup)
 
         def otherUserCommunityUserId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])[0]
         SkillsService otherUserCommunityUser = createService(otherUserCommunityUserId)
@@ -130,6 +138,8 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         !validateForbidden { otherUserCommunityUser.getRankDistribution(null, proj.projectId, subj.subjectId)}
         !validateForbidden { otherUserCommunityUser.getPointHistory(null, proj.projectId)}
         !validateForbidden { otherUserCommunityUser.getPointHistory(null, proj.projectId, subj.subjectId)}
+        !validateForbidden { otherUserCommunityUser.getGroupDescriptions(proj.projectId, skillGroup.skillId)}
+        !validateForbidden { otherUserCommunityUser.getSkillsGroupSummary(proj.projectId, skillGroup.skillId)}
     }
 
     def "cannot add a project admin role to a community protected project if the user is not a member of that community"() {

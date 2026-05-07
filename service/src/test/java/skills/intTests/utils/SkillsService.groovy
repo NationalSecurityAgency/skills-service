@@ -387,6 +387,13 @@ class SkillsService {
         wsHelper.apiGet(url, params)
     }
 
+    def getGroupDescriptions(String projectId, String groupId, String userId = null) {
+        userId = getUserId(userId)
+        String url = "/projects/${projectId}/groups/${groupId}/descriptions".toString()
+        Map params = userId ? [userId: userId] : null
+        wsHelper.apiGet(url, params)
+    }
+
     def getBadgeDescriptions(String projectId, String badgeId, boolean isGlobal = false, String userId = null) {
         userId = getUserId(userId)
         String url = "/projects/${projectId}/badges/${badgeId}/descriptions"
