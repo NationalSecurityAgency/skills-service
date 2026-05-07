@@ -240,6 +240,7 @@ class SkillApprovalService {
                     projectId: projectId,
                     subjectId: simpleSkillApproval.getSubjectId(),
                     skillId: simpleSkillApproval.getSkillId(),
+                    groupId: simpleSkillApproval.getGroupId(),
                     skillName: InputSanitizer.unsanitizeName(simpleSkillApproval.getSkillName()),
                     requestedOn: simpleSkillApproval.getRequestedOn().time,
                     approverActionTakenOn: simpleSkillApproval.getApproverActionTakenOn()?.time,
