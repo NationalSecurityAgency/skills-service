@@ -32,11 +32,13 @@ import InputGroup from 'primevue/inputgroup'
 import LoadingContainer from '@/components/utils/LoadingContainer.vue'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useStorage} from "@vueuse/core";
+import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 
 const route = useRoute()
 const userInfo = useUserInfo()
 const appConfig = useAppConfig()
 const responsive = useResponsiveBreakpoints()
+const skillRouteUtil = useSkillOverviewRouteUtil()
 
 const quizType = ref('')
 const skills = ref([])
@@ -107,6 +109,11 @@ const clearFilter = () => {
 const onFilter = (filterEvent) => {
   totalRows.value = filterEvent.filteredValue.length
   filtering.value = true
+}
+
+const toRouteProps = (skill) => {
+  const routeProps = skillRouteUtil.toRouteProps(skill.projectId, skill.subjectId, skill.skillId, skill.type, skill.groupId)
+  return { name: routeProps.name, params: routeProps.params }
 }
 
 </script>
@@ -189,8 +196,7 @@ const onFilter = (filterEvent) => {
                   <div v-else-if="slotProps.field === 'skillName'">
                     <RouterLink v-if="slotProps.data.canUserAccess"
                                 role="link"
-                                tag="a" :to="{ name:'SkillOverview',
-                              params: { projectId: slotProps.data.projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId }}"
+                                tag="a" :to="toRouteProps(slotProps.data)"
                                 :aria-label="`Manage skill ${slotProps.data.skillName} via link`">
                       <HighlightedValue :value="slotProps.data.skillName" :filter="filters.global.value" />
                     </RouterLink>

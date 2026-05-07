@@ -30,7 +30,6 @@ import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.QuizToSkillDefRepo
-import spock.lang.IgnoreIf
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -72,6 +71,31 @@ class QuizSkillAssignmentSpecs extends DefaultIntSpec {
         skills[0].quizId == quiz.body.quizId
         skills[0].quizName == quiz.body.name
         skills[0].quizType == QuizDefParent.QuizType.Quiz.toString()
+    }
+
+    def "assign quiz to group skill"() {
+        def quiz = skillsService.createQuizDef(QuizDefFactory.createQuiz(1))
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [])
+
+        def skillWithQuiz = createSkill(1, 1, 1, 1, 1, 480, 200)
+        skillWithQuiz.selfReportingType = SkillDef.SelfReportingType.Quiz
+        skillWithQuiz.quizId = quiz.body.quizId
+
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        String skillsGroupId = skillsGroup.skillId
+
+        when:
+        skillsService.createSkill(skillsGroup)
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, skillWithQuiz)
+
+        def quizSkills = skillsService.getSkillsForQuiz(quiz.body.quizId)
+        then:
+        quizSkills.skillId == [skillWithQuiz.skillId]
+        quizSkills.skillName == [skillWithQuiz.name]
+        quizSkills.groupId == [skillsGroupId]
     }
 
     def "assign survey to skill"() {
