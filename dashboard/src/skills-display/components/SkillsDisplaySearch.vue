@@ -24,7 +24,7 @@ import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import SkillReuseIdUtil from "@/components/utils/SkillReuseIdUtil.js";
-import SkillType from "@/skills-display/components/skill/SkillType.js";
+import SkillType from "@/common-components/utilities/SkillType.js";
 
 const emit = defineEmits(['hidden']);
 const props = defineProps({

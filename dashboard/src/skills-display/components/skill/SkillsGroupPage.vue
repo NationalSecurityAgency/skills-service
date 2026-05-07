@@ -23,7 +23,7 @@ import SkillsProgressList from "@/skills-display/components/progress/SkillsProgr
 import VerticalProgressBar from "@/skills-display/components/progress/VerticalProgressBar.vue";
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
-import SkillType from "@/skills-display/components/skill/SkillType.js";
+import SkillType from "@/common-components/utilities/SkillType.js";
 
 const route = useRoute()
 const attributes = useSkillsDisplayAttributesState()

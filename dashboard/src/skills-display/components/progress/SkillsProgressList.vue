@@ -84,7 +84,7 @@ const scrollToLastViewedSkill = (timeout = null) => {
     }
   } else {
     // set it if backend provided
-    skillsInternal.value.forEach((item) => {
+    skillsInternal.value?.forEach((item) => {
       if (item.isLastViewed === true) {
         scrollIntoViewState.setLastViewedSkillId(item.skillId)
       } else if (item.type === 'SkillsGroup') {

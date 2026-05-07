@@ -20,7 +20,7 @@ import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useRoute } from 'vue-router'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
-import SkillType from "@/skills-display/components/skill/SkillType.js";
+import SkillType from "@/common-components/utilities/SkillType.js";
 
 export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttributesState', () => {
   const loadingConfig = ref(true)

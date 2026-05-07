@@ -17,7 +17,7 @@ import axios from 'axios'
 import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import {useRoute} from 'vue-router'
 import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
-import SkillType from "@/skills-display/components/skill/SkillType.js";
+import SkillType from "@/common-components/utilities/SkillType.js";
 
 export const useSkillsDisplayService = () => {
   const servicePath = '/api/projects'
@@ -71,7 +71,7 @@ export const useSkillsDisplayService = () => {
 
   const addMetaToSummary = (summary) => {
     const res = summary
-    res.skills = res.skills.map((item) => {
+    res.skills = res.skills?.map((item) => {
       const skillRes = addMeta(item)
       const isSkillsGroupType = item.type === 'SkillsGroup'
       if (isSkillsGroupType) {
