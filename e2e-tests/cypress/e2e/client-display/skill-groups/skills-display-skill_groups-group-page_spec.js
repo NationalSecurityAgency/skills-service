@@ -583,75 +583,76 @@ describe('Skills Display Skills Groups Page Tests', () => {
         cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill1]').should('not.exist');
     });
 
-    it('logout, navigate directly to Skills Group page, login and validate page rendering', () => {
-        const groupDescription = "This is a test skills group description for logout/login flow";
-        
-        // Create a skills group with at least 2 skills and a description
-        cy.createSkillsGroup(1, 1, 1, {
-            description: groupDescription
+    if (!Cypress.env('oauthMode')) {
+        it('logout, navigate directly to Skills Group page, login and validate page rendering', () => {
+            const groupDescription = "This is a test skills group description for logout/login flow";
+
+            // Create a skills group with at least 2 skills and a description
+            cy.createSkillsGroup(1, 1, 1, {
+                description: groupDescription
+            });
+            cy.addSkillToGroup(1, 1, 1, 1, {
+                pointIncrement: 100,
+                numPerformToCompletion: 2
+            });
+            cy.addSkillToGroup(1, 1, 1, 2, {
+                pointIncrement: 150,
+                numPerformToCompletion: 1
+            });
+
+            // Add some progress to skills
+            cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+            cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+
+            // Logout first
+            cy.logout();
+
+            // Navigate directly to the Skills Group page while logged out
+            cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/groups/group1');
+
+            // Should be redirected to login page - wait for redirect to complete
+            cy.location('pathname', {timeout: 5000}).should('include', 'skills-login');
+            cy.get('[data-cy="login"]').should('be.disabled')
+
+            // Login using the page's form
+            cy.fixture('vars.json').then((vars) => {
+                cy.get('#username')
+                    .type(vars.defaultUser);
+                cy.get('#inputPassword')
+                    .type(vars.defaultPass);
+                cy.get('[data-cy=login]')
+                    .click();
+            });
+
+            // Should be redirected back to the Skills Group page after login
+            cy.url().should('include', '/subjects/subj1/groups/group1');
+
+            // Validate the group page properly rendered
+            cy.get('[data-cy="skillsTitle"]').contains('Group Overview');
+
+            // Validate group name and progress information
+            cy.get('[data-cy="skillsGroupName"]').should('contain', 'Awesome Group 1');
+            cy.get('[data-cy="skillsGroupProgress"]').contains(/1 \/ 2 Skills/);
+
+            // Validate group description is displayed
+            cy.get('[data-cy="skillsGroupDescription"]').contains(groupDescription);
+
+            // Validate skills progress list is displayed
+            cy.get('[data-cy="skillsProgressList"]').should('exist');
+
+            // Validate at least 2 skills are displayed under the group
+            cy.get('[data-cy="skillProgressTitle-skill1"]').should('exist');
+            cy.get('[data-cy="skillProgressTitle-skill1"] [data-cy="skillProgressTitle"]')
+                .should('contain', 'Very Great Skill 1');
+            cy.get('[data-cy="skillProgressTitle-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
+                .should('contain', '100 / 200 Points');
+
+            cy.get('[data-cy="skillProgressTitle-skill2"]').should('exist');
+            cy.get('[data-cy="skillProgressTitle-skill2"] [data-cy="skillProgressTitle"]')
+                .should('contain', 'Very Great Skill 2');
+            cy.get('[data-cy="skillProgressTitle-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
+                .should('contain', '150 / 150 Points');
         });
-        cy.addSkillToGroup(1, 1, 1, 1, {
-            pointIncrement: 100,
-            numPerformToCompletion: 2
-        });
-        cy.addSkillToGroup(1, 1, 1, 2, {
-            pointIncrement: 150,
-            numPerformToCompletion: 1
-        });
-
-        // Add some progress to skills
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
-
-        // Logout first
-        cy.logout();
-
-        // Navigate directly to the Skills Group page while logged out
-        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/groups/group1');
-
-        // Should be redirected to login page - wait for redirect to complete
-        cy.location('pathname', { timeout: 5000 }).should('include', 'skills-login');
-        cy.get('[data-cy="login"]').should('be.disabled')
-        
-        // Login using the page's form
-        cy.fixture('vars.json').then((vars) => {
-            cy.get('#username')
-                .type(vars.defaultUser);
-            cy.get('#inputPassword')
-                .type(vars.defaultPass);
-            cy.get('[data-cy=login]')
-                .click();
-        });
-
-        // Should be redirected back to the Skills Group page after login
-        cy.url().should('include', '/subjects/subj1/groups/group1');
-
-        // Validate the group page properly rendered
-        cy.get('[data-cy="skillsTitle"]').contains('Group Overview');
-        
-        // Validate group name and progress information
-        cy.get('[data-cy="skillsGroupName"]').should('contain', 'Awesome Group 1');
-        cy.get('[data-cy="skillsGroupProgress"]').contains(/1 \/ 2 Skills/);
-
-        // Validate group description is displayed
-        cy.get('[data-cy="skillsGroupDescription"]').contains(groupDescription);
-
-        // Validate skills progress list is displayed
-        cy.get('[data-cy="skillsProgressList"]').should('exist');
-
-        // Validate at least 2 skills are displayed under the group
-        cy.get('[data-cy="skillProgressTitle-skill1"]').should('exist');
-        cy.get('[data-cy="skillProgressTitle-skill1"] [data-cy="skillProgressTitle"]')
-            .should('contain', 'Very Great Skill 1');
-        cy.get('[data-cy="skillProgressTitle-skill1"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .should('contain', '100 / 200 Points');
-
-        cy.get('[data-cy="skillProgressTitle-skill2"]').should('exist');
-        cy.get('[data-cy="skillProgressTitle-skill2"] [data-cy="skillProgressTitle"]')
-            .should('contain', 'Very Great Skill 2');
-        cy.get('[data-cy="skillProgressTitle-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
-            .should('contain', '150 / 150 Points');
-    });
-
+    }
 
 })
