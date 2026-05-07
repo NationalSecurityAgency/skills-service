@@ -158,6 +158,13 @@ const saveSettings = handleSubmit((values) => {
 const updateTimeLimit = () => {
   quizTimeLimit.value = ((parseInt(values.quizTimeLimitHours, 10) * 60) + parseInt(values.quizTimeLimitMinutes, 10)) * 60;
 };
+
+const isEnabled = (attrId) => {
+  return values[attrId] === true;
+}
+const getBooleanEnabledLabel = (attrId) => {
+  return isEnabled(attrId) ? 'Enabled' : 'Disabled';
+}
 </script>
 
 <template>
@@ -202,9 +209,10 @@ const updateTimeLimit = () => {
             inputId="quizNumberOfAttemptsUnlimited"
             aria-label="Maximum Number of Attempts setting, unlimited number of attempts checkbox"
             data-cy="unlimitedAttemptsSwitch"/>
-        <span class="mx-2">Unlimited</span>
-        <div v-if="!values.quizNumberOfAttemptsUnlimited" class="flex-1 border-l ml-2 pl-2">
+        <div class="mx-2 flex flex-col gap-2 flex-1">
+          <div>{{ isEnabled('quizNumberOfAttemptsUnlimited') ? 'Unlimited' : 'Limit To:' }}</div>
           <SkillsNumberInput
+              v-if="!values.quizNumberOfAttemptsUnlimited"
               label="Number of Attempts"
               id="numAttemptsInput"
               :min="1"
@@ -226,7 +234,7 @@ const updateTimeLimit = () => {
           inputId="randomizeQuestions"
           aria-label="Randomize order of the questions"
           data-cy="randomizeQuestionSwitch"/>
-      <span class="mx-2 align-top">Randomize</span>
+      <span class="mx-2 align-top">{{ getBooleanEnabledLabel('quizRandomizeQuestions') }}</span>
     </div>
   </div>
 
@@ -242,7 +250,7 @@ const updateTimeLimit = () => {
           inputId="randomizeAnswers"
           aria-label="Randomize order of the answers"
           data-cy="randomizeAnswerSwitch"/>
-      <span class="mx-2 align-top">Randomize</span>
+      <span class="mx-2 align-top">{{ getBooleanEnabledLabel('quizRandomizeAnswers') }}</span>
     </div>
   </div>
 
@@ -257,9 +265,9 @@ const updateTimeLimit = () => {
                            name="quizTimeLimitUnlimited"
                            aria-label="Quiz Time Limit setting, unlimited time checkbox"
                            data-cy="unlimitedTimeSwitch"/>
-        <div class="flex flex-col flex-1">
-          <div class="mx-2">Unlimited</div>
-          <div v-if="!values.quizTimeLimitUnlimited" class="flex flex-col sm:flex-row flex-1 gap-2 mt-4">
+        <div class="flex flex-col gap-2 flex-1 mx-2">
+          <div>{{ isEnabled('quizTimeLimitUnlimited') ? 'Unlimited' : 'Limit To:' }}</div>
+          <div v-if="!values.quizTimeLimitUnlimited" class="flex flex-col sm:flex-row flex-1 gap-2">
             <SkillsNumberInput
                 class="flex-1"
                 label="Hours"
@@ -290,7 +298,7 @@ const updateTimeLimit = () => {
           inputId="multipleTakes"
           aria-label="Allow retaking the quiz/survey after passing"
           data-cy="multipleTakesSwitch"/>
-      <span class="mx-2 align-top">Allow</span>
+      <span class="mx-2 align-top">{{ getBooleanEnabledLabel('quizMultipleTakes') }}</span>
     </div>
   </div>
 
@@ -304,7 +312,7 @@ const updateTimeLimit = () => {
           inputId="alwaysShowCorrectAnswers"
           aria-label="Allow retaking the quiz after passing"
           data-cy="alwaysShowCorrectAnswersSwitch"/>
-      <span class="mx-2 align-top">Enabled</span>
+      <span class="mx-2 align-top">{{ getBooleanEnabledLabel('quizAlwaysShowCorrectAnswers') }}</span>
     </div>
   </div>
 
@@ -318,7 +326,7 @@ const updateTimeLimit = () => {
           inputId="retakeIncorrectQuestions"
           aria-label="Allow retaking the quiz after passing"
           data-cy="retakeIncorrectQuestionsSwitch"/>
-      <span class="mx-2 align-top">Enabled</span>
+      <span class="mx-2 align-top">{{ getBooleanEnabledLabel('quizRetakeIncorrectQuestions') }}</span>
     </div>
   </div>
 
@@ -332,7 +340,7 @@ const updateTimeLimit = () => {
           inputId="quizShowAnswerHintsOnRetakeAttemptsOnly"
           aria-label="Only Show Hints on Retake Attempts"
           data-cy="quizShowAnswerHintsOnRetakeAttemptsOnlySwitch"/>
-      <span class="mx-2 align-top">Enabled</span>
+      <span class="mx-2 align-top">{{ getBooleanEnabledLabel('quizShowAnswerHintsOnRetakeAttemptsOnly') }}</span>
     </div>
   </div>
 
@@ -346,7 +354,7 @@ const updateTimeLimit = () => {
             inputId="showDescriptionOnQuizPage"
             aria-label="Show the quiz description on the quiz run"
             data-cy="showDescriptionOnQuizPageSwitch"/>
-        <span class="mx-2 align-top">Enabled</span>
+        <span class="mx-2 align-top">{{ getBooleanEnabledLabel('quizShowDescriptionOnQuizPage') }}</span>
       </div>
     </div>
 
@@ -360,7 +368,7 @@ const updateTimeLimit = () => {
             inputId="quizHideCorrectAnswersOnCompletedQuiz"
             aria-label="Hide Answers for Completed Quizzes"
             data-cy="quizHideCorrectAnswersOnCompletedQuiz"/>
-        <span class="mx-2 align-top">Enabled</span>
+        <span class="mx-2 align-top">{{ getBooleanEnabledLabel('quizHideCorrectAnswersOnCompletedQuiz') }}</span>
       </div>
     </div>
 
