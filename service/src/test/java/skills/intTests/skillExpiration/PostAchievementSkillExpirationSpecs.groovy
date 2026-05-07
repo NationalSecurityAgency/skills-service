@@ -826,7 +826,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         List<UserAchievement> userAchievements_t0 = userAchievedRepo.findAll()
         List<ExpiredUserAchievement> expiredUserAchievements_t0 = expiredUserAchievementRepo.findAll()
 
-        expireAllSkillsForProject(proj4.projectId)
+        expireAllSkillsForProject(proj4.projectId, 7, true, false, true, [proj4_group.skillId])
 
         List<UserPerformedSkill> userPerformedSkills_t1 = userPerformedSkillRepo.findAll()
         List<UserPoints> userPoints_t1 = userPointsRepo.findAll()
@@ -1690,7 +1690,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         e.getMessage().contains("Cannot configure expiration attribute on skills that are reused")
     }
 
-    def "skill summary reflect expiration time relative to the next expiration task exeution time"() {
+    def "skill summary reflect expiration time relative to the next expiration task execution time"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(10, )
@@ -1741,8 +1741,8 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         subjectSummary.skills[2].expirationDate == DTF.print((nextExpirationRun.toDate()+2).time)
     }
 
-    def expireAllSkillsForProject(String projectId, Integer numDaysAfterAchievement=7,excludeImportedSkills = true, boolean includeDisabled = false, boolean excludeReusedSkills = true) {
-        def skills = skillsService.getSkillsForProject(projectId, "", excludeImportedSkills, includeDisabled, excludeReusedSkills)
+    def expireAllSkillsForProject(String projectId, Integer numDaysAfterAchievement=7,excludeImportedSkills = true, boolean includeDisabled = false, boolean excludeReusedSkills = true, excludeSkillIds = []) {
+        def skills = skillsService.getSkillsForProject(projectId, "", excludeImportedSkills, includeDisabled, excludeReusedSkills).findAll { it.skillId !in excludeSkillIds}
         expireSkills(projectId, skills, numDaysAfterAchievement)
     }
 

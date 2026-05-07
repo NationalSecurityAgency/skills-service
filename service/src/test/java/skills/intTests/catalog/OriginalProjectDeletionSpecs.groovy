@@ -99,14 +99,14 @@ class OriginalProjectDeletionSpecs extends CatalogIntSpec {
         def p2_subj_after = skillsService.getSubject(p2_subj)
         def p2_after = skillsService.getProject(proj2.projectId)
         then:
-        skillsP2_before.skillId == p1Skills.skillId
+        skillsP2_before.skillId - p2subj2g2.skillId == p1Skills.skillId
         p2_subj_before.totalPoints == 1500
         p2_subj_before.numSkills == 3
         p2_before.numSkills == 3
         p2_before.totalPoints == 1500
 
-        !skillsP1_after
-        !skillsP2_after
+        !skillsP1_after.skillId
+        skillsP2_after.skillId == [p2subj2g2.skillId]
         p2_subj_after.totalPoints == 0
         p2_subj_after.numSkills == 0
         p2_after.numSkills == 0
@@ -355,13 +355,13 @@ class OriginalProjectDeletionSpecs extends CatalogIntSpec {
         def p2_subj_after = skillsService.getSubject(p2_subj)
         def p2_after = skillsService.getProject(proj2.projectId)
         then:
-        skillsP2_before.skillId == p1Skills.skillId
+        skillsP2_before.skillId - p2subj2g2.skillId == p1Skills.skillId
         p2_subj_before.totalPoints == 1500
         p2_subj_before.numSkills == 3
         p2_before.numSkills == 3
         p2_before.totalPoints == 1500
 
-        !skillsP2_after
+        skillsP2_after.skillId == [p2subj2g2.skillId]
         p2_subj_after.totalPoints == 0
         p2_subj_after.numSkills == 0
         p2_after.numSkills == 0
