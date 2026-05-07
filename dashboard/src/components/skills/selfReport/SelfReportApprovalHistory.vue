@@ -26,12 +26,14 @@ import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import {useStorage} from "@vueuse/core";
+import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
 const colors = useColors()
 const responsive = useResponsiveBreakpoints()
 const numberFormat = useNumberFormat()
+const skillRouteUtil = useSkillOverviewRouteUtil()
 
 const loading = ref(true);
 const pageSize = useStorage('selfReportApprovalHistory-pageSize', 5)
@@ -130,6 +132,11 @@ const toggleRow = (row) => {
   expandedRows.value = { ...expandedRows.value };
 }
 
+const toRouteProps = (skill) => {
+  const routeProps = skillRouteUtil.toRouteProps(skill.projectId, skill.subjectId, skill.skillId, skill.type, skill.groupId)
+  return { name: routeProps.name, params: routeProps.params }
+}
+
 defineExpose( {
   loadApprovalsHistory
 })
@@ -185,7 +192,7 @@ defineExpose( {
             <div>
               <router-link
                   :data-cy="`viewSkillLink_${slotProps.data.skillId}`"
-                  :to="{ name:'SkillOverview', params: { projectId: slotProps.data.projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId }}"
+                  :to="toRouteProps(slotProps.data)"
                   :aria-label="`View skill ${slotProps.data.skillName}  via link`"
                   target="_blank"><span v-if="slotProps.data.skillNameHtml" v-html="slotProps.data.skillNameHtml"></span><span v-else>{{ slotProps.data.skillName }}</span>
               </router-link>
