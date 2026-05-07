@@ -207,7 +207,7 @@ export const useGlobalNavGuards = () => {
     // }
 
     const navTo = (navItem) => {
-      if (navItem) {
+      if (navItem && navItem !== true) {
         router.push(navItem)
       }
     }
