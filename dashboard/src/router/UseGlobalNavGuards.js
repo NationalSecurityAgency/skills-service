@@ -62,7 +62,7 @@ export const useGlobalNavGuards = () => {
   const registrationId = () => appConfig.saml2RegistrationId;
   const isSaml2 = () => appConfig.isSAML2Authenticated;
 
-  const beforeEachNavGuard = (to, from, next) => {
+  const beforeEachNavGuard = (to, from) => {
     const { skillsClientDisplayPath } = to.query
     const requestRootAccountPath = '/request-root-account'
     const skillsLoginPath = '/skills-login'
@@ -73,17 +73,17 @@ export const useGlobalNavGuards = () => {
         to.path?.toLowerCase() !== requestRootAccountPath.toLowerCase() &&
         appConfig.needToBootstrap
     ) {
-      next({ path: requestRootAccountPath })
+      return { path: requestRootAccountPath }
     } else if (
         to.path?.toLowerCase() === requestRootAccountPath.toLowerCase() &&
         !appConfig.needToBootstrap
     ) {
-      next({ name: getLandingPage() })
+      return{ name: getLandingPage() }
     } else if (
       ((isPki() || isLoggedIn()) &&
       (to.path === skillsLoginPath || to.path === `${skillsLoginPath}/`))
     ) {
-      next(route.query.redirect || { name: getLandingPage() })
+      return route.query.redirect || { name: getLandingPage() }
     } else {
       /* eslint-disable no-lonely-if */
       if (appInfoState.showUa && to.path?.toLowerCase() !== '/user-agreement' && to.path?.toLowerCase() !== '/skills-login') {
@@ -95,11 +95,11 @@ export const useGlobalNavGuards = () => {
         }
         const ua =
           p !== '/' ? { name: 'UserAgreement', query: { redirect: p } } : { name: 'UserAgreement' }
-        next(ua)
+        return ua
       } else {
         if (to.path === '/') {
           const landingPageRoute = { name: getLandingPage() }
-          next(landingPageRoute)
+          return landingPageRoute
         }
         if (from && from.path !== '/error') {
           appInfoState.setPreviousUrl(from.fullPath)
@@ -135,19 +135,19 @@ export const useGlobalNavGuards = () => {
               } else {
 	            newRoute.name = 'Login';
 	          }
-            next(newRoute)
+            return newRoute
           } else {
             if((to.name?.endsWith(PathAppendValues.Local) || to.name?.endsWith(PathAppendValues.Inception)) && skillsClientDisplayPath) {
               const newRoute = to.path + skillsClientDisplayPath;
               const nextRoute = '/redirect?nextPage=' + newRoute
-              next(nextRoute)
+              return nextRoute
             }
             else {
-              next()
+              return true
             }
           }
         } else {
-          next()
+          return true
         }
       }
     }
@@ -156,9 +156,9 @@ export const useGlobalNavGuards = () => {
 
   const addNavGuards = () => {
     router.beforeEach(beforeEachNavGuard)
-    router.beforeEach((to, from, next) => {
+    router.beforeEach((to) => {
       skillsDisplayAttributes.loadConfigStateIfNeeded(to)
-      next()
+      return true
     })
     const DEFAULT_TITLE = 'SkillTree Dashboard'
     router.afterEach((to, from) => {
@@ -207,12 +207,13 @@ export const useGlobalNavGuards = () => {
     // }
 
     const navTo = (navItem) => {
-      if (navItem) {
+      if (navItem && navItem !== true) {
         router.push(navItem)
       }
     }
     // because the navigation guards are added after App loaded must execute the very first time manually
-    beforeEachNavGuard(route, {params: {}}, navTo)
+    const navToInitially = beforeEachNavGuard(route, {params: {}})
+    navTo(navToInitially)
   }
 
   return {

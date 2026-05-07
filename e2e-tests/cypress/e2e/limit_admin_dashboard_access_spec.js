@@ -156,7 +156,7 @@ describe('Limit Admin Dashboard Access Tests', () => {
     cy.visit('/')
     cy.wait('@getConfig')
     cy.wait('@getUserInfo1')
-    cy.get('[data-cy="manageMyProjsBtnInNoContent"')
+    cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
 
     const pAndRNavSelector = '[aria-label="Progress and Ranking"]'
     const projAdminNavSelector = '[aria-label="Project Admin"]'
@@ -172,7 +172,7 @@ describe('Limit Admin Dashboard Access Tests', () => {
     cy.visit('/')
     cy.wait('@getConfig')
     cy.wait('@getUserInfo2')
-    cy.get('[data-cy="manageMyProjsBtnInNoContent"')
+    cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
 
     cy.get('[data-cy="settings-button"]').click();
     cy.get(pAndRNavSelector).should('not.exist');
