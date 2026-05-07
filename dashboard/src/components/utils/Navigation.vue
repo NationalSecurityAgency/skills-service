@@ -101,8 +101,8 @@ watch(() => props.navItems, () => {
             </div>
             <ul class="list-none font-medium">
               <router-link v-for="(navItem, index) of navItems"
-                           :key="navItem.name"
-                           :to="{ name: navItem.page }"
+                           :key="navItem.page"
+                           :to="{ name: navItem.page, params: navItem.params }"
                            v-slot="{ navigate, isExactActive }"
                            custom>
                 <li :class="{ 'bg-primary ': isExactActive, 'pr-5': !showCollapsed, 'pr-2': showCollapsed }" :data-cy="`navLine-${navItem.name}`" class="pl-2">

@@ -29,6 +29,10 @@ const props = defineProps({
   skill: {
     type: Object,
     required: true
+  },
+  showLegend: {
+    type: Boolean,
+    default: true
   }
 })
 const appConfig = useAppConfig()
@@ -50,14 +54,22 @@ onMounted(() => {
 
 const loadSkillsInfo = () => {
   loading.value = true
-  SkillsService.getSkillDetails(props.skill.projectId, props.skill.subjectId, props.skill.skillId)
-    .then((response) => {
-      skillInfo.value = response
-      return skillsState.loadGroupSkills(props.skill.projectId, props.skill.skillId)
-        .finally(() => {
-          loading.value = false
-        })
-    })
+  if (props.skill.description === undefined) {
+    SkillsService.getSkillDetails(props.skill.projectId, props.skill.subjectId, props.skill.skillId)
+      .then((response) => {
+        skillInfo.value = response
+        return skillsState.loadGroupSkills(props.skill.projectId, props.skill.skillId)
+          .finally(() => {
+            loading.value = false
+          })
+      })
+  } else {
+    skillInfo.value = props.skill
+    skillsState.loadGroupSkills(props.skill.projectId, props.skill.skillId)
+      .finally(() => {
+        loading.value = false
+      })
+  }
 }
 
 const allSkillsRequired = computed(() => {
@@ -110,20 +122,26 @@ const groupChanged = (updatedGroup) => {
 </script>
 
 <template>
-  <div>
+  <div class="mr-5 mb-4">
     <skills-spinner :is-loading="loading" />
     <div v-if="!loading" :data-cy="`ChildRowSkillGroupDisplay_${skillInfo.skillId}`">
-
-      <Fieldset v-if="skillInfo.description" legend="Group's Description" class="mb-4">
-        <markdown-text
-          :text="skillInfo.description"
-          :instance-id="skillInfo.skillId"
-          data-cy="description" />
-      </Fieldset>
+      <div class="mb-4">
+        <Fieldset v-if="skillInfo.description" legend="Group's Description">
+          <markdown-text
+            :text="skillInfo.description"
+            :instance-id="skillInfo.skillId"
+            data-cy="description" />
+        </Fieldset>
+      </div>
 
       <Fieldset
-        legend="Group's Skills"
-        :pt="{ content: { class: 'p-0' }, root: { class: 'm-0' }, toggler: { class: 'm-2'} }"
+      legend="Group's Skills"
+      :pt="{
+        content: { class: 'p-0' },
+        root: { class: 'm-0' },
+        toggler: { class: 'm-2'},
+        ...(showLegend ? {} : { legend: { style: 'display: none' } })
+      }"
       >
         <div class="flex mx-4 my-6" data-cy="requiredSkillsSection">
           <div>
