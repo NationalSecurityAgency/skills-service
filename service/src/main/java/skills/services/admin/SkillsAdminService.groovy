@@ -957,7 +957,7 @@ class SkillsAdminService {
 
     @Profile
     private List<SkillDefSkinny> loadSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
-        skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, skillNameQuery, (!excludeImportedSkills).toString(), includeDisabled.toString())
+        skillDefRepo.findAllSkinnySelectByProjectIdAndTypeIn(projectId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup], skillNameQuery, (!excludeImportedSkills).toString(), includeDisabled.toString())
     }
 
     @Profile

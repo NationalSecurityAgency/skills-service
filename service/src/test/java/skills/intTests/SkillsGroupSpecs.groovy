@@ -1039,11 +1039,12 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         child2Enabled.enabled == true
     }
 
-    void "skills under SkillsGroup are returned in project's skills endpoint" () {
+    void "skills under SkillsGroup and group itself are returned in project's skills endpoint" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(4) // first one is group
         def skillsGroup = allSkills[0]
+        skillsGroup.name = 'Awesome Group'
         skillsGroup.type = 'SkillsGroup'
 
         skillsService.createProject(proj)
@@ -1059,8 +1060,58 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         def res = skillsService.getSkillsForProject(proj.projectId)
 
         then:
+        res.size() == 4
+        res.collect { it.skillId }.sort() == allSkills.skillId.sort()
+    }
+
+    void "searching for skills under SkillsGroup are returned in project's skills endpoint" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(4) // first one is group
+        def skillsGroup = allSkills[0]
+        skillsGroup.name = 'Awesome Group'
+        skillsGroup.type = 'SkillsGroup'
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        // regular skill
+        skillsService.createSkill(allSkills[3])
+
+        when:
+        def res = skillsService.getSkillsForProject(proj.projectId, 'Skill')
+
+        then:
         res.size() == 3
         res.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
+    }
+
+    void "searching for Group name SkillsGroup itself is returned in project's skills endpoint" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(4) // first one is group
+        def skillsGroup = allSkills[0]
+        skillsGroup.name = 'Awesome Group'
+        skillsGroup.type = 'SkillsGroup'
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        // regular skill
+        skillsService.createSkill(allSkills[3])
+
+        when:
+        def res = skillsService.getSkillsForProject(proj.projectId, 'Awesome')
+
+        then:
+        res.size() == 1
+        res[0].skillId == skillsGroup.skillId
     }
 
     @Autowired

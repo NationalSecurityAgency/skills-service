@@ -733,6 +733,24 @@ describe('Skills Group Page Tests', () => {
     cy.get('[data-cy=breadcrumb-group1]').should('be.visible');
   })
 
+  it('search and navigate to group', () => {
+    cy.createSkillsGroup(1, 1, 1)
+    cy.addSkillToGroup(1, 1, 1, 1)
+    cy.addSkillToGroup(1, 1, 1, 2)
+
+    cy.visit('/administrator/projects/proj1/')
+    cy.get('[data-cy="skillsSelector"]').click()
+    cy.get('li.p-autocomplete-empty-message').contains('Type to search for skills').should('be.visible')
+    cy.get(`[data-cy="skillsSelector"]`).type('awesome')
+
+    cy.get('[data-cy="skillsSelectionItem-skillId"]').should('have.length', 1).as('skillIds')
+    cy.get('@skillIds').eq(0).contains('group1')
+    cy.get('@skillIds').eq(0).click()
+    cy.get('[data-cy="pageHeader"]').contains('ID: group1')
+
+    cy.get('[data-cy=breadcrumb-group1]').should('be.visible');
+  })
+
   it('More than 10 skills are visible in the group', () => {
     cy.createSkillsGroup(1, 1, 1)
     for (let step = 1; step < 25; step++) {
