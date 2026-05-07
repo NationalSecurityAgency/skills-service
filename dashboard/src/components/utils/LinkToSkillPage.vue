@@ -14,8 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import SkillsService from '@/components/skills/SkillsService.js'
+import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 
 const props = defineProps({
   projectId: {
@@ -31,6 +32,8 @@ const props = defineProps({
     default: null
   }
 })
+
+const skillRouteUtil = useSkillOverviewRouteUtil()
 const loading = ref(true)
 
 const skill = ref({})
@@ -41,13 +44,18 @@ onMounted(() => {
       loading.value = false;
     })
 })
+
+const toRouteProps = computed(() => {
+  const routeProps = skillRouteUtil.toRouteProps(skill.value.projectId, skill.value.subjectId, skill.value.skillId, skill.value.type, skill.value.groupId)
+  return { name: routeProps.name, params: routeProps.params }
+})
 </script>
 
 <template>
   <div class="inline-block">
     <skills-spinner :is-loading="loading" :size-in-rem="1"/>
     <router-link v-if="!loading"
-                 :to="{ name:'SkillOverview', params: { projectId: projectId, subjectId: skill.subjectId, skillId:  skill.skillId }}"
+                 :to="toRouteProps"
                  :aria-label="`Navigate to skill ${skill.name}  via link`">
       <div class="d-inline-block" style="text-decoration: underline">
         <span v-if="linkLabel">{{ linkLabel }}</span>

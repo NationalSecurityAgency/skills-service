@@ -59,7 +59,8 @@ const highlightedValue = computed(() => {
 })
 
 const toRouteProps = computed(() => {
-  return skillRouteUtil.toRouteProps(props.skill.projectId, props.subjectId, props.skill.skillId, props.skill.type, props.groupId)
+  const routeProps = skillRouteUtil.toRouteProps(props.skill.projectId, props.subjectId, props.skill.skillId, props.skill.type, props.groupId)
+  return { name: routeProps.name, params: routeProps.params }
 })
 
 </script>
