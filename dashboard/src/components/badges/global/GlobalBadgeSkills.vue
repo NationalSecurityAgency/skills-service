@@ -26,12 +26,14 @@ import Column from "primevue/column";
 import {useBadgeState} from "@/stores/UseBadgeState.js";
 import {storeToRefs} from "pinia";
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 
 const dialogMessages = useDialogMessages()
 const announcer = useSkillsAnnouncer();
 const emit = defineEmits(['skills-changed']);
 const route = useRoute();
 const badgeState = useBadgeState();
+const skillRouteUtil = useSkillOverviewRouteUtil()
 const { badge } = storeToRefs(badgeState);
 
 const loading = ref({
@@ -166,6 +168,12 @@ const searchChanged = (query) => {
   search.value = query;
   loadAvailableBadgeSkills(query);
 };
+
+const toRouteProps = (skill) => {
+  const routeProps = skillRouteUtil.toRouteProps(skill.projectId, skill.subjectId, skill.skillId, skill.type, skill.groupId)
+  return { name: routeProps.name, params: routeProps.params }
+}
+
 </script>
 
 <template>
@@ -195,8 +203,7 @@ const searchChanged = (query) => {
               <Column header="Project ID" field="projectId" sortable></Column>
               <Column header="Skill Name" field="name" style="width: 40%;" sortable>
                 <template #body="slotProps">
-                  <router-link v-if="slotProps.data.subjectId" :id="slotProps.data.skillId" :to="{ name:'SkillOverview',
-                    params: { projectId: slotProps.data.projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId }}"
+                  <router-link v-if="slotProps.data.subjectId" :id="slotProps.data.skillId" :to="toRouteProps(slotProps.data)"
                                class="btn btn-sm btn-outline-hc ml-2" :data-cy="`manage_${slotProps.data.skillId}`">
                     {{ slotProps.data.name }}
                   </router-link>
