@@ -62,7 +62,7 @@ export const useGlobalNavGuards = () => {
   const registrationId = () => appConfig.saml2RegistrationId;
   const isSaml2 = () => appConfig.isSAML2Authenticated;
 
-  const beforeEachNavGuard = (to, from, next) => {
+  const beforeEachNavGuard = (to, from) => {
     const { skillsClientDisplayPath } = to.query
     const requestRootAccountPath = '/request-root-account'
     const skillsLoginPath = '/skills-login'
@@ -73,17 +73,17 @@ export const useGlobalNavGuards = () => {
         to.path?.toLowerCase() !== requestRootAccountPath.toLowerCase() &&
         appConfig.needToBootstrap
     ) {
-      next({ path: requestRootAccountPath })
+      return { path: requestRootAccountPath }
     } else if (
         to.path?.toLowerCase() === requestRootAccountPath.toLowerCase() &&
         !appConfig.needToBootstrap
     ) {
-      next({ name: getLandingPage() })
+      return{ name: getLandingPage() }
     } else if (
       ((isPki() || isLoggedIn()) &&
       (to.path === skillsLoginPath || to.path === `${skillsLoginPath}/`))
     ) {
-      next(route.query.redirect || { name: getLandingPage() })
+      return route.query.redirect || { name: getLandingPage() }
     } else {
       /* eslint-disable no-lonely-if */
       if (appInfoState.showUa && to.path?.toLowerCase() !== '/user-agreement' && to.path?.toLowerCase() !== '/skills-login') {
@@ -95,11 +95,10 @@ export const useGlobalNavGuards = () => {
         }
         const ua =
           p !== '/' ? { name: 'UserAgreement', query: { redirect: p } } : { name: 'UserAgreement' }
-        next(ua)
+        return ua
       } else {
         if (to.path === '/') {
-          const landingPageRoute = { name: getLandingPage() }
-          next(landingPageRoute)
+          return { name: getLandingPage() }
         }
         if (from && from.path !== '/error') {
           appInfoState.setPreviousUrl(from.fullPath)
@@ -126,28 +125,22 @@ export const useGlobalNavGuards = () => {
         if (to.matched.some((record) => record.meta.requiresAuth)) {
           // this route requires auth, check if logged in if not, redirect to login page.
           if (!isLoggedIn()) {
-            const newRoute = { query: { redirect: to.fullPath } }
-              if (isPki()) {
-          		newRoute.name = getLandingPage();
-	          } else if (isSaml2()) {
-                window.location = `/saml2/authenticate/${registrationId()}`;
-                return;
-              } else {
-	            newRoute.name = 'Login';
-	          }
-            next(newRoute)
-          } else {
-            if((to.name?.endsWith(PathAppendValues.Local) || to.name?.endsWith(PathAppendValues.Inception)) && skillsClientDisplayPath) {
-              const newRoute = to.path + skillsClientDisplayPath;
-              const nextRoute = '/redirect?nextPage=' + newRoute
-              next(nextRoute)
+            const newRoute = {query: {redirect: to.fullPath}}
+            if (isPki()) {
+              newRoute.name = getLandingPage();
+            } else if (isSaml2()) {
+              window.location = `/saml2/authenticate/${registrationId()}`;
+              return;
+            } else {
+              newRoute.name = 'Login';
             }
-            else {
-              next()
+            return newRoute
+          } else {
+            if ((to.name?.endsWith(PathAppendValues.Local) || to.name?.endsWith(PathAppendValues.Inception)) && skillsClientDisplayPath) {
+              const newRoute = to.path + skillsClientDisplayPath;
+              return `/redirect?nextPage=${newRoute}`
             }
           }
-        } else {
-          next()
         }
       }
     }
@@ -156,9 +149,8 @@ export const useGlobalNavGuards = () => {
 
   const addNavGuards = () => {
     router.beforeEach(beforeEachNavGuard)
-    router.beforeEach((to, from, next) => {
+    router.beforeEach((to) => {
       skillsDisplayAttributes.loadConfigStateIfNeeded(to)
-      next()
     })
     const DEFAULT_TITLE = 'SkillTree Dashboard'
     router.afterEach((to, from) => {
