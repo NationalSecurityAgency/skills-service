@@ -140,6 +140,7 @@ interface ExportedSkillRepo extends CrudRepository<ExportedSkill, Integer>, Pagi
                es.created       as exportedOn,
                subject.name     as subjectName,
                subject.skill_id as subjectId,
+               skill.group_id   as groupId,
                MAX(group_def.name)   as groupName,
                (count(distinct imported_skills.project_id)) as importedProjectCount
         from skill_relationship_definition srd,
@@ -154,7 +155,7 @@ interface ExportedSkillRepo extends CrudRepository<ExportedSkill, Integer>, Pagi
           and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
           and subject.type = 'Subject'
           and skill.type = 'Skill'
-        group by skillId, skillName, exportedOn, subjectName, subjectId
+        group by skillId, skillName, exportedOn, subjectName, subjectId, groupId
     """, nativeQuery=true)
     List<ExportedSkillTiny> getTinySkillsExportedByProject(String projectId, Pageable pageable)
 

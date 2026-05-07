@@ -46,6 +46,7 @@ class CatalogExportSkillsUnderGroupSpec extends CatalogIntSpec {
         p2Exported.count == 2
         p2Exported.data.skillName == [gSkill1.name, gSkill2.name]
         p2Exported.data.groupName == [p2skillsGroup.name, p2skillsGroup.name]
+        p2Exported.data.groupId == [p2skillsGroup.skillId, p2skillsGroup.skillId]
 
         catalogSkills.count == 2
         catalogSkills.data.name == [gSkill1.name, gSkill2.name]

@@ -27,10 +27,12 @@ import ExportedSkillRemovalValidation from '@/components/skills/catalog/Exported
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue';
 import {useStorage} from "@vueuse/core";
+import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 
 const route = useRoute()
 const responsive = useResponsiveBreakpoints()
 const announcer = useSkillsAnnouncer()
+const skillRouteUtil = useSkillOverviewRouteUtil()
 
 const initialLoad = ref(true)
 const reloadData = ref(false)
@@ -100,6 +102,10 @@ const doRemoveSkill = () => {
       });
     });
 }
+const toRouteProps = (skill) => {
+  const routeProps = skillRouteUtil.toRouteProps(skill.projectId, skill.subjectId, skill.skillId, skill.type, skill.groupId)
+  return { name: routeProps.name, params: routeProps.params }
+}
 </script>
 
 <template>
@@ -144,7 +150,7 @@ const doRemoveSkill = () => {
                 <div :data-cy="`nameCell_${slotProps.data.skillId}`">
                   <router-link
                     :data-cy="`viewSkillLink_${slotProps.data.skillId}`"
-                    :to="{ name:'SkillOverview', params: { projectId: slotProps.data.projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId }}"
+                    :to="toRouteProps(slotProps.data)"
                     :aria-label="`View skill ${slotProps.data.skillName} via link`">
                     <div class="h5 d-inline-block">{{ slotProps.data.skillName }}</div>
                   </router-link>
