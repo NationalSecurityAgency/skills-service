@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import SkillType from "@/common-components/utilities/SkillType.js";
+
 export const useSkillOverviewRouteUtil = () => {
 
   const toRouteProps = (projectId, subjectId, skillId, skillType, groupId) => {
     let routeProps = null
-    if (skillType === 'SkillsGroup') {
+    if (SkillType.isSkillsGroup(skillType)) {
       routeProps = {
         name: 'GroupSkills',
         path: `/administrator/projects/${projectId}/subjects/${subjectId}/groups/${skillId}`,
