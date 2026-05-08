@@ -131,6 +131,41 @@ class SkillReuseSupportEntpointsSpec extends CatalogIntSpec {
         !dest[7].groupId
     }
 
+    def "only subjects are available when skill group is provided"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+        def p1subj3 = createSubject(1, 3)
+        skillsService.createSubject(p1subj3)
+        def p1subj4 = createSubject(1, 4)
+        skillsService.createSubject(p1subj4)
+
+        def s1_g1 = SkillsFactory.createSkillsGroup(1, 1, 10)
+        def s1_g2 = SkillsFactory.createSkillsGroup(1, 1, 11)
+        def s2_g1 = SkillsFactory.createSkillsGroup(1, 2, 12)
+        def s3_g1 = SkillsFactory.createSkillsGroup(1, 3, 13)
+        def s3_g2 = SkillsFactory.createSkillsGroup(1, 3, 14)
+        skillsService.createSkills([s1_g1, s1_g2, s2_g1, s3_g1, s3_g2])
+
+        when:
+        def dest = skillsService.getReuseDestinationsForASkill(p1.projectId, s1_g1.skillId).sort { "${it.subjectId}" }
+        then:
+        dest.size() == 3
+
+        dest[0].subjectId == p1subj2.subjectId
+        !dest[0].groupId
+
+        dest[1].subjectId == p1subj3.subjectId
+        !dest[1].groupId
+
+        dest[2].subjectId == p1subj4.subjectId
+        !dest[2].groupId
+    }
+
     def "parent group should not be provided as destination option"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
