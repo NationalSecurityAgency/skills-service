@@ -180,6 +180,12 @@ class SkillsMoveService {
         SkillDef origParentSkill
         skillReuseRequest.skillIds.each { String skillId ->
             SkillDef skillToMove = skillDefAccessor.getSkillDef(projectId, skillId)
+
+            boolean isMovingGroup = skillToMove.type == SkillsGroup
+            if (isGroupDest && isMovingGroup) {
+                throw new SkillException("Cannot move a group into another group", skillToMove.projectId, skillToMove.skillId, ErrorCode.BadParam)
+            }
+
             // make display order very high so the skills are added at the end of the display order
             // please note that display order will be reset at the end
             skillToMove.displayOrder = skillToMove.displayOrder + 10000 // no way someone has 10k skills
@@ -205,36 +211,54 @@ class SkillsMoveService {
             boolean stayingInTheSameSubject = skillReuseRequest.subjectId == subject.skillId
             boolean moveSkillBetweenGroupsInTheSameSubject = stayingInTheSameSubject && isGroupOrig && isGroupDest
 
-            // handle original
-            if (isGroupOrig) {
-                ruleSetDefGraphService.removeGraphRelationship(projectId, parentSkill.skillId, SkillsGroup, projectId, skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)
-                if (!moveSkillBetweenGroupsInTheSameSubject) {
-                    ruleSetDefGraphService.removeGraphRelationship(projectId, subject.skillId, Subject, projectId, skillId, SkillRelDef.RelationshipType.GroupSkillToSubject)
-                }
-                if (parentSkill.numSkillsRequired > 0) {
-                    Long numSkillsInGroup = ruleSetDefGraphService.countChildrenSkills(projectId, parentSkill.skillId, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
-                    if (numSkillsInGroup <= parentSkill.numSkillsRequired) {
-                        // -1 is the default = ALL
-                        parentSkill.numSkillsRequired = -1
+            if (isMovingGroup) {
+                moveSkillsGroupDefinition(subject, skillToMove, destParentSkill)
+            } else {
+                // handle original
+                if (isGroupOrig) {
+                    ruleSetDefGraphService.removeGraphRelationship(projectId, parentSkill.skillId, SkillsGroup, projectId, skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+                    if (!moveSkillBetweenGroupsInTheSameSubject) {
+                        ruleSetDefGraphService.removeGraphRelationship(projectId, subject.skillId, Subject, projectId, skillId, SkillRelDef.RelationshipType.GroupSkillToSubject)
                     }
+                    if (parentSkill.numSkillsRequired > 0) {
+                        Long numSkillsInGroup = ruleSetDefGraphService.countChildrenSkills(projectId, parentSkill.skillId, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
+                        if (numSkillsInGroup <= parentSkill.numSkillsRequired) {
+                            // -1 is the default = ALL
+                            parentSkill.numSkillsRequired = -1
+                        }
+                    }
+                } else {
+                    ruleSetDefGraphService.removeGraphRelationship(projectId, parentSkill.skillId, Subject, projectId, skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
                 }
-            } else {
-                ruleSetDefGraphService.removeGraphRelationship(projectId, parentSkill.skillId, Subject, projectId, skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
-            }
 
-            // handle destination
-            if (isGroupDest) {
-                ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.groupId, SkillsGroup, projectId, skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)
-                if (!moveSkillBetweenGroupsInTheSameSubject) {
-                    ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.subjectId, Subject, projectId, skillId, SkillRelDef.RelationshipType.GroupSkillToSubject)
+                // handle destination
+                if (isGroupDest) {
+                    ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.groupId, SkillsGroup, projectId, skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+                    if (!moveSkillBetweenGroupsInTheSameSubject) {
+                        ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.subjectId, Subject, projectId, skillId, SkillRelDef.RelationshipType.GroupSkillToSubject)
+                    }
+                } else {
+                    ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.subjectId, Subject, projectId, skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
                 }
-            } else {
-                ruleSetDefGraphService.assignGraphRelationship(projectId, skillReuseRequest.subjectId, Subject, projectId, skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
             }
         }
 
         resetDisplayOrder(origParentSkill, destParentSkillId)
         return origParentSkill
+    }
+
+    @Profile
+    private void moveSkillsGroupDefinition(SkillDef subjOrigin, SkillDef groupToMove, SkillDef destSubj) {
+        List<SkillDef> skillsOrigin = ruleSetDefGraphService.getChildrenSkills(groupToMove, [SkillRelDef.RelationshipType.SkillsGroupRequirement])
+        String projectId = groupToMove.projectId
+        ruleSetDefGraphService.removeGraphRelationship(projectId, subjOrigin.skillId, Subject, projectId, groupToMove.skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
+        skillsOrigin.each {
+            ruleSetDefGraphService.removeGraphRelationship(projectId, subjOrigin.skillId, Subject, projectId, it.skillId, SkillRelDef.RelationshipType.GroupSkillToSubject)
+        }
+        ruleSetDefGraphService.assignGraphRelationship(projectId, destSubj.skillId, Subject, projectId, groupToMove.skillId, SkillRelDef.RelationshipType.RuleSetDefinition)
+        skillsOrigin.each {
+            ruleSetDefGraphService.assignGraphRelationship(projectId, destSubj.skillId, Subject, projectId, it.skillId, SkillRelDef.RelationshipType.GroupSkillToSubject)
+        }
     }
 
     private void resetDisplayOrder(SkillDef origParentSkill, String parentSkillId) {

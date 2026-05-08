@@ -1801,7 +1801,7 @@ class AdminController {
 
         skillsMoveService.moveSkills(projectId, skillReuseRequest)
         RequestResult success = RequestResult.success()
-        success.explanation = "Successfully reused skills"
+        success.explanation = "Successfully moved skills"
         return success
     }
 
