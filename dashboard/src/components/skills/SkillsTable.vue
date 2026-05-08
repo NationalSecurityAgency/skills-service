@@ -361,8 +361,8 @@ const actionsMenu = ref(addWidthToIcon([
     }
   },
   {
-    label: 'Add Skill Events',
-    icon: 'fas fa-user',
+    label: 'Report Skills for Users',
+    icon: 'fas fa-user-plus',
     command: () => {
       showAddEventsModal.value = true
     }

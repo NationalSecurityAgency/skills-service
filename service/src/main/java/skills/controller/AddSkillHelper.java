@@ -25,10 +25,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import skills.PublicProps;
 import skills.auth.AuthMode;
 import skills.auth.UserAuthService;
 import skills.auth.UserInfo;
+import org.springframework.transaction.annotation.Transactional;
 import skills.auth.UserInfoService;
 import skills.auth.pki.PkiUserLookup;
 import skills.controller.exceptions.ErrorCode;
@@ -67,35 +69,14 @@ public class AddSkillHelper {
     @Value("${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}")
     AuthMode authMode;
 
+    @Transactional
     public BatchSkillEventResult addBatchSkillsForBatchUsers(String projectId, BatchSkillEventRequest batchSkillEventRequest) {
-
+        SkillsValidator.isNotNull(batchSkillEventRequest, "BatchSkillEventRequest cannot be null");
         Long requestedTimestamp = batchSkillEventRequest != null ? batchSkillEventRequest.getTimestamp() : null;
-        Boolean notifyIfSkillNotApplied = batchSkillEventRequest != null ? batchSkillEventRequest.getNotifyIfSkillNotApplied() : false;
-        Boolean isRetry = batchSkillEventRequest != null ? batchSkillEventRequest.getIsRetry() : false;
         List<String> skillIds = batchSkillEventRequest.getSkillIds();
         String skillBatchString = String.join(", ", skillIds);
-
-        Date incomingDate = null;
-
-        if (batchSkillEventRequest != null && requestedTimestamp != null && requestedTimestamp > 0) {
-            //let's account for some possible clock drift
-            SkillsValidator.isTrue(requestedTimestamp <= (System.currentTimeMillis() + 30000), "Skill Events may not be in the future", projectId);
-            incomingDate = new Date(requestedTimestamp);
-        }
-
-        if (batchSkillEventRequest != null && batchSkillEventRequest.getApprovalRequestedMsg() != null) {
-            int maxLength = publicProps.getInt(PublicProps.UiProp.maxSelfReportMessageLength);
-            int msgLength = batchSkillEventRequest.getApprovalRequestedMsg().length();
-            SkillsValidator.isTrue(msgLength <= maxLength, String.format("message has length of %d, maximum allowed length is %d", msgLength, maxLength), projectId, skillBatchString);
-        }
-
+        Date incomingDate = validateTime(projectId, requestedTimestamp);
         String currentUser = userInfoService.getCurrentUserId();
-        if (batchSkillEventRequest != null && batchSkillEventRequest.getDoNotRequireApproval()) {
-            if (!userInfoService.isCurrentUserAProjectAdmin()) {
-                throw new SkillException("Only project admins can apply approval-based skills without approval", projectId, skillBatchString, ErrorCode.AccessDenied);
-            }
-        }
-
         BatchSkillEventResult batchResults = new BatchSkillEventResult();
         ArrayList<SkillEventResult> results = new ArrayList<>();
 
@@ -115,57 +96,19 @@ public class AddSkillHelper {
                     }
                 }
             } catch (SkillException e) {
-                SkillEventResult res = new SkillEventResult();
-                res.setSkillApplied(false);
-                res.setExplanation("User [" + userIdToProcess + "] could not be processed: " + e.getMessage());
-                res.setProjectId(projectId);
-                res.setSkillId("");
-                res.setUserId(userIdToProcess);
+                SkillEventResult res = createNewEventResult("User [" + userIdToProcess + "] could not be processed: " + e.getMessage(), projectId, "", userIdToProcess);
                 results.add(res);
                 log.error("Error applying skills, user [{}], error [{}]", userIdToProcess, res.getExplanation());
                 continue;
             }
 
             if (log.isInfoEnabled()) {
-                log.info("ReportSkills (ProjectId=[{}], SkillIds=[{}], CurrentUser=[{}], UserId=[{}], RequestDate=[{}], IsRetry=[{}])",
-                        projectId, skillBatchString, userInfoService.getCurrentUserId(), userIdToProcess, toDateString(requestedTimestamp), isRetry.toString());
+                log.info("ReportSkills (ProjectId=[{}], SkillIds=[{}], CurrentUser=[{}], UserId=[{}], RequestDate=[{}])",
+                        projectId, skillBatchString, userInfoService.getCurrentUserId(), userIdToProcess, toDateString(requestedTimestamp));
             }
             for (String skillId : skillIds) {
-                boolean forAnotherUser = userId != null && currentUser != null && !userId.equalsIgnoreCase(currentUser);
-                String prof = "retry-reportSkillBatch";
-                CProf.start(prof);
-                try {
-                    final Date dataParam = incomingDate;
-                    final String userIdToReport = userId;
-                    Closure<SkillEventResult> closure = new Closure<>(null) {
-                        @Override
-                        public SkillEventResult call() {
-                            SkillEventsService.SkillApprovalParams skillApprovalParams = batchSkillEventRequest.getApprovalRequestedMsg() != null ?
-                                    new SkillEventsService.SkillApprovalParams(batchSkillEventRequest.getApprovalRequestedMsg()) : SkillEventsService.getDefaultSkillApprovalParams();
-                            skillApprovalParams.setForAnotherUser(forAnotherUser);
-                            skillApprovalParams.setDoNotRequireApproval(batchSkillEventRequest.getDoNotRequireApproval() != null ? batchSkillEventRequest.getDoNotRequireApproval() : false);
-                            return skillsManagementFacade.reportSkill(projectId, skillId, userIdToReport, notifyIfSkillNotApplied, dataParam, skillApprovalParams);
-                        }
-                    };
-                    SkillEventResult result = (SkillEventResult) RetryUtil.withRetry(3, false, closure);
-                    results.add(result);
-                } catch(SkillException ske) {
-
-                    SkillEventResult res = new SkillEventResult();
-                    res.setSkillApplied(false);
-                    res.setExplanation(ske.getMessage());
-                    res.setProjectId(projectId);
-                    res.setSkillId(skillId);
-                    res.setUserId(userId);
-                    results.add(res);
-                    log.error("Error applying skill [{}], user [{}], error [{}]", skillId, userId, ske.getMessage());
-
-                    if (ske.getErrorCode() == ErrorCode.SkillNotFound) {
-                        projectErrorService.invalidSkillReported(projectId, skillId);
-                    }
-                }finally {
-                    CProf.stop(prof);
-                }
+                SkillEventResult result = processSkillForUser(skillId, userId, projectId, incomingDate, currentUser);
+                results.add(result);
             }
         }
 
@@ -174,19 +117,53 @@ public class AddSkillHelper {
         return batchResults;
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    protected SkillEventResult processSkillForUser(String skillId, String userId, String projectId, Date incomingDate, String currentUser) {
+        boolean forAnotherUser = userId != null && currentUser != null && !userId.equalsIgnoreCase(currentUser);
+        String prof = "retry-reportSkillBatch";
+        CProf.start(prof);
+        try {
+            SkillEventsService.SkillApprovalParams skillApprovalParams = SkillEventsService.getDefaultSkillApprovalParams();
+            skillApprovalParams.setForAnotherUser(forAnotherUser);
+            return skillsManagementFacade.reportSkill(projectId, skillId, userId, true, incomingDate, skillApprovalParams);
+        } catch(SkillException ske) {
+            log.error("Error applying skill [{}], user [{}], error [{}]", skillId, userId, ske.getMessage());
+
+            if (ske.getErrorCode() == ErrorCode.SkillNotFound) {
+                projectErrorService.invalidSkillReported(projectId, skillId);
+            }
+            return createNewEventResult(ske.getMessage(), projectId, skillId, userId);
+        }finally {
+            CProf.stop(prof);
+        }
+    }
+
+    private Date validateTime(String projectId, Long requestedTimestamp) {
+        if (requestedTimestamp != null && requestedTimestamp > 0) {
+            //let's account for some possible clock drift
+            SkillsValidator.isTrue(requestedTimestamp <= (System.currentTimeMillis() + 30000), "Skill Events may not be in the future", projectId);
+            return null;
+        }
+        return new Date(requestedTimestamp);
+    }
+
+    private SkillEventResult createNewEventResult(String failureMessage, String projectId, String skillId, String userId) {
+        SkillEventResult res = new SkillEventResult();
+        res.setSkillApplied(false);
+        res.setExplanation(failureMessage);
+        res.setProjectId(projectId);
+        res.setSkillId(skillId);
+        res.setUserId(userId);
+        return res;
+    }
+
     public SkillEventResult addSkill(String projectId, String skillId, SkillEventRequest skillEventRequest) {
+        SkillsValidator.isNotNull(skillEventRequest, "SkillEventRequest cannot be null");
         String requestedUserId = skillEventRequest != null ? skillEventRequest.getUserId() : null;
         Long requestedTimestamp = skillEventRequest != null ? skillEventRequest.getTimestamp() : null;
         Boolean notifyIfSkillNotApplied = skillEventRequest != null ? skillEventRequest.getNotifyIfSkillNotApplied() : false;
         Boolean isRetry = skillEventRequest != null ? skillEventRequest.getIsRetry() : false;
-
-        Date incomingDate = null;
-
-        if (skillEventRequest != null && requestedTimestamp != null && requestedTimestamp > 0) {
-            //let's account for some possible clock drift
-            SkillsValidator.isTrue(requestedTimestamp <= (System.currentTimeMillis() + 30000), "Skill Events may not be in the future", projectId, skillId);
-            incomingDate = new Date(requestedTimestamp);
-        }
+        Date incomingDate = validateTime(projectId, requestedTimestamp);
 
         if (skillEventRequest != null && skillEventRequest.getApprovalRequestedMsg() != null) {
             int maxLength = publicProps.getInt(PublicProps.UiProp.maxSelfReportMessageLength);

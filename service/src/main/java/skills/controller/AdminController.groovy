@@ -15,6 +15,7 @@
  */
 package skills.controller
 
+import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
@@ -49,6 +50,7 @@ import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
 import skills.services.attributes.SlidesAttrs
+import skills.services.events.BatchSkillEventResult
 import skills.services.events.BulkSkillEventResult
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.services.inception.InceptionProjectService
@@ -216,6 +218,8 @@ class AdminController {
     @Value('#{"${skills.config.ui.maxProjectInviteEmails:50}"}')
     int maxInviteEmails
 
+    @Autowired
+    AddSkillHelper addSkillHelper;
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -2007,6 +2011,12 @@ class AdminController {
         return attachmentService.saveAttachment(file, projectId, null, null);
     }
 
-
+    @RequestMapping(value = "/projects/{projectId}/skills", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    @Profile
+    BatchSkillEventResult addBatchSkillsForBatchUsers(@PathVariable("projectId") String projectId,
+                                                             @RequestBody BatchSkillEventRequest batchSkillEventRequest) {
+        return addSkillHelper.addBatchSkillsForBatchUsers(projectId, batchSkillEventRequest);
+    }
 }
 

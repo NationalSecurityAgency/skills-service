@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
 import SkillsService from "@/components/skills/SkillsService.js";
 import StepList from "primevue/steplist";
@@ -24,6 +24,7 @@ import StepPanels from "primevue/steppanels";
 import Stepper from 'primevue/stepper'
 import Column from "primevue/column";
 import dayjs from "dayjs";
+import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 
 const model = defineModel()
 const emit = defineEmits([])
@@ -39,17 +40,29 @@ const props = defineProps({
   }
 })
 
+const loading = ref(false);
 const usersToAdd = ref("");
 const dateAdded = ref(new Date());
 const results = ref([]);
+const displayFullText = ref(false);
+
+const userList = computed(() => {
+  if(usersToAdd.value.length > 0) {
+    return usersToAdd.value.split('\n').filter(user => user.trim() !== '');
+  } else {
+    return [];
+  }
+})
 
 const saveEvents = () => {
-  const userIds = usersToAdd.value.split('\n').filter(user => user.trim() !== '');
+  const userIds = userList.value;
   const skillIds = props.skills.map((skill) => skill.skillId);
+  loading.value = true;
 
   return SkillsService.saveSkillEventBatch(props.projectId, skillIds, userIds, dateAdded.value.getTime(), true).then((result) => {
     usersToAdd.value = '';
     results.value = result.results;
+    loading.value = false;
   })
 
 }
@@ -72,7 +85,7 @@ const closeMe = () => {
       ok-button-icon="fas fa-check"
       data-cy="addSkillEventBatchDialog">
 
-    <Stepper v-if="results.length === 0" :linear="true" value="1" class="mb-4">
+    <Stepper v-if="results.length === 0 && !loading" :linear="true" value="1" class="mb-4">
       <StepList>
         <Step value="1">Select Date</Step>
         <Step value="2">Add Users</Step>
@@ -81,7 +94,21 @@ const closeMe = () => {
       <StepPanels>
         <StepPanel value="1" v-slot="{ activateCallback }">
           <Message class="mb-2" data-cy="skillsToAdd" :closable="false" severity="info">
-            This will add skill events for the skills <span class="font-bold">{{ skills.map( skill => skill.name ).join(', ')}}</span>
+            This will add skill events for {{ skills.length }} skill(s):
+            <ul v-if="skills.length > 5 && !displayFullText" class="ml-4">
+                <li class="font-bold" v-for="skill of skills.slice(0, 5)">- {{ skill.name }}</li>
+            </ul>
+            <ul v-else class="ml-4">
+              <li class="font-bold" v-for="skill of skills">- {{ skill.name }}</li>
+            </ul>
+            <a v-if="skills.length > 5" size="xs" variant="outline-info"
+               class="cursor-pointer"
+               @click="displayFullText = !displayFullText"
+               aria-label="Show/Hide truncated text"
+               data-cy="showMoreOrLessBtn">
+              <div v-if="displayFullText" data-cy="showLess"> Show less</div>
+              <div v-else data-cy="showMore"><em>Show more</em></div>
+            </a>
           </Message>
 
           <div class="mb-2 mt-4 flex flex-1 items-center">
@@ -121,9 +148,8 @@ const closeMe = () => {
           </div>
         </StepPanel>
         <StepPanel value="3" v-slot="{ activateCallback }">
-          <Message>
-            Skill events for <span class="font-bold">{{ skills.map( skill => skill.name ).join(', ')}}</span> will be added for the
-            user(s) <span class="font-bold">{{ usersToAdd.split( '\n' ).filter(user => user.trim() !== '').join(', ') }}</span> on {{ dayjs(dateAdded).format('YYYY-MM-DD') }}.
+          <Message :closable="false">
+            Skill events for <span class="font-bold">{{ skills.length }}</span> skill(s) will be added for <span class="font-bold">{{ userList.length }}</span> user(s) on {{ dayjs(dateAdded).format('YYYY-MM-DD') }}.
             Please click "Add Events" to confirm.
           </Message>
           <div class="flex pt-6 justify-between">
@@ -134,6 +160,8 @@ const closeMe = () => {
       </StepPanels>
     </Stepper>
 
+    <SkillsSpinner :is-loading="loading" class="my-8" />
+
     <SkillsDataTable
         aria-label="Admin Group Global Badges Table"
         class="mb-4"
@@ -143,9 +171,9 @@ const closeMe = () => {
         :totalRecords="results.length"
         v-if="results.length > 0"
         data-cy="skillEventBatchResult" table-stored-state-id="skillEventBatchResultTable">
-      <Column header="" field="skillApplied" :sortable="false" style="width: 1rem">
+      <Column header="Result" field="skillApplied" :sortable="true" style="width: 8rem">
         <template #body="slotProps">
-            <i :class="[slotProps.data.success && slotProps.data.skillApplied ? 'fa fa-check text-primary' : 'fa fa-info-circle text-red-800']" aria-hidden="true"/>
+            <i class="mr-2" :class="[slotProps.data.success && slotProps.data.skillApplied ? 'fa fa-check text-primary' : 'fa fa-info-circle text-red-800']" aria-hidden="true"/> {{ slotProps.data.success && slotProps.data.skillApplied ? 'Applied' : 'Rejected' }}
         </template>
       </Column>
       <Column header="User" field="userId" :sortable="true"></Column>

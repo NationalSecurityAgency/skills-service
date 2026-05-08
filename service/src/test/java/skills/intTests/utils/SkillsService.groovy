@@ -643,7 +643,7 @@ class SkillsService {
 
     @Profile
     def addBatchSkillsForBatchUsers(String projectId, Map props) {
-        return wsHelper.apiPost("/projects/${projectId}/skills", props ?: null)
+        return wsHelper.adminPost("/projects/${projectId}/skills", props ?: null)
     }
 
     def reportCrossProjectSkill(String projId, String crossProjectId, String otherProjId, String optionalUserId = null, Date optionalDate = null, String optionalApprovalMsg = null) {
