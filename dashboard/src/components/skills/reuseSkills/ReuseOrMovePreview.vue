@@ -24,6 +24,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import {useAnnouncer} from "@vue-a11y/announcer";
 import LinkToSkillPage from "@/components/utils/LinkToSkillPage.vue";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 const props = defineProps({
   skills: {
@@ -56,6 +57,7 @@ const route = useRoute()
 const router = useRouter()
 const announcer = useAnnouncer()
 const pluralSupport = useLanguagePluralSupport()
+const plurize = usePluralize()
 const appConfig = useAppConfig()
 
 const loadingReusedSkills = ref(true)
@@ -63,6 +65,8 @@ const skillsForReuse = ref({
   allAlreadyExist: [],
   alreadyExist: [],
   available: [],
+  availableGroups: [],
+  availableSkills: [],
   skillsWithDeps: []
 })
 
@@ -74,6 +78,8 @@ const buildSummaryInfo = () => {
       skillsForReuse.value.allAlreadyExist = res
       skillsForReuse.value.alreadyExist = props.skills.filter((skill) => res.find((e) => e.name === skill.name))
       skillsForReuse.value.available = props.skills.filter((skill) => !res.find((e) => e.name === skill.name))
+      skillsForReuse.value.availableSkills = skillsForReuse.value.available.filter((skill) => !skill.isGroupType)
+      skillsForReuse.value.availableGroups = skillsForReuse.value.available.filter((skill) => skill.isGroupType)
       loadDependencyInfo()
     })
     .finally(() => {
@@ -198,9 +204,10 @@ const isReuseBtnDisabled = computed(() => {
 
           <div v-if="!reuseFailedInfo.failed">
             <div v-if="skillsForReuse.available.length > 0 && !exceedsMaxDestinationSkills">
-              <Tag severity="info">{{ skillsForReuse.available.length }}</Tag>
-              skill{{ pluralSupport.plural(skillsForReuse.available) }} will be {{ actionNameInPast }}
-              {{ actionDirection }} the
+              <span v-if="skillsForReuse.availableSkills.length > 0"><Tag severity="info">{{ skillsForReuse.availableSkills.length }}</Tag> {{ plurize.plural('skill', skillsForReuse.availableSkills.length) }}</span>
+              <span v-if="skillsForReuse.availableGroups.length > 0"><span v-if="skillsForReuse.availableSkills.length > 0"> and </span><Tag severity="info">{{ skillsForReuse.availableGroups.length }}</Tag> {{ plurize.plural('group', skillsForReuse.availableGroups.length) }}</span>
+              <span> will be {{ actionNameInPast }}&nbsp;</span>
+              <span> {{ actionDirection }} the </span>
               <span v-if="destination.groupName">
                   <span class="text-primary font-weight-bold">[{{
                       destination.groupName

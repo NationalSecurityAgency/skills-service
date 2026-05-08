@@ -25,7 +25,7 @@ describe('Move Skills Modal Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         cy.contains('There are no Subjects or Groups that this skill can be moved to.');
 
@@ -49,7 +49,7 @@ describe('Move Skills Modal Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         cy.get('[data-cy="reuseButton"]')
             .should('be.disabled');
@@ -73,7 +73,7 @@ describe('Move Skills Modal Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 2 skills.');
+            .contains('Successfully moved 2 items.');
         cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .should('not.be.visible');
         cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')
@@ -103,7 +103,7 @@ describe('Move Skills Modal Tests', () => {
 
         cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         cy.contains('Skills were moved or reused in another browser tab');
         cy.contains('No Destinations Available').should('not.exist');
@@ -121,7 +121,7 @@ describe('Move Skills Modal Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         cy.get('[data-cy="closeButton"]')
             .click();
@@ -132,7 +132,7 @@ describe('Move Skills Modal Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         cy.get('[aria-label="Close"]')
             .click();
@@ -145,7 +145,7 @@ describe('Move Skills Modal Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
@@ -166,7 +166,7 @@ describe('Move Skills Modal Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"]  [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
@@ -184,7 +184,7 @@ describe('Move Skills Modal Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill2"]')
         cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
           .click();
@@ -282,7 +282,7 @@ describe('Move Skills Modal Tests', () => {
 
         cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
           .click();
@@ -370,7 +370,7 @@ describe('Move Skills Modal Tests', () => {
 
         cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2group12Subj2"]')
           .click();
@@ -389,4 +389,109 @@ describe('Move Skills Modal Tests', () => {
         cy.get('[data-cy="reuseSkillsModalStep3"]')
           .should('not.exist');
     });
+
+    it('when a group is selected only subject destinations are available', () => {
+        cy.createSubject(1, 2);
+        cy.createSkillsGroup(1, 1, 11);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.createSubject(1, 3);
+        cy.createSubject(1, 4);
+
+        cy.addSkillToGroup(1, 1, 11, 6);
+        cy.addSkillToGroup(1, 1, 11, 7);
+        cy.addSkillToGroup(1, 1, 11, 8);
+
+        cy.createSkillsGroup(1, 2, 12);
+        cy.createSkillsGroup(1, 3, 13);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="skillsTable"] th`).contains('Display').click()
+
+        // Test 1: when only skill is selected, both subjects and groups are available
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+
+        // open the actions menu
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
+
+        // verify both subjects and groups are available as destinations
+        cy.get('[data-cy="reuseSkillsModalStep1"]');
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj4"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group11"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2group12Subj2"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3group13Subj3"]')
+
+        // close the modal
+        cy.get('[data-cy="closeButton"]').click();
+
+        // Test 2: when group is selected, only subjects are available
+        // select the group
+        cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+
+        cy.intercept('/admin/projects/proj1/skills/skill1/reuse/destinations').as('getDestinationsForSkill1')
+        // open the actions menu
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
+        // important to validate that destinations are loaded for the skill and not group
+        // because skill can be moved to a group so grop filtering must happen on UI
+        cy.wait('@getDestinationsForSkill1')
+
+        // verify only subjects are available as destinations but groups are gone
+        cy.get('[data-cy="reuseSkillsModalStep1"]');
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj4"]')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj1group11"]').should('not.exist')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2group12Subj2"]').should('not.exist')
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj3group13Subj3"]').should('not.exist')
+    })
+
+    it('move preview shows the counts for skills and groups separately', () => {
+        cy.createSubject(1, 2);
+        cy.createSkillsGroup(1, 1, 11);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.createSkillsGroup(1, 1, 12);
+        cy.addSkillToGroup(1, 1, 11, 6);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="skillsTable"] th`).contains('Display').click()
+
+        // select only skill
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+
+        // open the actions menu
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]').click()
+
+        cy.get('[data-cy="reuseSkillsModalStep2"]').contains('1 skill will be moved to the [Subject 2] subject')
+
+        // close the modal
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]').click();
+
+        // now select a group
+        cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]').click()
+
+        cy.get('[data-cy="reuseSkillsModalStep2"]').contains('1 skill and 1 group will be moved to the [Subject 2] subject')
+
+        // close the modal
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]').click();
+
+        // now select all
+        cy.get('[data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-p-index="3"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-p-index="4"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]').click()
+
+        cy.get('[data-cy="reuseSkillsModalStep2"]').contains('3 skills and 2 groups will be moved to the [Subject 2] subject')
+    })
 });

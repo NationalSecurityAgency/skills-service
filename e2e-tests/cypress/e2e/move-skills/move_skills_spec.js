@@ -39,7 +39,7 @@ describe('Move Skills Tests', () => {
         cy.get('[data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         // step 1
         cy.get('[data-cy="reuseSkillsModalStep1"]');
@@ -56,7 +56,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 2 skills');
+            .contains('Successfully moved 2 items');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
@@ -111,7 +111,7 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         // step 1
         cy.get('[data-cy="reuseSkillsModalStep1"]');
@@ -128,7 +128,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 2 skills');
+            .contains('Successfully moved 2 items');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
@@ -187,7 +187,7 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         // step 1
         cy.get('[data-cy="reuseSkillsModalStep1"]');
@@ -204,7 +204,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 1 skill');
+            .contains('Successfully moved 1 item');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
@@ -264,7 +264,7 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
           .click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         // step 1
         cy.get('[data-cy="reuseSkillsModalStep1"]');
@@ -281,7 +281,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 3 skills');
+            .contains('Successfully moved 3 items');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
@@ -331,7 +331,7 @@ describe('Move Skills Tests', () => {
         cy.get('[data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
 
         cy.get('[data-cy="skillActionsBtn"]').first().click()
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         // step 1
         cy.get('[data-cy="reuseSkillsModalStep1"]');
@@ -348,7 +348,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 2 skills');
+            .contains('Successfully moved 2 items');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
@@ -392,7 +392,7 @@ describe('Move Skills Tests', () => {
 
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
 
         // step 1
@@ -410,7 +410,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 2 skills');
+            .contains('Successfully moved 2 items');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
@@ -460,7 +460,7 @@ describe('Move Skills Tests', () => {
 
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         // step 1
         cy.get('[data-cy="reuseSkillsModalStep1"]');
@@ -477,7 +477,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 3 skills');
+            .contains('Successfully moved 3 items');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
@@ -497,5 +497,109 @@ describe('Move Skills Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="requiredAllSkills"]');
 
     });
+
+    it('selecting a skill group disables all the actions by move', () => {
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.createSubject(1, 3);
+        cy.createSubject(1, 4);
+
+        cy.createSkillsGroup(1, 1, 11);
+        cy.addSkillToGroup(1, 1, 11, 6);
+        cy.addSkillToGroup(1, 1, 11, 7);
+        cy.addSkillToGroup(1, 1, 11, 8);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // select the group and 1 skill
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+
+        // open the actions menu
+        cy.get('[data-cy="skillActionsBtn"]').click();
+
+        // verify the warning is displayed
+        cy.get('[data-cy="groupsLimitActionsWarning"]')
+            .should('be.visible')
+            .and('contain.text', 'Groups limit actions');
+
+        const menuItems = ['Move', 'Export To Catalog', 'Reuse in this Project', 'Add To Badge', 'Copy to another Project', 'Add Tag', 'Remove Tag']
+
+        // verify that "Move" action is enabled (not disabled)
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]')
+            .should('not.have.attr', 'aria-disabled', 'true')
+            .and('not.have.class', 'p-disabled');
+        for (const item of menuItems.filter(item => item !== 'Move')) {
+            cy.get('[data-cy="skillsActionsMenu"] [aria-label="' + item + '"]')
+                .should('have.attr', 'aria-disabled', 'true')
+                .and('have.class', 'p-disabled');
+        }
+
+        // unselect the group
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+
+        // open the actions menu
+        cy.get('[data-cy="skillActionsBtn"]').click();
+
+        // now the warning is gone and all the menu items are enabled
+        for (const item of menuItems) {
+            cy.get('[data-cy="skillsActionsMenu"] [aria-label="' + item + '"]')
+                .should('not.have.attr', 'aria-disabled', 'true')
+                .and('not.have.class', 'p-disabled');
+        }
+        cy.get('[data-cy="groupsLimitActionsWarning"]').should('not.exist')
+    })
+
+    it('move group to another subject', () => {
+        cy.createSkillsGroup(1, 1, 11);
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.createSkillsGroup(1, 1, 12);
+        cy.addSkillToGroup(1, 1, 11, 6);
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get(`[data-cy="skillsTable"] th`).contains('Display').click()
+
+        cy.validateTable('[data-cy="skillsTable"]', [
+            [{ colIndex: 2, value: 'Skill 1' }],
+            [{ colIndex: 2, value: 'Group 11' }],
+            [{ colIndex: 2, value: 'Skill 2' }],
+            [{ colIndex: 2, value: 'Skill 3' }],
+            [{ colIndex: 2, value: 'Group 12' }],
+        ], 10)
+
+        // select only skill
+        cy.get('[data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+
+        // open the actions menu
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
+        cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]').click()
+        cy.get('[data-cy="reuseSkillsModalStep2"]').contains('1 skill and 1 group will be moved to the [Subject 2] subject')
+        cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]').click();
+
+        cy.get('[data-cy="reuseSkillsModalStep3"]').contains('Successfully moved 2 items');
+        cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]').click();
+
+        cy.validateTable('[data-cy="skillsTable"]', [
+            [{ colIndex: 2, value: 'Skill 2' }],
+            [{ colIndex: 2, value: 'Skill 3' }],
+            [{ colIndex: 2, value: 'Group 12' }],
+        ], 10)
+
+        cy.get('[data-cy="breadcrumb-proj1"]').click();
+        cy.get('[data-cy="manageBtn_subj2"]').click();
+        cy.get(`[data-cy="skillsTable"] th`).contains('Display').click()
+        cy.validateTable('[data-cy="skillsTable"]', [
+            [{ colIndex: 2, value: 'Skill 1' }],
+            [{ colIndex: 2, value: 'Group 11' }],
+        ], 10)
+
+        cy.get(`[data-p-index="1"] [data-pc-section="rowtogglebutton"]`).click()
+        cy.validateTable('[data-cy="ChildRowSkillGroupDisplay_group11"] [data-cy="skillsTable"]', [
+            [{ colIndex: 2, value: 'Skill 6' }]
+        ], 5, true, null, false);
+    })
 
 });

@@ -328,7 +328,7 @@ describe('Inception Skills Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move Skills"]').click()
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]').click()
 
         // step 1
         cy.get('[ data-cy="reuseSkillsModalStep1"] [data-cy="selectDest_subjsubj2"]')

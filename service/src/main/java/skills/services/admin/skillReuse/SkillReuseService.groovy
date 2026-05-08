@@ -210,10 +210,13 @@ class SkillReuseService {
 
     @Transactional(readOnly = true)
     List<SkillReuseDestination> getReuseDestinationsForASkill(String projectId, String skillId) {
-        SkillDef skill = skillAccessor.getSkillDef(projectId, skillId, [SkillDef.ContainerType.Skill])
+        SkillDef skill = skillAccessor.getSkillDef(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
         List<SkillDef> parentsToExclude = skillRelDefRepo.findParentByChildIdAndTypes(skill.id, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.SkillsGroupRequirement])
         List<SkillDef> allDestSkillDefs = skillDefRepo.findAllByProjectIdAndTypeIn(projectId, [SkillDef.ContainerType.Subject, SkillDef.ContainerType.SkillsGroup])
         List<SkillDef> availableSkillDefs = allDestSkillDefs.findAll({ SkillDef s1 -> (!Boolean.valueOf(skill.enabled) || Boolean.valueOf(s1.enabled)) && !parentsToExclude.find { SkillDef s2 -> s1.skillId == s2.skillId } })
+        if (skill.type == SkillDef.ContainerType.SkillsGroup) {
+            availableSkillDefs = availableSkillDefs.findAll { SkillDef s1 -> s1.type != SkillDef.ContainerType.SkillsGroup }
+        }
         return availableSkillDefs.collect {
             SkillDef subj, group
             if (it.type == SkillDef.ContainerType.Subject) {
