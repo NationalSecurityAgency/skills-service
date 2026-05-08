@@ -146,10 +146,12 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
         String getProjectId()
         String getSkillName()
         String getSkillId()
+        @Nullable
+        String getGroupId()
         Date getPerformedOn()
         String getSubjectId()
     }
-    @Query('''select u.projectId as projectId, s.name as skillName, u.skillId as skillId, u.performedOn as performedOn, u.id as id, subjectDef.skillId as subjectId
+    @Query('''select u.projectId as projectId, s.name as skillName, u.skillId as skillId, s.groupId as groupId, u.performedOn as performedOn, u.id as id, subjectDef.skillId as subjectId
               from UserPerformedSkill u, SkillDef s, SkillDef subjectDef, SkillRelDef srd
               where u.skillRefId in (
                 select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id from SkillDef s

@@ -793,5 +793,43 @@ describe('Performed Skills Table Tests', () => {
 
         cy.contains('Cannot delete skill events for skills imported from the catalog.')
     });
+
+    it('view regular skill from performed skills table', () => {
+        cy.createSkills(1);
+        cy.report(1, false);
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents');
+
+        cy.intercept('DELETE', '/admin/projects/proj1/skills/skill2/users/*/events/**')
+            .as('delete');
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1, value: 'skill1' }],
+        ], 5);
+
+        cy.get('[data-cy="viewSkillBtn"]').click();
+        cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill # 1')
+        cy.get('[data-cy=breadcrumbItemLabel]').should('not.contain.text', 'Group:');
+    });
+
+    it('view group skill from performed skills table', () => {
+        cy.createSkillsGroup(1, 1, 20);
+        cy.addSkillToGroup(1, 1, 20, 1, {
+            pointIncrement: 100,
+            numPerformToCompletion: 5
+        });
+        cy.report(1, false);
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents');
+
+        cy.intercept('DELETE', '/admin/projects/proj1/skills/skill2/users/*/events/**')
+            .as('delete');
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1, value: 'skill1' }],
+        ], 5);
+
+        cy.get('[data-cy="viewSkillBtn"]').click();
+        cy.get('[data-cy="pageHeader"]').contains('SKILL: Very Great Skill 1')
+        cy.get('[data-cy=breadcrumbItemLabel]').should('contain.text', 'Group:');
+    });
 });
 

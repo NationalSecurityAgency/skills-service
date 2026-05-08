@@ -39,12 +39,13 @@ import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useStorage} from "@vueuse/core";
-import SkillNameRouterLink from "@/components/skills/SkillNameRouterLink.vue";
+import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 
 const dialogMessages = useDialogMessages()
 const timeUtils = useTimeUtils()
 const projConfig = useProjConfig()
 const colors = useColors()
+const skillRouteUtil = useSkillOverviewRouteUtil()
 
 const route = useRoute()
 const projectUserState = useProjectUserState()
@@ -264,6 +265,11 @@ const highlight = (value) => {
   }
 }
 
+const toRouteProps = (skill) => {
+  const routeProps = skillRouteUtil.toRouteProps(skill.projectId, skill.subjectId, skill.skillId, skill.type, skill.groupId)
+  return { name: routeProps.name, params: routeProps.params }
+}
+
 const selectedSkills = ref([]);
 </script>
 
@@ -392,7 +398,7 @@ const selectedSkills = ref([]);
                 </div>
                 <div class="flex grow items-start justify-end">
                   <router-link :aria-label="`View Skill ${slotProps.data.skillName}`"
-                               :to="{ name:'SkillOverview', params: { projectId: projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId }}">
+                               :to="toRouteProps({ projectId, ...slotProps.data })">
                     <SkillsButton outlined
                                   size="small"
                                   data-cy="viewSkillBtn"

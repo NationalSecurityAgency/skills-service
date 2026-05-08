@@ -60,6 +60,7 @@ class UserAdminService {
                         id: it.getId(),
                         skillName: it.getSkillName(),
                         skillId: it.getSkillId(),
+                        groupId: it.getGroupId(),
                         performedOn: it.getPerformedOn(),
                         importedSkill: it.getProjectId() != projectId,
                         subjectId: it.getSubjectId())
