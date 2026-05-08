@@ -169,12 +169,12 @@ const skillId = computed(() => {
 
 const prevButtonClicked = () => {
   const routeProps = skillRouteUtil.toRouteProps(route.params.projectId, route.params.subjectId, skillsState.skill.prevSkillId, skillsState.skill.type, skillsState.skill.prevSkillGroupId)
-  router.push({ name: routeProps.name, params: routeProps.params })
+  router.push({ name: route.name, params: routeProps.params })
 }
 
 const nextButtonClicked = () => {
   const routeProps = skillRouteUtil.toRouteProps(route.params.projectId, route.params.subjectId, skillsState.skill.nextSkillId, skillsState.skill.type, skillsState.skill.nextSkillGroupId)
-  router.push({ name: routeProps.name, params: routeProps.params })
+  router.push({ name: route.name, params: routeProps.params })
 }
 
 </script>
