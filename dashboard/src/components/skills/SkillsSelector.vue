@@ -20,6 +20,7 @@ import Badge from 'primevue/badge';
 // import Fluid from 'primevue/fluid';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil';
+import SkillType from "@/common-components/utilities/SkillType.js";
 
 const announcer = useSkillsAnnouncer();
 const emit = defineEmits(['added', 'search-change']);
@@ -227,9 +228,9 @@ defineExpose({
                 </span>
               </span>
                 <span class="mx-2" v-if="slotProps.option.type !== 'Badge'">|</span>
-                <span v-if="slotProps.option.type === 'Skill'" class="uppercase mr-1 italic"
+                <span v-if="SkillType.isSkill(slotProps.option.type) || SkillType.isSkillsGroup(slotProps.option.type)" class="uppercase mr-1 italic"
                       data-cy="skillsSelectionItem-subjectId">Subject:</span>
-                <span v-if="slotProps.option.type === 'Skill'"
+                <span v-if="SkillType.isSkill(slotProps.option.type) || SkillType.isSkillsGroup(slotProps.option.type)"
                       class="font-bold skills-option-subject-name"
                       data-cy="skillsSelector-subjectName">{{ slotProps.option.subjectName }}</span>
                 <span v-if="slotProps.option.type === 'Shared Skill'" class="uppercase mr-1 italic"
