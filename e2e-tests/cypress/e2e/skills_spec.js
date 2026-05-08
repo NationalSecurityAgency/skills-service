@@ -1782,7 +1782,6 @@ describe('Skills Tests', () => {
     ], 5, true, null, false);
   })
 
-
   it('Expiration updates when skill changes', () => {
     cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
       projectId: 'proj1',
@@ -1829,5 +1828,53 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy="prevSkill"]').click()
     cy.get('[data-cy="dailyFormGroup"] [data-pc-section="input"]').should('be.checked')
+  })
+
+  it('nav to prev/next to/from reg skills and group child skills', () => {
+    cy.createSubject(1, 1);
+    cy.createSkill(1, 1, 1);
+    cy.createSkillsGroup(1, 1, 20);
+    cy.addSkillToGroup(1, 1, 20, 21, {
+        pointIncrement: 100,
+        numPerformToCompletion: 5
+    });
+    cy.createSkill(1, 1, 3);
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+    
+    cy.get('[data-cy="pageHeader"').contains('Very Great Skill 1');
+    cy.get('[data-cy=breadcrumbItemLabel]').should('not.contain.text', 'Group:');
+    cy.get('[data-cy="skillOrder"]').contains('Skill 1 of 3');
+    cy.get('[data-cy="prevSkill"]').should('not.be.enabled');
+    cy.get('[data-cy="nextSkill"]').should('exist');
+    cy.get('[data-cy="nextSkill"]').click();
+
+    cy.get('[data-cy="pageHeader"').contains('Very Great Skill 21');
+    cy.get('[data-cy=breadcrumbItemLabel]').should('contain.text', 'Group:');
+    cy.get('[data-cy="skillOrder"]').contains('Skill 2 of 3');
+    cy.get('[data-cy="prevSkill"]').should('exist');
+    cy.get('[data-cy="nextSkill"]').should('exist');
+    cy.get('[data-cy="nextSkill"]').click();
+
+    cy.get('[data-cy="pageHeader"').contains('Very Great Skill 3');
+    cy.get('[data-cy=breadcrumbItemLabel]').should('not.contain.text', 'Group:');
+    cy.get('[data-cy="skillOrder"]').contains('Skill 3 of 3');
+    cy.get('[data-cy="prevSkill"]').should('exist');
+    cy.get('[data-cy="nextSkill"]').should('not.be.enabled');
+
+    // now go back
+    cy.get('[data-cy="prevSkill"]').click();
+    cy.get('[data-cy="pageHeader"').contains('Very Great Skill 21');
+    cy.get('[data-cy=breadcrumbItemLabel]').should('contain.text', 'Group:');
+    cy.get('[data-cy="skillOrder"]').contains('Skill 2 of 3');
+    cy.get('[data-cy="prevSkill"]').should('exist');
+    cy.get('[data-cy="nextSkill"]').should('exist');
+    cy.get('[data-cy="prevSkill"]').click();
+
+    cy.get('[data-cy="pageHeader"').contains('Very Great Skill 1');
+    cy.get('[data-cy=breadcrumbItemLabel]').should('not.contain.text', 'Group:');
+    cy.get('[data-cy="skillOrder"]').contains('Skill 1 of 3');
+    cy.get('[data-cy="prevSkill"]').should('not.be.enabled');
+    cy.get('[data-cy="nextSkill"]').should('exist');
   })
 })

@@ -169,12 +169,26 @@ const skillId = computed(() => {
 
 const prevButtonClicked = () => {
   const routeProps = skillRouteUtil.toRouteProps(route.params.projectId, route.params.subjectId, skillsState.skill.prevSkillId, skillsState.skill.type, skillsState.skill.prevSkillGroupId)
-  router.push({ name: route.name, params: routeProps.params })
+  const currentPageName = route.name
+  
+  // Extract prefix from route.name and suffix from routeProps.name
+  const routeNamePrefix = currentPageName.replace(/(GroupSkillOverview|SingleSkillOverview)$/, '')
+  const routePropsSuffix = routeProps.name.match(/(GroupSkillOverview|SingleSkillOverview)$/)[1]
+  const newPageName = routeNamePrefix + routePropsSuffix
+  
+  router.push({ name: newPageName, params: routeProps.params })
 }
 
 const nextButtonClicked = () => {
   const routeProps = skillRouteUtil.toRouteProps(route.params.projectId, route.params.subjectId, skillsState.skill.nextSkillId, skillsState.skill.type, skillsState.skill.nextSkillGroupId)
-  router.push({ name: route.name, params: routeProps.params })
+  const currentPageName = route.name
+
+  // Extract prefix from route.name and suffix from routeProps.name
+  const routeNamePrefix = currentPageName.replace(/(GroupSkillOverview|SingleSkillOverview)$/, '')
+  const routePropsSuffix = routeProps.name.match(/(GroupSkillOverview|SingleSkillOverview)$/)[1]
+  const newPageName = routeNamePrefix + routePropsSuffix
+
+  router.push({ name: newPageName, params: routeProps.params })
 }
 
 </script>
