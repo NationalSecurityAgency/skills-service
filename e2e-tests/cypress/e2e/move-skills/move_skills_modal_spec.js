@@ -73,7 +73,7 @@ describe('Move Skills Modal Tests', () => {
         cy.get('[ data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .click();
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 2 items.');
+            .contains('Successfully moved 2 skills.');
         cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="reuseButton"]')
             .should('not.be.visible');
         cy.get('[data-cy="reuseSkillsModalStep2"] [data-cy="closeButton"]')

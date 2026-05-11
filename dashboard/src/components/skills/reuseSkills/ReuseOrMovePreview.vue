@@ -108,6 +108,7 @@ const loadDependencyInfo = () => {
         const withDeps = res.filter((item) => item.hasDependency)
         skillsForReuse.value.skillsWithDeps = skillsForReuse.value.available.filter((skill) => withDeps.find((e) => e.skillId === skill.skillId))
         skillsForReuse.value.available = skillsForReuse.value.available.filter((skill) => !withDeps.find((e) => e.skillId === skill.skillId))
+        skillsForReuse.value.availableSkills = skillsForReuse.value.availableSkills.filter((skill) => !withDeps.find((e) => e.skillId === skill.skillId))
       })
       .finally(() => {
         loadingDependencyInfo.value = false

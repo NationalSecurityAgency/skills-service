@@ -56,7 +56,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 2 items');
+            .contains('Successfully moved 2 skills');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
@@ -128,7 +128,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 2 items');
+            .contains('Successfully moved 2 skills');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
@@ -204,7 +204,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 1 item');
+            .contains('Successfully moved 1 skill');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
@@ -281,7 +281,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 3 items');
+            .contains('Successfully moved 3 skills');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
@@ -348,7 +348,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 2 items');
+            .contains('Successfully moved 2 skills');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
@@ -410,7 +410,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 2 items');
+            .contains('Successfully moved 2 skills');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
@@ -477,7 +477,7 @@ describe('Move Skills Tests', () => {
 
         // step 3
         cy.get('[data-cy="reuseSkillsModalStep3"]')
-            .contains('Successfully moved 3 items');
+            .contains('Successfully moved 3 skills');
         cy.get('[data-cy="reuseSkillsModalStep3"] [data-cy="okButton"]')
             .click();
 
