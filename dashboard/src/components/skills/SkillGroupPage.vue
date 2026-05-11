@@ -65,12 +65,7 @@ const navItems = computed(() => {
       page: 'GroupSkills'
     }
   ]
-  items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'GroupUsers' })
-  items.push({
-    name: 'Metrics',
-    iconClass: 'fa-chart-bar skills-color-metrics',
-    page: 'GroupMetrics'
-  })
+  // items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'GroupUsers' })
   return items
 })
 
