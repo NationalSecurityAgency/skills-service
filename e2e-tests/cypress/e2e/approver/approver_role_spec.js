@@ -49,6 +49,10 @@ describe('Approver Role Tests', () => {
             cy.createSkill(projNum, 1, 3, { selfReportingType: 'Approval' })
             cy.createSkill(projNum, 2, 4, { selfReportingType: 'Approval' })
             cy.createSkill(projNum, 2, 5)
+            cy.createSkillsGroup(projNum, 1, 1)
+            cy.addSkillToGroup(projNum, 1, 1, 6)
+            cy.addSkillToGroup(projNum, 1, 1, 7)
+            cy.addSkillToGroup(projNum, 1, 1, 8)
             cy.createBadge(projNum, 1)
             cy.createBadge(projNum, 2)
             cy.assignSkillToBadge(projNum, 1, 1);
@@ -222,10 +226,67 @@ describe('Approver Role Tests', () => {
             cy.get('[data-cy="orderMoveUp_skill3"]').should(`${chainerPrepend}exist`)
 
             cy.get('[data-cy="nameCell_skill1"]').contains('Very Great Skill 1')
+
+            cy.get(`[data-p-index="3"] [data-pc-section="rowtogglebutton"]`).click()
+            cy.get('[data-cy="editRequired"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="importSkillToGroupBtn-group1"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="addSkillToGroupBtn-group1"]').should(`${chainerPrepend}exist`)
         }
         runCheck(2)
         runCheck(1, 'View','not.')
     });
+
+  it('/skill group page - approver role has no mutation controls', function () {
+      const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
+          const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+          cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1/groups/group1`);
+          cy.wait(`@getSettingsProj${projNum}`);
+          cy.get('[data-cy="btn_edit-group"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="skillActionsBtn"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').should(`${chainerPrepend}exist`)
+
+          cy.get('[data-cy="editSkillButton_skill6"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="editSkillButton_skill7"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="editSkillButton_skill8"]').should(`${chainerPrepend}exist`)
+
+          cy.get('[data-cy="copySkillButton_skill6"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="copySkillButton_skill7"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="copySkillButton_skill8"]').should(`${chainerPrepend}exist`)
+
+          cy.get('[data-cy="deleteSkillButton_skill6"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="deleteSkillButton_skill7"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="deleteSkillButton_skill8"]').should(`${chainerPrepend}exist`)
+
+          cy.get('[data-cy="manageSkillLink_skill6"]').invoke('attr', 'aria-label').should('contain', manageButtonTxt)
+          cy.get('[data-cy="manageSkillLink_skill7"]').invoke('attr', 'aria-label').should('contain', manageButtonTxt)
+          cy.get('[data-cy="manageSkillLink_skill8"]').invoke('attr', 'aria-label').should('contain', manageButtonTxt)
+
+          cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`)
+
+          if (assertChainPrepend == null) {
+              cy.get('[data-cy="enableDisplayOrderSort"]').click()
+          }
+
+          cy.get('[data-cy="orderMoveDown_skill6"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="orderMoveDown_skill7"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="orderMoveDown_skill8"]').should(`${chainerPrepend}exist`)
+
+          cy.get('[data-cy="orderMoveUp_skill6"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="orderMoveUp_skill7"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="orderMoveUp_skill8"]').should(`${chainerPrepend}exist`)
+
+          cy.get('[data-cy="nameCell_skill6"]').contains('Very Great Skill 6')
+
+          // cy.get(`[data-p-index="3"] [data-pc-section="rowtogglebutton"]`).click()
+          cy.get('[data-cy="editRequired"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="importSkillToGroupBtn-group1"]').should(`${chainerPrepend}exist`)
+          cy.get('[data-cy="addSkillToGroupBtn-group1"]').should(`${chainerPrepend}exist`)
+      }
+      runCheck(2)
+      runCheck(1, 'View','not.')
+  });
 
     it('name link from skills page down to skill page works', function () {
         const runCheck = () => {
