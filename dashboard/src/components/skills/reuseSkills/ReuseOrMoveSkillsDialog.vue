@@ -255,7 +255,7 @@ const dialogUtils = useDialogUtils()
                   class="border-2 border-dashed border-surface rounded-border bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium">
                 <span><span class="text-primary">Successfully</span> {{ actionNameInPast }}
                 <Tag severity="info">{{ movedOrReusedSkills.length }}</Tag>
-                item{{ pluralSupport.plural(movedOrReusedSkills) }}.</span>
+                {{ isReuseType ? 'skill' : 'item'}}{{ pluralSupport.plural(movedOrReusedSkills) }}.</span>
                 </div>
               </div>
               <div class="flex pt-6 justify-end">
