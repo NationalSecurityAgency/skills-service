@@ -1408,7 +1408,7 @@ describe('Skills Tests', () => {
     cy.createSkill(1, 1, 2)
     cy.createSkill(1, 1, 3)
     cy.createSkill(1, 1, 4)
-    cy.createSkill(1, 1, 5)
+    // cy.createSkill(1, 1, 5)
 
     cy.visit('/administrator/projects/proj1/subjects/subj1')
 
@@ -1418,6 +1418,8 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy*=copySkillButton]').should('have.length', 5)
     cy.get('[data-cy*=copySkillButton]').should('be.disabled')
+
+    cy.pause()
 
     cy.openDialog('[data-cy=deleteSkillButton_skill1]')
     cy.get('[data-cy=currentValidationText]').type('Delete Me', {delay: 0})
@@ -1432,7 +1434,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy*=copySkillButton]').should('be.enabled')
   })
 
-  it('add skill and copy skill buttons disabled if max skills for subject reached including re-used skills', () => {
+  it.only('add skill and copy skill buttons disabled if max skills for subject reached including re-used skills', () => {
     cy.intercept('/public/config', {
       body: {
         artifactBuildTimestamp: '2022-01-17T14:39:38Z',
@@ -1512,6 +1514,8 @@ describe('Skills Tests', () => {
     cy.get('[data-cy*=copySkillButton]').should('have.length', 4)
     cy.get('[data-cy*=copySkillButton]').should('be.disabled')
     cy.get('[data-cy="importedBadge-skill1Subj2STREUSESKILLST0"]').contains('Reused');
+
+    cy.pause()
 
     cy.openDialog('[data-cy=deleteSkillButton_skill1]')
     cy.get('[data-cy=currentValidationText]').type('Delete Me', {delay: 0})

@@ -77,12 +77,6 @@ const createOrUpdateGroup = (skill = {}, isEdit = false) => {
 }
 provide('createOrUpdateGroup', createOrUpdateGroup)
 
-onBeforeMount(() => {
-  if (skillsState.skill?.skillId !== route.params.groupId) {
-    skillsState.loadSkill(route.params.projectId, route.params.subjectId, route.params.groupId)
-  }
-})
-
 const newSkillInfo = ref({
   skill: {},
   show: false,
@@ -202,6 +196,15 @@ const skillCreatedOrUpdated = (skill) => {
       title="Skills Group"
       :is-loading="isLoading"
       aria-label="new skill">
+
+      <div v-if="addSkillDisabled && !projConfig.isReadOnlyProj">
+        <InlineMessage severity="warn"
+                       class="mx-2"
+                       :aria-label="addSkillsDisabledMsg"
+                       data-cy="addSkillDisabledWarning"  :closable="false">
+          {{ addSkillsDisabledMsg }}
+        </InlineMessage>
+      </div>
     </sub-page-header>
 
     <Card :pt="{ body: { class: 'p-0!' } }">

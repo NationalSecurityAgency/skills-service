@@ -48,6 +48,9 @@ const loadData = () => {
   if (skillsState.skill?.skillId !== route.params.groupId) {
     skillsState.loadSkill(route.params.projectId, route.params.subjectId, route.params.groupId)
   }
+  if (subjectState.subject?.subjectId !== route.params.subjectId) {
+    subjectState.loadSubjectDetailsState()
+  }
 }
 
 const isLoadingData = computed(() => {

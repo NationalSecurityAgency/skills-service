@@ -24,6 +24,7 @@ import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import SkillsTable from '@/components/skills/SkillsTable.vue'
 import EditNumRequiredSkills from '@/components/skills/skillsGroup/EditNumRequiredSkills.vue'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 
 const props = defineProps({
   skill: {
@@ -36,6 +37,7 @@ const props = defineProps({
   }
 })
 const appConfig = useAppConfig()
+const projConfig = useProjConfig()
 const subjectState = useSubjectsState()
 const skillsState = useSubjectSkillsState()
 
@@ -86,7 +88,7 @@ const lessThanTwoSkills = computed(() => {
 
 const addDisabled = computed(() => {
   if (props.skill.enabled) {
-    if (subjectState.subject.numSkills >= appConfig.maxSkillsPerSubject) {
+    if ((subjectState.subject?.numSkills || 0) + (subjectState.subject?.numSkillsReused || 0) >= appConfig.maxSkillsPerSubject) {
       return true
     }
   }
@@ -155,6 +157,7 @@ const groupChanged = (updatedGroup) => {
               <Tag severity="info" class="uppercase">all skills</Tag>
             </span>
             <SkillsButton
+              v-if="!projConfig.isReadOnlyProj"
               :id="`editNumSkillsReq${skillInfo.skillId}`"
               icon="far fa-edit"
               severity="outline"
@@ -169,7 +172,7 @@ const groupChanged = (updatedGroup) => {
               class="italic text-small mt-1 font-light">** Must have at least 2 skills to modify</div>
 
           </div>
-          <div class="flex-1 text-right">
+          <div class="flex-1 text-right" v-if="!projConfig.isReadOnlyProj">
             <ButtonGroup>
               <SkillsButton
                 :id="`group-${skillInfo.skillId}_importSkillBtn`"
