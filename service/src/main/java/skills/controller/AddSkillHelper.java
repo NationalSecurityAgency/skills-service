@@ -75,7 +75,7 @@ public class AddSkillHelper {
         Long requestedTimestamp = batchSkillEventRequest != null ? batchSkillEventRequest.getTimestamp() : null;
         List<String> skillIds = batchSkillEventRequest.getSkillIds();
         String skillBatchString = String.join(", ", skillIds);
-        Date incomingDate = validateTime(projectId, requestedTimestamp);
+        Date incomingDate = requestedTimestamp != null ? validateTime(projectId, requestedTimestamp) : null;
         String currentUser = userInfoService.getCurrentUserId();
         BatchSkillEventResult batchResults = new BatchSkillEventResult();
         ArrayList<SkillEventResult> results = new ArrayList<>();
@@ -139,7 +139,7 @@ public class AddSkillHelper {
     }
 
     private Date validateTime(String projectId, Long requestedTimestamp) {
-        if (requestedTimestamp != null && requestedTimestamp > 0) {
+        if (requestedTimestamp > 0) {
             //let's account for some possible clock drift
             SkillsValidator.isTrue(requestedTimestamp <= (System.currentTimeMillis() + 30000), "Skill Events may not be in the future", projectId);
             return null;
@@ -163,7 +163,7 @@ public class AddSkillHelper {
         Long requestedTimestamp = skillEventRequest != null ? skillEventRequest.getTimestamp() : null;
         Boolean notifyIfSkillNotApplied = skillEventRequest != null ? skillEventRequest.getNotifyIfSkillNotApplied() : false;
         Boolean isRetry = skillEventRequest != null ? skillEventRequest.getIsRetry() : false;
-        Date incomingDate = validateTime(projectId, requestedTimestamp);
+        Date incomingDate = requestedTimestamp != null ? validateTime(projectId, requestedTimestamp) : null;
 
         if (skillEventRequest != null && skillEventRequest.getApprovalRequestedMsg() != null) {
             int maxLength = publicProps.getInt(PublicProps.UiProp.maxSelfReportMessageLength);
