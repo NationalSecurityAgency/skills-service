@@ -1,4 +1,4 @@
-FROM eclipse-temurin:24-jdk-alpine-3.22
+FROM eclipse-temurin:25-jdk-alpine-3.23
 
 # install netcat so start script can use nc command to wait for DB to come up
 RUN apk update && apk upgrade \
