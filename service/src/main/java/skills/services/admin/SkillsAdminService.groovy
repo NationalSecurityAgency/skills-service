@@ -179,8 +179,8 @@ class SkillsAdminService {
                 throw new SkillException("Skill with name [${skillRequest.name}] already exists! Sorry!", skillRequest.projectId, null, ErrorCode.ConstraintViolation)
             }
         }
-        if (skillDefinition && !groupId) {
-            groupId = skillDefinition.groupId
+        if (skillDefinition && skillDefinition.groupId !== groupId) {
+            throw new SkillException("Existing Skill with id [${skillRequest.skillId}] cannot change it's group id, existing group id [${skillDefinition.groupId}], requested group id [${groupId}]!", skillRequest.projectId, skillDefinition.skillId, ErrorCode.ConstraintViolation)
         }
 
         boolean shouldRebuildScores = false

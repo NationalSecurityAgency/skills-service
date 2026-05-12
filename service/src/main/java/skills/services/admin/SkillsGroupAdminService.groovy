@@ -17,17 +17,19 @@ package skills.services.admin
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillRequest
+import skills.controller.result.model.SkillDefPartialRes
+import skills.controller.result.model.SubjectResult
 import skills.services.CreatedResourceLimitsValidator
 import skills.services.CustomValidator
 import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.storage.accessors.ProjDefAccessor
+import skills.storage.model.SimpleBadgeRes
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
@@ -64,6 +66,9 @@ class SkillsGroupAdminService {
 
     @Autowired
     SkillsAdminService skillsAdminService
+
+    @Autowired
+    SubjAdminService subjAdminService
 
     @Autowired
     PostgresQlNativeRepo PostgresQlNativeRepo
@@ -143,5 +148,17 @@ class SkillsGroupAdminService {
             totalPoints = enabledGroupChildSkills.collect { it.totalPoints }.sum()
         }
         return totalPoints
+    }
+
+    @Profile
+    List<SkillDefPartialRes> getSkillsForSkillsGroupWithBadges(String projectId, String groupId) {
+        List<SkillDefPartialRes> res = skillsAdminService.getSkillsByProjectSkillAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+        SubjectResult subjectResult = subjAdminService.getSubjectForGroup(projectId, groupId)
+        List<SimpleBadgeRes> badges = skillDefRepo.findAllSkillsWithBadgesForSubject(projectId, subjectResult.subjectId)
+        Map<String, List<SimpleBadgeRes>> badgeCollection = badges.groupBy{ it.skillId }
+        return res.collect {
+            it.badges = badgeCollection.get(it.skillId) ?: []
+            return it
+        }.sort { it.displayOrder }
     }
 }

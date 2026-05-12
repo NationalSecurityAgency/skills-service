@@ -943,5 +943,19 @@ describe('Skills Group Page Tests', () => {
     cy.get('[data-cy*=copySkillButton]').should('be.enabled')
   })
 
+  it('badge icon and link are shown when a group skill is also assigned to a badge', () => {
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1, 15)
+    cy.createSkillsGroup(1, 1, 1)
+    cy.addSkillToGroup(1, 1, 1, 1)
+    cy.createBadge(1, 1)
+    cy.assignSkillToBadge(1, 1, 1)
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1/groups/group1')
+    cy.wait('@getGroupSkills')
+
+    cy.get('[data-cy="nameCell_skill1"] [data-cy="skillBadges"]').should('be.visible').and('contain.text', 'Badge 1')
+  })
+
 })
 

@@ -728,7 +728,7 @@ const pageChanged = (pagingInfo) => {
                         <span class="font-medium pr-3">{{ tag.tagValue }}</span>
                 </Chip>
               </div>
-              <div v-if="slotProps.data.badges && slotProps.data.badges.length > 0" class="mt-2">
+              <div v-if="slotProps.data.badges && slotProps.data.badges.length > 0" class="mt-2" data-cy="skillBadges">
                 <i class="fa fa-award text-purple-500" aria-hidden="true"></i> Badges:
                 <router-link v-for="badge in slotProps.data.badges" :key="badge.id"
                              :to="{ name: badge.skillType === 'GlobalBadge' ? 'GlobalBadgeSkills' : 'BadgeSkills', params: { badgeId: badge.badgeId, projectId: projectId } }"

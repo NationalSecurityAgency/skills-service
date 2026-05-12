@@ -617,7 +617,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(groupId, "Skills Group Id", projectId)
 
-        return skillsAdminService.getSkillsByProjectSkillAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+        return skillsGroupAdminService.getSkillsForSkillsGroupWithBadges(projectId, groupId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/subject", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
