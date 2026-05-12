@@ -1057,7 +1057,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.createSkill(allSkills[3])
 
         when:
-        def res = skillsService.getSkillsForProject(proj.projectId)
+        def res = skillsService.getSkillsForProject(proj.projectId, '', false, false, false, true)
 
         then:
         res.size() == 4
@@ -1082,7 +1082,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.createSkill(allSkills[3])
 
         when:
-        def res = skillsService.getSkillsForProject(proj.projectId, 'Skill')
+        def res = skillsService.getSkillsForProject(proj.projectId, 'Skill', false, false, false, true)
 
         then:
         res.size() == 3
@@ -1107,7 +1107,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.createSkill(allSkills[3])
 
         when:
-        def res = skillsService.getSkillsForProject(proj.projectId, 'Awesome')
+        def res = skillsService.getSkillsForProject(proj.projectId, 'Awesome', false, false, false, true)
 
         then:
         res.size() == 1

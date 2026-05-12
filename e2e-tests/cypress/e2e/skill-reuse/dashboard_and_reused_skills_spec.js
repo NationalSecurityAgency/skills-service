@@ -42,7 +42,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains('Type to search for skills')
             .should('be.visible');
         cy.get('[data-cy="skillsSelector"]')
-            .type('s');
+            .type('skill');
 
         cy.get('[data-cy="skillsSelector-skillId"]')
             .should('have.length', 3)
