@@ -42,7 +42,7 @@ describe('Skill Reuse and Dashboard Tests', () => {
             .contains('Type to search for skills')
             .should('be.visible');
         cy.get('[data-cy="skillsSelector"]')
-            .type('skill');
+            .type('s');
 
         cy.get('[data-cy="skillsSelector-skillId"]')
             .should('have.length', 3)
@@ -89,13 +89,10 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.get('[data-cy="skillsSelector"]')
             .click();
         cy.get('[data-cy="skillsSelector-skillId"]')
-            .should('have.length', 2)
+            .should('have.length', 1)
             .as('skillIds');
         cy.get('@skillIds')
             .eq(0)
-            .contains('group12');
-        cy.get('@skillIds')
-            .eq(1)
             .contains('skill1');
     });
 

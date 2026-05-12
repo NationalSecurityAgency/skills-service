@@ -82,7 +82,7 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         skillsService.reuseSkills(p1.projectId, [p1Skills[0].skillId], p1subj2.subjectId, p1subj2g2.skillId)
 
         when:
-        def skills1 = skillsService.getSkillsForProject(p1.projectId, p1Skills[0].name).findAll { it.skillId != p1subj1g1.skillId}
+        def skills1 = skillsService.getSkillsForProject(p1.projectId, p1Skills[0].name)
         then:
         skills1.groupName == [p1subj1g1.name, p1subj2g2.name]
         skills1.groupId == [p1subj1g1.skillId, p1subj2g2.skillId]

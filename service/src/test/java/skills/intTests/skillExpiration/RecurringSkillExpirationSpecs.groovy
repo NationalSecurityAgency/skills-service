@@ -677,7 +677,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         List<UserAchievement> userAchievements_t0 = userAchievedRepo.findAll()
         List<ExpiredUserAchievement> expiredUserAchievements_t0 = expiredUserAchievementRepo.findAll()
 
-        expireAllSkillsForProject(proj4.projectId, null, true, false, true, [proj4_group.skillId])
+        expireAllSkillsForProject(proj4.projectId)
 
         List<UserPerformedSkill> userPerformedSkills_t1 = userPerformedSkillRepo.findAll()
         List<UserPoints> userPoints_t1 = userPointsRepo.findAll()
@@ -1551,8 +1551,8 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         ].collect { it.toString() }.sort ()
     }
 
-    def expireAllSkillsForProject(String projectId, LocalDateTime expirationDate=null,excludeImportedSkills = true, boolean includeDisabled = false, boolean excludeReusedSkills = true, excludeSkillIds = []) {
-        def skills = skillsService.getSkillsForProject(projectId, "", excludeImportedSkills, includeDisabled, excludeReusedSkills).findAll { it.skillId !in excludeSkillIds}
+    def expireAllSkillsForProject(String projectId, LocalDateTime expirationDate=null,excludeImportedSkills = true, boolean includeDisabled = false, boolean excludeReusedSkills = true) {
+        def skills = skillsService.getSkillsForProject(projectId, "", excludeImportedSkills, includeDisabled, excludeReusedSkills)
         expireSkills(projectId, skills, expirationDate)
     }
 

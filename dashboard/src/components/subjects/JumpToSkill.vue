@@ -33,7 +33,7 @@ const searchChanged = (query) => {
     search.value = query;
     if (search.value && search.value.length > 0) {
       loading.value = true;
-      SkillsService.getProjectSkills(route.params.projectId, search.value).then((result) => {
+      SkillsService.getProjectSkills(route.params.projectId, search.value, true, false, true).then((result) => {
         availableSkills.value = result;
         loading.value = false;
       });

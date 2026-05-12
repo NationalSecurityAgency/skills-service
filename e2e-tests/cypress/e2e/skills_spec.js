@@ -1877,4 +1877,24 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="prevSkill"]').should('not.be.enabled');
     cy.get('[data-cy="nextSkill"]').should('exist');
   })
+
+  it('nav to group skills page', () => {
+    cy.createSubject(1, 1);
+    cy.createSkill(1, 1, 1);
+    cy.createSkillsGroup(1, 1, 20);
+    cy.addSkillToGroup(1, 1, 20, 21, {
+        pointIncrement: 100,
+        numPerformToCompletion: 5
+    });
+    cy.createSkill(1, 1, 3);
+
+    cy.visit('/administrator/projects/proj1/')
+
+    cy.get('[data-cy="skillsSelector"]').click()
+    cy.get(`[data-cy="skillsSelector"]`).type('g')
+
+    cy.get(`[data-cy="skillsSelectionItem-proj1-group20"]`).click()
+
+    cy.get('[data-cy="pageHeader"').contains('Awesome Group 20');
+  })
 })
