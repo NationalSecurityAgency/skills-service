@@ -212,6 +212,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.reuseSkillIntoAnotherGroup(1, 9, 1, 12);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
         cy.get('[data-cy="reuseSkillsModalStep1"] [data-cy="reuseButton"]')
@@ -374,6 +375,7 @@ describe('Skill Reuse Modal Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click();
 

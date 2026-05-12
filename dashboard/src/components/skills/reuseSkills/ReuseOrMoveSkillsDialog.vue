@@ -72,6 +72,7 @@ const destinations = ref([])
 const selectedDestination = ref({})
 const loadDestinations = () => {
   const skillId = props.skills[0].skillId
+  const hasAGroup = props.skills.find((row) => row.isGroupType) !== undefined
   SkillsService.getSkillInfo(route.params.projectId, skillId)
     .then((skillInfo) => {
       if (skillInfo.subjectId !== route.params.subjectId) {
@@ -80,8 +81,7 @@ const loadDestinations = () => {
       } else {
         SkillsService.getReuseDestinationsForASkill(route.params.projectId, skillId)
           .then((res) => {
-            destinations.value = res
-            // this.updateDestinationPage(this.destinations.currentPageNum);
+            destinations.value = hasAGroup ? res.filter((dest) => !dest.groupId) : res
           })
           .finally(() => {
             loadingDest.value = false
@@ -108,6 +108,7 @@ onMounted(() => {
 })
 
 const movedOrReusedSkills = ref([])
+const movedOrReusedSkillsHasGroup = computed(() => movedOrReusedSkills.value.find((row) => row.isGroupType) !== undefined)
 const onReuseOrMove = (changedSkills) => {
   // after reuse/move action button will be disabled so need to focus on another button
   const groupId = props.skills[0].groupId
@@ -255,7 +256,7 @@ const dialogUtils = useDialogUtils()
                   class="border-2 border-dashed border-surface rounded-border bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium">
                 <span><span class="text-primary">Successfully</span> {{ actionNameInPast }}
                 <Tag severity="info">{{ movedOrReusedSkills.length }}</Tag>
-                skill{{ pluralSupport.plural(movedOrReusedSkills) }}.</span>
+                {{ isReuseType || !movedOrReusedSkillsHasGroup ? 'skill' : 'item'}}{{ pluralSupport.plural(movedOrReusedSkills) }}.</span>
                 </div>
               </div>
               <div class="flex pt-6 justify-end">

@@ -292,6 +292,8 @@ describe('Export Skills to the Catalog Tests', () => {
         cy.get('[data-cy="skillActionsNumSelected"]')
             .should('have.text', '0');
         cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="8"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .should('be.enabled');
         cy.get('[data-cy="skillActionsNumSelected"]')

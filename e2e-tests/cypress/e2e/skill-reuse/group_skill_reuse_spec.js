@@ -36,8 +36,10 @@ describe('Group Skill Reuse Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-cy="manageSkillLink_skill2"]')
         cy.get('[data-cy="skillsTable"] [data-cy="manageSkillLink_skill3"]')
 
-        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"')
+        cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"]')
             .click();
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Reuse in this Project"]').click()

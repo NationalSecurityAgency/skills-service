@@ -218,8 +218,11 @@ const onFilter = (filterEvent) => {
 
 const selectedRows = ref([])
 const selectedSkills = computed(() => {
-  return selectedRows.value.filter((row) => row.isSkillType && !row.isCatalogImportedSkills)
+  return selectedRows.value.filter((row) => (row.isSkillType || row.isGroupType) && !row.isCatalogImportedSkills)
 })
+const doSelectedRowsHaveAGroup = () => {
+  return selectedRows.value.find((row) => row.isGroupType) !== undefined
+}
 
 const subjSkillsDisplayOrder = useSubjSkillsDisplayOrder()
 const reorderEnable = ref(false)
@@ -314,6 +317,9 @@ const actionsMenu = ref(addWidthToIcon([
     icon: 'far fa-arrow-alt-circle-up',
     command: () => {
       showExportToCatalogDialog.value = true
+    },
+    disabled: () => {
+      return doSelectedRowsHaveAGroup()
     }
   },
   {
@@ -321,10 +327,13 @@ const actionsMenu = ref(addWidthToIcon([
     icon: 'fas fa-recycle',
     command: () => {
       showSkillsReuseModal.value = true
+    },
+    disabled: () => {
+      return doSelectedRowsHaveAGroup()
     }
   },
   {
-    label: 'Move Skills',
+    label: 'Move',
     icon: 'fas fa-shipping-fast',
     command: () => {
       showMoveSkillsInfoModal.value = true
@@ -335,6 +344,9 @@ const actionsMenu = ref(addWidthToIcon([
     icon: 'fas fa-award',
     command: () => {
       showAddSkillsToBadgeDialog.value = true
+    },
+    disabled: () => {
+      return doSelectedRowsHaveAGroup()
     }
   },
   {
@@ -342,6 +354,9 @@ const actionsMenu = ref(addWidthToIcon([
     icon: 'fas fa-copy',
     command: () => {
       showCopySkillsModal.value = true
+    },
+    disabled: () => {
+      return doSelectedRowsHaveAGroup()
     }
   },
   {
@@ -352,6 +367,9 @@ const actionsMenu = ref(addWidthToIcon([
         icon: 'fas fa-tag',
         command: () => {
           showAddSkillsTag.value = true
+        },
+        disabled: () => {
+          return doSelectedRowsHaveAGroup()
         }
       },
       {
@@ -359,6 +377,9 @@ const actionsMenu = ref(addWidthToIcon([
         icon: 'fas fa-trash',
         command: () => {
           showRemoveSkillsTag.value = true
+        },
+        disabled: () => {
+          return doSelectedRowsHaveAGroup()
         }
       }
     ])
@@ -381,7 +402,7 @@ const isExporting = ref(false)
 // };
 
 const disableRow = (row) => {
-  return (row.isGroupType || row.isCatalogImportedSkills) ? 'remove-checkbox' : ''
+  return row.isCatalogImportedSkills ? 'remove-checkbox' : ''
 }
 
 const onMovedOrReused = (movedInfo, isMoved = true) => {
@@ -588,6 +609,11 @@ const pageChanged = (pagingInfo) => {
                   @blur="actionMenuOnBlur"
                   aria-label="Menu to perform actions on selected skills"
                   :popup="true">
+              <template v-if="doSelectedRowsHaveAGroup()" #end>
+                <div class="p-2">
+                  <InlineMessage severity="warn" icon="fa fa-exclamation-triangle" data-cy="groupsLimitActionsWarning">Groups limit actions</InlineMessage>
+                </div>
+              </template>
               <template #item="{ item, props }">
                 <a :href="item.url" target="_blank" v-bind="props.action">
                   <span class="w-7 border text-center rounded-sm text-green-800 bg-green-50 dark:bg-gray-900 dark:text-green-500 dark:border-green-700"><i :class="item.icon"/></span>
