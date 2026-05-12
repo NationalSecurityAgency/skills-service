@@ -149,6 +149,9 @@ class AdminController {
     @Value('#{"${skills.config.maxUserIdsForBulkSkillReporting:1000}"}')
     int maxUserIdsForBulkSkillReporting
 
+    @Value('#{"${skills.config.ui.maxSkillBatchSize:200}"}')
+    int maxSkillBatchSize
+
     @Autowired
     ProjectErrorService errorService
 
@@ -2016,6 +2019,12 @@ class AdminController {
     @Profile
     BatchSkillEventResult addBatchSkillsForBatchUsers(@PathVariable("projectId") String projectId,
                                                              @RequestBody BatchSkillEventRequest batchSkillEventRequest) {
+
+        long batchSize = batchSkillEventRequest.skillIds.size() * batchSkillEventRequest.userIds.size();
+        if(batchSize > maxSkillBatchSize) {
+            throw new SkillException("Request size ${batchSize} exceeds maximum allowable (${maxSkillBatchSize}).", projectId, null, ErrorCode.BadParam)
+        }
+
         return addSkillHelper.addBatchSkillsForBatchUsers(projectId, batchSkillEventRequest);
     }
 }

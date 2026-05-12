@@ -25,8 +25,10 @@ import Stepper from 'primevue/stepper'
 import Column from "primevue/column";
 import dayjs from "dayjs";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
 const model = defineModel()
+const appConfig = useAppConfig();
 const emit = defineEmits([])
 
 const props = defineProps({
@@ -54,6 +56,10 @@ const userList = computed(() => {
   }
 })
 
+const tooManyEvents = computed(() => {
+  return (userList.value.length * props.skills.length) > maxSkillBatchSize.value;
+})
+
 const saveEvents = () => {
   const userIds = userList.value;
   const skillIds = props.skills.map((skill) => skill.skillId);
@@ -70,6 +76,10 @@ const saveEvents = () => {
 const closeMe = () => {
   model.value = false;
 }
+
+const maxSkillBatchSize = computed(() => {
+  return appConfig.maxSkillBatchSize ? appConfig.maxSkillBatchSize : 200
+})
 </script>
 
 <template>
@@ -148,13 +158,16 @@ const closeMe = () => {
           </div>
         </StepPanel>
         <StepPanel value="3" v-slot="{ activateCallback }">
-          <Message :closable="false">
+          <Message :closable="false" v-if="!tooManyEvents">
             Skill events for <span class="font-bold">{{ skills.length }}</span> skill(s) will be added for <span class="font-bold">{{ userList.length }}</span> user(s) on {{ dayjs(dateAdded).format('YYYY-MM-DD') }}.
             Please click "Add Events" to confirm.
           </Message>
+          <Message :closable="false" v-if="tooManyEvents" severity="error">
+            Your batch exceeds the {{ maxSkillBatchSize }} request limit ({{skills.length}} skills × {{ userList.length }} users). To proceed, please remove either users or skills to reduce the total number of requests.
+          </Message>
           <div class="flex pt-6 justify-between">
             <SkillsButton label="Back" icon="fas fa-arrow-circle-left" outlined class="mr-2" severity="secondary" @click="activateCallback('2')" data-cy="backButton" />
-            <SkillsButton variant="outline-primary" :disabled="usersToAdd.length === 0 || !dateAdded" data-cy="saveBatchSkillEvents" @click="saveEvents" label="Add Events" />
+            <SkillsButton variant="outline-primary" :disabled="usersToAdd.length === 0 || !dateAdded || tooManyEvents" data-cy="saveBatchSkillEvents" @click="saveEvents" label="Add Events" />
           </div>
         </StepPanel>
       </StepPanels>

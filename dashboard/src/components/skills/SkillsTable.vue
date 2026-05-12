@@ -224,6 +224,9 @@ const selectedSkills = computed(() => {
 const doSelectedRowsHaveAGroup = () => {
   return selectedRows.value.find((row) => row.isGroupType) !== undefined
 }
+const reportSkillsDisabled = computed(() => {
+  return selectedSkills.value.length > appConfig.maxSkillBatchSize;
+})
 
 const subjSkillsDisplayOrder = useSubjSkillsDisplayOrder()
 const reorderEnable = ref(false)
@@ -363,6 +366,7 @@ const actionsMenu = ref(addWidthToIcon([
   {
     label: 'Report Skills for Users',
     icon: 'fas fa-user-plus',
+    disabled: reportSkillsDisabled,
     command: () => {
       showAddEventsModal.value = true
     }
@@ -502,7 +506,6 @@ const isLoading = computed(() => {
 const isSkillsGroupTable = computed(() => {
   return !!props.groupId
 })
-
 
 // Actions Men Tab fix
 // the following functions handle when pressing tab after Action Menu is open
