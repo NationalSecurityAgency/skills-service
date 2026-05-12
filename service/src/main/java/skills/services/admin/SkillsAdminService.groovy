@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.Strings
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.PageRequest
@@ -181,6 +182,9 @@ class SkillsAdminService {
         }
         if (skillDefinition && !groupId) {
             groupId = skillDefinition.groupId
+        }
+        if (skillDefinition && !Strings.CI.equals(skillDefinition.groupId, groupId)) {
+            throw new SkillException("Existing Skill with id [${skillRequest.skillId}] cannot change it's group id, existing group id [${skillDefinition.groupId}], requested group id [${groupId}]!", skillRequest.projectId, skillDefinition.skillId, ErrorCode.ConstraintViolation)
         }
 
         boolean shouldRebuildScores = false
@@ -670,8 +674,8 @@ class SkillsAdminService {
     }
 
     @Transactional(readOnly = true)
-    List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
-        List<SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery, excludeImportedSkills, includeDisabled)
+    List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false, boolean includeSkillGroups = false) {
+        List<SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery, excludeImportedSkills, includeDisabled, includeSkillGroups)
         List<SkillDefSkinnyRes> res = data.collect { convertToSkillDefSkinnyRes(it) }?.sort({ it.skillId })
 
         // do not hit on the reuse tag
@@ -956,8 +960,12 @@ class SkillsAdminService {
     }
 
     @Profile
-    private List<SkillDefSkinny> loadSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false) {
-        skillDefRepo.findAllSkinnySelectByProjectIdAndType(projectId, SkillDef.ContainerType.Skill, skillNameQuery, (!excludeImportedSkills).toString(), includeDisabled.toString())
+    private List<SkillDefSkinny> loadSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false, boolean includeSkillGroups = false) {
+        List<SkillDef.ContainerType> types = [SkillDef.ContainerType.Skill]
+        if (includeSkillGroups) {
+            types << SkillDef.ContainerType.SkillsGroup
+        }
+        skillDefRepo.findAllSkinnySelectByProjectIdAndTypeIn(projectId, types, skillNameQuery, (!excludeImportedSkills).toString(), includeDisabled.toString())
     }
 
     @Profile

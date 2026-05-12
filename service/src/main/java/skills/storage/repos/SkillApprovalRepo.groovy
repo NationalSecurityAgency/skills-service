@@ -43,6 +43,8 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         String getApproverUserIdForDisplay()
         String getSkillId()
         String getSubjectId()
+        @Nullable
+        String getGroupId()
         String getSkillName()
         Date getRequestedOn()
         @Nullable
@@ -60,6 +62,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         s.id as approvalId,
         sd.skillId as skillId,
         subjectDef.skillId as subjectId,
+        sd.groupId as groupId,
         sd.name as skillName,
         s.userId as userId,
         uAttrs.userIdForDisplay as userIdForDisplay,
@@ -87,6 +90,7 @@ interface SkillApprovalRepo extends CrudRepository<SkillApproval, Integer> {
         s.id as approvalId,
         sd.skillId as skillId,
         subjectDef.skillId as subjectId,
+        sd.groupId as groupId,
         sd.name as skillName,
         s.userId as userId,
         uAttrs.userIdForDisplay as userIdForDisplay,
@@ -176,6 +180,7 @@ where request.id in :approvalRequestIds
         s.id as approvalId,
         sd.skillId as skillId,
         subjectDef.skillId as subjectId,
+        sd.groupId as groupId,
         sd.name as skillName,
         s.userId as userId,
         uAttrs.userIdForDisplay as userIdForDisplay,
@@ -226,6 +231,7 @@ where request.id in :approvalRequestIds
         s.id as approvalId,
         sd.skillId as skillId,
         subjectDef.skillId as subjectId,
+        sd.groupId as groupId,
         sd.name as skillName,
         s.userId as userId,
         uAttrs.userIdForDisplay as userIdForDisplay,

@@ -137,6 +137,32 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         res.data.find { it.skillId  == skills1[0].skillId}.subjectId == subj1.subjectId
     }
 
+    void "getApprovals - results include group id for group skills"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, skills[0])
+
+        List<String> users = getRandomUsers(7)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users.first(), new Date(), "Please approve this 1!")
+
+        when:
+        def res = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+
+        then:
+        res.data.size() == 1
+        res.data.find { it.skillId  == skills[0].skillId}.groupId == skillsGroupId
+    }
+
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     void "getApprovals sorting"() {
         def proj = SkillsFactory.createProject()

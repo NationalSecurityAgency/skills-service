@@ -638,6 +638,15 @@ Badges add another facet to the overall gamification profile and allows you to f
                         helpUrl: "/dashboard/user-guide/skills-groups.html",
                         iconClass: "fa-solid fa-layer-group"
                 ),
+                new SkillRequest(name: "Visit Skills For A Group", skillId: "VisitSkillsForAGroup", subjectId: subjectSkillsId, projectId: inceptionProjectId,
+                        pointIncrement: 2,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 4, // up-to 4 per day
+                        numPerformToCompletion: 30,
+                        description: "Lookup:Desc_VisitSkillsForAGroup.md",
+                        helpUrl: "/dashboard/user-guide/skills-groups.html",
+                        iconClass: "fa-solid fa-list"
+                ),
                 new SkillRequest(name: "Change Skill Display Order", skillId: "ChangeSkillDisplayOrder", subjectId: subjectSkillsId, projectId: inceptionProjectId,
                         pointIncrement: 5,
                         pointIncrementInterval: 60 * 12, // 1 work day

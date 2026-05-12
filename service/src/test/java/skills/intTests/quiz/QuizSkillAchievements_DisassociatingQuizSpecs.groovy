@@ -666,7 +666,7 @@ class QuizSkillAchievements_DisassociatingQuizSpecs extends QuizSkillAchievement
 
         subj2Skills[1].selfReportingType = null
         subj2Skills[1].quizId = null
-        skillsService.assignSkillToSkillsGroup(subj2SkillsGroup1.skillId, subj2Skills[1])
+        skillsService.updateSkill(subj2Skills[1])
 
         List<UserPerformedSkill> userPerformedSkills_t3 = userPerformedSkillRepo.findAll().findAll( { it.projectId == proj.projectId})
         List<UserPoints> userPoints_t3 = userPointsRepo.findAll().findAll( { it.projectId == proj.projectId})
@@ -674,7 +674,7 @@ class QuizSkillAchievements_DisassociatingQuizSpecs extends QuizSkillAchievement
 
         subj2Skills[2].selfReportingType = null
         subj2Skills[2].quizId = null
-        skillsService.assignSkillToSkillsGroup(subj2SkillsGroup1.skillId, subj2Skills[2])
+        skillsService.updateSkill(subj2Skills[2])
 
         List<UserPerformedSkill> userPerformedSkills_t4 = userPerformedSkillRepo.findAll().findAll( { it.projectId == proj.projectId})
         List<UserPoints> userPoints_t4 = userPointsRepo.findAll().findAll( { it.projectId == proj.projectId})

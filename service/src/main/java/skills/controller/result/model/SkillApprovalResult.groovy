@@ -27,6 +27,7 @@ class SkillApprovalResult {
 
     String projectId
     String skillId
+    String groupId
     String subjectId
     String skillName
     Long requestedOn

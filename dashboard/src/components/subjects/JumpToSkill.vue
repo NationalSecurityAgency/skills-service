@@ -19,9 +19,11 @@ import { useRouter, useRoute } from 'vue-router';
 import { SkillsReporter } from '@skilltree/skills-client-js';
 import SkillsService from '@/components/skills/SkillsService';
 import SkillsSelector from '@/components/skills/SkillsSelector.vue';
+import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 
 const router = useRouter();
 const route = useRoute();
+const skillRouteUtil = useSkillOverviewRouteUtil()
 
 let loading = ref(false);
 let availableSkills = ref([]);
@@ -31,7 +33,7 @@ const searchChanged = (query) => {
     search.value = query;
     if (search.value && search.value.length > 0) {
       loading.value = true;
-      SkillsService.getProjectSkills(route.params.projectId, search.value).then((result) => {
+      SkillsService.getProjectSkills(route.params.projectId, search.value, true, false, true).then((result) => {
         availableSkills.value = result;
         loading.value = false;
       });
@@ -42,9 +44,10 @@ const searchChanged = (query) => {
 
 const navToSkill = (selectedItem) => {
   if (selectedItem) {
+    const routeProps = skillRouteUtil.toRouteProps(selectedItem.projectId, selectedItem.subjectId, selectedItem.skillId, selectedItem.type, selectedItem.groupId)
     router.push({
-      name: 'SkillOverview',
-      params: { projectId: selectedItem.projectId, subjectId: selectedItem.subjectId, skillId: selectedItem.skillId },
+      name: routeProps.name,
+      params: routeProps.params,
     });
     SkillsReporter.reportSkill('SearchandNavigatedirectlytoaskill');
   }

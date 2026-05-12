@@ -258,36 +258,42 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         skill1.numUsersInProgress == 4
         new Date(skill1.lastReportedTimestamp) == days[5]
         new Date(skill1.lastAchievedTimestamp) == days[5]
+        skill1.groupId == group.skillId
 
         def skill2 = res.skills.find { it.skillId == 'skill2' }
         skill2.numUserAchieved == 0
         skill2.numUsersInProgress == 5
         new Date(skill2.lastReportedTimestamp) == days[5]
         !skill2.lastAchievedTimestamp
+        skill2.groupId == group.skillId
 
         def skill3 = res.skills.find { it.skillId == 'skill3' }
         skill3.numUserAchieved == 0
         skill3.numUsersInProgress == 5
         new Date(skill3.lastReportedTimestamp) == days[5]
         !skill3.lastAchievedTimestamp
+        skill3.groupId == group.skillId
 
         def skill4 = res.skills.find { it.skillId == 'skill4' }
         skill4.numUserAchieved == 0
         skill4.numUsersInProgress == 5
         new Date(skill4.lastReportedTimestamp) == days[5]
         !skill4.lastAchievedTimestamp
+        skill4.groupId == group.skillId
 
         def skill5 = res.skills.find { it.skillId == 'skill5' }
         skill5.numUserAchieved == 0
         skill5.numUsersInProgress == 5
         new Date(skill5.lastReportedTimestamp) == days[5]
         !skill5.lastAchievedTimestamp
+        skill5.groupId == group.skillId
 
         def skill6 = res.skills.find { it.skillId == 'skill6' }
         skill6.numUserAchieved == 0
         skill6.numUsersInProgress == 0
         !skill6.lastReportedTimestamp
         !skill6.lastAchievedTimestamp
+        skill6.groupId == group.skillId
 
 
         resAfterArchive.skills.size() == 10
@@ -297,36 +303,42 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         skill1AfterArchive.numUsersInProgress == 3
         new Date(skill1AfterArchive.lastReportedTimestamp) == days[5]
         new Date(skill1AfterArchive.lastAchievedTimestamp) == days[5]
+        skill1AfterArchive.groupId == group.skillId
 
         def skill2AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill2' }
         skill2AfterArchive.numUserAchieved == 0
         skill2AfterArchive.numUsersInProgress == 4
         new Date(skill2AfterArchive.lastReportedTimestamp) == days[5]
         !skill2AfterArchive.lastAchievedTimestamp
+        skill2AfterArchive.groupId == group.skillId
 
         def skill3AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill3' }
         skill3AfterArchive.numUserAchieved == 0
         skill3AfterArchive.numUsersInProgress == 4
         new Date(skill3AfterArchive.lastReportedTimestamp) == days[5]
         !skill3AfterArchive.lastAchievedTimestamp
+        skill3AfterArchive.groupId == group.skillId
 
         def skill4AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill4' }
         skill4AfterArchive.numUserAchieved == 0
         skill4AfterArchive.numUsersInProgress == 4
         new Date(skill4AfterArchive.lastReportedTimestamp) == days[5]
         !skill4AfterArchive.lastAchievedTimestamp
+        skill4AfterArchive.groupId == group.skillId
 
         def skill5AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill5' }
         skill5AfterArchive.numUserAchieved == 0
         skill5AfterArchive.numUsersInProgress == 4
         new Date(skill5AfterArchive.lastReportedTimestamp) == days[5]
         !skill5AfterArchive.lastAchievedTimestamp
+        skill5AfterArchive.groupId == group.skillId
 
         def skill6AfterArchive = resAfterArchive.skills.find { it.skillId == 'skill6' }
         skill6AfterArchive.numUserAchieved == 0
         skill6AfterArchive.numUsersInProgress == 0
         !skill6AfterArchive.lastReportedTimestamp
         !skill6AfterArchive.lastAchievedTimestamp
+        skill6AfterArchive.groupId == group.skillId
     }
 
     def "last reported is later than last achieved"() {

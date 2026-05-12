@@ -14,13 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { computed, onMounted, ref } from 'vue'
+import StringHighlighter from '@/common-components/utilities/StringHighlighter.js'
+import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 
-import { computed, onMounted, ref } from 'vue';
-import StringHighlighter from '@/common-components/utilities/StringHighlighter.js';
+const skillRouteUtil = useSkillOverviewRouteUtil()
 
 const props = defineProps({
   skill: Object,
   subjectId: String,
+  groupId: { type: String, required: false },
   filterValue: String,
   readOnly: {
     type: Boolean,
@@ -53,20 +56,26 @@ const highlightedValue = computed(() => {
   } else {
     return value;
   }
-});
+})
+
+const toRouteProps = computed(() => {
+  const routeProps = skillRouteUtil.toRouteProps(props.skill.projectId, props.subjectId, props.skill.skillId, props.skill.type, props.groupId)
+  return { name: routeProps.name, params: routeProps.params }
+})
 
 </script>
 
 <template>
   <div class="">
-    <router-link :data-cy="`manageSkillLink_${skill.skillId}`"
-                 :to="{ name:'SkillOverview', params: { projectId: skill.projectId, subjectId: subjectId, skillId: skill.skillId }}"
-                 :aria-label="`${readOnly ? 'View' : 'Manage'} skill ${skill.name} via link`">
+    <router-link
+      :data-cy="`manageSkillLink_${skill.skillId}`"
+      :to="toRouteProps"
+      :aria-label="`${readOnly ? 'View' : 'Manage'} skill ${skill.name} via link`">
       <div data-cy="highlightedValue"
-           class="text-lg overflow-hidden text-ellipsis"
-           style="overflow-wrap: anywhere;"
-           :title="toDisplay?.length > 30 ? toDisplay : ''"
-           v-html="highlightedValue" />
+        class="text-lg overflow-hidden text-ellipsis"
+        style="overflow-wrap: anywhere"
+        :title="toDisplay?.length > 30 ? toDisplay : ''"
+        v-html="highlightedValue" />
     </router-link>
   </div>
 </template>

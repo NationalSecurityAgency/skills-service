@@ -110,7 +110,7 @@ class PerformedSkillsSpec extends DefaultIntSpec {
         }
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj1)
-        skillsService.createSkills(proj1_skills)
+        skillsService.createSkills(proj1_skills[0..2])
         skillsService.createSubject(proj1_subj2)
         skillsService.createSkills(proj1_skills2)
         def skillsGroup = SkillsFactory.createSkillsGroup(5, 1, 6)
@@ -131,37 +131,47 @@ class PerformedSkillsSpec extends DefaultIntSpec {
         events.data.size() == 10
         events.data[0].skillName == proj1_skills2[4].name
         events.data[0].skillId == proj1_skills2[4].skillId
+        events.data[0].groupId == null
         events.data[0].subjectId == proj1_subj2.subjectId
         events.data[1].skillName == proj1_skills[4].name
         events.data[1].skillId == proj1_skills[4].skillId
+        events.data[1].groupId == skillsGroup.skillId
         events.data[1].subjectId == proj1_subj1.subjectId
 
         events.data[2].skillName == proj1_skills2[3].name
         events.data[2].skillId == proj1_skills2[3].skillId
+        events.data[2].groupId == null
         events.data[2].subjectId == proj1_subj2.subjectId
         events.data[3].skillName == proj1_skills[3].name
         events.data[3].skillId == proj1_skills[3].skillId
+        events.data[3].groupId == skillsGroup.skillId
         events.data[3].subjectId == proj1_subj1.subjectId
 
         events.data[4].skillName == proj1_skills2[2].name
         events.data[4].skillId == proj1_skills2[2].skillId
+        events.data[4].groupId == null
         events.data[4].subjectId == proj1_subj2.subjectId
         events.data[5].skillName == proj1_skills[2].name
         events.data[5].skillId == proj1_skills[2].skillId
+        events.data[5].groupId == null
         events.data[5].subjectId == proj1_subj1.subjectId
 
         events.data[6].skillName == proj1_skills2[1].name
         events.data[6].skillId == proj1_skills2[1].skillId
+        events.data[6].groupId == null
         events.data[6].subjectId == proj1_subj2.subjectId
         events.data[7].skillName == proj1_skills[1].name
         events.data[7].skillId == proj1_skills[1].skillId
+        events.data[7].groupId == null
         events.data[7].subjectId == proj1_subj1.subjectId
 
         events.data[8].skillName == proj1_skills2[0].name
         events.data[8].skillId == proj1_skills2[0].skillId
+        events.data[8].groupId == null
         events.data[8].subjectId == proj1_subj2.subjectId
         events.data[9].skillName == proj1_skills[0].name
         events.data[9].skillId == proj1_skills[0].skillId
+        events.data[9].groupId == null
         events.data[9].subjectId == proj1_subj1.subjectId
     }
 }

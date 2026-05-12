@@ -23,6 +23,14 @@ import AdminGroupsPage from '@/components/access/groups/AdminGroupsPage.vue'
 import UsersOverallProgressPage from "@/components/users/UsersOverallProgressPage.vue";
 import OverallMetricsPage from "@/components/metrics/OverallMetricsPage.vue";
 import GlobalQuizRunsHistoryPage from "@/components/quiz/runsHistory/GlobalQuizRunsHistoryPage.vue";
+import SkillOverview from '@//components/skills/SkillOverview.vue'
+import Users from '@/components/users/Users.vue'
+import UsersTablePage from '@/components/users/UsersTablePage.vue'
+import SlidesConfigPage from '@/components/slides/SlidesConfigPage.vue'
+import VideoConfigPage from '@/components/video/VideoConfigPage.vue'
+import ExpirationConfigPage from '@/components/expiration/ExpirationConfigPage.vue'
+import AddSkillEvent from '@/components/skills/AddSkillEvent.vue'
+import SkillMetricsPage from '@/components/metrics/skill/SkillMetricsPage.vue'
 
 const createAdminRoutes = () => {
   return {
@@ -130,4 +138,90 @@ const createAdminRoutes = () => {
   }
 }
 
-export default createAdminRoutes
+const createAdminSkillChildRoutes = (baseName) => [
+  {
+    name: baseName,
+    path: '',
+    component: SkillOverview,
+    meta: {
+      requiresAuth: true,
+      reportSkillId: 'VisitSkillOverview',
+      announcer: {
+        message: 'Skill Overview',
+      },
+    },
+  }, {
+    path: 'users',
+    component: Users,
+    meta: { requiresAuth: true },
+    children: [{
+      component: UsersTablePage,
+      name: `SkillUsers${baseName}`,
+      path: '',
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitSkillUsers',
+        announcer: {
+          message: 'Skill Users',
+        },
+      },
+    }],
+  }, {
+    name: `ConfigureSlides${baseName}`,
+    path: 'config-slides',
+    component: SlidesConfigPage,
+    meta: {
+      requiresAuth: true,
+      announcer: {
+        message: 'Configure Slides',
+      },
+    },
+    props: true,
+  }, {
+    name: `ConfigureVideo${baseName}`,
+    path: 'config-video',
+    component: VideoConfigPage,
+    meta: {
+      requiresAuth: true,
+      announcer: {
+        message: 'Configure Audio/Video',
+      },
+    },
+    props: true,
+  }, {
+    name: `ConfigureExpiration${baseName}`,
+    path: 'config-expiration',
+    component: ExpirationConfigPage,
+    meta: {
+      requiresAuth: true,
+      announcer: {
+        message: 'Configure Expiration',
+      },
+    },
+    props: true,
+  }, {
+    name: `AddSkillEvent${baseName}`,
+    path: 'addSkillEvent',
+    component: AddSkillEvent,
+    meta: {
+      requiresAuth: true,
+      breadcrumb: 'Add Skill Event',
+      announcer: {
+        message: 'Add Skill Event',
+      },
+    },
+    props: true,
+  }, {
+    name: `SkillMetrics${baseName}`,
+    path: 'metrics',
+    component: SkillMetricsPage,
+    meta: {
+      requiresAuth: true,
+      reportSkillId: 'VisitSkillStats',
+      announcer: {
+        message: 'Skill Metrics',
+      },
+    }
+  }];
+
+export { createAdminRoutes, createAdminSkillChildRoutes }

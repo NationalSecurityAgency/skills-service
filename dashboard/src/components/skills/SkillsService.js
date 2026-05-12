@@ -102,7 +102,8 @@ export default {
     projectId,
     skillNameQuery = null,
     includeDisabled = true,
-    excludeReusedSkills = false
+    excludeReusedSkills = false,
+    includeSkillGroups = false,
   ) {
     let params = `?includeDisabled=${includeDisabled}`
     if (skillNameQuery) {
@@ -110,6 +111,9 @@ export default {
     }
     if (excludeReusedSkills) {
       params = `${params}&excludeReusedSkills=${excludeReusedSkills}`
+    }
+    if (includeSkillGroups) {
+      params = `${params}&includeSkillGroups=${includeSkillGroups}`
     }
     return axios
       .get(`/admin/projects/${encodeURIComponent(projectId)}/skills${params}`)

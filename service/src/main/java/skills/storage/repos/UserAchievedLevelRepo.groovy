@@ -904,6 +904,8 @@ select badgeDef.name as name,
         String getSubjectId()
         String getSkillName()
         @Nullable
+        String getGroupId()
+        @Nullable
         Integer getNumUserAchieved()
         @Nullable
         Integer getNumUsersInProgress()
@@ -917,12 +919,13 @@ select badgeDef.name as name,
                 sd.skillId as skillId, 
                 sd.name as skillName, 
                 sd.subjId as subjectId,
+                sd.groupId as groupId,
                 achievements.usersAchieved as numUserAchieved, 
                 performedSkills.userInProgress as numUsersInProgress, 
                 achievements.lastAchieved as lastAchieved, 
                 performedSkills.lastPerformed as lastReported
             from (
-                select skill.skill_id as skillId, skill.name as name, subj.skill_id as subjId
+                select skill.skill_id as skillId, skill.name as name, skill.group_id as groupId, subj.skill_id as subjId
                 from skill_definition skill, skill_definition subj, skill_relationship_definition rel
                 where
                       subj.id = rel.parent_ref_id and skill.id = rel.child_ref_id and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject') and

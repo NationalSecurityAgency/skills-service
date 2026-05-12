@@ -16,7 +16,7 @@
 import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router'
 import Login from '@/components/access/Login.vue'
 import MyProgress from '@/components/myProgress/MyProgress.vue'
-import createAdminRoutes from './AdminRoutes.js'
+import { createAdminRoutes, createAdminSkillChildRoutes } from './AdminRoutes.js'
 import createProgressAndRankingRoutes from './ProgressAndRankingRoutes.js'
 import createQuizRoutes from '@/router/QuizRoutes.js'
 import GlobalSettings from '@/components/settings/GlobalSettings.vue'
@@ -30,7 +30,6 @@ import ProjectPage from '@/components/projects/ProjectPage.vue'
 import Subjects from '@/components/subjects/Subjects.vue'
 import Badges from '@/components/badges/Badges.vue'
 import Levels from '@/components/levels/Levels.vue'
-const FullDependencyGraph = defineAsyncComponent(() => import('@/components/skills/dependencies/FullDependencyGraph.vue'))
 import Users from '@/components/users/Users.vue'
 import SelfReportPageNav from '@/components/skills/selfReport/SelfReportPageNav.vue'
 import SelfReportStatusPage from '@/components/skills/selfReport/SelfReportStatusPage.vue'
@@ -45,16 +44,10 @@ import MetricsPageNav from '@/components/metrics/MetricsPageNav.vue'
 import ProjectMetrics from '@/components/metrics/ProjectMetrics.vue'
 import UsersAchievementsMetricPage from '@/components/metrics/projectAchievements/UsersAchievementsMetricPage.vue'
 import SubjectMetricsPage from '@/components/metrics/projectSubjects/SubjectMetricsPage.vue'
-import SkillMetricsPage from '@/components/metrics/skill/SkillMetricsPage.vue'
 import SkillsMetricsPage from '@/components/metrics/projectSkills/SkillsMetricsPage.vue'
 import UserTagMetrics from '@/components/metrics/userTags/UserTagMetrics.vue'
 import SkillsCatalog from '@/components/skills/catalog/SkillsCatalog.vue'
-import AddSkillEvent from '@/components/skills/AddSkillEvent.vue'
-import VideoConfigPage from '@/components/video/VideoConfigPage.vue'
-import SlidesConfigPage from '@/components/slides/SlidesConfigPage.vue'
-import ExpirationConfigPage from '@/components/expiration/ExpirationConfigPage.vue'
 import SkillPage from '@/components/skills/SkillPage.vue'
-import SkillOverview from '@//components/skills/SkillOverview.vue'
 import SubjectPage from '@/components/subjects/SubjectPage.vue'
 import Skills from '@/components/skills/Skills.vue'
 import MetricsOnSubjectPage from '@/components/metrics/subject/MetricsOnSubjectPage.vue'
@@ -72,35 +65,39 @@ import SkillsDisplayPreview from '@/components/users/SkillsDisplayPreview.vue'
 import UserSkillsPerformed from '@/components/users/UserSkillsPerformed.vue'
 import PrivateProjectAccessRequestPage from '@/components/access/invite-only/PrivateProjectAccessRequestPage.vue'
 import JoinProjectPage from '@/components/access/invite-only/JoinProjectPage.vue'
-import NotFoundPage from '@/components/utils/NotFoundPage.vue';
-import GlobalBadgePage from "@/components/badges/global/GlobalBadgePage.vue";
-import GlobalBadgeSkills from "@/components/badges/global/GlobalBadgeSkills.vue";
-import GlobalBadgeLevels from "@/components/levels/global/GlobalBadgeLevels.vue";
-import RequestPasswordReset from '@/components/access/RequestPasswordReset.vue';
-import ResetPassword from '@/components/access/ResetPassword.vue';
-import RequestResetConfirmation from '@/components/access/RequestResetConfirmation.vue';
-import ResetConfirmation from '@/components/access/ResetConfirmation.vue';
-import ResetNotSupportedPage from '@/components/access/ResetNotSupportedPage.vue';
-import RequestAccount from '@/components/access/RequestAccount.vue';
+import NotFoundPage from '@/components/utils/NotFoundPage.vue'
+import GlobalBadgePage from '@/components/badges/global/GlobalBadgePage.vue'
+import GlobalBadgeSkills from '@/components/badges/global/GlobalBadgeSkills.vue'
+import GlobalBadgeLevels from '@/components/levels/global/GlobalBadgeLevels.vue'
+import RequestPasswordReset from '@/components/access/RequestPasswordReset.vue'
+import ResetPassword from '@/components/access/ResetPassword.vue'
+import RequestResetConfirmation from '@/components/access/RequestResetConfirmation.vue'
+import ResetConfirmation from '@/components/access/ResetConfirmation.vue'
+import ResetNotSupportedPage from '@/components/access/ResetNotSupportedPage.vue'
+import RequestAccount from '@/components/access/RequestAccount.vue'
 import UserAgreement from '@/components/access/UserAgreement.vue'
-import EmailVerificationSent from "@/components/access/EmailVerificationSent.vue";
-import EmailVerifiedConfirmation from "@/components/access/EmailVerifiedConfirmation.vue";
-import RequestEmailVerification from "@/components/access/RequestEmailVerification.vue";
-import AdminGroupPage from '@/components/access/groups/AdminGroupPage.vue';
-import AdminGroupMembers from '@/components/access/groups/AdminGroupMembers.vue';
-import AdminGroupProjects from '@/components/access/groups/AdminGroupProjects.vue';
-import AdminGroupQuizzes from '@/components/access/groups/AdminGroupQuizzes.vue';
-import RedirectPage from "@/components/utils/RedirectPage.vue";
+import EmailVerificationSent from '@/components/access/EmailVerificationSent.vue'
+import EmailVerifiedConfirmation from '@/components/access/EmailVerifiedConfirmation.vue'
+import RequestEmailVerification from '@/components/access/RequestEmailVerification.vue'
+import AdminGroupPage from '@/components/access/groups/AdminGroupPage.vue'
+import AdminGroupMembers from '@/components/access/groups/AdminGroupMembers.vue'
+import AdminGroupProjects from '@/components/access/groups/AdminGroupProjects.vue'
+import AdminGroupQuizzes from '@/components/access/groups/AdminGroupQuizzes.vue'
+import RedirectPage from '@/components/utils/RedirectPage.vue'
 import UpgradeInProgressPage from '@/components/utils/errors/UpgradeInProgressPage.vue'
 import SkillsClientPath from '@/router/SkillsClientPath.js'
 import log from 'loglevel'
-import UserArchivePage from '@/components/users/UserArchivePage.vue';
-import UsersTablePage from '@/components/users/UsersTablePage.vue';
-import GlobalUsersTablePage from '@/components/users/GlobalUsersTablePage.vue';
-import SupportPage from "@/components/contact/SupportPage.vue";
-import {defineAsyncComponent} from "vue";
+import UserArchivePage from '@/components/users/UserArchivePage.vue'
+import UsersTablePage from '@/components/users/UsersTablePage.vue'
+import GlobalUsersTablePage from '@/components/users/GlobalUsersTablePage.vue'
+import SupportPage from '@/components/contact/SupportPage.vue'
+import { defineAsyncComponent } from 'vue'
 import GlobalBadgeAccessPage from '@/components/badges/global/GlobalBadgeAccessPage.vue'
 import AdminGroupGlobalBadges from '@/components/access/groups/AdminGroupGlobalBadges.vue'
+import SkillGroupPage from '@/components/skills/SkillGroupPage.vue'
+import SkillGroupSkills from '@/components/skills/SkillGroupSkills.vue'
+
+const FullDependencyGraph = defineAsyncComponent(() => import('@/components/skills/dependencies/FullDependencyGraph.vue'))
 
 const routes = [
   {
@@ -629,18 +626,30 @@ const routes = [
     }],
   },
   {
+    path: '/administrator/projects/:projectId/subjects/:subjectId/groups/:groupId/skills/:skillId',
+    component: SkillPage,
+    meta: { requiresAuth: true },
+    children: createAdminSkillChildRoutes('GroupSkillOverview')
+  },
+  {
     path: '/administrator/projects/:projectId/subjects/:subjectId/skills/:skillId',
     component: SkillPage,
     meta: { requiresAuth: true },
+    children: createAdminSkillChildRoutes('SingleSkillOverview')
+  },
+  {
+    path: '/administrator/projects/:projectId/subjects/:subjectId/groups/:groupId',
+    component: SkillGroupPage,
+    meta: {requiresAuth: true},
     children: [{
-      name: 'SkillOverview',
+      name: 'GroupSkills',
       path: '',
-      component: SkillOverview,
+      component: SkillGroupSkills,
       meta: {
         requiresAuth: true,
-        reportSkillId: 'VisitSkillOverview',
+        reportSkillId: 'VisitSkillsForAGroup',
         announcer: {
-          message: 'Skill Overview',
+          message: 'Group Skills',
         },
       },
     }, {
@@ -649,73 +658,28 @@ const routes = [
       meta: { requiresAuth: true },
       children: [{
         component: UsersTablePage,
-        name: 'SkillUsers',
+        name: 'GroupUsers',
         path: '',
         meta: {
           requiresAuth: true,
-          reportSkillId: 'VisitSkillUsers',
+          reportSkillId: 'VisitGroupUsers',
           announcer: {
-            message: 'Skill Users',
+            message: 'Group Users',
           },
         },
       }],
     }, {
-      name: 'ConfigureSlides',
-      path: 'config-slides',
-      component: SlidesConfigPage,
-      meta: {
-        requiresAuth: true,
-        announcer: {
-          message: 'Configure Slides',
-        },
-      },
-      props: true,
-    }, {
-      name: 'ConfigureVideo',
-      path: 'config-video',
-      component: VideoConfigPage,
-      meta: {
-        requiresAuth: true,
-        announcer: {
-          message: 'Configure Audio/Video',
-        },
-      },
-      props: true,
-    }, {
-      name: 'ConfigureExpiration',
-      path: 'config-expiration',
-      component: ExpirationConfigPage,
-      meta: {
-        requiresAuth: true,
-        announcer: {
-          message: 'Configure Expiration',
-        },
-      },
-      props: true,
-    }, {
-      name: 'AddSkillEvent',
-      path: 'addSkillEvent',
-      component: AddSkillEvent,
-      meta: {
-        requiresAuth: true,
-        breadcrumb: 'Add Skill Event',
-        announcer: {
-          message: 'Add Skill Event',
-        },
-      },
-      props: true,
-    }, {
-      name: 'SkillMetrics',
+      name: 'GroupMetrics',
       path: 'metrics',
-      component: SkillMetricsPage,
+      component: MetricsOnSubjectPage,
       meta: {
         requiresAuth: true,
-        reportSkillId: 'VisitSkillStats',
+        reportSkillId: 'VisitGroupMetrics',
         announcer: {
-          message: 'Skill Metrics',
+          message: 'Group Metrics',
         },
-      }
-    }]
+      },
+    }],
   },
   {
     path: '/administrator/projects/:projectId/subjects/:subjectId',
@@ -977,7 +941,7 @@ const routes = [
         message: 'Page Not Found',
       },
     },
-  }, 
+  },
   {
     path: '/user-agreement',
     component: UserAgreement,

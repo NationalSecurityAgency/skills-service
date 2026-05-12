@@ -80,6 +80,11 @@ describe('Export Group Skills to the Catalog Tests', () => {
         ], 5);
         cy.get('[data-cy="nameCell_skill22"]')
             .contains('Awesome Group 20 Subj1');
+
+        // navigate to the skill page and validate
+        cy.get('[data-cy="viewSkillLink_skill22"]').click()
+        cy.get('[data-cy="pageHeader"]').contains('Group: Awesome Group 20 Subj1')
+        cy.get('[data-cy=breadcrumb-group20]').should('be.visible');
     });
 
 });

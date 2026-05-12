@@ -943,5 +943,20 @@ describe('Skills Group Tests', () => {
         cy.get('[data-cy="ChildRowSkillGroupDisplay_group1"] [data-cy=manageSkillLink_skill4]').should('be.visible')
     });
 
+    it('badge icon and link are shown when a group skill is also assigned to a badge', () => {
+      cy.createSubject(1, 1)
+      cy.createSkill(1, 1, 15)
+      cy.createSkillsGroup(1, 1, 1)
+      cy.addSkillToGroup(1, 1, 1, 1)
+      cy.createBadge(1, 1)
+      cy.assignSkillToBadge(1, 1, 1)
+
+      cy.visit('/administrator/projects/proj1/subjects/subj1')
+      cy.contains('Awesome Group 1').should('be.visible')
+      cy.get(`[data-p-index="0"] [data-pc-section="rowtogglebutton"]`).click()
+
+      cy.get('[data-cy="nameCell_skill1"] [data-cy="skillBadges"]').should('be.visible').and('contain.text', 'Badge 1')
+    })
+
 });
 

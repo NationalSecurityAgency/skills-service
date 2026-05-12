@@ -24,14 +24,20 @@ import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import SkillsTable from '@/components/skills/SkillsTable.vue'
 import EditNumRequiredSkills from '@/components/skills/skillsGroup/EditNumRequiredSkills.vue'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
 
 const props = defineProps({
   skill: {
     type: Object,
     required: true
+  },
+  showLegend: {
+    type: Boolean,
+    default: true
   }
 })
 const appConfig = useAppConfig()
+const projConfig = useProjConfig()
 const subjectState = useSubjectsState()
 const skillsState = useSubjectSkillsState()
 
@@ -50,14 +56,22 @@ onMounted(() => {
 
 const loadSkillsInfo = () => {
   loading.value = true
-  SkillsService.getSkillDetails(props.skill.projectId, props.skill.subjectId, props.skill.skillId)
-    .then((response) => {
-      skillInfo.value = response
-      return skillsState.loadGroupSkills(props.skill.projectId, props.skill.skillId)
-        .finally(() => {
-          loading.value = false
-        })
-    })
+  if (props.skill.description === undefined) {
+    SkillsService.getSkillDetails(props.skill.projectId, props.skill.subjectId, props.skill.skillId)
+      .then((response) => {
+        skillInfo.value = response
+        return skillsState.loadGroupSkills(props.skill.projectId, props.skill.skillId)
+          .finally(() => {
+            loading.value = false
+          })
+      })
+  } else {
+    skillInfo.value = props.skill
+    skillsState.loadGroupSkills(props.skill.projectId, props.skill.skillId)
+      .finally(() => {
+        loading.value = false
+      })
+  }
 }
 
 const allSkillsRequired = computed(() => {
@@ -74,7 +88,7 @@ const lessThanTwoSkills = computed(() => {
 
 const addDisabled = computed(() => {
   if (props.skill.enabled) {
-    if (subjectState.subject.numSkills >= appConfig.maxSkillsPerSubject) {
+    if ((subjectState.subject?.numSkills || 0) + (subjectState.subject?.numSkillsReused || 0) >= appConfig.maxSkillsPerSubject) {
       return true
     }
   }
@@ -110,20 +124,26 @@ const groupChanged = (updatedGroup) => {
 </script>
 
 <template>
-  <div>
+  <div class="mr-5 mb-4">
     <skills-spinner :is-loading="loading" />
     <div v-if="!loading" :data-cy="`ChildRowSkillGroupDisplay_${skillInfo.skillId}`">
-
-      <Fieldset v-if="skillInfo.description" legend="Group's Description" class="mb-4">
-        <markdown-text
-          :text="skillInfo.description"
-          :instance-id="skillInfo.skillId"
-          data-cy="description" />
-      </Fieldset>
+      <div class="mb-4">
+        <Fieldset v-if="skillInfo.description" legend="Group's Description">
+          <markdown-text
+            :text="skillInfo.description"
+            :instance-id="skillInfo.skillId"
+            data-cy="description" />
+        </Fieldset>
+      </div>
 
       <Fieldset
-        legend="Group's Skills"
-        :pt="{ content: { class: 'p-0' }, root: { class: 'm-0' }, toggler: { class: 'm-2'} }"
+      legend="Group's Skills"
+      :pt="{
+        content: { class: 'p-0' },
+        root: { class: 'm-0' },
+        toggler: { class: 'm-2'},
+        ...(showLegend ? {} : { legend: { style: 'display: none' } })
+      }"
       >
         <div class="flex mx-4 my-6" data-cy="requiredSkillsSection">
           <div>
@@ -137,6 +157,7 @@ const groupChanged = (updatedGroup) => {
               <Tag severity="info" class="uppercase">all skills</Tag>
             </span>
             <SkillsButton
+              v-if="!projConfig.isReadOnlyProj"
               :id="`editNumSkillsReq${skillInfo.skillId}`"
               icon="far fa-edit"
               severity="outline"
@@ -151,7 +172,7 @@ const groupChanged = (updatedGroup) => {
               class="italic text-small mt-1 font-light">** Must have at least 2 skills to modify</div>
 
           </div>
-          <div class="flex-1 text-right">
+          <div class="flex-1 text-right" v-if="!projConfig.isReadOnlyProj">
             <ButtonGroup>
               <SkillsButton
                 :id="`group-${skillInfo.skillId}_importSkillBtn`"

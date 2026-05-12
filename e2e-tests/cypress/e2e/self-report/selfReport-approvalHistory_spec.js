@@ -232,6 +232,19 @@ describe('Self Report Approval History Tests', () => {
             .should('not.exist');
     });
 
+    it('rejected request skill should be a link to skill details', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'Approval' });
+        cy.reportSkill(1, 2, 'user2', '2020-09-16 11:00');
+        cy.rejectRequest(0, '');
+
+        cy.visit('/administrator/projects/proj1/self-report');
+
+        cy.get('[data-cy="selfReportApprovalHistoryTable"] [data-cy="viewSkillLink_skill2"]')
+          .should('have.attr', 'href', '/administrator/projects/proj1/subjects/subj1/skills/skill2');
+    });
+
     it('approved and rejected requests - sorting', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
         cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });

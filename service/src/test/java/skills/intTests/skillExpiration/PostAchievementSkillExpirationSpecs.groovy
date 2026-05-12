@@ -1690,7 +1690,7 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         e.getMessage().contains("Cannot configure expiration attribute on skills that are reused")
     }
 
-    def "skill summary reflect expiration time relative to the next expiration task exeution time"() {
+    def "skill summary reflect expiration time relative to the next expiration task execution time"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def skills = SkillsFactory.createSkills(10, )

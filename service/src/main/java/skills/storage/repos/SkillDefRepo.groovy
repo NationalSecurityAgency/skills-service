@@ -52,11 +52,11 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
          where
             subjectDef = srd.parent and s = srd.child and 
             (srd.type = 'RuleSetDefinition' or srd.type = 'GroupSkillToSubject') and subjectDef.type = 'Subject' and 
-            s.projectId = ?1 and s.type = ?2 and
+            s.projectId = ?1 and s.type in ?2 and
             (s.copiedFromProjectId is null or 'true' = ?4) and
             (s.enabled = 'true' or 'true' = ?5) and
             lower(s.name) like lower(CONCAT('%', ?3, '%'))''')
-    List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndType(String id, SkillDef.ContainerType type, String skillNameQuery, String includeCatalogImportedSkills, String includeDisabled)
+    List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndTypeIn(String id, List<SkillDef.ContainerType> types, String skillNameQuery, String includeCatalogImportedSkills, String includeDisabled)
 
     @Query('''SELECT
         s.id as id,

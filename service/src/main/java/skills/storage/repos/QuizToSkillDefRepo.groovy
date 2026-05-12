@@ -71,7 +71,7 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     QuizNameAndId getQuizIdBySkillIdRef(Integer skillIdRef)
 
     @Nullable
-    @Query('''select child.name as skillName, child.skillId as skillId, child.projectId as projectId, subject.skillId as subjectId,
+    @Query('''select child.name as skillName, child.skillId as skillId, child.projectId as projectId, child.groupId as groupId, child.type as type, subject.skillId as subjectId,
                      subject.name as subjectName, exists(
                        select ur.roleName from UserRole ur where ((ur.projectId = project.projectId and
                        ur.roleName in ('ROLE_PROJECT_ADMIN', 'ROLE_PROJECT_APPROVER')) OR ur.roleName = 'ROLE_SUPER_DUPER_USER') and ur.userId = ?2

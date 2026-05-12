@@ -18,6 +18,8 @@ package skills.controller.result.model
 interface QuizSkillResult {
     String getSkillName()
     String getSkillId()
+    String getGroupId()
+    String getType()
     String getSubjectId()
     String getSubjectName()
     String getProjectId()

@@ -614,4 +614,36 @@ describe('Metrics Tests - Skills', () => {
             .contains(17);
 
     });
+
+    it('skills table - validate skill config and metrics links for regular and grouped skills', () => {
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.createSkillsGroup(1, 1, 20);
+        cy.addSkillToGroup(1, 1, 20, 21, {
+            pointIncrement: 100,
+            numPerformToCompletion: 5
+        });
+
+        cy.intercept('GET', '/admin/projects/proj1/metrics/skillUsageNavigatorChartBuilder**').as('skillUsageNavigatorChartBuilder');
+        cy.visit('/administrator/projects/proj1/metrics/skills');
+        cy.wait('@skillUsageNavigatorChartBuilder');
+
+        const tableSelector = '[data-cy=skillsNavigator-table]';
+        const expected = [
+          [ { colIndex: 0, value: 'Very Great Skill 1' } ],
+          [ { colIndex: 0, value: 'Very Great Skill 21' } ],
+        ];
+        cy.validateTable(tableSelector, expected);
+
+
+      cy.get(`${tableSelector} [data-cy="viewSkillConfigBtn_skill1"]`)
+        .should('have.attr', 'href', '/administrator/projects/proj1/subjects/subj1/skills/skill1');
+      cy.get(`${tableSelector} [data-cy="viewSkillMetricsBtn_skill1"]`)
+        .should('have.attr', 'href', '/administrator/projects/proj1/subjects/subj1/skills/skill1/metrics');
+
+      cy.get(`${tableSelector} [data-cy="viewSkillConfigBtn_skill21"]`)
+        .should('have.attr', 'href', '/administrator/projects/proj1/subjects/subj1/groups/group20/skills/skill21');
+      cy.get(`${tableSelector} [data-cy="viewSkillMetricsBtn_skill21"]`)
+        .should('have.attr', 'href', '/administrator/projects/proj1/subjects/subj1/groups/group20/skills/skill21/metrics');
+    });
 });

@@ -28,6 +28,7 @@ import ShowMore from '@/components/skills/selfReport/ShowMore.vue'
 import EditSkill from '@/components/skills/EditSkill.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import SkillNavigation from "@/skills-display/components/utilities/SkillNavigation.vue";
+import { useSkillOverviewRouteUtil } from './UseSkillOverviewRouteUtil.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -42,6 +43,7 @@ const showEdit = ref(false)
 // let skill = ref(store.getters["skills/skill"]);
 
 const skillsState = useSkillsState()
+const skillRouteUtil = useSkillOverviewRouteUtil()
 
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
@@ -81,24 +83,29 @@ const isLoading = computed(() => {
 
 const navItems = ref([])
 const buildNavItems = () => {
+  const suffix = !!skillsState.skill?.groupId ? 'GroupSkillOverview' : 'SingleSkillOverview'
+  const routeProps = skillRouteUtil.toRouteProps(route.params.projectId, route.params.subjectId, skillsState.skill.skillId, skillsState.skill.type,  skillsState.skill.groupId)
+
   const items = []
-  items.push({ name: 'Overview', iconClass: 'fa-info-circle skills-color-overview', page: 'SkillOverview' })
-  items.push({ name: 'Slides', iconClass: 'fa-solid fa-file-pdf', page: 'ConfigureSlides' })
-  items.push({ name: 'Audio/Video', iconClass: 'fa-play-circle skills-color-video', page: 'ConfigureVideo' })
+  items.push({ name: 'Overview', iconClass: 'fa-info-circle skills-color-overview', page: `${suffix}`, params: routeProps.params })
+  items.push({ name: 'Slides', iconClass: 'fa-solid fa-file-pdf', page: `ConfigureSlides${suffix}`, params: routeProps.params })
+  items.push({ name: 'Audio/Video', iconClass: 'fa-play-circle skills-color-video', page: `ConfigureVideo${suffix}`, params: routeProps.params })
   items.push({
     name: 'Expiration',
     iconClass: 'fa-hourglass-end skills-color-expiration',
-    page: 'ConfigureExpiration'
+    page: `ConfigureExpiration${suffix}`,
+    params: routeProps.params
   })
-  items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: 'SkillUsers' })
+  items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: `SkillUsers${suffix}`, params: routeProps.params  })
   if (!isImported?.value && !isReadOnlyProj.value && !isDisabled.value) {
     items.push({
       name: 'Add Event',
       iconClass: 'fa-user-plus skills-color-events',
-      page: 'AddSkillEvent',
+      page: `AddSkillEvent${suffix}`,
+      params: routeProps.params
     })
   }
-  items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: 'SkillMetrics' })
+  items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: `SkillMetrics${suffix}`, params: routeProps.params })
   return items
 }
 
@@ -161,13 +168,27 @@ const skillId = computed(() => {
 })
 
 const prevButtonClicked = () => {
-  const params = { skillId: skillsState.skill.prevSkillId, projectId: route.params.projectId }
-  router.push({ name: route.name, params: params })
+  const routeProps = skillRouteUtil.toRouteProps(route.params.projectId, route.params.subjectId, skillsState.skill.prevSkillId, skillsState.skill.type, skillsState.skill.prevSkillGroupId)
+  const currentPageName = route.name
+  
+  // Extract prefix from route.name and suffix from routeProps.name
+  const routeNamePrefix = currentPageName.replace(/(GroupSkillOverview|SingleSkillOverview)$/, '')
+  const routePropsSuffix = routeProps.name.match(/(GroupSkillOverview|SingleSkillOverview)$/)[1]
+  const newPageName = routeNamePrefix + routePropsSuffix
+  
+  router.push({ name: newPageName, params: routeProps.params })
 }
 
 const nextButtonClicked = () => {
-  const params = { skillId: skillsState.skill.nextSkillId, projectId: route.params.projectId }
-  router.push({ name: route.name, params: params })
+  const routeProps = skillRouteUtil.toRouteProps(route.params.projectId, route.params.subjectId, skillsState.skill.nextSkillId, skillsState.skill.type, skillsState.skill.nextSkillGroupId)
+  const currentPageName = route.name
+
+  // Extract prefix from route.name and suffix from routeProps.name
+  const routeNamePrefix = currentPageName.replace(/(GroupSkillOverview|SingleSkillOverview)$/, '')
+  const routePropsSuffix = routeProps.name.match(/(GroupSkillOverview|SingleSkillOverview)$/)[1]
+  const newPageName = routeNamePrefix + routePropsSuffix
+
+  router.push({ name: newPageName, params: routeProps.params })
 }
 
 </script>

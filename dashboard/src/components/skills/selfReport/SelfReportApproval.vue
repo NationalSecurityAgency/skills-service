@@ -29,6 +29,7 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import {useStorage} from "@vueuse/core";
 import AssignedApproversCell from "@/components/skills/selfReport/AssignedApproversCell.vue";
 import {useProjConfig} from "@/stores/UseProjConfig.js";
+import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 
 
 const route = useRoute();
@@ -39,6 +40,7 @@ const colors = useColors()
 const responsive = useResponsiveBreakpoints()
 const numberFormat = useNumberFormat()
 const projConfig = useProjConfig()
+const skillRouteUtil = useSkillOverviewRouteUtil()
 
 const props = defineProps({
   selfReportStats: Array
@@ -183,6 +185,11 @@ const reset = () => {
   filters.value.skillName = '';
   loadApprovals();
 };
+
+const toRouteProps = (skill) => {
+  const routeProps = skillRouteUtil.toRouteProps(skill.projectId, skill.subjectId, skill.skillId, skill.type, skill.groupId)
+  return { name: routeProps.name, params: routeProps.params }
+}
 </script>
 
 <template>
@@ -270,9 +277,7 @@ const reset = () => {
                 <span>
                   <router-link class="ml-1" target="_blank" rel="noopener"
                                :data-cy="`viewSkillLink_${slotProps.data.skillId}`"
-                      :to="{ name:'SkillOverview', params: { projectId: slotProps.data.projectId,
-                                                             subjectId: slotProps.data.subjectId,
-                                                             skillId: slotProps.data.skillId }}">
+                      :to="toRouteProps(slotProps.data)">
                         {{ slotProps.data.skillName }}
                   </router-link>
                 </span>

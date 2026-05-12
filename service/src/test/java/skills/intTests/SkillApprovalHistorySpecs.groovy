@@ -165,6 +165,47 @@ class SkillApprovalHistorySpecs extends DefaultIntSpec {
         approvalsHistory1_proj2.count == 2
     }
 
+    void "get approval history - results include group id for group skills"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 5)
+        skills[0].pointIncrement = 200
+        skills[0].numPerformToCompletion = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, skills[0])
+
+        List<String> users = getRandomUsers(7)
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users.first(), new Date(), "Please approve this 1!")
+
+        when:
+        def approvals1 = skillsService.getApprovals(proj.projectId, 7, 1, 'requestedOn', false)
+        def approvalsHistory1 = skillsService.getApprovalsHistory(proj.projectId, 7, 1, 'requestedOn', false)
+        skillsService.approve(proj.projectId, [approvals1.data[0].id], 'This is an approval message 1')
+
+        def approvals2 = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        def approvalsHistory2 = skillsService.getApprovalsHistory(proj.projectId, 5, 1, 'requestedOn', false)
+
+        then:
+        approvals1.totalCount == 1
+        approvals1.count == 1
+        approvalsHistory1.totalCount == 0
+        approvalsHistory1.count == 0
+
+        approvals2.totalCount == 0
+        approvals2.count == 0
+
+        approvalsHistory2.totalCount == 1
+        approvalsHistory2.count == 1
+        approvalsHistory2.data[0].groupId == skillsGroupId
+    }
+
+
     void "get approvals history - paging"() {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()

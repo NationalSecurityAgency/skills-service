@@ -617,7 +617,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(groupId, "Skills Group Id", projectId)
 
-        return skillsAdminService.getSkillsByProjectSkillAndType(projectId, groupId, SkillDef.ContainerType.SkillsGroup, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+        return skillsGroupAdminService.getSkillsForSkillsGroupWithBadges(projectId, groupId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/subject", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -971,12 +971,14 @@ class AdminController {
             @RequestParam(required = false, value = "skillNameQuery") String skillNameQuery,
             @RequestParam(required = false, value = "excludeImportedSkills") Boolean excludeImportedSkills,
             @RequestParam(required = false, value = "excludeReusedSkills") Boolean excludeReusedSkills,
-            @RequestParam(required = false, value = "includeDisabled", defaultValue = "false") Boolean includeDisabled) {
+            @RequestParam(required = false, value = "includeDisabled", defaultValue = "false") Boolean includeDisabled,
+            @RequestParam(required = false, value = "includeSkillGroups", defaultValue = "false") Boolean includeSkillGroups) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
         boolean excludeImportedSkillsBol = excludeImportedSkills
         boolean includeDisabledBool = includeDisabled
-        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol, includeDisabledBool)
+        boolean includeSkillGroupsBool = includeSkillGroups
+        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol, includeDisabledBool, includeSkillGroupsBool)
         if (excludeReusedSkills) {
             res = res.findAll { !it.isReused }
         }

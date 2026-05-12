@@ -437,7 +437,7 @@ class GroupSkillReusePointsAndAchivementsSpec extends CatalogIntSpec {
 
         p1Skills[0].pointIncrement = 1000
         p1Skills[0].numPerformToCompletion = 6
-        skillsService.assignSkillToSkillsGroup(p1subj2g2.skillId, p1Skills[0])
+        skillsService.updateSkill(p1Skills[0])
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         def proj_after = skillsService.getSkillSummary(user, p1.projectId)

@@ -312,7 +312,7 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
 
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj)
-        skillsService.createSkills([proj1_skills[0..4], group].flatten())
+        skillsService.createSkills([proj1_skills[0..2], group].flatten())
         skillsService.assignSkillToSkillsGroup(group.skillId, proj1_skills[3])
         skillsService.assignSkillToSkillsGroup(group.skillId, proj1_skills[4])
 
@@ -324,17 +324,13 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         skillsService.createBadge(badge)
 
         when:
-        def skills = skillsService.getSkillsForSubject(proj1.projectId, proj1_subj.subjectId)
+        def skills = skillsService.getSkillsForGroup(proj1.projectId, group.skillId)
         skills.sort() { it.skillId }
 
         then:
-        skills.size() == 6
-        skills.get(0).badges == []
-        skills.get(1).badges == [] // this will be the group skill
-        skills.get(2).badges == []
-        skills.get(3).badges == [[ name: badge.name, badgeId: badge.badgeId, skillType: 'Badge', skillId: proj1_skills.get(2).skillId]]
-        skills.get(4).badges == [[ name: badge.name, badgeId: badge.badgeId, skillType: 'Badge', skillId: proj1_skills.get(3).skillId]]
-        skills.get(5).badges == []
+        skills.size() == 2
+        skills.get(0).badges == [[ name: badge.name, badgeId: badge.badgeId, skillType: 'Badge', skillId: proj1_skills.get(3).skillId]]
+        skills.get(1).badges == []
     }
 
 }

@@ -26,10 +26,12 @@ import Column from 'primevue/column'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useStorage} from "@vueuse/core";
+import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 
 const route = useRoute();
 const numberFormat = useNumberFormat()
 const responsive = useResponsiveBreakpoints()
+const skillRouteUtil = useSkillOverviewRouteUtil()
 const isFlex = computed(() => responsive.lg.value)
 
 onMounted(() => {
@@ -95,6 +97,11 @@ const exportSkills = () => {
         isExporting.value = false;
         loading.value = false;
       });
+}
+
+const toRouteProps = (skill) => {
+  const routeProps = skillRouteUtil.toRouteProps(skill.projectId, skill.subjectId, skill.skillId, skill.type, skill.groupId)
+  return { name: routeProps.name, params: routeProps.params }
 }
 
 const totalRows = computed(() => items.value.length);
@@ -193,10 +200,10 @@ const totalRows = computed(() => items.value.length);
                 </div>
               </div>
               <div class="flex gap-1 right-0">
-                <router-link target="_blank" :to="{ name: 'SkillOverview', params: { projectId: projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId } }" tabindex="-1">
+                <router-link target="_blank" :to="toRouteProps({ projectId, ...slotProps.data })" tabindex="-1" :data-cy="`viewSkillConfigBtn_${slotProps.data.skillId}`">
                   <SkillsButton size="small" class="text-secondary"><i class="fa fa-wrench"/><span class="sr-only">view skill configuration</span></SkillsButton>
                 </router-link>
-                <router-link :id="`b-skill-metrics_${slotProps.data.skillId}`" target="_blank" :to="{ name: 'SkillMetrics', params: { projectId: projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId } }" tabindex="-1">
+                <router-link :id="`b-skill-metrics_${slotProps.data.skillId}`" target="_blank" :to="{ name: slotProps.data.groupId ? 'SkillMetricsGroupSkillOverview' : 'SkillMetricsSingleSkillOverview', params: { projectId, ...slotProps.data } }" tabindex="-1" :data-cy="`viewSkillMetricsBtn_${slotProps.data.skillId}`">
                   <SkillsButton variant="outline-info" size="small" class="text-secondary"><i class="fa fa-chart-bar"/><span class="sr-only">view skill metrics</span></SkillsButton>
                 </router-link>
               </div>

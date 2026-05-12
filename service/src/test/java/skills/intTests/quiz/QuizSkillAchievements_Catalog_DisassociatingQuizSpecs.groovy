@@ -705,7 +705,7 @@ class QuizSkillAchievements_Catalog_DisassociatingQuizSpecs extends QuizSkillAch
 
         subj2Skills[2].selfReportingType = null
         subj2Skills[2].quizId = null
-        skillsService.assignSkillToSkillsGroup(subj2SkillsGroup1.skillId, subj2Skills[2])
+        skillsService.assignSkillToSkillsGroup(subj2SkillsGroup2.skillId, subj2Skills[2])
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         List<UserPerformedSkill> userPerformedSkills_t4 = userPerformedSkillRepo.findAll().findAll( { it.projectId == proj2.projectId})

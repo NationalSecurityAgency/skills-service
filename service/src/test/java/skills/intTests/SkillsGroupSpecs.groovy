@@ -69,6 +69,44 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         exception.message.contains("Skill with id [skill1] with type [Skill] already exists! Requested to create skill with type of [SkillsGroup]")
     }
 
+    void "cannot convert an existing Skill To be a child of a SkillsGroup" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skill = SkillsFactory.createSkill(1, 1, 2)
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills([skill, skillsGroup])
+
+        when:
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, skill)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Existing Skill with id [${skill.skillId}] cannot change it's group id, existing group id [null], requested group id [${skillsGroup.skillId}]!")
+    }
+
+    void "cannot change an existing Skill Group Skill To be a child of a different SkillsGroup" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skill = SkillsFactory.createSkill(1, 1, 3)
+        def skillsGroup = SkillsFactory.createSkillsGroup()
+        def skillsGroup2 = SkillsFactory.createSkillsGroup(1, 1, 2)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills([skillsGroup])
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, skill)
+
+        when:
+        skillsService.assignSkillToSkillsGroup(skillsGroup2.skillId, skill)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("Existing Skill with id [${skill.skillId}] cannot change it's group id, existing group id [${skillsGroup.skillId}], requested group id [${skillsGroup2.skillId}]!")
+    }
+
     void "create and add skills to SkillsGroup" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -1039,11 +1077,12 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         child2Enabled.enabled == true
     }
 
-    void "skills under SkillsGroup are returned in project's skills endpoint" () {
+    void "skills under SkillsGroup and group itself are returned in project's skills endpoint" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
         def allSkills = SkillsFactory.createSkills(4) // first one is group
         def skillsGroup = allSkills[0]
+        skillsGroup.name = 'Awesome Group'
         skillsGroup.type = 'SkillsGroup'
 
         skillsService.createProject(proj)
@@ -1056,11 +1095,61 @@ class SkillsGroupSpecs extends DefaultIntSpec {
         skillsService.createSkill(allSkills[3])
 
         when:
-        def res = skillsService.getSkillsForProject(proj.projectId)
+        def res = skillsService.getSkillsForProject(proj.projectId, '', false, false, false, true)
+
+        then:
+        res.size() == 4
+        res.collect { it.skillId }.sort() == allSkills.skillId.sort()
+    }
+
+    void "searching for skills under SkillsGroup are returned in project's skills endpoint" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(4) // first one is group
+        def skillsGroup = allSkills[0]
+        skillsGroup.name = 'Awesome Group'
+        skillsGroup.type = 'SkillsGroup'
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        // regular skill
+        skillsService.createSkill(allSkills[3])
+
+        when:
+        def res = skillsService.getSkillsForProject(proj.projectId, 'Skill', false, false, false, true)
 
         then:
         res.size() == 3
         res.collect { it.skillId }.sort() == [ allSkills[1].skillId, allSkills[2].skillId, allSkills[3].skillId, ]
+    }
+
+    void "searching for Group name SkillsGroup itself is returned in project's skills endpoint" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def allSkills = SkillsFactory.createSkills(4) // first one is group
+        def skillsGroup = allSkills[0]
+        skillsGroup.name = 'Awesome Group'
+        skillsGroup.type = 'SkillsGroup'
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[1])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, allSkills[2])
+        // regular skill
+        skillsService.createSkill(allSkills[3])
+
+        when:
+        def res = skillsService.getSkillsForProject(proj.projectId, 'Awesome', false, false, false, true)
+
+        then:
+        res.size() == 1
+        res[0].skillId == skillsGroup.skillId
     }
 
     @Autowired

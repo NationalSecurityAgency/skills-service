@@ -31,6 +31,7 @@ import { storeToRefs } from 'pinia';
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
+import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 
 const dialogMessages = useDialogMessages()
 const projConf = useProjConfig();
@@ -41,6 +42,7 @@ const router = useRouter();
 const emit = defineEmits(['skills-changed']);
 const responsive = useResponsiveBreakpoints()
 const upgradeInProgressErrorChecker = useUpgradeInProgressErrorChecker()
+const skillRouteUtil = useSkillOverviewRouteUtil()
 
 const loading = ref({
   availableSkills: true,
@@ -191,6 +193,11 @@ const filterSkills = (searchQuery) => {
   loadAvailableBadgeSkills();
 }
 
+const toRouteProps = (skill) => {
+  const routeProps = skillRouteUtil.toRouteProps(skill.projectId, skill.subjectId, skill.skillId, skill.type, skill.groupId)
+  return { name: routeProps.name, params: routeProps.params }
+}
+
 </script>
 
 <template>
@@ -229,8 +236,7 @@ const filterSkills = (searchQuery) => {
               data-cy="badgeSkillsTable">
               <Column header="Skill Name" field="name" sortable :class="{'flex': responsive.md.value }">
                 <template #body="slotProps">
-                  <router-link v-if="slotProps.data.subjectId && !hideManageButton" :id="slotProps.data.skillId" :to="{ name:'SkillOverview',
-                    params: { projectId: slotProps.data.projectId, subjectId: slotProps.data.subjectId, skillId: slotProps.data.skillId }}"
+                  <router-link v-if="slotProps.data.subjectId && !hideManageButton" :id="slotProps.data.skillId" :to="toRouteProps(slotProps.data)"
                                class="btn btn-sm btn-outline-hc ml-2"
                                :data-cy="`manage_${slotProps.data.skillId}`">
                     {{ slotProps.data.name }}

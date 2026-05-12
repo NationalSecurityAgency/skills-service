@@ -51,6 +51,7 @@ import { useFocusState } from '@/stores/UseFocusState.js'
 import skillsService from '@/components/skills/SkillsService.js';
 import CopySubjectOrSkillsDialog from "@/components/subjects/CopySubjectOrSkillsDialog.vue";
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
+import { useSkillsState } from '@/stores/UseSkillsState.js';
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -64,7 +65,8 @@ const props = defineProps({
 
 const responsive = useResponsiveBreakpoints()
 const appConfig = useAppConfig()
-const skillsState = useSubjectSkillsState()
+const skillsState = useSkillsState()
+const subjectSkillsState = useSubjectSkillsState()
 const subjectState = useSubjectsState()
 const projConfig = useProjConfig()
 const route = useRoute()
@@ -181,9 +183,9 @@ const onToggle = (currentSelection) => {
 
 const tableSkills = computed(() => {
   if (props.groupId) {
-    return skillsState.getGroupSkills(props.groupId)
+    return subjectSkillsState.getGroupSkills(props.groupId)
   }
-  return skillsState.subjectSkills
+  return subjectSkillsState.subjectSkills
 })
 
 const filteredCount = ref(-1)
@@ -192,9 +194,9 @@ const totalRows = computed(() => {
   if (filteredCount.value > 0) {
     res = filteredCount.value
   } else if (props.groupId) {
-    res = skillsState.getGroupSkills(props.groupId).length
+    res = subjectSkillsState.getGroupSkills(props.groupId).length
   } else {
-    res = skillsState.subjectSkills.length
+    res = subjectSkillsState.subjectSkills.length
   }
   return res
 })
@@ -257,11 +259,11 @@ const deleteSkill = (skillToDelete) => {
   deleteSkillInfo.value.show = true
 }
 const doDeleteSkill = () => {
-  skillsState.setLoadingSubjectSkills(true)
+  subjectSkillsState.setLoadingSubjectSkills(true)
   const skill = deleteSkillInfo.value.skill
   SkillsService.deleteSkill(skill)
     .then(() => {
-      const skills = skill.groupId ? skillsState.getGroupSkills(skill.groupId) : skillsState.subjectSkills
+      const skills = skill.groupId ? subjectSkillsState.getGroupSkills(skill.groupId) : subjectSkillsState.subjectSkills
       const itemIndex = skills.findIndex((item) => item.skillId === skill.skillId)
       skills.splice(itemIndex, 1)
       skills.sort((a, b) => a.displayOrder - b.displayOrder)
@@ -269,24 +271,32 @@ const doDeleteSkill = () => {
         skills[i].displayOrder = i + 1
       }
       if (skill.groupId) {
-        skillsState.setGroupSkills(skill.groupId, skills)
-        const parentGroup = skillsState.subjectSkills.find((item) => item.skillId === skill.groupId)
-        parentGroup.totalPoints = skills
-          .filter((item) => item.enabled === true)
-          .map((item) => item.totalPoints)
-          .reduce((accumulator, currentValue) => {
-            return accumulator + currentValue
-          }, 0)
-        parentGroup.numSkillsInGroup = skills.length
+        subjectSkillsState.setGroupSkills(skill.groupId, skills)
+        const totalPoints = skills
+                    .filter((item) => item.enabled === true)
+                    .map((item) => item.totalPoints)
+                    .reduce((accumulator, currentValue) => {
+                      return accumulator + currentValue
+                    }, 0)
+        const numSkillsInGroup = skills.length
+        const parentGroup = subjectSkillsState.subjectSkills.find((item) => item.skillId === skill.groupId)
+        if (parentGroup) {
+          parentGroup.totalPoints = totalPoints
+          parentGroup.numSkillsInGroup = numSkillsInGroup
+        }
+        if (skillsState.skill && skillsState.skill.skillId === skill.groupId) {
+          skillsState.skill.totalPoints = totalPoints
+          skillsState.skill.numSkillsInGroup = numSkillsInGroup
+        }
       }
       announcer.polite(`Removed ${skill.name} skill`)
       subjectState.loadSubjectDetailsState()
-      skillsState.setLoadingSubjectSkills(false)
+      subjectSkillsState.setLoadingSubjectSkills(false)
     })
 }
 
 const importedSkillUpdated = (skill) => {
-  const skills = skill.groupId ? skillsState.getGroupSkills(skill.groupId) : skillsState.subjectSkills
+  const skills = skill.groupId ? subjectSkillsState.getGroupSkills(skill.groupId) : subjectSkillsState.subjectSkills
   const itemIndex = skills.findIndex((item) => item.skillId === skill.skillId)
   skills[itemIndex].pointIncrement = skill.pointIncrement
   skills[itemIndex].totalPoints = skill.pointIncrement * skill.numPerformToCompletion
@@ -380,21 +390,21 @@ const onMovedOrReused = (movedInfo, isMoved = true) => {
   }
   const movedSkillIds = movedInfo.moved.map((sk) => sk.skillId)
   const groupSkill = movedInfo.moved.find((sk) => sk.groupId)
-  const origSkills = groupSkill ? skillsState.getGroupSkills(groupSkill.groupId) : skillsState.subjectSkills
+  const origSkills = groupSkill ? subjectSkillsState.getGroupSkills(groupSkill.groupId) : subjectSkillsState.subjectSkills
   const movedSkills = origSkills.filter((sk) => movedSkillIds.includes(sk.skillId))
 
   if (route.params.subjectId === movedInfo.destination.subjectId && !movedInfo.destination.groupId) {
-    skillsState.pushIntoSubjectSkills(toRaw(movedSkills))
+    subjectSkillsState.pushIntoSubjectSkills(toRaw(movedSkills))
   }
   const aMovedSkills = movedInfo.moved[0]
   if (isMoved && route.params.subjectId === aMovedSkills.subjectId && !aMovedSkills.groupId) {
-    skillsState.removeSubjectSkillsBySkillIds(movedSkillIds)
+    subjectSkillsState.removeSubjectSkillsBySkillIds(movedSkillIds)
   }
   if (movedInfo.destination.groupId) {
-    skillsState.loadGroupSkills(route.params.projectId, movedInfo.destination.groupId)
+    subjectSkillsState.loadGroupSkills(route.params.projectId, movedInfo.destination.groupId)
   }
   if (groupSkill) {
-    skillsState.loadGroupSkills(route.params.projectId, groupSkill.groupId)
+    subjectSkillsState.loadGroupSkills(route.params.projectId, groupSkill.groupId)
   }
 
   removeSelectedRows()
@@ -405,9 +415,9 @@ const onExported = (exportInfo) => {
   const exportedSkillIds = exportInfo.exported.map((sk) => sk.skillId)
 
   if (exportInfo.groupId) {
-    skillsState.loadGroupSkills(route.params.projectId, exportInfo.groupId)
+    subjectSkillsState.loadGroupSkills(route.params.projectId, exportInfo.groupId)
   } else {
-    skillsState.subjectSkills.forEach((skill) => {
+    subjectSkillsState.subjectSkills.forEach((skill) => {
       if (exportedSkillIds.includes(skill.skillId)) {
         skill.sharedToCatalog = true
       }
@@ -453,10 +463,10 @@ const getNextExpirationDate = (skill) => {
 
 const isLoading = computed(() => {
   if (props.groupId) {
-    return skillsState.getLoadingGroupSkills(props.groupId)
+    return subjectSkillsState.getLoadingGroupSkills(props.groupId)
   }
 
-  return skillsState.loadingSubjectSkills
+  return subjectSkillsState.loadingSubjectSkills
 })
 
 const isSkillsGroupTable = computed(() => {
@@ -662,10 +672,13 @@ const pageChanged = (pagingInfo) => {
                   skill{{ slotProps.data.numSkillsInGroup !== 1 ? 's' : '' }}
                 </Tag>
               </div>
-              <highlighted-value
-                class="text-lg w-min-10rem"
-                :value="slotProps.data.name"
-                :filter="filters.global.value" />
+              <div class="flex w-min-10rem">
+                <SkillNameRouterLink :skill="slotProps.data" :subjectId="subjectId"
+                                     :filter-value="filters.global.value"
+                                     :read-only="projConfig.isReadOnlyProj || slotProps.data.isCatalogImportedSkills"
+                                     :group-id="groupId"
+                />
+              </div>
               <Tag
                   v-if="!slotProps.data.enabled"
                   severity="secondary"
@@ -679,6 +692,7 @@ const pageChanged = (pagingInfo) => {
                 <SkillNameRouterLink :skill="slotProps.data" :subjectId="subjectId"
                                      :filter-value="filters.global.value"
                                      :read-only="projConfig.isReadOnlyProj || slotProps.data.isCatalogImportedSkills"
+                                     :group-id="groupId"
                 />
               </div>
               <div class="flex flex-wrap gap-2 items-center">
@@ -714,7 +728,7 @@ const pageChanged = (pagingInfo) => {
                         <span class="font-medium pr-3">{{ tag.tagValue }}</span>
                 </Chip>
               </div>
-              <div v-if="slotProps.data.badges && slotProps.data.badges.length > 0" class="mt-2">
+              <div v-if="slotProps.data.badges && slotProps.data.badges.length > 0" class="mt-2" data-cy="skillBadges">
                 <i class="fa fa-award text-purple-500" aria-hidden="true"></i> Badges:
                 <router-link v-for="badge in slotProps.data.badges" :key="badge.id"
                              :to="{ name: badge.skillType === 'GlobalBadge' ? 'GlobalBadgeSkills' : 'BadgeSkills', params: { badgeId: badge.badgeId, projectId: projectId } }"

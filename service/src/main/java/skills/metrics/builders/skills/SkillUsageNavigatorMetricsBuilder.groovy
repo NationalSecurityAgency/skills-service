@@ -42,6 +42,7 @@ class SkillUsageNavigatorMetricsBuilder implements ProjectMetricsBuilder {
 
     static class SkillUsageNavigatorItem {
         String skillId
+        String groupId
         String skillName
         String subjectId
         Integer numUserAchieved
@@ -63,6 +64,7 @@ class SkillUsageNavigatorMetricsBuilder implements ProjectMetricsBuilder {
                     skillId: it.getSkillId(),
                     skillName: SkillReuseIdUtil.removeTag(InputSanitizer.unsanitizeName(it.getSkillName())),
                     subjectId: it.getSubjectId(),
+                    groupId: it.getGroupId(),
                     numUserAchieved: numAchieved,
                     numUsersInProgress: numProgress - numAchieved,
                     lastReportedTimestamp: it.getLastReported()?.time,
