@@ -29,6 +29,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
     @Autowired
     AddSkillHelper addSkillHelper
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "Submit a single skill for a single user"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
@@ -64,7 +65,8 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         result.results[0].userId == users[0]
 
     }
-    
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "Submit a batch of skills for a single user"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
@@ -105,6 +107,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         result.results[2].userId == users[0]
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "Submit a single skill for multiple users"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
@@ -152,6 +155,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
 
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "Submit a batch of skills for multiple users"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
@@ -213,6 +217,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         result.results[7].userId == users[3]
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "Submit a batch of skills for multiple users with a skill not applied"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)

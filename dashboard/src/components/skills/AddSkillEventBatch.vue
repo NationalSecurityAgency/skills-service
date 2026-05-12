@@ -153,20 +153,20 @@ const maxSkillBatchSize = computed(() => {
           </div>
 
           <div class="flex pt-6 justify-between">
-            <SkillsButton label="Back" icon="fas fa-arrow-circle-left" outlined class="mr-2" severity="secondary" @click="activateCallback('1')" data-cy="backButton" />
-            <SkillsButton label="Next" icon="fas fa-arrow-circle-right float-right" @click="activateCallback('3')" :disabled="usersToAdd.length === 0" data-cy="firstNextButton"/>
+            <SkillsButton label="Back" icon="fas fa-arrow-circle-left" outlined class="mr-2" severity="secondary" @click="activateCallback('1')" data-cy="secondBackButton" />
+            <SkillsButton label="Next" icon="fas fa-arrow-circle-right float-right" @click="activateCallback('3')" :disabled="usersToAdd.length === 0" data-cy="secondNextButton"/>
           </div>
         </StepPanel>
         <StepPanel value="3" v-slot="{ activateCallback }">
-          <Message :closable="false" v-if="!tooManyEvents">
+          <Message :closable="false" v-if="!tooManyEvents" data-cy="confirmMessage">
             Skill events for <span class="font-bold">{{ skills.length }}</span> skill(s) will be added for <span class="font-bold">{{ userList.length }}</span> user(s) on {{ dayjs(dateAdded).format('YYYY-MM-DD') }}.
             Please click "Add Events" to confirm.
           </Message>
-          <Message :closable="false" v-if="tooManyEvents" severity="error">
+          <Message :closable="false" v-if="tooManyEvents" severity="error" data-cy="batchErrorMessage">
             Your batch exceeds the {{ maxSkillBatchSize }} request limit ({{skills.length}} skills × {{ userList.length }} users). To proceed, please remove either users or skills to reduce the total number of requests.
           </Message>
           <div class="flex pt-6 justify-between">
-            <SkillsButton label="Back" icon="fas fa-arrow-circle-left" outlined class="mr-2" severity="secondary" @click="activateCallback('2')" data-cy="backButton" />
+            <SkillsButton label="Back" icon="fas fa-arrow-circle-left" outlined class="mr-2" severity="secondary" @click="activateCallback('2')" data-cy="lastBackButton" />
             <SkillsButton variant="outline-primary" :disabled="usersToAdd.length === 0 || !dateAdded || tooManyEvents" data-cy="saveBatchSkillEvents" @click="saveEvents" label="Add Events" />
           </div>
         </StepPanel>
