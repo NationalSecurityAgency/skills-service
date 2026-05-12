@@ -385,7 +385,7 @@ class CatalogExportSkillsUnderGroupSpec extends CatalogIntSpec {
         def p1Skills = createSkills(3, 1, 1, 100)
 
         def p1skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 50)
-        def skillsAndGroup = [p1skillsGroup, p1Skills].flatten()
+        def skillsAndGroup = [p1skillsGroup].flatten()
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, skillsAndGroup)
         p1Skills.each {
             skillsService.assignSkillToSkillsGroup(p1skillsGroup.skillId, it)
@@ -438,7 +438,7 @@ class CatalogExportSkillsUnderGroupSpec extends CatalogIntSpec {
         def p1Skills = createSkills(3, 1, 1, 100)
 
         def p1skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 50)
-        def skillsAndGroup = [p1skillsGroup, p1Skills].flatten()
+        def skillsAndGroup = [p1skillsGroup].flatten()
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, skillsAndGroup)
         p1Skills.each {
             skillsService.assignSkillToSkillsGroup(p1skillsGroup.skillId, it)
@@ -533,7 +533,7 @@ class CatalogExportSkillsUnderGroupSpec extends CatalogIntSpec {
         def p1Skills = createSkills(3, 1, 1, 100)
 
         def p1skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 50)
-        def skillsAndGroup = [p1skillsGroup, p1Skills].flatten()
+        def skillsAndGroup = [p1skillsGroup].flatten()
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, skillsAndGroup)
         p1Skills.each {
             skillsService.assignSkillToSkillsGroup(p1skillsGroup.skillId, it)
@@ -593,7 +593,7 @@ class CatalogExportSkillsUnderGroupSpec extends CatalogIntSpec {
         def p1Skills = createSkills(3, 1, 1, 100)
 
         def p1skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 50)
-        def skillsAndGroup = [p1skillsGroup, p1Skills].flatten()
+        def skillsAndGroup = [p1skillsGroup].flatten()
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, skillsAndGroup)
         p1Skills.each {
             skillsService.assignSkillToSkillsGroup(p1skillsGroup.skillId, it)

@@ -19,6 +19,7 @@ import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
+import org.apache.commons.lang3.Strings
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.data.domain.PageRequest
@@ -182,7 +183,7 @@ class SkillsAdminService {
         if (skillDefinition && !groupId) {
             groupId = skillDefinition.groupId
         }
-        if (skillDefinition && skillDefinition.groupId !== groupId) {
+        if (skillDefinition && !Strings.CI.equals(skillDefinition.groupId, groupId)) {
             throw new SkillException("Existing Skill with id [${skillRequest.skillId}] cannot change it's group id, existing group id [${skillDefinition.groupId}], requested group id [${groupId}]!", skillRequest.projectId, skillDefinition.skillId, ErrorCode.ConstraintViolation)
         }
 
