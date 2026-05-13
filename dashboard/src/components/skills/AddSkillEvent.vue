@@ -206,6 +206,10 @@ const addSkill = () => {
     <SkillsSpinner :is-loading="isLoading"/>
     <div v-if="!isLoading">
       <Message data-cy="addEventDisabledMsg" v-if="addEventDisabled" severity="warn" :closable="false">{{ addEventDisabledMsg }}</Message>
+      <Message severity="warn">
+        This page is being replaced by the ability to add multiple skills to multiple users at once from the Subject page.
+        This feature can be used by selecting skills and then selecting "Report Skills for Users" from the Action menu.
+      </Message>
       <BlockUI data-cy="addEventDisabledBlockUI" :blocked="addEventDisabled">
         <Card>
           <template #content>
