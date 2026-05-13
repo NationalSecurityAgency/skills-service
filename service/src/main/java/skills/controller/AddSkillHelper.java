@@ -42,12 +42,13 @@ import skills.services.ProjectErrorService;
 import skills.services.events.BatchSkillEventResult;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
+import skills.services.userActions.DashboardAction;
+import skills.services.userActions.DashboardItem;
+import skills.services.userActions.UserActionInfo;
+import skills.services.userActions.UserActionsHistoryService;
 import skills.utils.RetryUtil;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 @Component
 public class AddSkillHelper {
@@ -65,6 +66,9 @@ public class AddSkillHelper {
 
     @Autowired
     UserAuthService userAuthService;
+
+    @Autowired
+    UserActionsHistoryService userActionsHistoryService;
 
     @Value("${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}")
     AuthMode authMode;
@@ -112,6 +116,20 @@ public class AddSkillHelper {
         }
 
         batchResults.setResults(results);
+
+        String userIdsString = !batchSkillEventRequest.getUserIds().isEmpty() ? String.join(", ", batchSkillEventRequest.getUserIds()) : null;
+        HashMap<String, String> actionAttributes = new HashMap<>();
+        actionAttributes.put("userIds", userIdsString);
+
+        for (String skillId : skillIds) {
+            UserActionInfo userActionInfo = new UserActionInfo();
+            userActionInfo.setProjectId(projectId);
+            userActionInfo.setItem(DashboardItem.SkillEvents);
+            userActionInfo.setAction(DashboardAction.ManuallyAddSkillEvent);
+            userActionInfo.setItemId(skillId);
+            userActionInfo.setActionAttributes(actionAttributes);
+            userActionsHistoryService.saveUserAction(userActionInfo);
+        }
 
         return batchResults;
     }

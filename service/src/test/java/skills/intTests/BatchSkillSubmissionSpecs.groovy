@@ -339,7 +339,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
 
     }
 
-
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
     def "Submit multiple skills for a single user by DN"() {
         def proj1 = SkillsFactory.createProject(1)
@@ -672,5 +671,44 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         result.results[7].skillId == 'skill2'
         result.results[7].skillApplied
         result.results[7].userId == users[3]
+    }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
+    def "Submit a single skill for a single user by user ID"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_skills)
+
+        String user = getRandomUsers(1)[0]
+        createService(user, "passefeafeaef", "John", "Smith")
+        UserAttrs expectedAttrs = userAttrsRepo.findByUserIdIgnoreCase(user)
+
+        def skillRequest = [
+                userIds: [expectedAttrs.userId],
+                skillIds: ['skill1'],
+                timestamp: 1234l,
+                notifyIfSkillNotApplied: true,
+                isRetry: false,
+        ]
+
+        when:
+        def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        result
+        result.results.size() == 1
+        result.results[0].skillId == 'skill1'
+        result.results[0].skillApplied
+        result.results[0].userId == user
+
     }
 }

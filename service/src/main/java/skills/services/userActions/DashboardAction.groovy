@@ -37,4 +37,5 @@ enum DashboardAction {
     CancelExpiration,
     ArchiveUser,
     RestoreArchivedUser,
+    ManuallyAddSkillEvent,
 }
