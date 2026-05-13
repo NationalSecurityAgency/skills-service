@@ -22,12 +22,15 @@ import Column from 'primevue/column'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
+import SkillType from "@/common-components/utilities/SkillType.js";
 
 const dialogMessages = useDialogMessages()
 const projConfig = useProjConfig();
 const props = defineProps(['isLoading', 'data'])
 const emit = defineEmits(['update', 'panToNode'])
 const announcer = useSkillsAnnouncer()
+const skillRouteUtil = useSkillOverviewRouteUtil()
 
 const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 
@@ -103,10 +106,11 @@ const removeLearningPath = (data) => {
 
 const getUrl = (item) => {
   let url = `/administrator/projects/${encodeURIComponent(item.projectId)}`
-  if (item.type === 'Skill') {
-    url += `/subjects/${encodeURIComponent(item.subjectId)}/skills/${encodeURIComponent(item.skillId)}/`
-  } else if (item.type === 'Badge') {
-    url += `/badges/${encodeURIComponent(item.skillId)}/`
+  if (SkillType.isSkill(item.type)) {
+    const routeProps = skillRouteUtil.toRouteProps(item.projectId, item.subjectId, item.skillId, item.type, item.groupId)
+    url = routeProps.path
+  } else if (SkillType.isBadge(item.type)) {
+    url += `/badges/${encodeURIComponent(item.skillId)}`
   }
 
   return url
@@ -147,12 +151,12 @@ const jumpToNode = (value) => {
           striped-rows>
           <Column field="fromItem" header="From" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
-              <a :href="getUrl(slotProps.data.fromNode)">{{ slotProps.data.fromItem }}</a>
+              <a :href="getUrl(slotProps.data.fromNode)" :data-cy="`fromNodeLink_${slotProps.data.fromNode.skillId}`">{{ slotProps.data.fromItem }}</a>
             </template>
           </Column>
           <Column field="toItem" header="To" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
-              <a :href="getUrl(slotProps.data.toNode)">{{ slotProps.data.toItem }}</a>
+              <a :href="getUrl(slotProps.data.toNode)" :data-cy="`toNodeLink_${slotProps.data.toNode.skillId}`">{{ slotProps.data.toItem }}</a>
             </template>
           </Column>
           <Column field="edit" header="View Route" v-if="!isReadOnlyProj" :class="{'flex': isFlex }">

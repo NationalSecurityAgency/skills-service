@@ -260,34 +260,36 @@ class SkillsDepsService {
                     id: it[0],
                     name: it[1],
                     skillId: it[2],
-                    subjectId: it[3],
-                    projectId: it[4],
-                    projectName: it[5],
-                    pointIncrement: it[6],
-                    totalPoints: it[7],
-                    type: it[8],
+                    groupId: it[3],
+                    subjectId: it[4],
+                    projectId: it[5],
+                    projectName: it[6],
+                    pointIncrement: it[7],
+                    totalPoints: it[8],
+                    type: it[9],
                     containedSkills: null,
             )
 
-            if(it[8] == SkillDef.ContainerType.Badge) {
-                from.containedSkills = getSkillsForLearningPathItem(projectId, it[5], it[2])
+            if(it[9] == SkillDef.ContainerType.Badge) {
+                from.containedSkills = getSkillsForLearningPathItem(projectId, it[6], it[2])
             }
 
             SkillDefGraphRes to = new SkillDefGraphRes(
-                    id: it[9],
-                    name: it[10],
-                    skillId: it[11],
-                    subjectId: it[12],
-                    projectId: it[13],
-                    projectName: it[14],
-                    pointIncrement: it[15],
-                    totalPoints: it[16],
-                    type: it[17],
+                    id: it[10],
+                    name: it[11],
+                    skillId: it[12],
+                    groupId: it[13],
+                    subjectId: it[14],
+                    projectId: it[15],
+                    projectName: it[16],
+                    pointIncrement: it[17],
+                    totalPoints: it[18],
+                    type: it[19],
                     containedSkills: null,
             )
 
-            if(it[17] == SkillDef.ContainerType.Badge) {
-                to.containedSkills = getSkillsForLearningPathItem(projectId, it[14], it[11])
+            if(it[18] == SkillDef.ContainerType.Badge) {
+                to.containedSkills = getSkillsForLearningPathItem(projectId, it[16], it[12])
             }
 
             new GraphSkillDefEdge(from: from, to: to)
@@ -301,6 +303,7 @@ class SkillsDepsService {
                 id: null,
                 name: res.name,
                 skillId: res.skillId,
+                groupId: res.groupId,
                 subjectId: res.subjectId,
                 projectId: res.projectId,
                 projectName: projectName,

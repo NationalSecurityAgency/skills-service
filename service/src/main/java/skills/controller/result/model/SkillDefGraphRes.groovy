@@ -23,6 +23,7 @@ class SkillDefGraphRes {
     Integer id
     String name
     String skillId
+    String groupId
     String subjectId
     String projectId
     String projectName
