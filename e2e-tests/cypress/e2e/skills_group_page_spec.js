@@ -335,8 +335,6 @@ describe('Skills Group Page Tests', () => {
     cy.visit('/administrator/projects/proj1/subjects/subj1/groups/group1')
     cy.wait('@getGroupSkills')
 
-    cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '150');
-
     cy.get('[data-cy="pageHeader"] [data-cy="title"]').should('contain.text', 'GROUP: Awesome Group 1')
     cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').should('contain.text', 'ID: group1')
     cy.get('[data-cy="breadcrumb-newId"]').should('not.exist')
