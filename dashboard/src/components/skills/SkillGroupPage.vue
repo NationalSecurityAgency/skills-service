@@ -108,7 +108,7 @@ const groupEdited = (updatedGroup) => {
   if (origId !== skillsState.skill.skillId) {
     router.replace({
       name: route.name,
-      params: { ...route.params, skillId: skillsState.skill.skillId },
+      params: { ...route.params, groupId: skillsState.skill.skillId },
       query: { preventReload: true }
     })
   }
