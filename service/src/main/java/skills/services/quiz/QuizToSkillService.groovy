@@ -35,6 +35,7 @@ import skills.storage.model.QuizDef
 import skills.storage.model.QuizToSkillDef
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
+import skills.storage.model.SkillDefParent
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserAchievement
@@ -157,7 +158,7 @@ class QuizToSkillService {
 
     @Profile
     @Transactional
-    void removeQuizToSkillAssignment(SkillDefWithExtra skillDef) {
+    void  removeQuizToSkillAssignment(SkillDefParent skillDef) {
         Integer skillRefId = skillDef.id
 
         quizToSkillDefRepo.deleteBySkillRefId(skillRefId)
@@ -184,7 +185,7 @@ class QuizToSkillService {
     }
 
     @Profile
-    private void removeGroupAchievements(SkillDefWithExtra skillDef) {
+    private void removeGroupAchievements(SkillDefParent skillDef) {
         if (skillDef.groupId) {
             SkillDef group = ruleSetDefGraphService.getMyGroupParent(skillDef.id)
             if (group) {
@@ -195,7 +196,7 @@ class QuizToSkillService {
     }
 
     @Profile
-    private void removeBadgeAchievements(SkillDefWithExtra skillDef) {
+    private void removeBadgeAchievements(SkillDefParent skillDef) {
         List<SkillDef> badges = ruleSetDefGraphService.getBadgesSkillBelongsTo(skillDef.id)
         badges?.each { SkillDef badge ->
             if (BadgeUtils.withinActiveTimeframe(badge)) {

@@ -34,6 +34,7 @@ import skills.auth.UserInfoService
 
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillRequestValidator
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.*
 import skills.controller.result.model.*
@@ -103,6 +104,9 @@ class AdminController {
     PublicPropsBasedValidator propsBasedValidator
 
     @Autowired
+    SkillRequestValidator skillRequestValidator
+
+    @Autowired
     ControllerPropsValidatorAndSanitizer controllerPropsValidatorAndSanitizer
 
     @Autowired
@@ -140,9 +144,6 @@ class AdminController {
 
     @Autowired
     ProjectSettingsValidator projectSettingsValidator
-
-    @Value('#{"${skills.config.ui.maxTimeWindowInMinutes}"}')
-    int maxTimeWindowInMinutes
 
     @Value('#{"${skills.config.ui.maxBadgeBonusInMinutes}"}')
     int maxBadgeBonusInMinutes
@@ -665,6 +666,15 @@ class AdminController {
         return new RequestResult(success: true)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/batchUpdateSkills", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult batchUpdateSkills(@PathVariable("projectId") String projectId,
+                                    @RequestBody MultiSkillUpdateRequest skillRequest) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        skillsAdminService.batchUpdateSkills(projectId, skillRequest)
+        return RequestResult.success()
+    }
+
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/video", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SkillVideoAttrs saveSkillVideoAttrs(@PathVariable("projectId") String projectId,
@@ -806,25 +816,8 @@ class AdminController {
         skillRequest.iconClass = InputSanitizer.sanitize(skillRequest.iconClass)
 
         if (isBasicSkill) {
-            SkillsValidator.isTrue(skillRequest.pointIncrement > 0, "pointIncrement must be > 0", projectId, skillId)
-            propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxPointIncrement, "pointIncrement", skillRequest.pointIncrement)
+            skillRequestValidator.validateSkillRequest(projectId, skillId, skillRequest)
 
-            SkillsValidator.isTrue(skillRequest.pointIncrementInterval >= 0, "pointIncrementInterval must be >= 0", projectId, skillId)
-            SkillsValidator.isTrue(skillRequest.pointIncrementInterval <= maxTimeWindowInMinutes, "pointIncrementInterval must be <= $maxTimeWindowInMinutes", projectId, skillId)
-            SkillsValidator.isTrue(skillRequest.numPerformToCompletion > 0, "numPerformToCompletion must be > 0", projectId, skillId)
-            propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPerformToCompletion, "numPerformToCompletion", skillRequest.numPerformToCompletion)
-
-            if (skillRequest.pointIncrementInterval > 0) {
-                // if pointIncrementInterval is disabled then this validation is not needed
-                SkillsValidator.isTrue(skillRequest.numMaxOccurrencesIncrementInterval > 0, "numMaxOccurrencesIncrementInterval must be > 0", projectId, skillId)
-                SkillsValidator.isTrue(skillRequest.numPerformToCompletion >= skillRequest.numMaxOccurrencesIncrementInterval, "numPerformToCompletion must be >= numMaxOccurrencesIncrementInterval", projectId, skillId)
-                propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPointIncrementMaxOccurrences, "numMaxOccurrencesIncrementInterval", skillRequest.numMaxOccurrencesIncrementInterval)
-            }
-
-            SkillsValidator.isTrue(skillRequest.version >= 0, "version must be >= 0", projectId, skillId)
-            propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxSkillVersion, "Skill Version", skillRequest.version)
-
-            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Skill Description", skillRequest.description)
             skillRequest.description = InputSanitizer.sanitizeDescription(skillRequest.description)
             skillRequest.helpUrl = InputSanitizer.sanitizeUrl(skillRequest.helpUrl)
         }

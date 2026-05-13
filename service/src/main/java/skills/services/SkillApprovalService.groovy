@@ -355,7 +355,7 @@ class SkillApprovalService {
     }
 
     @Profile
-    void modifyApprovalsWhenSelfReportingTypeChanged(SkillDefWithExtra existing, SkillDef.SelfReportingType incomingType) {
+    void modifyApprovalsWhenSelfReportingTypeChanged(SkillDefParent existing, SkillDef.SelfReportingType incomingType) {
         if (existing.selfReportingType == incomingType) {
             return;
         }
