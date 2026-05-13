@@ -461,6 +461,11 @@ class SkillsService {
         wsHelper.adminPost(getSkillUrl(props.projectId, props.subjectId, originalSkillId ?: props.skillId), props)
     }
 
+    def batchUpdateSkills(String projectId, Map props) {
+        String url = "${getProjectUrl(projectId)}/batchUpdateSkills"
+        wsHelper.adminPost(url, props)
+    }
+
     def createBadge(Map props, String originalBadgeId = null) {
         wsHelper.adminPost(getBadgeUrl(props.projectId, originalBadgeId ?: props.badgeId), props)
     }

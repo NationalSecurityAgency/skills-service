@@ -17,6 +17,7 @@ package skills.storage.repos
 
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
@@ -166,6 +167,9 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
 
     @Nullable
     List<SkillDef> findAllByProjectIdAndType(@Nullable String id, SkillDef.ContainerType type)
+
+    @Nullable
+    List<SkillDef> findAllByProjectIdAndSkillIdIn(@Nullable String projectId, List<String> skillId)
 
     @Nullable
     List<SkillDef> findAllByProjectIdAndTypeAndEnabled(@Nullable String id, SkillDef.ContainerType type, String enabled)
