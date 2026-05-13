@@ -912,10 +912,12 @@ ORDER BY s.name ASC
         String getSkillName()
         String getSubjectId()
         String getSubjectName()
+        @Nullable
+        String getGroupId()
     }
 
     @Nullable
-    @Query('''select pd.projectId as projectId, pd.name as projectName, sdChild.skillId as skillId, sdChild.name as skillName, sdParent.skillId as subjectId, sdParent.name as subjectName
+    @Query('''select pd.projectId as projectId, pd.name as projectName, sdChild.skillId as skillId, sdChild.name as skillName, sdParent.skillId as subjectId, sdParent.name as subjectName, sdChild.groupId as groupId
                 from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, ProjDef pd
                 where 
                     srd.parent=sdParent and 

@@ -408,6 +408,7 @@ class SkillApprovalService {
                         approved     : approved,
                         skillName    : skillDefinition.name,
                         skillId      : skillDefinition.skillId,
+                        groupId        : skillDefinition.groupId,
                         subjectId    : subjectId,
                         projectName  : projDef.getProjectName(),
                         projectId    : skillDefinition.projectId,

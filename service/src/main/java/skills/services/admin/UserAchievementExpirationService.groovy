@@ -105,7 +105,6 @@ class UserAchievementExpirationService {
     @Value('#{"${skills.config.dailySkillExpirationNotificationThreshold:0.1}"}')
     Double dailySkillExpirationNotificationThreshold = 0.1
 
-
     TableResult findAllExpiredAchievements(String projectId, String userId, String skillName, PageRequest pageRequest) {
         Page<ExpiredSkillRes> results = expiredUserAchievementRepo.findAllExpiredAchievements(projectId, userId, skillName, pageRequest)
         def totalExpirations = results.getTotalElements()
@@ -156,7 +155,7 @@ class UserAchievementExpirationService {
                                         projectName      : skillProjectAndSubjectIdsAndNames.projectName,
                                         expirationType   : expirationAttrs.expirationType,
                                         expirationDate   : formatWithOrdinal(nextExpirationDate),
-                                        skillTrainingUrl : "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}/subjects/${skillProjectAndSubjectIdsAndNames.subjectId}/skills/${skillProjectAndSubjectIdsAndNames.skillId}",
+                                        skillTrainingUrl : buildSkillTrainingUrl(publicUrl, skillProjectAndSubjectIdsAndNames),
                                         contactProjectUrl: "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}?openContact=true",
                                         communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
                                 ]
@@ -192,7 +191,7 @@ class UserAchievementExpirationService {
                                         skillName           : skillProjectAndSubjectIdsAndNames.skillName,
                                         projectName         : skillProjectAndSubjectIdsAndNames.projectName,
                                         retentionDeadline   : formatWithOrdinal(retentionDeadline),
-                                        skillTrainingUrl    : "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}/subjects/${skillProjectAndSubjectIdsAndNames.subjectId}/skills/${skillProjectAndSubjectIdsAndNames.skillId}",
+                                        skillTrainingUrl    : buildSkillTrainingUrl(publicUrl, skillProjectAndSubjectIdsAndNames),
                                         contactProjectUrl   : "${publicUrl}progress-and-rankings/projects/${skillProjectAndSubjectIdsAndNames.projectId}?openContact=true",
                                         communityHeaderDescriptor: uiConfigProperties.ui.defaultCommunityDescriptor
                                 ]
@@ -268,6 +267,15 @@ class UserAchievementExpirationService {
             return false
         }
         return true
+    }
+
+    private static String buildSkillTrainingUrl(String publicUrl, SkillDefRepo.SkillProjectAndSubjectIdsAndNames skillInfo) {
+        String baseUrl = "${publicUrl}progress-and-rankings/projects/${skillInfo.projectId}/subjects/${skillInfo.subjectId}"
+        if (skillInfo.groupId) {
+            return "${baseUrl}/groups/${skillInfo.groupId}/skills/${skillInfo.skillId}"
+        } else {
+            return "${baseUrl}/skills/${skillInfo.skillId}"
+        }
     }
 
     static String formatWithOrdinal(LocalDateTime dateTime) {
