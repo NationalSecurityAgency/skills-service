@@ -1121,4 +1121,132 @@ Always yours, <br/> -SkillTree Bot
         SkillsClientException skillsClientException = thrown(SkillsClientException)
         skillsClientException.message.contains("doNotRequireApproval property is not allowed for imported skills")
     }
+
+    def "report via approval - validate link to subject skill"() {
+        String user = "skills@skills.org"
+
+        def proj = createProject()
+        proj.description = 'this is an important project'
+        def subj = createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
+        skillsService.approve(proj.projectId, ids)
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
+        int approvalEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Approved') }
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, approvalEmailIdx)
+
+        then:
+        emailRes.subj == "SkillTree Points Approved"
+        emailRes.html.contains("Congratulations! Your request for the <a href=\"http://localhost:${localPort}/progress-and-rankings/projects/TestProject1/subjects/TestSubject1/skills/skill1\">Test Skill 1</a> skill in the <b>Test Project#1</b> project has been approved!</p>")
+    }
+
+    def "report via disapproval - validate link to subject skill"() {
+        String user = "skills@skills.org"
+
+        def proj = createProject()
+        proj.description = 'this is an important project'
+        def subj = createSubject()
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        Date date = new Date() - 60
+
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
+        skillsService.rejectSkillApprovals(proj.projectId, ids)
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
+        int approvalEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Denied') }
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, approvalEmailIdx)
+
+        then:
+        emailRes.subj == "SkillTree Points Denied"
+        emailRes.html.contains("Your request for the <a href=\"http://localhost:${localPort}/progress-and-rankings/projects/TestProject1/subjects/TestSubject1/skills/skill1\">Test Skill 1</a> skill in the <b>Test Project#1</b> project has been denied.</p>")
+    }
+
+    def "report via approval - validate link to skill group skill"() {
+        String user = "skills@skills.org"
+
+        def proj = createProject()
+        proj.description = 'this is an important project'
+        def subj = createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 2)
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills([skillsGroup])
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, skills[0])
+
+        Date date = new Date() - 60
+
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
+        skillsService.approve(proj.projectId, ids)
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
+        int approvalEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Approved') }
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, approvalEmailIdx)
+
+        then:
+        emailRes.subj == "SkillTree Points Approved"
+        emailRes.html.contains("Congratulations! Your request for the <a href=\"http://localhost:${localPort}/progress-and-rankings/projects/TestProject1/subjects/TestSubject1/groups/skill2/skills/skill1\">Test Skill 1</a> skill in the <b>Test Project#1</b> project has been approved!</p>")
+    }
+
+    def "report via disapproval - validate link to skill group skill"() {
+        String user = "skills@skills.org"
+
+        def proj = createProject()
+        proj.description = 'this is an important project'
+        def subj = createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 2)
+        def skills = SkillsFactory.createSkills(1,)
+        skills[0].pointIncrement = 200
+        skills[0].selfReportingType = SkillDef.SelfReportingType.Approval
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills([skillsGroup])
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, skills[0])
+
+        Date date = new Date() - 60
+
+        when:
+        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], user, date, "Please approve this!")
+        def approvalsEndpointRes = skillsService.getApprovals(proj.projectId, 5, 1, 'requestedOn', false)
+        List<Integer> ids = approvalsEndpointRes.data.collect { it.id }
+        skillsService.rejectSkillApprovals(proj.projectId, ids)
+
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 2 }
+        int approvalEmailIdx = greenMail.getReceivedMessages().findIndexOf {it.subject.contains('Denied') }
+        EmailUtils.EmailRes emailRes = EmailUtils.getEmail(greenMail, approvalEmailIdx)
+
+        then:
+        emailRes.subj == "SkillTree Points Denied"
+        emailRes.html.contains("Your request for the <a href=\"http://localhost:${localPort}/progress-and-rankings/projects/TestProject1/subjects/TestSubject1/groups/skill2/skills/skill1\">Test Skill 1</a> skill in the <b>Test Project#1</b> project has been denied.</p>")
+    }
 }

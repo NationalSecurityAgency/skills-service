@@ -55,6 +55,7 @@ class SkillApprovalResponseNotificationBuilder implements NotificationEmailBuild
         templateContext.setVariable("approved", parsed.approved)
         templateContext.setVariable("skillName", parsed.skillName)
         templateContext.setVariable("skillId", parsed.skillId)
+        templateContext.setVariable("groupId", parsed.groupId)
         templateContext.setVariable("subjectId", parsed.subjectId)
         templateContext.setVariable("projectName", parsed.projectName)
         templateContext.setVariable("projectId", parsed.projectId)
