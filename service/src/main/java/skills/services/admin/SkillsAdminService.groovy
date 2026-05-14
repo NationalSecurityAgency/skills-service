@@ -471,7 +471,8 @@ class SkillsAdminService {
                 throw new SkillException("All provided skills must belong to the same subject. Skill [${skill.skillId}] is not a child of [${subject.skillId}]", projectId, skill.skillId, ErrorCode.BadParam)
             }
             int currentOccurrences = (int)(skill.totalPoints / skill.pointIncrement)
-            if (updateRequest.pointIncrement != null || updateRequest.numPerformToCompletion != null) {
+            boolean skillIsEnabled = skill.enabled == "true"
+            if (skillIsEnabled && updateRequest.pointIncrement != null || updateRequest.numPerformToCompletion != null) {
                 skillsWhosePointsChanged.add( new SkillDefWithExtraMeta(
                         skill: skill,
                         pointIncrementDelta: updateRequest.pointIncrement != null ? updateRequest.pointIncrement - skill.pointIncrement : 0,
@@ -514,6 +515,14 @@ class SkillsAdminService {
                 skillApprovalService.modifyApprovalsWhenSelfReportingTypeChanged(skill, newType)
 
                 skill.selfReportingType = newType
+            }
+            if (updateRequest.enabled == "true" ) {
+                if (skill.copiedFrom != null) {
+                    throw new SkillException("Cannot enable imported skill through the batch update", projectId, skill.skillId, ErrorCode.BadParam)
+                }
+                if (skill.enabled != "true") {
+                    skill.enabled = "true"
+                }
             }
         }
 
