@@ -27,6 +27,7 @@ class GraphRelWithAchievement {
     String childProjectName
     Integer childId
     String childSkillId
+    String childSkillGroupId
     String childName
     String childType
 

@@ -495,6 +495,43 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         summary.skills[0].subjectId == proj1_subj.subjectId
     }
 
+    def "single badge summary with group-based skills"() {
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        def group1 = SkillsFactory.createSkillsGroup(1, 1, 11)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj, [proj1_skills[0], group1])
+        proj1_skills[1..2].each {
+            skillsService.assignSkillToSkillsGroup(group1.skillId, it)
+        }
+
+        String badge1 = "badge1"
+        Map badge = [projectId: proj1.projectId, badgeId: badge1, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.addBadge(badge)
+        proj1_skills.each {
+            skillsService.assignSkillToBadge([projectId: proj1.projectId, badgeId: badge1, skillId: it.skillId])
+        }
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        when:
+        def summary = skillsService.getBadgeSummary(userId, proj1.projectId, badge1)
+        then:
+        summary.badgeId == "badge1"
+        summary.skills[0].skillId == proj1_skills.get(0).skillId
+        summary.skills[0].skill == proj1_skills.get(0).name
+        summary.skills[0].subjectName == proj1_subj.name
+        summary.skills[0].subjectId == proj1_subj.subjectId
+
+        summary.skills.skillId == proj1_skills.skillId
+        summary.skills.subjectId == [proj1_subj.subjectId, proj1_subj.subjectId, proj1_subj.subjectId]
+        summary.skills.subjectName == [proj1_subj.name, proj1_subj.name, proj1_subj.name]
+        summary.skills.groupSkillId == [null, group1.skillId, group1.skillId]
+    }
+
     def "single badge summary - gem"() {
         String userId = "user1"
 

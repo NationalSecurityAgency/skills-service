@@ -95,22 +95,23 @@ const buildToRoute = () => {
   let name = 'skillDetails'
   const query = {}
   const params = props.skill.isSkillsGroupType ? { groupId: props.skill.skillId } : { skillId: props.skill.skillId }
-  if (route.params.subjectId) {
-    params.subjectId = route.params.subjectId
+
+  if (skillsDisplayInfo.isGlobalBadgePage.value && route.params.badgeId) {
+    params.badgeId = route.params.badgeId
+    name = 'globalBadgeSkillDetails'
+    if (props.skill.crossProject) {
+      name = 'globalBadgeSkillDetailsUnderAnotherProject'
+      params.crossProjectId = props.skill.projectId
+      params.dependentSkillId = props.skill.skillId
+    }
+  }
+  else if (route.params.subjectId || route.params.badgeId) {
+    params.subjectId = route.params.subjectId || props.skill.subjectId
     if (props.skill.isSkillsGroupType) {
       name = 'skillsGroupDetails'
     } else if (props.skill.groupSkillId) {
       params.groupId = props.skill.groupSkillId
       name = 'skillDetailsUnderGroup'
-    }
-  } else if (route.params.badgeId) {
-    params.badgeId = route.params.badgeId
-    name = (skillsDisplayInfo.isGlobalBadgePage.value) ? 'globalBadgeSkillDetails' : 'badgeSkillDetails'
-
-    if (skillsDisplayInfo.isGlobalBadgePage.value && props.skill.crossProject) {
-      name = 'globalBadgeSkillDetailsUnderAnotherProject'
-      params.crossProjectId = props.skill.projectId
-      params.dependentSkillId = props.skill.skillId
     }
   } else if (props.skill.crossProject && props.skill.projectId) {
     params.crossProjectId = props.skill.projectId

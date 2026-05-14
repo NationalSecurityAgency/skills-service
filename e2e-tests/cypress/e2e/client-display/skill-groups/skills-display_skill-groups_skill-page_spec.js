@@ -236,4 +236,72 @@ describe('Client Display Skills Groups Tests', () => {
         cy.get('[data-cy="groupDescriptionSection"]').contains(groupDescription);
 
     });
+
+    it('navigate from a badge to a skill under a group', () => {
+        cy.createSkillsGroup(1, 1, 1, {
+            numSkillsRequired: 1,
+        });
+        cy.addSkillToGroup(1, 1, 1, 1, {
+            pointIncrement: 100,
+            numPerformToCompletion: 2
+        });
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: 150,
+            numPerformToCompletion: 2
+        });
+        cy.createSkill(1, 1, 3)
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.assignSkillToBadge(1, 1, 2);
+        cy.assignSkillToBadge(1, 1, 3);
+        cy.createBadge(1, 1, { enabled: true });
+
+        cy.cdVisit('/badges/badge1');
+        cy.get('[data-cy="skillsTitle"]').contains('Badge Details')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-badge1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group1]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill1]').should('not.exist');
+
+        // navigate to skill that's under a group
+        cy.get('[data-cy="skillProgressTitle-skill1"] [data-cy="skillProgressTitle"]').click();
+        cy.get('[data-cy="skillsTitle"]').contains('Skill Overview')
+        cy.get('[data-cy="skillProgressTitle-skill1"]').contains('Very Great Skill 1');
+        cy.get('[data-cy="groupInformationSection"]').contains('Awesome Group 1')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-badge1]').should('not.exist');
+
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group1]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill1]').should('be.visible');
+
+        cy.go(-1);
+
+        cy.get('[data-cy="skillsTitle"]').contains('Badge Details')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-badge1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group1]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill1]').should('not.exist');
+
+        // navigate to skill that's NOT under a group
+        cy.get('[data-cy="skillProgressTitle-skill3"] [data-cy="skillProgressTitle"]').click();
+        cy.get('[data-cy="skillsTitle"]').contains('Skill Overview')
+        cy.get('[data-cy="skillProgressTitle-skill3"]').contains('Very Great Skill 3');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill3]').should('be.visible');
+        cy.get('[data-cy="groupInformationSection"]').should('not.exist')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group1]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-badge1]').should('not.exist');
+
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill3]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group1]').should('not.exist');
+    });
+
 })

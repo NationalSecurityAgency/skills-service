@@ -619,4 +619,27 @@ describe('Client Display Breadcrumb Tests', () => {
         cy.get('[data-pc-name="progressspinner"]').should('not.exist')
     });
 
+    it('navigate up to the group from skill using breadcrumb', () => {
+        cy.createSkillsGroup(1, 1, 10);
+        cy.addSkillToGroup(1, 1, 10, 11);
+
+        cy.cdVisit('/subjects/subj1/groups/group10/skills/skill11');
+
+        cy.get('[data-cy="skillProgressTitle-skill11"]').contains('Very Great Skill 11');
+        cy.get('[data-cy="groupInformationSection"]').contains('Awesome Group 10 Subj1')
+
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group10]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill11]').should('be.visible');
+        cy.get('[data-cy="skillsTitle"]').contains('Skill Overview')
+
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group10]').click()
+
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group10]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill11]').should('not.exist');
+
+        cy.get('[data-cy="skillsGroupName"]').contains('Awesome Group 10 Subj1')
+        cy.get('[data-cy="skillsTitle"]').contains('Group Overview')
+    })
 });

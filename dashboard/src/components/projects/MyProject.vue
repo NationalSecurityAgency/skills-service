@@ -248,7 +248,7 @@ defineExpose({
              @keyup.down="moveDown"
              @keyup.up="moveUp"
              @click.prevent.self
-             class="absolute text-secondary px-2 py-1 sort-control border-l border-b border-surface text-muted-color"
+             class="absolute text-secondary px-1 py-1 sort-control border-l border-b border-surface text-muted-color"
              tabindex="0"
              :aria-label="`Project Sort Control. Current position for ${project.name} project is ${project.displayOrder}. Press up or down to change the order of the project.`"
              role="button"
@@ -303,5 +303,6 @@ defineExpose({
 
 .sort-control:hover, .sort-control i:hover {
   font-size: 1.2rem;
+  cursor: pointer;
 }
 </style>

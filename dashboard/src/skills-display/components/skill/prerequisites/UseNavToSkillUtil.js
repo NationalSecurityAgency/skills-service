@@ -44,12 +44,14 @@ export const useNavToSkillUtil = () => {
           )
         }
       } else if (skillItem.type !== 'Badge') {
+        const pageName = skillItem.groupId ? 'skillDetailsUnderGroup' : 'skillDetails'
         displayInfo.routerPush(
-          'skillDetails',
-          {
-            subjectId: skillItem.subjectId,
-            skillId: skillItem.skillId
-          }
+            pageName,
+            {
+              subjectId: skillItem.subjectId,
+              skillId: skillItem.skillId,
+              groupId: skillItem.groupId
+            }
         )
       } else {
         displayInfo.routerPush(

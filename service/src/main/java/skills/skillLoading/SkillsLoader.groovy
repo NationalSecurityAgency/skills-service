@@ -953,7 +953,7 @@ class SkillsLoader {
             String childSubjectId = subjectIdLookup[it.childSkillId]
             new SkillDependencyInfo.SkillRelationship(
                     skill: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.parentProjectId, projectName: InputSanitizer.unsanitizeName(it.parentProjectName), skillId: it.parentSkillId, skillName: InputSanitizer.unsanitizeName(it.parentName), type: it.parentType),
-                    dependsOn: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.childProjectId, subjectId: childSubjectId, projectName: InputSanitizer.unsanitizeName(it.childProjectName), skillId: it.childSkillId, skillName: InputSanitizer.unsanitizeName(it.childName), type: it.childType),
+                    dependsOn: new SkillDependencyInfo.SkillRelationshipItem(projectId: it.childProjectId, subjectId: childSubjectId, projectName: InputSanitizer.unsanitizeName(it.childProjectName), skillId: it.childSkillId, groupId: it.childSkillGroupId, skillName: InputSanitizer.unsanitizeName(it.childName), type: it.childType),
                     achieved: it.achievementId != null,
                     crossProject: projectId != it.childProjectId
             )
@@ -1359,6 +1359,13 @@ class SkillsLoader {
     private List<SkillSummaryParent> createSkillSummaries(ProjDef thisProjDef, List<SubjectDataLoader.SkillsAndPoints> childrenWithPoints, boolean populateSubjectInfo, String userId, Integer version) {
         List<SkillSummaryParent> skillsRes = []
 
+        Map<Integer, SkillRelDefRepo.ParentInfo> subjectLookup = [:]
+        if (populateSubjectInfo) {
+            List<Integer> childIds = childrenWithPoints.collect { it.skillDef.id }
+            List<SkillRelDefRepo.ParentInfo> parentInfos = skillRelDefRepo.findParentIdAndNameByChildIdsInAndTypes(childIds, SkillDef.ContainerType.Subject, [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.GroupSkillToSubject])
+            subjectLookup = parentInfos.collectEntries { [it.childId, it] }
+        }
+
         Map<String,ProjDef> projDefMap = [:]
         childrenWithPoints.each { SubjectDataLoader.SkillsAndPoints skillDefAndUserPoints ->
             SkillDef skillDef = skillDefAndUserPoints.skillDef
@@ -1372,20 +1379,9 @@ class SkillsLoader {
                 projDefMap[skillDef.projectId] = projDef
             }
 
-            String subjectName = "";
-            String subjectId = "";
-            if (populateSubjectInfo) {
-                List<SkillRelDef> subject = skillRelDefRepo.findAllByChildAndType(skillDef, SkillRelDef.RelationshipType.RuleSetDefinition)
-                if (subject) {
-                    if (subject.size() == 1) {
-                        SkillRelDef subj = subject.first()
-                        subjectId = subj.parent.skillId
-                        subjectName = InputSanitizer.unsanitizeName(subj.parent.name)
-                    } else {
-                        log.error("Skill [${skillDef.id}] has multiple SkillRelDef parents of type RuleSetDefinition")
-                    }
-                }
-            }
+            SkillRelDefRepo.ParentInfo parentInfo = populateSubjectInfo ? subjectLookup[skillDef.id] : null
+            String subjectName = parentInfo?.parentName ?: ""
+            String subjectId = parentInfo?.parentSkillId ?: ""
 
             if (skillDef.type == ContainerType.SkillsGroup && Boolean.valueOf(skillDef.enabled)) {
                 SkillsSummaryGroup skillsSummary = new SkillsSummaryGroup(
