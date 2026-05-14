@@ -163,7 +163,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
 
     }
 
-    
     def "Submit a batch of skills for multiple users"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
@@ -227,7 +226,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         result.results[7].skillApplied
         result.results[7].userId == users[3]
     }
-
     
     def "Submit a batch of skills for multiple users with a skill not applied"() {
         def proj1 = SkillsFactory.createProject(1)
@@ -298,6 +296,86 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         result.results[7].skillId == 'skill2'
         result.results[7].skillApplied
         result.results[7].userId == users[3]
+    }
+
+    def "Submit a batch of skills for multiple users with a bad skill identifier"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_skills)
+        List<String> users = getRandomUsers(4)
+        users.each{
+            createService(it)
+        }
+
+        def skillRequest = [
+                userIds: users,
+                skillIds: ['skill1', 'fakeskill', 'skill2'],
+                timestamp: 1234l,
+                notifyIfSkillNotApplied: true,
+                isRetry: false,
+        ]
+
+        when:
+        def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        result.results.size() == 12
+        result.results[0].skillId == 'skill1'
+        result.results[0].skillApplied
+        result.results[0].userId == users[0]
+
+        result.results[1].skillId == 'fakeskill'
+        !result.results[1].skillApplied
+        result.results[1].userId == users[0]
+
+        result.results[2].skillId == 'skill2'
+        result.results[2].skillApplied
+        result.results[2].userId == users[0]
+
+        result.results[3].skillId == 'skill1'
+        result.results[3].skillApplied
+        result.results[3].userId == users[1]
+
+        result.results[4].skillId == 'fakeskill'
+        !result.results[4].skillApplied
+        result.results[4].userId == users[1]
+
+        result.results[5].skillId == 'skill2'
+        result.results[5].skillApplied
+        result.results[5].userId == users[1]
+
+        result.results[6].skillId == 'skill1'
+        result.results[6].skillApplied
+        result.results[6].userId == users[2]
+
+        result.results[7].skillId == 'fakeskill'
+        !result.results[7].skillApplied
+        result.results[7].userId == users[2]
+
+        result.results[8].skillId == 'skill2'
+        result.results[8].skillApplied
+        result.results[8].userId == users[2]
+
+        result.results[9].skillId == 'skill1'
+        result.results[9].skillApplied
+        result.results[9].userId == users[3]
+
+        result.results[10].skillId == 'fakeskill'
+        !result.results[10].skillApplied
+        result.results[10].userId == users[3]
+
+        result.results[11].skillId == 'skill2'
+        result.results[11].skillApplied
+        result.results[11].userId == users[3]
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })

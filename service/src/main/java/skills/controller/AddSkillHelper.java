@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.transaction.annotation.Propagation;
 import skills.PublicProps;
 import skills.auth.AuthMode;
@@ -110,8 +111,19 @@ public class AddSkillHelper {
                         projectId, skillBatchString, userInfoService.getCurrentUserId(), userIdToProcess, toDateString(requestedTimestamp));
             }
             for (String skillId : skillIds) {
-                SkillEventResult result = processSkillForUser(skillId, userId, projectId, incomingDate, currentUser);
-                results.add(result);
+                SkillEventResult result = null;
+                try {
+                    result = processSkillForUser(skillId, userId, projectId, incomingDate, currentUser);
+                } catch(SkillException ske) {
+                    log.error("Error applying skill [{}], user [{}], error [{}]", skillId, userId, ske.getMessage());
+
+                    if (ske.getErrorCode() == ErrorCode.SkillNotFound) {
+                        projectErrorService.invalidSkillReported(projectId, skillId);
+                    }
+                    result = createNewEventResult(ske.getMessage(), projectId, skillId, userId);
+                } finally {
+                    results.add(result);
+                }
             }
         }
 
@@ -137,22 +149,9 @@ public class AddSkillHelper {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     protected SkillEventResult processSkillForUser(String skillId, String userId, String projectId, Date incomingDate, String currentUser) {
         boolean forAnotherUser = userId != null && currentUser != null && !userId.equalsIgnoreCase(currentUser);
-        String prof = "retry-reportSkillBatch";
-        CProf.start(prof);
-        try {
-            SkillEventsService.SkillApprovalParams skillApprovalParams = SkillEventsService.getDefaultSkillApprovalParams();
-            skillApprovalParams.setForAnotherUser(forAnotherUser);
-            return skillsManagementFacade.reportSkill(projectId, skillId, userId, true, incomingDate, skillApprovalParams);
-        } catch(SkillException ske) {
-            log.error("Error applying skill [{}], user [{}], error [{}]", skillId, userId, ske.getMessage());
-
-            if (ske.getErrorCode() == ErrorCode.SkillNotFound) {
-                projectErrorService.invalidSkillReported(projectId, skillId);
-            }
-            return createNewEventResult(ske.getMessage(), projectId, skillId, userId);
-        }finally {
-            CProf.stop(prof);
-        }
+        SkillEventsService.SkillApprovalParams skillApprovalParams = SkillEventsService.getDefaultSkillApprovalParams();
+        skillApprovalParams.setForAnotherUser(forAnotherUser);
+        return skillsManagementFacade.reportSkill(projectId, skillId, userId, true, incomingDate, skillApprovalParams);
     }
 
     private Date validateTime(String projectId, Long requestedTimestamp) {
