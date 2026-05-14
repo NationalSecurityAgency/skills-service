@@ -966,6 +966,68 @@ describe('Users Tests', () => {
         ], 5);
     });
 
+    it('view users from skill group page', () => {
+        cy.intercept('/admin/projects/proj1/groups/group1/users?query=*').as('getGroupUsers');
+
+        cy.createSkillsGroup(1, 1, 1);
+        cy.addSkillToGroup(1, 1, 1, 2, {
+            pointIncrement: '100',
+            numPerformToCompletion: '5',
+            pointIncrementInterval: 0
+        });
+        cy.addSkillToGroup(1, 1, 1, 3, {
+            pointIncrement: '100',
+            numPerformToCompletion: '5',
+            pointIncrementInterval: 0
+        });
+
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+            userId: 'usera@skills.org',
+            timestamp: m.clone().add(1, 'day').format('x')
+        });
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+            userId: 'userb@skills.org',
+            timestamp: m.clone().add(2, 'day').format('x')
+        });
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {
+            userId: 'userb@skills.org',
+            timestamp: m.clone().add(3, 'day').format('x')
+        });
+
+        // this user earned points in the subject, but not in the skill group
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+            userId: 'userc@skills.org',
+            timestamp: m.clone().add(4, 'day').format('x')
+        });
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/groups/group1/users');
+        cy.wait('@getGroupUsers');
+
+        cy.get('[data-cy="pageHeader"]').contains('GROUP: Awesome Group 1');
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'userb@skills.org' }, { colIndex: 4, value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 0, value: 'usera@skills.org' }, { colIndex: 4, value: dateFormatter(m.clone().add(1, 'day')) }],
+        ], 5, true, 2);
+
+        cy.get('[data-cy="usr_progress-usera@skills.org"] [data-cy="progressPercent"]').should('have.text', '10%');
+        cy.get('[data-cy="usr_progress-usera@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '100');
+        cy.get('[data-cy="usr_progress-usera@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '1,000');
+        cy.get('[data-cy="usr_progress-usera@skills.org"] [data-cy="progressLevels"]').should('not.exist');
+
+        cy.get('[data-cy="usr_progress-userb@skills.org"] [data-cy="progressPercent"]').should('have.text', '20%');
+        cy.get('[data-cy="usr_progress-userb@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '200');
+        cy.get('[data-cy="usr_progress-userb@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '1,000');
+        cy.get('[data-cy="usr_progress-userb@skills.org"] [data-cy="progressLevels"]').should('not.exist');
+
+        cy.get(tableSelector).should('not.contain', 'userc@skills.org');
+
+        cy.get(`${tableSelector} [data-cy="usersTable_viewDetailsLink"]`).first().click();
+        cy.get('[data-cy="subPageHeader"]').contains("User's Display");
+        cy.contains('ID: userb@skills.org');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]');
+    });
+
     it('users with various progress', () => {
         cy.createSkill(1, 1, 3,  { pointIncrement: '1111', numPerformToCompletion: '10', pointIncrementInterval: 0 })
         cy.createSubject(1, 2)

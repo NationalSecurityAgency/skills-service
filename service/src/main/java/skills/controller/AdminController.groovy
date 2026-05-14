@@ -1281,6 +1281,33 @@ class AdminController {
         return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest, minimumPoints, maximumPoints, userTagFilter, includeImported)
     }
 
+    @GetMapping(value = "/projects/{projectId}/groups/{groupId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    TableResult getSkillGroupUsers(@PathVariable("projectId") String projectId,
+                                   @PathVariable("groupId") String groupId,
+                                   @RequestParam String query,
+                                   @RequestParam int limit,
+                                   @RequestParam int page,
+                                   @RequestParam String orderBy,
+                                   @RequestParam Boolean ascending,
+                                   @RequestParam int minimumPoints,
+                                   @RequestParam String userTagFilter,
+                                   @RequestParam(required = false, defaultValue = "true") boolean includeImported,
+                                   @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(groupId, "Skills Group Id", projectId)
+        SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
+        SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
+
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        List<SkillDefPartialRes> groupSkills = getSkillsForSkillsGroup(projectId, groupId)
+        List<String> skillIds = groupSkills.collect { it.skillId }
+        if (!skillIds) {
+            return new TableResult()
+        }
+        return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest, minimumPoints, maximumPoints, userTagFilter, includeImported)
+    }
+
     @GetMapping(value = "/projects/{projectId}/userTags/{userTagKey}/{userTagValue}/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     TableResultWithTotalPoints getUserTagUsers(@PathVariable("projectId") String projectId,
