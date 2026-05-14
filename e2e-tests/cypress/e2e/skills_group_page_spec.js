@@ -326,6 +326,36 @@ describe('Skills Group Page Tests', () => {
     cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '150');
   })
 
+  it('edit skill group', () => {
+    cy.createSkillsGroup(1, 1, 1)
+    cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 })
+    cy.addSkillToGroup(1, 1, 1, 2, { pointIncrement: 10, numPerformToCompletion: 5 })
+    cy.addSkillToGroup(1, 1, 1, 3, { pointIncrement: 10, numPerformToCompletion: 5 })
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1/groups/group1')
+    cy.wait('@getGroupSkills')
+
+    cy.get('[data-cy="pageHeader"] [data-cy="title"]').should('contain.text', 'GROUP: Awesome Group 1')
+    cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').should('contain.text', 'ID: group1')
+    cy.get('[data-cy="breadcrumb-newId"]').should('not.exist')
+    cy.get('[data-cy="breadcrumb-group1"]').should('be.visible')
+    cy.get('[data-cy="breadcrumb-group1"] [data-cy="breadcrumbItemLabel"]').should('contain.text', 'Group:')
+    cy.get('[data-cy="breadcrumb-group1"] [data-cy="breadcrumbItemValue"]').should('contain.text', 'group1')
+
+    cy.get('[data-cy="btn_edit-group"]').click()
+    cy.get('[data-cy="name"]').clear().type('other')
+    cy.get('[data-cy="enableIdInput"]').click()
+    cy.get('[data-cy="idInputValue"]').clear().type('newId')
+    cy.clickSaveDialogBtn()
+
+    cy.get('[data-cy="pageHeader"] [data-cy="title"]').should('contain.text', 'GROUP: other')
+    cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').should('contain.text', 'ID: newId')
+    cy.get('[data-cy="breadcrumb-group1"]').should('not.exist')
+    cy.get('[data-cy="breadcrumb-newId"]').should('be.visible')
+    cy.get('[data-cy="breadcrumb-newId"] [data-cy="breadcrumbItemLabel"]').should('contain.text', 'Group:')
+    cy.get('[data-cy="breadcrumb-newId"] [data-cy="breadcrumbItemValue"]').should('contain.text', 'newId')
+  })
+
   it('edit skill', () => {
     cy.createSkillsGroup(1, 1, 1)
     cy.addSkillToGroup(1, 1, 1, 1, { pointIncrement: 10, numPerformToCompletion: 5 })
