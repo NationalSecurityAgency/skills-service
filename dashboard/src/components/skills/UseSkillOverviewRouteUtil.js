@@ -22,7 +22,7 @@ export const useSkillOverviewRouteUtil = () => {
     if (SkillType.isSkillsGroup(skillType)) {
       routeProps = {
         name: 'GroupSkills',
-        path: `/administrator/projects/${projectId}/subjects/${subjectId}/groups/${skillId}`,
+        path: `/administrator/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/groups/${encodeURIComponent(skillId)}`,
         params: {
           projectId: projectId,
           subjectId: subjectId,
@@ -32,7 +32,7 @@ export const useSkillOverviewRouteUtil = () => {
     } else if (groupId) {
       routeProps = {
         name: 'GroupSkillOverview',
-        path: `/administrator/projects/${projectId}/subjects/${subjectId}/groups/${groupId}/skills/${skillId}`,
+        path: `/administrator/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/groups/${encodeURIComponent(groupId)}/skills/${encodeURIComponent(skillId)}`,
         params: {
           projectId: projectId,
           subjectId: subjectId,
@@ -43,7 +43,7 @@ export const useSkillOverviewRouteUtil = () => {
     } else {
       routeProps = {
         name: 'SingleSkillOverview',
-        path: `/administrator/projects/${projectId}/subjects/${subjectId}/skills/${skillId}`,
+        path: `/administrator/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills/${encodeURIComponent(skillId)}`,
         params: {
           projectId: projectId,
           subjectId: subjectId,

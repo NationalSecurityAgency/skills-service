@@ -133,6 +133,17 @@ describe('Learning Path Management Validation Tests', () => {
             }],
         ], 5, false, null, false);
 
+        // validate to/from badge links
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="fromNodeLink_badge1"]`)
+              .should('have.attr', 'href', '/administrator/projects/proj1/badges/badge1');
+         cy.get(`${tableSelector} [data-p-index="0"] [data-cy="toNodeLink_badge2"]`)
+            .should('have.attr', 'href', '/administrator/projects/proj1/badges/badge2');
+
+        // validate from/to subject skill links
+        cy.get(`${tableSelector} [data-p-index="3"] [data-cy="fromNodeLink_skill7Subj2"]`)
+              .should('have.attr', 'href', '/administrator/projects/proj1/subjects/subj2/skills/skill7Subj2');
+        cy.get(`${tableSelector} [data-p-index="3"] [data-cy="toNodeLink_skill5Subj2"]`)
+            .should('have.attr', 'href', '/administrator/projects/proj1/subjects/subj2/skills/skill5Subj2');
     })
 
     it('add group\'s skill as a prerequisite', () => {
@@ -156,6 +167,12 @@ describe('Learning Path Management Validation Tests', () => {
                 value: 'Very Great Skill 17'
             }],
         ], 5, false, null, false);
+
+        // validate to/from group skill links
+        cy.get(`${tableSelector} [data-p-index="0"] [data-cy="fromNodeLink_skill16"]`)
+              .should('have.attr', 'href', '/administrator/projects/proj1/subjects/subj1/groups/group15/skills/skill16');
+         cy.get(`${tableSelector} [data-p-index="0"] [data-cy="toNodeLink_skill17"]`)
+            .should('have.attr', 'href', '/administrator/projects/proj1/subjects/subj1/groups/group15/skills/skill17');
     });
 
     it('reused skills must NOT be available for prerequisites', () => {
