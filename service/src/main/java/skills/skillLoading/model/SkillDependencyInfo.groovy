@@ -23,6 +23,7 @@ class SkillDependencyInfo {
         String projectId
         String projectName
         String skillId
+        String groupId
         String skillName
         String subjectId
         String type

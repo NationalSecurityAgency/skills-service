@@ -66,6 +66,139 @@ describe('Client Display Prerequisites Tests', () => {
         cy.get('[data-cy="breadcrumb-subj3"]').should('exist')
     })
 
+    it('Deps Chart - drill down into deps from another group via click', () => {
+        cy.createSkillsGroup(1, 1, 10);
+        cy.addSkillToGroup(1, 1, 10, 1);
+
+        cy.createSubject(1, 2);
+        cy.createSkillsGroup(1, 2, 11);
+        cy.addSkillToGroup(1, 2, 11, 3);
+        cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj1/skill3Subj2`);
+
+        cy.createSubject(1, 3);
+        cy.createSkillsGroup(1, 3, 12);
+        cy.addSkillToGroup(1, 3, 12, 4);
+        cy.request('POST', `/admin/projects/proj1/skill3Subj2/prerequisite/proj1/skill4Subj3`);
+
+        cy.cdVisit('/subjects/subj1/groups/group10/skills/skill1');
+
+        cy.get('[data-cy="skillProgressTitle-skill1"]').contains('Very Great Skill 1');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group10]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill1]').should('be.visible');
+        cy.get('[data-cy="groupInformationSection"]').contains('Awesome Group 10 Subj1')
+
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group10]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill1]').should('be.visible');
+
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+        cy.clickOnNode(600, 250);
+
+        cy.get('[data-cy="skillProgressTitle-skill3Subj2"]').contains('Very Great Skill 3 Subj2');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj2]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group11Subj2]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill3Subj2]').should('be.visible');
+        cy.get('[data-cy="groupInformationSection"]').contains('Awesome Group 11 Subj2')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group10]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill1]').should('not.exist');
+
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj2]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group11Subj2]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill3Subj2]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]').should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group10]').should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill1]').should('not.exist');
+
+        cy.clickOnNode(600, 200);
+        cy.get('[data-cy="skillProgressTitle-skill4Subj3"]').contains('Very Great Skill 4 Subj3');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj3]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group12Subj3]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill4Subj3]').should('be.visible');
+        cy.get('[data-cy="groupInformationSection"]').contains('Awesome Group 12 Subj3')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj2]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group11Subj2]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill3Subj2]').should('not.exist');
+
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj3]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group12Subj3]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill4Subj3]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj2]').should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group11Subj2]').should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill3Subj2]').should('not.exist');
+    })
+
+    it('Deps Table - drill down into deps from another group', () => {
+        cy.createSkillsGroup(1, 1, 10);
+        cy.addSkillToGroup(1, 1, 10, 1);
+
+        cy.createSubject(1, 2);
+        cy.createSkillsGroup(1, 2, 11);
+        cy.addSkillToGroup(1, 2, 11, 3);
+        cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj1/skill3Subj2`);
+
+        cy.createSubject(1, 3);
+        cy.createSkillsGroup(1, 3, 12);
+        cy.addSkillToGroup(1, 3, 12, 4);
+        cy.request('POST', `/admin/projects/proj1/skill3Subj2/prerequisite/proj1/skill4Subj3`);
+
+        cy.cdVisit('/subjects/subj1/groups/group10/skills/skill1');
+
+        cy.get('[data-cy="skillProgressTitle-skill1"]').contains('Very Great Skill 1');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group10]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill1]').should('be.visible');
+        cy.get('[data-cy="groupInformationSection"]').contains('Awesome Group 10 Subj1')
+
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group10]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill1]').should('be.visible');
+        cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+
+        cy.get('[data-cy="prerequisitesCard"] [data-pc-section="table"] [data-cy="skillLink-proj1-skill3Subj2"]').click()
+
+        cy.get('[data-cy="skillProgressTitle-skill3Subj2"]').contains('Very Great Skill 3 Subj2');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj2]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group11Subj2]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill3Subj2]').should('be.visible');
+        cy.get('[data-cy="groupInformationSection"]').contains('Awesome Group 11 Subj2')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj1]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group10]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill1]').should('not.exist');
+
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj2]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group11Subj2]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill3Subj2]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj1]').should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group10]').should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill1]').should('not.exist');
+
+        cy.get('[data-cy="prerequisitesCard"] [data-pc-section="table"] [data-cy="skillLink-proj1-skill4Subj3"]').click()
+
+        cy.get('[data-cy="skillProgressTitle-skill4Subj3"]').contains('Very Great Skill 4 Subj3');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-proj1]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj3]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group12Subj3]').should('be.visible');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill4Subj3]').should('be.visible');
+        cy.get('[data-cy="groupInformationSection"]').contains('Awesome Group 12 Subj3')
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-subj2]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-group11Subj2]').should('not.exist');
+        cy.get('[data-cy="breadcrumb-bar"] [data-cy=breadcrumb-skill3Subj2]').should('not.exist');
+
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj3]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group12Subj3]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill4Subj3]').should('be.visible');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-subj2]').should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-group11Subj2]').should('not.exist');
+        cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumb-skill3Subj2]').should('not.exist');
+    })
+
     it('Deps Chart - drill down into deps from another subject via click - verify that prev/next works in the dep', () => {
         cy.createSkill(1, 1, 1);
         cy.createSubject(1, 2);

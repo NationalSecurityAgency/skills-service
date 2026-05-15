@@ -32,11 +32,9 @@ defineProps({
         </div>
       </div>
 
-      <i
-          shape="circle"
-          size="small"
-          class="fa-solid fa-hat-wizard absolute -left-2 -top-2 border-2 border-blue-500 bg-blue-200 text-gray-900 p-2 rounded-full text-lg"
-      />
+      <div class="absolute -left-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-blue-500 bg-blue-200 text-gray-900">
+        <i class="fa-solid fa-hat-wizard text-sm"></i>
+      </div>
     </div>
   </div>
 </template>

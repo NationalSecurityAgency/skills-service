@@ -76,7 +76,7 @@ const build = () => {
   breadcrumbState.breadcrumbItems = newItems
 }
 
-const idsToExcludeFromPath = ['subjects', 'skills', 'crossProject', 'dependency', 'global', 'quizzes']
+const idsToExcludeFromPath = ['subjects', 'skills', 'groups', 'crossProject', 'dependency', 'global', 'quizzes']
 const keysToExcludeFromPath = []
 const shouldExcludeKey = (key) => {
   keysToExcludeFromPath.some((searchForMe) => key === searchForMe)

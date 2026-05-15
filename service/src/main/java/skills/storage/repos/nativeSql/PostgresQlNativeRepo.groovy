@@ -88,9 +88,14 @@ class PostgresQlNativeRepo {
 
     List<GraphRelWithAchievement> getDependencyGraphWithAchievedIndicator(String projectId, String skillId, String userId) {
         String q = '''
-            WITH RECURSIVE skill_deps_path(parentProjectId, parentSkillId, parentId, parentName, parentType, childProjectId, childSkillId, childId, childName, childType) AS (
+            WITH RECURSIVE skill_deps_path(parentProjectId, parentSkillId, parentId, parentName, parentType, childProjectId, childSkillId, childSkillGroupId, childId, childName, childType) AS (
               select sd.project_id as parentProjectId, sd.skill_id as parentSkillId, sd.id as parentId, sd.name as parentName, sd.type as parentType,
-                     sd1.project_id as childProjectId, sd1.skill_id as childSkillId, sd1.id as childId, sd1.name as childName, sd1.type as childType
+                     sd1.project_id as childProjectId, 
+                     sd1.skill_id as childSkillId,
+                     sd1.group_id as childSkillGroupId,
+                     sd1.id as childId, 
+                     sd1.name as childName, 
+                     sd1.type as childType
               from skill_definition sd,
                    skill_relationship_definition srd,
                    skill_definition sd1
@@ -100,7 +105,12 @@ class PostgresQlNativeRepo {
                 and sd.project_id=:projectId and sd.skill_id=:skillId 
               UNION ALL
               select skill_deps_path.childProjectId as parentProjectId, skill_deps_path.childSkillId as parentSkillId, skill_deps_path.childId as parentId, skill_deps_path.childName as parentName, skill_deps_path.childType as parentType,
-                     sd1.project_id as childProjectId, sd1.skill_id as childSkillId, sd1.id as childId, sd1.name as childName, sd1.type as childType
+                     sd1.project_id as childProjectId,
+                     sd1.skill_id as childSkillId,
+                     sd1.group_id as childSkillGroupId,
+                     sd1.id as childId,
+                     sd1.name as childName,
+                     sd1.type as childType
               from  skill_deps_path,
                    skill_relationship_definition srd,
                    skill_definition sd1
@@ -110,7 +120,7 @@ class PostgresQlNativeRepo {
                 and skill_deps_path.childProjectId=:projectId
             )
             select CAST(pd.project_id as TEXT) as parentProjectId, CAST(pd.name as TEXT) as parentProjectName, skill_deps_path.parentId, CAST(skill_deps_path.parentSkillId as TEXT), CAST(skill_deps_path.parentName as TEXT), CAST(skill_deps_path.parentType as TEXT),
-                   CAST(skill_deps_path.childProjectId as TEXT), CAST(pd1.name as TEXT) as childProjectName, skill_deps_path.childId, CAST(skill_deps_path.childSkillId as TEXT), CAST(skill_deps_path.childName as TEXT), CAST(skill_deps_path.childType as TEXT),
+                   CAST(skill_deps_path.childProjectId as TEXT), CAST(pd1.name as TEXT) as childProjectName, skill_deps_path.childId, CAST(skill_deps_path.childSkillId as TEXT), CAST(skill_deps_path.childSkillGroupId as TEXT), CAST(skill_deps_path.childName as TEXT), CAST(skill_deps_path.childType as TEXT),
                    ua.id as achievementId
             from skill_deps_path
               join project_definition pd on skill_deps_path.parentProjectId = pd.project_id
@@ -136,9 +146,10 @@ class PostgresQlNativeRepo {
                     childProjectName: it[7],
                     childId: it[8],
                     childSkillId: it[9],
-                    childName: it[10],
-                    childType: it[11],
-                    achievementId: it[12]
+                    childSkillGroupId: it[10],
+                    childName: it[11],
+                    childType: it[12],
+                    achievementId: it[13]
             )
         }
         return resList

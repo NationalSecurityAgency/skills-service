@@ -273,11 +273,56 @@ class ClientDisplayOfDependentSkillsSpec extends DefaultIntSpec {
         def skill1 = dependencyInfo.dependencies.get(0)
         skill1.dependsOn.skillId == "skill2"
         skill1.dependsOn.subjectId == subj1.subjectId
+        !skill1.dependsOn.groupId
         !skill1.achieved
 
         def skill2 = dependencyInfo.dependencies.get(1)
         skill2.dependsOn.skillId == "skill2subj2"
         skill2.dependsOn.subjectId == subj2.subjectId
+        !skill2.dependsOn.groupId
+        !skill2.achieved
+    }
+
+    def "show dependency info for multiple skill from different groups"() {
+        String userId = "user1"
+        def subj1 = SkillsFactory.createSubject()
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def group1 = SkillsFactory.createSkillsGroup(1, 1, 10)
+        skillsService.createProject(SkillsFactory.createProject())
+        skillsService.createSubject(subj1)
+        skillsService.createSkill(group1)
+
+        List<Map> skills = SkillsFactory.createSkills(4)
+        skills.each {
+            skillsService.assignSkillToSkillsGroup(group1.skillId, it)
+        }
+
+        skillsService.createSubject(subj2)
+        def group2 = SkillsFactory.createSkillsGroup(1, 1, 11)
+        skillsService.createSkill(group2)
+        List<Map> skills_subj2 = SkillsFactory.createSkills(4, 1, 2)
+        skills_subj2.each {
+            skillsService.assignSkillToSkillsGroup(group2.skillId, it)
+        }
+
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills.get(1).skillId)
+        skillsService.addLearningPathPrerequisite(SkillsFactory.defaultProjId, skills.get(0).skillId, skills_subj2.get(1).skillId)
+
+        when:
+        def dependencyInfo = skillsService.getSkillDependencyInfo(userId, SkillsFactory.defaultProjId, skills.get(0).skillId)
+
+        then:
+        dependencyInfo.dependencies.size() == 2
+        def skill1 = dependencyInfo.dependencies.get(0)
+        skill1.dependsOn.skillId == "skill2"
+        skill1.dependsOn.subjectId == subj1.subjectId
+        skill1.dependsOn.groupId == group1.skillId
+        !skill1.achieved
+
+        def skill2 = dependencyInfo.dependencies.get(1)
+        skill2.dependsOn.skillId == "skill2subj2"
+        skill2.dependsOn.subjectId == subj2.subjectId
+        skill2.dependsOn.groupId == group2.skillId
         !skill2.achieved
     }
 

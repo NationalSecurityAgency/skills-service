@@ -22,11 +22,9 @@ defineProps({
 <template>
   <div class="p-2 bg-green-100 dark:bg-green-900 rounded-2xl relative pr-8 pl-4" :data-cy="`userMsg-${id}`">
     <slot />
-    <i
-        shape="circle"
-        size="small"
-        class="fa-solid fa-user absolute -right-2 -top-2 border-2 border-green-700 bg-green-100 text-green-900 p-2 rounded-full text-lg"
-    />
+    <div class="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-green-700 bg-green-100 text-green-900">
+      <i class="fa-solid fa-user text-sm"></i>
+    </div>
   </div>
 </template>
 
