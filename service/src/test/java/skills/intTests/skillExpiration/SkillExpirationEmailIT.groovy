@@ -1037,8 +1037,8 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
                 emailNotificationsEnabled: true
         ])
 
-        userIds.each {String userId ->
-            skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["${userId}@email.foo".toString()]])
+        userIds.eachWithIndex {String userId, index ->
+            skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail${index}@email.foo".toString()]])
         }
         assert WaitFor.wait { greenMail.getReceivedMessages().size() == 4 }
 
