@@ -171,16 +171,16 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         }
 
         when:
-        def excelExport = skillsService.getGlobalBadgeUserProgressExcelExport(globalBadge.badgeId)
+        def excelExport = skillsService.getGlobalBadgeUserProgressExcelExport(globalBadge.badgeId, 'userTag')
 
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
                 ["User ID", "Last Name", "First Name", "Org", "Skills Achieved", "Levels Achieved", "Percent Complete", "Skill Last Earned (UTC)"],
-                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "0.0", "2.0", "0.2857142857", formatDate(today)],
-                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag3", "0.0", "2.0", "0.2857142857", formatDate(today)],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "1.0", "3.0", "0.5714285714", formatDate(today)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "0.0", "2.0", "0.2857142857", formatDate(today)],
                 [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "1.0", "3.0", "0.5714285714", formatDate(today)],
+                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag3", "0.0", "2.0", "0.2857142857", formatDate(today)],
                 [getUserIdForDisplay(users[4]), getName(users[4], false), getName(users[4]), "tag4", "2.0", "5.0", "1.0", formatDate(today)],
                 ["For All Dragons Only"],
         ])
