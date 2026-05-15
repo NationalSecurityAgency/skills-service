@@ -749,14 +749,16 @@ describe('Skills Group Page Tests', () => {
     cy.addSkillToGroup(1, 1, 1, 1)
     cy.addSkillToGroup(1, 1, 1, 2)
 
+    cy.intercept('/admin/projects/proj1/skills?*skillNameQuery=skill*').as('searchSkills');
     cy.visit('/administrator/projects/proj1/')
     cy.get('[data-cy="skillsSelector"]').click()
     cy.get('li.p-autocomplete-empty-message').contains('Type to search for skills').should('be.visible')
     cy.get(`[data-cy="skillsSelector"]`).type('skill')
+    cy.wait('@searchSkills')
 
-    cy.get('[data-cy="skillsSelectionItem-skillId"]').should('have.length', 2).as('skillIds')
-    cy.get('@skillIds').eq(0).contains('skill1')
-    cy.get('@skillIds').eq(1).contains('skill2')
+    cy.get('[data-cy="skillsSelector-skillName"]').should('have.length', 2).as('skillIds')
+    cy.get('@skillIds').eq(0).contains('Skill 1')
+    cy.get('@skillIds').eq(1).contains('Skill 2')
     cy.get('@skillIds').eq(1).click()
     cy.get('[data-cy="pageHeader"]').contains('ID: skill2')
 
@@ -771,10 +773,12 @@ describe('Skills Group Page Tests', () => {
     cy.visit('/administrator/projects/proj1/')
     cy.get('[data-cy="skillsSelector"]').click()
     cy.get('li.p-autocomplete-empty-message').contains('Type to search for skills').should('be.visible')
+    cy.intercept('/admin/projects/proj1/skills?*skillNameQuery=awesome*').as('searchSkills');
     cy.get(`[data-cy="skillsSelector"]`).type('awesome')
+    cy.wait('@searchSkills')
 
-    cy.get('[data-cy="skillsSelectionItem-skillId"]').should('have.length', 1).as('skillIds')
-    cy.get('@skillIds').eq(0).contains('group1')
+    cy.get('[data-cy="skillsSelector-skillName"]').should('have.length', 1).as('skillIds')
+    cy.get('@skillIds').eq(0).contains('Group 1')
     cy.get('@skillIds').eq(0).click()
     cy.get('[data-cy="pageHeader"]').contains('ID: group1')
 

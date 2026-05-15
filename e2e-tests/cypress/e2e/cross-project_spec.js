@@ -156,8 +156,8 @@ describe('Cross-project Skills Tests', () => {
 
         const sharedSkillSelector = '[data-cy="skillsSelectionItem-proj1-skill1"]'
         cy.get('[data-cy="learningPathFromSkillSelector"]').click()
-        cy.get(sharedSkillSelector).contains('Shared Skill:');
-        cy.get(sharedSkillSelector).contains('Project 1')
+        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-type"]`).contains('Shared Skill');
+        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-projectName"]`).contains('Project 1')
         cy.get(sharedSkillSelector).contains('Very Great Skill # 1')
 
         // -------------------------
@@ -226,8 +226,8 @@ describe('Cross-project Skills Tests', () => {
         cy.contains('No Learning Path Yet');
         const sharedSkillSelector = '[data-cy="skillsSelectionItem-proj1-skill1"]'
         cy.get('[data-cy="learningPathFromSkillSelector"]').click()
-        cy.get(sharedSkillSelector).contains('Shared Skill:');
-        cy.get(sharedSkillSelector).contains('Project 1')
+        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-type"]`).contains('Shared Skill');
+        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-projectName"]`).contains('Project 1')
         cy.get(sharedSkillSelector).contains('Very Great Skill # 1')
 
         // -------------------------
@@ -249,8 +249,8 @@ describe('Cross-project Skills Tests', () => {
 
         cy.contains('No Learning Path Yet');
         cy.get('[data-cy="learningPathFromSkillSelector"]').click()
-        cy.get(sharedSkillSelector).contains('Shared Skill:');
-        cy.get(sharedSkillSelector).contains('Project 1')
+        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-type"]`).contains('Shared Skill');
+        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-projectName"]`).contains('Project 1')
         cy.get(sharedSkillSelector).contains('Very Great Skill # 1')
     });
 
