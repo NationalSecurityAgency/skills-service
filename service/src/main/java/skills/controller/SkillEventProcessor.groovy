@@ -19,8 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfo
+import skills.services.UserAttrsService
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
+import skills.storage.model.UserAttrs
 
 @Component
 class SkillEventProcessor {
@@ -28,11 +31,19 @@ class SkillEventProcessor {
     @Autowired
     SkillEventsService skillsManagementFacade;
 
+    @Autowired
+    UserAttrsService userAttrsService
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     SkillEventResult processSkillForUser(String skillId, String userId, String projectId, Date incomingDate, String currentUser) {
         boolean forAnotherUser = userId != null && currentUser != null && !userId.equalsIgnoreCase(currentUser);
         SkillEventsService.SkillApprovalParams skillApprovalParams = SkillEventsService.getDefaultSkillApprovalParams();
         skillApprovalParams.setForAnotherUser(forAnotherUser);
         return skillsManagementFacade.reportSkill(projectId, skillId, userId, true, incomingDate, skillApprovalParams);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    UserAttrs createNewUser(String userId) {
+        return userAttrsService.saveUserAttrs(userId, new UserInfo(username: userId));
     }
 }

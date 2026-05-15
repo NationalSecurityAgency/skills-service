@@ -40,6 +40,7 @@ import skills.controller.exceptions.SkillsValidator;
 import skills.controller.request.model.BatchSkillEventRequest;
 import skills.controller.request.model.SkillEventRequest;
 import skills.services.ProjectErrorService;
+import skills.services.UserAttrsService;
 import skills.services.events.BatchSkillEventResult;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
@@ -47,6 +48,7 @@ import skills.services.userActions.DashboardAction;
 import skills.services.userActions.DashboardItem;
 import skills.services.userActions.UserActionInfo;
 import skills.services.userActions.UserActionsHistoryService;
+import skills.storage.model.UserAttrs;
 import skills.utils.RetryUtil;
 
 import java.util.*;
@@ -76,6 +78,8 @@ public class AddSkillHelper {
 
     @Value("${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}")
     AuthMode authMode;
+    @Autowired
+    private UserAttrsService userAttrsService;
 
     @Transactional
     public BatchSkillEventResult addBatchSkillsForBatchUsers(String projectId, BatchSkillEventRequest batchSkillEventRequest) {
@@ -91,16 +95,19 @@ public class AddSkillHelper {
             String userId = "";
 
             try {
-                String mode = "ID";
-                if(userIdToProcess.substring(0, 3).equalsIgnoreCase("CN=")) {
-                    mode = "DN";
-                }
-                userId = userInfoService.getUserName(userIdToProcess, false, mode);
                 if(authMode == AuthMode.PKI) {
+                    String mode = "ID";
+                    if (userIdToProcess.substring(0, 3).equalsIgnoreCase("CN=")) {
+                        mode = "DN";
+                    }
+                    userId = userInfoService.getUserName(userIdToProcess, false, mode);
                     boolean userExists = userAuthService.userExists(userId);
                     if (!userExists) {
                         throw new SkillException("User [" + userIdToProcess + "] does not exist");
                     }
+                } else {
+                    log.info("User [" + userIdToProcess + "] does not exist, will be created");
+                    userId = skillEventProcessor.createNewUser(userIdToProcess).getUserId();
                 }
             } catch (SkillException e) {
                 SkillEventResult res = createNewEventResult("User [" + userIdToProcess + "] could not be processed: " + e.getMessage(), projectId, "", userIdToProcess);
