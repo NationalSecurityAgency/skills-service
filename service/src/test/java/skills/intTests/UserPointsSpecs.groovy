@@ -1451,4 +1451,529 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     }
 
+    def 'get skill group users returns correct data'() {
+        skillsService.deleteProjectIfExist(projId)
+        def proj = createProject()
+        def subject = createSubject()
+        def skills = createSkills(1, 1, 1, 100, 4)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        // Create a skills group and assign skills to it
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        def users = getRandomUsers(4)
+        skillsService.addSkill(skills[0], users[0], new Date() - 3)
+        skillsService.addSkill(skills[0], users[0], new Date() - 2)
+        skillsService.addSkill(skills[0], users[0], new Date() - 1)
+        skillsService.addSkill(skills[0], users[0], new Date())
+
+        skillsService.addSkill(skills[0], users[1], new Date() - 2)
+        skillsService.addSkill(skills[0], users[1], new Date() - 1)
+        skillsService.addSkill(skills[0], users[1], new Date())
+
+        skillsService.addSkill(skills[0], users[2], new Date() - 1)
+        skillsService.addSkill(skills[0], users[2], new Date())
+
+        skillsService.addSkill(skills[0], users[3], new Date())
+
+        when:
+        def results = skillsService.getSkillGroupUsers(projId, skillsGroupId)
+
+        then:
+        results
+        results.count == 4
+        results.totalCount == 4
+        results.data.size() == 4
+        results.data.get(0).userId.contains(users[0].toLowerCase())
+        results.data.get(0).totalPoints == 400
+        results.data.get(1).userId.contains(users[1].toLowerCase())
+        results.data.get(1).totalPoints == 300
+        results.data.get(2).userId.contains(users[2].toLowerCase())
+        results.data.get(2).totalPoints == 200
+        results.data.get(3).userId.contains(users[3].toLowerCase())
+        results.data.get(3).totalPoints == 100
+    }
+
+    def 'get skill group users with paging'() {
+        skillsService.deleteProjectIfExist(projId)
+        def proj = createProject()
+        def subject = createSubject()
+        def skills = createSkills(1, 1, 1, 100, 4)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        // Create a skills group and assign skills to it
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        def users = getRandomUsers(4)
+        skillsService.addSkill(skills[0], users[0], new Date() - 3)
+        skillsService.addSkill(skills[0], users[0], new Date() - 2)
+        skillsService.addSkill(skills[0], users[0], new Date() - 1)
+        skillsService.addSkill(skills[0], users[0], new Date())
+
+        skillsService.addSkill(skills[0], users[1], new Date() - 2)
+        skillsService.addSkill(skills[0], users[1], new Date() - 1)
+        skillsService.addSkill(skills[0], users[1], new Date())
+
+        skillsService.addSkill(skills[0], users[2], new Date() - 1)
+        skillsService.addSkill(skills[0], users[2], new Date())
+
+        skillsService.addSkill(skills[0], users[3], new Date())
+
+        when:
+        def results1 = skillsService.getSkillGroupUsers(projId, skillsGroupId, 2, 1)
+        def results2 = skillsService.getSkillGroupUsers(projId, skillsGroupId, 2, 2)
+
+        then:
+        results1
+        results1.count == 4
+        results1.totalCount == 4
+        results1.data.size() == 2
+
+        results2
+        results2.count == 4
+        results2.totalCount == 4
+        results2.data.size() == 2
+
+        results1.data.get(0).userId != results2.data.get(0).userId
+    }
+
+    def 'get skill group users with sorting'() {
+        skillsService.deleteProjectIfExist(projId)
+        def proj = createProject()
+        def subject = createSubject()
+        def skills = createSkills(1, 1, 1, 100, 4)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        // Create a skills group and assign skills to it
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        def users = getRandomUsers(4)
+        skillsService.addSkill(skills[0], users[0], new Date() - 3)
+        skillsService.addSkill(skills[0], users[0], new Date() - 2)
+        skillsService.addSkill(skills[0], users[0], new Date() - 1)
+        skillsService.addSkill(skills[0], users[0], new Date())
+
+        skillsService.addSkill(skills[0], users[1], new Date() - 2)
+        skillsService.addSkill(skills[0], users[1], new Date() - 1)
+        skillsService.addSkill(skills[0], users[1], new Date())
+
+        skillsService.addSkill(skills[0], users[2], new Date() - 1)
+        skillsService.addSkill(skills[0], users[2], new Date())
+
+        skillsService.addSkill(skills[0], users[3], new Date())
+
+        when:
+        def ascResults = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "userId", true)
+        def descResults = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "userId", false)
+
+        then:
+        ascResults
+        ascResults.count == 4
+        ascResults.data.size() == 4
+
+        descResults
+        descResults.count == 4
+        descResults.data.size() == 4
+
+        ascResults.data.get(0).userId != descResults.data.get(0).userId
+    }
+
+    def 'get skill group users with query filter'() {
+        skillsService.deleteProjectIfExist(projId)
+        def proj = createProject()
+        def subject = createSubject()
+        def skills = createSkills(1, 1, 1, 100, 4)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        // Create a skills group and assign skills to it
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        def users = getRandomUsers(4)
+        skillsService.addSkill(skills[0], users[0], new Date() - 3)
+        skillsService.addSkill(skills[0], users[0], new Date() - 2)
+        skillsService.addSkill(skills[0], users[0], new Date() - 1)
+        skillsService.addSkill(skills[0], users[0], new Date())
+
+        skillsService.addSkill(skills[0], users[1], new Date() - 2)
+        skillsService.addSkill(skills[0], users[1], new Date() - 1)
+        skillsService.addSkill(skills[0], users[1], new Date())
+
+        skillsService.addSkill(skills[0], users[2], new Date() - 1)
+        skillsService.addSkill(skills[0], users[2], new Date())
+
+        skillsService.addSkill(skills[0], users[3], new Date())
+
+        when:
+        def results = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "userId", true, users[0])
+
+        then:
+        results
+        results.count == 1
+        results.totalCount == 1
+        results.data.size() == 1
+        results.data.get(0).userId.contains(users[0]?.toLowerCase())
+    }
+
+    def 'get skill group users with point range filter'() {
+        skillsService.deleteProjectIfExist(projId)
+        def proj = createProject()
+        def subject = createSubject()
+        def skills = createSkills(1, 1, 1, 100, 4)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        // Create a skills group and assign skills to it
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        def users = getRandomUsers(4)
+        skillsService.addSkill(skills[0], users[0], new Date() - 3)
+        skillsService.addSkill(skills[0], users[0], new Date() - 2)
+        skillsService.addSkill(skills[0], users[0], new Date() - 1)
+        skillsService.addSkill(skills[0], users[0], new Date())
+
+        skillsService.addSkill(skills[0], users[1], new Date() - 2)
+        skillsService.addSkill(skills[0], users[1], new Date() - 1)
+        skillsService.addSkill(skills[0], users[1], new Date())
+
+        skillsService.addSkill(skills[0], users[2], new Date() - 1)
+        skillsService.addSkill(skills[0], users[2], new Date())
+
+        skillsService.addSkill(skills[0], users[3], new Date())
+
+        when:
+        def results = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "userId", true, "", 99, 100)
+
+        then:
+        results
+        results.count == 1
+        results.totalCount == 1
+        results.data.size() == 1
+        results.data.get(0).userId.contains(users[0]?.toLowerCase())
+        results.data.get(0).totalPoints == 400
+    }
+
+    def 'get skill group users with user tag filter'() {
+        skillsService.deleteProjectIfExist(projId)
+        def proj = createProject()
+        def subject = createSubject()
+        def skills = createSkills(1, 1, 1, 100, 4)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        // Create a skills group and assign skills to it
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        def users = getRandomUsers(4)
+        skillsService.addSkill(skills[0], users[0], new Date() - 3)
+        skillsService.addSkill(skills[0], users[0], new Date() - 2)
+        skillsService.addSkill(skills[0], users[0], new Date() - 1)
+        skillsService.addSkill(skills[0], users[0], new Date())
+
+        skillsService.addSkill(skills[0], users[1], new Date() - 2)
+        skillsService.addSkill(skills[0], users[1], new Date() - 1)
+        skillsService.addSkill(skills[0], users[1], new Date())
+
+        skillsService.addSkill(skills[0], users[2], new Date() - 1)
+        skillsService.addSkill(skills[0], users[2], new Date())
+
+        skillsService.addSkill(skills[0], users[3], new Date())
+
+        // Add user tags
+        rootSkillsService.saveUserTag(users[0], 'dutyOrganization', ['value1'])
+        rootSkillsService.saveUserTag(users[1], 'dutyOrganization', ['value2'])
+//        rootSkillsService.saveUserTag(userId, "dutyOrganization", [tagValue]);
+
+        when:
+        def results = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "userId", true, "", 0, 100, 'value1')
+
+        then:
+        results
+        results.count == 1
+        results.totalCount == 1
+        results.data.size() == 1
+        results.data.get(0).userId.contains(users[0]?.toLowerCase())
+    }
+
+    def 'get skill group users with exclude imported filter'() {
+        List<String> users = getRandomUsers(5)
+
+        def p1 = createProject(10)
+        def p1Subj = createSubject(10, 1)
+        def p1Skills = createSkills(3, 10, 1, 100, 1)
+        p1Skills.each {
+            it.skillId = "${it.skillId}_exported".toString()
+            it.name = "${it.name}_exported".toString()
+        }
+        skillsService.createProjectAndSubjectAndSkills(p1, p1Subj, p1Skills)
+        skillsService.bulkExportSkillsToCatalog(p1.projectId, p1Skills.collect { it.skillId })
+
+        def p2 = createProject(11)
+        def p2Subj = createSubject(11, 1)
+        def p2SkillsGroup = createSkillsGroup(11, 1, 5)
+        def p2LocalSkills = createSkills(2, 11, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2Subj, [p2SkillsGroup].flatten())
+        p2LocalSkills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(p2SkillsGroup.skillId, skill)
+        }
+
+        skillsService.bulkImportSkillsIntoGroupFromCatalog(p2.projectId, p2Subj.subjectId, p2SkillsGroup.skillId,
+                p1Skills.collect { [projectId: it.projectId, skillId: it.skillId] })
+        skillsService.finalizeSkillsImportFromCatalog(p2.projectId)
+
+        assert skillsService.addSkill(p1Skills[0], users[0]).body.skillApplied
+        assert skillsService.addSkill(p1Skills[1], users[0]).body.skillApplied
+        assert skillsService.addSkill(p1Skills[0], users[1]).body.skillApplied
+        assert skillsService.addSkill(p1Skills[0], users[2]).body.skillApplied
+        assert skillsService.addSkill(p1Skills[1], users[2]).body.skillApplied
+
+        assert skillsService.addSkill(p2LocalSkills[0], users[2]).body.skillApplied
+        assert skillsService.addSkill(p2LocalSkills[0], users[3]).body.skillApplied
+        assert skillsService.addSkill(p2LocalSkills[1], users[3]).body.skillApplied
+
+        when:
+        def resultsIncluded = skillsService.getSkillGroupUsers(p2.projectId, p2SkillsGroup.skillId, 10, 1, "userId", true, "", 0, 100, '', true)
+        def resultsExcluded = skillsService.getSkillGroupUsers(p2.projectId, p2SkillsGroup.skillId, 10, 1, "userId", true, "", 0, 100, '', false)
+        def resultsExcludedWithMaxPoints = skillsService.getSkillGroupUsers(p2.projectId, p2SkillsGroup.skillId, 10, 1, "userId", true, "", 0, 60, '', false)
+        def resultsExcludedWithMinPoints = skillsService.getSkillGroupUsers(p2.projectId, p2SkillsGroup.skillId, 10, 1, "userId", true, "", 41, 100, '', false)
+
+        then:
+        resultsIncluded
+        resultsIncluded.count == 4
+        resultsIncluded.totalCount == 4
+        resultsIncluded.data.userId.sort() == users[0..3].collect { it.toLowerCase() }.sort()
+        resultsIncluded.data.find { users[0].equalsIgnoreCase(it.userId) }.totalPoints == 200
+        resultsIncluded.data.find { users[1].equalsIgnoreCase(it.userId) }.totalPoints == 100
+        resultsIncluded.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
+        resultsIncluded.data.find { users[3].equalsIgnoreCase(it.userId) }.totalPoints == 200
+
+        resultsExcluded
+        resultsExcluded.count == 2
+        resultsExcluded.totalCount == 2
+        resultsExcluded.data.userId.sort() == [users[2], users[3]].collect { it.toLowerCase() }.sort()
+        resultsExcluded.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
+        resultsExcluded.data.find { users[3].equalsIgnoreCase(it.userId) }.totalPoints == 200
+
+        resultsExcludedWithMaxPoints
+        resultsExcludedWithMaxPoints.count == 1
+        resultsExcludedWithMaxPoints.totalCount == 1
+        resultsExcludedWithMaxPoints.data.userId.sort() == [users[3]].collect { it.toLowerCase() }.sort()
+        resultsExcludedWithMaxPoints.data.find { users[3].equalsIgnoreCase(it.userId) }.totalPoints == 200
+
+        resultsExcludedWithMinPoints
+        resultsExcludedWithMinPoints.count == 1
+        resultsExcludedWithMinPoints.totalCount == 1
+        resultsExcludedWithMinPoints.data.userId.sort() == [users[2]].collect { it.toLowerCase() }.sort()
+        resultsExcludedWithMinPoints.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
+    }
+
+    def 'get skill group users with exclude imported filter - no imported skills so same results'() {
+        skillsService.deleteProjectIfExist(projId)
+        def proj = createProject()
+        def subject = createSubject()
+        def skills = createSkills(1, 1, 1, 100, 4)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        // Create a skills group and assign skills to it
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        def users = getRandomUsers(4)
+        skillsService.addSkill(skills[0], users[0], new Date() - 3)
+        skillsService.addSkill(skills[0], users[0], new Date() - 2)
+        skillsService.addSkill(skills[0], users[0], new Date() - 1)
+        skillsService.addSkill(skills[0], users[0], new Date())
+
+        skillsService.addSkill(skills[0], users[1], new Date() - 2)
+        skillsService.addSkill(skills[0], users[1], new Date() - 1)
+        skillsService.addSkill(skills[0], users[1], new Date())
+
+        skillsService.addSkill(skills[0], users[2], new Date() - 1)
+        skillsService.addSkill(skills[0], users[2], new Date())
+
+        skillsService.addSkill(skills[0], users[3], new Date())
+
+        when:
+        def resultsIncluded = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "userId", true, "", 0, 100, '', true)
+        def resultsExcluded = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "userId", true, "", 0, 100, '', false)
+
+        then:
+        resultsIncluded
+        resultsIncluded.count == 4
+        resultsIncluded.data.size() == 4
+
+        resultsExcluded
+        resultsExcluded.count == 4
+        resultsExcluded.data.size() == 4
+        // Both users should be included since they have non-imported skills
+    }
+
+    def 'get skill group users returns correct firstUpdated and lastUpdated date'() {
+        skillsService.deleteProjectIfExist(projId)
+        def proj = createProject()
+        def subject = createSubject()
+        def skills = createSkills(1, 1, 1, 100, 4)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        // Create a skills group and assign skills to it
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        def users = getRandomUsers(4)
+        def date1 = new Date() - 3
+        def date2 = new Date() - 2
+        def date3 = new Date() - 1
+        def date4 = new Date()
+        
+        skillsService.addSkill(skills[0], users[0], date1)
+        skillsService.addSkill(skills[0], users[0], date2)
+        skillsService.addSkill(skills[0], users[0], date3)
+        skillsService.addSkill(skills[0], users[0], date4)
+
+        skillsService.addSkill(skills[0], users[1], date2)
+        skillsService.addSkill(skills[0], users[1], date3)
+        skillsService.addSkill(skills[0], users[1], date4)
+
+        skillsService.addSkill(skills[0], users[2], date3)
+        skillsService.addSkill(skills[0], users[2], date4)
+
+        skillsService.addSkill(skills[0], users[3], date4)
+
+        when:
+        def results = skillsService.getSkillGroupUsers(projId, skillsGroupId)
+
+        then:
+        results
+        results.count == 4
+        results.data.size() == 4
+
+        def resultUser = results.data.find { it -> it.userId.contains(users[0].toLowerCase()) }
+        resultUser.lastUpdated == DTF.print(date4.time)
+        resultUser.firstUpdated == DTF.print(date1.time)
+
+        def result2User = results.data.find { it -> it.userId.contains(users[1].toLowerCase()) }
+        result2User.lastUpdated == DTF.print(date4.time)
+        result2User.firstUpdated == DTF.print(date2.time)
+    }
+
+    def 'get skill group users returns empty result for group with no skills'() {
+        skillsService.deleteProjectIfExist(projId)
+        def proj = createProject()
+        def subject = createSubject()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        // Create a skills group but don't assign any skills to it
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+
+        when:
+        def results = skillsService.getSkillGroupUsers(projId, skillsGroupId)
+
+        then:
+        results
+        results.count == 0
+        results.totalCount == 0
+        results.data.size() == 0
+    }
+
+    def 'get skill group users with point range filter - various ranges'() {
+        skillsService.deleteProjectIfExist(projId)
+        def proj = createProject()
+        def subject = createSubject()
+        def skills = createSkills(1, 1, 1, 100, 4)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        // Create a skills group and assign skills to it
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+
+        def users = getRandomUsers(4)
+        skillsService.addSkill(skills[0], users[0], new Date() - 3)
+        skillsService.addSkill(skills[0], users[0], new Date() - 2)
+        skillsService.addSkill(skills[0], users[0], new Date() - 1)
+        skillsService.addSkill(skills[0], users[0], new Date())
+
+        skillsService.addSkill(skills[0], users[1], new Date() - 2)
+        skillsService.addSkill(skills[0], users[1], new Date() - 1)
+        skillsService.addSkill(skills[0], users[1], new Date())
+
+        skillsService.addSkill(skills[0], users[2], new Date() - 1)
+        skillsService.addSkill(skills[0], users[2], new Date())
+
+        skillsService.addSkill(skills[0], users[3], new Date())
+
+        when:
+        def group100 = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "userId", true, "", 0, 100)
+        def group76 = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "userId", true, "", 0, 76)
+        def group75 = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "userId", true, "", 0, 75)
+        def group50 = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "userId", true, "", 0, 50)
+        def group25 = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "userId", true, "", 0, 25)
+
+        then:
+        group100.count == 4  // All users
+        group76.count == 3  // Users with 300, 200, 100 points
+        group75.count == 2  // Users with 200, 100 points
+        group50.count == 1  // Only user with 100 points
+        group25.count == 0  // No users (25% is excluded from 0-25% range)
+    }
+
 }

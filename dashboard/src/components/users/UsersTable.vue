@@ -14,28 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, nextTick, onMounted, ref} from 'vue'
-import {useRoute} from 'vue-router'
+import { computed, nextTick, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import InputText from 'primevue/inputtext'
 import Slider from 'primevue/slider'
 import Column from 'primevue/column'
 import ProgressBar from 'primevue/progressbar'
 import UsersService from './UsersService.js'
 import DateCell from '@/components/utils/table/DateCell.vue'
-import {useSkillsAnnouncer} from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import {useResponsiveBreakpoints} from '@/components/utils/misc/UseResponsiveBreakpoints.js'
-import {useColors} from '@/skills-display/components/utilities/UseColors.js'
-import {useExportUtil} from '@/components/utils/UseExportUtil.js';
+import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import { useExportUtil } from '@/components/utils/UseExportUtil.js'
 import SkillsDisplayPathAppendValues from '@/router/SkillsDisplayPathAppendValues.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
-import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
-import {useUserInfo} from "@/components/utils/UseUserInfo.js";
-import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
-import {useNumberFormat} from '@/common-components/filter/UseNumberFormat.js'
-import {useProjConfig} from '@/stores/UseProjConfig.js';
-import TableNoRes from "@/components/utils/table/TableNoRes.vue";
-import {useStorage} from "@vueuse/core";
-import CatalogService from "@/components/skills/catalog/CatalogService.js";
+import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import { useUserInfo } from '@/components/utils/UseUserInfo.js'
+import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
+import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import { useProjConfig } from '@/stores/UseProjConfig.js'
+import TableNoRes from '@/components/utils/table/TableNoRes.vue'
+import { useStorage } from '@vueuse/core'
+import CatalogService from '@/components/skills/catalog/CatalogService.js'
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
@@ -72,7 +72,7 @@ const maximumProgress = computed(() => {
 })
 
 const showUserTagColumn = computed(() => {
- return !!(appConfig.usersTableAdditionalUserTagKey && appConfig.usersTableAdditionalUserTagLabel);
+  return !!(appConfig.usersTableAdditionalUserTagKey && appConfig.usersTableAdditionalUserTagLabel)
 })
 
 const tagKey = computed(() => {
@@ -139,6 +139,8 @@ const getUrl = () => {
     url += `/skills/${encodeURIComponent(route.params.skillId)}`
   } else if (route.params.badgeId) {
     url += `/badges/${encodeURIComponent(route.params.badgeId)}`
+  } else if (route.params.groupId) {
+    url += `/groups/${encodeURIComponent(route.params.groupId)}`
   } else if (route.params.subjectId) {
     url += `/subjects/${encodeURIComponent(route.params.subjectId)}`
   } else if (route.params.tagKey && route.params.tagFilter) {

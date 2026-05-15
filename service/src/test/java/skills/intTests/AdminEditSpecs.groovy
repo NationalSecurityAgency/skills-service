@@ -1468,8 +1468,12 @@ class AdminEditSpecs extends DefaultIntSpec {
 
         skillsService.createProject(project)
         skillsService.createSubject(subject)
-        skillsService.createSkill(skill1)
-        skillsService.createSkill(skill2)
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, skill1)
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, skill2)
+
         skillsService.addBadge([projectId: project.projectId, badgeId: badgeId, name: 'Badge 1'])
         skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badgeId, skillId: skill1.skillId])
         skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badgeId, skillId: skill2.skillId])
@@ -1505,6 +1509,9 @@ class AdminEditSpecs extends DefaultIntSpec {
         def userTagUsers = skillsService.getUserTagUsers(project.projectId, 'someTag', 'ABC')
         assert userTagUsers.data.find { it.userId == user1 && it.totalPoints == 100 }
         assert userTagUsers.data.find { it.userId == user2 && it.totalPoints == 60 }
+        def skillGroupUsers = skillsService.getSkillGroupUsers(project.projectId, skillsGroupId)
+        assert skillGroupUsers.data.find { it.userId == user1 && it.totalPoints == 100 }
+        assert skillGroupUsers.data.find { it.userId == user2 && it.totalPoints == 60 }
 
         when:
 
@@ -1516,6 +1523,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         def skill2UsersAfterArchive = skillsService.getSkillUsers(project.projectId, skill2.skillId)
         def badgeUsersAfterArchive = skillsService.getBadgeUsers(project.projectId, badgeId)
         def userTagUsersAfterArchive = skillsService.getUserTagUsers(project.projectId, 'someTag', 'ABC')
+        def skillGroupUsersAfterArchive = skillsService.getSkillGroupUsers(project.projectId, skillsGroupId)
 
         then:
         !projectUsersAfterArchive.data.find { it.userId == user1 }
@@ -1530,6 +1538,8 @@ class AdminEditSpecs extends DefaultIntSpec {
         badgeUsersAfterArchive.data.find { it.userId == user2 && it.totalPoints == 60 }
         !userTagUsersAfterArchive.data.find { it.userId == user1 }
         userTagUsersAfterArchive.data.find { it.userId == user2 && it.totalPoints == 60 }
+        !skillGroupUsersAfterArchive.data.find { it.userId == user1 }
+        skillGroupUsersAfterArchive.data.find { it.userId == user2 && it.totalPoints == 60 }
     }
 
     def "editing skill's skill_id updates skill_id in achievement"() {
