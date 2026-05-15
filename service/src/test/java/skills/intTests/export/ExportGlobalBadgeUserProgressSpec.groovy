@@ -417,4 +417,27 @@ class ExportGlobalBadgeUserProgressSpec extends ExportBaseIntSpec  {
         validateExport(excelExportSortPointsAsc.file, expectedDataForSortAsc)
     }
 
+    def 'getGlobalUserProgressExcelExport allows userTagFilter to be omitted'() {
+        def project = createProject()
+        def subject = createSubject()
+        def skill1 = createSkill(1, 1, 1, 0, 2)
+
+        skillsService.createProject(project)
+        skillsService.createSubject(subject)
+        skillsService.createSkill(skill1)
+
+        def globalBadge = createBadge()
+        skillsService.createGlobalBadge(globalBadge)
+        skillsService.assignSkillToGlobalBadge([projectId: project.projectId, badgeId: globalBadge.badgeId, skillId: skill1.skillId])
+        skillsService.assignProjectLevelToGlobalBadge([badgeId: globalBadge.badgeId, projectId: project.projectId, level: "3"])
+
+        globalBadge.enabled = "true"
+        skillsService.updateGlobalBadge(globalBadge)
+
+        when:
+        def results = skillsService.getGlobalBadgeUserProgressExcelExport(globalBadge.badgeId)
+
+        then:
+        results
+    }
 }

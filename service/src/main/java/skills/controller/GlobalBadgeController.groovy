@@ -319,7 +319,7 @@ class GlobalBadgesController {
                                     @RequestParam int limit,
                                     @RequestParam int page,
                                     @RequestParam String orderBy,
-                                    @RequestParam String userTagFilter,
+                                    @RequestParam(required = false, defaultValue = "") String userTagFilter,
                                     @RequestParam Boolean ascending) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id", badgeId)
         PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(badgeId, limit, page, orderBy, ascending)
@@ -332,7 +332,7 @@ class GlobalBadgesController {
     ModelAndView exportGlobalBadgeUsers(@PathVariable("badgeId") String badgeId,
                                         @RequestParam String query,
                                         @RequestParam String orderBy,
-                                        @RequestParam String userTagFilter,
+                                        @RequestParam(required = false, defaultValue = "") String userTagFilter,
                                         @RequestParam Boolean ascending) {
         SkillsValidator.isNotBlank(badgeId, "Badge Id", badgeId)
         PageRequest pageRequest = PageRequest.of(0, Integer.MAX_VALUE, ascending ? ASC : DESC, orderBy)

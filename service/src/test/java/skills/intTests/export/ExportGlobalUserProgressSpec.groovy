@@ -583,6 +583,14 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
         ])
     }
 
+    def 'getGlobalUserProgressExcelExport allows userTagFilter to be omitted'() {
+        when:
+        def results = skillsService.getGlobalUserProgressExcelExport()
+
+        then:
+        results
+    }
+
     def createQuiz(int num, SkillsService serviceToUse = null, boolean isTextInputQuestion = false) {
         serviceToUse = serviceToUse ?: skillsService
         def quiz = QuizDefFactory.createQuiz(num)

@@ -36,8 +36,8 @@ class UserPointsSpecs extends DefaultIntSpec {
     List<List<String>> allSkillIds
     String badgeId
 
-    Date threeDaysAgo = new Date()-3
-    Date twoDaysAgo = new Date()-2
+    Date threeDaysAgo = new Date() - 3
+    Date twoDaysAgo = new Date() - 2
     Date yesterday = new Date() - 1
     DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
@@ -45,7 +45,7 @@ class UserPointsSpecs extends DefaultIntSpec {
     SkillsService rootSkillsService
     List<String> usersWithTags
 
-    def setup(){
+    def setup() {
         rootSkillsService = createService(ultimateRoot, 'aaaaaaaa')
         if (!rootSkillsService.isRoot()) {
             rootSkillsService.grantRoot()
@@ -66,7 +66,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillsService.assignSkillToBadge([projectId: projId, badgeId: badgeId, skillId: allSkillIds.get(0).get(0)])
     }
 
-    def 'recalculate user points after changing point value' () {
+    def 'recalculate user points after changing point value'() {
 
         skillsService.deleteProjectIfExist(projId)
         String subjectId = 'testSubject1'
@@ -74,7 +74,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillsService.createSubject([projectId: projId, subjectId: subjectId, name: "Test Subject"])
         String skillId = addDependentSkills(projId, subjectId, 1, 1, 5).get(0)
 
-        skillsService.addSkill(['projectId': projId, skillId: skillId], sampleUserIds.get(0), new Date()-4)
+        skillsService.addSkill(['projectId': projId, skillId: skillId], sampleUserIds.get(0), new Date() - 4)
         skillsService.addSkill(['projectId': projId, skillId: skillId], sampleUserIds.get(0), threeDaysAgo)
 
         when:
@@ -223,8 +223,6 @@ class UserPointsSpecs extends DefaultIntSpec {
         result2User.firstUpdated == DTF.print(threeDaysAgo.time)
     }
 
-
-
     def 'get project users when project exists'() {
         when:
         def results = skillsService.getProjectUsers(projId)
@@ -239,7 +237,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.data.get(0).totalPoints == 70
         results.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results.data.get(1).totalPoints == 35
-        results.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
+        results.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
     }
 
     def 'get project users with paging'() {
@@ -377,7 +375,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.data.size() == 1
         results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
-        results1.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
+        results1.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
 
         results2
         results2.count == 2
@@ -387,7 +385,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.data.get(0).totalPoints == 35
         results2.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results2.data.get(1).totalPoints == 35
-        results2.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
+        results2.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
 
         results3
         results3.count == 0
@@ -513,7 +511,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.data.size() == 1
         results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
-        results2.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
+        results2.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
 
         results2
         results2.count == 2
@@ -523,7 +521,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.data.get(0).totalPoints == 35
         results2.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results2.data.get(1).totalPoints == 35
-        results2.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
+        results2.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
 
         results3
         results3.count == 0
@@ -685,7 +683,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         when:
         def users = skillsService.getProjectUsers(projId, 100).data
 
-        def userBeforeSkillAdd = users.find() {it.userId.contains(uid)}
+        def userBeforeSkillAdd = users.find() { it.userId.contains(uid) }
         DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
         def res = skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(1)], uid, new DateTime().toDate())
@@ -693,7 +691,7 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         def users2 = skillsService.getProjectUsers(projId, 100).data
 
-        def userAfterSkillAdd = users2.find() {it.userId.contains(uid)}
+        def userAfterSkillAdd = users2.find() { it.userId.contains(uid) }
 
 
         then:
@@ -701,8 +699,8 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     }
 
-   @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
-   def "filter users by name"(){
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "filter users by name"() {
 
         SkillsService createAcctService = createService()
         createAcctService.createUser([firstName: "John", lastName: "Doe", email: "jdoe@email.foo", password: "password"])
@@ -725,18 +723,18 @@ class UserPointsSpecs extends DefaultIntSpec {
         control.data.size() == 5
 
         result1.data.size() == 1
-        result1.data.find{it.userId.contains('jadoe@email.foo')}
+        result1.data.find { it.userId.contains('jadoe@email.foo') }
 
         result2.data.size() == 1
-        result2.data.find{it.userId.contains('jadoe@email.foo')}
+        result2.data.find { it.userId.contains('jadoe@email.foo') }
 
         result3.data.size() == 2
-        result3.data.find{it.userId.contains('jadoe@email.foo')}
-        result3.data.find{it.userId.contains('jdoe@email.foo')}
+        result3.data.find { it.userId.contains('jadoe@email.foo') }
+        result3.data.find { it.userId.contains('jdoe@email.foo') }
     }
 
-    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
-    def "sort users" () {
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "sort users"() {
         SkillsService createAcctService = createService()
         createAcctService.createUser([firstName: "John", lastName: "Doe", email: "jdoe@email.foo", password: "password"])
         createAcctService.createUser([firstName: "Jane", lastName: "Doe", email: "jadoe@email.foo", password: "password"])
@@ -782,8 +780,8 @@ class UserPointsSpecs extends DefaultIntSpec {
         fooUsersSortByLastName.data[2].lastName == 'Doe'
     }
 
-    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
-    def "user paging" () {
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "user paging"() {
         SkillsService createAcctService = createService()
         createAcctService.createUser([firstName: "Aaa", lastName: "Aaa", email: "aaa@email.foo", password: "password"])
         createAcctService.createUser([firstName: "Bbb", lastName: "Bbb", email: "bbb@email.foo", password: "password"])
@@ -822,13 +820,12 @@ class UserPointsSpecs extends DefaultIntSpec {
     }
 
 
-
-    private List<List<String>> setupProjectWithSkills(List<String> subjects = ['testSubject1', 'testSubject2'], String projectId=projId, name="Test Project") {
+    private List<List<String>> setupProjectWithSkills(List<String> subjects = ['testSubject1', 'testSubject2'], String projectId = projId, name = "Test Project") {
         List<List<String>> skillIds = []
         skillsService.createProject([projectId: projectId, name: name])
         subjects.eachWithIndex { String subject, int index ->
             skillsService.createSubject([projectId: projectId, subjectId: subject, name: "Test Subject $index".toString()])
-            skillIds << addDependentSkills(projectId,  subject, 3, 1, 4)
+            skillIds << addDependentSkills(projectId, subject, 3, 1, 4)
         }
         return skillIds
     }
@@ -850,14 +847,14 @@ class UserPointsSpecs extends DefaultIntSpec {
             String skillId = 'skill' + RandomStringUtils.randomAlphabetic(5)
             skillsService.createSkill(
                     [
-                            projectId: projectId,
-                            subjectId: subject,
-                            skillId: skillId,
-                            name: 'Test Skill ' + RandomStringUtils.randomAlphabetic(8),
-                            pointIncrement: 35,
+                            projectId             : projectId,
+                            subjectId             : subject,
+                            skillId               : skillId,
+                            name                  : 'Test Skill ' + RandomStringUtils.randomAlphabetic(8),
+                            pointIncrement        : 35,
                             numPerformToCompletion: numPerformToCompletion,
-                            pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1,
-                            dependenctSkillsIds: dependentSkillIds
+                            pointIncrementInterval: 8 * 60, numMaxOccurrencesIncrementInterval: 1,
+                            dependenctSkillsIds   : dependentSkillIds
                     ]
             )
             skillIds << skillId
@@ -875,19 +872,19 @@ class UserPointsSpecs extends DefaultIntSpec {
         List<List<String>> proj2SkillIds = setupProjectWithSkills(['testSubject1', 'testSubject2', 'testSubject3'], projId2, 'Test Project 2')
 
         def results = skillsService.getProjectUsers(projId)
-        String mostRecentDate1 = results.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated
+        String mostRecentDate1 = results.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated
 
         // report a skill for project2
         skillsService.addSkill(['projectId': projId2, skillId: proj2SkillIds.get(0).get(0)], sampleUserIds.get(0), new Date())
 
         // results two show not be affected
         def results2 = skillsService.getProjectUsers(projId)
-        String mostRecentDate2 = results2.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated
+        String mostRecentDate2 = results2.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated
 
         // now report another skill for project1
         skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(0)], sampleUserIds.get(2), new Date())
         def results3 = skillsService.getProjectUsers(projId)
-        String mostRecentDate3 = results3.data.sort {a,b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated
+        String mostRecentDate3 = results3.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated
 
         then:
         results
@@ -909,9 +906,9 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     def 'skill users total points should not be a multiple of the actual total'() {
         def project = SkillsFactory.createProject(99)
-        def subject = SkillsFactory.createSubject(99)
-        def skill1 = SkillsFactory.createSkill(99, 1, 1, 0, 10, 0, 10)
-        def skill2 = SkillsFactory.createSkill(99, 1, 2, 0, 10, 0, 20)
+        def subject = createSubject(99)
+        def skill1 = createSkill(99, 1, 1, 0, 10, 0, 10)
+        def skill2 = createSkill(99, 1, 2, 0, 10, 0, 20)
 
         skillsService.createProject(project)
         skillsService.createSubject(subject)
@@ -939,9 +936,9 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     def 'subject users total points should not be a multiple of the actual total'() {
         def project = SkillsFactory.createProject(99)
-        def subject = SkillsFactory.createSubject(99)
-        def skill1 = SkillsFactory.createSkill(99, 1, 1, 0, 10, 0, 10)
-        def skill2 = SkillsFactory.createSkill(99, 1, 2, 0, 10, 0, 20)
+        def subject = createSubject(99)
+        def skill1 = createSkill(99, 1, 1, 0, 10, 0, 10)
+        def skill2 = createSkill(99, 1, 2, 0, 10, 0, 20)
 
         skillsService.createProject(project)
         skillsService.createSubject(subject)
@@ -1010,17 +1007,17 @@ class UserPointsSpecs extends DefaultIntSpec {
         then:
         projRes.count == 6
         projRes.totalCount == 6
-        def data = users.collect {String usr -> projRes.data.find { it.userId == usr} }
+        def data = users.collect { String usr -> projRes.data.find { it.userId == usr } }
         data.userMaxLevel == [0, 1, 1, 2, 4, 4]
 
         subjRes.count == 6
         subjRes.totalCount == 6
-        def data1 = users.collect {String usr -> subjRes.data.find { it.userId == usr} }
+        def data1 = users.collect { String usr -> subjRes.data.find { it.userId == usr } }
         data1.userMaxLevel == [1, 1, 1, 3, 2, 2]
 
         subj2Res.count == 4
         subj2Res.totalCount == 4
-        def data2 = users.collect {String usr -> subj2Res.data.find { it.userId == usr} }
+        def data2 = users.collect { String usr -> subj2Res.data.find { it.userId == usr } }
         data2.userMaxLevel == [1, 1, 5, 5]
         data2.userId == [users[1], users[2], users[4], users[5]]
     }
@@ -1079,27 +1076,27 @@ class UserPointsSpecs extends DefaultIntSpec {
         then:
         projRes.count == 6
         projRes.totalCount == 6
-        def data = users.collect {String usr -> projRes.data.find { it.userId == usr} }
+        def data = users.collect { String usr -> projRes.data.find { it.userId == usr } }
         data.userTag == ['tag0', 'tag1', 'tag2', 'tag3', 'tag4', 'tag5']
 
         subjRes.count == 6
         subjRes.totalCount == 6
-        def data1 = users.collect {String usr -> subjRes.data.find { it.userId == usr} }
+        def data1 = users.collect { String usr -> subjRes.data.find { it.userId == usr } }
         data1.userTag == ['tag0', 'tag1', 'tag2', 'tag3', 'tag4', 'tag5']
 
         subj2Res.count == 4
         subj2Res.totalCount == 4
-        def data2 = users.collect {String usr -> subj2Res.data.find { it.userId == usr} }
+        def data2 = users.collect { String usr -> subj2Res.data.find { it.userId == usr } }
         data2.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
 
         badgeRes.count == 4
         badgeRes.totalCount == 4
-        def data3 = users.collect {String usr -> badgeRes.data.find { it.userId == usr} }
+        def data3 = users.collect { String usr -> badgeRes.data.find { it.userId == usr } }
         data3.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
 
         skillRes.count == 4
         skillRes.totalCount == 4
-        def data4 = users.collect {String usr -> skillRes.data.find { it.userId == usr} }
+        def data4 = users.collect { String usr -> skillRes.data.find { it.userId == usr } }
         data4.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
     }
 
@@ -1163,57 +1160,57 @@ class UserPointsSpecs extends DefaultIntSpec {
         then:
         projRes.count == 6
         projRes.totalCount == 6
-        def data = users.collect {String usr -> projRes.data.find { it.userId == usr} }
+        def data = users.collect { String usr -> projRes.data.find { it.userId == usr } }
         data.userTag == ['tag0', 'tag1', 'tag2', 'tag3', 'tag4', 'tag5']
 
         subjRes.count == 6
         subjRes.totalCount == 6
-        def data1 = users.collect {String usr -> subjRes.data.find { it.userId == usr} }
+        def data1 = users.collect { String usr -> subjRes.data.find { it.userId == usr } }
         data1.userTag == ['tag0', 'tag1', 'tag2', 'tag3', 'tag4', 'tag5']
 
         subj2Res.count == 4
         subj2Res.totalCount == 4
-        def data2 = users.collect {String usr -> subj2Res.data.find { it.userId == usr} }
+        def data2 = users.collect { String usr -> subj2Res.data.find { it.userId == usr } }
         data2.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
 
         badgeRes.count == 4
         badgeRes.totalCount == 4
-        def data3 = users.collect {String usr -> badgeRes.data.find { it.userId == usr} }
+        def data3 = users.collect { String usr -> badgeRes.data.find { it.userId == usr } }
         data3.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
 
         skillRes.count == 4
         skillRes.totalCount == 4
-        def data4 = users.collect {String usr -> skillRes.data.find { it.userId == usr} }
+        def data4 = users.collect { String usr -> skillRes.data.find { it.userId == usr } }
         data4.userTag == ['tag1', 'tag2', 'tag4', 'tag5']
-        
+
         // now check filtered results
         projResFiltered.count == 1
         projResFiltered.totalCount == 1
-        def dataFiltered = users.collect {String usr -> projResFiltered.data.find { it.userId == usr} }
+        def dataFiltered = users.collect { String usr -> projResFiltered.data.find { it.userId == usr } }
         dataFiltered.userTag == ['tag2']
 
         subjResFiltered.count == 1
         subjResFiltered.totalCount == 1
-        def data1Filtered = users.collect {String usr -> subjResFiltered.data.find { it.userId == usr} }
+        def data1Filtered = users.collect { String usr -> subjResFiltered.data.find { it.userId == usr } }
         data1Filtered.userTag == ['tag2']
 
         subj2ResFiltered.count == 1
         subj2ResFiltered.totalCount == 1
-        def data2Filtered = users.collect {String usr -> subj2ResFiltered.data.find { it.userId == usr} }
+        def data2Filtered = users.collect { String usr -> subj2ResFiltered.data.find { it.userId == usr } }
         data2Filtered.userTag == ['tag2']
 
         badgeResFiltered.count == 1
         badgeResFiltered.totalCount == 1
-        def data3Filtered = users.collect {String usr -> badgeResFiltered.data.find { it.userId == usr} }
+        def data3Filtered = users.collect { String usr -> badgeResFiltered.data.find { it.userId == usr } }
         data3Filtered.userTag == ['tag2']
 
         skillResFiltered.count == 1
         skillResFiltered.totalCount == 1
-        def data4Filtered = users.collect {String usr -> skillResFiltered.data.find { it.userId == usr} }
+        def data4Filtered = users.collect { String usr -> skillResFiltered.data.find { it.userId == usr } }
         data4Filtered.userTag == ['tag2']
     }
-    
-    def 'user project points maximum filter is exclusive' () {
+
+    def 'user project points maximum filter is exclusive'() {
         skillsService.deleteProjectIfExist(projId)
         def proj = createProject()
         def subject = createSubject()
@@ -1264,16 +1261,16 @@ class UserPointsSpecs extends DefaultIntSpec {
         skillsService.addSkill(skills2[0], users[5], new Date())
 
         when:
-        def projFull = skillsService.getProjectUsers(projId,  10, 1, "userId", true, "", 0, 100)
-        def proj76 = skillsService.getProjectUsers(projId,  10, 1, "userId", true, "", 0, 76)
-        def proj75 = skillsService.getProjectUsers(projId,  10, 1, "userId", true, "", 0, 75)
-        def proj50 = skillsService.getProjectUsers(projId,  10, 1, "userId", true, "", 0, 50)
-        def proj25 = skillsService.getProjectUsers(projId,  10, 1, "userId", true, "", 0, 25)
-        def proj2_Full = skillsService.getProjectUsers(proj2.projectId,  10, 1, "userId", true, "", 0, 100)
-        def proj2_76 = skillsService.getProjectUsers(proj2.projectId,  10, 1, "userId", true, "", 0, 76)
-        def proj2_75 = skillsService.getProjectUsers(proj2.projectId,  10, 1, "userId", true, "", 0, 75)
-        def proj2_50 = skillsService.getProjectUsers(proj2.projectId,  10, 1, "userId", true, "", 0, 50)
-        def proj2_25 = skillsService.getProjectUsers(proj2.projectId,  10, 1, "userId", true, "", 0, 25)
+        def projFull = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0, 100)
+        def proj76 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0, 76)
+        def proj75 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0, 75)
+        def proj50 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0, 50)
+        def proj25 = skillsService.getProjectUsers(projId, 10, 1, "userId", true, "", 0, 25)
+        def proj2_Full = skillsService.getProjectUsers(proj2.projectId, 10, 1, "userId", true, "", 0, 100)
+        def proj2_76 = skillsService.getProjectUsers(proj2.projectId, 10, 1, "userId", true, "", 0, 76)
+        def proj2_75 = skillsService.getProjectUsers(proj2.projectId, 10, 1, "userId", true, "", 0, 75)
+        def proj2_50 = skillsService.getProjectUsers(proj2.projectId, 10, 1, "userId", true, "", 0, 50)
+        def proj2_25 = skillsService.getProjectUsers(proj2.projectId, 10, 1, "userId", true, "", 0, 25)
 
         then:
         projFull.count == 8
@@ -1289,7 +1286,7 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     }
 
-    def 'user subject points maximum filter is exclusive' () {
+    def 'user subject points maximum filter is exclusive'() {
         skillsService.deleteProjectIfExist(projId)
         def proj = createProject()
         def subject = createSubject()
@@ -1363,7 +1360,7 @@ class UserPointsSpecs extends DefaultIntSpec {
 
     }
 
-    def 'user skill points maximum filter is exclusive' () {
+    def 'user skill points maximum filter is exclusive'() {
         skillsService.deleteProjectIfExist(projId)
         def proj = createProject()
         def subject = createSubject()
@@ -1450,6 +1447,60 @@ class UserPointsSpecs extends DefaultIntSpec {
         badge25.count == 0
 
     }
+    def 'get project users allows userTagFilter to be  omitted'() {
+        when:
+        def results = skillsService.getProjectUsers(projId)
+
+        then:
+        results
+    }
+
+    def 'get subject users allows userTagFilter to be  omitted'() {
+        when:
+        def results = skillsService.getSubjectUsers(projId, subjectId)
+
+        then:
+        results
+    }
+
+    def 'get skill users allows userTagFilter to be  omitted'() {
+        when:
+        def results = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0))
+
+        then:
+        results
+    }
+
+    def 'get badge users allows userTagFilter to be  omitted'() {
+        when:
+        def results = skillsService.getBadgeUsers(projId, badgeId)
+
+        then:
+        results
+    }
+
+//    def 'get skill group users allows userTagFilter to be  omitted'() {
+//        when:
+//        skillsService.deleteProjectIfExist(projId)
+//        def proj = createProject()
+//        def subject = createSubject()
+//        def skills = createSkills(1, 1, 1, 100, 4)
+//
+//        skillsService.createProject(proj)
+//        skillsService.createSubject(subject)
+//        // Create a skills group and assign skills to it
+//        def skillsGroup = createSkillsGroup(1, 1, 5)
+//        skillsService.createSkill(skillsGroup)
+//        String skillsGroupId = skillsGroup.skillId
+//
+//        skills.each { skill ->
+//            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+//        }
+//        def results = skillsService.getSkillGroupUsers(projId, skillsGroupId)
+//
+//        then:
+//        results
+//    }
 
     def 'get skill group users returns correct data'() {
         skillsService.deleteProjectIfExist(projId)
