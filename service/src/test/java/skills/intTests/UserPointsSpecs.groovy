@@ -1447,60 +1447,6 @@ class UserPointsSpecs extends DefaultIntSpec {
         badge25.count == 0
 
     }
-    def 'get project users allows userTagFilter to be  omitted'() {
-        when:
-        def results = skillsService.getProjectUsers(projId)
-
-        then:
-        results
-    }
-
-    def 'get subject users allows userTagFilter to be  omitted'() {
-        when:
-        def results = skillsService.getSubjectUsers(projId, subjectId)
-
-        then:
-        results
-    }
-
-    def 'get skill users allows userTagFilter to be  omitted'() {
-        when:
-        def results = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0))
-
-        then:
-        results
-    }
-
-    def 'get badge users allows userTagFilter to be  omitted'() {
-        when:
-        def results = skillsService.getBadgeUsers(projId, badgeId)
-
-        then:
-        results
-    }
-
-//    def 'get skill group users allows userTagFilter to be  omitted'() {
-//        when:
-//        skillsService.deleteProjectIfExist(projId)
-//        def proj = createProject()
-//        def subject = createSubject()
-//        def skills = createSkills(1, 1, 1, 100, 4)
-//
-//        skillsService.createProject(proj)
-//        skillsService.createSubject(subject)
-//        // Create a skills group and assign skills to it
-//        def skillsGroup = createSkillsGroup(1, 1, 5)
-//        skillsService.createSkill(skillsGroup)
-//        String skillsGroupId = skillsGroup.skillId
-//
-//        skills.each { skill ->
-//            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
-//        }
-//        def results = skillsService.getSkillGroupUsers(projId, skillsGroupId)
-//
-//        then:
-//        results
-//    }
 
     def 'get skill group users returns correct data'() {
         skillsService.deleteProjectIfExist(projId)
@@ -2027,4 +1973,58 @@ class UserPointsSpecs extends DefaultIntSpec {
         group25.count == 0  // No users (25% is excluded from 0-25% range)
     }
 
+    def 'get project users allows userTagFilter to be  omitted'() {
+        when:
+        def results = skillsService.getProjectUsers(projId)
+
+        then:
+        results
+    }
+
+    def 'get subject users allows userTagFilter to be  omitted'() {
+        when:
+        def results = skillsService.getSubjectUsers(projId, subjectId)
+
+        then:
+        results
+    }
+
+    def 'get skill users allows userTagFilter to be  omitted'() {
+        when:
+        def results = skillsService.getSkillUsers(projId, allSkillIds.get(0).get(0))
+
+        then:
+        results
+    }
+
+    def 'get badge users allows userTagFilter to be  omitted'() {
+        when:
+        def results = skillsService.getBadgeUsers(projId, badgeId)
+
+        then:
+        results
+    }
+
+    def 'get skill group users allows userTagFilter to be  omitted'() {
+        when:
+        skillsService.deleteProjectIfExist(projId)
+        def proj = createProject()
+        def subject = createSubject()
+        def skills = createSkills(1, 1, 1, 100, 4)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        // Create a skills group and assign skills to it
+        def skillsGroup = createSkillsGroup(1, 1, 5)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        def results = skillsService.getSkillGroupUsers(projId, skillsGroupId)
+
+        then:
+        results
+    }
 }
