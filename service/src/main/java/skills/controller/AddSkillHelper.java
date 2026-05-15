@@ -71,6 +71,9 @@ public class AddSkillHelper {
     @Autowired
     UserActionsHistoryService userActionsHistoryService;
 
+    @Autowired
+    SkillEventProcessor skillEventProcessor;
+
     @Value("${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}")
     AuthMode authMode;
 
@@ -113,7 +116,7 @@ public class AddSkillHelper {
             for (String skillId : skillIds) {
                 SkillEventResult result = null;
                 try {
-                    result = processSkillForUser(skillId, userId, projectId, incomingDate, currentUser);
+                    result = skillEventProcessor.processSkillForUser(skillId, userId, projectId, incomingDate, currentUser);
                 } catch(SkillException ske) {
                     log.error("Error applying skill [{}], user [{}], error [{}]", skillId, userId, ske.getMessage());
 
@@ -144,14 +147,6 @@ public class AddSkillHelper {
         }
 
         return batchResults;
-    }
-
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    protected SkillEventResult processSkillForUser(String skillId, String userId, String projectId, Date incomingDate, String currentUser) {
-        boolean forAnotherUser = userId != null && currentUser != null && !userId.equalsIgnoreCase(currentUser);
-        SkillEventsService.SkillApprovalParams skillApprovalParams = SkillEventsService.getDefaultSkillApprovalParams();
-        skillApprovalParams.setForAnotherUser(forAnotherUser);
-        return skillsManagementFacade.reportSkill(projectId, skillId, userId, true, incomingDate, skillApprovalParams);
     }
 
     private Date validateTime(String projectId, Long requestedTimestamp) {
