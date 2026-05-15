@@ -44,32 +44,24 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.get('[data-cy="skillsSelector"]')
             .type('skill');
 
-        cy.get('[data-cy="skillsSelector-skillId"]')
-            .should('have.length', 3)
-            .as('skillIds');
-        cy.get('@skillIds')
-            .eq(0)
-            .contains('skill1');
-        cy.get('@skillIds')
-            .eq(1)
-            .contains('skill1');
-        cy.get('@skillIds')
-            .eq(2)
-            .contains('skill1');
-
         cy.get('[data-cy="skillsSelector-skillName"]')
             .should('have.length', 3)
             .as('skillIds');
         cy.get('@skillIds')
             .eq(0)
-            .find('[data-cy="reusedBadge"]')
-            .should('not.exist');
+            .contains('Skill 1');
         cy.get('@skillIds')
             .eq(1)
-            .find('[data-cy="reusedBadge"]');
+            .contains('Skill 1');
         cy.get('@skillIds')
             .eq(2)
-            .find('[data-cy="reusedBadge"]');
+            .contains('Skill 1');
+
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1STREUSESKILLST0"] [data-cy="reusedBadge"]')
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1STREUSESKILLST1"] [data-cy="reusedBadge"]')
+        // skill 1 exist but does not have a badge
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1"]')
+        cy.get('[data-cy="skillsSelectionItem-proj1-skill1"] [data-cy="reusedBadge"]').should('not.exist');
 
         cy.get('[data-cy="skillsSelector-groupName"]')
             .should('have.length', 1)
@@ -88,12 +80,12 @@ describe('Skill Reuse and Dashboard Tests', () => {
         cy.visit('/administrator/projects/proj1/badges/badge1');
         cy.get('[data-cy="skillsSelector"]')
             .click();
-        cy.get('[data-cy="skillsSelector-skillId"]')
+        cy.get('[data-cy="skillsSelector-skillName"]')
             .should('have.length', 1)
             .as('skillIds');
         cy.get('@skillIds')
             .eq(0)
-            .contains('skill1');
+            .contains('Skill 1');
     });
 
     it('cannot initiate reuse when finalization is pending', () => {

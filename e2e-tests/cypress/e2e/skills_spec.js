@@ -1316,10 +1316,10 @@ describe('Skills Tests', () => {
     cy.get('li.p-autocomplete-empty-message').contains('Type to search for skills').should('be.visible')
     cy.get(`[data-cy="skillsSelector"]`).type('sUbJ2')
 
-    cy.get('[data-cy="skillsSelector-skillId"]').should('have.length', 3).as('skillIds')
-    cy.get('@skillIds').eq(0).contains('skill6Subj2')
-    cy.get('@skillIds').eq(1).contains('skill7Subj2')
-    cy.get('@skillIds').eq(2).contains('skill8Subj2')
+    cy.get('[data-cy="skillsSelector-skillName"]').should('have.length', 3).as('skillIds')
+    cy.get('@skillIds').eq(0).contains('Skill 6')
+    cy.get('@skillIds').eq(1).contains('Skill 7')
+    cy.get('@skillIds').eq(2).contains('Skill 8')
 
     cy.get('[data-cy="skillsSelector-skillName"]').should('have.length', 3).as('names')
     cy.get('@names').eq(0).contains('Very Great Skill 6 Subj2')
