@@ -90,7 +90,7 @@ public class MockUserInfoService {
                 .trustStoreType("JKS")
                 .httpDisabled(true)
                 .needClientAuth(true)
-                .extensions(new UserInfoResponseTransformer(userAttrsRepo)));
+                .extensions(new UserInfoResponseTransformer(userAttrsRepo), new UserSuggestionResponseTransformer(userAttrsRepo)));
 
         mockServer.stubFor(any(urlPathEqualTo("/status")).willReturn(
                 ok()
@@ -99,8 +99,9 @@ public class MockUserInfoService {
         ));
         mockServer.stubFor(any(urlPathEqualTo("/userQuery")).willReturn(
                 ok()
-                .withHeader(CONTENT_TYPE, "application/json")
-                .withBody("""[{"username": "skills@skills.org", "usernameForDisplay":"skills@skills.org"}]""")
+                        .withTransformers("user-suggestion-transformer")
+//                .withHeader(CONTENT_TYPE, "application/json")
+//                .withBody("""[{"username": "skills@skills.org", "usernameForDisplay":"skills@skills.org", "userDn": "abc123"}]""")
         ));
         mockServer.stubFor(
                 any(urlPathEqualTo("/userInfo"))
@@ -201,4 +202,70 @@ public class MockUserInfoService {
         }
     }
 
+
+    public static class UserSuggestionResponseTransformer extends ResponseDefinitionTransformer {
+
+        UserAttrsRepo userAttrsRepo
+
+        public UserSuggestionResponseTransformer(UserAttrsRepo userAttrsRepo) {
+            this.userAttrsRepo = userAttrsRepo
+        }
+
+        @Override
+        ResponseDefinition transform(Request request, ResponseDefinition responseDefinition, FileSource files, Parameters parameters) {
+            String query = request.queryParameter('query')?.firstValue()
+
+//            if (dnQuery?.containsIgnoreCase('doesNotExist')) {
+//                throw new Exception("Unknown User [${dnQuery}]")
+//            }
+
+            if (!query || query == "null") {
+                return new ResponseDefinitionBuilder()
+                        .withHeader(CONTENT_TYPE, "application/json")
+                        .withBody("{}")
+                        .build()
+            }
+
+            String usernamified = DnUsernameHelper.getUsername(query).toLowerCase()
+            UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(usernamified)
+            String usernamifiedForDisplay = userAttrs?.userIdForDisplay ?: "${usernamified} for display"
+//            String usernamified = dnQuery.replaceAll(" ", "_").replaceAll(",","").replaceAll("=","-")
+
+            String fname = userAttrs?.firstName ?: "${usernamified.toUpperCase()}_first"
+            String lname = userAttrs?.lastName ?: "${usernamified.toUpperCase()}_last"
+
+            log.info("looking up firstname/lastname for ${query}")
+            FirstnameLastname configuredNames = DN_TO_NAME.get(query.toLowerCase())
+            if (configuredNames) {
+                log.info("!!!! found FirstnameLastname for $query")
+                fname = configuredNames.firstname
+                lname = configuredNames.lastname
+            }
+
+            String email = userAttrs?.email ?: EmailUtils.generateEmaillAddressFor(usernamified)
+
+            return new ResponseDefinitionBuilder()
+                    .withHeader(CONTENT_TYPE, "application/json")
+                    .withBody("""
+                    [{
+                        "firstName" : "${fname}",
+                        "lastName": "${lname}",
+                        "email": "${email.toLowerCase()}",
+                        "username": "${usernamified}",
+                        "usernameForDisplay": "${usernamifiedForDisplay}",
+                        "userDn": "${query}"
+                    }]
+                    """).build()
+        }
+
+        @Override
+        String getName() {
+            return "user-suggestion-transformer"
+        }
+
+        @Override
+        boolean applyGlobally() {
+            return false;
+        }
+    }
 }

@@ -58,6 +58,7 @@ class SkillEventProcessor {
     
     private String getUserName(String userIdToProcess) {
             String idType = "ID";
+            String originalIdToProcess = userIdToProcess;
             if(authMode == AuthMode.PKI) {
                 List<UserInfo> userInfos = pkiUserLookup.suggestUsers(userIdToProcess, "");
 
@@ -71,7 +72,7 @@ class SkillEventProcessor {
 
                 userIdToProcess = userInfos.get(0).getUserDn();
                 if (!userIdToProcess) {
-                    throw new SkillException("User [" + userIdToProcess + "] as found but did not have a DN set");
+                    throw new SkillException("User [" + originalIdToProcess + "] was found but did not have a DN set");
                 }
                 idType = "DN";
             }
