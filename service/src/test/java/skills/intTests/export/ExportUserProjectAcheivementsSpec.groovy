@@ -15,14 +15,10 @@
  */
 package skills.intTests.export
 
-import groovy.time.TimeCategory
-import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.MockUserInfoService
 import skills.intTests.utils.SkillsService
 import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 import skills.storage.model.SkillDef
-import spock.lang.Shared
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -36,7 +32,13 @@ class ExportUserProjectAcheivementsSpec extends ExportBaseIntSpec {
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj1)
-        skillsService.createSkills(skillsSubj1)
+        skillsService.createSkills(skillsSubj1[0..2])
+
+        def skillsGroup = createSkillsGroup(1, 1, 6)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, skillsSubj1[4])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, skillsSubj1[3])
 
         def subj2 = createSubject(1, 2)
         List<Map> skillsSubj2 = createSkills(5, 1, 2)
@@ -48,6 +50,8 @@ class ExportUserProjectAcheivementsSpec extends ExportBaseIntSpec {
         List<String> usersCopy = new ArrayList<>(users)
         achieveLevelForUsers(usersCopy, skillsSubj1, 2, 1, "Subject")
         achieveLevelForUsers(usersCopy, skillsSubj2, 1, 1, "Subject")
+        skillsService.addSkill([projectId: proj.projectId, skillId: skillsSubj1[3].skillId], users.first(), dates[0])
+        skillsService.addSkill([projectId: proj.projectId, skillId: skillsSubj1[4].skillId], users.first(), new Date(dates[0].time+1))
 
         Map props = [:]
         props[MetricsPagingParamsHelper.PROP_SORT_DESC] = false
@@ -58,21 +62,68 @@ class ExportUserProjectAcheivementsSpec extends ExportBaseIntSpec {
 
         def excelExport = skillsService.getUserAchievementsExcelExport(proj.projectId, props)
 
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = "${SkillDef.ContainerType.Skill}"
+        def justSkills = skillsService.getUserAchievementsExcelExport(proj.projectId, props)
+
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = "${SkillDef.ContainerType.SkillsGroup}"
+        def justSkillsGroup = skillsService.getUserAchievementsExcelExport(proj.projectId, props)
+
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = "${SkillDef.ContainerType.Subject}"
+        def justSubject = skillsService.getUserAchievementsExcelExport(proj.projectId, props)
+
         then:
 
         excelExport
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
                 ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 4", "", formatDate(dates[0])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "2.0", formatDate(dates[0])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 5", "", formatDate(dates[0])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "SkillsGroup", "Test Skill 6", "", formatDate(dates[0])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "3.0", formatDate(dates[0])],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 1", "", formatDate(dates[1])],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "1.0", formatDate(dates[1])],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Overall", "Overall", "1.0", formatDate(dates[1])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Overall", "Overall", "2.0", formatDate(dates[1])],
                 [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Skill", "Test Skill 1", "", formatDate(dates[1], 1)],
                 [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Subject", "Test Subject #1", "1.0", formatDate(dates[1], 1)],
                 [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Overall", "Overall", "1.0", formatDate(dates[1], 1)],
                 [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Skill", "Test Skill 1 Subject2", "", formatDate(dates[1], 2)],
                 [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Subject", "Test Subject #2", "1.0", formatDate(dates[1], 2)],
                 [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Overall", "Overall", "1.0", formatDate(dates[1], 2)],
+                ["For All Dragons Only"],
+        ])
+
+        justSkills
+        validateExport(justSkills.file, [
+                ["For All Dragons Only"],
+                ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 4", "", formatDate(dates[0])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 5", "", formatDate(dates[0])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Skill", "Test Skill 1", "", formatDate(dates[1])],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Skill", "Test Skill 1", "", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Skill", "Test Skill 1 Subject2", "", formatDate(dates[1], 2)],
+                ["For All Dragons Only"],
+        ])
+
+        justSkillsGroup
+        validateExport(justSkillsGroup.file, [
+                ["For All Dragons Only"],
+                ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "SkillsGroup", "Test Skill 6", "", formatDate(dates[0])],
+                ["For All Dragons Only"],
+        ])
+
+        justSubject
+        validateExport(justSubject.file, [
+                ["For All Dragons Only"],
+                ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "2.0", formatDate(dates[0])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "3.0", formatDate(dates[0])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "Subject", "Test Subject #1", "1.0", formatDate(dates[1])],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "Subject", "Test Subject #1", "1.0", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "Subject", "Test Subject #2", "1.0", formatDate(dates[1], 2)],
                 ["For All Dragons Only"],
         ])
     }
