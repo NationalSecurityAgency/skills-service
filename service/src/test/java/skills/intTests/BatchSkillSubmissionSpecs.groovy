@@ -15,9 +15,9 @@
  */
 package skills.intTests
 
+import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import skills.controller.AddSkillHelper
-import skills.controller.request.model.BatchSkillEventRequest
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
@@ -307,6 +307,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
 
         when:
         def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+        println JsonOutput.prettyPrint(JsonOutput.toJson(result.results))
 
         then:
         result.results.size() == 12

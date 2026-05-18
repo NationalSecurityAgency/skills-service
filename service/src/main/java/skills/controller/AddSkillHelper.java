@@ -17,6 +17,7 @@ package skills.controller;
 
 import callStack.profiler.CProf;
 import groovy.lang.Closure;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -68,75 +69,35 @@ public class AddSkillHelper {
     ProjectErrorService projectErrorService;
 
     @Autowired
-    UserAuthService userAuthService;
-
-    @Autowired
     UserActionsHistoryService userActionsHistoryService;
 
     @Autowired
     SkillEventProcessor skillEventProcessor;
 
-    @Value("${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}")
-    AuthMode authMode;
-    @Autowired
-    private UserAttrsService userAttrsService;
-
     @Transactional
     public BatchSkillEventResult addBatchSkillsForBatchUsers(String projectId, BatchSkillEventRequest batchSkillEventRequest) {
-        Long requestedTimestamp = batchSkillEventRequest != null ? batchSkillEventRequest.getTimestamp() : null;
-        List<String> skillIds = batchSkillEventRequest != null ? batchSkillEventRequest.getSkillIds() : null;
-        String skillBatchString = !skillIds.isEmpty() ? String.join(", ", skillIds) : null;
+        if (batchSkillEventRequest == null) {
+            throw new SkillException("batchSkillEventRequest cannot be null");
+        }
+        Long requestedTimestamp = batchSkillEventRequest.getTimestamp();
+        List<String> skillIds = batchSkillEventRequest.getSkillIds();
         Date incomingDate = validateTime(projectId, requestedTimestamp);
         String currentUser = userInfoService.getCurrentUserId();
         BatchSkillEventResult batchResults = new BatchSkillEventResult();
         ArrayList<SkillEventResult> results = new ArrayList<>();
 
         for(String userIdToProcess : batchSkillEventRequest.getUserIds()) {
-            String userId = "";
-
-            try {
-                boolean userExists = false;
-
-                if(authMode == AuthMode.PKI) {
-                    String mode = "ID";
-                    if (userIdToProcess.substring(0, 3).equalsIgnoreCase("CN=")) {
-                        mode = "DN";
-                    }
-                    userId = userInfoService.getUserName(userIdToProcess, false, mode);
-                    userExists = userAuthService.userExists(userId);
-                } else {
-                    UserAttrs user = userAttrsService.findByUserId(userIdToProcess);
-                    if(user != null && user.getUserId() != null) {
-                        userExists = true;
-                        userId = user.getUserId();
-                    }
-                }
-                if (!userExists) {
-                    log.info("User [" + userIdToProcess + "] does not exist, will be created");
-                    userId = skillEventProcessor.createNewUser(userIdToProcess).getUserId();
-                }
-            } catch (SkillException e) {
-                SkillEventResult res = createNewEventResult("User [" + userIdToProcess + "] could not be processed: " + e.getMessage(), projectId, "", userIdToProcess);
-                results.add(res);
-                log.error("Error applying skills, user [{}], error [{}]", userIdToProcess, res.getExplanation());
-                continue;
-            }
-
-            if (log.isInfoEnabled()) {
-                log.info("ReportSkills (ProjectId=[{}], SkillIds=[{}], CurrentUser=[{}], UserId=[{}], RequestDate=[{}])",
-                        projectId, skillBatchString, userInfoService.getCurrentUserId(), userIdToProcess, toDateString(requestedTimestamp));
-            }
             for (String skillId : skillIds) {
                 SkillEventResult result = null;
                 try {
-                    result = skillEventProcessor.processSkillForUser(skillId, userId, projectId, incomingDate, currentUser);
+                    result = skillEventProcessor.processSkillForUser(skillId, userIdToProcess, projectId, incomingDate, currentUser);
                 } catch(SkillException ske) {
-                    log.error("Error applying skill [{}], user [{}], error [{}]", skillId, userId, ske.getMessage());
+                    log.error("Error applying skill [{}], user [{}], error [{}]", skillId, userIdToProcess, ske.getMessage());
 
                     if (ske.getErrorCode() == ErrorCode.SkillNotFound) {
                         projectErrorService.invalidSkillReported(projectId, skillId);
                     }
-                    result = createNewEventResult(ske.getMessage(), projectId, skillId, userId);
+                    result = createNewEventResult(ske.getMessage(), projectId, skillId, userIdToProcess);
                 } finally {
                     results.add(result);
                 }
