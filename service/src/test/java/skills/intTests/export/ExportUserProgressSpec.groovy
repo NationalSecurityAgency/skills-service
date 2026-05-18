@@ -416,4 +416,17 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
                 ["For All Dragons Only"],
         ])
     }
+
+    def 'getUserProgressExcelExport allows userTagFilter to be omitted'() {
+        def p1 = createProject(10)
+        def p1_subj1 = createSubject(10, 1)
+        def p1_skills = createSkills(5, 10, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1_subj1, p1_skills)
+
+        when:
+        def results = skillsService.getUserProgressExcelExport(p1.projectId)
+
+        then:
+        results
+    }
 }
