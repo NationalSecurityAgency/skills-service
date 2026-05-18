@@ -84,7 +84,11 @@ const props = defineProps({
     type: String,
     default: 'body',
     required: false,
-  }
+  },
+  showIcon: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const selectedInternal = ref([]);
@@ -176,6 +180,67 @@ defineExpose({
   clearValue,
   focus
 })
+
+const getIconClass = (skill) => {
+  console.log(skill)
+  const { type } = skill
+  if (SkillType.isSubject(type)) {
+    return 'fa-solid fa-cubes skills-color-subjects text-slate-500'
+  }
+  if (SkillType.isBadge(type)) {
+    return 'fas fa-award skills-color-badges text-indigo-500'
+  }
+  if (SkillType.isSkillsGroup(type)) {
+    return 'fa-solid fa-layer-group text-purple-500'
+  }
+  return 'fas fa-graduation-cap skills-color-skills text-sky-500'
+}
+
+const subTypesToShow = (item) => {
+  const res = []
+
+  if (props.showType) {
+    res.push({
+      label: 'Type',
+      value: SkillType.isSkillsGroup(item.type) ? 'Skills Group' : item.type,
+      dataCy: 'skillsSelector-type'
+    })
+  }
+
+  if (props.showProject) {
+    res.push({
+      label: 'Project ID',
+      value: item.projectId,
+      dataCy: 'skillsSelector-projectId'
+    })
+  }
+
+  if (SkillType.isSkill(item.type) || SkillType.isSkillsGroup(item.type)) {
+    res.push({
+      label: 'Subject',
+      value: item.subjectName,
+      dataCy: 'skillsSelector-subjectName'
+    })
+  }
+
+  if (item.type === 'Shared Skill') {
+    res.push({
+      label: 'Project',
+      value: item.projectName,
+      dataCy: 'skillsSelector-projectName'
+    })
+  }
+
+  if (item.groupName) {
+    res.push({
+      label: 'Group',
+      value: item.groupName,
+      dataCy: 'skillsSelector-groupName'
+    })
+  }
+
+  return res
+}
 </script>
 
 <template>
@@ -204,46 +269,24 @@ defineExpose({
 
         <template #option="slotProps">
           <slot name="dropdown-item" :option="slotProps">
-            <div :data-cy="`skillsSelectionItem-${slotProps.option.projectId}-${slotProps.option.skillId}`">
-              <div class="text-xl text-info skills-option-name" data-cy="skillsSelector-skillName"><span
-                  v-if="showType">{{
-                  slotProps.option.type
-                }}:</span> {{ slotProps.option.name }}
-                <Tag v-if="slotProps.option.isReused" variant="success" size="sm" class="uppercase"
-                     data-cy="reusedBadge" aria-label="Reused"
-                     style="font-size: 0.85rem !important;"><i class="fas fa-recycle" aria-hidden="true"></i> reused
-                </Tag>
+            <div class="flex gap-2 items-center w-full">
+              <div v-if="showIcon" class="border rounded p-2 min-w-6 text-primary">
+                <i class="text-2xl" :class="getIconClass(slotProps.option)" aria-hidden="true"/>
               </div>
-              <div style="font-size: 0.8rem;">
-              <span class="skills-option-id">
-                <span v-if="showProject" data-cy="skillsSelectionItem-projectId"><span
-                    class="uppercase mr-1 italic">Project ID:</span><span
-                    class="font-bold"
-                    data-cy="skillsSelector-projectId">{{ slotProps.option.projectId }}</span></span>
-                <span v-if="!showProject" data-cy="skillsSelectionItem-skillId">
-                  <span class="uppercase mr-1 italic">ID:</span>
-                  <span class="font-bold" data-cy="skillsSelector-skillId">
-                  {{ removeReuseTag(slotProps.option.skillId) }}
-                  </span>
-                </span>
-              </span>
-                <span class="mx-2" v-if="slotProps.option.type !== 'Badge'">|</span>
-                <span v-if="SkillType.isSkill(slotProps.option.type) || SkillType.isSkillsGroup(slotProps.option.type)" class="uppercase mr-1 italic"
-                      data-cy="skillsSelectionItem-subjectId">Subject:</span>
-                <span v-if="SkillType.isSkill(slotProps.option.type) || SkillType.isSkillsGroup(slotProps.option.type)"
-                      class="font-bold skills-option-subject-name"
-                      data-cy="skillsSelector-subjectName">{{ slotProps.option.subjectName }}</span>
-                <span v-if="slotProps.option.type === 'Shared Skill'" class="uppercase mr-1 italic"
-                      data-cy="skillsSelectionItem-projectName">Project:</span>
-                <span v-if="slotProps.option.type === 'Shared Skill'"
-                      class="font-bold skills-option-subject-name"
-                      data-cy="skillsSelector-projectName">{{ slotProps.option.projectName }}</span>
-                <span v-if="slotProps.option.groupName">
-                <span class="mx-2">|</span>
-                <span class="uppercase mr-1 italic skills-option-group-name" data-cy="skillsSelectionItem-group">Group:</span><span
-                    class="font-bold skills-id"
-                    data-cy="skillsSelector-groupName">{{ slotProps.option.groupName }}</span>
-              </span>
+              <div :data-cy="`skillsSelectionItem-${slotProps.option.projectId}-${slotProps.option.skillId}`">
+                <div class="text-xl text-info skills-option-name flex gap-2 items-center">
+                  <div data-cy="skillsSelector-skillName" class="text-primary">{{ slotProps.option.name }}</div>
+                  <Tag v-if="slotProps.option.isReused" aria-label="Reused" class="text-sm" data-cy="reusedBadge">
+                    <i class="fas fa-recycle" aria-hidden="true"></i><span class="uppercase">reused</span>
+                  </Tag>
+                </div>
+                <div class="text-sm flex gap-2 items-center">
+                  <div v-for="(subType, index) in subTypesToShow(slotProps.option)" :key="subType.dataCy" class="flex gap-1 items-center">
+                    <div v-if="index > 0" class="text-gray-500 mx-1">|</div>
+                    <div class="italic">{{ subType.label }}:</div>
+                    <div class="font-bold" :data-cy="subType.dataCy">{{ subType.value }}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </slot>

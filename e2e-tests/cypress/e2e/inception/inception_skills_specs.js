@@ -135,9 +135,11 @@ describe('Inception Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/');
         cy.get('[data-cy="skillsSelector"]').click();
         cy.get('li.p-autocomplete-empty-message').contains('Type to search for skills').should('be.visible')
+        cy.intercept('/admin/projects/proj1/skills?*skillNameQuery=s*').as('searchSkills');
         cy.get(`[data-cy="skillsSelector"]`).type('s')
+        cy.wait('@searchSkills')
 
-        cy.get('[data-cy="skillsSelectionItem-skillId"]').should('have.length', 1).as('skillIds');
+        cy.get('[data-cy="skillsSelector-skillName"]').should('have.length', 1).as('skillIds');
         cy.get('@skillIds').eq(0).click();
         cy.get('[data-cy="pageHeader"]').contains('ID: skill1')
 

@@ -85,39 +85,40 @@ describe('Cross-project Skills Tests', () => {
         });
 
         Cypress.Commands.add('shareSkill', (skillText, projText) => {
-            cy.get('[data-cy="shareButton"')
+            cy.get('[data-cy="shareSkillsWithOtherProjectsCard"] [data-cy="shareButton"]')
                 .should('be.disabled');
-            cy.get('[data-cy="skillSelector"]')
+            cy.get('[data-cy="shareSkillsWithOtherProjectsCard"] [data-cy="skillsSelector"]')
                 .click()
-            cy.get('[data-cy="skillSelector"]')
+            cy.get('[data-cy="shareSkillsWithOtherProjectsCard"] [data-cy="skillsSelector"] input')
                 .type(`{selectall}${skillText}`)
-            cy.get('[data-cy="skillsSelector-skillName"]').contains(skillText).first()
+            cy.get('[data-pc-section="overlay"] [data-cy="skillsSelector-skillName"]').contains(skillText).first()
                 .click()
-            cy.get('[data-cy="shareButton"]')
+            cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]  [data-cy="shareButton"]')
                 .should('be.disabled');
 
-            cy.get('[data-cy="projectSelector"]')
+            cy.get('[data-cy="shareSkillsWithOtherProjectsCard"] [data-cy="projectSelector"]')
                 .click()
             if (projText) {
-                cy.get('[data-pc-name="pcfilter"]')
+                cy.get('[data-pc-section="overlay"] [data-pc-name="pcfilter"]')
                   .type(`${projText}`)
-                cy.get('[data-cy="projectSelector-projectName"]').contains(projText).first()
+                cy.get('[data-pc-section="overlay"] [data-cy="projectSelector-projectName"]').contains(projText).first()
                   .click()
             } else {
-                cy.get('[data-cy="projectSelector-projectName"]').first().click()
+                cy.get('[data-pc-section="overlay"] [data-cy="projectSelector-projectName"]').first().click()
             }
-            cy.get('[data-cy="shareButton"')
+            cy.get('[data-cy="shareSkillsWithOtherProjectsCard"] [data-cy="shareButton"]')
                 .should('be.enabled');
 
-            cy.get('[data-cy="shareButton"')
+            cy.get('[data-cy="shareSkillsWithOtherProjectsCard"] [data-cy="shareButton"]')
                 .click();
         });
     });
 
     it('share skill with another project', () => {
-        cy.visit('/administrator/projects/proj1');
-        cy.clickNav('Learning Path');
-
+        cy.viewport(1400, 1800)
+        cy.intercept('/admin/projects/proj1/skillsAndBadges**').as('skillsAndBadges');
+        cy.visit('/administrator/projects/proj1/learning-path');
+        cy.wait('@skillsAndBadges');
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]')
             .contains('Share skills from this project with other projects');
         cy.get('[data-cy="skillsSharedWithMeCard"]')
@@ -156,8 +157,8 @@ describe('Cross-project Skills Tests', () => {
 
         const sharedSkillSelector = '[data-cy="skillsSelectionItem-proj1-skill1"]'
         cy.get('[data-cy="learningPathFromSkillSelector"]').click()
-        cy.get(sharedSkillSelector).contains('Shared Skill:');
-        cy.get(sharedSkillSelector).contains('Project 1')
+        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-type"]`).contains('Shared Skill');
+        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-projectName"]`).contains('Project 1')
         cy.get(sharedSkillSelector).contains('Very Great Skill # 1')
 
         // -------------------------
@@ -180,18 +181,18 @@ describe('Cross-project Skills Tests', () => {
         cy.get('[data-cy="skillsSharedWithMeCard"]')
             .contains('No Skills Available Yet...');
 
-        cy.get('[data-cy="shareButton"')
+        cy.get('[data-cy="shareButton"]')
             .should('be.disabled');
         cy.get('[data-cy="skillSelector"]')
             .click()
             .type('1{enter}');
         cy.get(`[data-cy="skillsSelectionItem-proj1-skill1"]`).click()
-        cy.get('[data-cy="shareButton"')
+        cy.get('[data-cy="shareButton"]')
             .should('be.disabled');
 
         cy.get('[data-cy="shareWithAllProjectsCheckbox"]').click()
 
-        cy.get('[data-cy="shareButton"')
+        cy.get('[data-cy="shareButton"]')
             .click();
 
         cy.validateTable(sharedWithOtherTableSelector, [
@@ -226,8 +227,8 @@ describe('Cross-project Skills Tests', () => {
         cy.contains('No Learning Path Yet');
         const sharedSkillSelector = '[data-cy="skillsSelectionItem-proj1-skill1"]'
         cy.get('[data-cy="learningPathFromSkillSelector"]').click()
-        cy.get(sharedSkillSelector).contains('Shared Skill:');
-        cy.get(sharedSkillSelector).contains('Project 1')
+        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-type"]`).contains('Shared Skill');
+        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-projectName"]`).contains('Project 1')
         cy.get(sharedSkillSelector).contains('Very Great Skill # 1')
 
         // -------------------------
@@ -249,8 +250,8 @@ describe('Cross-project Skills Tests', () => {
 
         cy.contains('No Learning Path Yet');
         cy.get('[data-cy="learningPathFromSkillSelector"]').click()
-        cy.get(sharedSkillSelector).contains('Shared Skill:');
-        cy.get(sharedSkillSelector).contains('Project 1')
+        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-type"]`).contains('Shared Skill');
+        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-projectName"]`).contains('Project 1')
         cy.get(sharedSkillSelector).contains('Very Great Skill # 1')
     });
 
