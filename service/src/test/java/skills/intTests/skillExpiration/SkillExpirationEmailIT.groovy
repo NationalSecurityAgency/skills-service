@@ -1024,8 +1024,7 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
         skillsService.createSkills(skills)
         skillsService.changeSetting(proj.projectId, "invite_only", [projectId: proj.projectId, setting: "invite_only", value: "true"])
 
-        String userId = getRandomUsers(1, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID]).first()
-        def newService = createService(userId)
+        List<String> userIds = getRandomUsers(4, true, ['skills@skills.org', DEFAULT_ROOT_USER_ID])
         Date achievementDate = new Date() - 10 // 10 days ago
 
         // Configure skill expiration
@@ -1038,27 +1037,44 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
                 emailNotificationsEnabled: true
         ])
 
-        skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail@email.foo"]])
-        WaitFor.wait {
-            greenMail.getReceivedMessages().length > 0
+        userIds.eachWithIndex {String userId, index ->
+            skillsService.inviteUsersToProject(proj.projectId, [validityDuration: "PT5M", recipients: ["someemail${index}@email.foo".toString()]])
         }
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 4 }
 
-        def email = EmailUtils.getEmail(greenMail, 0)
-        def invite = extractInviteFromEmail(email.html)
+        userIds.eachWithIndex { String userId, int index ->
+            def newService = createService(userId)
+            def email = EmailUtils.getEmail(greenMail, index)
+            def invite = extractInviteFromEmail(email.html)
+            newService.joinProject(proj.projectId, invite)
+            // Create user achievement
+            skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], userId, achievementDate)
+        }
         greenMail.reset()
 
-        newService.joinProject(proj.projectId, invite)
+        List<UserAttrs> userAttrs = userIds.collect { userId ->
+            userAttrsRepo.findByUserIdIgnoreCase(userId)
+        }
 
-        // Create user achievement
-        skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId.toString()], userId, achievementDate)
-
-        skillsService.revokeInviteOnlyProjectAccess(proj.projectId, userId)
+        String revokedUserId = userIds.removeAt(1)
+        skillsService.revokeInviteOnlyProjectAccess(proj.projectId, revokedUserId)
 
         when:
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
 
+        assert WaitFor.wait { greenMail.getReceivedMessages().size() == 3 }
+        List<EmailUtils.EmailRes> emails = EmailUtils.getEmails(greenMail)
+
         then:
-        greenMail.getReceivedMessages().size() == 0
+        emails.size() == 3
+
+        // Verify revoked user did not receive an email
+        !emails.any { it.recipients == [userAttrs.find {it.userId == revokedUserId}.email] }
+
+        // Verify the non-revoked users did receive the email
+        emails.any { it.recipients == [userAttrs.find {it.userId == userIds[0]}.email] }
+        emails.any { it.recipients == [userAttrs.find {it.userId == userIds[1]}.email] }
+        emails.any { it.recipients == [userAttrs.find {it.userId == userIds[2]}.email] }
     }
 
     def "users that fully and partially achieve a skill receive expired email notifications for MONTHLY"() {
