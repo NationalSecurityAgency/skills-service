@@ -44,9 +44,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         List<String> users = getRandomUsers(1)
-        users.each{
-            createService(it)
-        }
 
         def skillRequest = [
                 userIds: [users[0]],
@@ -67,7 +64,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         result.results[0].userId == users[0]
 
     }
-
     
     def "Submit a batch of skills for a single user"() {
         def proj1 = SkillsFactory.createProject(1)
@@ -83,9 +79,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
         List<String> users = getRandomUsers(1)
-        users.each{
-            createService(it)
-        }
 
         def skillRequest = [
                 userIds: [users[0]],
@@ -127,9 +120,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
         List<String> users = getRandomUsers(4)
-        users.each{
-            createService(it)
-        }
 
         def skillRequest = [
                 userIds: users,
@@ -177,9 +167,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
         List<String> users = getRandomUsers(4)
-        users.each{
-            createService(it)
-        }
 
         def skillRequest = [
                 userIds: users,
@@ -242,9 +229,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         List<String> users = getRandomUsers(4)
-        users.each{
-            createService(it)
-        }
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: 'skill1'], users[0], new Date())
         skillsService.addSkill([projectId: proj1.projectId, skillId: 'skill1'], users[1], new Date() - 1)
@@ -312,9 +296,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
         List<String> users = getRandomUsers(4)
-        users.each{
-            createService(it)
-        }
 
         def skillRequest = [
                 userIds: users,
@@ -641,49 +622,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         result.results[3].skillId == 'skill1'
         result.results[3].skillApplied
         result.results[3].userId == users[3]
-    }
-
-    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
-    def "Submit a skill for an invalid user"() {
-        def proj1 = SkillsFactory.createProject(1)
-        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
-
-        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
-        proj1_skills.each {
-            it.pointIncrement = 100
-            it.numPerformToCompletion = 2
-            it.pointIncrementInterval = 0 // ability to achieve right away
-        }
-        skillsService.createProject(proj1)
-        skillsService.createSubject(proj1_subj1)
-        skillsService.createSkills(proj1_skills)
-
-        List<String> users = getRandomUsers(1)
-        SkillsService user1Service = createService(users[0], "passefeafeaef", "John", "Smith")
-        UserAttrs user1Attrs = userAttrsRepo.findByUserIdIgnoreCase(users[0])
-
-        def skillRequest = [
-                userIds: [user1Attrs.dn, "invaliduser"],
-                skillIds: ['skill1'],
-                timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
-        ]
-
-        when:
-        def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
-
-        then:
-        result
-        result.results.size() == 2
-        result.results[0].skillId == 'skill1'
-        result.results[0].skillApplied
-        result.results[0].userId == users[0]
-
-        !result.results[1].skillApplied
-        result.results[1].userId == "invaliduser"
-        result.results[1].explanation == "User [invaliduser] could not be processed: User [invaliduser] does not exist"
-
     }
 
     def "Submit a batch of skills for multiple users as a root user"() {

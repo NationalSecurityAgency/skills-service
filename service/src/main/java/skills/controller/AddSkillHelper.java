@@ -95,17 +95,23 @@ public class AddSkillHelper {
             String userId = "";
 
             try {
+                boolean userExists = false;
+
                 if(authMode == AuthMode.PKI) {
                     String mode = "ID";
                     if (userIdToProcess.substring(0, 3).equalsIgnoreCase("CN=")) {
                         mode = "DN";
                     }
                     userId = userInfoService.getUserName(userIdToProcess, false, mode);
-                    boolean userExists = userAuthService.userExists(userId);
-                    if (!userExists) {
-                        throw new SkillException("User [" + userIdToProcess + "] does not exist");
-                    }
+                    userExists = userAuthService.userExists(userId);
                 } else {
+                    UserAttrs user = userAttrsService.findByUserId(userIdToProcess);
+                    if(user != null && user.getUserId() != null) {
+                        userExists = true;
+                        userId = user.getUserId();
+                    }
+                }
+                if (!userExists) {
                     log.info("User [" + userIdToProcess + "] does not exist, will be created");
                     userId = skillEventProcessor.createNewUser(userIdToProcess).getUserId();
                 }
