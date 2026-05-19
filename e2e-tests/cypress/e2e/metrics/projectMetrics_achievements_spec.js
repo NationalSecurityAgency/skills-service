@@ -174,7 +174,7 @@ describe('Metrics Tests - Achievements', () => {
               { colIndex: 3, value: 'N/A' }, { colIndex: 4, value: '2020-09-10 11:00' }
             ],
             [ { colIndex: 0, value: 'user0Good@skills.org' },
-              { colIndex: 1, value: 'Skill Group' },
+              { colIndex: 1, value: 'Group' },
               { colIndex: 2, value: 'Awesome Group 6 Subj1' },
               { colIndex: 3, value: 'N/A' }, { colIndex: 4, value: '2020-09-09 11:00' }
             ],
