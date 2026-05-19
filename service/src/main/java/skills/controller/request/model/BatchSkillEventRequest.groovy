@@ -19,4 +19,5 @@ class BatchSkillEventRequest {
     List<String> skillIds
     List<String> userIds
     Long timestamp
+    String userSuggestOption
 }

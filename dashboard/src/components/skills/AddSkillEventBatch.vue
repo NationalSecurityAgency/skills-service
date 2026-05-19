@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInput.vue";
 import SkillsService from "@/components/skills/SkillsService.js";
 import StepList from "primevue/steplist";
@@ -47,6 +47,19 @@ const usersToAdd = ref("");
 const dateAdded = ref(new Date());
 const results = ref([]);
 const displayFullText = ref(false);
+const userSuggestOptions = ref([]);
+const selectedSuggestOption = ref(null);
+
+onMounted(() => {
+  if (appConfig.userSuggestOptions) {
+    userSuggestOptions.value = appConfig.userSuggestOptions.split(',')
+    selectedSuggestOption.value = userSuggestOptions.value[0];
+  }
+});
+
+const hasUserSuggestOptions = computed(() => {
+  return userSuggestOptions.value && userSuggestOptions.value.length > 0;
+});
 
 const userList = computed(() => {
   if(usersToAdd.value.length > 0) {
@@ -65,7 +78,7 @@ const saveEvents = () => {
   const skillIds = props.skills.map((skill) => skill.skillId);
   loading.value = true;
 
-  return SkillsService.saveSkillEventBatch(props.projectId, skillIds, userIds, dateAdded.value.getTime(), true).then((result) => {
+  return SkillsService.saveSkillEventBatch(props.projectId, skillIds, userIds, dateAdded.value.getTime(), true, selectedSuggestOption.value).then((result) => {
     usersToAdd.value = '';
     results.value = result.results;
     loading.value = false;
@@ -140,6 +153,9 @@ const maxSkillBatchSize = computed(() => {
           <Message class="mb-2" data-cy="skillsToAdd" :closable="false" severity="info">
             Add the users that have performed the skill(s), one user per line.
           </Message>
+          <div class="mb-2">
+            <Select v-if="hasUserSuggestOptions" data-cy="userSuggestOptionsDropdown" v-model="selectedSuggestOption" :options="userSuggestOptions" class="md:mr-2"/>
+          </div>
           <div class="mb-2">
             <SkillsTextarea
                 label="Users to add skill events for"
