@@ -23,12 +23,14 @@ import com.github.tomakehurst.wiremock.extension.Parameters
 import com.github.tomakehurst.wiremock.extension.ResponseDefinitionTransformer
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.ResponseDefinition
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Component
 import skills.auth.SecurityMode
+import skills.auth.UserInfo
 import skills.storage.model.UserAttrs
 import skills.storage.repos.UserAttrsRepo
 
@@ -90,7 +92,7 @@ class MockUserInfoService {
                 .trustStoreType("JKS")
                 .httpDisabled(true)
                 .needClientAuth(true)
-                .extensions(new UserInfoResponseTransformer(userAttrsRepo), new UserSuggestionResponseTransformer(userAttrsRepo)));
+                .extensions(new UserInfoResponseTransformer(userAttrsRepo), new UserSuggestionResponseTransformer(userAttrsRepo, certificateRegistry)));
 
         mockServer.stubFor(any(urlPathEqualTo("/status")).willReturn(
                 ok()
@@ -192,18 +194,29 @@ class MockUserInfoService {
     }
 
 
+    static class MockedUserInfoRes {
+        String firstName
+        String lastName
+        String email
+        String username
+        String usernameForDisplay
+        String userDn
+    }
+
     static class UserSuggestionResponseTransformer extends ResponseDefinitionTransformer {
 
         UserAttrsRepo userAttrsRepo
+        CertificateRegistry suggestTransformerCertRegistry
 
-        UserSuggestionResponseTransformer(UserAttrsRepo userAttrsRepo) {
+        UserSuggestionResponseTransformer(UserAttrsRepo userAttrsRepo, CertificateRegistry suggestTransformerCertRegistry) {
             this.userAttrsRepo = userAttrsRepo
+            this.suggestTransformerCertRegistry = suggestTransformerCertRegistry
         }
 
         @Override
         ResponseDefinition transform(Request request, ResponseDefinition responseDefinition, FileSource files, Parameters parameters) {
             String query = request.queryParameter('query')?.firstValue()
-            log.debug("Called /userQuery endpoint with [{}] query", query)
+
             if (!query || query == "null") {
                 return new ResponseDefinitionBuilder()
                         .withHeader(CONTENT_TYPE, "application/json")
@@ -211,33 +224,30 @@ class MockUserInfoService {
                         .build()
             }
 
-            String usernamified = DnUsernameHelper.getUsername(query).toLowerCase()
-            UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(usernamified)
-            String usernamifiedForDisplay = userAttrs?.userIdForDisplay ?: "${usernamified} for display"
+            List<String> allUserIds = suggestTransformerCertRegistry.allUserIds
+            List<String> foundUserIds = allUserIds.findAll { it.toLowerCase().contains(query.toLowerCase())}
+            log.debug("Called /userQuery endpoint with [{}] query and found {} userIds", query, foundUserIds)
 
-            String fname = userAttrs?.firstName ?: "${usernamified.toUpperCase()}_first"
-            String lname = userAttrs?.lastName ?: "${usernamified.toUpperCase()}_last"
+            List<MockedUserInfoRes> mockedUserInfoRes = foundUserIds.collect {
+                String userName = it
+                String dn = suggestTransformerCertRegistry.loadDnFromUserId(userName)
+                log.debug("Loaded dn [{}] for username [{}]", dn, userName)
+                UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userName)
+                String userNameForDisplay = userAttrs?.userIdForDisplay ?: "${userName} for display"
+                String firstName = userAttrs?.firstName ?: "${userName.toUpperCase()}_first"
+                String lastName = userAttrs?.lastName ?: "${userName.toUpperCase()}_last"
+                String email = userAttrs?.email ?: EmailUtils.generateEmaillAddressFor(userName)
 
-            log.debug("Looking up firstname/lastname for [{}]", query)
-            FirstnameLastname configuredNames = DN_TO_NAME.get(query.toLowerCase())
-            if (configuredNames) {
-                log.debug("Found Firstname and Lastname for [{}]", query)
-                fname = configuredNames.firstname
-                lname = configuredNames.lastname
+                return new MockedUserInfoRes(
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        username: userName,
+                        usernameForDisplay: userNameForDisplay,
+                        userDn: dn
+                )
             }
-
-            String email = userAttrs?.email ?: EmailUtils.generateEmaillAddressFor(usernamified)
-
-            String bodyRes = """
-                    [{
-                        "firstName" : "${fname}",
-                        "lastName": "${lname}",
-                        "email": "${email.toLowerCase()}",
-                        "username": "${usernamified}",
-                        "usernameForDisplay": "${usernamifiedForDisplay}",
-                        "userDn": "${query}"
-                    }]
-                    """
+            String bodyRes = JsonOutput.prettyPrint(JsonOutput.toJson(mockedUserInfoRes))
             log.debug("Returning /userQuery with body of {}", bodyRes)
             return new ResponseDefinitionBuilder()
                     .withHeader(CONTENT_TYPE, "application/json")

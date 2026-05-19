@@ -2019,10 +2019,14 @@ class AdminController {
     @Profile
     BatchSkillEventResult addBatchSkillsForBatchUsers(@PathVariable("projectId") String projectId,
                                                              @RequestBody BatchSkillEventRequest batchSkillEventRequest) {
-
+        SkillsValidator.isNotBlank(projectId, 'projectId')
+        SkillsValidator.isNotNull(batchSkillEventRequest, 'batchSkillEventRequest', projectId)
+        SkillsValidator.isNotEmpty(batchSkillEventRequest.skillIds, 'batchSkillEventRequest.skillIds')
+        SkillsValidator.isNotEmpty(batchSkillEventRequest.userIds, 'batchSkillEventRequest.userIds')
         long batchSize = batchSkillEventRequest.skillIds.size() * batchSkillEventRequest.userIds.size();
         if(batchSize > maxSkillBatchSize) {
-            throw new SkillException("Request size ${batchSize} exceeds maximum allowable (${maxSkillBatchSize}).", projectId, null, ErrorCode.BadParam)
+            String calculationStr = "(${batchSkillEventRequest.userIds.size()} users x ${batchSkillEventRequest.skillIds.size()} skills)"
+            throw new SkillException("Request size ${batchSize} ${calculationStr} exceeds maximum allowable [${maxSkillBatchSize}].", projectId, null, ErrorCode.BadParam)
         }
 
         return addSkillHelper.addBatchSkillsForBatchUsers(projectId, batchSkillEventRequest);

@@ -18,9 +18,7 @@ package skills.intTests
 import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
 import skills.controller.AddSkillHelper
-import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.SkillsFactory
-import skills.intTests.utils.SkillsService
+import skills.intTests.utils.*
 import skills.storage.model.UserAttrs
 import spock.lang.IgnoreIf
 
@@ -28,6 +26,9 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
 
     @Autowired
     AddSkillHelper addSkillHelper
+
+    @Autowired(required = false)
+    CertificateRegistry certificateRegistry
 
     def "Submit a single skill for a single user"() {
         def proj1 = SkillsFactory.createProject(1)
@@ -43,14 +44,12 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
 
-        List<String> users = getRandomUsers(1)
+        List<String> users = getRandomUsersForThisTest(1)
 
         def skillRequest = [
                 userIds: [users[0]],
                 skillIds: ['skill1'],
                 timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
         ]
 
         when:
@@ -78,14 +77,12 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
-        List<String> users = getRandomUsers(1)
+        List<String> users = getRandomUsersForThisTest(1)
 
         def skillRequest = [
                 userIds: [users[0]],
                 skillIds: ['skill1', 'skill2', 'skill3'],
                 timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
         ]
 
         when:
@@ -105,7 +102,19 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         result.results[2].userId == users[0]
     }
 
-    
+    private List<String> getRandomUsersForThisTest(int num) {
+        boolean isPki = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki'
+        if (isPki) {
+            List<String> copyOfAllUserIds = new ArrayList<>(certificateRegistry.allUserIds.collect { it.toLowerCase()})
+            List<String> res = certificateRegistry.allUserIds
+                    .collect { it.toLowerCase() }
+                    .findAll { String userIdToConsider -> copyOfAllUserIds.count { it.contains(userIdToConsider.substring(0, userIdToConsider.size()-1))} == 1 }
+            return res.subList(0, num)
+        }
+
+        return getRandomUsers(num)
+    }
+
     def "Submit a single skill for multiple users"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
@@ -119,14 +128,12 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
-        List<String> users = getRandomUsers(4)
+        List<String> users = getRandomUsersForThisTest(4)
 
         def skillRequest = [
                 userIds: users,
                 skillIds: ['skill1'],
                 timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
         ]
 
         when:
@@ -166,14 +173,12 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
-        List<String> users = getRandomUsers(4)
+        List<String> users = getRandomUsersForThisTest(4)
 
         def skillRequest = [
                 userIds: users,
-                skillIds: ['skill1', 'skill2'],
+                skillIds: proj1_skills[0..1].skillId,
                 timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
         ]
 
         when:
@@ -181,39 +186,202 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
 
         then:
         result.results.size() == 8
-        result.results[0].skillId == 'skill1'
+        result.results[0].skillId == proj1_skills[0].skillId
         result.results[0].skillApplied
         result.results[0].userId == users[0]
 
-        result.results[1].skillId == 'skill2'
+        result.results[1].skillId == proj1_skills[1].skillId
         result.results[1].skillApplied
         result.results[1].userId == users[0]
 
-        result.results[2].skillId == 'skill1'
+        result.results[2].skillId == proj1_skills[0].skillId
         result.results[2].skillApplied
         result.results[2].userId == users[1]
 
-        result.results[3].skillId == 'skill2'
+        result.results[3].skillId == proj1_skills[1].skillId
         result.results[3].skillApplied
         result.results[3].userId == users[1]
 
-        result.results[4].skillId == 'skill1'
+        result.results[4].skillId == proj1_skills[0].skillId
         result.results[4].skillApplied
         result.results[4].userId == users[2]
 
-        result.results[5].skillId == 'skill2'
+        result.results[5].skillId == proj1_skills[1].skillId
         result.results[5].skillApplied
         result.results[5].userId == users[2]
 
-        result.results[6].skillId == 'skill1'
+        result.results[6].skillId == proj1_skills[0].skillId
         result.results[6].skillApplied
         result.results[6].userId == users[3]
 
-        result.results[7].skillId == 'skill2'
+        result.results[7].skillId == proj1_skills[1].skillId
         result.results[7].skillApplied
         result.results[7].userId == users[3]
     }
-    
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
+    def "Submit a batch of skills for multiple users - userIds are looked up via suggest"() {
+        List<String> allUserIds = certificateRegistry.allUserIds
+        List<String> suggestUserIds = [
+                "aafirstsuggestusersspecsuser",
+                "aaa@email.foo",
+                "bob@email.com",
+                "ddd@email.foo"
+        ]
+        suggestUserIds.each {
+            assert allUserIds.contains(it)
+        }
+        List<String> substringsForSuggestions = suggestUserIds.collect { it.substring(0, it.length()-1)}
+        substringsForSuggestions.each { String checkSuggestId ->
+            assert !allUserIds.contains(checkSuggestId)
+            assert allUserIds.count { it.contains(checkSuggestId) } == 1
+        }
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_skills)
+        List<String> users = getRandomUsersForThisTest(4)
+
+        def skillRequest = [
+                userIds: substringsForSuggestions,
+                skillIds: proj1_skills[0..1].skillId,
+                timestamp: 1234l,
+        ]
+
+        when:
+        def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        result.results.size() == 8
+        result.results[0].skillId == proj1_skills[0].skillId
+        result.results[0].skillApplied
+        result.results[0].userId == suggestUserIds[0]
+
+        result.results[1].skillId == proj1_skills[1].skillId
+        result.results[1].skillApplied
+        result.results[1].userId == suggestUserIds[0]
+
+        result.results[2].skillId == proj1_skills[0].skillId
+        result.results[2].skillApplied
+        result.results[2].userId == suggestUserIds[1]
+
+        result.results[3].skillId == proj1_skills[1].skillId
+        result.results[3].skillApplied
+        result.results[3].userId == suggestUserIds[1]
+
+        result.results[4].skillId == proj1_skills[0].skillId
+        result.results[4].skillApplied
+        result.results[4].userId == suggestUserIds[2]
+
+        result.results[5].skillId == proj1_skills[1].skillId
+        result.results[5].skillApplied
+        result.results[5].userId == suggestUserIds[2]
+
+        result.results[6].skillId == proj1_skills[0].skillId
+        result.results[6].skillApplied
+        result.results[6].userId == suggestUserIds[3]
+
+        result.results[7].skillId == proj1_skills[1].skillId
+        result.results[7].skillApplied
+        result.results[7].userId == suggestUserIds[3]
+    }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
+    def "Batch submission handles both ambiguous and non-existent users gracefully"() {
+        List<String> allUserIds = certificateRegistry.allUserIds
+        String userWithMultipleResults = "usera"
+        allUserIds.count { it.contains(userWithMultipleResults) } == 2
+        String nonExistentUser = "notAvailbleUser"
+        List<String> suggestUserIds = [
+                "aaa@email.foo",
+                "bob@email.com",
+        ]
+        suggestUserIds.each {
+            assert allUserIds.contains(it)
+        }
+        List<String> substringsForSuggestions = suggestUserIds.collect { it.substring(0, it.length()-1)}
+        substringsForSuggestions.each { String checkSuggestId ->
+            assert !allUserIds.contains(checkSuggestId)
+            assert allUserIds.count { it.contains(checkSuggestId) } == 1
+        }
+
+        suggestUserIds.add(1, userWithMultipleResults)
+        substringsForSuggestions.add(1, userWithMultipleResults)
+
+        suggestUserIds.add(nonExistentUser)
+        substringsForSuggestions.add(nonExistentUser)
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_skills)
+        List<String> users = getRandomUsersForThisTest(4)
+
+        def skillRequest = [
+                userIds: substringsForSuggestions,
+                skillIds: proj1_skills[0..1].skillId,
+                timestamp: 1234l,
+        ]
+
+        when:
+        def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        result.results.size() == 8
+        result.results[0].skillId == proj1_skills[0].skillId
+        result.results[0].skillApplied
+        result.results[0].userId == suggestUserIds[0]
+
+        result.results[1].skillId == proj1_skills[1].skillId
+        result.results[1].skillApplied
+        result.results[1].userId == suggestUserIds[0]
+
+        result.results[2].skillId == proj1_skills[0].skillId
+        !result.results[2].skillApplied
+        result.results[2].userId == suggestUserIds[1]
+        result.results[2].explanation == "Ambiguous user ID [${suggestUserIds[1]}]. Found multiple DNs: [\"CN=UserInfoSpecsUserA, OU=integration tests, O=Skilltree Test, C=US\", \"CN=usera, OU=integration tests, O=Skilltree Test, C=US\"]"
+
+        result.results[3].skillId == proj1_skills[1].skillId
+        !result.results[3].skillApplied
+        result.results[3].userId == suggestUserIds[1]
+        result.results[3].explanation == "Ambiguous user ID [${suggestUserIds[1]}]. Found multiple DNs: [\"CN=UserInfoSpecsUserA, OU=integration tests, O=Skilltree Test, C=US\", \"CN=usera, OU=integration tests, O=Skilltree Test, C=US\"]"
+
+        result.results[4].skillId == proj1_skills[0].skillId
+        result.results[4].skillApplied
+        result.results[4].userId == suggestUserIds[2]
+
+        result.results[5].skillId == proj1_skills[1].skillId
+        result.results[5].skillApplied
+        result.results[5].userId == suggestUserIds[2]
+
+        result.results[6].skillId == proj1_skills[0].skillId
+        !result.results[6].skillApplied
+        result.results[6].userId == suggestUserIds[3]
+        result.results[6].explanation == "User [" + suggestUserIds[3] + "] was not found"
+
+        result.results[7].skillId == proj1_skills[1].skillId
+       !result.results[7].skillApplied
+        result.results[7].userId == suggestUserIds[3]
+        result.results[7].explanation == "User [" + suggestUserIds[3] + "] was not found"
+    }
+
     def "Submit a batch of skills for multiple users with a skill not applied"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)
@@ -228,7 +396,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
 
-        List<String> users = getRandomUsers(4)
+        List<String> users = getRandomUsersForThisTest(4)
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: 'skill1'], users[0], new Date())
         skillsService.addSkill([projectId: proj1.projectId, skillId: 'skill1'], users[1], new Date() - 1)
@@ -238,8 +406,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
                 userIds: users,
                 skillIds: ['skill1', 'skill2'],
                 timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
         ]
 
         when:
@@ -295,14 +461,12 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
-        List<String> users = getRandomUsers(4)
+        List<String> users = getRandomUsersForThisTest(4)
 
         def skillRequest = [
                 userIds: users,
                 skillIds: ['skill1', 'fakeskill', 'skill2'],
                 timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
         ]
 
         when:
@@ -375,7 +539,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
 
-        String user = getRandomUsers(1)[0]
+        String user = getRandomUsersForThisTest(1)[0]
         SkillsService user1Service = createService(user, "passefeafeaef", "John", "Smith")
         UserAttrs expectedAttrs = userAttrsRepo.findByUserIdIgnoreCase(user)
 
@@ -383,8 +547,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
                 userIds: [expectedAttrs.dn],
                 skillIds: ['skill1'],
                 timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
         ]
 
         when:
@@ -414,7 +576,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
 
-        String user = getRandomUsers(1)[0]
+        String user = getRandomUsersForThisTest(1)[0]
         SkillsService user1Service = createService(user, "passefeafeaef", "John", "Smith")
         UserAttrs expectedAttrs = userAttrsRepo.findByUserIdIgnoreCase(user)
 
@@ -422,8 +584,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
                 userIds: [expectedAttrs.dn],
                 skillIds: ['skill1', 'skill2', 'skill3'],
                 timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
         ]
 
         when:
@@ -460,7 +620,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
 
-        List<String> users = getRandomUsers(3)
+        List<String> users = getRandomUsersForThisTest(3)
         SkillsService user1Service = createService(users[0], "passefeafeaef", "John", "Smith")
         SkillsService user2Service = createService(users[1], "passefeafeaef", "Dave", "Johnson")
         SkillsService user3Service = createService(users[2], "passefeafeaef", "Bob", "Williams")
@@ -472,8 +632,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
                 userIds: [user1Attrs.dn, user2Attrs.dn, user3Attrs.dn],
                 skillIds: ['skill1'],
                 timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
         ]
 
         when:
@@ -510,7 +668,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
 
-        List<String> users = getRandomUsers(3)
+        List<String> users = getRandomUsersForThisTest(3)
         SkillsService user1Service = createService(users[0], "passefeafeaef", "John", "Smith")
         SkillsService user2Service = createService(users[1], "passefeafeaef", "Dave", "Johnson")
         SkillsService user3Service = createService(users[2], "passefeafeaef", "Bob", "Williams")
@@ -522,8 +680,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
                 userIds: [user1Attrs.dn, user2Attrs.dn, user3Attrs.dn],
                 skillIds: ['skill1', 'skill2', 'skill3'],
                 timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
         ]
 
         when:
@@ -584,7 +740,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
 
-        List<String> users = getRandomUsers(4)
+        List<String> users = getRandomUsersForThisTest(4)
         SkillsService user1Service = createService(users[0], "passefeafeaef", "John", "Smith")
         SkillsService user2Service = createService(users[1], "passefeafeaef", "Dave", "Johnson")
         SkillsService user3Service = createService(users[2], "passefeafeaef", "Bob", "Williams")
@@ -598,8 +754,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
                 userIds: [user1Attrs.dn, user2Attrs.userId, user3Attrs.userId, user4Attrs.dn],
                 skillIds: ['skill1'],
                 timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
         ]
 
         when:
@@ -639,7 +793,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
-        List<String> users = getRandomUsers(4)
+        List<String> users = getRandomUsersForThisTest(4)
         users.each{
             createService(it)
         }
@@ -648,8 +802,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
                 userIds: users,
                 skillIds: ['skill1', 'skill2'],
                 timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
         ]
 
         when:
@@ -704,7 +856,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
 
-        String user = getRandomUsers(1)[0]
+        String user = getRandomUsersForThisTest(1)[0]
         createService(user, "passefeafeaef", "John", "Smith")
         UserAttrs expectedAttrs = userAttrsRepo.findByUserIdIgnoreCase(user)
 
@@ -712,8 +864,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
                 userIds: [expectedAttrs.userId],
                 skillIds: ['skill1'],
                 timestamp: 1234l,
-                notifyIfSkillNotApplied: true,
-                isRetry: false,
         ]
 
         when:
@@ -726,5 +876,82 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         result.results[0].skillApplied
         result.results[0].userId == user
 
+    }
+
+    def "BatchSkillEventRequest is required"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj1, proj1_skills)
+
+        when:
+        skillsService.addBatchSkillsForBatchUsers(proj1.projectId, null).body
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Required request body is missing")
+    }
+
+    def "BatchSkillEventRequest.userIds is required"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj1, proj1_skills)
+        def skillRequest = [
+//                userIds: [users[0]],
+                skillIds: ['skill1'],
+                timestamp: 1234l,
+        ]
+
+        when:
+        skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("batchSkillEventRequest.userIds must contain at least 1 item")
+    }
+
+    def "BatchSkillEventRequest.skillIds is required"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj1, proj1_skills)
+        List<String> users = getRandomUsersForThisTest(1)
+
+        def skillRequest = [
+                userIds  : users,
+//                skillIds : ['skill1'],
+                timestamp: 1234l,
+        ]
+
+        when:
+        skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("batchSkillEventRequest.skillIds must contain at least 1 item")
+    }
+
+    def "BatchSkillEventRequest.userIds * BatchSkillEventRequest.skillIds must not exceed max threshold"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(10, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj1, proj1_skills)
+
+        List<String> users = getRandomUsersForThisTest(11)
+        def skillRequest = [
+                userIds  : users,
+                skillIds : proj1_subj1.skillId,
+                timestamp: 1234l,
+        ]
+
+        when:
+        skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("batchSkillEventRequest.skillIds must contain at least 1 item")
     }
 }

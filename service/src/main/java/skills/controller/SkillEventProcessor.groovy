@@ -15,6 +15,7 @@
  */
 package skills.controller
 
+import groovy.util.logging.Slf4j
 import org.apache.commons.collections4.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -26,18 +27,15 @@ import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.SkillException
-import skills.services.UserAttrsService
 import skills.services.events.SkillEventResult
 import skills.services.events.SkillEventsService
 
 @Component
+@Slf4j
 class SkillEventProcessor {
 
     @Autowired
     SkillEventsService skillsManagementFacade;
-
-    @Autowired
-    UserAttrsService userAttrsService
 
     @Autowired(required = false)
     PkiUserLookup pkiUserLookup;
@@ -47,37 +45,46 @@ class SkillEventProcessor {
 
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
-    
+
+    @Value('#{"${skills.batchManualSkillEvents.dnCheckStr:CN=}"}')
+    String dnCheckStr
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    SkillEventResult processSkillForUser(String skillId, String userId, String projectId, Date incomingDate, String currentUser) {
-        String userIdToProcess = getUserName(userId);
+    SkillEventResult processSkillForUserInItsOwnTransaction(String projectId, String skillId, String userId, Date incomingDate, Map<String, List<UserInfo>> userInfoCache) {
+        String userIdToProcess = getUserName(userId, userInfoCache);
         SkillEventsService.SkillApprovalParams skillApprovalParams = SkillEventsService.getDefaultSkillApprovalParams();
         skillApprovalParams.setForAnotherUser(true);
         return skillsManagementFacade.reportSkill(projectId, skillId, userIdToProcess, true, incomingDate, skillApprovalParams);
     }
-    
-    private String getUserName(String userIdToProcess) {
-            String idType = "ID";
-            String originalIdToProcess = userIdToProcess;
-            if(authMode == AuthMode.PKI) {
-                List<UserInfo> userInfos = pkiUserLookup.suggestUsers(userIdToProcess, "");
 
-                // need to validate that only 1 returned
-                if (CollectionUtils.isEmpty(userInfos)) {
-                    throw new SkillException("User [" + userIdToProcess + "] was not found");
-                }
-                if(userInfos.size() > 1) {
-                    throw new SkillException("Multiple users found for [" + userIdToProcess + "]");
-                }
-
-                userIdToProcess = userInfos.get(0).getUserDn();
-                if (!userIdToProcess) {
-                    throw new SkillException("User [" + originalIdToProcess + "] was found but did not have a DN set");
-                }
-                idType = "DN";
+    private String getUserName(String userIdToProcess, Map<String, List<UserInfo>> userInfoCache) {
+        boolean isPki = authMode == AuthMode.PKI
+        String idType = isPki ? "DN" : "ID"
+        log.debug("UserId To Process=[{}], Mode=[{}], dnCheckStr=[{}]", userIdToProcess, authMode, dnCheckStr)
+        if (isPki && !userIdToProcess.toLowerCase().contains(dnCheckStr.toLowerCase())) {
+            List<UserInfo> userInfos = userInfoCache.get(userIdToProcess)
+            if (!userInfos) {
+                userInfos = pkiUserLookup.suggestUsers(userIdToProcess, "");
+                log.debug("Returned suggest {} for provided userId [{}]", userInfos, userIdToProcess)
+                userInfoCache.put(userIdToProcess, userInfos)
             }
 
-            return userInfoService.getUserName(userIdToProcess, false, idType);
-    }
+            // need to validate that only 1 returned
+            if (CollectionUtils.isEmpty(userInfos)) {
+                throw new SkillException("User [" + userIdToProcess + "] was not found");
+            }
+            if (userInfos.size() > 1) {
+                String msg = "Ambiguous user ID [" + userIdToProcess + "]. Found multiple DNs: " + userInfos.collect { "\"${it.userDn}\"" }.take(5)
+                throw new SkillException(msg);
 
+            }
+
+            userIdToProcess = userInfos.get(0).userDn
+            if (!userIdToProcess) {
+                throw new SkillException("User [" + userIdToProcess + "] was found but did not have a DN set");
+            }
+        }
+
+        return userInfoService.getUserName(userIdToProcess, false, idType);
+    }
 }

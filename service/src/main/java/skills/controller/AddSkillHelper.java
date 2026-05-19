@@ -17,31 +17,23 @@ package skills.controller;
 
 import callStack.profiler.CProf;
 import groovy.lang.Closure;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.UnexpectedRollbackException;
-import org.springframework.transaction.annotation.Propagation;
 import skills.PublicProps;
-import skills.auth.AuthMode;
-import skills.auth.UserAuthService;
-import skills.auth.UserInfo;
 import org.springframework.transaction.annotation.Transactional;
+import skills.auth.UserInfo;
 import skills.auth.UserInfoService;
-import skills.auth.pki.PkiUserLookup;
 import skills.controller.exceptions.ErrorCode;
 import skills.controller.exceptions.SkillException;
 import skills.controller.exceptions.SkillsValidator;
 import skills.controller.request.model.BatchSkillEventRequest;
 import skills.controller.request.model.SkillEventRequest;
 import skills.services.ProjectErrorService;
-import skills.services.UserAttrsService;
 import skills.services.events.BatchSkillEventResult;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
@@ -49,7 +41,6 @@ import skills.services.userActions.DashboardAction;
 import skills.services.userActions.DashboardItem;
 import skills.services.userActions.UserActionInfo;
 import skills.services.userActions.UserActionsHistoryService;
-import skills.storage.model.UserAttrs;
 import skills.utils.RetryUtil;
 
 import java.util.*;
@@ -58,13 +49,17 @@ import java.util.*;
 public class AddSkillHelper {
 
     static final DateTimeFormatter DTF = ISODateTimeFormat.dateTimeNoMillis().withLocale(Locale.ENGLISH).withZoneUTC();
-    private Logger log = LoggerFactory.getLogger(AddSkillHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(AddSkillHelper.class);
+
     @Autowired
     PublicProps publicProps;
+
     @Autowired
     UserInfoService userInfoService;
+
     @Autowired
     SkillEventsService skillsManagementFacade;
+
     @Autowired
     ProjectErrorService projectErrorService;
 
@@ -76,21 +71,18 @@ public class AddSkillHelper {
 
     @Transactional
     public BatchSkillEventResult addBatchSkillsForBatchUsers(String projectId, BatchSkillEventRequest batchSkillEventRequest) {
-        if (batchSkillEventRequest == null) {
-            throw new SkillException("batchSkillEventRequest cannot be null");
-        }
         Long requestedTimestamp = batchSkillEventRequest.getTimestamp();
         List<String> skillIds = batchSkillEventRequest.getSkillIds();
         Date incomingDate = validateTime(projectId, requestedTimestamp);
-        String currentUser = userInfoService.getCurrentUserId();
         BatchSkillEventResult batchResults = new BatchSkillEventResult();
         ArrayList<SkillEventResult> results = new ArrayList<>();
 
+        Map<String, List<UserInfo>> userInfoCache = Collections.synchronizedMap(new HashMap<>());
         for(String userIdToProcess : batchSkillEventRequest.getUserIds()) {
             for (String skillId : skillIds) {
                 SkillEventResult result = null;
                 try {
-                    result = skillEventProcessor.processSkillForUser(skillId, userIdToProcess, projectId, incomingDate, currentUser);
+                    result = skillEventProcessor.processSkillForUserInItsOwnTransaction(projectId, skillId, userIdToProcess, incomingDate, userInfoCache);
                 } catch(SkillException ske) {
                     log.error("Error applying skill [{}], user [{}], error [{}]", skillId, userIdToProcess, ske.getMessage());
 
