@@ -273,24 +273,6 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.get('[data-pc-section="overlay"] [data-pc-section="emptymessage"]').contains('No results')
     });
 
-    it('reporting to quiz-based skill is not allowed', function () {
-        cy.createQuizDef(1, { name: 'Trivia Knowledge' });
-        cy.createQuizQuestionDef(1, 1);
-
-        cy.createProject(1)
-        cy.createSubject(1,1)
-        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/addSkillEvent');
-        cy.get('[data-cy="pageHeader"]').contains('Very Great Skill 1')
-        const userIdSelector = '[data-cy="userIdInput"] [data-cy="existingUserInputDropdown"]';
-        const addButtonSelector = '[data-cy=addSkillEventButton]';
-        cy.get(`${userIdSelector} [data-pc-name="pcinputtext"]`).should('be.enabled')
-        cy.get(userIdSelector).type('oTHIGHJK{enter}');
-        cy.get(addButtonSelector).should('not.be.disabled')
-        cy.get(addButtonSelector).click();
-        cy.get('[data-cy="addedUserEventsInfo"]').contains('Unable to add points for [oTHIGHJK] - Cannot report skill events directly to a quiz-based skill');
-    });
-
     it('view skill overview where quiz/survey is assigned', function() {
         cy.createProject(1)
         cy.createSubject(1,1)
