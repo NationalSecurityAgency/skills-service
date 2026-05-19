@@ -20,7 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import skills.controller.AddSkillHelper
 import skills.intTests.utils.*
 import skills.storage.model.UserAttrs
+import skills.storage.repos.UserAchievedLevelRepo
 import spock.lang.IgnoreIf
+
+import java.text.DateFormat
 
 class BatchSkillSubmissionSpecs extends DefaultIntSpec {
 
@@ -29,6 +32,12 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
 
     @Autowired(required = false)
     CertificateRegistry certificateRegistry
+
+    @Autowired
+    UserAchievedLevelRepo userAchievementRepo
+
+    DateFormat df = new java.text.SimpleDateFormat("yyyy-MM-dd")
+    String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS"
 
     def "Submit a single skill for a single user"() {
         def proj1 = SkillsFactory.createProject(1)
@@ -1032,5 +1041,103 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.getMessage().contains("batchSkillEventRequest.skillIds must contain at least 1 item")
+    }
+
+    def "BatchSkillEventRequest.timestamp is not required"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_skills)
+
+        List<String> users = getRandomUsersForThisTest(1)
+
+        def skillRequest = [
+                userIds: [users[0]],
+                skillIds: ['skill1'],
+        ]
+
+        when:
+        def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        result.results.size() == 1
+        result.results[0].skillId == 'skill1'
+        result.results[0].skillApplied
+        result.results[0].userId == users[0]
+    }
+
+    def "Can add dates in the past"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 200
+            it.numPerformToCompletion = 1
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_skills)
+
+        List<String> users = getRandomUsersForThisTest(1)
+
+        def dateToAchieve = new Date() - 5
+
+        def skillRequest = [
+                userIds: [users[0]],
+                skillIds: ['skill1'],
+                timestamp: dateToAchieve,
+        ]
+
+        def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+        assert result.results.size() == 1
+        assert result.results[0].skillId == 'skill1'
+        assert result.results[0].skillApplied
+        assert result.results[0].userId == users[0]
+
+        when:
+        def skillSummary = userAchievementRepo.findAllByUserAndProjectIds(users[0], [proj1.projectId])
+
+        then:
+        skillSummary.find { it.projectId == proj1.projectId && it.skillId == 'skill1' }.achievedOn.format(dateFormat) == dateToAchieve.format(dateFormat)
+    }
+
+    def "Can not add dates in the future"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_skills)
+
+        List<String> users = getRandomUsersForThisTest(1)
+
+        def skillRequest = [
+                userIds: [users[0]],
+                skillIds: ['skill1'],
+                timestamp: new Date() + 10,
+        ]
+
+        when:
+        skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.getMessage().contains("Skill Events may not be in the future")
     }
 }
