@@ -54,6 +54,7 @@ class SkillEventProcessor {
         String userIdToProcess = getUserName(userId, userSuggestOption, userInfoCache);
         SkillEventsService.SkillApprovalParams skillApprovalParams = SkillEventsService.getDefaultSkillApprovalParams();
         skillApprovalParams.setForAnotherUser(true);
+        skillApprovalParams.setDoNotRequireApproval(true)
         return skillsManagementFacade.reportSkill(projectId, skillId, userIdToProcess, true, incomingDate, skillApprovalParams);
     }
 

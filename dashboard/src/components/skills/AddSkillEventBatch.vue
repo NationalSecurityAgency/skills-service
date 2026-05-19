@@ -26,9 +26,11 @@ import Column from "primevue/column";
 import dayjs from "dayjs";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 const model = defineModel()
 const appConfig = useAppConfig();
+const pluralize = usePluralize();
 const emit = defineEmits([])
 
 const props = defineProps({
@@ -62,12 +64,15 @@ const hasUserSuggestOptions = computed(() => {
 });
 
 const userList = computed(() => {
-  if(usersToAdd.value.length > 0) {
-    return usersToAdd.value.split('\n').filter(user => user.trim() !== '');
-  } else {
-    return [];
-  }
-})
+  if (!usersToAdd.value) return [];
+
+  const cleanedUsers = usersToAdd.value
+      .split('\n')
+      .map(user => user.trim().toLowerCase())
+      .filter(user => user !== '');
+
+  return [...new Set(cleanedUsers)];
+});
 
 const tooManyEvents = computed(() => {
   return (userList.value.length * props.skills.length) > maxSkillBatchSize.value;
@@ -150,15 +155,15 @@ const maxSkillBatchSize = computed(() => {
           </div>
         </StepPanel>
         <StepPanel value="2" v-slot="{ activateCallback }">
-          <Message class="mb-2" data-cy="skillsToAdd" :closable="false" severity="info">
-            Add the users that have performed the skill(s), one user per line.
-          </Message>
-          <div class="mb-2">
-            <Select v-if="hasUserSuggestOptions" data-cy="userSuggestOptionsDropdown" v-model="selectedSuggestOption" :options="userSuggestOptions" class="md:mr-2"/>
+          <div v-if="hasUserSuggestOptions" class="flex gap-1 items-center mb-3">
+            <Select  data-cy="userSuggestOptionsDropdown"
+                     v-model="selectedSuggestOption"
+                     :options="userSuggestOptions"
+                     class="flex-1"/>
           </div>
           <div class="mb-2">
             <SkillsTextarea
-                label="Users to add skill events for"
+                label="Users to add skill events for (one user per line)"
                 :is-required="true"
                 :submit-on-enter="false"
                 v-model="usersToAdd"
@@ -175,7 +180,7 @@ const maxSkillBatchSize = computed(() => {
         </StepPanel>
         <StepPanel value="3" v-slot="{ activateCallback }">
           <Message :closable="false" v-if="!tooManyEvents" data-cy="confirmMessage">
-            Skill events for <span class="font-bold">{{ skills.length }}</span> skill(s) will be added for <span class="font-bold">{{ userList.length }}</span> user(s) on {{ dayjs(dateAdded).format('YYYY-MM-DD') }}.
+            Skill events for <span class="font-bold">{{ skills.length }}</span> {{ pluralize.plural('skill', skills.length)}} will be added for <span class="font-bold">{{ userList.length }}</span> {{ pluralize.plural('user', userList.length)}} on {{ dayjs(dateAdded).format('YYYY-MM-DD') }}.
             Please click "Add Events" to confirm.
           </Message>
           <Message :closable="false" v-if="tooManyEvents" severity="error" data-cy="batchErrorMessage">
