@@ -165,4 +165,41 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="batchErrorMessage"]').contains('request limit (3 skills × 100 users). To proceed, please remove either users or skills to reduce the total number of requests.');
         cy.get('[data-cy="saveBatchSkillEvents"]').should('be.disabled');
     });
+
+
+    it('User suggestion sent to back end', () => {
+        cy.intercept('PUT', '/admin/projects/proj1/skills').as('saveSkills')
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Report Skills for Users"]', true)
+
+        cy.get('[data-cy="skillsToAdd"]').contains('Very Great Skill 3')
+        cy.get('[data-cy="skillsToAdd"]').contains('Very Great Skill 1')
+
+        cy.get('[data-cy="firstNextButton"]').click();
+        cy.get('[data-cy="batchUserList"]').type('user1{enter}user3');
+
+        cy.contains('ONE').click()
+        cy.contains('TWO').click()
+        cy.get('[data-cy="userSuggestOptionsDropdown"]').contains('TWO')
+
+        cy.get('[data-cy="secondNextButton"]').click();
+
+        cy.get('[data-cy="confirmMessage"]').contains('Skill events for 2 skill(s) will be added for 2 user(s)');
+        cy.get('[data-cy="saveBatchSkillEvents"]').click();
+
+        cy.wait('@saveSkills').then((interception) => {
+            expect(interception.request.body.suggestionOption).to.equal('TWO');
+        });
+
+    });
 });
