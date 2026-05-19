@@ -50,21 +50,21 @@ class SkillEventProcessor {
     String dnCheckStr
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    SkillEventResult processSkillForUserInItsOwnTransaction(String projectId, String skillId, String userId, Date incomingDate, Map<String, List<UserInfo>> userInfoCache) {
-        String userIdToProcess = getUserName(userId, userInfoCache);
+    SkillEventResult processSkillForUserInItsOwnTransaction(String projectId, String skillId, String userId, Date incomingDate, String userSuggestOption, Map<String, List<UserInfo>> userInfoCache) {
+        String userIdToProcess = getUserName(userId, userSuggestOption, userInfoCache);
         SkillEventsService.SkillApprovalParams skillApprovalParams = SkillEventsService.getDefaultSkillApprovalParams();
         skillApprovalParams.setForAnotherUser(true);
         return skillsManagementFacade.reportSkill(projectId, skillId, userIdToProcess, true, incomingDate, skillApprovalParams);
     }
 
-    private String getUserName(String userIdToProcess, Map<String, List<UserInfo>> userInfoCache) {
+    private String getUserName(String userIdToProcess, String userSuggestOption, Map<String, List<UserInfo>> userInfoCache) {
         boolean isPki = authMode == AuthMode.PKI
         String idType = isPki ? "DN" : "ID"
         log.debug("UserId To Process=[{}], Mode=[{}], dnCheckStr=[{}]", userIdToProcess, authMode, dnCheckStr)
         if (isPki && !userIdToProcess.toLowerCase().contains(dnCheckStr.toLowerCase())) {
             List<UserInfo> userInfos = userInfoCache.get(userIdToProcess)
             if (!userInfos) {
-                userInfos = pkiUserLookup.suggestUsers(userIdToProcess, "");
+                userInfos = pkiUserLookup.suggestUsers(userIdToProcess, userSuggestOption);
                 log.debug("Returned suggest {} for provided userId [{}]", userInfos, userIdToProcess)
                 userInfoCache.put(userIdToProcess, userInfos)
             }

@@ -332,7 +332,6 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createProject(proj1)
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
-        List<String> users = getRandomUsersForThisTest(4)
 
         def skillRequest = [
                 userIds: substringsForSuggestions,
@@ -380,6 +379,86 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
        !result.results[7].skillApplied
         result.results[7].userId == suggestUserIds[3]
         result.results[7].explanation == "User [" + suggestUserIds[3] + "] was not found"
+    }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
+    def "Submit a batch of skills and support suggestOptionParam"() {
+        List<String> allUserIds = certificateRegistry.allUserIds
+        List<String> suggestUserIds = [
+                "aafirstsuggestusersspecsuser",
+                "aaa@email.foo",
+                "bob@email.com",
+                "ddd@email.foo"
+        ]
+        suggestUserIds.each {
+            assert allUserIds.contains(it)
+        }
+        List<String> substringsForSuggestions = suggestUserIds.collect { it.substring(0, it.length()-1)}
+        substringsForSuggestions.each { String checkSuggestId ->
+            assert !allUserIds.contains(checkSuggestId)
+            assert allUserIds.count { it.contains(checkSuggestId) } == 1
+        }
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj1, proj1_skills)
+
+        def skillRequest = [
+                userIds: substringsForSuggestions,
+                skillIds: proj1_skills[0..1].skillId,
+                timestamp: 1234l,
+                userSuggestOption: "ONLY_ONE_USER_IN_THIS_SET"
+        ]
+
+        when:
+        def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        result.results.size() == 8
+        result.results[0].skillId == proj1_skills[0].skillId
+        result.results[0].skillApplied
+        result.results[0].userId == suggestUserIds[0]
+
+        result.results[1].skillId == proj1_skills[1].skillId
+        result.results[1].skillApplied
+        result.results[1].userId == suggestUserIds[0]
+
+        result.results[2].skillId == proj1_skills[0].skillId
+        !result.results[2].skillApplied
+        result.results[2].userId == substringsForSuggestions[1]
+        result.results[2].explanation == "User [" + substringsForSuggestions[1] + "] was not found"
+
+        result.results[3].skillId == proj1_skills[1].skillId
+        !result.results[3].skillApplied
+        result.results[3].userId == substringsForSuggestions[1]
+        result.results[3].explanation == "User [" + substringsForSuggestions[1] + "] was not found"
+
+        result.results[4].skillId == proj1_skills[0].skillId
+        !result.results[4].skillApplied
+        result.results[4].userId == substringsForSuggestions[2]
+        result.results[4].explanation == "User [" + substringsForSuggestions[2] + "] was not found"
+
+        result.results[5].skillId == proj1_skills[1].skillId
+        !result.results[5].skillApplied
+        result.results[5].userId == substringsForSuggestions[2]
+        result.results[5].explanation == "User [" + substringsForSuggestions[2] + "] was not found"
+
+        result.results[6].skillId == proj1_skills[0].skillId
+        !result.results[6].skillApplied
+        result.results[6].userId == substringsForSuggestions[3]
+        result.results[6].explanation == "User [" + substringsForSuggestions[3] + "] was not found"
+
+        result.results[7].skillId == proj1_skills[1].skillId
+        !result.results[7].skillApplied
+        result.results[7].userId == substringsForSuggestions[3]
+        result.results[7].explanation == "User [" + substringsForSuggestions[3] + "] was not found"
     }
 
     def "Submit a batch of skills for multiple users with a skill not applied"() {

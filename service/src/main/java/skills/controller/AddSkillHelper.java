@@ -82,7 +82,8 @@ public class AddSkillHelper {
             for (String skillId : skillIds) {
                 SkillEventResult result = null;
                 try {
-                    result = skillEventProcessor.processSkillForUserInItsOwnTransaction(projectId, skillId, userIdToProcess, incomingDate, userInfoCache);
+                    result = skillEventProcessor.processSkillForUserInItsOwnTransaction(projectId, skillId, userIdToProcess, incomingDate,
+                            batchSkillEventRequest.getUserSuggestOption(), userInfoCache);
                 } catch(SkillException ske) {
                     log.error("Error applying skill [{}], user [{}], error [{}]", skillId, userIdToProcess, ske.getMessage());
 

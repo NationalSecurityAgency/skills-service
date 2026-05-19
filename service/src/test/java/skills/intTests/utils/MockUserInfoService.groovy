@@ -21,6 +21,7 @@ import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.common.FileSource
 import com.github.tomakehurst.wiremock.extension.Parameters
 import com.github.tomakehurst.wiremock.extension.ResponseDefinitionTransformer
+import com.github.tomakehurst.wiremock.http.QueryParameter
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.ResponseDefinition
 import groovy.json.JsonOutput
@@ -215,6 +216,10 @@ class MockUserInfoService {
 
         @Override
         ResponseDefinition transform(Request request, ResponseDefinition responseDefinition, FileSource files, Parameters parameters) {
+            // configured in application-pki.properties via skills.authorization.suggestOptionParam=extraParam
+
+            QueryParameter extraParam = request.queryParameter("extraParam")
+            String suggestOptionParam= extraParam.present ? extraParam?.firstValue() : null
             String query = request.queryParameter('query')?.firstValue()
 
             if (!query || query == "null") {
@@ -225,6 +230,10 @@ class MockUserInfoService {
             }
 
             List<String> allUserIds = suggestTransformerCertRegistry.allUserIds
+            if (suggestOptionParam && suggestOptionParam == "ONLY_ONE_USER_IN_THIS_SET") {
+                allUserIds = ["aafirstsuggestusersspecsuser"]
+            }
+
             List<String> foundUserIds = allUserIds.findAll { it.toLowerCase().contains(query.toLowerCase())}
             log.debug("Called /userQuery endpoint with [{}] query and found {} userIds", query, foundUserIds)
 
