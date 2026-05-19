@@ -42,7 +42,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 @Slf4j
 @Conditional(SecurityMode.PkiAuth)
 @Component
-public class MockUserInfoService {
+class MockUserInfoService {
 
     @Value('${skills.authorization.userInfoHealthCheckUri}')
     String userInfoHealthCheckUri
@@ -100,8 +100,6 @@ public class MockUserInfoService {
         mockServer.stubFor(any(urlPathEqualTo("/userQuery")).willReturn(
                 ok()
                         .withTransformers("user-suggestion-transformer")
-//                .withHeader(CONTENT_TYPE, "application/json")
-//                .withBody("""[{"username": "skills@skills.org", "usernameForDisplay":"skills@skills.org", "userDn": "abc123"}]""")
         ));
         mockServer.stubFor(
                 any(urlPathEqualTo("/userInfo"))
@@ -115,15 +113,15 @@ public class MockUserInfoService {
     }
 
     @PreDestroy
-    public void stop() {
+    void stop() {
         mockServer.stop();
     }
 
-    public static class UserInfoResponseTransformer extends ResponseDefinitionTransformer {
+    static class UserInfoResponseTransformer extends ResponseDefinitionTransformer {
 
         UserAttrsRepo userAttrsRepo
 
-        public UserInfoResponseTransformer(UserAttrsRepo userAttrsRepo) {
+        UserInfoResponseTransformer(UserAttrsRepo userAttrsRepo) {
             this.userAttrsRepo = userAttrsRepo
         }
 
@@ -145,7 +143,6 @@ public class MockUserInfoService {
             String usernamified = DnUsernameHelper.getUsername(dnQuery).toLowerCase()
             UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(usernamified)
             String usernamifiedForDisplay = userAttrs?.userIdForDisplay ?: "${usernamified} for display"
-//            String usernamified = dnQuery.replaceAll(" ", "_").replaceAll(",","").replaceAll("=","-")
 
             String fname = userAttrs?.firstName ?: "${usernamified.toUpperCase()}_first"
             String lname = userAttrs?.lastName ?: "${usernamified.toUpperCase()}_last"
@@ -185,40 +182,28 @@ public class MockUserInfoService {
         }
     }
 
-    FirstnameLastname getFirstNameLastnameForUserId(String userId) {
-        return DN_TO_NAME.get(certificateRegistry.loadDnFromUserId(userId)?.toLowerCase())
-    }
-
-    String getUserIdWithCase(String userId) {
-        return certificateRegistry.loadCNFromCert(certificateRegistry.getCertificate(userId))
-    }
-
     static class FirstnameLastname {
         String firstname=""
         String lastname=""
-        public FirstnameLastname(String firstname, String lastname){
+        FirstnameLastname(String firstname, String lastname){
             this.firstname = firstname
             this.lastname = lastname
         }
     }
 
 
-    public static class UserSuggestionResponseTransformer extends ResponseDefinitionTransformer {
+    static class UserSuggestionResponseTransformer extends ResponseDefinitionTransformer {
 
         UserAttrsRepo userAttrsRepo
 
-        public UserSuggestionResponseTransformer(UserAttrsRepo userAttrsRepo) {
+        UserSuggestionResponseTransformer(UserAttrsRepo userAttrsRepo) {
             this.userAttrsRepo = userAttrsRepo
         }
 
         @Override
         ResponseDefinition transform(Request request, ResponseDefinition responseDefinition, FileSource files, Parameters parameters) {
             String query = request.queryParameter('query')?.firstValue()
-
-//            if (dnQuery?.containsIgnoreCase('doesNotExist')) {
-//                throw new Exception("Unknown User [${dnQuery}]")
-//            }
-
+            log.debug("Called /userQuery endpoint with [{}] query", query)
             if (!query || query == "null") {
                 return new ResponseDefinitionBuilder()
                         .withHeader(CONTENT_TYPE, "application/json")
@@ -229,24 +214,21 @@ public class MockUserInfoService {
             String usernamified = DnUsernameHelper.getUsername(query).toLowerCase()
             UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(usernamified)
             String usernamifiedForDisplay = userAttrs?.userIdForDisplay ?: "${usernamified} for display"
-//            String usernamified = dnQuery.replaceAll(" ", "_").replaceAll(",","").replaceAll("=","-")
 
             String fname = userAttrs?.firstName ?: "${usernamified.toUpperCase()}_first"
             String lname = userAttrs?.lastName ?: "${usernamified.toUpperCase()}_last"
 
-            log.info("looking up firstname/lastname for ${query}")
+            log.debug("Looking up firstname/lastname for [{}]", query)
             FirstnameLastname configuredNames = DN_TO_NAME.get(query.toLowerCase())
             if (configuredNames) {
-                log.info("!!!! found FirstnameLastname for $query")
+                log.debug("Found Firstname and Lastname for [{}]", query)
                 fname = configuredNames.firstname
                 lname = configuredNames.lastname
             }
 
             String email = userAttrs?.email ?: EmailUtils.generateEmaillAddressFor(usernamified)
 
-            return new ResponseDefinitionBuilder()
-                    .withHeader(CONTENT_TYPE, "application/json")
-                    .withBody("""
+            String bodyRes = """
                     [{
                         "firstName" : "${fname}",
                         "lastName": "${lname}",
@@ -255,7 +237,11 @@ public class MockUserInfoService {
                         "usernameForDisplay": "${usernamifiedForDisplay}",
                         "userDn": "${query}"
                     }]
-                    """).build()
+                    """
+            log.debug("Returning /userQuery with body of {}", bodyRes)
+            return new ResponseDefinitionBuilder()
+                    .withHeader(CONTENT_TYPE, "application/json")
+                    .withBody(bodyRes).build()
         }
 
         @Override
