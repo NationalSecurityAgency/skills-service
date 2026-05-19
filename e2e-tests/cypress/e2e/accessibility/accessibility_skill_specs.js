@@ -235,19 +235,15 @@ describe('Accessibility Skill Tests', () => {
 
         it(`skill add event ${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/skills/skill1/addSkillEvent');
+            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1');
             cy.injectAxe();
-            cy.get('[data-cy="userIdInput"]')
-            cy.customLighthouse();
-            cy.customA11y();
 
-            cy.get('[data-cy="userIdInput"]').click();
-            cy.get('[data-cy="existingUserInputDropdown"]').type('u4');
-            cy.get('#existingUserInput_0').contains('u4').click()
-            cy.get('[data-cy="eventDatePicker"]').click();
-            cy.get('[aria-label="Choose Date"] [aria-label="1"]').not('[data-p-other-month="true"]').click()
-            cy.get('[data-cy=addSkillEventButton]').click();
-            cy.contains('Added points');
+            cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+            cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+            cy.get('[data-cy="skillActionsBtn"]').click();
+            cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Report Skills for Users"]', true)
+
+            cy.customLighthouse();
             cy.customA11y();
         });
 

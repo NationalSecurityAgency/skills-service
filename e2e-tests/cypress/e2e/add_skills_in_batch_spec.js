@@ -419,4 +419,88 @@ describe('Tag Skills Tests', () => {
         ], 10, true, null, false);
     });
 
+    it('able to report user with slashes', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Report Skills for Users"]', true)
+
+        cy.get('[data-cy="skillsToAdd"]').contains('Very Great Skill 3')
+        cy.get('[data-cy="firstNextButton"]').click();
+        cy.get('[data-cy="batchUserList"]').type('foo/bar');
+        cy.get('[data-cy="secondNextButton"]').click();
+
+        cy.get('[data-cy="confirmMessage"]').contains('Skill events for 1 skill will be added for 1 user');
+        cy.get('[data-cy="saveBatchSkillEvents"]').click();
+
+        cy.validateTable('[data-cy="skillEventBatchResult"]', [
+            [{ colIndex: 1,  value: 'foo/bar' }, { colIndex: 2,  value: 'skill3' }, { colIndex: 3, value: 'Skill event was applied' }],
+        ], 10, true, null, false);
+    });
+
+    it('cannot report a disable skill', () => {
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1, { enabled: false, numPerformToCompletion: 1 });
+        cy.createSkill(2, 1, 2, { numPerformToCompletion: 1 });
+        cy.createSkill(2, 1, 3, { enabled: false, numPerformToCompletion: 1 });
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Report Skills for Users"]', true)
+
+        cy.get('[data-cy="skillsToAdd"]').contains('Very Great Skill 3')
+        cy.get('[data-cy="firstNextButton"]').click();
+        cy.get('[data-cy="batchUserList"]').type('user1');
+        cy.get('[data-cy="secondNextButton"]').click();
+
+        cy.get('[data-cy="confirmMessage"]').contains('Skill events for 3 skills will be added for 1 user');
+        cy.get('[data-cy="saveBatchSkillEvents"]').click();
+
+        cy.validateTable('[data-cy="skillEventBatchResult"]', [
+            [{colIndex: 0, value: 'Rejected' }, { colIndex: 1,  value: 'user1' }, { colIndex: 2,  value: 'skill3' }, { colIndex: 3, value: 'Cannot report skill events for a skill that is disabled.' }],
+            [{colIndex: 0, value: 'Applied' }, { colIndex: 1,  value: 'user1' }, { colIndex: 2,  value: 'skill2' }, { colIndex: 3, value: 'Skill event was applied' }],
+            [{colIndex: 0, value: 'Rejected' }, { colIndex: 1,  value: 'user1' }, { colIndex: 2,  value: 'skill1' }, { colIndex: 3, value: 'Cannot report skill events for a skill that is disabled.' }],
+        ], 10, true, null, false);
+
+    });
+
+    it('cannot report catalog imported skill', () => {
+        cy.exportSkillToCatalog(1, 1, 1);
+        cy.exportSkillToCatalog(1, 1, 2);
+
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+
+        cy.importSkillFromCatalog(2, 1, 1, 1);
+        cy.wait(200);
+        cy.importSkillFromCatalog(2, 1, 1, 2);
+
+        cy.finalizeCatalogImport(2);
+
+        cy.visit('/administrator/projects/proj2/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').should('not.be.visible');
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').should('not.be.visible');
+    });
+
 });
