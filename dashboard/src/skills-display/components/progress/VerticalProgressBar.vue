@@ -102,6 +102,7 @@ const thirdProgressBarPt = computed(() => {
   <div class="user-skill-progress-layers" :style="`height: ${props.barSize+2}px`">
     <ProgressBar v-if="!isCompleted && !disableDailyColor" :value="totalProgress"
                  :pt="firstProgressBarPt"
+                 data-cy="firstProgressBar"
                  class="progress-bar sd-theme-today-progress is-not-completed"
                  :class="{ 'is-completed': isCompleted, 'is-not-completed': !isCompleted }"
                  :show-value="false"
@@ -109,6 +110,7 @@ const thirdProgressBarPt = computed(() => {
                  :style="styleObject"></ProgressBar>
     <ProgressBar v-if="!isCompleted && !disableDailyColor" :value="computedTotalProgressBeforeToday"
                  :pt="secondProgressBarPt"
+                 data-cy="secondProgressBar"
                  class="progress-bar sd-theme-total-progress  is-not-completed"
                  :class="{ 'is-completed': isCompleted, 'is-not-completed': !isCompleted }"
                  :show-value="false"
@@ -116,6 +118,7 @@ const thirdProgressBarPt = computed(() => {
                  :style="styleObject"></ProgressBar>
     <ProgressBar v-if="isCompleted || disableDailyColor" :value="totalProgress"
                  :pt="thirdProgressBarPt"
+                 data-cy="thirdProgressBar"
                  class="is-completed progress-bar"
                  :show-value="false"
                  :ariaLabel="ariaLabelFullMsg"
