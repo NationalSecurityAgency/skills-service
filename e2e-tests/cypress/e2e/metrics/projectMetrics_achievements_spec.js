@@ -120,6 +120,17 @@ describe('Metrics Tests - Achievements', () => {
                 numPerformToCompletion: skillsCounter < 3 ? '1' : '200',
             });
         }
+        cy.createSkillsGroup(1, 1, 6, { enabled: true});
+        cy.addSkillToGroup(1, 1, 6, 7, {
+            pointIncrement: '100',
+            numPerformToCompletion: '1',
+            pointIncrementInterval: 0
+        });
+        cy.addSkillToGroup(1, 1, 6, 8, {
+            pointIncrement: '100',
+            numPerformToCompletion: '1',
+            pointIncrementInterval: 0
+        });
 
         const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
@@ -131,6 +142,18 @@ describe('Metrics Tests - Achievements', () => {
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {
             userId: 'user0Good@skills.org',
             timestamp: m.clone()
+                .subtract(2, 'day')
+                .format('x')
+        });
+        cy.request('POST', `/api/projects/proj1/skills/skill7`, {
+            userId: 'user0Good@skills.org',
+            timestamp: m.clone()
+                .subtract(3, 'day')
+                .format('x')
+        });
+        cy.request('POST', `/api/projects/proj1/skills/skill8`, {
+            userId: 'user0Good@skills.org',
+            timestamp: m.clone()
                 .subtract(4, 'day')
                 .format('x')
         });
@@ -140,38 +163,31 @@ describe('Metrics Tests - Achievements', () => {
 
         const tableSelector = '[data-cy=achievementsNavigator-table]';
         cy.validateTable(tableSelector, [
-            [{
-                colIndex: 0,
-                value: 'user0Good@skills.org'
-            }, {
-                colIndex: 1,
-                value: 'Skill'
-            }, {
-                colIndex: 2,
-                value: 'Very Great Skill # 1'
-            }, {
-                colIndex: 3,
-                value: 'N/A'
-            }, {
-                colIndex: 4,
-                value: '2020-09-11 11:00'
-            }],
-            [{
-                colIndex: 0,
-                value: 'user0Good@skills.org'
-            }, {
-                colIndex: 1,
-                value: 'Skill'
-            }, {
-                colIndex: 2,
-                value: 'Very Great Skill # 2'
-            }, {
-                colIndex: 3,
-                value: 'N/A'
-            }, {
-                colIndex: 4,
-                value: '2020-09-08 11:00'
-            }],
+            [ { colIndex: 0, value: 'user0Good@skills.org' },
+              { colIndex: 1, value: 'Skill' },
+              { colIndex: 2, value: 'Very Great Skill # 1' },
+              { colIndex: 3, value: 'N/A' }, { colIndex: 4, value: '2020-09-11 11:00' }
+            ],
+            [ { colIndex: 0, value: 'user0Good@skills.org' },
+              { colIndex: 1, value: 'Skill' },
+              { colIndex: 2, value: 'Very Great Skill # 2' },
+              { colIndex: 3, value: 'N/A' }, { colIndex: 4, value: '2020-09-10 11:00' }
+            ],
+            [ { colIndex: 0, value: 'user0Good@skills.org' },
+              { colIndex: 1, value: 'Group' },
+              { colIndex: 2, value: 'Awesome Group 6 Subj1' },
+              { colIndex: 3, value: 'N/A' }, { colIndex: 4, value: '2020-09-09 11:00' }
+            ],
+            [ { colIndex: 0, value: 'user0Good@skills.org' },
+              { colIndex: 1, value: 'Skill' },
+              { colIndex: 2, value: 'Very Great Skill 7' },
+              { colIndex: 3, value: 'N/A' }, { colIndex: 4, value: '2020-09-09 11:00' }
+            ],
+            [ { colIndex: 0, value: 'user0Good@skills.org' },
+              { colIndex: 1, value: 'Skill' },
+              { colIndex: 2, value: 'Very Great Skill 8' },
+              { colIndex: 3, value: 'N/A' }, { colIndex: 4, value: '2020-09-08 11:00' }
+            ],
         ]);
 
         // export achievements and verify that the file exists

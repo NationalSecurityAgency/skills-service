@@ -112,7 +112,7 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         }
 
         List<SkillDef.ContainerType> achievementTypesWithoutOverall = achievementTypes.findAll({ !it.equalsIgnoreCase(MetricsParams.ACHIEVEMENT_TYPE_OVERALL) }).collect { SkillDef.ContainerType.valueOf(it) }
-        String allNonOverallTypes = achievementTypesWithoutOverall.size() < 3 ? "false" : "true"
+        String allNonOverallTypes = achievementTypesWithoutOverall.size() < 4 ? "false" : "true"
         String includeOverallType = achievementTypes.contains(MetricsParams.ACHIEVEMENT_TYPE_OVERALL) ? "true" : "false"
 
         int totalNumItems = userAchievedRepo.countForAchievementNavigator(

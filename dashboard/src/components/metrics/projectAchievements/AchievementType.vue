@@ -22,10 +22,15 @@ const types = [
   'Subject',
   'Skill',
   'Badge',
+  'SkillsGroup',
 ];
 
 const isUnknownType = computed(() => {
   return types.find((item) => item === props.type) === undefined;
+});
+const typeLabel = computed(() => {
+  if (props.type === 'SkillsGroup') return 'Group';
+  return props.type;
 });
 </script>
 
@@ -36,20 +41,23 @@ const isUnknownType = computed(() => {
         <i class="fa fa-trophy"/>
       </span>
       <span v-if="type === types[1]">
-            <i class="fa fa-cubes "/>
+            <i class="fa fa-cubes"/>
       </span>
       <span v-if="type === types[2]">
-            <i class="fa fa-graduation-cap "/>
+            <i class="fa fa-graduation-cap"/>
       </span>
       <span v-if="type === types[3]">
             <i class="fa fa-award "/>
       </span>
+      <span v-if="type === types[4]">
+            <i class="fa fa-layer-group"/>
+      </span>
       <span v-if="isUnknownType">
-            <i class="fa fa-award "/>
+            <i class="fa fa-award"/>
       </span>
     </span>
     <span style="vertical-align: text-top !important;">
-      {{ type }}
+      {{ typeLabel }}
     </span>
   </div>
 </template>

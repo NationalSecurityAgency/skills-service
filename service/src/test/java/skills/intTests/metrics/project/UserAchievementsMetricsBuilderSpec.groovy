@@ -15,17 +15,17 @@
  */
 package skills.intTests.metrics.project
 
-
 import groovy.json.JsonSlurper
 import groovy.time.TimeCategory
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
-import skills.intTests.utils.SkillsFactory
 import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 import skills.storage.model.SkillDef
 import spock.lang.IgnoreIf
 import spock.lang.Shared
+
+import static skills.intTests.utils.SkillsFactory.*
 
 class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
@@ -45,11 +45,11 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
     def "no selected types results in empty result set"() {
 
-        def proj = SkillsFactory.createProject()
-        List<Map> skills = SkillsFactory.createSkills(1)
+        def proj = createProject()
+        List<Map> skills = createSkills(1)
         skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
-        def subj = SkillsFactory.createSubject()
+        def subj = createSubject()
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -72,11 +72,11 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "empty res"() {
-        def proj = SkillsFactory.createProject()
-        List<Map> skills = SkillsFactory.createSkills(1)
+        def proj = createProject()
+        List<Map> skills = createSkills(1)
         skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
-        def subj = SkillsFactory.createSubject()
+        def subj = createSubject()
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -95,7 +95,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "validate that current page is supplied"() {
-        def proj = SkillsFactory.createProject()
+        def proj = createProject()
         skillsService.createProject(proj)
 
         Map props = [:]
@@ -113,7 +113,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "validate that current page > 0"() {
-        def proj = SkillsFactory.createProject()
+        def proj = createProject()
         skillsService.createProject(proj)
 
         Map props = [:]
@@ -131,7 +131,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "validate that page size is present"() {
-        def proj = SkillsFactory.createProject()
+        def proj = createProject()
         skillsService.createProject(proj)
 
         Map props = [:]
@@ -149,7 +149,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "validate that page size >= 1"() {
-        def proj = SkillsFactory.createProject()
+        def proj = createProject()
         skillsService.createProject(proj)
 
         Map props = [:]
@@ -173,7 +173,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "validate that sort param is present"() {
-        def proj = SkillsFactory.createProject()
+        def proj = createProject()
         skillsService.createProject(proj)
 
         Map props = [:]
@@ -191,7 +191,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "validate that sort param is a boolean"() {
-        def proj = SkillsFactory.createProject()
+        def proj = createProject()
         skillsService.createProject(proj)
 
         Map props = [:]
@@ -209,7 +209,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "validate that sort username param is present"() {
-        def proj = SkillsFactory.createProject()
+        def proj = createProject()
         skillsService.createProject(proj)
 
         Map props = [:]
@@ -227,7 +227,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "validate that sort username param is one of the well-known values"() {
-        def proj = SkillsFactory.createProject()
+        def proj = createProject()
         skillsService.createProject(proj)
 
         Map props = [:]
@@ -247,26 +247,26 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "get achievements"() {
-        def proj = SkillsFactory.createProject()
-        List<Map> skills = SkillsFactory.createSkills(5)
+        def proj = createProject()
+        List<Map> skills = createSkills(5)
         skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
-        def subj = SkillsFactory.createSubject()
+        def subj = createSubject()
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        def subj1 = SkillsFactory.createSubject(1, 2)
-        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 1, 2)
+        def subj1 = createSubject(1, 2)
+        List<Map> skillsSubj1 = createSkills(5, 1, 2)
         skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
         skillsService.createSubject(subj1)
         skillsService.createSkills(skillsSubj1)
 
-        def proj2 = SkillsFactory.createProject(2)
-        def proj2_subj = SkillsFactory.createSubject(2, 1)
-        List<Map> proj2_skills = SkillsFactory.createSkills(5, 2, 1)
+        def proj2 = createProject(2)
+        def proj2_subj = createSubject(2, 1)
+        List<Map> proj2_skills = createSkills(5, 2, 1)
         proj2_skills[0].skillId = skills[0].skillId
         skillsService.createProjectAndSubjectAndSkills(proj2, proj2_subj, proj2_skills)
 
@@ -358,11 +358,11 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
     def "get achievement in pki mode - username is different from userid"() {
-        def proj = SkillsFactory.createProject()
-        List<Map> skills = SkillsFactory.createSkills(5)
+        def proj = createProject()
+        List<Map> skills = createSkills(5)
         skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
-        def subj = SkillsFactory.createSubject()
+        def subj = createSubject()
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
@@ -388,18 +388,18 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "get achievements - sorting"() {
-        def proj = SkillsFactory.createProject()
-        List<Map> skills = SkillsFactory.createSkills(5)
+        def proj = createProject()
+        List<Map> skills = createSkills(5)
         skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
-        def subj = SkillsFactory.createSubject()
+        def subj = createSubject()
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        def subj1 = SkillsFactory.createSubject(1, 2)
-        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 1, 2)
+        def subj1 = createSubject(1, 2)
+        List<Map> skillsSubj1 = createSkills(5, 1, 2)
         skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
         skillsService.createSubject(subj1)
@@ -507,18 +507,18 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "get achievements - filtering by userName"() {
-        def proj = SkillsFactory.createProject()
-        List<Map> skills = SkillsFactory.createSkills(5)
+        def proj = createProject()
+        List<Map> skills = createSkills(5)
         skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
-        def subj = SkillsFactory.createSubject()
+        def subj = createSubject()
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        def subj1 = SkillsFactory.createSubject(1, 2)
-        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 1, 2)
+        def subj1 = createSubject(1, 2)
+        List<Map> skillsSubj1 = createSkills(5, 1, 2)
         skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
         skillsService.createSubject(subj1)
@@ -617,18 +617,18 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })
     def "get achievements - filtering by userName in pki mode"() {
-        def proj = SkillsFactory.createProject()
-        List<Map> skills = SkillsFactory.createSkills(5)
+        def proj = createProject()
+        List<Map> skills = createSkills(5)
         skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
-        def subj = SkillsFactory.createSubject()
+        def subj = createSubject()
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        def subj1 = SkillsFactory.createSubject(1, 2)
-        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 1, 2)
+        def subj1 = createSubject(1, 2)
+        List<Map> skillsSubj1 = createSkills(5, 1, 2)
         skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
         skillsService.createSubject(subj1)
@@ -665,18 +665,18 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
     def "get achievements - filtering by level"() {
 
-        def proj = SkillsFactory.createProject()
-        List<Map> skills = SkillsFactory.createSkills(5)
+        def proj = createProject()
+        List<Map> skills = createSkills(5)
         skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
-        def subj = SkillsFactory.createSubject()
+        def subj = createSubject()
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        def subj1 = SkillsFactory.createSubject(1, 2)
-        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 1, 2)
+        def subj1 = createSubject(1, 2)
+        List<Map> skillsSubj1 = createSkills(5, 1, 2)
         skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
         skillsService.createSubject(subj1)
@@ -759,18 +759,25 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "get achievements - filtering by type"() {
-        def proj = SkillsFactory.createProject()
-        List<Map> skills = SkillsFactory.createSkills(5)
+        def proj = createProject()
+        List<Map> skills = createSkills(5)
         skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
-        def subj = SkillsFactory.createSubject()
+        def subj = createSubject()
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
-        skillsService.createSkills(skills)
+        skillsService.createSkills(skills[0..2])
 
-        def subj1 = SkillsFactory.createSubject(1, 2)
-        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 1, 2)
+        def skillsGroup = createSkillsGroup(1, 1, 6)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, skills[4])
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, skills[3])
+
+
+        def subj1 = createSubject(1, 2)
+        List<Map> skillsSubj1 = createSkills(5, 1, 2)
         skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
         skillsService.createSubject(subj1)
@@ -803,6 +810,9 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         props[MetricsParams.P_ACHIEVEMENT_TYPES] = "${SkillDef.ContainerType.Subject}"
         def justSubject = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = "${SkillDef.ContainerType.SkillsGroup}"
+        def justSkillsGroup = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
         props[MetricsParams.P_ACHIEVEMENT_TYPES] = "${SkillDef.ContainerType.Skill}"
         def justSkills = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
@@ -813,7 +823,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         def overallAndSubjectAndSkill = skillsService.getMetricsData(proj.projectId, metricsId, props)
 
         then:
-        allTypes.totalNumItems == 71
+        allTypes.totalNumItems == 72
         allTypes.items.collect { it.type }.unique().sort() == ['Overall', 'Skill', 'Subject',]
 
         justOverall.totalNumItems == 17
@@ -821,6 +831,9 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
 
         justSubject.totalNumItems == 27
         justSubject.items.collect { it.type }.unique().sort() == ['Subject']
+
+        justSkillsGroup.totalNumItems == 1
+        justSkillsGroup.items.collect { it.type }.unique().sort() == ['SkillsGroup']
 
         justSkills.totalNumItems == 27
         justSkills.items.collect { it.type }.unique().sort() == ['Skill']
@@ -833,18 +846,18 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "get achievements - filtering by name"() {
-        def proj = SkillsFactory.createProject()
-        List<Map> skills = SkillsFactory.createSkills(5)
+        def proj = createProject()
+        List<Map> skills = createSkills(5)
         skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
-        def subj = SkillsFactory.createSubject()
+        def subj = createSubject()
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        def subj1 = SkillsFactory.createSubject(1, 2)
-        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 1, 2)
+        def subj1 = createSubject(1, 2)
+        List<Map> skillsSubj1 = createSkills(5, 1, 2)
         skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
         skillsService.createSubject(subj1)
@@ -876,18 +889,18 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "get achievements - filtering by date"() {
-        def proj = SkillsFactory.createProject()
-        List<Map> skills = SkillsFactory.createSkills(5)
+        def proj = createProject()
+        List<Map> skills = createSkills(5)
         skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
-        def subj = SkillsFactory.createSubject()
+        def subj = createSubject()
 
         skillsService.createProject(proj)
         skillsService.createSubject(subj)
         skillsService.createSkills(skills)
 
-        def subj1 = SkillsFactory.createSubject(1, 2)
-        List<Map> skillsSubj1 = SkillsFactory.createSkills(5, 1, 2)
+        def subj1 = createSubject(1, 2)
+        List<Map> skillsSubj1 = createSkills(5, 1, 2)
         skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
 
         skillsService.createSubject(subj1)

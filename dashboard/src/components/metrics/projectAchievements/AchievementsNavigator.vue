@@ -52,8 +52,8 @@ const levels = {
   ],
 };
 const achievementTypes = ref({
-  selected: ['Overall', 'Subject', 'Skill', 'Badge'],
-  available: ['Overall', 'Subject', 'Skill', 'Badge'],
+  selected: ['Overall', 'Subject', 'Skill', 'SkillsGroup', 'Badge'],
+  available: ['Overall', 'Subject', 'Skill', 'SkillsGroup', 'Badge'],
 });
 
 const sortBy = ref('achievedOn');
@@ -133,6 +133,11 @@ const getQueryParams = () => {
     sortDesc: sortOrder.value !== 1,
   };
 }
+
+const typeLabel = (type) => {
+  if (type === 'SkillsGroup') return 'Group';
+  return type;
+};
 </script>
 
 <template>
@@ -159,7 +164,7 @@ const getQueryParams = () => {
                 <span v-for="tag in achievementTypes.available" :key="tag">
                   <Checkbox v-model="achievementTypes.selected" :value="tag" :name="tag" :inputId="tag"></Checkbox>
                   <label :for="tag" class="ml-2">
-                    {{ tag }}
+                    {{ typeLabel(tag) }}
                   </label>
                 </span>
               </div>
