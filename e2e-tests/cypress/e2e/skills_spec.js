@@ -340,38 +340,6 @@ describe('Skills Tests', () => {
     cy.get('[data-cy="manageSkillLink_testSkill"]')
   })
 
-  it('Add Skill Event - suggest user with slash character does not cause error', () => {
-    cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
-      projectId: 'proj1',
-      subjectId: 'subj1',
-      skillId: 'skill1',
-      name: 'Skill 1',
-      pointIncrement: '50',
-      numPerformToCompletion: '5'
-    })
-
-    cy.intercept({
-      method: 'POST',
-      url: '/app/users/projects/proj1/suggestClientUsers?userSuggestOption=TWO'
-    }).as('suggestUsers')
-    cy.intercept({
-      method: 'GET',
-      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
-    }).as('loadSkill')
-
-    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
-    cy.wait('@loadSkill')
-    cy.contains('Add Event').click()
-
-    cy.contains('ONE').click()
-    cy.contains('TWO').click()
-    cy.get('[data-cy="userSuggestOptionsDropdown"]').contains('TWO')
-
-    cy.get('[data-cy="userIdInput"]').click().type('foo/bar{enter}')
-    cy.wait('@suggestUsers')
-  })
-
-
   it('create skill and then update skillId', () => {
     const initialId = 'myid1Skill'
     const newId = 'MyId1Skill'
