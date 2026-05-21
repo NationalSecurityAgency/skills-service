@@ -1157,4 +1157,118 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         SkillsClientException e = thrown(SkillsClientException)
         e.getMessage().contains("Skill Events may not be in the future")
     }
+
+    def "Skills groups will fail to report"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        Map group = SkillsFactory.createSkillsGroup(1, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj1, [proj1_skills[0], group])
+        proj1_skills[1..2].each{
+            skillsService.assignSkillToSkillsGroup(group.skillId, it)
+        }
+        List<String> users = getRandomUsersForThisTest(1)
+
+        def skillRequest = [
+                userIds: users,
+                skillIds: [proj1_skills[0].skillId, group.skillId],
+        ]
+
+        when:
+        def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        result
+        result.results.size() == 2
+        result.results[0].skillId == proj1_skills[0].skillId
+        result.results[0].skillApplied
+        result.results[0].userId == users[0]
+        result.results[0].explanation == "Skill event was applied"
+
+        result.results[1].skillId == group.skillId
+        !result.results[1].skillApplied
+        result.results[1].userId == users[0]
+        result.results[1].explanation == "Failed to report skill event because skill definition does not exist."
+    }
+
+    def "able to batch report skills under a group"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        Map group = SkillsFactory.createSkillsGroup(1, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj1, [proj1_skills[0], group])
+        proj1_skills[1..2].each{
+            skillsService.assignSkillToSkillsGroup(group.skillId, it)
+        }
+        List<String> users = getRandomUsersForThisTest(1)
+
+        def skillRequest = [
+                userIds: users,
+                skillIds: [proj1_skills[1].skillId, proj1_skills[2].skillId],
+        ]
+
+        when:
+        def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        result
+        result.results.size() == 2
+        result.results[0].skillId == proj1_skills[1].skillId
+        result.results[0].skillApplied
+        result.results[0].userId == users[0]
+        result.results[0].explanation == "Skill event was applied"
+
+        result.results[1].skillId == proj1_skills[2].skillId
+        result.results[1].skillApplied
+        result.results[1].userId == users[0]
+        result.results[1].explanation == "Skill event was applied"
+    }
+
+    def "must not be able to report skill events if there is not enough points because group is not enabled"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 33
+            it.numPerformToCompletion = 1
+        }
+        Map group = SkillsFactory.createSkillsGroup(1, 1, 11)
+        group.enabled = false
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1_subj1, [proj1_skills[0], group])
+        proj1_skills[1..2].each{
+            it.enabled = false
+            skillsService.assignSkillToSkillsGroup(group.skillId, it)
+        }
+        List<String> users = getRandomUsersForThisTest(1)
+
+        def skillRequest = [
+                userIds: users,
+                skillIds: [proj1_skills[0].skillId],
+        ]
+
+        when:
+        def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        result
+        result.results.size() == 1
+        result.results[0].skillId == proj1_skills[0].skillId
+        !result.results[0].skillApplied
+        result.results[0].userId == users[0]
+        result.results[0].explanation == "Insufficient project points, skill achievement is disallowed"
+
+    }
 }
