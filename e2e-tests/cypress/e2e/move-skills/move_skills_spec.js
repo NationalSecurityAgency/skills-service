@@ -498,7 +498,7 @@ describe('Move Skills Tests', () => {
 
     });
 
-    it.only('selecting a skill group disables all the actions by move', () => {
+    it('selecting a skill group disables all the actions by move', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
         cy.createSubject(1, 3);
