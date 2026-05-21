@@ -36,6 +36,7 @@ import { useProjConfig } from '@/stores/UseProjConfig.js'
 import TableNoRes from '@/components/utils/table/TableNoRes.vue'
 import { useStorage } from '@vueuse/core'
 import CatalogService from '@/components/skills/catalog/CatalogService.js'
+import { useSkillsState } from '@/stores/UseSkillsState.js'
 
 const route = useRoute()
 const announcer = useSkillsAnnouncer()
@@ -46,6 +47,7 @@ const userInfo = useUserInfo()
 const exportUtil = useExportUtil()
 const numberFormat = useNumberFormat()
 const projConfig = useProjConfig()
+const skillsState = useSkillsState()
 
 let filters = ref({
   user: '',
@@ -128,6 +130,13 @@ const reset = () => {
 const isGlobalBadgePage = computed(() => {
   return route.path?.toLowerCase().startsWith('/administrator/globalbadges');
 })
+const isSkillsGroupPage = computed(() => {
+  return route.params.groupId;
+})
+const numSkillsRequired = computed(() => {
+  // -1 == all skills required
+  return (skillsState.skill?.numSkillsRequired === -1) ? skillsState.skill?.numSkillsInGroup : skillsState.skill?.numSkillsRequired
+})
 
 const getUrl = () => {
   if(isGlobalBadgePage.value === true) {
@@ -209,6 +218,10 @@ const calcTotalPercent = (totalProgress) => {
   return Math.trunc(totalProgress / maximumProgress.value * 100)
 }
 
+const calcGroupProgressPercent = (numSkillsAchieved) => {
+  return Math.trunc(numSkillsAchieved / numSkillsRequired.value * 100)
+}
+
 const pageChanged = (pagingInfo) => {
   pageSize.value = pagingInfo.rows
   currentPage.value = pagingInfo.page + 1
@@ -252,7 +265,7 @@ const archiveUsers = () => {
     <div class="px-6 py-4">
       <div class="flex flex-col lg:flex-row gap-6 my-2">
         <div class="flex flex-col sm:flex-row gap-3" :class="isGlobalBadgePage ? 'w-full' : ''">
-          <div :class="isGlobalBadgePage ? 'w-full' : 'xl:flex-none w-56'">
+          <div :class="isGlobalBadgePage || isSkillsGroupPage ? 'w-full' : 'xl:flex-none w-56'">
             <div>
               <label for="userFilter">User Filter</label>
             </div>
@@ -260,7 +273,7 @@ const archiveUsers = () => {
                        class="w-full"
                        data-cy="users-skillIdFilter" aria-label="user filter" />
           </div>
-          <div v-if="showUserTagColumn && !isUserTagsMetricsPage" :class="isGlobalBadgePage ? 'w-full' : 'xl:flex-none w-56'">
+          <div v-if="showUserTagColumn && !isUserTagsMetricsPage" :class="isGlobalBadgePage || isSkillsGroupPage ? 'w-full' : 'xl:flex-none w-56'">
             <div>
               <label for="userTagFilter">{{ appConfig.usersTableAdditionalUserTagLabel }} Filter</label>
             </div>
@@ -269,7 +282,7 @@ const archiveUsers = () => {
                        data-cy="users-userTagFilter" aria-label="user tag filter" />
           </div>
         </div>
-        <div class="flex-1" v-if="!isGlobalBadgePage">
+        <div class="flex-1" v-if="!isGlobalBadgePage && !isSkillsGroupPage">
           <div>
             <label for="minimumProgress">User Progress Filter</label>
           </div>
@@ -394,7 +407,7 @@ const archiveUsers = () => {
             <span v-if="isGlobalBadgePage">{{ slotProps.data.userTag }}</span>
           </template>
         </Column>
-        <Column field="totalPoints" header="Progress" :sortable="true" :class="{'flex': responsive.md.value }" v-if="!isGlobalBadgePage">
+        <Column field="totalPoints" header="Progress" :sortable="true" :class="{'flex': responsive.md.value }" v-if="!isGlobalBadgePage && !isSkillsGroupPage">
           <template #header>
             <i class="far fa-arrow-alt-circle-up mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
           </template>
@@ -452,6 +465,32 @@ const archiveUsers = () => {
                 </div>
               </div>
               <ProgressBar style="height: 5px;" :value="calcTotalPercent(slotProps.data.totalProgress)" :showValue="false"
+                           class="lg:min-w-[12rem] xl:min-w-[20rem]"
+                           :aria-label="`Progress for ${slotProps.data.userId} user`" />
+            </div>
+          </template>
+        </Column>
+
+        <Column v-if="isSkillsGroupPage" field="totalProgress" header="Group Progress" :sortable="true" :class="{'flex': responsive.md.value }">
+          <template #header>
+            <i class="far fa-arrow-alt-circle-up mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
+          </template>
+          <template #body="slotProps">
+            <div :data-cy="`usr_progress-${slotProps.data.userId}`" class="w-full">
+              <div class="flex">
+                <div class="flex flex-auto">
+                  <span class="font-weight-bold text-primary"
+                        :aria-label="`${calcGroupProgressPercent(slotProps.data.skillsAchieved)} percent completed`"
+                        data-cy="progressPercent">{{ calcGroupProgressPercent(slotProps.data.skillsAchieved) }}%</span>
+                </div>
+                <div class="flex flex-auto justify-end">
+                  <span class="text-primary font-weight-bold ml-3"
+                        :aria-label="`${slotProps.data.skillsAchieved} out of ${numSkillsRequired} required skills`"
+                        data-cy="progressAchievedSkills">{{ slotProps.data.skillsAchieved?.toLocaleString() }}</span> /
+                  <span data-cy="progressRequiredSkills">{{ numSkillsRequired }} Skills</span>
+                </div>
+              </div>
+              <ProgressBar style="height: 5px;" :value="calcGroupProgressPercent(slotProps.data.skillsAchieved)" :showValue="false"
                            class="lg:min-w-[12rem] xl:min-w-[20rem]"
                            :aria-label="`Progress for ${slotProps.data.userId} user`" />
             </div>

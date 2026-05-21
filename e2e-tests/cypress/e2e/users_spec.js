@@ -972,12 +972,12 @@ describe('Users Tests', () => {
         cy.createSkillsGroup(1, 1, 1);
         cy.addSkillToGroup(1, 1, 1, 2, {
             pointIncrement: '100',
-            numPerformToCompletion: '5',
+            numPerformToCompletion: '2',
             pointIncrementInterval: 0
         });
         cy.addSkillToGroup(1, 1, 1, 3, {
             pointIncrement: '100',
-            numPerformToCompletion: '5',
+            numPerformToCompletion: '2',
             pointIncrementInterval: 0
         });
 
@@ -993,6 +993,10 @@ describe('Users Tests', () => {
             userId: 'userb@skills.org',
             timestamp: m.clone().add(3, 'day').format('x')
         });
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+            userId: 'userb@skills.org',
+            timestamp: m.clone().add(4, 'day').format('x')
+        });
 
         // this user earned points in the subject, but not in the skill group
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
@@ -1006,18 +1010,18 @@ describe('Users Tests', () => {
         cy.get('[data-cy="pageHeader"]').contains('GROUP: Awesome Group 1');
 
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'userb@skills.org' }, { colIndex: 4, value: dateFormatter(m.clone().add(3, 'day')) }],
+            [{ colIndex: 0, value: 'userb@skills.org' }, { colIndex: 4, value: dateFormatter(m.clone().add(4, 'day')) }],
             [{ colIndex: 0, value: 'usera@skills.org' }, { colIndex: 4, value: dateFormatter(m.clone().add(1, 'day')) }],
         ], 5, true, 2);
 
-        cy.get('[data-cy="usr_progress-usera@skills.org"] [data-cy="progressPercent"]').should('have.text', '10%');
-        cy.get('[data-cy="usr_progress-usera@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '100');
-        cy.get('[data-cy="usr_progress-usera@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '1,000');
+        cy.get('[data-cy="usr_progress-usera@skills.org"] [data-cy="progressPercent"]').should('have.text', '0%');
+        cy.get('[data-cy="usr_progress-usera@skills.org"] [data-cy="progressAchievedSkills"]').should('have.text', '0');
+        cy.get('[data-cy="usr_progress-usera@skills.org"] [data-cy="progressRequiredSkills"]').should('have.text', '2 Skills');
         cy.get('[data-cy="usr_progress-usera@skills.org"] [data-cy="progressLevels"]').should('not.exist');
 
-        cy.get('[data-cy="usr_progress-userb@skills.org"] [data-cy="progressPercent"]').should('have.text', '20%');
-        cy.get('[data-cy="usr_progress-userb@skills.org"] [data-cy="progressCurrentPoints"]').should('have.text', '200');
-        cy.get('[data-cy="usr_progress-userb@skills.org"] [data-cy="progressTotalPoints"]').should('have.text', '1,000');
+        cy.get('[data-cy="usr_progress-userb@skills.org"] [data-cy="progressPercent"]').should('have.text', '50%');
+        cy.get('[data-cy="usr_progress-userb@skills.org"] [data-cy="progressAchievedSkills"]').should('have.text', '1');
+        cy.get('[data-cy="usr_progress-userb@skills.org"] [data-cy="progressRequiredSkills"]').should('have.text', '2 Skills');
         cy.get('[data-cy="usr_progress-userb@skills.org"] [data-cy="progressLevels"]').should('not.exist');
 
         cy.get(tableSelector).should('not.contain', 'userc@skills.org');
