@@ -27,6 +27,7 @@ import dayjs from "dayjs";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
+import LengthyOperationProgressBar from "@/components/utils/LengthyOperationProgressBar.vue";
 
 const model = defineModel()
 const appConfig = useAppConfig();
@@ -44,7 +45,7 @@ const props = defineProps({
   }
 })
 
-const loading = ref(false);
+const savingEvents = ref(false);
 const usersToAdd = ref("");
 const dateAdded = ref(new Date());
 const results = ref([]);
@@ -74,19 +75,38 @@ const userList = computed(() => {
   return [...new Set(cleanedUsers)];
 });
 
+const numTotalEvents = computed(() => userList.value.length * props.skills.length)
+
 const tooManyEvents = computed(() => {
-  return (userList.value.length * props.skills.length) > maxSkillBatchSize.value;
+  return numTotalEvents.value > maxSkillBatchSize.value;
 })
+
+const numMillisPerSkillEvent = appConfig.numMillisPerSkillEventInBatchReporting;
+
+// Total time in milliseconds
+const totalEstimatedTime = computed(() => (numTotalEvents.value * numMillisPerSkillEvent) + 1000);
+
+const timeoutPerProgressMovement = 300;
+
+// 1. Find the total number of progress updates/ticks that will happen
+const totalExpectedTicks = computed(() => totalEstimatedTime.value / timeoutPerProgressMovement);
+
+// 2. Divide 100% by the total ticks to get the exact percentage step size
+const incrementPerProgressMovement = computed(() => {
+  if (totalExpectedTicks.value <= 0) return 100;
+  return 100 / totalExpectedTicks.value;
+});
+
 
 const saveEvents = () => {
   const userIds = userList.value;
   const skillIds = props.skills.map((skill) => skill.skillId);
-  loading.value = true;
+  savingEvents.value = true;
 
   return SkillsService.saveSkillEventBatch(props.projectId, skillIds, userIds, dateAdded.value.getTime(), true, selectedSuggestOption.value).then((result) => {
     usersToAdd.value = '';
     results.value = result.results;
-    loading.value = false;
+    savingEvents.value = false;
   })
 
 }
@@ -105,6 +125,7 @@ const maxSkillBatchSize = computed(() => {
       id="addSkillEventBatch"
       header="Add Skill Events"
       v-model="model"
+      :submitting="savingEvents"
       :enable-return-focus="true"
       :show-cancel-button="false"
       :show-ok-button="results.length > 0"
@@ -113,7 +134,7 @@ const maxSkillBatchSize = computed(() => {
       ok-button-icon="fas fa-check"
       data-cy="addSkillEventBatchDialog">
 
-    <Stepper v-if="results.length === 0 && !loading" :linear="true" value="1" class="mb-4">
+    <Stepper v-if="results.length === 0 && !savingEvents" :linear="true" value="1" class="mb-4">
       <StepList>
         <Step value="1">Select Date</Step>
         <Step value="2">Add Users</Step>
@@ -194,7 +215,19 @@ const maxSkillBatchSize = computed(() => {
       </StepPanels>
     </Stepper>
 
-    <SkillsSpinner :is-loading="loading" class="my-8" />
+    <div v-if="savingEvents"  class="mt-8 mb-14 flex flex-col gap-3 items-center">
+      <SkillsSpinner v-if="numTotalEvents === 1" :is-loading="savingEvents" data-cy="batchSaveLoader"/>
+      <div data-cy="batchSaveLoadingMsg">Reporting <Tag>{{ numTotalEvents }}</Tag> skill {{ pluralize.plural('event', numTotalEvents)}}<span v-if="numTotalEvents > 1"> ({{skills.length}} {{ pluralize.plural('skill', skills.length) }} × {{ userList.length }} {{ pluralize.plural('users', userList.length) }})</span>.</div>
+      <div v-if="numTotalEvents > 1" class="w-full">
+        <lengthy-operation-progress-bar
+          style="height: 1.2rem"
+          :show-value="false"
+          :timeout="timeoutPerProgressMovement"
+          :increment="incrementPerProgressMovement"
+          data-cy="batchSaveProgressBar"
+          aria-label="Report Skills Progress"/>
+      </div>
+    </div>
 
     <SkillsDataTable
         aria-label="Admin Group Global Badges Table"

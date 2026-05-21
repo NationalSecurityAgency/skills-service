@@ -518,4 +518,90 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').should('not.be.visible');
     });
 
+    it('progress bar when there are more than 1 request', () => {
+        const numMillisPerSkillEventInBatchReporting = 600
+        const numSkillEvents = 6
+        cy.intercept('GET', '/public/config', (req) => {
+            req.continue((res) => {
+                res.body.numMillisPerSkillEventInBatchReporting = numMillisPerSkillEventInBatchReporting
+            })
+        }).as('getConfig')
+        cy.intercept('/admin/projects/proj1/reportSkillEvents', (req) => {
+            req.reply((res) => {
+                res.send({ delay: (numMillisPerSkillEventInBatchReporting * numSkillEvents) + 1000 });
+            });
+        }).as('saveSkillEvents');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('@getConfig')
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Report Skills for Users"]', true)
+        cy.get('[data-cy="firstNextButton"]').click();
+        cy.get('[data-cy="batchUserList"]').type('user1{enter}user2{enter}user3{enter}');
+        cy.get('[data-cy="secondNextButton"]').click();
+
+        cy.get('[data-cy="confirmMessage"]').contains('Skill events for 2 skills will be added for 3 users');
+        cy.get('[data-cy="saveBatchSkillEvents"]').click();
+        cy.get('[data-cy="batchSaveLoadingMsg"]').contains('Reporting 6 skill events (2 skills × 3 users)')
+        cy.get('[data-cy="batchSaveProgressBar"]').should('be.visible');
+        cy.get('[data-cy="batchSaveLoader"]').should('not.exist');
+        cy.wait('@saveSkillEvents');
+
+        cy.validateTable('[data-cy="skillEventBatchResult"]', [
+            [{ colIndex: 1,  value: 'user1' }, { colIndex: 2,  value: 'skill3' }, { colIndex: 3, value: 'Skill event was applied' }],
+            [{ colIndex: 1,  value: 'user1' }, { colIndex: 2,  value: 'skill1' }, { colIndex: 3, value: 'Skill event was applied' }],
+            [{ colIndex: 1,  value: 'user2' }, { colIndex: 2,  value: 'skill3' }, { colIndex: 3, value: 'Skill event was applied' }],
+            [{ colIndex: 1,  value: 'user2' }, { colIndex: 2,  value: 'skill1' }, { colIndex: 3, value: 'Skill event was applied' }],
+            [{ colIndex: 1,  value: 'user3' }, { colIndex: 2,  value: 'skill3' }, { colIndex: 3, value: 'Skill event was applied' }],
+            [{ colIndex: 1,  value: 'user3' }, { colIndex: 2,  value: 'skill1' }, { colIndex: 3, value: 'Skill event was applied' }],
+        ], 10, true, null, false);
+    });
+
+    it('loader when there is only 1 request', () => {
+        const numMillisPerSkillEventInBatchReporting = 1500
+        const numSkillEvents = 1
+        cy.intercept('GET', '/public/config', (req) => {
+            req.continue((res) => {
+                res.body.numMillisPerSkillEventInBatchReporting = numMillisPerSkillEventInBatchReporting
+            })
+        }).as('getConfig')
+        cy.intercept('/admin/projects/proj1/reportSkillEvents', (req) => {
+            req.reply((res) => {
+                res.send({ delay: (numMillisPerSkillEventInBatchReporting * numSkillEvents) + 1000 });
+            });
+        }).as('saveSkillEvents');
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('@getConfig')
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Report Skills for Users"]', true)
+        cy.get('[data-cy="firstNextButton"]').click();
+        cy.get('[data-cy="batchUserList"]').type('user1');
+        cy.get('[data-cy="secondNextButton"]').click();
+
+        cy.get('[data-cy="confirmMessage"]').contains('Skill events for 1 skill will be added for 1 user on');
+        cy.get('[data-cy="saveBatchSkillEvents"]').click();
+        cy.get('[data-cy="batchSaveLoadingMsg"]').contains('Reporting 1 skill event')
+        cy.get('[data-cy="batchSaveLoader"]').should('be.visible');
+        cy.get('[data-cy="batchSaveProgressBar"]').should('not.exist');
+        cy.wait('@saveSkillEvents');
+
+        cy.validateTable('[data-cy="skillEventBatchResult"]', [
+            [{ colIndex: 1,  value: 'user1' }, { colIndex: 2,  value: 'skill3' }, { colIndex: 3, value: 'Skill event was applied' }],
+        ], 10, true, null, false);
+    });
+
 });

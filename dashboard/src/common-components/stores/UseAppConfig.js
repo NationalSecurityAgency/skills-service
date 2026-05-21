@@ -200,6 +200,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
 
   const sdPointHistoryChartAchievementsCombinePct = computed(() => config.value.sdPointHistoryChartAchievementsCombinePct || 0.05)
   const audioAndVideoConfigExternalUrlWarningMsg = computed(() => config.value.audioAndVideoConfigExternalUrlWarningMsg || 'Video URL must link directly to WebM or MP4 files (no streaming or web pages).')
+  const numMillisPerSkillEventInBatchReporting = computed(() => config.value.numMillisPerSkillEventInBatchReporting || 350)
 
   return {
     loadConfigState,
@@ -333,5 +334,6 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     openAiAnnounceGenStatusInterval,
     sdPointHistoryChartAchievementsCombinePct,
     audioAndVideoConfigExternalUrlWarningMsg,
+    numMillisPerSkillEventInBatchReporting,
   }
 })
