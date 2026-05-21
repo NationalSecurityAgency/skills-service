@@ -969,7 +969,7 @@ WHERE
     (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%')))
     and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId)
     and (:includeImported = true OR exists( select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id) )
-GROUP BY upa.user_id, achievedSkills.skillsAchieved
+GROUP BY upa.user_id
 HAVING sum(skill.point_increment) >= :minimumPoints
    and sum(skill.point_increment) < :maximumPoints
             ''', nativeQuery = true)
@@ -985,30 +985,6 @@ HAVING sum(skill.point_increment) >= :minimumPoints
 
 
     static final String FIND_DISTINCT_GLOBAL_BADGE_USERS_SQL = '''
-SELECT
-    userSkillPoints.user_id,
-    count(userSkillPoints.skill_id) as skillsAchieved
-FROM (
-    SELECT
-        upaForSkillsAchieved.user_id,
-        skillForSkillsAchieved.skill_id,
-        sum(skillForSkillsAchieved.point_increment) as userSkillPoints,
-        max(skillForSkillsAchieved.total_points) as skillTotalPoints
-    FROM user_performed_skill upaForSkillsAchieved
-         JOIN skill_definition skillForSkillsAchieved ON (
-        upaForSkillsAchieved.skill_ref_id = CASE
-            WHEN skillForSkillsAchieved.copied_from_skill_ref IS NOT NULL THEN skillForSkillsAchieved.copied_from_skill_ref
-            ELSE skillForSkillsAchieved.id
-            END
-        AND skillForSkillsAchieved.type = 'Skill'
-        AND skillForSkillsAchieved.project_id = :projectId
-        AND skillForSkillsAchieved.skill_id IN (:skillIds)
-        AND skillForSkillsAchieved.enabled = 'true'
-    )
-    GROUP BY upaForSkillsAchieved.user_id, skillForSkillsAchieved.skill_id
-) userSkillPoints
-WHERE userSkillPoints.userSkillPoints = userSkillPoints.skillTotalPoints
-GROUP BY userSkillPoints.user_id
     WITH levelsConf AS (
             SELECT project_id, level FROM global_badge_level_definition where skill_id = :badgeId
     ),
