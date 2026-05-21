@@ -192,7 +192,13 @@ describe('Tag Skills Tests', () => {
     });
 
     it('Can not add too many events', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.continue((res) => {
+                res.body.maxSkillBatchSize = 10
+            })
+        }).as('getConfig')
         cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.wait('@getConfig');
 
         // must exist initially
         cy.get('[data-cy="manageSkillLink_skill1"]');
@@ -210,18 +216,27 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillsToAdd"]').contains('Very Great Skill 1')
 
         cy.get('[data-cy="firstNextButton"]').click();
-        for(let i = 0; i < 100; i++) {
+        for(let i = 0; i < 4; i++) {
             cy.get('[data-cy="batchUserList"]').type('user' + i + '{enter}');
         }
         cy.get('[data-cy="secondNextButton"]').click();
 
-        cy.get('[data-cy="batchErrorMessage"]').contains('Your batch exceeds the');
-        cy.get('[data-cy="batchErrorMessage"]').contains('request limit (3 skills × 100 users). To proceed, please remove either users or skills to reduce the total number of requests.');
+        cy.get('[data-cy="batchErrorMessage"]').contains('Your batch exceeds the 10 request limit (3 skills × 4 users).');
         cy.get('[data-cy="saveBatchSkillEvents"]').should('be.disabled');
+        cy.get('[data-cy="lastBackButton"]').should('be.enabled')
+
+        cy.get('[data-cy="lastBackButton"]').click();
+        cy.get('[data-cy="batchUserList"]').type('{end}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}')
+
+        cy.get('[data-cy="secondNextButton"]').click();
+        cy.get('[data-cy="confirmMessage"]').contains('Skill events for 3 skills will be added for 3 users');
+        cy.get('[data-cy="saveBatchSkillEvents"]').should('be.enabled');
+        cy.get('[data-cy="lastBackButton"]').should('be.enabled')
+
     });
 
     it('User suggestion sent to back end', () => {
-        cy.intercept('PUT', '/admin/projects/proj1/skills').as('saveSkills')
+        cy.intercept('POST', '/admin/projects/proj1/reportSkillEvents').as('saveSkills')
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 

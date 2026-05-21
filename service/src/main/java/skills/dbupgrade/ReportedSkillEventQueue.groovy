@@ -24,7 +24,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
-import skills.controller.AddSkillHelper
+import skills.services.events.AddSkillHelper
 import skills.dbupgrade.s3.DiskBufferingS3OutputStreamProviderConfigurer
 import skills.dbupgrade.s3.S3SerializedEventsReader
 

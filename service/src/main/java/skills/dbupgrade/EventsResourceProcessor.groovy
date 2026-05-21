@@ -24,7 +24,7 @@ import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Component
-import skills.controller.AddSkillHelper
+import skills.services.events.AddSkillHelper
 import skills.controller.request.model.SkillEventRequest
 
 import java.nio.charset.StandardCharsets

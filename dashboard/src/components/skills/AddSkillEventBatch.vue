@@ -184,7 +184,7 @@ const maxSkillBatchSize = computed(() => {
             Please click "Add Events" to confirm.
           </Message>
           <Message :closable="false" v-if="tooManyEvents" severity="error" data-cy="batchErrorMessage">
-            Your batch exceeds the {{ maxSkillBatchSize }} request limit ({{skills.length}} skills × {{ userList.length }} users). To proceed, please remove either users or skills to reduce the total number of requests.
+            Your batch exceeds the {{ maxSkillBatchSize }} request limit ({{skills.length}} {{ pluralize.plural('skill', skills.length) }} × {{ userList.length }} {{ pluralize.plural('users', userList.length) }}). To proceed, please remove either users or skills to reduce the total number of requests.
           </Message>
           <div class="flex pt-6 justify-between">
             <SkillsButton label="Back" icon="fas fa-arrow-circle-left" outlined class="mr-2" severity="secondary" @click="activateCallback('2')" data-cy="lastBackButton" />
@@ -210,7 +210,7 @@ const maxSkillBatchSize = computed(() => {
             <i class="mr-2" :class="[slotProps.data.success && slotProps.data.skillApplied ? 'fa fa-check text-primary' : 'fa fa-info-circle text-red-800']" aria-hidden="true"/> {{ slotProps.data.success && slotProps.data.skillApplied ? 'Applied' : 'Rejected' }}
         </template>
       </Column>
-      <Column header="User" field="userId" :sortable="true"></Column>
+      <Column header="User" field="userIdForDisplay" :sortable="true"></Column>
       <Column header="Skill" field="skillId" :sortable="true"></Column>
       <Column header="Explanation" field="explanation" :sortable="true"></Column>
     </SkillsDataTable>

@@ -293,7 +293,7 @@ export default {
       .then((remoteRes) => remoteRes.data)
   },
   saveSkillEventBatch(projectId, skillIds, users, timestamp, doNotRequireApproval, selectedSuggestOption) {
-    return axios.put(`/admin/projects/${encodeURIComponent(projectId)}/skills`,
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/reportSkillEvents`,
         { skillIds: skillIds, userIds: users, timestamp: timestamp, suggestionOption: selectedSuggestOption })
         .then((remoteRes) => remoteRes.data)
   },

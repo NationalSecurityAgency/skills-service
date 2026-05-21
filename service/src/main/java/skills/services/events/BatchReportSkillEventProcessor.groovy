@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller
+package skills.services.events
 
+import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.collections4.CollectionUtils
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,12 +28,10 @@ import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.SkillException
-import skills.services.events.SkillEventResult
-import skills.services.events.SkillEventsService
 
 @Component
 @Slf4j
-class SkillEventProcessor {
+class BatchReportSkillEventProcessor {
 
     @Autowired
     SkillEventsService skillsManagementFacade;
@@ -50,6 +49,7 @@ class SkillEventProcessor {
     String dnCheckStr
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Profile
     SkillEventResult processSkillForUserInItsOwnTransaction(String projectId, String skillId, String userId, Date incomingDate, String userSuggestOption, Map<String, List<UserInfo>> userInfoCache) {
         String userIdToProcess = getUserName(userId, userSuggestOption, userInfoCache);
         SkillEventsService.SkillApprovalParams skillApprovalParams = SkillEventsService.getDefaultSkillApprovalParams();
@@ -58,6 +58,7 @@ class SkillEventProcessor {
         return skillsManagementFacade.reportSkill(projectId, skillId, userIdToProcess, true, incomingDate, skillApprovalParams);
     }
 
+    @Profile
     private String getUserName(String userIdToProcess, String userSuggestOption, Map<String, List<UserInfo>> userInfoCache) {
         boolean isPki = authMode == AuthMode.PKI
         String idType = isPki ? "DN" : "ID"

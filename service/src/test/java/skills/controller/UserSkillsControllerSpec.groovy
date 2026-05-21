@@ -18,6 +18,7 @@ package skills.controller
 import ch.qos.logback.classic.spi.ILoggingEvent
 import skills.auth.UserInfoService
 import skills.controller.request.model.SkillEventRequest
+import skills.services.events.AddSkillHelper
 import skills.services.events.SkillEventsService
 import skills.utils.LoggerHelper
 import skills.utils.WaitFor

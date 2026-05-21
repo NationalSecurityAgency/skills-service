@@ -50,6 +50,8 @@ import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
 import skills.services.attributes.SlidesAttrs
+import skills.services.events.AddSkillHelper
+import skills.services.events.BatchReportService
 import skills.services.events.BatchSkillEventResult
 import skills.services.events.BulkSkillEventResult
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
@@ -64,7 +66,6 @@ import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionsHistoryService
 import skills.services.video.AdminVideoService
 import skills.storage.model.SkillDef
-import skills.storage.model.SkillRelDef
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 import skills.utils.TablePageUtil
@@ -223,6 +224,9 @@ class AdminController {
 
     @Autowired
     AddSkillHelper addSkillHelper;
+
+    @Autowired
+    BatchReportService batchReportService
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -2014,7 +2018,7 @@ class AdminController {
         return attachmentService.saveAttachment(file, projectId, null, null);
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skills", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/reportSkillEvents", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
     @Profile
     BatchSkillEventResult addBatchSkillsForBatchUsers(@PathVariable("projectId") String projectId,
@@ -2029,7 +2033,7 @@ class AdminController {
             throw new SkillException("Request size ${batchSize} ${calculationStr} exceeds maximum allowable [${maxSkillBatchSize}].", projectId, null, ErrorCode.BadParam)
         }
 
-        return addSkillHelper.addBatchSkillsForBatchUsers(projectId, batchSkillEventRequest);
+        return batchReportService.addBatchSkillsForBatchUsers(projectId, batchSkillEventRequest);
     }
 }
 

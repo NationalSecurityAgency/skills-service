@@ -17,7 +17,7 @@ package skills.intTests
 
 import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
-import skills.controller.AddSkillHelper
+import skills.services.events.AddSkillHelper
 import skills.intTests.utils.*
 import skills.storage.model.UserAttrs
 import skills.storage.repos.UserAchievedLevelRepo
@@ -54,6 +54,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSkills(proj1_skills)
 
         List<String> users = getRandomUsersForThisTest(1)
+        users.each { createService(it) }
 
         def skillRequest = [
                 userIds: [users[0]],
@@ -70,7 +71,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         result.results[0].skillId == 'skill1'
         result.results[0].skillApplied
         result.results[0].userId == users[0]
-
+        result.results[0].userIdForDisplay == userAttrsRepo.findByUserIdIgnoreCase(users[0]).userIdForDisplay
     }
     
     def "Submit a batch of skills for a single user"() {
@@ -138,6 +139,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
         List<String> users = getRandomUsersForThisTest(4)
+        users.each { createService(it)}
 
         def skillRequest = [
                 userIds: users,
@@ -154,19 +156,22 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         result.results[0].skillId == 'skill1'
         result.results[0].skillApplied
         result.results[0].userId == users[0]
+        result.results[0].userIdForDisplay == userAttrsRepo.findByUserIdIgnoreCase(users[0]).userIdForDisplay
 
         result.results[1].skillId == 'skill1'
         result.results[1].skillApplied
         result.results[1].userId == users[1]
+        result.results[1].userIdForDisplay == userAttrsRepo.findByUserIdIgnoreCase(users[1]).userIdForDisplay
 
         result.results[2].skillId == 'skill1'
         result.results[2].skillApplied
         result.results[2].userId == users[2]
+        result.results[2].userIdForDisplay == userAttrsRepo.findByUserIdIgnoreCase(users[2]).userIdForDisplay
 
         result.results[3].skillId == 'skill1'
         result.results[3].skillApplied
         result.results[3].userId == users[3]
-
+        result.results[3].userIdForDisplay == userAttrsRepo.findByUserIdIgnoreCase(users[3]).userIdForDisplay
     }
 
     def "Submit a batch of skills for multiple users"() {
@@ -550,6 +555,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         skillsService.createSubject(proj1_subj1)
         skillsService.createSkills(proj1_skills)
         List<String> users = getRandomUsersForThisTest(4)
+        users.each { createService(it) }
 
         def skillRequest = [
                 userIds: users,
@@ -559,57 +565,68 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
 
         when:
         def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
-        println JsonOutput.prettyPrint(JsonOutput.toJson(result.results))
 
         then:
         result.results.size() == 12
         result.results[0].skillId == 'skill1'
         result.results[0].skillApplied
         result.results[0].userId == users[0]
+        result.results[0].userIdForDisplay == userAttrsRepo.findByUserIdIgnoreCase(users[0]).userIdForDisplay
 
         result.results[1].skillId == 'fakeskill'
         !result.results[1].skillApplied
         result.results[1].userId == users[0]
+        result.results[1].userIdForDisplay == users[0]
 
         result.results[2].skillId == 'skill2'
         result.results[2].skillApplied
         result.results[2].userId == users[0]
+        result.results[2].userIdForDisplay == userAttrsRepo.findByUserIdIgnoreCase(users[0]).userIdForDisplay
 
         result.results[3].skillId == 'skill1'
         result.results[3].skillApplied
         result.results[3].userId == users[1]
+        result.results[3].userIdForDisplay == userAttrsRepo.findByUserIdIgnoreCase(users[1]).userIdForDisplay
 
         result.results[4].skillId == 'fakeskill'
         !result.results[4].skillApplied
         result.results[4].userId == users[1]
+        result.results[4].userIdForDisplay == users[1]
 
         result.results[5].skillId == 'skill2'
         result.results[5].skillApplied
         result.results[5].userId == users[1]
+        result.results[5].userIdForDisplay == userAttrsRepo.findByUserIdIgnoreCase(users[1]).userIdForDisplay
 
         result.results[6].skillId == 'skill1'
         result.results[6].skillApplied
         result.results[6].userId == users[2]
+        result.results[6].userIdForDisplay == userAttrsRepo.findByUserIdIgnoreCase(users[2]).userIdForDisplay
 
         result.results[7].skillId == 'fakeskill'
         !result.results[7].skillApplied
         result.results[7].userId == users[2]
+        result.results[7].userIdForDisplay == users[2]
 
         result.results[8].skillId == 'skill2'
         result.results[8].skillApplied
         result.results[8].userId == users[2]
+        result.results[8].userIdForDisplay == userAttrsRepo.findByUserIdIgnoreCase(users[2]).userIdForDisplay
 
         result.results[9].skillId == 'skill1'
         result.results[9].skillApplied
         result.results[9].userId == users[3]
+        result.results[9].userIdForDisplay == userAttrsRepo.findByUserIdIgnoreCase(users[3]).userIdForDisplay
 
         result.results[10].skillId == 'fakeskill'
         !result.results[10].skillApplied
         result.results[10].userId == users[3]
+        result.results[10].userIdForDisplay == users[3]
 
         result.results[11].skillId == 'skill2'
         result.results[11].skillApplied
         result.results[11].userId == users[3]
+        result.results[11].userIdForDisplay == userAttrsRepo.findByUserIdIgnoreCase(users[3]).userIdForDisplay
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] != "pki" })

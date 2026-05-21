@@ -42,4 +42,5 @@ class SkillEventResult {
     List<CompletionItem> completed = []
     String selfReportType
     String userId
+    String userIdForDisplay
 }

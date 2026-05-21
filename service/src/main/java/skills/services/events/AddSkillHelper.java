@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller;
+package skills.services.events;
 
 import callStack.profiler.CProf;
 import groovy.lang.Closure;
@@ -25,25 +25,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import skills.PublicProps;
-import org.springframework.transaction.annotation.Transactional;
-import skills.auth.UserInfo;
 import skills.auth.UserInfoService;
 import skills.controller.exceptions.ErrorCode;
 import skills.controller.exceptions.SkillException;
 import skills.controller.exceptions.SkillsValidator;
-import skills.controller.request.model.BatchSkillEventRequest;
 import skills.controller.request.model.SkillEventRequest;
 import skills.services.ProjectErrorService;
-import skills.services.events.BatchSkillEventResult;
-import skills.services.events.SkillEventResult;
-import skills.services.events.SkillEventsService;
-import skills.services.userActions.DashboardAction;
-import skills.services.userActions.DashboardItem;
-import skills.services.userActions.UserActionInfo;
-import skills.services.userActions.UserActionsHistoryService;
 import skills.utils.RetryUtil;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Locale;
 
 @Component
 public class AddSkillHelper {
@@ -64,83 +55,14 @@ public class AddSkillHelper {
     ProjectErrorService projectErrorService;
 
     @Autowired
-    UserActionsHistoryService userActionsHistoryService;
-
-    @Autowired
-    SkillEventProcessor skillEventProcessor;
-
-    @Transactional
-    public BatchSkillEventResult addBatchSkillsForBatchUsers(String projectId, BatchSkillEventRequest batchSkillEventRequest) {
-        Long requestedTimestamp = batchSkillEventRequest.getTimestamp();
-        List<String> skillIds = batchSkillEventRequest.getSkillIds();
-        Date incomingDate = validateTime(projectId, requestedTimestamp);
-        BatchSkillEventResult batchResults = new BatchSkillEventResult();
-        ArrayList<SkillEventResult> results = new ArrayList<>();
-
-        Map<String, List<UserInfo>> userInfoCache = Collections.synchronizedMap(new HashMap<>());
-        for(String userIdToProcess : batchSkillEventRequest.getUserIds()) {
-            for (String skillId : skillIds) {
-                SkillEventResult result = null;
-                try {
-                    result = skillEventProcessor.processSkillForUserInItsOwnTransaction(projectId, skillId, userIdToProcess, incomingDate,
-                            batchSkillEventRequest.getUserSuggestOption(), userInfoCache);
-                } catch(SkillException ske) {
-                    log.error("Error applying skill [{}], user [{}], error [{}]", skillId, userIdToProcess, ske.getMessage());
-
-                    if (ske.getErrorCode() == ErrorCode.SkillNotFound) {
-                        projectErrorService.invalidSkillReported(projectId, skillId);
-                    }
-                    result = createNewEventResult(ske.getMessage(), projectId, skillId, userIdToProcess);
-                } finally {
-                    results.add(result);
-                }
-            }
-        }
-
-        batchResults.setResults(results);
-
-        String userIdsString = !batchSkillEventRequest.getUserIds().isEmpty() ? String.join(", ", batchSkillEventRequest.getUserIds()) : null;
-        HashMap<String, String> actionAttributes = new HashMap<>();
-        actionAttributes.put("userIds", userIdsString);
-
-        for (String skillId : skillIds) {
-            UserActionInfo userActionInfo = new UserActionInfo();
-            userActionInfo.setProjectId(projectId);
-            userActionInfo.setItem(DashboardItem.SkillEvents);
-            userActionInfo.setAction(DashboardAction.ManuallyAddSkillEvent);
-            userActionInfo.setItemId(skillId);
-            userActionInfo.setActionAttributes(actionAttributes);
-            userActionsHistoryService.saveUserAction(userActionInfo);
-        }
-
-        return batchResults;
-    }
-
-    private Date validateTime(String projectId, Long requestedTimestamp) {
-        if (requestedTimestamp != null && requestedTimestamp > 0) {
-            //let's account for some possible clock drift
-            SkillsValidator.isTrue(requestedTimestamp <= (System.currentTimeMillis() + 30000), "Skill Events may not be in the future", projectId);
-            return new Date(requestedTimestamp);
-        }
-        return null;
-    }
-
-    private SkillEventResult createNewEventResult(String failureMessage, String projectId, String skillId, String userId) {
-        SkillEventResult res = new SkillEventResult();
-        res.setSkillApplied(false);
-        res.setExplanation(failureMessage);
-        res.setProjectId(projectId);
-        res.setSkillId(skillId);
-        res.setUserId(userId);
-        return res;
-    }
+    ReportEventsValidateHelper reportEventsValidateHelper;
 
     public SkillEventResult addSkill(String projectId, String skillId, SkillEventRequest skillEventRequest) {
         String requestedUserId = skillEventRequest != null ? skillEventRequest.getUserId() : null;
         Long requestedTimestamp = skillEventRequest != null ? skillEventRequest.getTimestamp() : null;
         Boolean notifyIfSkillNotApplied = skillEventRequest != null ? skillEventRequest.getNotifyIfSkillNotApplied() : false;
         Boolean isRetry = skillEventRequest != null ? skillEventRequest.getIsRetry() : false;
-        Date incomingDate = validateTime(projectId, requestedTimestamp);
+        Date incomingDate = reportEventsValidateHelper.validateSkillEventTime(projectId, requestedTimestamp);
 
         if (skillEventRequest != null && skillEventRequest.getApprovalRequestedMsg() != null) {
             int maxLength = publicProps.getInt(PublicProps.UiProp.maxSelfReportMessageLength);

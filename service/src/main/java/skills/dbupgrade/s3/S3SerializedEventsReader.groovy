@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Conditional
 import org.springframework.core.io.Resource
 import org.springframework.core.io.support.ResourcePatternResolver
 import org.springframework.stereotype.Component
-import skills.controller.AddSkillHelper
+import skills.services.events.AddSkillHelper
 import skills.dbupgrade.EventsResourceProcessor
 import skills.dbupgrade.ReportedSkillEventQueue
 import software.amazon.awssdk.services.s3.S3Client
