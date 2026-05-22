@@ -488,25 +488,27 @@ describe('Self Report Skills Management Tests', () => {
     cy.get('[data-cy=rejectBtn]')
       .click();
     cy.contains('Reject Skills');
-    cy.get('[data-cy=rejectionInputMsg]')
-      .fill(new Array(500).join('A'));
-    cy.get('[data-cy=approvalRequiredMsgError]')
-      .contains('Message must be at most 250 characters')
-      .should('be.visible');
+    const msg =  'A'.repeat(250)
+    // .type does not work reliably on textarea
+    cy.get('[data-cy="rejectionInputMsg"]').invoke('val', msg).trigger('input');
+
+    cy.get('[data-cy="approvalRequiredMsgNumCharsRemaining"]').contains('0 characters remaining');
+    cy.get('[data-cy="rejectionInputMsg"]').invoke('val').should('have.length', 250);
+
     cy.get('[data-cy=saveDialogBtn]')
-      .should('be.disabled');
+      .should('be.enabled');
     cy.get('[data-cy=rejectionInputMsg]')
       .clear();
+    cy.get('[data-cy="approvalRequiredMsgNumCharsRemaining"]').contains('250 characters remaining');
+
+    const msg2 = 'B'.repeat(50);
+    // .type does not work reliably on textarea
+    cy.get('[data-cy="rejectionInputMsg"]').invoke('val', msg2).trigger('input');
+
+    cy.get('[data-cy="approvalRequiredMsgNumCharsRemaining"]').contains('200 characters remaining');
+    cy.get('[data-cy="rejectionInputMsg"]').invoke('val').should('have.length', 50);
     cy.get('[data-cy=saveDialogBtn]')
       .should('be.enabled');
-    cy.get('[data-cy=approvalRequiredMsgError]')
-      .should('not.be.visible');
-    cy.get('[data-cy=rejectionInputMsg]')
-      .type(new Array(50).join('B'));
-    cy.get('[data-cy=saveDialogBtn]')
-      .should('be.enabled');
-    cy.get('[data-cy=approvalRequiredMsgError]')
-      .should('not.be.visible');
   });
 
   it('approval request skill should be a link to skill details', () => {
