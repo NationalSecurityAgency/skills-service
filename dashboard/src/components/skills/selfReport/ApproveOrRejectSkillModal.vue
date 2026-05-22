@@ -94,7 +94,7 @@ const done = () => {
     <SkillsTextarea :data-cy="isReject ? 'rejectionInputMsg' : 'approvalInputMsg'"
                     aria-describedby="rejectionApprovalTitleInModal"
                     :aria-label="isReject ? 'Optional Rejection Message' : 'Optional Approval Message'"
-                    rows="5" :max-num-chars="appConfig.maxSelfReportRejectionMessageLength"
+                    rows="5" :max-num-chars="+appConfig.maxSelfReportRejectionMessageLength"
                     name="approvalRequiredMsg">
     </SkillsTextarea>
   </SkillsInputFormDialog>
