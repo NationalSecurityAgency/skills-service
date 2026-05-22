@@ -353,6 +353,9 @@ function getUserDisplay(item) {
 }
 
 function canDeleteUser(userId, userRole) {
+  if (userRole === ROLE_DASHBOARD_ADMIN_ACCESS) {
+    return true;
+  }
   if (userRole === ROLE_ADMIN_GROUP_OWNER) {
     return numberOfGroupOwners.value > 1;
   }
