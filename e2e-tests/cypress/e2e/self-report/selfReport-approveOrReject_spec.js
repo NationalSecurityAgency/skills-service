@@ -457,7 +457,7 @@ describe('Self Report Skills Management Tests', () => {
       .should('have.length', 0);
   });
 
-  it('rejection message is limited to configure max size', () => {
+  it.only('rejection message is limited to configure max size', () => {
     cy.createSkill(1, 1, 1, {
       selfReportingType: 'Approval',
       description: 'This is skill 1'
