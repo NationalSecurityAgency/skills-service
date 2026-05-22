@@ -154,14 +154,14 @@ class AdminUsersService {
         return new TableResultWithTotalPoints(usersPage, totalPoints)
     }
 
-    TableResultWithTotalPoints loadUsersPageForSkills(String projectId, List<String> skillIds, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter, boolean includeImported) {
+    TableResultWithTotalPoints loadUsersPageForSkills(String projectId, List<String> skillIds, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter, boolean includeImported, includeAchievedSkills=false) {
         if (!skillIds) {
             return TableResultWithTotalPoints.EMPTY
         }
         query = query ? query.trim() : ''
         Integer totalPoints = skillDefRepo.getTotalPointsSumForSkills(projectId, skillIds) ?: 0
         Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)
-        Page<ProjectUser> usersPage = userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(projectId, usersTableAdditionalUserTagKey, skillIds, query, minMax.left, minMax.right, userTagFilter, includeImported, pageRequest)
+        Page<ProjectUser> usersPage = userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLike(projectId, usersTableAdditionalUserTagKey, skillIds, query, minMax.left, minMax.right, userTagFilter, includeImported, pageRequest, includeAchievedSkills)
         return new TableResultWithTotalPoints(usersPage, totalPoints, skillIds.size())
     }
 
