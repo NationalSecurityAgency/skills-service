@@ -131,7 +131,7 @@ const isGlobalBadgePage = computed(() => {
   return route.path?.toLowerCase().startsWith('/administrator/globalbadges');
 })
 const isSkillsGroupPage = computed(() => {
-  return route.params.groupId;
+  return !!route.params.groupId;
 })
 const numSkillsRequired = computed(() => {
   // -1 == all skills required
@@ -264,8 +264,8 @@ const archiveUsers = () => {
   <div class="w-full">
     <div class="px-6 py-4">
       <div class="flex flex-col lg:flex-row gap-6 my-2">
-        <div class="flex flex-col sm:flex-row gap-3" :class="isGlobalBadgePage ? 'w-full' : ''">
-          <div :class="isGlobalBadgePage || isSkillsGroupPage ? 'w-full' : 'xl:flex-none w-56'">
+        <div class="flex flex-col sm:flex-row gap-3" :class="isGlobalBadgePage || isSkillsGroupPage ? 'w-full' : ''">
+          <div :class="isGlobalBadgePage || isSkillsGroupPage ? 'w-1/2' : 'xl:flex-none w-56'">
             <div>
               <label for="userFilter">User Filter</label>
             </div>
@@ -273,7 +273,7 @@ const archiveUsers = () => {
                        class="w-full"
                        data-cy="users-skillIdFilter" aria-label="user filter" />
           </div>
-          <div v-if="showUserTagColumn && !isUserTagsMetricsPage" :class="isGlobalBadgePage || isSkillsGroupPage ? 'w-full' : 'xl:flex-none w-56'">
+          <div v-if="showUserTagColumn && !isUserTagsMetricsPage" :class="isGlobalBadgePage || isSkillsGroupPage ? 'w-1/2' : 'xl:flex-none w-56'">
             <div>
               <label for="userTagFilter">{{ appConfig.usersTableAdditionalUserTagLabel }} Filter</label>
             </div>
