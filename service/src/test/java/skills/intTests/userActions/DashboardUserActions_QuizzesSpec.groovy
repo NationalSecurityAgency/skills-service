@@ -41,6 +41,7 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
         String originalName = quiz.name
         when:
         skillsService.createQuizDef(quiz)
+        String prevQuizName = quiz.name
         quiz.name = "Cool New Name"
         quiz.description = "Important Update"
         skillsService.createQuizDef(quiz, quiz.quizId)
@@ -81,10 +82,44 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
         !createAction.description
 
         editAction.id == res.data[1].itemRefId
-        editAction.name == quiz.name
+        editAction.newName == quiz.name
+        editAction.previousName == prevQuizName
         editAction.description == "Important Update"
 
         !deleteAction.id
+    }
+
+    def "change quiz id"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        when:
+        skillsService.createQuizDef(quiz)
+        def question1 = QuizDefFactory.createChoiceQuestion(1, 1, 4, QuizQuestionType.SingleChoice)
+        skillsService.createQuizQuestionDef(question1)
+
+        quiz.description = "Important Update"
+        String previousQuizId = quiz.quizId
+        quiz.quizId = "newId"
+        skillsService.createQuizDef(quiz, previousQuizId)
+
+        then:
+        def res = rootService.getUserActionsForEverything()
+        def editAction = rootService.getUserActionAttributes(res.data[0].id)
+        then:
+        // previous actions are still associated
+        res.data.action == [DashboardAction.Edit.toString(), DashboardAction.Create.toString(), DashboardAction.Create.toString()]
+        res.data.item == [DashboardItem.Quiz.toString(), DashboardItem.Question.toString(), DashboardItem.Quiz.toString()]
+        res.data.itemId == [previousQuizId, previousQuizId, previousQuizId]
+        res.data.quizId == [quiz.quizId, quiz.quizId, quiz.quizId] // quizId was updated
+
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        !res.data[0].projectId
+
+        editAction.id == res.data[0].itemRefId
+        editAction.name == quiz.name
+        editAction.newQuizId == quiz.quizId
+        editAction.previousQuizId == previousQuizId
+        editAction.description == "Important Update"
     }
 
     def "question def CRUD"() {

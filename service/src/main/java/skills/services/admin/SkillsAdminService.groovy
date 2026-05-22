@@ -417,7 +417,7 @@ class SkillsAdminService {
                     action: dashboardAction,
                     item: isSkillsGroup ? DashboardItem.SkillsGroup : DashboardItem.Skill,
                     actionAttributes: tempSaved,
-                    itemId: savedSkill.skillId,
+                    itemId: originalSkillId ?: savedSkill.skillId,
                     itemRefId: savedSkill.id,
                     projectId: savedSkill.projectId,
             ))

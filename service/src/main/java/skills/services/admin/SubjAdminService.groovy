@@ -128,6 +128,8 @@ class SubjAdminService {
             throw new SkillException("Cannot disable an existing enabled Subject. SubjectId=[${origSubjectId}]", projectId, null, ErrorCode.BadParam)
         }
 
+        String prevSubjId = existing?.skillId
+
         SkillDefWithExtra res
         if (existing) {
             Props.copy(subjectRequest, existing)
@@ -174,7 +176,7 @@ class SubjAdminService {
                 action: existing ? DashboardAction.Edit : DashboardAction.Create,
                 item: DashboardItem.Subject,
                 actionAttributes: res,
-                itemId: res.skillId,
+                itemId: prevSubjId ?: res.skillId,
                 itemRefId: res.id,
                 projectId: res.projectId,
         ))

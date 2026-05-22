@@ -46,8 +46,4 @@ class ProjDefParent implements Serializable {
     @LastModifiedDate
     Date updated
 
-//    @Lob
-//    @Column(columnDefinition = "text")
-//    String description
-
 }

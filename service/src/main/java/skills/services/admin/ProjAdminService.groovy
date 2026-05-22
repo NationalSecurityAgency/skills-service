@@ -158,6 +158,8 @@ class ProjAdminService {
             serviceValidatorHelper.validateProjectNameDoesNotExist(projectRequest.name, projectRequest.projectId)
         }
         final boolean isEdit = projectDefinition
+        String previousName = projectDefinition?.name
+        String previousProjId = projectDefinition?.projectId
 
         ProjDefParent savedProjDef
         if (isEdit) {
@@ -198,11 +200,38 @@ class ProjAdminService {
         }
         attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(projectRequest.description, projectDefinition.projectId, null, null)
 
+        Map actionAttributes
+        if (isEdit) {
+            actionAttributes = [
+                    id: projectDefinition.id,
+                    description: projectDefinition.description
+            ]
+            if (previousProjId != projectDefinition.projectId) {
+                actionAttributes.previousProjectId = previousProjId
+                actionAttributes.newProjectId = projectDefinition.projectId
+                userActionsHistoryService.handleProjectIdChange(previousProjId, projectDefinition.projectId)
+            } else {
+                actionAttributes.projectId = projectDefinition.projectId
+            }
+            if (previousName != projectDefinition.name) {
+                actionAttributes.newName = projectDefinition.name
+                actionAttributes.previousName = previousName
+            } else {
+                actionAttributes.name = projectDefinition.name
+            }
+        } else {
+            actionAttributes = [
+                    id: projectDefinition.id,
+                    name: projectDefinition.name,
+                    projectId: projectDefinition.projectId,
+                    description: projectDefinition.description
+            ]
+        }
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
                 item: DashboardItem.Project,
-                actionAttributes: projectDefinition,
-                itemId: savedProjDef.projectId,
+                actionAttributes: actionAttributes,
+                itemId: previousProjId ?: savedProjDef.projectId,
                 itemRefId: savedProjDef.id,
                 projectId: savedProjDef.projectId,
         ))

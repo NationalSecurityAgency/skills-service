@@ -412,6 +412,8 @@ class QuizDefService {
         QuizDefWithDescription quizDefWithDescription = retrieveAndValidateQuizDef(originalQuizId, newQuizId, quizDefRequest)
         validateUserCommunityProps(quizDefRequest, quizDefWithDescription)
         final boolean isEdit = quizDefWithDescription
+        String previousQuizId = quizDefWithDescription?.quizId
+        String previousQuizName = quizDefWithDescription?.name
         if (quizDefWithDescription) {
             QuizDefParent.QuizType incomingType = QuizDefParent.QuizType.valueOf(quizDefRequest.type)
             QuizValidator.isTrue(quizDefWithDescription.type == incomingType, "Existing quiz type cannot be changed", quizDefWithDescription.quizId)
@@ -447,11 +449,39 @@ class QuizDefService {
             quizSettingsService.saveSettings(quizDefWithDescription.quizId, [new QuizSettingsRequest(setting: QuizSettings.UserCommunityOnlyQuiz.setting, value: Boolean.TRUE.toString())], false)
         }
 
+        Map actionAttributes
+        if (isEdit) {
+            actionAttributes = [
+                    id: quizDefWithDescription.id,
+                    description: quizDefWithDescription.description
+            ]
+            if (previousQuizId != quizDefWithDescription.quizId) {
+                actionAttributes.previousQuizId = previousQuizId
+                actionAttributes.newQuizId = quizDefWithDescription.quizId
+                userActionsHistoryService.handleQuizIdChange(previousQuizId, quizDefWithDescription.quizId)
+            } else {
+                actionAttributes.quizId = quizDefWithDescription.quizId
+            }
+            if (previousQuizName != quizDefWithDescription.name) {
+                actionAttributes.newName = quizDefWithDescription.name
+                actionAttributes.previousName = previousQuizName
+            } else {
+                actionAttributes.name = quizDefWithDescription.name
+            }
+        } else {
+            actionAttributes = [
+                    id: quizDefWithDescription.id,
+                    name: quizDefWithDescription.name,
+                    quizId: quizDefWithDescription.quizId,
+                    description: quizDefWithDescription.description,
+                    quizType: quizDefWithDescription.type
+            ]
+        }
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
                 item: DashboardItem.Quiz,
-                actionAttributes: quizDefWithDescription,
-                itemId: quizDefWithDescription.quizId,
+                actionAttributes: actionAttributes,
+                itemId: previousQuizId ?: quizDefWithDescription.quizId,
                 itemRefId: quizDefWithDescription.id,
                 quizId: quizDefWithDescription.quizId,
         ))
