@@ -144,7 +144,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const activityHistoryStartDate = computed(() => config.value.activityHistoryStartDate)
   const motivationalSkillWarningGracePeriod = computed(() => config.value.motivationalSkillWarningGracePeriod)
   const skillsDisplayProjectDescription = computed(() => config.value.skillsDisplayProjectDescription)
-  const maxSelfReportRejectionMessageLength = computed(() => config.value.maxSelfReportRejectionMessageLength)
+  const maxSelfReportRejectionMessageLength = computed(() => toNumOr0(config.value.maxSelfReportRejectionMessageLength))
   const approvalConfUserTagKey = computed(() => config.value.approvalConfUserTagKey)
   const approvalConfUserTagLabel = computed(() => config.value.approvalConfUserTagLabel)
   const projectMetricsTagCharts = computed(() => config.value.projectMetricsTagCharts)
