@@ -68,6 +68,7 @@ const rejectOrApproveSkills = (values) => {
 const done = () => {
   emit('done');
 }
+const maxSelfReportRejectionMessageLength = computed(() => Number(appConfig.maxSelfReportRejectionMessageLength))
 </script>
 
 <template>
@@ -94,7 +95,7 @@ const done = () => {
     <SkillsTextarea :data-cy="isReject ? 'rejectionInputMsg' : 'approvalInputMsg'"
                     aria-describedby="rejectionApprovalTitleInModal"
                     :aria-label="isReject ? 'Optional Rejection Message' : 'Optional Approval Message'"
-                    rows="5" :max-num-chars="+appConfig.maxSelfReportRejectionMessageLength"
+                    rows="5" :max-num-chars="maxSelfReportRejectionMessageLength"
                     name="approvalRequiredMsg">
     </SkillsTextarea>
   </SkillsInputFormDialog>
