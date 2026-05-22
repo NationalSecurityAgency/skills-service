@@ -399,6 +399,7 @@ describe('Root Pin and Unpin Tests', () => {
                 cy.contains('td', 'root@skills.org').closest('tr').find('[data-cy="removeUserBtn"]').click();
 
                 cy.get('[data-cy="removalSafetyCheckMsg"]').contains('This will remove root@skills.org')
+                cy.wait(1000)
                 cy.get('[data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
                 cy.clickSaveDialogBtn()
                 cy.wait('@loadProjectAdmins');

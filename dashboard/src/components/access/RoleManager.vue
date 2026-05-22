@@ -152,7 +152,7 @@ const removeRoleInfo = ref({
   userInfo: {}
 })
 const data = computed(() => {
-  const groupRows = adminGroupsSupported.value ? assignedAdminGroups.value.map((g) => {
+  const groupRows = adminGroupsSupported.value ? assignedAdminGroups.value?.map((g) => {
     return {
       ...g,
       userId: g.adminGroupId,
@@ -160,15 +160,15 @@ const data = computed(() => {
       roleName: ROLE_PROJECT_ADMIN,
     }
   }) : [];
-  return assignedLocalAdmins.value.concat(groupRows);
+  return assignedLocalAdmins.value?.concat(groupRows);
 })
 
 const adminGroupsSupported = computed(() => {
   return !props.adminGroupId && (!!props.projectId || !!props.quizId || !!props.badgeId);
 })
 const availableAdminGroups = computed(() => {
-  const assignedAdminGroupIds = assignedAdminGroups.value.map((ag) => ag.adminGroupId);
-  return allAdminGroups.value.filter((ag) => !assignedAdminGroupIds.includes(ag.adminGroupId));
+  const assignedAdminGroupIds = assignedAdminGroups.value?.map((ag) => ag.adminGroupId);
+  return allAdminGroups.value?.filter((ag) => !assignedAdminGroupIds.includes(ag.adminGroupId));
 })
 const areAdminGroupsAvailable = computed(() => {
   return availableAdminGroups.value && availableAdminGroups.value.length > 0;
@@ -188,7 +188,7 @@ const emptyAdminGroupsMessage = computed(() => {
 })
 
 const assignedUserIds = computed(() => {
-  const assignedUserIds = new Set(assignedLocalAdmins.value.map((u) => appConfig.isPkiAuthenticated ? u.userIdForDisplay : u.userId));
+  const assignedUserIds = new Set(assignedLocalAdmins.value?.map((u) => appConfig.isPkiAuthenticated ? u.userIdForDisplay : u.userId));
   assignedAdminGroups.value?.forEach((ag) => {
     ag.allMembers.forEach((u) => {
       appConfig.isPkiAuthenticated ? assignedUserIds.add(u.userIdForDisplay) : assignedUserIds.add(u.userId);
@@ -353,11 +353,10 @@ function getUserDisplay(item) {
 }
 
 function canDeleteUser(userId, userRole) {
-  return !(userRole === ROLE_PROJECT_ADMIN && numberOfAdmins.value === 1)
-      && !(userRole === ROLE_ADMIN_GROUP_OWNER && numberOfGroupOwners.value === 1)
-      && !(userRole === ROLE_SUPER_DUPER_USER && numberOfRootUsers.value === 1)
-      && !(userRole === ROLE_QUIZ_ADMIN && numberOfQuizAdmins.value === 1)
-      && !(userRole === ROLE_GLOBAL_BADGE_ADMIN && numberOfGlobalBadgeAdmins.value === 1);
+  if (userRole === ROLE_ADMIN_GROUP_OWNER) {
+    return numberOfGroupOwners.value > 1;
+  }
+  return data.value?.length > 1;
 }
 
 function isCurrentUser(userId) {
