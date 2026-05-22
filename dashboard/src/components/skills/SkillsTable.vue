@@ -52,6 +52,7 @@ import skillsService from '@/components/skills/SkillsService.js';
 import CopySubjectOrSkillsDialog from "@/components/subjects/CopySubjectOrSkillsDialog.vue";
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import { useSkillsState } from '@/stores/UseSkillsState.js';
+import AddSkillEventBatch from "@/components/skills/AddSkillEventBatch.vue";
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -223,6 +224,9 @@ const selectedSkills = computed(() => {
 const doSelectedRowsHaveAGroup = () => {
   return selectedRows.value.find((row) => row.isGroupType) !== undefined
 }
+const reportSkillsDisabled = computed(() => {
+  return selectedSkills.value.length > appConfig.maxSkillBatchSize;
+})
 
 const subjSkillsDisplayOrder = useSubjSkillsDisplayOrder()
 const reorderEnable = ref(false)
@@ -311,16 +315,33 @@ const toggleActionsMenu = (event) => {
   skillsActionsMenu.value.toggle(event)
 }
 const addWidthToIcon = (menuItems) => menuItems.map((item) => ({...item, icon: `${item.icon} w-1_5rem`}))
-const actionsMenu = ref(addWidthToIcon([
+const disableItemsWhenGroupIsSelected = (menuItems) => {
+  return menuItems.map((item) => {
+    if (item.label === 'Move'){
+      return item
+    }
+    const res = {
+      ...item,
+      disabled: () => {
+        return doSelectedRowsHaveAGroup()
+      }
+    }
+
+    if (res.items) {
+      res.items = disableItemsWhenGroupIsSelected(res.items)
+    }
+
+    return res
+  })
+}
+const propMenu = (menuItems) => disableItemsWhenGroupIsSelected(addWidthToIcon(menuItems))
+const actionsMenu = ref(propMenu([
   {
     label: 'Export To Catalog',
     icon: 'far fa-arrow-alt-circle-up',
     command: () => {
       showExportToCatalogDialog.value = true
     },
-    disabled: () => {
-      return doSelectedRowsHaveAGroup()
-    }
   },
   {
     label: 'Reuse in this Project',
@@ -328,9 +349,6 @@ const actionsMenu = ref(addWidthToIcon([
     command: () => {
       showSkillsReuseModal.value = true
     },
-    disabled: () => {
-      return doSelectedRowsHaveAGroup()
-    }
   },
   {
     label: 'Move',
@@ -345,9 +363,6 @@ const actionsMenu = ref(addWidthToIcon([
     command: () => {
       showAddSkillsToBadgeDialog.value = true
     },
-    disabled: () => {
-      return doSelectedRowsHaveAGroup()
-    }
   },
   {
     label: 'Copy to another Project',
@@ -355,8 +370,13 @@ const actionsMenu = ref(addWidthToIcon([
     command: () => {
       showCopySkillsModal.value = true
     },
-    disabled: () => {
-      return doSelectedRowsHaveAGroup()
+  },
+  {
+    label: 'Report Skills for Users',
+    icon: 'fas fa-user-plus',
+    disabled: reportSkillsDisabled,
+    command: () => {
+      showAddEventsModal.value = true
     }
   },
   {
@@ -368,9 +388,6 @@ const actionsMenu = ref(addWidthToIcon([
         command: () => {
           showAddSkillsTag.value = true
         },
-        disabled: () => {
-          return doSelectedRowsHaveAGroup()
-        }
       },
       {
         label: 'Remove Tag',
@@ -378,9 +395,6 @@ const actionsMenu = ref(addWidthToIcon([
         command: () => {
           showRemoveSkillsTag.value = true
         },
-        disabled: () => {
-          return doSelectedRowsHaveAGroup()
-        }
       }
     ])
   }
@@ -390,6 +404,7 @@ const expandedRows = ref([])
 const showMoveSkillsInfoModal = ref(false)
 const showSkillsReuseModal = ref(false)
 const showCopySkillsModal = ref(false)
+const showAddEventsModal = ref(false)
 const showExportToCatalogDialog = ref(false)
 const showAddSkillsToBadgeDialog = ref(false)
 const showAddSkillsTag = ref(false)
@@ -493,7 +508,6 @@ const isLoading = computed(() => {
 const isSkillsGroupTable = computed(() => {
   return !!props.groupId
 })
-
 
 // Actions Men Tab fix
 // the following functions handle when pressing tab after Action Menu is open
@@ -990,6 +1004,13 @@ const pageChanged = (pagingInfo) => {
       :skills="selectedSkills"
       :group-id="groupId"
       @removed-tag="removeSelectedRows"
+    />
+    <add-skill-event-batch
+      id="addSkillEventBatchModal"
+      v-if="showAddEventsModal"
+      v-model="showAddEventsModal"
+      :skills="selectedSkills"
+      :projectId="route.params.projectId"
     />
   </div>
 </template>

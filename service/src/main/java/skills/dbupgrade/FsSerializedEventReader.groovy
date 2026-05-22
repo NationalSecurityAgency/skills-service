@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.PathResource
 import org.springframework.stereotype.Component
-import skills.controller.AddSkillHelper
+import skills.services.events.AddSkillHelper
 
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes

@@ -292,6 +292,11 @@ export default {
       .get(`/admin/projects/${encodeURIComponent(projectId)}/latestVersion`)
       .then((remoteRes) => remoteRes.data)
   },
+  saveSkillEventBatch(projectId, skillIds, users, timestamp, doNotRequireApproval, selectedSuggestOption) {
+    return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/reportSkillEvents`,
+        { skillIds: skillIds, userIds: users, timestamp: timestamp, suggestionOption: selectedSuggestOption })
+        .then((remoteRes) => remoteRes.data)
+  },
   saveSkillEvent(projectId, skillId, user, timestamp, doNotRequireApproval) {
     const userId = user.dn ? user.dn : user.userId
     return axios

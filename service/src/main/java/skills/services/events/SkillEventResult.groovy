@@ -41,4 +41,6 @@ class SkillEventResult {
     String explanation = "Skill event was applied"
     List<CompletionItem> completed = []
     String selfReportType
+    String userId
+    String userIdForDisplay
 }

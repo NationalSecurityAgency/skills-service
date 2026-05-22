@@ -641,6 +641,11 @@ class SkillsService {
         return wsHelper.apiPut("/projects/${props.projectId}/skills/${props.skillId}", params ?: null)
     }
 
+    @Profile
+    def addBatchSkillsForBatchUsers(String projectId, Map props) {
+        return wsHelper.adminPost("/projects/${projectId}/reportSkillEvents", props ?: null)
+    }
+
     def reportCrossProjectSkill(String projId, String crossProjectId, String otherProjId, String optionalUserId = null, Date optionalDate = null, String optionalApprovalMsg = null) {
         String url = "/projects/${projId}/crossProject/${crossProjectId}/skills/${otherProjId}"
         Map params = [:]

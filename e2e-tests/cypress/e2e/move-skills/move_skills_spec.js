@@ -523,7 +523,7 @@ describe('Move Skills Tests', () => {
             .should('be.visible')
             .and('contain.text', 'Groups limit actions');
 
-        const menuItems = ['Move', 'Export To Catalog', 'Reuse in this Project', 'Add To Badge', 'Copy to another Project', 'Add Tag', 'Remove Tag']
+        const menuItems = ['Move', 'Export To Catalog', 'Reuse in this Project', 'Add To Badge', 'Copy to another Project', 'Report Skills for Users', 'Add Tag', 'Remove Tag']
 
         // verify that "Move" action is enabled (not disabled)
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Move"]')

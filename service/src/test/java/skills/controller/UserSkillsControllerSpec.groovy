@@ -18,12 +18,17 @@ package skills.controller
 import ch.qos.logback.classic.spi.ILoggingEvent
 import skills.auth.UserInfoService
 import skills.controller.request.model.SkillEventRequest
+import skills.services.events.AddSkillHelper
+import skills.services.events.ReportEventsValidateHelper
 import skills.services.events.SkillEventsService
 import skills.utils.LoggerHelper
 import skills.utils.WaitFor
 import spock.lang.Specification
 
 class UserSkillsControllerSpec extends Specification {
+
+
+    ReportEventsValidateHelper reportEventsValidateHelper = new ReportEventsValidateHelper()
 
     def "isRetry is logged properly when true"() {
 
@@ -32,7 +37,7 @@ class UserSkillsControllerSpec extends Specification {
         SkillEventsService skillsManagementFacade = Mock()
         UserInfoService userInfoService = Mock()
         userInfoService.getUserName(_, _) >> 'user1'
-        AddSkillHelper ash = new AddSkillHelper(userInfoService: userInfoService, skillsManagementFacade: skillsManagementFacade)
+        AddSkillHelper ash = new AddSkillHelper(userInfoService: userInfoService, skillsManagementFacade: skillsManagementFacade, reportEventsValidateHelper: reportEventsValidateHelper)
         UserSkillsController userSkillsController = new UserSkillsController(userInfoService: userInfoService,
                 skillsManagementFacade: skillsManagementFacade,
                 addSkillHelper: ash)
@@ -61,7 +66,7 @@ class UserSkillsControllerSpec extends Specification {
         SkillEventsService skillsManagementFacade = Mock()
         UserInfoService userInfoService = Mock()
         userInfoService.getUserName(_, _) >> 'user1'
-        AddSkillHelper ash = new AddSkillHelper(userInfoService: userInfoService, skillsManagementFacade: skillsManagementFacade)
+        AddSkillHelper ash = new AddSkillHelper(userInfoService: userInfoService, skillsManagementFacade: skillsManagementFacade, reportEventsValidateHelper: reportEventsValidateHelper)
         UserSkillsController userSkillsController = new UserSkillsController(userInfoService: userInfoService,
                 skillsManagementFacade: skillsManagementFacade,
                 addSkillHelper: ash)

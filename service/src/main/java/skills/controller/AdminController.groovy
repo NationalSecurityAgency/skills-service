@@ -15,6 +15,7 @@
  */
 package skills.controller
 
+import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
@@ -49,6 +50,9 @@ import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
 import skills.services.attributes.SlidesAttrs
+import skills.services.events.AddSkillHelper
+import skills.services.events.BatchReportService
+import skills.services.events.BatchSkillEventResult
 import skills.services.events.BulkSkillEventResult
 import skills.services.events.pointsAndAchievements.InsufficientPointsValidator
 import skills.services.inception.InceptionProjectService
@@ -62,7 +66,6 @@ import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionsHistoryService
 import skills.services.video.AdminVideoService
 import skills.storage.model.SkillDef
-import skills.storage.model.SkillRelDef
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 import skills.utils.TablePageUtil
@@ -147,6 +150,9 @@ class AdminController {
     @Value('#{"${skills.config.maxUserIdsForBulkSkillReporting:1000}"}')
     int maxUserIdsForBulkSkillReporting
 
+    @Value('#{"${skills.config.ui.maxSkillBatchSize:200}"}')
+    int maxSkillBatchSize
+
     @Autowired
     ProjectErrorService errorService
 
@@ -216,6 +222,11 @@ class AdminController {
     @Value('#{"${skills.config.ui.maxProjectInviteEmails:50}"}')
     int maxInviteEmails
 
+    @Autowired
+    AddSkillHelper addSkillHelper;
+
+    @Autowired
+    BatchReportService batchReportService
 
     @RequestMapping(value = "/projects/{id}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -2007,6 +2018,22 @@ class AdminController {
         return attachmentService.saveAttachment(file, projectId, null, null);
     }
 
+    @RequestMapping(value = "/projects/{projectId}/reportSkillEvents", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    @Profile
+    BatchSkillEventResult addBatchSkillsForBatchUsers(@PathVariable("projectId") String projectId,
+                                                             @RequestBody BatchSkillEventRequest batchSkillEventRequest) {
+        SkillsValidator.isNotBlank(projectId, 'projectId')
+        SkillsValidator.isNotNull(batchSkillEventRequest, 'batchSkillEventRequest', projectId)
+        SkillsValidator.isNotEmpty(batchSkillEventRequest.skillIds, 'batchSkillEventRequest.skillIds')
+        SkillsValidator.isNotEmpty(batchSkillEventRequest.userIds, 'batchSkillEventRequest.userIds')
+        long batchSize = batchSkillEventRequest.skillIds.size() * batchSkillEventRequest.userIds.size();
+        if(batchSize > maxSkillBatchSize) {
+            String calculationStr = "(${batchSkillEventRequest.userIds.size()} users x ${batchSkillEventRequest.skillIds.size()} skills)"
+            throw new SkillException("Request size ${batchSize} ${calculationStr} exceeds maximum allowable [${maxSkillBatchSize}].", projectId, null, ErrorCode.BadParam)
+        }
 
+        return batchReportService.addBatchSkillsForBatchUsers(projectId, batchSkillEventRequest);
+    }
 }
 

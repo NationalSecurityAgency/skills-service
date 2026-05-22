@@ -1129,7 +1129,6 @@ Cypress.Commands.add('customPa11y', (optsObj) => {
 })
 
 Cypress.Commands.add('customA11y', ()=> {
-    cy.wait(500);
     // ignore heading-order for now
     // ignore multi-select plugin elements, there are a11y improvements pending for the library
     // ignore visualizations for now as those come from a 3rd party library
@@ -1138,7 +1137,7 @@ Cypress.Commands.add('customA11y', ()=> {
     // have validated .accessible and .skillsBTableTotalRows with numerous a11y browser plugins, not sure why cypress axe is complaining about it
     //      but color contrast for those classes has been verified using 3rd party contrast tools
     // we can't really do anything about the apex chart a11y issues
-    cy.checkA11y({
+    cy.customA11yWithContext({
         exclude:[
             ['#SvgjsSvg1001'],
             ['#apexcharts-radialbarTrack-0'],
@@ -1154,6 +1153,11 @@ Cypress.Commands.add('customA11y', ()=> {
             ['.rank-detail-card'],
             ['.apex-chart-container'],
         ]}, {}, terminalLog);
+});
+
+Cypress.Commands.add('customA11yWithContext', (context, options)=> {
+    cy.wait(500);
+    cy.checkA11y(context, options, terminalLog);
 });
 
 

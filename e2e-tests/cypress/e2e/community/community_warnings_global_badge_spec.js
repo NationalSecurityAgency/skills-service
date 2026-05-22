@@ -111,12 +111,20 @@ describe('Quiz - Community Attachment Warning Tests', () => {
     })
 
     it('edit global badge - from badge page', () => {
+        cy.intercept('/admin/badges/globalBadge1').as('getBadge1')
+        cy.intercept('/admin/badges/globalBadge1').as('getBadge2')
         cy.visit('/administrator/globalBadges/globalBadge1')
         cy.wait('@loadConfig')
+        // page calls it twice as of now
+        cy.wait('@getBadge1')
+        cy.wait('@getBadge1')
         cy.openDescModalAndAttachFile('[data-cy="btn_edit-badge"]', 'Editing Existing Badge')
         cy.validateAllDragonsWarning()
 
         cy.visit('/administrator/globalBadges/globalBadge2')
+        // page calls it twice as of now
+        cy.wait('@getBadge2')
+        cy.wait('@getBadge2')
         cy.openDescModalAndAttachFile('[data-cy="btn_edit-badge"]', 'Editing Existing Badge')
         cy.validateDivineDragonWarning()
     })

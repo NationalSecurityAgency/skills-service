@@ -27,21 +27,45 @@ const props = defineProps({
     type: Number,
     default: 4,
   },
+  showValue: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const max = 100
 const current = ref(0)
-useIntervalFn(() => {
-  if (current.value >= max) {
-    current.value = 0;
+
+const isPausedForReset = ref(false)
+
+// Destructure pause and resume control hooks from VueUse
+const { pause, resume } = useIntervalFn(() => {
+  // If we are currently holding at 100%, do nothing during this tick
+  if (isPausedForReset.value) return
+
+  // Calculate the next step increment safely
+  const nextValue = current.value + props.increment
+
+  if (nextValue >= max) {
+    current.value = max // Snap explicitly to 100%
+    isPausedForReset.value = true
+    pause() // Stop the interval ticks temporarily
+
+    // Wait 500ms at full completion before starting over
+    setTimeout(() => {
+      current.value = 0
+      isPausedForReset.value = false
+      resume() // Start the interval engine back up
+    }, 500)
+
   } else {
-    current.value += props.increment;
+    current.value = nextValue
   }
 }, props.timeout)
 </script>
 
 <template>
-  <ProgressBar :value="current"></ProgressBar>
+  <ProgressBar :value="current" :show-value="showValue"></ProgressBar>
 </template>
 
 <style scoped>

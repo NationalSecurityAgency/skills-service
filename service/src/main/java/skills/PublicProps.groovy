@@ -73,7 +73,8 @@ class PublicProps {
         maxVideoTranscriptLength,
         motivationalSkillWarningGracePeriod,
         maxGraderFeedbackMessageLength,
-        maxRolePageSize
+        maxRolePageSize,
+        maxSkillBatchSize
     }
 
     @Autowired

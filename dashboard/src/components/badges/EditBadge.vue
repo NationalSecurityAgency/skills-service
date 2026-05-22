@@ -75,7 +75,8 @@ onMounted(() => {
 let formId = 'newBadgeDialog'
 let modalTitle = 'New Badge'
 if (props.isEdit) {
-  formId = `editBadgeDialog-${route.params.projectId}-${props.badge.badgeId}`
+  const idPortion = props.global ? props.badge.badgeId : `${route.params.projectId}-${props.badge.badgeId}`
+  formId = `editBadgeDialog-${idPortion}`
   modalTitle = 'Editing Existing Badge'
 }
 

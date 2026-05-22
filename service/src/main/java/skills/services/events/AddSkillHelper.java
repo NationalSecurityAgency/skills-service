@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.controller;
+package skills.services.events;
 
 import callStack.profiler.CProf;
 import groovy.lang.Closure;
@@ -31,8 +31,6 @@ import skills.controller.exceptions.SkillException;
 import skills.controller.exceptions.SkillsValidator;
 import skills.controller.request.model.SkillEventRequest;
 import skills.services.ProjectErrorService;
-import skills.services.events.SkillEventResult;
-import skills.services.events.SkillEventsService;
 import skills.utils.RetryUtil;
 
 import java.util.Date;
@@ -42,29 +40,29 @@ import java.util.Locale;
 public class AddSkillHelper {
 
     static final DateTimeFormatter DTF = ISODateTimeFormat.dateTimeNoMillis().withLocale(Locale.ENGLISH).withZoneUTC();
-    private Logger log = LoggerFactory.getLogger(AddSkillHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(AddSkillHelper.class);
+
     @Autowired
     PublicProps publicProps;
+
     @Autowired
     UserInfoService userInfoService;
+
     @Autowired
     SkillEventsService skillsManagementFacade;
+
     @Autowired
     ProjectErrorService projectErrorService;
+
+    @Autowired
+    ReportEventsValidateHelper reportEventsValidateHelper;
 
     public SkillEventResult addSkill(String projectId, String skillId, SkillEventRequest skillEventRequest) {
         String requestedUserId = skillEventRequest != null ? skillEventRequest.getUserId() : null;
         Long requestedTimestamp = skillEventRequest != null ? skillEventRequest.getTimestamp() : null;
         Boolean notifyIfSkillNotApplied = skillEventRequest != null ? skillEventRequest.getNotifyIfSkillNotApplied() : false;
         Boolean isRetry = skillEventRequest != null ? skillEventRequest.getIsRetry() : false;
-
-        Date incomingDate = null;
-
-        if (skillEventRequest != null && requestedTimestamp != null && requestedTimestamp > 0) {
-            //let's account for some possible clock drift
-            SkillsValidator.isTrue(requestedTimestamp <= (System.currentTimeMillis() + 30000), "Skill Events may not be in the future", projectId, skillId);
-            incomingDate = new Date(requestedTimestamp);
-        }
+        Date incomingDate = reportEventsValidateHelper.validateSkillEventTime(projectId, requestedTimestamp);
 
         if (skillEventRequest != null && skillEventRequest.getApprovalRequestedMsg() != null) {
             int maxLength = publicProps.getInt(PublicProps.UiProp.maxSelfReportMessageLength);

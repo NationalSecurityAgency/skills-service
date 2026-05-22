@@ -21,14 +21,17 @@ import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.common.FileSource
 import com.github.tomakehurst.wiremock.extension.Parameters
 import com.github.tomakehurst.wiremock.extension.ResponseDefinitionTransformer
+import com.github.tomakehurst.wiremock.http.QueryParameter
 import com.github.tomakehurst.wiremock.http.Request
 import com.github.tomakehurst.wiremock.http.ResponseDefinition
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Component
 import skills.auth.SecurityMode
+import skills.auth.UserInfo
 import skills.storage.model.UserAttrs
 import skills.storage.repos.UserAttrsRepo
 
@@ -42,7 +45,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 @Slf4j
 @Conditional(SecurityMode.PkiAuth)
 @Component
-public class MockUserInfoService {
+class MockUserInfoService {
 
     @Value('${skills.authorization.userInfoHealthCheckUri}')
     String userInfoHealthCheckUri
@@ -90,7 +93,7 @@ public class MockUserInfoService {
                 .trustStoreType("JKS")
                 .httpDisabled(true)
                 .needClientAuth(true)
-                .extensions(new UserInfoResponseTransformer(userAttrsRepo)));
+                .extensions(new UserInfoResponseTransformer(userAttrsRepo), new UserSuggestionResponseTransformer(userAttrsRepo, certificateRegistry)));
 
         mockServer.stubFor(any(urlPathEqualTo("/status")).willReturn(
                 ok()
@@ -99,8 +102,7 @@ public class MockUserInfoService {
         ));
         mockServer.stubFor(any(urlPathEqualTo("/userQuery")).willReturn(
                 ok()
-                .withHeader(CONTENT_TYPE, "application/json")
-                .withBody("""[{"username": "skills@skills.org", "usernameForDisplay":"skills@skills.org"}]""")
+                        .withTransformers("user-suggestion-transformer")
         ));
         mockServer.stubFor(
                 any(urlPathEqualTo("/userInfo"))
@@ -114,15 +116,15 @@ public class MockUserInfoService {
     }
 
     @PreDestroy
-    public void stop() {
+    void stop() {
         mockServer.stop();
     }
 
-    public static class UserInfoResponseTransformer extends ResponseDefinitionTransformer {
+    static class UserInfoResponseTransformer extends ResponseDefinitionTransformer {
 
         UserAttrsRepo userAttrsRepo
 
-        public UserInfoResponseTransformer(UserAttrsRepo userAttrsRepo) {
+        UserInfoResponseTransformer(UserAttrsRepo userAttrsRepo) {
             this.userAttrsRepo = userAttrsRepo
         }
 
@@ -144,7 +146,6 @@ public class MockUserInfoService {
             String usernamified = DnUsernameHelper.getUsername(dnQuery).toLowerCase()
             UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(usernamified)
             String usernamifiedForDisplay = userAttrs?.userIdForDisplay ?: "${usernamified} for display"
-//            String usernamified = dnQuery.replaceAll(" ", "_").replaceAll(",","").replaceAll("=","-")
 
             String fname = userAttrs?.firstName ?: "${usernamified.toUpperCase()}_first"
             String lname = userAttrs?.lastName ?: "${usernamified.toUpperCase()}_last"
@@ -184,21 +185,92 @@ public class MockUserInfoService {
         }
     }
 
-    FirstnameLastname getFirstNameLastnameForUserId(String userId) {
-        return DN_TO_NAME.get(certificateRegistry.loadDnFromUserId(userId)?.toLowerCase())
-    }
-
-    String getUserIdWithCase(String userId) {
-        return certificateRegistry.loadCNFromCert(certificateRegistry.getCertificate(userId))
-    }
-
     static class FirstnameLastname {
         String firstname=""
         String lastname=""
-        public FirstnameLastname(String firstname, String lastname){
+        FirstnameLastname(String firstname, String lastname){
             this.firstname = firstname
             this.lastname = lastname
         }
     }
 
+
+    static class MockedUserInfoRes {
+        String firstName
+        String lastName
+        String email
+        String username
+        String usernameForDisplay
+        String userDn
+    }
+
+    static class UserSuggestionResponseTransformer extends ResponseDefinitionTransformer {
+
+        UserAttrsRepo userAttrsRepo
+        CertificateRegistry suggestTransformerCertRegistry
+
+        UserSuggestionResponseTransformer(UserAttrsRepo userAttrsRepo, CertificateRegistry suggestTransformerCertRegistry) {
+            this.userAttrsRepo = userAttrsRepo
+            this.suggestTransformerCertRegistry = suggestTransformerCertRegistry
+        }
+
+        @Override
+        ResponseDefinition transform(Request request, ResponseDefinition responseDefinition, FileSource files, Parameters parameters) {
+            // configured in application-pki.properties via skills.authorization.suggestOptionParam=extraParam
+
+            QueryParameter extraParam = request.queryParameter("extraParam")
+            String suggestOptionParam= extraParam.present ? extraParam?.firstValue() : null
+            String query = request.queryParameter('query')?.firstValue()
+
+            if (!query || query == "null") {
+                return new ResponseDefinitionBuilder()
+                        .withHeader(CONTENT_TYPE, "application/json")
+                        .withBody("{}")
+                        .build()
+            }
+
+            List<String> allUserIds = suggestTransformerCertRegistry.allUserIds
+            if (suggestOptionParam && suggestOptionParam == "ONLY_ONE_USER_IN_THIS_SET") {
+                allUserIds = ["aafirstsuggestusersspecsuser"]
+            }
+
+            List<String> foundUserIds = allUserIds.findAll { it.toLowerCase().contains(query.toLowerCase())}
+            log.debug("Called /userQuery endpoint with [{}] query and found {} userIds", query, foundUserIds)
+
+            List<MockedUserInfoRes> mockedUserInfoRes = foundUserIds.collect {
+                String userName = it
+                String dn = suggestTransformerCertRegistry.loadDnFromUserId(userName)
+                log.debug("Loaded dn [{}] for username [{}]", dn, userName)
+                UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userName)
+                String userNameForDisplay = userAttrs?.userIdForDisplay ?: "${userName} for display"
+                String firstName = userAttrs?.firstName ?: "${userName.toUpperCase()}_first"
+                String lastName = userAttrs?.lastName ?: "${userName.toUpperCase()}_last"
+                String email = userAttrs?.email ?: EmailUtils.generateEmaillAddressFor(userName)
+
+                return new MockedUserInfoRes(
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        username: userName,
+                        usernameForDisplay: userNameForDisplay,
+                        userDn: dn
+                )
+            }
+            String bodyRes = JsonOutput.prettyPrint(JsonOutput.toJson(mockedUserInfoRes))
+            log.debug("Returning /userQuery with body of {}", bodyRes)
+            return new ResponseDefinitionBuilder()
+                    .withHeader(CONTENT_TYPE, "application/json")
+                    .withBody(bodyRes).build()
+        }
+
+        @Override
+        String getName() {
+            return "user-suggestion-transformer"
+        }
+
+        @Override
+        boolean applyGlobally() {
+            return false;
+        }
+    }
 }

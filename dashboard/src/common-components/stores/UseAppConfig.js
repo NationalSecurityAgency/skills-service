@@ -144,7 +144,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const activityHistoryStartDate = computed(() => config.value.activityHistoryStartDate)
   const motivationalSkillWarningGracePeriod = computed(() => config.value.motivationalSkillWarningGracePeriod)
   const skillsDisplayProjectDescription = computed(() => config.value.skillsDisplayProjectDescription)
-  const maxSelfReportRejectionMessageLength = computed(() => config.value.maxSelfReportRejectionMessageLength)
+  const maxSelfReportRejectionMessageLength = computed(() => toNumOr0(config.value.maxSelfReportRejectionMessageLength))
   const approvalConfUserTagKey = computed(() => config.value.approvalConfUserTagKey)
   const approvalConfUserTagLabel = computed(() => config.value.approvalConfUserTagLabel)
   const projectMetricsTagCharts = computed(() => config.value.projectMetricsTagCharts)
@@ -180,6 +180,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const contactSupportExternalEmail = computed(() => config.value.contactSupportExternalEmail)
   const contactSupportExternalEmailDescription = computed(() => config.value.contactSupportExternalEmailDescription)
   const maxRolePageSize = computed(() => config.value.maxRolePageSize)
+  const maxSkillBatchSize = computed(() => config.value.maxSkillBatchSize)
   const matomoUrl = computed(() => config.value.matomoUrl)
   const matomoSiteId = computed(() => config.value.matomoSiteId)
   const matomoProcessUserIdRegex = computed(() => config.value.matomoProcessUserIdRegex)
@@ -199,6 +200,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
 
   const sdPointHistoryChartAchievementsCombinePct = computed(() => config.value.sdPointHistoryChartAchievementsCombinePct || 0.05)
   const audioAndVideoConfigExternalUrlWarningMsg = computed(() => config.value.audioAndVideoConfigExternalUrlWarningMsg || 'Video URL must link directly to WebM or MP4 files (no streaming or web pages).')
+  const numMillisPerSkillEventInBatchReporting = computed(() => config.value.numMillisPerSkillEventInBatchReporting || 350)
 
   return {
     loadConfigState,
@@ -313,6 +315,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     contactSupportExternalEmail,
     contactSupportExternalEmailDescription,
     maxRolePageSize,
+    maxSkillBatchSize,
     matomoUrl,
     matomoSiteId,
     matomoProcessUserIdRegex,
@@ -331,5 +334,6 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     openAiAnnounceGenStatusInterval,
     sdPointHistoryChartAchievementsCombinePct,
     audioAndVideoConfigExternalUrlWarningMsg,
+    numMillisPerSkillEventInBatchReporting,
   }
 })

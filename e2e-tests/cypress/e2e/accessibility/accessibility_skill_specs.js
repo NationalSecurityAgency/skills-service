@@ -181,7 +181,10 @@ describe('Accessibility Skill Tests', () => {
 
     });
 
-    const runWithDarkMode = ['', ' - dark mode']
+    const runWithDarkMode = [
+        '',
+        ' - dark mode'
+    ]
 
     runWithDarkMode.forEach((darkMode) => {
         it(`skill overview ${darkMode}`, () => {
@@ -235,20 +238,36 @@ describe('Accessibility Skill Tests', () => {
 
         it(`skill add event ${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
-            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1/skills/skill1/addSkillEvent');
+            cy.visit('/administrator/projects/MyNewtestProject/subjects/subj1');
             cy.injectAxe();
-            cy.get('[data-cy="userIdInput"]')
-            cy.customLighthouse();
-            cy.customA11y();
 
-            cy.get('[data-cy="userIdInput"]').click();
-            cy.get('[data-cy="existingUserInputDropdown"]').type('u4');
-            cy.get('#existingUserInput_0').contains('u4').click()
-            cy.get('[data-cy="eventDatePicker"]').click();
-            cy.get('[aria-label="Choose Date"] [aria-label="1"]').not('[data-p-other-month="true"]').click()
-            cy.get('[data-cy=addSkillEventButton]').click();
-            cy.contains('Added points');
-            cy.customA11y();
+            cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+            cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+            cy.get('[data-cy="skillActionsBtn"]').click();
+            cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Report Skills for Users"]', true)
+
+            cy.customLighthouse();
+            // 1. Audit the entire page completely, ignoring the table and the stepper components
+            cy.customA11yWithContext({ exclude: ['[data-cy="skillsTable"]', '[data-pc-name="stepper"]'] }, {});
+
+            // 2. Audit ONLY the table component, turning off the problematic rule
+            //    the rule hits on `aria-selected="true"` attribute of the table row selector added by PrimeVue
+            cy.customA11yWithContext('[data-cy="skillsTable"]', {
+                rules: {
+                    'aria-allowed-attr': { enabled: false }
+                }
+            });
+
+            // 2. Audit the stepper component separately, excluding the strict container child rule
+            //    Axe ensures elements with role="tablist" can only contain direct children with role="tab".
+            //    PrimeVue's Stepper component has strugures of
+            //       role="tablist" / role="presentation" /  role="tab"
+            //    where role="presentation" is for the prev/step navigation
+            cy.customA11yWithContext('[data-pc-name="stepper"]', {
+                rules: {
+                    'aria-required-children': { enabled: false }
+                }
+            })
         });
 
         it(`skill metrics ${darkMode}`, () => {

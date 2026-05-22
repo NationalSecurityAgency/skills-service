@@ -582,17 +582,16 @@ describe('Approver Role Tests', () => {
         const runCheck = (projNum, chainerPrepend = '', addSkillEventAssertChainPrepend = '') => {
 
             // don't even show the link for private projects
-            cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1/skills/skill1`);
-            cy.get('[data-cy="nav-Add Event"]').should(`${chainerPrepend}exist`);
-
-            // navigate directly to the add skill event page
-            cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1/skills/skill1/addSkillEvent`);
-            cy.wait(`@getSettingsProj${projNum}`);
-            cy.wait(`@getProj${projNum}Skill1`)
-            // cy.get('[data-cy="addSkillEventButton"]').should(`${chainerPrepend}be.enabled`);
-            cy.get('[data-cy="addEventDisabledBlockUI"] > [data-pc-section="mask"]').should(`${addSkillEventAssertChainPrepend}exist`);
-            cy.get('[data-cy="addEventDisabledMsg"]').should(`${addSkillEventAssertChainPrepend}exist`);
+            cy.visit(`/administrator/projects/proj${projNum}/subjects/subj1`);
+            cy.get('[data-cy="manageSkillLink_skill1"]');
+            cy.get('[data-cy="manageSkillLink_skill2"]');
+            cy.get('[data-cy="manageSkillLink_skill3"]');
+            cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`);
+            cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`);
+            cy.get('[data-cy="skillsTable"] [data-p-index="3"] [data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`);
+            cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').should(`${chainerPrepend}exist`);
         }
+
         runCheck(2, '', 'not.')
         runCheck(1, 'not.','')
     });
