@@ -1490,12 +1490,16 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.data.size() == 4
         results.data.get(0).userId.contains(users[0].toLowerCase())
         results.data.get(0).totalPoints == 400
+        results.data.get(0).skillsAchieved == 1
         results.data.get(1).userId.contains(users[1].toLowerCase())
         results.data.get(1).totalPoints == 300
+        results.data.get(1).skillsAchieved == 0
         results.data.get(2).userId.contains(users[2].toLowerCase())
         results.data.get(2).totalPoints == 200
+        results.data.get(2).skillsAchieved == 0
         results.data.get(3).userId.contains(users[3].toLowerCase())
         results.data.get(3).totalPoints == 100
+        results.data.get(3).skillsAchieved == 0
     }
 
     def 'get skill group users with paging'() {
