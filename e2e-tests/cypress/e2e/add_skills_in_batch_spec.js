@@ -219,19 +219,14 @@ describe('Tag Skills Tests', () => {
         for(let i = 0; i < 4; i++) {
             cy.get('[data-cy="batchUserList"]').type('user' + i + '{enter}');
         }
-        cy.get('[data-cy="secondNextButton"]').click();
 
-        cy.get('[data-cy="batchErrorMessage"]').contains('Your batch exceeds the 10 request limit (3 skills × 4 users).');
-        cy.get('[data-cy="saveBatchSkillEvents"]').should('be.disabled');
-        cy.get('[data-cy="lastBackButton"]').should('be.enabled')
+        cy.get('[data-cy="usersToAddError"]').contains('Limit Exceeded: Your batch of 12 requests (3 skills × 4 users) exceeds the 10-request limit. Please remove users or unselect skills to proceed.')
+        cy.get('[data-cy="secondNextButton"]').should('be.disabled');
 
-        cy.get('[data-cy="lastBackButton"]').click();
         cy.get('[data-cy="batchUserList"]').type('{end}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}')
 
-        cy.get('[data-cy="secondNextButton"]').click();
-        cy.get('[data-cy="confirmMessage"]').contains('Skill events for 3 skills will be added for 3 users');
-        cy.get('[data-cy="saveBatchSkillEvents"]').should('be.enabled');
-        cy.get('[data-cy="lastBackButton"]').should('be.enabled')
+        cy.get('[data-cy="usersToAddError"]').should('not.be.visible')
+        cy.get('[data-cy="secondNextButton"]').should('be.enabled');
 
     });
 
@@ -602,6 +597,36 @@ describe('Tag Skills Tests', () => {
         cy.validateTable('[data-cy="skillEventBatchResult"]', [
             [{ colIndex: 1,  value: 'user1' }, { colIndex: 2,  value: 'skill3' }, { colIndex: 3, value: 'Skill event was applied' }],
         ], 10, true, null, false);
+    });
+
+    it('usernames must be at least 3 characters', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Report Skills for Users"]', true)
+
+        cy.get('[data-cy="skillsToAdd"]').contains('Very Great Skill 3')
+        cy.get('[data-cy="skillsToAdd"]').contains('Very Great Skill 1')
+
+        cy.get('[data-cy="firstNextButton"]').click();
+        cy.get('[data-cy="batchUserList"]').type('user1{enter}user2{enter}us');
+        cy.get('[data-cy="usersToAddError"]').contains('Each user must be at least 3 characters')
+        cy.get('[data-cy="secondNextButton"]').should('be.disabled');
+
+        cy.get('[data-cy="batchUserList"]').type('{end}e');
+        cy.get('[data-cy="usersToAddError"]').should('not.be.visible');
+        cy.get('[data-cy="secondNextButton"]').should('be.enabled');
+
+        cy.get('[data-cy="batchUserList"]').type('{end}{upArrow}{rightArrow}{rightArrow}{backspace}{backspace}{backspace}');
+        cy.get('[data-cy="usersToAddError"]').contains('Each user must be at least 3 characters')
+        cy.get('[data-cy="secondNextButton"]').should('be.disabled');
     });
 
 });

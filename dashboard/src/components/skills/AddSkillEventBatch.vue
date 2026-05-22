@@ -28,6 +28,9 @@ import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 import LengthyOperationProgressBar from "@/components/utils/LengthyOperationProgressBar.vue";
+import {object, string} from "yup";
+import {useForm} from "vee-validate";
+import {useDebounceFn} from "@vueuse/core";
 
 const model = defineModel()
 const appConfig = useAppConfig();
@@ -60,26 +63,48 @@ onMounted(() => {
   }
 });
 
-const hasUserSuggestOptions = computed(() => {
-  return userSuggestOptions.value && userSuggestOptions.value.length > 0;
-});
+const parseUsersFromStr = (str) => {
+  if (!str) return [];
 
-const userList = computed(() => {
-  if (!usersToAdd.value) return [];
-
-  const cleanedUsers = usersToAdd.value
+  const cleanedUsers = str
       .split('\n')
       .map(user => user.trim().toLowerCase())
       .filter(user => user !== '');
 
   return [...new Set(cleanedUsers)];
-});
+}
+
+const checkUserNameLength = useDebounceFn((value) => {
+  const usersToCheck = parseUsersFromStr(value)
+  return usersToCheck.find(user => user.length < 3) === undefined;
+}, 500)
+
+const checkTooManyEvents = (value) => {
+  const numUsers = parseUsersFromStr(value).length;
+  const totalEvents = numUsers * props.skills.length;
+  return totalEvents < maxSkillBatchSize.value
+}
+const userList = computed(() => parseUsersFromStr(usersToAdd.value))
 
 const numTotalEvents = computed(() => userList.value.length * props.skills.length)
 
-const tooManyEvents = computed(() => {
-  return numTotalEvents.value > maxSkillBatchSize.value;
+const schema = object({
+  'usersToAdd': string()
+      .trim()
+      .test('minUserLength', 'Each user must be at least 3 characters', (value) => checkUserNameLength(value))
+      .test('tooManyEvents', () =>
+          `Limit Exceeded: Your batch of ${numTotalEvents.value} requests (${props.skills.length} ${ pluralize.plural('skill', props.skills.length)} × ${ userList.value.length } ${pluralize.plural('users', userList.value.length)}) exceeds the ${maxSkillBatchSize.value}-request limit. Please remove users or unselect skills to proceed.`,
+          (value) => checkTooManyEvents(value)
+      )
+      .label('Users')
 })
+const { meta, validate } = useForm({
+  validationSchema: schema,
+})
+
+const hasUserSuggestOptions = computed(() => {
+  return userSuggestOptions.value && userSuggestOptions.value.length > 0;
+});
 
 const numMillisPerSkillEvent = appConfig.numMillisPerSkillEventInBatchReporting;
 
@@ -118,6 +143,14 @@ const closeMe = () => {
 const maxSkillBatchSize = computed(() => {
   return appConfig.maxSkillBatchSize ? appConfig.maxSkillBatchSize : 200
 })
+
+const toStep3 = (activateCallback) => {
+  validate().then(({valid}) => {
+    if (valid) {
+      activateCallback('3')
+    }
+  })
+}
 </script>
 
 <template>
@@ -143,7 +176,7 @@ const maxSkillBatchSize = computed(() => {
       <StepPanels>
         <StepPanel value="1" v-slot="{ activateCallback }">
           <Message class="mb-2" data-cy="skillsToAdd" :closable="false" severity="info">
-            This will add skill events for {{ skills.length }} skill(s):
+            This will add skill events for {{ skills.length }} {{ pluralize.plural('skill', skills.length)}}:
             <ul v-if="skills.length > 5 && !displayFullText" class="ml-4">
                 <li class="font-bold" v-for="skill of skills.slice(0, 5)">- {{ skill.name }}</li>
             </ul>
@@ -196,20 +229,17 @@ const maxSkillBatchSize = computed(() => {
 
           <div class="flex pt-6 justify-between">
             <SkillsButton label="Back" icon="fas fa-arrow-circle-left" outlined class="mr-2" severity="secondary" @click="activateCallback('1')" data-cy="secondBackButton" />
-            <SkillsButton label="Next" icon="fas fa-arrow-circle-right float-right" @click="activateCallback('3')" :disabled="usersToAdd.length === 0" data-cy="secondNextButton"/>
+            <SkillsButton label="Next" icon="fas fa-arrow-circle-right float-right" @click="toStep3(activateCallback)" :disabled="usersToAdd.length === 0 || !meta.valid" data-cy="secondNextButton"/>
           </div>
         </StepPanel>
         <StepPanel value="3" v-slot="{ activateCallback }">
-          <Message :closable="false" v-if="!tooManyEvents" data-cy="confirmMessage">
+          <Message :closable="false" data-cy="confirmMessage">
             Skill events for <span class="font-bold">{{ skills.length }}</span> {{ pluralize.plural('skill', skills.length)}} will be added for <span class="font-bold">{{ userList.length }}</span> {{ pluralize.plural('user', userList.length)}} on {{ dayjs(dateAdded).format('YYYY-MM-DD') }}.
             Please click "Add Events" to confirm.
           </Message>
-          <Message :closable="false" v-if="tooManyEvents" severity="error" data-cy="batchErrorMessage">
-            Your batch exceeds the {{ maxSkillBatchSize }} request limit ({{skills.length}} {{ pluralize.plural('skill', skills.length) }} × {{ userList.length }} {{ pluralize.plural('users', userList.length) }}). To proceed, please remove either users or skills to reduce the total number of requests.
-          </Message>
           <div class="flex pt-6 justify-between">
             <SkillsButton label="Back" icon="fas fa-arrow-circle-left" outlined class="mr-2" severity="secondary" @click="activateCallback('2')" data-cy="lastBackButton" />
-            <SkillsButton variant="outline-primary" :disabled="usersToAdd.length === 0 || !dateAdded || tooManyEvents" data-cy="saveBatchSkillEvents" @click="saveEvents" label="Add Events" />
+            <SkillsButton variant="outline-primary" :disabled="usersToAdd.length === 0 || !dateAdded" data-cy="saveBatchSkillEvents" @click="saveEvents" label="Add Events" />
           </div>
         </StepPanel>
       </StepPanels>
