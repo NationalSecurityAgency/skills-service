@@ -27,4 +27,5 @@ interface ProjectUser {
     String getUserIdForDisplay()
     Integer getUserMaxLevel()
     String getUserTag()
+    Integer getSkillsAchieved()
 }

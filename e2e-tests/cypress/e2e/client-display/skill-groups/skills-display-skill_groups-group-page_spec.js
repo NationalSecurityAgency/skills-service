@@ -655,4 +655,60 @@ describe('Skills Display Skills Groups Page Tests', () => {
         });
     }
 
+  it('points earned before today are not shown in the groups progress bar', () => {
+      cy.createSkillsGroup(1, 1, 1);
+      cy.addSkillToGroup(1, 1, 1, 1, {
+          pointIncrement: 100,
+          numPerformToCompletion: 2
+      });
+      cy.addSkillToGroup(1, 1, 1, 2, {
+          pointIncrement: 100,
+          numPerformToCompletion: 2
+      });
+      cy.addSkillToGroup(1, 1, 1, 3, {
+          pointIncrement: 100,
+          numPerformToCompletion: 2
+      });
+      cy.createSkillsGroup(1, 1, 1, { numSkillsRequired: 2 });
+
+      cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
+      cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+      cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
+
+
+      cy.cdVisit('/subjects/subj1/groups/group1');
+
+      // Verify the page loads and displays group information
+      cy.get('[data-cy="skillsTitle"]').contains('Group Overview');
+      cy.get('[data-cy="skillsGroupName"]').contains('Awesome Group 1');
+
+      // verify the group progress bar does now try and show the points earned before today points
+      cy.get('[data-cy="skillsGroupProgress"] [data-cy="secondProgressBar"]').should('not.exist')
+
+      // the child skills should show points
+      cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
+          .contains('100 / 200 Points');
+      cy.get('[data-cy="skillProgress_index-0"] [data-cy="firstProgressBar"]').should('exist')
+        .should('have.attr', 'aria-valuenow', '50')
+      cy.get('[data-cy="skillProgress_index-0"] [data-cy="secondProgressBar"]').should('exist')
+        .should('have.attr', 'aria-valuenow', '50')
+      cy.get('[data-cy="skillProgress_index-0"] [data-cy="thirdProgressBar"]').should('not.exist')
+
+      cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]')
+          .contains('100 / 200 Points');
+      cy.get('[data-cy="skillProgress_index-1"] [data-cy="firstProgressBar"]').should('exist')
+        .should('have.attr', 'aria-valuenow', '50')
+      cy.get('[data-cy="skillProgress_index-1"] [data-cy="secondProgressBar"]').should('exist')
+        .should('have.attr', 'aria-valuenow', '0')
+      cy.get('[data-cy="skillProgress_index-1"] [data-cy="thirdProgressBar"]').should('not.exist')
+
+      cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]')
+        .contains('100 / 200 Points');
+      cy.get('[data-cy="skillProgress_index-2"] [data-cy="firstProgressBar"]').should('exist')
+        .should('have.attr', 'aria-valuenow', '50')
+      cy.get('[data-cy="skillProgress_index-2"] [data-cy="secondProgressBar"]').should('exist')
+        .should('have.attr', 'aria-valuenow', '50')
+      cy.get('[data-cy="skillProgress_index-2"] [data-cy="thirdProgressBar"]').should('not.exist')
+  });
+
 })

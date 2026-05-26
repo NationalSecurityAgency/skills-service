@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page
 @Canonical
 class TableResultWithTotalPoints extends TableResult{
     Integer totalPoints = 0
+    Integer totalSkills = 0
 
     final static TableResultWithTotalPoints EMPTY = new TableResultWithTotalPoints()
 
@@ -30,6 +31,11 @@ class TableResultWithTotalPoints extends TableResult{
 
     TableResultWithTotalPoints(Page<ProjectUser> usersPage, Integer totalPoints) {
         this( usersPage.getContent(), (Integer)usersPage.getTotalElements(), totalPoints)
+    }
+
+    TableResultWithTotalPoints(Page<ProjectUser> usersPage, Integer totalPoints, Integer totalSkills) {
+        this( usersPage.getContent(), (Integer)usersPage.getTotalElements(), totalPoints)
+        this.totalSkills = totalSkills
     }
 
     TableResultWithTotalPoints(List<ProjectUser> users, Integer count, Integer totalPoints) {

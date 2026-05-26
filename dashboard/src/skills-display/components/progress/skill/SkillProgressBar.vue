@@ -51,7 +51,7 @@ const progressPercent = computed(() => {
 })
 
 const progressBeforeToday = computed(() => {
-  return ((props.skill.points - props.skill.todaysPoints) / props.skill.totalPoints) * 100;
+  return isSkillsGroupWithChildren.value ? 0 : ((props.skill.points - props.skill.todaysPoints) / props.skill.totalPoints) * 100;
 })
 
 </script>
