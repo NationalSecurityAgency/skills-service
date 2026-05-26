@@ -59,19 +59,14 @@ class BatchReportService {
         BatchSkillEventResult batchResults = new BatchSkillEventResult()
         ArrayList<SkillEventResult> results = new ArrayList<>()
 
-        List<String> userIds = batchSkillEventRequest.getUserIds()
-        List<UserAttrsRepo.UserIdForDisplayPair> userIdForDisplayPairs = userAttrsRepo.findUserNameForDisplayByUserIds(userIds)
-        Map<String,String> userIdForDisplayLookup = userIdForDisplayPairs.collectEntries {[it.userId, it.userIdForDisplay] }
-
         Map<String, List<UserInfo>> userInfoCache = Collections.synchronizedMap(new HashMap<>())
+        Map<String, String> userIdForDisplayCache = Collections.synchronizedMap(new HashMap<>())
         for(String userIdToProcess : batchSkillEventRequest.getUserIds()) {
             for (String skillId : skillIds) {
                 SkillEventResult result = null
                 try {
                     result = skillEventProcessor.processSkillForUserInItsOwnTransaction(projectId, skillId, userIdToProcess, incomingDate,
-                            batchSkillEventRequest.getUserSuggestOption(), userInfoCache)
-                    String userIdForDisplay = userIdForDisplayLookup[result.userId] ?: result.userId
-                    result.setUserIdForDisplay(userIdForDisplay)
+                            batchSkillEventRequest.getUserSuggestOption(), userInfoCache, userIdForDisplayCache)
                 } catch(SkillException ske) {
                     log.error("Error applying skill [{}], user [{}], error [{}]", skillId, userIdToProcess, ske.getMessage())
 

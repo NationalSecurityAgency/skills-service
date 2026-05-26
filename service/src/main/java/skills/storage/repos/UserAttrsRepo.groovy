@@ -53,4 +53,8 @@ interface UserAttrsRepo extends CrudRepository<UserAttrs, Integer> {
     @Nullable
     @Query(value='''select attrs.user_id userId, attrs.user_id_for_display userIdForDisplay from user_attrs attrs where attrs.user_id in ?1''', nativeQuery = true)
     List<UserIdForDisplayPair> findUserNameForDisplayByUserIds(List<String> userId)
+
+    @Nullable
+    @Query(value='''select attrs.user_id_for_display userIdForDisplay from user_attrs attrs where attrs.user_id = ?1''', nativeQuery = true)
+    String findUserNameForDisplayByUserId(String userId)
 }

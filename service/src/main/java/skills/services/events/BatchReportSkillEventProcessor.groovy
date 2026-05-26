@@ -28,6 +28,7 @@ import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.pki.PkiUserLookup
 import skills.controller.exceptions.SkillException
+import skills.storage.repos.UserAttrsRepo
 
 @Component
 @Slf4j
@@ -42,20 +43,44 @@ class BatchReportSkillEventProcessor {
     @Autowired
     UserInfoService userInfoService;
 
+    @Autowired
+    UserAttrsRepo userAttrsRepo
+
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
 
     @Value('#{"${skills.batchManualSkillEvents.dnCheckStr:CN=}"}')
     String dnCheckStr
 
+    private final static String notFoundToken = "ST_TOKEN_USER_NOT_FOUND"
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Profile
-    SkillEventResult processSkillForUserInItsOwnTransaction(String projectId, String skillId, String userId, Date incomingDate, String userSuggestOption, Map<String, List<UserInfo>> userInfoCache) {
+    SkillEventResult processSkillForUserInItsOwnTransaction(String projectId, String skillId, String userId, Date incomingDate, String userSuggestOption,
+                                                            Map<String, List<UserInfo>> userInfoCache,
+                                                            Map<String, String> userIdForDisplayCache) {
         String userIdToProcess = getUserName(userId, userSuggestOption, userInfoCache);
         SkillEventsService.SkillApprovalParams skillApprovalParams = SkillEventsService.getDefaultSkillApprovalParams();
         skillApprovalParams.setForAnotherUser(true);
         skillApprovalParams.setDoNotRequireApproval(true)
-        return skillsManagementFacade.reportSkill(projectId, skillId, userIdToProcess, true, incomingDate, skillApprovalParams);
+        SkillEventResult res = skillsManagementFacade.reportSkill(projectId, skillId, userIdToProcess, true, incomingDate, skillApprovalParams);
+
+        handleUserIdForDisplay(userIdForDisplayCache, userIdToProcess, res)
+
+        return res
+    }
+
+    private void handleUserIdForDisplay(Map<String, String> userIdForDisplayCache, String userIdToProcess, SkillEventResult res) {
+        String userIdForDisplay = userIdForDisplayCache.get(userIdToProcess)
+        if (userIdForDisplay) {
+            if (userIdForDisplay != notFoundToken) {
+                res.userIdForDisplay = userIdForDisplay
+            }
+        } else {
+            userIdForDisplay = userAttrsRepo.findUserNameForDisplayByUserId(userIdToProcess)
+            res.userIdForDisplay = userIdForDisplay ?: userIdToProcess
+            userIdForDisplayCache.put(userIdToProcess, userIdForDisplay ?: notFoundToken)
+        }
     }
 
     @Profile
