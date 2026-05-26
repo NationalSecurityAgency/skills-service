@@ -49,16 +49,29 @@ class NewVersionsNotifCreator {
         assert docsRootHost // must have it configured
         List<WebNotifWrapper> newVersionsNotifications = [
                 new WebNotifWrapper(
+                        releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-06-26'),
+                        notif: new WebNotification(
+                                notifiedOn: new Date(),
+                                showUntil: Date.parse('yyyy-MM-dd', '2026-07-26'),
+                                lookupId: "new-versions-9",
+                                title: "Version 4.4 Released",
+                                notification: """- Report multiple skills for multiple users at once
+- Move an entire group within the same project
+- New dedicated Skill Group page with search and direct navigation support
+- Improved self-report approval requests table allowing admins to see all requests and the assigned approver
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)
+""")
+                ),
+                new WebNotifWrapper(
                         releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-05-19'),
                         notif: new WebNotification(
                                 notifiedOn: new Date(),
                                 showUntil: Date.parse('yyyy-MM-dd', '2026-06-19'),
                                 lookupId: "new-versions-8",
                                 title: "Version 4.3 Released",
-                                notification: """- Report multiple skills for multiple users at once
-- Move an entire group within the same project
-- New dedicated Skill Group page with search and direct navigation support
-- Improved self-report approval requests table allowing admins to see all requests and the assigned approver
+                                notification: """- Enhanced quiz experience with project association visibility and try again functionality for failed attempts
+- Project users pages toggle to display only users with points from native (non-imported) skills
+- Automated email notifications for skill expiration reminders and removal notifications
 - [Learn More]({{docsRootHost}}/release-notes/skills-service.html)
 """)
                 ),
