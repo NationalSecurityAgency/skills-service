@@ -55,9 +55,10 @@ class NewVersionsNotifCreator {
                                 showUntil: Date.parse('yyyy-MM-dd', '2026-06-19'),
                                 lookupId: "new-versions-8",
                                 title: "Version 4.3 Released",
-                                notification: """- Enhanced quiz experience with project association visibility and try again functionality for failed attempts
-- Project users pages toggle to display only users with points from native (non-imported) skills
-- Automated email notifications for skill expiration reminders and removal notifications
+                                notification: """- Report multiple skills for multiple users at once
+- Move an entire group within the same project
+- New dedicated Skill Group page with search and direct navigation support
+- Improved self-report approval requests table allowing admins to see all requests and the assigned approver
 - [Learn More]({{docsRootHost}}/release-notes/skills-service.html)
 """)
                 ),
