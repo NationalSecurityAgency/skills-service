@@ -163,8 +163,10 @@ class AdminGroupService {
         lockingService.lockAdminGroupDefs()
 
         AdminGroupDef adminGroupDef
+        String previousGroupId = null
         if (isEdit) {
             adminGroupDef = adminGroupDefRepo.findByAdminGroupIdIgnoreCase(adminGroupDefRequest.adminGroupId)
+            previousGroupId = adminGroupDef.adminGroupId
             adminGroupDef.name = adminGroupDefRequest.name
             adminGroupDef.protectedCommunityEnabled = adminGroupDefRequest.enableProtectedUserCommunity
             log.debug("Updated admin group [{}]", adminGroupDef)
@@ -189,7 +191,7 @@ class AdminGroupService {
             action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
             item: DashboardItem.AdminGroup,
             actionAttributes: adminGroupDef,
-            itemId: adminGroupDef.adminGroupId,
+            itemId: previousGroupId ?: adminGroupDef.adminGroupId,
             itemRefId: adminGroupDef.id,
         ))
 

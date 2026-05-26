@@ -157,6 +157,7 @@ class BadgeAdminService {
         boolean identifyEligibleUsers = false
         final boolean isEdit = skillDefinition
         final boolean isIdUpdate = skillDefinition && !skillDefinition.skillId.equalsIgnoreCase(badgeRequest.badgeId)
+        String previousBadgeId = isEdit ? skillDefinition.skillId : null;
 
         if (isEdit) {
             String existingEnabled = skillDefinition.enabled;
@@ -235,12 +236,12 @@ class BadgeAdminService {
             awardBadgeToUsersMeetingRequirements(savedSkill)
         }
 
-        saveUserDashboardAction(savedSkill, badgeRequest, isEdit, type == SkillDef.ContainerType.GlobalBadge)
+        saveUserDashboardAction(savedSkill, badgeRequest, isEdit, type == SkillDef.ContainerType.GlobalBadge, previousBadgeId)
         log.debug("Saved [{}]", savedSkill)
     }
 
     @Profile
-    private void saveUserDashboardAction(SkillDefWithExtra savedSkill, BadgeRequest badgeRequest, boolean isEdit, boolean isGlobalBadge) {
+    private void saveUserDashboardAction(SkillDefWithExtra savedSkill, BadgeRequest badgeRequest, boolean isEdit, boolean isGlobalBadge, String previousBadgeId = null) {
         Map actionAttributes = [:]
         Closure addAttributes = { Object obj, String prependToKey = null ->
             obj.properties
@@ -259,7 +260,7 @@ class BadgeAdminService {
                 action: isEdit ? DashboardAction.Edit : DashboardAction.Create,
                 item: isGlobalBadge ? DashboardItem.GlobalBadge : DashboardItem.Badge,
                 actionAttributes: actionAttributes,
-                itemId: savedSkill.skillId,
+                itemId: previousBadgeId ?: savedSkill.skillId,
                 itemRefId: savedSkill.id,
                 projectId: savedSkill.projectId,
         ))

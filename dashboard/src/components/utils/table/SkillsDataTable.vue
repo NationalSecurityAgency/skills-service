@@ -98,7 +98,6 @@ const onRowExpanded = (expandEvent) => {
 }
 const onRowCollapsed = (expandEvent) => {
   emit('row-collapse', expandEvent)
-  console.log(expandEvent)
   announcer.polite(`Row was expanded`)
 }
 

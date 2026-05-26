@@ -34,12 +34,12 @@ const attributes = ref([])
 
 const propsLookupByItem = new Map();
 propsLookupByItem.set('Skill', ['name', 'description', 'groupId', 'helpUrl', 'pointIncrement', 'numMaxOccurrencesIncrementInterval', 'pointIncrementInterval', 'selfReportingType', 'version', 'justificationRequired', 'totalPoints', 'skillId', 'enabled']);
-propsLookupByItem.set('Subject', ['name', 'description', 'helpUrl', 'iconClass', 'enabled']);
-propsLookupByItem.set('SkillsGroup', ['name', 'description', 'helpUrl']);
-propsLookupByItem.set('Project', ['name', 'projectId', 'description']);
+propsLookupByItem.set('Subject', ['name', 'description', 'helpUrl', 'iconClass', 'enabled', 'skillId']);
+propsLookupByItem.set('SkillsGroup', ['name', 'description', 'helpUrl', 'skillId']);
+propsLookupByItem.set('Project', ['name', 'projectId', 'description', 'previousProjectId', 'newProjectId', 'previousName', 'newName']);
 propsLookupByItem.set('Level', ['level', 'percent', 'pointsTo', 'pointsFrom']);
-propsLookupByItem.set('Quiz', ['name', 'description', 'type']);
-propsLookupByItem.set('Badge', ['name', 'enabled', 'helpUrl', 'description', 'iconClass', 'BonusAward:name', 'BonusAward:numMinutes', 'BonusAward:iconClass', 'startDate', 'endDate']);
+propsLookupByItem.set('Quiz', ['name', 'description', 'type', 'previousQuizId', 'newQuizId', 'previousName', 'newName']);
+propsLookupByItem.set('Badge', ['name', 'skillId', 'enabled', 'helpUrl', 'description', 'iconClass', 'BonusAward:name', 'BonusAward:numMinutes', 'BonusAward:iconClass', 'startDate', 'endDate']);
 propsLookupByItem.set('GlobalBadge', ['name', 'enabled', 'helpUrl', 'description', 'iconClass']);
 const excludeLookupFromActions = ['Move', 'ImportFromCatalog', 'ReuseInProject', 'AssignSkill', 'AssignLevel', 'RemoveLevelAssignment', 'RemoveSkillAssignment'];
 const valuesMap = new Map();
@@ -60,10 +60,12 @@ valuesMap.set('quizPassingReq', 'Passing Requirement');
 valuesMap.set('rank_and_leaderboard_optOut', 'Ranking and Leaderboard Opt-Out');
 valuesMap.set('home_page', 'Default Home Page');
 const customLabelByItem = new Map()
-customLabelByItem.set('Skill', {'enabled': 'Initial Visibility'});
-customLabelByItem.set('Subject', {'enabled': 'Initial Visibility'});
-const booleanLabels = new Map()
-booleanLabels.set('Initial Visibility', {'true': 'Visible', 'false': 'Hidden'})
+customLabelByItem.set('Skill', {'enabled': 'Visibility'});
+customLabelByItem.set('Subject', {'enabled': 'Visibility', 'skillId': 'Subject ID'});
+customLabelByItem.set('SkillsGroup', {'skillId': 'Group ID'});
+customLabelByItem.set('Badge', {'skillId': 'Badge ID'});
+const customValuesByLabel = new Map()
+customValuesByLabel.set('Visibility', {'true': 'Visible', 'false': 'Hidden'})
 
 onMounted(() => {
   loadData();
@@ -80,15 +82,22 @@ const loadData = () => {
               .filter(([key]) => propsToShow.includes(key)));
         }
         attributes.value = Object.entries(loadedObj).map((entry) => {
-          let label = formatLabel(entry[0]);
-          const replacement = valuesMap.get(entry[1]);
-          let value = replacement || entry[1];
-          const customLabel = customLabelByItem.get(props.item)
-          if(customLabel && customLabel[entry[0]]) {
-            label = customLabel[entry[0]]
-            const customValue = booleanLabels.get(label)
-            value = customValue[entry[1]] ? customValue[entry[1]] : value
+          let label = entry[0];
+          const customLabels = customLabelByItem.get(props.item)
+          const newLabelMapping = customLabels ? Object.entries(customLabels).find(([key]) => key === label) : null
+          if (newLabelMapping) {
+            label = newLabelMapping[1]
+          } else {
+            label = formatLabel(label);
           }
+
+          let value = entry[1]
+          const customValues = customValuesByLabel.get(label)
+          if (customValues) {
+            value = customValues[value] || value
+          }
+          const replacement = valuesMap.get(value);
+          value = replacement || value;
           return {
             label: label,
             value,

@@ -17,6 +17,7 @@ package skills.storage.repos
 
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -105,4 +106,12 @@ interface UserActionsHistoryRepo extends CrudRepository<UserActionsHistory, Long
     ''')
     List<DashboardItem> findDistinctDashboardItems(@Nullable @Param("projectId") String projectId,
                                                        @Nullable @Param("quizId") String quizId)
+
+    @Modifying
+    @Query("UPDATE UserActionsHistory action SET action.projectId = :newProjId WHERE action.projectId = :previousProjId")
+    int updateProjectId(@Param("previousProjId") String previousProjId, @Param("newProjId") String newProjId)
+
+    @Modifying
+    @Query("UPDATE UserActionsHistory action SET action.quizId = :newQuizId WHERE action.quizId = :previousQuizId")
+    int updateQuizId(@Param("previousQuizId") String previousQuizId, @Param("newQuizId") String newQuizId)
 }

@@ -196,4 +196,11 @@ class UserActionsHistoryService {
                 itemFilterOptions: dashboardItems.collect { it.toString() }
         )
     }
+
+    int handleProjectIdChange(String prevProjId, String newProjId) {
+        return userActionsHistoryRepo.updateProjectId(prevProjId, newProjId)
+    }
+    int handleQuizIdChange(String prevQuizId, String newQuizId) {
+        return userActionsHistoryRepo.updateQuizId(prevQuizId, newQuizId)
+    }
 }

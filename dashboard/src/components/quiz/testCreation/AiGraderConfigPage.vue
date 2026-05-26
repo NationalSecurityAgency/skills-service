@@ -98,7 +98,6 @@ const submitSaveSettingsForm = () => {
   })
 }
 const saveSettings = () => {
-  console.log(values)
   savingSettings.value = true
   QuizService.saveTextInputAiGradingAttrs(route.params.quizId, route.params.questionId, {
     enabled: graderEnabled.value,

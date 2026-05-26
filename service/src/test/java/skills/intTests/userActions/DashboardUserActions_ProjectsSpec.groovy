@@ -98,6 +98,117 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         !deleteAction.id
     }
 
+    def "change project id"() {
+        SkillsService rootService = createRootSkillService()
+        def p1 = createProject(1)
+        p1.description = 'blah'
+        skillsService.createProject(p1)
+
+        def subj = createSubject(1, 1)
+        skillsService.createSubject(subj)
+
+        String prevProjId = p1.projectId
+        p1.projectId = 'newOne'
+        Thread.sleep(100)
+
+        when:
+        skillsService.updateProject(p1, prevProjId)
+
+        then:
+        def res = rootService.getUserActionsForEverything()
+        res.data.action == [DashboardAction.Edit.toString(), DashboardAction.Create.toString(), DashboardAction.Create.toString()]
+        res.data.item == [DashboardItem.Project.toString(), DashboardItem.Subject.toString(), DashboardItem.Project.toString()]
+        res.data.projectId == [p1.projectId, p1.projectId, p1.projectId] // project id is updated
+        def editData = res.data[0]
+        editData.action == DashboardAction.Edit.toString()
+        editData.item == DashboardItem.Project.toString()
+        editData.itemId == prevProjId
+        editData.userId == skillsService.userName
+        editData.userIdForDisplay == displayName
+        editData.projectId == p1.projectId
+        !editData.quizId
+
+
+        def editAction = rootService.getUserActionAttributes(editData.id)
+
+        editAction.id == editData.itemRefId
+        editAction.name == p1.name
+        editAction.newProjectId == p1.projectId
+        editAction.previousProjectId == prevProjId
+        editAction.description ==  p1.description
+    }
+
+    def "change project name"() {
+        SkillsService rootService = createRootSkillService()
+        def p1 = createProject(1)
+        p1.description = 'blah'
+        skillsService.createProject(p1)
+        String prevProjName = p1.name
+        p1.name = 'new cool name'
+        Thread.sleep(100)
+
+
+        when:
+        skillsService.updateProject(p1, p1.projectId)
+
+        then:
+        def res = rootService.getUserActionsForEverything()
+        def editData = res.data[0]
+        editData.action == DashboardAction.Edit.toString()
+        editData.item == DashboardItem.Project.toString()
+        editData.itemId == p1.projectId
+        editData.userId == skillsService.userName
+        editData.userIdForDisplay == displayName
+        editData.projectId == p1.projectId
+        !editData.quizId
+
+
+        def editAction = rootService.getUserActionAttributes(editData.id)
+
+        editAction.id == editData.itemRefId
+        editAction.projectId == p1.projectId
+        editAction.previousName == prevProjName
+        editAction.newName == p1.name
+        editAction.description ==  p1.description
+    }
+
+    def "change project id, name and description"() {
+        SkillsService rootService = createRootSkillService()
+        def p1 = createProject(1)
+        p1.description = 'blah'
+        skillsService.createProject(p1)
+        String prevProjId = p1.projectId
+        String prevProjName = p1.name
+        p1.projectId = 'newOne'
+        p1.name = 'new cool  name'
+        p1.description = 'some other'
+        Thread.sleep(100)
+
+        when:
+        skillsService.updateProject(p1, prevProjId)
+
+        then:
+        def res = rootService.getUserActionsForEverything()
+        def editData = res.data[0]
+        editData.action == DashboardAction.Edit.toString()
+        editData.item == DashboardItem.Project.toString()
+        editData.itemId == prevProjId
+        editData.userId == skillsService.userName
+        editData.userIdForDisplay == displayName
+        editData.projectId == p1.projectId
+        !editData.quizId
+
+
+        def editAction = rootService.getUserActionAttributes(editData.id)
+
+        editAction.id == editData.itemRefId
+        editAction.newName == p1.name
+        editAction.previousName == prevProjName
+        editAction.newProjectId == p1.projectId
+        editAction.previousProjectId == prevProjId
+        editAction.description ==  p1.description
+    }
+
     def "track subject CRUD actions"() {
         SkillsService rootService = createRootSkillService()
         def p1 = createProject(1)
@@ -156,6 +267,38 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
 
         !deleteAction.id
     }
+
+    def "change subject id"() {
+        SkillsService rootService = createRootSkillService()
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+        def subj = createSubject(1, 1)
+        skillsService.createSubject(subj)
+        String prevSubjId = subj.subjectId
+        subj.subjectId = "newId"
+        subj.description = "this is a description allright"
+        Thread.sleep(100)
+
+        when:
+        skillsService.updateSubject(subj, prevSubjId)
+        def res = rootService.getUserActionsForEverything(10, 1, "created", false, "", DashboardItem.Subject)
+        def editAction = rootService.getUserActionAttributes(res.data[0].id)
+        String displayName = getDisplayName()
+        then:
+        res.data[0].action == DashboardAction.Edit.toString()
+        res.data[0].item == DashboardItem.Subject.toString()
+        res.data[0].itemId == prevSubjId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == p1.projectId
+        !res.data[0].quizId
+
+        editAction.id == res.data[1].itemRefId
+        editAction.name == subj.name
+        editAction.skillId == subj.subjectId
+        editAction.description == "this is a description allright"
+    }
+
 
     def "track skill CRUD actions"() {
         SkillsService rootService = createRootSkillService()
@@ -217,6 +360,40 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         !deleteAction.id
     }
 
+    def "update skill id"() {
+        SkillsService rootService = createRootSkillService()
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+        def subj = createSubject(1, 1)
+        skillsService.createSubject(subj)
+
+        def skill = createSkill(1, 1, )
+        skillsService.createSkill(skill)
+        skill.description = "this is a description allright"
+        String prevSkillId = skill.skillId
+        skill.skillId = "newONe"
+        Thread.sleep(100)
+        skillsService.updateSkill(skill, prevSkillId)
+
+        when:
+        def res = rootService.getUserActionsForEverything(10, 1, "created", false, "", DashboardItem.Skill)
+        def editAction = rootService.getUserActionAttributes(res.data[0].id)
+        String displayName = getDisplayName()
+        then:
+        res.data[0].action == DashboardAction.Edit.toString()
+        res.data[0].item == DashboardItem.Skill.toString()
+        res.data[0].itemId == prevSkillId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == p1.projectId
+        !res.data[0].quizId
+
+        editAction.id == res.data[1].itemRefId
+        editAction.name == skill.name
+        editAction.skillId == skill.skillId
+        editAction.description == "this is a description allright"
+    }
+
     def "track skill group CRUD actions"() {
         SkillsService rootService = createRootSkillService()
         def p1 = createProject(1)
@@ -275,6 +452,40 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         editAction.description == "this is a description allright"
 
         !deleteAction.id
+    }
+
+    def "edit group id"() {
+        SkillsService rootService = createRootSkillService()
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+        def subj = createSubject(1, 1)
+        skillsService.createSubject(subj)
+
+        def skill = createSkillsGroup(1, 1, 1)
+        skillsService.createSkill(skill)
+        skill.description = "this is a description allright"
+        String previousGroupId = skill.skillId
+        skill.skillId = "newId"
+        Thread.sleep(100)
+        skillsService.updateSkill(skill, previousGroupId)
+
+        when:
+        def res = rootService.getUserActionsForEverything(10, 1, "created", false, "", DashboardItem.SkillsGroup)
+        def editAction = rootService.getUserActionAttributes(res.data[0].id)
+        String displayName = getDisplayName()
+        then:
+        res.data[0].action == DashboardAction.Edit.toString()
+        res.data[0].item == DashboardItem.SkillsGroup.toString()
+        res.data[0].itemId == previousGroupId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == p1.projectId
+        !res.data[0].quizId
+
+        editAction.id == res.data[0].itemRefId
+        editAction.name == skill.name
+        editAction.skillId == skill.skillId
+        editAction.description == "this is a description allright"
     }
 
     def "track skills under a group CRUD actions"() {
@@ -821,6 +1032,47 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         editAction.endDate
 
         !deleteAction.id
+    }
+
+    def "change badge id"() {
+        SkillsService rootService = createRootSkillService()
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+
+        def badge = createBadge(1, 1)
+        badge.helpUrl = "https://skilltreeHelpBadgeNow.com"
+        badge.awardAttrs = [ name: 'Test Badge', iconClass: 'abc', numMinutes: 60 ]
+        badge.startDate = new Date() + 2
+        badge.endDate = new Date() + 2
+        skillsService.createBadge(badge)
+        badge.description = "this is a description allright"
+        Thread.sleep(100)
+        String previousBadgeId = badge.badgeId
+        badge.badgeId = "newOne"
+        skillsService.updateBadge(badge, previousBadgeId)
+
+        when:
+        def res = rootService.getUserActionsForEverything(10, 1, "created", false, "", DashboardItem.Badge)
+        def editAction = rootService.getUserActionAttributes(res.data[0].id)
+        String displayName = getDisplayName()
+        then:
+        res.data[0].action == DashboardAction.Edit.toString()
+        res.data[0].item == DashboardItem.Badge.toString()
+        res.data[0].itemId == previousBadgeId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == p1.projectId
+        !res.data[0].quizId
+
+        editAction.id == res.data[1].itemRefId
+        editAction.name == badge.name
+        editAction.skillId == badge.badgeId
+        editAction.description == "this is a description allright"
+        editAction["BonusAward:name"] == "Test Badge"
+        editAction["BonusAward:iconClass"] == "abc"
+        editAction["BonusAward:numMinutes"] == 60
+        editAction.startDate
+
     }
 
     def "track adding/removing skills to/from badge"() {
