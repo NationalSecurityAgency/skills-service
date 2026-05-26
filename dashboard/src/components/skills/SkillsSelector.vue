@@ -182,7 +182,6 @@ defineExpose({
 })
 
 const getIconClass = (skill) => {
-  console.log(skill)
   const { type } = skill
   if (SkillType.isSubject(type)) {
     return 'fa-solid fa-cubes skills-color-subjects text-slate-500'
