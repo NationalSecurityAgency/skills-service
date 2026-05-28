@@ -446,7 +446,7 @@ class SkillsAdminService {
 
     @Transactional()
     @Profile
-    void batchUpdateSkills(String projectId, MultiSkillUpdateRequest updateRequest) {
+    List<SaveSkillService.SkillInBatchUpdateRes> batchUpdateSkills(String projectId, MultiSkillUpdateRequest updateRequest) {
         List<String> skillIds = updateRequest.skills
         List<SkillDef> skillsToUpdate = skillDefRepo.findAllByProjectIdAndSkillIdIn(projectId, skillIds)
 
@@ -465,6 +465,9 @@ class SkillsAdminService {
         for (SkillDef skill : skillsToUpdate) {
             if (skill.projectId != projectId) {
                 throw new SkillException("Provided skill id [${skill.skillId}] does not exist", projectId, skill.skillId, ErrorCode.BadParam)
+            }
+            if (skill.copiedFrom != null) {
+                throw new SkillException("Cannot batch update imported skills", projectId, skill.skillId, ErrorCode.BadParam)
             }
             SkillDef currentSkillSubject = ruleSetDefGraphService.getMySubjectParent(skill.id)
             if (currentSkillSubject.id != subject.id) {
@@ -506,7 +509,7 @@ class SkillsAdminService {
             if (updateRequest.selfReportingType != null) {
                 SelfReportingType previousType = skill.selfReportingType
                 SelfReportingType newType = updateRequest.selfReportingType == "reset" ? null : SelfReportingType.valueOf(updateRequest.selfReportingType)
-                if (newType != SelfReportingType.Approval && newType != SelfReportingType.HonorSystem && !newType) {
+                if (newType && newType != SelfReportingType.Approval && newType != SelfReportingType.HonorSystem ) {
                     throw new SkillException("Only [${SelfReportingType.Approval}] or [${SelfReportingType.HonorSystem}] are supported for self reporting type in a batch update", projectId, null, ErrorCode.BadParam)
                 }
                 if (previousType == SelfReportingType.Quiz && previousType != newType) {
@@ -517,9 +520,6 @@ class SkillsAdminService {
                 skill.selfReportingType = newType
             }
             if (updateRequest.enabled == "true" ) {
-                if (skill.copiedFrom != null) {
-                    throw new SkillException("Cannot enable imported skill through the batch update", projectId, skill.skillId, ErrorCode.BadParam)
-                }
                 if (skill.enabled != "true") {
                     skill.enabled = "true"
                 }
@@ -557,6 +557,15 @@ class SkillsAdminService {
             batchOperationsTransactionalAccessor.updateUserPointsForSubject(projectId, subject.skillId, true)
             userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfUsersDoNotQualify(subject)
             batchOperationsTransactionalAccessor.identifyAndAddSubjectLevelAchievements(projectId, subject.skillId)
+        }
+
+        return skillsToUpdate.collect {
+            new SaveSkillService.SkillInBatchUpdateRes(
+                    projectId: it.projectId,
+                    skillRefId: it.id,
+                    skillId: it.skillId,
+                    isImportedByOtherProjects: skillDefRepo.isCatalogSkillImportedByOtherProjects(it.id)
+            )
         }
     }
 

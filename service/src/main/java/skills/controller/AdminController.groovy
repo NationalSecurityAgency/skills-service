@@ -668,7 +668,7 @@ class AdminController {
     RequestResult batchUpdateSkills(@PathVariable("projectId") String projectId,
                                     @RequestBody MultiSkillUpdateRequest skillRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        skillsAdminService.batchUpdateSkills(projectId, skillRequest)
+        saveSkillService.batchUpdateSkills(projectId, skillRequest)
         return RequestResult.success()
     }
 
