@@ -16,6 +16,7 @@
 package skills.intTests.batchUpdateSkills
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -55,6 +56,9 @@ class BatchUpdateSkillsSpec extends DefaultIntSpec {
         def project = skillsService.getProject(p1.projectId)
         then:
         subjSkills.collect { it.pointIncrement } == [100, 555, 555, 555, 100]
+        subjSkills.collect { it.numPerformToCompletion } == p1skills.collect { it.numPerformToCompletion }
+        subjSkills.collect { it.pointIncrementInterval } == p1skills.collect { it.pointIncrementInterval }
+
 
         subjects.collect { it.totalPoints } == [subject1Pts, subject2Pts]
         project.totalPoints == subject1Pts + subject2Pts
@@ -84,6 +88,7 @@ class BatchUpdateSkillsSpec extends DefaultIntSpec {
         then:
         subjSkills.collect { it.pointIncrement } == [100, 100, 100, 100, 100]
         subjSkills.collect { it.totalPoints } == [100, 500, 500, 500, 100]
+        subjSkills.collect { it.pointIncrementInterval } == p1skills.collect { it.pointIncrementInterval }
 
         subjects.collect { it.totalPoints } == [subject1Pts, subject2Pts]
         project.totalPoints == subject1Pts + subject2Pts
@@ -114,6 +119,8 @@ class BatchUpdateSkillsSpec extends DefaultIntSpec {
         subjSkills.collect { it.pointIncrementInterval } == [480, 720, 720, 720, 480]
         subjSkills.collect { it.pointIncrement } == [100, 100, 100, 100, 100]
         subjSkills.collect { it.totalPoints } == [100, 100, 100, 100, 100]
+        subjSkills.collect { it.numPerformToCompletion } == p1skills.collect { it.numPerformToCompletion }
+
 
         subjects.collect { it.totalPoints } == [subject1Pts, subject2Pts]
         project.totalPoints == subject1Pts + subject2Pts
@@ -144,6 +151,41 @@ class BatchUpdateSkillsSpec extends DefaultIntSpec {
         subjSkills.collect { it.numMaxOccurrencesIncrementInterval } == [1, 3, 3, 3, 1]
         subjSkills.collect { it.pointIncrement } == [100, 100, 100, 100, 100]
         subjSkills.collect { it.totalPoints } == [500, 500, 500, 500, 500]
+        subjSkills.collect { it.pointIncrementInterval } == p1skills.collect { it.pointIncrementInterval }
+
+        subjects.collect { it.totalPoints } == [subject1Pts, subject2Pts]
+        project.totalPoints == subject1Pts + subject2Pts
+    }
+
+    def "batch update pointIncrementInterval and numMaxOccurrencesIncrementInterval at the same time - definition only"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skills = createSkills(5, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+
+        def p1subj2 = createSubject(1, 2)
+        def p1skillsSubj2 = createSkills(4, 1, 2, 22)
+        skillsService.createProjectAndSubjectAndSkills(null, p1subj2, p1skillsSubj2)
+
+        int subject1Pts = 100 * 5 * p1skills.size()
+        int subject2Pts = 22 * p1skillsSubj2.size()
+
+        when:
+        skillsService.batchUpdateSkills(p1.projectId, [
+                pointIncrementInterval: 720,
+                numMaxOccurrencesIncrementInterval: 3,
+                skills: p1skills[1..3].skillId
+        ])
+
+        def subjSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
+        def subjects = skillsService.getSubjects(p1.projectId)
+        def project = skillsService.getProject(p1.projectId)
+        then:
+        subjSkills.collect { it.pointIncrementInterval } == [480, 720, 720, 720, 480]
+        subjSkills.collect { it.numMaxOccurrencesIncrementInterval } == [1, 3, 3, 3, 1]
+        subjSkills.collect { it.pointIncrement } == [100, 100, 100, 100, 100]
+        subjSkills.collect { it.totalPoints } == [500, 500, 500, 500, 500]
+        subjSkills.collect { it.numPerformToCompletion } == p1skills.collect { it.numPerformToCompletion }
 
         subjects.collect { it.totalPoints } == [subject1Pts, subject2Pts]
         project.totalPoints == subject1Pts + subject2Pts
@@ -176,6 +218,49 @@ class BatchUpdateSkillsSpec extends DefaultIntSpec {
 
         then:
         subjSkills.findAll { it.type == "Skill" }.collect { it.enabled } == [false, true, true, true, false]
+    }
+
+
+    def "batch update all attributes at the same time"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        // create 5 skills: 100 pts, 5 max occurrences
+        def p1skills = createSkills(5, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+
+        def p1subj2 = createSubject(1, 2)
+        def p1skillsSubj2 = createSkills(4, 1, 2, 22)
+        skillsService.createProjectAndSubjectAndSkills(null, p1subj2, p1skillsSubj2)
+
+        // Calculate expected points for subject 1:
+        // 2 skills remain (100 * 5) + 3 skills updated (555 * 10)
+        int subject1Pts = (100 * 5 * 2) + (555 * 10 * 3)
+        int subject2Pts = 22 * p1skillsSubj2.size()
+
+        when:
+        skillsService.batchUpdateSkills(p1.projectId, [
+                pointIncrement: 555,
+                numPerformToCompletion: 10,
+                pointIncrementInterval: 720,
+                numMaxOccurrencesIncrementInterval: 3,
+                enabled: "true",
+                skills: p1skills[1..3].skillId
+        ])
+
+        def subjSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId, true)
+        def subjects = skillsService.getSubjects(p1.projectId)
+        def project = skillsService.getProject(p1.projectId)
+
+        then:
+        // Verify specific attribute updates for the range [1..3]
+        subjSkills.collect { it.pointIncrement } == [100, 555, 555, 555, 100]
+        subjSkills.collect { it.totalPoints } == [500, 5550, 5550, 5550, 500]
+        subjSkills.collect { it.pointIncrementInterval } == [480, 720, 720, 720, 480]
+        subjSkills.collect { it.numMaxOccurrencesIncrementInterval } == [1, 3, 3, 3, 1]
+
+        // Total points verification
+        subjects.collect { it.totalPoints } == [subject1Pts, subject2Pts]
+        project.totalPoints == subject1Pts + subject2Pts
     }
 
     def "batch update point increment with skills under a skill group"() {
@@ -214,7 +299,189 @@ class BatchUpdateSkillsSpec extends DefaultIntSpec {
         project.totalPoints == subject1Pts + subject2Pts
     }
 
+    def "batch update all attributes with skills under a skill group"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        // Create 5 skills: 100 pts, 5 max occurrences
+        def p1skills = createSkills(5, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
 
+        def p1SkillGroup = createSkillsGroup(1, 1, 10)
+        skillsService.createSkill(p1SkillGroup)
+        p1skills.each {
+            skillsService.assignSkillToSkillsGroup(p1SkillGroup.skillId, it)
+        }
 
+        def p1subj2 = createSubject(1, 2)
+        def p1skillsSubj2 = createSkills(4, 1, 2, 22)
+        skillsService.createProjectAndSubjectAndSkills(null, p1subj2, p1skillsSubj2)
+
+        // Calculate expected points for subject 1:
+        // 2 skills remain (100 * 5) + 3 skills updated (555 * 10)
+        int subject1Pts = (100 * 5 * 2) + (555 * 10 * 3)
+        int subject2Pts = 22 * p1skillsSubj2.size()
+
+        when:
+        skillsService.batchUpdateSkills(p1.projectId, [
+                pointIncrement: 555,
+                numPerformToCompletion: 10,
+                pointIncrementInterval: 720,
+                numMaxOccurrencesIncrementInterval: 3,
+                enabled: "true",
+                skills: p1skills[1..3].skillId
+        ])
+
+        def subjSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId, true)
+        def subjects = skillsService.getSubjects(p1.projectId)
+        def project = skillsService.getProject(p1.projectId)
+
+        then:
+        def filteredSkills = subjSkills.findAll { it.type == "Skill" }
+        filteredSkills.collect { it.pointIncrement } == [100, 555, 555, 555, 100]
+        filteredSkills.collect { it.totalPoints } == [500, 5550, 5550, 5550, 500]
+        filteredSkills.collect { it.pointIncrementInterval } == [480, 720, 720, 720, 480]
+        filteredSkills.collect { it.numMaxOccurrencesIncrementInterval } == [1, 3, 3, 3, 1]
+
+        subjects.collect { it.totalPoints } == [subject1Pts, subject2Pts]
+        project.totalPoints == subject1Pts + subject2Pts
+    }
+
+    def "batch update exported single skill should propagate updates to imported skills"() {
+        given:
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skills = createSkills(2, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+
+        // Export a skill to the catalog
+        def sourceSkill = p1skills[0]
+        skillsService.exportSkillToCatalog(p1.projectId, sourceSkill.skillId)
+
+        // Setup another project to import the skill
+        def p3 = createProject(3)
+        def p3Subj1 = createSubject(3, 1)
+        skillsService.createProjectAndSubjectAndSkills(p3, p3Subj1, [])
+
+        // Import the skill and finalize it
+        skillsService.importSkillFromCatalog(p3.projectId, p3Subj1.subjectId, p1.projectId, sourceSkill.skillId)
+        skillsService.finalizeSkillsImportFromCatalog(p3.projectId)
+
+        when:
+        // Batch update the exported skill in the source project
+        skillsService.batchUpdateSkills(p1.projectId, [
+                numPerformToCompletion: 12,
+                skills: [sourceSkill.skillId]
+        ])
+
+        // Verify source skill in p1
+        def p1subjSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
+        def p1UpdatedSkill = p1subjSkills.find { it.skillId == sourceSkill.skillId }
+
+        // must wait for async propagation
+        skillsService.waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        // Verify imported skill in p2
+        def p2subjSkills = skillsService.getSkillsForSubject(p3.projectId, p3Subj1.subjectId)
+        def p2ImportedSkill = p2subjSkills.find { it.skillId == sourceSkill.skillId }
+
+        then:
+        // Source updated
+        p1UpdatedSkill.numPerformToCompletion == 12
+
+        // Imported skill should have propagated the updates from the catalog source
+        p2ImportedSkill.numPerformToCompletion == 12
+    }
+
+    def "batch update exported skills should propagate updates to imported skills"() {
+        given:
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        // Create a larger pool of skills
+        def p1skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+
+        // Export a subset of skills to the catalog (e.g., the first 3)
+        def exportedSkills = p1skills.take(3)
+        exportedSkills.each { skill ->
+            skillsService.exportSkillToCatalog(p1.projectId, skill.skillId)
+        }
+
+        // Setup another project to import the exported skills
+        def p3 = createProject(3)
+        def p3Subj1 = createSubject(3, 1)
+        skillsService.createProjectAndSubjectAndSkills(p3, p3Subj1, [])
+
+        exportedSkills.each { skill ->
+            skillsService.importSkillFromCatalog(p3.projectId, p3Subj1.subjectId, p1.projectId, skill.skillId)
+        }
+        skillsService.finalizeSkillsImportFromCatalog(p3.projectId)
+
+        // Define which specific skills from the pool will be updated (e.g., the first 2)
+        def skillsToUpdate = exportedSkills.take(2)
+        def skillIdsToUpdate = skillsToUpdate.collect { it.skillId }
+        def newValue = 12
+
+        when:
+        // Batch update only the selected skills in the source project
+        skillsService.batchUpdateSkills(p1.projectId, [
+                numPerformToCompletion: newValue,
+                skills: skillIdsToUpdate
+        ])
+
+        // must wait for async propagation
+        skillsService.waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        // Retrieve final states
+        def p1subjSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
+        def p3subjSkills = skillsService.getSkillsForSubject(p3.projectId, p3Subj1.subjectId)
+
+        then:
+        // 1. Verify source project: updated skills changed, others remained 100
+        p1subjSkills.findAll { it.skillId in skillIdsToUpdate }.each { it.numPerformToCompletion == newValue }
+        p1subjSkills.findAll { !(it.skillId in skillIdsToUpdate) }.each { it.numPerformToCompletion == 100 }
+
+        // 2. Verify imported project: only the updated exported skills propagated the change
+        p3subjSkills.findAll { it.skillId in skillIdsToUpdate }.each { it.numPerformToCompletion == newValue }
+
+        // The 3rd exported skill was imported but NOT included in batch update; it should still be 100
+        def nonUpdatedImportedSkill = p3subjSkills.find { it.skillId == exportedSkills[2].skillId }
+        nonUpdatedImportedSkill.numPerformToCompletion == 1
+    }
+
+    def "batch update skills should propagate updates only to targeted reused skills in different subjects"() {
+        given:
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        // Create 5 skills in the first subject
+        def p1skills = createSkills(5, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+
+        // Create a second subject in the same project p1
+        def p1subj2 = createSubject(1, 2)
+        skillsService.createSubject(p1subj2)
+
+        // Reuse all skills from subj1 into subj2 within project p1
+        skillsService.reuseSkills(p1.projectId, p1skills.collect { it.skillId }, p1subj2.subjectId)
+
+        // Define a subset to update (skills 1 and 3)
+        def skillsToUpdate = [p1skills[1].skillId, p1skills[3].skillId]
+        def skillsToKeep = [p1skills[0].skillId, p1skills[2].skillId, p1skills[4].skillId]
+
+        when:
+        skillsService.batchUpdateSkills(p1.projectId, [
+                numPerformToCompletion: 12,
+                skills: skillsToUpdate
+        ])
+
+        // must wait for async propagation
+        skillsService.waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        def subj1Skills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
+        def subj2Skills = skillsService.getSkillsForSubject(p1.projectId, p1subj2.subjectId)
+
+        then:
+        subj1Skills.numPerformToCompletion == [1, 12, 1, 12, 1]
+        subj2Skills.numPerformToCompletion == [1, 12, 1, 12, 1]
+    }
 
 }
