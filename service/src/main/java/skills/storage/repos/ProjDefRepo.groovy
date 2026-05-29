@@ -499,4 +499,15 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
               and LOWER(project_id) <> LOWER(?1)''', nativeQuery = true)
     Boolean otherProjectExistWithAttachmentUUID(String notThisProject, String attachmentUUID)
 
+    @Query(value = '''
+        select exists(
+          select 1
+          from settings s
+          left join users u on u.id = s.user_ref_id
+          where s.project_id = ?1
+            and s.setting = 'my_project'
+            and u.user_id = ?2
+        )       
+    ''', nativeQuery = true)
+    Boolean isProjectSavedByUser(String projectId, String userId)
 }
