@@ -38,6 +38,9 @@ Cypress.Commands.add('validateDivineDragonWarning', (attachmentWarning = true, d
 Cypress.Commands.add('openDescModalAndAttachFile', (btnSelector, expectedTitle) => {
     cy.get(btnSelector).click()
     cy.get('[data-p="modal"] [data-pc-section="title"]').contains(expectedTitle)
+    cy.attachFile()
+});
+Cypress.Commands.add('attachFile', (btnSelector, expectedTitle) => {
     cy.get(markdownEditorToolbarIconsSelector).should('be.visible')
     cy.get(attachmentBtnSelector).should('be.visible');
     cy.addAttachment(attachmentBtnSelector)

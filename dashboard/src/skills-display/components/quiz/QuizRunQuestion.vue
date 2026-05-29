@@ -285,7 +285,7 @@ const updateAnswerOrder = (newOrder) => {
                              :name="fieldName"
                              :user-community="userCommunity"
                              :allow-community-elevation="true"
-                             :allow-attachments="false"
+                             :upload-url="`/admin/quiz-definitions/${props.quizId}/upload`"
                              :allow-insert-images="false"
                              :aria-label="`Please enter text to answer question number ${num}`"
                              placeholder="Please enter your response here..."
