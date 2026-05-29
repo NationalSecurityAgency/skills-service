@@ -166,7 +166,7 @@ describe('Quiz - Community Attachment Warning Tests', () => {
         cy.get('[data-cy="question_1"] [data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for Divine Dragon')
     })
 
-    it.only('text answers with attachments', () => {
+    it('text answers with attachments', () => {
         cy.createTextInputQuestionDef(1, 1)
         cy.visit('/progress-and-rankings/quizzes/quiz1')
         cy.get('[data-cy="startQuizAttempt"]').click()
