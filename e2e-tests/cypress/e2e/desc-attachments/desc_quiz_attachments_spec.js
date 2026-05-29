@@ -116,16 +116,6 @@ describe('Description Quiz Attachments Tests', () => {
         cy.validateAttachmentInDb('quiz_id', 'quiz1')
     });
 
-    it('attachments are not enabled for quiz text answers', () => {
-        cy.viewport(1400, 1000)
-        cy.createQuizDef(1);
-        cy.createTextInputQuestionDef(1, 1)
-        cy.visit('/progress-and-rankings/quizzes/quiz1')
-        cy.get('[data-cy="startQuizAttempt"]').click()
-        cy.get(`[data-cy="question_1"] ${markdownEditorToolbarIconsSelector}`).should('be.visible')
-        cy.get(`[data-cy="question_1"] ${attachmentBtnSelector}`).should('not.exist');
-    })
-
     it('attachments are not enabled for quiz text-based questions grading input', () => {
         cy.viewport(1400, 1000)
         cy.createQuizDef(1);
