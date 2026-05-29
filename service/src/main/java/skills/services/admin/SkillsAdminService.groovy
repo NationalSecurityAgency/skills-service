@@ -557,6 +557,10 @@ class SkillsAdminService {
             batchOperationsTransactionalAccessor.updateUserPointsForSubject(projectId, subject.skillId, true)
             userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfUsersDoNotQualify(subject)
             batchOperationsTransactionalAccessor.identifyAndAddSubjectLevelAchievements(projectId, subject.skillId)
+
+            // project
+            userAchievementsAndPointsManagement.removeProjectLevelAchievementsIfUsersDoNotQualify(projectId)
+            batchOperationsTransactionalAccessor.handlePointsAndAchievementsForProject(projectId)
         }
 
         return skillsToUpdate.collect {
