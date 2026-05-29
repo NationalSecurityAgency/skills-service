@@ -240,7 +240,7 @@ describe('My Progress Tests', () => {
             .should('be.visible');
         cy.get('[data-cy=breadcrumb-proj1]')
             .should('be.visible');
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]')
             .contains('Global Badge Details');
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="badgeTitle"]')
             .contains('Global Badge 1')
@@ -318,7 +318,7 @@ describe('My Progress Tests', () => {
         cy.visit('/progress-and-rankings/projects/proj1');
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="overallPoints"]')
             .contains('Overall Points');
-         cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]')
             .contains('Project: This is project 1')
     });
 

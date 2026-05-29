@@ -67,13 +67,13 @@ describe('Navigation Tests', () => {
             cy.get('[data-cy="skillsDisplayHome"]')
                 .find('[data-cy=back]')
                 .should('not.exist');
-            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]')
                 .contains('Project: This is project 1');
             cy.get('[data-cy="skillsDisplayHome"] [data-cy="pointHistoryChartNoData"]')
 
             // to subject page
             cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectTileBtn"]').first().click();
-            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]')
               .contains('Subject 1');
             cy.get('[data-cy="skillsDisplayHome"] [data-cy="pointHistoryChartNoData"]')
             cy.wait(1000);
@@ -82,7 +82,7 @@ describe('Navigation Tests', () => {
             cy.get('[data-cy="skillsDisplayHome"]')
                 .find('[data-cy=myRankBtn]')
                 .click();
-            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]')
                 .contains('My Rank');
             cy.get('[data-cy="skillsDisplayHome"]')
                 .find('[data-cy=back]')
@@ -93,13 +93,13 @@ describe('Navigation Tests', () => {
             // client display (Subject page)
             cy.go('back');  // browser back button
             cy.wait(1000);
-            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]')
               .contains('Subject 1');
             cy.get('[data-cy="skillsDisplayHome"] [data-cy="pointHistoryChartNoData"]')
 
             // then back one more time and we should be back on the client display home page
             cy.go('back');  // browser back button
-            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]')
+            cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]')
               .contains('Project: This is project 1');
             cy.get('[data-cy="skillsDisplayHome"] [data-cy="pointHistoryChartNoData"]')
             cy.wait(1000);
