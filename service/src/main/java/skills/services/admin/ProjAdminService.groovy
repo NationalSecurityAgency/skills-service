@@ -557,6 +557,11 @@ class ProjAdminService {
     }
 
     @Transactional(readOnly = true)
+    boolean isInMyProjects(String projectId, String userId) {
+        return projDefRepo.isProjectSavedByUser(projectId, userId);
+    }
+
+    @Transactional(readOnly = true)
     boolean existsByProjectId(String projectId) {
         return projDefRepo.existsByProjectIdIgnoreCase(projectId)
     }

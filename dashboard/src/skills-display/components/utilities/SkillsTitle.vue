@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, ref } from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import SkillsDisplayBreadcrumb from '@/skills-display/components/header/SkillsDisplayBreadcrumb.vue'
 import PoweredBySkilltree from '@/skills-display/components/header/PoweredBySkilltree.vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
@@ -22,6 +22,7 @@ import { useSkillsDisplayBreadcrumbState } from '@/skills-display/stores/UseSkil
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillsDisplaySearch from '@/skills-display/components/SkillsDisplaySearch.vue'
+import ProjectService from "@/components/projects/ProjectService.js";
 
 const attributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
@@ -33,7 +34,7 @@ const showSkillsDisplaySearchDialog = ref(false)
 
 const props = defineProps({
   backButton: { type: Boolean, default: true },
-  animatePowerByLabel: { type: Boolean, default: true }
+  animatePowerByLabel: { type: Boolean, default: true },
 })
 
 const showBackButton = computed(() => {
@@ -52,6 +53,29 @@ const disableSkillTreeBrand = computed(() => isTrueCaseInsensitive(themeState.th
 const renderDivWhereBackButtonResides = computed(() => (showBackButton.value || !disableSearchButton.value || !disableSkillTreeBrand.value))
 const renderDivWhereBrandResides = computed(() => showBackButton.value || !disableSkillTreeBrand.value)
 const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
+
+const isMyProject = ref(false);
+const showAddedMsg = ref(false);
+
+onMounted(() => {
+  loadProjectSavedStatus()
+})
+
+const loadProjectSavedStatus = () => {
+  ProjectService.isMyProject(attributes.projectId).then((res) => {
+    isMyProject.value = res;
+  });
+}
+
+const addToMyProjects = () => {
+  ProjectService.addToMyProjects(attributes.projectId).then(() => {
+        loadProjectSavedStatus();
+        showAddedMsg.value = true;
+        setTimeout(() => {
+          showAddedMsg.value = false;
+        }, 4000);
+      })
+}
 </script>
 
 <template>
@@ -82,13 +106,26 @@ const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
               icon="fa-solid fa-magnifying-glass" />
         </div>
 
-        <div :class="{'mx-5': showBackButton}" class="text-center flex-1">
+        <div :class="{'mx-5': showBackButton}" class="text-center flex items-center">
           <SkillsDisplayBreadcrumb v-if="!disableBreadcrumb"></SkillsDisplayBreadcrumb>
           <h1 data-cy="title"
                :class="{ 'mt-2': disableBreadcrumb}"
                class="skills-title uppercase text-2xl font-normal m-0">
             <slot />
           </h1>
+            <SkillsButton
+                v-if="!isMyProject && !showAddedMsg"
+                label="Add To My Projects"
+                icon="fa-solid fa-heart-circle-plus"
+                @click="addToMyProjects()"
+                outlined
+                class="animate-fadein animate-duration-300 mt-2 ml-4"
+                size="small"
+                :data-cy="`addButton-${attributes.projectId}`"
+                :aria-label="`add project ${attributes.projectId} to my projects`"/>
+          <InlineMessage v-if="showAddedMsg" class="ml-4 mt-2" severity="success">
+            Project added!
+          </InlineMessage>
         </div>
 
         <div v-if="renderDivWhereBrandResides" class="md:w-32">

@@ -161,5 +161,10 @@ export default {
     return axios
       .get(`/admin/projects/${encodeURIComponent(projectId)}/validateEnablingCommunity`)
       .then((response) => response.data)
+  },
+  isMyProject(projectId) {
+    return axios.get(`/app/projects/${encodeURIComponent(projectId)}/isMyProject`).then(
+      (response) => response.data
+    )
   }
 }
