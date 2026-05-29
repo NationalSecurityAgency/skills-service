@@ -193,7 +193,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
 
         // initiate training-wide search dialog from the project page
         cy.visit('/progress-and-rankings/projects/proj1');
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').should('have.text', 'Project: This is project 1');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]').should('have.text', 'Project: This is project 1');
         cy.realPress(["Control", "k"]);
         cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
         cy.realPress('Escape');
