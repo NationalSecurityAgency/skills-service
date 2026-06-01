@@ -113,23 +113,23 @@ const addToMyProjects = () => {
               icon="fa-solid fa-magnifying-glass" />
         </div>
 
-        <div :class="{'mx-5': showBackButton}" class="text-center flex items-center">
+        <div :class="{'mx-5': showBackButton}" class="text-center flex flex-col md:flex-row items-center">
           <SkillsDisplayBreadcrumb v-if="!disableBreadcrumb"></SkillsDisplayBreadcrumb>
           <h1 data-cy="title"
                :class="{ 'mt-2': disableBreadcrumb}"
                class="skills-title uppercase text-2xl font-normal m-0">
             <slot />
           </h1>
-            <SkillsButton
-                v-if="!isMyProject && !showAddedMsg && isProjectLevel"
-                label="Add To My Projects"
-                icon="fa-solid fa-heart-circle-plus"
-                @click="addToMyProjects()"
-                outlined
-                class="animate-fadein animate-duration-300 mt-2 ml-4"
-                size="small"
-                :data-cy="`addButton-${attributes.projectId}`"
-                :aria-label="`add project ${attributes.projectId} to my projects`"/>
+          <SkillsButton
+              v-if="!isMyProject && !showAddedMsg && isProjectLevel"
+              label="Add To My Projects"
+              icon="fa-solid fa-heart-circle-plus"
+              @click="addToMyProjects()"
+              outlined
+              class="animate-fadein animate-duration-300 mt-2 ml-4"
+              size="small"
+              :data-cy="`addButton-${attributes.projectId}`"
+              :aria-label="`add project ${attributes.projectId} to my projects`"/>
           <InlineMessage v-if="showAddedMsg" class="ml-4 mt-2" severity="success">
             Project added!
           </InlineMessage>
