@@ -113,7 +113,7 @@ const addToMyProjects = () => {
               icon="fa-solid fa-magnifying-glass" />
         </div>
 
-        <div :class="{'mx-5': showBackButton}" class="text-center flex flex-col md:flex-row items-center">
+        <div class="text-center flex " :class="{'flex-col md:flex-row items-center': isProjectLevel && !isMyProject, 'flex-1': !isProjectLevel || isMyProject, 'mx-5': showBackButton}">
           <SkillsDisplayBreadcrumb v-if="!disableBreadcrumb"></SkillsDisplayBreadcrumb>
           <h1 data-cy="title"
                :class="{ 'mt-2': disableBreadcrumb}"
