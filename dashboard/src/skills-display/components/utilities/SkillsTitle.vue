@@ -23,6 +23,9 @@ import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkil
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillsDisplaySearch from '@/skills-display/components/SkillsDisplaySearch.vue'
 import ProjectService from "@/components/projects/ProjectService.js";
+import {useRoute} from "vue-router";
+
+const route = useRoute()
 
 const attributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
@@ -53,6 +56,10 @@ const disableSkillTreeBrand = computed(() => isTrueCaseInsensitive(themeState.th
 const renderDivWhereBackButtonResides = computed(() => (showBackButton.value || !disableSearchButton.value || !disableSkillTreeBrand.value))
 const renderDivWhereBrandResides = computed(() => showBackButton.value || !disableSkillTreeBrand.value)
 const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
+
+const isProjectLevel = computed(() => {
+  return !(route.params.skillId || route.params.badgeId || route.params.subjectId || (route.params.tagKey && route.params.tagFilter))
+})
 
 const isMyProject = ref(false);
 const showAddedMsg = ref(false);
@@ -114,7 +121,7 @@ const addToMyProjects = () => {
             <slot />
           </h1>
             <SkillsButton
-                v-if="!isMyProject && !showAddedMsg"
+                v-if="!isMyProject && !showAddedMsg && isProjectLevel"
                 label="Add To My Projects"
                 icon="fa-solid fa-heart-circle-plus"
                 @click="addToMyProjects()"
