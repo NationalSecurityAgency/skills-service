@@ -432,12 +432,14 @@ describe('Global Quiz Runs History Tests', () => {
         cy.wait('@quizRuns')
         cy.get('[data-cy="quizRunsHistoryTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '14')
 
-        Cypress.Commands.add('setDay', (dayNum) => {
-            const dayNumClean = Number(dayNum).toString()
-            let re = new RegExp(String.raw`^${dayNumClean}$`)
-            cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="day"]').contains(re).click()
-        });
-
+      Cypress.Commands.add('setDay', (dayNum) => {
+          const dayNumClean = Number(dayNum).toString()
+          const re = new RegExp(String.raw`^${dayNumClean}$`)
+          cy.contains(
+              '[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="day"]:not([data-p*="other-month"]):not([aria-disabled="true"])',
+              re,
+          ).click()
+      });
         Cypress.Commands.add('filterSetYear', (yearNum) => {
             cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-section="selectyear"]').click()
             cy.get('[data-pc-section="panel"] [data-pc-section="year"]').contains(yearNum).click()
