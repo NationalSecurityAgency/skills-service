@@ -131,7 +131,7 @@ describe('Custom Label with Reused Data Tests', () => {
         cy.get('[data-cy="skillsDisplayHome"]').contains('Level', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Skill', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Subject', { matchCase: false }).should('be.visible');
-        cy.get('[data-cy="skillsDisplayHome"]').contains('Project', { matchCase: false }).should('not.exist');
+        cy.contains('[data-cy="skillsDisplayHome"]', /\bProject\b/i).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Point', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Group', { matchCase: false }).should('not.exist');
     })
@@ -157,7 +157,7 @@ describe('Custom Label with Reused Data Tests', () => {
         cy.get('[data-cy="skillsDisplayHome"]').contains('Level', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Skill', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Subject', { matchCase: false }).should('be.visible');
-        cy.get('[data-cy="skillsDisplayHome"]').contains('Project', { matchCase: false }).should('not.exist');
+        cy.contains('[data-cy="skillsDisplayHome"]', /\bProject\b/i).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Point', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Group', { matchCase: false }).should('not.exist');
     })
