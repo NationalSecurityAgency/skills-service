@@ -57,8 +57,9 @@ const renderDivWhereBackButtonResides = computed(() => (showBackButton.value || 
 const renderDivWhereBrandResides = computed(() => showBackButton.value || !disableSkillTreeBrand.value)
 const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
 
-const isProjectLevel = computed(() => {
-  return route.params.projectId && !(route.params.skillId && route.params.badgeId && route.params.subjectId)
+const isProjectPage = computed(() => {
+  const regex = new RegExp(route.params.projectId + '/?$');
+  return regex.test(route.path) && route.params.projectId && !(route.params.skillId && route.params.badgeId && route.params.subjectId)
 })
 
 const isMyProject = ref(false);
@@ -113,8 +114,7 @@ const addToMyProjects = () => {
               icon="fa-solid fa-magnifying-glass" />
         </div>
 
-<!--        <div :class="{'mx-5': showBackButton}" class="text-center flex-1">-->
-        <div class="text-center flex-1" :class="{'sm:flex-col md:flex-row items-center': isProjectLevel && !isMyProject, 'mx-5': showBackButton}">
+        <div class="text-center flex-1" :class="{'sm:flex-col md:flex-row items-center': isProjectPage && !isMyProject, 'mx-5': showBackButton}">
           <SkillsDisplayBreadcrumb v-if="!disableBreadcrumb"></SkillsDisplayBreadcrumb>
           <h1 data-cy="title"
                :class="{ 'mt-2': disableBreadcrumb}"
@@ -123,7 +123,7 @@ const addToMyProjects = () => {
           </h1>
 
           <SkillsButton
-              v-if="isProjectLevel && !isMyProject && !showAddedMsg"
+              v-if="isProjectPage && !isMyProject && !showAddedMsg"
               label="Add To My Projects"
               icon="fa-solid fa-heart-circle-plus"
               @click="addToMyProjects()"
