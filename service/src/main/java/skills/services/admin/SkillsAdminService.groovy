@@ -653,7 +653,7 @@ class SkillsAdminService {
      * @return
      */
     @Transactional(readOnly = true)
-    List<SkillDefPartialRes> getSkillsForSubjectWithCatalogStatus(String projectId, String subjectId, boolean includeGroupChildren=false) {
+    List<SkillDefPartialRes> getSkillsForSubjectWithCatalogStatus(String projectId, String subjectId, boolean includeGroupChildren=false, boolean approvalsOnly=false) {
         SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, subjectId, SkillDef.ContainerType.Subject)
         if (!subject) {
             ErrorCode code = ErrorCode.SubjectNotFound
@@ -663,7 +663,7 @@ class SkillsAdminService {
         List<SkillRelDef.RelationshipType> relationshipTypes = includeGroupChildren ?
                 [SkillRelDef.RelationshipType.RuleSetDefinition, SkillRelDef.RelationshipType.GroupSkillToSubject] :
                 [SkillRelDef.RelationshipType.RuleSetDefinition]
-        List<SkillDefPartial> res = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subject.skillId, relationshipTypes)
+        List<SkillDefPartial> res = skillRelDefRepo.getSkillsWithCatalogStatus(projectId, subject.skillId, relationshipTypes, approvalsOnly.toString())
 
         Boolean projectHasSkillTags = skillDefRepo.doesProjectHaveSkillTags(projectId) as boolean
 
@@ -674,8 +674,8 @@ class SkillsAdminService {
     }
 
     @Transactional(readOnly = true)
-    List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false, boolean includeSkillGroups = false) {
-        List<SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery, excludeImportedSkills, includeDisabled, includeSkillGroups)
+    List<SkillDefSkinnyRes> getSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false, boolean includeSkillGroups = false, boolean approvalsOnly = false) {
+        List<SkillDefSkinny> data = loadSkinnySkills(projectId, skillNameQuery, excludeImportedSkills, includeDisabled, includeSkillGroups, approvalsOnly)
         List<SkillDefSkinnyRes> res = data.collect { convertToSkillDefSkinnyRes(it) }?.sort({ it.skillId })
 
         // do not hit on the reuse tag
@@ -960,12 +960,12 @@ class SkillsAdminService {
     }
 
     @Profile
-    private List<SkillDefSkinny> loadSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false, boolean includeSkillGroups = false) {
+    private List<SkillDefSkinny> loadSkinnySkills(String projectId, String skillNameQuery, boolean excludeImportedSkills = false, boolean includeDisabled = false, boolean includeSkillGroups = false, boolean approvalsOnly = false) {
         List<SkillDef.ContainerType> types = [SkillDef.ContainerType.Skill]
         if (includeSkillGroups) {
             types << SkillDef.ContainerType.SkillsGroup
         }
-        skillDefRepo.findAllSkinnySelectByProjectIdAndTypeIn(projectId, types, skillNameQuery, (!excludeImportedSkills).toString(), includeDisabled.toString())
+        skillDefRepo.findAllSkinnySelectByProjectIdAndTypeIn(projectId, types, skillNameQuery, (!excludeImportedSkills).toString(), includeDisabled.toString(), approvalsOnly.toString())
     }
 
     @Profile

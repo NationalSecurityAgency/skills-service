@@ -44,9 +44,10 @@ export default {
       )
       .then((res) => res.data)
   },
-  getSubjects(projectId) {
+  getSubjects(projectId, approvalsOnly = false) {
+    const query = approvalsOnly ? '?approvalsOnly=true' : ''
     return axios
-      .get(`/admin/projects/${encodeURIComponent(projectId)}/subjects`)
+      .get(`/admin/projects/${encodeURIComponent(projectId)}/subjects${query}`)
       .then((res) => res.data)
   },
   saveSubject(subject) {

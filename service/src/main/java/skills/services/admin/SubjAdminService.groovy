@@ -261,9 +261,9 @@ class SubjAdminService {
     }
 
     @Transactional(readOnly = true)
-    List<SubjectResult> getSubjects(String projectId) {
+    List<SubjectResult> getSubjects(String projectId, boolean approvalsOnly = false) {
         List<SkillDefWithExtra> subjects = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
-        List<SubjectResult> res = subjects.collect { convertToSubject(it) }
+        List<SubjectResult> res = subjects.collect { convertToSubject(it, approvalsOnly) }
         calculatePercentages(res)
         return res?.sort({ it.displayOrder })
     }
@@ -282,7 +282,7 @@ class SubjAdminService {
     }
 
     @Profile
-    private SubjectResult convertToSubject(SkillDefWithExtra skillDef) {
+    private SubjectResult convertToSubject(SkillDefWithExtra skillDef, boolean approvalsOnly = false) {
         SubjectResult res = new SubjectResult(
                 subjectId: skillDef.skillId,
                 projectId: skillDef.projectId,
@@ -294,7 +294,7 @@ class SubjAdminService {
                 helpUrl: InputSanitizer.unsanitizeUrl(skillDef.helpUrl),
         )
 
-        SkillCounts skillCounts = getSkillsStatsForSubjects(skillDef)
+        SkillCounts skillCounts = getSkillsStatsForSubjects(skillDef, approvalsOnly)
 
         res.numGroups = skillCounts.getEnabledGroupsCount() ?: 0
         res.numGroupsDisabled = skillCounts.getDisabledGroupsCount() ?: 0
@@ -315,8 +315,8 @@ class SubjAdminService {
     }
 
     @Profile
-    private SkillCounts getSkillsStatsForSubjects(SkillDefWithExtra skillDef) {
-        skillDefRepo.getSkillsCountsForParentId(skillDef.id)
+    private SkillCounts getSkillsStatsForSubjects(SkillDefWithExtra skillDef, boolean approvalsOnly) {
+        skillDefRepo.getSkillsCountsForParentId(skillDef.id, approvalsOnly.toString())
     }
 
     @Transactional

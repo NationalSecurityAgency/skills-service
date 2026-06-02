@@ -55,8 +55,9 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
             s.projectId = ?1 and s.type in ?2 and
             (s.copiedFromProjectId is null or 'true' = ?4) and
             (s.enabled = 'true' or 'true' = ?5) and
+            ('false' = ?6 or s.selfReportingType = 'Approval') and
             lower(s.name) like lower(CONCAT('%', ?3, '%'))''')
-    List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndTypeIn(String id, List<SkillDef.ContainerType> types, String skillNameQuery, String includeCatalogImportedSkills, String includeDisabled)
+    List<SkillDefSkinny> findAllSkinnySelectByProjectIdAndTypeIn(String id, List<SkillDef.ContainerType> types, String skillNameQuery, String includeCatalogImportedSkills, String includeDisabled, String approvalsOnly)
 
     @Query('''SELECT
         s.id as id,
@@ -294,9 +295,9 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
             sum(case when skillId like '%STREUSESKILLST%' and  c.type = 'Skill' then 1 end) as numSkillsReused,
             sum(case when skillId like '%STREUSESKILLST%' and  c.type = 'Skill' then c.totalPoints end) as totalPointsReused
             from SkillRelDef r, SkillDef c 
-            where r.parent.id=?1 and c.id = r.child.id and r.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+            where r.parent.id=?1 and c.id = r.child.id and r.type in ('RuleSetDefinition', 'GroupSkillToSubject') and ('false' = ?2 or c.selfReportingType = 'Approval')
         ''')
-    SkillCounts getSkillsCountsForParentId(Integer parentSkillRefId)
+    SkillCounts getSkillsCountsForParentId(Integer parentSkillRefId, String approvalsOnly)
 
     long countByProjectIdAndEnabledAndCopiedFromIsNotNull(String projectId, String enabled)
 

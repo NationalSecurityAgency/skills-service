@@ -86,8 +86,13 @@ export default {
 
     return copy
   },
-  getSubjectSkills(projectId, subjectId, includeGroupSkills = false) {
-    const queryParam = includeGroupSkills ? '?includeGroupSkills=true' : ''
+  getSubjectSkills(projectId, subjectId, includeGroupSkills = false, approvalsOnly = false) {
+    let queryParam = includeGroupSkills ? '?includeGroupSkills=true' : ''
+    if(queryParam === '' && approvalsOnly) {
+      queryParam = '?approvalsOnly=true'
+    } else {
+      queryParam += approvalsOnly ? '&approvalsOnly=true' : ''
+    }
     return axios
       .get(
         `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills${queryParam}`
@@ -104,6 +109,7 @@ export default {
     includeDisabled = true,
     excludeReusedSkills = false,
     includeSkillGroups = false,
+    approvalsOnly = false,
   ) {
     let params = `?includeDisabled=${includeDisabled}`
     if (skillNameQuery) {
@@ -114,6 +120,9 @@ export default {
     }
     if (includeSkillGroups) {
       params = `${params}&includeSkillGroups=${includeSkillGroups}`
+    }
+    if (approvalsOnly) {
+      params = `${params}&approvalsOnly=${approvalsOnly}`;
     }
     return axios
       .get(`/admin/projects/${encodeURIComponent(projectId)}/skills${params}`)
