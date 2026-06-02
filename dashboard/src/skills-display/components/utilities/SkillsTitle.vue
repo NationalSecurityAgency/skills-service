@@ -58,7 +58,7 @@ const renderDivWhereBrandResides = computed(() => showBackButton.value || !disab
 const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
 
 const isProjectLevel = computed(() => {
-  return !(route.params.skillId || route.params.badgeId || route.params.subjectId || (route.params.tagKey && route.params.tagFilter))
+  return route.params.projectId && !(route.params.skillId && route.params.badgeId && route.params.subjectId)
 })
 
 const isMyProject = ref(false);
@@ -113,15 +113,17 @@ const addToMyProjects = () => {
               icon="fa-solid fa-magnifying-glass" />
         </div>
 
-        <div class="text-center flex " :class="{'flex-col md:flex-row items-center': isProjectLevel && !isMyProject, 'flex-1': !isProjectLevel || isMyProject, 'mx-5': showBackButton}">
+<!--        <div :class="{'mx-5': showBackButton}" class="text-center flex-1">-->
+        <div class="text-center flex-1" :class="{'sm:flex-col md:flex-row items-center': isProjectLevel && !isMyProject, 'mx-5': showBackButton}">
           <SkillsDisplayBreadcrumb v-if="!disableBreadcrumb"></SkillsDisplayBreadcrumb>
           <h1 data-cy="title"
                :class="{ 'mt-2': disableBreadcrumb}"
                class="skills-title uppercase text-2xl font-normal m-0">
             <slot />
           </h1>
+
           <SkillsButton
-              v-if="!isMyProject && !showAddedMsg && isProjectLevel"
+              v-if="isProjectLevel && !isMyProject && !showAddedMsg"
               label="Add To My Projects"
               icon="fa-solid fa-heart-circle-plus"
               @click="addToMyProjects()"
