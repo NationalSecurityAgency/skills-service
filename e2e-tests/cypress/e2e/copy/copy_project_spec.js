@@ -62,7 +62,7 @@ describe('Copy Project Tests', () => {
         cy.get('[data-cy="projectCard_NewProject"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]')
             .should('have.text', '400');
         cy.get('[data-cy="projectCard_NewProject"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="statNum"]')
-            .should('have.text', '0');
+            .should('have.text', '1');
 
         // navigate to new project
         cy.get('[data-cy="projCard_NewProject_manageBtn"]')
@@ -87,7 +87,7 @@ describe('Copy Project Tests', () => {
         cy.get('[data-cy="projectCard_NewProject"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]')
             .should('have.text', '400');
         cy.get('[data-cy="projectCard_NewProject"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="statNum"]')
-            .should('have.text', '0');
+            .should('have.text', '1');
 
         // navigate to new project
         cy.get('[data-cy="projCard_NewProject_manageBtn"]')
