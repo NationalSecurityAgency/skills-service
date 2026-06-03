@@ -73,6 +73,7 @@ const copyProgressModal = ref({
   isVideoTranscript: false,
   copiedProjectId: '',
   originalProjectId: '',
+  validationFailureReason: ''
 })
 
 const addProjectDisabled = computed(() => {
@@ -132,7 +133,7 @@ const copyProject = (projectInfo) => {
       SkillsReporter.reportSkill('CopyProject')
       loadProjectsAfterCopy()
     }).catch((err) => {
-      const isParagraphValidationFailed = err && err.response && err.response.data && err.response.data.errorCode === 'ParagraphValidationFailed'
+      const isParagraphValidationFailed = err && err.response && err.response.data && (err.response.data.errorCode === 'ParagraphValidationFailed' || err.response.data.errorCode === 'AttachmentNotFound')
       if (isParagraphValidationFailed) {
         const explanation = err.response.data.explanation
         const isSubject = explanation.includes('Failed to copy a subject')
@@ -147,6 +148,11 @@ const copyProject = (projectInfo) => {
         copyProgressModal.value.isComplete = true
         const failedSkillId = err.response.data.skillId
         copyProgressModal.value.skillIdThatFailedParagraphValidation = failedSkillId
+        if (err.response.data.errorCode === 'AttachmentNotFound') {
+          copyProgressModal.value.validationFailureReason = 'has a missing or invalid attachment.'
+        } else {
+          copyProgressModal.value.validationFailureReason = 'has a description that doesn\'t meet the validation requirements.'
+        }
         announcer.polite(`Project ${projectInfo.newProject.name} failed to be copied due to paragraph validation for skill with id ${failedSkillId}`)
       } else {
         router.push({ name: 'ErrorPage', query: { err } });
@@ -392,7 +398,7 @@ const createNewProject = () => {
                   :link-label="copyProgressModal.skillIdThatFailedParagraphValidation"
                   data-cy="failedSkillLink"
               />
-              has a description that doesn't meet the validation requirements.
+              {{ copyProgressModal.validationFailureReason }}
               </div>
               <div>
                 Please update the skill's description to resolve the issue, then try copying the project again.
@@ -408,7 +414,7 @@ const createNewProject = () => {
                     class="underline"
                     data-cy="failedSkillLink"
                 > {{ copyProgressModal.skillIdThatFailedParagraphValidation }}
-                </router-link> has a description that doesn't meet the validation requirements.
+                </router-link> {{ copyProgressModal.validationFailureReason }}
               </div>
               <div>
                 Please update the subject's description to resolve the issue, then try copying the project again.
@@ -424,7 +430,7 @@ const createNewProject = () => {
                     class="underline"
                     data-cy="failedSkillLink"
                 > {{ copyProgressModal.skillIdThatFailedParagraphValidation }}
-                </router-link> has a description that doesn't meet the validation requirements.
+                </router-link> {{ copyProgressModal.validationFailureReason }}
               </div>
               <div>
                 Please update the badge's description to resolve the issue, then try copying the project again.

@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import '../desc-attachments/desc-attachment-commands'
+
 describe('Copy Project Tests', () => {
 
     beforeEach(() => {
@@ -135,4 +138,31 @@ describe('Copy Project Tests', () => {
             .should('be.disabled');
     });
 
+    it('copy project gracefully handles errors when an attachment is missing', () => {
+        cy.viewport(1400, 1000)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2');
+
+        cy.get('[data-cy="editSkillButton_skill2"]').click()
+
+        cy.addAttachment('[data-cy="markdownEditorInput"] button.attachment-button')
+        cy.validateAttachmentInDb('project_id', 'proj1')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-p="modal"]').should('not.exist')
+        cy.validateAttachmentInDb('project_id', 'proj1')
+
+        cy.execSql(`delete from attachments where project_id='proj1'`, true)
+
+        cy.visit('/administrator/')
+
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
+        cy.get('[data-cy="projectName"]').type('New Project');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('The skill with ID skill2 has a missing or invalid attachment.');
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('Please update the skill\'s description to resolve the issue, then try copying the project again.')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').contains('skill2')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').click()
+        cy.get('[data-cy="pageHeader"] [data-cy="skillId"]').contains('ID: skill2')
+    });
 });
