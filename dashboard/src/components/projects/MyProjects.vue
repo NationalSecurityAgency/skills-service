@@ -412,7 +412,7 @@ const createNewProject = () => {
                     params: { projectId: copyProgressModal.originalProjectId, subjectId: copyProgressModal.skillIdThatFailedParagraphValidation }
                   }"
                     class="underline"
-                    data-cy="failedSkillLink"
+                    data-cy="failedSubjectLink"
                 > {{ copyProgressModal.skillIdThatFailedParagraphValidation }}
                 </router-link> {{ copyProgressModal.validationFailureReason }}
               </div>
@@ -428,7 +428,7 @@ const createNewProject = () => {
                     params: { projectId: copyProgressModal.originalProjectId, badgeId: copyProgressModal.skillIdThatFailedParagraphValidation }
                   }"
                     class="underline"
-                    data-cy="failedSkillLink"
+                    data-cy="failedBadgeLink"
                 > {{ copyProgressModal.skillIdThatFailedParagraphValidation }}
                 </router-link> {{ copyProgressModal.validationFailureReason }}
               </div>

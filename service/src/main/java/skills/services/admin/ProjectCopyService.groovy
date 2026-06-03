@@ -674,14 +674,13 @@ class ProjectCopyService {
 
     private void saveSingleSubjectAndItsSkills(ProjDef fromProject, ProjDef toProj, SkillDefWithExtra fromSubj, List<SkillInfo> allCollectedSkills, Map<String, String> newIcons, boolean validateNameAndIdCollisions = false) {
         SubjectRequest toSubj = new SubjectRequest()
-        Props.copy(fromSubj, toSubj)
-        toSubj.subjectId = fromSubj.skillId
-        toSubj.description = handleAttachmentsInDescription(toSubj.description, toProj.projectId)
-        if (newIcons[fromSubj.iconClass]) {
-            toSubj.iconClass = newIcons[fromSubj.iconClass]
-        }
-
         try {
+            Props.copy(fromSubj, toSubj)
+            toSubj.subjectId = fromSubj.skillId
+            toSubj.description = handleAttachmentsInDescription(toSubj.description, toProj.projectId)
+            if (newIcons[fromSubj.iconClass]) {
+                toSubj.iconClass = newIcons[fromSubj.iconClass]
+            }
             subjAdminService.saveSubject(toProj.projectId, fromSubj.skillId, toSubj)
         } catch (Throwable t) {
             handleItemFailure(t, fromSubj)
