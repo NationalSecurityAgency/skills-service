@@ -360,7 +360,7 @@ describe('Modifications not permitted when upgrade in progress is configured', (
     const user1 = 'user1'
     cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
     cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).click();
-    cy.get(`[data-cy="skillsSelectionItem-proj1-skill1"]`).click()
+    cy.get(`[data-cy="skillsSelectionItem-proj1-skill6"]`).click()
     cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
 
     cy.wait('@saveEndpoint')

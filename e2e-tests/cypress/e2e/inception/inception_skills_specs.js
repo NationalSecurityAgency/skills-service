@@ -431,7 +431,7 @@ describe('Inception Skills Tests', () => {
         const pass = 'password';
         cy.createProject(1);
         cy.createSubject(1, 1);
-        cy.createSkill(1, 1, 1);
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval'});
 
         cy.register('user1', pass);
         cy.fixture('vars.json')
