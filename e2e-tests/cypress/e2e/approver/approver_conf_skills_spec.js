@@ -150,8 +150,8 @@ describe('Approver Config Skills Tests', () => {
         cy.createSubject(1, 2)
         cy.createSubject(1, 3)
         cy.createSubject(1, 4)
-        cy.createSkill(1, 2, 8)
-        cy.createSkill(1, 2, 9)
+        cy.createSkill(1, 2, 8, { selfReportingType: 'Approval' })
+        cy.createSkill(1, 2, 9, { selfReportingType: 'Approval' })
         cy.visit('/administrator/projects/proj1/self-report/configure');
         const user1 = 'user1'
         const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`
@@ -204,9 +204,9 @@ describe('Approver Config Skills Tests', () => {
         cy.createSubject(1, 2)
         cy.createSubject(1, 3)
         cy.createSubject(1, 4)
-        cy.createSkill(1, 2, 8)
+        cy.createSkill(1, 2, 8, { selfReportingType: 'Approval' })
         cy.createSkillsGroup(1, 2, 5);
-        cy.addSkillToGroup(1, 2, 5, 9);
+        cy.addSkillToGroup(1, 2, 5, 9, { selfReportingType: 'Approval' });
         cy.visit('/administrator/projects/proj1/self-report/configure');
         const user1 = 'user1'
         const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`

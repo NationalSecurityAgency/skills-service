@@ -450,8 +450,9 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/subjects", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    List<SubjectResult> getSubjects(@PathVariable("projectId") String projectId, @RequestParam(required = false, value = "approvalsOnly", defaultValue = 'false') Boolean approvalsOnly) {
+    List<SubjectResult> getSubjects(@PathVariable("projectId") String projectId, @RequestParam(required = false, value = "approvalsOnly", defaultValue = 'false') Boolean approvalsOnlyStr) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
+        Boolean approvalsOnly = Boolean.valueOf(approvalsOnlyStr)
         return subjAdminService.getSubjects(projectId, approvalsOnly)
     }
 
