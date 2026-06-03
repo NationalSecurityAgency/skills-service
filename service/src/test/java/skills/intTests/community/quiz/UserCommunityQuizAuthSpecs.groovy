@@ -505,7 +505,7 @@ class UserCommunityQuizAuthSpecs extends DefaultIntSpec {
         !validateForbidden { pristineDragonsUser.removeQuizDef(q1.quizId) }
     }
 
-    def "cannot download attachments associated with a UC protected project if the user does not belong to the user community"() {
+    def "cannot download attachments associated with a UC protected quiz if the user does not belong to the user community"() {
         when:
         List<String> users = getRandomUsers(2)
 

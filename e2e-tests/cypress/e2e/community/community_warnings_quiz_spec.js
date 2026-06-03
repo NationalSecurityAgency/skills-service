@@ -166,6 +166,22 @@ describe('Quiz - Community Attachment Warning Tests', () => {
         cy.get('[data-cy="question_1"] [data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for Divine Dragon')
     })
 
+    it('text answers with attachments', () => {
+        cy.createTextInputQuestionDef(1, 1)
+        cy.visit('/progress-and-rankings/quizzes/quiz1')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for All Dragons')
+        cy.attachFile()
+        cy.validateAllDragonsWarning()
+
+        cy.createTextInputQuestionDef(2, 1)
+        cy.visit('/progress-and-rankings/quizzes/quiz2')
+        cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.get('[data-cy="question_1"] [data-cy="descriptionWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for Divine Dragon')
+        cy.attachFile()
+        cy.validateDivineDragonWarning()
+    })
+
     if (!Cypress.env('oauthMode')) {
         it('questions grading input', () => {
             cy.createTextInputQuestionDef(1, 1)
