@@ -388,4 +388,79 @@ describe('Approver Config Skills Tests', () => {
         cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.enabled')
     });
 
+    it('only approval skills are returned', function () {
+        cy.createSkill(1, 1, 6)
+        cy.createSkill(1, 1, 7)
+        cy.createSkill(1, 1, 8)
+
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        const user1 = 'user1'
+        const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noSkillConf"]`).should('exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.disabled')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="skillsSelector"]`).click();
+        cy.get(`[data-cy="skillsSelectionItem-proj1-skill1"]`).should('exist')
+        cy.get(`[data-cy="skillsSelectionItem-proj1-skill2"]`).should('exist')
+        cy.get(`[data-cy="skillsSelectionItem-proj1-skill3"]`).should('exist')
+        cy.get(`[data-cy="skillsSelectionItem-proj1-skill4"]`).should('exist')
+        cy.get(`[data-cy="skillsSelectionItem-proj1-skill5"]`).should('exist')
+        cy.get(`[data-cy="skillsSelectionItem-proj1-skill6"]`).should('not.exist')
+        cy.get(`[data-cy="skillsSelectionItem-proj1-skill7"]`).should('not.exist')
+        cy.get(`[data-cy="skillsSelectionItem-proj1-skill8"]`).should('not.exist')
+
+    });
+
+    it('only approval skills are returned and added for subjects', function () {
+        cy.createSkill(1, 1, 6)
+        cy.createSkill(1, 1, 7)
+        cy.createSkill(1, 1, 8)
+
+        cy.visit('/administrator/projects/proj1/self-report/configure');
+        const user1 = 'user1'
+        const tableSelector = `[data-cy="expandedChild_${user1}"] [data-cy="skillApprovalSkillConfTable"]`
+        cy.get(`[data-cy="workloadCell_${user1}"] [data-cy="editApprovalBtn"]`).click()
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="noSkillConf"]`).should('exist')
+        cy.get(`[data-cy="workloadCell_${user1}"]`).contains('Default Fallback - All Unmatched Requests')
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.disabled')
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="subjectSelector"]`).click();
+        cy.get(`[data-cy="subjectSelectionItem-proj1-subj1"]`).should('exist');
+        cy.get(`[data-cy="subjectSelectionItem-proj1-subj1"] [data-cy="skillsSelector-projectId"]`).contains('5');
+        cy.get(`[data-cy="subjectSelectionItem-proj1-subj1"] [data-cy="skillsSelector-subjectName"]`).contains('1000');
+        cy.get(`[data-cy="subjectSelectionItem-proj1-subj1"]`).click();
+
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).click()
+
+        cy.get(`${tableSelector} tr th`).contains('Skill').click();
+        cy.get(`[data-cy="expandedChild_${user1}"] [data-cy="addSkillConfBtn"]`).should('be.disabled')
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 2'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 3'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 4'
+            }],
+            [{
+                colIndex: 0,
+                value: 'Very Great Skill 5'
+            }],
+        ], 4);
+
+    });
+
 });

@@ -210,7 +210,7 @@ const removeTagConf = (removedItem) => {
         </div>
         <div class="mx-1 mt-1 text-center lg:self-end">
           <SkillsButton
-              aria-label="Add Tag Value"
+              aria-label="Add Skills"
               @click="addSkillToConf"
               v-skills="'ConfigureSelfApprovalWorkload'"
               data-cy="addSkillConfBtn"
