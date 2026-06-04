@@ -87,15 +87,9 @@ export default {
     return copy
   },
   getSubjectSkills(projectId, subjectId, includeGroupSkills = false, approvalsOnly = false) {
-    let queryParam = includeGroupSkills ? '?includeGroupSkills=true' : ''
-    if(queryParam === '' && approvalsOnly) {
-      queryParam = '?approvalsOnly=true'
-    } else {
-      queryParam += approvalsOnly ? '&approvalsOnly=true' : ''
-    }
     return axios
       .get(
-        `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills${queryParam}`
+        `/admin/projects/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills?includeGRoupSkills=${includeGroupSkills}&approvalsOnly=${approvalsOnly}`
       )
       .then((response) => response.data.map((item) => this.addMetaToSkillObj(item)))
   },

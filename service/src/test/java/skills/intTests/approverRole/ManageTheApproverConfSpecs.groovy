@@ -1166,6 +1166,8 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         def skills = SkillsFactory.createSkills(3, 1, 1, 100)
         def skills2 = SkillsFactory.createSkills(3, 1, 2, 100)
         skills[1].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[2].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skills2[0].selfReportingType = SkillDef.SelfReportingType.HonorSystem
         skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
         skillsService.createSubjectAndSkills(subj2, skills2)
 
