@@ -839,6 +839,7 @@ class ProjectCopyService {
     @Profile
     private ProjDef saveToProject(ProjectRequest projectRequest, String originalProjectId) {
         try {
+            projectRequest.description = null  // any description in the request should be ignored
             projAdminService.saveProject(null, projectRequest)
             ProjDef toProj = projDefRepo.findByProjectId(projectRequest.projectId)
             projectRequest.description = handleAttachmentsInDescription(projDefWithDescriptionRepo.getDescriptionByProjectId(originalProjectId), toProj.projectId)
