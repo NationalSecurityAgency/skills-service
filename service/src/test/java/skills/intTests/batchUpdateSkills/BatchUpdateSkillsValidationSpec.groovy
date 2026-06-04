@@ -133,4 +133,29 @@ class BatchUpdateSkillsValidationSpec extends DefaultIntSpec {
         def ex = thrown(SkillsClientException)
         ex.message.contains("Only [Approval] or [HonorSystem] are supported")
     }
+
+    def "should return error when skills belong to different skill groups"() {
+        given:
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+
+        def group1 = createSkillsGroup(1, 1, 10)
+        def group2 = createSkillsGroup(1, 1, 20)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, [group1, group2])
+
+        def p1skills = createSkills(2, 1, 1, 100)
+        skillsService.assignSkillToSkillsGroup(group1.skillId, p1skills[0])
+        skillsService.assignSkillToSkillsGroup(group2.skillId, p1skills[1])
+
+        when:
+        skillsService.batchUpdateSkills(p1.projectId, [
+                skills: [p1skills[0].skillId, p1skills[1].skillId],
+                pointIncrement: 100
+        ])
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("All provided skills must belong to the same skills group")
+    }
+
 }

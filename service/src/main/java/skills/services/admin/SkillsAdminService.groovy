@@ -460,6 +460,11 @@ class SkillsAdminService {
             throw new SkillException("Only skill type is supported. [${invalidSkill.skillId}] is [${invalidSkill.type}]", projectId, null, ErrorCode.BadParam)
         }
 
+        List<String> uniqueGroupIds = skillsToUpdate.groupId.unique()
+        if (uniqueGroupIds.size() > 1) {
+            throw new SkillException("All provided skills must belong to the same skills group but provided ${uniqueGroupIds}", projectId, null, ErrorCode.BadParam)
+        }
+
         SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillsToUpdate.first().id)
         List<SkillDefWithExtraMeta> skillsWhosePointsChanged = []
         for (SkillDef skill : skillsToUpdate) {
@@ -545,12 +550,25 @@ class SkillsAdminService {
                 updatePointsAndAchievements(skillWithExtraMeta.skill, subject.skillId,
                         skillWithExtraMeta.pointIncrementDelta, skillWithExtraMeta.occurrencesDelta, skillWithExtraMeta.currentOccurrences,
                         0, null, null, false)
+
+                if (skillWithExtraMeta.occurrencesDelta < 0) {
+                    int occurrencesToKeep = skillWithExtraMeta.skill.totalPoints / skillWithExtraMeta.skill.pointIncrement
+                    userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(skillWithExtraMeta.skill.projectId,
+                            skillWithExtraMeta.skill.skillId, occurrencesToKeep)
+                }
             }
 
             // updated groups' achievements
             if (groupIdsToUpdate) {
                 List<SkillDef> groupDefs = skillDefRepo.findAllByProjectIdAndSkillIdIn(projectId, groupIdsToUpdate)
                 batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements(groupDefs)
+            }
+
+            List<String> skillGroupsIds = skillsToUpdate.findAll { it.groupId }.groupId
+            if (skillGroupsIds) {
+                List<SkillDef> skillGroups = skillDefRepo.findAllByProjectIdAndSkillIdIn(projectId, skillGroupsIds.unique())
+                log.info("Identifying group achievements for {} groups in project [{}]", skillGroups.skillId, projectId)
+                batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements(skillGroups)
             }
 
             // updated subject's points and achievements
