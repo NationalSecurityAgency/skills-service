@@ -224,4 +224,32 @@ describe('Copy Project Tests', () => {
         cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedBadgeLink"]').click()
         cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: badge1')
     });
+
+    it('copy project gracefully handles errors when an attachment is missing in project description', () => {
+        cy.viewport(1400, 1000)
+        cy.visit('/administrator/projects/proj1');
+
+        cy.get('[data-cy="btn_edit-project"]').click()
+
+        cy.addAttachment('[data-cy="markdownEditorInput"] button.attachment-button')
+        cy.validateAttachmentInDb('project_id', 'proj1')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-p="modal"]').should('not.exist')
+        cy.validateAttachmentInDb('project_id', 'proj1')
+
+        cy.execSql(`delete from attachments where project_id='proj1'`, true)
+
+        cy.visit('/administrator/')
+
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
+        cy.get('[data-cy="projectName"]').type('New Project');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('The project with ID proj1 has a missing or invalid attachment.');
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('Please update the project\'s description to resolve the issue, then try copying the project again.')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedProjectLink"]').contains('proj1')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedProjectLink"]').click()
+        cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: proj1')
+    });
 });
