@@ -15,6 +15,7 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
@@ -33,4 +34,8 @@ interface ProjDefWithDescriptionRepo extends CrudRepository<ProjDefWithDescripti
 
     @Query('''SELECT s FROM ProjDefWithDescription s''')
     Stream<ProjDefWithDescription> streamAll()
+
+    @Modifying
+    @Query('''update ProjDefWithDescription set description = ?2 where projectId = ?1''')
+    void updateDescription(String projectId, @Nullable String description)
 }
