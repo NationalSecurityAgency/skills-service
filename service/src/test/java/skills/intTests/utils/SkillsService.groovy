@@ -368,8 +368,8 @@ class SkillsService {
         wsHelper.adminPost(getSubjectUrl(props.projectId, originalSubjectId ?: props.subjectId), props)
     }
 
-    def getSubjects(String projectId) {
-        wsHelper.adminGet(getProjectUrl(projectId) + "/subjects")
+    def getSubjects(String projectId, boolean approvalsOnly = false) {
+        wsHelper.adminGet(getProjectUrl(projectId) + "/subjects" + (approvalsOnly ? "?approvalsOnly=true" : ""))
     }
 
     def getSubjectsAndSkillGroups(String projectId) {
@@ -522,7 +522,7 @@ class SkillsService {
         wsHelper.adminGet(getSkillUrl(props.projectId, props.subjectId, props.skillId), props)
     }
 
-    def getSkillsForProject(String projectId, String optionalSkillNameQuery = "", boolean excludeImportedSkills = false, boolean includeDisabled = false, boolean excludeReusedSkills = false, includeSkillGroups = false) {
+    def getSkillsForProject(String projectId, String optionalSkillNameQuery = "", boolean excludeImportedSkills = false, boolean includeDisabled = false, boolean excludeReusedSkills = false, boolean includeSkillGroups = false, boolean approvalsOnly = false) {
         String query = optionalSkillNameQuery ? "?skillNameQuery=${optionalSkillNameQuery}" : ''
         if (excludeImportedSkills) {
             String append = "excludeImportedSkills=true"
@@ -540,12 +540,16 @@ class SkillsService {
             String append = "includeSkillGroups=true"
             query = query.contains("?") ? "${query}&${append}" : "${query}?${append}"
         }
+        if (approvalsOnly) {
+            String append = "approvalsOnly=true"
+            query = query.contains("?") ? "${query}&${append}" : "${query}?${append}"
+        }
 
         wsHelper.adminGet("/projects/${projectId}/skills${query}")
     }
 
-    def getSkillsForSubject(String projectId, String subjectId, boolean includeGroupSkills = false) {
-        wsHelper.adminGet("/projects/${projectId}/subjects/${subjectId}/skills?includeGroupSkills=${includeGroupSkills}")
+    def getSkillsForSubject(String projectId, String subjectId, boolean includeGroupSkills = false, boolean approvalsOnly = false) {
+        wsHelper.adminGet("/projects/${projectId}/subjects/${subjectId}/skills?includeGroupSkills=${includeGroupSkills}&approvalsOnly=${approvalsOnly}")
     }
 
     def getSkillsForGroup(String projectId, String groupId) {

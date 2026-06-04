@@ -264,6 +264,10 @@ class SubjAdminService {
     List<SubjectResult> getSubjects(String projectId, boolean approvalsOnly = false) {
         List<SkillDefWithExtra> subjects = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
         List<SubjectResult> res = subjects.collect { convertToSubject(it, approvalsOnly) }
+
+        if(approvalsOnly) {
+            res = res.findAll{ it.numSkills != 0 }
+        }
         calculatePercentages(res)
         return res?.sort({ it.displayOrder })
     }
