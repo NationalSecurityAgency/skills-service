@@ -842,8 +842,8 @@ class ProjectCopyService {
             projectRequest.description = null  // any description in the request should be ignored
             projAdminService.saveProject(null, projectRequest)
             ProjDef toProj = projDefRepo.findByProjectId(projectRequest.projectId)
-            projectRequest.description = handleAttachmentsInDescription(projDefWithDescriptionRepo.getDescriptionByProjectId(originalProjectId), toProj.projectId)
-            projAdminService.saveProject(toProj.projectId, projectRequest)
+            String description = projDefWithDescriptionRepo.getDescriptionByProjectId(originalProjectId)
+            projDefWithDescriptionRepo.updateDescription(toProj.projectId, handleAttachmentsInDescription(description, toProj.projectId))
             return toProj
         } catch (Throwable t) {
             handleItemFailure(t, 'project', originalProjectId)
