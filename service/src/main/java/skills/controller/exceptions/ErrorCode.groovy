@@ -29,6 +29,7 @@ enum ErrorCode {
     TagNotFound,
     SubjectNotFound,
     ProjectNotFound,
+    AttachmentNotFound,
     EmptyBadgeNotAllowed,
     InsufficientProjectPoints,
     InsufficientSubjectPoints,

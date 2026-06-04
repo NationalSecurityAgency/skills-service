@@ -76,8 +76,8 @@ describe('Community Project Creation Tests', () => {
             .contains('The subject with ID subj2 has a description that doesn\'t meet the validation requirements.');
         cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
             .contains('Please update the subject\'s description to resolve the issue, then try copying the project again.');
-        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').contains('subj2')
-        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').click()
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSubjectLink"]').contains('subj2')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSubjectLink"]').click()
         cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: subj2')
     });
 
@@ -104,8 +104,8 @@ describe('Community Project Creation Tests', () => {
             .contains('The badge with ID badge1 has a description that doesn\'t meet the validation requirements.');
         cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
             .contains('Please update the badge\'s description to resolve the issue, then try copying the project again.');
-        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').contains('badge1')
-        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').click()
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedBadgeLink"]').contains('badge1')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedBadgeLink"]').click()
         cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: badge1')
     });
 

@@ -654,8 +654,8 @@ class ProjectCopyService {
         String itemType = item.type.toString().toLowerCase()
         String msg = "Error copying ${itemType}: ${item.skillId}"
         if (t instanceof SkillException) {
-            if (t.errorCode == ErrorCode.ParagraphValidationFailed) {
-                errorCode = ErrorCode.ParagraphValidationFailed
+            if (t.errorCode == ErrorCode.ParagraphValidationFailed || t.errorCode == ErrorCode.AttachmentNotFound) {
+                errorCode = t.errorCode
                 msg = "Failed to copy a ${itemType} due to the paragraph validation. Full message: ${t.message}"
             }
         }
@@ -674,14 +674,13 @@ class ProjectCopyService {
 
     private void saveSingleSubjectAndItsSkills(ProjDef fromProject, ProjDef toProj, SkillDefWithExtra fromSubj, List<SkillInfo> allCollectedSkills, Map<String, String> newIcons, boolean validateNameAndIdCollisions = false) {
         SubjectRequest toSubj = new SubjectRequest()
-        Props.copy(fromSubj, toSubj)
-        toSubj.subjectId = fromSubj.skillId
-        toSubj.description = handleAttachmentsInDescription(toSubj.description, toProj.projectId)
-        if (newIcons[fromSubj.iconClass]) {
-            toSubj.iconClass = newIcons[fromSubj.iconClass]
-        }
-
         try {
+            Props.copy(fromSubj, toSubj)
+            toSubj.subjectId = fromSubj.skillId
+            toSubj.description = handleAttachmentsInDescription(toSubj.description, toProj.projectId)
+            if (newIcons[fromSubj.iconClass]) {
+                toSubj.iconClass = newIcons[fromSubj.iconClass]
+            }
             subjAdminService.saveSubject(toProj.projectId, fromSubj.skillId, toSubj)
         } catch (Throwable t) {
             handleItemFailure(t, fromSubj)
@@ -768,6 +767,9 @@ class ProjectCopyService {
         if (description) {
             attachmentService.findAttachmentUuids(res).each { String uuid ->
                 Attachment attachment = attachmentService.getAttachment(uuid)
+                if (!attachment) {
+                    throw new SkillException("Attachment not found: uuid=[${uuid}], description=[${description}]", ErrorCode.AttachmentNotFound)
+                }
                 String copiedUuid = copiedAttachmentUuids[uuid]
                 if (!copiedUuid) {
                     Attachment copiedAttachment = attachmentService.copyAttachmentWithNewUuid(attachment, newProjectId)

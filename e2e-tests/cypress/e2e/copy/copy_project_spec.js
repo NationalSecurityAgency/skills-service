@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import '../desc-attachments/desc-attachment-commands'
+
 describe('Copy Project Tests', () => {
 
     beforeEach(() => {
@@ -21,6 +24,9 @@ describe('Copy Project Tests', () => {
         cy.createSubject(1, 2);
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
+        cy.createBadge(1, 1);
+        cy.assignSkillToBadge(1, 1, 1);
+        cy.createBadge(1, 1, { enabled: true });
     });
 
     it('copy project', () => {
@@ -56,7 +62,7 @@ describe('Copy Project Tests', () => {
         cy.get('[data-cy="projectCard_NewProject"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]')
             .should('have.text', '400');
         cy.get('[data-cy="projectCard_NewProject"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="statNum"]')
-            .should('have.text', '0');
+            .should('have.text', '1');
 
         // navigate to new project
         cy.get('[data-cy="projCard_NewProject_manageBtn"]')
@@ -81,7 +87,7 @@ describe('Copy Project Tests', () => {
         cy.get('[data-cy="projectCard_NewProject"] [data-cy="pagePreviewCardStat_Points"] [data-cy="statNum"]')
             .should('have.text', '400');
         cy.get('[data-cy="projectCard_NewProject"] [data-cy="pagePreviewCardStat_Badges"] [data-cy="statNum"]')
-            .should('have.text', '0');
+            .should('have.text', '1');
 
         // navigate to new project
         cy.get('[data-cy="projCard_NewProject_manageBtn"]')
@@ -135,4 +141,87 @@ describe('Copy Project Tests', () => {
             .should('be.disabled');
     });
 
+    it('copy project gracefully handles errors when an attachment is missing in skill description', () => {
+        cy.viewport(1400, 1000)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill2');
+
+        cy.get('[data-cy="editSkillButton_skill2"]').click()
+
+        cy.addAttachment('[data-cy="markdownEditorInput"] button.attachment-button')
+        cy.validateAttachmentInDb('project_id', 'proj1')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-p="modal"]').should('not.exist')
+        cy.validateAttachmentInDb('project_id', 'proj1')
+
+        cy.execSql(`delete from attachments where project_id='proj1'`, true)
+
+        cy.visit('/administrator/')
+
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
+        cy.get('[data-cy="projectName"]').type('New Project');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('The skill with ID skill2 has a missing or invalid attachment.');
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('Please update the skill\'s description to resolve the issue, then try copying the project again.')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').contains('skill2')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSkillLink"]').click()
+        cy.get('[data-cy="pageHeader"] [data-cy="skillId"]').contains('ID: skill2')
+    });
+
+    it('copy project gracefully handles errors when an attachment is missing in subject description', () => {
+        cy.viewport(1400, 1000)
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="btn_edit-subject"]').click()
+
+        cy.addAttachment('[data-cy="markdownEditorInput"] button.attachment-button')
+        cy.validateAttachmentInDb('project_id', 'proj1')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-p="modal"]').should('not.exist')
+        cy.validateAttachmentInDb('project_id', 'proj1')
+
+        cy.execSql(`delete from attachments where project_id='proj1'`, true)
+
+        cy.visit('/administrator/')
+
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
+        cy.get('[data-cy="projectName"]').type('New Project');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('The subject with ID subj1 has a missing or invalid attachment.');
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('Please update the subject\'s description to resolve the issue, then try copying the project again.')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSubjectLink"]').contains('subj1')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedSubjectLink"]').click()
+        cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: subj1')
+    });
+
+    it('copy project gracefully handles errors when an attachment is missing in badge description', () => {
+        cy.viewport(1400, 1000)
+        cy.visit('/administrator/projects/proj1/badges/badge1');
+
+        cy.get('[data-cy="btn_edit-badge"]').click()
+
+        cy.addAttachment('[data-cy="markdownEditorInput"] button.attachment-button')
+        cy.validateAttachmentInDb('project_id', 'proj1')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-p="modal"]').should('not.exist')
+        cy.validateAttachmentInDb('project_id', 'proj1')
+
+        cy.execSql(`delete from attachments where project_id='proj1'`, true)
+
+        cy.visit('/administrator/')
+
+        cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
+        cy.get('[data-cy="projectName"]').type('New Project');
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('The badge with ID badge1 has a missing or invalid attachment.');
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"]')
+            .contains('Please update the badge\'s description to resolve the issue, then try copying the project again.')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedBadgeLink"]').contains('badge1')
+        cy.get('[data-cy="lengthyOpModal"] [data-cy="copyFailedMsg"] [data-cy="failedBadgeLink"]').click()
+        cy.get('[data-cy="pageHeader"] [data-cy="subTitle"]').contains('ID: badge1')
+    });
 });
