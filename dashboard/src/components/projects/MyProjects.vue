@@ -71,6 +71,7 @@ const copyProgressModal = ref({
   isBadge: false,
   isSkill: false,
   isVideoTranscript: false,
+  isProject: false,
   copiedProjectId: '',
   originalProjectId: '',
   validationFailureReason: ''
@@ -121,6 +122,7 @@ const copyProject = (projectInfo) => {
   copyProgressModal.value.isBadge = false
   copyProgressModal.value.isSkill = false
   copyProgressModal.value.isVideoTranscript = false
+  copyProgressModal.value.isProject = false
   copyProgressModal.value.skillIdThatFailedParagraphValidation = null
   copyProgressModal.value.copiedProjectId = ''
   copyProgressModal.value.originalProjectId = projectInfo.originalProjectId
@@ -140,10 +142,12 @@ const copyProject = (projectInfo) => {
         const isBadge = explanation.includes('Failed to copy a badge')
         const isSkill = explanation.includes('Failed to copy a skill')
         const isVideoTranscript = explanation.includes('Video transcript validation failed')
+        const isProject = explanation.includes('Failed to copy a project')
         copyProgressModal.value.isSubject = isSubject
         copyProgressModal.value.isBadge = isBadge
         copyProgressModal.value.isSkill = isSkill
         copyProgressModal.value.isVideoTranscript = isVideoTranscript
+        copyProgressModal.value.isProject = isProject
         copyProgressModal.value.hasFailed = true
         copyProgressModal.value.isComplete = true
         const failedSkillId = err.response.data.skillId
@@ -449,6 +453,19 @@ const createNewProject = () => {
               </div>
               <div>
                 Please update the skill's video transcript to resolve the issue, then try copying the project again.
+              </div>
+            </div>
+            <div v-if="copyProgressModal.isProject">
+              <div>The project with ID
+                <router-link
+                    :to="{ name:'Subjects', params: { projectId: copyProgressModal.originalProjectId }}"
+                    class="underline"
+                    data-cy="failedProjectLink"
+                > {{ copyProgressModal.originalProjectId }}
+                </router-link> {{ copyProgressModal.validationFailureReason }}
+              </div>
+              <div>
+                Please update the project's description to resolve the issue, then try copying the project again.
               </div>
             </div>
           </div>

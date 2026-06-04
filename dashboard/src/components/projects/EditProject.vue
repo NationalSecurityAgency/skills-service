@@ -222,6 +222,7 @@ const onSavedProject = () => {
         :is-edit="isEdit"
         :is-copy="isCopy" />
       <markdown-editor
+        v-if="!isCopy"
         class="mt-8"
         :upload-url="isEdit   ? `/admin/projects/${props.project.projectId}/upload` : null"
         :allow-attachments="isEdit"
