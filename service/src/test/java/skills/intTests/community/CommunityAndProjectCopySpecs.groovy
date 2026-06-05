@@ -138,19 +138,11 @@ class CommunityAndProjectCopySpecs extends DefaultIntSpec {
         when:
         def newProj = SkillsFactory.createProject(50)
         newProj.enableProtectedUserCommunity = true
-        newProj.description = "This is a jabberwocky description that is not allowed in non-uc projects"
         pristineDragonsUser.copyProject(p1.projectId, newProj)
-        def copiedProject = pristineDragonsUser.getProject(newProj.projectId)
-        def originalProject = pristineDragonsUser.getProject(p1.projectId)
-        def copiedProjectDesc = pristineDragonsUser.getProjectDescription(newProj.projectId)
-        def origProjectDesc = pristineDragonsUser.getProjectDescription(p1.projectId)
-        then:
-        copiedProject.projectId == newProj.projectId
-        copiedProject.userCommunity == 'Divine Dragon'
-        copiedProjectDesc.description == "This is a jabberwocky description that is not allowed in non-uc projects"
 
-        originalProject.userCommunity == 'All Dragons'
-        origProjectDesc.description == "divinedragon is not allowed in uc projects"
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.message.contains("May not contain divinedragon word")
     }
 
     def "enable protected community during copy and description has divinedragon that's not allowed in uc projects"() {

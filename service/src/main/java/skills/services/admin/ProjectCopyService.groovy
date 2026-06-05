@@ -845,7 +845,14 @@ class ProjectCopyService {
             projAdminService.saveProject(null, projectRequest)
             ProjDef toProj = projDefRepo.findByProjectId(projectRequest.projectId)
             String description = projDefWithDescriptionRepo.getDescriptionByProjectId(originalProjectId)
-            projDefWithDescriptionRepo.updateDescription(toProj.projectId, handleAttachmentsInDescription(description, toProj.projectId))
+            description = handleAttachmentsInDescription(description, toProj.projectId)
+            projectRequest.description = description
+            // re-run validation with updated description
+            CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
+            if (!customValidationResult.valid) {
+                throw new SkillException(customValidationResult.msg)
+            }
+            projDefWithDescriptionRepo.updateDescription(toProj.projectId, description)
             return toProj
         } catch (Throwable t) {
             handleItemFailure(t, 'project', originalProjectId)
