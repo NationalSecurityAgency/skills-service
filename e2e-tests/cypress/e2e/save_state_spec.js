@@ -148,19 +148,19 @@ describe('Save State Tests', () => {
 
     cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
     cy.get('[data-cy="projectName"]').type('Copy Proj With Edits')
-    cy.get('[data-cy="markdownEditorInput"]').type('description with edits');
+    cy.get('[data-cy="markdownEditorInput"]').should('not.exist')
 
     cy.visit('/administrator/');
     cy.wait('@loadProjects');
 
     cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
     cy.get('[data-cy="projectName"]').should('have.value', 'Copy Proj With Edits');
-    cy.get('[data-cy="markdownEditorInput"]').contains('description with edits');
+    cy.get('[data-cy="markdownEditorInput"]').should('not.exist')
     cy.get('[data-cy=closeDialogBtn]').click();
 
     cy.get('[data-cy="projectCard_proj1"] [data-cy="copyProjBtn"]').click();
     cy.get('[data-cy="projectName"]').should('have.value', '');
-    cy.get('[data-cy="markdownEditorInput"]').should('have.value', '');
+    cy.get('[data-cy="markdownEditorInput"]').should('not.exist')
   })
 
   it('Saves and discards new skill state', () => {
