@@ -84,10 +84,7 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="restrictCommunity"] [data-pc-section="input"]').click()
         cy.get('[data-cy="restrictCommunityControls"]').contains(warningMsg)
 
-        cy.intercept('POST', '/api/validation/description*').as('validateDescription');
-        cy.get('[data-cy="markdownEditorInput"]').type('ldkj aljdl aj\n\njabberwocky');
-        cy.wait('@validateDescription');
-        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="markdownEditorInput"]').should('not.exist')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         cy.clickSaveDialogBtn()
