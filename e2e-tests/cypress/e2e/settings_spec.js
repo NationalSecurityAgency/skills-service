@@ -167,6 +167,49 @@ describe('Settings Tests', () => {
             .should('have.text', '15');
     });
 
+    it('names are update with saved values from the server', () => {
+        cy.intercept('POST', '/app/userInfo').as('saveUserInfo')
+        cy.visit('/settings')
+        cy.get('[data-cy="firstName"]').type('<b>')
+        cy.get('[data-cy="lastName"]').type('<b>')
+        cy.get('[data-cy="nickname"]').type('<b>')
+        cy.get('[data-cy="generalSettingsSave"]').click()
+        cy.get('[data-pc-name="message"]').contains('Updated User Info')
+        cy.wait('@saveUserInfo')
+
+        cy.get('[data-cy="firstName"]').should('have.value', 'Jack')
+        cy.get('[data-cy="lastName"]').should('have.value', 'Smith')
+        cy.get('[data-cy="nickname"]').should('have.value', 'Zack Smith')
+    })
+
+    it('max name validation', () => {
+        cy.intercept('POST', '/app/userInfo').as('saveUserInfo')
+        cy.visit('/settings')
+
+        const longName = "a".repeat(31);
+        cy.get('[data-cy="firstName"]').type(`{selectall}${longName}`)
+        cy.get('[data-cy="firstNameError"]').contains('First Name must be at most 30 characters')
+        cy.get('[data-cy="generalSettingsSave"]').should('be.disabled')
+
+        cy.get('[data-cy="firstName"]').type(`{backspace}`)
+        cy.get('[data-cy="generalSettingsSave"]').should('be.enabled')
+
+        cy.get('[data-cy="lastName"]').type(`{selectall}${longName}`)
+        cy.get('[data-cy="lastNameError"]').contains('Last Name must be at most 30 characters')
+        cy.get('[data-cy="generalSettingsSave"]').should('be.disabled')
+
+        cy.get('[data-cy="lastName"]').type(`{backspace}`)
+        cy.get('[data-cy="generalSettingsSave"]').should('be.enabled')
+
+        const longNickname = "a".repeat(71);
+        cy.get('[data-cy="nickname"]').type(`{selectall}${longNickname}`)
+        cy.get('[data-cy="nicknameError"]').contains('Primary Name must be at most 70 characters')
+        cy.get('[data-cy="generalSettingsSave"]').should('be.disabled')
+
+        cy.get('[data-cy="nickname"]').type(`{backspace}`)
+        cy.get('[data-cy="generalSettingsSave"]').should('be.enabled')
+    })
+
     it('Add and remove Root User', () => {
         cy.intercept('POST', '/root/users/without/role/ROLE_SUPER_DUPER_USER?userSuggestOption=ONE')
             .as('getEligibleForRoot');

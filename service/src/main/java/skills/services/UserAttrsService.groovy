@@ -30,6 +30,7 @@ import skills.storage.model.UserAttrs
 import skills.storage.model.UserTag
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserTagRepo
+import skills.utils.InputSanitizer
 
 import static skills.controller.exceptions.SkillException.NA
 
@@ -183,12 +184,12 @@ class UserAttrsService {
     }
 
     private void populate(UserAttrs userAttrs, UserInfo userInfo, boolean updateUserTags) {
-        userAttrs.firstName = userInfo.firstName ?: userAttrs.firstName
-        userAttrs.lastName = userInfo.lastName ?: userAttrs.lastName
+        userAttrs.firstName = userInfo.firstName ? InputSanitizer.sanitizeUserName(userInfo.firstName) : userAttrs.firstName
+        userAttrs.lastName = userInfo.lastName ? InputSanitizer.sanitizeUserName(userInfo.lastName) : userAttrs.lastName
         userAttrs.email = userInfo.email ?: userAttrs.email
         userAttrs.emailVerified = Boolean.valueOf(userInfo.emailVerified) ?: Boolean.FALSE.toString()
         userAttrs.dn = userInfo.userDn ?: userAttrs.dn
-        userAttrs.nickname = (userInfo.nickname != null ? userInfo.nickname : userAttrs.nickname) ?: ""
+        userAttrs.nickname = (userInfo.nickname != null ? InputSanitizer.sanitizeUserName(userInfo.nickname) : userAttrs.nickname) ?: ""
         userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
         if (updateUserTags) {
             userAttrs.userTagsLastUpdated = new Date()

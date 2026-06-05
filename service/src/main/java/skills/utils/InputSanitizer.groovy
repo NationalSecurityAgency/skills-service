@@ -54,12 +54,18 @@ class InputSanitizer {
             .addTags('del', 'skills-display')
             .addAttributes('skills-display', 'version')
 
-    static String sanitize(String input) {
+    private static final SAFE_LIST_USER_NAMES = Safelist.none()
+
+    static String sanitizeUserName(String input) {
+        return sanitize(input, SAFE_LIST_USER_NAMES)
+    }
+
+    static String sanitize(String input, Safelist safelist = SAFE_LIST) {
         if (!input) {
             return input;
         }
 
-        return Jsoup.clean(input, "", SAFE_LIST, print)
+        return Jsoup.clean(input, "", safelist, print)
     }
 
     private static class CodeBlockMatch {
