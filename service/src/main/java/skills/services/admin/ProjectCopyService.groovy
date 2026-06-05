@@ -662,6 +662,8 @@ class ProjectCopyService {
             if (t.errorCode == ErrorCode.ParagraphValidationFailed || t.errorCode == ErrorCode.AttachmentNotFound) {
                 errorCode = t.errorCode
                 msg = "Failed to copy a ${itemType} due to the paragraph validation. Full message: ${t.message}"
+            } else {
+                throw t
             }
         }
         throw new SkillException(msg, t, projectId, skillId, errorCode)
