@@ -1990,6 +1990,10 @@ class SkillsService {
         return resp
     }
 
+    def isMyProject(String projectId) {
+        return wsHelper.appGet("/projects/${projectId}/isMyProject")
+    }
+
     def getSkillDescription(String projectId, String skillId) {
         def resp = wsHelper.apiGet("/projects/${projectId}/skills/${skillId}/description")
         return resp

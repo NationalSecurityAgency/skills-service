@@ -1634,4 +1634,19 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillAchievementsAfter.userId == [users[0].userName, users[1].userName]
     }
 
+    def "isMyProject accurately returns if a project is in the users list"() {
+        def proj1 = createProject(1)
+        def subj = createSubject(1, 1)
+        def skills = createSkills(5, 1, 1, 100, 1)
+        skillsService.createProjectAndSubjectAndSkills(proj1, subj, skills[1..4])
+
+        when:
+        def isMyProject = skillsService.isMyProject(proj1.projectId)
+        skillsService.addMyProject(proj1.projectId)
+        def isMyProjectNow = skillsService.isMyProject(proj1.projectId)
+
+        then:
+        isMyProject == false
+        isMyProjectNow == true
+    }
 }

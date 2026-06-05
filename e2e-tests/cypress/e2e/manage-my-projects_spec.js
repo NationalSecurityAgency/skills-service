@@ -395,5 +395,63 @@ describe('Manage My Projects Tests', () => {
 
 
     });
+
+    it('can add to my projects from project page', function () {
+        for (let i = 1; i <=5; i += 1) {
+            cy.createProject(i);
+            cy.enableProdMode(i);
+        }
+
+        cy.visit('/progress-and-rankings/manage-my-projects');
+
+        cy.doesNotContainsCellValue(0, 2, 'My Project');
+        cy.doesNotContainsCellValue(1, 2, 'My Project');
+        cy.doesNotContainsCellValue(2, 2, 'My Project');
+        cy.doesNotContainsCellValue(3, 2, 'My Project');
+        cy.doesNotContainsCellValue(4, 2, 'My Project');
+
+        cy.get('[data-cy="viewButton-proj1"]').click()
+        cy.get('[data-cy="addButton-proj1"]').should('exist')
+        cy.get('[data-cy="addButton-proj1"]').click()
+        cy.get('[data-cy="addButton-proj1"]').should('not.exist')
+
+        cy.visit('/progress-and-rankings/manage-my-projects');
+        cy.containsCellValue(0, 2, 'My Project');
+
+        cy.get('[data-cy="removeBtn-proj1"]').click()
+        cy.doesNotContainsCellValue(0, 2, 'My Project');
+
+        cy.get('[data-cy="viewButton-proj1"]').click()
+        cy.get('[data-cy="addButton-proj1"]').should('exist')
+        cy.get('[data-cy="addButton-proj1"]').click()
+        cy.get('[data-cy="addButton-proj1"]').should('not.exist')
+
+        cy.visit('/progress-and-rankings/manage-my-projects');
+        cy.containsCellValue(0, 2, 'My Project');
+
+    });
+
+    it('add button does not show for project already added', function () {
+        for (let i = 1; i <=5; i += 1) {
+            cy.createProject(i);
+            cy.enableProdMode(i);
+        }
+
+        cy.visit('/progress-and-rankings/manage-my-projects');
+
+        cy.doesNotContainsCellValue(0, 2, 'My Project');
+        cy.doesNotContainsCellValue(1, 2, 'My Project');
+        cy.doesNotContainsCellValue(2, 2, 'My Project');
+        cy.doesNotContainsCellValue(3, 2, 'My Project');
+        cy.doesNotContainsCellValue(4, 2, 'My Project');
+
+        cy.get('[data-cy="addButton-proj1"]').click()
+
+        cy.visit('/progress-and-rankings/projects/proj1');
+        cy.get('[data-cy="addButton-proj1"]').should('not.exist')
+        cy.visit('/progress-and-rankings/projects/proj2');
+        cy.get('[data-cy="addButton-proj2"]').should('exist')
+
+    });
 });
 
