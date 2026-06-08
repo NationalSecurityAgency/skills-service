@@ -19,8 +19,10 @@ import callStack.profiler.Profile
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.AuthMode
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillExceptionBuilder
@@ -36,6 +38,7 @@ import skills.services.userActions.UserActionsHistoryService
 import skills.storage.model.*
 import skills.storage.repos.*
 import skills.tasks.TaskSchedulerService
+import skills.utils.InputSanitizer
 
 import static skills.services.events.CompletionItem.CompletionItemType
 import static skills.services.events.SkillEventsService.AppliedCheckRes
@@ -48,6 +51,9 @@ class SkillEventsTransactionalService {
 
     private static final String PENDING_NOTIFICATION_EXPLANATION = "Achieved due to a modification " +
             "in the training profile (such as: skill deleted, occurrences modified, badge published, etc..)"
+
+    @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
+    AuthMode authMode
 
     @Autowired
     UserPerformedSkillRepo performedSkillRepository
@@ -179,6 +185,14 @@ class SkillEventsTransactionalService {
     SkillEventResult reportSkillInternal(String projectId, String skillId, String userId, Date incomingSkillDateParam, SkillApprovalParams approvalParams = SkillEventsService.defaultSkillApprovalParams) {
         assert projectId
         assert skillId
+
+        if (authMode !== AuthMode.PKI && approvalParams.forAnotherUser) {
+            if (!userId.equalsIgnoreCase(InputSanitizer.sanitizeUserName(userId))) {
+                SkillException e = new SkillException("Provided userId [${userId}]is not the supported format.", projectId, skillId, ErrorCode.BadParam)
+                e.doNotRetry = true
+                throw e;
+            }
+        }
 
         SkillDate skillDate = new SkillDate(date: incomingSkillDateParam ?: new Date(), isProvided: incomingSkillDateParam != null)
 

@@ -1271,4 +1271,56 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         result.results[0].explanation == "Insufficient project points, skill achievement is disallowed"
 
     }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "Sanitize user ids"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj1 = SkillsFactory.createSubject(1, 1)
+
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each {
+            it.pointIncrement = 100
+            it.numPerformToCompletion = 2
+            it.pointIncrementInterval = 0 // ability to achieve right away
+        }
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj1)
+        skillsService.createSkills(proj1_skills)
+        List<String> users = ["user1", "<script>some</script>blah", "user@email.org", "<script>again</script>" ]
+
+        def skillRequest = [
+                userIds: users,
+                skillIds: [proj1_skills[0].skillId],
+                timestamp: 1234l,
+        ]
+
+        when:
+        def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
+
+        then:
+        result
+        result.results.size() == 4
+        result.results[0].skillId == 'skill1'
+        result.results[0].skillApplied
+        result.results[0].userId == "user1"
+        result.results[0].userIdForDisplay == "user1"
+
+        result.results[1].skillId == 'skill1'
+        !result.results[1].skillApplied
+        result.results[1].userId == "blah" // sanitized
+        result.results[1].userIdForDisplay == "blah" // sanitized
+        result.results[1].explanation == "Provided user id [<script>some</script>blah] is not in a supported format"
+
+        result.results[2].skillId == 'skill1'
+        result.results[2].skillApplied
+        result.results[2].userId == "user@email.org"
+        result.results[2].userIdForDisplay == "user@email.org"
+
+        result.results[3].skillId == 'skill1'
+        !result.results[3].skillApplied
+        result.results[3].userId == "" // sanitized
+        result.results[3].userIdForDisplay == "" // sanitized
+        result.results[3].explanation == "Provided user id [<script>again</script>] is not in a supported format"
+    }
+
 }

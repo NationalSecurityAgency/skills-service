@@ -30,6 +30,7 @@ import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
 import skills.storage.repos.UserAttrsRepo
+import skills.utils.InputSanitizer
 
 @Service
 @Slf4j
@@ -61,10 +62,14 @@ class BatchReportService {
 
         Map<String, List<UserInfo>> userInfoCache = Collections.synchronizedMap(new HashMap<>())
         Map<String, String> userIdForDisplayCache = Collections.synchronizedMap(new HashMap<>())
-        for(String userIdToProcess : batchSkillEventRequest.getUserIds()) {
+        userIdLoop: for(String userIdToProcessTmp : batchSkillEventRequest.getUserIds()) {
+            String userIdToProcess = InputSanitizer.sanitizeUserName(userIdToProcessTmp)
             for (String skillId : skillIds) {
                 SkillEventResult result = null
                 try {
+                    if (!userIdToProcess || !userIdToProcessTmp?.equalsIgnoreCase(userIdToProcess)) {
+                        throw new SkillException("Provided user id [${userIdToProcessTmp}] is not in a supported format")
+                    }
                     result = skillEventProcessor.processSkillForUserInItsOwnTransaction(projectId, skillId, userIdToProcess, incomingDate,
                             batchSkillEventRequest.getUserSuggestOption(), userInfoCache, userIdForDisplayCache)
                 } catch(SkillException ske) {

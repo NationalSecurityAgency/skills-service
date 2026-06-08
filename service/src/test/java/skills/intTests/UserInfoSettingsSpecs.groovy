@@ -140,6 +140,7 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
         exception.message.contains("errorCode:BadParam")
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'sanitize user first name'() {
         currentUser.first = "<b>f</b><script>irst"
 
@@ -155,6 +156,7 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
         userAfter.first == "f"
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'sanitize user last name'() {
         currentUser.last = "<b>l</b><script>ast"
 
@@ -170,6 +172,7 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
         userAfter.last == "l"
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'sanitize user nickname'() {
         currentUser.nickname = "<b>n</b><script>ickname"
 
@@ -185,6 +188,7 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
         userAfter.nickname == "n"
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'sanitize user first, last and nickname'() {
         currentUser.first = "<b>f</b><script>irst"
         currentUser.last = "<b>l</b><script>ast"

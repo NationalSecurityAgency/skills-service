@@ -3086,9 +3086,9 @@
     </changeSet>
 
     <changeSet id="60" author="skills team">
-        <sql>UPDATE user_attrs SET first_name = '' WHERE first_name LIKE '%<%';</sql>
-        <sql>UPDATE user_attrs SET last_name = '' WHERE last_name LIKE '%<%';</sql>
-        <sql>UPDATE user_attrs SET nickname = '' WHERE nickname LIKE '%<%';</sql>
+        <sql><![CDATA[UPDATE user_attrs SET first_name = '' WHERE first_name LIKE '%<%';]]></sql>
+        <sql><![CDATA[UPDATE user_attrs SET last_name = '' WHERE last_name LIKE '%<%';]]></sql>
+        <sql><![CDATA[UPDATE user_attrs SET nickname = '' WHERE nickname LIKE '%<%';]]></sql>
     </changeSet>
 
 </databaseChangeLog>
