@@ -45,12 +45,12 @@ const privateInviteOnly = 'pio';
 
 const schema = yup.object({
   helpUrlHost: yup.string().max(appConfig.maxHostLength).label('Root Help Url').urlValidator(),
-  projectDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Project Display Text'),
-  subjectDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Subject Display Text'),
-  groupDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Group Display Text'),
-  skillDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Skill Display Text'),
-  levelDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Level Display Text'),
-  pointDisplayName: yup.string().max(appConfig.maxCustomLabelLength).label('Point Display Text'),
+  projectDisplayName: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Project Display Text'),
+  subjectDisplayName: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Subject Display Text'),
+  groupDisplayName: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Group Display Text'),
+  skillDisplayName: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Skill Display Text'),
+  levelDisplayName: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Level Display Text'),
+  pointDisplayName: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Point Display Text'),
 });
 
 const { values, defineField, errors, meta, handleSubmit, setFieldValue, resetForm } = useForm({

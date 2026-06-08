@@ -19,6 +19,7 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useLayoutSizesState } from '@/stores/UseLayoutSizesState.js'
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 defineProps(['loading', 'options'])
 const numberFormat = useNumberFormat()
@@ -74,7 +75,7 @@ onUnmounted(() => {
                           <div class="" :data-cy="`pageHeaderStat_${stat.label}`">
                             <div class="uppercase text-muted-color">{{ stat.label }}</div>
                             <div class="font-bold text-xl">
-                              <span v-if="stat.preformatted" data-cy="statPreformatted" v-html="stat.preformatted"/>
+                              <span v-if="stat.preformatted" data-cy="statPreformatted" v-html="InputSanitizer.sanitize(stat.preformatted)"/>
                               <span v-else data-cy="statValue">{{ numberFormat.pretty(stat.count) }}</span>
                             </div>
                           </div>
@@ -84,7 +85,7 @@ onUnmounted(() => {
                           </div>
                         </div>
                         <div class="text-left" style="font-size:0.9rem;" v-if="stat.secondaryPreformatted"
-                             v-html="stat.secondaryPreformatted"
+                             v-html="InputSanitizer.sanitize(stat.secondaryPreformatted)"
                              :data-cy="`pageHeaderStatSecondaryLabel_${stat.label}`"></div>
                         <div v-if="stat.secondaryStats" class="mt-2">
                           <div v-for="secCount in stat.secondaryStats" :key="secCount.label">

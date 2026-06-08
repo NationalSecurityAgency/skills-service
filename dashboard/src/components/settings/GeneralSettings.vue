@@ -21,14 +21,16 @@ import { object, string } from 'yup'
 import SettingsService from '@/components/settings/SettingsService.js'
 import {useForm} from "vee-validate";
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
+import {useAuthState} from "@/stores/UseAuthState.js";
 
 const userInfo = useUserInfo()
+const authState = useAuthState()
 const appConfig = useAppConfig();
 
 const schema = object({
-  firstName: string().required().min(2).label('First Name'),
-  lastName: string().required().min(2).max(30).label('Last Name'),
-  nickName: string().label('Primary Name')
+  firstName: string().required().min(2).max(appConfig.maxFirstNameLength).label('First Name'),
+  lastName: string().required().min(2).max(appConfig.maxLastNameLength).label('Last Name'),
+  nickname: string().max(appConfig.maxNicknameLength).label('Primary Name')
 })
 
 const { defineField, meta } = useForm({
@@ -67,13 +69,16 @@ function updateUserInfo() {
   currentUser.nickname = nickname.value;
   isSaving.value = true;
 
-  SettingsService.saveUserInfo(currentUser).then(() => {
+  SettingsService.saveUserInfo(currentUser).then((resUser) => {
+    authState.fetchUser().finally(() => {
+      loadData()
+      isSaving.value = false;
+    })
     saveMessage.value = 'Updated User Info Successfully!';
   }).catch(() => {
     saveMessage.value = 'Failed to Update User Info Settings!';
-  }).finally(() => {
     isSaving.value = false;
-  });
+  })
 }
 </script>
 

@@ -16,6 +16,7 @@ limitations under the License.
 <script setup>
 import { computed } from 'vue'
 import StringHighlighter from '@/common-components/utilities/StringHighlighter.js'
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 const props = defineProps({
   value: {
@@ -28,23 +29,22 @@ const props = defineProps({
   }
 })
 
-const highlightValue = computed(() =>{
-  if (!props.filter) {
-    return props.value
+const trimmedFilter = computed(() => props.filter?.trim() ?? '')
+const highlightValue = computed(() => {
+  if (!trimmedFilter.value || props.value == null) {
+    return null
   }
-  const filterValue = props.filter;
-  if (filterValue && filterValue.trim().length > 0) {
-    const highlighted = StringHighlighter.highlight(props.value, filterValue);
-    return highlighted || props.value;
-  } else {
-    return props.value;
+  const raw = StringHighlighter.highlight(String(props.value), trimmedFilter.value)
+  if (!raw) {
+    return null
   }
+  return InputSanitizer.sanitizeForHighlighting(raw)
 })
-
 </script>
 
 <template>
-  <div v-html="highlightValue" data-cy="highlightedValue" class="max-wrap"/>
+  <div v-if="highlightValue != null" v-html="highlightValue" data-cy="highlightedValue" class="max-wrap"/>
+  <div v-else data-cy="highlightedValue" class="max-wrap">{{ value }}</div>
 </template>
 
 <style scoped>

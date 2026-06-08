@@ -80,6 +80,20 @@ describe('Quiz Runs History Tests', () => {
         ], 10);
     });
 
+
+    it('survey status', function () {
+        cy.createSurveyDef(1);
+        cy.createSurveyMultipleChoiceQuestionDef(1, 1);
+        cy.runQuizForUser(1, 1, [{selectedIndex: [1]}]);
+        cy.runQuizForUser(1, 2, [{selectedIndex: [0]}], false);
+        cy.visit('/administrator/quizzes/quiz1/runs');
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 0, value: 'user2' }, { colIndex: 2, value: 'In Progress' }],
+            [{ colIndex: 0, value: 'user1' }, { colIndex: 2, value: 'Completed' }],
+        ], 10);
+    });
+
     it('format total runtime and start time', function () {
         const runs = [
             { 'started': '2023-02-15T22:52:53.990+00:00', 'completed': '2023-02-15T22:52:53.990+00:00', 'attemptId' : 1, 'status': 'PASSED', 'userId': 'user1', 'userIdForDisplay': 'user1' },
