@@ -114,27 +114,30 @@ const addToMyProjects = () => {
               icon="fa-solid fa-magnifying-glass" />
         </div>
 
-        <div class="text-center flex-1" :class="{'sm:flex-col md:flex-row items-center': isProjectPage && !isMyProject, 'mx-5': showBackButton}">
+        <div class="text-center flex-1 flex flex-col sm:flex-row sm:items-center sm:text-left"
+             :class="{'mx-5': showBackButton}">
           <SkillsDisplayBreadcrumb v-if="!disableBreadcrumb"></SkillsDisplayBreadcrumb>
           <h1 data-cy="title"
-               :class="{ 'mt-2': disableBreadcrumb}"
-               class="skills-title uppercase text-2xl font-normal m-0">
-            <slot />
+              :class="{ 'mt-2': disableBreadcrumb}"
+              class="skills-title uppercase text-2xl font-normal m-0">
+            <slot/>
           </h1>
 
-          <SkillsButton
-              v-if="isProjectPage && !isMyProject && !showAddedMsg"
-              label="Add To My Projects"
-              icon="fa-solid fa-heart-circle-plus"
-              @click="addToMyProjects()"
-              outlined
-              class="animate-fadein animate-duration-300 mt-2 ml-4"
-              size="small"
-              :data-cy="`addButton-${attributes.projectId}`"
-              :aria-label="`add project ${attributes.projectId} to my projects`"/>
-          <InlineMessage v-if="showAddedMsg" class="ml-4 mt-2" severity="success">
-            Project added!
-          </InlineMessage>
+          <div id="addProjectButton" class="text-center sm:text-left">
+            <SkillsButton
+                v-if="isProjectPage && !isMyProject && !showAddedMsg"
+                label="Add To My Projects"
+                icon="fa-solid fa-heart-circle-plus"
+                @click="addToMyProjects()"
+                outlined
+                class="animate-fadein animate-duration-300 mt-2 sm:ml-4"
+                size="small"
+                :data-cy="`addButton-${attributes.projectId}`"
+                :aria-label="`add project ${attributes.projectId} to my projects`"/>
+            <InlineMessage v-if="showAddedMsg" class="sm:ml-4 mt-2" severity="success">
+              Project added!
+            </InlineMessage>
+          </div>
         </div>
 
         <div v-if="renderDivWhereBrandResides" class="md:w-32">
