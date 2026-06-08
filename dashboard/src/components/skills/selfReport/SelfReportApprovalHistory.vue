@@ -27,6 +27,7 @@ import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveB
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import {useStorage} from "@vueuse/core";
 import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 const route = useRoute();
 const announcer = useSkillsAnnouncer();
@@ -194,12 +195,12 @@ defineExpose( {
                   :data-cy="`viewSkillLink_${slotProps.data.skillId}`"
                   :to="toRouteProps(slotProps.data)"
                   :aria-label="`View skill ${slotProps.data.skillName}  via link`"
-                  target="_blank"><span v-if="slotProps.data.skillNameHtml" v-html="slotProps.data.skillNameHtml"></span><span v-else>{{ slotProps.data.skillName }}</span>
+                  target="_blank"><span v-if="slotProps.data.skillNameHtml" v-html="InputSanitizer.sanitizeForHighlighting(slotProps.data.skillNameHtml)"></span><span v-else>{{ slotProps.data.skillName }}</span>
               </router-link>
               <Badge class="ml-2">+ {{ slotProps.data.points }} Points</Badge>
             </div>
             <div class="text-primary">by</div>
-            <div class="italic"><span v-if="slotProps.data.userIdHtml" v-html="slotProps.data.userIdHtml"></span><span v-else>{{ slotProps.data.userIdForDisplay }}</span></div>
+            <div class="italic"><span v-if="slotProps.data.userIdHtml" v-html="InputSanitizer.sanitizeForHighlighting(slotProps.data.userIdHtml)"></span><span v-else>{{ slotProps.data.userIdForDisplay }}</span></div>
             <SkillsButton size="small" variant="outline-info"
                       class="mr-2 py-0 px-1"
                       @click="toggleRow(slotProps.data.id)"
@@ -216,7 +217,7 @@ defineExpose( {
             <div v-if="slotProps.data.rejectedOn"><Badge variant="danger"><i class="fas fa-thumbs-down"></i> <span class="text-uppercase">Rejected</span></Badge></div>
             <div v-else><Badge variant="success"><i class="fas fa-thumbs-up"></i> <span class="text-uppercase">Approved</span></Badge></div>
             <div class="text-primary">by</div>
-            <div class="italic"><span v-if="slotProps.data.approverUserIdHtml" v-html="slotProps.data.approverUserIdHtml"></span><span v-else>{{ slotProps.data.approverUserIdForDisplay }}</span></div>
+            <div class="italic"><span v-if="slotProps.data.approverUserIdHtml" v-html="InputSanitizer.sanitizeForHighlighting(slotProps.data.approverUserIdHtml)"></span><span v-else>{{ slotProps.data.approverUserIdForDisplay }}</span></div>
             <div v-if="slotProps.data.message"><span class="text-primary text-break">Explanation:</span> <show-more :text="slotProps.data.message"/></div>
           </template>
         </Column>

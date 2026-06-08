@@ -19,6 +19,7 @@ import AchievementMsg from "@/skills-display/components/progress/celebration/Ach
 import {computed} from "vue";
 import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 const props = defineProps({
   skill: Object,
@@ -61,7 +62,7 @@ const randomMessage = computed(() => {
       :storage-key="storageKey" data-cy="skillAchievementCelebrationMsg">
     <template #content>
       <div class="text-left">
-        <span v-html="randomMessage"/>
+        <span v-html="InputSanitizer.sanitize(randomMessage)"/>
       </div>
     </template>
   </achievement-msg>

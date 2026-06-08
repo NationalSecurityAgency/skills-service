@@ -15,6 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 const props = defineProps({
   text: {
@@ -59,7 +60,7 @@ const toDisplay = computed(() => {
 <template>
   <div data-cy="showMoreText" class="text-break" :class="{'inline-block' : isInline}">
     <span>
-      <span v-if="containsHtml" v-html="toDisplay"></span><span v-else data-cy="smtText">{{toDisplay}}</span>
+      <span v-if="containsHtml" v-html="InputSanitizer.sanitize(toDisplay)"></span><span v-else data-cy="smtText">{{toDisplay}}</span>
       <a v-if="truncate" size="xs" variant="outline-info"
               class=""
               @click="displayFullText = !displayFullText"

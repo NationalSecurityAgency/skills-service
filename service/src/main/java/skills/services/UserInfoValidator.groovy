@@ -38,18 +38,12 @@ class UserInfoValidator {
 
     void validate(UserInfo userInfo) {
 
-        boolean userProxiedAndFirstNameIsEmpty = userInfo.proxied && StringUtils.isBlank(userInfo?.firstName)
-        if (!userProxiedAndFirstNameIsEmpty) {
-            if (!userInfo.firstName || userInfo.firstName.length() > maxFirstNameLength) {
-                throw new SkillException("First Name is required and can be no longer than ${maxFirstNameLength} characters; provided firstName=[${userInfo.firstName}]", NA, NA, ErrorCode.BadParam)
-            }
+        if (userInfo.firstName && userInfo.firstName.length() > maxFirstNameLength) {
+            throw new SkillException("First Name can be no longer than ${maxFirstNameLength} characters; provided firstName=[${userInfo.firstName}]", NA, NA, ErrorCode.BadParam)
         }
 
-        boolean userProxiedAndLastNameIsEmpty = userInfo.proxied && StringUtils.isBlank(userInfo?.lastName)
-        if (!userProxiedAndLastNameIsEmpty) {
-            if (!userInfo.lastName || userInfo.lastName.length() > maxLastNameLength) {
-                throw new SkillException("Last Name is required and can be no longer than ${maxLastNameLength} characters; provided lastName=[${userInfo.lastName}]", NA, NA, ErrorCode.BadParam)
-            }
+        if (userInfo.lastName && userInfo.lastName.length() > maxLastNameLength) {
+            throw new SkillException("Last Name can be no longer than ${maxLastNameLength} characters; provided lastName=[${userInfo.lastName}]", NA, NA, ErrorCode.BadParam)
         }
         // nickname by default is "firstName lastName"
         if (userInfo.nickname && userInfo.nickname.length() > maxNicknameLength) {

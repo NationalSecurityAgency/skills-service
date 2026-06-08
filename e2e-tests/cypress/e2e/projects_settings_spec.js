@@ -379,6 +379,35 @@ describe('Project Settings Tests', () => {
             .should('not.exist');
     });
 
+    it('project-level settings do not allowe tags', () => {
+        let labelsSwitch = '[data-cy="customLabelsSwitch"] [data-pc-section="input"]';
+        cy.createProject(1);
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.get(labelsSwitch).should('not.be.checked');
+        cy.get(labelsSwitch).click({ force: true });
+        cy.get(labelsSwitch).should('be.checked');
+
+        cy.get('[data-cy="projectDeletionProtectionSwitch"]').click()
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+
+        const validateNotTagsInField = (name) => {
+            cy.get(`[data-cy="${name}Error"]`).should('not.exist')
+            cy.get(`[data-cy="${name}TextInput"]`).type('{selectAll}<sCriPt>');
+            cy.get(`[data-cy="${name}Error"]`).should('exist')
+            cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled')
+            cy.get(`[data-cy="${name}TextInput"]`).type('{selectAll}Valid');
+            cy.get(`[data-cy="${name}Error"]`).should('not.exist')
+            cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled')
+        }
+        validateNotTagsInField('projectDisplayName')
+        validateNotTagsInField('subjectDisplayName')
+        validateNotTagsInField('groupDisplayName')
+        validateNotTagsInField('skillDisplayName')
+        validateNotTagsInField('levelDisplayName')
+        validateNotTagsInField('pointDisplayName')
+    });
+
+
     it('project-level settings: custom labels can be turned off without resetting values', () => {
         let labelsSwitch = '[data-cy="customLabelsSwitch"] [data-pc-section="input"]';
         cy.createProject(1);

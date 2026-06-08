@@ -26,6 +26,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import SkillsSelector from '@/components/skills/SkillsSelector.vue'
 import ProjectSelector from '@/components/skills/crossProjects/ProjectSelector.vue'
 import SharedSkillsTable from '@/components/skills/crossProjects/SharedSkillsTable.vue'
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 const route = useRoute()
 const projectId = route.params.projectId
@@ -211,7 +212,7 @@ const onShareWithAllProjects = (checked) => {
           </div>
         </div>
         <Message v-if="doesShareAlreadyExist" severity="error">
-          <span v-html="errorMessage"></span>
+          <span v-html="InputSanitizer.sanitize(errorMessage)"></span>
         </Message>
 
         <div v-if="sharedSkills && sharedSkills.length > 0" class="my-6">

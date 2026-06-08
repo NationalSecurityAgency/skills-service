@@ -31,6 +31,7 @@ import {useInstructionGenerator} from "@/common-components/utilities/learning-co
 import AiPromptDialogFooter from "@/common-components/utilities/learning-conent-gen/AiPromptDialogFooter.vue";
 import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 
 const model = defineModel()
@@ -489,7 +490,7 @@ const hasFooter = computed(() => appConfig.openaiFooterMsg || hasPoweredByInfo.v
       </div>
 
       <Message severity="warn" v-if="!isValid && overallErrMsg && !isGenerating" data-cy="overallErrMsg">
-        <div v-html="overallErrMsg"></div>
+        <div v-html="InputSanitizer.sanitize(overallErrMsg)"></div>
       </Message>
       <div class="flex justify-end mt-6">
         <div class="flex gap-2 w-10/12">

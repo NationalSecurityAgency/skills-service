@@ -17,6 +17,7 @@ limitations under the License.
 import { computed } from 'vue';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useDynamicVariableReplacementHelper } from '@/components/customization/DynamicVariableReplacementHelper.js';
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 const appConfig = useAppConfig();
 const variableReplacementHelper = useDynamicVariableReplacementHelper();
@@ -27,7 +28,7 @@ let customHeader = computed(() => {
 </script>
 
 <template>
-  <div v-html="customHeader">
+  <div v-html="InputSanitizer.sanitize(customHeader)">
   </div>
 </template>
 

@@ -23,6 +23,13 @@ export default class InputSanitizer {
     return input;
   }
 
+  static sanitizeForHighlighting(input) {
+    if (input) {
+      return DOMPurify.sanitize(input, { ALLOWED_TAGS: ['mark'], ALLOWED_ATTR: [] });
+    }
+    return input;
+  }
+
   static removeSpecialChars(input) {
     return input.replace(/[\W_]/gi, '');
   }

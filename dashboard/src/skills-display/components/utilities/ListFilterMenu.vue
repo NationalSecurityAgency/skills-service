@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-
 import {Popover, PanelMenu} from "primevue";
 import { nextTick, onMounted, ref } from 'vue'
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 const props = defineProps({
   filters: Array,
@@ -105,7 +105,7 @@ const focusOnProgressGroup = () => {
             <div text v-if="root" class="p-4 sd-theme-menu-header" :id="item.key" :data-cy="`filter_${item.key}`">
               <i v-if="!active" class="far fa-arrow-alt-circle-right"></i>
               <i v-else class="far fa-arrow-alt-circle-down"></i>
-              <span class="ml-2" v-html="item.label" />
+              <span class="ml-2" v-html="InputSanitizer.sanitize(item.label)" />
             </div>
             <div v-else class="flex items-center pl-4 p-2" v-bind="props.action" :data-cy="`filter_${item.key}`">
               <Avatar v-if="item.icon" :icon="item.icon" class="" size="small" />
