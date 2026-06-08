@@ -187,7 +187,7 @@ class SkillEventsTransactionalService {
         assert skillId
 
         if (authMode !== AuthMode.PKI && approvalParams.forAnotherUser) {
-            if (!userId.equalsIgnoreCase(InputSanitizer.sanitizeUserName(userId))) {
+            if (!userId.equalsIgnoreCase(InputSanitizer.sanitizeNoSafeList(userId))) {
                 SkillException e = new SkillException("Provided userId [${userId}]is not the supported format.", projectId, skillId, ErrorCode.BadParam)
                 e.doNotRetry = true
                 throw e;

@@ -117,6 +117,30 @@ class ProjectSettingsSpecs extends DefaultIntSpec {
         ex.message.contains("[Level Display Text] must not exceed [20]")
     }
 
+    def "tags are not allowed in custom label display settings"(){
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        when:
+        skillsService.addOrUpdateProjectSetting(proj.projectId, setting, "<sCript>")
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("Invalid format for [<sCript>]")
+
+        where:
+        setting << [
+                'project.displayName',
+                'subject.displayName',
+                'group.displayname',
+                'skill.displayname',
+                'point.displayname',
+                'leVel.displayName',
+                'help.url.root'
+        ]
+    }
+
+
     def "return user community if configured"() {
         List<String> users = getRandomUsers(2)
 

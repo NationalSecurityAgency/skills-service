@@ -54,10 +54,10 @@ class InputSanitizer {
             .addTags('del', 'skills-display')
             .addAttributes('skills-display', 'version')
 
-    private static final SAFE_LIST_USER_NAMES = Safelist.none()
+    private static final SAFE_LIST_NONE = Safelist.none()
 
-    static String sanitizeUserName(String input) {
-        return sanitize(input, SAFE_LIST_USER_NAMES)
+    static String sanitizeNoSafeList(String input) {
+        return sanitize(input, SAFE_LIST_NONE)
     }
 
     static String sanitize(String input, Safelist safelist = SAFE_LIST) {

@@ -149,10 +149,10 @@ class UserAttrsService {
         List<UserTag> userTags = userInfo.userTags.collect {
             if (isCollectionOrArray(it.value)) {
                 it.value.collect { value ->
-                    return new UserTag(userId: userId, key: it.key, value: value)
+                    return new UserTag(userId: userId, key: it.key, value: InputSanitizer.sanitizeNoSafeList(value))
                 }
             } else {
-                return new UserTag(userId: userId, key: it.key, value: it.value)
+                return new UserTag(userId: userId, key: it.key, value: InputSanitizer.sanitizeNoSafeList(it.value))
             }
         }.flatten()
 
@@ -184,12 +184,12 @@ class UserAttrsService {
     }
 
     private void populate(UserAttrs userAttrs, UserInfo userInfo, boolean updateUserTags) {
-        userAttrs.firstName = userInfo.firstName ? InputSanitizer.sanitizeUserName(userInfo.firstName) : userAttrs.firstName
-        userAttrs.lastName = userInfo.lastName ? InputSanitizer.sanitizeUserName(userInfo.lastName) : userAttrs.lastName
+        userAttrs.firstName = userInfo.firstName ? InputSanitizer.sanitizeNoSafeList(userInfo.firstName) : userAttrs.firstName
+        userAttrs.lastName = userInfo.lastName ? InputSanitizer.sanitizeNoSafeList(userInfo.lastName) : userAttrs.lastName
         userAttrs.email = userInfo.email ?: userAttrs.email
         userAttrs.emailVerified = Boolean.valueOf(userInfo.emailVerified) ?: Boolean.FALSE.toString()
         userAttrs.dn = userInfo.userDn ?: userAttrs.dn
-        userAttrs.nickname = (userInfo.nickname != null ? InputSanitizer.sanitizeUserName(userInfo.nickname) : userAttrs.nickname) ?: ""
+        userAttrs.nickname = (userInfo.nickname != null ? InputSanitizer.sanitizeNoSafeList(userInfo.nickname) : userAttrs.nickname) ?: ""
         userAttrs.userIdForDisplay = userInfo.usernameForDisplay ?: userAttrs.userIdForDisplay
         if (updateUserTags) {
             userAttrs.userTagsLastUpdated = new Date()

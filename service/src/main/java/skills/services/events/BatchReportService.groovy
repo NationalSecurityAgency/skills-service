@@ -63,7 +63,7 @@ class BatchReportService {
         Map<String, List<UserInfo>> userInfoCache = Collections.synchronizedMap(new HashMap<>())
         Map<String, String> userIdForDisplayCache = Collections.synchronizedMap(new HashMap<>())
         userIdLoop: for(String userIdToProcessTmp : batchSkillEventRequest.getUserIds()) {
-            String userIdToProcess = InputSanitizer.sanitizeUserName(userIdToProcessTmp)
+            String userIdToProcess = InputSanitizer.sanitizeNoSafeList(userIdToProcessTmp)
             for (String skillId : skillIds) {
                 SkillEventResult result = null
                 try {

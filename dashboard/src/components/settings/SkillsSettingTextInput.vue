@@ -75,7 +75,14 @@ const inputId = computed(() => {
                  :class="{ 'p-invalid': errorMessage }"
                  :aria-invalid="!!errorMessage"
                  :aria-errormessage="`${name}Error`" />
-      <small role="alert" class="p-error" :id="`${name}Error`" :data-cy="`${name}Error`" v-if="errorMessage">{{ errorMessage || '&nbsp;' }}</small>
+      <Message
+          v-if="errorMessage"
+          severity="error"
+          variant="simple"
+          size="small"
+          :closable="false"
+          :id="`${name}Error`"
+          :data-cy="`${name}Error`">{{ errorMessage || '&nbsp;' }}</Message>
     </div>
   </settings-item>
 </template>

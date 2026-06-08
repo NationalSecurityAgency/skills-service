@@ -107,6 +107,16 @@ export const useCustomGlobalValidators = () => {
     })
   }
 
+  function noHtml() {
+    const tagRegex = /^(?!.*<[^>]+>).*$/i;
+    return this.test('noHtml', 'HTML tags are not allowed', (value) => {
+      if (value) {
+        return value.match(tagRegex) !== null;
+      }
+      return true;
+    })
+  }
+
   const addValidators = () => {
     log.trace('Adding custom global validators')
     addMethod(string, "customNameValidator", customNameValidator);
@@ -115,6 +125,7 @@ export const useCustomGlobalValidators = () => {
     addMethod(string, 'urlValidator', urlValidator)
     addMethod(string, 'idValidator', idValidator)
     addMethod(string, 'noScript', noScript)
+    addMethod(string, 'noHtml', noHtml)
   }
 
   return {

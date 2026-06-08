@@ -568,7 +568,7 @@ After strip'''
     @Unroll
     def "sanitize users' names"() {
         expect:
-        InputSanitizer.sanitizeUserName(input) == expected
+        InputSanitizer.sanitizeNoSafeList(input) == expected
 
         where:
         input                                                                                               || expected

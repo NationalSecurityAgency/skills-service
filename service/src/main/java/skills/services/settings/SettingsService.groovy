@@ -45,6 +45,7 @@ import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.User
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
+import skills.utils.InputSanitizer
 import skills.utils.Props
 
 @Service
@@ -120,6 +121,7 @@ class SettingsService {
     @Transactional
     SettingsResult saveSetting(SettingsRequest request, User user=null, boolean performSaveUserAction = false) {
         validateSettingRequest(request)
+        validateCustomLabels(request)
         Integer userRefId = user ? user.id : getUserRefId(request)
         String userId = user ? user.userId : loadCurrentUser(isUserSettingRequest(request))?.username
         lockTransaction(request, userId)
@@ -143,6 +145,22 @@ class SettingsService {
         log.debug("saved [{}]", setting)
 
         return convertToRes(setting)
+    }
+
+    static List<String> customLabelsSettings = [
+            "project.displayName",
+            "subject.displayName",
+            "group.displayName",
+            "skill.displayName",
+            "level.displayName",
+            "point.displayName",
+            "help.url.root"
+    ].collect { it.toLowerCase( )}
+    private void validateCustomLabels(SettingsRequest request) {
+        boolean isDisplayLabelSetting = customLabelsSettings.contains(request?.setting?.trim()?.toLowerCase())
+        if (!request.value || (isDisplayLabelSetting && !request.value?.equalsIgnoreCase(InputSanitizer.sanitizeNoSafeList(request.value)))) {
+            throw new SkillException("Invalid format for [${request.value}]")
+        }
     }
 
     @Profile
