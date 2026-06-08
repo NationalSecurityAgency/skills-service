@@ -17,6 +17,7 @@ limitations under the License.
 import { computed, onMounted, ref } from 'vue'
 import StringHighlighter from '@/common-components/utilities/StringHighlighter.js'
 import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 const skillRouteUtil = useSkillOverviewRouteUtil()
 
@@ -75,7 +76,7 @@ const toRouteProps = computed(() => {
         class="text-lg overflow-hidden text-ellipsis"
         style="overflow-wrap: anywhere"
         :title="toDisplay?.length > 30 ? toDisplay : ''"
-        v-html="highlightedValue" />
+        v-html="InputSanitizer.sanitizeForHighlighting(highlightedValue)" />
     </router-link>
   </div>
 </template>

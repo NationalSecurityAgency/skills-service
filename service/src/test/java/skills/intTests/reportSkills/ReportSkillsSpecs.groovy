@@ -1128,4 +1128,46 @@ class ReportSkillsSpecs extends DefaultIntSpec {
     }
 
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "user ids are sanitized - to a blank value"() {
+        List<String> users = getRandomUsers(3)
+        SkillsService projAdmin = createService(users[2])
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        projAdmin.createProject(proj)
+        projAdmin.createSubject(subj)
+        projAdmin.createSkills(skills)
+
+        when:
+        projAdmin.addSkill([projectId: projId, skillId: skills[0].skillId], "<script>some</script>", new Date())
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains("Provided userId [<script>some</script>]is not the supported format.")
+    }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "user ids are sanitized - to a partial value"() {
+        List<String> users = getRandomUsers(3)
+        SkillsService projAdmin = createService(users[2])
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(10, )
+
+        projAdmin.createProject(proj)
+        projAdmin.createSubject(subj)
+        projAdmin.createSkills(skills)
+
+        when:
+        projAdmin.addSkill([projectId: projId, skillId: skills[0].skillId], "<script>some</script>blah", new Date())
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.message.contains("Provided userId [<script>some</script>blah]is not the supported format.")
+    }
+
 }

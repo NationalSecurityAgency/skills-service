@@ -635,6 +635,18 @@ class RootAccessSpec extends DefaultIntSpec {
         skillsClientException.httpStatus == HttpStatus.FORBIDDEN
     }
 
+    def 'user tags are sanitized' () {
+        SkillsService user = createService(getRandomUsers(1)[0])
+        when:
+        rootSkillsService.saveUserTag(user.userName, "myKey", ["<script>some</script>"])
+
+        def tags = rootSkillsService.getUserTags(user.userName)
+        then:
+        tags.key == ["myKey"]
+        tags.value == [""]
+    }
+
+
     def 'rebuild a projects users user_points, subject and project definition total_points' () {
         // need to call DefaultIntSpec.getRandomUsers so that tests will work in ssl mode
         List<String> users = []

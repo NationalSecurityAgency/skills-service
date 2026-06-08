@@ -164,6 +164,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const maxPasswordLength = computed(() => config.value.maxPasswordLength)
   const maxFirstNameLength = computed(() => config.value.maxFirstNameLength)
   const maxLastNameLength = computed(() => config.value.maxLastNameLength)
+  const maxNicknameLength = computed(() => config.value.maxNicknameLength)
   const numProjectsToStartShowingAsCards = computed(() => config.value.numProjectsToStartShowingAsCards)
   const disableScrollToTop = computed(() => config.value.disableScrollToTop)
   const dbUpgradeInProgress = computed(() => isTrue(config.value.dbUpgradeInProgress))
@@ -298,6 +299,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxPasswordLength,
     maxFirstNameLength,
     maxLastNameLength,
+    maxNicknameLength,
     numProjectsToStartShowingAsCards,
     disableScrollToTop,
     dbUpgradeInProgress,

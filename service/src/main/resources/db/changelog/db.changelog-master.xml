@@ -3084,4 +3084,11 @@
             <column name="lock" type="varchar(255)" value="skill_expiration_lock" />
         </insert>
     </changeSet>
+
+    <changeSet id="60" author="skills team">
+        <sql><![CDATA[UPDATE user_attrs SET first_name = '' WHERE first_name LIKE '%<%';]]></sql>
+        <sql><![CDATA[UPDATE user_attrs SET last_name = '' WHERE last_name LIKE '%<%';]]></sql>
+        <sql><![CDATA[UPDATE user_attrs SET nickname = '' WHERE nickname LIKE '%<%';]]></sql>
+    </changeSet>
+
 </databaseChangeLog>

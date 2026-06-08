@@ -23,6 +23,7 @@ import Dropdown from "primevue/dropdown";
 import UserRolesUtil from "@/components/utils/UserRolesUtil.js";
 import SubjectsService from "@/components/subjects/SubjectsService.js";
 import {useFocusState} from "@/stores/UseFocusState.js";
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 const props = defineProps({
   copyType: {
@@ -232,7 +233,7 @@ const showOkButton = computed(() => !copied.value && (hasProjects.value || loadi
         <div v-if="isSubjectCopy">Subject cannot be copied:</div>
         <div v-if="isSelectedSkillsCopy">Skills cannot be copied:</div>
         <ul>
-          <li v-for="error in validationErrors" :key="error"><span v-html="error"></span></li>
+          <li v-for="error in validationErrors" :key="error"><span v-html="InputSanitizer.sanitize(error)"></span></li>
         </ul>
 
       </Message>

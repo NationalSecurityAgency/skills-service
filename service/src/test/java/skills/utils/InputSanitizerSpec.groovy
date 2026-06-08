@@ -18,6 +18,7 @@ package skills.utils
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class InputSanitizerSpec extends Specification{
 
@@ -563,4 +564,60 @@ After strip'''
 ```
 '''
     }
+
+    @Unroll
+    def "sanitize users' names"() {
+        expect:
+        InputSanitizer.sanitizeNoSafeList(input) == expected
+
+        where:
+        input                                                                                               || expected
+        "some@email.com"                                                                                    || "some@email.com"
+
+        // --- Basic Scripting & Code Injection ---
+        "<script>blah</script>"                                                                             || ""
+        "<script src='http://evil.com'></script>"                                                           || ""
+
+        // --- Common HTML Formatting & Structural Tags ---
+        "<b>John</b> Doe"                                                                                   || "John Doe"
+        "<i>Jane</i>"                                                                                       || "Jane"
+        "<h1>Title</h1>"                                                                                    || "Title"
+        "<div>Paragraph</div>"                                                                              || "Paragraph"
+        "Line 1<br>Line 2"                                                                                  || "Line 1Line 2" // Adjust to "Line 1 Line 2" if your code replaces tags with spaces
+
+        // --- HTML Attributes & Inline Styles ---
+        "<span style='color: red; font-size: 20px;'>Alice</span>"                                           || "Alice"
+        "<p class=\"paragraph-style\" id=\"main\">Bob</p>"                                                  || "Bob"
+        "<img src='avatar.jpg' alt='Profile Picture' />"                                                    || ""
+        "<a href='https://example.com'>Click Here</a>"                                                      || "Click Here"
+
+        // --- Event Handlers (XSS Vectors) ---
+        "<body onload=alert('test')>Charlie"                                                                || "Charlie"
+        "<img src=x onerror=alert(1)>"                                                                      || ""
+        "<div onmouseover='badCode()'>Hover Me</div>"                                                       || "Hover Me"
+
+        // --- Broken, Malformed, or Nested HTML ---
+        "Missing <b Closing Tag"                                                                            || "Missing "
+        "Nested <div>Tags <b>Everywhere</b></div>"                                                          || "Nested Tags Everywhere"
+        "<<script></script>script>nested</script>"                                                          || "&lt;script&gt;nested"
+        "<b <script></script>>Complex Bracket</b>"                                                          || "&gt;Complex Bracket"
+
+        // --- Legitimate Name Characters (Should NOT be stripped) ---
+        "O'Connor"                                                                                          || "O'Connor"
+        "Jean-Luc"                                                                                          || "Jean-Luc"
+        "Dr. Smith, Jr."                                                                                    || "Dr. Smith, Jr."
+        "Renée"                                                                                             || "Renée" // Unicode / Accented characters
+
+        // --- Edge Cases ---
+        ""                                                                                                  || ""
+        "   "                                                                                               || "   " // Or "" if your sanitizer auto-trims whitespace
+        null                                                                                                || null
+
+        // DNs
+        "cn=aaa@email.foo, ou=integration tests, o=skilltree test, c=us"                                    || "cn=aaa@email.foo, ou=integration tests, o=skilltree test, c=us"
+        "UID=jdoe123, CN=John Doe, OU=Employees, O=Example Corp, C=US"                                      || "UID=jdoe123, CN=John Doe, OU=Employees, O=Example Corp, C=US"
+        "CN=server01.device.example.net, OU=IoT Infrastructure, O=Example Corp, C=US"                       || "CN=server01.device.example.net, OU=IoT Infrastructure, O=Example Corp, C=US"
+        "CN=John Doe, E=john.doe@example.com, OU=Some, O=Example Corp, L=Fancy Junction, ST=Maryland, C=US" || "CN=John Doe, E=john.doe@example.com, OU=Some, O=Example Corp, L=Fancy Junction, ST=Maryland, C=US"
+    }
+
 }

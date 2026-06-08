@@ -49,6 +49,7 @@ import skills.storage.model.UserTag
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserTagRepo
 import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
+import skills.utils.InputSanitizer
 
 import javax.xml.bind.DatatypeConverter
 import java.nio.charset.StandardCharsets
@@ -386,7 +387,9 @@ class RootController {
     RequestResult saveTag(@PathVariable("userId") String userId, @PathVariable("tagKey") String tagKey, @RequestBody UserTagRequest userTagRequest) {
         SkillsValidator.isNotEmpty(userTagRequest?.tags, "tags")
 
-        List<UserTag> userTags = userTagRequest.tags.collect { new UserTag(userId: userId?.toLowerCase(), key: tagKey, value: it)}
+        List<UserTag> userTags = userTagRequest.tags.collect {
+            new UserTag(userId: userId?.toLowerCase(), key: tagKey, value: InputSanitizer.sanitizeNoSafeList(it))
+        }
         userTagRepo.saveAll(userTags)
 
         return RequestResult.success()

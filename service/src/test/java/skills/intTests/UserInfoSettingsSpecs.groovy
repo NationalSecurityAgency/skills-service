@@ -102,7 +102,7 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException exception = thrown()
-        exception.message.contains("explanation:First Name is required and can be no longer than 30 characters; provided firstName=[${nameOver30Chars}]")
+        exception.message.contains("explanation:First Name can be no longer than 30 characters; provided firstName=[${nameOver30Chars}]")
         exception.message.contains("errorCode:BadParam")
     }
 
@@ -120,7 +120,7 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException exception = thrown()
-        exception.message.contains("explanation:Last Name is required and can be no longer than 30 characters; provided lastName=[${nameOver30Chars}]")
+        exception.message.contains("explanation:Last Name can be no longer than 30 characters; provided lastName=[${nameOver30Chars}]")
         exception.message.contains("errorCode:BadParam")
     }
 
@@ -138,6 +138,72 @@ class UserInfoSettingsSpecs extends DefaultIntSpec {
         SkillsClientException exception = thrown()
         exception.message.contains("explanation:Nickname cannot be over 70 characters; provided nickname=[${nameOver70Chars}]")
         exception.message.contains("errorCode:BadParam")
+    }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def 'sanitize user first name'() {
+        currentUser.first = "<b>f</b><script>irst"
+
+        when:
+        def userBefore = skillsService.getCurrentUser()
+        skillsService.updateUserInfo(currentUser)
+        def userAfter = skillsService.getCurrentUser()
+
+        then:
+
+        then:
+        userBefore.first == "Skills"
+        userAfter.first == "f"
+    }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def 'sanitize user last name'() {
+        currentUser.last = "<b>l</b><script>ast"
+
+        when:
+        def userBefore = skillsService.getCurrentUser()
+        skillsService.updateUserInfo(currentUser)
+        def userAfter = skillsService.getCurrentUser()
+
+        then:
+
+        then:
+        userBefore.last == "Test"
+        userAfter.last == "l"
+    }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def 'sanitize user nickname'() {
+        currentUser.nickname = "<b>n</b><script>ickname"
+
+        when:
+        def userBefore = skillsService.getCurrentUser()
+        skillsService.updateUserInfo(currentUser)
+        def userAfter = skillsService.getCurrentUser()
+
+        then:
+
+        then:
+        userBefore.nickname == "Skills Test"
+        userAfter.nickname == "n"
+    }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def 'sanitize user first, last and nickname'() {
+        currentUser.first = "<b>f</b><script>irst"
+        currentUser.last = "<b>l</b><script>ast"
+        currentUser.nickname = "<b>n</b><script>ickname"
+
+        when:
+        skillsService.updateUserInfo(currentUser)
+        def userAfter = skillsService.getCurrentUser()
+
+        then:
+
+        then:
+        userAfter.first == "f"
+        userAfter.last == "l"
+        userAfter.nickname == "n"
     }
 
     def 'project sort - move project up'(){

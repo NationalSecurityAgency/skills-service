@@ -23,6 +23,7 @@ import SkillsService from '@/components/skills/SkillsService';
 import SkillsShareService from '@/components/skills/crossProjects/SkillsShareService.js';
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 const props = defineProps(['selectedFromSkills', 'appendTo', 'showHeader', 'disabled']);
 const emit = defineEmits(['updateSelectedFromSkills', 'clearSelectedFromSkills', 'update', 'beforeUpdate'])
@@ -239,7 +240,7 @@ function validate(value, ctx) {
       </div>
       <div>
         <input v-model="toSkillId" v-bind="toSkillIdAttrs" class="hidden" aria-hidden="true" aria-label="Used to validate learning path route"/>
-        <Message v-if="errors.toSkillId" severity="error" data-cy="learningPathError" :closable="false"><span v-html="errors.toSkillId" /></Message>
+        <Message v-if="errors.toSkillId" severity="error" data-cy="learningPathError" :closable="false"><span v-html="InputSanitizer.sanitize(errors.toSkillId)" /></Message>
       </div>
     </template>
   </Card>
