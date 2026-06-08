@@ -24,6 +24,7 @@ import SkillsCalendarInput from "@/components/utils/inputForm/SkillsCalendarInpu
 import {useTimeUtils} from "@/common-components/utilities/UseTimeUtils.js";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 import {useStorage} from "@vueuse/core";
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 const props = defineProps({
   tagChart: Object,
@@ -131,6 +132,8 @@ const loadData = (shouldHighlight = false) => {
 };
 
 const filterRange = ref([]);
+
+const sanitize = (value) => InputSanitizer.sanitizeForHighlighting(value)
 </script>
 
 <template>
@@ -187,10 +190,10 @@ const filterRange = ref([]);
             <template #body="slotProps">
               <span :data-cy="`cell_tagValue-${slotProps.data.value}`">
                 <router-link v-if="projectId" :to="{ name: 'UserTagMetrics', params: { projectId: projectId, tagKey: tagKey, tagFilter: slotProps.data.value } }" :data-cy="`userTagTable-${tagKey}_viewMetricsLink`">
-                  <span v-if="slotProps.data.htmlValue" v-html="slotProps.data.htmlValue"></span><span v-else>{{ slotProps.data.value }}</span>
+                  <span v-if="slotProps.data.htmlValue" v-html="sanitize(slotProps.data.htmlValue)"></span><span v-else>{{ slotProps.data.value }}</span>
                 </router-link>
                 <span v-else>
-                  <span v-if="slotProps.data.htmlValue" v-html="slotProps.data.htmlValue"></span><span v-else>{{ slotProps.data.value }}</span>
+                  <span v-if="slotProps.data.htmlValue" v-html="sanitize(slotProps.data.htmlValue)"></span><span v-else>{{ slotProps.data.value }}</span>
                 </span>
               </span>
             </template>

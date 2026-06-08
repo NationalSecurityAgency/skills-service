@@ -15,8 +15,8 @@ limitations under the License.
 */
 <script setup>
 import { computed } from 'vue'
-import DOMPurify from 'dompurify'
 import StringHighlighter from '@/common-components/utilities/StringHighlighter.js'
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 const props = defineProps({
   value: {
@@ -38,7 +38,7 @@ const highlightValue = computed(() => {
   if (!raw) {
     return null
   }
-  return DOMPurify.sanitize(raw, { ALLOWED_TAGS: ['mark'], ALLOWED_ATTR: [] })
+  return InputSanitizer.sanitizeForHighlighting(raw)
 })
 </script>
 
