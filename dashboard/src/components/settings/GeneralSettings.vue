@@ -43,12 +43,10 @@ const [nickname] = defineField('nickname');
 
 const isLoading = ref(true);
 const isSaving = ref(false);
-const pkiAuthenticated = ref(false);
 const saveMessage = ref('');
 
 onMounted(() => {
   loadData();
-  pkiAuthenticated.value = appConfig.isPkiAuthenticated.value;
 })
 
 function loadData() {
@@ -88,8 +86,8 @@ function updateUserInfo() {
   <Card>
     <template #content v-if="!isLoading">
       <Message v-if="saveMessage" :sticky="false" :life="10000" severity="success">{{saveMessage}}</Message>
-      <SkillsTextInput name="firstName" label="First Name" is-required :initialValue="firstName" v-if="!pkiAuthenticated"/>
-      <SkillsTextInput name="lastName" label="Last Name" is-required :initialValue="lastName" v-if="!pkiAuthenticated" class="my-2"/>
+      <SkillsTextInput name="firstName" label="First Name" is-required :initialValue="firstName" v-if="!appConfig.isPkiAuthenticated" class="my-2"/>
+      <SkillsTextInput name="lastName" label="Last Name" is-required :initialValue="lastName" v-if="!appConfig.isPkiAuthenticated" class="my-2"/>
       <SkillsTextInput name="nickname" label="Primary Name" :initialValue="nickname" class="mb-3"/>
 
       <SkillsButton label="Save" icon="fas fa-arrow-circle-right" @click="updateUserInfo" :disabled="!meta.valid || !meta.dirty" data-cy="generalSettingsSave" />
