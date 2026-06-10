@@ -135,6 +135,11 @@ describe('Badges Tests', () => {
             name: 'Badge Exist',
             badgeId: 'badgeExist'
         });
+        cy.intercept('GET', '/public/config', (req) => {
+          req.continue((res) => {
+            res.body.descriptionMaxLength = 20000
+          })
+        })
 
         cy.intercept('POST', '/api/validation/url')
             .as('customUrlValidation');
