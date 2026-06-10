@@ -195,6 +195,11 @@ describe('Markdown Tests', () => {
     });
 
     it('allows image paste events to continue through the editor', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.continue((res) => {
+                res.body.descriptionMaxLength = 20000
+            })
+        })
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
         cy.get('[data-cy=newSkillButton]')
           .click();
