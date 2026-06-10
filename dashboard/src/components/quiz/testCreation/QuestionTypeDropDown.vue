@@ -43,15 +43,19 @@ function questionTypeChanged(inputItem) {
       :isRequired="isRequired"
       :options="options">
     <template #value="slotProps">
-      <div v-if="slotProps.value" class="p-1" :data-cy="`selectionItem_${slotProps.value.id}`" :aria-label="`Select ${slotProps.value.label}`">
-        <i :class="slotProps.value.icon" style="min-width: 1.2rem" class="border rounded-sm p-1 mr-2" aria-hidden="true"></i>
+      <div v-if="slotProps.value" class="flex gap-1 items-center" :data-cy="`selectionItem_${slotProps.value.id}`" :aria-label="`Select ${slotProps.value.label}`">
+        <div class="border rounded-sm px-1 min-w-5">
+          <i :class="slotProps.value.icon" aria-hidden="true"></i>
+        </div>
         <span class="">{{ slotProps.value.label }}</span>
       </div>
     </template>
 
     <template #option="slotProps">
-      <div class="p-1" :data-cy="`selectionItem_${slotProps.option.id}`">
-        <i :class="slotProps.option.icon" style="min-width: 1.2rem" class="border rounded-sm p-1 mr-2" aria-hidden="true"></i>
+      <div class="flex gap-1 items-center py-1" :data-cy="`selectionItem_${slotProps.option.id}`">
+        <div class="border rounded-sm px-1 min-w-5">
+          <i :class="slotProps.option.icon" aria-hidden="true"></i>
+        </div>
         <span class="">{{ slotProps.option.label }}</span><span class="hidden sm:inline">: {{ slotProps.option.description }}</span>
       </div>
     </template>
