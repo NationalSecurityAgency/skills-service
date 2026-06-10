@@ -24,6 +24,7 @@ import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillsDisplaySearch from '@/skills-display/components/SkillsDisplaySearch.vue'
 import ProjectService from "@/components/projects/ProjectService.js";
 import {useRoute} from "vue-router";
+import SkillsDisplayPathAppendValues from "@/router/SkillsDisplayPathAppendValues.js";
 
 const route = useRoute()
 
@@ -57,16 +58,14 @@ const renderDivWhereBackButtonResides = computed(() => (showBackButton.value || 
 const renderDivWhereBrandResides = computed(() => showBackButton.value || !disableSkillTreeBrand.value)
 const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
 
-const isProjectPage = computed(() => {
-  const regex = new RegExp(route.params.projectId + '/?$');
-  return regex.test(route.path) && route.params.projectId && !(route.params.skillId && route.params.badgeId && route.params.subjectId)
-})
-
+const isProgressAndRankingProjPage = route.name === `SkillsDisplay${SkillsDisplayPathAppendValues.Local}`
 const isMyProject = ref(false);
 const showAddedMsg = ref(false);
 
 onMounted(() => {
-  loadProjectSavedStatus()
+  if (isProgressAndRankingProjPage) {
+    loadProjectSavedStatus()
+  }
 })
 
 const loadProjectSavedStatus = () => {
@@ -84,6 +83,8 @@ const addToMyProjects = () => {
         }, 4000);
       })
 }
+
+const showAddToMyProjectsBtn = computed(() => isProgressAndRankingProjPage && !isMyProject.value)
 </script>
 
 <template>
@@ -117,26 +118,25 @@ const addToMyProjects = () => {
           <div :class="{'mx-5': showBackButton}" class="text-center flex-col w-full">
             <SkillsDisplayBreadcrumb v-if="!disableBreadcrumb"></SkillsDisplayBreadcrumb>
 
-            <div class="flex flex-row flex-wrap" :class="{ 'justify-center': !disableBreadcrumb }">
+            <div class="flex flex-col md:flex-row md:gap-3 flex-wrap items-start" :class="{ 'justify-center': !disableBreadcrumb }">
               <h1 data-cy="title"
-                   :class="{ 'mt-2': disableBreadcrumb}"
+                   :class="{ 'mt-1': disableBreadcrumb, 'max-w-[42rem]': showAddToMyProjectsBtn || showAddedMsg }"
                    class="skills-title uppercase text-2xl font-normal m-0">
                 <slot />
               </h1>
               <SkillsButton
-                  v-if="isProjectPage && !isMyProject && !showAddedMsg"
-                  label="Add To My Projects"
-                  icon="fa-solid fa-heart-circle-plus"
-                  @click="addToMyProjects()"
+                  v-if="showAddToMyProjectsBtn && !showAddedMsg"
+                  label="My Projects"
+                  icon="fas fa-plus-circle"
+                  @click="addToMyProjects"
                   outlined
-                  class="animate-fadein animate-duration-300 mt-2 ml-4 absolute"
-                  size="small"
+                  class="mt-2"
                   :data-cy="`addButton-${attributes.projectId}`"
                   :aria-label="`add project ${attributes.projectId} to my projects`"/>
-              <InlineMessage v-if="showAddedMsg" class="ml-4 mt-2" severity="success">
+              <InlineMessage v-if="showAddedMsg" class="mt-2" severity="success">
                 Project added!
               </InlineMessage>
-              </div>
+            </div>
           </div>
         </div>
 
