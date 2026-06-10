@@ -201,6 +201,7 @@ describe('Markdown Tests', () => {
         cy.get('[data-cy=skillName]')
           .type('skill1');
 
+        cy.typeInMarkdownEditor('[data-cy=markdownEditorInput]', 'Uploaded Image:{enter}');
         cy.fixture('skilltree_logo.png', 'base64')
           .then((imageBase64) => {
               return Cypress.Blob.base64StringToBlob(imageBase64, 'image/png');
