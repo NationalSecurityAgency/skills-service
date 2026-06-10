@@ -906,4 +906,41 @@ class ClientDisplayGlobalBadgesSpec extends DefaultIntSpec {
         e.httpStatus == HttpStatus.BAD_REQUEST
         e.resBody.contains("Project ID [InvalidProjectId] does not participate in this global badge [${badge.badgeId}]")
     }
+
+    def "increasing skill's numPerformToCompletion should retain achieved badge"() {
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement = 40
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        Map badge = [badgeId: globalBadgeId, name: 'Badge 1', description: 'This is a first badge', iconClass: "fa fa-seleted-icon",]
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignSkillToGlobalBadge(projectId: projId, badgeId: badge.badgeId, skillId: proj1_skills.get(0).skillId)
+        badge.enabled  = 'true'
+        skillsService.updateGlobalBadge(badge, badge.badgeId)
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
+
+        proj1_skills.get(0).numPerformToCompletion = 5
+        skillsService.updateSkill(proj1_skills.get(0), proj1_skills.get(0).skillId)
+
+        when:
+        def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+        then:
+        summaries.size() == 1
+        def summary = summaries.first()
+        summary.badge == "Badge 1"
+        summary.badgeId == globalBadgeId
+        summary.badgeAchieved == true
+        summary.numTotalSkills == 1
+        summary.numSkillsAchieved == 0
+    }
 }
