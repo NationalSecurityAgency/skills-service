@@ -238,7 +238,7 @@ describe('Markdown Tests', () => {
           .should('exist')
           .and('have.attr', 'alt', 'skilltree_logo.png');
 
-        cy.clickSave();
+        cy.clickSaveDialogBtn();
         cy.get('[data-cy="manageSkillLink_skill1Skill"]')
           .click();
         cy.get('[data-cy="skillOverviewDescription"] img')
