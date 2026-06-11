@@ -137,7 +137,7 @@ describe('Badges Tests', () => {
         });
         cy.intercept('GET', '/public/config', (req) => {
           req.continue((res) => {
-            res.body.descriptionMaxLength = 20000
+            res.body.descriptionMaxLength = 2000
           })
         })
 
