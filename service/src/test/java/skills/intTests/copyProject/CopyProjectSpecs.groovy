@@ -1254,6 +1254,74 @@ class CopyProjectSpecs extends CopyIntSpec {
         file.bytes == contents.getBytes()
     }
 
+    def "Copy a project with description - validate description is copied"() {
+        def p1 = createProject(1)
+        p1.description = "Here is a project description"
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2Skills = createSkills(3, 2, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
+
+        when:
+        def newProj = SkillsFactory.createProject(50)
+        skillsService.copyProject(p1.projectId, newProj)
+
+        def copiedProject = skillsService.getProject(newProj.projectId)
+        def copiedProjectDesc = skillsService.getProjectDescription(newProj.projectId).description
+        def originalProject = skillsService.getProject(p1.projectId)
+        def originalProjectDesc = skillsService.getProjectDescription(p1.projectId).description
+        then:
+
+        copiedProject
+        originalProject
+        originalProject.projectId != copiedProject.projectId
+
+        originalProjectDesc
+        copiedProjectDesc
+        originalProjectDesc == copiedProjectDesc
+    }
+
+    def "Copy a project with description that has attachments"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+        String contents = 'Test is a test'
+        String attachmentHref = attachFileAndReturnHref(p1.projectId, contents)
+
+        p1.description = "Here is a [Link](${attachmentHref})".toString()
+        skillsService.updateProject(p1)
+
+        when:
+        def projToCopy = createProject(2)
+        skillsService.copyProject(p1.projectId, projToCopy)
+
+        def copiedProjectDesc = skillsService.getProjectDescription(projToCopy.projectId).description
+        def originalProjectDesc = skillsService.getProjectDescription(p1.projectId).description
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        assert attachments.size() == 2
+        Attachment originalAttachment = attachments.find { attachmentHref.contains(it.uuid) }
+        Attachment newAttachment = attachments.find { !attachmentHref.contains(it.uuid) }
+
+        then:
+        // validate description is copied, new attachments were created for the copied projects and those attachments are valid and have different uuid
+        originalProjectDesc == "Here is a [Link](${attachmentHref})"
+        copiedProjectDesc == "Here is a [Link](/api/download/${newAttachment.uuid})"
+
+        SkillsService.FileAndHeaders origFileAndHeaders = skillsService.downloadAttachment("/api/download/${newAttachment.uuid}")
+        File origFile = origFileAndHeaders.file
+        origFile
+        origFile.bytes == contents.getBytes()
+
+        SkillsService.FileAndHeaders fileAndHeaders = skillsService.downloadAttachment("/api/download/${originalAttachment.uuid}")
+        File file = fileAndHeaders.file
+        file
+        file.bytes == contents.getBytes()
+    }
+
     static class Edge {
         String from
         String to
