@@ -20,14 +20,16 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
 import org.springframework.jdbc.core.JdbcTemplate
+import skills.intTests.copyProject.CopyIntSpec
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.storage.model.Attachment
 
 import static skills.intTests.utils.SkillsFactory.*
 
-class CommunityAndProjectCopySpecs extends DefaultIntSpec {
+class CommunityAndProjectCopySpecs extends CopyIntSpec {
 
     @Autowired
     JdbcTemplate jdbcTemplate
@@ -171,6 +173,47 @@ class CommunityAndProjectCopySpecs extends DefaultIntSpec {
         then:
         def exception = thrown(SkillsClientException)
         exception.message.contains("May not contain divinedragon word")
+    }
+
+    def "copy UC-protected project with attachment"() {
+        // validate that new attachments are also UC-protected
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        def p1Skills = createSkills(3, 1, 1, 100, 5)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, p1Skills)
+        String contents = 'Test is a test'
+        String attachmentHref = attachFileAndReturnHref(p1.projectId, contents, pristineDragonsUser)
+
+        p1.description = "Here is a [Link](${attachmentHref})".toString()
+        pristineDragonsUser.updateProject(p1)
+
+        def projToCopy = createProject(2)
+        pristineDragonsUser.copyProject(p1.projectId, projToCopy)
+
+        def copiedProjectDesc = pristineDragonsUser.getProjectDescription(projToCopy.projectId).description
+        def originalProjectDesc = pristineDragonsUser.getProjectDescription(p1.projectId).description
+        List<Attachment> attachments = attachmentRepo.findAll()
+        assert attachments.size() == 2
+        Attachment newAttachment = attachments.find { !attachmentHref.contains(it.uuid) }
+
+        // validate description is copied, new attachments were created for the copied projects and those attachments are valid and have different uuid
+        assert originalProjectDesc == "Here is a [Link](${attachmentHref})"
+        assert copiedProjectDesc == "Here is a [Link](/api/download/${newAttachment.uuid})"
+
+        when:
+        // validate non-UC user cannot download the copied attachment
+        skillsService.getProjectDescription(projToCopy.projectId)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains("code=403 FORBIDDEN")
     }
 
     def "keeping community disabled during copy and description has divinedragon that's not allowed in uc projects"() {
