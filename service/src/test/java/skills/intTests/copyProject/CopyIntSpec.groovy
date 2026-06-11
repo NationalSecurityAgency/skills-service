@@ -18,6 +18,7 @@ package skills.intTests.copyProject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsService
 import skills.storage.repos.AttachmentRepo
 import skills.storage.repos.LevelDefRepo
 import skills.utils.GroovyToJavaByteUtils
@@ -29,10 +30,10 @@ class CopyIntSpec extends DefaultIntSpec {
     @Autowired
     AttachmentRepo attachmentRepo
 
-    def attachFileAndReturnHref(String projectId, String contents = 'Test is a test') {
+    def attachFileAndReturnHref(String projectId, String contents = 'Test is a test', SkillsService skillsServiceToUse = skillsService) {
         String filename = 'test-pdf.pdf'
         Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
-        def result = skillsService.uploadAttachment(resource, projectId, null, null)
+        def result = skillsServiceToUse.uploadAttachment(resource, projectId, null, null)
         String attachmentHref = result.href
         return attachmentHref
     }
