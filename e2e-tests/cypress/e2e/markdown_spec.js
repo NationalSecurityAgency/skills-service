@@ -129,6 +129,123 @@ describe('Markdown Tests', () => {
           .should('have.attr', 'target', '_blank');
     });
 
+    it('pastes html clipboard content as plain text', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.get('[data-cy=newSkillButton]')
+          .click();
+        cy.get('[data-cy=skillName]')
+          .type('skill1');
+
+        cy.get(markdownInput)
+          .focus()
+          .trigger('paste', {
+              clipboardData: {
+                  items: [
+                      {
+                          type: 'text/html',
+                      },
+                      {
+                          type: 'text/plain',
+                      },
+                  ],
+                  getData: (type) => {
+                      if (type === 'text/html') {
+                          return '<h1>HTML Title</h1><p><strong>Bold Text</strong></p><p><a href="https://example.com">Example Link</a></p>';
+                      }
+                      if (type === 'text/plain') {
+                          return 'HTML Title\nBold Text\nExample Link';
+                      }
+                      return '';
+                  },
+              },
+          });
+
+        cy.get(markdownInput)
+          .contains('HTML Title');
+        cy.get(markdownInput)
+          .contains('Bold Text');
+        cy.get(markdownInput)
+          .contains('Example Link');
+
+        cy.get(markdownInput)
+          .find('h1')
+          .should('not.exist');
+        cy.get(markdownInput)
+          .find('strong')
+          .should('not.exist');
+        cy.get(markdownInput)
+          .find('a[href="https://example.com"]')
+          .should('not.exist');
+
+        cy.clickSave();
+        cy.get('[data-cy="manageSkillLink_skill1Skill"]')
+          .click();
+        cy.get('[data-cy="skillOverviewDescription"]')
+          .contains('HTML Title');
+        cy.get('[data-cy="skillOverviewDescription"]')
+          .contains('Bold Text');
+        cy.get('[data-cy="skillOverviewDescription"]')
+          .contains('Example Link');
+        cy.get('[data-cy="skillOverviewDescription"] h1')
+          .should('not.exist');
+        cy.get('[data-cy="skillOverviewDescription"] strong')
+          .should('not.exist');
+        cy.get('[data-cy="skillOverviewDescription"] a[href="https://example.com"]')
+          .should('not.exist');
+    });
+
+    it('allows image paste events to continue through the editor', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1/');
+        cy.get('[data-cy=newSkillButton]')
+          .click();
+        cy.get('[data-cy=skillName]')
+          .type('skill1');
+
+        cy.typeInMarkdownEditor('[data-cy=markdownEditorInput]', 'Uploaded Image:{enter}');
+        cy.fixture('skilltree_logo.png', 'base64')
+          .then((imageBase64) => {
+              return Cypress.Blob.base64StringToBlob(imageBase64, 'image/png');
+          })
+          .then((imageBlob) => {
+              const imageFile = new File([imageBlob], 'skilltree_logo.png', { type: 'image/png' });
+              cy.get(markdownInput)
+                .focus()
+                .then(($el) => {
+                    const pasteEvent = new Event('paste', {
+                        bubbles: true,
+                        cancelable: true,
+                    });
+
+                    Object.defineProperty(pasteEvent, 'clipboardData', {
+                        value: {
+                            items: [
+                                {
+                                    kind: 'file',
+                                    type: 'image/png',
+                                    getAsFile: () => imageFile,
+                                },
+                            ],
+                            files: [imageFile],
+                            getData: () => '',
+                        },
+                    });
+
+                    $el[0].dispatchEvent(pasteEvent);
+                });
+          });
+
+        cy.get(markdownInput)
+          .find('img')
+          .should('exist')
+          .and('have.attr', 'alt', 'skilltree_logo.png');
+
+        cy.clickSaveDialogBtn();
+        cy.get('[data-cy="manageSkillLink_skill1Skill"]')
+          .click();
+        cy.get('[data-cy="skillOverviewDescription"] img')
+          .should('exist');
+    });
+
     it('attempt to upload an attachment that is too large', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {

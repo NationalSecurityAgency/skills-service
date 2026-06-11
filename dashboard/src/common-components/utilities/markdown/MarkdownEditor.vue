@@ -193,6 +193,26 @@ const callSetMarkdownText = (newText) => {
   return toastuiEditor.value.invoke('setMarkdown', newText)
 }
 
+const handlePasteAsText = (event) => {
+  if (props.disabled) {
+    return
+  }
+
+  const clipboardItems = [...(event.clipboardData?.items || [])]
+  const hasImage = clipboardItems.some((item) => item.type.startsWith('image/'))
+  if (hasImage) {
+    return
+  }
+
+  const plainText = event.clipboardData?.getData('text/plain') || ''
+  event.preventDefault()
+  event.stopPropagation()
+
+  if (plainText) {
+    insertText(plainText)
+  }
+}
+
 onMounted(() => {
   if (props.allowAttachments) {
     toastuiEditor.value.invoke('addCommand', 'wysiwyg', 'attachFile', () => {
@@ -501,6 +521,7 @@ defineExpose({
                        :options="editorOptions"
                        :height="markdownHeight"
                        :disabled="disabled"
+                       @paste.capture="handlePasteAsText"
                        @change="onChangeFunc"
                        @keydown="onKeydown"
                        @focus="handleFocus"
