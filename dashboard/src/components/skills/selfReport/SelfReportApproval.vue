@@ -30,7 +30,7 @@ import {useStorage} from "@vueuse/core";
 import AssignedApproversCell from "@/components/skills/selfReport/AssignedApproversCell.vue";
 import {useProjConfig} from "@/stores/UseProjConfig.js";
 import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
-
+import { useDescriptionFetchService } from "@/common-components/utilities/UseDescriptionFetchService.js";
 
 const route = useRoute();
 const appInfo = useAppInfoState()
@@ -41,6 +41,7 @@ const responsive = useResponsiveBreakpoints()
 const numberFormat = useNumberFormat()
 const projConfig = useProjConfig()
 const skillRouteUtil = useSkillOverviewRouteUtil()
+const descriptionService = useDescriptionFetchService()
 
 const props = defineProps({
   selfReportStats: Array
@@ -56,6 +57,7 @@ const sortOrder = ref(-1);
 const sortBy = ref('requestedOn');
 const selectedItems = ref([]);
 const expandedRows = ref({});
+const descriptions = ref({});
 const totalRows = ref(null);
 const emailSubscribed = ref(true);
 const isEmailEnabled = computed(() => appInfo.emailEnabled)
@@ -180,6 +182,13 @@ const toggleRow = (row) => {
   expandedRows.value = { ...expandedRows.value };
 }
 
+const fetchDescription = (row) => {
+  descriptionService.getDescriptionForSkill(route.params.projectId, row.skillId).then((res) => {
+    descriptions.value[row.skillId] = res.description;
+    toggleRow(row.id);
+  })
+}
+
 const reset = () => {
   filters.value.userId = '';
   filters.value.skillName = '';
@@ -289,6 +298,12 @@ const toRouteProps = (skill) => {
                       :aria-label="`Show Justification for ${slotProps.data.name}`"
                       :data-cy="`expandDetailsBtn_${slotProps.data.skillId}`" :icon="expandedRows[slotProps.data.id] ? 'fa fa-minus-square' : 'fa fa-plus-square'" label="Justification">
             </SkillsButton>
+            <SkillsButton size="small" variant="outline-info"
+                          class="mr-2 py-0 px-1 mt-1 ml-2 lg:ml-0"
+                          @click="fetchDescription(slotProps.data)"
+                          :aria-label="`Show Description for ${slotProps.data.name}`"
+                          :data-cy="`showDescriptionBtn_${slotProps.data.skillId}`" :icon="expandedRows[slotProps.data.id] ? 'fa fa-minus-square' : 'fa fa-plus-square'" label="Skill Description">
+            </SkillsButton>
           </template>
         </Column>
         <Column field="userId" :sortable="true" :class="{'flex': responsive.md.value }">
@@ -319,6 +334,7 @@ const toRouteProps = (skill) => {
         <template #expansion="slotProps">
           <div>
             <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-6">
+              <template #title>Justification</template>
               <template #content>
                 <markdown-text class="d-inline-block" :text="slotProps.data.requestMsg" data-cy="approvalMessage" :instance-id="`${slotProps.data.id}`"/>
               </template>
@@ -326,6 +342,14 @@ const toRouteProps = (skill) => {
             <Card v-else>
               <template #content>
                 No Justification supplied
+              </template>
+            </Card>
+          </div>
+          <div>
+            <Card v-if="descriptions[slotProps.data.skillId]" header="Skill Description" class="ml-6 mt-4">
+              <template #title>Skill Description</template>
+              <template #content>
+                <markdown-text class="d-inline-block" :text="descriptions[slotProps.data.skillId]" data-cy="approvalMessage" :instance-id="`${slotProps.data.skillId}`"/>
               </template>
             </Card>
           </div>
