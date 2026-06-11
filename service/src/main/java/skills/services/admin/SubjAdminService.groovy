@@ -300,14 +300,7 @@ class SubjAdminService {
 
         SkillCounts skillCounts = getSkillsStatsForSubjects(skillDef, approvalsOnly)
 
-        if(approvalsOnly) {
-            Integer skillPoints = skillCounts.getTotalSkillPoints()
-            if(skillPoints) {
-                res.totalPoints = skillPoints
-            } else {
-                res.totalPoints = 0;
-            }
-        }
+        res.totalPoints = skillCounts.getTotalSkillPoints() ?: 0
 
         res.numGroups = skillCounts.getEnabledGroupsCount() ?: 0
         res.numGroupsDisabled = skillCounts.getDisabledGroupsCount() ?: 0
