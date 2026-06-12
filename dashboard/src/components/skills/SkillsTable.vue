@@ -53,6 +53,7 @@ import CopySubjectOrSkillsDialog from "@/components/subjects/CopySubjectOrSkills
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import { useSkillsState } from '@/stores/UseSkillsState.js';
 import AddSkillEventBatch from "@/components/skills/AddSkillEventBatch.vue";
+import BatchSkillEditDialog from "@/components/skills/BatchSkillEditDialog.vue";
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -337,8 +338,31 @@ const disableItemsWhenGroupIsSelected = (menuItems) => {
 const propMenu = (menuItems) => disableItemsWhenGroupIsSelected(addWidthToIcon(menuItems))
 const actionsMenu = ref(propMenu([
   {
+    label: 'Report Skills for Users',
+    icon: 'fas fa-user-plus',
+    disabled: reportSkillsDisabled,
+    command: () => {
+      showAddEventsModal.value = true
+    }
+  },
+  {
+    label: 'Batch Edit',
+    icon: 'fa-solid fa-pen-to-square',
+    disabled: reportSkillsDisabled,
+    command: () => {
+      showBatchEditModal.value = true
+    }
+  },
+  {
+    label: 'Add To Badge',
+    icon: 'fas fa-award',
+    command: () => {
+      showAddSkillsToBadgeDialog.value = true
+    },
+  },
+  {
     label: 'Export To Catalog',
-    icon: 'far fa-arrow-alt-circle-up',
+    icon: 'fas fa-edit',
     command: () => {
       showExportToCatalogDialog.value = true
     },
@@ -358,26 +382,11 @@ const actionsMenu = ref(propMenu([
     }
   },
   {
-    label: 'Add To Badge',
-    icon: 'fas fa-award',
-    command: () => {
-      showAddSkillsToBadgeDialog.value = true
-    },
-  },
-  {
     label: 'Copy to another Project',
     icon: 'fas fa-copy',
     command: () => {
       showCopySkillsModal.value = true
     },
-  },
-  {
-    label: 'Report Skills for Users',
-    icon: 'fas fa-user-plus',
-    disabled: reportSkillsDisabled,
-    command: () => {
-      showAddEventsModal.value = true
-    }
   },
   {
     label: 'Skill Tags',
@@ -401,6 +410,7 @@ const actionsMenu = ref(propMenu([
 ]))
 const expandedRows = ref([])
 
+const showBatchEditModal = ref(false)
 const showMoveSkillsInfoModal = ref(false)
 const showSkillsReuseModal = ref(false)
 const showCopySkillsModal = ref(false)
@@ -462,6 +472,12 @@ const onExported = (exportInfo) => {
   removeSelectedRows()
   subjectState.loadSubjectDetailsState()
 }
+
+const onBatchSkillUpdate = () => {
+  subjectSkillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
+  subjectState.loadSubjectDetailsState()
+}
+
 const removeSelectedRows = () => {
   selectedRows.value = []
 }
@@ -946,8 +962,14 @@ const pageChanged = (pagingInfo) => {
       v-model="deleteSkillInfo.show"
       :skill="deleteSkillInfo.skill"
       @do-remove="doDeleteSkill" />
+    <batch-skill-edit-dialog
+      v-if="showBatchEditModal"
+      v-model="showBatchEditModal"
+      @skills-updated="onBatchSkillUpdate"
+      :skills="selectedSkills"
+    />
     <export-to-catalog-dialog
-      v-if="showExportToCatalogDialog"
+      v-if="showBatchEditModal"
       v-model="showExportToCatalogDialog"
       :skills="selectedSkills"
       :show-invite-only-warning="inviteOnlyProjectState.isInviteOnlyProject"

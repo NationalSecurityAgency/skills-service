@@ -77,7 +77,7 @@ watch(value, (newValue) => {
 </script>
 
 <template>
-  <div class="field" v-bind="fallthroughAttributes.rootAttrs.value">
+  <div class="flex flex-col gap-2" v-bind="fallthroughAttributes.rootAttrs.value">
     <label v-if="label" :for="name"><span v-if="isRequired">*</span> {{ label }}:</label>
     <Select v-model="value"
               :options="options"
