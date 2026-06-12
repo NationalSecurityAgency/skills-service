@@ -294,7 +294,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
             sum(case when c.enabled = 'false' and  c.type = 'SkillsGroup' then 1 end) as disabledGroupsCount,
             sum(case when skillId like '%STREUSESKILLST%' and  c.type = 'Skill' then 1 end) as numSkillsReused,
             sum(case when skillId like '%STREUSESKILLST%' and  c.type = 'Skill' then c.totalPoints end) as totalPointsReused,
-            sum(c.totalPoints) as totalSkillPoints
+            sum(case when c.enabled = 'true' and c.type = 'Skill' then c.totalPoints end) as totalSkillPoints
             from SkillRelDef r, SkillDef c 
             where r.parent.id=?1 and c.id = r.child.id and r.type in ('RuleSetDefinition', 'GroupSkillToSubject') and ('false' = ?2 or c.selfReportingType = 'Approval')
         ''')
