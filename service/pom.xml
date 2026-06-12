@@ -745,7 +745,7 @@
                                 <licenseMerge>Common Development and Distribution License (CDDL) + The GNU General Public License (GPL) Version 2 with the Classpath Exception|CDDL + GPLv2 with classpath exception</licenseMerge>
                                 <licenseMerge>The GNU General Public License (GPL) Version 2 with FOSS exception|The GNU General Public License, v2 with FOSS exception</licenseMerge>
                                 <licenseMerge>Mozilla Public License, Version 2.0 or Eclipse Public License - Version 1.0|MPL 2.0 or EPL 1.0</licenseMerge>
-                                <licenseMerge>Eclipse Public License - Version 2.0|Eclipse Public License v. 2.0|Eclipse Public License v2.0</licenseMerge>
+                                <licenseMerge>Eclipse Public License - Version 2.0|Eclipse Public License v. 2.0|Eclipse Public License v2.0|EPL-2.0</licenseMerge>
                                 <licenseMerge>Eclipse Distribution License - Version 1.0|EDL 1.0|Eclipse Distribution License v. 1.0|Eclipse Distribution License - v 1.0</licenseMerge>
                             </licenseMerges>
                         </configuration>

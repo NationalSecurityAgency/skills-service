@@ -167,7 +167,7 @@ describe('Settings Tests', () => {
             .should('have.text', '15');
     });
 
-    it('names are update with saved values from the server', () => {
+    it('names are updated with saved values from the server', () => {
         cy.intercept('POST', '/app/userInfo').as('saveUserInfo')
         cy.visit('/settings')
         cy.get('[data-cy="firstName"]').type('<b>')
@@ -180,6 +180,34 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="firstName"]').should('have.value', 'Jack')
         cy.get('[data-cy="lastName"]').should('have.value', 'Smith')
         cy.get('[data-cy="nickname"]').should('have.value', 'Zack Smith')
+    })
+
+    it('first and last name is not showing in pki-mode install', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.authMode = 'PKI';
+                res.send(conf);
+            });
+        }).as('loadConfig');
+        cy.visit('/settings')
+        cy.wait('@loadConfig')
+        cy.get('[data-cy="nickname"]').should('be.visible')
+        cy.get('[data-cy="nickname"]').type('{selectAll}hi')
+        cy.get('[data-cy="firstName"]').should('not.exist')
+        cy.get('[data-cy="lastName"]').should('not.exist')
+        cy.get('[data-cy="generalSettingsSave"]').should('be.enabled')
+
+        cy.intercept('POST', '/app/userInfo').as('saveUserInfo')
+        cy.get('[data-cy="generalSettingsSave"]').click()
+        cy.wait('@saveUserInfo')
+        cy.get('[data-pc-name="message"]').contains('Updated User Info')
+
+        cy.visit('/settings')
+        cy.wait('@loadConfig')
+        cy.get('[data-cy="nickname"]').should('have.value', 'hi')
+        cy.get('[data-cy="firstName"]').should('not.exist')
+        cy.get('[data-cy="lastName"]').should('not.exist')
     })
 
     it('max name validation', () => {
