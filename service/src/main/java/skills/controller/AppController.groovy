@@ -267,14 +267,6 @@ class AppController {
         return projAdminService.getProjectDescription(projectId)
     }
 
-    @RequestMapping(value = "/projects/{id}/isMyProject", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    @ExcludeFromLimitDashboardAccess
-    boolean getIsInMyProjects(@PathVariable("id") String projectId) {
-        String userId = userInfoService.getCurrentUserId();
-        return projAdminService.isInMyProjects(projectId, userId)
-    }
-
     @RequestMapping(value = "/badges", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<GlobalBadgeResult> getBadges() {

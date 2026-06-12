@@ -1641,12 +1641,15 @@ class AdminEditSpecs extends DefaultIntSpec {
         skillsService.createProjectAndSubjectAndSkills(proj1, subj, skills[1..4])
 
         when:
-        def isMyProject = skillsService.isMyProject(proj1.projectId)
+        def isMyProject = skillsService.isMyProject(proj1.projectId).data
         skillsService.addMyProject(proj1.projectId)
-        def isMyProjectNow = skillsService.isMyProject(proj1.projectId)
+        def isMyProjectNow = skillsService.isMyProject(proj1.projectId).data
+        skillsService.removeMyProject(proj1.projectId)
+        def isMyProjectRemoval = skillsService.isMyProject(proj1.projectId).data
 
         then:
         isMyProject == false
         isMyProjectNow == true
+        isMyProjectRemoval == false
     }
 }

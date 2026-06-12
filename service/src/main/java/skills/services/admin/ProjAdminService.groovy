@@ -558,7 +558,8 @@ class ProjAdminService {
 
     @Transactional(readOnly = true)
     boolean isInMyProjects(String projectId, String userId) {
-        return projDefRepo.isProjectSavedByUser(projectId, userId);
+        SettingsResult result = settingsService.getUserProjectSetting(userId, projectId, 'my_project', 'my_projects')
+        return result ? true : false
     }
 
     @Transactional(readOnly = true)

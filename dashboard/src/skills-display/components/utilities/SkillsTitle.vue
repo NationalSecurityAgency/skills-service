@@ -70,7 +70,7 @@ onMounted(() => {
 
 const loadProjectSavedStatus = () => {
   ProjectService.isMyProject(attributes.projectId).then((res) => {
-    isMyProject.value = res;
+    isMyProject.value = res.data;
   });
 }
 
