@@ -18,8 +18,6 @@
            clientLibVersion: @maven.build.timestamp@
            -->
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
-        <mojo.maven.license.plugin.version>2.6.0</mojo.maven.license.plugin.version>
-        <mycila.maven.license.plugin.version>4.6</mycila.maven.license.plugin.version>
         <gmavenplus-plugin.version>4.3.1</gmavenplus-plugin.version>
     </properties>
     <dependencyManagement>
@@ -483,7 +481,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -548,7 +545,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>${surefire.version}</version>
                 <configuration>
                     <includes>
                         <include>**/*Spec*.java</include>
@@ -563,14 +559,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>${surefire.version}</version>
                 <configuration>
                     <reportsDirectory>target/surefire-reports</reportsDirectory>
                 </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>${surefire.version}</version>
                 <configuration>
                     <includes>
                         <include>**/*IT</include>
@@ -609,25 +603,6 @@
                             </resources>
                         </configuration>
                     </execution>
-<!--                    <execution>-->
-<!--                        <id>copy Vue.js client-display content</id>-->
-<!--                        <phase>generate-resources</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>copy-resources</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <outputDirectory>${basedir}/src/main/resources/public/static/clientPortal</outputDirectory>-->
-<!--                            <overwrite>true</overwrite>-->
-<!--                            <resources>-->
-<!--                                <resource>-->
-<!--                                    <directory>${project.parent.basedir}/client-display/dist</directory>-->
-<!--                                    <includes>-->
-<!--                                        <include>/*/</include>-->
-<!--                                    </includes>-->
-<!--                                </resource>-->
-<!--                            </resources>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
                 </executions>
             </plugin>
 
@@ -642,7 +617,6 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.5.1</version>
                 <executions>
                     <execution>
                         <id>default-deploy</id>
@@ -663,7 +637,6 @@
 <!--                mvn license:add-third-party-->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>${mojo.maven.license.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>default-cli</id>
@@ -758,7 +731,6 @@
                     mvn com.mycila:license-maven-plugin:3.0:format-->
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>${mycila.maven.license.plugin.version}</version>
                 <configuration>
                     <mapping>
                         <java>JAVADOC_STYLE</java>
@@ -816,7 +788,6 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>license-maven-plugin</artifactId>
-                        <version>${mojo.maven.license.plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>default-cli</id>
@@ -827,7 +798,6 @@
                     <plugin>
                         <groupId>com.mycila</groupId>
                         <artifactId>license-maven-plugin</artifactId>
-                        <version>${mycila.maven.license.plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>license-check</id>
