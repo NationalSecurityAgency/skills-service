@@ -183,7 +183,7 @@ const calculateClientDisplayRoute = (props) => {
 const loadData = () => {
   const url = getUrl()
   isLoading.value = true
-  const orderBy = sortInfo.value.sortBy === appConfig.usersTableAdditionalUserTagKey ? 'userTag' : sortInfo.value.sortBy
+  const orderBy = getOrderBy(sortInfo.value.sortBy)
   return UsersService.ajaxCall(url, {
     query: filters.value.user,
     limit: pageSize.value,
@@ -205,6 +205,16 @@ const loadData = () => {
     selectedRows.value = []
     isLoading.value = false
   })
+}
+
+const getOrderBy = (orderBy) => {
+  if (orderBy === appConfig.usersTableAdditionalUserTagKey) {
+    return 'userTag'
+  }
+  if (orderBy === 'totalProgress' && isSkillsGroupPage.value) {
+    return 'totalPoints'
+  }
+  return orderBy
 }
 
 const calcPercent = (userPoints) => {
