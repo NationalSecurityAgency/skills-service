@@ -605,15 +605,13 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         res.users.value == dates
     }
 
-    private Map getProps(int numDaysAgo, Boolean byMonth = false) {
-        Map props = [:]
-        use(TimeCategory) {
-            props[MetricsParams.P_START_TIMESTAMP] = numDaysAgo.days.ago.time
-            if (byMonth) {
-                props[MetricsParams.P_BY_MONTH] = byMonth
-            }
-        }
-        return props
+    private static Map getProps(int numDaysAgo) {
+        LocalDate weekStart = LocalDate.now()
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+                .minusDays(numDaysAgo)
+        Date startDate = Date.from(weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant())
+
+        return [ (MetricsParams.P_START_TIMESTAMP): startDate.time ]
     }
 
     void runQuiz(String userId, def quiz, boolean pass, Date startDate = null) {
