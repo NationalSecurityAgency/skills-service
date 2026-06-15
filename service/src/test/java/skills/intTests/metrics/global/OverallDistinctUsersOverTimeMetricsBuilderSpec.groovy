@@ -518,7 +518,7 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getOverallMetricsData(metricsId, getProps(15))
         then:
-        res.users.count == [0,0,0]
+        res.users.count == [0,0,0,0]
 
         where:
         "Query should return empty list when no users exist in date range"
@@ -547,13 +547,19 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         users.each { String user ->
             skillsService.addSkill([projectId: proj1.projectId, skillId: "skill1"], user, startOfToday)
         }
+        boolean isTodaySaturday = LocalDate.now().getDayOfWeek() == DayOfWeek.SATURDAY
+        LocalDate previousSaturday = isTodaySaturday ?
+            LocalDate.now().with(TemporalAdjusters.previous(DayOfWeek.SATURDAY)) :
+            LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY))
+        Date startOfSaturday = Date.from(previousSaturday.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant())
+        Date previousSunday = startOfSaturday+1
 
         when:
         def res = skillsService.getOverallMetricsData(metricsId, getProps(0))
         then:
-        res.users.size() == 1
-        res.users.count == [5]
-        res.users.value == [startOfToday.time]
+        res.users.size() == 2
+        res.users.count == [0,5]
+        res.users.value == [previousSunday.time, startOfToday.time]
     }
 
     def "test week boundary transition"() {
@@ -605,13 +611,17 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         res.users.value == dates
     }
 
-    private static Map getProps(int numDaysAgo) {
+    private static Map getProps(int numDaysAgo, Boolean byMonth = false) {
+        Map props = [:]
         LocalDate weekStart = LocalDate.now()
                 .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
                 .minusDays(numDaysAgo)
-        Date startDate = Date.from(weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant())
-
-        return [ (MetricsParams.P_START_TIMESTAMP): startDate.time ]
+        Date startDate = Date.from(weekStart.atStartOfDay(ZoneOffset.UTC).toInstant())
+        props[MetricsParams.P_START_TIMESTAMP] = startDate.time
+        if (byMonth) {
+            props[MetricsParams.P_BY_MONTH] = byMonth
+        }
+        return props
     }
 
     void runQuiz(String userId, def quiz, boolean pass, Date startDate = null) {
