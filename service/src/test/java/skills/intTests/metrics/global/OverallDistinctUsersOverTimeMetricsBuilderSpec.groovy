@@ -273,11 +273,9 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         assert maxDailyDays == 3, "test data constructed with the assumption that skills.config.compactDailyEventsOlderThan is set to 3"
         userEventService.compactDailyEvents()
 
-        Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
-
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(days[0]))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(daysPlusTwoWeeksPrior[0]))
 
         then:
         res30days.users.size() == 6
@@ -618,6 +616,16 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
                 .minusDays(numDaysAgo)
         Date startDate = Date.from(weekStart.atStartOfDay(ZoneOffset.UTC).toInstant())
         props[MetricsParams.P_START_TIMESTAMP] = startDate.time
+        if (byMonth) {
+            props[MetricsParams.P_BY_MONTH] = byMonth
+        }
+        return props
+    }
+
+    private static Map getProps(Date startDate, Boolean byMonth = false) {
+        Map props = [
+                (MetricsParams.P_START_TIMESTAMP): startDate.time
+        ]
         if (byMonth) {
             props[MetricsParams.P_BY_MONTH] = byMonth
         }
