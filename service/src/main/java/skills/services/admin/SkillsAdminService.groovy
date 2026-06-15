@@ -508,9 +508,6 @@ class SkillsAdminService {
                 skillRequestValidator.validateNumMaxOccurrencesIncrementInterval(projectId, skill.skillId, skill.pointIncrement, numToPerformToCompletion, updateRequest.numMaxOccurrencesIncrementInterval)
                 skill.numMaxOccurrencesIncrementInterval = updateRequest.numMaxOccurrencesIncrementInterval
             }
-            if (updateRequest.iconClass != null) {
-                skill.iconClass = InputSanitizer.sanitize(updateRequest.iconClass)
-            }
             if (updateRequest.selfReportingType != null) {
                 SelfReportingType previousType = skill.selfReportingType
                 SelfReportingType newType = updateRequest.selfReportingType == "reset" ? null : SelfReportingType.valueOf(updateRequest.selfReportingType)

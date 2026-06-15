@@ -474,6 +474,7 @@ const onExported = (exportInfo) => {
 }
 
 const onBatchSkillUpdate = () => {
+  removeSelectedRows()
   subjectSkillsState.loadSubjectSkills(route.params.projectId, route.params.subjectId)
   subjectState.loadSubjectDetailsState()
 }

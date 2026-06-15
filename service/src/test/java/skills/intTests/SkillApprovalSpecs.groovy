@@ -1008,8 +1008,9 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         skillsService.rejectSkillApprovals(proj.projectId, [ids[1], ids[2]], 'Just felt like it')
 
         when:
-        def res1 = skillsService.getSkillApprovalsStats(proj.projectId, skills[0].skillId)
-        def res2 = skillsService.getSkillApprovalsStats(proj.projectId, skills[1].skillId)
+        def res1 = skillsService.getSkillApprovalsStats(proj.projectId, [skills[0].skillId]).body
+        def res2 = skillsService.getSkillApprovalsStats(proj.projectId, [skills[1].skillId]).body
+        def res3 = skillsService.getSkillApprovalsStats(proj.projectId, [skills[0].skillId, skills[1].skillId]).body
 
         then:
         res1.find { it.value == 'SkillApprovalsRequests' }.count == 5
@@ -1017,6 +1018,9 @@ class SkillApprovalSpecs extends DefaultIntSpec {
 
         res2.find { it.value == 'SkillApprovalsRequests' }.count == 3
         res2.find { it.value == 'SkillApprovalsRejected' }.count == 0
+
+        res3.find { it.value == 'SkillApprovalsRequests' }.count == 8
+        res3.find { it.value == 'SkillApprovalsRejected' }.count == 2
     }
 
     def "skill approval stats should not include approval history as pending approvals"() {
@@ -1069,8 +1073,9 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         skillsService.approve(proj.projectId, [ids[3], ids[4]])
 
         when:
-        def res1 = skillsService.getSkillApprovalsStats(proj.projectId, skills[0].skillId)
-        def res2 = skillsService.getSkillApprovalsStats(proj.projectId, skills[1].skillId)
+        def res1 = skillsService.getSkillApprovalsStats(proj.projectId, [skills[0].skillId]).body
+        def res2 = skillsService.getSkillApprovalsStats(proj.projectId, [skills[1].skillId]).body
+        def res3 = skillsService.getSkillApprovalsStats(proj.projectId, [skills[0].skillId, skills[1].skillId]).body
 
         then:
         res1.find { it.value == 'SkillApprovalsRequests' }.count == 3
@@ -1079,6 +1084,10 @@ class SkillApprovalSpecs extends DefaultIntSpec {
 
         res2.find { it.value == 'SkillApprovalsRequests' }.count == 3
         res2.find { it.value == 'SkillApprovalsRejected' }.count == 0
+
+        res3.find { it.value == 'SkillApprovalsRequests' }.count == 6
+        res3.find { it.value == 'SkillApprovalsApproved' }.count == 2
+        res3.find { it.value == 'SkillApprovalsRejected' }.count == 2
     }
 
     void "requesting same skill over and over again will only add 1 approval"() {

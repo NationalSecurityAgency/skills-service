@@ -345,12 +345,12 @@ class SkillApprovalService {
         return res
     }
 
-    List<LabelCountItem> getSkillApprovalsStats(String projectId, String skillId) {
-        SkillRequestApprovalStats stats = skillApprovalRepo.countSkillRequestApprovals(projectId, skillId)
+    List<LabelCountItem> getSkillApprovalsStats(String projectId, List<String> skillIds) {
+        SkillRequestApprovalStats stats = skillApprovalRepo.countSkillRequestApprovals(projectId, skillIds)
         return [
-                new LabelCountItem(value: 'SkillApprovalsRequests', count: stats != null ? stats.getPending() : 0),
-                new LabelCountItem(value: 'SkillApprovalsRejected', count: stats != null ? stats.getRejected() : 0),
-                new LabelCountItem(value: 'SkillApprovalsApproved', count: stats != null ? stats.getApproved() : 0)
+                new LabelCountItem(value: 'SkillApprovalsRequests', count: stats?.getPending() ?: 0),
+                new LabelCountItem(value: 'SkillApprovalsRejected', count: stats?.getPending() ?: 0),
+                new LabelCountItem(value: 'SkillApprovalsApproved', count: stats?.getPending() ?: 0)
         ]
     }
 

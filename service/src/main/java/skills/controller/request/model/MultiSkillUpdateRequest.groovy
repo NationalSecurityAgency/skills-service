@@ -32,7 +32,5 @@ class MultiSkillUpdateRequest {
 
     String selfReportingType
 
-    String iconClass
-
     List<String> skills
 }

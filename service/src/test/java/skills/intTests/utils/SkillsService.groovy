@@ -732,8 +732,8 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/approvals/reject", [skillApprovalIds: approvalId, rejectionMessage: msg])
     }
 
-    def getSkillApprovalsStats(String projectId, String skillId) {
-        return wsHelper.adminGet("/projects/${projectId}/skills/${skillId}/approvals/stats")
+    def getSkillApprovalsStats(String projectId, List<String> skillIds) {
+        return wsHelper.adminPost("/projects/${projectId}/approvals/stats", [skillIds:skillIds])
     }
 
     def removeRejectionFromView(String projectId, Integer approvalId, String userId = null) {

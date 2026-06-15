@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import * as yup from 'yup';
+import { boolean, number, object, string } from 'yup'
 import { useForm } from 'vee-validate';
 import SkillsDialog from "@/components/utils/inputForm/SkillsDialog.vue";
 import {useAppConfig} from '@/common-components/stores/UseAppConfig';
@@ -28,6 +28,7 @@ import {useRoute} from "vue-router";
 import LengthyOperationProgressBar from "@/components/utils/LengthyOperationProgressBar.vue";
 import SkillsDropDown from "@/components/utils/inputForm/SkillsDropDown.vue";
 import SkillsCheckboxInput from "@/components/utils/inputForm/SkillsCheckboxInput.vue";
+import TimeWindowInput from "@/components/skills/inputForm/TimeWindowInput.vue";
 
 const props = defineProps({
   skills: Array,
@@ -41,27 +42,79 @@ const model = defineModel()
 const focusState = useFocusState()
 const emit = defineEmits(['skills-updated'])
 
-const schema = yup.object({
-  pointIncrement: yup.number().min(1).max(appConfig.maxPointIncrement).nullable().label('Point Increment'),
-  numPerformToCompletion: yup.number()
+const validateMoreThanWindowMaxOccurrences = (value, testContext) => {
+  const parent = testContext.parent
+  const nullChecks = parent.numPerformToCompletion === null || parent.numPointIncrementMaxOccurrences === null
+  return nullChecks || parent.numPointIncrementMaxOccurrences <= value
+}
+const validateLessThanTotalOccurrences = (value, testContext) => {
+  const parent = testContext.parent
+  const nullChecks = parent.numPointIncrementMaxOccurrences === null || parent.numPerformToCompletion === null
+  return nullChecks || parent.numPerformToCompletion >= value
+}
+const validateMustHaveHoursIfMins = (value, testContext) => {
+  const parent = testContext.parent
+  const nullChecks = parent.pointIncrementIntervalHrs === null || parent.pointIncrementIntervalMins === null
+  return nullChecks || (parent.pointIncrementIntervalMins > 0 || value > 0)
+}
+
+const validateMustHaveMinsIfHours = (value, testContext) => {
+  const parent = testContext.parent
+  const nullChecks = parent.pointIncrementIntervalMins === null || parent.pointIncrementIntervalHrs === null
+  return nullChecks || (parent.pointIncrementIntervalHrs > 0 || value > 0)
+}
+const schema = object({
+  pointIncrement: number().min(1).max(appConfig.maxPointIncrement).nullable().label('Point Increment'),
+  numPerformToCompletion: number()
       .min(1)
       .max(appConfig.maxPointIncrement)
       .test(
           'moreThanWindowOccurrences',
           ({ label }) => `${label} must be >= Window's Max Occurrences`,
-          async (value, testContext) => testContext.parent.numPointIncrementMaxOccurrences === null || testContext.parent.numPointIncrementMaxOccurrences <= value
+          async (value, testContext) => validateMoreThanWindowMaxOccurrences(value, testContext)
       )
       .label('Occurrences').nullable(),
+  'numPointIncrementMaxOccurrences': number()
+      .min(1)
+      .max(appConfig.maxNumPointIncrementMaxOccurrences)
+      .test(
+          'lessThanTotalOccurrences',
+          ({ label }) => `${label} must be <= total Occurrences to Completion`,
+          async (value, testContext) => validateLessThanTotalOccurrences(value, testContext)
+      )
+      .label('Max Occurrences').nullable(),
+  'pointIncrementIntervalHrs': number()
+      .required()
+      .min(0)
+      .max(appConfig.maxTimeWindowInHrs)
+      .test(
+          'mustHaveHoursIfMinsAre0',
+          'Hours must be > 0 if Minutes = 0',
+          async (value, testContext) => validateMustHaveHoursIfMins(value, testContext)
+      )
+      .label('Hours').nullable(),
+  'pointIncrementIntervalMins': number()
+      .required()
+      .min(0)
+      .max(60)
+      .test(
+          'mustHaveMinsIfHoursAre0',
+          'Minutes must be > 0 if Hours = 0',
+          async (value, testContext) => validateMustHaveMinsIfHours(value, testContext)
+      )
+      .label('Minutes').nullable(),
 });
 
 const initialValues = {
   pointIncrement: null,
   numPerformToCompletion: null,
   numPointIncrementMaxOccurrences: null,
+  pointIncrementIntervalHrs: null,
+  pointIncrementIntervalMins: null,
   selfReportingType: null,
   enabled: null,
 }
-const { values, errors, defineField, resetForm, validate } = useForm({ validationSchema: schema, initialValues });
+const { values, meta, errors, defineField, resetForm, validate } = useForm({ validationSchema: schema, initialValues });
 
 const isUpdating = ref(false)
 const approvalKey = 'Approval'
@@ -94,11 +147,20 @@ const doUpdate = () => {
     ...values,
     skills: props.skills.map((it) => it.skillId),
     selfReportingType: values.selfReportingType?.key,
+    numMaxOccurrencesIncrementInterval: values.numPointIncrementMaxOccurrences
   }
+  if (values.pointIncrementIntervalHrs !== null && values.pointIncrementIntervalMins !== null ) {
+    updateInfo.pointIncrementInterval = values.pointIncrementIntervalHrs * 60 + values.pointIncrementIntervalMins;
+    if (values.numPointIncrementMaxOccurrences !== null) {
+      updateInfo.numMaxOccurrencesIncrementInterval = values.numPointIncrementMaxOccurrences;
+    }
+  }
+
   SkillsService.batchSkillsUpdate(route.params.projectId, updateInfo)
       .finally(() => {
         isUpdating.value = false
         emit('skills-updated')
+        announcer.polite(`Updated ${props.skills.length} ${pluralize.plural('Skill', props.skills.length)}`)
         close()
       })
 }
@@ -114,10 +176,11 @@ const hasDisabledSkills = computed(() => numOfDisabledSkills.value > 0)
       :enable-return-focus="true"
       @on-cancel="close"
       ok-button-label="Update"
+      :ok-button-disabled="!meta.valid"
       @on-ok="validateThenUpdate"
   >
     <div class="pb-5 flex flex-col gap-3">
-      <Message :closable="false">Update
+      <Message :closable="false" data-cy="batchUpdateMsg">Update
         <Tag>{{ skills.length }}</Tag>
         {{ pluralize.plural('Skill', skills.length) }} at once. Provide at least <b>one</b> attribute below to apply changes.
       </Message>
@@ -143,10 +206,17 @@ const hasDisabledSkills = computed(() => numOfDisabledSkills.value > 0)
         <total-points-field class="min-w-[8rem]"/>
       </div>
 
+      <time-window-input class="mb-4">
+        <template #message>
+          <Message :closable="false" severity="warn" icon="fa-solid fa-triangle-exclamation">Applies only to skills with <span class="italic font-bold">Occurrences to Completion</span> greater than 1 </Message>
+        </template>
+      </time-window-input>
+
       <SkillsDropDown
           label="Self Report Type"
           optionLabel="name"
           :options="selfReportOptions"
+          :show-clear-button="true"
           name="selfReportingType" />
 
       <div v-if="hasDisabledSkills" class="flex gap-2 items-center mt-1">
@@ -158,7 +228,7 @@ const hasDisabledSkills = computed(() => numOfDisabledSkills.value > 0)
           <div>Visible</div>
         </div>
 
-        <div class="italic">( <b>{{ numOfDisabledSkills }}</b> {{ pluralize.plural('Skill', numOfDisabledSkills) }}
+        <div class="italic" data-cy="hiddenSkillsMsg">( <b>{{ numOfDisabledSkills }}</b> {{ pluralize.plural('Skill', numOfDisabledSkills) }}
           currently hidden )
         </div>
       </div>

@@ -86,7 +86,7 @@ const handleSelfReportingWarning =() => {
     if (originalSelfReportingType.value === 'Approval' &&
         (selfReportingType.value === 'HonorSystem' || !enabled.value || selfReportingType.value === 'Video' || selfReportingType.value === 'Quiz')) {
       approvals.value.loading = true;
-      SelfReportService.getSkillApprovalsStats(route.params.projectId, props.initialSkillData.skillId)
+      SelfReportService.getSkillApprovalsStats(route.params.projectId, [props.initialSkillData.skillId])
         .then((res) => {
           const pendingApprovalsRes = res.find((item) => item.value === 'SkillApprovalsRequests');
           if (pendingApprovalsRes) {
