@@ -65,6 +65,9 @@ class ProjectCopyService {
     ProjDefRepo projDefRepo
 
     @Autowired
+    ProjDefWithDescriptionRepo projDefWithDescriptionRepo
+
+    @Autowired
     CreatedResourceLimitsValidator createdResourceLimitsValidator
 
     @Autowired
@@ -412,7 +415,7 @@ class ProjectCopyService {
             ProjDef fromProject = loadProject(originalProjectId)
             validate(projectRequest)
 
-            ProjDef toProj = saveToProject(projectRequest)
+            ProjDef toProj = saveToProject(projectRequest, originalProjectId)
             saveProjectSettings(fromProject, toProj)
 
             CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
@@ -650,16 +653,20 @@ class ProjectCopyService {
     }
 
     private static void handleItemFailure(Throwable t, SkillDefParent item) {
+        handleItemFailure(t, item.type.toString().toLowerCase(), item.projectId, item.skillId)
+    }
+    private static void handleItemFailure(Throwable t, String itemType, String projectId, String skillId = SkillException.NA) {
         ErrorCode errorCode = ErrorCode.InternalError
-        String itemType = item.type.toString().toLowerCase()
-        String msg = "Error copying ${itemType}: ${item.skillId}"
+        String msg = "Error copying ${itemType}: ${skillId}"
         if (t instanceof SkillException) {
             if (t.errorCode == ErrorCode.ParagraphValidationFailed || t.errorCode == ErrorCode.AttachmentNotFound) {
                 errorCode = t.errorCode
                 msg = "Failed to copy a ${itemType} due to the paragraph validation. Full message: ${t.message}"
+            } else {
+                throw t
             }
         }
-        throw new SkillException(msg, t, item.projectId, item.skillId, errorCode)
+        throw new SkillException(msg, t, projectId, skillId, errorCode)
     }
 
     @Profile
@@ -832,14 +839,24 @@ class ProjectCopyService {
 
 
     @Profile
-    private ProjDef saveToProject(ProjectRequest projectRequest) {
-        Closure<Boolean> alreadyExistLookup = { String uuid ->
-            return projDefRepo.otherProjectExistWithAttachmentUUID(projectRequest.projectId, uuid)
+    private ProjDef saveToProject(ProjectRequest projectRequest, String originalProjectId) {
+        try {
+            projectRequest.description = null  // any description in the request should be ignored
+            projAdminService.saveProject(null, projectRequest)
+            ProjDef toProj = projDefRepo.findByProjectId(projectRequest.projectId)
+            String description = projDefWithDescriptionRepo.getDescriptionByProjectId(originalProjectId)
+            description = handleAttachmentsInDescription(description, toProj.projectId)
+            projectRequest.description = description
+            // re-run validation with updated description
+            CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
+            if (!customValidationResult.valid) {
+                throw new SkillException(customValidationResult.msg)
+            }
+            projDefWithDescriptionRepo.updateDescription(toProj.projectId, description)
+            return toProj
+        } catch (Throwable t) {
+            handleItemFailure(t, 'project', originalProjectId)
         }
-        projectRequest.description = attachmentService.copyAttachmentsForIncomingDescription(projectRequest.description, null, null, null, alreadyExistLookup)
-        projAdminService.saveProject(null, projectRequest)
-        ProjDef toProj = projDefRepo.findByProjectId(projectRequest.projectId)
-        return toProj
     }
 
     @Profile
