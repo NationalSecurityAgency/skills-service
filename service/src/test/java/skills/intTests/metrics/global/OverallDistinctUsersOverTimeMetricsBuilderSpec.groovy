@@ -186,13 +186,13 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(days[0]))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(daysPlusTwoWeeksPrior[0]))
 
         skillsService.archiveUsers([users[2]], proj1.projectId)
 
-        def res30daysAfterArchive = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
-        def resOver30daysAfterArchive = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
+        def res30daysAfterArchive = skillsService.getOverallMetricsData(metricsId, getProps(days[0]))
+        def resOver30daysAfterArchive = skillsService.getOverallMetricsData(metricsId, getProps(daysPlusTwoWeeksPrior[0]))
 
         then:
         res30days.users.size() == 6
@@ -348,8 +348,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(days[0]))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(daysPlusTwoWeeksPrior[0]))
 
         then:
         res30days.users.size() == 6
@@ -423,8 +423,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(days[0]))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(daysPlusTwoWeeksPrior[0]))
 
         then:
         res30days.users.size() == 6
@@ -479,8 +479,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Duration duration = Duration.between(testDates.getFirstOfMonth(1), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger(), true))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14, true))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(days[0], true))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(days[0].minus(14), true))
 
         then:
         // Adjust expectations based on current date
