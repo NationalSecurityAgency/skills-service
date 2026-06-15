@@ -137,7 +137,7 @@ const toolbarItems = [
   ['heading', 'bold', 'italic', 'strike'],
   ['hr', 'quote'],
   ['ul', 'ol', 'indent', 'outdent'],
-  props.allowInsertImages ? ['image', 'link'] : ['link'],
+  props.allowInsertImages ? ['table', 'image', 'link'] : ['table', 'link'],
   ['code', 'codeblock'],
   ['scrollSync']
 ]
