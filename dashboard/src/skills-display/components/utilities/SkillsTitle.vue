@@ -63,7 +63,7 @@ const isMyProject = ref(false);
 const showAddedMsg = ref(false);
 
 onMounted(() => {
-  if (isProgressAndRankingProjPage) {
+  if (isProgressAndRankingProjPage && shouldCheckIfMyProject.value) {
     loadProjectSavedStatus()
   }
 })
@@ -84,7 +84,8 @@ const addToMyProjects = () => {
       })
 }
 
-const showAddToMyProjectsBtn = computed(() => isProgressAndRankingProjPage && !isMyProject.value)
+const showAddToMyProjectsBtn = computed(() => isProgressAndRankingProjPage && !isMyProject.value && projectId !== 'Inception')
+const shouldCheckIfMyProject = computed(() => isProgressAndRankingProjPage && projectId !== 'Inception')
 </script>
 
 <template>

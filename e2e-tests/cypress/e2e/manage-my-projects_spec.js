@@ -453,5 +453,40 @@ describe('Manage My Projects Tests', () => {
         cy.get('[data-cy="addButton-proj2"]').should('exist')
 
     });
+
+    it('add button does not show on Inception', function () {
+        cy.intercept('GET', '/api/projects/Inception/isMyProject', cy.spy().as('isMyProject'));
+        cy.visit('/progress-and-rankings/projects/Inception');
+        cy.get('@isMyProject').should('not.have.been.called');
+        cy.get('[data-cy="addButton-Inception"]').should('not.exist')
+    });
+
+    it('add button does not show on skills-client', function () {
+        for (let i = 1; i <=2; i += 1) {
+            cy.createProject(i);
+            cy.enableProdMode(i);
+        }
+
+        cy.intercept('GET', '/api/projects/proj1/isMyProject', cy.spy().as('isMyProject'));
+        cy.visit('/test-skills-client/proj1');
+
+        cy.get('@isMyProject').should('not.have.been.called');
+        cy.get('[data-cy="addButton-proj1"]').should('not.exist')
+
+    });
+
+    it('add button does not show on user skills-display preview', function () {
+        cy.intercept('GET', '/api/projects/proj1/isMyProject', cy.spy().as('isMyProject'));
+        cy.createProject(1);
+        cy.enableProdMode(1);
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.reportSkill(1, 1, 'user1', 'yesterday');
+
+        cy.visit('/administrator/projects/proj1/users/user1')
+        cy.get('@isMyProject').should('not.have.been.called');
+        cy.get('[data-cy="addButton-proj1"]').should('not.exist')
+
+    });
 });
 
