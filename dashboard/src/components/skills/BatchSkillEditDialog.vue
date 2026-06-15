@@ -129,7 +129,6 @@ const close = () => {
   focusState.focusOnLastElement()
 }
 
-// todo: need to add a service tests for this too
 const occurrencesToCompletionAndTimeWindowDisabled = computed(() => {
   return (props.skills.indexOf((it) => it.selfReportingType.value === 'Quiz') === undefined)
 })

@@ -970,7 +970,7 @@ const pageChanged = (pagingInfo) => {
       :skills="selectedSkills"
     />
     <export-to-catalog-dialog
-      v-if="showBatchEditModal"
+      v-if="showExportToCatalogDialog"
       v-model="showExportToCatalogDialog"
       :skills="selectedSkills"
       :show-invite-only-warning="inviteOnlyProjectState.isInviteOnlyProject"
