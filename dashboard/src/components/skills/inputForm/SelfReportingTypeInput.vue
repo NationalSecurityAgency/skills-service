@@ -14,21 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, inject, onMounted, ref, watch } from 'vue'
-import { useFieldValue } from 'vee-validate'
+import {computed, inject, ref} from 'vue'
+import {useFieldValue} from 'vee-validate'
 import QuizSelector from '@/components/skills/selfReport/QuizSelector.vue'
-import SelfReportService from '@/components/skills/selfReport/SelfReportService.js'
-import { useRoute } from 'vue-router'
-import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
+import PendingApprovalsWarning from "@/components/skills/inputForm/PendingApprovalsWarning.vue";
 
 const props = defineProps({
   initialSkillData: Object,
   isEdit: Boolean
 })
 const emit = defineEmits(['quizIdChanged', 'selfReportingTypeChanged'])
-
-const route = useRoute()
-const numFormat = useNumberFormat()
 
 const approvalKey = 'Approval'
 const honorKey = 'HonorSystem'
@@ -64,55 +59,11 @@ const quizIdSelected = (quizId) => {
   emit('quizIdChanged', quizId)
 }
 
-const justificationRequired = useFieldValue('justificationRequired')
 const selfReportingType = useFieldValue('selfReportingType')
 const enabled = useFieldValue('selfReportingEnabled')
 const quizSelected = computed(() => selfReportingType.value === quizKey)
 const isVideoChoiceDisabled = computed(() => !enabled.value || !props.isEdit || (props.isEdit && !props.initialSkillData.hasVideoConfigured))
 const isVideoConfigured = computed(() => props.initialSkillData.hasVideoConfigured)
-
-const originalSelfReportingType = ref(selfReportingType.value)
-
-const approvals = ref( {
-  showWarning: false,
-  loading: false,
-  numPending: 0,
-  numRejected: 0,
-  newSelfReportingType: null,
-})
-const handleSelfReportingWarning =() => {
-  if (props.isEdit) {
-    approvals.value.showWarning = false;
-    if (originalSelfReportingType.value === 'Approval' &&
-        (selfReportingType.value === 'HonorSystem' || !enabled.value || selfReportingType.value === 'Video' || selfReportingType.value === 'Quiz')) {
-      approvals.value.loading = true;
-      SelfReportService.getSkillApprovalsStats(route.params.projectId, [props.initialSkillData.skillId])
-        .then((res) => {
-          const pendingApprovalsRes = res.find((item) => item.value === 'SkillApprovalsRequests');
-          if (pendingApprovalsRes) {
-            approvals.value.numPending = pendingApprovalsRes.count;
-          }
-
-          const pendingRejectionsRes = res.find((item) => item.value === 'SkillApprovalsRejected');
-          if (pendingRejectionsRes) {
-            approvals.value.numRejected = pendingRejectionsRes.count;
-          }
-
-          approvals.value.showWarning = pendingApprovalsRes.count > 0 || pendingRejectionsRes.count > 0;
-        })
-        .finally(() => {
-          approvals.value.loading = false;
-        });
-      approvals.value.newSelfReportingType = !enabled.value ? 'Disabled' : selfReportingType.value;
-    } else {
-      approvals.value.showWarning = false;
-    }
-  }
-}
-
-watch(() => selfReportingType.value, () => {
-  handleSelfReportingWarning();
-})
 </script>
 
 <template>
@@ -174,34 +125,12 @@ watch(() => selfReportingType.value, () => {
         </div>
       </div>
     </div>
-    <Message class="pt-1"
-             v-if="approvals.showWarning"
-             :closable="false"
-             severity="warn"
-             data-cy="selfReportingTypeWarning">
-      <div v-if="approvals.newSelfReportingType === 'HonorSystem'">
-        Switching this skill to the <i>Honor System</i> will automatically:
-        <ul>
-          <li v-if="approvals.numPending > 0">
-            Approve <b>{{ numFormat.pretty(approvals.numPending) }} pending</b> request<span v-if="approvals.numPending>1">s</span>
-          </li>
-          <li v-if="approvals.numRejected > 0">
-            Remove <b>{{ approvals.numRejected}} rejected</b> request<span v-if="approvals.numRejected>1">s</span>
-          </li>
-        </ul>
-      </div>
-      <div v-if="approvals.newSelfReportingType === 'Disabled' || approvals.newSelfReportingType === 'Quiz' || approvals.newSelfReportingType === 'Video'">
-        Disabling <i>Self Reporting</i> will automatically:
-        <ul>
-          <li v-if="approvals.numPending > 0">
-            Remove <b>{{ numFormat.pretty(approvals.numPending) }} pending</b> request<span v-if="approvals.numPending>1">s</span>
-          </li>
-          <li v-if="approvals.numRejected > 0">
-            Remove <b>{{ approvals.numRejected}} rejected</b> request<span v-if="approvals.numRejected>1">s</span>
-          </li>
-        </ul>
-      </div>
-    </Message>
+
+    <pending-approvals-warning
+        v-if="isEdit"
+        :self-reporting-type="selfReportingType"
+        :self-report-enabled="enabled"
+        :skill-ids="[initialSkillData.skillId]"/>
   </div>
 </template>
 

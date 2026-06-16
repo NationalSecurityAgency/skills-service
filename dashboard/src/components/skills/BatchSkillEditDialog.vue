@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { boolean, number, object, string } from 'yup'
-import { useForm } from 'vee-validate';
+import {useFieldValue, useForm} from 'vee-validate';
 import SkillsDialog from "@/components/utils/inputForm/SkillsDialog.vue";
 import {useAppConfig} from '@/common-components/stores/UseAppConfig';
 import {useSkillsAnnouncer} from '@/common-components/utilities/UseSkillsAnnouncer';
@@ -29,6 +29,8 @@ import LengthyOperationProgressBar from "@/components/utils/LengthyOperationProg
 import SkillsDropDown from "@/components/utils/inputForm/SkillsDropDown.vue";
 import SkillsCheckboxInput from "@/components/utils/inputForm/SkillsCheckboxInput.vue";
 import TimeWindowInput from "@/components/skills/inputForm/TimeWindowInput.vue";
+import PendingApprovalsWarning from "@/components/skills/inputForm/PendingApprovalsWarning.vue";
+import SelfReportType from "@/components/skills/selfReport/SelfReportType.js";
 
 const props = defineProps({
   skills: Array,
@@ -114,7 +116,8 @@ const initialValues = {
   selfReportingType: null,
   enabled: null,
 }
-const { values, meta, errors, defineField, resetForm, validate } = useForm({ validationSchema: schema, initialValues });
+const { values, meta, validate } = useForm({ validationSchema: schema, initialValues });
+const selfReportingType = useFieldValue('selfReportingType')
 
 const isUpdating = ref(false)
 const approvalKey = 'Approval'
@@ -123,6 +126,7 @@ const selfReportOptions = [
   { name: 'Approval Queue', key: approvalKey },
   { name: 'Honor System', key: honorKey },
 ]
+const skillsIds = props.skills.map((it) => it.skillId)
 
 const close = () => {
   model.value = false
@@ -144,7 +148,7 @@ const doUpdate = () => {
   isUpdating.value = true
   const updateInfo = {
     ...values,
-    skills: props.skills.map((it) => it.skillId),
+    skills: skillsIds,
     selfReportingType: values.selfReportingType?.key,
     numMaxOccurrencesIncrementInterval: values.numPointIncrementMaxOccurrences
   }
@@ -217,6 +221,11 @@ const hasDisabledSkills = computed(() => numOfDisabledSkills.value > 0)
           :options="selfReportOptions"
           :show-clear-button="true"
           name="selfReportingType" />
+
+      <pending-approvals-warning
+          :self-reporting-type="selfReportingType?.key || SelfReportType.Approval"
+          :self-report-enabled="true"
+          :skill-ids="skillsIds"/>
 
       <div v-if="hasDisabledSkills" class="flex gap-2 items-center mt-1">
         <label>Visibility:</label>

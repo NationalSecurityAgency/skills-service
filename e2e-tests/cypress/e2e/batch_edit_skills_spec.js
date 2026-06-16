@@ -361,6 +361,16 @@ describe('batch edit skills', () => {
     });
 
     it('warn if switching self report skills to honor will cause pending approval request to be applied', () => {
+        Cypress.Commands.add('rejectRequest', (requestNum = 0, rejectionMsg = 'Skill was rejected') => {
+            cy.request('/admin/projects/proj1/approvals?limit=10&ascending=true&page=1&orderBy=userId')
+                .then((response) => {
+                    cy.request('POST', '/admin/projects/proj1/approvals/reject', {
+                        skillApprovalIds: [response.body.data[requestNum].id],
+                        rejectionMessage: rejectionMsg,
+                    });
+                });
+        });
+
         cy.createSkill(1, 1, 1, {
             selfReportingType: 'Approval',
             name: 'Approval 1'
@@ -379,16 +389,20 @@ describe('batch edit skills', () => {
         });
         cy.createSkill(1, 1, 5, { name: 'Disabled 1' });
         cy.reportSkill(1, 1, 'user6Good@skills.org', '2020-09-12 11:00');
-        cy.reportSkill(1, 1, 'user5Good@skills.org', '2020-09-13 11:00');
-        cy.reportSkill(1, 1, 'user4Good@skills.org', '2020-09-14 11:00');
-        cy.reportSkill(1, 1, 'user3Good@skills.org', '2020-09-15 11:00');
-        // cy.rejectRequest(3);
+        cy.reportSkill(1, 1, 'user5Good@skills.org', '2020-09-12 11:00');
+        cy.reportSkill(1, 1, 'user4Good@skills.org', '2020-09-12 11:00');
+        cy.reportSkill(1, 2, 'user5Good@skills.org', '2020-09-13 11:00');
+        cy.reportSkill(1, 3, 'user4Good@skills.org', '2020-09-14 11:00');
+        cy.reportSkill(1, 3, 'user3Good@skills.org', '2020-09-14 11:00');
+        cy.reportSkill(1, 4, 'user3Good@skills.org', '2020-09-15 11:00');
+        cy.rejectRequest(3);
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillsTable"] [data-p-index="3"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="4"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Batch Edit"]', true)
 
@@ -396,13 +410,12 @@ describe('batch edit skills', () => {
         cy.get('[data-cy="selfReportingType"]').click()
         cy.get('[data-pc-section="overlay"] [aria-label="Honor System"]').click()
 
-        // cy.intercept('POST', '/admin/projects/proj1/batchUpdateSkills').as('batchUpdateSkills')
-        // cy.get('[data-cy="saveDialogBtn"]').click()
-        // cy.wait('@batchUpdateSkills')
-        //
-        // cy.validateTable('[data-cy="skillsTable"]', [
-        //     [ { colIndex: 5,  value: "111 pts x 2" }, { colIndex: 6,  value: "Disabled" }],
-        // ])
+        cy.get('[data-cy="selfReportingTypeWarning"]')
+            .contains('Switching this skill to the Honor System will automatically:');
+        cy.get('[data-cy="selfReportingTypeWarning"]')
+            .contains('Approve 5 pending requests');
+        cy.get('[data-cy="selfReportingTypeWarning"]')
+            .contains('Remove 1 rejected request');
     });
 
 });
