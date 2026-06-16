@@ -58,6 +58,8 @@ const sortBy = ref('requestedOn');
 const selectedItems = ref([]);
 const expandedRows = ref({});
 const descriptions = ref({});
+const showDescriptions = ref({});
+const justifications = ref({});
 const totalRows = ref(null);
 const emailSubscribed = ref(true);
 const isEmailEnabled = computed(() => appInfo.emailEnabled)
@@ -174,6 +176,7 @@ const toggleUnsubscribe = () => {
 const toggleRow = (row) => {
   if(expandedRows.value[row]) {
     delete expandedRows.value[row];
+    toggleRow(row);
   }
   else {
     expandedRows.value[row] = true;
@@ -182,11 +185,28 @@ const toggleRow = (row) => {
   expandedRows.value = { ...expandedRows.value };
 }
 
+const showJustification = (row) => {
+  if(!justifications.value[row]) {
+    justifications.value[row] = true;
+    if(!expandedRows.value[row]) {
+      toggleRow(row);
+    }
+  } else {
+    justifications.value[row] = !justifications.value[row];
+  }
+}
+
 const fetchDescription = (row) => {
-  descriptionService.getDescriptionForSkill(route.params.projectId, row.skillId).then((res) => {
-    descriptions.value[row.skillId] = res.description;
+  if(!descriptions.value[row.skillId]) {
+    descriptionService.getDescriptionForSkill(route.params.projectId, row.skillId).then((res) => {
+      descriptions.value[row.skillId] = res.description;
+      showDescriptions.value[row.id] = true;
+      toggleRow(row.id);
+    })
+  } else {
+    showDescriptions.value[row.id] = !showDescriptions.value[row.id];
     toggleRow(row.id);
-  })
+  }
 }
 
 const reset = () => {
@@ -236,7 +256,6 @@ const toRouteProps = (skill) => {
       </div>
 
       <hr />
-
 
       <SkillsDataTable :value="approvals"
                        v-model:selection="selectedItems"
@@ -294,15 +313,15 @@ const toRouteProps = (skill) => {
             </div>
             <SkillsButton size="small" variant="outline-info"
                       class="mr-2 py-0 px-1 mt-1 ml-2 lg:ml-0"
-                      @click="toggleRow(slotProps.data.id)"
+                      @click="showJustification(slotProps.data.id)"
                       :aria-label="`Show Justification for ${slotProps.data.name}`"
-                      :data-cy="`expandDetailsBtn_${slotProps.data.skillId}`" :icon="expandedRows[slotProps.data.id] ? 'fa fa-minus-square' : 'fa fa-plus-square'" label="Justification">
+                      :data-cy="`expandDetailsBtn_${slotProps.data.skillId}`" :icon="expandedRows[slotProps.data.id] && justifications[slotProps.data.id] ? 'fa fa-minus-square' : 'fa fa-plus-square'" label="Justification">
             </SkillsButton>
             <SkillsButton size="small" variant="outline-info"
                           class="mr-2 py-0 px-1 mt-1 ml-2 lg:ml-0"
                           @click="fetchDescription(slotProps.data)"
                           :aria-label="`Show Description for ${slotProps.data.name}`"
-                          :data-cy="`showDescriptionBtn_${slotProps.data.skillId}`" :icon="expandedRows[slotProps.data.id] ? 'fa fa-minus-square' : 'fa fa-plus-square'" label="Skill Description">
+                          :data-cy="`showDescriptionBtn_${slotProps.data.skillId}`" :icon="expandedRows[slotProps.data.id] && showDescriptions[slotProps.data.id] ? 'fa fa-minus-square' : 'fa fa-plus-square'" label="Skill Description">
             </SkillsButton>
           </template>
         </Column>
@@ -332,7 +351,7 @@ const toRouteProps = (skill) => {
         </Column>
 
         <template #expansion="slotProps">
-          <div>
+          <div v-if="justifications[slotProps.data.id]">
             <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-6">
               <template #title>Justification</template>
               <template #content>
@@ -345,7 +364,7 @@ const toRouteProps = (skill) => {
               </template>
             </Card>
           </div>
-          <div>
+          <div v-if="showDescriptions[slotProps.data.id]">
             <Card v-if="descriptions[slotProps.data.skillId]" header="Skill Description" class="ml-6 mt-4">
               <template #title>Skill Description</template>
               <template #content>
