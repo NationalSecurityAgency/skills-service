@@ -29,4 +29,6 @@ public interface SkillCounts {
     Integer getNumSkillsReused();
 
     Integer getTotalPointsReused();
+
+    Integer getTotalSkillPoints();
 }

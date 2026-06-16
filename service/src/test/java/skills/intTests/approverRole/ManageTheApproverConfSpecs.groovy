@@ -1112,4 +1112,74 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
         approvals_t1_default_skill_filter.data.userId == [users[7]]
         approvals_t1_default_skill_filter.data.skillName == [skills[1].name]
     }
+
+    def "skills for approvers only returns self report skills"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        when:
+        def allSkills = skillsService.getSkillsForProject(proj.projectId, "", false, false, false, false, false)
+        def approvalOnlySkills = skillsService.getSkillsForProject(proj.projectId, "", false, false, false, false, true)
+
+        then:
+        allSkills
+        allSkills.size() == 3
+        approvalOnlySkills
+        approvalOnlySkills.size() == 1
+    }
+
+    def "subjects for approvers only returns self report skills within subject"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Approval
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        when:
+        def allSubjects = skillsService.getSubjects(proj.projectId, false)
+        def approvalOnlySubjects = skillsService.getSubjects(proj.projectId, true)
+        def allSkillsForSubject = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId, false, false)
+        def approvalOnlySkillsForSubject = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId, false, true)
+
+        then:
+        allSubjects
+        allSubjects[0].numSkills == 3
+        allSubjects[0].totalPoints == 300
+        approvalOnlySubjects
+        approvalOnlySubjects[0].numSkills == 1
+        approvalOnlySubjects[0].totalPoints == 100
+
+        allSkillsForSubject
+        allSkillsForSubject.size() == 3
+        approvalOnlySkillsForSubject
+        approvalOnlySkillsForSubject.size() == 1
+    }
+
+
+    def "subjects without approval skills do not return for approvalsOnly"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def subj2 = SkillsFactory.createSubject(1, 2)
+        def skills = SkillsFactory.createSkills(3, 1, 1, 100)
+        def skills2 = SkillsFactory.createSkills(3, 1, 2, 100)
+        skills[1].selfReportingType = SkillDef.SelfReportingType.Approval
+        skills[2].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skills2[0].selfReportingType = SkillDef.SelfReportingType.HonorSystem
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+        skillsService.createSubjectAndSkills(subj2, skills2)
+
+        when:
+        def allSubjects = skillsService.getSubjects(proj.projectId, false)
+        def approvalOnlySubjects = skillsService.getSubjects(proj.projectId, true)
+
+        then:
+        allSubjects
+        allSubjects.size() == 2
+        approvalOnlySubjects
+        approvalOnlySubjects.size() == 1
+
+    }
 }

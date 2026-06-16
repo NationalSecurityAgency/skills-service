@@ -86,14 +86,14 @@ const removeSkill = (item) => {
 };
 
 const loadAvailableSkills = () => {
-  SkillsService.getProjectSkills(route.params.projectId, null, false, true)
+  SkillsService.getProjectSkills(route.params.projectId, null, false, true, false, true)
       .then((loadedSkills) => {
         const alreadySelectedSkillIds = data.value.map((item) => item.skillId);
         availableSkills.value = loadedSkills.filter((item) => !alreadySelectedSkillIds.includes(item.skillId));
       }).finally(() => {
     loadingMeta.value.skills = false;
   });
-  SubjectsService.getSubjects(route.params.projectId)
+  SubjectsService.getSubjects(route.params.projectId, true)
       .then((subjects) => {
         availableSubjects.value = subjects;
       }).finally(() => {
@@ -131,7 +131,7 @@ const addSkillToConf = () => {
     loadingMeta.value.loadingSkillsUnderASubject = true;
     const { subjectId } = selectedSubject.value;
     selectedSubject.value = null;
-    SkillsService.getSubjectSkills(route.params.projectId, subjectId, true).then((subjectSkills) => {
+    SkillsService.getSubjectSkills(route.params.projectId, subjectId, true, true).then((subjectSkills) => {
       const skillsToAdd = subjectSkills.filter((s) => s.type === 'Skill' && existingSkills.indexOf(s.skillId) < 0);
       const numSkillsToAdd = skillsToAdd.length;
       loadingMeta.value.numSkillsToProcess = numSkillsToAdd;
@@ -186,7 +186,7 @@ const removeTagConf = (removedItem) => {
     <template #content>
       <div v-if="!(loadingMeta.skills || loadingMeta.subjects)" class="flex gap-1 items-center pt-4 px-4 flex-col lg:flex-row">
         <div class="flex flex-1 flex-col mx-1 mt-1 w-full">
-          <div class="mb-1">Add a Single Skill</div>
+          <div class="mb-1">Add a Single Approval Skill</div>
           <skills-selector
               :disabled="selectedSubject !== null || loading"
               :options="availableSkills"
@@ -198,7 +198,7 @@ const removeTagConf = (removedItem) => {
           <span class="text-center">OR</span>
         </div>
         <div class="flex flex-1 flex-col mx-1 mt-1 self-end w-full">
-          <div class="mb-1">Add <b>ALL</b> Skills under a Subject</div>
+          <div class="mb-1">Add <b>ALL</b> Approval Skills under a Subject</div>
           <subject-selector v-if="availableSubjects && availableSubjects.length > 0"
                             :disabled="(selectedSkills && selectedSkills.length > 0) || loading"
                             :options="availableSubjects"
@@ -210,7 +210,7 @@ const removeTagConf = (removedItem) => {
         </div>
         <div class="mx-1 mt-1 text-center lg:self-end">
           <SkillsButton
-              aria-label="Add Tag Value"
+              aria-label="Add Skills"
               @click="addSkillToConf"
               v-skills="'ConfigureSelfApprovalWorkload'"
               data-cy="addSkillConfBtn"

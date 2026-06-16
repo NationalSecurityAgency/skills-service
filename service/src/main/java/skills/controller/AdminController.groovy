@@ -450,9 +450,10 @@ class AdminController {
 
     @RequestMapping(value = "/projects/{projectId}/subjects", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    List<SubjectResult> getSubjects(@PathVariable("projectId") String projectId) {
+    List<SubjectResult> getSubjects(@PathVariable("projectId") String projectId, @RequestParam(required = false, value = "approvalsOnly", defaultValue = 'false') Boolean approvalsOnlyStr) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return subjAdminService.getSubjects(projectId)
+        Boolean approvalsOnly = Boolean.valueOf(approvalsOnlyStr)
+        return subjAdminService.getSubjects(projectId, approvalsOnly)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjectsAndSkillsGroups", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -614,12 +615,14 @@ class AdminController {
     List<SkillDefPartialRes> getSkills(
             @PathVariable("projectId") String projectId,
             @PathVariable("subjectId") String subjectId,
-            @RequestParam(required = false, value = "includeGroupSkills", defaultValue = 'false') Boolean includeGroupSkillsStr) {
+            @RequestParam(required = false, value = "includeGroupSkills", defaultValue = 'false') Boolean includeGroupSkillsStr,
+            @RequestParam(required = false, value = "approvalsOnly", defaultValue = 'false') Boolean approvalsOnlyStr) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
 
         Boolean includeGroupSkills = Boolean.valueOf(includeGroupSkillsStr)
-        return skillsAdminService.getSkillsForSubjectWithCatalogStatus(projectId, subjectId, includeGroupSkills)
+        Boolean approvalsOnly = Boolean.valueOf(approvalsOnlyStr)
+        return skillsAdminService.getSkillsForSubjectWithCatalogStatus(projectId, subjectId, includeGroupSkills, approvalsOnly)
     }
 
     @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/skills", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -983,13 +986,15 @@ class AdminController {
             @RequestParam(required = false, value = "excludeImportedSkills") Boolean excludeImportedSkills,
             @RequestParam(required = false, value = "excludeReusedSkills") Boolean excludeReusedSkills,
             @RequestParam(required = false, value = "includeDisabled", defaultValue = "false") Boolean includeDisabled,
-            @RequestParam(required = false, value = "includeSkillGroups", defaultValue = "false") Boolean includeSkillGroups) {
+            @RequestParam(required = false, value = "includeSkillGroups", defaultValue = "false") Boolean includeSkillGroups,
+            @RequestParam(required = false, value = "approvalsOnly", defaultValue = "false") Boolean approvalsOnly) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
 
         boolean excludeImportedSkillsBol = excludeImportedSkills
         boolean includeDisabledBool = includeDisabled
         boolean includeSkillGroupsBool = includeSkillGroups
-        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol, includeDisabledBool, includeSkillGroupsBool)
+        boolean approvalsOnlyBool = approvalsOnly
+        List<SkillDefSkinnyRes> res = skillsAdminService.getSkinnySkills(projectId, skillNameQuery ?: '', excludeImportedSkillsBol, includeDisabledBool, includeSkillGroupsBool, approvalsOnlyBool)
         if (excludeReusedSkills) {
             res = res.findAll { !it.isReused }
         }

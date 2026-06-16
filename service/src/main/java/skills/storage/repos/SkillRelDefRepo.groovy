@@ -234,9 +234,9 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         left join ExportedSkill es on es.skill.id = sd2.id
         left join QuizToSkillDef qToSkill on qToSkill.skillRefId = (case when sd2.copiedFrom is not null then sd2.copiedFrom else sd2.id end)
         left join QuizDef qDef on qDef.id = qToSkill.quizRefId
-    where sd1.projectId=?1 and sd1.skillId=?2 and srd.type in ?3
+    where sd1.projectId=?1 and sd1.skillId=?2 and srd.type in ?3 and ('false' = ?4 or sd2.selfReportingType = 'Approval')
     ''')
-    List<SkillDefPartial> getSkillsWithCatalogStatus(String projectId, String subjectId, List<SkillRelDef.RelationshipType> relationshipTypes)
+    List<SkillDefPartial> getSkillsWithCatalogStatus(String projectId, String subjectId, List<SkillRelDef.RelationshipType> relationshipTypes, String approvalsOnly)
 
     @Query(value='''
         WITH RECURSIVE subj_skills (parentId, childId) AS (
