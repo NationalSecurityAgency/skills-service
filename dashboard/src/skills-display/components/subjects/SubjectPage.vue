@@ -24,6 +24,7 @@ import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vu
 import SkillsProgressList from '@/skills-display/components/progress/SkillsProgressList.vue'
 import MyRank from '@/skills-display/components/rank/MyRank.vue'
 import PointProgressChart from '@/skills-display/components/progress/points/PointProgressChart.vue'
+import TagList from "@/skills-display/components/skill/tags/TagList.vue";
 
 const subject = useSkillsDisplaySubjectState()
 const route = useRoute()
@@ -77,8 +78,9 @@ watch( () => route.params.subjectId, () => {
 
         </template>
       </Card>
-<!--      @points-earned="refreshHeader"-->
-<!--      @scrollTo="scrollToLastViewedSkill"-->
+
+      <tag-list class="mt-4" />
+
       <skills-progress-list
         class="mt-4" />
 
