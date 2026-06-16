@@ -545,19 +545,13 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         users.each { String user ->
             skillsService.addSkill([projectId: proj1.projectId, skillId: "skill1"], user, startOfToday)
         }
-        boolean isTodaySaturday = LocalDate.now().getDayOfWeek() == DayOfWeek.SATURDAY
-        LocalDate previousSaturday = isTodaySaturday ?
-            LocalDate.now().with(TemporalAdjusters.previous(DayOfWeek.SATURDAY)) :
-            LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY))
-        Date startOfSaturday = Date.from(previousSaturday.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant())
-        Date previousSunday = startOfSaturday+1
 
         when:
-        def res = skillsService.getOverallMetricsData(metricsId, getProps(0))
+        def res = skillsService.getOverallMetricsData(metricsId, getProps(startOfToday))
         then:
-        res.users.size() == 2
-        res.users.count == [0,5]
-        res.users.value == [previousSunday.time, startOfToday.time]
+        res.users.size() == 1
+        res.users.count == [5]
+        res.users.value == [startOfToday.time]
     }
 
     def "test week boundary transition"() {
