@@ -27,6 +27,7 @@ import ProjectDescription from '@/skills-display/components/home/ProjectDescript
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import MyBadges from '@/skills-display/components/badges/MyBadges.vue'
 import TranscriptCard from '@/skills-display/components/userTranscript/TranscriptCard.vue'
+import TagList from "@/skills-display/components/skill/tags/TagList.vue";
 
 const skillsDisplayTheme = useSkillsDisplayThemeState()
 const userProgress = useUserProgressSummaryState()
@@ -72,6 +73,8 @@ const hasBadges = computed(() => {
           <my-badges :badges="userProgress.userProgressSummary.badges"></my-badges>
         </div>
       </div>
+
+      <tag-list class="mt-4" />
 
       <subject-tiles class="mt-4"/>
 
