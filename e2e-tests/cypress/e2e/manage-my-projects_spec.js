@@ -448,15 +448,19 @@ describe('Manage My Projects Tests', () => {
         cy.get('[data-cy="addButton-proj1"]').click()
 
         cy.visit('/progress-and-rankings/projects/proj1');
+        cy.get('[data-cy="overallPoints"]').should('exist')
         cy.get('[data-cy="addButton-proj1"]').should('not.exist')
         cy.visit('/progress-and-rankings/projects/proj2');
+        cy.get('[data-cy="overallPoints"]').should('exist')
         cy.get('[data-cy="addButton-proj2"]').should('exist')
 
     });
 
     it('add button does not show on Inception', function () {
-        cy.intercept('GET', '/api/projects/Inception/isMyProject', cy.spy().as('isMyProject'));
+        cy.intercept('GET', '/api/myprojects/Inception/isMyProject', cy.spy().as('isMyProject'));
         cy.visit('/progress-and-rankings/projects/Inception');
+
+        cy.get('[data-cy="overallPoints"]').should('exist')
         cy.get('@isMyProject').should('not.have.been.called');
         cy.get('[data-cy="addButton-Inception"]').should('not.exist')
     });
@@ -467,16 +471,17 @@ describe('Manage My Projects Tests', () => {
             cy.enableProdMode(i);
         }
 
-        cy.intercept('GET', '/api/projects/proj1/isMyProject', cy.spy().as('isMyProject'));
+        cy.intercept('GET', '/api/myprojects/proj1/isMyProject', cy.spy().as('isMyProject'));
         cy.visit('/test-skills-client/proj1');
 
+        cy.wrapIframe().find('[data-cy="overallPoints"]')
         cy.get('@isMyProject').should('not.have.been.called');
-        cy.get('[data-cy="addButton-proj1"]').should('not.exist')
+        cy.wrapIframe().find('[data-cy="addButton-proj1"]').should('not.exist')
 
     });
 
     it('add button does not show on user skills-display preview', function () {
-        cy.intercept('GET', '/api/projects/proj1/isMyProject', cy.spy().as('isMyProject'));
+        cy.intercept('GET', '/api/myprojects/proj1/isMyProject', cy.spy().as('isMyProject'));
         cy.createProject(1);
         cy.enableProdMode(1);
         cy.createSubject(1, 1)
@@ -484,6 +489,7 @@ describe('Manage My Projects Tests', () => {
         cy.reportSkill(1, 1, 'user1', 'yesterday');
 
         cy.visit('/administrator/projects/proj1/users/user1')
+        cy.get('[data-cy="overallPoints"]').should('exist')
         cy.get('@isMyProject').should('not.have.been.called');
         cy.get('[data-cy="addButton-proj1"]').should('not.exist')
 

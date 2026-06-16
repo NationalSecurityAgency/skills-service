@@ -163,7 +163,7 @@ export default {
       .then((response) => response.data)
   },
   isMyProject(projectId) {
-    return axios.get(`/api/projects/${encodeURIComponent(projectId)}/isMyProject`).then(
+    return axios.get(`/api/myprojects/${encodeURIComponent(projectId)}/isMyProject`).then(
       (response) => response.data
     )
   }

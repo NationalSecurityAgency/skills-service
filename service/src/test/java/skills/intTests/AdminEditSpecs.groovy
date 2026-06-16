@@ -1648,8 +1648,8 @@ class AdminEditSpecs extends DefaultIntSpec {
         def isMyProjectRemoval = skillsService.isMyProject(proj1.projectId).data
 
         then:
-        isMyProject == false
-        isMyProjectNow == true
-        isMyProjectRemoval == false
+        isMyProject.isInMyProjects == false
+        isMyProjectNow.isInMyProjects == true
+        isMyProjectRemoval.isInMyProjects == false
     }
 }

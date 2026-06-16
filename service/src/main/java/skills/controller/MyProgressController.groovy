@@ -129,11 +129,11 @@ class MyProgressController {
         }
     }
 
-    @RequestMapping(value = "/projects/{id}/isMyProject", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/myprojects/{id}/isMyProject", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     @ExcludeFromLimitDashboardAccess
     RequestResult getIsInMyProjects(@PathVariable("id") String projectId) {
         String userId = userInfoService.getCurrentUserId();
-        return new RequestResult(success: true, data: projAdminService.isInMyProjects(projectId, userId))
+        return new RequestResult(success: true, data: [ isInMyProjects: projAdminService.isInMyProjects(projectId, userId) ])
     }
 }
