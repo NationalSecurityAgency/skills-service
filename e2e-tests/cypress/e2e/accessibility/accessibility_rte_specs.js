@@ -212,6 +212,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
     });
 
     it('insert link using keyboard - use keyboard mapping', () => {
+        cy.viewport(1000, 1400);
         cy.visit('/administrator/');
         cy.get('[data-cy=newProjectButton]').click()
         cy.get('[data-cy="projectName"]').should('have.focus')
