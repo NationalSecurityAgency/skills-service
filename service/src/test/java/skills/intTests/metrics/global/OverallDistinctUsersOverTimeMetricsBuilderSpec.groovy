@@ -186,13 +186,13 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(days[0]))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(daysPlusTwoWeeksPrior[0]))
 
         skillsService.archiveUsers([users[2]], proj1.projectId)
 
-        def res30daysAfterArchive = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
-        def resOver30daysAfterArchive = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
+        def res30daysAfterArchive = skillsService.getOverallMetricsData(metricsId, getProps(days[0]))
+        def resOver30daysAfterArchive = skillsService.getOverallMetricsData(metricsId, getProps(daysPlusTwoWeeksPrior[0]))
 
         then:
         res30days.users.size() == 6
@@ -273,11 +273,9 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         assert maxDailyDays == 3, "test data constructed with the assumption that skills.config.compactDailyEventsOlderThan is set to 3"
         userEventService.compactDailyEvents()
 
-        Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
-
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(days[0]))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(daysPlusTwoWeeksPrior[0]))
 
         then:
         res30days.users.size() == 6
@@ -350,8 +348,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(days[0]))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(daysPlusTwoWeeksPrior[0]))
 
         then:
         res30days.users.size() == 6
@@ -425,8 +423,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(days[0]))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(daysPlusTwoWeeksPrior[0]))
 
         then:
         res30days.users.size() == 6
@@ -481,8 +479,8 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         Duration duration = Duration.between(testDates.getFirstOfMonth(1), LocalDateTime.now())
 
         when:
-        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger(), true))
-        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(duration.toDays().toInteger()+14, true))
+        def res30days = skillsService.getOverallMetricsData(metricsId, getProps(days[0], true))
+        def resOver30days = skillsService.getOverallMetricsData(metricsId, getProps(days[0].minus(14), true))
 
         then:
         // Adjust expectations based on current date
@@ -518,7 +516,7 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         when:
         def res = skillsService.getOverallMetricsData(metricsId, getProps(15))
         then:
-        res.users.count == [0,0,0]
+        res.users.count == [0,0,0,0]
 
         where:
         "Query should return empty list when no users exist in date range"
@@ -547,13 +545,19 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         users.each { String user ->
             skillsService.addSkill([projectId: proj1.projectId, skillId: "skill1"], user, startOfToday)
         }
+        boolean isTodaySaturday = LocalDate.now().getDayOfWeek() == DayOfWeek.SATURDAY
+        LocalDate previousSaturday = isTodaySaturday ?
+            LocalDate.now().with(TemporalAdjusters.previous(DayOfWeek.SATURDAY)) :
+            LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY))
+        Date startOfSaturday = Date.from(previousSaturday.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant())
+        Date previousSunday = startOfSaturday+1
 
         when:
         def res = skillsService.getOverallMetricsData(metricsId, getProps(0))
         then:
-        res.users.size() == 1
-        res.users.count == [5]
-        res.users.value == [startOfToday.time]
+        res.users.size() == 2
+        res.users.count == [0,5]
+        res.users.value == [previousSunday.time, startOfToday.time]
     }
 
     def "test week boundary transition"() {
@@ -605,13 +609,25 @@ class OverallDistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         res.users.value == dates
     }
 
-    private Map getProps(int numDaysAgo, Boolean byMonth = false) {
+    private static Map getProps(int numDaysAgo, Boolean byMonth = false) {
         Map props = [:]
-        use(TimeCategory) {
-            props[MetricsParams.P_START_TIMESTAMP] = numDaysAgo.days.ago.time
-            if (byMonth) {
-                props[MetricsParams.P_BY_MONTH] = byMonth
-            }
+        LocalDate weekStart = LocalDate.now()
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+                .minusDays(numDaysAgo)
+        Date startDate = Date.from(weekStart.atStartOfDay(ZoneOffset.UTC).toInstant())
+        props[MetricsParams.P_START_TIMESTAMP] = startDate.time
+        if (byMonth) {
+            props[MetricsParams.P_BY_MONTH] = byMonth
+        }
+        return props
+    }
+
+    private static Map getProps(Date startDate, Boolean byMonth = false) {
+        Map props = [
+                (MetricsParams.P_START_TIMESTAMP): startDate.time
+        ]
+        if (byMonth) {
+            props[MetricsParams.P_BY_MONTH] = byMonth
         }
         return props
     }
