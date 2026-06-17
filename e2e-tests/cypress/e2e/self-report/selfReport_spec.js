@@ -806,5 +806,71 @@ describe('Approval Requests Management Tests', () => {
         cy.get('[data-cy="skillsReportApprovalTable"] [data-p-index="0"] [data-cy="userId"]').should('have.text', 'user1')
         cy.get(`${myRequestOnlyToggleSelector} [data-pc-section="input"]`).should('not.be.checked')
     })
+
+    it('approval table shows descriptions', () => {
+        cy.createSkill(1, 1, 1, {selfReportingType: 'Approval', description: 'Test skill description'});
+        cy.createSkill(1, 1, 2, {selfReportingType: 'Approval', description: 'Second test skill description'});
+        cy.reportSkill(1, 1, 'user1', 'now');
+        cy.reportSkill(1, 2, 'user2', 'now');
+        cy.reportSkill(1, 1, 'user3', 'now');
+        cy.reportSkill(1, 1, 'user4', 'now');
+        cy.reportSkill(1, 1, 'user5', 'now');
+        cy.reportSkill(1, 1, 'user6', 'now');
+
+        cy.intercept('GET', '/admin/projects/proj*/approvals?*').as('loadApprovals');
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@loadApprovals');
+
+        cy.get('[data-cy="showDescriptionBtn_skill1"]').eq(0).click();
+        cy.get('[data-cy="skillDescription_skill1"]').eq(0).contains( 'Test skill description');
+        cy.get('[data-cy="showDescriptionBtn_skill2"]').eq(0).click();
+        cy.get('[data-cy="skillDescription_skill2"]').eq(0).contains( 'Second test skill description');
+        cy.get('[data-cy="showDescriptionBtn_skill2"]').eq(0).click();
+        cy.get('[data-cy="skillDescription_skill2"]').should('not.exist');
+        cy.get('[data-cy="skillDescription_skill1"]').eq(0).should('exist');
+        cy.get('[data-pc-section="page"]').contains('2').click();
+        cy.get('[data-cy="skillDescription_skill1"]').should('not.exist');
+
+        cy.get('[data-pc-section="page"]').contains('1').click();
+        cy.get('[data-cy="skillDescription_skill1"]').should('exist');
+    })
+
+    it('descriptions are only loaded once', () => {
+        // http://localhost:5173/api/projects/proj1/skills/skill1/description
+        cy.createSkill(1, 1, 1, {selfReportingType: 'Approval', description: 'Test skill description'});
+        cy.createSkill(1, 1, 2, {selfReportingType: 'Approval', description: 'Second test skill description'});
+        cy.reportSkill(1, 1, 'user1', 'now');
+        cy.reportSkill(1, 2, 'user2', 'now');
+        cy.reportSkill(1, 1, 'user3', 'now');
+
+        cy.intercept('GET', '/api/projects/proj1/skills/skill1/description', cy.spy().as('loadSkill1Description'));
+        cy.intercept('GET', '/api/projects/proj1/skills/skill2/description', cy.spy().as('loadSkill2Description'));
+        cy.intercept('GET', '/admin/projects/proj*/approvals?*').as('loadApprovals');
+        cy.visit('/administrator/projects/proj1/self-report');
+        cy.wait('@loadApprovals');
+
+        cy.get('[data-cy="showDescriptionBtn_skill1"]').eq(0).click();
+        cy.get('[data-cy="skillDescription_skill1"]').eq(0).contains( 'Test skill description');
+        cy.get('@loadSkill1Description').should('have.been.called');
+
+        cy.get('[data-cy="showDescriptionBtn_skill2"]').eq(0).click();
+        cy.get('[data-cy="skillDescription_skill2"]').eq(0).contains( 'Second test skill description');
+        cy.get('@loadSkill2Description').should('have.been.called');
+
+        cy.get('[data-cy="showDescriptionBtn_skill2"]').eq(0).click();
+        cy.get('[data-cy="skillDescription_skill2"]').should('not.exist');
+        cy.get('[data-cy="skillDescription_skill1"]').eq(0).should('exist');
+
+        cy.get('[data-cy="showDescriptionBtn_skill1"]').eq(1).click();
+        cy.get('[data-cy="skillDescription_skill1"]').eq(1).contains( 'Test skill description');
+        cy.get('@loadSkill1Description').should('have.been.calledOnce');
+
+        cy.get('[data-cy="showDescriptionBtn_skill1"]').eq(0).click();
+        cy.get('[data-cy="showDescriptionBtn_skill1"]').eq(0).click();
+        cy.get('[data-cy="showDescriptionBtn_skill1"]').eq(0).click();
+        cy.get('[data-cy="showDescriptionBtn_skill1"]').eq(0).click();
+        cy.get('@loadSkill1Description').should('have.been.calledOnce');
+
+    })
 });
 

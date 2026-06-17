@@ -368,7 +368,7 @@ const toRouteProps = (skill) => {
             <Card v-if="descriptions[slotProps.data.skillId]" header="Skill Description" class="ml-6 mt-4">
               <template #title>Skill Description</template>
               <template #content>
-                <markdown-text class="d-inline-block" :text="descriptions[slotProps.data.skillId]" data-cy="approvalMessage" :instance-id="`${slotProps.data.id}-${slotProps.data.skillId}`"/>
+                <markdown-text class="d-inline-block" :text="descriptions[slotProps.data.skillId]" :data-cy="`skillDescription_${slotProps.data.skillId}`" :instance-id="`${slotProps.data.id}-${slotProps.data.skillId}`"/>
               </template>
             </Card>
           </div>
