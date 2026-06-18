@@ -19,7 +19,9 @@ import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
+const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
 const route = useRoute()
 const colors = useColors()
@@ -30,7 +32,8 @@ onMounted(() => {
   loadData()
 })
 const loadData = async () => {
-  const { projectId, subjectId } = route.params
+  const projectId = attributes.projectId
+  const { subjectId } = route.params
   tags.value = subjectId
     ? await skillsDisplayService.getTagsForSubject(projectId, subjectId)
     : await skillsDisplayService.getTagsForProject(projectId)
