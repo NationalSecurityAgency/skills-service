@@ -1947,6 +1947,16 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/skills/tags${query}")
     }
 
+    def getApiTagsForProject(String projectId, Boolean includeDisabled=false) {
+        String query = "?includeDisabled=${includeDisabled}"
+        return wsHelper.apiGet("/projects/${projectId}/skills/tags${query}")
+    }
+
+    def getApiTagsForSubject(String projectId, String subjectId, Boolean includeDisabled=false) {
+        String query = "?includeDisabled=${includeDisabled}"
+        return wsHelper.apiGet("/projects/${projectId}/subjects/${subjectId}/skills/tags${query}")
+    }
+
     def deleteTagForSkills(String projectId, List<String> skillIds, String tagId) {
         return wsHelper.adminDelete("/projects/${projectId}/skills/tag", [skillIds: skillIds, tagId: tagId])
     }
