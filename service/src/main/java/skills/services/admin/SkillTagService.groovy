@@ -106,7 +106,7 @@ class SkillTagService {
     }
 
     @Transactional
-    List<SkillTag> getTagsForProject(String projectId, Boolean includeDisabled) {
+    List<SkillTag> getTagsForProject(String projectId, Boolean includeDisabled=true) {
         skillDefRepo.getTagsForProject(projectId, includeDisabled.toString())
     }
 
