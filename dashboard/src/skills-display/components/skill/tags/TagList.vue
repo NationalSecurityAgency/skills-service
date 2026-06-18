@@ -23,7 +23,7 @@ import { useRoute } from 'vue-router'
 const skillsDisplayService = useSkillsDisplayService()
 const route = useRoute()
 const colors = useColors()
-const getBgColor = (index) => colors.getBgColorClass(index, 50)
+const getBgColor = (index) => `${colors.getBgColorClass(index, 50)} dark:bg-slate-800`
 const tags = ref([])
 
 onMounted(() => {
@@ -44,14 +44,16 @@ const loadData = async () => {
         <h2 class="sr-only">Skill Tags</h2>
         <div data-cy="skillTags" class="flex gap-2">
           <div v-for="(tag, index) in tags"
-               class="border rounded-xl px-2 py-1"
+               class="border rounded-xl px-2 py-1 text-slate-900 dark:text-slate-100 dark:bg-slate-800 dark:border-slate-600"
                :class="getBgColor(index)"
                icon="fa-solid fa-tag"
                severity="secondary">
             <div class="flex gap-1 items-center">
               <i class="fa-solid fa-tag" aria-hidden="true" :class="colors.getTextClass(index)"></i>
               <div>{{ tag.tagValue }}</div>
-              <div class="border rounded-3xl px-2 bg-gray-200">{{ tag.numSkills }}</div>
+              <div class="border rounded-3xl px-2 bg-gray-200 text-slate-900 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-500">
+                {{ tag.numSkills }}
+              </div>
             </div>
           </div>
         </div>
