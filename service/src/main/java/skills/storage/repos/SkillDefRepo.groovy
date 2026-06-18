@@ -726,11 +726,19 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     ''', nativeQuery = true)
     List<SkillTag> getTagsForSkills(String projectId, List<String> skillIds)
 
-    @Query(value='''select distinct tag.skill_id as tagId, tag.name as tagValue
-                    from skill_definition tag, skill_definition skill, skill_relationship_definition srd
-                    where tag.project_id=?1 and tag.type = 'Tag'
-                        and srd.parent_ref_id = tag.id and srd.child_ref_id = skill.id and srd.type = 'Tag'
-                        and (skill.enabled = 'true' or 'true' = ?2)
+    @Query(value='''select tag.skill_id          as tagId,
+                           tag.name              as tagValue,
+                           count(skill.skill_id) as numSkills
+                    from skill_definition tag
+                             join skill_relationship_definition srd
+                                  on srd.parent_ref_id = tag.id
+                             join skill_definition skill
+                                  on srd.child_ref_id = skill.id
+                    where tag.project_id = ?1
+                      and tag.type = 'Tag'
+                      and srd.type = 'Tag'
+                      and (skill.enabled = 'true' or 'true' = ?2)
+                    group by tag.skill_id, tag.name
     ''', nativeQuery = true)
     List<SkillTag> getTagsForProject(String projectId, String includeDisabled)
 
