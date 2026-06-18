@@ -275,6 +275,20 @@ export const useSkillsDisplayService = () => {
     return axios.get('/app/userInfo').then((response) => response.data)
   }
 
+  const getTagsForProject = (projectId, includeDisabled = false) => {
+    let params = `?includeDisabled=${includeDisabled}`
+    return axios
+      .get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(projectId)}/skills/tags${params}`)
+      .then((response) => response.data)
+  }
+
+  const getTagsForSubject = (projectId, subjectId, includeDisabled = false) => {
+    let params = `?includeDisabled=${includeDisabled}`
+    return axios
+      .get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(projectId)}/skills/subjects/${encodeURIComponent(subjectId)}/tags${params}`)
+      .then((response) => response.data)
+  }
+
   return {
     loadUserProjectSummary,
     loadSubjectSummary,
@@ -295,6 +309,8 @@ export const useSkillsDisplayService = () => {
     getRankingDistributionUsersPerLevel,
     getLeaderboard,
     getVideoTranscript,
-    getLoggedInUserInfo
+    getLoggedInUserInfo,
+    getTagsForProject,
+    getTagsForSubject
   }
 }
