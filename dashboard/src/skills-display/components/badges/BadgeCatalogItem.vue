@@ -24,6 +24,7 @@ import BadgeHeaderIcons from '@/skills-display/components/badges/BadgeHeaderIcon
 import ExtraBadgeAward from '@/skills-display/components/badges/ExtraBadgeAward.vue'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import {useRoute} from "vue-router";
+import { calculateBadgeCompletionPercent } from '@/skills-display/components/badges/BadgeProgressUtil.js'
 
 const props = defineProps({
   badge: {
@@ -51,12 +52,7 @@ const props = defineProps({
 const timeUtils = useTimeUtils()
 const route = useRoute()
 const iconCss = computed(() => `${props.badge.iconClass} ${props.iconColor}`)
-const percent = computed(() => {
-  if (props.badge.numTotalSkills === 0) {
-    return 0
-  }
-  return Math.trunc((props.badge.numSkillsAchieved / props.badge.numTotalSkills) * 100)
-})
+const percent = computed(() => calculateBadgeCompletionPercent(props.badge))
 
 const showHeader = computed(() => props.badge.gem || props.badge.global)
 const iconCardPt = computed(() => {
