@@ -1888,14 +1888,14 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotNull(skillsTagRequest, "skillsTagRequest", projectId)
         SkillsValidator.isNotEmpty(skillsTagRequest.skillIds, "skillsTagRequest.skillIds", projectId)
-        return skillTagService.getTagsForSkills(projectId, skillsTagRequest.skillIds)?.collect { new SkillTagRes(tagId: it.tagId, tagValue: it.tagValue) }
+        return skillTagService.getTagsForSkills(projectId, skillsTagRequest.skillIds)?.collect { new SkillTagRes(tagId: it.tagId, tagValue: it.tagValue, numSkills: it.numSkills) }
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/tags", method = RequestMethod.GET, produces = "application/json")
     List<SkillTagRes> getTagsForProject(@PathVariable("projectId") String projectId,
                                         @RequestParam(required = false, value = "includeDisabled", defaultValue = "true") Boolean includeDisabled) {
         SkillsValidator.isNotBlank(projectId, "projectId")
-        return skillTagService.getTagsForProject(projectId, includeDisabled)?.collect { new SkillTagRes(tagId: it.tagId, tagValue: it.tagValue) }
+        return skillTagService.getTagsForProject(projectId, includeDisabled)?.collect { new SkillTagRes(tagId: it.tagId, tagValue: it.tagValue, numSkills: it.numSkills) }
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/tag", method = [RequestMethod.DELETE], produces = MediaType.APPLICATION_JSON_VALUE)
