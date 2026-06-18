@@ -353,7 +353,9 @@ const toRouteProps = (skill) => {
         <template #expansion="slotProps">
           <div v-if="justifications[slotProps.data.id]">
             <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-6">
-              <template #title>Justification</template>
+              <template #header>
+                <SkillsCardHeader title="Requested points with the following justification:"></SkillsCardHeader>
+              </template>
               <template #content>
                 <markdown-text class="d-inline-block" :text="slotProps.data.requestMsg" data-cy="approvalMessage" :instance-id="`${slotProps.data.id}`"/>
               </template>
@@ -366,7 +368,9 @@ const toRouteProps = (skill) => {
           </div>
           <div v-if="showDescriptions[slotProps.data.id]">
             <Card v-if="descriptions[slotProps.data.skillId]" header="Skill Description" class="ml-6 mt-4">
-              <template #title>Skill Description</template>
+              <template #header>
+                <SkillsCardHeader title="Description of the skill:"></SkillsCardHeader>
+              </template>
               <template #content>
                 <markdown-text class="d-inline-block" :text="descriptions[slotProps.data.skillId]" :data-cy="`skillDescription_${slotProps.data.skillId}`" :instance-id="`${slotProps.data.id}-${slotProps.data.skillId}`"/>
               </template>
