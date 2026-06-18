@@ -16,31 +16,25 @@ limitations under the License.
 <script setup>
 
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
+import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
+const skillsDisplayService = useSkillsDisplayService()
+const route = useRoute()
 const colors = useColors()
 const getBgColor = (index) => colors.getBgColorClass(index, 50)
-const tags = [
-  {
-    tagId: '1',
-    tagValue: 'Programming',
-    numSkills: 2,
-  },
-  {
-    tagId: '2',
-    tagValue: 'Design',
-    numSkills: 5,
-  },
-  {
-    tagId: '3',
-    tagValue: 'Communication',
-    numSkills: 3,
-  },
-  {
-    tagId: '4',
-    tagValue: 'Analysis',
-    numSkills: 7,
-  },
-]
+const tags = ref([])
+
+onMounted(() => {
+  loadData()
+})
+const loadData = async () => {
+  const { projectId, subjectId } = route.params
+  tags.value = subjectId
+    ? await skillsDisplayService.getTagsForSubject(projectId, subjectId)
+    : await skillsDisplayService.getTagsForProject(projectId)
+}
 </script>
 
 <template>
