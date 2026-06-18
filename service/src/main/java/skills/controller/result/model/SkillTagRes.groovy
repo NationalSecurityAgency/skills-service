@@ -21,4 +21,5 @@ import groovy.transform.Canonical
 class SkillTagRes {
     String tagId
     String tagValue
+    Integer numSkills
 }
