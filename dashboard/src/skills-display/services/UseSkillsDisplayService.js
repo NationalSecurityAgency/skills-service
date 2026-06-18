@@ -285,7 +285,7 @@ export const useSkillsDisplayService = () => {
   const getTagsForSubject = (projectId, subjectId, includeDisabled = false) => {
     let params = `?includeDisabled=${includeDisabled}`
     return axios
-      .get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(projectId)}/skills/subjects/${encodeURIComponent(subjectId)}/tags${params}`)
+      .get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills/tags${params}`)
       .then((response) => response.data)
   }
 
