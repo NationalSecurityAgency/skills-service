@@ -1942,8 +1942,9 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/skills/tags", [skillIds: skillIds])
     }
 
-    def getTagsForProject(String projectId) {
-        return wsHelper.adminGet("/projects/${projectId}/skills/tags")
+    def getTagsForProject(String projectId, Boolean includeDisabled=true) {
+        String query = "?includeDisabled=${includeDisabled}"
+        return wsHelper.adminGet("/projects/${projectId}/skills/tags${query}")
     }
 
     def deleteTagForSkills(String projectId, List<String> skillIds, String tagId) {
