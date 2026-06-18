@@ -174,9 +174,8 @@ const toggleUnsubscribe = () => {
 };
 
 const toggleRow = (row) => {
-  if(expandedRows.value[row]) {
+  if(expandedRows.value[row] && !justifications.value[row] && !showDescriptions.value[row]) {
     delete expandedRows.value[row];
-    toggleRow(row);
   }
   else {
     expandedRows.value[row] = true;
@@ -188,12 +187,11 @@ const toggleRow = (row) => {
 const showJustification = (row) => {
   if(!justifications.value[row]) {
     justifications.value[row] = true;
-    if(!expandedRows.value[row]) {
-      toggleRow(row);
-    }
   } else {
     justifications.value[row] = !justifications.value[row];
   }
+
+  toggleRow(row);
 }
 
 const fetchDescription = (row) => {
@@ -352,7 +350,7 @@ const toRouteProps = (skill) => {
 
         <template #expansion="slotProps">
           <div v-if="justifications[slotProps.data.id]">
-            <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-6">
+            <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-6 mb-4">
               <template #header>
                 <SkillsCardHeader title="Requested points with the following justification:"></SkillsCardHeader>
               </template>
@@ -360,14 +358,14 @@ const toRouteProps = (skill) => {
                 <markdown-text class="d-inline-block" :text="slotProps.data.requestMsg" data-cy="approvalMessage" :instance-id="`${slotProps.data.id}`"/>
               </template>
             </Card>
-            <Card v-else>
+            <Card v-else class="ml-6 mb-4">
               <template #content>
                 No Justification supplied
               </template>
             </Card>
           </div>
           <div v-if="showDescriptions[slotProps.data.id]">
-            <Card v-if="descriptions[slotProps.data.skillId]" header="Skill Description" class="ml-6 mt-4">
+            <Card v-if="descriptions[slotProps.data.skillId]" header="Skill Description" class="ml-6">
               <template #header>
                 <SkillsCardHeader title="Description of the skill:"></SkillsCardHeader>
               </template>
