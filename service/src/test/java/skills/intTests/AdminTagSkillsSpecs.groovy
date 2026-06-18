@@ -142,7 +142,11 @@ class AdminTagSkillsSpecs extends DefaultIntSpec {
         skillsAfterTagging[3].tags && skillsAfterTagging[3].tags.size() == 1 && skillsAfterTagging[3].tags[0].tagValue == tagValue2
 
         tagsForProject && tagsForProject.size() == 2 && tagsForProject.find { it.tagValue == tagValue1 } && tagsForSkills.find { it.tagValue == tagValue2 }
+        tagsForProject.find { it.tagValue == tagValue1 }.numSkills == 2
+        tagsForProject.find { it.tagValue == tagValue2 }.numSkills == 3
         tagsForSkills && tagsForSkills.size() == 2 && tagsForSkills.find { it.tagValue == tagValue1 } && tagsForSkills.find { it.tagValue == tagValue2 }
+        tagsForSkills.find { it.tagValue == tagValue1 }.numSkills == 2
+        tagsForSkills.find { it.tagValue == tagValue2 }.numSkills == 3
     }
 
     void "delete tag from some skills"() {
