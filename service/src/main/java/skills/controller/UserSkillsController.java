@@ -247,6 +247,17 @@ class UserSkillsController {
         return skillsLoader.loadSkillsGroupSummary(projectId, groupId, userId, getProvidedVersionOrReturnDefault(version));
     }
 
+    @RequestMapping(value = "/projects/{projectId}/tags/{tagId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public SkillTagSummary getSkillTagSummary(@PathVariable("projectId") String projectId,
+                                               @PathVariable("tagId") String tagId,
+                                               @RequestParam(name = "userId", required = false) String userIdParam,
+                                               @RequestParam(name = "version", required = false) Integer version,
+                                               @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        return skillsLoader.loadSkillTagSummary(projectId, tagId, userId, getProvidedVersionOrReturnDefault(version));
+    }
+
     @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/descriptions", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public List<SkillDescription> getGroupSkillsDescriptions(@PathVariable("projectId") String projectId,
