@@ -18,15 +18,13 @@ import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
 import SkillsProgressList from '@/skills-display/components/progress/SkillsProgressList.vue'
-import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
-import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
+import SkillTagProgress from '@/skills-display/components/skill/tags/SkillTagProgress.vue'
 
 const route = useRoute()
 const attributes = useSkillsDisplayAttributesState()
 const summaryAndSkillsState = useSkillsDisplaySubjectState()
-const nF = useNumberFormat()
 
 const tag = computed(() => summaryAndSkillsState.subjectSummary)
 const isLoading = computed(() => summaryAndSkillsState.loadingSkillTagSummary)
@@ -39,16 +37,6 @@ const loadSkillTagSummary = () => {
   summaryAndSkillsState.loadSkillTagSummary(route.params.tagId)
 }
 
-const tagName = computed(() => {
-  return tag.value.tag || tag.value.tagValue || route.query.tagValue || route.params.tagId
-})
-
-const skillsAchieved = computed(() => tag.value.skillsAchieved || 0)
-const totalSkills = computed(() => tag.value.totalSkills || tag.value.skills?.length || 0)
-
-const progressPercent = computed(() => {
-  return totalSkills.value > 0 ? Math.trunc((skillsAchieved.value / totalSkills.value) * 100) : 0
-})
 </script>
 
 <template>
@@ -60,38 +48,7 @@ const progressPercent = computed(() => {
         <skills-title>{{ attributes.skillDisplayName }} Tag Overview</skills-title>
       </div>
 
-      <Card>
-        <template #content>
-          <div class="flex flex-col gap-4">
-            <div class="flex items-center gap-3">
-              <div class="border rounded p-3 text-primary">
-                <i class="fa-solid fa-tag text-4xl" aria-hidden="true"></i>
-              </div>
-
-              <div class="flex-1 flex flex-col gap-2">
-                <div class="flex items-end gap-1">
-                  <div class="flex-1">
-                    <span class="text-3xl" data-cy="skillTagName">{{ tagName }}</span>
-                  </div>
-
-                  <div data-cy="skillTagProgress">
-                    <span>{{ nF.pretty(skillsAchieved) }}</span>
-                    /
-                    <span>{{ nF.pretty(totalSkills) }}</span>
-                    {{ attributes.skillDisplayNamePlural }}
-                  </div>
-                </div>
-
-                <div>
-                  <vertical-progress-bar
-                    :total-progress="progressPercent"
-                    :disable-daily-color="true" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </template>
-      </Card>
+      <skill-tag-progress :skill-tag-overview="tag" :build-link="false" />
 
       <skills-progress-list type="tag" />
     </div>
