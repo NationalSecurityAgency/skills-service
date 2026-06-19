@@ -469,6 +469,23 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
+    List<SkillTagSummary> loadTagSummaries(String projectId, String userId, Integer version = Integer.MAX_VALUE){
+        ProjDef projDef = getProjDef(userId, projectId)
+        List<SkillDefWithExtra> tagDefs = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, ContainerType.Tag)
+        if ( version >= 0 ) {
+            tagDefs = tagDefs.findAll { it.version <= version }
+        }
+
+        List<SkillTagSummary> tags = tagDefs.sort({ it.displayOrder }).findAll {
+            (it.enabled == null || Boolean.valueOf(it.enabled)) && BadgeUtils.afterStartTime(it)
+        }.collect { SkillDefWithExtra tagSkillDef ->
+            doLoadSkillTagSummary(projDef, userId, tagSkillDef, version)
+        }
+
+        return tags
+    }
+
+    @Transactional(readOnly = true)
     List<SkillGlobalBadgeSummary> loadGlobalBadgeSummaries(String userId, String projectId, Integer version = Integer.MAX_VALUE){
         List<SkillDefWithExtra> badgeDefs = skillDefWithExtraRepo.findAllByProjectIdAndTypeAndEnabled(null, ContainerType.GlobalBadge, Boolean.TRUE.toString())
         if ( version >= 0 ) {
