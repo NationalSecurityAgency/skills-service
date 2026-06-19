@@ -148,6 +148,14 @@ export const useSkillsDisplayService = () => {
     }).then((result) => addMetaToSummary(result.data))
   }
 
+  const getSkillTagSummary = (tagId) => {
+    const url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/tags/${encodeURIComponent(tagId)}/summary`
+    return axios.get(url, {
+      params: getUserIdAndVersionParams(),
+      withCredentials: true
+    }).then((result) => addMetaToSummary(result.data))
+  }
+
   const getAllProjectSkillsSubjectsAndBadges = () => {
     return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skillsSubjectsAndBadges`, {
       params: ({ ...getUserIdAndVersionParams() })
@@ -311,6 +319,7 @@ export const useSkillsDisplayService = () => {
     getVideoTranscript,
     getLoggedInUserInfo,
     getTagsForProject,
-    getTagsForSubject
+    getTagsForSubject,
+    getSkillTagSummary
   }
 }
