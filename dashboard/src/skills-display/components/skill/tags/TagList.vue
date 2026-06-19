@@ -17,7 +17,7 @@ limitations under the License.
 
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
@@ -38,11 +38,12 @@ const loadData = async () => {
     ? await skillsDisplayService.getTagsForSubject(projectId, subjectId)
     : await skillsDisplayService.getTagsForProject(projectId)
 }
+const hasTags = computed(() => tags.value?.length > 0)
 </script>
 
 <template>
   <div class="">
-    <Card class="mb-3">
+    <Card v-if="hasTags" class="mb-3">
       <template #content>
         <h2 class="sr-only">Skill Tags</h2>
         <div data-cy="skillTags" class="flex gap-2">
