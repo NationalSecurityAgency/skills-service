@@ -20,9 +20,11 @@ import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisp
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
+const skillsDisplayInfo = useSkillsDisplayInfo()
 const route = useRoute()
 const colors = useColors()
 const getBgColor = (index) => `${colors.getBgColorClass(index, 50)} dark:bg-slate-800`
@@ -52,13 +54,17 @@ const hasTags = computed(() => tags.value?.length > 0)
                :class="getBgColor(index)"
                icon="fa-solid fa-tag"
                severity="secondary">
-            <div class="flex gap-1 items-center">
-              <i class="fa-solid fa-tag" aria-hidden="true" :class="colors.getTextClass(index)"></i>
-              <div>{{ tag.tagValue }}</div>
-              <div class="border rounded-3xl px-2 bg-gray-200 text-slate-900 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-500">
-                {{ tag.numSkills }}
+            <router-link
+                :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('skillTagDetails'), params: { tagId: tag.tagId } }"
+                :data-cy="`tagLink-${tag.tagId}`">
+              <div class="flex gap-1 items-center">
+                <i class="fa-solid fa-tag" aria-hidden="true" :class="colors.getTextClass(index)"></i>
+                <div>{{ tag.tagValue }}</div>
+                <div class="border rounded-3xl px-2 bg-gray-200 text-slate-900 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-500">
+                  {{ tag.numSkills }}
+                </div>
               </div>
-            </div>
+            </router-link>
           </div>
         </div>
       </template>
