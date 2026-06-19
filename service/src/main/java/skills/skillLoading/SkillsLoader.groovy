@@ -1136,6 +1136,18 @@ class SkillsLoader {
         }
     }
 
+    @Transactional(readOnly = true)
+    SkillTagSummary loadSkillTagSummary(String projectId, String tagId, String userId, Integer version = -1) {
+        ProjDef projDef = getProjDef(userId, projectId)
+        SkillDefWithExtra tagSkillDef = getSkillDefWithExtra(userId, projectId, tagId, [ContainerType.Tag])
+
+        if (version == -1 || tagSkillDef.version <= version) {
+            return doLoadSkillTagSummary(projDef, userId, tagSkillDef, version)
+        } else {
+            return null
+        }
+    }
+
     @Profile
     private SkillsGroupSummary doLoadSkillsGroupSummary(ProjDef projDef, String userId, SkillDefWithExtra groupSkillDef, Integer version) {
         List<SkillRelDef.RelationshipType> relTypes = [ SkillRelDef.RelationshipType.SkillsGroupRequirement]
@@ -1164,6 +1176,24 @@ class SkillsLoader {
                 skillsAchieved: skillsAchieved,
                 totalSkills: totalSkills,
 
+                skills: skillsRes,
+        )
+    }
+
+    @Profile
+    private SkillTagSummary doLoadSkillTagSummary(ProjDef projDef, String userId, SkillDefWithExtra tagSkillDef, Integer version) {
+        List<SkillRelDef.RelationshipType> relTypes = [SkillRelDef.RelationshipType.Tag]
+        SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, tagSkillDef, version, relTypes)
+
+        List<SkillSummaryParent> skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true, userId, version)
+        Integer skillsAchieved = skillsRes ? skillsRes.collect({it.points == it.totalPoints ? 1 : 0 }).sum() as Integer : 0
+        Integer totalSkills = skillsRes ? skillsRes.size() : 0
+
+        return new SkillTagSummary(
+                tag: InputSanitizer.unsanitizeName(tagSkillDef.name),
+                tagId: tagSkillDef.skillId,
+                skillsAchieved: skillsAchieved,
+                totalSkills: totalSkills,
                 skills: skillsRes,
         )
     }
