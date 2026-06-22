@@ -27,7 +27,7 @@ const attributes = useSkillsDisplayAttributesState()
 const summaryAndSkillsState = useSkillsDisplaySubjectState()
 
 const tag = computed(() => summaryAndSkillsState.subjectSummary)
-const isLoading = computed(() => summaryAndSkillsState.loadingSkillTagSummary && hasLoaded.value)
+const isLoading = computed(() => summaryAndSkillsState.loadingSkillTagSummary || !hasLoaded.value)
 const hasLoaded = ref(false)
 
 onMounted(() => {
