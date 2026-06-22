@@ -471,7 +471,8 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     List<SkillTagSummary> loadTagSummaries(String projectId, String userId, Integer version = Integer.MAX_VALUE){
         ProjDef projDef = getProjDef(userId, projectId)
-        List<SkillDefWithExtra> tagDefs = skillDefWithExtraRepo.findAllByProjectIdAndType(projectId, ContainerType.Tag)
+        List tagIds = skillDefRepo.getTagsForProject(projectId, false.toString()).collect {it.tagId }
+        List<SkillDefWithExtra> tagDefs = skillDefWithExtraRepo.findAllByProjectIdAndSkillIdIn(projectId, tagIds)
         if ( version >= 0 ) {
             tagDefs = tagDefs.findAll { it.version <= version }
         }
