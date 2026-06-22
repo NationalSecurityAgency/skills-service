@@ -1229,6 +1229,19 @@ describe('Users Tests', () => {
         cy.get('[data-cy="usr_progress-userd@skills.org"] [data-cy="progressPercent"]').should('have.text', '100%');
 
         cy.get(tableSelector).should('not.contain', 'usere@skills.org');
+
+        // validate project's users, it uses a separate tableStoredStateId - default sort order is 'Points Last Earned' desc
+        cy.intercept('/admin/projects/proj1/users*').as('getProjectUsers');
+        cy.visit('/administrator/projects/proj1/users');
+        cy.wait('@getProjectUsers')
+
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1, value: 'usere@skills.org' }],
+            [{ colIndex: 1, value: 'userd@skills.org' }],
+            [{ colIndex: 1, value: 'userc@skills.org' }],
+            [{ colIndex: 1, value: 'userb@skills.org' }],
+            [{ colIndex: 1, value: 'usera@skills.org' }],
+        ], 10, true, 5);
     });
 
     it('users with various progress', () => {
