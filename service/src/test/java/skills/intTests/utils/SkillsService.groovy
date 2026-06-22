@@ -1962,6 +1962,22 @@ class SkillsService {
         return wsHelper.apiGet("/projects/${projectId}/subjects/${subjectId}/skills/tags${query}")
     }
 
+    def getSkillTagSummary(String userId, String projectId, String tagId) {        userId = getUserId(userId)
+        String url = "/projects/${projectId}/tags/${tagId}/summary"
+        if (userId) {
+            url += "?userId=${userId}"
+        }
+        return wsHelper.apiGet(url)
+    }
+
+    def getSkillTagSummariesForProject(String userId, String projectId) {
+        String url = "/projects/${projectId}/tags/summary"
+        if (userId) {
+            url += "?userId=${userId}"
+        }
+        return wsHelper.apiGet(url)
+    }
+
     def deleteTagForSkills(String projectId, List<String> skillIds, String tagId) {
         return wsHelper.adminDelete("/projects/${projectId}/skills/tag", [skillIds: skillIds, tagId: tagId])
     }
