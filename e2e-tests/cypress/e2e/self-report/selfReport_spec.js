@@ -836,7 +836,6 @@ describe('Approval Requests Management Tests', () => {
     })
 
     it('descriptions are only loaded once', () => {
-        // http://localhost:5173/api/projects/proj1/skills/skill1/description
         cy.createSkill(1, 1, 1, {selfReportingType: 'Approval', description: 'Test skill description'});
         cy.createSkill(1, 1, 2, {selfReportingType: 'Approval', description: 'Second test skill description'});
         cy.reportSkill(1, 1, 'user1', 'now');
