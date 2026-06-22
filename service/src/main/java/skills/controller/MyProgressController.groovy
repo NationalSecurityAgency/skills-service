@@ -20,9 +20,11 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import skills.PublicProps
 import skills.auth.UserInfoService
+import skills.auth.aop.ExcludeFromLimitDashboardAccess
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
@@ -125,5 +127,13 @@ class MyProgressController {
         if (!rankingAndProgressViewsEnabled) {
             throw new SkillException("Progress and Ranking Views are disabled for this installation of the SkillTree", null, null, ErrorCode.AccessDenied)
         }
+    }
+
+    @RequestMapping(value = "/myprojects/{id}/isMyProject", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @ExcludeFromLimitDashboardAccess
+    RequestResult getIsInMyProjects(@PathVariable("id") String projectId) {
+        String userId = userInfoService.getCurrentUserId();
+        return new RequestResult(success: true, data: [ isInMyProjects: projAdminService.isInMyProjects(projectId, userId) ])
     }
 }

@@ -557,6 +557,12 @@ class ProjAdminService {
     }
 
     @Transactional(readOnly = true)
+    boolean isInMyProjects(String projectId, String userId) {
+        SettingsResult result = settingsService.getUserProjectSetting(userId, projectId, 'my_project', 'my_projects')
+        return result ? true : false
+    }
+
+    @Transactional(readOnly = true)
     boolean existsByProjectId(String projectId) {
         return projDefRepo.existsByProjectIdIgnoreCase(projectId)
     }
