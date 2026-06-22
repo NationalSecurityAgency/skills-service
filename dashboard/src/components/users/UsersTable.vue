@@ -268,6 +268,17 @@ const archiveUsers = () => {
     loadData()
   })
 }
+
+const tableStoredStateId = computed(() => {
+  const tableId = 'usersTable'
+  if (isGlobalBadgePage.value) {
+    return `${tableId}Global`
+  }
+  if (isSkillsGroupPage.value) {
+    return `${tableId}Group`
+  }
+  return tableId
+})
 </script>
 
 <template>
@@ -334,7 +345,7 @@ const archiveUsers = () => {
       <SkillsDataTable
         :value="data" :loading="isLoading" size="small" stripedRows showGridlines paginator lazy
         :totalRecords="totalRows" :rows="pageSize" @page="pageChanged"
-        :tableStoredStateId="`usersTable${isGlobalBadgePage ? 'Global' : ''}`" data-cy="usersTable"
+        :tableStoredStateId="tableStoredStateId" data-cy="usersTable"
         aria-label="Users"
         :rowsPerPageOptions="possiblePageSizes"
         v-model:sort-field="sortInfo.sortBy"
