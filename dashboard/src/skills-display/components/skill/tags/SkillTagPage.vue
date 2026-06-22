@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
 import SkillsProgressList from '@/skills-display/components/progress/SkillsProgressList.vue'
@@ -27,14 +27,17 @@ const attributes = useSkillsDisplayAttributesState()
 const summaryAndSkillsState = useSkillsDisplaySubjectState()
 
 const tag = computed(() => summaryAndSkillsState.subjectSummary)
-const isLoading = computed(() => summaryAndSkillsState.loadingSkillTagSummary)
+const isLoading = computed(() => summaryAndSkillsState.loadingSkillTagSummary && hasLoaded.value)
+const hasLoaded = ref(false)
 
 onMounted(() => {
   loadSkillTagSummary()
 })
 
 const loadSkillTagSummary = () => {
-  summaryAndSkillsState.loadSkillTagSummary(route.params.tagId)
+  summaryAndSkillsState.loadSkillTagSummary(route.params.tagId).then(() => {
+    hasLoaded.value = true
+  })
 }
 
 </script>
