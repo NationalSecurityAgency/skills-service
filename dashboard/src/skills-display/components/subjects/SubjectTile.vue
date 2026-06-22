@@ -78,11 +78,16 @@ const activePointsColor = computed(() => {
   <CardWithVericalSections class="h-full text-center" :data-cy="`subjectTile-${subject.subjectId}`">
     <template #content>
       <div class="px-4 pt-4">
-        <ribbon :color="ribbonColor" class="subject-tile-ribbon">
-          <div class="flex justify-center">
-            <h3 class="overflow-hidden text-ellipsis text-center max-w-[20rem]">{{ subject.subject }}</h3>
-          </div>
-        </ribbon>
+          <ribbon :color="ribbonColor" class="subject-tile-ribbon">
+            <router-link v-if="!attributes.isSummaryOnly"
+                         :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('SubjectDetailsPage'), params: { subjectId: subject.subjectId } }"
+                         :aria-label="`Click to navigate to the ${subject.subject} ${attributes.subjectDisplayName} page.`"
+                         data-cy="subjectRibbonBtn" tabindex="-1">
+              <div class="flex justify-center">
+                <h3 class="overflow-hidden text-ellipsis text-center max-w-[20rem]">{{ subject.subject }}</h3>
+              </div>
+            </router-link>
+          </ribbon>
       </div>
     </template>
     <template #footer>
