@@ -60,7 +60,7 @@ const tableOptions = ref({
     server: true,
     currentPage: 1,
     totalRows: 0,
-    possiblePageSizes: [5, 10, 15, 20],
+    possiblePageSizes: [5, 10, 15, 20, 100, 200],
   },
 })
 const pageSize = useStorage('quizAnswerHistory-tablePageSize', 5)
