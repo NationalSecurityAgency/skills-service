@@ -35,6 +35,7 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
     const loadSubjectSummary = (subjectId, includeSkills = true) => {
       return skillsDisplayService.loadSubjectSummary(subjectId, includeSkills)
         .then((res) => {
+          res.skills?.forEach(skill => skill.subjectId = subjectId)
           subjectSummary.value = res
           return res
         }).finally(() => {
