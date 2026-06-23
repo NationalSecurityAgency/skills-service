@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import skills.PublicProps
 import skills.controller.PublicPropsBasedValidator
+import skills.controller.request.model.MultiSkillUpdateRequest
 import skills.controller.request.model.SkillRequest
 
 @Slf4j
@@ -41,6 +42,31 @@ class SkillRequestValidator {
         validateVersion(projectId, skillId, skillRequest.version)
         validateDescription(skillRequest.description)
     }
+
+    void validateMultiSkillUpdateRequest(String projectId, MultiSkillUpdateRequest request) {
+        if (request.pointIncrement != null) {
+            validatePointIncrement(projectId, null, request.pointIncrement)
+        }
+        if (request.pointIncrementInterval != null) {
+            validatePointIncrementInterval(projectId, null, request.pointIncrementInterval)
+        }
+        if (request.numPerformToCompletion != null) {
+            validateNumPerformToCompletion(projectId, null, request.numPerformToCompletion)
+        }
+        if (request.pointIncrementInterval != null && request.pointIncrementInterval > 0) {
+            // if pointIncrementInterval is disabled then this validation is not needed
+            if (request.numMaxOccurrencesIncrementInterval != null) {
+                SkillsValidator.isTrue(request.numMaxOccurrencesIncrementInterval > 0, "numMaxOccurrencesIncrementInterval must be > 0", projectId)
+            }
+            if (request.numPerformToCompletion != null && request.numMaxOccurrencesIncrementInterval != null) {
+                SkillsValidator.isTrue(request.numPerformToCompletion >= request.numMaxOccurrencesIncrementInterval, "numPerformToCompletion must be >= numMaxOccurrencesIncrementInterval", projectId)
+            }
+            if (request.numMaxOccurrencesIncrementInterval !=null) {
+                propsBasedValidator.validateMaxIntValue(PublicProps.UiProp.maxNumPointIncrementMaxOccurrences, "numMaxOccurrencesIncrementInterval", request.numMaxOccurrencesIncrementInterval)
+            }
+        }
+    }
+
 
 
     void validatePointIncrement(String projectId, String skillId, Integer pointIncrement) {

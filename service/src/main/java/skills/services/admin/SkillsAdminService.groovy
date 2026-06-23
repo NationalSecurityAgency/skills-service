@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillRequestValidator
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
 import skills.controller.request.model.MultiSkillUpdateRequest
 import skills.controller.request.model.SkillImportRequest
@@ -443,10 +444,14 @@ class SkillsAdminService {
         int occurrencesDelta
         int currentOccurrences
     }
+    static final Set<String> SUPPORTED_SELF_REPORT_TYPES_FOR_BATCH_UPDATES = [
+            SelfReportingType.Approval.toString(), SelfReportingType.HonorSystem.toString()].toSet()
 
     @Transactional()
     @Profile
     List<SaveSkillService.SkillInBatchUpdateRes> batchUpdateSkills(String projectId, MultiSkillUpdateRequest updateRequest) {
+        validate(updateRequest, projectId)
+        skillRequestValidator.validateMultiSkillUpdateRequest(projectId, updateRequest)
         List<String> skillIds = updateRequest.skills
         List<SkillDef> skillsToUpdate = skillDefRepo.findAllByProjectIdAndSkillIdIn(projectId, skillIds)
 
@@ -478,10 +483,13 @@ class SkillsAdminService {
             if (currentSkillSubject.id != subject.id) {
                 throw new SkillException("All provided skills must belong to the same subject. Skill [${skill.skillId}] is not a child of [${subject.skillId}]", projectId, skill.skillId, ErrorCode.BadParam)
             }
-            int currentOccurrences = (int)(skill.totalPoints / skill.pointIncrement)
+            String selfReportTypeToBe = updateRequest.selfReportingType ?: skill.selfReportingType?.toString()
+            boolean allowOccurrencesChange = !selfReportTypeToBe || SUPPORTED_SELF_REPORT_TYPES_FOR_BATCH_UPDATES.contains(selfReportTypeToBe)
+
+            int currentOccurrences = (int) (skill.totalPoints / skill.pointIncrement)
             boolean skillIsEnabled = skill.enabled == "true"
-            if (skillIsEnabled && updateRequest.pointIncrement != null || updateRequest.numPerformToCompletion != null) {
-                skillsWhosePointsChanged.add( new SkillDefWithExtraMeta(
+            if (skillIsEnabled && updateRequest.pointIncrement != null || (updateRequest.numPerformToCompletion != null && allowOccurrencesChange)) {
+                skillsWhosePointsChanged.add(new SkillDefWithExtraMeta(
                         skill: skill,
                         pointIncrementDelta: updateRequest.pointIncrement != null ? updateRequest.pointIncrement - skill.pointIncrement : 0,
                         currentOccurrences: currentOccurrences,
@@ -494,26 +502,28 @@ class SkillsAdminService {
                 skill.pointIncrement = updateRequest.pointIncrement
                 skill.totalPoints = updateRequest.pointIncrement * currentOccurrences
             }
-            if (updateRequest.numPerformToCompletion != null) {
+            if (updateRequest.numPerformToCompletion != null && allowOccurrencesChange) {
                 skillRequestValidator.validateNumPerformToCompletion(projectId, skill.skillId, updateRequest.numPerformToCompletion)
                 skill.totalPoints = skill.pointIncrement * updateRequest.numPerformToCompletion
             }
 
-            if (updateRequest.pointIncrementInterval != null) {
-                skillRequestValidator.validatePointIncrementInterval(projectId, skill.skillId, updateRequest.pointIncrementInterval)
-                skill.pointIncrementInterval = updateRequest.pointIncrementInterval
+            Integer numToPerformToCompletion = (Integer) (skill.totalPoints / skill.pointIncrement)
+            // ony apply to skills that can support the Time Window
+            boolean hasNumMaxOccurrencesIncrementInterval = updateRequest.numMaxOccurrencesIncrementInterval != null
+            if (!hasNumMaxOccurrencesIncrementInterval || numToPerformToCompletion >= updateRequest.numMaxOccurrencesIncrementInterval) {
+                if (updateRequest.pointIncrementInterval != null && numToPerformToCompletion > 1) {
+                    skillRequestValidator.validatePointIncrementInterval(projectId, skill.skillId, updateRequest.pointIncrementInterval)
+                    skill.pointIncrementInterval = updateRequest.pointIncrementInterval
+                }
+                if (hasNumMaxOccurrencesIncrementInterval) {
+                    skillRequestValidator.validateNumMaxOccurrencesIncrementInterval(projectId, skill.skillId, skill.pointIncrement, numToPerformToCompletion, updateRequest.numMaxOccurrencesIncrementInterval)
+                    skill.numMaxOccurrencesIncrementInterval = updateRequest.numMaxOccurrencesIncrementInterval
+                }
             }
-            if (updateRequest.numMaxOccurrencesIncrementInterval != null) {
-                Integer numToPerformToCompletion = (Integer)(skill.totalPoints / skill.pointIncrement)
-                skillRequestValidator.validateNumMaxOccurrencesIncrementInterval(projectId, skill.skillId, skill.pointIncrement, numToPerformToCompletion, updateRequest.numMaxOccurrencesIncrementInterval)
-                skill.numMaxOccurrencesIncrementInterval = updateRequest.numMaxOccurrencesIncrementInterval
-            }
+
             if (updateRequest.selfReportingType != null) {
                 SelfReportingType previousType = skill.selfReportingType
                 SelfReportingType newType = updateRequest.selfReportingType == "reset" ? null : SelfReportingType.valueOf(updateRequest.selfReportingType)
-                if (newType && newType != SelfReportingType.Approval && newType != SelfReportingType.HonorSystem ) {
-                    throw new SkillException("Only [${SelfReportingType.Approval}] or [${SelfReportingType.HonorSystem}] are supported for self reporting type in a batch update", projectId, null, ErrorCode.BadParam)
-                }
                 if (previousType == SelfReportingType.Quiz && previousType != newType) {
                     quizToSkillService.removeQuizToSkillAssignment(skill)
                 }
@@ -588,6 +598,21 @@ class SkillsAdminService {
         }
     }
 
+    void validate(MultiSkillUpdateRequest updateRequest, String projectId) {
+        SelfReportingType newType = (!updateRequest.selfReportingType || updateRequest.selfReportingType == "reset") ? null : SelfReportingType.valueOf(updateRequest.selfReportingType)
+        if (newType){
+            if (!SUPPORTED_SELF_REPORT_TYPES_FOR_BATCH_UPDATES.contains(newType.toString())) {
+                throw new SkillException("Only ${SUPPORTED_SELF_REPORT_TYPES_FOR_BATCH_UPDATES} are supported for self reporting type in a batch update", projectId, null, ErrorCode.BadParam)
+            }
+            if (newType == SkillDef.SelfReportingType.Quiz && updateRequest.numPerformToCompletion != null) {
+                SkillsValidator.isTrue(updateRequest.numPerformToCompletion == 1, "When quizId is provided numPerformToCompletion must be equal 1", projectId)
+            }
+        }
+        if (updateRequest.numPerformToCompletion != null && updateRequest.numMaxOccurrencesIncrementInterval != null) {
+            SkillsValidator.isTrue(updateRequest.numPerformToCompletion >= updateRequest.numMaxOccurrencesIncrementInterval, "numPerformToCompletion must be >= numMaxOccurrencesIncrementInterval", projectId)
+        }
+
+    }
 
     /**
      * Transitive relationships appear to confuse hibernate cache - if the same

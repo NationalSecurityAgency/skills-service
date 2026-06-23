@@ -16,7 +16,9 @@
 package skills.intTests.batchUpdateSkills
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.QuizDefFactory
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.storage.model.SkillDef
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -94,17 +96,66 @@ class BatchUpdateSkillsSpec extends DefaultIntSpec {
         project.totalPoints == subject1Pts + subject2Pts
     }
 
+    def "updating numPerformToCompletion is not applicable to Quiz and Video self-reportable skills"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skills = createSkills(5, 1, 1, 100, 5)
+        p1skills[0].selfReportingType = SkillDef.SelfReportingType.HonorSystem.toString()
+        p1skills[1].selfReportingType = SkillDef.SelfReportingType.Quiz.toString()
+        p1skills[1].quizId = quiz.quizId
+        p1skills[1].numPerformToCompletion = 1
+        // p1skills[2].selfReportingType = video has to be updated after initial skill is created
+        p1skills[3].selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+        p1skills[3].selfReportingType = null // just to make it explicit
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+
+        skillsService.saveSkillVideoAttributes(p1.projectId, p1skills[2].skillId, [
+                videoUrl: "http://some.url",
+                transcript: "transcript",
+                captions: "captions",
+        ])
+        p1skills[2].selfReportingType = SkillDef.SelfReportingType.Video.toString()
+        p1skills[2].numPerformToCompletion = 1
+        skillsService.updateSkill(p1skills[2])
+
+        def p1subj2 = createSubject(1, 2)
+        def p1skillsSubj2 = createSkills(4, 1, 2, 22)
+        skillsService.createProjectAndSubjectAndSkills(null, p1subj2, p1skillsSubj2)
+
+        when:
+        def subjSkills_before = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
+
+        skillsService.batchUpdateSkills(p1.projectId, [
+                numPerformToCompletion: 5,
+                skills: p1skills.skillId
+        ])
+
+        def subjSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
+        then:
+        subjSkills_before.collect { it.pointIncrement } == [100, 100, 100, 100, 100]
+        subjSkills_before.collect { it.totalPoints } == [500, 100, 100, 500, 500]
+        subjSkills_before.collect { it.pointIncrementInterval } == p1skills.collect { it.pointIncrementInterval }
+
+        subjSkills.collect { it.pointIncrement } == [100, 100, 100, 100, 100]
+        subjSkills.collect { it.totalPoints } == [500, 100, 100, 500, 500]
+        subjSkills.collect { it.pointIncrementInterval } == p1skills.collect { it.pointIncrementInterval }
+
+    }
+
     def "batch update pointIncrementInterval - definition only"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
-        def p1skills = createSkills(5, 1, 1, 100)
+        def p1skills = createSkills(5, 1, 1, 100, 2)
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
 
         def p1subj2 = createSubject(1, 2)
         def p1skillsSubj2 = createSkills(4, 1, 2, 22)
         skillsService.createProjectAndSubjectAndSkills(null, p1subj2, p1skillsSubj2)
 
-        int subject1Pts = 100 * p1skills.size()
+        int subject1Pts = 200 * p1skills.size()
         int subject2Pts = 22 * p1skillsSubj2.size()
         when:
         skillsService.batchUpdateSkills(p1.projectId, [
@@ -118,7 +169,7 @@ class BatchUpdateSkillsSpec extends DefaultIntSpec {
         then:
         subjSkills.collect { it.pointIncrementInterval } == [480, 720, 720, 720, 480]
         subjSkills.collect { it.pointIncrement } == [100, 100, 100, 100, 100]
-        subjSkills.collect { it.totalPoints } == [100, 100, 100, 100, 100]
+        subjSkills.collect { it.totalPoints } == [200, 200, 200, 200, 200]
         subjSkills.collect { it.numPerformToCompletion } == p1skills.collect { it.numPerformToCompletion }
 
 
@@ -190,6 +241,68 @@ class BatchUpdateSkillsSpec extends DefaultIntSpec {
         subjects.collect { it.totalPoints } == [subject1Pts, subject2Pts]
         project.totalPoints == subject1Pts + subject2Pts
     }
+
+    def "updating pointIncrementInterval and numMaxOccurrencesIncrementInterval only applies to skills whose occurrences > numMaxOccurrencesIncrementInterval"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skills = createSkills(5, 1, 1, 100, 5)
+        p1skills[1].numPerformToCompletion = 1
+        p1skills[2].numPerformToCompletion = 2
+        p1skills[3].numPerformToCompletion = 3
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+
+        def p1subj2 = createSubject(1, 2)
+        def p1skillsSubj2 = createSkills(4, 1, 2, 22)
+        skillsService.createProjectAndSubjectAndSkills(null, p1subj2, p1skillsSubj2)
+
+        when:
+        skillsService.batchUpdateSkills(p1.projectId, [
+                pointIncrementInterval: 720,
+                numMaxOccurrencesIncrementInterval: 3,
+                skills: p1skills.skillId
+        ])
+
+        def subjSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
+        then:
+        subjSkills.collect { it.pointIncrementInterval } == [720, 480, 480, 720, 720]
+        subjSkills.collect { it.numMaxOccurrencesIncrementInterval } == [3, 1, 1, 3, 3]
+        subjSkills.collect { it.pointIncrement } == [100, 100, 100, 100, 100]
+        subjSkills.collect { it.totalPoints } == [500, 100, 200, 300, 500]
+        subjSkills.collect { it.numPerformToCompletion } == p1skills.collect { it.numPerformToCompletion }
+    }
+
+    def "updating pointIncrementInterval only applies to skills whose occurrences > 1"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skills = createSkills(5, 1, 1, 100, 5)
+        p1skills[0].numPerformToCompletion = 5
+        p1skills[1].numPerformToCompletion = 1
+        p1skills[2].numPerformToCompletion = 1
+        p1skills[3].numPerformToCompletion = 2
+        p1skills[4].numPerformToCompletion = 3
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+
+        def p1subj2 = createSubject(1, 2)
+        def p1skillsSubj2 = createSkills(4, 1, 2, 22)
+        skillsService.createProjectAndSubjectAndSkills(null, p1subj2, p1skillsSubj2)
+
+        when:
+        skillsService.batchUpdateSkills(p1.projectId, [
+                pointIncrementInterval: 720,
+                skills: p1skills.skillId
+        ])
+
+        def subjSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
+        def subjects = skillsService.getSubjects(p1.projectId)
+        def project = skillsService.getProject(p1.projectId)
+        then:
+        subjSkills.collect { it.pointIncrementInterval } == [720, 480, 480, 720, 720]
+        subjSkills.collect { it.numMaxOccurrencesIncrementInterval } == [1, 1, 1, 1, 1]
+        subjSkills.collect { it.pointIncrement } == [100, 100, 100, 100, 100]
+        subjSkills.collect { it.totalPoints } == [500, 100, 100, 200, 300]
+        subjSkills.collect { it.numPerformToCompletion } == p1skills.collect { it.numPerformToCompletion }
+    }
+
 
     def "batch update enabled - definition only"() {
         def p1 = createProject(1)
