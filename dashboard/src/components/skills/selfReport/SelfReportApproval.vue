@@ -30,7 +30,7 @@ import {useStorage} from "@vueuse/core";
 import AssignedApproversCell from "@/components/skills/selfReport/AssignedApproversCell.vue";
 import {useProjConfig} from "@/stores/UseProjConfig.js";
 import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
-import { useDescriptionFetchService } from "@/common-components/utilities/UseDescriptionFetchService.js";
+import SkillsService from "@/components/skills/SkillsService.js";
 
 const route = useRoute();
 const appInfo = useAppInfoState()
@@ -41,7 +41,6 @@ const responsive = useResponsiveBreakpoints()
 const numberFormat = useNumberFormat()
 const projConfig = useProjConfig()
 const skillRouteUtil = useSkillOverviewRouteUtil()
-const descriptionService = useDescriptionFetchService()
 
 const props = defineProps({
   selfReportStats: Array
@@ -196,7 +195,7 @@ const showJustification = (row) => {
 
 const fetchDescription = (row) => {
   if(!descriptions.value[row.skillId]) {
-    descriptionService.getDescriptionForSkill(route.params.projectId, row.skillId).then((res) => {
+    SkillsService.getSkillDetails(route.params.projectId, row.subjectId, row.skillId).then((res) => {
       descriptions.value[row.skillId] = res.description;
       showDescriptions.value[row.id] = true;
       toggleRow(row.id);
