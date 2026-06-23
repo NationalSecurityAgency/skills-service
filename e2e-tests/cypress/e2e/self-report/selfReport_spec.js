@@ -842,8 +842,8 @@ describe('Approval Requests Management Tests', () => {
         cy.reportSkill(1, 2, 'user2', 'now');
         cy.reportSkill(1, 1, 'user3', 'now');
 
-        cy.intercept('GET', '/api/projects/proj1/skills/skill1/description', cy.spy().as('loadSkill1Description'));
-        cy.intercept('GET', '/api/projects/proj1/skills/skill2/description', cy.spy().as('loadSkill2Description'));
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill1', cy.spy().as('loadSkill1Description'));
+        cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills/skill2', cy.spy().as('loadSkill2Description'));
         cy.intercept('GET', '/admin/projects/proj*/approvals?*').as('loadApprovals');
         cy.visit('/administrator/projects/proj1/self-report');
         cy.wait('@loadApprovals');
