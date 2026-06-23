@@ -228,7 +228,7 @@ const hasDisabledSkills = computed(() => numOfDisabledSkills.value > 0)
           :skill-ids="skillsIds"/>
 
       <div v-if="hasDisabledSkills" class="flex gap-2 items-center mt-1">
-        <label>Visibility:</label>
+        <label for="enabledCheckbox">Visibility:</label>
         <div class="flex gap-2 items-center">
           <SkillsCheckboxInput
               :binary="true"

@@ -27,6 +27,7 @@ const { value } = useField(() => props.name)
 <template>
   <Checkbox
       :data-cy="`checkbox_${name}`"
+      :inputId="`${name}Checkbox`"
       v-model="value"/>
 </template>
 
