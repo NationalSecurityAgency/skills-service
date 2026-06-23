@@ -30,7 +30,7 @@ const totalPoints = computed(() => {
     <label id="totalPointsLabel" for="totalPoints">Total Points</label>
     <InputGroup>
       <InputGroupAddon><i class="fas fa-equals"></i></InputGroupAddon>
-      <InputNumber id="totalPoints" :model-value="totalPoints" :disabled="true" aria-labelledby="totalPointsLabel"/>
+      <InputNumber id="totalPoints" :model-value="totalPoints" :disabled="true" aria-labelledby="totalPointsLabel" data-cy="calculatedTotalPoints"/>
     </InputGroup>
   </div>
 </template>

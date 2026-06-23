@@ -170,6 +170,12 @@ export default {
       .post(url, copy)
       .then(() => this.getSkillDetails(skill.projectId, skill.subjectId, skill.skillId))
   },
+  batchSkillsUpdate(projectId, updateInfo) {
+    const url = `/admin/projects/${projectId}/batchUpdateSkills`
+    return axios
+        .post(url, updateInfo)
+        .then((res) => res.data)
+  },
   reuseSkillInAnotherSubject(projectId, skillIds, newSubjectId, newGroupId = null) {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/reuse`
     return axios.post(url, {

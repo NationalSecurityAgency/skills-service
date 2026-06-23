@@ -18,6 +18,7 @@ package skills.services.admin
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import skills.controller.request.model.MultiSkillUpdateRequest
 import skills.controller.request.model.SkillRequest
 import skills.tasks.TaskSchedulerService
 
@@ -37,6 +38,22 @@ class SaveSkillService {
         if (saveSkillTmpRes.isImportedByOtherProjects) {
             // IMPORTANT: must schedule once transaction that saves skill committed; logic in the async propagation relies on the completion of the original skill modification
             taskSchedulerService.scheduleCatalogSkillUpdate(saveSkillTmpRes.projectId, saveSkillTmpRes.skillId, saveSkillTmpRes.skillRefId)
+        }
+    }
+
+    static class SkillInBatchUpdateRes {
+        String projectId
+        Integer skillRefId
+        String skillId
+        boolean isImportedByOtherProjects
+    }
+    void batchUpdateSkills(String projectId, MultiSkillUpdateRequest updateRequest) {
+        List<SkillInBatchUpdateRes> updateRes = skillsAdminService.batchUpdateSkills(projectId, updateRequest)
+        // IMPORTANT: must schedule once transaction that saves skill committed; logic in the async propagation relies on the completion of the original skill modification
+        updateRes.each {
+            if (it.isImportedByOtherProjects) {
+                taskSchedulerService.scheduleCatalogSkillUpdate(it.projectId, it.skillId, it.skillRefId)
+            }
         }
     }
 }

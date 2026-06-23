@@ -497,8 +497,7 @@ describe('Self Report Skills Management Tests', () => {
 
     cy.get('[data-cy=saveDialogBtn]')
       .should('be.enabled');
-    cy.get('[data-cy=rejectionInputMsg]')
-      .clear();
+    cy.get('[data-cy="rejectionInputMsg"]').invoke('val', '').trigger('input');
     cy.get('[data-cy="approvalRequiredMsgNumCharsRemaining"]').contains('250 characters remaining');
 
     const msg2 = 'B'.repeat(50);

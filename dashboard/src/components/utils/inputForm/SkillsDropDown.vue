@@ -52,6 +52,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  showClearButton: {
+    type: Boolean,
+    default: false
+  },
 })
 const model = defineModel()
 
@@ -77,14 +81,20 @@ watch(value, (newValue) => {
 </script>
 
 <template>
-  <div class="field" v-bind="fallthroughAttributes.rootAttrs.value">
-    <label v-if="label" :for="name"><span v-if="isRequired">*</span> {{ label }}:</label>
+  <div class="flex flex-col gap-2" v-bind="fallthroughAttributes.rootAttrs.value">
+    <div class="flex gap-2 items-center h-[2rem]">
+      <div class="flex-1"><label v-if="label" :for="`${name}Select`"><span v-if="isRequired">*</span> {{ label }}:</label></div>
+      <div v-if="showClearButton && value">
+        <Button link label="Clear" @click="value = null" size="small" class="underline" :data-cy="`${$attrs['data-cy'] || name}_clearBtn`"/>
+      </div>
+    </div>
     <Select v-model="value"
               :options="options"
               class="w-full"
               v-bind="fallthroughAttributes.inputAttrs.value"
+              aria-label="Select Self Report Type"
               :autofocus="autofocus"
-              :id="name"
+              :labelId="`${name}Select`"
               :disabled="disabled"
               :data-cy="$attrs['data-cy'] || name"
               :class="{ 'p-invalid': errorMessage }"

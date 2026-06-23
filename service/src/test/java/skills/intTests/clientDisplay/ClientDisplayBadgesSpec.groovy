@@ -1442,6 +1442,42 @@ class ClientDisplayBadgesSpec extends DefaultIntSpec {
         u4GbEarnedBadged.isGlobalBadge
     }
 
+    def "increasing skill's numPerformToCompletion should retain achieved badge"() {
+        String userId = "user1"
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> proj1_skills = SkillsFactory.createSkills(3, 1, 1)
+        proj1_skills.each{
+            it.pointIncrement = 40
+        }
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        Map badge = SkillsFactory.createBadge(1, 10)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge(projectId: proj1.projectId, badgeId: badge.badgeId, skillId: proj1_skills.get(0).skillId)
+        badge.enabled  = 'true'
+        skillsService.updateBadge(badge, badge.badgeId)
+
+        skillsService.addSkill([projectId: proj1.projectId, skillId: proj1_skills.get(0).skillId], userId, new Date())
+
+        proj1_skills.get(0).numPerformToCompletion = 5
+        skillsService.updateSkill(proj1_skills.get(0), proj1_skills.get(0).skillId)
+
+        when:
+        def summaries = skillsService.getBadgesSummary(userId, proj1.projectId)
+        then:
+        summaries.size() == 1
+        def summary = summaries.first()
+        summary.badge == badge.name
+        summary.badgeAchieved == true
+        summary.numTotalSkills == 1
+        summary.numSkillsAchieved == 0
+    }
+
     String datePattern = "yyyy-MM-dd'T'HH:mm:ss"
     private String reformatStrDate(String str) {
         return formatDate(Date.parse(datePattern, str))

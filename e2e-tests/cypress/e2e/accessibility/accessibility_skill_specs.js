@@ -283,5 +283,48 @@ describe('Accessibility Skill Tests', () => {
             cy.customLighthouse();
             cy.customA11y();
         });
+
+        it(`batch edit skills${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.createProject(1);
+            cy.createSubject(1, 1);
+            cy.createSkill(1, 1, 1, { numPerformToCompletion: 1 });
+            cy.createSkill(1, 1, 2, { enabled: false});
+            cy.createSkill(1, 1, 3);
+            cy.viewport(1800, 1000)
+            cy.visit('/administrator/projects/proj1/subjects/subj1');
+            cy.injectAxe();
+
+            // must exist initially
+            cy.get('[data-cy="manageSkillLink_skill1"]');
+            cy.get('[data-cy="manageSkillLink_skill2"]');
+            cy.get('[data-cy="manageSkillLink_skill3"]');
+
+            cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+            cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+            cy.get('[data-cy="skillActionsBtn"]').click();
+            cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Batch Edit"]', true)
+
+            cy.get('[data-cy="batchUpdateMsg"]').contains('Update 2 Skills at once. Provide at least one attribute below to apply changes.')
+
+            cy.get('[data-cy="pointIncrement"]').type('111')
+            cy.get('[data-cy="numPerformToCompletion"]').type('3')
+            cy.get('[data-cy="calculatedTotalPoints"] [data-pc-name="pcinputtext"]').should('have.value', '333')
+            cy.get('[data-cy="selfReportingType"]').click()
+            cy.get('[data-pc-section="overlay"] [aria-label="Approval Queue"]').click()
+
+            // 1. Audit the entire page completely, ignoring the table
+            cy.customA11yWithContext({ exclude: ['[data-cy="skillsTable"]'] }, {});
+
+            // 2. Audit ONLY the table component, turning off the problematic rule
+            //    the rule hits on `aria-selected="true"` attribute of the table row selector added by PrimeVue
+            cy.customA11yWithContext('[data-cy="skillsTable"]', {
+                rules: {
+                    'aria-allowed-attr': { enabled: false }
+                }
+            });
+
+            cy.customLighthouse();
+        });
     })
 });
