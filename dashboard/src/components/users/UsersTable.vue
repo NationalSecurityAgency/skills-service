@@ -212,7 +212,7 @@ const getOrderBy = (orderBy) => {
     return 'userTag'
   }
   if (orderBy === 'totalProgress' && isSkillsGroupPage.value) {
-    return 'totalPoints'
+    return 'skillsAchieved'
   }
   return orderBy
 }
