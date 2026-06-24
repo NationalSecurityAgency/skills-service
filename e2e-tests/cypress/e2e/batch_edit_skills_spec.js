@@ -418,4 +418,51 @@ describe('batch edit skills', () => {
             .contains('Remove 1 rejected request');
     });
 
+    it('display progress laoder while batch operation is performed', () => {
+        cy.createSkill(1, 1, 1, { numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 2, { numPerformToCompletion: 1 });
+        cy.viewport(1800, 1000)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Batch Edit"]', true)
+
+        cy.get('[data-cy="batchUpdateMsg"]').contains('Update 2 Skills at once. Provide at least one attribute below to apply changes.')
+
+        cy.get('[data-cy="numPerformToCompletion"]').type('3')
+        const responseTimeoutInSecs = 10
+        const checkElementsDoNotExistForSecs = 3
+        cy.intercept({ method: 'POST', url: '/admin/projects/proj1/batchUpdateSkills', middleware: true }, (req) => {
+            req.on('response', (res) => {
+                // Wait 3 seconds before sending the response to the client.
+                res.setDelay( responseTimeoutInSecs * 1000)
+            })
+        }).as('batchUpdateSkills')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+
+        // must show progress bar and status
+        cy.get('[data-cy="batchUpdateInProgress"] [data-pc-name="progressbar"]').should('be.visible')
+        cy.get('[data-cy="batchUpdateInProgress"]').contains('Updating 2 Skills.')
+
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        // cannot cancel after update started
+        cy.get('[data-cy="closeDialogBtn"]', {timeout: checkElementsDoNotExistForSecs * 1000}).should('not.exist')
+
+        // input must not be shown
+        cy.get('[data-cy="batchUpdateMsg"]', {timeout: checkElementsDoNotExistForSecs * 1000}).should('not.exist')
+        cy.get('[data-cy="pointIncrement"]', {timeout: checkElementsDoNotExistForSecs * 1000}).should('not.exist')
+        cy.get('[data-cy="numPerformToCompletion"]', {timeout: checkElementsDoNotExistForSecs * 1000}).should('not.exist')
+        cy.get('[data-cy="calculatedTotalPoints"] [data-pc-name="pcinputtext"]', {timeout: checkElementsDoNotExistForSecs * 1000}).should('not.exist')
+        cy.get('[data-cy="selfReportingType"]', {timeout: checkElementsDoNotExistForSecs * 1000}).should('not.exist')
+        cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]', {timeout: checkElementsDoNotExistForSecs * 1000}).should('not.exist')
+
+        cy.wait('@batchUpdateSkills')
+        cy.get('[data-cy="batchUpdateInProgress"]').should('not.exist')
+    });
+
 });

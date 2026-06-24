@@ -18,6 +18,8 @@ package skills.intTests.batchUpdateSkills
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
 import skills.storage.model.SkillDef
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -595,6 +597,62 @@ class BatchUpdateSkillsSpec extends DefaultIntSpec {
         then:
         subj1Skills.numPerformToCompletion == [1, 12, 1, 12, 1]
         subj2Skills.numPerformToCompletion == [1, 12, 1, 12, 1]
+    }
+
+    def "batch update user action must be saved for each skill"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        // Create 5 skills: 100 pts, 5 max occurrences
+        def p1skills = createSkills(5, 1, 1, 100, 5)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def p1SkillGroup = createSkillsGroup(1, 1, 10)
+        skillsService.createSkill(p1SkillGroup)
+        p1skills.each {
+            skillsService.assignSkillToSkillsGroup(p1SkillGroup.skillId, it)
+        }
+
+        def p1subj2 = createSubject(1, 2)
+        def p1skillsSubj2 = createSkills(4, 1, 2, 22)
+        skillsService.createProjectAndSubjectAndSkills(null, p1subj2, p1skillsSubj2)
+
+        when:
+        skillsService.batchUpdateSkills(p1.projectId, [
+                pointIncrement: 555,
+                numPerformToCompletion: 10,
+                pointIncrementInterval: 720,
+                numMaxOccurrencesIncrementInterval: 3,
+                selfReportingType: SkillDef.SelfReportingType.HonorSystem.toString(),
+                enabled: "true",
+                skills: p1skills[1..3].skillId
+        ])
+
+        def subjSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId, true)
+
+        def allActions = skillsService.getUserActionsForProject(p1.projectId, 10, 1, "created", false, DashboardItem.SkillsBatch)
+        List batchSkillUpdateUserActions = skillsService.getUserActionsForProject(p1.projectId, 10, 1, "created", false, DashboardItem.SkillsBatch).data.sort( { it.itemId })
+
+        then:
+        def filteredSkills = subjSkills.findAll { it.type == "Skill" }
+        filteredSkills.collect { it.pointIncrement } == [100, 555, 555, 555, 100]
+        filteredSkills.collect { it.totalPoints } == [500, 5550, 5550, 5550, 500]
+        filteredSkills.collect { it.pointIncrementInterval } == [480, 720, 720, 720, 480]
+        filteredSkills.collect { it.numMaxOccurrencesIncrementInterval } == [1, 3, 3, 3, 1]
+
+        batchSkillUpdateUserActions.size() == 3
+        batchSkillUpdateUserActions.action == [DashboardAction.Edit.name(), DashboardAction.Edit.name(), DashboardAction.Edit.name()]
+        batchSkillUpdateUserActions.itemId == p1skills[1..3].skillId.sort()
+
+        batchSkillUpdateUserActions.each {
+            def attributes = skillsService.getProjectUserActionAttributes(p1.projectId, it.id)
+            assert attributes.skills?.sort() == p1skills[1..3].skillId.sort()
+            assert attributes.enabled == Boolean.TRUE.toString().toLowerCase()
+            assert attributes.pointIncrement == 555
+            assert attributes.selfReportingType == SkillDef.SelfReportingType.HonorSystem.toString()
+            assert attributes.numPerformToCompletion == 10
+            assert attributes.numMaxOccurrencesIncrementInterval == 3
+        }
+
     }
 
 }

@@ -588,6 +588,17 @@ class SkillsAdminService {
             batchOperationsTransactionalAccessor.handlePointsAndAchievementsForProject(projectId)
         }
 
+        skillsToUpdate.each {
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.Edit,
+                    item: DashboardItem.SkillsBatch,
+                    actionAttributes: updateRequest,
+                    itemId: it.skillId,
+                    itemRefId: it.id,
+                    projectId: it.projectId,
+            ))
+        }
+
         return skillsToUpdate.collect {
             new SaveSkillService.SkillInBatchUpdateRes(
                     projectId: it.projectId,
