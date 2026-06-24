@@ -1287,6 +1287,117 @@ describe('Users Tests', () => {
         ], 10, true, 1);
     });
 
+    it('paging the skills group users page', () => {
+      cy.intercept('/admin/projects/proj1/groups/group1/users?query=*').as('getGroupUsers');
+
+      cy.createSkillsGroup(1, 1, 1);
+      cy.addSkillToGroup(1, 1, 1, 2, {
+          pointIncrement: '100',
+          numPerformToCompletion: '2',
+          pointIncrementInterval: 0
+      });
+
+      for (let i = 0; i < 17; i += 1) {
+          for (let j = 0; j <= i+2; j += 1) {
+              // cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: `user${i}@skills.org`, timestamp: m.clone().add(j, 'day').format('x')})
+
+            cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+                userId: `user${i}@skills.org`,
+                timestamp: m.clone().add(i+j, 'day').format('x')
+            });
+          }
+      }
+      cy.visit('/administrator/projects/proj1/users');
+      cy.visit('/administrator/projects/proj1/subjects/subj1/groups/group1/users');
+      cy.wait('@getGroupUsers');
+
+      // test the various page sizes
+      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('20').click();      cy.validateTable(tableSelector, [
+                [{ colIndex: 0, value: 'user16@skills.org' }],
+                [{ colIndex: 0, value: 'user15@skills.org' }],
+                [{ colIndex: 0, value: 'user14@skills.org' }],
+                [{ colIndex: 0, value: 'user13@skills.org' }],
+                [{ colIndex: 0, value: 'user12@skills.org' }],
+                [{ colIndex: 0, value: 'user11@skills.org' }],
+                [{ colIndex: 0, value: 'user10@skills.org' }],
+                [{ colIndex: 0, value: 'user9@skills.org' }],
+                [{ colIndex: 0, value: 'user8@skills.org' }],
+                [{ colIndex: 0, value: 'user7@skills.org' }],
+                [{ colIndex: 0, value: 'user6@skills.org' }],
+                [{ colIndex: 0, value: 'user5@skills.org' }],
+                [{ colIndex: 0, value: 'user4@skills.org' }],
+                [{ colIndex: 0, value: 'user3@skills.org' }],
+                [{ colIndex: 0, value: 'user2@skills.org' }],
+                [{ colIndex: 0, value: 'user1@skills.org' }],
+                [{ colIndex: 0, value: 'user0@skills.org' }],
+            ], 17, true, 17);
+
+      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('15').click();      cy.validateTable(tableSelector, [
+                [{ colIndex: 0, value: 'user16@skills.org' }],
+                [{ colIndex: 0, value: 'user15@skills.org' }],
+                [{ colIndex: 0, value: 'user14@skills.org' }],
+                [{ colIndex: 0, value: 'user13@skills.org' }],
+                [{ colIndex: 0, value: 'user12@skills.org' }],
+                [{ colIndex: 0, value: 'user11@skills.org' }],
+                [{ colIndex: 0, value: 'user10@skills.org' }],
+                [{ colIndex: 0, value: 'user9@skills.org' }],
+                [{ colIndex: 0, value: 'user8@skills.org' }],
+                [{ colIndex: 0, value: 'user7@skills.org' }],
+                [{ colIndex: 0, value: 'user6@skills.org' }],
+                [{ colIndex: 0, value: 'user5@skills.org' }],
+                [{ colIndex: 0, value: 'user4@skills.org' }],
+                [{ colIndex: 0, value: 'user3@skills.org' }],
+                [{ colIndex: 0, value: 'user2@skills.org' }],
+            ], 15, true, 17);
+
+      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('10').click();      cy.validateTable(tableSelector, [
+                [{ colIndex: 0, value: 'user16@skills.org' }],
+                [{ colIndex: 0, value: 'user15@skills.org' }],
+                [{ colIndex: 0, value: 'user14@skills.org' }],
+                [{ colIndex: 0, value: 'user13@skills.org' }],
+                [{ colIndex: 0, value: 'user12@skills.org' }],
+                [{ colIndex: 0, value: 'user11@skills.org' }],
+                [{ colIndex: 0, value: 'user10@skills.org' }],
+                [{ colIndex: 0, value: 'user9@skills.org' }],
+                [{ colIndex: 0, value: 'user8@skills.org' }],
+                [{ colIndex: 0, value: 'user7@skills.org' }],
+            ], 10, true, 17);
+
+      // set page size to 5 and page through all results
+      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('5').click();
+      cy.validateTable(tableSelector, [
+          [{ colIndex: 0, value: 'user16@skills.org' }],
+          [{ colIndex: 0, value: 'user15@skills.org' }],
+          [{ colIndex: 0, value: 'user14@skills.org' }],
+          [{ colIndex: 0, value: 'user13@skills.org' }],
+          [{ colIndex: 0, value: 'user12@skills.org' }],
+      ], 5, true, 17);
+
+      cy.get('button.p-paginator-next').click();
+      cy.validateTable(tableSelector, [
+          [{ colIndex: 0, value: 'user11@skills.org' }],
+          [{ colIndex: 0, value: 'user10@skills.org' }],
+          [{ colIndex: 0, value: 'user9@skills.org' }],
+          [{ colIndex: 0, value: 'user8@skills.org' }],
+          [{ colIndex: 0, value: 'user7@skills.org' }],
+      ], 5, true, 17);
+
+      cy.get('button.p-paginator-next').click();
+      cy.validateTable(tableSelector, [
+          [{ colIndex: 0, value: 'user6@skills.org' }],
+          [{ colIndex: 0, value: 'user5@skills.org' }],
+          [{ colIndex: 0, value: 'user4@skills.org' }],
+          [{ colIndex: 0, value: 'user3@skills.org' }],
+          [{ colIndex: 0, value: 'user2@skills.org' }],
+      ], 5, true, 17);
+
+      cy.get('button.p-paginator-next').click();
+      cy.validateTable(tableSelector, [
+          [{ colIndex: 0, value: 'user1@skills.org' }],
+          [{ colIndex: 0, value: 'user0@skills.org' }],
+      ], 2, true, 17);
+    });
+
     it('users with various progress', () => {
         cy.createSkill(1, 1, 3,  { pointIncrement: '1111', numPerformToCompletion: '10', pointIncrementInterval: 0 })
         cy.createSubject(1, 2)
