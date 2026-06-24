@@ -1313,7 +1313,8 @@ describe('Users Tests', () => {
       cy.wait('@getGroupUsers');
 
       // test the various page sizes
-      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('20').click();      cy.validateTable(tableSelector, [
+      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('20').click();
+      cy.validateTable(tableSelector, [
                 [{ colIndex: 0, value: 'user16@skills.org' }],
                 [{ colIndex: 0, value: 'user15@skills.org' }],
                 [{ colIndex: 0, value: 'user14@skills.org' }],
@@ -1333,7 +1334,8 @@ describe('Users Tests', () => {
                 [{ colIndex: 0, value: 'user0@skills.org' }],
             ], 17, true, 17);
 
-      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('15').click();      cy.validateTable(tableSelector, [
+      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('15').click();
+      cy.validateTable(tableSelector, [
                 [{ colIndex: 0, value: 'user16@skills.org' }],
                 [{ colIndex: 0, value: 'user15@skills.org' }],
                 [{ colIndex: 0, value: 'user14@skills.org' }],
@@ -1351,7 +1353,8 @@ describe('Users Tests', () => {
                 [{ colIndex: 0, value: 'user2@skills.org' }],
             ], 15, true, 17);
 
-      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('10').click();      cy.validateTable(tableSelector, [
+      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('10').click();
+      cy.validateTable(tableSelector, [
                 [{ colIndex: 0, value: 'user16@skills.org' }],
                 [{ colIndex: 0, value: 'user15@skills.org' }],
                 [{ colIndex: 0, value: 'user14@skills.org' }],
