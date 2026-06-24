@@ -346,4 +346,36 @@ describe('Skills Display Badges Tests', () => {
     cy.get('[data-cy="earnedBadgeLink_badge1"]').click();
     cy.get('[data-cy="badge_badge1_gem"]').should('not.exist')
   });
+
+  it('badge percent reflects partial progress on not-yet-completed skills', () => {
+    cy.resetDb();
+    cy.fixture('vars.json')
+        .then((vars) => {
+          if (!Cypress.env('oauthMode')) {
+            cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+          }
+        });
+    cy.loginAsProxyUser();
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    // each skill needs 2 occurrences of 100 points, so 200 total points per skill
+    cy.createSkill(1, 1, 1, { pointIncrement: 100, numPerformToCompletion: 2 });
+    cy.createSkill(1, 1, 2, { pointIncrement: 100, numPerformToCompletion: 2 });
+
+    cy.createBadge(1, 1);
+    cy.assignSkillToBadge(1, 1, 1);
+    cy.assignSkillToBadge(1, 1, 2);
+    cy.enableBadge(1, 1);
+
+    // report skill1 once - half way to completion, but not yet achieved. skill2 has no progress.
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+
+    cy.cdVisit('/', true);
+    cy.cdClickBadges();
+    cy.get('[data-cy=badgeDetailsLink_badge1]').click();
+
+    cy.get('[data-cy="title"]').contains('Badge Details');
+    // neither skill is fully achieved, but skill1 is half done so the badge is (50% + 0%) / 2 = 25%
+    cy.get('[data-cy="badgePercentCompleted"]').contains('25% Complete');
+  });
 })
