@@ -31,6 +31,7 @@ import AssignedApproversCell from "@/components/skills/selfReport/AssignedApprov
 import {useProjConfig} from "@/stores/UseProjConfig.js";
 import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 import SkillsService from "@/components/skills/SkillsService.js";
+import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 
 const route = useRoute();
 const appInfo = useAppInfoState()
@@ -64,6 +65,7 @@ const emailSubscribed = ref(true);
 const isEmailEnabled = computed(() => appInfo.emailEnabled)
 const showApproveOrRejectModal = ref(false);
 const requestType = ref('Reject');
+const loadingDescription = ref({});
 
 const myRequestsOnly = useStorage(`selfReportApproval-MyRequestsOnlyFilter-${route.params.projectId}`, false)
 const hasApprovalConfigsDefined = computed(() => !projConfig.isReadOnlyProj && props.selfReportStats?.find((item) => item.value === 'WorkloadConfig')?.count > 0)
@@ -195,10 +197,12 @@ const showJustification = (row) => {
 
 const fetchDescription = (row) => {
   if(!descriptions.value[row.skillId]) {
+    loadingDescription.value[row.skillId] = true;
+    toggleRow(row.id);
     SkillsService.getSkillDetails(route.params.projectId, row.subjectId, row.skillId).then((res) => {
       descriptions.value[row.skillId] = res.description;
       showDescriptions.value[row.id] = true;
-      toggleRow(row.id);
+      loadingDescription.value[row.skillId] = false;
     })
   } else {
     showDescriptions.value[row.id] = !showDescriptions.value[row.id];
@@ -363,6 +367,7 @@ const toRouteProps = (skill) => {
               </template>
             </Card>
           </div>
+          <skills-spinner :is-loading="loadingDescription[slotProps.data.skillId]" class="text-center"/>
           <div v-if="showDescriptions[slotProps.data.id]">
             <Card v-if="descriptions[slotProps.data.skillId]" header="Skill Description" class="ml-6">
               <template #header>
