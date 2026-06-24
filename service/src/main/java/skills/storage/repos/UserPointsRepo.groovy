@@ -921,58 +921,94 @@ HAVING
                                                                 @Param("includeImported") boolean includeImported,
                                                                 Pageable pageable)
 
-
     static final String FIND_DISTINCT_PROJECT_USERS_BY_SKILLS_WITH_ACHIEVED_SQL = '''
-    SELECT
-        upa.user_id as userId,
-        min(upa.performed_on) as firstUpdated,
-        max(upa.performed_on) as lastUpdated,
-        sum(skill.point_increment) as totalPoints,
-        max(ua.first_name) as firstName,
-        max(ua.last_name) as lastName,
-        max(ua.dn) as dn,
-        max(ua.email) as email,
-        max(ua.user_id_for_display) as userIdForDisplay,
-        max(ut.value) as userTag,
-        coalesce(max(achievedSkills.skillsAchieved), 0) as skillsAchieved
-    FROM user_performed_skill upa
-        JOIN skill_definition skill on (
-            upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end
-            and type = 'Skill' and skill.project_id = :projectId and skill.skill_id in :skillIds
-        )
-        JOIN user_attrs ua ON ua.user_id=upa.user_id
-        LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.user_id) ut ON ut.user_id=ua.user_id
+    SELECT * FROM (
+        SELECT 
+            upa.user_id as userId, 
+            min(upa.performed_on) as firstUpdated, 
+            max(upa.performed_on) as lastUpdated, 
+            sum(skill.point_increment) as totalPoints, 
+            max(ua.first_name) as firstName, 
+            max(ua.last_name) as lastName, 
+            max(ua.dn) as dn, 
+            max(ua.email) as email, 
+            max(ua.user_id_for_display) as userIdForDisplay, 
+            max(ut.value) as userTag, 
+            coalesce(max(achievedSkills.skillsAchieved), 0) as skillsAchieved 
+        FROM user_performed_skill upa 
+        JOIN skill_definition skill on ( 
+            upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end 
+            and type = 'Skill' 
+            and skill.project_id = :projectId 
+            and skill.skill_id in :skillIds 
+        ) 
+        JOIN user_attrs ua ON ua.user_id=upa.user_id 
         LEFT JOIN (
-            SELECT achieved.user_id, count(*) AS skillsAchieved
-            FROM (
-                SELECT
-                    upa_inner.user_id,
-                    skill_inner.skill_id
-                FROM user_performed_skill upa_inner
-                    JOIN skill_definition skill_inner on (
-                        upa_inner.skill_ref_id = CASE when skill_inner.copied_from_skill_ref is not null then skill_inner.copied_from_skill_ref ELSE skill_inner.id end
-                        and skill_inner.type = 'Skill'
-                        and skill_inner.project_id = :projectId
-                        and skill_inner.skill_id in :skillIds
-                        and skill_inner.enabled = 'true'
-                    )
-                GROUP BY upa_inner.user_id, skill_inner.skill_id, skill_inner.total_points
-                HAVING sum(skill_inner.point_increment) = skill_inner.total_points
-            ) achieved
-            GROUP BY achieved.user_id
-        ) achievedSkills ON achievedSkills.user_id = upa.user_id
-    WHERE
-        skill.enabled = 'true' and
-        ((lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', :query, '%'))) OR
-         (lower(CONCAT(ua.user_id_for_display, ' (', ua.last_name, ', ', ua.first_name,  ')')) like lower(CONCAT('%', :query, '%'))) OR
-         (lower(ua.user_id_for_display) like lower(CONCAT('%', :query, '%')))
-            ) and
-        (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%')))
-        and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId)
-        and (:includeImported = true OR exists( select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id) )
-    GROUP BY upa.user_id
-    HAVING sum(skill.point_increment) >= :minimumPoints
-       and sum(skill.point_increment) < :maximumPoints
+            SELECT ut.user_id, max(ut.value) AS value 
+            FROM user_tags ut 
+            WHERE ut.key = :usersTableAdditionalUserTagKey 
+            group by ut.user_id
+        ) ut ON ut.user_id=ua.user_id 
+        LEFT JOIN ( 
+            SELECT achieved.user_id, count(*) AS skillsAchieved 
+            FROM ( 
+                SELECT upa_inner.user_id, skill_inner.skill_id 
+                FROM user_performed_skill upa_inner 
+                JOIN skill_definition skill_inner on ( 
+                    upa_inner.skill_ref_id = CASE when skill_inner.copied_from_skill_ref is not null then skill_inner.copied_from_skill_ref ELSE skill_inner.id end 
+                    and skill_inner.type = 'Skill' 
+                    and skill_inner.project_id = :projectId 
+                    and skill_inner.skill_id in :skillIds 
+                    and skill_inner.enabled = 'true' 
+                ) 
+                GROUP BY upa_inner.user_id, skill_inner.skill_id, skill_inner.total_points 
+                HAVING sum(skill_inner.point_increment) = skill_inner.total_points 
+            ) achieved 
+            GROUP BY achieved.user_id 
+        ) achievedSkills ON achievedSkills.user_id = upa.user_id 
+        WHERE skill.enabled = 'true' 
+          and (
+            (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (', ua.user_id_for_display, ')')) like lower(CONCAT('%', :query, '%'))) 
+            OR (lower(CONCAT(ua.user_id_for_display, ' (', ua.last_name, ', ', ua.first_name, ')')) like lower(CONCAT('%', :query, '%'))) 
+            OR (lower(ua.user_id_for_display) like lower(CONCAT('%', :query, '%'))) 
+          ) 
+          and (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) 
+          and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId) 
+          and (:includeImported = true OR exists(select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id)) 
+        GROUP BY upa.user_id 
+        HAVING sum(skill.point_increment) >= :minimumPoints and sum(skill.point_increment) < :maximumPoints
+    ) as user_results
+    '''
+
+    static final String FIND_DISTINCT_PROJECT_USERS_BY_SKILLS_WITH_ACHIEVED_COUNT_SQL = '''
+    SELECT count(*) FROM (
+        SELECT upa.user_id 
+        FROM user_performed_skill upa 
+        JOIN skill_definition skill on ( 
+            upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end 
+            and type = 'Skill' 
+            and skill.project_id = :projectId 
+            and skill.skill_id in :skillIds 
+        ) 
+        JOIN user_attrs ua ON ua.user_id=upa.user_id 
+        LEFT JOIN (
+            SELECT ut.user_id, max(ut.value) AS value 
+            FROM user_tags ut 
+            WHERE ut.key = :usersTableAdditionalUserTagKey 
+            group by ut.user_id
+        ) ut ON ut.user_id=ua.user_id 
+        WHERE skill.enabled = 'true' 
+          and (
+            (lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (', ua.user_id_for_display, ')')) like lower(CONCAT('%', :query, '%'))) 
+            OR (lower(CONCAT(ua.user_id_for_display, ' (', ua.last_name, ', ', ua.first_name, ')')) like lower(CONCAT('%', :query, '%'))) 
+            OR (lower(ua.user_id_for_display) like lower(CONCAT('%', :query, '%'))) 
+          ) 
+          and (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) 
+          and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId) 
+          and (:includeImported = true OR exists(select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id)) 
+        GROUP BY upa.user_id 
+        HAVING sum(skill.point_increment) >= :minimumPoints and sum(skill.point_increment) < :maximumPoints
+    ) as count_results
     '''
 
     static final String FIND_DISTINCT_PROJECT_USERS_BY_SKILLS_WITHOUT_ACHIEVED_SQL = '''
@@ -1009,7 +1045,11 @@ HAVING
        and sum(skill.point_increment) < :maximumPoints
     '''
 
-    @Query(value = FIND_DISTINCT_PROJECT_USERS_BY_SKILLS_WITH_ACHIEVED_SQL, nativeQuery = true)
+    @Query(
+        value = FIND_DISTINCT_PROJECT_USERS_BY_SKILLS_WITH_ACHIEVED_SQL,
+        countQuery = FIND_DISTINCT_PROJECT_USERS_BY_SKILLS_WITH_ACHIEVED_COUNT_SQL,
+        nativeQuery = true
+    )
     Page<ProjectUser> findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLikeWithAchievedSkills(@Param("projectId") String projectId,
                                                                                                       @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
                                                                                                       @Param("skillIds") List<String> skillIds,
