@@ -179,55 +179,62 @@ const hasDisabledSkills = computed(() => numOfDisabledSkills.value > 0)
       :enable-return-focus="true"
       @on-cancel="close"
       ok-button-label="Update"
-      :ok-button-disabled="!meta.valid"
+      :ok-button-disabled="!meta.valid || isUpdating"
+      :show-cancel-button="!isUpdating"
       @on-ok="validateThenUpdate"
   >
     <div class="pb-5 flex flex-col gap-3">
-      <Message :closable="false" data-cy="batchUpdateMsg">Update
+      <Message v-if="!isUpdating" :closable="false" data-cy="batchUpdateMsg">Update
         <Tag>{{ skills.length }}</Tag>
         {{ pluralize.plural('Skill', skills.length) }} at once. Provide at least <b>one</b> attribute below to apply changes.
       </Message>
-      <lengthy-operation-progress-bar v-if="isUpdating "/>
-      <div v-if="!isUpdating"
-          class="flex flex-col md:flex-row gap-2 mt-2">
-
-        <SkillsNumberInput
-            class="flex-1 min-w-[13rem]"
-            :min="1"
-            :is-required="true"
-            label="Point Increment"
-            name="pointIncrement" />
-
-        <SkillsNumberInput
-            class="flex-1 min-w-[15rem]"
-            :min="0"
-            :is-required="true"
-            :disabled="occurrencesToCompletionAndTimeWindowDisabled"
-            label="Occurrences to Completion"
-            name="numPerformToCompletion" />
-
-        <total-points-field class="min-w-[8rem]"/>
+      <div v-if="isUpdating" data-cy="batchUpdateInProgress" class="flex flex-col gap-2">
+        <lengthy-operation-progress-bar />
+        <div class="text-center">Updating
+          <Tag>{{ skills.length }}</Tag>
+          {{ pluralize.plural('Skill', skills.length) }}. This may take a few moments</div>
       </div>
+      <div v-if="!isUpdating" class="flex flex-col gap-4">
+        <div
+            class="flex flex-col md:flex-row gap-2 mt-2">
 
-      <time-window-input class="mb-4">
-        <template #message>
-          <Message :closable="false" severity="warn" icon="fa-solid fa-triangle-exclamation">Applies only to skills with <span class="italic font-bold">Occurrences to Completion</span> greater than 1 </Message>
-        </template>
-      </time-window-input>
+          <SkillsNumberInput
+              class="flex-1 min-w-[13rem]"
+              :min="1"
+              :is-required="true"
+              label="Point Increment"
+              name="pointIncrement" />
 
-      <SkillsDropDown
-          label="Self Report Type"
-          optionLabel="name"
-          :options="selfReportOptions"
-          :show-clear-button="true"
-          name="selfReportingType" />
+          <SkillsNumberInput
+              class="flex-1 min-w-[15rem]"
+              :min="0"
+              :is-required="true"
+              :disabled="occurrencesToCompletionAndTimeWindowDisabled"
+              label="Occurrences to Completion"
+              name="numPerformToCompletion" />
 
-      <pending-approvals-warning
-          :self-reporting-type="selfReportingType?.key || SelfReportType.Approval"
-          :self-report-enabled="true"
-          :skill-ids="skillsIds"/>
+          <total-points-field class="min-w-[8rem]"/>
+        </div>
 
-      <div v-if="hasDisabledSkills" class="flex gap-2 items-center mt-1">
+        <time-window-input>
+          <template #message>
+            <Message :closable="false" severity="warn" icon="fa-solid fa-triangle-exclamation">Applies only to skills with <span class="italic font-bold">Occurrences to Completion</span> greater than 1 </Message>
+          </template>
+        </time-window-input>
+
+        <SkillsDropDown
+            label="Self Report Type"
+            optionLabel="name"
+            :options="selfReportOptions"
+            :show-clear-button="true"
+            name="selfReportingType" />
+
+        <pending-approvals-warning
+            :self-reporting-type="selfReportingType?.key || SelfReportType.Approval"
+            :self-report-enabled="true"
+            :skill-ids="skillsIds"/>
+
+        <div v-if="hasDisabledSkills" class="flex gap-2 items-center mt-1">
         <label for="enabledCheckbox">Visibility:</label>
         <div class="flex gap-2 items-center">
           <SkillsCheckboxInput
@@ -240,7 +247,7 @@ const hasDisabledSkills = computed(() => numOfDisabledSkills.value > 0)
           currently hidden )
         </div>
       </div>
-
+      </div>
     </div>
 
   </SkillsDialog>
