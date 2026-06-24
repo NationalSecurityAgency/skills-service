@@ -131,7 +131,7 @@ const isGlobalBadgePage = computed(() => {
   return route.path?.toLowerCase().startsWith('/administrator/globalbadges');
 })
 const isSkillsGroupPage = computed(() => {
-  return !!route.params.groupId;
+  return !!route.params.groupId && !route.params.skillId;
 })
 const numSkillsRequired = computed(() => {
   // -1 == all skills required

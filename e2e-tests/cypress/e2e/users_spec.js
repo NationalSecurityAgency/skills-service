@@ -1271,6 +1271,20 @@ describe('Users Tests', () => {
             [{ colIndex: 1, value: 'userb@skills.org' }],
             [{ colIndex: 1, value: 'usera@skills.org' }],
         ], 10, true, 5);
+
+        // validate that the user's page for a group child skill uses the skill users table and not the skill group users table
+        cy.intercept('/admin/projects/proj1/skills/skill4/users*').as('getSkillUsers');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/groups/group1/skills/skill4/users');
+        cy.wait('@getSkillUsers')
+
+        cy.validateTable(tableSelector, [
+          [
+            { colIndex: 0, value: 'usera@skills.org' },
+            { colIndex: 1, value: 'tag-d' },
+            { colIndex: 2, value: '50%1,000 / 2,000' },
+            { colIndex: 3, value: dateFormatter(m.clone().add(1, 'day')) },
+            { colIndex: 4, value: dateFormatter(m.clone().add(1, 'day')) }],
+        ], 10, true, 1);
     });
 
     it('users with various progress', () => {
