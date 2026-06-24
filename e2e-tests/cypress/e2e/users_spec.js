@@ -1281,7 +1281,8 @@ describe('Users Tests', () => {
           [
             { colIndex: 0, value: 'usera@skills.org' },
             { colIndex: 1, value: 'tag-d' },
-            { colIndex: 2, value: '50%1,000 / 2,000' },
+            { colIndex: 2, value: '50%' },
+            { colIndex: 2, value: '1,000 / 2,000' },
             { colIndex: 3, value: dateFormatter(m.clone().add(1, 'day')) },
             { colIndex: 4, value: dateFormatter(m.clone().add(1, 'day')) }],
         ], 10, true, 1);
