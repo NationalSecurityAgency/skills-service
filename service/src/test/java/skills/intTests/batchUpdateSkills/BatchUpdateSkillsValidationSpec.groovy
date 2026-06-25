@@ -52,6 +52,24 @@ class BatchUpdateSkillsValidationSpec extends DefaultIntSpec {
         !ex.message.contains(p1skills[0].skillId)
     }
 
+    def "at least 1 attribute must be provided"() {
+        given:
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skills = createSkills(1, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+        String missingSkillId = "non_existent_skill_2"
+
+        when:
+        skillsService.batchUpdateSkills(p1.projectId, [
+                skills: [p1skills[0].skillId],
+        ])
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("Must provide at least 1 attribute to update")
+    }
+
     def "should return error when skill is not of skill type"() {
         given:
         def p1 = createProject(1)

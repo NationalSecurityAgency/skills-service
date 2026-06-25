@@ -610,6 +610,17 @@ class SkillsAdminService {
     }
 
     void validate(MultiSkillUpdateRequest updateRequest, String projectId) {
+
+        boolean atLeastOneAttributeProvided = updateRequest.pointIncrement != null
+                || updateRequest.numPerformToCompletion != null
+                || updateRequest.pointIncrementInterval != null
+                || updateRequest.numMaxOccurrencesIncrementInterval != null
+                || updateRequest.enabled != null
+                || updateRequest.selfReportingType != null
+        if (!atLeastOneAttributeProvided) {
+            throw new SkillException("Must provide at least 1 attribute to update", projectId)
+        }
+
         SelfReportingType newType = (!updateRequest.selfReportingType || updateRequest.selfReportingType == "reset") ? null : SelfReportingType.valueOf(updateRequest.selfReportingType)
         if (newType){
             if (!SUPPORTED_SELF_REPORT_TYPES_FOR_BATCH_UPDATES.contains(newType.toString())) {
