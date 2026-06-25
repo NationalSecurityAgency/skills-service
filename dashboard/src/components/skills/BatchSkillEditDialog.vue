@@ -63,10 +63,29 @@ const validateMustHaveHoursIfMins = (value, testContext) => {
 const validateMustHaveMinsIfHours = (value, testContext) => {
   const parent = testContext.parent
   const nullChecks = parent.pointIncrementIntervalMins === null || parent.pointIncrementIntervalHrs === null
+  if (nullChecks && parent.pointIncrementIntervalHrs == 0) {
+    return false
+  }
   return nullChecks || (parent.pointIncrementIntervalHrs > 0 || value > 0)
 }
+const atLeastOne = (value, testContext) => {
+  const parent = testContext.parent
+  return parent.pointIncrement !== null
+      || parent.numPerformToCompletion !== null
+      || parent.numPointIncrementMaxOccurrences !== null
+      || parent.pointIncrementIntervalHrs !== null
+      || parent.pointIncrementIntervalMins !== null
+      || parent.selfReportingType !== null
+      || (parent.enabled !== null && parent.enabled !== false)
+}
+const oneMsg = 'You must change at least one value'
 const schema = object({
-  pointIncrement: number().min(1).max(appConfig.maxPointIncrement).nullable().label('Point Increment'),
+  pointIncrement: number()
+      .min(1)
+      .max(appConfig.maxPointIncrement)
+      .nullable()
+      .test('atLeastOne', oneMsg, async (v, t) => atLeastOne(v, t))
+      .label('Point Increment'),
   numPerformToCompletion: number()
       .min(1)
       .max(appConfig.maxPointIncrement)
@@ -75,6 +94,7 @@ const schema = object({
           ({ label }) => `${label} must be >= Window's Max Occurrences`,
           async (value, testContext) => validateMoreThanWindowMaxOccurrences(value, testContext)
       )
+      .test('atLeastOne', oneMsg, async (v, t) => atLeastOne(v, t))
       .label('Occurrences').nullable(),
   'numPointIncrementMaxOccurrences': number()
       .min(1)
@@ -84,6 +104,7 @@ const schema = object({
           ({ label }) => `${label} must be <= total Occurrences to Completion`,
           async (value, testContext) => validateLessThanTotalOccurrences(value, testContext)
       )
+      .test('atLeastOne', oneMsg, async (v, t) => atLeastOne(v, t))
       .label('Max Occurrences').nullable(),
   'pointIncrementIntervalHrs': number()
       .required()
@@ -94,6 +115,7 @@ const schema = object({
           'Hours must be > 0 if Minutes = 0',
           async (value, testContext) => validateMustHaveHoursIfMins(value, testContext)
       )
+      .test('atLeastOne', oneMsg, async (v, t) => atLeastOne(v, t))
       .label('Hours').nullable(),
   'pointIncrementIntervalMins': number()
       .required()
@@ -104,7 +126,14 @@ const schema = object({
           'Minutes must be > 0 if Hours = 0',
           async (value, testContext) => validateMustHaveMinsIfHours(value, testContext)
       )
+      .test('atLeastOne', oneMsg, async (v, t) => atLeastOne(v, t))
       .label('Minutes').nullable(),
+  'selfReportingType': object()
+      .test('atLeastOne', oneMsg, async (v, t) => atLeastOne(v, t))
+      .label('Minutes').nullable(),
+  'enabled': boolean()
+      .test('atLeastOne', oneMsg, async (v, t) => atLeastOne(v, t))
+      .label('Visibility').nullable(),
 });
 
 const initialValues = {

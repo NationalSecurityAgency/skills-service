@@ -180,15 +180,16 @@ describe('batch edit skills', () => {
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Batch Edit"]', true)
 
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        // disable until at least 1 attribute is selected
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         cy.get('[data-cy="pointIncrement"]').type('0')
         cy.get('[data-cy="pointIncrementError"]').contains('Point Increment must be greater than or equal to 1')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         cy.get('[data-cy="pointIncrement"]').type('{backspace}')
-        cy.get('[data-cy="pointIncrementError"]').should('not.exist')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointIncrementError"]').contains('You must change at least one value')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         cy.get('[data-cy="pointIncrement"]').type('10001')
         cy.get('[data-cy="pointIncrementError"]').contains('Point Increment must be less than or equal to 10000')
@@ -224,7 +225,7 @@ describe('batch edit skills', () => {
         cy.get('[data-cy="skillActionsBtn"]').click();
         cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Batch Edit"]', true)
 
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
         cy.get('[data-cy="pointIncrementIntervalHrs"] [data-pc-name="pcinputtext"]').should('be.disabled')
@@ -243,8 +244,8 @@ describe('batch edit skills', () => {
 
         cy.get('[data-cy="pointIncrementIntervalMins"]').type('{backspace}')
         cy.get('[data-cy="pointIncrementIntervalHrsError"]').should('not.exist')
-        cy.get('[data-cy="pointIncrementIntervalMinsError"]').should('not.exist')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointIncrementIntervalMinsError"]').contains('Minutes must be > 0 if Hours = 0')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         cy.get('[data-cy="pointIncrementIntervalMins"]').type('0')
         cy.get('[data-cy="pointIncrementIntervalHrsError"]').contains('Hours must be > 0 if Minutes = 0')
@@ -317,6 +318,123 @@ describe('batch edit skills', () => {
         cy.get('[data-cy="numPointIncrementMaxOccurrencesError"]').should('not.exist')
         cy.get('[data-cy="numPerformToCompletionError"]').should('not.exist')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+    });
+
+    it('must change at least 1 attribute', () => {
+        cy.createSkill(1, 1, 1, { numPerformToCompletion: 1, enabled: false });
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Batch Edit"]', true)
+
+        // disable until at least 1 attribute is selected
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="pointIncrement"]').type('1')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="pointIncrement"]').type('{backspace}')
+        cy.get('[data-cy="pointIncrementError"]').contains('You must change at least one value')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="numPerformToCompletion"]').type('1')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointIncrementError"]').should('not.exist')
+        cy.get('[data-cy="numPerformToCompletionError"]').should('not.exist')
+
+        cy.get('[data-cy="numPerformToCompletion"]').type('{backspace}')
+        cy.get('[data-cy="pointIncrementError"]').contains('You must change at least one value')
+        cy.get('[data-cy="numPerformToCompletionError"]').contains('You must change at least one value')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
+        cy.get('[data-cy="timeWindowCheckbox"]').click()
+        cy.get('[data-cy="pointIncrementIntervalHrs"] [data-pc-name="pcinputtext"]').should('be.enabled')
+        cy.get('[data-cy="pointIncrementIntervalMins"] [data-pc-name="pcinputtext"]').should('be.enabled')
+        cy.get('[data-cy="numPointIncrementMaxOccurrences"] [data-pc-name="pcinputtext"]').should('be.enabled')
+        cy.get('[data-cy="pointIncrementError"]').contains('You must change at least one value')
+        cy.get('[data-cy="numPerformToCompletionError"]').contains('You must change at least one value')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="pointIncrementIntervalHrs"]').type('1')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointIncrementError"]').should('not.exist')
+        cy.get('[data-cy="numPerformToCompletionError"]').should('not.exist')
+        cy.get('[data-cy="pointIncrementIntervalHrsError"]').should('not.exist')
+
+        cy.get('[data-cy="pointIncrementIntervalHrs"]').type('{backspace}')
+        cy.get('[data-cy="pointIncrementIntervalHrsError"]').contains('You must change at least one value')
+        cy.get('[data-cy="pointIncrementError"]').contains('You must change at least one value')
+        cy.get('[data-cy="numPerformToCompletionError"]').contains('You must change at least one value')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="pointIncrementIntervalMins"]').type('1')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointIncrementError"]').should('not.exist')
+        cy.get('[data-cy="numPerformToCompletionError"]').should('not.exist')
+        cy.get('[data-cy="pointIncrementIntervalHrsError"]').should('not.exist')
+        cy.get('[data-cy="pointIncrementIntervalMinsError"]').should('not.exist')
+
+        cy.get('[data-cy="pointIncrementIntervalMins"]').type('{backspace}')
+        cy.get('[data-cy="pointIncrementIntervalMinsError"]').contains('You must change at least one value')
+        cy.get('[data-cy="pointIncrementIntervalHrsError"]').contains('You must change at least one value')
+        cy.get('[data-cy="pointIncrementError"]').contains('You must change at least one value')
+        cy.get('[data-cy="numPerformToCompletionError"]').contains('You must change at least one value')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="numPointIncrementMaxOccurrences"]').type('1')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointIncrementError"]').should('not.exist')
+        cy.get('[data-cy="numPerformToCompletionError"]').should('not.exist')
+        cy.get('[data-cy="pointIncrementIntervalHrsError"]').should('not.exist')
+        cy.get('[data-cy="pointIncrementIntervalMinsError"]').should('not.exist')
+        cy.get('[data-cy="numPointIncrementMaxOccurrencesError"]').should('not.exist')
+
+        cy.get('[data-cy="numPointIncrementMaxOccurrences"]').type('{backspace}')
+        cy.get('[data-cy="numPointIncrementMaxOccurrencesError"]').contains('You must change at least one value')
+        cy.get('[data-cy="pointIncrementIntervalMinsError"]').contains('You must change at least one value')
+        cy.get('[data-cy="pointIncrementIntervalHrsError"]').contains('You must change at least one value')
+        cy.get('[data-cy="pointIncrementError"]').contains('You must change at least one value')
+        cy.get('[data-cy="numPerformToCompletionError"]').contains('You must change at least one value')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="selfReportingType"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Approval Queue"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointIncrementError"]').should('not.exist')
+        cy.get('[data-cy="numPerformToCompletionError"]').should('not.exist')
+        cy.get('[data-cy="pointIncrementIntervalHrsError"]').should('not.exist')
+        cy.get('[data-cy="pointIncrementIntervalMinsError"]').should('not.exist')
+        cy.get('[data-cy="numPointIncrementMaxOccurrencesError"]').should('not.exist')
+        cy.get('[data-cy="selfReportingTypeError"]').should('not.exist')
+
+        cy.get('[data-cy="selfReportingType_clearBtn"]').click()
+        cy.get('[data-cy="selfReportingTypeError"]').contains('You must change at least one value')
+        cy.get('[data-cy="numPointIncrementMaxOccurrencesError"]').contains('You must change at least one value')
+        cy.get('[data-cy="pointIncrementIntervalMinsError"]').contains('You must change at least one value')
+        cy.get('[data-cy="pointIncrementIntervalHrsError"]').contains('You must change at least one value')
+        cy.get('[data-cy="pointIncrementError"]').contains('You must change at least one value')
+        cy.get('[data-cy="numPerformToCompletionError"]').contains('You must change at least one value')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="checkbox_enabled"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointIncrementError"]').should('not.exist')
+        cy.get('[data-cy="numPerformToCompletionError"]').should('not.exist')
+        cy.get('[data-cy="pointIncrementIntervalHrsError"]').should('not.exist')
+        cy.get('[data-cy="pointIncrementIntervalMinsError"]').should('not.exist')
+        cy.get('[data-cy="numPointIncrementMaxOccurrencesError"]').should('not.exist')
+        cy.get('[data-cy="selfReportingTypeError"]').should('not.exist')
+
+        cy.get('[data-cy="checkbox_enabled"]').click()
+        cy.get('[data-cy="selfReportingTypeError"]').contains('You must change at least one value')
+        cy.get('[data-cy="numPointIncrementMaxOccurrencesError"]').contains('You must change at least one value')
+        cy.get('[data-cy="pointIncrementIntervalMinsError"]').contains('You must change at least one value')
+        cy.get('[data-cy="pointIncrementIntervalHrsError"]').contains('You must change at least one value')
+        cy.get('[data-cy="pointIncrementError"]').contains('You must change at least one value')
+        cy.get('[data-cy="numPerformToCompletionError"]').contains('You must change at least one value')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
     });
 
     it('able to reset self report selection', () => {
