@@ -768,7 +768,8 @@ select badgeDef.name as name,
                 (ua.level >= :level OR (:level = -1)) and
                 (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
                 (ua.skillId is not null OR (:includeOverallType = 'true')) and
-                not exists (select 1 from ArchivedUser au where au.userId = ua.userId and au.projectId = :projectId)
+                not exists (select 1 from ArchivedUser au where au.userId = ua.userId and au.projectId = :projectId) and
+                (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) 
                 ''')
     Stream<AchievementItem> findAllForAchievementNavigator(
             @Param("projectId") String projectId,
@@ -781,6 +782,7 @@ select badgeDef.name as name,
             @Param("disableTypes") String disableTypes,
             @Param("includeOverallType") String includeOverallType,
             @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
+            @Param("userTagFilter") String userTagFilter,
             @Param("pageable") Pageable pageable)
 
     @Query('''
