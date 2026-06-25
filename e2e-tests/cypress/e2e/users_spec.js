@@ -1033,19 +1033,29 @@ describe('Users Tests', () => {
     });
 
     it('sort users from skill group page', () => {
-        cy.intercept('/admin/projects/proj1/groups/group1/users?query=*').as('getGroupUsers');
+      cy.intercept('/admin/projects/proj1/groups/group1/users?query=*').as('getGroupUsers');
 
-        cy.createSkillsGroup(1, 1, 1);
-        cy.addSkillToGroup(1, 1, 1, 2, {
-            pointIncrement: '100',
-            numPerformToCompletion: '2',
-            pointIncrementInterval: 0
-        });
-        cy.addSkillToGroup(1, 1, 1, 3, {
-            pointIncrement: '100',
-            numPerformToCompletion: '2',
-            pointIncrementInterval: 0
-        });
+      cy.createSkillsGroup(1, 1, 1);
+      cy.addSkillToGroup(1, 1, 1, 2, {
+          pointIncrement: '100',
+          numPerformToCompletion: '2',
+          pointIncrementInterval: 0
+      });
+      cy.addSkillToGroup(1, 1, 1, 3, {
+          pointIncrement: '100',
+          numPerformToCompletion: '2',
+          pointIncrementInterval: 0
+      });
+      cy.addSkillToGroup(1, 1, 1, 4, {
+          pointIncrement: '1000',  // make points for skill 4 larger to make progress for totalPoints differ from progress for # of skills achieved
+          numPerformToCompletion: '2',
+          pointIncrementInterval: 0
+      });
+      cy.addSkillToGroup(1, 1, 1, 5, {
+          pointIncrement: '100',
+          numPerformToCompletion: '2',
+          pointIncrementInterval: 0
+      });
 
       cy.logout();
       cy.fixture('vars.json')
@@ -1105,16 +1115,16 @@ describe('Users Tests', () => {
             userId: 'userc@skills.org',
             timestamp: m.clone().add(6, 'day').format('x')
         });
-
-        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
-            userId: 'userd@skills.org',
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {
+            userId: 'userc@skills.org',
             timestamp: m.clone().add(7, 'day').format('x')
         });
+
         cy.request('POST', `/api/projects/proj1/skills/skill2`, {
             userId: 'userd@skills.org',
             timestamp: m.clone().add(8, 'day').format('x')
         });
-        cy.request('POST', `/api/projects/proj1/skills/skill3`, {
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
             userId: 'userd@skills.org',
             timestamp: m.clone().add(9, 'day').format('x')
         });
@@ -1122,11 +1132,30 @@ describe('Users Tests', () => {
             userId: 'userd@skills.org',
             timestamp: m.clone().add(10, 'day').format('x')
         });
+        cy.request('POST', `/api/projects/proj1/skills/skill3`, {
+            userId: 'userd@skills.org',
+            timestamp: m.clone().add(11, 'day').format('x')
+        });
+        cy.request('POST', `/api/projects/proj1/skills/skill5`, {
+            userId: 'userd@skills.org',
+            timestamp: m.clone().add(12, 'day').format('x')
+        });
+        cy.request('POST', `/api/projects/proj1/skills/skill5`, {
+            userId: 'userd@skills.org',
+            timestamp: m.clone().add(13, 'day').format('x')
+        });
 
         // this user earned points in the subject, but not in the skill group
         cy.request('POST', `/api/projects/proj1/skills/skill1`, {
             userId: 'usere@skills.org',
-            timestamp: m.clone().add(11, 'day').format('x')
+            timestamp: m.clone().add(14, 'day').format('x')
+        });
+
+        // the only user earned points for skill4, giving them more total points,
+        // but should not affect their total progress since that is based on # of skills achieved
+        cy.request('POST', `/api/projects/proj1/skills/skill4`, {
+            userId: 'usera@skills.org',
+            timestamp: m.clone().add(1, 'day').format('x')
         });
 
         cy.visit('/administrator/projects/proj1/subjects/subj1/groups/group1/users');
@@ -1136,8 +1165,8 @@ describe('Users Tests', () => {
 
         // default sort order is 'Points Last Earned' desc
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'userd@skills.org' }, { colIndex: 1, value: 'tag-a' }, { colIndex: 4, value: dateFormatter(m.clone().add(10, 'day')) }],
-            [{ colIndex: 0, value: 'userc@skills.org' }, { colIndex: 1, value: 'tag-b' }, { colIndex: 4, value: dateFormatter(m.clone().add(6, 'day')) }],
+            [{ colIndex: 0, value: 'userd@skills.org' }, { colIndex: 1, value: 'tag-a' }, { colIndex: 4, value: dateFormatter(m.clone().add(13, 'day')) }],
+            [{ colIndex: 0, value: 'userc@skills.org' }, { colIndex: 1, value: 'tag-b' }, { colIndex: 4, value: dateFormatter(m.clone().add(7, 'day')) }],
             [{ colIndex: 0, value: 'userb@skills.org' }, { colIndex: 1, value: 'tag-c' }, { colIndex: 4, value: dateFormatter(m.clone().add(3, 'day')) }],
             [{ colIndex: 0, value: 'usera@skills.org' }, { colIndex: 1, value: 'tag-d' }, { colIndex: 4, value: dateFormatter(m.clone().add(1, 'day')) }],
         ], 5, true, 4);
@@ -1147,8 +1176,8 @@ describe('Users Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 0, value: 'usera@skills.org' }, { colIndex: 4, value: dateFormatter(m.clone().add(1, 'day')) }],
             [{ colIndex: 0, value: 'userb@skills.org' }, { colIndex: 4, value: dateFormatter(m.clone().add(3, 'day')) }],
-            [{ colIndex: 0, value: 'userc@skills.org' }, { colIndex: 4, value: dateFormatter(m.clone().add(6, 'day')) }],
-            [{ colIndex: 0, value: 'userd@skills.org' }, { colIndex: 4, value: dateFormatter(m.clone().add(10, 'day')) }],
+            [{ colIndex: 0, value: 'userc@skills.org' }, { colIndex: 4, value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 0, value: 'userd@skills.org' }, { colIndex: 4, value: dateFormatter(m.clone().add(13, 'day')) }],
         ], 5, true, 4);
 
         cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('Points First Earned').click();
@@ -1157,13 +1186,13 @@ describe('Users Tests', () => {
             [{ colIndex: 0, value: 'usera@skills.org' }, { colIndex: 3, value: dateFormatter(m.clone().add(1, 'day')) }],
             [{ colIndex: 0, value: 'userb@skills.org' }, { colIndex: 3, value: dateFormatter(m.clone().add(2, 'day')) }],
             [{ colIndex: 0, value: 'userc@skills.org' }, { colIndex: 3, value: dateFormatter(m.clone().add(4, 'day')) }],
-            [{ colIndex: 0, value: 'userd@skills.org' }, { colIndex: 3, value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 0, value: 'userd@skills.org' }, { colIndex: 3, value: dateFormatter(m.clone().add(8, 'day')) }],
         ], 5, true, 4);
 
         cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('Points First Earned').click();
         cy.wait('@getGroupUsers');
         cy.validateTable(tableSelector, [
-            [{ colIndex: 0, value: 'userd@skills.org' }, { colIndex: 3, value: dateFormatter(m.clone().add(7, 'day')) }],
+            [{ colIndex: 0, value: 'userd@skills.org' }, { colIndex: 3, value: dateFormatter(m.clone().add(8, 'day')) }],
             [{ colIndex: 0, value: 'userc@skills.org' }, { colIndex: 3, value: dateFormatter(m.clone().add(4, 'day')) }],
             [{ colIndex: 0, value: 'userb@skills.org' }, { colIndex: 3, value: dateFormatter(m.clone().add(2, 'day')) }],
             [{ colIndex: 0, value: 'usera@skills.org' }, { colIndex: 3, value: dateFormatter(m.clone().add(1, 'day')) }],
@@ -1224,9 +1253,9 @@ describe('Users Tests', () => {
         ], 5, true, 4);
 
         cy.get('[data-cy="usr_progress-usera@skills.org"] [data-cy="progressPercent"]').should('have.text', '0%');
-        cy.get('[data-cy="usr_progress-userb@skills.org"] [data-cy="progressPercent"]').should('have.text', '50%');
+        cy.get('[data-cy="usr_progress-userb@skills.org"] [data-cy="progressPercent"]').should('have.text', '25%');
         cy.get('[data-cy="usr_progress-userc@skills.org"] [data-cy="progressPercent"]').should('have.text', '50%');
-        cy.get('[data-cy="usr_progress-userd@skills.org"] [data-cy="progressPercent"]').should('have.text', '100%');
+        cy.get('[data-cy="usr_progress-userd@skills.org"] [data-cy="progressPercent"]').should('have.text', '75%');
 
         cy.get(tableSelector).should('not.contain', 'usere@skills.org');
 
@@ -1242,6 +1271,135 @@ describe('Users Tests', () => {
             [{ colIndex: 1, value: 'userb@skills.org' }],
             [{ colIndex: 1, value: 'usera@skills.org' }],
         ], 10, true, 5);
+
+        // validate that the user's page for a group child skill uses the skill users table and not the skill group users table
+        cy.intercept('/admin/projects/proj1/skills/skill4/users*').as('getSkillUsers');
+        cy.visit('/administrator/projects/proj1/subjects/subj1/groups/group1/skills/skill4/users');
+        cy.wait('@getSkillUsers')
+
+        cy.validateTable(tableSelector, [
+          [
+            { colIndex: 0, value: 'usera@skills.org' },
+            { colIndex: 1, value: 'tag-d' },
+            { colIndex: 2, value: '50%' },
+            { colIndex: 2, value: '1,000 / 2,000' },
+            { colIndex: 3, value: dateFormatter(m.clone().add(1, 'day')) },
+            { colIndex: 4, value: dateFormatter(m.clone().add(1, 'day')) }],
+        ], 10, true, 1);
+    });
+
+    it('paging the skills group users page', () => {
+      cy.intercept('/admin/projects/proj1/groups/group1/users?query=*').as('getGroupUsers');
+
+      cy.createSkillsGroup(1, 1, 1);
+      cy.addSkillToGroup(1, 1, 1, 2, {
+          pointIncrement: '100',
+          numPerformToCompletion: '2',
+          pointIncrementInterval: 0
+      });
+
+      for (let i = 0; i < 17; i += 1) {
+          for (let j = 0; j <= i+2; j += 1) {
+              // cy.request('POST', `/api/projects/proj1/skills/skill1`, {userId: `user${i}@skills.org`, timestamp: m.clone().add(j, 'day').format('x')})
+
+            cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+                userId: `user${i}@skills.org`,
+                timestamp: m.clone().add(i+j, 'day').format('x')
+            });
+          }
+      }
+      cy.visit('/administrator/projects/proj1/users');
+      cy.visit('/administrator/projects/proj1/subjects/subj1/groups/group1/users');
+      cy.wait('@getGroupUsers');
+
+      // test the various page sizes
+      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('20').click();
+      cy.validateTable(tableSelector, [
+                [{ colIndex: 0, value: 'user16@skills.org' }],
+                [{ colIndex: 0, value: 'user15@skills.org' }],
+                [{ colIndex: 0, value: 'user14@skills.org' }],
+                [{ colIndex: 0, value: 'user13@skills.org' }],
+                [{ colIndex: 0, value: 'user12@skills.org' }],
+                [{ colIndex: 0, value: 'user11@skills.org' }],
+                [{ colIndex: 0, value: 'user10@skills.org' }],
+                [{ colIndex: 0, value: 'user9@skills.org' }],
+                [{ colIndex: 0, value: 'user8@skills.org' }],
+                [{ colIndex: 0, value: 'user7@skills.org' }],
+                [{ colIndex: 0, value: 'user6@skills.org' }],
+                [{ colIndex: 0, value: 'user5@skills.org' }],
+                [{ colIndex: 0, value: 'user4@skills.org' }],
+                [{ colIndex: 0, value: 'user3@skills.org' }],
+                [{ colIndex: 0, value: 'user2@skills.org' }],
+                [{ colIndex: 0, value: 'user1@skills.org' }],
+                [{ colIndex: 0, value: 'user0@skills.org' }],
+            ], 17, true, 17);
+
+      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('15').click();
+      cy.validateTable(tableSelector, [
+                [{ colIndex: 0, value: 'user16@skills.org' }],
+                [{ colIndex: 0, value: 'user15@skills.org' }],
+                [{ colIndex: 0, value: 'user14@skills.org' }],
+                [{ colIndex: 0, value: 'user13@skills.org' }],
+                [{ colIndex: 0, value: 'user12@skills.org' }],
+                [{ colIndex: 0, value: 'user11@skills.org' }],
+                [{ colIndex: 0, value: 'user10@skills.org' }],
+                [{ colIndex: 0, value: 'user9@skills.org' }],
+                [{ colIndex: 0, value: 'user8@skills.org' }],
+                [{ colIndex: 0, value: 'user7@skills.org' }],
+                [{ colIndex: 0, value: 'user6@skills.org' }],
+                [{ colIndex: 0, value: 'user5@skills.org' }],
+                [{ colIndex: 0, value: 'user4@skills.org' }],
+                [{ colIndex: 0, value: 'user3@skills.org' }],
+                [{ colIndex: 0, value: 'user2@skills.org' }],
+            ], 15, true, 17);
+
+      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('10').click();
+      cy.validateTable(tableSelector, [
+                [{ colIndex: 0, value: 'user16@skills.org' }],
+                [{ colIndex: 0, value: 'user15@skills.org' }],
+                [{ colIndex: 0, value: 'user14@skills.org' }],
+                [{ colIndex: 0, value: 'user13@skills.org' }],
+                [{ colIndex: 0, value: 'user12@skills.org' }],
+                [{ colIndex: 0, value: 'user11@skills.org' }],
+                [{ colIndex: 0, value: 'user10@skills.org' }],
+                [{ colIndex: 0, value: 'user9@skills.org' }],
+                [{ colIndex: 0, value: 'user8@skills.org' }],
+                [{ colIndex: 0, value: 'user7@skills.org' }],
+            ], 10, true, 17);
+
+      // set page size to 5 and page through all results
+      cy.get('[data-pc-name="pcrowperpagedropdown"]').click().get('[data-pc-section="option"]').contains('5').click();
+      cy.validateTable(tableSelector, [
+          [{ colIndex: 0, value: 'user16@skills.org' }],
+          [{ colIndex: 0, value: 'user15@skills.org' }],
+          [{ colIndex: 0, value: 'user14@skills.org' }],
+          [{ colIndex: 0, value: 'user13@skills.org' }],
+          [{ colIndex: 0, value: 'user12@skills.org' }],
+      ], 5, true, 17);
+
+      cy.get('button.p-paginator-next').click();
+      cy.validateTable(tableSelector, [
+          [{ colIndex: 0, value: 'user11@skills.org' }],
+          [{ colIndex: 0, value: 'user10@skills.org' }],
+          [{ colIndex: 0, value: 'user9@skills.org' }],
+          [{ colIndex: 0, value: 'user8@skills.org' }],
+          [{ colIndex: 0, value: 'user7@skills.org' }],
+      ], 5, true, 17);
+
+      cy.get('button.p-paginator-next').click();
+      cy.validateTable(tableSelector, [
+          [{ colIndex: 0, value: 'user6@skills.org' }],
+          [{ colIndex: 0, value: 'user5@skills.org' }],
+          [{ colIndex: 0, value: 'user4@skills.org' }],
+          [{ colIndex: 0, value: 'user3@skills.org' }],
+          [{ colIndex: 0, value: 'user2@skills.org' }],
+      ], 5, true, 17);
+
+      cy.get('button.p-paginator-next').click();
+      cy.validateTable(tableSelector, [
+          [{ colIndex: 0, value: 'user1@skills.org' }],
+          [{ colIndex: 0, value: 'user0@skills.org' }],
+      ], 2, true, 17);
     });
 
     it('users with various progress', () => {
