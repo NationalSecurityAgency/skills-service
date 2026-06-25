@@ -64,6 +64,8 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         String name
         String type
         Integer level
+        String userTag
+        Map<String, Object> userTags = [:]
     }
 
     private final static String PROP_SORT_BY_USER_ID = "userName"
@@ -84,7 +86,7 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
             Stream<UserAchievedLevelRepo.AchievementItem> achievements = userAchievedRepo.findAllForAchievementNavigator(
                     queryParams.projectId, queryParams.usernameFilter, queryParams.from, queryParams.to,
                     queryParams.skillNameFilter, queryParams.minLevel, queryParams.achievementTypesWithoutOverall,
-                    queryParams.allNonOverallTypes, queryParams.includeOverallType, usersTableAdditionalUserTagKey, queryParams.pageRequest)
+                    queryParams.allNonOverallTypes, queryParams.includeOverallType, usersTableAdditionalUserTagKey, queryParams.userTagFilter, queryParams.pageRequest)
             try {
                 List items = achievements.collect(Collectors.toList()).collect {
                     return buildMetricUserAchievement(it)
@@ -105,6 +107,7 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
 
         String skillNameFilter = MetricsParams.getNameFilter(projectId, chartId, props)
         Integer minLevel = MetricsParams.getMinLevel(projectId, chartId, props)
+        String userTagFilter = MetricsParams.getTagFilter(projectId, chartId, props)
 
         List<String> achievementTypes = MetricsParams.getAchievementTypes(projectId, chartId, props)
         if (!achievementTypes) {
@@ -120,7 +123,7 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         if (totalNumItems == 0) {
             return null
         }
-        return new QueryParams(projectId, usernameFilter, from, to, skillNameFilter, minLevel, achievementTypesWithoutOverall, allNonOverallTypes, includeOverallType, totalNumItems, pageRequest)
+        return new QueryParams(projectId, usernameFilter, from, to, skillNameFilter, minLevel, achievementTypesWithoutOverall, allNonOverallTypes, includeOverallType, totalNumItems, pageRequest, userTagFilter)
     }
 
     @Canonical
@@ -136,6 +139,7 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         String includeOverallType
         Integer totalNumItems
         PageRequest pageRequest
+        String userTagFilter
     }
 
     static PageRequest getPageRequest(String projectId, String chartId, Map<String, String> props, Boolean validatePageSize) {
@@ -173,6 +177,7 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
                 type: "Overall",
                 level: achievementItem.level,
                 skillId: achievementItem.skillId,
+                userTag: achievementItem.userTag
         )
 
         if (achievementItem.skillId) {
