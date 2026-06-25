@@ -30,16 +30,29 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useStorage} from "@vueuse/core";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 
 const route = useRoute();
 const numberFormat = useNumberFormat()
 const responsive = useResponsiveBreakpoints()
 const isFlex = computed(() => responsive.md.value)
+const appConfig = useAppConfig()
+const colors = useColors()
+
+const showUserTagColumn = computed(() => {
+  return !!(appConfig.usersTableAdditionalUserTagKey && appConfig.usersTableAdditionalUserTagLabel)
+})
+
+const tagKey = computed(() => {
+  return appConfig.usersTableAdditionalUserTagKey;
+});
 
 const usernameFilter = ref('');
 const fromDayFilter = ref();
 const toDayFilter = ref();
 const nameFilter = ref('');
+const userTagFilter = ref('');
 const levels = {
   selected: '',
   available: [
@@ -91,6 +104,7 @@ const reset = () => {
   currentPage.value = 1;
   fromDayFilter.value = null;
   toDayFilter.value = null;
+  userTagFilter.value = '';
   nameFilter.value = '';
   levels.selected = '';
   achievementTypes.value.selected = achievementTypes.value.available;
@@ -131,6 +145,7 @@ const getQueryParams = () => {
     achievementTypes: achievementTypes.value.selected,
     sortBy: sortBy.value,
     sortDesc: sortOrder.value !== 1,
+    tagFilter: userTagFilter.value,
   };
 }
 
@@ -157,6 +172,14 @@ const typeLabel = (type) => {
                          data-cy="achievementsNavigator-usernameInput"
                          @keydown.enter="reloadTable"
                          aria-label="Skill name filter" />
+            </div>
+            <div v-if="showUserTagColumn" class="xl:flex-none w-56">
+              <div>
+                <label for="userTagFilter">{{ appConfig.usersTableAdditionalUserTagLabel }} Filter</label>
+              </div>
+              <InputText id="userTagFilter" v-model="userTagFilter" v-on:keydown.enter="reloadTable"
+                         class="w-full"
+                         data-cy="users-userTagFilter" aria-label="user tag filter" />
             </div>
             <div class="field">
               <label>Types: </label>
@@ -264,6 +287,26 @@ const typeLabel = (type) => {
                 </router-link>
               </div>
             </div>
+          </template>
+        </Column>
+        <Column v-if="showUserTagColumn"
+                :sortable="true"
+                :field="appConfig.usersTableAdditionalUserTagKey"
+                :header="appConfig.usersTableAdditionalUserTagLabel"
+                :class="{'flex': responsive.md.value }">
+          <template #header>
+            <i class="fas fa-tag mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
+          </template>
+          <template #body="slotProps">
+            <router-link
+                v-if="showUserTagColumn && slotProps.data.userTag"
+                :to="{ name: 'UserTagMetrics', params: { projectId: route.params.projectId, tagKey: tagKey, tagFilter: slotProps.data.userTag } }"
+                class="text-info mb-0 pb-0 preview-card-title"
+                :aria-label="`View metrics for ${slotProps.data.userTag}`"
+                role="link"
+                data-cy="usersTable_viewUserTagMetricLink">
+              {{ slotProps.data.userTag }}
+            </router-link>
           </template>
         </Column>
         <Column field="type" header="Type" :class="{'flex': isFlex }">
