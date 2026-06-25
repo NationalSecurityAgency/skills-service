@@ -134,6 +134,71 @@ describe('batch edit skills', () => {
         ])
     });
 
+    it('edit Time Windows hours and minutes on their own', () => {
+        cy.createSkill(1, 1, 1, { numPerformToCompletion: 1 });
+        cy.createSkill(1, 1, 2, { enabled: false});
+        cy.createSkill(1, 1, 3);
+        cy.viewport(1800, 1000)
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Time Window"]').click()
+        cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
+
+        cy.validateTable('[data-cy="skillsTable"]', [
+            [{ colIndex: 5,  value: "Minimum Time Window between occurrences to receive"}],
+            [{ colIndex: 5,  value: "Minimum Time Window between occurrences to receive"}],
+            [{ colIndex: 5,  value: "N/A" }],
+        ])
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Batch Edit"]', true)
+
+        cy.get('[data-cy="batchUpdateMsg"]').contains('Update 2 Skills at once. Provide at least one attribute below to apply changes.')
+
+        cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
+        cy.get('[data-cy="timeWindowCheckbox"]').click()
+        cy.get('[data-cy="pointIncrementIntervalHrs"]').type('24')
+
+        cy.intercept('POST', '/admin/projects/proj1/batchUpdateSkills').as('batchUpdateSkills')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@batchUpdateSkills')
+
+        cy.validateTable('[data-cy="skillsTable"]', [
+            [{ colIndex: 5,  value: "24 Hours" }],
+            [{ colIndex: 5,  value: "24 Hours" }],
+            [{ colIndex: 5,  value: "N/A" }],
+        ])
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Batch Edit"]', true)
+
+        cy.get('[data-cy="batchUpdateMsg"]').contains('Update 2 Skills at once. Provide at least one attribute below to apply changes.')
+
+        // cy.get('[data-cy="timeWindowInput"] [data-pc-section="togglebutton"]').click()
+        cy.get('[data-cy="timeWindowCheckbox"]').click()
+        cy.get('[data-cy="pointIncrementIntervalMins"]').type('13')
+
+        cy.intercept('POST', '/admin/projects/proj1/batchUpdateSkills').as('batchUpdateSkills')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@batchUpdateSkills')
+
+        cy.validateTable('[data-cy="skillsTable"]', [
+            [{ colIndex: 5,  value: "0 Hours 13 Minutes" }],
+            [{ colIndex: 5,  value: "0 Hours 13 Minutes" }],
+            [{ colIndex: 5,  value: "N/A" }],
+        ])
+    });
+
     it('batch change skills visibility', () => {
         cy.createSkill(1, 1, 1, { enabled: false });
         cy.createSkill(1, 1, 2, { enabled: false});
@@ -253,9 +318,8 @@ describe('batch edit skills', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         cy.get('[data-cy="pointIncrementIntervalHrs"]').type('{backspace}')
-        cy.get('[data-cy="pointIncrementIntervalHrsError"]').should('not.exist')
-        cy.get('[data-cy="pointIncrementIntervalMinsError"]').should('not.exist')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointIncrementIntervalMinsError"]').contains('Minutes must be > 0 if Hours = 0')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         cy.get('[data-cy="pointIncrementIntervalHrs"]').type('-1')
         cy.get('[data-cy="pointIncrementIntervalHrsError"]').contains('Hours must be greater than or equal to 0')
@@ -264,8 +328,8 @@ describe('batch edit skills', () => {
 
         cy.get('[data-cy="pointIncrementIntervalHrs"]').type('{backspace}{backspace}')
         cy.get('[data-cy="pointIncrementIntervalHrsError"]').should('not.exist')
-        cy.get('[data-cy="pointIncrementIntervalMinsError"]').should('not.exist')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointIncrementIntervalMinsError"]').contains('Minutes must be > 0 if Hours = 0')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         cy.get('[data-cy="pointIncrementIntervalHrs"]').type('721')
         cy.get('[data-cy="pointIncrementIntervalHrsError"]').contains('Hours must be less than or equal to 720')
