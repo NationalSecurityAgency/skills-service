@@ -62,11 +62,12 @@ const validateMustHaveHoursIfMins = (value, testContext) => {
 
 const validateMustHaveMinsIfHours = (value, testContext) => {
   const parent = testContext.parent
-  const nullChecks = parent.pointIncrementIntervalMins === null || parent.pointIncrementIntervalHrs === null
-  if (nullChecks && parent.pointIncrementIntervalHrs == 0) {
-    return false
+  if (parent.pointIncrementIntervalMins === null && parent.pointIncrementIntervalHrs === null) {
+    return true
   }
-  return nullChecks || (parent.pointIncrementIntervalHrs > 0 || value > 0)
+
+  const noHours = parent.pointIncrementIntervalHrs === null || parent.pointIncrementIntervalHrs <= 0
+  return !noHours || value > 0
 }
 const atLeastOne = (value, testContext) => {
   const parent = testContext.parent
@@ -181,8 +182,15 @@ const doUpdate = () => {
     selfReportingType: values.selfReportingType?.key,
     numMaxOccurrencesIncrementInterval: values.numPointIncrementMaxOccurrences
   }
-  if (values.pointIncrementIntervalHrs !== null && values.pointIncrementIntervalMins !== null ) {
-    updateInfo.pointIncrementInterval = values.pointIncrementIntervalHrs * 60 + values.pointIncrementIntervalMins;
+  if (values.pointIncrementIntervalHrs !== null || values.pointIncrementIntervalMins !== null ) {
+    let pointIncrementInterval = 0
+    if (values.pointIncrementIntervalHrs !== null) {
+      pointIncrementInterval = values.pointIncrementIntervalHrs * 60
+    }
+    if (values.pointIncrementIntervalMins !== null) {
+      pointIncrementInterval += values.pointIncrementIntervalMins
+    }
+    updateInfo.pointIncrementInterval = pointIncrementInterval
     if (values.numPointIncrementMaxOccurrences !== null) {
       updateInfo.numMaxOccurrencesIncrementInterval = values.numPointIncrementMaxOccurrences;
     }
