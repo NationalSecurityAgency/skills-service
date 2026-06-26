@@ -292,4 +292,37 @@ class UserAuthService {
     boolean userExists(String userId) {
         return userRepository.existsByUserIdIgnoreCase(userId)
     }
+
+    boolean isUserProjectAdmin(UserInfo userInfo, String projectId, Boolean allowRoot = true) {
+        boolean isRoot = userInfo.authorities?.find() {
+            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
+        }
+        if (isRoot && allowRoot) {
+            return true
+        } else {
+            return userRoleRepo.isUserProjectAdmin(userInfo.username, projectId)
+        }
+    }
+
+    boolean isUserQuizAdmin(UserInfo userInfo, String quizId, Boolean allowRoot = true) {
+        boolean isRoot = userInfo.authorities?.find() {
+            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
+        }
+        if (isRoot && allowRoot) {
+            return true
+        } else {
+            return userRoleRepo.isUserQuizAdmin(userInfo.username, quizId)
+        }
+    }
+
+    boolean isUserGlobalBadgeAdmin(UserInfo userInfo, String globalBadgeId, Boolean allowRoot = true) {
+        boolean isRoot = userInfo.authorities?.find() {
+            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
+        }
+        if (isRoot && allowRoot) {
+            return true
+        } else {
+            return userRoleRepo.isUserGlobalBadgeAdmin(userInfo.username, globalBadgeId)
+        }
+    }
 }
