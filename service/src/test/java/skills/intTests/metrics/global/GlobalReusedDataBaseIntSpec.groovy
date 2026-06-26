@@ -95,6 +95,9 @@ class GlobalReusedDataBaseIntSpec extends DefaultIntSpec {
         admin2ProjectIds = [p3Skills[1].projectId]
         admin2QuizAndSurveyIds = quizzes[2..4].quizId + surveys[2..3].quizId
 
+        admins[0].addProjectAdmin(admin0ProjectIds[0], skillsService.userName)
+        admins[0].addQuizUserRole(admin0QuizAndSurveyIds[0], skillsService.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
+
         // user 0
         assert users[0].addSkill(p1Skills[0]).body.skillApplied
         assert users[0].addSkill(p1Skills[5]).body.skillApplied
