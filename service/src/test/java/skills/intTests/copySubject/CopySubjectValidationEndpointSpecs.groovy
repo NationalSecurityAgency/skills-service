@@ -17,6 +17,7 @@ package skills.intTests.copySubject
 
 import org.springframework.beans.factory.annotation.Value
 import skills.intTests.copyProject.CopyIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -545,5 +546,25 @@ class CopySubjectValidationEndpointSpecs extends CopyIntSpec {
         then:
         res.isAllowed == false
         res.validationErrors == ["Each Project is limited to [25] Subjects, currently [TestProject2] has [25] Subjects, copying [3] would exceed the maximum"]
+    }
+
+    def "cannot validate on destination project you do not administrate"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Subj1Skills = createSkills(6, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Subj1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 2)
+        def p2Subj1Skills = createSkillsStartingAt(95, 9000, 2, 2)
+        SkillsService otherUser = createService("someOtherUser")
+        otherUser.createProjectAndSubjectAndSkills(p2, p2subj1, p2Subj1Skills)
+
+        when:
+        skillsService.validateCopySubjectDefIntoAnotherProject(p1.projectId, p1subj1.subjectId, p2.projectId)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("User [${skillsService.userName}] is not an admin for destination project [${p2.projectId}]")
     }
 }
