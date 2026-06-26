@@ -15,8 +15,9 @@
  */
 package skills.intTests.copySkillsToAnotherProject
 
-
+import org.springframework.http.HttpStatus
 import skills.intTests.copyProject.CopyIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -623,5 +624,27 @@ class CopySkillsValidationEndpointSpecs extends CopyIntSpec {
         then:
         res.isAllowed == false
         res.validationErrors == ["Each Subject is limited to [100] Skills, currently [TestSubject2] has [95] Skills, copying [6] would exceed the maximum"]
+    }
+
+    def "cannot validate on destination project you do not administrate"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1Subj1Skills = createSkills(6, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Subj1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 2)
+        def p2Subj1Skills = createSkillsStartingAt(95, 9000, 2, 2)
+        SkillsService otherUser = createService("someOtherUser")
+        otherUser.createProjectAndSubjectAndSkills(p2, p2subj1, p2Subj1Skills)
+
+        when:
+        skillsService.validateCopySkillDefsIntoAnotherProject(p1.projectId,
+                        p1Subj1Skills.collect { it.skillId as String },
+                        p2.projectId, p2subj1.subjectId)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("User [${skillsService.userName}] is not an admin for destination project [${p2.projectId}]")
     }
 }

@@ -158,6 +158,7 @@ class ProjectCopyService {
     @Transactional
     @Profile
     CopyValidationRes validateCopyItemsToAnotherProject(String fromProjectId, String toProjectId, CopyToAnotherProjectRequest copyRequest) {
+        validateUserIsAndAdminOfDestProj(toProjectId, fromProjectId)
         if (copyRequest.copyType == CopyToAnotherProjectRequestType.SelectSkills) {
             return validateCopySkillsToAnotherProject(fromProjectId, copyRequest.skillIds, toProjectId, copyRequest.toSubjectId, copyRequest.toGroupId)
         }
@@ -377,11 +378,16 @@ class ProjectCopyService {
         }
     }
 
+
     private void validateUserIsAndAdminOfDestProj(ProjDef otherProject, String projectId) {
+        validateUserIsAndAdminOfDestProj(otherProject.projectId, projectId)
+    }
+
+    private void validateUserIsAndAdminOfDestProj(String otherProjectId, String projectId) {
         UserInfo userInfo = userInfoService.currentUser
-        Boolean isAdminForOtherProject = userRoleRepo.isUserProjectAdmin(userInfo.username, otherProject.projectId)
+        Boolean isAdminForOtherProject = userRoleRepo.isUserProjectAdmin(userInfo.username, otherProjectId)
         if (!isAdminForOtherProject) {
-            throw new SkillException("User [${userInfo.username}] is not an admin for destination project [${otherProject.projectId}]", projectId, null, ErrorCode.BadParam)
+            throw new SkillException("User [${userInfo.username}] is not an admin for destination project [${otherProjectId}]", projectId, null, ErrorCode.BadParam)
         }
     }
 
