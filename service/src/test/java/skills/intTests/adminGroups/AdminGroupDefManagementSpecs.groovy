@@ -16,6 +16,7 @@
 package skills.intTests.adminGroups
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
@@ -1095,4 +1096,55 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("Cannot delete roles for myself when there are no other admins")
     }
+
+    def "owner cannot add project they do not administrate to admin group"() {
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def proj = createProject(1)
+        def subj = createSubject(1, 1)
+        def skill = createSkill(1, 1)
+
+        SkillsService otherUser = createService("someOtherUser")
+        otherUser.createProjectAndSubjectAndSkills(proj, subj, [skill])
+
+        when:
+        skillsService.addProjectToAdminGroup(adminGroup.adminGroupId, proj.projectId)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.httpStatus == HttpStatus.FORBIDDEN
+    }
+    def "owner cannot add quiz they do not administrate to admin group"() {
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        SkillsService otherUser = createService("someOtherUser")
+        otherUser.createQuizDef(quiz)
+
+        when:
+        skillsService.addQuizToAdminGroup(adminGroup.adminGroupId, quiz.quizId)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.httpStatus == HttpStatus.FORBIDDEN
+    }
+
+    def "owner cannot add badge they do not administrate to admin group"() {
+        def adminGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(adminGroup)
+
+        def badge = createBadge(1, 1)
+        SkillsService otherUser = createService("someOtherUser")
+        otherUser.createGlobalBadge(badge)
+
+        when:
+        skillsService.addGlobalBadgeToAdminGroup(adminGroup.adminGroupId, badge.badgeId)
+
+        then:
+        def exception = thrown(SkillsClientException)
+        exception.httpStatus == HttpStatus.FORBIDDEN
+    }
+
 }
