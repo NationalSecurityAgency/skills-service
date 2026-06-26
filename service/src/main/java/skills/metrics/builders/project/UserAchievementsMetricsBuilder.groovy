@@ -119,7 +119,7 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         String includeOverallType = achievementTypes.contains(MetricsParams.ACHIEVEMENT_TYPE_OVERALL) ? "true" : "false"
 
         int totalNumItems = userAchievedRepo.countForAchievementNavigator(
-                projectId, usernameFilter, from, to, skillNameFilter, minLevel, achievementTypesWithoutOverall, allNonOverallTypes, includeOverallType)
+                projectId, usernameFilter, from, to, skillNameFilter, minLevel, achievementTypesWithoutOverall, allNonOverallTypes, includeOverallType, usersTableAdditionalUserTagKey, userTagFilter)
         if (totalNumItems == 0) {
             return null
         }
