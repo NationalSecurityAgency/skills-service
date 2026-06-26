@@ -229,7 +229,7 @@ class ExcelExportService {
             Stream<UserAchievedLevelRepo.AchievementItem> achievements = userAchievedRepo.findAllForAchievementNavigator(
                     queryParams.projectId, queryParams.usernameFilter, queryParams.from, queryParams.to,
                     queryParams.skillNameFilter, queryParams.minLevel, queryParams.achievementTypesWithoutOverall,
-                    queryParams.allNonOverallTypes, queryParams.includeOverallType, usersTableAdditionalUserTagKey, queryParams.pageRequest)
+                    queryParams.allNonOverallTypes, queryParams.includeOverallType, usersTableAdditionalUserTagKey, queryParams.userTagFilter, queryParams.pageRequest)
             try {
                 achievements?.each { UserAchievedLevelRepo.AchievementItem achievementItem ->
                     UserAchievementsMetricsBuilder.MetricUserAchievement metricUserAchievement = UserAchievementsMetricsBuilder.buildMetricUserAchievement(achievementItem)
