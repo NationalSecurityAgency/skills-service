@@ -24,9 +24,9 @@ import org.springframework.data.domain.Sort
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserAuthService
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
-import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
@@ -44,7 +44,6 @@ import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.*
 import skills.storage.model.SkillRelDef.RelationshipType
-import skills.storage.model.auth.RoleName
 import skills.storage.repos.*
 import skills.utils.InputSanitizer
 
@@ -127,7 +126,7 @@ class GlobalBadgesService {
     UserInfoService userInfoService
 
     @Autowired
-    UserRoleRepo userRoleRepo
+    UserAuthService userAuthService
 
     @Autowired
     InviteOnlyProjectService inviteOnlyProjectService
@@ -550,14 +549,9 @@ class GlobalBadgesService {
     @Profile
     private void validateUserIsAndAdminOfProj(String projectId) {
         UserInfo userInfo = userInfoService.currentUser
-        boolean isRoot = userInfo.authorities?.find() {
-            it instanceof UserSkillsGrantedAuthority && RoleName.ROLE_SUPER_DUPER_USER == it.role?.roleName
-        }
-        if (!isRoot) {
-            Boolean isAdminForOtherProject = userRoleRepo.isUserProjectAdmin(userInfo.username, projectId)
-            if (!isAdminForOtherProject) {
-                throw new AccessDeniedException("User [${userInfo.username}] is not an admin for project [${projectId}]")
-            }
+        Boolean isAdminForOtherProject = userAuthService.isUserProjectAdmin(userInfo, projectId)
+        if (!isAdminForOtherProject) {
+            throw new AccessDeniedException("User [${userInfo.username}] is not an admin for project [${projectId}]")
         }
     }
 
