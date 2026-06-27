@@ -25,9 +25,8 @@ const props = defineProps({
     default: false
   }
 })
-const appConfig = useAppConfig()
 const timeWindowCollapsed = useStorage('editSkillTimeWindowCollapsed', true)
-const setFieldValue = inject('setFieldValue')
+const setFieldValue = inject('setFieldValue', null)
 const { value, errorMessage } = useField(() => 'timeWindowEnabled')
 
 watch(() => value.value, (newValue) => {
@@ -37,7 +36,7 @@ const updateCollapsed = (newState) => {
   timeWindowCollapsed.value = newState
 }
 const resetTimeWindow = (checked) => {
-  if (!checked) {
+  if (!checked && setFieldValue) {
     setFieldValue('pointIncrementIntervalHrs', 8)
     setFieldValue('pointIncrementIntervalMins', 0)
     setFieldValue('numPointIncrementMaxOccurrences', 1)
@@ -53,6 +52,7 @@ const resetTimeWindow = (checked) => {
     data-cy="timeWindowInput"
     @update:collapsed="updateCollapsed"
     :collapsed="timeWindowCollapsed">
+    <slot name="message" />
     <div class="flex items-center mb-2 mt-4 mx-2">
       <SkillsCheckboxInput
         class="mb-2"

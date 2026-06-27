@@ -28,7 +28,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
 
 
         cy.visit('/progress-and-rankings/projects/proj1');
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').should('have.text', 'Project: This is project 1');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]').should('have.text', 'Project: This is project 1');
 
         // navigate to subject 1
         cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
@@ -108,7 +108,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.createSubject(1, 2)
 
         cy.visit('/progress-and-rankings/projects/proj1');
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').should('have.text', 'Project: This is project 1');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]').should('have.text', 'Project: This is project 1');
 
         // navigate to subject 1
         cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
@@ -140,7 +140,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.createBadge(1, 1, { enabled: true });
 
         cy.visit('/progress-and-rankings/projects/proj1');
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').should('have.text', 'Project: This is project 1');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]').should('have.text', 'Project: This is project 1');
 
         cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
         cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
@@ -153,7 +153,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.createProject(1)
 
         cy.visit('/progress-and-rankings/projects/proj1');
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').should('have.text', 'Project: This is project 1');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]').should('have.text', 'Project: This is project 1');
 
         cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
         cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
@@ -171,7 +171,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.createBadge(1, 1, { enabled: true });
 
         cy.visit('/progress-and-rankings/projects/proj1');
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').should('have.text', 'Project: This is project 1');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]').should('have.text', 'Project: This is project 1');
 
         cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
         cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
@@ -193,7 +193,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.createProject(1)
 
         cy.visit('/progress-and-rankings/projects/proj1');
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').should('have.text', 'Project: This is project 1');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]').should('have.text', 'Project: This is project 1');
 
         cy.get('[data-cy="trainingSearchDialog"]').should('not.exist')
         cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
@@ -304,7 +304,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.addSkillToGroup(1, 1, 1, 3)
 
         cy.visit('/progress-and-rankings/projects/proj1');
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').should('have.text', 'Project: This is project 1');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]').should('have.text', 'Project: This is project 1');
 
         // navigate to skills group 1
         cy.get('[data-cy="skillsDisplaySearchBtn"]').click()

@@ -267,7 +267,6 @@ class AppController {
         return projAdminService.getProjectDescription(projectId)
     }
 
-
     @RequestMapping(value = "/badges", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     List<GlobalBadgeResult> getBadges() {

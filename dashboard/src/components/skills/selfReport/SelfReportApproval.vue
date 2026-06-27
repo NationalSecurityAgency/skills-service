@@ -30,7 +30,8 @@ import {useStorage} from "@vueuse/core";
 import AssignedApproversCell from "@/components/skills/selfReport/AssignedApproversCell.vue";
 import {useProjConfig} from "@/stores/UseProjConfig.js";
 import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
-
+import SkillsService from "@/components/skills/SkillsService.js";
+import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 
 const route = useRoute();
 const appInfo = useAppInfoState()
@@ -56,11 +57,15 @@ const sortOrder = ref(-1);
 const sortBy = ref('requestedOn');
 const selectedItems = ref([]);
 const expandedRows = ref({});
+const descriptions = ref({});
+const showDescriptions = ref({});
+const justifications = ref({});
 const totalRows = ref(null);
 const emailSubscribed = ref(true);
 const isEmailEnabled = computed(() => appInfo.emailEnabled)
 const showApproveOrRejectModal = ref(false);
 const requestType = ref('Reject');
+const loadingDescription = ref({});
 
 const myRequestsOnly = useStorage(`selfReportApproval-MyRequestsOnlyFilter-${route.params.projectId}`, false)
 const hasApprovalConfigsDefined = computed(() => !projConfig.isReadOnlyProj && props.selfReportStats?.find((item) => item.value === 'WorkloadConfig')?.count > 0)
@@ -170,7 +175,7 @@ const toggleUnsubscribe = () => {
 };
 
 const toggleRow = (row) => {
-  if(expandedRows.value[row]) {
+  if(expandedRows.value[row] && !justifications.value[row] && !showDescriptions.value[row]) {
     delete expandedRows.value[row];
   }
   else {
@@ -178,6 +183,31 @@ const toggleRow = (row) => {
   }
 
   expandedRows.value = { ...expandedRows.value };
+}
+
+const showJustification = (row) => {
+  if(!justifications.value[row]) {
+    justifications.value[row] = true;
+  } else {
+    justifications.value[row] = !justifications.value[row];
+  }
+
+  toggleRow(row);
+}
+
+const fetchDescription = (row) => {
+  if(!descriptions.value[row.skillId]) {
+    loadingDescription.value[row.skillId] = true;
+    toggleRow(row.id);
+    SkillsService.getSkillDetails(route.params.projectId, row.subjectId, row.skillId).then((res) => {
+      descriptions.value[row.skillId] = res.description;
+      showDescriptions.value[row.id] = true;
+      loadingDescription.value[row.skillId] = false;
+    })
+  } else {
+    showDescriptions.value[row.id] = !showDescriptions.value[row.id];
+    toggleRow(row.id);
+  }
 }
 
 const reset = () => {
@@ -227,7 +257,6 @@ const toRouteProps = (skill) => {
       </div>
 
       <hr />
-
 
       <SkillsDataTable :value="approvals"
                        v-model:selection="selectedItems"
@@ -285,9 +314,15 @@ const toRouteProps = (skill) => {
             </div>
             <SkillsButton size="small" variant="outline-info"
                       class="mr-2 py-0 px-1 mt-1 ml-2 lg:ml-0"
-                      @click="toggleRow(slotProps.data.id)"
+                      @click="showJustification(slotProps.data.id)"
                       :aria-label="`Show Justification for ${slotProps.data.name}`"
-                      :data-cy="`expandDetailsBtn_${slotProps.data.skillId}`" :icon="expandedRows[slotProps.data.id] ? 'fa fa-minus-square' : 'fa fa-plus-square'" label="Justification">
+                      :data-cy="`expandDetailsBtn_${slotProps.data.skillId}`" :icon="expandedRows[slotProps.data.id] && justifications[slotProps.data.id] ? 'fa fa-minus-square' : 'fa fa-plus-square'" label="Justification">
+            </SkillsButton>
+            <SkillsButton size="small" variant="outline-info"
+                          class="mr-2 py-0 px-1 mt-1 ml-2 lg:ml-0"
+                          @click="fetchDescription(slotProps.data)"
+                          :aria-label="`Show Description for ${slotProps.data.name}`"
+                          :data-cy="`showDescriptionBtn_${slotProps.data.skillId}`" :icon="expandedRows[slotProps.data.id] && showDescriptions[slotProps.data.id] ? 'fa fa-minus-square' : 'fa fa-plus-square'" label="Skill Description">
             </SkillsButton>
           </template>
         </Column>
@@ -317,15 +352,29 @@ const toRouteProps = (skill) => {
         </Column>
 
         <template #expansion="slotProps">
-          <div>
-            <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-6">
+          <div v-if="justifications[slotProps.data.id]">
+            <Card v-if="slotProps.data.requestMsg && slotProps.data.requestMsg.length > 0" header="Requested points with the following justification:" class="ml-6 mb-4">
+              <template #header>
+                <SkillsCardHeader title="Requested points with the following justification:"></SkillsCardHeader>
+              </template>
               <template #content>
                 <markdown-text class="d-inline-block" :text="slotProps.data.requestMsg" data-cy="approvalMessage" :instance-id="`${slotProps.data.id}`"/>
               </template>
             </Card>
-            <Card v-else>
+            <Card v-else class="ml-6 mb-4">
               <template #content>
                 No Justification supplied
+              </template>
+            </Card>
+          </div>
+          <skills-spinner :is-loading="loadingDescription[slotProps.data.skillId]" class="text-center"/>
+          <div v-if="showDescriptions[slotProps.data.id]">
+            <Card v-if="descriptions[slotProps.data.skillId]" header="Skill Description" class="ml-6">
+              <template #header>
+                <SkillsCardHeader title="Description of the skill:"></SkillsCardHeader>
+              </template>
+              <template #content>
+                <markdown-text class="d-inline-block" :text="descriptions[slotProps.data.skillId]" :data-cy="`skillDescription_${slotProps.data.skillId}`" :instance-id="`${slotProps.data.id}-${slotProps.data.skillId}`"/>
               </template>
             </Card>
           </div>

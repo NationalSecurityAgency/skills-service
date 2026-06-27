@@ -41,9 +41,9 @@ export default {
     return axios.get(url)
       .then((response) => response.data);
   },
-  getSkillApprovalsStats(projectId, skillId) {
-    const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/approvals/stats`;
-    return axios.get(url)
+  getSkillApprovalsStats(projectId, skillIds) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/approvals/stats`;
+    return axios.post(url, { skillIds})
       .then((response) => response.data);
   },
   isUserSubscribedToEmails(projectId) {

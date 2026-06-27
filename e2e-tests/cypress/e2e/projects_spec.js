@@ -86,7 +86,7 @@ describe('Projects Tests', () => {
         cy.visit('/progress-and-rankings/projects/proj1');
         cy.get('[data-cy="skillsDisplayHome"]')
             .contains('Overall Points');
-        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"]').contains('proj1');
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]').contains('proj1');
     });
 
     it('Trusted client should be shown when oAuthOnly!=true', () => {

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, ref } from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import SkillsDisplayBreadcrumb from '@/skills-display/components/header/SkillsDisplayBreadcrumb.vue'
 import PoweredBySkilltree from '@/skills-display/components/header/PoweredBySkilltree.vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
@@ -22,6 +22,11 @@ import { useSkillsDisplayBreadcrumbState } from '@/skills-display/stores/UseSkil
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillsDisplaySearch from '@/skills-display/components/SkillsDisplaySearch.vue'
+import ProjectService from "@/components/projects/ProjectService.js";
+import {useRoute} from "vue-router";
+import SkillsDisplayPathAppendValues from "@/router/SkillsDisplayPathAppendValues.js";
+
+const route = useRoute()
 
 const attributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
@@ -33,7 +38,7 @@ const showSkillsDisplaySearchDialog = ref(false)
 
 const props = defineProps({
   backButton: { type: Boolean, default: true },
-  animatePowerByLabel: { type: Boolean, default: true }
+  animatePowerByLabel: { type: Boolean, default: true },
 })
 
 const showBackButton = computed(() => {
@@ -52,11 +57,39 @@ const disableSkillTreeBrand = computed(() => isTrueCaseInsensitive(themeState.th
 const renderDivWhereBackButtonResides = computed(() => (showBackButton.value || !disableSearchButton.value || !disableSkillTreeBrand.value))
 const renderDivWhereBrandResides = computed(() => showBackButton.value || !disableSkillTreeBrand.value)
 const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
+
+const isProgressAndRankingProjPage = route.name === `SkillsDisplay${SkillsDisplayPathAppendValues.Local}`
+const isMyProject = ref(false);
+const showAddedMsg = ref(false);
+
+onMounted(() => {
+  if (isProgressAndRankingProjPage && shouldCheckIfMyProject.value) {
+    loadProjectSavedStatus()
+  }
+})
+
+const loadProjectSavedStatus = () => {
+  ProjectService.isMyProject(attributes.projectId).then((res) => {
+    isMyProject.value = res.data?.isInMyProjects;
+  });
+}
+
+const addToMyProjects = () => {
+  ProjectService.addToMyProjects(attributes.projectId).then(() => {
+        loadProjectSavedStatus();
+        showAddedMsg.value = true;
+        setTimeout(() => {
+          showAddedMsg.value = false;
+        }, 4000);
+      })
+}
+
+const showAddToMyProjectsBtn = computed(() => isProgressAndRankingProjPage && !isMyProject.value && projectId !== 'Inception')
+const shouldCheckIfMyProject = computed(() => isProgressAndRankingProjPage && projectId !== 'Inception')
 </script>
 
 <template>
-  <Card class="skills-theme-page-title" data-cy="skillsTitle"
-        :pt="{ body: { class: 'p-0!' }, content: { class: 'px-2! pt-2! pb-3!' } }">
+  <Card class="skills-theme-page-title" data-cy="skillsTitle" :pt="{ body: { class: 'p-0!' }, content: { class: 'px-2! pt-2! pb-3!' } }">
     <template #content>
       <div class="flex flex-wrap flex-col md:flex-row content-center gap-2" :class="{'px-2': !renderDivWhereBackButtonResides}">
         <div v-if="renderDivWhereBackButtonResides"
@@ -82,13 +115,30 @@ const isThemeAligned = computed(() => themeState.theme?.pageTitle?.textAlign)
               icon="fa-solid fa-magnifying-glass" />
         </div>
 
-        <div :class="{'mx-5': showBackButton}" class="text-center flex-1">
-          <SkillsDisplayBreadcrumb v-if="!disableBreadcrumb"></SkillsDisplayBreadcrumb>
-          <h1 data-cy="title"
-               :class="{ 'mt-2': disableBreadcrumb}"
-               class="skills-title uppercase text-2xl font-normal m-0">
-            <slot />
-          </h1>
+        <div class="flex flex-1 flex-col md:flex-row flex-wrap text-center">
+          <div :class="{'mx-5': showBackButton}" class="text-center flex-col w-full">
+            <SkillsDisplayBreadcrumb v-if="!disableBreadcrumb"></SkillsDisplayBreadcrumb>
+
+            <div class="flex flex-col md:flex-row md:gap-3 flex-wrap items-start" :class="{ 'justify-center': !disableBreadcrumb }">
+              <h1 data-cy="title"
+                   :class="{ 'mt-1': disableBreadcrumb, 'max-w-[42rem]': showAddToMyProjectsBtn || showAddedMsg }"
+                   class="skills-title uppercase text-2xl font-normal m-0">
+                <slot />
+              </h1>
+              <SkillsButton
+                  v-if="showAddToMyProjectsBtn && !showAddedMsg"
+                  label="My Projects"
+                  icon="fas fa-plus-circle"
+                  @click="addToMyProjects"
+                  outlined
+                  class="mt-2"
+                  :data-cy="`addButton-${attributes.projectId}`"
+                  :aria-label="`add project ${attributes.projectId} to my projects`"/>
+              <InlineMessage v-if="showAddedMsg" class="mt-2" severity="success">
+                Project added!
+              </InlineMessage>
+            </div>
+          </div>
         </div>
 
         <div v-if="renderDivWhereBrandResides" class="md:w-32">

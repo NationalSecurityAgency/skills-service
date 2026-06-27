@@ -395,5 +395,104 @@ describe('Manage My Projects Tests', () => {
 
 
     });
+
+    it('can add to my projects from project page', function () {
+        for (let i = 1; i <=5; i += 1) {
+            cy.createProject(i);
+            cy.enableProdMode(i);
+        }
+
+        cy.visit('/progress-and-rankings/manage-my-projects');
+
+        cy.doesNotContainsCellValue(0, 2, 'My Project');
+        cy.doesNotContainsCellValue(1, 2, 'My Project');
+        cy.doesNotContainsCellValue(2, 2, 'My Project');
+        cy.doesNotContainsCellValue(3, 2, 'My Project');
+        cy.doesNotContainsCellValue(4, 2, 'My Project');
+
+        cy.get('[data-cy="viewButton-proj1"]').click()
+        cy.get('[data-cy="addButton-proj1"]').should('exist')
+        cy.get('[data-cy="addButton-proj1"]').click()
+        cy.get('[data-cy="addButton-proj1"]').should('not.exist')
+
+        cy.visit('/progress-and-rankings/manage-my-projects');
+        cy.containsCellValue(0, 2, 'My Project');
+
+        cy.get('[data-cy="removeBtn-proj1"]').click()
+        cy.doesNotContainsCellValue(0, 2, 'My Project');
+
+        cy.get('[data-cy="viewButton-proj1"]').click()
+        cy.get('[data-cy="addButton-proj1"]').should('exist')
+        cy.get('[data-cy="addButton-proj1"]').click()
+        cy.get('[data-cy="addButton-proj1"]').should('not.exist')
+
+        cy.visit('/progress-and-rankings/manage-my-projects');
+        cy.containsCellValue(0, 2, 'My Project');
+
+    });
+
+    it('add button does not show for project already added', function () {
+        for (let i = 1; i <=5; i += 1) {
+            cy.createProject(i);
+            cy.enableProdMode(i);
+        }
+
+        cy.visit('/progress-and-rankings/manage-my-projects');
+
+        cy.doesNotContainsCellValue(0, 2, 'My Project');
+        cy.doesNotContainsCellValue(1, 2, 'My Project');
+        cy.doesNotContainsCellValue(2, 2, 'My Project');
+        cy.doesNotContainsCellValue(3, 2, 'My Project');
+        cy.doesNotContainsCellValue(4, 2, 'My Project');
+
+        cy.get('[data-cy="addButton-proj1"]').click()
+
+        cy.visit('/progress-and-rankings/projects/proj1');
+        cy.get('[data-cy="overallPoints"]').should('exist')
+        cy.get('[data-cy="addButton-proj1"]').should('not.exist')
+        cy.visit('/progress-and-rankings/projects/proj2');
+        cy.get('[data-cy="overallPoints"]').should('exist')
+        cy.get('[data-cy="addButton-proj2"]').should('exist')
+
+    });
+
+    it('add button does not show on Inception', function () {
+        cy.intercept('GET', '/api/myprojects/Inception/isMyProject', cy.spy().as('isMyProject'));
+        cy.visit('/progress-and-rankings/projects/Inception');
+
+        cy.get('[data-cy="overallPoints"]').should('exist')
+        cy.get('@isMyProject').should('not.have.been.called');
+        cy.get('[data-cy="addButton-Inception"]').should('not.exist')
+    });
+
+    it('add button does not show on skills-client', function () {
+        for (let i = 1; i <=2; i += 1) {
+            cy.createProject(i);
+            cy.enableProdMode(i);
+        }
+
+        cy.intercept('GET', '/api/myprojects/proj1/isMyProject', cy.spy().as('isMyProject'));
+        cy.visit('/test-skills-client/proj1');
+
+        cy.wrapIframe().find('[data-cy="overallPoints"]')
+        cy.get('@isMyProject').should('not.have.been.called');
+        cy.wrapIframe().find('[data-cy="addButton-proj1"]').should('not.exist')
+
+    });
+
+    it('add button does not show on user skills-display preview', function () {
+        cy.intercept('GET', '/api/myprojects/proj1/isMyProject', cy.spy().as('isMyProject'));
+        cy.createProject(1);
+        cy.enableProdMode(1);
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.reportSkill(1, 1, 'user1', 'yesterday');
+
+        cy.visit('/administrator/projects/proj1/users/user1')
+        cy.get('[data-cy="overallPoints"]').should('exist')
+        cy.get('@isMyProject').should('not.have.been.called');
+        cy.get('[data-cy="addButton-proj1"]').should('not.exist')
+
+    });
 });
 

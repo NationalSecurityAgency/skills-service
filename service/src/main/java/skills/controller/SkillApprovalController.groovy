@@ -27,6 +27,7 @@ import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.SkillApproverConfRequest
 import skills.controller.request.model.SkillApprovalRejection
 import skills.controller.request.model.SkillApprovalRequest
+import skills.controller.request.model.SkillApproverStatsRequest
 import skills.controller.result.model.ApproverConfResult
 import skills.controller.result.model.LabelCountItem
 import skills.controller.result.model.RequestResult
@@ -139,13 +140,15 @@ class SkillApprovalController {
     }
 
 
-    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/approvals/stats", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/projects/{projectId}/approvals/stats", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    List<LabelCountItem> getSkillApprovalsStats(@PathVariable("projectId") String projectId, @PathVariable("skillId") String skillId) {
+    List<LabelCountItem> getApprovalsStatsForMultipleSkills(
+            @PathVariable("projectId") String projectId,
+            @RequestBody SkillApproverStatsRequest statsRequest) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(skillId, "Skill Id")
+        SkillsValidator.isNotEmpty(statsRequest?.skillIds, "skillIds")
 
-        return skillApprovalService.getSkillApprovalsStats(projectId, skillId)
+        return skillApprovalService.getSkillApprovalsStats(projectId, statsRequest.skillIds)
     }
 
     @RequestMapping(value = "/projects/{projectId}/approvalEmails/unsubscribe", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

@@ -373,8 +373,7 @@ where request.id in :approvalRequestIds
             where
                 sd.projectId = :projectId and 
                 sa.projectId = :projectId and
-                sd.skillId = :skillId
-            group by sa.skillRefId
+                sd.skillId in :skillIds
                 ''')
-    SkillRequestApprovalStats countSkillRequestApprovals(@Param("projectId") String projectId, @Param("skillId") String skillId)
+    SkillRequestApprovalStats countSkillRequestApprovals(@Param("projectId") String projectId, @Param("skillIds") List<String> skillIds)
 }

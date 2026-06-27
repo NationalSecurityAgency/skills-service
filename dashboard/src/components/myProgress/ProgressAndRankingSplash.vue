@@ -35,7 +35,7 @@ const logoWidth = computed(() => responsive.sm.value ? '15rem' : '23rem')
           training
           platform
         </div>
-        <div class="flex flex-col lg:flex-row gap-6 px-6">
+        <div class="flex flex-col lg:flex-row gap-6 px-6 justify-center">
           <splash-page-card
               title="Gamification"
               icon="fas fa-trophy text"

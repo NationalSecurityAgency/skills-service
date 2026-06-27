@@ -41,5 +41,6 @@ enum DashboardItem {
     TrustedClientSecret,
     ProjectInvite,
     UserPreference,
-    AiGradingConfig
+    AiGradingConfig,
+    SkillsBatch
 }

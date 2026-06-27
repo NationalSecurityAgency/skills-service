@@ -668,4 +668,99 @@ describe('Markdown Tests', () => {
             errorThreshold: 0.1
         });
     })
+
+    it('add a table', () => {
+      cy.viewport(1000, 1400);
+      cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+          projectId: 'proj1',
+          subjectId: 'subj1',
+          skillId: 'skill1',
+          name: 'Skill 1',
+          pointIncrement: '50',
+          numPerformToCompletion: '5',
+      });
+      cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+
+      cy.get('[data-cy="editSkillButton_skill1"]').click();
+      cy.typeInMarkdownEditor('[data-cy=markdownEditorInput]', '{selectall}{backspace}Table:');
+
+      // Click the table button in the toolbar
+      cy.clickToolbarButton('table')
+
+      // Target the table selection container
+      cy.get('.toastui-editor-popup-body .toastui-editor-table')
+        .within(() => {
+          // To get a 4x3 table (4 columns, 3 rows):
+          // Target the 3rd row (index 2)
+          // Target the 4th cell in that row (index 3)
+          cy.get('.toastui-editor-table-row').eq(2)
+            .find('.toastui-editor-table-cell').eq(3)
+            .click();
+        });
+
+      // Validate the actual inserted HTML table structure
+      cy.get('.toastui-editor-contents table').within(() => {
+        // Validate Rows: Expect 1 header row + 2 body rows = 3 rows total
+        cy.get('tr').should('have.length', 3);
+
+        // Validate Columns in Header: Expect 4 header cells
+        cy.get('thead tr').find('th').should('have.length', 4);
+
+        // Validate Columns in Body Rows: Expect 4 data cells per row
+        cy.get('tbody tr').each(($row) => {
+          cy.wrap($row).find('td').should('have.length', 4);
+        });
+      });
+
+      // Target the inserted table inside the editor
+      cy.get('.toastui-editor-contents table').within(() => {
+        // Row 2 Column 3 means:
+        // - Go into the tbody
+        // - Find the 2nd row (index 1)
+        // - Find the 3rd cell (index 2)
+        cy.get('tbody tr').eq(1)
+          .find('td').eq(2)
+          .as('targetCell'); // Save cell as alias
+      });
+
+      // Click the cell to focus ProseMirror, type text, and verify it
+      cy.get('@targetCell')
+        .click()
+        .type('Hello World')
+        .should('contain.text', 'Hello World');
+
+      cy.clickSaveDialogBtn();
+      cy.get('[data-cy="skillOverviewDescription"]').within(() => {
+
+        // Validate the Header Structure (4 Columns)
+        cy.get('thead tr').within(() => {
+          cy.get('th').should('have.length', 4);
+        });
+
+        // Validate the Body Structure (2 Rows)
+        cy.get('tbody tr').should('have.length', 2);
+
+        // Validate Row 1 Data Cells (4 Columns, All Empty)
+        cy.get('tbody tr').eq(0).within(() => {
+          cy.get('td').should('have.length', 4);
+          cy.get('td').each(($cell) => {
+            cy.wrap($cell).should('have.text', '');
+          });
+        });
+
+        // Validate Row 2 Data Cells and the Text Location
+        cy.get('tbody tr').eq(1).within(() => {
+          cy.get('td').should('have.length', 4);
+
+          // Check specific columns in the second row (0-indexed)
+          cy.get('td').eq(0).should('have.text', '');
+          cy.get('td').eq(1).should('have.text', '');
+
+          // Validate Column 3 contains your typed text
+          cy.get('td').eq(2).should('have.text', 'Hello World');
+
+          cy.get('td').eq(3).should('have.text', '');
+        });
+      });
+    });
 });

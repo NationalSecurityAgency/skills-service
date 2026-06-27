@@ -29,7 +29,10 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillRequestValidator
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ActionPatchRequest
+import skills.controller.request.model.MultiSkillUpdateRequest
 import skills.controller.request.model.SkillImportRequest
 import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.SkillDefPartialRes
@@ -68,6 +71,12 @@ class SkillsAdminService {
 
     @Autowired
     SkillDefRepo skillDefRepo
+
+    @Autowired
+    BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
+
+    @Autowired
+    UserAchievementsAndPointsManagement userAchievementsAndPointsManagement
 
     @Autowired
     SkillRelDefRepo skillRelDefRepo
@@ -138,6 +147,9 @@ class SkillsAdminService {
 
     @Autowired
     private SkillsLoader skillsLoader;
+
+    @Autowired
+    SkillRequestValidator skillRequestValidator
 
     protected static class SaveSkillTmpRes {
         // because of the skill re-use it could be imported but NOT available in the catalog
@@ -426,6 +438,204 @@ class SkillsAdminService {
         return saveSkillTmpRes
     }
 
+    static class SkillDefWithExtraMeta {
+        SkillDef skill
+        int pointIncrementDelta
+        int occurrencesDelta
+        int currentOccurrences
+    }
+    static final Set<String> SUPPORTED_SELF_REPORT_TYPES_FOR_BATCH_UPDATES = [
+            SelfReportingType.Approval.toString(), SelfReportingType.HonorSystem.toString()].toSet()
+
+    @Transactional()
+    @Profile
+    List<SaveSkillService.SkillInBatchUpdateRes> batchUpdateSkills(String projectId, MultiSkillUpdateRequest updateRequest) {
+        validate(updateRequest, projectId)
+        skillRequestValidator.validateMultiSkillUpdateRequest(projectId, updateRequest)
+        List<String> skillIds = updateRequest.skills
+        List<SkillDef> skillsToUpdate = skillDefRepo.findAllByProjectIdAndSkillIdIn(projectId, skillIds)
+
+        List<String> badSkillIds = skillIds - skillsToUpdate.skillId
+        if (badSkillIds) {
+            throw new SkillException("Skills not found: ${badSkillIds.join(", ")}", projectId, null, ErrorCode.BadParam)
+        }
+
+        SkillDef invalidSkill = skillsToUpdate.find { it.type != SkillDef.ContainerType.Skill }
+        if (invalidSkill) {
+            throw new SkillException("Only skill type is supported. [${invalidSkill.skillId}] is [${invalidSkill.type}]", projectId, null, ErrorCode.BadParam)
+        }
+
+        List<String> uniqueGroupIds = skillsToUpdate.groupId.unique()
+        if (uniqueGroupIds.size() > 1) {
+            throw new SkillException("All provided skills must belong to the same skills group but provided ${uniqueGroupIds}", projectId, null, ErrorCode.BadParam)
+        }
+
+        SkillDef subject = ruleSetDefGraphService.getMySubjectParent(skillsToUpdate.first().id)
+        List<SkillDefWithExtraMeta> skillsWhosePointsChanged = []
+        for (SkillDef skill : skillsToUpdate) {
+            if (skill.projectId != projectId) {
+                throw new SkillException("Provided skill id [${skill.skillId}] does not exist", projectId, skill.skillId, ErrorCode.BadParam)
+            }
+            if (skill.copiedFrom != null) {
+                throw new SkillException("Cannot batch update imported skills", projectId, skill.skillId, ErrorCode.BadParam)
+            }
+            SkillDef currentSkillSubject = ruleSetDefGraphService.getMySubjectParent(skill.id)
+            if (currentSkillSubject.id != subject.id) {
+                throw new SkillException("All provided skills must belong to the same subject. Skill [${skill.skillId}] is not a child of [${subject.skillId}]", projectId, skill.skillId, ErrorCode.BadParam)
+            }
+            String selfReportTypeToBe = updateRequest.selfReportingType ?: skill.selfReportingType?.toString()
+            boolean allowOccurrencesChange = !selfReportTypeToBe || SUPPORTED_SELF_REPORT_TYPES_FOR_BATCH_UPDATES.contains(selfReportTypeToBe)
+
+            int currentOccurrences = (int) (skill.totalPoints / skill.pointIncrement)
+            boolean skillIsEnabled = skill.enabled == "true"
+            if (skillIsEnabled && updateRequest.pointIncrement != null || (updateRequest.numPerformToCompletion != null && allowOccurrencesChange)) {
+                skillsWhosePointsChanged.add(new SkillDefWithExtraMeta(
+                        skill: skill,
+                        pointIncrementDelta: updateRequest.pointIncrement != null ? updateRequest.pointIncrement - skill.pointIncrement : 0,
+                        currentOccurrences: currentOccurrences,
+                        occurrencesDelta: updateRequest.numPerformToCompletion != null ? updateRequest.numPerformToCompletion - currentOccurrences : 0
+                ))
+            }
+
+            if (updateRequest.pointIncrement != null) {
+                skillRequestValidator.validatePointIncrement(projectId, skill.skillId, updateRequest.pointIncrement)
+                skill.pointIncrement = updateRequest.pointIncrement
+                skill.totalPoints = updateRequest.pointIncrement * currentOccurrences
+            }
+            if (updateRequest.numPerformToCompletion != null && allowOccurrencesChange) {
+                skillRequestValidator.validateNumPerformToCompletion(projectId, skill.skillId, updateRequest.numPerformToCompletion)
+                skill.totalPoints = skill.pointIncrement * updateRequest.numPerformToCompletion
+            }
+
+            Integer numToPerformToCompletion = (Integer) (skill.totalPoints / skill.pointIncrement)
+            // ony apply to skills that can support the Time Window
+            boolean hasNumMaxOccurrencesIncrementInterval = updateRequest.numMaxOccurrencesIncrementInterval != null
+            if (!hasNumMaxOccurrencesIncrementInterval || numToPerformToCompletion >= updateRequest.numMaxOccurrencesIncrementInterval) {
+                if (updateRequest.pointIncrementInterval != null && numToPerformToCompletion > 1) {
+                    skillRequestValidator.validatePointIncrementInterval(projectId, skill.skillId, updateRequest.pointIncrementInterval)
+                    skill.pointIncrementInterval = updateRequest.pointIncrementInterval
+                }
+                if (hasNumMaxOccurrencesIncrementInterval) {
+                    skillRequestValidator.validateNumMaxOccurrencesIncrementInterval(projectId, skill.skillId, skill.pointIncrement, numToPerformToCompletion, updateRequest.numMaxOccurrencesIncrementInterval)
+                    skill.numMaxOccurrencesIncrementInterval = updateRequest.numMaxOccurrencesIncrementInterval
+                }
+            }
+
+            if (updateRequest.selfReportingType != null) {
+                SelfReportingType previousType = skill.selfReportingType
+                SelfReportingType newType = updateRequest.selfReportingType == "reset" ? null : SelfReportingType.valueOf(updateRequest.selfReportingType)
+                if (previousType == SelfReportingType.Quiz && previousType != newType) {
+                    quizToSkillService.removeQuizToSkillAssignment(skill)
+                }
+                skillApprovalService.modifyApprovalsWhenSelfReportingTypeChanged(skill, newType)
+
+                skill.selfReportingType = newType
+            }
+            if (updateRequest.enabled == "true" ) {
+                if (skill.enabled != "true") {
+                    skill.enabled = "true"
+                }
+            }
+        }
+
+        skillDefRepo.saveAll(skillsToUpdate)
+
+        if (skillsWhosePointsChanged) {
+            // update group and subject defined points
+            List<String> groupIdsToUpdate = skillsWhosePointsChanged.skill.groupId.findAll( { it != null }).unique()
+            if (groupIdsToUpdate) {
+                groupIdsToUpdate.each {String groupId ->
+                    batchOperationsTransactionalAccessor.updateGroupTotalPoints(projectId, groupId, true)
+                }
+            }
+            batchOperationsTransactionalAccessor.updateSubjectTotalPoints(projectId, subject.skillId, true)
+            batchOperationsTransactionalAccessor.updateProjectsTotalPoints(projectId, true)
+
+            // update skills points
+            skillsWhosePointsChanged.each {SkillDefWithExtraMeta skillWithExtraMeta ->
+                userPointsRepo.updateUserPointsForASkill(projectId, skillWithExtraMeta.skill.skillId)
+                updatePointsAndAchievements(skillWithExtraMeta.skill, subject.skillId,
+                        skillWithExtraMeta.pointIncrementDelta, skillWithExtraMeta.occurrencesDelta, skillWithExtraMeta.currentOccurrences,
+                        0, null, null, false)
+
+                if (skillWithExtraMeta.occurrencesDelta < 0) {
+                    int occurrencesToKeep = skillWithExtraMeta.skill.totalPoints / skillWithExtraMeta.skill.pointIncrement
+                    userPointsManagement.removeExtraEntriesOfUserPerformedSkillByUser(skillWithExtraMeta.skill.projectId,
+                            skillWithExtraMeta.skill.skillId, occurrencesToKeep)
+                }
+            }
+
+            // updated groups' achievements
+            if (groupIdsToUpdate) {
+                List<SkillDef> groupDefs = skillDefRepo.findAllByProjectIdAndSkillIdIn(projectId, groupIdsToUpdate)
+                batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements(groupDefs)
+            }
+
+            List<String> skillGroupsIds = skillsToUpdate.findAll { it.groupId }.groupId
+            if (skillGroupsIds) {
+                List<SkillDef> skillGroups = skillDefRepo.findAllByProjectIdAndSkillIdIn(projectId, skillGroupsIds.unique())
+                log.info("Identifying group achievements for {} groups in project [{}]", skillGroups.skillId, projectId)
+                batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements(skillGroups)
+            }
+
+            // updated subject's points and achievements
+            batchOperationsTransactionalAccessor.updateUserPointsForSubject(projectId, subject.skillId, true)
+            userAchievementsAndPointsManagement.removeSubjectLevelAchievementsIfUsersDoNotQualify(subject)
+            batchOperationsTransactionalAccessor.identifyAndAddSubjectLevelAchievements(projectId, subject.skillId)
+
+            // project
+            userAchievementsAndPointsManagement.removeProjectLevelAchievementsIfUsersDoNotQualify(projectId)
+            batchOperationsTransactionalAccessor.handlePointsAndAchievementsForProject(projectId)
+        }
+
+        skillsToUpdate.each {
+            userActionsHistoryService.saveUserAction(new UserActionInfo(
+                    action: DashboardAction.Edit,
+                    item: DashboardItem.SkillsBatch,
+                    actionAttributes: updateRequest,
+                    itemId: it.skillId,
+                    itemRefId: it.id,
+                    projectId: it.projectId,
+            ))
+        }
+
+        return skillsToUpdate.collect {
+            new SaveSkillService.SkillInBatchUpdateRes(
+                    projectId: it.projectId,
+                    skillRefId: it.id,
+                    skillId: it.skillId,
+                    isImportedByOtherProjects: skillDefRepo.isCatalogSkillImportedByOtherProjects(it.id)
+            )
+        }
+    }
+
+    void validate(MultiSkillUpdateRequest updateRequest, String projectId) {
+
+        boolean atLeastOneAttributeProvided = updateRequest.pointIncrement != null
+                || updateRequest.numPerformToCompletion != null
+                || updateRequest.pointIncrementInterval != null
+                || updateRequest.numMaxOccurrencesIncrementInterval != null
+                || updateRequest.enabled != null
+                || updateRequest.selfReportingType != null
+        if (!atLeastOneAttributeProvided) {
+            throw new SkillException("Must provide at least 1 attribute to update", projectId)
+        }
+
+        SelfReportingType newType = (!updateRequest.selfReportingType || updateRequest.selfReportingType == "reset") ? null : SelfReportingType.valueOf(updateRequest.selfReportingType)
+        if (newType){
+            if (!SUPPORTED_SELF_REPORT_TYPES_FOR_BATCH_UPDATES.contains(newType.toString())) {
+                throw new SkillException("Only ${SUPPORTED_SELF_REPORT_TYPES_FOR_BATCH_UPDATES} are supported for self reporting type in a batch update", projectId, null, ErrorCode.BadParam)
+            }
+            if (newType == SkillDef.SelfReportingType.Quiz && updateRequest.numPerformToCompletion != null) {
+                SkillsValidator.isTrue(updateRequest.numPerformToCompletion == 1, "When quizId is provided numPerformToCompletion must be equal 1", projectId)
+            }
+        }
+        if (updateRequest.numPerformToCompletion != null && updateRequest.numMaxOccurrencesIncrementInterval != null) {
+            SkillsValidator.isTrue(updateRequest.numPerformToCompletion >= updateRequest.numMaxOccurrencesIncrementInterval, "numPerformToCompletion must be >= numMaxOccurrencesIncrementInterval", projectId)
+        }
+
+    }
+
     /**
      * Transitive relationships appear to confuse hibernate cache - if the same
      * object was loaded earlier in the session via transitive relationship the hibernate fails
@@ -462,7 +672,7 @@ class SkillsAdminService {
     }
 
     @Profile
-    private void updatePointsAndAchievements(SkillDef savedSkill, String subjectId, int pointIncrementDelta, int occurrencesDelta, int currentOccurrences, int numSkillsRequiredDelta, SkillDef skillsGroupSkillDef, List<SkillDef> groupChildSkills) {
+    private void updatePointsAndAchievements(SkillDef savedSkill, String subjectId, int pointIncrementDelta, int occurrencesDelta, int currentOccurrences, int numSkillsRequiredDelta, SkillDef skillsGroupSkillDef, List<SkillDef> groupChildSkills, boolean updateSubjAchievements = true) {
         if (savedSkill.type != SkillDef.ContainerType.SkillsGroup) {
 
             int newOccurrences = savedSkill.totalPoints / savedSkill.pointIncrement
@@ -499,11 +709,11 @@ class SkillsAdminService {
             userPointsManagement.insertUserAchievementWhenDecreaseOfSkillsRequiredCausesUsersToAchieve(savedSkill.projectId, skillsGroupSkillDef.skillId, skillsGroupSkillDef.id, groupChildSkills.collect {it.skillId}, numSkillsRequired)
         }
 
-        if (pointIncrementDelta != 0 || occurrencesDelta < 0) {
+        if (updateSubjAchievements && (pointIncrementDelta != 0 || occurrencesDelta < 0)) {
             SkillDef subject = skillDefRepo.findByProjectIdAndSkillIdAndType(savedSkill.projectId, subjectId, SkillDef.ContainerType.Subject)
             userPointsManagement.identifyAndAddLevelAchievements(subject)
         }
-        log.debug("Saved [{}]", savedSkill)
+        log.debug("updatePointsAndAchievements for [{}]", savedSkill.skillId)
     }
 
     @Transactional

@@ -212,6 +212,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
     });
 
     it('insert link using keyboard - use keyboard mapping', () => {
+        cy.viewport(1000, 1400);
         cy.visit('/administrator/');
         cy.get('[data-cy=newProjectButton]').click()
         cy.get('[data-cy="projectName"]').should('have.focus')
@@ -229,5 +230,42 @@ describe('Accessibility Rich Text Editor Tests', () => {
         cy.get('.toastui-editor-popup-body .toastui-editor-ok-button').click()
         cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents a[href="/static/img/skilltree_logo_v1.png"]').should('have.text', 'Logo')
     });
+
+  it('insert table using keyboard - use keyboard mapping', () => {
+      cy.viewport(1000, 1400);
+      cy.visit('/administrator/');
+      cy.get('[data-cy=newProjectButton]').click()
+      cy.get('[data-cy="projectName"]').should('have.focus')
+
+      cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', 'Table:{ctrl+alt+w}')
+      cy.get('[data-cy="insertTableRowsInput"] #inputinsertTableRows').should('have.focus')
+      cy.get('[data-cy="insertTableRowsInput"] #inputinsertTableRows').type('{uparrow}')
+      cy.get('[data-cy="insertTableRowsInput"] #inputinsertTableRows').tab()
+
+      cy.get('[data-cy="insertTableColumnsInput"] #inputinsertTableColumns').should('have.focus')
+      cy.get('[data-cy="insertTableColumnsInput"] #inputinsertTableColumns').type('{downarrow}')
+      cy.get('[data-cy="insertTableColumnsInput"] #inputinsertTableColumns').tab()
+        cy.get('[data-cy="closeDialogBtn"]').should('have.focus')
+        // cy.get('[data-cy="closeDialogBtn"]').tab()
+      cy.press(Cypress.Keyboard.Keys.TAB)
+        cy.get('[data-cy="saveDialogBtn"]').should('have.focus')
+      cy.get('[data-cy="insertTableDialog"]')
+        .find('[data-cy="saveDialogBtn"]')
+        .focus()
+        .type('{enter}', { force: true })
+      // Validate the actual inserted HTML table structure
+      cy.get('.toastui-editor-contents table').within(() => {
+        // Validate Rows: Expect 1 header row + 2 body rows = 3 rows total
+        cy.get('tr').should('have.length', 3);
+
+        // Validate Columns in Header: Expect 4 header cells
+        cy.get('thead tr').find('th').should('have.length', 2);
+
+        // Validate Columns in Body Rows: Expect 2 data cells per row
+        cy.get('tbody tr').each(($row) => {
+          cy.wrap($row).find('td').should('have.length', 2);
+        });
+      });
+  });
 
 });

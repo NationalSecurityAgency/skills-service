@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.storage.model.UserAchievement
 import skills.storage.repos.UserAchievedLevelRepo
 
@@ -513,4 +514,32 @@ class SkillsGroupAchievementSpecs extends DefaultIntSpec {
         exception.message.contains("Failed to report skill event because skill definition does not exist") // only looks for skillDef.type == SkillDef.ContainerType.Skill
     }
 
+    void "increasing number of occurrences remove groups achievement" () {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 10)
+        def skill = SkillsFactory.createSkill(1, 1, 1, 0, 2, 0, 100)
+
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, [skillsGroup])
+        skillsService.assignSkillToSkillsGroup(skillsGroup.skillId, skill)
+
+        SkillsService user = createService(getRandomUsers(1).first())
+
+        user.addSkill(skill)
+        user.addSkill(skill)
+        when:
+        List<UserAchievement> achievements_before = userAchievedRepo.findAll()
+
+        skill.numPerformToCompletion = 3
+        skillsService.updateSkill(skill, skill.skillId)
+        List<UserAchievement> achievements_after = userAchievedRepo.findAll()
+
+        then:
+        achievements_before.findAll( { it.userId == user.userName && it.projectId == proj.projectId && it.skillId == skill.skillId})
+        achievements_before.findAll( { it.userId == user.userName && it.projectId == proj.projectId && it.skillId == skillsGroup.skillId})
+        !achievements_after.findAll( { it.userId == user.userName && it.projectId == proj.projectId && it.skillId == skill.skillId})
+
+        // group achievement are kept in place for now but the approach may change in the future, will keep the check here
+        achievements_after.findAll( { it.userId == user.userName && it.projectId == proj.projectId && it.skillId == skillsGroup.skillId})
+    }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2026 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+package skills.controller.request.model
 
-import org.springframework.lang.Nullable
+import groovy.transform.Canonical
+import groovy.transform.ToString
 
-interface SkillRequestApprovalStats {
-    @Nullable
-    Long getPending()
-    @Nullable
-    Long getApproved()
-    @Nullable
-    Long getRejected()
+@Canonical
+@ToString(includeNames = true)
+class SkillApproverStatsRequest {
+    List<String> skillIds
 }

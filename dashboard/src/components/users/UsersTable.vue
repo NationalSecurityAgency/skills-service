@@ -131,7 +131,7 @@ const isGlobalBadgePage = computed(() => {
   return route.path?.toLowerCase().startsWith('/administrator/globalbadges');
 })
 const isSkillsGroupPage = computed(() => {
-  return !!route.params.groupId;
+  return !!route.params.groupId && !route.params.skillId;
 })
 const numSkillsRequired = computed(() => {
   // -1 == all skills required
@@ -212,7 +212,7 @@ const getOrderBy = (orderBy) => {
     return 'userTag'
   }
   if (orderBy === 'totalProgress' && isSkillsGroupPage.value) {
-    return 'totalPoints'
+    return 'skillsAchieved'
   }
   return orderBy
 }
@@ -268,6 +268,17 @@ const archiveUsers = () => {
     loadData()
   })
 }
+
+const tableStoredStateId = computed(() => {
+  const tableId = 'usersTable'
+  if (isGlobalBadgePage.value) {
+    return `${tableId}Global`
+  }
+  if (isSkillsGroupPage.value) {
+    return `${tableId}Group`
+  }
+  return tableId
+})
 </script>
 
 <template>
@@ -334,7 +345,7 @@ const archiveUsers = () => {
       <SkillsDataTable
         :value="data" :loading="isLoading" size="small" stripedRows showGridlines paginator lazy
         :totalRecords="totalRows" :rows="pageSize" @page="pageChanged"
-        :tableStoredStateId="`usersTable${isGlobalBadgePage ? 'Global' : ''}`" data-cy="usersTable"
+        :tableStoredStateId="tableStoredStateId" data-cy="usersTable"
         aria-label="Users"
         :rowsPerPageOptions="possiblePageSizes"
         v-model:sort-field="sortInfo.sortBy"

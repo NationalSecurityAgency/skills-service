@@ -49,6 +49,19 @@ class NewVersionsNotifCreator {
         assert docsRootHost // must have it configured
         List<WebNotifWrapper> newVersionsNotifications = [
                 new WebNotifWrapper(
+                        releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-07-13'),
+                        notif: new WebNotification(
+                                notifiedOn: new Date(),
+                                showUntil: Date.parse('yyyy-MM-dd', '2026-08-26'),
+                                lookupId: "new-versions-10",
+                                title: "Version 4.5 Released",
+                                notification: """- Bulk-edit attributes across multiple skills simultaneously
+- Ability to attach files to text input answers in quizzes and surveys
+- Create and configure formatted tables within description fields
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)
+""")
+                ),
+                new WebNotifWrapper(
                         releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-06-26'),
                         notif: new WebNotification(
                                 notifiedOn: new Date(),

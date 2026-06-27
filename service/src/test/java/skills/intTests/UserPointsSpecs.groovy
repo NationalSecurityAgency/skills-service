@@ -2031,4 +2031,103 @@ class UserPointsSpecs extends DefaultIntSpec {
         then:
         results
     }
+
+    def 'get skill group users with sorting and paging on skillsAchieved'() {
+        skillsService.deleteProjectIfExist(projId)
+        def proj = createProject()
+        def subject = createSubject()
+        def skills = createSkills(5, 1, 1, 100, 1)
+        def skillWithLotsOfPoints = createSkill(1, 1, 6, 0, 2, 1000)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject)
+        // Create a skills group and assign skills to it
+        def skillsGroup = createSkillsGroup(1, 1, 55)
+        skillsService.createSkill(skillsGroup)
+        String skillsGroupId = skillsGroup.skillId
+
+        skills.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroupId, skill)
+        }
+        skillsService.assignSkillToSkillsGroup(skillsGroupId, skillWithLotsOfPoints)
+
+        def users = getRandomUsers(6)
+
+        // user 0: 5 skills achieved (all)
+        skillsService.addSkill(skills[0], users[0], new Date() - 5)
+        skillsService.addSkill(skills[1], users[0], new Date() - 4)
+        skillsService.addSkill(skills[2], users[0], new Date() - 3)
+        skillsService.addSkill(skills[3], users[0], new Date() - 2)
+        skillsService.addSkill(skills[4], users[0], new Date() - 1)
+
+        // user 1: 4 skills achieved
+        skillsService.addSkill(skills[0], users[1], new Date() - 4)
+        skillsService.addSkill(skills[1], users[1], new Date() - 3)
+        skillsService.addSkill(skills[2], users[1], new Date() - 2)
+        skillsService.addSkill(skills[3], users[1], new Date() - 1)
+
+        // user 2: 3 skills achieved
+        skillsService.addSkill(skills[0], users[2], new Date() - 3)
+        skillsService.addSkill(skills[1], users[2], new Date() - 2)
+        skillsService.addSkill(skills[2], users[2], new Date() - 1)
+
+        // user 3: 2 skills achieved
+        skillsService.addSkill(skills[0], users[3], new Date() - 2)
+        skillsService.addSkill(skills[1], users[3], new Date() - 1)
+
+        // user 4: 1 skill achieved
+        skillsService.addSkill(skills[0], users[4], new Date() - 1)
+
+        // user 4 also adds skill6 so has the most points, but should not affect being sorted on skillsAchieved
+        skillsService.addSkill(skillWithLotsOfPoints, users[4], new Date() - 1)
+
+        // user 5: 0 skills achieved (no events reported)
+
+        when:
+        def ascResults = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "skillsAchieved", true)
+        def descResults = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "skillsAchieved", false)
+        def ascPage1 = skillsService.getSkillGroupUsers(projId, skillsGroupId, 3, 1, "skillsAchieved", true)
+        def ascPage2 = skillsService.getSkillGroupUsers(projId, skillsGroupId, 3, 2, "skillsAchieved", true)
+        def descPage1 = skillsService.getSkillGroupUsers(projId, skillsGroupId, 3, 1, "skillsAchieved", false)
+        def descPage2 = skillsService.getSkillGroupUsers(projId, skillsGroupId, 3, 2, "skillsAchieved", false)
+
+        then:
+        ascResults.count == 5
+        ascResults.data.size() == 5
+        ascResults.data[0].skillsAchieved == 1
+        ascResults.data[1].skillsAchieved == 2
+        ascResults.data[2].skillsAchieved == 3
+        ascResults.data[3].skillsAchieved == 4
+        ascResults.data[4].skillsAchieved == 5
+
+        descResults.count == 5
+        descResults.data.size() == 5
+        descResults.data[0].skillsAchieved == 5
+        descResults.data[1].skillsAchieved == 4
+        descResults.data[2].skillsAchieved == 3
+        descResults.data[3].skillsAchieved == 2
+        descResults.data[4].skillsAchieved == 1
+
+        ascPage1.count == 5
+        ascPage1.data.size() == 3
+        ascPage1.data[0].skillsAchieved == 1
+        ascPage1.data[1].skillsAchieved == 2
+        ascPage1.data[2].skillsAchieved == 3
+
+        ascPage2.count == 5
+        ascPage2.data.size() == 2
+        ascPage2.data[0].skillsAchieved == 4
+        ascPage2.data[1].skillsAchieved == 5
+
+        descPage1.count == 5
+        descPage1.data.size() == 3
+        descPage1.data[0].skillsAchieved == 5
+        descPage1.data[1].skillsAchieved == 4
+        descPage1.data[2].skillsAchieved == 3
+
+        descPage2.count == 5
+        descPage2.data.size() == 2
+        descPage2.data[0].skillsAchieved == 2
+        descPage2.data[1].skillsAchieved == 1
+    }
 }

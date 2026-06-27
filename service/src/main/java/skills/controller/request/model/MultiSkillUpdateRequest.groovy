@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 SkillTree
+ * Copyright 2026 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+package skills.controller.request.model
 
-import org.springframework.lang.Nullable
+import groovy.transform.Canonical
+import skills.storage.model.SkillDef
 
-interface SkillRequestApprovalStats {
-    @Nullable
-    Long getPending()
-    @Nullable
-    Long getApproved()
-    @Nullable
-    Long getRejected()
+@Canonical
+class MultiSkillUpdateRequest {
+
+    Integer pointIncrement
+    Integer numPerformToCompletion
+
+    // Time Window - in minute; 0 means that the action can be performed right away
+    Integer pointIncrementInterval
+    Integer numMaxOccurrencesIncrementInterval
+
+    String enabled
+
+    String selfReportingType
+
+    List<String> skills
 }

@@ -461,6 +461,11 @@ class SkillsService {
         wsHelper.adminPost(getSkillUrl(props.projectId, props.subjectId, originalSkillId ?: props.skillId), props)
     }
 
+    def batchUpdateSkills(String projectId, Map props) {
+        String url = "${getProjectUrl(projectId)}/batchUpdateSkills"
+        wsHelper.adminPost(url, props)
+    }
+
     def createBadge(Map props, String originalBadgeId = null) {
         wsHelper.adminPost(getBadgeUrl(props.projectId, originalBadgeId ?: props.badgeId), props)
     }
@@ -727,8 +732,8 @@ class SkillsService {
         return wsHelper.adminPost("/projects/${projectId}/approvals/reject", [skillApprovalIds: approvalId, rejectionMessage: msg])
     }
 
-    def getSkillApprovalsStats(String projectId, String skillId) {
-        return wsHelper.adminGet("/projects/${projectId}/skills/${skillId}/approvals/stats")
+    def getSkillApprovalsStats(String projectId, List<String> skillIds) {
+        return wsHelper.adminPost("/projects/${projectId}/approvals/stats", [skillIds:skillIds])
     }
 
     def removeRejectionFromView(String projectId, Integer approvalId, String userId = null) {
@@ -1992,6 +1997,10 @@ class SkillsService {
     def getProjectDescription(String projectId) {
         def resp = wsHelper.appGet("/projects/${projectId}/description")
         return resp
+    }
+
+    def isMyProject(String projectId) {
+        return wsHelper.apiGet("/myprojects/${projectId}/isMyProject")
     }
 
     def getSkillDescription(String projectId, String skillId) {

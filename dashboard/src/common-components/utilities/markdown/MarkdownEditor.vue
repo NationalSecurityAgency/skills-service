@@ -40,6 +40,7 @@ import PrefixControls from "@/common-components/utilities/markdown/PrefixControl
 import GenerateDescriptionDialog1
   from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionDialog1.vue";
 import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
+import InsertTableDialog from '@/common-components/utilities/markdown/InsertTableDialog.vue'
 
 const appConfig = useAppConfig()
 const quizConfig = useQuizConfig()
@@ -137,7 +138,7 @@ const toolbarItems = [
   ['heading', 'bold', 'italic', 'strike'],
   ['hr', 'quote'],
   ['ul', 'ol', 'indent', 'outdent'],
-  props.allowInsertImages ? ['image', 'link'] : ['link'],
+  props.allowInsertImages ? ['table', 'image', 'link'] : ['table', 'link'],
   ['code', 'codeblock'],
   ['scrollSync']
 ]
@@ -191,6 +192,15 @@ const addFileLink = (linkUrl, linkText) => {
 }
 const callSetMarkdownText = (newText) => {
   return toastuiEditor.value.invoke('setMarkdown', newText)
+}
+const showInsertTableDialog = ref(false)
+const insertTable = (dimensions) => {
+  if (dimensions.rows > 0 && dimensions.cols > 0) {
+    toastuiEditor.value.invoke('exec', 'addTable', {
+      rowCount: parseInt(dimensions.rows, 10),
+      columnCount: parseInt(dimensions.cols, 10)
+    })
+  }
 }
 
 const handlePasteAsText = (event) => {
@@ -309,6 +319,10 @@ function onKeydown(mode, event) {
       markdownAccessibilityFixes.clickOnLinkToolbarButton(idForToastUIEditor)
     } else if (event.key === 'a') {
       markdownAccessibilityFixes.clickOnAttachmentToolbarButton(idForToastUIEditor)
+    } else if (event.key === 'w') {
+      event.preventDefault()
+      event.stopPropagation()
+      showInsertTableDialog.value = true
     }
   }
 }
@@ -474,6 +488,9 @@ defineExpose({
                     data-cy="aiButton"
                     @click="showGenerateDescriptionDialog = true"/>
     </div>
+    <insert-table-dialog
+      v-model="showInsertTableDialog"
+      @insert-table="insertTable" />
     <generate-description-dialog1
         v-if="showGenerateDescriptionDialog"
         ref="generateDescriptionDialogRef"
