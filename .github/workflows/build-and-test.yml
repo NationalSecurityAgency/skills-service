@@ -15,8 +15,6 @@
 name: Continuous Integration
 
 on:
-  schedule:
-    - cron: '0 5 * * *'
   workflow_dispatch:
   push:
     paths-ignore:
@@ -28,6 +26,9 @@ on:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
       - '.github/workflows/generate-images-for-regression-tests.yml'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-skills-service-for-ui-tests:
@@ -297,7 +298,7 @@ jobs:
           cd ..
 
       - name: Run Cypress tests
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v7
         with:
           working-directory: e2e-tests
           record: true
@@ -315,7 +316,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: UI test with cypress dashboards (${{ matrix.containers }})
+          name: UI test with cypress dashboards (${{ matrix.container }})
           path: |
             ./e2e-tests/logs
             ./e2e-tests/cypress/visualRegression/diff
@@ -337,7 +338,6 @@ jobs:
         # run 15 copies of the current job in parallel
         # IMPORTANT: must, must, must match the total number of containers below: runSubsetOfServiceTests.sh -t <num_of_containers>
         container: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ]
-
     services:
       postgres:
         image: postgres:17-alpine
@@ -354,14 +354,11 @@ jobs:
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
-
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ vars.NODE_VERSION }}
-
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -380,6 +377,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
+      # --- 1. Run Standard Tests & Isolate Output ---
       - name: Run skills-service tests
         env:
           MAVEN_OPTS: -Xmx3G -XX:+UnlockDiagnosticVMOptions -XX:GCLockerRetryAllocationCount=100
@@ -387,24 +385,41 @@ jobs:
           cd service
           ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword"
 
-      - name: upload result artifacts
+      - name: Stage Standard Reports
+        if: ${{ always() }}
+        run: |
+          mkdir -p service/target/standard-reports
+          cp -r service/target/surefire-reports/. service/target/standard-reports/ || true
+
+      # --- 2. Run PKI Tests & Isolate Output ---
+      - name: Run skills-service pki tests
+        env:
+          SPRING_PROFILES_ACTIVE: pki
+          MAVEN_OPTS: -Xmx3G -XX:+UnlockDiagnosticVMOptions -XX:GCLockerRetryAllocationCount=100
+        run: |
+          cd service
+          ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword -Dspring.cloud.aws.s3.enabled=false"
+
+      - name: Stage PKI Reports
+        if: ${{ always() }}
+        run: |
+          mkdir -p service/target/pki-reports
+          cp -r service/target/surefire-reports/. service/target/pki-reports/ || true
+
+      # --- 3. Upload Isolated Artifact Bundles ---
+      - name: Upload Standard Surefire Artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: Service test artifacts (${{ matrix.container }})
-          path: |
-            ./service/target/*.log
-            ./e2e-tests/logs
-            ./e2e-tests/cypress/visualRegression/diff
+          name: surefire-standard-${{ matrix.container }}
+          path: ./service/target/standard-reports
 
-      - name: Upload surefire reports
+      - name: Upload PKI Surefire Artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: surefire-artifacts-(${{ matrix.container }})
-          path: |
-            ./service/target/surefire-reports      
-
+          name: surefire-pki-${{ matrix.container }}
+          path: ./service/target/pki-reports
 
   combine-surefire-reports:
     runs-on: ubuntu-latest
@@ -414,39 +429,41 @@ jobs:
     needs: [service-against-postgresql]
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ vars.NODE_VERSION }}
-
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{ vars.JAVA_VERSION }}
 
-      - name: Print Versions
-        run: |
-          java -version
-          mvn --version
-          google-chrome --version 
-
-      - name: Download Surefire Artifacts
+      # Download standard XMLs into their own folder structure
+      - name: Download Standard Surefire Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: service/target/surefire-reports
-          pattern: surefire-artifacts*
+          path: service/target/combined-surefire-reports/standard
+          pattern: surefire-standard-*
           merge-multiple: true
 
-      - name: Build Surefire Report
+      # Download PKI XMLs into their own folder structure
+      - name: Download PKI Surefire Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: service/target/combined-surefire-reports/pki
+          pattern: surefire-pki-*
+          merge-multiple: true
+
+      # Execute surefire-report targeting both directories concurrently
+      - name: Build Combined Surefire Report
         run: |
           cd service
-          mvn surefire-report:report-only
+          mvn surefire-report:report-only -Dsurefire.reportsDirectories=target/combined-surefire-reports/standard,target/combined-surefire-reports/pki
           cd ../
 
-      - name: Upload Surefire Report
+      - name: Upload Combined Surefire Report
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: surefire-report
           path: |
-            ./service/target/reports
+            ./service/target/site/surefire-report.html
