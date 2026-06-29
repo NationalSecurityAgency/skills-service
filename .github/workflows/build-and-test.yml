@@ -298,7 +298,7 @@ jobs:
           cd ..
 
       - name: Run Cypress tests
-        uses: cypress-io/github-action@v5
+        uses: cypress-io/github-action@v7
         with:
           working-directory: e2e-tests
           record: true
@@ -316,7 +316,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: UI test with cypress dashboards (${{ matrix.containers }})
+          name: UI test with cypress dashboards (${{ matrix.container }})
           path: |
             ./e2e-tests/logs
             ./e2e-tests/cypress/visualRegression/diff
