@@ -258,4 +258,67 @@ class ExportUserProjectAcheivementsSpec extends ExportBaseIntSpec {
         validateExport(excelExportQueryFilter.file, expectedDataForQuery)
     }
 
+    def "export project achievements with user tags that are filtered"() {
+        def proj = createProject()
+        def subj1 = createSubject()
+        List<Map> skillsSubj1 = createSkills(5)
+        skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skillsSubj1)
+
+        def subj2 = createSubject(1, 2)
+        List<Map> skillsSubj2 = createSkills(5, 1, 2)
+        skillsSubj2.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        skillsService.createSubject(subj2)
+        skillsService.createSkills(skillsSubj2)
+
+        List<String> usersCopy = new ArrayList<>(users)
+        achieveLevelForUsers(usersCopy, skillsSubj1, 2, 1, "Subject")
+        achieveLevelForUsers(usersCopy, skillsSubj2, 1, 1, "Subject")
+
+        Map props = [:]
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = false
+        props[MetricsPagingParamsHelper.PROP_SORT_BY] = "achievedOn"
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = allAchievementTypes
+
+        users.eachWithIndex { userId, idx ->
+            String tagValue = "tag${idx}"
+            rootSkillsService.saveUserTag(userId, "dutyOrganization", [tagValue]);
+        }
+
+        when:
+        def excelExport = skillsService.getUserAchievementsExcelExport(proj.projectId, props)
+        props[MetricsParams.P_TAG_FILTER] = 'tag1'
+
+        def excelExportFiltered = skillsService.getUserAchievementsExcelExport(proj.projectId, props)
+
+        then:
+        validateExport(excelExport.file, [
+                ["For All Dragons Only"],
+                ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "Skill", "Test Skill 1", "", formatDate(dates[1])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "Subject", "Test Subject #1", "1.0", formatDate(dates[1])],
+                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "Overall", "Overall", "1.0", formatDate(dates[1])],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Skill", "Test Skill 1", "", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Subject", "Test Subject #1", "1.0", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Overall", "Overall", "1.0", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Skill", "Test Skill 1 Subject2", "", formatDate(dates[1], 2)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Subject", "Test Subject #2", "1.0", formatDate(dates[1], 2)],
+                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "Overall", "Overall", "1.0", formatDate(dates[1], 2)],
+                ["For All Dragons Only"],
+        ])
+
+        validateExport(excelExportFiltered.file, [
+                ["For All Dragons Only"],
+                ["User ID", "Last Name", "First Name", "Org", "Achievement Type", "Achievement Name", "Level", "Achievement Date (UTC)"],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Skill", "Test Skill 1", "", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Subject", "Test Subject #1", "1.0", formatDate(dates[1], 1)],
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "Overall", "Overall", "1.0", formatDate(dates[1], 1)],
+                ["For All Dragons Only"],
+        ])
+    }
+
 }
