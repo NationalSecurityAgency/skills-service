@@ -26,12 +26,22 @@ on:
       - 'README.md'
       - '.github/workflows/build-and-test-postgres.yml'
       - '.github/workflows/generate-images-for-regression-tests.yml'
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
+  pre_job:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@v5
+        with:
+          cancel_others: 'true'
+          skip_after_successful_duplicate: 'true'
+
   build-skills-service-for-ui-tests:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -76,6 +86,7 @@ jobs:
           path: ./service/target/*.jar
 
   ui-tests-against-postgres:
+    if: needs.pre_job.outputs.should_skip != 'true'
 #    if: github.event_name == 'schedule-never'
     runs-on: ubuntu-latest
     permissions:
@@ -189,7 +200,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    if: ${{ !cancelled() }}
+    if: needs.pre_job.outputs.should_skip != 'true' && !cancelled()
 #    if: github.event_name == 'schedule-never'
     needs: [ui-tests-against-postgres]
     steps:
@@ -229,7 +240,7 @@ jobs:
         
 
   ui-tests-against-postgres-cypress-dashboard:
-    if: github.event_name == 'schedule-never'
+    if: github.event_name == 'schedule-never' && needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -328,6 +339,8 @@ jobs:
 
 
   service-against-postgresql:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -422,10 +435,10 @@ jobs:
           path: ./service/target/pki-reports
 
   combine-surefire-reports:
+    if: needs.pre_job.outputs.should_skip != 'true' && !cancelled()
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    if: ${{ !cancelled() }}
     needs: [service-against-postgresql]
     steps:
       - uses: actions/checkout@v4
