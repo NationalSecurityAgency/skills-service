@@ -17,8 +17,10 @@ package skills.services.adminGroup
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserAuthService
 import skills.auth.UserInfoService
 import skills.auth.UserNameService
 import skills.controller.exceptions.ErrorCode
@@ -58,6 +60,9 @@ class AdminGroupRoleService {
 
     @Autowired
     UserInfoService userInfoService
+
+    @Autowired
+    UserAuthService userAuthService
 
     @Autowired
     QuizDefService quizDefService
@@ -171,9 +176,12 @@ class AdminGroupRoleService {
 
     @Transactional()
     void addQuizToAdminGroup(String adminGroupId, String quizId) {
+        if (!userAuthService.isUserQuizAdmin(userInfoService.currentUser, quizId)) {
+            throw new AccessDeniedException("User [${userInfoService.currentUser.username}] is not an admin for quizId [${quizId}]")
+        }
+
         AdminGroupDef adminGroupDef = findAdminGroupDef(adminGroupId)
         QuizDef quizDef = quizDefService.findQuizDef(quizId)
-
         if (userCommunityService.isUserCommunityOnlyQuiz(quizId) && !userCommunityService.isUserCommunityOnlyAdminGroup(adminGroupId)) {
             String communityName = userCommunityService.getCommunityNameBasedOnConfAndItemStatus(true)
             throw new SkillQuizException("Admin Group [${adminGroupDef.name}] is not allowed to be assigned to [${quizDef.name}] Quiz as the group does not have ${communityName} permission".toString(), quizId, ErrorCode.AccessDenied)
@@ -192,13 +200,15 @@ class AdminGroupRoleService {
 
     @Transactional()
     void addProjectToAdminGroup(String adminGroupId, String projectId) {
+        if (!userAuthService.isUserProjectAdmin(userInfoService.currentUser, projectId)) {
+            throw new AccessDeniedException("User [${userInfoService.currentUser.username}] is not an admin for projectId [${projectId}]")
+        }
+
         AdminGroupDef adminGroupDef = findAdminGroupDef(adminGroupId)
         ProjectResult projectDef = findProjectDef(projectId)
-
         if (userCommunityService.isUserCommunityOnlyProject(projectId) && !userCommunityService.isUserCommunityOnlyAdminGroup(adminGroupId)) {
             throw new SkillException("Project [${projectDef.name}] is not allowed to be assigned [${adminGroupDef.name}] Admin Group", ErrorCode.AccessDenied)
         }
-
         accessSettingsStorageService.findAllAdminGroupMembers(adminGroupDef.adminGroupId).each { UserRoleRes userRoleRes ->
             accessSettingsStorageService.addUserRole(userRoleRes.userId, projectDef.projectId, RoleName.ROLE_PROJECT_ADMIN, false, adminGroupId)
         }
@@ -212,9 +222,12 @@ class AdminGroupRoleService {
 
     @Transactional()
     void addGlobalBadgeToAdminGroup(String adminGroupId, String globalBadgeId) {
+        if (!userAuthService.isUserGlobalBadgeAdmin(userInfoService.currentUser, globalBadgeId)) {
+            throw new AccessDeniedException("User [${userInfoService.currentUser.username}] is not an admin for globalBadgeId [${globalBadgeId}]")
+        }
+
         AdminGroupDef adminGroupDef = findAdminGroupDef(adminGroupId)
         GlobalBadgeResult globalBadgeDef = findGlobalBadgeResult(globalBadgeId)
-
         if (userCommunityService.isUserCommunityOnlyGlobalBadge(globalBadgeId) && !userCommunityService.isUserCommunityOnlyAdminGroup(adminGroupId)) {
             throw new SkillException("Global Badge [${globalBadgeDef.name}] is not allowed to be assigned [${adminGroupDef.name}] Admin Group", ErrorCode.AccessDenied)
         }
