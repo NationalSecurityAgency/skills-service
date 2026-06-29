@@ -19,6 +19,12 @@ describe('Metrics Tests - Achievements', () => {
     const waitForSnap = 4000;
     const exportedFileName = `cypress/downloads/proj1-achievements-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
 
+    before(() => {
+        Cypress.Commands.add('addUserTag', (userId, tagKey, tags) => {
+            cy.request('POST', `/root/users/${userId}/tags/${tagKey}`, { tags });
+        });
+    })
+
     beforeEach(() => {
         Cypress.Commands.add('filterNextMonth', () => {
             cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-name="pcnextbutton"]').click()
@@ -51,18 +57,8 @@ describe('Metrics Tests - Achievements', () => {
                 conf.usersTableAdditionalUserTagKey = null;
                 res.send(conf);
             });
-        })
-            .as('loadConfig');
+        }).as('loadConfig');
 
-        cy.logout()
-        cy.fixture('vars.json')
-            .then((vars) => {
-                cy.login(vars.rootUser, vars.defaultPass);
-            });
-
-        Cypress.Commands.add('addUserTag', (userId, tagKey, tags) => {
-            cy.request('POST', `/root/users/${userId}/tags/${tagKey}`, { tags });
-        });
     });
 
     it('overall levels - empty', () => {
@@ -1516,7 +1512,7 @@ describe('Metrics Tests - Achievements', () => {
             .click();
     });
 
-    it('achievements table - few rows - tag test', () => {
+    it('achievements table - filter based on tags', () => {
         cy.viewport(1500, 750);
 
         cy.intercept('GET', '/public/config', (req) => {
@@ -1582,8 +1578,27 @@ describe('Metrics Tests - Achievements', () => {
         });
 
         const tagKey = 'dutyOrganization'
+
+        cy.logout()
+        cy.fixture('vars.json')
+            .then((vars) => {
+                cy.login(vars.rootUser, vars.defaultPass);
+            });
+
         cy.addUserTag('user0Good@skills.org', tagKey, ['tag1'])
         cy.addUserTag('user1Good@skills.org', tagKey, ['tag2'])
+
+        cy.logout();
+        cy.fixture('vars.json')
+            .then((vars) => {
+                if (!Cypress.env('oauthMode')) {
+                    cy.log('NOT in oauthMode, using form login');
+                    cy.login(vars.defaultUser, vars.defaultPass);
+                } else {
+                    cy.log('oauthMode, using loginBySingleSignOn');
+                    cy.loginBySingleSignOn();
+                }
+            });
 
         cy.visit('/administrator/projects/proj1/metrics/achievements');
         cy.wait('@userAchievementsChartBuilder');
