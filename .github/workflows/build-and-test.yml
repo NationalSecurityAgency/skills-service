@@ -182,6 +182,24 @@ jobs:
           cd e2e-tests
           npm run verifyThatNewSnapshotsAreNotCreated
 
+      - name: Run skills-service pki tests
+        env:
+          SPRING_PROFILES_ACTIVE: pki
+          MAVEN_OPTS: -Xmx3G -XX:+UnlockDiagnosticVMOptions -XX:GCLockerRetryAllocationCount=100
+        run: |
+          cd service
+          ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword -Dspring.cloud.aws.s3.enabled=false"
+
+      - name: upload pki result artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Service test artifacts (${{ matrix.container }})
+          path: |
+            ./service/target/*.log
+            ./e2e-tests/logs
+            ./e2e-tests/cypress/visualRegression/diff
+
   combine-cypress-mochawesome-results:
     runs-on: ubuntu-latest
     permissions:
