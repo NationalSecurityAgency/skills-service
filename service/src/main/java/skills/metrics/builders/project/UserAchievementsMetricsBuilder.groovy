@@ -65,7 +65,6 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
         String type
         Integer level
         String userTag
-        Map<String, Object> userTags = [:]
     }
 
     private final static String PROP_SORT_BY_USER_ID = "userName"
