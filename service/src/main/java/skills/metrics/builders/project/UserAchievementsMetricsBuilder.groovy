@@ -68,7 +68,8 @@ class UserAchievementsMetricsBuilder implements ProjectMetricsBuilder {
     }
 
     private final static String PROP_SORT_BY_USER_ID = "userName"
-    private final static List<String> supportedSortBy = ["achievedOn", PROP_SORT_BY_USER_ID]
+    private final static String PROP_SORT_BY_USER_TAG = "userTag"
+    private final static List<String> supportedSortBy = ["achievedOn", PROP_SORT_BY_USER_ID, PROP_SORT_BY_USER_TAG]
 
     @Override
     @Transactional(readOnly = true)
