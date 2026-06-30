@@ -31,14 +31,12 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useStorage} from "@vueuse/core";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
-import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 
 const route = useRoute();
 const numberFormat = useNumberFormat()
 const responsive = useResponsiveBreakpoints()
 const isFlex = computed(() => responsive.md.value)
 const appConfig = useAppConfig()
-const colors = useColors()
 
 const showUserTagColumn = computed(() => {
   return !!(appConfig.usersTableAdditionalUserTagKey && appConfig.usersTableAdditionalUserTagLabel)
@@ -294,9 +292,6 @@ const typeLabel = (type) => {
                 :field="appConfig.usersTableAdditionalUserTagKey"
                 :header="appConfig.usersTableAdditionalUserTagLabel"
                 :class="{'flex': responsive.md.value }">
-          <template #header>
-            <i class="fas fa-tag mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
-          </template>
           <template #body="slotProps">
             <router-link
                 v-if="showUserTagColumn && slotProps.data.userTag"
