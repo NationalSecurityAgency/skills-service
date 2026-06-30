@@ -23,6 +23,8 @@ describe('Client Display Skill Tag Page Features', () => {
       .as('loadSkillTag2Summary')
     cy.intercept('GET', `/api/projects/proj1/skills/tags?*`)
       .as('loadSkillTagsForProject')
+    cy.intercept('GET', `/api/projects/proj1/tags/summary`)
+      .as('loadSkillTagsSummary')
     cy.intercept('GET', `/api/projects/proj1/subjects/subj1/skills/tags?*`)
       .as('loadSkillTagsForSubject1')
     cy.intercept('GET', `/api/projects/proj1/subjects/subj2/skills/tags?*`)
@@ -112,7 +114,7 @@ describe('Client Display Skill Tag Page Features', () => {
     cy.get('[data-cy="tagLink-tag2"] [data-cy="numSkills"]').should('have.text', '1')
   })
 
-  it('navigate to skill tag page from the project page', () => {
+  it('navigate to skill tag overview  page from the project page', () => {
 
     cy.cdVisit('/')
     cy.wait('@loadSkillTagsForProject')
@@ -142,7 +144,7 @@ describe('Client Display Skill Tag Page Features', () => {
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"] [data-cy="skillPoints"]').should('have.text', '0')
   })
 
-  it('navigate to skill tag page from the subject page', () => {
+  it('navigate to skill tag overview page from the subject page', () => {
 
     cy.cdVisit('/')
     cy.cdClickSubj(0)
@@ -171,5 +173,66 @@ describe('Client Display Skill Tag Page Features', () => {
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 3')
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 100 Points')
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"] [data-cy="skillPoints"]').should('have.text', '0')
+  })
+
+  it('navigate to project skill tags page from the skill tag overview page', () => {
+
+    cy.cdVisit('/tags/tag1')
+    cy.wait('@loadSkillTag1Summary')
+
+    cy.get('[data-cy="title"]').should('contain.text', 'Skill Tag Overview')
+    cy.get('[data-cy="skillTagName"]').should('contain.text', 'TAG 1')
+    cy.get('[data-cy="skillTagProgress"]').should('contain.text', '1 / 2 Skills')
+
+    cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+    cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
+    cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"] [data-cy="skillPoints"]').should('have.text', '100')
+
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 3')
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 100 Points')
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"] [data-cy="skillPoints"]').should('have.text', '0')
+
+    cy.get('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy=breadcrumbLink-Tags]').click()
+    cy.wait('@loadSkillTagsSummary')
+
+    cy.get('#tagRow-tag2').within(() => {
+      cy.get('[data-cy="tagLink-tag2"]')
+        .should('be.visible')
+        .and('have.text', 'TAG 2')
+        .and('have.attr', 'href', '/test-skills-display/proj1/tags/tag2');
+
+      cy.get('[data-cy="skillTagProgress"]')
+        .should('be.visible')
+        .and('contain.text', '0 / 3 Skills');
+
+      cy.get('[data-cy="thirdProgressBar"]')
+        .should('be.visible')
+        .and('have.attr', 'aria-valuenow', '0')
+        .and('have.attr', 'aria-valuemax', '100');
+
+      cy.get('[data-cy="thirdProgressBar"] .p-progressbar-value')
+        .should('have.attr', 'style')
+        .and('contain', 'width: 0%');
+    });
+
+    cy.get('#tagRow-tag1').within(() => {
+      cy.get('[data-cy="tagLink-tag1"]')
+        .should('be.visible')
+        .and('have.text', 'TAG 1')
+        .and('have.attr', 'href', '/test-skills-display/proj1/tags/tag1');
+
+      cy.get('[data-cy="skillTagProgress"]')
+        .should('be.visible')
+        .and('contain.text', '1 / 2 Skills');
+
+      cy.get('[data-cy="thirdProgressBar"]')
+        .should('be.visible')
+        .and('have.attr', 'aria-valuenow', '50')
+        .and('have.attr', 'aria-valuemax', '100');
+
+      cy.get('[data-cy="thirdProgressBar"] .p-progressbar-value')
+        .should('have.attr', 'style')
+        .and('contain', 'width: 50%');
+    });
   })
 })
