@@ -16,7 +16,6 @@ limitations under the License.
 <script setup>
 import { computed, nextTick, onMounted, ref } from 'vue'
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
-import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
@@ -32,11 +31,18 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  loadProjPagesInfoFn: {
+    type: Function,
+    required: true,
+  },
+  navToSkillFn: {
+    type: Function,
+    required: true,
+  }
 });
 
 const model = defineModel()
 
-const skillsDisplayService = useSkillsDisplayService()
 const skillDisplayInfo = useSkillsDisplayInfo()
 const announcer = useSkillsAnnouncer()
 const focusState = useFocusState()
@@ -56,9 +62,8 @@ onMounted(() => {
 const loadSkillsSubjectsAndBadges = (event) => {
   query.value = event?.query || ''
   isSearching.value = true
-  return skillsDisplayService.getAllProjectSkillsSubjectsAndBadges()
-      .then((res) => {
-        let results = res.data
+  return props.loadProjPagesInfoFn()
+      .then((results) => {
         searchRes.value = results
         if (results && results.length > 0) {
           announcer.polite(`Showing ${results.length} items.  Type to search for a ${attributes.subjectDisplayNamePlural}, ${attributes.skillDisplayNamePlural} or Badges. Use arrow keys to select and enter or click to navigate to the ${attributes.subjectDisplayName}, ${attributes.skillDisplayName} or Badge.`)
@@ -82,36 +87,7 @@ const focusOnFilterInput = () => {
   });
 }
 const navToSkill = (skill) => {
-  const { skillType } = skill
-  if (SkillType.isSubject(skillType)) {
-    skillDisplayInfo.routerPush(
-        'SubjectDetailsPage',
-        {
-          subjectId: skill.skillId
-        })
-  } else if (SkillType.isBadge(skillType)) {
-    skillDisplayInfo.routerPush(
-        'badgeDetails',
-        {
-          badgeId: skill.skillId
-        })
-  } else if (SkillType.isSkillsGroup(skillType)) {
-    skillDisplayInfo.routerPush(
-        'skillsGroupDetails',
-        {
-          subjectId: skill.subjectId,
-          groupId: skill.skillId
-        })
-  } else {
-    const pageName = skill.skillsGroupId ? 'skillDetailsUnderGroup' : 'skillDetails'
-    skillDisplayInfo.routerPush(
-        pageName,
-        {
-          subjectId: skill.subjectId,
-          skillId: skill.skillId,
-          groupId: skill.skillsGroupId,
-        })
-  }
+  props.navToSkillFn(skill)
   closeMe()
 }
 

@@ -21,10 +21,10 @@ import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDis
 import { useSkillsDisplayBreadcrumbState } from '@/skills-display/stores/UseSkillsDisplayBreadcrumbState.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
-import SkillsDisplaySearch from '@/skills-display/components/SkillsDisplaySearch.vue'
 import ProjectService from "@/components/projects/ProjectService.js";
 import {useRoute} from "vue-router";
 import SkillsDisplayPathAppendValues from "@/router/SkillsDisplayPathAppendValues.js";
+import SkillsDisplaySearchButton from "@/skills-display/components/utilities/SkillsDisplaySearchButton.vue";
 
 const route = useRoute()
 
@@ -34,7 +34,6 @@ const breadcrumb = useSkillsDisplayBreadcrumbState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 
 const projectId = attributes.projectId
-const showSkillsDisplaySearchDialog = ref(false)
 
 const props = defineProps({
   backButton: { type: Boolean, default: true },
@@ -103,16 +102,11 @@ const shouldCheckIfMyProject = computed(() => isProgressAndRankingProjPage && pr
             data-cy="back"
             aria-label="navigate back" />
 
-          <SkillsButton
+          <skills-display-search-button
               v-if="!disableSearchButton"
-              id="skillsDisplaySearchBtn"
-              :track-for-focus="true"
-              class="skills-search-btn"
               :class="{'ml-2': showBackButton}"
-              @click="showSkillsDisplaySearchDialog = true"
-              data-cy="skillsDisplaySearchBtn"
-              title="Search Project"
-              icon="fa-solid fa-magnifying-glass" />
+              :show-label="false"
+              :keyboard-shortcut-enabled="false" />
         </div>
 
         <div class="flex flex-1 flex-col md:flex-row flex-wrap text-center">
@@ -148,10 +142,6 @@ const shouldCheckIfMyProject = computed(() => isProgressAndRankingProjPage && pr
           </div>
         </div>
 
-        <skills-display-search v-if="showSkillsDisplaySearchDialog && !disableSearchButton"
-                               ref="skillsDisplaySearch"
-                               v-model="showSkillsDisplaySearchDialog"
-                               :project-id="projectId" />
       </div>
     </template>
   </Card>

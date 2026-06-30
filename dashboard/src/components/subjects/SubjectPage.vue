@@ -20,7 +20,7 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import { useFocusState } from '@/stores/UseFocusState.js'
-import PageHeader from '@/components/utils/pages/PageHeader.vue'
+import ProjectPageHeader from "@/components/utils/pages/ProjectPageHeader.vue";
 import Navigation from '@/components/utils/Navigation.vue'
 import EditSubject from '@/components/subjects/EditSubject.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
@@ -159,7 +159,7 @@ const subjectEdited = (updatedSubject) => {
 
 <template>
   <div>
-    <page-header :loading="isLoadingData" :options="headerOptions">
+    <project-page-header :loading="isLoadingData" :options="headerOptions">
       <template #subSubTitle v-if="!isLoadingData && !isReadOnlyProj">
         <SkillsButton
           id="editSubjectBtn"
@@ -200,7 +200,7 @@ const subjectEdited = (updatedSubject) => {
       <template #footer>
         <!--        <import-finalize-alert />-->
       </template>
-    </page-header>
+    </project-page-header>
 
     <Message v-if="isInsufficientPoints" :closable="false" data-cy="subjInsufficientPoints">
       Subject has insufficient points assigned. Skills cannot be achieved until subject has at least <Tag>{{ appConfig.minimumSubjectPoints}}</Tag> points

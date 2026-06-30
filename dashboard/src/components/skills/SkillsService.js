@@ -131,6 +131,10 @@ export default {
       .get(`/admin/projects/${encodeURIComponent(projectId)}/skills?excludeImportedSkills=true`)
       .then((response) => response.data)
   },
+  getProjectNavigableItems(projectId) {
+    const url = `/api/projects/${encodeURIComponent(projectId)}/skillsSubjectsAndBadges`
+    return axios.get(url).then((response) => response.data)
+  },
   getProjectSkillsAndBadgesWithoutImportedSkills(projectId) {
     return axios
       .get(
