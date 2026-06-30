@@ -18,8 +18,8 @@ import {computed, ref} from 'vue'
 import { watchDebounced, useMagicKeys } from '@vueuse/core'
 import {useUserPreferences} from '@/stores/UseUserPreferences.js'
 import {useLog} from '@/components/utils/misc/useLog.js'
-import SkillsDisplaySearch from "@/skills-display/components/SkillsDisplaySearch.vue";
 import {useRoute} from "vue-router";
+import NavToSearchDialog from "@/common-components/search/NavToSearchDialog.vue";
 
 const props = defineProps({
   navToSkillFn: {
@@ -104,7 +104,7 @@ const onClick = () => {
       </div>
     </div>
 
-    <skills-display-search v-if="showSkillsDisplaySearchDialog"
+    <nav-to-search-dialog v-if="showSkillsDisplaySearchDialog"
                            ref="skillsDisplaySearch"
                            v-model="showSkillsDisplaySearchDialog"
                            :navToSkillFn="navToSkillFn"

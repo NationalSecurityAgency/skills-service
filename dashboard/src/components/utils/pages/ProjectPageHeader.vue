@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 import PageHeader from "@/components/utils/pages/PageHeader.vue";
-import SearchButton from "@/common-components/components/SearchButton.vue";
+import NavToSearchButton from "@/common-components/search/NavToSearchButton.vue";
 import SkillType from "@/common-components/utilities/SkillType.js";
 import {useRoute, useRouter} from "vue-router";
 import SkillsService from "@/components/skills/SkillsService.js";
@@ -54,8 +54,12 @@ const loadProjPagesInfo = () => SkillsService.getProjectNavigableItems(projectId
   <page-header :loading="loading" :options="options">
     <template #top-right>
       <div class="text-right">
-        <search-button :nav-to-skill-fn="navToSkill" :load-proj-pages-info-fn="loadProjPagesInfo"/>
+        <nav-to-search-button :nav-to-skill-fn="navToSkill" :load-proj-pages-info-fn="loadProjPagesInfo"/>
       </div>
+    </template>
+    <!-- Dynamically loop through all slots and forward them -->
+    <template v-for="(_, slotName) in $slots" #[slotName]="slotProps">
+      <slot :name="slotName" v-bind="slotProps"></slot>
     </template>
   </page-header>
 

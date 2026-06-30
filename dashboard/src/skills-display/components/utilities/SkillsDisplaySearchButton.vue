@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 import SkillType from "@/common-components/utilities/SkillType.js";
-import SearchButton from "@/common-components/components/SearchButton.vue";
+import NavToSearchButton from "@/common-components/search/NavToSearchButton.vue";
 import {useSkillsDisplayInfo} from "@/skills-display/UseSkillsDisplayInfo.js";
 import {useSkillsDisplayService} from "@/skills-display/services/UseSkillsDisplayService.js";
 
@@ -68,7 +68,7 @@ const navToSkill = (skill) => {
 </script>
 
 <template>
-  <SearchButton
+  <nav-to-search-button
       :nav-to-skill-fn="navToSkill"
       :load-proj-pages-info-fn="skillsDisplayService.getAllProjectSkillsSubjectsAndBadges"
       :show-label="showLabel"
