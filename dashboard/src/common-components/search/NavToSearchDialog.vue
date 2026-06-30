@@ -24,6 +24,8 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import SkillReuseIdUtil from "@/components/utils/SkillReuseIdUtil.js";
 import SkillType from "@/common-components/utilities/SkillType.js";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
+import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 
 const emit = defineEmits(['hidden']);
 const props = defineProps({
@@ -47,6 +49,8 @@ const skillDisplayInfo = useSkillsDisplayInfo()
 const announcer = useSkillsAnnouncer()
 const focusState = useFocusState()
 const attributes = useSkillsDisplayAttributesState()
+const pluralize = usePluralize()
+const numberFormat = useNumberFormat()
 
 const selected = ref('')
 const query = ref('')
@@ -124,13 +128,15 @@ const getIconClass = (skill) => {
   return 'fas fa-graduation-cap skills-color-skills text-sky-500'
 }
 const getUserProgress = (skill) => {
-  return isSkill(skill) ? skill.userCurrentPoints : skill.childAchievementCount
+  const res = isSkill(skill) ? skill.userCurrentPoints : skill.childAchievementCount
+  return res >= 0 ? numberFormat.pretty(res) : undefined
 }
 const getTotalProgress = (skill) => {
-  return isSkill(skill) ? skill.totalPoints : skill.totalChildCount
+  const res = isSkill(skill) ? skill.totalPoints : skill.totalChildCount
+  return numberFormat.pretty(res)
 }
 const getProgressLabel = (skill) => {
-  return isSkill(skill) ? attributes.pointDisplayNamePlural : attributes.skillDisplayNamePlural
+  return isSkill(skill) ?  pluralize.plural(attributes.pointDisplayName, skill.totalPoints) : pluralize.plural(attributes.skillDisplayName, skill.totalChildCount)
 }
 const dialogPosition = computed(() => {
   return skillDisplayInfo.isSkillsClientPath() ? 'top' : 'center'
@@ -209,7 +215,7 @@ const dialogPosition = computed(() => {
                 :class="{'text-green-700 dark:text-green-500': slotProps.option.userAchieved}"
                  aria-hidden="true">
               <i v-if="slotProps.option.userAchieved" class="fas fa-check mr-1" aria-hidden="" />
-              <span class="text-orange-700 dark:text-orange-500 font-medium">{{ getUserProgress(slotProps.option) }}</span> / {{ getTotalProgress(slotProps.option) }} <span class="italic">{{ getProgressLabel(slotProps.option) }}</span>
+              <span v-if="getUserProgress(slotProps.option) !== undefined"><span class="text-orange-700 dark:text-orange-500 font-medium">{{ getUserProgress(slotProps.option) }}</span> / </span>{{ getTotalProgress(slotProps.option) }} <span class="italic">{{ getProgressLabel(slotProps.option) }}</span>
             </div>
           </div>
 

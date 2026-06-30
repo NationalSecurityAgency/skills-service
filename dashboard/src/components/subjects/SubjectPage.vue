@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
@@ -47,6 +47,15 @@ const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 onMounted(() => {
   loadSubject()
 })
+
+watch(
+    () => route.params.subjectId,
+    () => {
+      if (!route.query.preventReload) {
+        loadSubject()
+      }
+    }
+)
 
 const isLoadingData = computed(() => {
   return subjectState.isLoadingSubject.value || subjectState.subject.subjectId === undefined; // || projConfig.loadingProjConfig

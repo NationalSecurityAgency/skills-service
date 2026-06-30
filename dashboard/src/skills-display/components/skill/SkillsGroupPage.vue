@@ -17,7 +17,7 @@ limitations under the License.
 import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
 import SkillsTitle from "@/skills-display/components/utilities/SkillsTitle.vue";
 import {useSkillsDisplaySubjectState} from "@/skills-display/stores/UseSkillsDisplaySubjectState.js";
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import SkillsProgressList from "@/skills-display/components/progress/SkillsProgressList.vue";
 import VerticalProgressBar from "@/skills-display/components/progress/VerticalProgressBar.vue";
@@ -36,6 +36,10 @@ const isLoading = computed(() => summaryAndSkillsState.loadingSkillsGroupSummary
 onMounted(() => {
   loadGroupSummary()
 })
+
+watch( () => route.params.groupId, () => {
+  loadGroupSummary()
+});
 
 const loadGroupSummary = () => {
   summaryAndSkillsState.loadSkillsGroupSummary(route.params.groupId)

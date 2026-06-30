@@ -18,10 +18,7 @@ package skills.skillLoading
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
-import skills.controller.result.model.TableResult
-import skills.skillLoading.model.SkillPreviewItem
 import skills.storage.repos.SkillDefRepo
 
 @Component
@@ -32,7 +29,7 @@ class SkillsService {
     @Autowired
     SkillDefRepo skillDefRepo
 
-    List<SkillDefRepo.SkillWithAchievementDetails> getAllSkillsSubjectsAndBadgesWithAchievementDetails(String projectId, String userId) {
+    List<SkillDefRepo.ProjNavItemWithAchievements> getAllSkillsSubjectsAndBadgesWithAchievementDetails(String projectId, String userId) {
         return skillDefRepo.findAllSkillsSubjectsAndBadgesWithAchievementDetails(projectId, userId)
     }
 }

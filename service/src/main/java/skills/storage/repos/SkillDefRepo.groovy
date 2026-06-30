@@ -15,9 +15,8 @@
  */
 package skills.storage.repos
 
-import org.springframework.data.domain.PageRequest
+
 import org.springframework.data.domain.Pageable
-import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
@@ -820,7 +819,8 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     @Query('''update SkillDef set displayOrder=?2 where skillId=?1''')
     void setSkillDisplayOrder(String skillId, Integer displayOrder)
 
-    static interface SkillWithAchievementDetails {
+
+    static interface ProjectNavItem {
         String getSkillId()
         String getSkillName()
         String getSkillType()
@@ -830,14 +830,18 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         String getSubjectName()
         @Nullable
         String getSubjectId()
-        Boolean getUserAchieved()
-        Integer getUserCurrentPoints()
-        Integer getChildAchievementCount()
-        Integer getTotalChildCount()
         @Nullable
         String getSkillsGroupId()
         @Nullable
         String getSkillsGroupName()
+
+        Integer getTotalChildCount()
+    }
+
+    static interface ProjNavItemWithAchievements extends ProjectNavItem{
+        Boolean getUserAchieved()
+        Integer getUserCurrentPoints()
+        Integer getChildAchievementCount()
     }
 
     @Query(value = '''
@@ -906,7 +910,7 @@ WHERE
   AND s.project_id = :projectId
 ORDER BY s.name ASC
     ''', nativeQuery = true)
-    List<SkillWithAchievementDetails> findAllSkillsSubjectsAndBadgesWithAchievementDetails(
+    List<ProjNavItemWithAchievements> findAllSkillsSubjectsAndBadgesWithAchievementDetails(
             @Param('projectId') String projectId,
             @Param('userId') String userId
     )
@@ -993,4 +997,67 @@ ORDER BY s.name ASC
                       and subj.type = 'Subject'
                       and subj.skill_id = ?2''', nativeQuery = true)
     List<SimpleBadgeRes> findAllSkillsWithBadgesForSubject(String projectId, String subjectId)
+
+    @Query(value = '''
+WITH
+    skill_subjects AS (
+        SELECT
+            srd.child_ref_id,
+            sd.name,
+            sd.skill_id
+        FROM
+            skill_relationship_definition srd
+                JOIN skill_definition sd ON srd.parent_ref_id = sd.id
+        WHERE sd.project_id = :projectId
+          AND sd.type = 'Subject\'
+    ),
+    child_counts AS (
+        SELECT
+            srd.parent_ref_id,
+            COUNT(DISTINCT srd.child_ref_id) AS child_skill_count
+        FROM
+            skill_relationship_definition srd
+                JOIN skill_definition parent_skill ON srd.parent_ref_id = parent_skill.id
+                JOIN skill_definition child_skill ON srd.child_ref_id = child_skill.id
+        WHERE parent_skill.project_id = :projectId
+          AND child_skill.project_id = :projectId
+          AND child_skill.type = 'Skill\'
+          AND srd.type IN (
+                           'RuleSetDefinition',
+                           'BadgeRequirement',
+                           'GroupSkillToSubject',
+                           'SkillsGroupRequirement\'
+            )
+        GROUP BY
+            srd.parent_ref_id
+    )
+SELECT DISTINCT
+    s.skill_id AS skillId,
+    s.name AS skillName,
+    s.type AS skillType,
+    s.point_increment AS pointIncrement,
+    s.total_points AS totalPoints,
+    s.group_id AS skillsGroupId,
+    skillsGroup.name AS skillsGroupName,
+    ss.name AS subjectName,
+    ss.skill_id AS subjectId,
+    COALESCE(cc.child_skill_count, 0) AS totalChildCount
+FROM
+    skill_definition s
+        LEFT JOIN skill_subjects ss ON s.id = ss.child_ref_id
+        LEFT JOIN child_counts cc ON s.id = cc.parent_ref_id
+        LEFT JOIN skill_definition skillsGroup ON (
+        s.group_id = skillsGroup.skill_id
+            AND s.project_id = skillsGroup.project_id
+        )
+WHERE
+    s.type IN ('Skill', 'Subject', 'Badge', 'SkillsGroup')
+  AND s.project_id = :projectId
+ORDER BY
+    s.name ASC
+''', nativeQuery = true)
+    List<ProjectNavItem> findProjNavItems(
+            @Param('projectId') String projectId
+    )
+
 }

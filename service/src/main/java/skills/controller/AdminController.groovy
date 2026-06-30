@@ -67,6 +67,7 @@ import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionsHistoryService
 import skills.services.video.AdminVideoService
 import skills.storage.model.SkillDef
+import skills.storage.repos.SkillDefRepo
 import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 import skills.utils.TablePageUtil
@@ -653,6 +654,13 @@ class AdminController {
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
 
         return skillsAdminService.getSkill(projectId, subjectId, skillId)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/navigableItems", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    List<SkillDefRepo.ProjectNavItem> getNavItems(@PathVariable("projectId") String projectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        return skillsAdminService.getProjectNavItems(projectId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/{skillId}", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
