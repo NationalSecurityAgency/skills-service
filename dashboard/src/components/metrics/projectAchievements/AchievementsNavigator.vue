@@ -112,6 +112,7 @@ const reset = () => {
 const reloadTable = () => {
   loadingTable.value = true;
   const params = getQueryParams();
+
   MetricsService.loadChart(route.params.projectId, 'userAchievementsChartBuilder', params)
       .then((dataFromServer) => {
         items.value = dataFromServer.items;
@@ -132,6 +133,7 @@ const exportAchievements = () => {
 };
 
 const getQueryParams = () => {
+  const orderBy = sortBy.value === appConfig.usersTableAdditionalUserTagKey ? 'userTag' : sortBy.value;
   return {
     pageSize: pageSize.value,
     currentPage: currentPage.value,
@@ -141,7 +143,7 @@ const getQueryParams = () => {
     nameFilter: nameFilter.value,
     minLevel: levels.selected,
     achievementTypes: achievementTypes.value.selected,
-    sortBy: sortBy.value,
+    sortBy: orderBy,
     sortDesc: sortOrder.value !== 1,
     tagFilter: userTagFilter.value,
   };
@@ -288,7 +290,7 @@ const typeLabel = (type) => {
           </template>
         </Column>
         <Column v-if="showUserTagColumn"
-                :sortable="true"
+                sortable
                 :field="appConfig.usersTableAdditionalUserTagKey"
                 :header="appConfig.usersTableAdditionalUserTagLabel"
                 :class="{'flex': responsive.md.value }">

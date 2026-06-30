@@ -1712,4 +1712,149 @@ describe('Metrics Tests - Achievements', () => {
             ],
         ]);
     });
+
+    it('achievements table - sort based on tags', () => {
+        cy.viewport(1500, 750);
+
+        cy.intercept('GET', '/public/config', (req) => {
+            req.continue()
+        }).as('loadConfig');
+
+        cy.intercept('/admin/projects/proj1/metrics/userAchievementsChartBuilder?**')
+            .as('userAchievementsChartBuilder');
+
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            name: 'Interesting Subject 1',
+        });
+
+        const numSkills = 5;
+        for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+            cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+                projectId: 'proj1',
+                subjectId: 'subj1',
+                skillId: `skill${skillsCounter}`,
+                name: `Very Great Skill # ${skillsCounter}`,
+                pointIncrement: '150',
+                numPerformToCompletion: skillsCounter < 3 ? '1' : '200',
+            });
+        }
+        cy.createSkillsGroup(1, 1, 6, { enabled: true});
+        cy.addSkillToGroup(1, 1, 6, 7, {
+            pointIncrement: '100',
+            numPerformToCompletion: '1',
+            pointIncrementInterval: 0
+        });
+        cy.addSkillToGroup(1, 1, 6, 8, {
+            pointIncrement: '100',
+            numPerformToCompletion: '1',
+            pointIncrementInterval: 0
+        });
+
+        const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
+        cy.request('POST', `/api/projects/proj1/skills/skill1`, {
+            userId: 'user0Good@skills.org',
+            timestamp: m.clone()
+                .subtract(1, 'day')
+                .format('x')
+        });
+        cy.request('POST', `/api/projects/proj1/skills/skill2`, {
+            userId: 'user0Good@skills.org',
+            timestamp: m.clone()
+                .subtract(2, 'day')
+                .format('x')
+        });
+        cy.request('POST', `/api/projects/proj1/skills/skill7`, {
+            userId: 'user1Good@skills.org',
+            timestamp: m.clone()
+                .subtract(3, 'day')
+                .format('x')
+        });
+        cy.request('POST', `/api/projects/proj1/skills/skill8`, {
+            userId: 'user1Good@skills.org',
+            timestamp: m.clone()
+                .subtract(4, 'day')
+                .format('x')
+        });
+
+        const tagKey = 'dutyOrganization'
+
+        cy.logout()
+        cy.fixture('vars.json')
+            .then((vars) => {
+                cy.login(vars.rootUser, vars.defaultPass);
+            });
+
+        cy.addUserTag('user0Good@skills.org', tagKey, ['tag1'])
+        cy.addUserTag('user1Good@skills.org', tagKey, ['tag2'])
+
+        cy.logout();
+        cy.fixture('vars.json')
+            .then((vars) => {
+                if (!Cypress.env('oauthMode')) {
+                    cy.log('NOT in oauthMode, using form login');
+                    cy.login(vars.defaultUser, vars.defaultPass);
+                } else {
+                    cy.log('oauthMode, using loginBySingleSignOn');
+                    cy.loginBySingleSignOn();
+                }
+            });
+
+        cy.visit('/administrator/projects/proj1/metrics/achievements');
+        cy.wait('@userAchievementsChartBuilder');
+
+        const tableSelector = '[data-cy=achievementsNavigator-table]';
+        const expectedResults = [
+            [ { colIndex: 0, value: 'user0Good@skills.org' },
+                { colIndex: 1, value: 'tag1' },
+                { colIndex: 2, value: 'Skill' },
+            ],
+            [ { colIndex: 0, value: 'user0Good@skills.org' },
+                { colIndex: 1, value: 'tag1' },
+                { colIndex: 2, value: 'Skill' },
+            ],
+            [ { colIndex: 0, value: 'user1Good@skills.org' },
+                { colIndex: 1, value: 'tag2' },
+                { colIndex: 2, value: 'Skill' },
+            ],
+            [ { colIndex: 0, value: 'user1Good@skills.org' },
+                { colIndex: 1, value: 'tag2' },
+                { colIndex: 2, value: 'Skill' },
+            ],
+            [ { colIndex: 0, value: 'user1Good@skills.org' },
+                { colIndex: 1, value: 'tag2' },
+                { colIndex: 2, value: 'Group' },
+            ],
+        ]
+
+        const resultsReversed = [
+            [ { colIndex: 0, value: 'user1Good@skills.org' },
+                { colIndex: 1, value: 'tag2' },
+                { colIndex: 2, value: 'Group' },
+            ],
+            [ { colIndex: 0, value: 'user1Good@skills.org' },
+                { colIndex: 1, value: 'tag2' },
+                { colIndex: 2, value: 'Skill' },
+            ],
+            [ { colIndex: 0, value: 'user1Good@skills.org' },
+                { colIndex: 1, value: 'tag2' },
+                { colIndex: 2, value: 'Skill' },
+            ],
+            [ { colIndex: 0, value: 'user0Good@skills.org' },
+                { colIndex: 1, value: 'tag1' },
+                { colIndex: 2, value: 'Skill' },
+            ],
+            [ { colIndex: 0, value: 'user0Good@skills.org' },
+                { colIndex: 1, value: 'tag1' },
+                { colIndex: 2, value: 'Skill' },
+            ],
+        ]
+
+        cy.get('[data-cy=achievementsNavigator-table] th').contains('Org').realClick();
+        cy.validateTable(tableSelector, expectedResults);
+
+        cy.get('[data-cy=achievementsNavigator-table] th').contains('Org').realClick();
+        cy.validateTable(tableSelector, resultsReversed);
+    });
 });

@@ -965,7 +965,6 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         fromDate2AndToDate1Res.items.collect { new Date(it.achievedOn) }.unique().sort() == [dates[3]]
     }
 
-
     def "get achievements - filtering by tag"() {
         def proj = createProject()
         List<Map> skills = createSkills(5)
@@ -1034,6 +1033,67 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         tag2Res.items.collect { it.userTag } == []
     }
 
+    def "get achievements - sorting and filtering by tag"() {
+        def proj = createProject()
+        List<Map> skills = createSkills(5)
+        skills.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        def subj = createSubject()
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        def subj1 = createSubject(1, 2)
+        List<Map> skillsSubj1 = createSkills(5, 1, 2)
+        skillsSubj1.each { it.pointIncrement = 200; it.numPerformToCompletion = 1 }
+
+        skillsService.createSubject(subj1)
+        skillsService.createSkills(skillsSubj1)
+
+        List<String> users = new ArrayList<>(getRandomUsers(16))
+        List<String> usersCopy = new ArrayList<>(users)
+
+        achieveLevelForUsers(usersCopy, skills, 2, 1, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 1, 2, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 3, 3, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 2, 4, "Subject")
+        achieveLevelForUsers(usersCopy, skills, 1, 5, "Subject")
+        achieveLevelForUsers(usersCopy, skillsSubj1, 1, 1, "Subject")
+
+        def tags = []
+        users.eachWithIndex { userId, idx ->
+            String tagValue = "tag${idx}"
+            tags.add(tagValue);
+            rootSkillsService.saveUserTag(userId, "dutyOrganization", [tagValue]);
+        }
+
+        Map props = [:]
+        props[MetricsPagingParamsHelper.PROP_CURRENT_PAGE] = 1
+        props[MetricsPagingParamsHelper.PROP_PAGE_SIZE] = 100
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = false
+        props[MetricsPagingParamsHelper.PROP_SORT_BY] = "userTag"
+        props[MetricsParams.P_ACHIEVEMENT_TYPES] = allAchievementTypes
+
+        when:
+        def allResults = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        props[MetricsPagingParamsHelper.PROP_SORT_DESC] = true
+        def resultsReversed = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        props[MetricsParams.P_TAG_FILTER] = 'tag1'
+        def tag1Res = skillsService.getMetricsData(proj.projectId, metricsId, props)
+
+        then:
+        allResults.totalNumItems == 71
+        allResults.items[0].userTag == 'tag0'
+
+        resultsReversed.totalNumItems == 71
+        resultsReversed.items[0].userTag == 'tag9'
+
+        tag1Res.totalNumItems == 3
+        tag1Res.items.collect { it.userTag }.unique().sort() == ['tag1']
+    }
 
     private void achieveLevelForUsers(List<String> users, List<Map> skills, int numUsers, int level, String type = "Overall") {
         List<String> usersToUse = (1..numUsers).collect({
