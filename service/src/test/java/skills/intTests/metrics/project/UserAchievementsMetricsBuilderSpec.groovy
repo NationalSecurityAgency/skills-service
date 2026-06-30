@@ -252,7 +252,7 @@ class UserAchievementsMetricsBuilderSpec extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown()
         def body = new JsonSlurper().parseText(e.resBody)
-        body.explanation == "Metrics[${metricsId}]: Invalid value [userId] for [sortBy] property. Suppored values are [achievedOn, userName]"
+        body.explanation == "Metrics[${metricsId}]: Invalid value [userId] for [sortBy] property. Suppored values are [achievedOn, userName, userTag]"
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
