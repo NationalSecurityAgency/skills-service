@@ -409,8 +409,6 @@ describe('Client Display Accessibility tests', () => {
 
         it(`Skill Tag page${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
-            // cy.visit('/tags/tag1');
-          cy.cdVisit('/', true);
             cy.visit('/test-skills-display/proj1/tags/tag1')
             cy.injectAxe();
 
@@ -421,5 +419,16 @@ describe('Client Display Accessibility tests', () => {
             cy.customA11y();
             cy.customLighthouse();
         });
+
+      it(`Skill Tags page${darkMode}`, () => {
+          cy.setDarkModeIfNeeded(darkMode)
+          cy.visit('/test-skills-display/proj1/tags')
+          cy.injectAxe();
+
+          cy.get('[data-cy="skillsTitle"]').should('contain.text', 'Project Tags')
+
+          cy.customA11y();
+          cy.customLighthouse();
+      });
     })
 });
