@@ -346,4 +346,73 @@ describe('Skills Display Badges Tests', () => {
     cy.get('[data-cy="earnedBadgeLink_badge1"]').click();
     cy.get('[data-cy="badge_badge1_gem"]').should('not.exist')
   });
+
+  it('badge percent reflects partial progress on not-yet-completed skills', () => {
+    cy.resetDb();
+    cy.fixture('vars.json')
+        .then((vars) => {
+          if (!Cypress.env('oauthMode')) {
+            cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+          }
+        });
+    cy.loginAsProxyUser();
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    // each skill needs 2 occurrences of 100 points, so 200 total points per skill
+    cy.createSkill(1, 1, 1, { pointIncrement: 100, numPerformToCompletion: 2 });
+    cy.createSkill(1, 1, 2, { pointIncrement: 100, numPerformToCompletion: 2 });
+
+    cy.createBadge(1, 1);
+    cy.assignSkillToBadge(1, 1, 1);
+    cy.assignSkillToBadge(1, 1, 2);
+    cy.enableBadge(1, 1);
+
+    // report skill1 once - half way to completion, but not yet achieved. skill2 has no progress.
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+
+    cy.cdVisit('/', true);
+    cy.cdClickBadges();
+    cy.get('[data-cy=badgeDetailsLink_badge1]').click();
+
+    cy.get('[data-cy="title"]').contains('Badge Details');
+    // each skill is 2 occurrences, so the badge has 4 total occurrences. skill1 has 1 of
+    // its 2 reported and skill2 has none, so 1 of 4 occurrences are earned -> 25%.
+    cy.get('[data-cy="badgePercentCompleted"]').contains('25% Complete');
+  });
+
+  it('badge details percent uses occurrences so a high-point skill does not skew it', () => {
+    cy.resetDb();
+    cy.fixture('vars.json')
+        .then((vars) => {
+          if (!Cypress.env('oauthMode')) {
+            cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+          }
+        });
+    cy.loginAsProxyUser();
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    // three single-occurrence skills worth 100, 50000 and 100 points. By raw points skill2
+    // would be over 99% of the badge, but each skill is a single occurrence.
+    cy.createSkill(1, 1, 1, { pointIncrement: 100, numPerformToCompletion: 1 });
+    cy.createSkill(1, 1, 2, { pointIncrement: 50000, numPerformToCompletion: 1 });
+    cy.createSkill(1, 1, 3, { pointIncrement: 100, numPerformToCompletion: 1 });
+
+    cy.createBadge(1, 1);
+    cy.assignSkillToBadge(1, 1, 1);
+    cy.assignSkillToBadge(1, 1, 2);
+    cy.assignSkillToBadge(1, 1, 3);
+    cy.enableBadge(1, 1);
+
+    // complete the two small skills, leave the 50000-point skill untouched.
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+    cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
+
+    cy.cdVisit('/', true);
+    cy.cdClickBadges();
+    cy.get('[data-cy=badgeDetailsLink_badge1]').click();
+
+    cy.get('[data-cy="title"]').contains('Badge Details');
+    // 2 of 3 occurrences earned -> 66%. Raw points would have read ~0%.
+    cy.get('[data-cy="badgePercentCompleted"]').contains('66% Complete');
+  });
 })
