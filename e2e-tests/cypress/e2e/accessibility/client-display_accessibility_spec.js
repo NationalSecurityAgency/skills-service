@@ -407,7 +407,7 @@ describe('Client Display Accessibility tests', () => {
             cy.customLighthouse();
         });
 
-        it(`Skill Tag page${darkMode}`, () => {
+        it(`Skill Tag overview page${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
             cy.visit('/test-skills-display/proj1/tags/tag1')
             cy.injectAxe();
