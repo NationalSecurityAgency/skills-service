@@ -768,7 +768,8 @@ select badgeDef.name as name,
                 (ua.level >= :level OR (:level = -1)) and
                 (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
                 (ua.skillId is not null OR (:includeOverallType = 'true')) and
-                not exists (select 1 from ArchivedUser au where au.userId = ua.userId and au.projectId = :projectId)
+                not exists (select 1 from ArchivedUser au where au.userId = ua.userId and au.projectId = :projectId) and
+                (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) 
                 ''')
     Stream<AchievementItem> findAllForAchievementNavigator(
             @Param("projectId") String projectId,
@@ -781,6 +782,7 @@ select badgeDef.name as name,
             @Param("disableTypes") String disableTypes,
             @Param("includeOverallType") String includeOverallType,
             @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
+            @Param("userTagFilter") String userTagFilter,
             @Param("pageable") Pageable pageable)
 
     @Query('''
@@ -788,6 +790,7 @@ select badgeDef.name as name,
             FROM  UserAttrs uAttrs
             JOIN  UserAchievement ua ON uAttrs.userId = ua.userId
             LEFT JOIN SkillDef sd ON ua.skillRefId = sd.id
+            LEFT JOIN (SELECT ut.userId userId, max(ut.value) AS value FROM UserTag ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.userId) ut ON ut.userId=ua.userId
             where 
                 ua.projectId = :projectId and
                 ua.achievedOn >= :fromDate and
@@ -798,7 +801,8 @@ select badgeDef.name as name,
                 (ua.level >= :level OR (:level = -1)) and
                 (sd.type in (:types) OR (:disableTypes = 'true') OR (ua.skillId is null AND (:includeOverallType = 'true'))) and 
                 (ua.skillId is not null OR (:includeOverallType = 'true')) and
-                 not exists (select 1 from ArchivedUser au where au.userId = ua.userId and au.projectId = :projectId)
+                 not exists (select 1 from ArchivedUser au where au.userId = ua.userId and au.projectId = :projectId) and
+                (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) 
                 ''')
     Integer countForAchievementNavigator(
             @Param("projectId") String projectId,
@@ -809,7 +813,9 @@ select badgeDef.name as name,
             @Param("level") Integer level,
             @Param("types") List<SkillDef.ContainerType> types,
             @Param("disableTypes") String disableTypes,
-            @Param("includeOverallType") String includeOverallType)
+            @Param("includeOverallType") String includeOverallType,
+            @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
+            @Param("userTagFilter") String userTagFilter)
 
 
     static interface SkillAndLevelUserCount {
