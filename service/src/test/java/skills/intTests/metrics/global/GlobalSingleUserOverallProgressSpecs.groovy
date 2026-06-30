@@ -74,19 +74,19 @@ class GlobalSingleUserOverallProgressSpecs extends DefaultIntSpec {
 
     def "get single user progress - user with achievements across multiple projects"() {
         when:
-        def res = admins[0].getGlobalSingleUserProgressMetrics(users[4].userName).sort { it.projectId }
+        def res = admins[0].getGlobalSingleUserProgressMetrics(users[4].userName).projectsProgress.sort { it.projectId }
         def res_viaAdmin2 = admins[1].getGlobalSingleUserProgressMetrics(users[4].userName)
         def res_viaAdmin3 = admins[2].getGlobalSingleUserProgressMetrics(users[4].userName)
         then:
-        res.projectsProgress.size() == 2
+        res.size() == 2
 
-        assertMetric(res.projectsProgress[0], new Metric(
+        assertMetric(res[0], new Metric(
                 projectId: "TestProject1", projectName: "Test Project#1",
                 numSkills: 11, projectTotalPoints: 1100, numProjectLevels: 5, numBadges: 2, points: 400,
                 numAchievedSkills: 4, numAchievedBadges: 1, achievedProjLevel: 2
         ))
 
-        assertMetric(res.projectsProgress[1], new Metric(
+        assertMetric(res[1], new Metric(
                 projectId: "TestProject2", projectName: "Test Project#2",
                 numSkills: 7, projectTotalPoints: 700, numProjectLevels: 5, numBadges: 1, points: 400,
                 numAchievedSkills: 4, numAchievedBadges: 1, achievedProjLevel: 3
