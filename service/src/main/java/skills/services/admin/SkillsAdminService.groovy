@@ -964,6 +964,11 @@ class SkillsAdminService {
         return getSkillsByProjectSkillAndType(projectId, badgeId, SkillDef.ContainerType.Badge, SkillRelDef.RelationshipType.BadgeRequirement)
     }
 
+    @Transactional
+    List<SkillDefRepo.ProjectNavItem> getProjectNavItems(String projectId) {
+        return skillDefRepo.findProjNavItems(projectId)
+    }
+
 
     @Transactional
     SkillDef updateSkillDisplayOrder(@PathVariable("projectId") String projectId,

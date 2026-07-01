@@ -16,7 +16,6 @@ limitations under the License.
 <script setup>
 import { computed, nextTick, onMounted, ref } from 'vue'
 import SkillsDialog from '@/components/utils/inputForm/SkillsDialog.vue'
-import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
@@ -25,6 +24,8 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import SkillReuseIdUtil from "@/components/utils/SkillReuseIdUtil.js";
 import SkillType from "@/common-components/utilities/SkillType.js";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
+import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 
 const emit = defineEmits(['hidden']);
 const props = defineProps({
@@ -32,15 +33,24 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  loadProjPagesInfoFn: {
+    type: Function,
+    required: true,
+  },
+  navToSkillFn: {
+    type: Function,
+    required: true,
+  }
 });
 
 const model = defineModel()
 
-const skillsDisplayService = useSkillsDisplayService()
 const skillDisplayInfo = useSkillsDisplayInfo()
 const announcer = useSkillsAnnouncer()
 const focusState = useFocusState()
 const attributes = useSkillsDisplayAttributesState()
+const pluralize = usePluralize()
+const numberFormat = useNumberFormat()
 
 const selected = ref('')
 const query = ref('')
@@ -56,9 +66,8 @@ onMounted(() => {
 const loadSkillsSubjectsAndBadges = (event) => {
   query.value = event?.query || ''
   isSearching.value = true
-  return skillsDisplayService.getAllProjectSkillsSubjectsAndBadges()
-      .then((res) => {
-        let results = res.data
+  return props.loadProjPagesInfoFn()
+      .then((results) => {
         searchRes.value = results
         if (results && results.length > 0) {
           announcer.polite(`Showing ${results.length} items.  Type to search for a ${attributes.subjectDisplayNamePlural}, ${attributes.skillDisplayNamePlural} or Badges. Use arrow keys to select and enter or click to navigate to the ${attributes.subjectDisplayName}, ${attributes.skillDisplayName} or Badge.`)
@@ -82,36 +91,7 @@ const focusOnFilterInput = () => {
   });
 }
 const navToSkill = (skill) => {
-  const { skillType } = skill
-  if (SkillType.isSubject(skillType)) {
-    skillDisplayInfo.routerPush(
-        'SubjectDetailsPage',
-        {
-          subjectId: skill.skillId
-        })
-  } else if (SkillType.isBadge(skillType)) {
-    skillDisplayInfo.routerPush(
-        'badgeDetails',
-        {
-          badgeId: skill.skillId
-        })
-  } else if (SkillType.isSkillsGroup(skillType)) {
-    skillDisplayInfo.routerPush(
-        'skillsGroupDetails',
-        {
-          subjectId: skill.subjectId,
-          groupId: skill.skillId
-        })
-  } else {
-    const pageName = skill.skillsGroupId ? 'skillDetailsUnderGroup' : 'skillDetails'
-    skillDisplayInfo.routerPush(
-        pageName,
-        {
-          subjectId: skill.subjectId,
-          skillId: skill.skillId,
-          groupId: skill.skillsGroupId,
-        })
-  }
+  props.navToSkillFn(skill)
   closeMe()
 }
 
@@ -148,13 +128,15 @@ const getIconClass = (skill) => {
   return 'fas fa-graduation-cap skills-color-skills text-sky-500'
 }
 const getUserProgress = (skill) => {
-  return isSkill(skill) ? skill.userCurrentPoints : skill.childAchievementCount
+  const res = isSkill(skill) ? skill.userCurrentPoints : skill.childAchievementCount
+  return res >= 0 ? numberFormat.pretty(res) : undefined
 }
 const getTotalProgress = (skill) => {
-  return isSkill(skill) ? skill.totalPoints : skill.totalChildCount
+  const res = isSkill(skill) ? skill.totalPoints : skill.totalChildCount
+  return numberFormat.pretty(res)
 }
 const getProgressLabel = (skill) => {
-  return isSkill(skill) ? attributes.pointDisplayNamePlural : attributes.skillDisplayNamePlural
+  return isSkill(skill) ?  pluralize.plural(attributes.pointDisplayName, skill.totalPoints) : pluralize.plural(attributes.skillDisplayName, skill.totalChildCount)
 }
 const dialogPosition = computed(() => {
   return skillDisplayInfo.isSkillsClientPath() ? 'top' : 'center'
@@ -233,7 +215,7 @@ const dialogPosition = computed(() => {
                 :class="{'text-green-700 dark:text-green-500': slotProps.option.userAchieved}"
                  aria-hidden="true">
               <i v-if="slotProps.option.userAchieved" class="fas fa-check mr-1" aria-hidden="" />
-              <span class="text-orange-700 dark:text-orange-500 font-medium">{{ getUserProgress(slotProps.option) }}</span> / {{ getTotalProgress(slotProps.option) }} <span class="italic">{{ getProgressLabel(slotProps.option) }}</span>
+              <span v-if="getUserProgress(slotProps.option) !== undefined"><span class="text-orange-700 dark:text-orange-500 font-medium">{{ getUserProgress(slotProps.option) }}</span> / </span>{{ getTotalProgress(slotProps.option) }} <span class="italic">{{ getProgressLabel(slotProps.option) }}</span>
             </div>
           </div>
 

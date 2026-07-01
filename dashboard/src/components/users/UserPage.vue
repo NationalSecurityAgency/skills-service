@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import PageHeader from '@/components/utils/pages/PageHeader.vue'
+import ProjectPageHeader from "@/components/utils/pages/ProjectPageHeader.vue";
 import Navigation from '@/components/utils/Navigation.vue'
 import { useRoute } from 'vue-router'
 import { useProjectUserState } from '@/stores/UseProjectUserState.js'
@@ -119,7 +119,7 @@ const processUserTags = (userTags) =>{
 
 <template>
 <div>
-  <page-header :loading="isLoading" :options="headerOptions">
+  <project-page-header :loading="isLoading" :options="headerOptions">
     <template #right-of-header>
       <Tag class="ml-2" data-cy="archivedUserTag" severity="danger" v-if="isUserArchived"><i class="fas fa-archive mr-1" aria-hidden="true"/>Archived</Tag>
     </template>
@@ -136,7 +136,7 @@ const processUserTags = (userTags) =>{
           <span v-if="index < tags.length - 1">; </span>
         </span>
     </template>
-  </page-header>
+  </project-page-header>
 
   <navigation v-if="!isLoading" :nav-items="navItems">
   </navigation>

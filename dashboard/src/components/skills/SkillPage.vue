@@ -19,7 +19,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import Badge from 'primevue/badge'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import PageHeader from '@/components/utils/pages/PageHeader.vue'
+import ProjectPageHeader from "@/components/utils/pages/ProjectPageHeader.vue";
 import Navigation from '@/components/utils/Navigation.vue'
 import SkillReuseIdUtil from '@/components/utils/SkillReuseIdUtil'
 import { useSkillsState } from '@/stores/UseSkillsState.js'
@@ -200,7 +200,7 @@ const nextButtonClicked = () => {
         <skill-navigation @prevButtonClicked="prevButtonClicked" @nextButtonClicked="nextButtonClicked" :skill="skillsState.skill" buttonSeverity="info" />
       </template>
     </Card>
-    <page-header :loading="isLoading" :options="headerOptions">
+    <project-page-header :loading="isLoading" :options="headerOptions">
       <template #subTitle v-if="skillsState.skill">
         <div v-for="(tag) in skillsState.skill.tags" :key="tag.tagId" class="h6 mr-2 d-inline-block"
              :data-cy="`skillTag-${skillsState.skill.skillId}-${tag.tagId}`">
@@ -244,7 +244,7 @@ const nextButtonClicked = () => {
              class="ml-2" data-cy="disabledSkillBadge"><i
           class="fas fa-eye-slash mr-1" aria-hidden="true"></i> DISABLED</Tag>
       </template>
-    </page-header>
+    </project-page-header>
 
     <navigation :nav-items="navItems">
     </navigation>

@@ -18,11 +18,10 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
-import PageHeader from '@/components/utils/pages/PageHeader.vue'
+import ProjectPageHeader from "@/components/utils/pages/ProjectPageHeader.vue";
 import Navigation from '@/components/utils/Navigation.vue'
 import ProjectService from '@/components/projects/ProjectService'
 import ProjectDates from '@/components/projects/ProjectDates.vue'
-import dayjs from '@/common-components/DayJsCustomizer.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert.vue'
 import EditProject from '@/components/projects/EditProject.vue'
@@ -209,7 +208,7 @@ const isProjectExpiring = computed(() => {
 
 <template>
   <div ref="mainFocus">
-    <PageHeader :loading="isLoading" :options="headerOptions">
+    <project-page-header :loading="isLoading" :options="headerOptions">
       <template #banner v-if="isProjectExpiring">
         <project-expiration-warning :project="project" @extended="project.expiring = false" />
       </template>
@@ -285,7 +284,7 @@ const isProjectExpiring = computed(() => {
           }}</span>
         </div>
       </template>
-    </PageHeader>
+    </project-page-header>
 
     <Message v-if="isInsufficientPoints" :closable="false" data-cy="projectInsufficientPoints">
       Project has insufficient points assigned. Skills cannot be achieved until project has at least <Tag>{{ appConfig.minimumProjectPoints }}</Tag> points.

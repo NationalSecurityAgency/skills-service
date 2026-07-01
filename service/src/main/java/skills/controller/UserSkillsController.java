@@ -177,7 +177,7 @@ class UserSkillsController {
     @RequestMapping(value = "/projects/{projectId}/skillsSubjectsAndBadges", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @Profile
-    public List<SkillDefRepo.SkillWithAchievementDetails> getAllProjectSkillsSubjectsAndBadges(HttpServletRequest request,
+    public List<SkillDefRepo.ProjNavItemWithAchievements> getAllProjectSkillsSubjectsAndBadges(HttpServletRequest request,
                                                                                                @PathVariable("projectId") String projectId,
                                                                                                @RequestParam(name = "userId", required = false) String userIdParam,
                                                                                                @RequestParam(name = "idType", required = false) String idType) {

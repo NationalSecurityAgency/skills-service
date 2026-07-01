@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/utils/pages/PageHeader.vue';
+import ProjectPageHeader from "@/components/utils/pages/ProjectPageHeader.vue";
 import Navigation from '@/components/utils/Navigation.vue';
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import BadgesService from '@/components/badges/BadgesService';
@@ -160,7 +160,7 @@ const toDate = (value) => {
 
 <template>
   <div>
-    <page-header :loading="isLoading" :options="headerOptions">
+    <project-page-header :loading="isLoading" :options="headerOptions">
       <template #right-of-header>
         <i v-if="badge && badge.endDate" class="fas fa-gem ml-2" style="font-size: 1.6rem; color: purple;"></i>
       </template>
@@ -191,7 +191,7 @@ const toDate = (value) => {
           </SkillsButton>
         </ButtonGroup>
       </template>
-    </page-header>
+    </project-page-header>
 
     <Message v-if="badge && badge.enabled !== 'true'"
              :closable="false"
