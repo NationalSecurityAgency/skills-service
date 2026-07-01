@@ -950,10 +950,11 @@ ORDER BY s.name ASC
 
     static interface SkillNameAndPresenceOfDescription {
         String getSkillName()
+        String getIconClass()
         Boolean getHasDescription()
     }
     @Nullable
-    @Query(value ='''select sd.name as skillName,
+    @Query(value ='''select sd.name as skillName, sd.icon_class as iconClass,
        case when sd.description::oid is not null and length(convert_from(lo_get(sd.description::oid), 'UTF8'))>0 then true else false end as hasDescription
             from skill_definition sd
             where sd.project_id = ?1 and sd.skill_id = ?2''', nativeQuery = true)

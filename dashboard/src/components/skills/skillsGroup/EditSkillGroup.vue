@@ -28,6 +28,7 @@ import InputGroup from 'primevue/inputgroup'
 import SkillsInputSwitch from '@/components/utils/inputForm/SkillsInputSwitch.vue'
 import InputGroupAddon from 'primevue/inputgroupaddon'
 import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
+import IconPicker from "@/components/utils/iconPicker/IconPicker.vue";
 
 const show = defineModel()
 const route = useRoute()
@@ -106,6 +107,7 @@ const saveSkill = (values) => {
     isEdit: props.isEdit,
     name: InputSanitizer.sanitize(values.name),
     skillId: InputSanitizer.sanitize(values.skillId),
+    iconClass: currentIcon.value,
   }
   return SkillsService.saveSkill(skilltoSave)
     .then((skillRes) => {
@@ -118,6 +120,11 @@ const saveSkill = (values) => {
 
 const onSkillSaved = (skill) => {
   emit('skill-saved', skill)
+}
+
+const currentIcon = ref((props.skill.iconClass || 'fas fa-layer-group'));
+const onSelectedIcon = (selectedIcon) => {
+  currentIcon.value = selectedIcon.css
 }
 </script>
 
@@ -143,7 +150,16 @@ const onSkillSaved = (skill) => {
       id-label="Group ID"
       id-field-name="skillId"
       id-suffix="Group"
-      :name-to-id-sync-enabled="!props.isEdit" />
+      :name-to-id-sync-enabled="!props.isEdit">
+      <template #beforeName>
+        <icon-picker
+            class="mb-4"
+            :startIcon="currentIcon"
+            :project-id="route.params.projectId"
+            @selected-icon="onSelectedIcon"
+        />
+      </template>
+    </SkillsNameAndIdInput>
 
     <div v-if="showVisibilityControl" data-cy="visibility" class="flex-1 min-w-[8rem] mb-2">
       <div class="flex flex-col gap-2">

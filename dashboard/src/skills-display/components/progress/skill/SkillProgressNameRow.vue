@@ -127,7 +127,7 @@ const iconClass = computed(() => {
   const color = props.index >= 0 ? colors.getTextClass(props.index): ''
   const commonCss = 'skill-icon sd-theme-icon'
   if (props.skill.isSkillsGroupType) {
-    return `${commonCss} fas fa-layer-group`
+    return !props.skill?.iconClass ? `${commonCss} fas fa-layer-group` : `${commonCss} ${props.skill?.iconClass}`
   }
   if (!props.skill.copiedFromProjectId && !props.skill.isSkillsGroupType) {
     const icon =  props.skill?.iconClass ? props.skill?.iconClass : 'fas fa-graduation-cap'
