@@ -327,9 +327,10 @@ export default {
       )
       .then((response) => response.data)
   },
-  getTagsForProject(projectId) {
+  getTagsForProject(projectId, includeDisabled=true) {
+    const params = `?includeDisabled=${includeDisabled}`
     return axios
-      .get(`/admin/projects/${encodeURIComponent(projectId)}/skills/tags`)
+      .get(`/admin/projects/${encodeURIComponent(projectId)}/skills/tags${params}`)
       .then((response) => response.data)
   },
   getTagsForSkills(projectId, skillIds) {

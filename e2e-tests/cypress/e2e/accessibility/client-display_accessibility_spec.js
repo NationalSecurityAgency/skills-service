@@ -126,6 +126,9 @@ describe('Client Display Accessibility tests', () => {
             badgeId: 'badge1',
             name: 'Badge 1'
         });
+
+      cy.addTagToSkills(1, ['skill1', 'skill3'], 1)
+      cy.addTagToSkills(1, ['skill2', 'skill3'], 2)
     });
 
     const runWithDarkMode = ['', ' - dark mode']
@@ -403,5 +406,29 @@ describe('Client Display Accessibility tests', () => {
             cy.customA11y();
             cy.customLighthouse();
         });
+
+        it(`Skill Tag overview page${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.visit('/test-skills-display/proj1/tags/tag1')
+            cy.injectAxe();
+
+            cy.get('[data-cy="title"]').should('contain.text', 'Skill Tag Overview')
+            cy.get('[data-cy="skillTagName"]').should('contain.text', 'TAG 1')
+            cy.get('[data-cy="skillTagProgress"]').should('contain.text', '1 / 2 Skills')
+
+            cy.customA11y();
+            cy.customLighthouse();
+        });
+
+      it(`Skill Tags page${darkMode}`, () => {
+          cy.setDarkModeIfNeeded(darkMode)
+          cy.visit('/test-skills-display/proj1/tags')
+          cy.injectAxe();
+
+          cy.get('[data-cy="skillsTitle"]').should('contain.text', 'Project Tags')
+
+          cy.customA11y();
+          cy.customLighthouse();
+      });
     })
 });

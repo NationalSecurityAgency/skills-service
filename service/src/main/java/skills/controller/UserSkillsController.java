@@ -41,11 +41,13 @@ import skills.controller.request.model.PageVisitRequest;
 import skills.controller.request.model.SkillEventRequest;
 import skills.controller.request.model.SkillsClientVersionRequest;
 import skills.controller.result.model.RequestResult;
+import skills.controller.result.model.SkillTagRes;
 import skills.controller.result.model.UploadAttachmentResult;
 import skills.dbupgrade.DBUpgradeSafe;
 import skills.icons.CustomIconFacade;
 import skills.services.*;
 import skills.services.admin.InviteOnlyProjectService;
+import skills.services.admin.SkillTagService;
 import skills.services.admin.SkillsDepsService;
 import skills.services.events.AddSkillHelper;
 import skills.services.events.SkillEventResult;
@@ -55,6 +57,7 @@ import skills.skillLoading.SkillsLoader;
 import skills.skillLoading.SkillsService;
 import skills.skillLoading.model.*;
 import skills.storage.model.Attachment;
+import skills.storage.model.SkillTag;
 import skills.storage.repos.SkillDefRepo;
 import skills.utils.MetricsLogger;
 
@@ -65,6 +68,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @CrossOrigin(allowCredentials = "true", originPatterns = {"*"})
 @RestController
@@ -135,6 +139,9 @@ class UserSkillsController {
 
     @Autowired
     GlobalBadgesService globalBadgeService;
+
+    @Autowired
+    SkillTagService skillTagService;
 
     @Value("${skills.config.allowedVideoUploadMimeTypes}")
     List<MediaType> allowedVideoUploadMimeTypes;
@@ -240,6 +247,17 @@ class UserSkillsController {
         return skillsLoader.loadSkillsGroupSummary(projectId, groupId, userId, getProvidedVersionOrReturnDefault(version));
     }
 
+    @RequestMapping(value = "/projects/{projectId}/tags/{tagId}/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public SkillTagSummary getSkillTagSummary(@PathVariable("projectId") String projectId,
+                                               @PathVariable("tagId") String tagId,
+                                               @RequestParam(name = "userId", required = false) String userIdParam,
+                                               @RequestParam(name = "version", required = false) Integer version,
+                                               @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        return skillsLoader.loadSkillTagSummary(projectId, tagId, userId, getProvidedVersionOrReturnDefault(version));
+    }
+
     @RequestMapping(value = "/projects/{projectId}/groups/{groupId}/descriptions", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public List<SkillDescription> getGroupSkillsDescriptions(@PathVariable("projectId") String projectId,
@@ -330,6 +348,17 @@ class UserSkillsController {
         // add any global badges as well
         badgeSummaries.addAll(skillsLoader.loadGlobalBadgeSummaries(userId, projectId, getProvidedVersionOrReturnDefault(version)));
         return badgeSummaries;
+    }
+
+
+    @RequestMapping(value = "/projects/{projectId}/tags/summary", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public List<SkillTagSummary> getAllTagsSummary(@PathVariable("projectId") String projectId,
+                                                       @RequestParam(name = "userId", required = false) String userIdParam,
+                                                       @RequestParam(name = "version", required = false) Integer version,
+                                                       @RequestParam(name = "idType", required = false) String idType) {
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        return skillsLoader.loadTagSummaries(projectId, userId, getProvidedVersionOrReturnDefault(version));
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}/descriptions", method = RequestMethod.GET, produces = "application/json")
@@ -608,4 +637,47 @@ class UserSkillsController {
         }
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skills/tags", method = RequestMethod.GET, produces = "application/json")
+    List<SkillTagRes> getTagsForProject(@PathVariable("projectId") String projectId,
+                                        @RequestParam(required = false, value = "includeDisabled", defaultValue = "false") Boolean includeDisabled) {
+        SkillsValidator.isNotBlank(projectId, "projectId");
+        List<SkillTagRes> tagResponses = null;
+        List<SkillTag> tags = skillTagService.getTagsForProject(projectId, includeDisabled);
+
+        if (tags != null) {
+            tagResponses = tags.stream()
+                .map(tag -> {
+                    SkillTagRes res = new SkillTagRes();
+                    res.setTagId(tag.getTagId());
+                    res.setTagValue(tag.getTagValue());
+                    res.setNumSkills(tag.getNumSkills());
+                    return res;
+                })
+                .collect(Collectors.toList());
+        }
+        return tagResponses;
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/tags", method = RequestMethod.GET, produces = "application/json")
+    List<SkillTagRes> getTagsForSubject(@PathVariable("projectId") String projectId,
+                                        @PathVariable("subjectId") String subjectId,
+                                        @RequestParam(required = false, value = "includeDisabled", defaultValue = "false") Boolean includeDisabled) {
+        SkillsValidator.isNotBlank(projectId, "projectId");
+        SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId);
+        List<SkillTagRes> tagResponses = null;
+        List<SkillTag> tags = skillTagService.getTagsForSubject(projectId, subjectId, includeDisabled);
+
+        if (tags != null) {
+            tagResponses = tags.stream()
+                .map(tag -> {
+                    SkillTagRes res = new SkillTagRes();
+                    res.setTagId(tag.getTagId());
+                    res.setTagValue(tag.getTagValue());
+                    res.setNumSkills(tag.getNumSkills());
+                    return res;
+                })
+                .collect(Collectors.toList());
+        }
+        return tagResponses;
+    }
 }

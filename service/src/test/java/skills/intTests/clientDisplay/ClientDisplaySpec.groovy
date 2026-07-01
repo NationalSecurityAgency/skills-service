@@ -19,7 +19,7 @@ import groovy.time.TimeCategory
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
-import skills.intTests.utils.SkillsService
+import skills.intTests.utils.SkillsFactory
 import skills.services.settings.Settings
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -702,6 +702,348 @@ class ClientDisplaySpec extends DefaultIntSpec {
         res.prevSkillId == null
         res.nextSkillId == null
     }
+
+    def "get skill tags for project"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> allSkills = SkillsFactory.createSkills(7, 1, 1, 100)
+        List<Map> proj1_skills = allSkills[0..2]
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        def skillsGroup1 = allSkills[3]
+        skillsGroup1.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup1)
+        String skillsGroup1Id = skillsGroup1.skillId
+        def group1Children = allSkills[4..6]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
+        }
+        skillsGroup1.numSkillsRequired = 2
+        skillsService.updateSkill(skillsGroup1, null)
+
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> subj2Skills = SkillsFactory.createSkills(2, 1, 2)
+        skillsService.createSubject(proj1_subj2)
+        subj2Skills[1].enabled = false
+        skillsService.createSkills(subj2Skills)
+
+        List<String> regSkillids = proj1_skills.collect { it.skillId }
+        List<String> childSkillids = group1Children.collect { it.skillId }
+        List<String> nonGroupSkillids = regSkillids + childSkillids
+
+        skillsService.addTagToSkills(proj1.projectId, regSkillids, "Regular Skill")
+        skillsService.addTagToSkills(proj1.projectId, childSkillids, "Group Child Skill")
+        skillsService.addTagToSkills(proj1.projectId, nonGroupSkillids, "A Skill")
+
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[0].skillId.toString()], "Subject2 Skill")
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[0].skillId.toString()], "A Skill")
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[1].skillId.toString()], "Disabled Skill")
+
+        when:
+        def projectTags = skillsService.getApiTagsForProject(proj1.projectId, false)
+        then:
+        projectTags
+        projectTags.size() == 4
+        projectTags.find {it.tagValue == 'A Skill'}
+        projectTags.find {it.tagValue == 'A Skill'}.numSkills == 7
+
+        projectTags.find {it.tagValue == 'Group Child Skill'}
+        projectTags.find {it.tagValue == 'Group Child Skill'}.numSkills == 3
+
+        projectTags.find {it.tagValue == 'Regular Skill'}
+        projectTags.find {it.tagValue == 'Regular Skill'}.numSkills == 3
+
+        projectTags.find {it.tagValue == 'Subject2 Skill'}
+        projectTags.find {it.tagValue == 'Subject2 Skill'}.numSkills == 1
+
+        !projectTags.find {it.tagValue == 'Disabled Skill'}
+    }
+
+    def "get skill tags summaries for project"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> allSkills = SkillsFactory.createSkills(7, 1, 1, 100)
+        List<Map> proj1_skills = allSkills[0..2]
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        def skillsGroup1 = allSkills[3]
+        skillsGroup1.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup1)
+        String skillsGroup1Id = skillsGroup1.skillId
+        def group1Children = allSkills[4..6]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
+        }
+        skillsGroup1.numSkillsRequired = 2
+        skillsService.updateSkill(skillsGroup1, null)
+
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> subj2Skills = SkillsFactory.createSkills(2, 1, 2)
+        skillsService.createSubject(proj1_subj2)
+        subj2Skills[1].enabled = false
+        skillsService.createSkills(subj2Skills)
+
+        List<String> regSkillids = proj1_skills.collect { it.skillId }
+        List<String> childSkillids = group1Children.collect { it.skillId }
+        List<String> nonGroupSkillids = regSkillids + childSkillids
+
+        skillsService.addTagToSkills(proj1.projectId, regSkillids, "Regular Skill")
+        skillsService.addTagToSkills(proj1.projectId, childSkillids, "Group Child Skill")
+        skillsService.addTagToSkills(proj1.projectId, nonGroupSkillids, "A Skill")
+
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[0].skillId.toString()], "Subject2 Skill")
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[0].skillId.toString()], "A Skill")
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[1].skillId.toString()], "Disabled Skill")
+
+        def user = getRandomUsers(1)[0]
+        skillsService.addSkill(proj1_skills[0], user)
+        skillsService.addSkill(group1Children[1], user)
+
+        when:
+        def projectTagSummaries = skillsService.getSkillTagSummariesForProject(user, proj1.projectId)
+        then:
+        projectTagSummaries
+        projectTagSummaries.find {it.tagId == 'askill'}
+        projectTagSummaries.find {it.tag == 'A Skill'}
+        projectTagSummaries.find {it.tag == 'A Skill'}.totalSkills == 7
+        projectTagSummaries.find {it.tag == 'A Skill'}.skillsAchieved == 2
+
+        projectTagSummaries.find {it.tagId == 'groupchildskill'}
+        projectTagSummaries.find {it.tag == 'Group Child Skill'}
+        projectTagSummaries.find {it.tag == 'Group Child Skill'}.totalSkills == 3
+        projectTagSummaries.find {it.tag == 'Group Child Skill'}.skillsAchieved == 1
+
+        projectTagSummaries.find {it.tagId == 'regularskill'}
+        projectTagSummaries.find {it.tag == 'Regular Skill'}
+        projectTagSummaries.find {it.tag == 'Regular Skill'}.totalSkills == 3
+        projectTagSummaries.find {it.tag == 'Regular Skill'}.skillsAchieved == 1
+
+        projectTagSummaries.find {it.tagId == 'subject2skill'}
+        projectTagSummaries.find {it.tag == 'Subject2 Skill'}
+        projectTagSummaries.find {it.tag == 'Subject2 Skill'}.totalSkills == 1
+        projectTagSummaries.find {it.tag == 'Subject2 Skill'}.skillsAchieved == 0
+
+        !projectTagSummaries.find {it.tag == 'Disabled Skill'}
+    }
+
+    def "get skill tags summaries for project, exclude disabled skills from counts "() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> allSkills = SkillsFactory.createSkills(7, 1, 1, 100)
+        List<Map> proj1_skills = allSkills[0..2]
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        def skillsGroup1 = allSkills[3]
+        skillsGroup1.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup1)
+        String skillsGroup1Id = skillsGroup1.skillId
+        def group1Children = allSkills[4..6]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
+        }
+        skillsGroup1.numSkillsRequired = 2
+        skillsService.updateSkill(skillsGroup1, null)
+
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> subj2Skills = SkillsFactory.createSkills(3, 1, 2)
+        skillsService.createSubject(proj1_subj2)
+        subj2Skills[1].enabled = false
+        skillsService.createSkills(subj2Skills)
+
+        List<String> regSkillids = proj1_skills.collect { it.skillId }
+        List<String> childSkillids = group1Children.collect { it.skillId }
+        List<String> nonGroupSkillids = regSkillids + childSkillids
+
+        skillsService.addTagToSkills(proj1.projectId, regSkillids, "Regular Skill")
+        skillsService.addTagToSkills(proj1.projectId, childSkillids, "Group Child Skill")
+        skillsService.addTagToSkills(proj1.projectId, nonGroupSkillids, "A Skill")
+
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[0].skillId.toString()], "Subject2 Skill")
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[0].skillId.toString()], "A Skill")
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[1].skillId.toString()], "Disabled Skill")
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[2].skillId.toString()], "Disabled Skill") // this skill is enabled
+
+        def user = getRandomUsers(1)[0]
+        skillsService.addSkill(proj1_skills[0], user)
+        skillsService.addSkill(group1Children[1], user)
+
+        when:
+        def projectTagSummaries = skillsService.getSkillTagSummariesForProject(user, proj1.projectId)
+        then:
+        projectTagSummaries
+        projectTagSummaries.find {it.tagId == 'askill'}
+        projectTagSummaries.find {it.tag == 'A Skill'}
+        projectTagSummaries.find {it.tag == 'A Skill'}.totalSkills == 7
+        projectTagSummaries.find {it.tag == 'A Skill'}.skillsAchieved == 2
+
+        projectTagSummaries.find {it.tagId == 'groupchildskill'}
+        projectTagSummaries.find {it.tag == 'Group Child Skill'}
+        projectTagSummaries.find {it.tag == 'Group Child Skill'}.totalSkills == 3
+        projectTagSummaries.find {it.tag == 'Group Child Skill'}.skillsAchieved == 1
+
+        projectTagSummaries.find {it.tagId == 'regularskill'}
+        projectTagSummaries.find {it.tag == 'Regular Skill'}
+        projectTagSummaries.find {it.tag == 'Regular Skill'}.totalSkills == 3
+        projectTagSummaries.find {it.tag == 'Regular Skill'}.skillsAchieved == 1
+
+        projectTagSummaries.find {it.tagId == 'subject2skill'}
+        projectTagSummaries.find {it.tag == 'Subject2 Skill'}
+        projectTagSummaries.find {it.tag == 'Subject2 Skill'}.totalSkills == 1
+        projectTagSummaries.find {it.tag == 'Subject2 Skill'}.skillsAchieved == 0
+
+        projectTagSummaries.find {it.tag == 'Disabled Skill'}
+        projectTagSummaries.find {it.tag == 'Disabled Skill'}
+        projectTagSummaries.find {it.tag == 'Disabled Skill'}.totalSkills == 1
+        projectTagSummaries.find {it.tag == 'Disabled Skill'}.skillsAchieved == 0
+    }
+
+    def "get individual skill tags summaries"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> allSkills = SkillsFactory.createSkills(7, 1, 1, 100)
+        List<Map> proj1_skills = allSkills[0..2]
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        def skillsGroup1 = allSkills[3]
+        skillsGroup1.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup1)
+        String skillsGroup1Id = skillsGroup1.skillId
+        def group1Children = allSkills[4..6]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
+        }
+        skillsGroup1.numSkillsRequired = 2
+        skillsService.updateSkill(skillsGroup1, null)
+
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> subj2Skills = SkillsFactory.createSkills(2, 1, 2)
+        skillsService.createSubject(proj1_subj2)
+        subj2Skills[1].enabled = false
+        skillsService.createSkills(subj2Skills)
+
+        List<String> regSkillids = proj1_skills.collect { it.skillId }
+        List<String> childSkillids = group1Children.collect { it.skillId }
+        List<String> nonGroupSkillids = regSkillids + childSkillids
+
+        skillsService.addTagToSkills(proj1.projectId, regSkillids, "Regular Skill")
+        skillsService.addTagToSkills(proj1.projectId, childSkillids, "Group Child Skill")
+        skillsService.addTagToSkills(proj1.projectId, nonGroupSkillids, "A Skill")
+
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[0].skillId.toString()], "Subject2 Skill")
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[0].skillId.toString()], "A Skill")
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[1].skillId.toString()], "Disabled Skill")
+
+        def user = getRandomUsers(1)[0]
+        skillsService.addSkill(proj1_skills[0], user)
+        skillsService.addSkill(group1Children[1], user)
+
+        when:
+        def projectTagSummary1 = skillsService.getSkillTagSummary(user, proj1.projectId, 'askill')
+        def projectTagSummary2 = skillsService.getSkillTagSummary(user, proj1.projectId, 'groupchildskill')
+        def projectTagSummary3 = skillsService.getSkillTagSummary(user, proj1.projectId, 'regularskill')
+        def projectTagSummary4 = skillsService.getSkillTagSummary(user, proj1.projectId, 'subject2skill')
+
+        then:
+        projectTagSummary1
+        projectTagSummary1.tagId == 'askill'
+        projectTagSummary1.tag == 'A Skill'
+        projectTagSummary1.totalSkills == 7
+        projectTagSummary1.skillsAchieved == 2
+
+        projectTagSummary2.tagId == 'groupchildskill'
+        projectTagSummary2.tag == 'Group Child Skill'
+        projectTagSummary2.totalSkills == 3
+        projectTagSummary2.skillsAchieved == 1
+
+        projectTagSummary3.tagId == 'regularskill'
+        projectTagSummary3.tag == 'Regular Skill'
+        projectTagSummary3.totalSkills == 3
+        projectTagSummary3.skillsAchieved == 1
+
+        projectTagSummary4.tagId == 'subject2skill'
+        projectTagSummary4.tag == 'Subject2 Skill'
+        projectTagSummary4.totalSkills == 1
+        projectTagSummary4.skillsAchieved == 0
+    }
+
+    def "get skill tags for subject"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> allSkills = SkillsFactory.createSkills(7, 1, 1)
+        List<Map> proj1_skills = allSkills[0..2]
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(proj1_skills)
+
+        def skillsGroup1 = allSkills[3]
+        skillsGroup1.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup1)
+        String skillsGroup1Id = skillsGroup1.skillId
+        def group1Children = allSkills[4..6]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
+        }
+        skillsGroup1.numSkillsRequired = 2
+        skillsService.updateSkill(skillsGroup1, null)
+
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> subj2Skills = SkillsFactory.createSkills(2, 1, 2)
+        skillsService.createSubject(proj1_subj2)
+        subj2Skills[1].enabled = false
+        skillsService.createSkills(subj2Skills)
+
+        List<String> regSkillids = proj1_skills.collect { it.skillId }
+        List<String> childSkillids = group1Children.collect { it.skillId }
+        List<String> nonGroupSkillids = regSkillids + childSkillids
+
+        skillsService.addTagToSkills(proj1.projectId, regSkillids, "Regular Skill")
+        skillsService.addTagToSkills(proj1.projectId, childSkillids, "Group Child Skill")
+        skillsService.addTagToSkills(proj1.projectId, nonGroupSkillids, "A Skill")
+
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[0].skillId.toString()], "Subject2 Skill")
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[0].skillId.toString()], "A Skill")
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[1].skillId.toString()], "Disabled Skill")
+
+        when:
+        def subject1Tags = skillsService.getApiTagsForSubject(proj1.projectId, proj1_subj.subjectId, false)
+        def subject2Tags = skillsService.getApiTagsForSubject(proj1.projectId, proj1_subj2.subjectId, false)
+        then:
+        subject1Tags
+        subject1Tags.size() == 3
+        subject1Tags.find {it.tagValue == 'A Skill'}
+        subject1Tags.find {it.tagValue == 'A Skill'}.numSkills == 6
+
+        subject1Tags.find {it.tagValue == 'Group Child Skill'}
+        subject1Tags.find {it.tagValue == 'Group Child Skill'}.numSkills == 3
+
+        subject1Tags.find {it.tagValue == 'Regular Skill'}
+        subject1Tags.find {it.tagValue == 'Regular Skill'}.numSkills == 3
+
+        !subject1Tags.find {it.tagValue == 'Subject2 Skill'}
+        !subject1Tags.find {it.tagValue == 'Disabled Skill'}
+
+        subject2Tags
+        subject2Tags.size() == 2
+        subject2Tags.find {it.tagValue == 'A Skill'}
+        subject2Tags.find {it.tagValue == 'A Skill'}.numSkills == 1
+        subject2Tags.find {it.tagValue == 'Subject2 Skill'}
+        subject2Tags.find {it.tagValue == 'Subject2 Skill'}.numSkills == 1
+        !subject2Tags.find {it.tagValue == 'Disabled Skill'}
+    }
+
 
     private Date parseDate(String str) {
         Date.parse("yyyy-MM-dd'T'HH:mm:ss", str)
