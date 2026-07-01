@@ -71,7 +71,7 @@ const navItems = computed(() => {
 
 const headerOptions = computed(() => {
   return {
-    icon: 'fas fa-layer-group skills-color-groups',
+    icon: `${skillsState?.skill?.iconClass ? skillsState.skill.iconClass : 'fas fa-layer-group'} skills-color-groups`,
     title: `GROUP: ${skillsState.skill?.name}`,
     subTitle: `ID: ${skillsState.skill?.skillId || ''}`,
     stats: [

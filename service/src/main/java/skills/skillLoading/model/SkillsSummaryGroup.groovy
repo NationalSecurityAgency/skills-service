@@ -21,4 +21,5 @@ class SkillsSummaryGroup extends SkillSummaryParent {
     List<SkillSummaryParent> children
     Integer numberOfChildren
     SkillDescription description
+    String iconClass
 }
