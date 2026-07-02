@@ -142,7 +142,11 @@ class AdminTagSkillsSpecs extends DefaultIntSpec {
         skillsAfterTagging[3].tags && skillsAfterTagging[3].tags.size() == 1 && skillsAfterTagging[3].tags[0].tagValue == tagValue2
 
         tagsForProject && tagsForProject.size() == 2 && tagsForProject.find { it.tagValue == tagValue1 } && tagsForSkills.find { it.tagValue == tagValue2 }
+        tagsForProject.find { it.tagValue == tagValue1 }.numSkills == 2
+        tagsForProject.find { it.tagValue == tagValue2 }.numSkills == 3
         tagsForSkills && tagsForSkills.size() == 2 && tagsForSkills.find { it.tagValue == tagValue1 } && tagsForSkills.find { it.tagValue == tagValue2 }
+        tagsForSkills.find { it.tagValue == tagValue1 }.numSkills == 2
+        tagsForSkills.find { it.tagValue == tagValue2 }.numSkills == 3
     }
 
     void "delete tag from some skills"() {
@@ -260,4 +264,45 @@ class AdminTagSkillsSpecs extends DefaultIntSpec {
         // verify the tag itself is removed since no other skills are tagged/associated with it
         !tagAfterDeletingAll
     }
+
+    void "add multiple tags to some skills, exclude disabled"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(4)
+        skills[1].enabled = false
+        skills[2].enabled = false
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> skillIds = skills.collect {it.skillId}
+        List<String> tagged1SkillIds = skillIds[1..2]
+        List<String> tagged2SkillIds = skillIds[1..3]
+        String tagValue1 = "New Tag 1"
+        String tagValue2 = "New Tag 2"
+
+        when:
+        def res1 = skillsService.addTagToSkills(proj.projectId, tagged1SkillIds, tagValue1)
+        def res2 = skillsService.addTagToSkills(proj.projectId, tagged2SkillIds, tagValue2)
+        List skillsAfterTagging = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
+        List tagsForSkills = skillsService.getTagsForSkills(proj.projectId, skillIds)
+        List tagsForProject = skillsService.getTagsForProject(proj.projectId, false)
+
+        then:
+        res1
+        res1.success
+
+        skillsAfterTagging
+        skillsAfterTagging.size() == 4
+        skillsAfterTagging.sort { it.skillId }
+        !skillsAfterTagging[0].tags
+        skillsAfterTagging[1].tags && skillsAfterTagging[1].tags.size() == 2 && skillsAfterTagging[1].tags.find { it.tagValue == tagValue1 } && skillsAfterTagging[1].tags.find { it.tagValue == tagValue2 }
+        skillsAfterTagging[2].tags && skillsAfterTagging[2].tags.size() == 2 && skillsAfterTagging[2].tags.find { it.tagValue == tagValue1 } && skillsAfterTagging[2].tags.find { it.tagValue == tagValue2 }
+        skillsAfterTagging[3].tags && skillsAfterTagging[3].tags.size() == 1 && skillsAfterTagging[3].tags[0].tagValue == tagValue2
+
+        tagsForProject && tagsForProject.size() == 1 && !tagsForProject.find { it.tagValue == tagValue1 } && tagsForSkills.find { it.tagValue == tagValue2 }
+        tagsForSkills && tagsForSkills.size() == 2 && tagsForSkills.find { it.tagValue == tagValue1 } && tagsForSkills.find { it.tagValue == tagValue2 }
+    }
+
 }

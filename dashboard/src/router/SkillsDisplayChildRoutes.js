@@ -22,6 +22,8 @@ import BadgesDetailsPage from '@/skills-display/components/badges/BadgesDetailsP
 import BadgeDetailsPage from '@/skills-display/components/badges/BadgeDetailsPage.vue'
 import QuizPage from '@/skills-display/components/quiz/QuizPage.vue'
 import SkillsGroupPage from "@/skills-display/components/skill/SkillsGroupPage.vue";
+import SkillTagPage from '@/skills-display/components/skill/tags/SkillTagPage.vue'
+import SkillTagsPage from '@/skills-display/components/skill/tags/SkillTagsPage.vue'
 
 const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) => {
 
@@ -151,6 +153,24 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
     name: `skillsGroupDetails${appendToName}`,
     meta: {
       title: `${groupPlaceholder} Details`
+    }
+  }, {
+    name: `TagsPage${appendToName}`,
+    path: `${prependToPath}tags`,
+    component: SkillTagsPage,
+    meta: {
+      requiresAuth: true,
+      nonAdmin: true,
+      announcer: {
+        message: 'Tags'
+      }
+    }
+  }, {
+    path: `${prependToPath}tags/:tagId`,
+    component: SkillTagPage,
+    name: `skillTagDetails${appendToName}`,
+    meta: {
+      title: `${skillPlaceholder} Tag Details`
     }
   }, {
     path: `${prependToPath}subjects/:subjectId/skills/:skillId/crossProject/:crossProjectId/:dependentSkillId`,

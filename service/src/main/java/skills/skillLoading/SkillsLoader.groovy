@@ -469,6 +469,24 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
+    List<SkillTagSummary> loadTagSummaries(String projectId, String userId, Integer version = Integer.MAX_VALUE){
+        ProjDef projDef = getProjDef(userId, projectId)
+        List tagIds = skillDefRepo.getTagsForProject(projectId, false.toString()).collect {it.tagId }
+        List<SkillDefWithExtra> tagDefs = skillDefWithExtraRepo.findAllByProjectIdAndSkillIdIn(projectId, tagIds)
+        if ( version >= 0 ) {
+            tagDefs = tagDefs.findAll { it.version <= version }
+        }
+
+        List<SkillTagSummary> tags = tagDefs.sort({ it.displayOrder }).findAll {
+            (it.enabled == null || Boolean.valueOf(it.enabled)) && BadgeUtils.afterStartTime(it)
+        }.collect { SkillDefWithExtra tagSkillDef ->
+            doLoadSkillTagSummary(projDef, userId, tagSkillDef, version, false)
+        }
+
+        return tags
+    }
+
+    @Transactional(readOnly = true)
     List<SkillGlobalBadgeSummary> loadGlobalBadgeSummaries(String userId, String projectId, Integer version = Integer.MAX_VALUE){
         List<SkillDefWithExtra> badgeDefs = skillDefWithExtraRepo.findAllByProjectIdAndTypeAndEnabled(null, ContainerType.GlobalBadge, Boolean.TRUE.toString())
         if ( version >= 0 ) {
@@ -835,6 +853,10 @@ class SkillsLoader {
     List<SkillDescription> loadGlobalBadgeDescriptions(String badgeId, String userId,Integer version = -1) {
         return loadDescriptions(null, badgeId, userId, SkillRelDef.RelationshipType.BadgeRequirement, version)
     }
+    @Transactional(readOnly = true)
+    List<SkillDescription> loadSkillTagDescriptions(String projectId, String tagId, String userId, Integer version = -1) {
+        return loadDescriptions(projectId, tagId, userId, SkillRelDef.RelationshipType.Tag, version)
+    }
 
     private Map<String, String> loadDescription(String projectId, String skillId) {
         List<SkillDefWithExtraRepo.SkillIdAndDesc> description = skillDefWithExtraRepo.findDescriptionBySkillIdIn(projectId, [skillId])
@@ -1136,6 +1158,18 @@ class SkillsLoader {
         }
     }
 
+    @Transactional(readOnly = true)
+    SkillTagSummary loadSkillTagSummary(String projectId, String tagId, String userId, Integer version = -1) {
+        ProjDef projDef = getProjDef(userId, projectId)
+        SkillDefWithExtra tagSkillDef = getSkillDefWithExtra(userId, projectId, tagId, [ContainerType.Tag])
+
+        if (version == -1 || tagSkillDef.version <= version) {
+            return doLoadSkillTagSummary(projDef, userId, tagSkillDef, version, true)
+        } else {
+            return null
+        }
+    }
+
     @Profile
     private SkillsGroupSummary doLoadSkillsGroupSummary(ProjDef projDef, String userId, SkillDefWithExtra groupSkillDef, Integer version) {
         List<SkillRelDef.RelationshipType> relTypes = [ SkillRelDef.RelationshipType.SkillsGroupRequirement]
@@ -1164,6 +1198,32 @@ class SkillsLoader {
                 skillsAchieved: skillsAchieved,
                 totalSkills: totalSkills,
 
+                skills: skillsRes,
+        )
+    }
+
+    @Profile
+    private SkillTagSummary doLoadSkillTagSummary(ProjDef projDef, String userId, SkillDefWithExtra tagSkillDef, Integer version, boolean loadTagDetails) {
+        List<SkillRelDef.RelationshipType> relTypes = [SkillRelDef.RelationshipType.Tag]
+        SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, tagSkillDef, version, relTypes)
+
+        Integer skillsAchieved
+        Integer totalSkills
+        List<SkillSummaryParent> skillsRes = []
+        if (loadTagDetails) {
+            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true, userId, version)
+            skillsAchieved = skillsRes ? skillsRes.collect({it.points == it.totalPoints ? 1 : 0 }).sum() as Integer : 0
+            totalSkills = skillsRes ? skillsRes.size() : 0
+        } else {
+            skillsAchieved = achievedLevelRepository.countAchievedChildren(userId, projDef.projectId, tagSkillDef.skillId, SkillRelDef.RelationshipType.Tag)
+            totalSkills = skillDefRepo.countEnabledChildren(projDef?.projectId, tagSkillDef.skillId, SkillRelDef.RelationshipType.Tag)
+        }
+
+        return new SkillTagSummary(
+                tag: InputSanitizer.unsanitizeName(tagSkillDef.name),
+                tagId: tagSkillDef.skillId,
+                skillsAchieved: skillsAchieved,
+                totalSkills: totalSkills,
                 skills: skillsRes,
         )
     }

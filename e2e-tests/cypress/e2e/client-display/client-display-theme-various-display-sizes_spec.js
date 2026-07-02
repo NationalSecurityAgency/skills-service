@@ -171,6 +171,9 @@ describe('Client Display Tests', () => {
                     .add(2, 'day')
                     .format('x')
             });
+
+            cy.addTagToSkills(1, ['skill1', 'skill3'], 1)
+            cy.addTagToSkills(1, ['skill2', 'skill3'], 2)
         });
 
     });
@@ -241,6 +244,30 @@ describe('Client Display Tests', () => {
                 cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', {blackout: '[data-cy="dateCell"]', errorThreshold: 0.35 });
             });
         }
+
+        it(`test theming - project tags page - ${size}`, () => {
+            cy.setResolution(size);
+
+            cy.cdInitProjWithSkills();
+
+            cy.cdVisit('/tags/?enableTheme=true');
+            cy.contains('Project Tags');
+            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { errorThreshold: 0.05  });
+        });
+
+        it(`test theming - tag overview page - ${size}`, () => {
+            cy.setResolution(size);
+
+            cy.cdInitProjWithSkills();
+
+            cy.intercept('GET', `/api/projects/proj1/tags/*/descriptions?*`)
+              .as('loadSkillTagDescriptions')
+            cy.cdVisit('/tags/tag1?enableTheme=true');
+            cy.contains('TAG 1');
+            cy.get('[data-cy=toggleSkillDetails]').click();
+            cy.wait('@loadSkillTagDescriptions')
+            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { errorThreshold: 0.05  });
+        });
 
         it(`test theming - badge - ${size}`, () => {
             cy.setResolution(size);

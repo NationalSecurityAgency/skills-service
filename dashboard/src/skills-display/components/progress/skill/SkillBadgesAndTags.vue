@@ -70,6 +70,7 @@ const hasTags = computed(()=> props.skill.tags && props.skill.tags.length > 0)
             class="text-sm"
             severity="primary"
             data-cy="addTagBtn"
+            :aria-label="`Filter skills with tag ${tag.tagValue}`"
             text
             @click="addTagFilter(tag)" />
       </Chip>

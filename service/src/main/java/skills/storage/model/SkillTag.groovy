@@ -18,4 +18,5 @@ package skills.storage.model
 interface SkillTag {
     String getTagId()
     String getTagValue()
+    Integer getNumSkills()
 }

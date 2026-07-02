@@ -328,6 +328,66 @@ describe('Accessibility forProgress and Rankings Pages Tests', () => {
       cy.customLighthouse();
       cy.customA11y();
     })
+    
+    it(`Skill Tag overview page${darkMode}`, () => {
+        cy.setDarkModeIfNeeded(darkMode)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem' })
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' })
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
+
+        cy.createSubject(1, 2)
+
+        cy.createSubject(1, 3)
+        cy.createSkill(1, 3, 4, { selfReportingType: 'HonorSystem' })
+        cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: Cypress.env('proxyUser'), date: 'yesterday' })
+        cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: Cypress.env('proxyUser'), date: 'now' })
+
+        cy.addTagToSkills(1, ['skill1', 'skill3'], 1)
+        cy.addTagToSkills(1, ['skill2', 'skill3'], 2)
+        cy.visit('/progress-and-rankings/projects/proj1/tags/tag1')
+        cy.injectAxe();
+
+        cy.get('[data-cy="title"]').should('contain.text', 'Skill Tag Overview')
+        cy.get('[data-cy="skillTagName"]').should('contain.text', 'TAG 1')
+        cy.get('[data-cy="skillTagProgress"]').should('contain.text', '1 / 2 Skills')
+
+        cy.customA11y();
+        cy.customLighthouse();
+    });
+  
+    it(`Skill Tags page${darkMode}`, () => {
+        cy.setDarkModeIfNeeded(darkMode)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem' })
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        cy.createSkill(1, 1, 4, { selfReportingType: 'Approval' })
+        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
+        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
+
+        cy.createSubject(1, 2)
+
+        cy.createSubject(1, 3)
+        cy.createSkill(1, 3, 4, { selfReportingType: 'HonorSystem' })
+        cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: Cypress.env('proxyUser'), date: 'yesterday' })
+        cy.doReportSkill({ project: 1, skill: 4, subjNum: 3, userId: Cypress.env('proxyUser'), date: 'now' })
+
+        cy.addTagToSkills(1, ['skill1', 'skill3'], 1)
+        cy.addTagToSkills(1, ['skill2', 'skill3'], 2)
+        cy.visit('/progress-and-rankings/projects/proj1/tags')
+        cy.injectAxe();
+  
+        cy.get('[data-cy="skillsTitle"]').should('contain.text', 'Project Tags')
+  
+        cy.customA11y();
+        cy.customLighthouse();
+    });
   })
 })
 

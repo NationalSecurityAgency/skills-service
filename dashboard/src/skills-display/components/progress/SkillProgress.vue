@@ -105,8 +105,11 @@ const buildToRoute = () => {
       params.dependentSkillId = props.skill.skillId
     }
   }
-  else if (route.params.subjectId || route.params.badgeId) {
+  else if (route.params.subjectId || route.params.badgeId || route.params.tagId) {
     params.subjectId = route.params.subjectId || props.skill.subjectId
+    if (!params.subjectId && props.type === 'tag') {
+      return null
+    }
     if (props.skill.isSkillsGroupType) {
       name = 'skillsGroupDetails'
     } else if (props.skill.groupSkillId) {

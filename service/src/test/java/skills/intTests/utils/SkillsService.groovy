@@ -394,6 +394,13 @@ class SkillsService {
         wsHelper.apiGet(url, params)
     }
 
+    def getSkillTagDescriptions(String projectId, String tagId, String userId = null) {
+        userId = getUserId(userId)
+        String url = "/projects/${projectId}/tags/${tagId}/descriptions".toString()
+        Map params = userId ? [userId: userId] : null
+        wsHelper.apiGet(url, params)
+    }
+
     def getBadgeDescriptions(String projectId, String badgeId, boolean isGlobal = false, String userId = null) {
         userId = getUserId(userId)
         String url = "/projects/${projectId}/badges/${badgeId}/descriptions"
@@ -422,6 +429,13 @@ class SkillsService {
     def createSkills(List<Map> props) {
         props.each {
             def res = createSkill(it)
+            assert res.statusCode.value() == 200
+        }
+    }
+
+    def updateSkills(List<Map> props) {
+        props.each {
+            def res = updateSkill(it)
             assert res.statusCode.value() == 200
         }
     }
@@ -1952,8 +1966,35 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/skills/tags", [skillIds: skillIds])
     }
 
-    def getTagsForProject(String projectId) {
-        return wsHelper.adminGet("/projects/${projectId}/skills/tags")
+    def getTagsForProject(String projectId, Boolean includeDisabled=true) {
+        String query = "?includeDisabled=${includeDisabled}"
+        return wsHelper.adminGet("/projects/${projectId}/skills/tags${query}")
+    }
+
+    def getApiTagsForProject(String projectId, Boolean includeDisabled=false) {
+        String query = "?includeDisabled=${includeDisabled}"
+        return wsHelper.apiGet("/projects/${projectId}/skills/tags${query}")
+    }
+
+    def getApiTagsForSubject(String projectId, String subjectId, Boolean includeDisabled=false) {
+        String query = "?includeDisabled=${includeDisabled}"
+        return wsHelper.apiGet("/projects/${projectId}/subjects/${subjectId}/skills/tags${query}")
+    }
+
+    def getSkillTagSummary(String userId, String projectId, String tagId) {        userId = getUserId(userId)
+        String url = "/projects/${projectId}/tags/${tagId}/summary"
+        if (userId) {
+            url += "?userId=${userId}"
+        }
+        return wsHelper.apiGet(url)
+    }
+
+    def getSkillTagSummariesForProject(String userId, String projectId) {
+        String url = "/projects/${projectId}/tags/summary"
+        if (userId) {
+            url += "?userId=${userId}"
+        }
+        return wsHelper.apiGet(url)
     }
 
     def deleteTagForSkills(String projectId, List<String> skillIds, String tagId) {

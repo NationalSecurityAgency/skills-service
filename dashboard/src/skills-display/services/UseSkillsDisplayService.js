@@ -148,6 +148,22 @@ export const useSkillsDisplayService = () => {
     }).then((result) => addMetaToSummary(result.data))
   }
 
+  const getSkillTagSummary = (tagId) => {
+    const url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/tags/${encodeURIComponent(tagId)}/summary`
+    return axios.get(url, {
+      params: getUserIdAndVersionParams(),
+      withCredentials: true
+    }).then((result) => addMetaToSummary(result.data))
+  }
+
+  const getAllProjectSkillTagSummaries = () => {
+    const url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/tags/summary`
+    return axios.get(url, {
+      params: getUserIdAndVersionParams(),
+      withCredentials: true
+    }).then((result) => addMetaToSummary(result.data))
+  }
+
   const getAllProjectSkillsSubjectsAndBadges = () => {
     return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skillsSubjectsAndBadges`, {
       params: ({ ...getUserIdAndVersionParams() })
@@ -170,6 +186,9 @@ export const useSkillsDisplayService = () => {
     }
     if (type === 'badge' || type === 'global-badge') {
       url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/badges/${encodeURIComponent(parentId)}/descriptions`
+    }
+    if (type === 'tag') {
+      url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/tags/${encodeURIComponent(parentId)}/descriptions`
     }
     return axios.get(url, {
       params: {
@@ -275,6 +294,20 @@ export const useSkillsDisplayService = () => {
     return axios.get('/app/userInfo').then((response) => response.data)
   }
 
+  const getTagsForProject = (projectId, includeDisabled = false) => {
+    let params = `?includeDisabled=${includeDisabled}`
+    return axios
+      .get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(projectId)}/skills/tags${params}`)
+      .then((response) => response.data)
+  }
+
+  const getTagsForSubject = (projectId, subjectId, includeDisabled = false) => {
+    let params = `?includeDisabled=${includeDisabled}`
+    return axios
+      .get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(projectId)}/subjects/${encodeURIComponent(subjectId)}/skills/tags${params}`)
+      .then((response) => response.data)
+  }
+
   return {
     loadUserProjectSummary,
     loadSubjectSummary,
@@ -295,6 +328,10 @@ export const useSkillsDisplayService = () => {
     getRankingDistributionUsersPerLevel,
     getLeaderboard,
     getVideoTranscript,
-    getLoggedInUserInfo
+    getLoggedInUserInfo,
+    getTagsForProject,
+    getTagsForSubject,
+    getSkillTagSummary,
+    getAllProjectSkillTagSummaries
   }
 }

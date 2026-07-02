@@ -1068,7 +1068,7 @@ class BatchUpdateUserAchievementsSpec extends DefaultIntSpec {
 
         achievements_before.findAll( { it.userId == users[1].userName && it.projectId == p1.projectId && !it.skillId && it.level }).level.sort() == [1, 2]
         achievements_before.findAll( { it.userId == users[1].userName && it.projectId == p1.projectId && it.skillId == p1subj1.subjectId && it.level }).level.sort() == [1, 2]
-        achievements_before.findAll( { it.userId == users[1].userName && it.projectId == p1.projectId && p1skills.skillId.contains(it.skillId) })?.skillId == [p1skills[1].skillId, p1skills[2].skillId]
+        achievements_before.findAll( { it.userId == users[1].userName && it.projectId == p1.projectId && p1skills.skillId.contains(it.skillId) })?.skillId?.sort() == [p1skills[1].skillId, p1skills[2].skillId]
 
         // user 3
         user3_before.totalPoints == total_before
@@ -1134,7 +1134,7 @@ class BatchUpdateUserAchievementsSpec extends DefaultIntSpec {
 
         achievements_after.findAll( { it.userId == users[1].userName && it.projectId == p1.projectId && it.skillId == p1subj1.subjectId && it.level }).level.sort() == [1,2,3]
         achievements_after.findAll( { it.userId == users[1].userName && it.projectId == p1.projectId && !it.skillId && it.level }).level.sort() == [1,2,3]
-        achievements_after.findAll( { it.userId == users[1].userName && it.projectId == p1.projectId && p1skills.skillId.contains(it.skillId) })?.skillId == [p1skills[1].skillId, p1skills[2].skillId, p1skills[3].skillId]
+        achievements_after.findAll( { it.userId == users[1].userName && it.projectId == p1.projectId && p1skills.skillId.contains(it.skillId) })?.skillId?.sort() == [p1skills[1].skillId, p1skills[2].skillId, p1skills[3].skillId]
 
         // user 3
         user3_after.totalPoints == total_after
@@ -1258,7 +1258,7 @@ class BatchUpdateUserAchievementsSpec extends DefaultIntSpec {
 
         achievements_before.findAll( { it.userId == users[1].userName && it.projectId == p1.projectId && !it.skillId && it.level }).level.sort() == [1, 2]
         achievements_before.findAll( { it.userId == users[1].userName && it.projectId == p1.projectId && it.skillId == p1subj1.subjectId && it.level }).level.sort() == [1, 2]
-        achievements_before.findAll( { it.userId == users[1].userName && it.projectId == p1.projectId && p1skills.skillId.contains(it.skillId) })?.skillId == [p1skills[1].skillId, p1skills[2].skillId]
+        achievements_before.findAll( { it.userId == users[1].userName && it.projectId == p1.projectId && p1skills.skillId.contains(it.skillId) })?.skillId?.sort() == [p1skills[1].skillId, p1skills[2].skillId]
 
         // user 3
         user3_before.totalPoints == total_before

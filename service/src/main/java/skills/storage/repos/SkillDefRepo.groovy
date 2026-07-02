@@ -419,6 +419,14 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         from SkillDef s, SkillRelDef r, SkillDef c 
         where 
             s.id = r.parent.id and c.id = r.child.id and 
+            s.projectId=?1 and c.projectId=?1 and c.enabled = 'true' and
+            s.skillId=?2 and r.type=?3''')
+    Integer countEnabledChildren(@Nullable String projectId, String skillId, RelationshipType relationshipType)
+
+    @Query(value='''SELECT count(c) 
+        from SkillDef s, SkillRelDef r, SkillDef c 
+        where 
+            s.id = r.parent.id and c.id = r.child.id and 
             s.projectId=?1 and c.projectId=?1 and
             c.type = 'Skill' and c.enabled = 'true' and
             s.skillId=?2''')
@@ -729,11 +737,47 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     ''', nativeQuery = true)
     List<SkillTag> getTagsForSkills(String projectId, List<String> skillIds)
 
-    @Query(value='''select distinct sd.skill_id as tagId, sd.name as tagValue
-                    from skill_definition sd
-                    where sd.project_id=?1 and sd.type = 'Tag'
+    @Query(value='''select tag.skill_id          as tagId,
+                           tag.name              as tagValue,
+                           count(skill.skill_id) as numSkills
+                    from skill_definition tag
+                             join skill_relationship_definition srd
+                                  on srd.parent_ref_id = tag.id
+                             join skill_definition skill
+                                  on srd.child_ref_id = skill.id
+                    where tag.project_id = ?1
+                      and tag.type = 'Tag'
+                      and srd.type = 'Tag'
+                      and (skill.enabled = 'true' or 'true' = ?2)
+                    group by tag.skill_id, tag.name
     ''', nativeQuery = true)
-    List<SkillTag> getTagsForProject(String projectId)
+    List<SkillTag> getTagsForProject(String projectId, String includeDisabled)
+
+    @Query(value='''select tag.skill_id          as tagId,
+                           tag.name              as tagValue,
+                           count(skill.skill_id) as numSkills
+                    from skill_definition tag
+                             join skill_relationship_definition srd
+                                  on srd.parent_ref_id = tag.id
+                             join skill_definition skill
+                                  on srd.child_ref_id = skill.id
+                    where tag.project_id = ?1
+                      and tag.type = 'Tag'
+                      and srd.type = 'Tag'
+                      and (skill.enabled = 'true' or 'true' = ?3)
+                      and exists (
+                          select 1
+                          from skill_relationship_definition subjectSrd
+                                   join skill_definition subject
+                                        on subject.id = subjectSrd.parent_ref_id
+                          where subjectSrd.child_ref_id = skill.id
+                            and subject.project_id = ?1
+                            and subject.skill_id = ?2
+                            and subjectSrd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
+                      )
+                    group by tag.skill_id, tag.name
+    ''', nativeQuery = true)
+    List<SkillTag> getTagsForSubject(String projectId, String subjectId, String includeDisabled)
 
     @Query(value='''select tag.skill_id as tagId, tag.name as tagValue, skill.skill_id as skillId
                     from skill_definition tag, skill_relationship_definition srd, skill_definition skill

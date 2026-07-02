@@ -15,12 +15,16 @@
  */
 export const useColors = () => {
   const colors = ['text-blue-500', 'text-green-500', 'text-cyan-500', 'text-indigo-500', 'text-teal-500', 'text-orange-500', 'text-purple-500']
-  const getTextClass = (index) => {
-    const colorIndex = index % colors.length
-    const color = colors[colorIndex]
+  const bgColorsBase = ['bg-blue-', 'bg-green-', 'bg-cyan-', 'bg-indigo-', 'bg-teal-', 'bg-orange-', 'bg-purple-']
+
+  const getListItemByIndex = (index, list) => {
+    const colorIndex = index % list.length
+    const color = list[colorIndex]
     return color
   }
 
+  const getTextClass = (index) => getListItemByIndex(index, colors)
+  const getBgColorClass = (index, weightNum) => `${getListItemByIndex(index, bgColorsBase)}${weightNum}`
 
   const goldText = 'text-yellow-600'
   const silverText = 'text-slate-600'
@@ -48,6 +52,7 @@ export const useColors = () => {
   return {
     getTextClass,
     getRankTextClass,
-    getLeftBorderClass
+    getLeftBorderClass,
+    getBgColorClass,
   }
 }
