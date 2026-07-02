@@ -208,6 +208,12 @@ const handlePasteAsText = (event) => {
     return
   }
 
+  // the actual context of the editor is within <p> tags and NOT an <input> tag
+  const isPasteIntoToolbarDialog =  event.target instanceof HTMLInputElement
+  if (isPasteIntoToolbarDialog) {
+    return
+  }
+
   const clipboardItems = [...(event.clipboardData?.items || [])]
   const hasImage = clipboardItems.some((item) => item.type.startsWith('image/'))
   if (hasImage) {
