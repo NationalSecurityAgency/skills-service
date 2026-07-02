@@ -49,6 +49,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         def subj = createSubject(1, 1)
         def skill = SkillsFactory.createSkill(1, 1)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+        skillsService.addTagToSkills(proj.projectId, [skill.skillId], "tag")
         Map badge = SkillsFactory.createBadge(1, 1)
         skillsService.createBadge(badge)
         skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, skill.skillId)
@@ -66,6 +67,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         validateForbidden { nonUserCommunityUser.contactProjectOwner(proj.projectId, "a message") }
         validateForbidden { nonUserCommunityUser.getSubjectDescriptions(proj.projectId, subj.subjectId) }
         validateForbidden { nonUserCommunityUser.getBadgeDescriptions(proj.projectId, badge.badgeId) }
+        validateForbidden { nonUserCommunityUser.getSkillTagDescriptions(proj.projectId, "tag") }
         validateForbidden { nonUserCommunityUser.addSkill([projectId: proj.projectId, skillId: skill.skillId]) }
         validateForbidden { nonUserCommunityUser.getSkillSummary(null, proj.projectId, subj.subjectId) }
         validateForbidden { nonUserCommunityUser.documentVisitedSkillId(proj.projectId, skill.skillId) }
@@ -100,6 +102,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         def subj = createSubject(1, 1)
         def skill = SkillsFactory.createSkill(1, 1)
         skillsService.createProjectAndSubjectAndSkills(proj, subj, [skill])
+        skillsService.addTagToSkills(proj.projectId, [skill.skillId], "tag")
         Map badge = SkillsFactory.createBadge(1, 1)
         skillsService.createBadge(badge)
         skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, skill.skillId)
@@ -118,6 +121,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         !validateForbidden { otherUserCommunityUser.contactProjectOwner(proj.projectId, "a message") }
         !validateForbidden { otherUserCommunityUser.getSubjectDescriptions(proj.projectId, subj.subjectId) }
         !validateForbidden { otherUserCommunityUser.getBadgeDescriptions(proj.projectId, badge.badgeId) }
+        !validateForbidden { otherUserCommunityUser.getSkillTagDescriptions(proj.projectId, "tag") }
         !validateForbidden { otherUserCommunityUser.addSkill([projectId: proj.projectId, skillId: skill.skillId]) }
         !validateForbidden { otherUserCommunityUser.getSkillSummary(null, proj.projectId, subj.subjectId) }
         !validateForbidden { otherUserCommunityUser.documentVisitedSkillId(proj.projectId, skill.skillId) }

@@ -379,6 +379,100 @@ class SkillsDescriptionSpec extends DefaultIntSpec {
         res[2].href == "http://${proj1_subj2_skills[2].skillId}".toString()
     }
 
+    void "get descriptions for a skill tag"() {
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1_subj = SkillsFactory.createSubject(1, 1)
+        List<Map> subj1Skills = SkillsFactory.createSkills(7, 1, 1, 100)
+        subj1Skills.each {
+            it.description = "Desc [${it.skillId}]".toString()
+            it.helpUrl = "http://${it.skillId}".toString()
+        }
+        List<Map> regSkills = subj1Skills[0..2]
+
+        skillsService.createProject(proj1)
+        skillsService.createSubject(proj1_subj)
+        skillsService.createSkills(regSkills)
+
+        def skillsGroup1 = subj1Skills[3]
+        skillsGroup1.type = 'SkillsGroup'
+        skillsService.createSkill(skillsGroup1)
+        String skillsGroup1Id = skillsGroup1.skillId
+        def group1Children = subj1Skills[4..6]
+        group1Children.each { skill ->
+            skillsService.assignSkillToSkillsGroup(skillsGroup1Id, skill)
+        }
+        skillsGroup1.numSkillsRequired = 2
+        skillsService.updateSkill(skillsGroup1, null)
+
+        def proj1_subj2 = SkillsFactory.createSubject(1, 2)
+        List<Map> subj2Skills = SkillsFactory.createSkills(2, 1, 2)
+        subj2Skills.each {
+            it.description = "Desc [${it.skillId}]".toString()
+            it.helpUrl = "http://${it.skillId}".toString()
+        }
+        skillsService.createSubject(proj1_subj2)
+        subj2Skills[1].enabled = false
+        skillsService.createSkills(subj2Skills)
+
+        List<String> regSkillIds = (regSkills.collect { it.skillId }).sort()
+        List<String> childSkillIds = (group1Children.collect { it.skillId }).sort()
+        List<String> nonGroupSkillIds = (regSkillIds + childSkillIds).sort()
+        List<String> aSkillSkillIds = (nonGroupSkillIds + [subj2Skills[0].skillId.toString()]).sort()
+
+        skillsService.addTagToSkills(proj1.projectId, regSkillIds, "Regular Skill")
+        skillsService.addTagToSkills(proj1.projectId, childSkillIds, "Group Child Skill")
+        skillsService.addTagToSkills(proj1.projectId, nonGroupSkillIds, "A Skill")
+
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[0].skillId.toString()], "Subject2 Skill")
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[0].skillId.toString()], "A Skill")
+        skillsService.addTagToSkills(proj1.projectId, [subj2Skills[1].skillId.toString()], "Disabled Skill")
+
+
+        when:
+        def askillTagSkillDescriptions = skillsService.getSkillTagDescriptions(proj1.projectId, 'askill').sort { it.skillId }
+        def groupchildskillTagSkillDescriptions = skillsService.getSkillTagDescriptions(proj1.projectId, 'groupchildskill').sort { it.skillId }
+        def regularskillTagSkillDescriptions = skillsService.getSkillTagDescriptions(proj1.projectId, 'regularskill').sort { it.skillId }
+        def subject2skillTagSkillDescriptions = skillsService.getSkillTagDescriptions(proj1.projectId, 'subject2skill').sort { it.skillId }
+
+        then:
+
+        askillTagSkillDescriptions.size() == 7
+        askillTagSkillDescriptions[0].description == "Desc [${aSkillSkillIds[0]}]".toString()
+        askillTagSkillDescriptions[0].href == "http://${aSkillSkillIds[0]}".toString()
+        askillTagSkillDescriptions[1].description == "Desc [${aSkillSkillIds[1]}]".toString()
+        askillTagSkillDescriptions[1].href == "http://${aSkillSkillIds[1]}".toString()
+        askillTagSkillDescriptions[2].description == "Desc [${aSkillSkillIds[2]}]".toString()
+        askillTagSkillDescriptions[2].href == "http://${aSkillSkillIds[2]}".toString()
+        askillTagSkillDescriptions[3].description == "Desc [${aSkillSkillIds[3]}]".toString()
+        askillTagSkillDescriptions[3].href == "http://${aSkillSkillIds[3]}".toString()
+        askillTagSkillDescriptions[4].description == "Desc [${aSkillSkillIds[4]}]".toString()
+        askillTagSkillDescriptions[4].href == "http://${aSkillSkillIds[4]}".toString()
+        askillTagSkillDescriptions[5].description == "Desc [${aSkillSkillIds[5]}]".toString()
+        askillTagSkillDescriptions[5].href == "http://${aSkillSkillIds[5]}".toString()
+        askillTagSkillDescriptions[6].description == "Desc [${aSkillSkillIds[6]}]".toString()
+        askillTagSkillDescriptions[6].href == "http://${aSkillSkillIds[6]}".toString()
+
+        groupchildskillTagSkillDescriptions.size() == 3
+        groupchildskillTagSkillDescriptions[0].description == "Desc [${childSkillIds[0]}]".toString()
+        groupchildskillTagSkillDescriptions[0].href == "http://${childSkillIds[0]}".toString()
+        groupchildskillTagSkillDescriptions[1].description == "Desc [${childSkillIds[1]}]".toString()
+        groupchildskillTagSkillDescriptions[1].href == "http://${childSkillIds[1]}".toString()
+        groupchildskillTagSkillDescriptions[2].description == "Desc [${childSkillIds[2]}]".toString()
+        groupchildskillTagSkillDescriptions[2].href == "http://${childSkillIds[2]}".toString()
+
+        regularskillTagSkillDescriptions.size() == 3
+        regularskillTagSkillDescriptions[0].description == "Desc [${regSkillIds[0]}]".toString()
+        regularskillTagSkillDescriptions[0].href == "http://${regSkillIds[0]}".toString()
+        regularskillTagSkillDescriptions[1].description == "Desc [${regSkillIds[1]}]".toString()
+        regularskillTagSkillDescriptions[1].href == "http://${regSkillIds[1]}".toString()
+        regularskillTagSkillDescriptions[2].description == "Desc [${regSkillIds[2]}]".toString()
+        regularskillTagSkillDescriptions[2].href == "http://${regSkillIds[2]}".toString()
+
+        subject2skillTagSkillDescriptions.size() == 1
+        subject2skillTagSkillDescriptions[0].description == "Desc [${subj2Skills[0].skillId}]".toString()
+        subject2skillTagSkillDescriptions[0].href == "http://${subj2Skills[0].skillId}".toString()
+    }
+
     void "get descriptions for a SkillsGroup"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj1 = SkillsFactory.createSubject(1, 1)

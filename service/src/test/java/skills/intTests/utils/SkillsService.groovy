@@ -394,6 +394,13 @@ class SkillsService {
         wsHelper.apiGet(url, params)
     }
 
+    def getSkillTagDescriptions(String projectId, String tagId, String userId = null) {
+        userId = getUserId(userId)
+        String url = "/projects/${projectId}/tags/${tagId}/descriptions".toString()
+        Map params = userId ? [userId: userId] : null
+        wsHelper.apiGet(url, params)
+    }
+
     def getBadgeDescriptions(String projectId, String badgeId, boolean isGlobal = false, String userId = null) {
         userId = getUserId(userId)
         String url = "/projects/${projectId}/badges/${badgeId}/descriptions"
@@ -422,6 +429,13 @@ class SkillsService {
     def createSkills(List<Map> props) {
         props.each {
             def res = createSkill(it)
+            assert res.statusCode.value() == 200
+        }
+    }
+
+    def updateSkills(List<Map> props) {
+        props.each {
+            def res = updateSkill(it)
             assert res.statusCode.value() == 200
         }
     }
