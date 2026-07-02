@@ -187,6 +187,9 @@ export const useSkillsDisplayService = () => {
     if (type === 'badge' || type === 'global-badge') {
       url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/badges/${encodeURIComponent(parentId)}/descriptions`
     }
+    if (type === 'tag') {
+      url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/tags/${encodeURIComponent(parentId)}/descriptions`
+    }
     return axios.get(url, {
       params: {
         ...getUserIdAndVersionParams(),

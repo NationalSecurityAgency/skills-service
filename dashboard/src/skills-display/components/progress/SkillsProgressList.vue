@@ -118,7 +118,7 @@ const descriptions = ref([])
 const onDetailsToggle = () => {
   if (!descriptionsLoaded.value) {
     loading.value = true
-    skillsDisplayService.getDescriptions(subject.value.subjectId || route.params.badgeId || route.params.groupId, props.type)
+    skillsDisplayService.getDescriptions(subject.value.subjectId || route.params.badgeId || route.params.groupId || subject.value.tagId, props.type)
       .then((res) => {
         descriptions.value = res
         res.forEach((desc) => {
