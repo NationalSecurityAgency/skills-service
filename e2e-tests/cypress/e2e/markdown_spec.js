@@ -763,4 +763,29 @@ describe('Markdown Tests', () => {
         });
       });
     });
+
+    it('enter link and its description', () => {
+        cy.viewport(1000, 1400);
+        cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+            projectId: 'proj1',
+            subjectId: 'subj1',
+            skillId: 'skill1',
+            name: 'Skill 1',
+            pointIncrement: '50',
+            numPerformToCompletion: '5',
+        });
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="editSkillButton_skill1"]').click();
+        cy.get('button[aria-label="Insert link"]').click({force: true})
+
+        cy.get('#toastuiLinkUrlInput').type('https://www.somewebsite.com')
+        cy.get('#toastuiLinkTextInput').type('Go Here')
+        cy.get('button.toastui-editor-ok-button').click()
+
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-main-container a').should('have.attr', 'href', 'https://www.somewebsite.com')
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-main-container a').should('have.text', 'Go Here')
+
+    });
 });
+393
