@@ -253,7 +253,20 @@ describe('Client Display Tests', () => {
             cy.cdVisit('/tags/?enableTheme=true');
             cy.contains('Project Tags');
             cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { errorThreshold: 0.05  });
+        });
 
+        it(`test theming - tag overview page - ${size}`, () => {
+            cy.setResolution(size);
+
+            cy.cdInitProjWithSkills();
+
+            cy.intercept('GET', `/api/projects/proj1/tags/*/descriptions?*`)
+              .as('loadSkillTagDescriptions')
+            cy.cdVisit('/tags/tag1?enableTheme=true');
+            cy.contains('TAG 1');
+            cy.get('[data-cy=toggleSkillDetails]').click();
+            cy.wait('@loadSkillTagDescriptions')
+            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { errorThreshold: 0.05  });
         });
 
         it(`test theming - badge - ${size}`, () => {
