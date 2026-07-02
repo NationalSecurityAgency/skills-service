@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import { useFocusState } from '@/stores/UseFocusState.js'
-import PageHeader from '@/components/utils/pages/PageHeader.vue'
+import ProjectPageHeader from "@/components/utils/pages/ProjectPageHeader.vue";
 import Navigation from '@/components/utils/Navigation.vue'
 import EditSubject from '@/components/subjects/EditSubject.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
@@ -47,6 +47,15 @@ const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
 onMounted(() => {
   loadSubject()
 })
+
+watch(
+    () => route.params.subjectId,
+    () => {
+      if (!route.query.preventReload) {
+        loadSubject()
+      }
+    }
+)
 
 const isLoadingData = computed(() => {
   return subjectState.isLoadingSubject.value || subjectState.subject.subjectId === undefined; // || projConfig.loadingProjConfig
@@ -159,7 +168,7 @@ const subjectEdited = (updatedSubject) => {
 
 <template>
   <div>
-    <page-header :loading="isLoadingData" :options="headerOptions">
+    <project-page-header :loading="isLoadingData" :options="headerOptions">
       <template #subSubTitle v-if="!isLoadingData && !isReadOnlyProj">
         <SkillsButton
           id="editSubjectBtn"
@@ -200,7 +209,7 @@ const subjectEdited = (updatedSubject) => {
       <template #footer>
         <!--        <import-finalize-alert />-->
       </template>
-    </page-header>
+    </project-page-header>
 
     <Message v-if="isInsufficientPoints" :closable="false" data-cy="subjInsufficientPoints">
       Subject has insufficient points assigned. Skills cannot be achieved until subject has at least <Tag>{{ appConfig.minimumSubjectPoints}}</Tag> points

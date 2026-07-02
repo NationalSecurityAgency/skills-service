@@ -19,7 +19,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
-import PageHeader from '@/components/utils/pages/PageHeader.vue'
+import ProjectPageHeader from "@/components/utils/pages/ProjectPageHeader.vue";
 import Navigation from '@/components/utils/Navigation.vue'
 import ImportFinalizeAlert from '@/components/skills/catalog/ImportFinalizeAlert.vue'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
@@ -122,7 +122,7 @@ const groupEdited = (updatedGroup) => {
 
 <template>
   <div>
-    <page-header :loading="isLoadingData" :options="headerOptions">
+    <project-page-header :loading="isLoadingData" :options="headerOptions">
       <template #subSubTitle v-if="!isLoadingData && !isReadOnlyProj">
         <SkillsButton
           id="editGroupBtn"
@@ -149,7 +149,7 @@ const groupEdited = (updatedGroup) => {
         >
       </template>
       <template #footer> </template>
-    </page-header>
+    </project-page-header>
 
     <import-finalize-alert />
 

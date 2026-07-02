@@ -872,6 +872,11 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    def getProjNavItems(String projectId) {
+        String url = "/projects/${projectId}/navigableItems"
+        wsHelper.adminGet(url)
+    }
+
     def documentVisitedSkillId(String projectId, String skillId) {
         String url = "/projects/${projectId}/skills/visited/${skillId}"
         wsHelper.apiPost(url, [])

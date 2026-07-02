@@ -151,7 +151,7 @@ export const useSkillsDisplayService = () => {
   const getAllProjectSkillsSubjectsAndBadges = () => {
     return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skillsSubjectsAndBadges`, {
       params: ({ ...getUserIdAndVersionParams() })
-    }).then((result) => result)
+    }).then((result) => result.data)
   }
   const getDescriptionForSkill = (skillId) => {
     let url = `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skills/${encodeURIComponent(skillId)}/description`

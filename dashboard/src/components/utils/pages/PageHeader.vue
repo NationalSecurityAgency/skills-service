@@ -65,7 +65,8 @@ onUnmounted(() => {
                 </div>
                 <slot name="subSubTitle" data-cy="subSubTitle"></slot>
               </div>
-              <div class="flex-1">
+              <div class="flex-1 flex flex-col gap-2">
+                <slot name="top-right" />
                 <div class="flex justify-center lg:justify-end flex-wrap">
                   <div v-for="(stat, index) in options.stats" :key="stat.label" data-cy="pageHeaderStat"
                        class="w-full md:w-6/12 lg:w-auto mb-1">
