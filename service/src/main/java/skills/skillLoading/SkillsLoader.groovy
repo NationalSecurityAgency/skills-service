@@ -854,8 +854,8 @@ class SkillsLoader {
         return loadDescriptions(null, badgeId, userId, SkillRelDef.RelationshipType.BadgeRequirement, version)
     }
     @Transactional(readOnly = true)
-    List<SkillDescription> loadSkillTagDescriptions(String projectId, String badgeId, String userId, Integer version = -1) {
-        return loadDescriptions(projectId, badgeId, userId, SkillRelDef.RelationshipType.Tag, version)
+    List<SkillDescription> loadSkillTagDescriptions(String projectId, String tagId, String userId, Integer version = -1) {
+        return loadDescriptions(projectId, tagId, userId, SkillRelDef.RelationshipType.Tag, version)
     }
 
     private Map<String, String> loadDescription(String projectId, String skillId) {

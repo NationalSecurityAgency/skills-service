@@ -29,20 +29,22 @@ describe('Client Display Skill Tag Page Features', () => {
       .as('loadSkillTagsForSubject1')
     cy.intercept('GET', `/api/projects/proj1/subjects/subj2/skills/tags?*`)
       .as('loadSkillTagsForSubject2')
+    cy.intercept('GET', `/api/projects/proj1/tags/*/descriptions?*`)
+      .as('loadSkillTagDescriptions')
 
     cy.createProject(1)
     cy.createSubject(1, 1)
     cy.createSkill(1, 1, 1, {
       numPerformToCompletion: 1,
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+      description: 'This is skill1 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
     })
     cy.createSkill(1, 1, 2, {
       numPerformToCompletion: 1,
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+      description: 'This is skill2 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
     })
     cy.createSkill(1, 1, 3, {
       numPerformToCompletion: 1,
-      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+      description: 'This is skill3 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
     })
 
     cy.createSubject(1, 2)
@@ -114,7 +116,7 @@ describe('Client Display Skill Tag Page Features', () => {
     cy.get('[data-cy="tagLink-tag2"] [data-cy="numSkills"]').should('have.text', '1')
   })
 
-  it('navigate to skill tag overview  page from the project page', () => {
+  it('navigate to skill tag overview page from the project page', () => {
 
     cy.cdVisit('/')
     cy.wait('@loadSkillTagsForProject')
@@ -142,6 +144,11 @@ describe('Client Display Skill Tag Page Features', () => {
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 3')
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 100 Points')
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"] [data-cy="skillPoints"]').should('have.text', '0')
+
+    cy.get('[data-cy=toggleSkillDetails]').click();
+    cy.wait('@loadSkillTagDescriptions')
+    cy.get('[data-cy="skillDescription-skill1"]').contains('This is skill1');
+    cy.get('[data-cy="skillDescription-skill3"]').contains('This is skill3');
   })
 
   it('navigate to skill tag overview page from the subject page', () => {
@@ -173,6 +180,11 @@ describe('Client Display Skill Tag Page Features', () => {
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 3')
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 100 Points')
     cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"] [data-cy="skillPoints"]').should('have.text', '0')
+
+    cy.get('[data-cy=toggleSkillDetails]').click();
+    cy.wait('@loadSkillTagDescriptions')
+    cy.get('[data-cy="skillDescription-skill1"]').contains('This is skill1');
+    cy.get('[data-cy="skillDescription-skill3"]').contains('This is skill3');
   })
 
   it('navigate to project skill tags page from the skill tag overview page', () => {
