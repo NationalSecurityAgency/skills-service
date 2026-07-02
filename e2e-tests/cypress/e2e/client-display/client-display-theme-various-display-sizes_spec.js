@@ -245,6 +245,17 @@ describe('Client Display Tests', () => {
             });
         }
 
+        it(`test theming - project tags page - ${size}`, () => {
+            cy.setResolution(size);
+
+            cy.cdInitProjWithSkills();
+
+            cy.cdVisit('/tags/?enableTheme=true');
+            cy.contains('Project Tags');
+            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { errorThreshold: 0.05  });
+
+        });
+
         it(`test theming - badge - ${size}`, () => {
             cy.setResolution(size);
 

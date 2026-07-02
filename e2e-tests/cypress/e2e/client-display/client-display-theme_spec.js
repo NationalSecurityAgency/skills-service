@@ -164,6 +164,9 @@ describe('Client Display Tests', () => {
                     .add(2, 'day')
                     .format('x')
             });
+
+            cy.addTagToSkills(1, ['skill1', 'skill3'], 1)
+            cy.addTagToSkills(1, ['skill2', 'skill3'], 2)
         });
 
     });
