@@ -480,7 +480,7 @@ class SkillsLoader {
         List<SkillTagSummary> tags = tagDefs.sort({ it.displayOrder }).findAll {
             (it.enabled == null || Boolean.valueOf(it.enabled)) && BadgeUtils.afterStartTime(it)
         }.collect { SkillDefWithExtra tagSkillDef ->
-            doLoadSkillTagSummary(projDef, userId, tagSkillDef, version)
+            doLoadSkillTagSummary(projDef, userId, tagSkillDef, version, false)
         }
 
         return tags
@@ -1164,7 +1164,7 @@ class SkillsLoader {
         SkillDefWithExtra tagSkillDef = getSkillDefWithExtra(userId, projectId, tagId, [ContainerType.Tag])
 
         if (version == -1 || tagSkillDef.version <= version) {
-            return doLoadSkillTagSummary(projDef, userId, tagSkillDef, version)
+            return doLoadSkillTagSummary(projDef, userId, tagSkillDef, version, true)
         } else {
             return null
         }
@@ -1203,13 +1203,21 @@ class SkillsLoader {
     }
 
     @Profile
-    private SkillTagSummary doLoadSkillTagSummary(ProjDef projDef, String userId, SkillDefWithExtra tagSkillDef, Integer version) {
+    private SkillTagSummary doLoadSkillTagSummary(ProjDef projDef, String userId, SkillDefWithExtra tagSkillDef, Integer version, boolean loadTagDetails) {
         List<SkillRelDef.RelationshipType> relTypes = [SkillRelDef.RelationshipType.Tag]
         SubjectDataLoader.SkillsData groupChildrenMeta = subjectDataLoader.loadData(userId, projDef.projectId, tagSkillDef, version, relTypes)
 
-        List<SkillSummaryParent> skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true, userId, version)
-        Integer skillsAchieved = skillsRes ? skillsRes.collect({it.points == it.totalPoints ? 1 : 0 }).sum() as Integer : 0
-        Integer totalSkills = skillsRes ? skillsRes.size() : 0
+        Integer skillsAchieved
+        Integer totalSkills
+        List<SkillSummaryParent> skillsRes = []
+        if (loadTagDetails) {
+            skillsRes = createSkillSummaries(projDef, groupChildrenMeta.childrenWithPoints, true, userId, version)
+            skillsAchieved = skillsRes ? skillsRes.collect({it.points == it.totalPoints ? 1 : 0 }).sum() as Integer : 0
+            totalSkills = skillsRes ? skillsRes.size() : 0
+        } else {
+            skillsAchieved = achievedLevelRepository.countAchievedChildren(userId, projDef.projectId, tagSkillDef.skillId, SkillRelDef.RelationshipType.Tag)
+            totalSkills = skillDefRepo.countChildren(projDef?.projectId, tagSkillDef.skillId, SkillRelDef.RelationshipType.Tag)
+        }
 
         return new SkillTagSummary(
                 tag: InputSanitizer.unsanitizeName(tagSkillDef.name),

@@ -45,7 +45,7 @@ const tagName = computed(() => {
 })
 
 const skillsAchieved = computed(() => props.skillTagOverview.skillsAchieved || 0)
-const totalSkills = computed(() => props.skillTagOverview.totalSkills || props.skillTagOverview.skills?.length || 0)
+const totalSkills = computed(() => props.skillTagOverview.totalSkills || 0)
 
 const progressPercent = computed(() => {
   return totalSkills.value > 0 ? Math.trunc((skillsAchieved.value / totalSkills.value) * 100) : 0
