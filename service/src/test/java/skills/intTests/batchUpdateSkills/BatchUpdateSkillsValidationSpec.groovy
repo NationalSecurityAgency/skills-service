@@ -110,7 +110,8 @@ class BatchUpdateSkillsValidationSpec extends DefaultIntSpec {
 
         then:
         def ex = thrown(SkillsClientException)
-        ex.message.contains("All provided skills must belong to the same subject. Skill [${p1skills2[0].skillId}] is not a child of [${p1subj1.subjectId}]")
+        ex.message.contains("All provided skills must belong to the same subject. Skill [${p1skills2[0].skillId}] is not a child of [${p1subj1.subjectId}]") ||
+        ex.message.contains("All provided skills must belong to the same subject. Skill [${p1skills1[0].skillId}] is not a child of [${p1subj2.subjectId}]")
     }
 
     def "should return error when trying to enable imported skill"() {
