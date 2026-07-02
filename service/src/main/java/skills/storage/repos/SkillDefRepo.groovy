@@ -998,6 +998,7 @@ ORDER BY s.name ASC
 
     static interface SkillNameAndPresenceOfDescription {
         String getSkillName()
+        @Nullable
         String getIconClass()
         Boolean getHasDescription()
     }

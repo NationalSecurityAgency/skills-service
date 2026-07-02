@@ -579,7 +579,7 @@ class SkillsLoader {
             SkillDefRepo.SkillNameAndPresenceOfDescription nameAndDescPresence = skillDefRepo.getGroupNameAndPresenceOfDescription(skillDef.projectId, skillDef.groupId)
             groupName = nameAndDescPresence?.skillName
             groupHasDescription = nameAndDescPresence?.hasDescription
-            groupIconClass = nameAndDescPresence.iconClass
+            groupIconClass = nameAndDescPresence?.iconClass
         }
 
         boolean isCrossProjectSkill = crossProjectId && crossProjectId != projectId
