@@ -1216,7 +1216,7 @@ class SkillsLoader {
             totalSkills = skillsRes ? skillsRes.size() : 0
         } else {
             skillsAchieved = achievedLevelRepository.countAchievedChildren(userId, projDef.projectId, tagSkillDef.skillId, SkillRelDef.RelationshipType.Tag)
-            totalSkills = skillDefRepo.countChildren(projDef?.projectId, tagSkillDef.skillId, SkillRelDef.RelationshipType.Tag)
+            totalSkills = skillDefRepo.countEnabledChildren(projDef?.projectId, tagSkillDef.skillId, SkillRelDef.RelationshipType.Tag)
         }
 
         return new SkillTagSummary(

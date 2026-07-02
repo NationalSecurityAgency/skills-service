@@ -419,6 +419,14 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         from SkillDef s, SkillRelDef r, SkillDef c 
         where 
             s.id = r.parent.id and c.id = r.child.id and 
+            s.projectId=?1 and c.projectId=?1 and c.enabled = 'true' and
+            s.skillId=?2 and r.type=?3''')
+    Integer countEnabledChildren(@Nullable String projectId, String skillId, RelationshipType relationshipType)
+
+    @Query(value='''SELECT count(c) 
+        from SkillDef s, SkillRelDef r, SkillDef c 
+        where 
+            s.id = r.parent.id and c.id = r.child.id and 
             s.projectId=?1 and c.projectId=?1 and
             c.type = 'Skill' and c.enabled = 'true' and
             s.skillId=?2''')
