@@ -59,7 +59,7 @@ const hasTags = computed(() => tags.value?.length > 0)
                 :data-cy="`tagLink-${tag.tagId}`">
               <div class="flex gap-1 items-center">
                 <i class="fa-solid fa-tag" aria-hidden="true" :class="colors.getTextClass(index)"></i>
-                <div data-cy="tagName">{{ tag.tagValue }}</div>
+                <div data-cy="tagName" class="sd-theme-tile-background-color">{{ tag.tagValue }}</div>
                 <div data-cy="numSkills" class="border rounded-3xl px-2 bg-gray-200 text-slate-900 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-500">
                   {{ tag.numSkills }}
                 </div>
