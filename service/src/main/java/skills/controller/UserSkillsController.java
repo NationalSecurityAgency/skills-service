@@ -379,6 +379,17 @@ class UserSkillsController {
         }
     }
 
+    @RequestMapping(value = "/projects/{projectId}/tags/{tagId}/descriptions", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    public List<SkillDescription> getSkillTagSkillsDescriptions(@PathVariable("projectId") String projectId,
+                                                                @PathVariable("tagId") String tagId,
+                                                                @RequestParam(name = "version", required = false) Integer version,
+                                                                @RequestParam(name = "userId", required = false) String userIdParam) {
+        String userId = userInfoService.getUserName(userIdParam, true);
+        return skillsLoader.loadSkillTagDescriptions(projectId, tagId, userId, getProvidedVersionOrReturnDefault(version));
+    }
+
+
     @RequestMapping(value = "/projects/{projectId}/badges/{badgeId}/summary", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     public SkillBadgeSummary getBadgeSummary(@PathVariable("projectId") String projectId,
