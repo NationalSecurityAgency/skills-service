@@ -47,7 +47,7 @@ jobs:
         with:
           node-version: ${{ vars.NODE_VERSION }}
 
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: ${{ vars.JAVA_VERSION }}
@@ -123,7 +123,7 @@ jobs:
         with:
           node-version: ${{ vars.NODE_VERSION }}
 
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: ${{ vars.JAVA_VERSION }}
@@ -276,7 +276,7 @@ jobs:
 
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: ${{ vars.JAVA_VERSION }}
@@ -363,7 +363,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ vars.NODE_VERSION }}
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: ${{ vars.JAVA_VERSION }}
@@ -436,7 +436,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ vars.NODE_VERSION }}
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: ${{ vars.JAVA_VERSION }}
