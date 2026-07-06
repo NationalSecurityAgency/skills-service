@@ -161,50 +161,58 @@ const typeLabel = (type) => {
       <SkillsCardHeader title="Achievements"></SkillsCardHeader>
     </template>
     <template #content>
-      <div class="p-4">
-        <div class="flex pb-2 flex-col lg:flex-row">
-          <div class="flex flex-1 flex-col lg:border-r lg:border-surface lg:pr-4 gap-2">
-            <div class="field">
-              <label for="user-name-filter">User Name Filter:</label>
-              <InputText class="w-full"
-                         v-model="usernameFilter"
-                         id="user-name-filter"
-                         data-cy="achievementsNavigator-usernameInput"
-                         @keydown.enter="reloadTable"
-                         aria-label="Skill name filter" />
-            </div>
-            <div v-if="showUserTagColumn" class="xl:flex-none w-56">
-              <div>
-                <label for="userTagFilter">{{ appConfig.usersTableAdditionalUserTagLabel }} Filter</label>
-              </div>
-              <InputText id="userTagFilter" v-model="userTagFilter" v-on:keydown.enter="reloadTable"
-                         class="w-full"
-                         data-cy="users-userTagFilter" aria-label="user tag filter" />
-            </div>
-            <div class="field">
-              <label>Types: </label>
-              <div class="flex gap-2 mt-2" data-cy="achievementsNavigator-typeInput">
-                <span v-for="tag in achievementTypes.available" :key="tag">
-                  <Checkbox v-model="achievementTypes.selected" :value="tag" :name="tag" :inputId="tag"></Checkbox>
-                  <label :for="tag" class="ml-2">
-                    {{ typeLabel(tag) }}
-                  </label>
-                </span>
-              </div>
-            </div>
+      <div class="p-4 flex flex-col gap-2">
+        <div class="flex flex-col xl:flex-row gap-3">
+          <div class="flex-1 flex flex-col gap-2">
+            <label for="user-name-filter">User Name Filter:</label>
+            <InputText class="w-full"
+                       v-model="usernameFilter"
+                       id="user-name-filter"
+                       data-cy="achievementsNavigator-usernameInput"
+                       @keydown.enter="reloadTable"
+                       aria-label="Skill name filter" />
           </div>
-          <div class="flex flex-1 flex-col gap-2 lg:border-r lg:border-surface lg:pl-2 lg:pr-2">
+          <div class="flex-1 flex flex-col gap-2">
+            <label for="name-filter">Subject, Skill or Badge Name:</label>
+            <InputText class="w-full"
+                       v-model="nameFilter"
+                       id="name-filter"
+                       data-cy="achievementsNavigator-nameInput"
+                       @keydown.enter="reloadTable" />
+          </div>
+          <div v-if="showUserTagColumn" class="flex-1 flex flex-col gap-2">
+            <div>
+              <label for="userTagFilter">{{ appConfig.usersTableAdditionalUserTagLabel }} Filter</label>
+            </div>
+            <InputText id="userTagFilter" v-model="userTagFilter" v-on:keydown.enter="reloadTable"
+                       class="w-full"
+                       data-cy="users-userTagFilter" aria-label="user tag filter" />
+          </div>
+        </div>
+        <div class="flex flex-col xl:flex-row gap-3">
+          <div class="flex-1">
             <SkillsCalendarInput
-              v-model="fromDayFilter"
-              id="from-date-filter"
-              data-cy="achievementsNavigator-fromDateInput"
-              label="From Date:"
-              name="fromDayFilter"
-              input-class="w-full"
-              :max-date="toDayFilter" />
-
+                v-model="fromDayFilter"
+                id="from-date-filter"
+                data-cy="achievementsNavigator-fromDateInput"
+                label="From Date:"
+                name="fromDayFilter"
+                input-class="w-full"
+                :max-date="toDayFilter" />
+          </div>
+          <div class="flex-1">
+            <SkillsCalendarInput
+                v-model="toDayFilter"
+                id="to-date-filter"
+                data-cy="achievementsNavigator-toDateInput"
+                label="To Date:"
+                name="toDayFilter"
+                input-class="w-full"
+                :min-date="fromDayFilter" />
+          </div>
+          <div class="flex-1">
             <SkillsDropDown
-                label="Minimum Level (Subject & Skill Only)"
+                label="Overall or Subject Minimum Level"
                 name="levels-input-group"
                 id="levels-input-group"
                 data-cy="achievementsNavigator-levelsInput"
@@ -214,31 +222,24 @@ const typeLabel = (type) => {
                 v-model="levels.selected"
                 :options="levels.available" />
           </div>
-          <div class="flex flex-1 flex-col lg:gap-2 lg:pl-2">
-            <SkillsCalendarInput
-              v-model="toDayFilter"
-              id="to-date-filter"
-              data-cy="achievementsNavigator-toDateInput"
-              label="To Date:"
-              name="toDayFilter"
-              input-class="w-full"
-              :min-date="fromDayFilter" />
-
-            <div class="field">
-              <label for="name-filter">Name (Subject, Skill and Badge Only):</label>
-              <InputText class="w-full"
-                         v-model="nameFilter"
-                         id="name-filter"
-                         data-cy="achievementsNavigator-nameInput"
-                         @keydown.enter="reloadTable" />
-            </div>
+        </div>
+        <div class="flex flex-col gap-2 mt-1">
+          <label>Types: </label>
+          <div class="flex gap-2" data-cy="achievementsNavigator-typeInput">
+                <span v-for="tag in achievementTypes.available" :key="tag">
+                  <Checkbox v-model="achievementTypes.selected" :value="tag" :name="tag" :inputId="tag"></Checkbox>
+                  <label :for="tag" class="ml-2">
+                    {{ typeLabel(tag) }}
+                  </label>
+                </span>
           </div>
         </div>
-        <div class="flex lg:pl-4 mb-4 lg:mt-4">
-        <SkillsButton size="small" aria-label="Filter" @click="reloadTable" data-cy="achievementsNavigator-filterBtn" icon="fa fa-filter" label="Filter" />
-        <SkillsButton size="small" aria-label="Reset" @click="reset" class="ml-1" data-cy="achievementsNavigator-resetBtn" icon="fa fa-times" label="Reset" />
+        <div class="mt-3 mb-2">
+          <SkillsButton aria-label="Filter" @click="reloadTable" data-cy="achievementsNavigator-filterBtn" icon="fa fa-filter" label="Filter" />
+          <SkillsButton aria-label="Reset" @click="reset" class="ml-1" data-cy="achievementsNavigator-resetBtn" icon="fa fa-times" label="Reset" />
+        </div>
       </div>
-      </div>
+
       <SkillsDataTable
         data-cy="achievementsNavigator-table"
         aria-label="Achievements"
