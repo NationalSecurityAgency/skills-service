@@ -96,6 +96,7 @@ import GlobalBadgeAccessPage from '@/components/badges/global/GlobalBadgeAccessP
 import AdminGroupGlobalBadges from '@/components/access/groups/AdminGroupGlobalBadges.vue'
 import SkillGroupPage from '@/components/skills/SkillGroupPage.vue'
 import SkillGroupSkills from '@/components/skills/SkillGroupSkills.vue'
+import SkillTagsPage from "@/components/skills/tags/SkillTagsPage.vue";
 
 const FullDependencyGraph = defineAsyncComponent(() => import('@/components/skills/dependencies/FullDependencyGraph.vue'))
 
@@ -408,6 +409,17 @@ const routes = [
         reportSkillId: 'VisitProjectDependencies',
         announcer: {
           message: 'Project Learning Path',
+        },
+      },
+    },  {
+      name: 'SkillTags',
+      path: 'skills-tags',
+      component: SkillTagsPage,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitSkillsTagsPage',
+        announcer: {
+          message: 'Skill Tags',
         },
       },
     }, {
