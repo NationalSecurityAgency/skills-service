@@ -42,15 +42,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Setup node version [${{ vars.NODE_VERSION }}]
+      - name: Setup node version [${{ env.NODE_VERSION }}]
         uses: actions/setup-node@v6
         with:
-          node-version: ${{ vars.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
 
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: ${{ vars.JAVA_VERSION }}
+          java-version: ${{ env.JAVA_VERSION }}
 
       - name: Print Versions
         run: |
@@ -121,12 +121,12 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: ${{ vars.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
 
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: ${{ vars.JAVA_VERSION }}
+          java-version: ${{ env.JAVA_VERSION }}
 
       - name: Print Versions
         run: |
@@ -201,7 +201,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: ${{ vars.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Print Versions
         run: |
@@ -279,7 +279,7 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: ${{ vars.JAVA_VERSION }}
+          java-version: ${{ env.JAVA_VERSION }}
 
       - name: Print Versions
         run: |
@@ -362,11 +362,11 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: ${{ vars.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: ${{ vars.JAVA_VERSION }}
+          java-version: ${{ env.JAVA_VERSION }}
 
       - name: Print Versions
         run: |
@@ -435,11 +435,11 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
-          node-version: ${{ vars.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: ${{ vars.JAVA_VERSION }}
+          java-version: ${{ env.JAVA_VERSION }}
 
       # Download standard XMLs into their own folder structure
       - name: Download Standard Surefire Artifacts

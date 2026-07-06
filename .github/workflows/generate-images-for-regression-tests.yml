@@ -49,12 +49,12 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: ${{ vars.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
 
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: ${{ vars.JAVA_VERSION }}
+          java-version: ${{ env.JAVA_VERSION }}
 
       - name: Install libs
         run: |
