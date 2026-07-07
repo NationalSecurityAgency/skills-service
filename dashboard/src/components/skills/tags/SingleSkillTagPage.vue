@@ -14,11 +14,50 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import ProjectPageHeader from "@/components/utils/pages/ProjectPageHeader.vue";
+import {computed, onMounted} from "vue";
+import {useSingleSkillTagState} from "@/stores/UseSingleSkillTagState.js";
+import {useRoute} from "vue-router";
+import Navigation from "@/components/utils/Navigation.vue";
+import SkillTagSkills from "@/components/skills/tags/SkillTagSkills.vue";
+
+const skillTagState = useSingleSkillTagState()
+const route = useRoute()
+const navItems = computed(() => {
+  return [
+    { name: 'Tagged Skills', iconClass: 'fa-graduation-cap', page: 'SkillTagSkills' },
+    { name: 'Users', iconClass: 'fa-users', page: 'SkillTagUsers' },
+  ];
+})
+
+onMounted(() => {
+  skillTagState.loadSkillTagInfo(route.params.projectId, route.params.tagId)
+})
+
+const isLoading = computed(() => skillTagState.loadingSkillTag)
+const headerOptions = computed(() => {
+  const iconClass = 'fa-solid fa-tags'
+
+  return {
+    icon: `${iconClass}`,
+    title: `TAG: ${skillTagState.skillTag?.tagValue || 'N/A' }`,
+    stats: [{
+      label: 'Tagged Skills',
+      count: skillTagState.skillTag?.skills?.length || 0,
+      icon: 'fa-solid fa-graduation-cap'
+    }]
+  }
+})
 
 </script>
 
 <template>
+  <div>
+    <project-page-header :loading="isLoading" :options="headerOptions">
+    </project-page-header>
 
+    <navigation :nav-items="navItems" />
+  </div>
 </template>
 
 <style scoped>

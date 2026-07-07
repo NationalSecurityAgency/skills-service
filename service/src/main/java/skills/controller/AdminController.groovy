@@ -1906,6 +1906,14 @@ class AdminController {
         return skillTagService.getTagsForProject(projectId, includeDisabled)?.collect { new SkillTagRes(tagId: it.tagId, tagValue: it.tagValue, numSkills: it.numSkills) }
     }
 
+    @RequestMapping(value = "/projects/{projectId}/skills/tags/{tagId}", method = RequestMethod.GET, produces = "application/json")
+    SkillTagInfoRes getSingleTagInfo(@PathVariable("projectId") String projectId,
+                                        @PathVariable("tagId") String tagId,
+                                        @RequestParam(required = false, value = "includeDisabled", defaultValue = "true") Boolean includeDisabled) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        return skillTagService.getSingleTagInfo(projectId, tagId)
+    }
+
     @RequestMapping(value = "/projects/{projectId}/skills/tag", method = [RequestMethod.DELETE], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult deleteTagForSkills(@PathVariable("projectId") String projectId,
                                      @RequestBody SkillsTagRequest skillsTagRequest) {

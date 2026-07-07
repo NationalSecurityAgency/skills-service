@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillsTagRequest
+import skills.controller.result.model.SkillTagInfoRes
 import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.userActions.DashboardAction
@@ -109,6 +110,34 @@ class SkillTagService {
     List<SkillTag> getTagsForProject(String projectId, Boolean includeDisabled=true) {
         skillDefRepo.getTagsForProject(projectId, includeDisabled.toString())
     }
+
+    @Transactional
+    SkillTagInfoRes getSingleTagInfo(String projectId, String tagId, Boolean includeDisabled=true) {
+
+        List<SkillDefPartial> skillsForTag = getSkillsForTag(projectId, tagId)
+
+        SkillDef tagSkillDef = skillDefRepo.findByProjectIdAndSkillIdAndType(projectId, tagId, SkillDef.ContainerType.Tag)
+        if (!tagSkillDef) {
+            throw new SkillException("Tag with id [${tagId}] does not exist.", projectId, null, ErrorCode.BadParam)
+        }
+
+        return new SkillTagInfoRes(
+                tagId: tagSkillDef.skillId,
+                tagValue: tagSkillDef.name,
+                skills: skillsForTag.collect {
+                    new SkillTagInfoRes.SkillInfo(
+                            skillId: it.skillId,
+                            skillName: it.name,
+                            subjectName: it.subjectName,
+                            subjectId: it.subjectSkillId,
+                            groupName: it.groupName,
+                            groupId: it.groupId
+                    )
+                }
+        )
+
+    }
+
 
     @Transactional
     List<SkillTag> getTagsForSubject(String projectId, String subjectId, Boolean includeDisabled=true) {

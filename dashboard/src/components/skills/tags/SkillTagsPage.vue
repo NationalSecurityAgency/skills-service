@@ -25,6 +25,7 @@ import {useResponsiveBreakpoints} from "@/components/utils/misc/UseResponsiveBre
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 import {useStorage} from "@vueuse/core";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import SkillTagUsers from "@/components/skills/tags/SkillTagUsers.vue";
 
 const route = useRoute()
 const responsive = useResponsiveBreakpoints()
@@ -118,6 +119,15 @@ const pageChanged = (pagingInfo) => {
           <Column field="tagValue" header="Tag" :sortable="true" :class="{'flex': responsive.md.value }">
             <template #header>
               <i class="fa-solid fa-tag mr-1" :class="colors.getTextClass(0)" aria-hidden="true"></i>
+            </template>
+            <template #body="slotProps">
+              <router-link
+                  :id="slotProps.data.tagValue"
+                  :to="{ name:'SkillTagSkills', params: { projectId: route.params.projectId, tagId: slotProps.data.tagId }}"
+                  class="underline"
+                  :data-cy="`manageTag_${slotProps.data.tagValue}`">
+                {{ slotProps.data.tagValue }}
+              </router-link>
             </template>
           </Column>
           <Column field="numSkills" header="# Skills" :sortable="true" :class="{'flex': responsive.md.value }">

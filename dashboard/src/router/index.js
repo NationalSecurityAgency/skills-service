@@ -97,6 +97,9 @@ import AdminGroupGlobalBadges from '@/components/access/groups/AdminGroupGlobalB
 import SkillGroupPage from '@/components/skills/SkillGroupPage.vue'
 import SkillGroupSkills from '@/components/skills/SkillGroupSkills.vue'
 import SkillTagsPage from "@/components/skills/tags/SkillTagsPage.vue";
+import SingleSkillTagPage from "@/components/skills/tags/SingleSkillTagPage.vue";
+import SkillTagSkills from "@/components/skills/tags/SkillTagSkills.vue";
+import SkillTagUsers from "@/components/skills/tags/SkillTagUsers.vue";
 
 const FullDependencyGraph = defineAsyncComponent(() => import('@/components/skills/dependencies/FullDependencyGraph.vue'))
 
@@ -648,6 +651,33 @@ const routes = [
     component: SkillPage,
     meta: { requiresAuth: true },
     children: createAdminSkillChildRoutes('SingleSkillOverview')
+  },
+  {
+    path: '/administrator/projects/:projectId/skills-tags/:tagId',
+    component: SingleSkillTagPage,
+    meta: { requiresAuth: true },
+    children: [{
+      name: 'SkillTagSkills',
+      path: '',
+      component: SkillTagSkills,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitSkillTagSkills',
+        announcer: {
+          message: 'Skill Tag Skills',
+        },
+      },
+    }, {
+      name: 'SkillTagUsers',
+      path: '',
+      component: SkillTagUsers,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Skill Tag Users',
+        },
+      },
+    }]
   },
   {
     path: '/administrator/projects/:projectId/subjects/:subjectId/groups/:groupId',
