@@ -81,8 +81,8 @@ watch(value, (newValue) => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-2" v-bind="fallthroughAttributes.rootAttrs.value">
-    <div class="flex gap-2 items-center h-[2rem]">
+  <div class="flex flex-col gap-1" v-bind="fallthroughAttributes.rootAttrs.value">
+    <div class="flex gap-2 items-center" :class="{'h-[2rem]' : showClearButton }">
       <div class="flex-1"><label v-if="label" :for="`${name}Select`"><span v-if="isRequired">*</span> {{ label }}:</label></div>
       <div v-if="showClearButton && value">
         <Button link label="Clear" @click="value = null" size="small" class="underline" :data-cy="`${$attrs['data-cy'] || name}_clearBtn`"/>

@@ -76,6 +76,7 @@ const handleOnInput = (event) => {
               @keydown.enter="onEnter"
               @input="handleOnInput"
               :inputId="`input${name}`"
+              inputClass="w-full"
               :id="name"
               :data-cy="$attrs['data-cy'] || name" />
     <Message v-if="errorMessage"
