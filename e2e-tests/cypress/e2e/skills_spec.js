@@ -1474,9 +1474,9 @@ describe('Skills Tests', () => {
 
     cy.url().should('include', '/administrator/projects/proj1/subjects/subj1/skills/newID');
     cy.contains('Users').click()
-    cy.url().should('include', '/administrator/projects/proj1/subjects/subj1/skills/newID/users');
 
-    cy.wait('@getSkillsUsers') //.should('have.been.calledOnce')
+    cy.wait('@getSkillsUsers')
+    cy.url().should('include', '/administrator/projects/proj1/subjects/subj1/skills/newID/users');
 
   })
 })
