@@ -17,7 +17,7 @@ limitations under the License.
 
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import {useSingleSkillTagState} from "@/stores/UseSingleSkillTagState.js";
-import {computed, onMounted, ref} from "vue";
+import {computed, nextTick, onMounted, ref} from "vue";
 import {useStorage} from "@vueuse/core";
 import Column from "primevue/column";
 import {useResponsiveBreakpoints} from "@/components/utils/misc/UseResponsiveBreakpoints.js";
@@ -30,10 +30,11 @@ import SkillsService from "@/components/skills/SkillsService.js";
 import {useProjConfig} from "@/stores/UseProjConfig.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import NoContent2 from "@/components/utils/NoContent2.vue";
 
 const skillTagState = useSingleSkillTagState()
 const tableId = 'skillTagSkillsTable'
-const pageSize = useStorage(`${tableId}-pageSize`, 10)
+const pageSize = useStorage(`${tableId}-pageSize`, 25)
 const responsive = useResponsiveBreakpoints()
 const colors = useColors()
 const route = useRoute()
@@ -42,6 +43,7 @@ const projConf = useProjConfig()
 const dialogMessages = useDialogMessages()
 
 const loadingProjSkills = ref(true)
+const addingSkillToTag = ref(false)
 const rowsPerPage = [10, 25, 50, 100];
 const projectSkills = ref([]);
 const nameQuery = ref(null);
@@ -51,7 +53,7 @@ onMounted(() => {
 })
 
 const hideManageButton = computed(() => projConf.isReadOnlyProj)
-const loading = computed(() => skillTagState.loadingSkillTag || loadingProjSkills.value)
+const loading = computed(() => skillTagState.loadingSkillTag || loadingProjSkills.value || addingSkillToTag.value)
 
 const pageChanged = (pagingInfo) => {
   pageSize.value = pagingInfo.rows
@@ -64,7 +66,7 @@ const toRouteProps = (skill) => {
 
 
 const loadProjSkills = () => {
-  SkillsService.getProjectSkills(route.params.projectId, nameQuery.value, false, true)
+  return SkillsService.getProjectSkills(route.params.projectId, nameQuery.value, false, true)
       .then((loadedSkills) => {
         projectSkills.value = loadedSkills
       }).finally(() => {
@@ -82,11 +84,16 @@ const availableSkills = computed(() => {
 })
 
 const skillAdded = (newItem) => {
+  addingSkillToTag.value = true
   const projectId = route.params.projectId
   const {tagId, tagValue} = skillTagState.skillTag
   return SkillsService.addTagToSkills(projectId, [newItem.skillId], tagId, tagValue)
       .then(() => {
         return skillTagState.loadSkillTagInfo(projectId, tagId)
+      }).finally(() => {
+        addingSkillToTag.value = false;
+      }).then(() => {
+        focusOnSkillsSelector()
       })
 }
 
@@ -111,20 +118,30 @@ const removeSkill = (skill) => {
 }
 const doRemoveSkill = (skill) => {
   const {tagId} = skillTagState.skillTag
-  SkillsService.deleteTagForSkills(route.params.projectId, [skill.skillId], tagId)
+  return SkillsService.deleteTagForSkills(route.params.projectId, [skill.skillId], tagId)
       .then(() => {
             return skillTagState.loadSkillTagInfo(route.params.projectId, tagId)
           }
-      )
+      ).finally(() => {
+        focusOnSkillsSelector()
+      })
+}
+
+const skillsSelector = ref(null)
+const focusOnSkillsSelector = () => {
+  nextTick(() => {
+    skillsSelector.value?.focus()
+  })
 }
 </script>
 
 <template>
   <div>
-    <sub-page-header title="Skills"/>
+    <sub-page-header title="Tagged Skills"/>
     <Card :pt="{ 'body': 'p-0! m-0!'}">
       <template #content>
-        <skills-spinner :is-loading="loading" class="my-14"/>
+        <skills-spinner v-if="loading" :is-loading="loading" class="my-14"/>
+
         <div v-if="!loading" class="flex flex-col gap-2">
           <div class="p-3">
             <skills-selector
@@ -136,52 +153,53 @@ const doRemoveSkill = (skill) => {
                 :internal-search="false"
                 :showClear="false"/>
           </div>
+
           <SkillsDataTable
-            v-if="skillTagState.hasSkills"
-            :tableStoredStateId="tableId"
-            aria-label="Tag Skills"
-            :value="skillTagState.skills"
-            :loading="skillTagState.loadingSkillTag"
-            paginator
-            :rows="pageSize"
-            :totalRecords="skillTagState.numSkills"
-            :rowsPerPageOptions="rowsPerPage"
-            @page="pageChanged"
-            data-cy="skillTagSkillsTable">
-          <Column header="Skill" field="skillName" sortable :class="{'flex': responsive.md.value }">
-            <template #header>
-              <i class="fa-solid fa-graduation-cap mr-1" :class="colors.getTextClass(0)" aria-hidden="true"></i>
-            </template>
-            <template #body="slotProps">
-              <router-link :to="toRouteProps(slotProps.data)"
-                           class="underline"
-                           :data-cy="`manage_${slotProps.data.skillId}`">
-                {{ slotProps.data.skillName }}
-              </router-link>
-            </template>
-          </Column>
-          <Column header="Subject" field="subjectName" sortable :class="{'flex': responsive.md.value }">
-            <template #header>
-              <i class="fa-solid fa-tag mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
-            </template>
-            <template #body="slotProps">
-              <router-link v-if="!hideManageButton" :id="slotProps.data.subjectId" :to="{ name:'SubjectSkills',
+              v-if="skillTagState.hasSkills"
+              :tableStoredStateId="tableId"
+              aria-label="Tag Skills"
+              :value="skillTagState.skills"
+              :loading="loading"
+              paginator
+              :rows="pageSize"
+              :totalRecords="skillTagState.numSkills"
+              :rowsPerPageOptions="rowsPerPage"
+              @page="pageChanged"
+              data-cy="skillTagSkillsTable">
+            <Column header="Skill" field="skillName" sortable :class="{'flex': responsive.md.value }">
+              <template #header>
+                <i class="fa-solid fa-graduation-cap mr-1" :class="colors.getTextClass(0)" aria-hidden="true"></i>
+              </template>
+              <template #body="slotProps">
+                <router-link :to="toRouteProps(slotProps.data)"
+                             class="underline"
+                             :data-cy="`manage_${slotProps.data.skillId}`">
+                  {{ slotProps.data.skillName }}
+                </router-link>
+              </template>
+            </Column>
+            <Column header="Subject" field="subjectName" sortable :class="{'flex': responsive.md.value }">
+              <template #header>
+                <i class="fa-solid fa-tag mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
+              </template>
+              <template #body="slotProps">
+                <router-link v-if="!hideManageButton" :id="slotProps.data.subjectId" :to="{ name:'SubjectSkills',
                   params: { projectId: slotProps.data.projectId, subjectId: slotProps.data.subjectId }}"
-                           class="btn btn-sm btn-outline-hc ml-2"
-                           :data-cy="`manage_${slotProps.data.subjectId}`">
-                {{ slotProps.data.subjectName }}
-              </router-link>
-              <div v-else>{{ slotProps.data.subjectName }}</div>
-            </template>
-          </Column>
-          <Column header="Group" field="groupName" sortable :class="{'flex': responsive.md.value }">
-            <template #header>
-              <i class="fa-solid fa-layer-group mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
-            </template>
-            <template #body="slotProps">
-              <div>{{ slotProps.data.groupName }}</div>
-            </template>
-          </Column>
+                             class="btn btn-sm btn-outline-hc ml-2"
+                             :data-cy="`manage_${slotProps.data.subjectId}`">
+                  {{ slotProps.data.subjectName }}
+                </router-link>
+                <div v-else>{{ slotProps.data.subjectName }}</div>
+              </template>
+            </Column>
+            <Column header="Group" field="groupName" sortable :class="{'flex': responsive.md.value }">
+              <template #header>
+                <i class="fa-solid fa-layer-group mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
+              </template>
+              <template #body="slotProps">
+                <div>{{ slotProps.data.groupName }}</div>
+              </template>
+            </Column>
             <Column v-if="!hideManageButton" header="Delete" :class="{'flex': responsive.md.value }">
               <template #body="slotProps">
                 <SkillsButton :id="`removeSkill_${slotProps.data.skillId}`"
@@ -196,7 +214,12 @@ const doRemoveSkill = (skill) => {
               </template>
             </Column>
 
-        </SkillsDataTable>
+          </SkillsDataTable>
+          <no-content2
+              v-if="!loading && !skillTagState.hasSkills"
+              class="my-10"
+              title="No Skills Added Yet..."
+              message="Please use drop-down above to start adding skills to this Tag!"/>
         </div>
       </template>
     </Card>

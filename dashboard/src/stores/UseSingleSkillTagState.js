@@ -34,6 +34,16 @@ export const useSingleSkillTagState = defineStore('singleTagState', () => {
         })
     }
 
+    function afterSkillTagStateLoaded() {
+        return new Promise((resolve) => {
+            (function waitForLoad() {
+                if (!loadingSkillTag.value) return resolve(skillTagState.value)
+                setTimeout(waitForLoad, 100)
+                return skillTagState.value
+            }())
+        })
+    }
+
     const skillTag = computed(() => skillTagState.value)
     const setSkillTag = (skillTag) => {
         skillTagState.value = skillTag
@@ -48,6 +58,7 @@ export const useSingleSkillTagState = defineStore('singleTagState', () => {
         setSkillTag,
         loadingSkillTag,
         loadSkillTagInfo,
+        afterSkillTagStateLoaded,
         hasSkills,
         skills,
         numSkills,

@@ -94,7 +94,7 @@ function addClicked() {
                         :disabled="disabledInternal"
                         v-on:click="addClicked" :aria-label="ariaLabel ? ariaLabel : action"
                         :data-cy="`btn_${title}`"/>
-          <div v-if="disabledInternal" class="mt-1" data-cy="subPageHeaderDisabledMsg">
+          <div v-if="disabledInternal && disabledMsg?.length > 0" class="mt-1" data-cy="subPageHeaderDisabledMsg">
             <InlineMessage severity="warn">{{ disabledMsg }}</InlineMessage>
           </div>
         </slot>

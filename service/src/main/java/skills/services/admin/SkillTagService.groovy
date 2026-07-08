@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.request.model.SkillsTagDeleteRequest
 import skills.controller.request.model.SkillsTagRequest
 import skills.controller.result.model.SkillTagInfoRes
 import skills.services.LockingService
@@ -86,22 +87,36 @@ class SkillTagService {
         }
 
         List<String> existingTaggedSkillIds = getSkillsForTag(projectId, skillsTagRequest.tagId)?.collect { it.skillId }
-        skillsTagRequest.skillIds.each { skillId ->
-            if (!existingTaggedSkillIds.find { it == skillId}) {
-                ruleSetDefGraphService.assignGraphRelationship(projectId, skillDefinition.skillId, SkillDef.ContainerType.Tag, skillId, SkillRelDef.RelationshipType.Tag)
-            }
 
+        if (skillsTagRequest.skillIds) {
+            skillsTagRequest.skillIds?.each { skillId ->
+                if (!existingTaggedSkillIds.find { it == skillId}) {
+                    ruleSetDefGraphService.assignGraphRelationship(projectId, skillDefinition.skillId, SkillDef.ContainerType.Tag, skillId, SkillRelDef.RelationshipType.Tag)
+                }
+
+                userActionsHistoryService.saveUserAction(new UserActionInfo(
+                        action: DashboardAction.Create,
+                        item: DashboardItem.Tag,
+                        actionAttributes: [
+                                tagId: skillsTagRequest.tagId,
+                                tagValue: skillsTagRequest.tagValue,
+                        ],
+                        itemId: skillId,
+                        projectId: projectId,
+                ))
+            }
+        } else {
             userActionsHistoryService.saveUserAction(new UserActionInfo(
                     action: DashboardAction.Create,
                     item: DashboardItem.Tag,
                     actionAttributes: [
-                            tagId: skillsTagRequest.tagId,
                             tagValue: skillsTagRequest.tagValue,
                     ],
-                    itemId: skillId,
+                    itemId: skillsTagRequest.tagId,
                     projectId: projectId,
             ))
         }
+
 
         log.debug("Added [{}] tag to skills [{}]", skillsTagRequest.tagValue, skillsTagRequest.skillIds)
     }
@@ -165,7 +180,7 @@ class SkillTagService {
     }
 
     @Transactional
-    void deleteTagForSkills(String projectId, SkillsTagRequest skillsTagRequest) {
+    void deleteTagForSkills(String projectId, SkillsTagDeleteRequest skillsTagRequest) {
         String tagId = skillsTagRequest.tagId
         SkillDefWithExtra tag = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, tagId, SkillDef.ContainerType.Tag)
 
@@ -173,23 +188,43 @@ class SkillTagService {
             throw new SkillException("Tag [${tagId}] does not exist", projectId, tagId, ErrorCode.TagNotFound)
         }
 
-        skillsTagRequest.skillIds.each {skillId ->
+        boolean removeTagFully = skillsTagRequest.removeTagFully == true
+        List<String> skillIds = (removeTagFully) ? getSkillsForTag(projectId, tagId)?.skillId : skillsTagRequest.skillIds
+
+        skillIds.each {skillId ->
             ruleSetDefGraphService.removeGraphRelationship(projectId, tagId, SkillDef.ContainerType.Tag,
                     projectId, skillId, SkillRelDef.RelationshipType.Tag, false)
+        }
 
+        if (removeTagFully) {
             userActionsHistoryService.saveUserAction(new UserActionInfo(
                     action: DashboardAction.Delete,
                     item: DashboardItem.Tag,
                     actionAttributes: [
-                            tagId: tag.skillId,
                             tagValue: tag.name,
                     ],
-                    itemId: skillId,
+                    itemId: tagId,
                     projectId: projectId,
             ))
+        } else {
+            skillIds.each {skillId ->
+                userActionsHistoryService.saveUserAction(new UserActionInfo(
+                        action: DashboardAction.Delete,
+                        item: DashboardItem.Tag,
+                        actionAttributes: [
+                                tagId: tag.skillId,
+                                tagValue: tag.name,
+                        ],
+                        itemId: skillId,
+                        projectId: projectId,
+                ))
+            }
         }
 
         Integer skillsWithTag = skillRelDefRepo.getSkillWithTagCount(tagId)
+        if (removeTagFully) {
+            assert skillsWithTag <= 0
+        }
         if (skillsWithTag <= 0) {
             log.info("Tag [${tagId}] removed from all skills, removing tag definition")
             skillDefWithExtraRepo.delete(tag)

@@ -13,11 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+package skills.controller.request.model
 
-interface SkillTag {
-    String getTagId()
-    String getTagValue()
-    Integer getNumSkills()
-    Date getCreatedOn()
+import groovy.transform.Canonical
+import groovy.transform.ToString
+
+@Canonical
+@ToString(includePackage = false)
+class SkillsTagDeleteRequest extends SkillsTagRequest{
+    String tagId
+    String tagValue
+    Boolean removeTagFully
 }
