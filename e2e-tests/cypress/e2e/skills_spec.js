@@ -1448,4 +1448,35 @@ describe('Skills Tests', () => {
 
     cy.get('[data-cy="pageHeader"').contains('Awesome Group 20');
   })
+
+
+  it('skill ID updates appropriately when editing skill ID', () => {
+    cy.intercept({
+      method: 'GET',
+      url: '/admin/projects/proj1/subjects/subj1/skills/skill1'
+    }).as('loadSkill')
+
+    cy.intercept('/admin/projects/proj1/skills/newID/users?query=*')
+        .as('getSkillsUsers');
+
+    cy.createSkill(1, 1, 1)
+    cy.createSkill(1, 1, 2)
+    cy.createSkill(1, 1, 3)
+
+    cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+    cy.wait('@loadSkill')
+
+    cy.get('[data-cy="editSkillButton_skill1"]').click()
+    cy.get('[data-cy="enableIdInput"]').click()
+
+    cy.getIdField().clear().type('newID')
+    cy.get('[data-cy="saveDialogBtn"]').click()
+
+    cy.url().should('include', '/administrator/projects/proj1/subjects/subj1/skills/newID');
+    cy.contains('Users').click()
+    cy.url().should('include', '/administrator/projects/proj1/subjects/subj1/skills/newID/users');
+
+    cy.wait('@getSkillsUsers') //.should('have.been.calledOnce')
+
+  })
 })
