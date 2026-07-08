@@ -849,5 +849,37 @@ describe('Skills Table Tests', () => {
     cy.get(`${tableSelector} tbody tr`).should('have.length', 3)
 
   })
+
+
+  it('deleting a selected skill updates the count appropriately', () => {
+    const numSkills = 3
+    for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
+      cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
+        projectId: 'proj1',
+        subjectId: 'subj1',
+        skillId: `skill${skillsCounter}`,
+        name: `Very Great Skill # ${skillsCounter}`,
+        pointIncrement: '150',
+        numPerformToCompletion: skillsCounter < 3 ? '1' : '200'
+      })
+    }
+
+    cy.intercept('GET', '/admin/projects/proj1/subjects/subj1/skills').as('getSkills')
+    cy.visit('/administrator/projects/proj1/subjects/subj1')
+    cy.wait('@getSkills')
+
+    cy.get('[data-cy="skillsTable"] [data-pc-name="pcheadercheckbox"] [data-pc-section="input"]').click();
+    cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+        .should('have.text', 3);
+
+    cy.get('[data-cy=deleteSkillButton_skill2]').click()
+    cy.contains('Removal Safety Check').should('exist')
+    cy.get('[data-cy=currentValidationText]').type('Delete Me', {delay: 0})
+    cy.get('[data-cy=saveDialogBtn]').click()
+
+    cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
+        .should('have.text', 2);
+
+  })
 })
 
