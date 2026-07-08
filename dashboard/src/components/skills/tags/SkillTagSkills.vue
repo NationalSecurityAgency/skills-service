@@ -29,6 +29,7 @@ import SkillsSelector from "@/components/skills/SkillsSelector.vue";
 import SkillsService from "@/components/skills/SkillsService.js";
 import {useProjConfig} from "@/stores/UseProjConfig.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
 const skillTagState = useSingleSkillTagState()
 const tableId = 'skillTagSkillsTable'
@@ -38,6 +39,7 @@ const colors = useColors()
 const route = useRoute()
 const skillRouteUtil = useSkillOverviewRouteUtil()
 const projConf = useProjConfig()
+const dialogMessages = useDialogMessages()
 
 const loadingProjSkills = ref(true)
 const rowsPerPage = [10, 25, 50, 100];
@@ -74,20 +76,46 @@ const availableSkills = computed(() => {
   const tagSkillIds = skillTagState.skills?.map((item) => item.skillId) || [];
   let res = projectSkills.value.filter((item) => !tagSkillIds.includes(item.skillId));
   if (nameQuery.value?.length > 0) {
-    console.log(res)
     res = res.filter((item) => item.name.toLowerCase().includes(nameQuery.value.toLowerCase()))
   }
   return res
 })
 
 const skillAdded = (newItem) => {
-  if (newItem) {
-
-  }
+  const projectId = route.params.projectId
+  const {tagId, tagValue} = skillTagState.skillTag
+  return SkillsService.addTagToSkills(projectId, [newItem.skillId], tagId, tagValue)
+      .then(() => {
+        return skillTagState.loadSkillTagInfo(projectId, tagId)
+      })
 }
 
 const filterSkills = (searchQuery) => {
   nameQuery.value = searchQuery;
+}
+
+const removeSkill = (skill) => {
+  const {tagValue} = skillTagState.skillTag
+  const msg = `Are you sure you want to remove Skill "${skill.skillName}" from Tag "${tagValue}"?`;
+  dialogMessages.msgConfirm({
+    target: skill.currentTarget,
+    message: msg,
+    header: 'WARNING: Remove Skill from Tag',
+    acceptLabel: 'YES, Remove It!',
+    rejectLabel: 'Cancel',
+    disableAutoFocus: false,
+    accept: () => {
+      doRemoveSkill(skill);
+    },
+  });
+}
+const doRemoveSkill = (skill) => {
+  const {tagId} = skillTagState.skillTag
+  SkillsService.deleteTagForSkills(route.params.projectId, [skill.skillId], tagId)
+      .then(() => {
+            return skillTagState.loadSkillTagInfo(route.params.projectId, tagId)
+          }
+      )
 }
 </script>
 
@@ -154,6 +182,19 @@ const filterSkills = (searchQuery) => {
               <div>{{ slotProps.data.groupName }}</div>
             </template>
           </Column>
+            <Column v-if="!hideManageButton" header="Delete" :class="{'flex': responsive.md.value }">
+              <template #body="slotProps">
+                <SkillsButton :id="`removeSkill_${slotProps.data.skillId}`"
+                              @click="removeSkill(slotProps.data)"
+                              size="small"
+                              icon="fa-solid fa-trash-can"
+                              label="Remove"
+                              :track-for-focus="true"
+                              :data-cy="`deleteSkill_${slotProps.data.skillId}`"
+                              :aria-label="`remove skill ${slotProps.data.skillId} from the tag`">
+                </SkillsButton>
+              </template>
+            </Column>
 
         </SkillsDataTable>
         </div>

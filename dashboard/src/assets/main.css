@@ -21,6 +21,13 @@
     pointer-events:none;
 }
 
+/* See comment in UseFocusState.js#restoreFocusWithIndicator */
+.p-button.st-force-focus-visible {
+    outline: var(--p-focus-ring-width, 2px) var(--p-focus-ring-style, solid) var(--p-focus-ring-color, var(--p-primary-color));
+    outline-offset: var(--p-focus-ring-offset, 2px);
+    box-shadow: var(--p-focus-ring-shadow, none);
+}
+
 .w-min-1rem {
     min-width: 1rem
 }

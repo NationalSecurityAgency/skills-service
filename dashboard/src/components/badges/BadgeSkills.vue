@@ -128,14 +128,6 @@ const deleteSkill = (skill) => {
     accept: () => {
       skillDeleted(skill);
     },
-    reject: () => {
-      nextTick(() => {
-        const deleteButton = document.getElementById(`deleteSkill_${skill.skillId}`)
-        if (deleteButton) {
-          deleteButton.focus()
-        }
-      })
-    }
   });
 };
 
@@ -261,6 +253,7 @@ const toRouteProps = (skill) => {
                   <SkillsButton v-if="!projConf.isReadOnlyProj" v-on:click="deleteSkill(slotProps.data)" size="small"
                                 :id="`deleteSkill_${slotProps.data.skillId}`"
                                 :disabled="badge && badge.enabled === 'true' && badgeSkills.length === 1"
+                                :track-for-focus="true"
                           :data-cy="`deleteSkill_${slotProps.data.skillId}`" icon="fas fa-trash" label="Delete"
                           :aria-label="`remove dependency on ${slotProps.data.skillId}`">
                   </SkillsButton>

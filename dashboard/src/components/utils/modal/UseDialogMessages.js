@@ -62,6 +62,7 @@ export const useDialogMessages = () => {
                         appendTo = null,
                         onShowHandler = () => {},
                         onHideHandler = () => {},
+                        disableAutoFocus = false,
                       }) => {
     confirm.require({
       target: targetElement,
@@ -84,16 +85,22 @@ export const useDialogMessages = () => {
         if(accept) {
           accept();
         }
-        focusState.focusOnLastElement();
+        if (!disableAutoFocus) {
+          focusState.focusOnLastElement();
+        }
       },
       reject: () => {
         if(reject) {
           reject();
         }
-        focusState.focusOnLastElement();
+        if (!disableAutoFocus) {
+          focusState.focusOnLastElement();
+        }
       },
       onHide: () => {
-        focusState.focusOnLastElement()
+        if (!disableAutoFocus) {
+          focusState.focusOnLastElement();
+        }
         onHideHandler.call()
       },
       defaultFocus: 'accept',
