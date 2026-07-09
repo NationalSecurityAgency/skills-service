@@ -98,8 +98,8 @@ import SkillGroupPage from '@/components/skills/SkillGroupPage.vue'
 import SkillGroupSkills from '@/components/skills/SkillGroupSkills.vue'
 import SkillTagsPage from "@/components/skills/tags/SkillTagsPage.vue";
 import SingleSkillTagPage from "@/components/skills/tags/SingleSkillTagPage.vue";
-import SkillTagSkills from "@/components/skills/tags/SkillTagSkills.vue";
 import SkillTagUsers from "@/components/skills/tags/SkillTagUsers.vue";
+import TaggedSkills from "@/components/skills/tags/TaggedSkills.vue";
 
 const FullDependencyGraph = defineAsyncComponent(() => import('@/components/skills/dependencies/FullDependencyGraph.vue'))
 
@@ -659,7 +659,7 @@ const routes = [
     children: [{
       name: 'SkillTagSkills',
       path: '',
-      component: SkillTagSkills,
+      component: TaggedSkills,
       meta: {
         requiresAuth: true,
         reportSkillId: 'VisitSkillTagSkills',

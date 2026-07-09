@@ -19,7 +19,6 @@ import {computed, onMounted} from "vue";
 import {useSingleSkillTagState} from "@/stores/UseSingleSkillTagState.js";
 import {useRoute} from "vue-router";
 import Navigation from "@/components/utils/Navigation.vue";
-import SkillTagSkills from "@/components/skills/tags/SkillTagSkills.vue";
 
 const skillTagState = useSingleSkillTagState()
 const route = useRoute()

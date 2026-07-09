@@ -808,8 +808,8 @@ Cypress.Commands.add("finalizeCatalogImport", (projNum = 1) => {
 });
 
 
-Cypress.Commands.add("acceptRemovalSafetyCheck", () => {
-    cy.get('[data-pc-name="dialog"]').contains('Delete Action CANNOT be undone');
+Cypress.Commands.add("acceptRemovalSafetyCheck", (expectedMsg = 'Delete Action CANNOT be undone') => {
+    cy.get('[data-pc-name="dialog"]').contains(expectedMsg);
     cy.get('[data-pc-name="dialog"] [data-cy="saveDialogBtn"]').should('be.disabled')
     cy.get('[data-pc-name="dialog"] [data-cy="currentValidationText"]').type('Delete Me', {delay: 0})
     cy.get('[data-pc-name="dialog"] [data-cy="saveDialogBtn"]').should('be.enabled')

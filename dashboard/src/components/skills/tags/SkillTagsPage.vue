@@ -101,6 +101,13 @@ const initiateRemoveTag = (tag) => {
   deleteTagInfo.value.tagName = tag.tagValue
   deleteTagInfo.value.showDialog = true
 }
+
+const onTagAdded = (tag) => {
+  loadTags().then(() => {
+    focusOnActionsBtn()
+  })
+}
+
 const removeTag = () => {
   isLoading.value = true
   const {tagId} = deleteTagInfo.value
@@ -108,13 +115,18 @@ const removeTag = () => {
       .then(() => {
             tags.value = tags.value.filter((item) => item.tagId !== tagId);
           }
-      ).finally(() => {
-    deleteTagInfo.value.tagName = null
-    deleteTagInfo.value.tagId = null
-    isLoading.value = false
-    focusState.setElementId('actionButton')
-    focusState.focusOnLastElement()
-  })
+      )
+      .finally(() => {
+        deleteTagInfo.value.tagName = null
+        deleteTagInfo.value.tagId = null
+        isLoading.value = false
+        focusOnActionsBtn()
+      })
+}
+
+const focusOnActionsBtn = () => {
+  focusState.setElementId('actionButton')
+  focusState.focusOnLastElement()
 }
 </script>
 
@@ -229,12 +241,12 @@ const removeTag = () => {
       v-if="!projConf.isReadOnlyProj && showCreateSkillTagDialog"
       id="addSkillsToBadgeModal"
       v-model="showCreateSkillTagDialog"
-      @added-tag="loadTags"
+      @added-tag="onTagAdded"
   />
   <removal-validation
       v-if="deleteTagInfo.showDialog && !projConf.isReadOnlyProj"
       :item-name="deleteTagInfo.tagName"
-      item-type="SkillTag"
+      item-type="Tag"
       v-model="deleteTagInfo.showDialog"
       :enable-return-focus="true"
       @do-remove="removeTag"/>

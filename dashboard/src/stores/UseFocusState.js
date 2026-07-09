@@ -74,7 +74,7 @@ export const useFocusState = defineStore('focusState', () => {
   }
 
   function focusOnLastElement() {
-    nextTick(() => {
+    return nextTick(() => {
       if (isElementIdPresent()) {
         elementHelper.getElementById(elementId.value).then((element) => {
           if (element) {
