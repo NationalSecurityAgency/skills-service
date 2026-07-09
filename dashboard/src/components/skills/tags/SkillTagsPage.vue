@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import SkillsService from "@/components/skills/SkillsService.js";
@@ -50,6 +50,18 @@ const pageSize = useStorage(`${tableId}-pageSize`, 25)
 const filter = ref('')
 
 const showCreateSkillTagDialog = ref(false)
+const editExistingTagId = ref(null)
+
+const editExistingTag = (tag) => {
+  editExistingTagId.value = tag.tagId
+  showCreateSkillTagDialog.value = true
+}
+watch(() => showCreateSkillTagDialog.value, (newVal) => {
+  if (!newVal) {
+    editExistingTagId.value = null
+  }
+})
+
 const deleteTagInfo = ref({
   showDialog: false,
   tagId: null,
@@ -102,9 +114,9 @@ const initiateRemoveTag = (tag) => {
   deleteTagInfo.value.showDialog = true
 }
 
-const onTagAdded = (tag) => {
+const onTagAdded = () => {
   loadTags().then(() => {
-    focusOnActionsBtn()
+    focusOnBtnThatInitiated()
   })
 }
 
@@ -120,12 +132,13 @@ const removeTag = () => {
         deleteTagInfo.value.tagName = null
         deleteTagInfo.value.tagId = null
         isLoading.value = false
-        focusOnActionsBtn()
+        focusOnBtnThatInitiated()
       })
 }
 
-const focusOnActionsBtn = () => {
-  focusState.setElementId('actionButton')
+const focusOnBtnThatInitiated = () => {
+  const elementId = editExistingTagId.value ? `editTag_${editExistingTagId.value}` : 'actionButton'
+  focusState.setElementId(elementId)
   focusState.focusOnLastElement()
 }
 </script>
@@ -208,17 +221,27 @@ const focusOnActionsBtn = () => {
             <div >
 
             </div>
-            <Column v-if="!projConf.isReadOnlyProj" style="width: 8rem"
+            <Column v-if="!projConf.isReadOnlyProj" style="width: 7rem"
                     :class="{'flex': responsive.md.value }">
               <template #body="slotProps">
-                <SkillsButton :id="`removeTag_${slotProps.data.tagId}`"
-                              @click="initiateRemoveTag(slotProps.data)"
-                              size="small"
-                              icon="fa-solid fa-trash-can"
-                              :track-for-focus="true"
-                              :data-cy="`deleteTag_${slotProps.data.tagId}`"
-                              :aria-label="`remove tag ${slotProps.data.tagValue}`">
-                </SkillsButton>
+                <ButtonGroup>
+                  <SkillsButton :id="`editTag_${slotProps.data.tagId}`"
+                                @click="editExistingTag(slotProps.data)"
+                                size="small"
+                                icon="fa-solid fa-edit"
+                                :track-for-focus="true"
+                                :data-cy="`editTag_${slotProps.data.tagId}`"
+                                :aria-label="`edit tag ${slotProps.data.tagValue}`">
+                  </SkillsButton>
+                  <SkillsButton :id="`removeTag_${slotProps.data.tagId}`"
+                                @click="initiateRemoveTag(slotProps.data)"
+                                size="small"
+                                icon="fa-solid fa-trash-can"
+                                :track-for-focus="true"
+                                :data-cy="`deleteTag_${slotProps.data.tagId}`"
+                                :aria-label="`remove tag ${slotProps.data.tagValue}`">
+                  </SkillsButton>
+                </ButtonGroup>
               </template>
             </Column>
 
@@ -241,6 +264,7 @@ const focusOnActionsBtn = () => {
       v-if="!projConf.isReadOnlyProj && showCreateSkillTagDialog"
       id="addSkillsToBadgeModal"
       v-model="showCreateSkillTagDialog"
+      :tag-id-to-edit="editExistingTagId"
       @added-tag="onTagAdded"
   />
   <removal-validation

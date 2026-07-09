@@ -24,8 +24,16 @@ import InputSanitizer from '@/components/utils/InputSanitizer.js'
 
 const model = defineModel()
 const emit = defineEmits(['added-tag'])
+const props = defineProps({
+  tagIdToEdit: {
+    type: String,
+    required: false
+  }
+})
 const appConfig = useAppConfig()
 const route = useRoute()
+
+const header = props.tagIdToEdit ? 'Edit Skill Tag' : 'Create New Skill Tag'
 
 const loadingExistingTags = ref(true)
 const existingTags = ref([])
@@ -53,11 +61,19 @@ const schema = object({
       .label('Tag Name'),
 })
 
+const createTagDialog = ref(null)
 const loadExistingTags = () => {
   loadingExistingTags.value = true
   return SkillsService.getTagsForProject(route.params.projectId)
     .then((res) => {
       existingTags.value = res;
+      if (props.tagIdToEdit) {
+        const foundTag = existingTags.value.find((item) => item.tagId?.toString()?.toLowerCase() === props.tagIdToEdit?.toString()?.toLowerCase())
+        if (foundTag) {
+          createTagDialog.value.setFieldValue('newTag', foundTag.tagValue)
+          existingTags.value = existingTags.value.filter((item) => item.tagId !== foundTag.tagId)
+        }
+      }
       return res
     }).finally(() => {
         loadingExistingTags.value = false
@@ -76,7 +92,9 @@ const constructTagInfo = (tagToSave) => {
 }
 const saveTag = (tagToSave) => {
   const taggedInfo = constructTagInfo(tagToSave.newTag)
-  return SkillsService.addTagToSkills(route.params.projectId, taggedInfo.skillIds, taggedInfo.tagId, taggedInfo.tagValue)
+
+  const tagId = props.tagIdToEdit || taggedInfo.tagId;
+  return SkillsService.addTagToSkills(route.params.projectId, taggedInfo.skillIds, tagId, taggedInfo.tagValue)
     .then(() => {
       return taggedInfo
     });
@@ -90,7 +108,8 @@ const afterSave = (taggedInfo) => {
 <template>
   <SkillsInputFormDialog
     id="createTagDialog"
-    header="Create New Skill Tag"
+    ref="createTagDialog"
+    :header="header"
     v-model="model"
     :save-data-function="saveTag"
     @saved="afterSave"

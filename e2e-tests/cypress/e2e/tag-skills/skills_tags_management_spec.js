@@ -103,6 +103,63 @@ describe('Manage Tag Skills Tests', () => {
         cy.get('[data-cy="btn_Skill Tags"]').should('have.focus')
     })
 
+    it('editing existing tags', () => {
+        cy.addTagToSkills(1, ['skill1'], 1)
+        cy.addTagToSkills(1, ['skill1'], 2)
+        cy.addTagToSkills(1, ['skill1'], 3)
+
+        cy.visit('/administrator/projects/proj1/skills-tags/');
+
+        cy.validateTable(tagsTableSelector, [
+            [{colIndex: 0, value: 'TAG 3'}],
+            [{colIndex: 0, value: 'TAG 2'}],
+            [{colIndex: 0, value: 'TAG 1'}],
+        ], 25);
+
+        cy.get('[data-cy="editTag_tag1"]').click()
+        cy.get('[data-cy="newTag"]').should('have.value', 'TAG 1')
+        cy.get('[data-cy="newTag"]').click()
+        cy.get('[data-cy="newTag"]').type('a')
+        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.validateTable(tagsTableSelector, [
+            [{colIndex: 0, value: 'TAG 3'}],
+            [{colIndex: 0, value: 'TAG 2'}],
+            [{colIndex: 0, value: 'TAG 1a'}],
+        ], 25);
+        cy.get('[data-cy="editTag_tag1"]').should('have.focus')
+
+        cy.get('[data-cy="editTag_tag1"]').click()
+        cy.get('[data-cy="newTag"]').should('have.value', 'TAG 1a')
+        cy.get('[data-cy="newTag"]').click()
+        cy.get('[data-cy="newTag"]').type('{selectAll}other')
+        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.validateTable(tagsTableSelector, [
+            [{colIndex: 0, value: 'TAG 3'}],
+            [{colIndex: 0, value: 'TAG 2'}],
+            [{colIndex: 0, value: 'other'}],
+        ], 25);
+        cy.get('[data-cy="editTag_tag1"]').should('have.focus')
+
+        cy.get('[data-cy="editTag_tag2"]').click()
+        cy.get('[data-cy="newTag"]').should('have.value', 'TAG 2')
+        cy.get('[data-cy="newTag"]').click()
+        cy.get('[data-cy="newTag"]').type('{selectAll}new')
+        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.validateTable(tagsTableSelector, [
+            [{colIndex: 0, value: 'TAG 3'}],
+            [{colIndex: 0, value: 'new'}],
+            [{colIndex: 0, value: 'other'}],
+        ], 25);
+        cy.get('[data-cy="editTag_tag2"]').should('have.focus')
+
+        cy.visit('/administrator/projects/proj1/skills-tags/');
+        cy.validateTable(tagsTableSelector, [
+            [{colIndex: 0, value: 'TAG 3'}],
+            [{colIndex: 0, value: 'new'}],
+            [{colIndex: 0, value: 'other'}],
+        ], 25);
+    });
+
     it('delete existing tags', () => {
         cy.addTagToSkills(1, ['skill1'], 1)
         cy.addTagToSkills(1, ['skill1'], 2)

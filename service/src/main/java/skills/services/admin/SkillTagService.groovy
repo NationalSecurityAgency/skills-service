@@ -84,6 +84,15 @@ class SkillTagService {
                 savedSkill = skillDefWithExtraRepo.save(skillDefinition)
             }
             log.debug("Saved [{}]", savedSkill)
+        } else {
+            if (skillsTagRequest.tagValue && skillsTagRequest.tagValue != skillDefinition.name) {
+                skillDefinition.name = skillsTagRequest.tagValue
+                SkillDefWithExtra savedSkill
+                DataIntegrityExceptionHandlers.tagDataIntegrityViolationExceptionHandler.handle(projectId) {
+                    savedSkill = skillDefWithExtraRepo.save(skillDefinition)
+                }
+                log.debug("Updated [{}]", savedSkill)
+            }
         }
 
         List<String> existingTaggedSkillIds = getSkillsForTag(projectId, skillsTagRequest.tagId)?.collect { it.skillId }
