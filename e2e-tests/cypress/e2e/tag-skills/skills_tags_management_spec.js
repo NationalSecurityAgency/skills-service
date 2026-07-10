@@ -31,7 +31,7 @@ describe('Manage Tag Skills Tests', () => {
         cy.get('[data-cy="noContent"]').contains('No Tags Yet')
         cy.get(tagsTableSelector).should('not.exist')
 
-        cy.get('[data-cy="btn_Skill Tags"]').click();
+        cy.openDialog('[data-cy="btn_Skill Tags"]', true)
         cy.get('[data-pc-name="pcmaximizebutton"]').should("have.focus")
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="newTag"]').should('be.visible')
@@ -45,7 +45,7 @@ describe('Manage Tag Skills Tests', () => {
         ], 25);
         cy.get('[data-cy="noContent"]').should('not.exist');
 
-        cy.get('[data-cy="btn_Skill Tags"]').click();
+        cy.openDialog('[data-cy="btn_Skill Tags"]', true)
         cy.get('[data-pc-name="pcmaximizebutton"]').should("have.focus")
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="newTag"]').should('be.visible')
@@ -115,10 +115,9 @@ describe('Manage Tag Skills Tests', () => {
             [{colIndex: 0, value: 'TAG 1'}],
         ], 25);
 
-        cy.get('[data-cy="editTag_tag1"]').click()
+        cy.openDialog('[data-cy="editTag_tag1"]', true)
         cy.get('[data-cy="newTag"]').should('have.value', 'TAG 1')
-        cy.get('[data-cy="newTag"]').click()
-        cy.get('[data-cy="newTag"]').type('a')
+        cy.get('[data-p="modal"] [data-cy="newTag"]').type('a')
         cy.get('[data-cy="saveDialogBtn"]').click();
         cy.validateTable(tagsTableSelector, [
             [{colIndex: 0, value: 'TAG 3'}],
@@ -127,10 +126,9 @@ describe('Manage Tag Skills Tests', () => {
         ], 25);
         cy.get('[data-cy="editTag_tag1"]').should('have.focus')
 
-        cy.get('[data-cy="editTag_tag1"]').click()
+        cy.openDialog('[data-cy="editTag_tag1"]', true)
         cy.get('[data-cy="newTag"]').should('have.value', 'TAG 1a')
-        cy.get('[data-cy="newTag"]').click()
-        cy.get('[data-cy="newTag"]').type('{selectAll}other')
+        cy.get('[data-p="modal"] [data-cy="newTag"]').type('{selectAll}other')
         cy.get('[data-cy="saveDialogBtn"]').click();
         cy.validateTable(tagsTableSelector, [
             [{colIndex: 0, value: 'TAG 3'}],
@@ -139,10 +137,9 @@ describe('Manage Tag Skills Tests', () => {
         ], 25);
         cy.get('[data-cy="editTag_tag1"]').should('have.focus')
 
-        cy.get('[data-cy="editTag_tag2"]').click()
+        cy.openDialog('[data-cy="editTag_tag2"]', true)
         cy.get('[data-cy="newTag"]').should('have.value', 'TAG 2')
-        cy.get('[data-cy="newTag"]').click()
-        cy.get('[data-cy="newTag"]').type('{selectAll}new')
+        cy.get('[data-p="modal"]  [data-cy="newTag"]').type('{selectAll}new')
         cy.get('[data-cy="saveDialogBtn"]').click();
         cy.validateTable(tagsTableSelector, [
             [{colIndex: 0, value: 'TAG 3'}],
@@ -170,7 +167,7 @@ describe('Manage Tag Skills Tests', () => {
             [{colIndex: 0, value: 'TAG 1'}],
         ], 25);
 
-        cy.get('[data-cy="deleteTag_tag1"]').click()
+        cy.openDialog('[data-cy="deleteTag_tag1"]')
         cy.acceptRemovalSafetyCheck('This will remove TAG 1 Tag.')
 
         cy.validateTable(tagsTableSelector, [
@@ -178,7 +175,7 @@ describe('Manage Tag Skills Tests', () => {
         ], 25);
         cy.get('[data-cy="btn_Skill Tags"]').should('have.focus')
 
-        cy.get('[data-cy="deleteTag_tag2"]').click()
+        cy.openDialog('[data-cy="deleteTag_tag2"]')
         cy.acceptRemovalSafetyCheck('This will remove TAG 2 Tag.')
         cy.get('[data-cy="noContent"]').contains('No Tags Yet')
         cy.get(tagsTableSelector).should('not.exist')
@@ -200,7 +197,7 @@ describe('Manage Tag Skills Tests', () => {
             [{colIndex: 0, value: 'TAG 1'}],
         ], 25);
 
-        cy.get('[data-cy="deleteTag_tag1"]').click()
+        cy.openDialog('[data-cy="deleteTag_tag1"]')
         cy.get('[data-pc-name="dialog"]').contains('This will remove TAG 1 Tag.');
         cy.get('[data-cy="closeDialogBtn"]').click()
         cy.get('[data-pc-name="dialog"]').should('not.exist')
@@ -254,7 +251,7 @@ describe('Manage Tag Skills Tests', () => {
             [{colIndex: 0, value: 'TAG 1'}],
         ], 25);
 
-        cy.get('[data-cy="editTag_tag1"]').click()
+        cy.openDialog('[data-cy="editTag_tag1"]', true)
         cy.get('[data-cy="newTag"]').should('have.value', 'TAG 1')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="newTagError"]').should('not.be.visible')
