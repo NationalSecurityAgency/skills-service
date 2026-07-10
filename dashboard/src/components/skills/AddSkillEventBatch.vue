@@ -220,9 +220,14 @@ const addSelectedUser = () => {
         <StepPanel value="2" v-slot="{ activateCallback }">
           <div v-if="hasUserSuggestOptions" class="flex gap-1 items-center mb-3">
             <div class="flex flex-1 px-1 gap-2">
+            <Select  data-cy="userSuggestOptionsDropdown"
+                     v-model="selectedSuggestOption"
+                     :options="userSuggestOptions" />
               <existing-user-input class="w-full"
                                    :project-id="projectId"
                                    v-model="currentSelectedUser"
+                                   :has-user-suggest-options="false"
+                                   :selected-suggest-option="selectedSuggestOption"
                                    :can-enter-new-user="!appConfig.isPkiAuthenticated"
                                    name="userIdInput"
                                    aria-errormessage="userIdInputError"

@@ -71,6 +71,9 @@ const props = defineProps({
   name: {
     type: String,
     default: 'userIdInput',
+  },
+  selectedSuggestOption: {
+    type: String,
   }
 });
 
@@ -147,6 +150,8 @@ const suggestUrl = computed(() => {
   }
   if (selectedSuggestOption.value) {
     suggestUrl += `?userSuggestOption=${selectedSuggestOption.value}`;
+  } else if(props.selectedSuggestOption) {
+    suggestUrl += `?userSuggestOption=${props.selectedSuggestOption}`;
   }
   return suggestUrl;
 })
@@ -194,7 +199,7 @@ const suggestUsers = (query) => {
 <template>
   <div data-cy="existingUserInput" v-bind="fallthroughAttributes.rootAttrs.value">
     <div class="flex flex-col sm:flex-row gap-2">
-      <Select v-if="hasUserSuggestOptions" data-cy="userSuggestOptionsDropdown" v-model="selectedSuggestOption" :options="userSuggestOptions" class="md:mr-2"/>
+      <Select v-if="hasUserSuggestOptions && !props.selectedSuggestOption" data-cy="userSuggestOptionsDropdown" v-model="selectedSuggestOption" :options="userSuggestOptions" class="md:mr-2"/>
       <AutoComplete v-bind="fallthroughAttributes.inputAttrs.value"
                     v-model="currentSelectedUser"
                     data-cy="existingUserInputDropdown"

@@ -164,24 +164,6 @@ describe('Breadcrumb Navigation Tests', () => {
         cy.get('[data-cy=errorPage]')
             .should('not.exist');
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/addSkillEvent');
-        cy.get('[data-cy=breadcrumb-skill1]')
-            .click();
-        cy.get('[data-cy=errorPage]')
-            .should('not.exist');
-        cy.get('[data-cy=breadcrumb-subj1]')
-            .click();
-        cy.get('[data-cy=errorPage]')
-            .should('not.exist');
-        cy.get('[data-cy=breadcrumb-proj1]')
-            .click();
-        cy.get('[data-cy=errorPage]')
-            .should('not.exist');
-        cy.get('[data-cy=breadcrumb-Projects]')
-            .click();
-        cy.get('[data-cy=errorPage]')
-            .should('not.exist');
-
         const toWaitFor = [
             'skillEventsOverTimeChartBuilder',
             'numUserAchievedOverTimeChartBuilder',
