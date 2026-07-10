@@ -37,6 +37,7 @@ const header = props.tagIdToEdit ? 'Edit Skill Tag' : 'Create New Skill Tag'
 
 const loadingExistingTags = ref(true)
 const existingTags = ref([])
+const origTagValue = ref('')
 const validateAgainstCurrentTags = (value) => {
   if (!value) {
     return true
@@ -48,6 +49,15 @@ const validateAgainstCurrentTags = (value) => {
   const existingValue = existingTags.value.find((item) => item.tagValue?.toString()?.toLowerCase() === tagValue)
   return existingTag === undefined && existingValue === undefined
 }
+
+const differentDuringEdit = (value) => {
+  if (!value || !props.tagIdToEdit || !origTagValue.value) {
+    return true
+  }
+  const tagInfo = constructTagInfo(value)
+  const tagValue = tagInfo.tagValue?.toString()?.toLowerCase()
+  return origTagValue.value?.toString()?.toLowerCase() !== tagValue
+}
 const schema = object({
   'newTag': string()
       .trim()
@@ -56,7 +66,12 @@ const schema = object({
       .test(
           'isNotAnExistingTag',
           ({label}) => `${label} already exist`,
-          async (value, testContext) => validateAgainstCurrentTags(value)
+          async (value) => validateAgainstCurrentTags(value)
+      )
+      .test(
+          'isNotSameTagDuringEdit',
+          ({label}) => `${label} needs to be different`,
+          async (value) => differentDuringEdit(value)
       )
       .label('Tag Name'),
 })
@@ -71,6 +86,8 @@ const loadExistingTags = () => {
         const foundTag = existingTags.value.find((item) => item.tagId?.toString()?.toLowerCase() === props.tagIdToEdit?.toString()?.toLowerCase())
         if (foundTag) {
           createTagDialog.value.setFieldValue('newTag', foundTag.tagValue)
+          origTagValue.value = foundTag.tagValue
+          initialData.newTag = foundTag.tagValue
           existingTags.value = existingTags.value.filter((item) => item.tagId !== foundTag.tagId)
         }
       }
@@ -100,7 +117,7 @@ const saveTag = (tagToSave) => {
     });
 }
 const afterSave = (taggedInfo) => {
-  emit('added-tag', taggedInfo)
+  emit('added-tag', {...taggedInfo, operation: props.tagIdToEdit ? 'edit' : 'add' })
 }
 
 </script>

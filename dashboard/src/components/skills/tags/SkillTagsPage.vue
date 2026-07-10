@@ -114,9 +114,9 @@ const initiateRemoveTag = (tag) => {
   deleteTagInfo.value.showDialog = true
 }
 
-const onTagAdded = () => {
+const onTagAdded = (tagInfo) => {
   loadTags().then(() => {
-    focusOnBtnThatInitiated()
+    focusOnBtnThatInitiated(tagInfo.operation === 'edit' ? tagInfo.tagId : null)
   })
 }
 
@@ -136,8 +136,8 @@ const removeTag = () => {
       })
 }
 
-const focusOnBtnThatInitiated = () => {
-  const elementId = editExistingTagId.value ? `editTag_${editExistingTagId.value}` : 'actionButton'
+const focusOnBtnThatInitiated = (editTagId) => {
+  const elementId = editTagId ? `editTag_${editTagId}` : 'actionButton'
   focusState.setElementId(elementId)
   focusState.focusOnLastElement()
 }

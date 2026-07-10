@@ -17,7 +17,6 @@ describe('Manage Tag Skills Tests', () => {
 
     const tagsTableSelector = '[data-cy="skillsTagsTable"]'
 
-
     beforeEach(() => {
         cy.createProject(1);
         cy.createSubject(1, 1);
@@ -103,7 +102,7 @@ describe('Manage Tag Skills Tests', () => {
         cy.get('[data-cy="btn_Skill Tags"]').should('have.focus')
     })
 
-    it('editing existing tags', () => {
+    it('edit existing tags', () => {
         cy.addTagToSkills(1, ['skill1'], 1)
         cy.addTagToSkills(1, ['skill1'], 2)
         cy.addTagToSkills(1, ['skill1'], 3)
@@ -241,6 +240,47 @@ describe('Manage Tag Skills Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
     })
+
+    it('tag edit in the dialog must validate against saving the same tag name', () => {
+        cy.addTagToSkills(1, ['skill1'], 1)
+        cy.addTagToSkills(1, ['skill1'], 2)
+        cy.addTagToSkills(1, ['skill1'], 3)
+
+        cy.visit('/administrator/projects/proj1/skills-tags/');
+
+        cy.validateTable(tagsTableSelector, [
+            [{colIndex: 0, value: 'TAG 3'}],
+            [{colIndex: 0, value: 'TAG 2'}],
+            [{colIndex: 0, value: 'TAG 1'}],
+        ], 25);
+
+        cy.get('[data-cy="editTag_tag1"]').click()
+        cy.get('[data-cy="newTag"]').should('have.value', 'TAG 1')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="newTagError"]').should('not.be.visible')
+
+        cy.get('[data-cy="newTag"]').click()
+        cy.get('[data-cy="newTag"]').type('a')
+        cy.get('[data-cy="newTagError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="newTag"]').click()
+        cy.get('[data-cy="newTag"]').type('{backspace}')
+        cy.get('[data-cy="newTagError"]').contains('Tag Name needs to be different')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        // id will remove special chars but it for the edit is not validated
+        cy.get('[data-cy="newTag"]').click()
+        cy.get('[data-cy="newTag"]').type('$')
+        cy.get('[data-cy="newTagError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        // still validates against other tags
+        cy.get('[data-cy="newTag"]').click()
+        cy.get('[data-cy="newTag"]').type('{backspace}{backspace}2')
+        cy.get('[data-cy="newTagError"]').contains('Tag Name already exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+    });
 
     it('filter tag names', () => {
         cy.addTagToSkills(1, ['skill1'], 1, { tagValue: 'Fancy oNe 1'})

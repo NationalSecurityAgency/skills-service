@@ -15,13 +15,17 @@ limitations under the License.
 */
 <script setup>
 import ProjectPageHeader from "@/components/utils/pages/ProjectPageHeader.vue";
-import {computed, onMounted} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {useSingleSkillTagState} from "@/stores/UseSingleSkillTagState.js";
 import {useRoute} from "vue-router";
 import Navigation from "@/components/utils/Navigation.vue";
+import CreateTagDialog from "@/components/skills/tags/CreateTagDialog.vue";
+import {useProjConfig} from "@/stores/UseProjConfig.js";
 
 const skillTagState = useSingleSkillTagState()
 const route = useRoute()
+const projConf = useProjConfig()
+const tagId = route.params.tagId.toString()
 const navItems = computed(() => {
   return [
     { name: 'Tagged Skills', iconClass: 'fa-graduation-cap', page: 'SkillTagSkills' },
@@ -30,7 +34,7 @@ const navItems = computed(() => {
 })
 
 onMounted(() => {
-  skillTagState.loadSkillTagInfo(route.params.projectId, route.params.tagId)
+  skillTagState.loadSkillTagInfo(route.params.projectId, tagId)
 })
 
 const isLoading = computed(() => skillTagState.loadingSkillTag)
@@ -48,14 +52,41 @@ const headerOptions = computed(() => {
   }
 })
 
+const showSkillTagDialog = ref(false)
+const editExistingTag = () => {
+  showSkillTagDialog.value = true
+}
+const onTagEdited = (newTag) => {
+  skillTagState.skillTag.tagValue = newTag.tagValue
+}
 </script>
 
 <template>
   <div>
     <project-page-header :loading="isLoading" :options="headerOptions">
+      <template #subSubTitle>
+        <div class="mt-2">
+          <SkillsButton :id="`editTag_${tagId}`"
+                        @click="editExistingTag()"
+                        label="Edit Tag"
+                        icon="fa-solid fa-edit"
+                        :track-for-focus="true"
+                        data-cy="editTag"
+                        :aria-label="`edit tag ${skillTagState.skillTag?.tagValue}`">
+          </SkillsButton>
+        </div>
+      </template>
     </project-page-header>
 
     <navigation :nav-items="navItems" />
+
+    <create-tag-dialog
+        v-if="!projConf.isReadOnlyProj && showSkillTagDialog"
+        id="addSkillsToBadgeModal"
+        v-model="showSkillTagDialog"
+        :tag-id-to-edit="tagId"
+        @added-tag="onTagEdited"
+    />
   </div>
 </template>
 

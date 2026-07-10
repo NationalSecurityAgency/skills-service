@@ -16,6 +16,7 @@ limitations under the License.
 <script setup>
 
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
+import NoContent2 from "@/components/utils/NoContent2.vue";
 </script>
 
 <template>
@@ -23,7 +24,7 @@ import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
     <sub-page-header title="Users"/>
     <Card>
       <template #content>
-        Users Table
+        <no-content2 title="Coming Soon!" class="my-10"/>
       </template>
     </Card>
   </div>
