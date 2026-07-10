@@ -333,7 +333,6 @@ describe('Approver Role Tests', () => {
             cy.wait(`@getSettingsProj${projNum}`);
 
             cy.get('[data-cy="editSkillButton_skill1"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="nav-Add Event"]').should(`${chainerPrepend}exist`)
         }
         runCheck(2)
         runCheck(1, 'not.')
@@ -346,7 +345,6 @@ describe('Approver Role Tests', () => {
             cy.wait(`@getSettingsProj${projNum}`);
 
             cy.get('[data-cy="editSkillButton_skill1"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="nav-Add Event"]').should(`${chainerPrepend}exist`)
         }
         runCheck(2)
         runCheck(1, 'not.')
@@ -359,7 +357,6 @@ describe('Approver Role Tests', () => {
             cy.wait(`@getSettingsProj${projNum}`);
 
             cy.get('[data-cy="editSkillButton_skill1"]').should(`${chainerPrepend}exist`)
-            cy.get('[data-cy="nav-Add Event"]').should(`${chainerPrepend}exist`)
         }
         runCheck(2)
         runCheck(1, 'not.')

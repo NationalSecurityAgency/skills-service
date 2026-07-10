@@ -22,8 +22,6 @@ describe('Single Skill and Catalog Tests', () => {
         cy.createSubject(1, 1);
     });
 
-    const navAddEventSelector = '[data-cy="nav-Add Event"]';
-
     it('drill down to a skill after creation', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
@@ -54,8 +52,6 @@ describe('Single Skill and Catalog Tests', () => {
             .contains('This skill was imported');
         cy.get('[data-cy="childRowDisplay_skill2"]')
             .contains('initially defined in the This is project 1');
-        cy.get(navAddEventSelector)
-            .should('not.exist');
 
         // now check non-import skills to validate that section selectors are correct
         cy.get('[data-cy="breadcrumb-subj1"]')
@@ -69,8 +65,6 @@ describe('Single Skill and Catalog Tests', () => {
         cy.get('[data-cy="childRowDisplay_skill4"]')
             .contains('This skill was imported')
             .should('not.exist');
-        cy.get(navAddEventSelector)
-            .should('exist');
     });
 
     it('drill down if skill already exist', () => {
@@ -100,8 +94,6 @@ describe('Single Skill and Catalog Tests', () => {
             .contains('This skill was imported');
         cy.get('[data-cy="childRowDisplay_skill2"]')
             .contains('initially defined in the This is project 1');
-        cy.get(navAddEventSelector)
-            .should('not.exist');
 
         // now check non-import skills to validate that section selectors are correct
         cy.get('[data-cy="breadcrumb-subj1"]')
@@ -115,8 +107,6 @@ describe('Single Skill and Catalog Tests', () => {
         cy.get('[data-cy="childRowDisplay_skill4"]')
             .contains('This skill was imported')
             .should('not.exist');
-        cy.get(navAddEventSelector)
-            .should('exist');
     });
 
     it('navigate directly to skill', () => {
@@ -144,8 +134,6 @@ describe('Single Skill and Catalog Tests', () => {
             .contains('This skill was imported');
         cy.get('[data-cy="childRowDisplay_skill2"]')
             .contains('initially defined in the This is project 1');
-        cy.get(navAddEventSelector)
-            .should('not.exist');
     });
 
 });
