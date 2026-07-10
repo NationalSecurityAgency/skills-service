@@ -278,6 +278,7 @@ const doDeleteSkill = () => {
       for (let i = 0; i < skills.length; i++) {
         skills[i].displayOrder = i + 1
       }
+      selectedRows.value = selectedRows.value.filter((item) => item.skillId !== skill.skillId)
       if (skill.groupId) {
         subjectSkillsState.setGroupSkills(skill.groupId, skills)
         const totalPoints = skills
