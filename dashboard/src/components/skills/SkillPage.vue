@@ -64,6 +64,8 @@ watch(
   () => {
     if (!route.query.preventReload) {
       loadData()
+    } else {
+      navItems.value = buildNavItems()
     }
   }
 )
