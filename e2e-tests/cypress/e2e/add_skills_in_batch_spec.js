@@ -253,7 +253,10 @@ describe('Tag Skills Tests', () => {
 
         cy.contains('ONE').click()
         cy.contains('TWO').click()
+        cy.get('[data-pc-name="pcacceptbutton"]').click()
         cy.get('[data-cy="userSuggestOptionsDropdown"]').contains('TWO')
+        cy.get('[data-cy="batchUserList"]').should('have.value', '')
+        cy.get('[data-cy="batchUserList"]').type('user1{enter}user3');
 
         cy.get('[data-cy="secondNextButton"]').click();
 

@@ -148,7 +148,7 @@ const suggestUrl = computed(() => {
       suggestUrl = '/app/users/suggestPkiUsers';
     }
   }
-  if (selectedSuggestOption.value) {
+  if (selectedSuggestOption.value && !props.selectedSuggestOption) {
     suggestUrl += `?userSuggestOption=${selectedSuggestOption.value}`;
   } else if(props.selectedSuggestOption) {
     suggestUrl += `?userSuggestOption=${props.selectedSuggestOption}`;

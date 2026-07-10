@@ -33,11 +33,13 @@ import {useForm} from "vee-validate";
 import {useDebounceFn} from "@vueuse/core";
 import ExistingUserInput from "@/components/utils/ExistingUserInput.vue";
 import { SkillsReporter } from '@skilltree/skills-client-js'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
 const model = defineModel()
 const appConfig = useAppConfig();
 const pluralize = usePluralize();
 const emit = defineEmits([])
+const dialogMessages = useDialogMessages()
 
 const props = defineProps({
   skills: {
@@ -160,6 +162,23 @@ const addSelectedUser = () => {
   usersToAdd.value += (usersToAdd.value.length > 0 ? "\n" : "") + currentSelectedUser.value.userId + "\n";
   currentSelectedUser.value = null;
 }
+
+const showChangeWarning = (newValue) => {
+  if (selectedSuggestOption.value !== newValue) {
+    const msg = `Changing the user suggestion option will remove all users from the list. Please confirm you want to proceed.`;
+    dialogMessages.msgConfirm({
+      message: msg,
+      header: 'Please Confirm!',
+      acceptLabel: 'Proceed',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        usersToAdd.value = '';
+        currentSelectedUser.value = null;
+        selectedSuggestOption.value = newValue;
+      },
+    });
+  }
+}
 </script>
 
 <template>
@@ -221,7 +240,8 @@ const addSelectedUser = () => {
           <div v-if="hasUserSuggestOptions" class="flex gap-1 items-center mb-3">
             <div class="flex flex-1 px-1 gap-2">
             <Select  data-cy="userSuggestOptionsDropdown"
-                     v-model="selectedSuggestOption"
+                     :defaultValue="selectedSuggestOption"
+                     @value-change="showChangeWarning"
                      :options="userSuggestOptions" />
               <existing-user-input class="w-full"
                                    :project-id="projectId"
