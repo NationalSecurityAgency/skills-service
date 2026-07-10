@@ -29,4 +29,5 @@ class SkillsGroupSummary {
 
     List<SkillSummaryParent> skills
 
+    String iconClass
 }

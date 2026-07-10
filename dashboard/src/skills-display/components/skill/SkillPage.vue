@@ -115,7 +115,8 @@ const groupLink = computed(() => {
           <div v-if="!attributes.groupInfoOnSkillPage && skill.groupName" class="mt-4 p-1 mb-4" data-cy="groupInformationSection">
             <div class="flex">
               <div class="mr-2 mt-1 text-xl">
-                <i class="fas fa-layer-group" aria-hidden="true"></i>
+                <i v-if="skill.groupIconClass" :class="skill.groupIconClass" />
+                <i v-else class="fas fa-layer-group" aria-hidden="true"></i>
               </div>
               <div class="flex-1 flex gap-1 items-center text-2xl">
                 <div class="items-center">{{ attributes.groupDisplayName }}:</div>

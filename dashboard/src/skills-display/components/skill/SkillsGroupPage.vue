@@ -60,7 +60,7 @@ const progressPercent = computed(() => group.value.totalSkills > 0 ? Math.trunc(
           <div class="flex flex-col gap-4">
             <div class="flex items-center gap-3">
               <div class="border rounded p-3 text-primary">
-                  <i class="fa-solid fa-layer-group text-4xl" aria-hidden="true"></i>
+                  <i :class="`${group.iconClass ? group.iconClass : 'fa-solid fa-layer-group'} text-4xl`" />
               </div>
               <div class="flex-1 flex flex-col gap-2">
                 <div class="flex items-end gap-1">

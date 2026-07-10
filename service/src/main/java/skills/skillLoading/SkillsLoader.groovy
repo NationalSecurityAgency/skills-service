@@ -574,10 +574,12 @@ class SkillsLoader {
 
         String groupName = null
         Boolean groupHasDescription = false
+        String groupIconClass = null
         if(skillDef.groupId) {
             SkillDefRepo.SkillNameAndPresenceOfDescription nameAndDescPresence = skillDefRepo.getGroupNameAndPresenceOfDescription(skillDef.projectId, skillDef.groupId)
             groupName = nameAndDescPresence?.skillName
             groupHasDescription = nameAndDescPresence?.hasDescription
+            groupIconClass = nameAndDescPresence?.iconClass
         }
 
         boolean isCrossProjectSkill = crossProjectId && crossProjectId != projectId
@@ -701,6 +703,7 @@ class SkillsLoader {
                 groupHasDescription: groupHasDescription,
                 approvalHistory: approvalHistory,
                 iconClass: skillDef.iconClass,
+                groupIconClass: groupIconClass,
         )
     }
 
@@ -1199,6 +1202,7 @@ class SkillsLoader {
                 totalSkills: totalSkills,
 
                 skills: skillsRes,
+                iconClass: groupSkillDef.iconClass
         )
     }
 
@@ -1457,6 +1461,7 @@ class SkillsLoader {
                                 skillId: skillDef.skillId,
                                 description: InputSanitizer.unsanitizeForMarkdown(skillDefAndUserPoints.description)
                         ) : null,
+                        iconClass: skillDef.iconClass,
                 )
 
                 List<SubjectDataLoader.SkillsAndPoints> groupChildren = skillDefAndUserPoints.children
