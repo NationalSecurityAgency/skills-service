@@ -29,6 +29,7 @@ class SkillTagInfoRes {
         String subjectId
         String groupName
         String groupId
+        Date taggedOn
     }
 
     List<SkillInfo> skills

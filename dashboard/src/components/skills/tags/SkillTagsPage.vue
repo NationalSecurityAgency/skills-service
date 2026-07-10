@@ -218,9 +218,6 @@ const focusOnBtnThatInitiated = (editTagId) => {
                 <DateCell :value="slotProps.data.createdOn" />
               </template>
             </Column>
-            <div >
-
-            </div>
             <Column v-if="!projConf.isReadOnlyProj" style="width: 7rem"
                     :class="{'flex': responsive.md.value }">
               <template #body="slotProps">

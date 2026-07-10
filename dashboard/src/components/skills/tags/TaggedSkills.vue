@@ -31,9 +31,12 @@ import {useProjConfig} from "@/stores/UseProjConfig.js";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import NoContent2 from "@/components/utils/NoContent2.vue";
+import DateCell from "@/components/utils/table/DateCell.vue";
+import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 
 const skillTagState = useSingleSkillTagState()
 const tableId = 'skillTagSkillsTable'
+const sortInfo = ref({ sortOrder: -1, sortBy: 'taggedOn' })
 const pageSize = useStorage(`${tableId}-pageSize`, 25)
 const responsive = useResponsiveBreakpoints()
 const colors = useColors()
@@ -118,7 +121,7 @@ const removeSkill = (skill) => {
 }
 const doRemoveSkill = (skill) => {
   const {tagId} = skillTagState.skillTag
-  return SkillsService.deleteTagForSkills(route.params.projectId, [skill.skillId], tagId)
+  return SkillsService.deleteTagForSkills(route.params.projectId, [skill.skillId], tagId, false, true)
       .then(() => {
             return skillTagState.loadSkillTagInfo(route.params.projectId, tagId)
           }
@@ -165,6 +168,8 @@ const focusOnSkillsSelector = () => {
               :totalRecords="skillTagState.numSkills"
               :rowsPerPageOptions="rowsPerPage"
               @page="pageChanged"
+              v-model:sort-field="sortInfo.sortBy"
+              v-model:sort-order="sortInfo.sortOrder"
               data-cy="skillTagSkillsTable">
             <Column header="Skill" field="skillName" sortable :class="{'flex': responsive.md.value }">
               <template #header>
@@ -183,13 +188,12 @@ const focusOnSkillsSelector = () => {
                 <i class="fa-solid fa-tag mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
               </template>
               <template #body="slotProps">
-                <router-link v-if="!hideManageButton" :id="slotProps.data.subjectId" :to="{ name:'SubjectSkills',
+                <router-link :id="slotProps.data.subjectId" :to="{ name:'SubjectSkills',
                   params: { projectId: slotProps.data.projectId, subjectId: slotProps.data.subjectId }}"
                              class="btn btn-sm btn-outline-hc ml-2"
                              :data-cy="`manage_${slotProps.data.subjectId}`">
                   {{ slotProps.data.subjectName }}
                 </router-link>
-                <div v-else>{{ slotProps.data.subjectName }}</div>
               </template>
             </Column>
             <Column header="Group" field="groupName" sortable :class="{'flex': responsive.md.value }">
@@ -197,7 +201,21 @@ const focusOnSkillsSelector = () => {
                 <i class="fa-solid fa-layer-group mr-1" :class="colors.getTextClass(2)" aria-hidden="true"></i>
               </template>
               <template #body="slotProps">
-                <div>{{ slotProps.data.groupName }}</div>
+                <router-link v-if="slotProps.data.groupId" :id="slotProps.data.groupId" :to="{
+                  name:'GroupSkills',
+                  params: { projectId: slotProps.data.projectId, subjectId: slotProps.data.subjectId, groupId: slotProps.data.groupId }}"
+                             class="btn btn-sm btn-outline-hc ml-2"
+                             :data-cy="`manage_${slotProps.data.groupId}`">
+                  {{ slotProps.data.groupName }}
+                </router-link>
+              </template>
+            </Column>
+            <Column field="taggedOn" header="Tagged On" :sortable="true" :class="{'flex': responsive.md.value }">
+              <template #header>
+                <i class="fa-solid fa-calendar mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
+              </template>
+              <template #body="slotProps">
+                <DateCell :value="slotProps.data.createdOn" />
               </template>
             </Column>
             <Column v-if="!hideManageButton" header="Delete" :class="{'flex': responsive.md.value }">
@@ -213,6 +231,10 @@ const focusOnSkillsSelector = () => {
                 </SkillsButton>
               </template>
             </Column>
+
+            <template #paginatorstart>
+              <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ skillTagState.numSkills }}</span>
+            </template>
 
           </SkillsDataTable>
           <no-content2

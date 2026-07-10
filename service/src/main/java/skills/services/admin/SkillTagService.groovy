@@ -148,14 +148,15 @@ class SkillTagService {
         return new SkillTagInfoRes(
                 tagId: tagSkillDef.skillId,
                 tagValue: tagSkillDef.name,
-                skills: skillsForTag.collect {
+                skills: skillsForTag?.sort { it.relationshipCreated }?.reversed().collect {
                     new SkillTagInfoRes.SkillInfo(
                             skillId: it.skillId,
                             skillName: it.name,
                             subjectName: it.subjectName,
                             subjectId: it.subjectSkillId,
                             groupName: it.groupName,
-                            groupId: it.groupId
+                            groupId: it.groupId,
+                            taggedOn: it.relationshipCreated,
                     )
                 }
         )
@@ -234,7 +235,7 @@ class SkillTagService {
         if (removeTagFully) {
             assert skillsWithTag <= 0
         }
-        if (skillsWithTag <= 0) {
+        if (!skillsTagRequest.retainTag && skillsWithTag <= 0) {
             log.info("Tag [${tagId}] removed from all skills, removing tag definition")
             skillDefWithExtraRepo.delete(tag)
         }
