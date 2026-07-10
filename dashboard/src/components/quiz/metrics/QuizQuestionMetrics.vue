@@ -69,7 +69,7 @@ const overallCorrectPercent = computed(() => {
   }
   return total > 0 ? (props.q.numAnsweredCorrect / total * 100).toFixed(1) : 0
 })
-const overallCorrectWrong = computed(() => 100 - overallCorrectPercent.value)
+const overallCorrectWrong = computed(() => (100 - overallCorrectPercent.value).toFixed(1))
 const setChartOptions = () => {
   return {
     responsive: true,
