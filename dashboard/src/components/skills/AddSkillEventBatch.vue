@@ -31,6 +31,8 @@ import LengthyOperationProgressBar from "@/components/utils/LengthyOperationProg
 import {object, string} from "yup";
 import {useForm} from "vee-validate";
 import {useDebounceFn} from "@vueuse/core";
+import ExistingUserInput from "@/components/utils/ExistingUserInput.vue";
+import { SkillsReporter } from '@skilltree/skills-client-js'
 
 const model = defineModel()
 const appConfig = useAppConfig();
@@ -55,6 +57,7 @@ const results = ref([]);
 const displayFullText = ref(false);
 const userSuggestOptions = ref([]);
 const selectedSuggestOption = ref(null);
+const currentSelectedUser = ref(null);
 
 onMounted(() => {
   if (appConfig.userSuggestOptions) {
@@ -132,6 +135,7 @@ const saveEvents = () => {
     usersToAdd.value = '';
     results.value = result.results;
     savingEvents.value = false;
+    SkillsReporter.reportSkill('ManuallyAddSkillEvent')
   })
 
 }
@@ -150,6 +154,11 @@ const toStep3 = (activateCallback) => {
       activateCallback('3')
     }
   })
+}
+
+const addSelectedUser = () => {
+  usersToAdd.value += (usersToAdd.value.length > 0 ? "\n" : "") + currentSelectedUser.value.userId + "\n";
+  currentSelectedUser.value = null;
 }
 </script>
 
@@ -210,10 +219,18 @@ const toStep3 = (activateCallback) => {
         </StepPanel>
         <StepPanel value="2" v-slot="{ activateCallback }">
           <div v-if="hasUserSuggestOptions" class="flex gap-1 items-center mb-3">
-            <Select  data-cy="userSuggestOptionsDropdown"
-                     v-model="selectedSuggestOption"
-                     :options="userSuggestOptions"
-                     class="flex-1"/>
+            <div class="flex flex-1 px-1 gap-2">
+              <existing-user-input class="w-full"
+                                   :project-id="projectId"
+                                   v-model="currentSelectedUser"
+                                   :can-enter-new-user="!appConfig.isPkiAuthenticated"
+                                   name="userIdInput"
+                                   aria-errormessage="userIdInputError"
+                                   aria-describedby="userIdInputError"
+                                   :aria-invalid="!meta.valid"
+                                   data-cy="userIdInput" />
+              <SkillsButton label="Add" @click="addSelectedUser" :disabled="!currentSelectedUser"/>
+            </div>
           </div>
           <div class="mb-2">
             <SkillsTextarea
