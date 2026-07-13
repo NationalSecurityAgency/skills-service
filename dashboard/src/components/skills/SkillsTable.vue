@@ -54,6 +54,7 @@ import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import { useSkillsState } from '@/stores/UseSkillsState.js';
 import AddSkillEventBatch from "@/components/skills/AddSkillEventBatch.vue";
 import BatchSkillEditDialog from "@/components/skills/BatchSkillEditDialog.vue";
+import SkillTagChip from "@/components/skills/tags/SkillTagChip.vue";
 
 const YEARLY = 'YEARLY';
 const MONTHLY = 'MONTHLY';
@@ -777,14 +778,13 @@ const pageChanged = (pagingInfo) => {
                   :data-cy="`exportedBadge-${slotProps.data.skillId}`">
                   <span><i class="fas fa-book" aria-hidden="true"></i> Exported</span>
                 </Tag>
-                <Chip :pt="{ root: { class: 'p-0!'}}"
-                      v-for="(tag) in slotProps.data.tags"
-                      :key="tag.tagId"
-                      :data-cy="`skillTag-${slotProps.data.skillId}-${tag.tagId}`">
-                  <span class="bg-primary text-primary-contrast rounded-full w-6 h-6 flex items-center justify-center"><i
-                      class="fas fa-tag text-sm" aria-hidden="true"/></span>
-                        <span class="font-medium pr-3">{{ tag.tagValue }}</span>
-                </Chip>
+                <div v-for="tag in slotProps.data.tags" :key="tag.tagId">
+                  <skill-tag-chip
+                      :data-cy="`skillTag-${slotProps.data.skillId}-${tag.tagId}`"
+                      :tag-id="tag.tagId"
+                      :tag-value="tag.tagValue"
+                  />
+                </div>
               </div>
               <div v-if="slotProps.data.badges && slotProps.data.badges.length > 0" class="mt-2" data-cy="skillBadges">
                 <i class="fa fa-award text-purple-500" aria-hidden="true"></i> Badges:

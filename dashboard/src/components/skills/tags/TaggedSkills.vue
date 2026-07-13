@@ -218,13 +218,15 @@ const focusOnSkillsSelector = () => {
                 <DateCell :value="slotProps.data.createdOn" />
               </template>
             </Column>
-            <Column v-if="!hideManageButton" header="Delete" :class="{'flex': responsive.md.value }">
+            <Column v-if="!hideManageButton"
+                    header=""
+                    :class="{'flex': responsive.md.value }"
+                    style="width: 4rem">
               <template #body="slotProps">
                 <SkillsButton :id="`removeSkill_${slotProps.data.skillId}`"
                               @click="removeSkill(slotProps.data)"
                               size="small"
                               icon="fa-solid fa-trash-can"
-                              label="Remove"
                               :track-for-focus="true"
                               :data-cy="`deleteSkill_${slotProps.data.skillId}`"
                               :aria-label="`remove skill ${slotProps.data.skillId} from the tag`">

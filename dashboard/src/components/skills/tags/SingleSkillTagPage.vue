@@ -70,6 +70,8 @@ const onTagEdited = (newTag) => {
                         @click="editExistingTag()"
                         label="Edit Tag"
                         icon="fa-solid fa-edit"
+                        size="small"
+                        severity="info"
                         :track-for-focus="true"
                         data-cy="editTag"
                         :aria-label="`edit tag ${skillTagState.skillTag?.tagValue}`">
