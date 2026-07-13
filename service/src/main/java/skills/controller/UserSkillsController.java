@@ -181,15 +181,15 @@ class UserSkillsController {
         return skillsLoader.getUserLevel(projectId, userId);
     }
 
-    @RequestMapping(value = "/projects/{projectId}/skillsSubjectsAndBadges", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/projects/{projectId}/navigableItems", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     @Profile
-    public List<SkillDefRepo.ProjNavItemWithAchievements> getAllProjectSkillsSubjectsAndBadges(HttpServletRequest request,
+    public List<SkillDefRepo.ProjNavItemWithAchievements> navigableItems(HttpServletRequest request,
                                                                                                @PathVariable("projectId") String projectId,
                                                                                                @RequestParam(name = "userId", required = false) String userIdParam,
                                                                                                @RequestParam(name = "idType", required = false) String idType) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
-        return skillsService.getAllSkillsSubjectsAndBadgesWithAchievementDetails(projectId, userId);
+        return skillsService.navigableItems(projectId, userId);
     }
 
     @RequestMapping(value = "/projects/{projectId}/summary", method = RequestMethod.GET, produces = "application/json")

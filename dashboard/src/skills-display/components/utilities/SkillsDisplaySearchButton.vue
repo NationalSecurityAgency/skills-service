@@ -47,6 +47,12 @@ const navToSkill = (skill) => {
         {
           badgeId: skill.skillId
         })
+  } else if (SkillType.isTag(skillType)) {
+    skillDisplayInfo.routerPush(
+        'skillTagDetails',
+        {
+          tagId: skill.skillId
+        })
   } else if (SkillType.isSkillsGroup(skillType)) {
     skillDisplayInfo.routerPush(
         'skillsGroupDetails',
@@ -70,7 +76,7 @@ const navToSkill = (skill) => {
 <template>
   <nav-to-search-button
       :nav-to-skill-fn="navToSkill"
-      :load-proj-pages-info-fn="skillsDisplayService.getAllProjectSkillsSubjectsAndBadges"
+      :load-proj-pages-info-fn="skillsDisplayService.getProjectNavigableItems"
       :show-label="showLabel"
       :keyboard-shortcut-enabled="keyboardShortcutEnabled"
   />

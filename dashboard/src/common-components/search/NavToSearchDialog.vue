@@ -122,6 +122,9 @@ const getIconClass = (skill) => {
   if (SkillType.isBadge(skillType)) {
     return 'fas fa-award skills-color-badges text-indigo-500'
   }
+  if (SkillType.isTag(skillType)) {
+    return 'fas fa-tag skills-color-badges text-emerald-500'
+  }
   if (SkillType.isSkillsGroup(skillType)) {
     return 'fa-solid fa-layer-group text-purple-500'
   }

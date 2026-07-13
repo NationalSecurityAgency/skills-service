@@ -18,8 +18,10 @@ export default {
     SkillsGroup: 'SkillsGroup',
     Badge: 'Badge',
     Subject: 'Subject',
+    Tag: 'Tag',
     isSkill: (type) => type === 'Skill',
     isSkillsGroup: (type) => type === 'SkillsGroup',
     isBadge: (type) => type === 'Badge',
     isSubject: (type) => type === 'Subject',
+    isTag: (type) => type === 'Tag',
 };

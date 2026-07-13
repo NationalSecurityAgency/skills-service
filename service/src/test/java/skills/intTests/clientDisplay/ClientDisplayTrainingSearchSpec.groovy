@@ -18,7 +18,6 @@ package skills.intTests.clientDisplay
 
 import org.apache.commons.lang3.StringUtils
 import skills.intTests.utils.DefaultIntSpec
-import skills.intTests.utils.SkillsFactory
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -66,7 +65,7 @@ class ClientDisplayTrainingSearchSpec extends DefaultIntSpec {
         skillsService.createBadge(badge)
 
         when:
-        def skills = skillsService.getApiAllSubjectsBadgesAndSkills(p1.projectId)
+        def skills = skillsService.getApiProjNavItems(p1.projectId)
         then:
         skills
         skills.size() == 27
@@ -115,7 +114,7 @@ class ClientDisplayTrainingSearchSpec extends DefaultIntSpec {
 
         skillsService.addSkill([projectId: p1.projectId, skillId: p1Subj1Skills.get(0).skillId], skillsService.userName, new Date())
         when:
-        def skills = skillsService.getApiAllSubjectsBadgesAndSkills(p1.projectId)
+        def skills = skillsService.getApiProjNavItems(p1.projectId)
         then:
         skills
         skills.size() == 8
@@ -138,7 +137,7 @@ class ClientDisplayTrainingSearchSpec extends DefaultIntSpec {
         skillsService.createProjectAndSubjectAndSkills(p1, null, [])
 
         when:
-        def skills = skillsService.getApiAllSubjectsBadgesAndSkills(p1.projectId)
+        def skills = skillsService.getApiProjNavItems(p1.projectId)
         then:
         !skills
     }
