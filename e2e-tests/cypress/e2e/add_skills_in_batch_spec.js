@@ -632,4 +632,62 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="secondNextButton"]').should('be.disabled');
     });
 
+    it('Canceling dialog does not reset user input', () => {
+        cy.intercept('POST', '/admin/projects/proj1/reportSkillEvents').as('saveSkills')
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Report Skills for Users"]', true)
+
+        cy.get('[data-cy="skillsToAdd"]').contains('Very Great Skill 3')
+        cy.get('[data-cy="skillsToAdd"]').contains('Very Great Skill 1')
+
+        cy.get('[data-cy="firstNextButton"]').click();
+        cy.get('[data-cy="batchUserList"]').type('user1{enter}user3');
+
+        cy.contains('ONE').click()
+        cy.contains('TWO').click()
+        cy.get('[data-pc-name="pcrejectbutton"]').click()
+        cy.get('[data-cy="userSuggestOptionsDropdown"]').contains('ONE')
+        cy.get('[data-cy="batchUserList"]').should('have.value', 'user1\nuser3')
+
+    });
+
+    it('Looking up users adds them to the textbox', () => {
+        cy.intercept('POST', '/admin/projects/proj1/reportSkillEvents').as('saveSkills')
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Report Skills for Users"]', true)
+
+        cy.get('[data-cy="skillsToAdd"]').contains('Very Great Skill 3')
+        cy.get('[data-cy="skillsToAdd"]').contains('Very Great Skill 1')
+
+        cy.get('[data-cy="firstNextButton"]').click();
+        cy.get('[data-cy="batchUserList"]').type('user1{enter}user3');
+
+        cy.get(`[data-cy="existingUserInputDropdown"] [data-pc-section="dropdown"]`).click()
+        cy.get(`[data-cy="existingUserInputDropdown"]`).type('userb')
+        cy.get('[data-pc-section="overlay"] [data-pc-section="option"]').contains('userb').click();
+        cy.get('[data-cy="addUserToList"]').click()
+
+        cy.get('[data-cy="batchUserList"]').should('have.value', 'user1\nuser3\nuserb')
+
+    });
 });

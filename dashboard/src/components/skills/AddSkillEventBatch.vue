@@ -159,7 +159,7 @@ const toStep3 = (activateCallback) => {
 }
 
 const addSelectedUser = () => {
-  usersToAdd.value += (usersToAdd.value.length > 0 ? "\n" : "") + currentSelectedUser.value.userId + "\n";
+  usersToAdd.value += (usersToAdd.value.length > 0 ? "\n" : "") + currentSelectedUser.value.userId;
   currentSelectedUser.value = null;
 }
 
@@ -254,7 +254,7 @@ const showChangeWarning = (newValue) => {
                                    aria-describedby="userIdInputError"
                                    :aria-invalid="!meta.valid"
                                    data-cy="userIdInput" />
-              <SkillsButton label="Add" @click="addSelectedUser" :disabled="!currentSelectedUser"/>
+              <SkillsButton label="Add" @click="addSelectedUser" :disabled="!currentSelectedUser" data-cy="addUserToList"/>
             </div>
           </div>
           <div class="mb-2">
