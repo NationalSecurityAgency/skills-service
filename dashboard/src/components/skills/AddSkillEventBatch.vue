@@ -265,6 +265,7 @@ const showChangeWarning = (newValue) => {
                 v-model="usersToAdd"
                 data-cy="batchUserList"
                 rows="10"
+                placeholder="Search for users above or enter users here, one user per line"
                 name="usersToAdd">
             </SkillsTextarea>
           </div>
