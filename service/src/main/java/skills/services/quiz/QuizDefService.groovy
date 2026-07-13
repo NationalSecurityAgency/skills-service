@@ -201,9 +201,10 @@ class QuizDefService {
         QuizDefRepo.QuizDefSummaryRes dbRes = quizDefRepo.getQuizDefSummary(quizId)
         UserInfo userInfo = userInfoService.currentUser
         Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
+        String quizName = InputSanitizer.unsanitizeName(dbRes.getName())
         return new QuizDefSummaryResult(
                 quizId: quizId,
-                name: dbRes.getName(),
+                name: quizName,
                 created: dbRes.getCreated(),
                 type: QuizDefParent.QuizType.valueOf(dbRes.getQuizType()),
                 numQuestions: dbRes.getNumQuestions(),
@@ -1450,6 +1451,7 @@ class QuizDefService {
 
         Boolean isUserCommunityEnableForThisQuiz = Boolean.valueOf(quizDefSummaryResult.userCommunityEnabled)
         result.userCommunity = isCommunityMember ? userCommunityService.getCommunityNameBasedOnConfAndItemStatus(isUserCommunityEnableForThisQuiz) : null
+        result.name = InputSanitizer.unsanitizeName(result.name)
         return result
     }
 
@@ -1460,7 +1462,7 @@ class QuizDefService {
         UserInfo userInfo = userInfoService.currentUser
         Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
         result.userCommunity = isCommunityMember ? userCommunityService.getQuizUserCommunity(updatedDef.quizId) : null
-
+        result.name = InputSanitizer.unsanitizeName(result.name)
         return result
     }
 
@@ -1472,6 +1474,7 @@ class QuizDefService {
         UserInfo userInfo = userInfoService.currentUser
         Boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username);
         result.userCommunity = isCommunityMember ? userCommunityService.getQuizUserCommunity(updatedDef.quizId) : null
+        result.name = InputSanitizer.unsanitizeName(result.name)
         return result
     }
 }
