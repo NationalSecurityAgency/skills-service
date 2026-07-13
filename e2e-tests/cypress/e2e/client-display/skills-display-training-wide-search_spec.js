@@ -78,7 +78,8 @@ describe('Skills Display Training Wide Search Tests', () => {
         cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
         cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
         cy.wait('@loadNavigableItems')
-        cy.get('input.p-listbox-filter').type('{selectall}tag 1')
+        cy.get('input.p-listbox-filter').should('be.visible').focus().type('tag 1', { delay: 0})
+        cy.get('input.p-listbox-filter').focus()
         cy.realPress('ArrowDown');
         cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', 'TAG 1');
         cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', '1 / 2 Skills')
