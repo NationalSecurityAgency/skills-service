@@ -357,6 +357,26 @@ Badges add another facet to the overall gamification profile and allows you to f
                         description: "Lookup:Desc_ChangeBadgeDisplayOrder.md",
                         iconClass: "fa-solid fa-arrow-up-9-1"
                 ),
+                new SkillRequest(name: "Visit Skill Tags", skillId: "VisitSkillsTagsPage", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 2, // up-to 4 per day
+                        numPerformToCompletion: 4,
+                        description: "Skill tagging allows administrators to attach custom labels to skills, making it easier to categorize and group them. These tags provide users with an intuitive way to search and filter specific skill sets. Additionally, skill tags appear directly in the Skills Display, helping learners quickly discover, categorize, and navigate training content." +
+                                "\n\nNavigate to ``Project -> Skill Tags``",
+                        helpUrl: "/dashboard/user-guide/skills.html#skill-tags",
+                        iconClass: "fa-solid fa-tags"
+                ),
+                new SkillRequest(name: "Visit Single Skill Tag Page", skillId: "VisitSkillTagSkills", subjectId: subjectProjectId, projectId: inceptionProjectId,
+                        pointIncrement: 5,
+                        pointIncrementInterval: 60 * 12, // 1 work day
+                        numMaxOccurrencesIncrementInterval: 2, // up-to 4 per day
+                        numPerformToCompletion: 4,
+                        description: "The administration page for an individual tag allows you to easily view, organize, and manage all skills associated with that tag." +
+                                "\n\nNavigate to ``Project -> Skill Tags -> Click on a specific tag``",
+                        helpUrl: "/dashboard/user-guide/skills.html#skill-tags",
+                        iconClass: "fa-solid fa-tag"
+                ),
 
         ]
     }
