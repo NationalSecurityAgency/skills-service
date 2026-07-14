@@ -664,6 +664,8 @@ describe('Tag Skills Tests', () => {
     it('Looking up users adds them to the textbox', () => {
         cy.intercept('POST', '/admin/projects/proj1/reportSkillEvents').as('saveSkills')
 
+        cy.reportSkill(1, 1, 'userb', 'now');
+
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         // must exist initially
