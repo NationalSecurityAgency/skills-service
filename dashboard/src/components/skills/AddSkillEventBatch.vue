@@ -248,10 +248,11 @@ const showChangeWarning = (newValue) => {
                                    v-model="currentSelectedUser"
                                    :has-user-suggest-options="false"
                                    :selected-suggest-option="selectedSuggestOption"
-                                   :can-enter-new-user="!appConfig.isPkiAuthenticated"
+                                   :can-enter-new-user="false"
                                    name="userIdInput"
                                    aria-errormessage="userIdInputError"
                                    aria-describedby="userIdInputError"
+                                   :placeholder="'Search for users'"
                                    :aria-invalid="!meta.valid"
                                    data-cy="userIdInput" />
               <SkillsButton label="Add" @click="addSelectedUser" :disabled="!currentSelectedUser" data-cy="addUserToList"/>
