@@ -98,6 +98,7 @@ describe('Single Skill Tag Management Tests', () => {
         cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
         cy.get('[data-cy="skillsSelector"] button').should('have.focus');
 
+        cy.get('[data-cy="pageHeaderStat_Tagged Skills"] [data-cy="statValue"]').should('have.text', '1');
         cy.validateTable(skillsTable, [
             [{colIndex: 0, value: 'Very Great Skill 1'}, {colIndex: 1, value: 'Subject 1'}],
         ], 25);
@@ -108,6 +109,7 @@ describe('Single Skill Tag Management Tests', () => {
             [{colIndex: 0, value: 'Very Great Skill 4 Subj2'}, {colIndex: 1, value: 'Subject 2'}],
             [{colIndex: 0, value: 'Very Great Skill 1'}, {colIndex: 1, value: 'Subject 1'}],
         ], 25);
+        cy.get('[data-cy="pageHeaderStat_Tagged Skills"] [data-cy="statValue"]').should('have.text', '2');
 
         cy.selectSkill('[data-cy="skillsSelector"]', 'skill21');
         cy.validateTable(skillsTable, [
@@ -115,6 +117,7 @@ describe('Single Skill Tag Management Tests', () => {
             [{colIndex: 0, value: 'Very Great Skill 4 Subj2'}, {colIndex: 1, value: 'Subject 2'}],
             [{colIndex: 0, value: 'Very Great Skill 1'}, {colIndex: 1, value: 'Subject 1'}],
         ], 25);
+        cy.get('[data-cy="pageHeaderStat_Tagged Skills"] [data-cy="statValue"]').should('have.text', '3');
 
         cy.visit('/administrator/projects/proj1/skills-tags/tag1');
 
@@ -123,6 +126,7 @@ describe('Single Skill Tag Management Tests', () => {
             [{colIndex: 0, value: 'Very Great Skill 4 Subj2'}, {colIndex: 1, value: 'Subject 2'}],
             [{colIndex: 0, value: 'Very Great Skill 1'}, {colIndex: 1, value: 'Subject 1'}],
         ], 25);
+        cy.get('[data-cy="pageHeaderStat_Tagged Skills"] [data-cy="statValue"]').should('have.text', '3');
     });
 
     it('remove skills', () => {

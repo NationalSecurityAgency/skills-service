@@ -1054,7 +1054,7 @@ WITH
             skill_relationship_definition srd
                 JOIN skill_definition sd ON srd.parent_ref_id = sd.id
         WHERE sd.project_id = :projectId
-          AND sd.type = 'Subject\'
+          AND sd.type = 'Subject'
     ),
     child_counts AS (
         SELECT
@@ -1066,12 +1066,13 @@ WITH
                 JOIN skill_definition child_skill ON srd.child_ref_id = child_skill.id
         WHERE parent_skill.project_id = :projectId
           AND child_skill.project_id = :projectId
-          AND child_skill.type = 'Skill\'
+          AND child_skill.type = 'Skill'
           AND srd.type IN (
                            'RuleSetDefinition',
                            'BadgeRequirement',
                            'GroupSkillToSubject',
-                           'SkillsGroupRequirement\'
+                           'SkillsGroupRequirement',
+                           'Tag'
             )
         GROUP BY
             srd.parent_ref_id
@@ -1096,7 +1097,7 @@ FROM
             AND s.project_id = skillsGroup.project_id
         )
 WHERE
-    s.type IN ('Skill', 'Subject', 'Badge', 'SkillsGroup')
+    s.type IN ('Skill', 'Subject', 'Badge', 'SkillsGroup', 'Tag')
   AND s.project_id = :projectId
 ORDER BY
     s.name ASC

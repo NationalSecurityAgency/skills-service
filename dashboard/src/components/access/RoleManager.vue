@@ -540,7 +540,7 @@ defineExpose({
                          :data-cy="`adminGroupSelected-${slotProps.value.adminGroupId}`">
                       <span class="ml-1">{{ slotProps.value.name }}</span>
                     </div>
-                    <span v-else> Search available admin groups...</span>
+                    <span v-else> Assign Admin Group</span>
                   </template>
                   <template #option="slotProps">
                     <div :data-cy="`availableAdminGroupSelection-${slotProps.option.adminGroupId}`">

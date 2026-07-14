@@ -35,6 +35,8 @@ const navToSkill = (skill) => {
     router.push({ name: 'BadgeSkills', params:{ projectId, badgeId: skill.skillId}})
   } else if (SkillType.isSkillsGroup(skillType)) {
     router.push({ name: 'GroupSkills', params: { projectId, subjectId: skill.subjectId, groupId: skill.skillId }})
+  } else if (SkillType.isTag(skillType)) {
+    router.push({ name: 'SkillTagSkills', params: { projectId, tagId: skill.skillId }})
   } else {
     const name = skill.skillsGroupId ? 'GroupSkillOverview' : 'SingleSkillOverview'
     const params = {

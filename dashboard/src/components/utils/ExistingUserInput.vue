@@ -202,6 +202,7 @@ const suggestUsers = (query) => {
                     class="w-full"
                     :dropdown="true"
                     :suggestions="suggestions"
+                    :placeholder="placeholder"
                     optionLabel="label"
                     aria-label="Type to select a user"
                     :pt="{ dropdown: { 'aria-label': 'click to select an item' } }"

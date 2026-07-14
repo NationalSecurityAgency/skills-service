@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 import ProjectPageHeader from "@/components/utils/pages/ProjectPageHeader.vue";
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {useSingleSkillTagState} from "@/stores/UseSingleSkillTagState.js";
 import {useRoute} from "vue-router";
 import Navigation from "@/components/utils/Navigation.vue";
@@ -35,6 +35,10 @@ const navItems = computed(() => {
 
 onMounted(() => {
   skillTagState.loadSkillTagInfo(route.params.projectId, tagId)
+})
+
+watch(() => route.params.tagId, (newTagId) => {
+  skillTagState.loadSkillTagInfo(route.params.projectId, newTagId)
 })
 
 const isLoading = computed(() => skillTagState.loadingSkillTag)
