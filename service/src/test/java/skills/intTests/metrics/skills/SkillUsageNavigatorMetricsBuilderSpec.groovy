@@ -209,7 +209,12 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
         then:
         res.skills.size() == 10
         res.tags.size() == 2
-        res.tags == [[tagValue: 'New Tag', tagId: 'newtag', numSkills: 5], [tagValue: 'Test Tag', tagId: 'testtag', numSkills: 10]]
+        def tag1 = res.tags.find { it.tagId == 'newtag' }
+        tag1.tagValue == 'New Tag'
+        tag1.numSkills == 5
+        def tag2 = res.tags.find { it.tagId == 'testtag' }
+        tag2.tagValue == 'Test Tag'
+        tag2.numSkills == 10
     }
 
     def "group skills with usage and achievements"() {

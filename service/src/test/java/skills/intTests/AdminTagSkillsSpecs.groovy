@@ -288,6 +288,7 @@ class AdminTagSkillsSpecs extends DefaultIntSpec {
         List skillsAfterTagging = skillsService.getSkillsForSubject(proj.projectId, subj.subjectId)
         List tagsForSkills = skillsService.getTagsForSkills(proj.projectId, skillIds)
         List tagsForProject = skillsService.getTagsForProject(proj.projectId, false)
+        List tagsForProjectWithDisabled = skillsService.getTagsForProject(proj.projectId, true)
 
         then:
         res1
@@ -301,7 +302,12 @@ class AdminTagSkillsSpecs extends DefaultIntSpec {
         skillsAfterTagging[2].tags && skillsAfterTagging[2].tags.size() == 2 && skillsAfterTagging[2].tags.find { it.tagValue == tagValue1 } && skillsAfterTagging[2].tags.find { it.tagValue == tagValue2 }
         skillsAfterTagging[3].tags && skillsAfterTagging[3].tags.size() == 1 && skillsAfterTagging[3].tags[0].tagValue == tagValue2
 
-        tagsForProject && tagsForProject.size() == 1 && !tagsForProject.find { it.tagValue == tagValue1 } && tagsForSkills.find { it.tagValue == tagValue2 }
+        tagsForProject.find { it.tagValue == tagValue1 }.numSkills == 0
+        tagsForSkills.find { it.tagValue == tagValue2 }.numSkills == 3
+
+        tagsForProjectWithDisabled.find { it.tagValue == tagValue1 }.numSkills == 2
+        tagsForProjectWithDisabled.find { it.tagValue == tagValue2 }.numSkills == 3
+
         tagsForSkills && tagsForSkills.size() == 2 && tagsForSkills.find { it.tagValue == tagValue1 } && tagsForSkills.find { it.tagValue == tagValue2 }
     }
 

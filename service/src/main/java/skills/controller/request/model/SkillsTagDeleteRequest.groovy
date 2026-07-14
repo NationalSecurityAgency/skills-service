@@ -21,8 +21,6 @@ import groovy.transform.ToString
 @Canonical
 @ToString(includePackage = false)
 class SkillsTagDeleteRequest extends SkillsTagRequest{
-    String tagId
-    String tagValue
     Boolean removeTagFully
     // when set to true and all skills are removed
     // with this request it will keep the Tag itself

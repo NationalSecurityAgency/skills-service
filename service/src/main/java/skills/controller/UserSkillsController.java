@@ -657,7 +657,8 @@ class UserSkillsController {
 
         if (tags != null) {
             tagResponses = tags.stream()
-                .map(tag -> {
+                    .filter(tag -> tag.getNumSkills() > 0)
+                    .map(tag -> {
                     SkillTagRes res = new SkillTagRes();
                     res.setTagId(tag.getTagId());
                     res.setTagValue(tag.getTagValue());
@@ -680,6 +681,7 @@ class UserSkillsController {
 
         if (tags != null) {
             tagResponses = tags.stream()
+                .filter(tag -> tag.getNumSkills() > 0)
                 .map(tag -> {
                     SkillTagRes res = new SkillTagRes();
                     res.setTagId(tag.getTagId());
