@@ -70,7 +70,8 @@ const onTagEdited = (newTag) => {
     <project-page-header :loading="isLoading" :options="headerOptions">
       <template #subSubTitle>
         <div class="mt-2">
-          <SkillsButton :id="`editTag_${tagId}`"
+          <SkillsButton v-if="!projConf.isReadOnlyProj"
+                        :id="`editTag_${tagId}`"
                         @click="editExistingTag()"
                         label="Edit Tag"
                         icon="fa-solid fa-edit"
