@@ -21,10 +21,13 @@ import {useRoute} from "vue-router";
 import Navigation from "@/components/utils/Navigation.vue";
 import CreateTagDialog from "@/components/skills/tags/CreateTagDialog.vue";
 import {useProjConfig} from "@/stores/UseProjConfig.js";
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
 const skillTagState = useSingleSkillTagState()
 const route = useRoute()
 const projConf = useProjConfig()
+const announcer = useSkillsAnnouncer()
+
 const tagId = route.params.tagId.toString()
 const navItems = computed(() => {
   return [
@@ -62,6 +65,7 @@ const editExistingTag = () => {
 }
 const onTagEdited = (newTag) => {
   skillTagState.skillTag.tagValue = newTag.tagValue
+  announcer.polite(`Changed tag to ${newTag.tagValue}`)
 }
 </script>
 

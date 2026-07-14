@@ -220,6 +220,9 @@ const focusOnBtnThatInitiated = (editTagId) => {
             </Column>
             <Column v-if="!projConf.isReadOnlyProj" style="width: 7rem"
                     :class="{'flex': responsive.md.value }">
+              <template #header>
+                <div class="sr-only">Actions</div>
+              </template>
               <template #body="slotProps">
                 <ButtonGroup>
                   <SkillsButton :id="`editTag_${slotProps.data.tagId}`"

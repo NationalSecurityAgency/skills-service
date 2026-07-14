@@ -33,6 +33,7 @@ import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
+import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 
 const skillTagState = useSingleSkillTagState()
 const tableId = 'skillTagSkillsTable'
@@ -44,6 +45,7 @@ const route = useRoute()
 const skillRouteUtil = useSkillOverviewRouteUtil()
 const projConf = useProjConfig()
 const dialogMessages = useDialogMessages()
+const announcer = useSkillsAnnouncer()
 
 const loadingProjSkills = ref(true)
 const addingSkillToTag = ref(false)
@@ -97,6 +99,7 @@ const skillAdded = (newItem) => {
         addingSkillToTag.value = false;
       }).then(() => {
         focusOnSkillsSelector()
+        announcer.polite(`Skill "${newItem.name}" was added to Tag "${tagValue}"`)
       })
 }
 
@@ -127,6 +130,7 @@ const doRemoveSkill = (skill) => {
           }
       ).finally(() => {
         focusOnSkillsSelector()
+        announcer.polite(`Skill "${skill.skillName}" was removed from Tag "${skillTagState.skillTag.tagValue}"!`)
       })
 }
 
@@ -219,9 +223,11 @@ const focusOnSkillsSelector = () => {
               </template>
             </Column>
             <Column v-if="!hideManageButton"
-                    header=""
                     :class="{'flex': responsive.md.value }"
                     style="width: 4rem">
+              <template #header>
+                <div class="sr-only">Actions</div>
+              </template>
               <template #body="slotProps">
                 <SkillsButton :id="`removeSkill_${slotProps.data.skillId}`"
                               @click="removeSkill(slotProps.data)"
