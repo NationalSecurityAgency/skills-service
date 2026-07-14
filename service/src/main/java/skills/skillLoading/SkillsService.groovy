@@ -29,7 +29,7 @@ class SkillsService {
     @Autowired
     SkillDefRepo skillDefRepo
 
-    List<SkillDefRepo.ProjNavItemWithAchievements> getAllSkillsSubjectsAndBadgesWithAchievementDetails(String projectId, String userId) {
-        return skillDefRepo.findAllSkillsSubjectsAndBadgesWithAchievementDetails(projectId, userId)
+    List<SkillDefRepo.ProjNavItemWithAchievements> navigableItems(String projectId, String userId) {
+        return skillDefRepo.findProjNavItems(projectId, userId)
     }
 }
