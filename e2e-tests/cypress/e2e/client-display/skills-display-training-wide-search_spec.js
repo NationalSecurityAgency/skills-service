@@ -105,7 +105,27 @@ describe('Skills Display Training Wide Search Tests', () => {
     it('navigate from one subject to another using training-wide search dialog', () => {
         cy.createProject(1)
         cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, {
+          numPerformToCompletion: 1,
+          description: 'This is skill1 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        })
+        cy.createSkill(1, 1, 2, {
+          numPerformToCompletion: 1,
+          description: 'This is skill2 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        })
+        cy.createSkill(1, 1, 3, {
+          numPerformToCompletion: 1,
+          description: 'This is skill3 - Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        })
+
         cy.createSubject(1, 2)
+        cy.createSkill(1, 2, 1)
+        cy.createSkill(1, 2, 2)
+
+        cy.addTagToSkills(1, ['skill1', 'skill3'], 1)
+        cy.addTagToSkills(1, ['skill2', 'skill3', 'skill1Subj2'], 2)
+
+        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
 
         cy.visit('/progress-and-rankings/projects/proj1');
         cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillsTitle"] [data-cy="title"]').should('have.text', 'Project: This is project 1');
@@ -118,6 +138,20 @@ describe('Skills Display Training Wide Search Tests', () => {
         cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', 'Subject 1');
         cy.realPress('Enter');
         cy.get('[data-cy="skillsTitle"]').contains('Subject 1')
+        cy.get('[data-cy="skillTags"]')
+          .should('be.visible')
+
+        cy.get('[data-cy="tagLink-tag1"]')
+          .should('be.visible')
+          .and('have.attr', 'href', '/progress-and-rankings/projects/proj1/tags/tag1')
+        cy.get('[data-cy="tagLink-tag1"] [data-cy="tagName"]').should('have.text', 'TAG 1')
+        cy.get('[data-cy="tagLink-tag1"] [data-cy="numSkills"]').should('have.text', '2')
+
+        cy.get('[data-cy="tagLink-tag2"]')
+          .should('be.visible')
+          .and('have.attr', 'href', '/progress-and-rankings/projects/proj1/tags/tag2')
+        cy.get('[data-cy="tagLink-tag2"] [data-cy="tagName"]').should('have.text', 'TAG 2')
+        cy.get('[data-cy="tagLink-tag2"] [data-cy="numSkills"]').should('have.text', '2')
 
         // navigate to subject 2
         cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
@@ -127,6 +161,17 @@ describe('Skills Display Training Wide Search Tests', () => {
         cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', 'Subject 2');
         cy.realPress('Enter');
         cy.get('[data-cy="skillsTitle"]').contains('Subject 2')
+        cy.get('[data-cy="skillTags"]')
+          .should('be.visible')
+
+        cy.get('[data-cy="tagLink-tag1"]')
+          .should('not.exist')
+
+        cy.get('[data-cy="tagLink-tag2"]')
+          .should('be.visible')
+          .and('have.attr', 'href', '/progress-and-rankings/projects/proj1/tags/tag2')
+        cy.get('[data-cy="tagLink-tag2"] [data-cy="tagName"]').should('have.text', 'TAG 2')
+        cy.get('[data-cy="tagLink-tag2"] [data-cy="numSkills"]').should('have.text', '1')
     })
 
     it('navigate from one skill to another using training-wide search dialog', () => {

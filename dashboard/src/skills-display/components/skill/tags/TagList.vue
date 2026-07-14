@@ -17,7 +17,7 @@ limitations under the License.
 
 import {useColors} from "@/skills-display/components/utilities/UseColors.js";
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
@@ -33,6 +33,9 @@ const tags = ref([])
 onMounted(() => {
   loadData()
 })
+watch( () => route.params.subjectId, () => {
+  loadData()
+});
 const loadData = async () => {
   const projectId = attributes.projectId
   const { subjectId } = route.params
