@@ -124,10 +124,6 @@ const buildToRoute = () => {
 }
 const toRoute = buildToRoute()
 
-const addTagFilter = (tag) => {
-  emit('add-tag-filter', tag)
-}
-
 const isSkillsGroupWithChildren = computed(() => {
   return props.skill?.isSkillsGroupType && props.skill?.children && props.skill?.children.length > 0
 })
@@ -226,8 +222,7 @@ const canSkillBeSelfReported = computed(() => SelfReportType.isSelfReportType(pr
       <!--                      :bar-size="skill.groupId ? 12 : 22"-->
       <!--                      :class="{ 'skills-navigable-item' : allowDrillDown }" />-->
     </div>
-    <skill-badges-and-tags :skill="skill" :badge-id="badgeId" :enable-to-add-tag="enableDrillDown"
-                           @add-tag-filter="addTagFilter" />
+    <skill-badges-and-tags :skill="skill" />
     <div v-if="showDescription || (skill.type === 'SkillsGroup' && attributes.groupDescriptionsOn)"
          :data-cy="`skillDescription-${skill.skillId}`">
 
@@ -300,7 +295,6 @@ const canSkillBeSelfReported = computed(() => SelfReportType.isSelfReportType(pr
           :show-description="showDescription"
           :child-skill-highlight-string="childSkillHighlightString"
           :data-cy="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
-          @add-tag-filter="addTagFilter"
           :index="index"
         ></skill-progress>
       </div>
