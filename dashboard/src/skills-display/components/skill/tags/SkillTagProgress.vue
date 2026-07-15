@@ -88,7 +88,9 @@ const iconClass = computed(() => {
                 <router-link
                     v-if="buildLink"
                     :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('skillTagDetails'), params: { tagId: skillTagOverview.tagId } }"
-                    :data-cy="`tagProgressLink-${skillTagOverview.tagId}`">
+                    :data-cy="`tagProgressLink-${skillTagOverview.tagId}`"
+                    tabindex="-1"
+                    aria-hidden="true">
                   <vertical-progress-bar
                       :total-progress="progressPercent"
                       :disable-daily-color="true"/>
