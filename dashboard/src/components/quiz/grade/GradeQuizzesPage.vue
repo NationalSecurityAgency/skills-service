@@ -61,11 +61,11 @@ const checkIfQuizHasInputTextQuestions = () => {
 
 const sortInfo = ref({ sortOrder: -1, sortBy: 'started' })
 const pagination = useStorage('gradedQuizzes-tablePageSize', {
-  currentPage: 1,
-  totalRows: 0,
   pageSize: 10,
-  possiblePageSizes: [10, 20, 50]
 })
+const currentPage = ref(1);
+const possiblePageSizes = [10, 20, 50];
+const totalRows = ref(0);
 const loadingQuizRunsFirstTime = ref(true)
 const loadingQuizRuns = ref(true)
 const quizRunsThatNeedGrading = ref([])
@@ -76,13 +76,13 @@ const loadQuizRuns = () => {
     quizAttemptStatus: QuizStatus.NeedsGrading,
     limit: pagination.value.pageSize,
     ascending: sortInfo.value.sortOrder === 1,
-    page: pagination.value.currentPage,
+    page: currentPage.value,
     orderBy: sortInfo.value.sortBy
   }
 
   return QuizService.getQuizRunsHistory(route.params.quizId, params).then((res) => {
     quizRunsThatNeedGrading.value = res.data.map((q) => ({ ...q, isGraded: false }))
-    pagination.value.totalRows = res.count
+    totalRows.value = res.count
   }).finally(() => {
     loadingQuizRuns.value = false
     loadingQuizRunsFirstTime.value = false
@@ -90,12 +90,12 @@ const loadQuizRuns = () => {
 }
 const pageChanged = (pagingInfo) => {
   pagination.value.pageSize = pagingInfo.rows
-  pagination.value.currentPage = pagingInfo.page + 1
+  currentPage.value = pagingInfo.page + 1
   return loadQuizRuns()
 }
 const sortField = (column) => {
   // set to the first page
-  pagination.value.currentPage = 1
+  currentPage.value = 1
   return loadQuizRuns()
 }
 
@@ -193,8 +193,8 @@ const isAiGradingFailed = (quizInfo) => {
               @page="pageChanged"
               @sort="sortField"
               :rows="pagination.pageSize"
-              :rowsPerPageOptions="pagination.possiblePageSizes"
-              :total-records="pagination.totalRows"
+              :rowsPerPageOptions="possiblePageSizes"
+              :total-records="totalRows"
               v-model:expandedRows="expandedRows"
               dataKey="attemptId"
               v-model:sort-field="sortInfo.sortBy"
@@ -256,7 +256,7 @@ const isAiGradingFailed = (quizInfo) => {
             </Column>
 
             <template #paginatorstart>
-              <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(pagination.totalRows) }}</span>
+              <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRows) }}</span>
             </template>
             <template #empty>
               <div>
