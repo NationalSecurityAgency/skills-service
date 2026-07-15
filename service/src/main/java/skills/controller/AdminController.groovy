@@ -1926,6 +1926,9 @@ class AdminController {
         if (skillsTagRequest.removeTagFully == null || skillsTagRequest.removeTagFully == false) {
             SkillsValidator.isNotEmpty(skillsTagRequest.skillIds, "skillsTagRequest.skillIds", projectId)
         }
+        if (skillsTagRequest.removeTagFully == true) {
+            SkillsValidator.isTrue(!skillsTagRequest.skillIds, "Skill ids must not be provided when removeTagFully parameter is true", projectId)
+        }
         SkillsValidator.isTrue(!(skillsTagRequest.removeTagFully == true && skillsTagRequest.retainTag == true),
                 "removeTagFully==true and retainTag==true is not a valid request")
         skillTagService.deleteTagForSkills(projectId, skillsTagRequest)

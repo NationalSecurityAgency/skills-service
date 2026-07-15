@@ -186,7 +186,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
         qDef.quizId as quizId,
         qDef.type as quizType,
         qDef.name as quizName,
-        srd2.created as relationshipCreated,
+        srd.created as relationshipCreated,
         group.name as groupName,
         case when es is not null then true else false end as sharedToCatalog
     from SkillRelDef srd

@@ -1971,6 +1971,11 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/skills/tags${query}")
     }
 
+    def getTagInfo(String projectId, String tagId, Boolean includeDisabled=true) {
+        String query = "?includeDisabled=${includeDisabled}"
+        return wsHelper.adminGet("/projects/${projectId}/skills/tags/${tagId}${query}")
+    }
+
     def getApiTagsForProject(String projectId, Boolean includeDisabled=false) {
         String query = "?includeDisabled=${includeDisabled}"
         return wsHelper.apiGet("/projects/${projectId}/skills/tags${query}")
@@ -1997,8 +2002,8 @@ class SkillsService {
         return wsHelper.apiGet(url)
     }
 
-    def deleteTagForSkills(String projectId, List<String> skillIds, String tagId) {
-        return wsHelper.adminDelete("/projects/${projectId}/skills/tag", [skillIds: skillIds, tagId: tagId])
+    def deleteTagForSkills(String projectId, List<String> skillIds, String tagId, Boolean removeTagFully = null, Boolean retainTag = null) {
+        return wsHelper.adminDelete("/projects/${projectId}/skills/tag", [skillIds: skillIds, tagId: tagId, removeTagFully: removeTagFully, retainTag: retainTag])
     }
 
     /**
