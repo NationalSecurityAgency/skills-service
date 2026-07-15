@@ -31,11 +31,15 @@ import LengthyOperationProgressBar from "@/components/utils/LengthyOperationProg
 import {object, string} from "yup";
 import {useForm} from "vee-validate";
 import {useDebounceFn} from "@vueuse/core";
+import ExistingUserInput from "@/components/utils/ExistingUserInput.vue";
+import { SkillsReporter } from '@skilltree/skills-client-js'
+import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
 const model = defineModel()
 const appConfig = useAppConfig();
 const pluralize = usePluralize();
 const emit = defineEmits([])
+const dialogMessages = useDialogMessages()
 
 const props = defineProps({
   skills: {
@@ -55,6 +59,7 @@ const results = ref([]);
 const displayFullText = ref(false);
 const userSuggestOptions = ref([]);
 const selectedSuggestOption = ref(null);
+const currentSelectedUser = ref(null);
 
 onMounted(() => {
   if (appConfig.userSuggestOptions) {
@@ -132,6 +137,7 @@ const saveEvents = () => {
     usersToAdd.value = '';
     results.value = result.results;
     savingEvents.value = false;
+    SkillsReporter.reportSkill('ManuallyAddSkillEvent')
   })
 
 }
@@ -150,6 +156,28 @@ const toStep3 = (activateCallback) => {
       activateCallback('3')
     }
   })
+}
+
+const addSelectedUser = () => {
+  usersToAdd.value += (usersToAdd.value.length > 0 ? "\n" : "") + currentSelectedUser.value.userId;
+  currentSelectedUser.value = null;
+}
+
+const showChangeWarning = (newValue) => {
+  if (selectedSuggestOption.value !== newValue) {
+    const msg = `Changing the user suggestion option will remove all users from the list. Please confirm you want to proceed.`;
+    dialogMessages.msgConfirm({
+      message: msg,
+      header: 'Please Confirm!',
+      acceptLabel: 'Proceed',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        usersToAdd.value = '';
+        currentSelectedUser.value = null;
+        selectedSuggestOption.value = newValue;
+      },
+    });
+  }
 }
 </script>
 
@@ -210,10 +238,25 @@ const toStep3 = (activateCallback) => {
         </StepPanel>
         <StepPanel value="2" v-slot="{ activateCallback }">
           <div v-if="hasUserSuggestOptions" class="flex gap-1 items-center mb-3">
+            <div class="flex flex-1 px-1 gap-2">
             <Select  data-cy="userSuggestOptionsDropdown"
-                     v-model="selectedSuggestOption"
-                     :options="userSuggestOptions"
-                     class="flex-1"/>
+                     :defaultValue="selectedSuggestOption"
+                     @value-change="showChangeWarning"
+                     :options="userSuggestOptions" />
+              <existing-user-input class="w-full"
+                                   :project-id="projectId"
+                                   v-model="currentSelectedUser"
+                                   :has-user-suggest-options="false"
+                                   :selected-suggest-option="selectedSuggestOption"
+                                   :can-enter-new-user="false"
+                                   name="userIdInput"
+                                   aria-errormessage="userIdInputError"
+                                   aria-describedby="userIdInputError"
+                                   :placeholder="'Search for users'"
+                                   :aria-invalid="!meta.valid"
+                                   data-cy="userIdInput" />
+              <SkillsButton label="Add" @click="addSelectedUser" :disabled="!currentSelectedUser" data-cy="addUserToList"/>
+            </div>
           </div>
           <div class="mb-2">
             <SkillsTextarea
@@ -223,6 +266,7 @@ const toStep3 = (activateCallback) => {
                 v-model="usersToAdd"
                 data-cy="batchUserList"
                 rows="10"
+                placeholder="Search for users above or enter users here, one user per line"
                 name="usersToAdd">
             </SkillsTextarea>
           </div>
