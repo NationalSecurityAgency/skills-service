@@ -38,6 +38,10 @@ const props = defineProps({
     type: String,
     default: null
   },
+  editTypeDisabled: {
+    type: Boolean,
+    default: false
+  }
 })
 const emit = defineEmits(['question-generated'])
 const route = useRoute()
@@ -219,7 +223,7 @@ const generationFailed = () => {
 }
 
 const questionTypeSelectionDisabled = computed(() => {
-  return isGenerating.value || (appConfig.openAiDisableSingleQuestionTypeChange && !!lastGeneratedQuestionInfo.value);
+  return isGenerating.value || (appConfig.openAiDisableSingleQuestionTypeChange && !!lastGeneratedQuestionInfo.value) || props.editTypeDisabled;
 })
 </script>
 
@@ -239,6 +243,7 @@ const questionTypeSelectionDisabled = computed(() => {
     <template #aboveChatHistory>
       <div class="pb-5">
         <label>Question Type:</label>
+        <Message v-if="editTypeDisabled" class="mb-2" severity="error" data-cy="disabledAiMsg" :closable="false">The question type can not be changed as there are currently answers to this question waiting to be graded</Message>
         <question-type-drop-down
             name="genQuestionType"
             data-cy="genQuestionTypeSelector"

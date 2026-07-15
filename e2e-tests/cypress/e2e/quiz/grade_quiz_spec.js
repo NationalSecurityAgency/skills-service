@@ -519,6 +519,55 @@ describe('Grade Quizzes', () => {
         ], 10);
     });
 
+    it('can not change textinput question if grading is waiting', () => {
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+        cy.createTextInputQuestionDef(1, 2)
+        cy.createTextInputQuestionDef(1, 3)
+
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}, {selectedIndex: [0]}, {selectedIndex: [0]}], true, 'My Answer')
+
+        cy.visit('/administrator/quizzes/quiz1/grading');
+        cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled').click()
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="questionDisplayText"]').contains('This is a question # 1')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="answer_1displayText"]').contains('My Answer')
+        cy.get('[data-cy="attemptGradedFor_user1"]').should('not.exist')
+
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="gradedTag"]').should('not.exist')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_2"] [data-cy="gradedTag"]').should('not.exist')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_3"] [data-cy="gradedTag"]').should('not.exist')
+
+        cy.visit('/administrator/quizzes/quiz1/questions');
+        cy.get('[data-cy="editQuestionButton_1"]').click();
+        cy.get('[data-cy="disabledMsg"]').should('exist');
+        cy.get('[data-cy="disabledMsg"]').should('have.text', 'The question type can not be changed as there are currently answers to this question waiting to be graded');
+        cy.get('[data-cy="answerTypeSelector"]').should('have.class', 'p-disabled');
+
+        cy.get('[data-cy="closeDialogBtn"]').click();
+        cy.visit('/administrator/quizzes/quiz1/grading');
+
+        // q1
+        cy.get('[data-cy="gradeBtn_user1"]').should('be.enabled').click()
+
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="feedbackTxtMarkdownEditor"]').type('Question 1 is correct')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="markCorrectBtn"]').should('be.enabled').click()
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="questionDisplayText"]').should('not.exist')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="answer_1displayText"]').should('not.exist')
+        cy.get('[data-cy="gradeAttemptFor_user1"] [data-cy="question_1"] [data-cy="gradedTag"]')
+        cy.get('[data-cy="attemptGradedFor_user1"]').should('not.exist')
+
+        cy.visit('/administrator/quizzes/quiz1/questions');
+        cy.get('[data-cy="editQuestionButton_1"]').click();
+        cy.get('[data-cy="disabledMsg"]').should('not.exist');
+        cy.get('[data-cy="answerTypeSelector"]').should('not.have.class', 'p-disabled');
+        cy.get('[data-cy="closeDialogBtn"]').click();
+
+        cy.get('[data-cy="editQuestionButton_2"]').click();
+        cy.get('[data-cy="disabledMsg"]').should('exist');
+        cy.get('[data-cy="disabledMsg"]').should('have.text', 'The question type can not be changed as there are currently answers to this question waiting to be graded');
+        cy.get('[data-cy="answerTypeSelector"]').should('have.class', 'p-disabled');
+
+    });
 });
 
 
