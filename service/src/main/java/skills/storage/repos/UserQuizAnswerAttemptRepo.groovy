@@ -68,6 +68,17 @@ interface UserQuizAnswerAttemptRepo extends JpaRepository<UserQuizAnswerAttempt,
     ''', nativeQuery = true)
     List<QuestionAIGradingStatus> findQuestionAiGradingStatus(List<Integer> attemptId)
 
+    @Query(value = '''
+        select exists (select 1
+        from user_quiz_answer_attempt uQuizAttempt
+                 inner join quiz_answer_definition answerDef on uQuizAttempt.quiz_answer_definition_ref_id = answerDef.id
+                 inner join quiz_question_definition qDef on qDef.id = answerDef.question_ref_id
+        where uQuizAttempt.status = 'NEEDS_GRADING'
+          and answerDef.quiz_id = ?1
+          and answerDef.id = ?2)
+    ''', nativeQuery = true)
+    boolean hasUngradedQuestions(String quizId, Integer answerId)
+
 
     @Query('''select answerAttempt.quizAnswerDefinitionRefId
         from UserQuizAnswerAttempt answerAttempt

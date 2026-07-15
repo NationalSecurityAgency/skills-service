@@ -561,6 +561,14 @@ class QuizDefService {
         }
         questionDefRequest.question = attachmentService.copyAttachmentsForIncomingDescription(questionDefRequest.question, null, null, quizDef.quizId, shouldCopyUuid)
         if (isEdit) {
+            def existingQuestion = getQuestionDef(quizId, existingQuestionId)
+            if(existingQuestion.questionType == QuizQuestionType.TextInput && questionDefRequest.questionType !== existingQuestion.questionType) {
+                // find questions awaiting grading
+                boolean hasOutstandingGrades = hasUngradedQuestions(quizDef.quizId, existingQuestion.id)
+                if(hasOutstandingGrades) {
+                    throw new SkillQuizException("Not allowed to change a skill when there are attempts awaiting grading", quizDef.quizId, ErrorCode.InternalError)
+                }
+            }
             savedQuestion = updateQuizQuestionDef(quizId, existingQuestionId, questionDefRequest)
             savedAnswers = updateQuizQuestionAnswerDefs(savedQuestion, questionDefRequest)
         } else {
@@ -573,6 +581,10 @@ class QuizDefService {
         attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(savedQuestion.question, null, quizDef.quizId, null)
 
         return convert(savedQuestion, savedAnswers)
+    }
+
+    boolean hasUngradedQuestions(String quizId, Integer questionId) {
+        return userQuizAnswerAttemptRepo.hasUngradedQuestions(quizId, questionId)
     }
 
     void addSavedQuestionUserAction(String quizId, QuizQuestionDef savedQuestion, List<QuizAnswerDef> savedAnswers, boolean isEdit = false) {
