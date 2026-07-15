@@ -1289,7 +1289,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-2"]').should('not.exist');
     });
 
-    it.only('filter on belongs to a badge', () => {
+    it('filter on belongs to a badge', () => {
         cy.createSkill(1, 1, 1);
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3);
@@ -1307,7 +1307,6 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-1"]').contains('Very Great Skill 2');
         cy.get('[data-cy="skillProgress_index-2"]').contains('Very Great Skill 3');
 
-        // cy.get('[data-cy="skillTag-0"] [data-cy="addTagBtn"]').click()
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
         cy.get('[data-cy="filter_attributeGroups"]').click();
         cy.get('[data-cy="filter_belongsToBadge"] [data-cy="filterCount"]').should('have.text', '1')
