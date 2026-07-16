@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
+import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.SkillDef
 import skills.storage.repos.QuizQuestionDefRepo
@@ -821,6 +822,36 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         quizDefs.name == ["Test & Quiz"]
         quizDef.name == "Test & Quiz"
         quizDefSummary.name == "Test & Quiz"
+    }
+
+
+    def "update question definition - can not change question type from TextInput when grades are pending"() {
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questionDef = QuizDefFactory.createTextInputQuestion(1, 1)
+        def q1 = skillsService.createQuizQuestionDef(questionDef).body
+
+        String quizId = quiz.quizId
+        def quizAttempt =  skillsService.startQuizAttempt(quizId).body
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: "answer"])
+        skillsService.completeQuizAttempt(quizId, quizAttempt.id)
+
+        q1.quizId = quizId
+        q1.questionType = QuizQuestionType.MultipleChoice.toString()
+        q1.answers = [
+                [isCorrect: true, answer: 'abc'],
+                [isCorrect: true, answer: 'def'],
+                [isCorrect: false, answer: 'ghi'],
+        ]
+
+        when:
+        skillsService.updateQuizQuestionDef(q1)
+
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains( "Not allowed to change a skill when there are attempts awaiting grading")
+
     }
 }
 
