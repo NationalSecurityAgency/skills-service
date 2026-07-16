@@ -222,11 +222,15 @@ describe('Skills Display Badges Tests', () => {
     cy.get('[data-cy=badgeDetailsLink_badge2]').click();
 
     cy.get('[data-cy="title"]').contains('Badge Details')
+    // badge2 holds skill1 (2 occurrences, already achieved), skill2 (2 occurrences, no
+    // progress) and skill3 (2 occurrences, already achieved), so 4 of 6 occurrences -> 66%.
     cy.get('[data-cy="badgePercentCompleted"]').contains('66% Complete');
     cy.get('[data-cy=toggleSkillDetails]').click();
     cy.get('[data-cy=claimPointsBtn]').click();
     cy.get('[data-cy="skillDescription-skill2"] [data-cy="selfReportAlert"]').contains('You just earned 50 points');
-    cy.get('[data-cy="badgePercentCompleted"]').contains('66% Complete');
+    // claiming one of skill2's two occurrences now moves the badge details percent. It used
+    // to stay at 66% until skill2 was fully achieved, which is the behavior #2850 is about.
+    cy.get('[data-cy="badgePercentCompleted"]').contains('83% Complete');
     cy.get('[data-cy=claimPointsBtn]').click();
     cy.get('[data-cy="badgePercentCompleted"]').contains('100% Complete');
   });
@@ -391,10 +395,11 @@ describe('Skills Display Badges Tests', () => {
     cy.loginAsProxyUser();
     cy.createProject(1);
     cy.createSubject(1, 1);
-    // three single-occurrence skills worth 100, 50000 and 100 points. By raw points skill2
-    // would be over 99% of the badge, but each skill is a single occurrence.
+    // three single-occurrence skills worth 100, 10000 and 100 points. By raw points skill2
+    // would be ~98% of the badge, but each skill is a single occurrence. 10000 is the
+    // largest pointIncrement the server accepts, so it stands in for the 50000 example.
     cy.createSkill(1, 1, 1, { pointIncrement: 100, numPerformToCompletion: 1 });
-    cy.createSkill(1, 1, 2, { pointIncrement: 50000, numPerformToCompletion: 1 });
+    cy.createSkill(1, 1, 2, { pointIncrement: 10000, numPerformToCompletion: 1 });
     cy.createSkill(1, 1, 3, { pointIncrement: 100, numPerformToCompletion: 1 });
 
     cy.createBadge(1, 1);
@@ -403,7 +408,7 @@ describe('Skills Display Badges Tests', () => {
     cy.assignSkillToBadge(1, 1, 3);
     cy.enableBadge(1, 1);
 
-    // complete the two small skills, leave the 50000-point skill untouched.
+    // complete the two small skills, leave the 10000-point skill untouched.
     cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
     cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
 
@@ -412,7 +417,7 @@ describe('Skills Display Badges Tests', () => {
     cy.get('[data-cy=badgeDetailsLink_badge1]').click();
 
     cy.get('[data-cy="title"]').contains('Badge Details');
-    // 2 of 3 occurrences earned -> 66%. Raw points would have read ~0%.
+    // 2 of 3 occurrences earned -> 66%. Raw points would have read 1%.
     cy.get('[data-cy="badgePercentCompleted"]').contains('66% Complete');
   });
 })
