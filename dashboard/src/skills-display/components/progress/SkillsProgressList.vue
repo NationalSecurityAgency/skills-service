@@ -133,26 +133,15 @@ const onDetailsToggle = () => {
   matomo.trackEvent(MatomoEvents.category.ToggleSwitch, MatomoEvents.action.Toggle, 'Skill Details')
 }
 
-const selectedTagFilters = ref([])
 const filterId = ref('')
 const setFilterId = (newFilterId) => {
   filterId.value = newFilterId
 }
-const addTagFilter = (tag) => {
-  if (!selectedTagFilters.value.find((elem) => elem.tagId === tag.tagId)) {
-    selectedTagFilters.value.push(tag)
-  }
-}
-const removeTagFilter = (tag) => {
-  selectedTagFilters.value = selectedTagFilters.value.filter((elem) => elem.tagId !== tag.tagId)
-}
 
 const skillsToShow = computed(() => {
   let resultSkills = skillsInternal.value ? skillsInternal.value.map((item) => ({ ...item })) : []
-  const hasTagSearch = Boolean(selectedTagFilters.value.length)
-  if (hasTagSearch || (searchString.value && searchString.value.trim().length > 0)) {
+  if (searchString.value && searchString.value.trim().length > 0) {
     const searchStrNormalized = searchString.value.trim().toLowerCase()
-    const tagFilters = Array.from(selectedTagFilters.value).map((tag) => tag.tagValue.toLowerCase())
 
     // groups are treated as a single unit (group and child skills shown OR the entire group is removed)
     // group is shown when either a group name matches OR any of the skill names match the search string
@@ -162,37 +151,11 @@ const skillsToShow = computed(() => {
         // if the group is not a match, find at least 1 child that matches the search string
         const foundGroup = foundSkill ? true : item.children.find((childItem) => childItem.skill?.trim()?.toLowerCase().includes(searchStrNormalized))
         if (foundGroup) {
-          // if filtering on tags, we need to make sure the group children (as a unit) contains *all* tags
-          if (hasTagSearch) {
-            const tagsFound = new Set()
-            for (let i = 0; i < item.children.length; i += 1) {
-              const child = item.children[i]
-              for (let j = 0; j < tagFilters.length; j += 1) {
-                const tagFilter = tagFilters[j]
-                if (child.tags?.find((tag) => tag?.tagValue?.trim()?.toLowerCase()?.includes(tagFilter))) {
-                  tagsFound.add(tagFilter)
-                }
-                if (tagsFound.size >= tagFilters.length) {
-                  break
-                }
-              }
-              if (tagsFound.size >= tagFilters.length) {
-                break
-              }
-            }
-            return tagsFound.size >= tagFilters.length
-          }
           return true
         }
       }
-      if (foundSkill) {
-        // if filtering on tags, we need to make sure the skill contains *all* tags
-        if (hasTagSearch) {
-          return tagFilters.every((tagFilter) => item.tags?.map((tag) => tag?.tagValue?.trim()?.toLowerCase()).includes(tagFilter))
-        }
-        return true
-      }
-      return false
+      return foundSkill;
+
     }).map((item) => ({ ...item, children: item.children?.filter((child) => {
       return child.skill?.trim()?.toLowerCase().includes(searchStrNormalized)
     })?.map((child) => ({ ...child })) }))
@@ -335,23 +298,6 @@ const toggle = (event) => {
               </div>
             </div>
           </div>
-
-        </div>
-        <div v-if="selectedTagFilters.length > 0" class="flex gap-2 mt-2">
-            <Chip
-              v-for="(tag, index) in selectedTagFilters"
-              :label="tag.tagValue"
-              icon="fas fa-tag"
-              :data-cy="`skillTagFilter-${index}`"
-              :key="tag.tagId"
-              :pt="{ root: { class: 'p-0!'}}"
-              @remove="removeTagFilter(tag)"
-              outlined
-              removable>
-              <span class="bg-primary text-primary-contrast rounded-full w-7 h-7 flex items-center justify-center"><i
-                class="fas fa-tag" aria-hidden="true"/></span>
-              <span class="font-medium">{{ tag.tagValue }}</span>
-            </Chip>
         </div>
       </div>
     </template>
@@ -376,7 +322,6 @@ const toggle = (event) => {
               :badge-is-locked="badgeIsLocked"
               :child-skill-highlight-string="searchString"
               :video-collapsed-by-default="true"
-              @add-tag-filter="addTagFilter"
               :index="index"
             />
           </div>
@@ -384,12 +329,12 @@ const toggle = (event) => {
       </div>
 
       <no-content-2
-        v-if="!(skillsToShow && skillsToShow.length > 0) && (searchString || Boolean(selectedTagFilters.length))"
+        v-if="!(skillsToShow && skillsToShow.length > 0) && (searchString)"
         class="my-8"
         icon="fas fa-search-minus" title="No results">
                       <span v-if="searchString">
                         Please refine [{{ searchString }}] search  <span
-                        v-if="filterId || Boolean(selectedTagFilters.length)">and/or clear the selected filter</span>
+                        v-if="filterId">and/or clear the selected filter</span>
                       </span>
         <span v-if="!searchString">
                        Please clear selected filters

@@ -116,7 +116,7 @@ describe('Client Display Skill Tag Page Features', () => {
     cy.get('[data-cy="tagLink-tag2"] [data-cy="numSkills"]').should('have.text', '1')
   })
 
-  it('navigate to skill tag overview page from the project page', () => {
+  it('navigate to skill tag overview page from the project page page using tag list', () => {
 
     cy.cdVisit('/')
     cy.wait('@loadSkillTagsForProject')
@@ -151,7 +151,7 @@ describe('Client Display Skill Tag Page Features', () => {
     cy.get('[data-cy="skillDescription-skill3"]').contains('This is skill3');
   })
 
-  it('navigate to skill tag overview page from the subject page', () => {
+  it('navigate to skill tag overview page from the subject page using tag list', () => {
 
     cy.cdVisit('/')
     cy.cdClickSubj(0)

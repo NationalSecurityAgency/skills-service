@@ -16,18 +16,13 @@ limitations under the License.
 <script setup>
 import { computed } from 'vue'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
-import { useRoute } from 'vue-router'
+import SkillTagChip from '@/skills-display/components/skill/tags/SkillTagChip.vue'
 
 const props = defineProps({
   skill: Object,
-  enableToAddTag: {
-    type: Boolean,
-    default: false
-  }
 })
 const emit = defineEmits(['add-tag-filter'])
 const skillsDisplayInfo = useSkillsDisplayInfo()
-const route = useRoute()
 const showBadgesAndTagsRow = computed(() => {
   return ((props.skill.badges && props.skill.badges.length > 0 && !props.badgeId) || (props.skill.tags && props.skill.tags.length > 0))
 })
@@ -35,9 +30,6 @@ const showBadgesAndTagsRow = computed(() => {
 const genLink = (b) => {
   const pageName = b.skillType === 'GlobalBadge' ? 'globalBadgeDetails' : 'badgeDetails'
   return { name: skillsDisplayInfo.getContextSpecificRouteName(pageName), params: { badgeId: b.badgeId } }
-}
-const addTagFilter = (tag) => {
-  emit('add-tag-filter', tag)
 }
 
 const hasBadges = computed(() => props.skill.badges && props.skill.badges.length > 0)
@@ -56,24 +48,10 @@ const hasTags = computed(()=> props.skill.tags && props.skill.tags.length > 0)
             </span>
     </div>
     <div v-if="hasTags" data-cy="skillTags" :class="{ 'mt-2': hasBadges }" class="flex gap-2">
-      <Chip v-for="(tag, index) in skill.tags"
-            :data-cy="`skillTag-${index}`"
-            :pt="{ root: { class: 'p-0!'}}"
-            v-bind:key="tag.tagId">
-        <span class="bg-primary text-primary-contrast rounded-full w-7 h-7 flex items-center justify-center"><i
-            class="fas fa-tag" /></span>
-        <span class="font-medium" :class="{ 'pr-3' : !enableToAddTag }">{{ tag.tagValue }}</span>
-        <SkillsButton
-            v-if="enableToAddTag"
-            icon="fas fa-search-plus"
-            size="small"
-            class="text-sm"
-            severity="primary"
-            data-cy="addTagBtn"
-            :aria-label="`Filter skills with tag ${tag.tagValue}`"
-            text
-            @click="addTagFilter(tag)" />
-      </Chip>
+      <skill-tag-chip v-for="(tag, index) in skill.tags" :key="tag.tagId"
+                      :tag-id="tag.tagId"
+                      :tag-value="tag.tagValue"
+                      :data-cy="`skillTag-${index}`" />
     </div>
   </div>
 </template>
