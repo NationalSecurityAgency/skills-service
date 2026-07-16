@@ -309,4 +309,169 @@ describe('Client Display Skill Tag Page Features', () => {
     cy.get('[data-cy="tagLink-tag1"]').should('not.exist')
     cy.get('[data-cy="tagProgressLink-tag1"]').should('not.exist')
   })
+
+  it('navigate to project skill tags page from the main project page', () => {
+    cy.cdVisit('/')
+    cy.wait('@loadSkillTagsForProject')
+
+    cy.get('[data-cy="skillTags"]')
+      .should('be.visible')
+
+    cy.get('[data-cy="viewProjectTagsBtn"]').click()
+    cy.wait('@loadSkillTagsSummary')
+
+    cy.get('#tagRow-tag2').within(() => {
+      cy.get('[data-cy="tagLink-tag2"]')
+        .should('be.visible')
+        .and('have.text', 'TAG 2')
+        .and('have.attr', 'href', '/test-skills-display/proj1/tags/tag2');
+
+      cy.get('[data-cy="skillTagProgress"]')
+        .should('be.visible')
+        .and('contain.text', '0 / 3 Skills');
+
+      cy.get('[data-cy="thirdProgressBar"]')
+        .should('be.visible')
+        .and('have.attr', 'aria-valuenow', '0')
+        .and('have.attr', 'aria-valuemax', '100');
+
+      cy.get('[data-cy="thirdProgressBar"] .p-progressbar-value')
+        .should('have.attr', 'style')
+        .and('contain', 'width: 0%');
+    });
+
+    cy.get('#tagRow-tag1').within(() => {
+      cy.get('[data-cy="tagLink-tag1"]')
+        .should('be.visible')
+        .and('have.text', 'TAG 1')
+        .and('have.attr', 'href', '/test-skills-display/proj1/tags/tag1');
+
+      cy.get('[data-cy="skillTagProgress"]')
+        .should('be.visible')
+        .and('contain.text', '1 / 2 Skills');
+
+      cy.get('[data-cy="thirdProgressBar"]')
+        .should('be.visible')
+        .and('have.attr', 'aria-valuenow', '50')
+        .and('have.attr', 'aria-valuemax', '100');
+
+      cy.get('[data-cy="thirdProgressBar"] .p-progressbar-value')
+        .should('have.attr', 'style')
+        .and('contain', 'width: 50%');
+    });
+  })
+
+  it('navigate to project skill tags page from the subject page', () => {
+    cy.cdVisit('/')
+    cy.cdClickSubj(0)
+    cy.wait('@loadSkillTagsForSubject1')
+
+    cy.get('[data-cy="skillTags"]')
+      .should('be.visible')
+
+    cy.get('[data-cy="viewProjectTagsBtn"]').click()
+    cy.wait('@loadSkillTagsSummary')
+
+    cy.get('#tagRow-tag2').within(() => {
+      cy.get('[data-cy="tagLink-tag2"]')
+        .should('be.visible')
+        .and('have.text', 'TAG 2')
+        .and('have.attr', 'href', '/test-skills-display/proj1/tags/tag2');
+
+      cy.get('[data-cy="skillTagProgress"]')
+        .should('be.visible')
+        .and('contain.text', '0 / 3 Skills');
+
+      cy.get('[data-cy="thirdProgressBar"]')
+        .should('be.visible')
+        .and('have.attr', 'aria-valuenow', '0')
+        .and('have.attr', 'aria-valuemax', '100');
+
+      cy.get('[data-cy="thirdProgressBar"] .p-progressbar-value')
+        .should('have.attr', 'style')
+        .and('contain', 'width: 0%');
+    });
+
+    cy.get('#tagRow-tag1').within(() => {
+      cy.get('[data-cy="tagLink-tag1"]')
+        .should('be.visible')
+        .and('have.text', 'TAG 1')
+        .and('have.attr', 'href', '/test-skills-display/proj1/tags/tag1');
+
+      cy.get('[data-cy="skillTagProgress"]')
+        .should('be.visible')
+        .and('contain.text', '1 / 2 Skills');
+
+      cy.get('[data-cy="thirdProgressBar"]')
+        .should('be.visible')
+        .and('have.attr', 'aria-valuenow', '50')
+        .and('have.attr', 'aria-valuemax', '100');
+
+      cy.get('[data-cy="thirdProgressBar"] .p-progressbar-value')
+        .should('have.attr', 'style')
+        .and('contain', 'width: 50%');
+    });
+  })
+
+  it('navigate to skill tag overview page from the project skill tags page - title link', () => {
+
+    cy.cdVisit('/tags')
+    cy.wait('@loadSkillTagsSummary')
+
+    cy.get('[data-cy="tagLink-tag1"]').should('exist')
+    cy.get('[data-cy="tagLink-tag1"]').click()
+    cy.wait('@loadSkillTag1Summary')
+
+    cy.get('[data-cy="title"]').should('contain.text', 'Skill Tag Overview')
+    cy.get('[data-cy="skillTagName"]').should('contain.text', 'TAG 1')
+    cy.get('[data-cy="skillTagProgress"]').should('contain.text', '1 / 2 Skills')
+
+    cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+    cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
+    cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"] [data-cy="skillPoints"]').should('have.text', '100')
+
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 3')
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 100 Points')
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"] [data-cy="skillPoints"]').should('have.text', '0')
+
+    cy.get('[data-cy=toggleSkillDetails]').click();
+    cy.wait('@loadSkillTagDescriptions')
+    cy.get('[data-cy="skillDescription-skill1"]').contains('This is skill1');
+    cy.get('[data-cy="skillDescription-skill3"]').contains('This is skill3');
+
+    // verify the tag title and tag progress bars are not links when on the tag overview page
+    cy.get('[data-cy="tagLink-tag1"]').should('not.exist')
+    cy.get('[data-cy="tagProgressLink-tag1"]').should('not.exist')
+  })
+
+  it('navigate to skill tag overview page from the project skill tags page - progress link', () => {
+
+    cy.cdVisit('/tags')
+    cy.wait('@loadSkillTagsSummary')
+
+    cy.get('[data-cy="tagProgressLink-tag1"]').should('exist')
+    cy.get('[data-cy="tagProgressLink-tag1"]').click()
+    cy.wait('@loadSkillTag1Summary')
+
+    cy.get('[data-cy="title"]').should('contain.text', 'Skill Tag Overview')
+    cy.get('[data-cy="skillTagName"]').should('contain.text', 'TAG 1')
+    cy.get('[data-cy="skillTagProgress"]').should('contain.text', '1 / 2 Skills')
+
+    cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
+    cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
+    cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"] [data-cy="skillPoints"]').should('have.text', '100')
+
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 3')
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 100 Points')
+    cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"] [data-cy="skillPoints"]').should('have.text', '0')
+
+    cy.get('[data-cy=toggleSkillDetails]').click();
+    cy.wait('@loadSkillTagDescriptions')
+    cy.get('[data-cy="skillDescription-skill1"]').contains('This is skill1');
+    cy.get('[data-cy="skillDescription-skill3"]').contains('This is skill3');
+
+    // verify the tag title and tag progress bars are not links when on the tag overview page
+    cy.get('[data-cy="tagLink-tag1"]').should('not.exist')
+    cy.get('[data-cy="tagProgressLink-tag1"]').should('not.exist')
+  })
 })

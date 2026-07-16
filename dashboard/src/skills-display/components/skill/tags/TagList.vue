@@ -69,6 +69,18 @@ const hasTags = computed(() => tags.value?.length > 0)
               </div>
             </router-link>
           </div>
+
+          <div class="ml-auto shrink-0">
+            <router-link
+                :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('skillTagsPage') }"
+                :aria-label="`Click to navigate to the project tags page`"
+                :data-cy="`viewProjectTagsBtn`" tabindex="-1">
+              <Button
+                  label="View All Tags"
+                  icon="fa-solid fa-tags"
+                  outlined class="w-full" size="small" />
+            </router-link>
+          </div>
         </div>
       </template>
     </Card>
