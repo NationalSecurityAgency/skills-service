@@ -29,6 +29,7 @@ import EditSkill from '@/components/skills/EditSkill.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import SkillNavigation from "@/skills-display/components/utilities/SkillNavigation.vue";
 import { useSkillOverviewRouteUtil } from './UseSkillOverviewRouteUtil.js'
+import SkillTagChip from "@/components/skills/tags/SkillTagChip.vue";
 
 const route = useRoute()
 const router = useRouter()
@@ -196,11 +197,16 @@ const nextButtonClicked = () => {
     </Card>
     <project-page-header :loading="isLoading" :options="headerOptions">
       <template #subTitle v-if="skillsState.skill">
-        <div v-for="(tag) in skillsState.skill.tags" :key="tag.tagId" class="h6 mr-2 d-inline-block"
-             :data-cy="`skillTag-${skillsState.skill.skillId}-${tag.tagId}`">
-          <Badge variant="info">
-            <span><i class="fas fa-tag"></i> {{ tag.tagValue }}</span>
-          </Badge>
+        <div
+            v-if="skillsState.skill.tags && skillsState.skill.tags.length > 0"
+            class="flex gap-2 py-1 flex-wrap">
+          <div v-for="tag in skillsState.skill.tags" :key="tag.tagId">
+            <skill-tag-chip
+                :data-cy="`skillTag-${skillsState.skill.skillId}-${tag.tagId}`"
+                :tag-id="tag.tagId"
+                :tag-value="tag.tagValue"
+            />
+          </div>
         </div>
         <div class="h5 text-muted" data-cy="skillId">
           <show-more :limit="54" :text="skillId"></show-more>

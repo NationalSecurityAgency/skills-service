@@ -138,7 +138,7 @@ const hasSlot = computed(() => {
         </Message>
       </div>
 
-      <div v-if="!removalNotAvailable" class="mb-6">
+      <div v-if="!removalNotAvailable" class="mb-6 mt-2">
         <p
             :aria-label="`Please type ${validationText} in the input box to permanently remove the record. To complete deletion press 'Yes, Do Remove' button!`">
           Please type <span class="italic font-bold text-primary">{{ validationText }}</span> to permanently

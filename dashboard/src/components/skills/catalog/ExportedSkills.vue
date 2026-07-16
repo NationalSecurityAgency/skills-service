@@ -110,7 +110,7 @@ const toRouteProps = (skill) => {
 
 <template>
   <div>
-    <Card :pt="{ 'body': 'p-0 m-0', 'content': 'pt-0'}">
+    <Card :pt="{ 'body': 'p-0! m-0!', 'content': 'pt-0'}">
       <template #content>
         <skills-spinner :is-loading="initialLoad" />
         <div v-if="!initialLoad">

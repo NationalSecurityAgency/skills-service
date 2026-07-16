@@ -739,16 +739,15 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
 
     @Query(value='''select tag.skill_id          as tagId,
                            tag.name              as tagValue,
+                           max(tag.created)      as createdOn,
                            count(skill.skill_id) as numSkills
                     from skill_definition tag
-                             join skill_relationship_definition srd
-                                  on srd.parent_ref_id = tag.id
-                             join skill_definition skill
-                                  on srd.child_ref_id = skill.id
+                             left join skill_relationship_definition srd
+                                  on srd.parent_ref_id = tag.id and srd.type = 'Tag'
+                             left join skill_definition skill
+                                  on srd.child_ref_id = skill.id and (skill.enabled = 'true' or 'true' = ?2 )
                     where tag.project_id = ?1
                       and tag.type = 'Tag'
-                      and srd.type = 'Tag'
-                      and (skill.enabled = 'true' or 'true' = ?2)
                     group by tag.skill_id, tag.name
     ''', nativeQuery = true)
     List<SkillTag> getTagsForProject(String projectId, String includeDisabled)
@@ -1055,7 +1054,7 @@ WITH
             skill_relationship_definition srd
                 JOIN skill_definition sd ON srd.parent_ref_id = sd.id
         WHERE sd.project_id = :projectId
-          AND sd.type = 'Subject\'
+          AND sd.type = 'Subject'
     ),
     child_counts AS (
         SELECT
@@ -1067,12 +1066,13 @@ WITH
                 JOIN skill_definition child_skill ON srd.child_ref_id = child_skill.id
         WHERE parent_skill.project_id = :projectId
           AND child_skill.project_id = :projectId
-          AND child_skill.type = 'Skill\'
+          AND child_skill.type = 'Skill'
           AND srd.type IN (
                            'RuleSetDefinition',
                            'BadgeRequirement',
                            'GroupSkillToSubject',
-                           'SkillsGroupRequirement\'
+                           'SkillsGroupRequirement',
+                           'Tag'
             )
         GROUP BY
             srd.parent_ref_id
@@ -1097,7 +1097,7 @@ FROM
             AND s.project_id = skillsGroup.project_id
         )
 WHERE
-    s.type IN ('Skill', 'Subject', 'Badge', 'SkillsGroup')
+    s.type IN ('Skill', 'Subject', 'Badge', 'SkillsGroup', 'Tag')
   AND s.project_id = :projectId
 ORDER BY
     s.name ASC

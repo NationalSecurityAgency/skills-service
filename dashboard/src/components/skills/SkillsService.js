@@ -345,13 +345,21 @@ export default {
       })
       .then((res) => res.data)
   },
-  deleteTagForSkills(projectId, skillIds, tagId) {
+  getTagInfo(projectId, tagId) {
+    const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/tags/${encodeURIComponent(tagId)}`
+    return axios
+        .get(url)
+        .then((res) => res.data)
+  },
+  deleteTagForSkills(projectId, skillIds, tagId, removeTagFully = false, retainTag = false) {
     const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/tag`
     return axios
       .delete(url, {
         data: {
           tagId,
-          skillIds
+          skillIds,
+          removeTagFully,
+          retainTag
         }
       })
       .then((res) => res.data)

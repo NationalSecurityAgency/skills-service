@@ -458,7 +458,26 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
         cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
 
+        cy.intercept('POST', '/api/quizzes/quiz1/attempt', (req) => {
+            req.reply((res) => {
+                const body = res.body;
+
+                // Note: backend shuffles matchingTerms before returning but in case of using keyboard navigation order is important
+                expect(body.questions[0].matchingTerms).to.have.lengthOf(3);
+                const question1ExpectedMatchingTerms = ['Third Answer', 'First Answer', 'Second Answer'];
+                expect(body.questions[0].matchingTerms).to.include.members(question1ExpectedMatchingTerms);
+                body.questions[0].matchingTerms = question1ExpectedMatchingTerms
+
+                expect(body.questions[1].matchingTerms).to.have.lengthOf(3);
+                const question2ExpectedMatchingTerms = ['Second Answer', 'Third Answer', 'First Answer'];
+                expect(body.questions[1].matchingTerms).to.include.members(question2ExpectedMatchingTerms);
+                body.questions[1].matchingTerms = question2ExpectedMatchingTerms
+                res.send(body);
+            });
+        })
+            .as('startQuizAttempt');
         cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.wait('@startQuizAttempt');
 
         cy.dragAndDropAnswerMatch(1, 'First Answer', 2)
         cy.dragAndDropAnswerMatch(1, 'Second Answer', 1)
@@ -517,7 +536,26 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.get('[data-cy="cancelQuizAttempt"]').should('be.enabled')
         cy.get('[data-cy="startQuizAttempt"]').should('be.enabled')
 
+        cy.intercept('POST', '/api/quizzes/quiz1/attempt', (req) => {
+            req.reply((res) => {
+                const body = res.body;
+
+                // Note: backend shuffles matchingTerms before returning but in case of using keyboard navigation order is important
+                expect(body.questions[0].matchingTerms).to.have.lengthOf(3);
+                const question1ExpectedMatchingTerms = ['Third Answer', 'First Answer', 'Second Answer'];
+                expect(body.questions[0].matchingTerms).to.include.members(question1ExpectedMatchingTerms);
+                body.questions[0].matchingTerms = question1ExpectedMatchingTerms
+
+                expect(body.questions[1].matchingTerms).to.have.lengthOf(3);
+                const question2ExpectedMatchingTerms = ['Second Answer', 'First Answer', 'Third Answer'];
+                expect(body.questions[1].matchingTerms).to.include.members(question2ExpectedMatchingTerms);
+                body.questions[1].matchingTerms = question2ExpectedMatchingTerms
+                res.send(body);
+            });
+        })
+            .as('startQuizAttempt');
         cy.get('[data-cy="startQuizAttempt"]').click()
+        cy.wait('@startQuizAttempt');
 
         cy.dragAndDropAnswerMatch(1, 'First Answer', 2)
         cy.dragAndDropAnswerMatch(1, 'Second Answer', 1)
@@ -530,7 +568,6 @@ describe('Client Display Quiz Matching Question Tests', () => {
         moveAnswer(2, 'First Answer', '{leftArrow}', 'available')
         moveAnswer(2, 'Third Answer', '{leftArrow}', 'available')
 
-        // cy.rearangeAnswerMatchViaDragAndDrop(2, 'First Answer', 'Third Answer')
         cy.get('[data-cy="question_2"] [data-cy="matchedNum-2"]').dragAndDrop('[data-cy="question_2"] [data-cy="matchedNum-0"]')
 
         cy.clickCompleteQuizBtn()

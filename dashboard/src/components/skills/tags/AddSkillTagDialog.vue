@@ -101,7 +101,7 @@ const onNewTagChange = (newValue) => {
 
 <template>
   <SkillsInputFormDialog
-    id="contactProjectAdmins"
+    id="addSkillTagDialog"
     header="Tag Selected Skills"
     v-model="model"
     :save-data-function="saveTags"

@@ -22,4 +22,5 @@ class SkillTagRes {
     String tagId
     String tagValue
     Integer numSkills
+    Date createdOn
 }

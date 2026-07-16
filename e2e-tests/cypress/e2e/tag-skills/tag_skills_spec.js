@@ -328,7 +328,7 @@ describe('Tag Skills Tests', () => {
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
 
-        for (let i= 0; i < 3 ; i++) {
+        for (let i = 0; i < 3; i++) {
             cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
         }
         cy.get('[data-cy="newSkillButton"]').should('have.focus')
@@ -369,7 +369,7 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-pc-section="list"]').contains('TAG 2').click()
         cy.clickSaveDialogBtn()
 
-        for (let i= 0; i < 3 ; i++) {
+        for (let i = 0; i < 3; i++) {
             cy.get(`[data-cy="skillsTable"] [data-p-index="${i}"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
         }
         cy.get('[data-cy="newSkillButton"]').should('have.focus')
@@ -444,4 +444,52 @@ describe('Tag Skills Tests', () => {
         cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
         cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
     });
-});
+
+    it('tag is linked to the subject page', () => {
+        cy.addTagToSkills(1, ['skill1', 'skill2', 'skill3'], 1)
+        cy.addTagToSkills(1, ['skill1', 'skill2'], 2)
+        cy.addTagToSkills(1, ['skill1'], 3)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="nameCell_skill1"] [data-cy="skillTag-skill1-tag3"]').click()
+        cy.get('[data-cy="title"]').contains('TAG: TAG 3')
+        const skillsTable = '[data-cy="skillTagSkillsTable"]'
+        cy.validateTable(skillsTable, [
+            [{colIndex: 0, value: 'Very Great Skill 1'}],
+        ], 25);
+
+        cy.go('back')
+        cy.get('[data-cy="nameCell_skill1"] [data-cy="skillTag-skill1-tag2"]').click()
+        cy.get('[data-cy="title"]').contains('TAG: TAG 2')
+        cy.validateTable(skillsTable, [
+            [{colIndex: 0, value: 'Very Great Skill 2'}],
+            [{colIndex: 0, value: 'Very Great Skill 1'}],
+        ], 25);
+
+    });
+
+    it('tag is linked to the skill page', () => {
+        cy.addTagToSkills(1, ['skill1', 'skill2', 'skill3'], 1)
+        cy.addTagToSkills(1, ['skill1', 'skill2'], 2)
+        cy.addTagToSkills(1, ['skill1'], 3)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="subTitle"] [data-cy="skillTag-skill1-tag3"]').click()
+        cy.get('[data-cy="title"]').contains('TAG: TAG 3')
+        const skillsTable = '[data-cy="skillTagSkillsTable"]'
+        cy.validateTable(skillsTable, [
+            [{colIndex: 0, value: 'Very Great Skill 1'}],
+        ], 25);
+
+        cy.go('back')
+        cy.get('[data-cy="subTitle"] [data-cy="skillTag-skill1-tag2"]').click()
+        cy.get('[data-cy="title"]').contains('TAG: TAG 2')
+        cy.validateTable(skillsTable, [
+            [{colIndex: 0, value: 'Very Great Skill 2'}],
+            [{colIndex: 0, value: 'Very Great Skill 1'}],
+        ], 25);
+
+    });
+})

@@ -16,7 +16,7 @@
 
 describe('Project Admin Training Wide Search Tests', () => {
 
-    it('navigate to skills, subjects, and badges using training-wide search dialog', () => {
+    it('navigate to skills, subjects, tags, and badges using training-wide search dialog', () => {
         cy.createProject(1)
         cy.createSubject(1, 1)
         cy.createSkill(1, 1, 1)
@@ -25,6 +25,9 @@ describe('Project Admin Training Wide Search Tests', () => {
         cy.createBadge(1, 1);
         cy.assignSkillToBadge(1, 1, 1);
         cy.createBadge(1, 1, { enabled: true });
+        cy.addTagToSkills(1, ['skill1', 'skill2', 'skill3'], 1)
+        cy.addTagToSkills(1, ['skill1', 'skill2'], 2)
+        cy.addTagToSkills(1, ['skill1'], 3)
 
         cy.visit('/administrator/projects/proj1');
         cy.get('[data-cy="manageBtn_subj1"]')
@@ -57,6 +60,15 @@ describe('Project Admin Training Wide Search Tests', () => {
         cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', 'Badge 1');
         cy.realPress('Enter');
         cy.get('[data-cy="pageHeader"] [data-cy="title"]').contains('BADGE: Badge 1')
+
+        // navigate to tag 1
+        cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
+        cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
+        cy.get('input.p-listbox-filter').type('tag 1')
+        cy.realPress('ArrowDown');
+        cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', 'TAG 1');
+        cy.realPress('Enter');
+        cy.get('[data-cy="pageHeader"] [data-cy="title"]').contains('TAG: TAG 1')
     })
 
     it('navigate from one subject to another using training-wide search dialog', () => {
@@ -191,6 +203,41 @@ describe('Project Admin Training Wide Search Tests', () => {
         cy.get('[data-cy="manageSkillLink_skill3"]')
         cy.get('[data-cy="manageSkillLink_skill1"]').should('not.exist')
         cy.get('[data-cy="manageSkillLink_skill2"]').should('not.exist')
+    })
+
+    it('navigate to Skill Tag from another tag using training-wide search dialog', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        cy.addTagToSkills(1, ['skill1', 'skill2', 'skill3'], 1)
+        cy.addTagToSkills(1, ['skill1', 'skill2'], 2)
+        cy.addTagToSkills(1, ['skill1'], 3)
+
+        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.get('[data-cy="pageHeader"] [data-cy="title"]').contains('TAG: TAG 1')
+        cy.get('[data-cy="pageHeaderStat_Tagged Skills"] [data-cy="statValue"]').should('have.text', '3');
+
+        const skillsTable = '[data-cy="skillTagSkillsTable"]'
+        cy.validateTable(skillsTable, [
+            [{colIndex: 0, value: 'Very Great Skill 3'}],
+            [{colIndex: 0, value: 'Very Great Skill 2'}],
+            [{colIndex: 0, value: 'Very Great Skill 1'}],
+        ], 25);
+
+        // navigate to tag 3
+        cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
+        cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
+        cy.get('input.p-listbox-filter').type('tag 3')
+        cy.realPress('ArrowDown');
+        cy.get('li.p-listbox-option[data-p-focused="true"]').should('contain.text', 'TAG 3');
+        cy.realPress('Enter');
+        cy.get('[data-cy="pageHeader"] [data-cy="title"]').contains('TAG: TAG 3')
+        cy.get('[data-cy="pageHeaderStat_Tagged Skills"] [data-cy="statValue"]').should('have.text', '1');
+        cy.validateTable(skillsTable, [
+            [{colIndex: 0, value: 'Very Great Skill 1'}],
+        ], 25);
     })
 
     it('point and skill counts on search dialog', () => {

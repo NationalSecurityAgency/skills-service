@@ -781,6 +781,80 @@ class DashboardUserActions_ProjectsSpec extends DefaultIntSpec {
         removeTag.tagValue == tagValue
     }
 
+    def "track skill tag creation without skills"() {
+        SkillsService rootService = createRootSkillService()
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        String tagValue = "New Tag"
+        String tagId = 'newtag'
+
+        userActionsHistoryRepo.deleteAll()
+        when:
+        skillsService.addTagToSkills(proj.projectId, [], tagValue)
+        def res = rootService.getUserActionsForEverything()
+
+        def addTag = rootService.getUserActionAttributes(res.data[0].id)
+
+        String displayName = getDisplayName()
+        then:
+        res.count == 1
+        res.data[0].action == DashboardAction.Create.toString()
+        res.data[0].item == DashboardItem.Tag.toString()
+        res.data[0].itemId == tagId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == proj.projectId
+        !res.data[0].quizId
+
+        !addTag.tagId
+        addTag.tagValue == tagValue
+    }
+
+    def "track skill tag removal when removeTagFully=true"() {
+        SkillsService rootService = createRootSkillService()
+
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> taggedSkillIds = skills.skillId
+        String tagValue = "New Tag"
+        String tagId = 'newtag'
+
+        skillsService.addTagToSkills(proj.projectId, taggedSkillIds, tagValue)
+        userActionsHistoryRepo.deleteAll()
+        when:
+        skillsService.deleteTagForSkills(proj.projectId, [], tagId, true)
+        def res = rootService.getUserActionsForEverything()
+        def removeTag = rootService.getUserActionAttributes(res.data[0].id)
+
+        String displayName = getDisplayName()
+        then:
+        res.count == 1
+        res.data[0].action == DashboardAction.Delete.toString()
+        res.data[0].item == DashboardItem.Tag.toString()
+        res.data[0].itemId == tagId
+        res.data[0].userId == skillsService.userName
+        res.data[0].userIdForDisplay == displayName
+        res.data[0].projectId == proj.projectId
+        !res.data[0].quizId
+
+        !removeTag.tagId
+        removeTag.tagValue == tagValue
+        removeTag.removedFromSkills == taggedSkillIds
+    }
+
     def "track setting external video for a skill"() {
         SkillsService rootService = createRootSkillService()
 

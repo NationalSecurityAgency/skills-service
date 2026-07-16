@@ -1,5 +1,5 @@
 /**
- * Copyright 2021 SkillTree
+ * Copyright 2026 SkillTree
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package skills.storage.model
+package skills.controller.result.model
 
-interface SkillTag {
-    String getTagId()
-    String getTagValue()
-    Integer getNumSkills()
-    Date getCreatedOn()
+import groovy.transform.Canonical
+
+@Canonical
+class SkillTagInfoRes {
+    String tagId
+    String tagValue
+
+    static class SkillInfo {
+        String skillId
+        String skillName
+        String subjectName
+        String subjectId
+        String groupName
+        String groupId
+        Date taggedOn
+    }
+
+    List<SkillInfo> skills
 }

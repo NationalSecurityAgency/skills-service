@@ -50,7 +50,7 @@ onUnmounted(() => {
           <div class="flex py-1 px-1 w-full">
             <div class="flex w-full flex-wrap">
               <div class="mt-2 text-center lg:text-left w-full lg:w-auto">
-                <div class="text-2xl flex">
+                <div class="text-2xl flex justify-center items-center lg:justify-start lg:items-start">
                   <div v-if="options.icon" class="d-inline-block rounded-border w-16 skill-icon-container text-primary text-center border mr-2">
                     <i class="skill-icon" :class="`${options.icon}`"></i>
                   </div>

@@ -62,6 +62,9 @@ describe('Approver Role Tests', () => {
             cy.addLearningPathItem(projNum, 1, 3)
             cy.addLearningPathItem(projNum, 2, 3)
 
+            cy.addTagToSkills(projNum, ['skill1', 'skill2', 'skill3'], 1)
+            cy.addTagToSkills(projNum, ['skill1'], 2)
+
             cy.reportSkill(projNum, 1, 'user0', 'yesterday');
             cy.reportSkill(projNum, 1, 'user0', 'now');
             cy.reportSkill(projNum, 1, 'user1', 'now');
@@ -287,6 +290,36 @@ describe('Approver Role Tests', () => {
       runCheck(2)
       runCheck(1, 'View','not.')
   });
+
+    it('/skill-tags page - approver role has no mutation controls', function () {
+        const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+            cy.visit(`/administrator/projects/proj${projNum}/skills-tags`);
+            cy.wait(`@getSettingsProj${projNum}`);
+            cy.get('[data-cy="btn_Skill Tags"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="editTag_tag1"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="editTag_tag2"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="deleteTag_tag1"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="deleteTag_tag2"]').should(`${chainerPrepend}exist`)
+        }
+        runCheck(2)
+        runCheck(1, 'View','not.')
+    });
+
+    it('/skill-tags/{tagId} page - approver role has no mutation controls', function () {
+        const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
+            const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
+            cy.visit(`/administrator/projects/proj${projNum}/skills-tags/tag1`);
+            cy.wait(`@getSettingsProj${projNum}`);
+            cy.get('[data-cy="editTag"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="skillsSelector"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="deleteSkill_skill1"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="deleteSkill_skill2"]').should(`${chainerPrepend}exist`)
+            cy.get('[data-cy="deleteSkill_skill3"]').should(`${chainerPrepend}exist`)
+        }
+        runCheck(2)
+        runCheck(1, 'View','not.')
+    });
 
     it('name link from skills page down to skill page works', function () {
         const runCheck = () => {

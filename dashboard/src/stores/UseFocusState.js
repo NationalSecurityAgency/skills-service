@@ -32,11 +32,49 @@ export const useFocusState = defineStore('focusState', () => {
   const focusAndReset = (element) => {
     log.trace(`focusing on [${elementId.value}]`)
     element.focus()
+    restoreFocusWithIndicator(element)
     resetElementId()
   }
 
+  /**
+   * PrimeVue’s button focus styles are designed around modern accessibility behavior:
+   *   :focus = element is focused, regardless of source
+   *   :focus-visible = browser thinks a visible focus indicator is appropriate, usually keyboard navigation
+   * When you call:
+   *   element.focus()
+   * the browser may focus the element but not apply :focus-visible, because the focus was caused by script
+   * after a mouse/pointer interaction, such as closing a confirmation dialog.
+   *
+   * To address this issue when we programmatically restore focus, add a temporary class that mimics the PrimeVue focus ring.
+   * This requires `st-force-focus-visible` global class to exist (see main.css)
+   *
+   * This gives sighted keyboard users a visible target after the dialog closes.
+   */
+  const restoreFocusWithIndicator = (el) => {
+    if (!el) {
+      return
+    }
+
+    el.focus()
+
+    if (!el.matches(':focus-visible')) {
+      el.classList.add('st-force-focus-visible')
+
+      const cleanup = () => {
+        el.classList.remove('st-force-focus-visible')
+        el.removeEventListener('blur', cleanup)
+        el.removeEventListener('pointerdown', cleanup)
+        el.removeEventListener('keydown', cleanup)
+      }
+
+      el.addEventListener('blur', cleanup)
+      el.addEventListener('pointerdown', cleanup)
+      el.addEventListener('keydown', cleanup)
+    }
+  }
+
   function focusOnLastElement() {
-    nextTick(() => {
+    return nextTick(() => {
       if (isElementIdPresent()) {
         elementHelper.getElementById(elementId.value).then((element) => {
           if (element) {

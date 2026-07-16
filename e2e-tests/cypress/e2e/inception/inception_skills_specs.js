@@ -582,6 +582,42 @@ describe('Inception Skills Tests', () => {
         cy.get('[data-cy="skillTag-skill1-tag1"]').should('not.exist')
     });
 
+    it('tag skills through Single Tag page', () => {
+        cy.intercept('POST', '/api/projects/Inception/skills/AddOrModifyTags').as('reportSkill');
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+        cy.addTagToSkills(1, [], 1)
+
+        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.get('[data-cy="noContent"]').contains('No Skills Added Yet...')
+
+        cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 0)
+        cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
+        cy.wait('@reportSkill')
+        cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 10)
+    });
+
+    it('untag skills through Single Tag page', () => {
+        cy.intercept('POST', '/api/projects/Inception/skills/AddOrModifyTags').as('reportSkill');
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1);
+
+        cy.addTagToSkills(1, ['skill1'], 1)
+
+        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+
+        cy.get('[data-cy="deleteSkill_skill1"]').click()
+        cy.get('[data-p="modal"]').contains('Are you sure you want to remove Skill "Very Great Skill 1" from Tag "TAG 1"?')
+
+        cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 0)
+        cy.get('[data-pc-name="pcacceptbutton"]').click()
+        cy.wait('@reportSkill')
+        cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 10)
+        cy.get('[data-cy="noContent"]').contains('No Skills Added Yet...')
+    });
+
     it('add project administrator', () => {
         cy.intercept('POST', '/api/projects/Inception/skills/AddAdmin').as('reportSkill');
         cy.createProject(1);

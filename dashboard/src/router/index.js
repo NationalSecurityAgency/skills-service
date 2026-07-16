@@ -96,6 +96,10 @@ import GlobalBadgeAccessPage from '@/components/badges/global/GlobalBadgeAccessP
 import AdminGroupGlobalBadges from '@/components/access/groups/AdminGroupGlobalBadges.vue'
 import SkillGroupPage from '@/components/skills/SkillGroupPage.vue'
 import SkillGroupSkills from '@/components/skills/SkillGroupSkills.vue'
+import SkillTagsPage from "@/components/skills/tags/SkillTagsPage.vue";
+import SingleSkillTagPage from "@/components/skills/tags/SingleSkillTagPage.vue";
+import SkillTagUsers from "@/components/skills/tags/SkillTagUsers.vue";
+import TaggedSkills from "@/components/skills/tags/TaggedSkills.vue";
 
 const FullDependencyGraph = defineAsyncComponent(() => import('@/components/skills/dependencies/FullDependencyGraph.vue'))
 
@@ -410,6 +414,17 @@ const routes = [
           message: 'Project Learning Path',
         },
       },
+    },  {
+      name: 'SkillTags',
+      path: 'skills-tags',
+      component: SkillTagsPage,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitSkillsTagsPage',
+        announcer: {
+          message: 'Skill Tags',
+        },
+      },
     }, {
       path: 'users',
       component: Users,
@@ -636,6 +651,33 @@ const routes = [
     component: SkillPage,
     meta: { requiresAuth: true },
     children: createAdminSkillChildRoutes('SingleSkillOverview')
+  },
+  {
+    path: '/administrator/projects/:projectId/skills-tags/:tagId',
+    component: SingleSkillTagPage,
+    meta: { requiresAuth: true },
+    children: [{
+      name: 'SkillTagSkills',
+      path: '',
+      component: TaggedSkills,
+      meta: {
+        requiresAuth: true,
+        reportSkillId: 'VisitSkillTagSkills',
+        announcer: {
+          message: 'Skill Tag Skills',
+        },
+      },
+    }, {
+      name: 'SkillTagUsers',
+      path: '',
+      component: SkillTagUsers,
+      meta: {
+        requiresAuth: true,
+        announcer: {
+          message: 'Skill Tag Users',
+        },
+      },
+    }]
   },
   {
     path: '/administrator/projects/:projectId/subjects/:subjectId/groups/:groupId',

@@ -1872,9 +1872,10 @@ class AdminController {
     @RequestMapping(value = "/projects/{projectId}/skills/tag", method = [RequestMethod.POST, RequestMethod.PUT], produces = "application/json")
     RequestResult addTagToSkills(@PathVariable("projectId") String projectId,
                                  @RequestBody SkillsTagRequest skillsTagRequest) {
-        SkillsValidator.isNotBlank(projectId, "projectId")
+            SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotNull(skillsTagRequest, "skillsTagRequest", projectId)
-        SkillsValidator.isNotEmpty(skillsTagRequest.skillIds, "skillsTagRequest.skillIds", projectId)
+        // deliberate empty list is supported
+        SkillsValidator.isNotNull(skillsTagRequest.skillIds, "skillsTagRequest.skillIds", projectId)
         SkillsValidator.isNotBlank(skillsTagRequest.tagId, "skillsTagRequest.tagId", projectId)
         SkillsValidator.isNotBlank(skillsTagRequest.tagValue, "skillsTagRequest.tagValue", projectId)
 
@@ -1903,16 +1904,33 @@ class AdminController {
     List<SkillTagRes> getTagsForProject(@PathVariable("projectId") String projectId,
                                         @RequestParam(required = false, value = "includeDisabled", defaultValue = "true") Boolean includeDisabled) {
         SkillsValidator.isNotBlank(projectId, "projectId")
-        return skillTagService.getTagsForProject(projectId, includeDisabled)?.collect { new SkillTagRes(tagId: it.tagId, tagValue: it.tagValue, numSkills: it.numSkills) }
+        return skillTagService.getTagsForProject(projectId, includeDisabled)?.collect {
+            new SkillTagRes(tagId: it.tagId, tagValue: it.tagValue, numSkills: it.numSkills, createdOn: it.createdOn)
+        }
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/tags/{tagId}", method = RequestMethod.GET, produces = "application/json")
+    SkillTagInfoRes getSingleTagInfo(@PathVariable("projectId") String projectId,
+                                        @PathVariable("tagId") String tagId,
+                                        @RequestParam(required = false, value = "includeDisabled", defaultValue = "true") Boolean includeDisabled) {
+        SkillsValidator.isNotBlank(projectId, "projectId")
+        return skillTagService.getSingleTagInfo(projectId, tagId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/tag", method = [RequestMethod.DELETE], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult deleteTagForSkills(@PathVariable("projectId") String projectId,
-                                     @RequestBody SkillsTagRequest skillsTagRequest) {
+                                     @RequestBody SkillsTagDeleteRequest skillsTagRequest) {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotNull(skillsTagRequest, "skillsTagRequest", projectId)
         SkillsValidator.isNotBlank(skillsTagRequest.tagId, "skillsTagRequest.tagId", projectId)
-        SkillsValidator.isNotEmpty(skillsTagRequest.skillIds, "skillsTagRequest.skillIds", projectId)
+        if (skillsTagRequest.removeTagFully == null || skillsTagRequest.removeTagFully == false) {
+            SkillsValidator.isNotEmpty(skillsTagRequest.skillIds, "skillsTagRequest.skillIds", projectId)
+        }
+        if (skillsTagRequest.removeTagFully == true) {
+            SkillsValidator.isTrue(!skillsTagRequest.skillIds, "Skill ids must not be provided when removeTagFully parameter is true", projectId)
+        }
+        SkillsValidator.isTrue(!(skillsTagRequest.removeTagFully == true && skillsTagRequest.retainTag == true),
+                "removeTagFully==true and retainTag==true is not a valid request")
         skillTagService.deleteTagForSkills(projectId, skillsTagRequest)
 
         RequestResult success = RequestResult.success()
