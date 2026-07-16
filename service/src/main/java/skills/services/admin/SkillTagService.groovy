@@ -212,6 +212,7 @@ class SkillTagService {
                     item: DashboardItem.Tag,
                     actionAttributes: [
                             tagValue: tag.name,
+                            removedFromSkills: skillIds,
                     ],
                     itemId: tagId,
                     projectId: projectId,
