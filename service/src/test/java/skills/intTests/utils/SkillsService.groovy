@@ -881,8 +881,8 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
-    def getApiAllSubjectsBadgesAndSkills(String projectId) {
-        String url = "/projects/${projectId}/skillsSubjectsAndBadges"
+    def getApiProjNavItems(String projectId) {
+        String url = "/projects/${projectId}/navigableItems"
         wsHelper.apiGet(url)
     }
 

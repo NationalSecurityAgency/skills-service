@@ -29,7 +29,6 @@ import UsersTablePage from '@/components/users/UsersTablePage.vue'
 import SlidesConfigPage from '@/components/slides/SlidesConfigPage.vue'
 import VideoConfigPage from '@/components/video/VideoConfigPage.vue'
 import ExpirationConfigPage from '@/components/expiration/ExpirationConfigPage.vue'
-import AddSkillEvent from '@/components/skills/AddSkillEvent.vue'
 import SkillMetricsPage from '@/components/metrics/skill/SkillMetricsPage.vue'
 
 const createAdminRoutes = () => {
@@ -196,18 +195,6 @@ const createAdminSkillChildRoutes = (baseName) => [
       requiresAuth: true,
       announcer: {
         message: 'Configure Expiration',
-      },
-    },
-    props: true,
-  }, {
-    name: `AddSkillEvent${baseName}`,
-    path: 'addSkillEvent',
-    component: AddSkillEvent,
-    meta: {
-      requiresAuth: true,
-      breadcrumb: 'Add Skill Event',
-      announcer: {
-        message: 'Add Skill Event',
       },
     },
     props: true,

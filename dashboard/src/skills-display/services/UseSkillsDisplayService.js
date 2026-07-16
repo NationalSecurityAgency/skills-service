@@ -164,8 +164,8 @@ export const useSkillsDisplayService = () => {
     }).then((result) => addMetaToSummary(result.data))
   }
 
-  const getAllProjectSkillsSubjectsAndBadges = () => {
-    return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skillsSubjectsAndBadges`, {
+  const getProjectNavigableItems = () => {
+    return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/navigableItems`, {
       params: ({ ...getUserIdAndVersionParams() })
     }).then((result) => result.data)
   }
@@ -315,7 +315,7 @@ export const useSkillsDisplayService = () => {
     updateSkillHistory,
     getSkillSummary,
     getSkillsGroupSummary,
-    getAllProjectSkillsSubjectsAndBadges,
+    getProjectNavigableItems,
     getDescriptions,
     getDescriptionForSkill,
     reportSkill,

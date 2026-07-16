@@ -919,7 +919,7 @@ child_achievement_counts AS (
          WHERE parent_skill.project_id = :projectId
              AND child_skill.project_id = :projectId
              AND child_skill.type = 'Skill'
-             AND srd.type IN ('RuleSetDefinition', 'BadgeRequirement', 'GroupSkillToSubject', 'SkillsGroupRequirement')
+             AND srd.type IN ('RuleSetDefinition', 'BadgeRequirement', 'GroupSkillToSubject', 'SkillsGroupRequirement', 'Tag')
          GROUP BY
              srd.parent_ref_id
      )
@@ -950,11 +950,11 @@ FROM
         LEFT JOIN skill_definition skillsGroup ON (s.group_id = skillsGroup.skill_id and s.project_id = skillsGroup.project_id)
 WHERE
     s.enabled = 'true'
-  AND s.type in ('Skill', 'Subject', 'Badge', 'SkillsGroup')
+  AND s.type in ('Skill', 'Subject', 'Badge', 'SkillsGroup', 'Tag')
   AND s.project_id = :projectId
 ORDER BY s.name ASC
     ''', nativeQuery = true)
-    List<ProjNavItemWithAchievements> findAllSkillsSubjectsAndBadgesWithAchievementDetails(
+    List<ProjNavItemWithAchievements> findProjNavItems(
             @Param('projectId') String projectId,
             @Param('userId') String userId
     )

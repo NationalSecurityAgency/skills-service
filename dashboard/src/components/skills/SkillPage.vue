@@ -99,14 +99,6 @@ const buildNavItems = () => {
     params: routeProps.params
   })
   items.push({ name: 'Users', iconClass: 'fa-users skills-color-users', page: `SkillUsers${suffix}`, params: routeProps.params  })
-  if (!isImported?.value && !isReadOnlyProj.value && !isDisabled.value) {
-    items.push({
-      name: 'Add Event',
-      iconClass: 'fa-user-plus skills-color-events',
-      page: `AddSkillEvent${suffix}`,
-      params: routeProps.params
-    })
-  }
   items.push({ name: 'Metrics', iconClass: 'fa-chart-bar skills-color-metrics', page: `SkillMetrics${suffix}`, params: routeProps.params })
   return items
 }

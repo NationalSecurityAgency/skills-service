@@ -804,5 +804,23 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         captions == "captions"
         transcript == "transcript"
     }
+
+    def "quiz title unescapes properly"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        quiz.name = "Test & Quiz"
+
+        when:
+        def newQuiz = skillsService.createQuizDef(quiz)
+
+        def quizDefs = skillsService.getQuizDefs()
+        def quizDef = skillsService.getQuizDef(quiz.quizId)
+        def quizDefSummary = skillsService.getQuizDefSummary(quiz.quizId)
+
+        then:
+        newQuiz.body.name == "Test & Quiz"
+        quizDefs.name == ["Test & Quiz"]
+        quizDef.name == "Test & Quiz"
+        quizDefSummary.name == "Test & Quiz"
+    }
 }
 

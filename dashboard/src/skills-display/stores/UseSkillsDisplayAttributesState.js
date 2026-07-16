@@ -85,7 +85,10 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const pointDisplayNamePlural = computed(() => pluralize.plural(pointDisplayName.value))
   const displayNameBySkillType = (type) => {
     if (SkillType.isBadge(type)) {
-      return 'Badge'
+      return SkillType.Badge
+    }
+    if (SkillType.isTag(type)) {
+      return SkillType.Tag
     }
     if (SkillType.isSkillsGroup(type)) {
       return groupDisplayName.value
