@@ -69,7 +69,6 @@ const iconClass = computed(() => {
             <div class="flex-1 flex flex-col gap-2">
               <div class="flex items-end gap-1">
                 <div class="flex-1">
-
                   <router-link
                       v-if="buildLink"
                       :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('skillTagDetails'), params: { tagId: skillTagOverview.tagId } }"
@@ -85,7 +84,19 @@ const iconClass = computed(() => {
                 </div>
               </div>
 
-              <div>
+              <div v-if="buildLink">
+                <router-link
+                    v-if="buildLink"
+                    :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('skillTagDetails'), params: { tagId: skillTagOverview.tagId } }"
+                    :data-cy="`tagProgressLink-${skillTagOverview.tagId}`"
+                    tabindex="-1"
+                    aria-hidden="true">
+                  <vertical-progress-bar
+                      :total-progress="progressPercent"
+                      :disable-daily-color="true"/>
+                </router-link>
+              </div>
+              <div v-else>
                 <vertical-progress-bar
                   :total-progress="progressPercent"
                   :disable-daily-color="true" />
