@@ -51,7 +51,7 @@ const hasTags = computed(() => tags.value?.length > 0)
     <Card v-if="hasTags" class="mb-3">
       <template #content>
         <h2 class="sr-only">Skill Tags</h2>
-        <div data-cy="skillTags" class="flex gap-2">
+        <div data-cy="skillTags" class="flex flex-wrap gap-2 items-start">
           <div v-for="(tag, index) in tags"
                class="border rounded-xl px-2 py-1 text-slate-900 dark:text-slate-100 dark:bg-slate-800 dark:border-slate-600"
                :class="getBgColor(index)"
