@@ -51,7 +51,7 @@ const hasTags = computed(() => tags.value?.length > 0)
     <Card v-if="hasTags" class="mb-3">
       <template #content>
         <h2 class="sr-only">Skill Tags</h2>
-        <div data-cy="skillTags" class="flex gap-2">
+        <div data-cy="skillTags" class="flex flex-wrap gap-2 items-start justify-center md:justify-start">
           <div v-for="(tag, index) in tags"
                class="border rounded-xl px-2 py-1 text-slate-900 dark:text-slate-100 dark:bg-slate-800 dark:border-slate-600"
                :class="getBgColor(index)"
@@ -67,6 +67,18 @@ const hasTags = computed(() => tags.value?.length > 0)
                   {{ tag.numSkills }}
                 </div>
               </div>
+            </router-link>
+          </div>
+
+          <div class="md:ml-auto shrink-0">
+            <router-link
+                :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('skillTagsPage') }"
+                :aria-label="`Click to navigate to the project tags page`"
+                :data-cy="`viewProjectTagsBtn`" tabindex="-1">
+              <Button
+                  label="View All Tags"
+                  icon="fa-solid fa-tags"
+                  outlined class="w-full" size="small" />
             </router-link>
           </div>
         </div>

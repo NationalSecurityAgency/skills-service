@@ -155,7 +155,7 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
       title: `${groupPlaceholder} Details`
     }
   }, {
-    name: `TagsPage${appendToName}`,
+    name: `skillTagsPage${appendToName}`,
     path: `${prependToPath}tags`,
     component: SkillTagsPage,
     meta: {
