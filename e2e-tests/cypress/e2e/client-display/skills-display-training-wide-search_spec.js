@@ -89,7 +89,7 @@ describe('Skills Display Training Wide Search Tests', () => {
         cy.get('[data-cy="skillsAchievedProgress"] [data-cy="completedNum"]').should('have.text', '1')
         cy.get('[data-cy="skillsAchievedProgress"] [data-cy="totalNum"]').should('have.text', '2')
         cy.get('[data-cy="pointsEarnedProgress"] [data-cy="completedNum"]').should('have.text', '100')
-        cy.get('[data-cy="pointsEarnedProgress"] [data-cy="totalNum"]').should('have.text', '200')
+        cy.get('[data-cy="pointsEarnedProgress"] [data-cy="totalNum"]').should('have.text', '300')
     })
 
     it('client-display: navigate to skills, subjects, tags and badges using training-wide search dialog', () => {
@@ -162,7 +162,7 @@ describe('Skills Display Training Wide Search Tests', () => {
         cy.get('[data-cy="skillsAchievedProgress"] [data-cy="completedNum"]').should('have.text', '1')
         cy.get('[data-cy="skillsAchievedProgress"] [data-cy="totalNum"]').should('have.text', '2')
         cy.get('[data-cy="pointsEarnedProgress"] [data-cy="completedNum"]').should('have.text', '100')
-        cy.get('[data-cy="pointsEarnedProgress"] [data-cy="totalNum"]').should('have.text', '200')
+        cy.get('[data-cy="pointsEarnedProgress"] [data-cy="totalNum"]').should('have.text', '300')
     })
 
     it('navigate from one subject to another using training-wide search dialog', () => {

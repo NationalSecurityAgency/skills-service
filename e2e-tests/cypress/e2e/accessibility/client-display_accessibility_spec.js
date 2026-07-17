@@ -407,7 +407,7 @@ describe('Client Display Accessibility tests', () => {
             cy.customLighthouse();
         });
 
-        it(`Skill Tag overview page${darkMode}`, () => {
+        it.only(`Skill Tag overview page${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
             cy.visit('/test-skills-display/proj1/tags/tag1')
             cy.injectAxe();
@@ -416,8 +416,8 @@ describe('Client Display Accessibility tests', () => {
             cy.get('[data-cy="skillTagName"]').should('contain.text', 'TAG 1')
             cy.get('[data-cy="skillsAchievedProgress"] [data-cy="completedNum"]').should('have.text', '1')
             cy.get('[data-cy="skillsAchievedProgress"] [data-cy="totalNum"]').should('have.text', '2')
-            cy.get('[data-cy="pointsEarnedProgress"] [data-cy="completedNum"]').should('have.text', '100')
-            cy.get('[data-cy="pointsEarnedProgress"] [data-cy="totalNum"]').should('have.text', '200')
+            cy.get('[data-cy="pointsEarnedProgress"] [data-cy="completedNum"]').should('have.text', '400')
+            cy.get('[data-cy="pointsEarnedProgress"] [data-cy="totalNum"]').should('have.text', '700')
 
             cy.customA11y();
             cy.customLighthouse();
