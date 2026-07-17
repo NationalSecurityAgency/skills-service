@@ -1269,18 +1269,18 @@ FROM user_performed_skill upa
                                       skill_relationship_definition rel,
                                       skill_definition child
             where parent.project_id = :projectId
-              and parent.skill_id = :subjectId
+              and parent.skill_id = :parentSkillId
               and rel.parent_ref_id = parent.id
               and rel.child_ref_id = child.id
-              and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')
-              and child.type = 'Skill\'
-              and child.enabled = 'true\'
+              and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject', 'Tag')
+              and child.type = 'Skill'
+              and child.enabled = 'true'
     ) skill on ( upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end)
     LEFT JOIN (
         SELECT uAchievement.user_id, max(uAchievement.level) as level
         FROM user_achievement uAchievement
         WHERE uAchievement.project_id = :projectId
-          and uAchievement.skill_id = :subjectId
+          and uAchievement.skill_id = :parentSkillId
           and uAchievement.level is not null
         GROUP BY uAchievement.user_id
     ) uAchievement ON uAchievement.user_id = upa.user_id
@@ -1303,15 +1303,15 @@ HAVING
     sum(skill.point_increment) >= :minimumPoints
    and sum(skill.point_increment) < :maximumPoints
     ''', nativeQuery = true)
-    Page<ProjectUser> findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(@Param("projectId") String projectId,
-                                                                                   @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
-                                                                                   @Param("subjectId") String subjectId,
-                                                                                   @Param("query") String userId,
-                                                                                   @Param("minimumPoints") int minimumPoints,
-                                                                                   @Param("maximumPoints") int maximumPoints,
-                                                                                   @Param("userTagFilter") String userTagFilter,
-                                                                                   @Param("includeImported") Boolean includeImported,
-                                                                                   Pageable pageable)
+    Page<ProjectUser> findDistinctProjectUsersByProjectIdAndParentSkillIdAndUserIdLike(@Param("projectId") String projectId,
+                                                                                       @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
+                                                                                       @Param("parentSkillId") String parentSkillId,
+                                                                                       @Param("query") String userId,
+                                                                                       @Param("minimumPoints") int minimumPoints,
+                                                                                       @Param("maximumPoints") int maximumPoints,
+                                                                                       @Param("userTagFilter") String userTagFilter,
+                                                                                       @Param("includeImported") Boolean includeImported,
+                                                                                       Pageable pageable)
 
     @Nullable
     @Query('SELECT up.points from UserPoints up where up.projectId=?1 and up.userId=?2 and up.skillRefId=?3')

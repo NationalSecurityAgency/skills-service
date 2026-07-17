@@ -176,7 +176,18 @@ class AdminUsersService {
         query = query ? query.trim() : ''
         Integer totalPoints = skillDefRepo.getTotalPointsByProjectIdAndSkillId(projectId, subjectId) ?: 0
         Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)
-        Page<ProjectUser> usersDataPage = userPointsRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectId, query, minMax.left, minMax.right, userTagFilter, includeImported, pageRequest)
+        Page<ProjectUser> usersDataPage = userPointsRepo.findDistinctProjectUsersByProjectIdAndParentSkillIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectId, query, minMax.left, minMax.right, userTagFilter, includeImported, pageRequest)
+        return new TableResultWithTotalPoints(usersDataPage, totalPoints)
+    }
+
+    TableResultWithTotalPoints loadUsersPageForSkillTag(String projectId, String tagId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter, Boolean includeImported) {
+        if (!tagId) {
+            return TableResultWithTotalPoints.EMPTY
+        }
+        query = query ? query.trim() : ''
+        Integer totalPoints = skillDefRepo.getTotalPointsForTag(projectId, tagId, includeImported) ?: 0
+        Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)
+        Page<ProjectUser> usersDataPage = userPointsRepo.findDistinctProjectUsersByProjectIdAndParentSkillIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, tagId, query, minMax.left, minMax.right, userTagFilter, includeImported, pageRequest)
         return new TableResultWithTotalPoints(usersDataPage, totalPoints)
     }
 

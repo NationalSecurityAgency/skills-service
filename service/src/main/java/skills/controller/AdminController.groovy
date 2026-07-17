@@ -1917,6 +1917,29 @@ class AdminController {
         return skillTagService.getSingleTagInfo(projectId, tagId)
     }
 
+    @GetMapping(value = "/projects/{projectId}/skills/tags/{tagId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    TableResult getUsersForSingleTag(@PathVariable("projectId") String projectId,
+                                   @PathVariable("tagId") String tagId,
+                                   @RequestParam String query,
+                                   @RequestParam int limit,
+                                   @RequestParam int page,
+                                   @RequestParam String orderBy,
+                                   @RequestParam Boolean ascending,
+                                   @RequestParam int minimumPoints,
+                                   @RequestParam String userTagFilter,
+                                   @RequestParam(required = false, defaultValue = "true") boolean includeImported,
+                                   @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(tagId, "Skills Group Id", tagId)
+        SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
+        SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
+
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        return adminUsersService.loadUsersPageForSkillTag(projectId, tagId, query, pageRequest, minimumPoints, maximumPoints, userTagFilter, includeImported)
+    }
+
+
     @RequestMapping(value = "/projects/{projectId}/skills/tag", method = [RequestMethod.DELETE], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult deleteTagForSkills(@PathVariable("projectId") String projectId,
                                      @RequestBody SkillsTagDeleteRequest skillsTagRequest) {

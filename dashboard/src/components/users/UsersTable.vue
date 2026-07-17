@@ -152,6 +152,8 @@ const getUrl = () => {
     url += `/groups/${encodeURIComponent(route.params.groupId)}`
   } else if (route.params.subjectId) {
     url += `/subjects/${encodeURIComponent(route.params.subjectId)}`
+  } else if (route.params.projectId && route.params.tagId) {
+    url += `/skills/tags/${encodeURIComponent(route.params.tagId)}`
   } else if (route.params.tagKey && route.params.tagFilter) {
     url += `/userTags/${encodeURIComponent(route.params.tagKey)}/${encodeURIComponent(route.params.tagFilter)}`
   }
@@ -160,13 +162,17 @@ const getUrl = () => {
 }
 
 const isProjectLevel = computed(() => {
-  return !(route.params.skillId || route.params.badgeId || route.params.subjectId || (route.params.tagKey && route.params.tagFilter))
+  return !(route.params.skillId || route.params.badgeId || route.params.subjectId || (route.params.tagKey && route.params.tagFilter)) && !isSkillsTagPage.value
 })
 const isProjectPage = computed(() => route.params.projectId)
 const eligibleForExcludeImportedUsersToggle = computed(() => isProjectPage.value)
 
 const isUserTagsMetricsPage = computed(() => {
   return route.params.tagKey && route.params.tagFilter
+})
+
+const isSkillsTagPage = computed(() => {
+  return route.name === 'SkillTagUsers'
 })
 
 const calculateClientDisplayRoute = (props) => {
@@ -291,6 +297,7 @@ const tableStoredStateId = computed(() => {
               <label for="userFilter">User Filter</label>
             </div>
             <InputText id="userFilter" v-model="filters.user" v-on:keydown.enter="applyFilters"
+                       :disabled="isLoading"
                        class="w-full"
                        data-cy="users-skillIdFilter" aria-label="user filter" />
           </div>
@@ -299,6 +306,7 @@ const tableStoredStateId = computed(() => {
               <label for="userTagFilter">{{ appConfig.usersTableAdditionalUserTagLabel }} Filter</label>
             </div>
             <InputText id="userTagFilter" v-model="filters.userTagFilter" v-on:keydown.enter="applyFilters"
+                       :disabled="isLoading"
                        class="w-full"
                        data-cy="users-userTagFilter" aria-label="user tag filter" />
           </div>
@@ -313,7 +321,7 @@ const tableStoredStateId = computed(() => {
                 <span class="mr-4">0%</span>
                 <div class="flex flex-1 flex-col">
                   <Slider v-model="filters.progress" v-on:keydown.enter="applyFilters" :min="0" :max="100" range
-                          data-cy="users-progress-range" aria-label="user progress range filter" />
+                          data-cy="users-progress-range" aria-label="user progress range filter" :disabled="isLoading" />
                 </div>
                 <span class="ml-4">100%</span>
               </div>
@@ -323,13 +331,13 @@ const tableStoredStateId = computed(() => {
                 <InputGroupAddon> &gt;= </InputGroupAddon>
                 <InputText v-model.number="filters.progress[0]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="minimumProgress"
                            data-cy="users-progress-input" aria-label="minimum user progress input filter" inputId="minimumProgress"
-                           class="p-0 m-0" />
+                           class="p-0 m-0" :disabled="isLoading" />
               </InputGroup>
               <InputGroup class="p-0 m-0">
                 <InputGroupAddon> &lt;{{ filters.progress[1] === 100 ? '=' : ''}} </InputGroupAddon>
                 <InputText v-model.number="filters.progress[1]" v-on:keydown.enter="applyFilters" :min="0" :max="100" id="maximumProgress"
                            data-cy="users-max-progress-input" aria-label="maximum user progress input filter" inputId="maximumProgress"
-                           class="p-0 m-0" />
+                           class="p-0 m-0" :disabled="isLoading" />
               </InputGroup>
             </div>
           </div>
@@ -337,8 +345,8 @@ const tableStoredStateId = computed(() => {
       </div>
 
       <div class="flex gap-2 mt-2 mb-6">
-        <SkillsButton icon="fa fa-filter" label="Filter" outlined @click="applyFilters" data-cy="users-filterBtn" size="small" />
-        <SkillsButton icon="fa fa-times" label="Reset" outlined @click="reset" class="ml-1" data-cy="users-resetBtn" size="small" />
+        <SkillsButton icon="fa fa-filter" label="Filter" outlined @click="applyFilters" data-cy="users-filterBtn" size="small" :disabled="isLoading" />
+        <SkillsButton icon="fa fa-times" label="Reset" outlined @click="reset" class="ml-1" data-cy="users-resetBtn" size="small" :disabled="isLoading" />
       </div>
     </div>
     <div>
@@ -363,7 +371,7 @@ const tableStoredStateId = computed(() => {
         <template v-if="isProjectPage && (showExcludeImportedUsersToggle || isProjectLevel) || isGlobalBadgePage" #header>
           <div class="flex gap-2 flex-wrap py-1">
             <div class="flex-1">
-              <div v-if="showExcludeImportedUsersToggle" class="flex gap-1 items-center">
+              <div v-if="showExcludeImportedUsersToggle && !isSkillsTagPage" class="flex gap-1 items-center">
                 <ToggleSwitch inputId="excludeImported" v-model="excludeImported" @change="loadData" data-cy="excludeImportedToggle"/><label for="excludeImported">Exclude Users that only earned points in imported skills</label>
               </div>
             </div>
@@ -452,7 +460,7 @@ const tableStoredStateId = computed(() => {
                            :aria-label="`Progress for ${slotProps.data.userId} user`" />
               <div v-if="slotProps.data.userMaxLevel || slotProps.data.userMaxLevel === 0" class="row"
                    data-cy="progressLevels">
-                <div class="col">
+                <div v-if="!isSkillsTagPage" class="col">
                   <i class="fas fa-trophy skills-color-levels" aria-hidden="true" /> <span class="italic">Current Level: </span>
                   <span v-if="slotProps.data.userMaxLevel === 0" data-cy="progressCurrentLevel">None</span>
                   <span v-else class="font-weight-bold" data-cy="progressCurrentLevel">{{ slotProps.data.userMaxLevel
