@@ -61,7 +61,10 @@ describe('Client Display Skill Tags Visible on Skill Summaries', () => {
 
     cy.get('[data-cy="title"]').should('contain.text', 'Skill Tag Overview')
     cy.get('[data-cy="skillTagName"]').should('contain.text', 'TAG 1')
-    cy.get('[data-cy="skillTagProgress"]').should('contain.text', '0 / 1 Skills')
+    cy.get('[data-cy="skillsAchievedProgress"] [data-cy="completedNum"]').should('have.text', '0')
+    cy.get('[data-cy="skillsAchievedProgress"] [data-cy="totalNum"]').should('have.text', '1')
+    cy.get('[data-cy="pointsEarnedProgress"] [data-cy="completedNum"]').should('have.text', '0')
+    cy.get('[data-cy="pointsEarnedProgress"] [data-cy="totalNum"]').should('have.text', '200')
 
     cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
     cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 200 Points')
@@ -113,7 +116,10 @@ describe('Client Display Skill Tags Visible on Skill Summaries', () => {
 
     cy.get('[data-cy="title"]').should('contain.text', 'Skill Tag Overview')
     cy.get('[data-cy="skillTagName"]').should('contain.text', 'TAG 2')
-    cy.get('[data-cy="skillTagProgress"]').should('contain.text', '0 / 2 Skills')
+    cy.get('[data-cy="skillsAchievedProgress"] [data-cy="completedNum"]').should('have.text', '0')
+    cy.get('[data-cy="skillsAchievedProgress"] [data-cy="totalNum"]').should('have.text', '2')
+    cy.get('[data-cy="pointsEarnedProgress"] [data-cy="completedNum"]').should('have.text', '0')
+    cy.get('[data-cy="pointsEarnedProgress"] [data-cy="totalNum"]').should('have.text', '80')
 
     cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 2')
     cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 50 Points')
@@ -162,7 +168,10 @@ describe('Client Display Skill Tags Visible on Skill Summaries', () => {
 
     cy.get('[data-cy="title"]').should('contain.text', 'Skill Tag Overview')
     cy.get('[data-cy="skillTagName"]').should('contain.text', 'TAG 1')
-    cy.get('[data-cy="skillTagProgress"]').should('contain.text', '0 / 1 Skills')
+    cy.get('[data-cy="skillsAchievedProgress"] [data-cy="completedNum"]').should('have.text', '0')
+    cy.get('[data-cy="skillsAchievedProgress"] [data-cy="totalNum"]').should('have.text', '1')
+    cy.get('[data-cy="pointsEarnedProgress"] [data-cy="completedNum"]').should('have.text', '0')
+    cy.get('[data-cy="pointsEarnedProgress"] [data-cy="totalNum"]').should('have.text', '200')
 
     cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
     cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 200 Points')

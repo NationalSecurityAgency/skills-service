@@ -354,7 +354,10 @@ describe('Accessibility forProgress and Rankings Pages Tests', () => {
 
         cy.get('[data-cy="title"]').should('contain.text', 'Skill Tag Overview')
         cy.get('[data-cy="skillTagName"]').should('contain.text', 'TAG 1')
-        cy.get('[data-cy="skillTagProgress"]').should('contain.text', '1 / 2 Skills')
+        cy.get('[data-cy="skillsAchievedProgress"] [data-cy="completedNum"]').should('have.text', '1')
+        cy.get('[data-cy="skillsAchievedProgress"] [data-cy="totalNum"]').should('have.text', '2')
+        cy.get('[data-cy="pointsEarnedProgress"] [data-cy="completedNum"]').should('have.text', '100')
+        cy.get('[data-cy="pointsEarnedProgress"] [data-cy="totalNum"]').should('have.text', '200')
 
         cy.customA11y();
         cy.customLighthouse();

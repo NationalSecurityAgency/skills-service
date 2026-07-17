@@ -1221,6 +1221,7 @@ class SkillsLoader {
         } else {
             skillsAchieved = achievedLevelRepository.countAchievedChildren(userId, projDef.projectId, tagSkillDef.skillId, SkillRelDef.RelationshipType.Tag)
             totalSkills = skillDefRepo.countEnabledChildren(projDef?.projectId, tagSkillDef.skillId, SkillRelDef.RelationshipType.Tag)
+            skillsRes = groupChildrenMeta.childrenWithPoints.collect { new SkillSummaryParent(points: it.points, totalPoints: it.skillDef.totalPoints)}
         }
 
         return new SkillTagSummary(
