@@ -86,7 +86,8 @@ const newSkillInfo = ref({
   isGroupEnabled: true,
   version: 1
 })
-const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId = null, isGroupEnabled = true) => {
+const skillSavedCallback = ref(null);
+const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId = null, isGroupEnabled = true, onSkillSavedCallback = null) => {
   if (skill.isGroupType) {
     createOrUpdateGroup(skill, isEdit)
   } else {
@@ -97,6 +98,9 @@ const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId
       isCopy,
       groupId,
       isGroupEnabled
+    }
+    if(onSkillSavedCallback) {
+      skillSavedCallback.value = onSkillSavedCallback
     }
   }
 }
@@ -169,6 +173,9 @@ const skillCreatedOrUpdated = (skill) => {
   subjectState.loadSubjectDetailsState()
 
   const msg = skill.type === 'SkillGroup' ? `Group ${skill.name} has been saved` : `Skill ${skill.name} has been saved`
+  if(skillSavedCallback.value) {
+    skillSavedCallback.value(skill)
+  }
   announcer.polite(msg)
   return createdSkill
 }

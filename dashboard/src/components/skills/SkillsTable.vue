@@ -254,7 +254,11 @@ const handleEditBtnClick = (skill) => {
     editImportedSkillInfo.value.skill = skill
     editImportedSkillInfo.value.show = true
   } else {
-    createOrUpdateSkill(skill, true, false, skill.groupId, props.groupEnabled)
+    createOrUpdateSkill(skill, true, false, skill.groupId, props.groupEnabled, (updatedSkill) => {
+      if(skill.skillId !== updatedSkill.skillId) {
+        selectedRows.value = selectedRows.value.filter((item) => item.skillId !== skill.skillId)
+      }
+    })
   }
 }
 
