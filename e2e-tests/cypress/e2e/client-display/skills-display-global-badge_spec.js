@@ -464,4 +464,57 @@ describe('Skills Display Global Badges Tests', () => {
 
     cy.get('[data-cy="skillProgressTitle-skill5=globalBadge1"] [data-cy="skillProgressTitle"]').eq(0).click();
   });
+
+  it('global badge overall percent reflects a mix of project levels and directly-assigned skills', () => {
+    cy.resetDb();
+    cy.fixture('vars.json')
+      .then((vars) => {
+        if (!Cypress.env('oauthMode')) {
+          cy.register(Cypress.env('proxyUser'), vars.defaultPass, false);
+        }
+      });
+    cy.loginAsProxyUser();
+
+    // proj1 owns the two skills assigned directly to the global badge. each skill
+    // is 2 occurrences of 100 points, so 4 total occurrences across the two skills.
+    cy.createProject(1);
+    cy.createSubject(1, 1);
+    cy.createSkill(1, 1, 1, { pointIncrement: 100, numPerformToCompletion: 2 });
+    cy.createSkill(1, 1, 2, { pointIncrement: 100, numPerformToCompletion: 2 });
+
+    // proj2 supplies a project-level requirement on the same badge.
+    cy.createProject(2);
+    cy.createSubject(2, 1);
+    cy.createSkill(2, 1, 1, { pointIncrement: 100, numPerformToCompletion: 2 });
+    cy.createSkill(2, 1, 2, { pointIncrement: 100, numPerformToCompletion: 2 });
+
+    cy.loginAsRootUser();
+    cy.createGlobalBadge(1);
+    cy.assignProjectToGlobalBadge(1, 2, 2);   // proj2, level 2 requirement
+    cy.assignSkillToGlobalBadge(1, 1, 1);     // proj1 skill1 assigned directly
+    cy.assignSkillToGlobalBadge(1, 2, 1);     // proj1 skill2 assigned directly
+    cy.enableGlobalBadge();
+
+    cy.loginAsProxyUser();
+
+    // skill1 earns 1 of its 2 occurrences, skill2 none, so 1 of the 4 skill
+    // occurrences is earned. proj2 gets some progress but the project level
+    // contributes no skill occurrences to the badge.
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
+    cy.reportSkill(2, 1, Cypress.env('proxyUser'), 'now');
+
+    cy.cdVisit('/', true);
+    cy.cdClickBadges();
+    cy.contains('Global Badge 1');
+    cy.get('[data-cy=badgeDetailsLink_globalBadge1]').click();
+    cy.contains('Global Badge 1').should('be.visible');
+
+    // overall completion is occurrences-based on the client-display route: 1 of 4
+    // earned -> 25%. the project level does not skew the overall percentage.
+    cy.get('[data-cy="badgePercentCompleted"]').contains('25% Complete');
+
+    // the project-level portion still renders alongside the assigned skills.
+    cy.get('[data-cy="globalBadgeProjectLevels"] [data-cy="gb_proj2"]')
+      .should('contain.text', '% Complete');
+  });
 })
