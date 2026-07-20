@@ -15,7 +15,7 @@
  */
 package skills.intTests
 
-
+import org.apache.commons.lang3.tuple.Pair
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
@@ -154,6 +154,55 @@ class AdminSkillTagUsersSpecs extends DefaultIntSpec {
         p2Data[1].userId == users[1].userName
         p2Data[2].totalPoints == 40
         p2Data[2].userId == users[0].userName
+    }
 
+    def "sort and page by user"() {
+        String tagValue = "New Tag"
+        String tagId = 'newtag'
+
+        def proj1 = SkillsFactory.createProject(1)
+        def proj1Subj1 = SkillsFactory.createSubject(1, 1)
+        def proj1Subj1Skills = SkillsFactory.createSkills(2, 1, 1, 100, 10)
+        proj1Subj1Skills.each {it.pointIncrementInterval = 0 }
+        skillsService.createProjectAndSubjectAndSkills(proj1, proj1Subj1, proj1Subj1Skills)
+
+        skillsService.addTagToSkills(proj1.projectId, [
+                proj1Subj1Skills[0].skillId,
+                proj1Subj1Skills[1].skillId,
+        ], tagValue, tagId)
+
+        List<SkillsService> users = getRandomUsers(10).collect { createService(it)}
+
+        List<Pair> userPoints = []
+        users.eachWithIndex { SkillsService user, int index ->
+            int earnedPoints = 0
+            (index + 1).times {
+                user.addSkill(proj1Subj1Skills[0])
+                earnedPoints += proj1Subj1Skills[0].pointIncrement
+            }
+            String userIdForDisplay = userAttrsRepo.findByUserIdIgnoreCase(user.userName).userIdForDisplay
+            userPoints.add(Pair.of(userIdForDisplay, earnedPoints))
+        }
+        userPoints = userPoints.sort { it.left.toString() }
+        List<Pair> userPointsReversed = userPoints.reverse(false)
+
+        when:
+        def page1Asc = skillsService.getSkillTagUsers(proj1.projectId, tagId, 4, 1, 'userIdForDisplay', true)
+        def page2Asc = skillsService.getSkillTagUsers(proj1.projectId, tagId, 4, 2, 'userIdForDisplay', true)
+        def page3Asc = skillsService.getSkillTagUsers(proj1.projectId, tagId, 4, 3, 'userIdForDisplay', true)
+
+        def page1Desc = skillsService.getSkillTagUsers(proj1.projectId, tagId, 4, 1, 'userIdForDisplay', false)
+        def page2Desc = skillsService.getSkillTagUsers(proj1.projectId, tagId, 4, 2, 'userIdForDisplay', false)
+        def page3Desc = skillsService.getSkillTagUsers(proj1.projectId, tagId, 4, 3, 'userIdForDisplay', false)
+        then:
+        page1Asc.count == 10
+        page1Asc.totalPoints == 2000
+        page1Asc.data.userIdForDisplay == userPoints[0..3].collect { it.left.toString() }
+        page2Asc.data.userIdForDisplay == userPoints[4..7].collect { it.left.toString() }
+        page3Asc.data.userIdForDisplay == userPoints[8..9].collect { it.left.toString() }
+
+        page1Desc.data.userIdForDisplay == userPointsReversed[0..3].collect { it.left.toString() }
+        page2Desc.data.userIdForDisplay == userPointsReversed[4..7].collect { it.left.toString() }
+        page3Desc.data.userIdForDisplay == userPointsReversed[8..9].collect { it.left.toString() }
     }
 }
