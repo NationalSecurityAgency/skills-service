@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, ref, onMounted, provide, inject} from 'vue'
+import {computed, ref, onMounted, provide} from 'vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
