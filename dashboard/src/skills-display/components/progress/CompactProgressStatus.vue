@@ -33,7 +33,7 @@ defineProps({
     <i class="text-surface-600 dark:text-surface-400" :class="iconClass"
        aria-hidden="true"></i>
     <div class="flex gap-1 items-center">
-      <div data-cy="completedNum" class="font-bold text-green-800">{{ nF.pretty(completedNum) }}</div>
+      <div data-cy="completedNum" class="font-bold text-green-800 dark:text-green-400">{{ nF.pretty(completedNum) }}</div>
       <div class="text-surface-500">/</div>
       <div data-cy="totalNum" class="font-semibold text-surface-600 dark:text-surface-400">{{
           nF.pretty(totalNum)
