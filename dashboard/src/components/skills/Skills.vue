@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, ref, onMounted, provide } from 'vue'
+import {computed, ref, onMounted, provide, inject} from 'vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
@@ -41,6 +41,8 @@ const isLoading = computed(() => {
   // return this.loadingSubjectSkills || this.isLoadingProjConfig;
   return false
 })
+
+const skillsTable = ref()
 
 const addSkillDisabled = computed(() => {
   return (subjectState.subject?.numSkills || 0) + (subjectState.subject?.numSkillsReused || 0) >= appConfig.maxSkillsPerSubject;
@@ -86,8 +88,8 @@ const newSkillInfo = ref({
   isGroupEnabled: true,
   version: 1
 })
-const skillSavedCallback = ref(null);
-const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId = null, isGroupEnabled = true, onSkillSavedCallback = null) => {
+
+const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId = null, isGroupEnabled = true) => {
   if (skill.isGroupType) {
     createOrUpdateGroup(skill, isEdit)
   } else {
@@ -98,9 +100,6 @@ const createOrUpdateSkill = (skill = {}, isEdit = false, isCopy = false, groupId
       isCopy,
       groupId,
       isGroupEnabled
-    }
-    if(onSkillSavedCallback) {
-      skillSavedCallback.value = onSkillSavedCallback
     }
   }
 }
@@ -169,13 +168,11 @@ const skillCreatedOrUpdated = (skill) => {
   }
   // attribute based skills should report on new or update operation
   reportSkills(origExistingSkill, createdSkill)
-
   subjectState.loadSubjectDetailsState()
+  skillsTable?.value?.removeSelectedRows()
 
   const msg = skill.type === 'SkillGroup' ? `Group ${skill.name} has been saved` : `Skill ${skill.name} has been saved`
-  if(skillSavedCallback.value) {
-    skillSavedCallback.value(skill)
-  }
+
   announcer.polite(msg)
   return createdSkill
 }
@@ -252,7 +249,7 @@ const skillCreatedOrUpdated = (skill) => {
           v-if="skillsState.loadingSubjectSkills && !skillsState.hasSkills "
           :is-loading="skillsState.loadingSubjectSkills"
           extraClass="py-20 my-0 h-[23rem]" />
-        <skills-table v-if="skillsState.hasSkills" />
+        <skills-table v-if="skillsState.hasSkills" ref="skillsTable" />
         <no-content2
           v-if="!skillsState.loadingSubjectSkills && !skillsState.hasSkills"
           title="No Skills Yet"
