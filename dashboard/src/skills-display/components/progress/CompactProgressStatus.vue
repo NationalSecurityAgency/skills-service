@@ -29,11 +29,11 @@ defineProps({
 </script>
 
 <template>
-  <div class="flex items-center gap-2 px-3 py-1 bg-surface-50 dark:bg-surface-800 rounded-lg border border-surface-200 dark:border-surface-700">
+  <div class="flex items-center gap-2 px-3 py-1 bg-surface-50 dark:bg-surface-800 sd-theme-tile-background-color rounded-lg border border-surface-200 dark:border-surface-700">
     <i class="text-surface-600 dark:text-surface-400" :class="iconClass"
        aria-hidden="true"></i>
     <div class="flex gap-1 items-center">
-      <div data-cy="completedNum" class="font-bold text-primary">{{ nF.pretty(completedNum) }}</div>
+      <div data-cy="completedNum" class="font-bold text-green-800">{{ nF.pretty(completedNum) }}</div>
       <div class="text-surface-500">/</div>
       <div data-cy="totalNum" class="font-semibold text-surface-600 dark:text-surface-400">{{
           nF.pretty(totalNum)
