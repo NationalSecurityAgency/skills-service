@@ -70,7 +70,7 @@ const iconClass = computed(() => {
             </div>
 
             <div class="flex-1 flex flex-col gap-2">
-              <div class="flex items-end gap-1">
+              <div class="flex flex-col md:flex-row md:items-end gap-2 md:gap-1">
                 <div class="flex-1">
                   <router-link
                       v-if="buildLink"
