@@ -64,14 +64,28 @@ const iconClass = computed(() => {
     <Card>
       <template #content>
         <div class="flex flex-col gap-4">
-          <div class="flex items-center gap-3">
+          <div class="flex md:hidden items-start gap-3">
             <div class="border rounded p-3 text-primary">
+              <i :class="iconClass" aria-hidden="true"></i>
+            </div>
+
+            <div class="flex-1">
+              <router-link
+                  v-if="buildLink"
+                  :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('skillTagDetails'), params: { tagId: skillTagOverview.tagId } }"
+                  :data-cy="`tagLink-${skillTagOverview.tagId}`">{{ tagName }}</router-link>
+              <span v-else class="text-3xl" data-cy="skillTagName">{{ tagName }}</span>
+            </div>
+          </div>
+
+          <div class="flex flex-col md:flex-row md:items-center gap-3">
+            <div class="hidden md:block border rounded p-3 text-primary">
               <i :class="iconClass" aria-hidden="true"></i>
             </div>
 
             <div class="flex-1 flex flex-col gap-2">
               <div class="flex flex-col md:flex-row md:items-end gap-2 md:gap-1">
-                <div class="flex-1">
+                <div class="hidden md:block flex-1">
                   <router-link
                       v-if="buildLink"
                       :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('skillTagDetails'), params: { tagId: skillTagOverview.tagId } }"
