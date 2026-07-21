@@ -21,6 +21,7 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
+import CompactProgressStatus from '../../progress/CompactProgressStatus.vue'
 
 const props = defineProps({
   skillTagOverview: Object,
@@ -46,12 +47,14 @@ const tagName = computed(() => {
 
 const skillsAchieved = computed(() => props.skillTagOverview.skillsAchieved || 0)
 const totalSkills = computed(() => props.skillTagOverview.totalSkills || 0)
+const totalPointsEarned = computed(() => props.skillTagOverview.skills.reduce((sum, skill) => { return sum + skill.points }, 0))
+const totalPointsAvailable = computed(() => props.skillTagOverview.skills.reduce((sum, skill) => { return sum + skill.totalPoints }, 0))
 
 const progressPercent = computed(() => {
-  return totalSkills.value > 0 ? Math.trunc((skillsAchieved.value / totalSkills.value) * 100) : 0
+  return totalPointsAvailable.value > 0 ? Math.trunc((totalPointsEarned.value / totalPointsAvailable.value) * 100) : 0
 })
 const iconClass = computed(() => {
-  const color = props.index >= 0 ? colors.getTextClass(props.index): ''
+  const color = props.index >= 0 ? colors.getTextClass(props.index) : ''
   return `fa-solid fa-tag text-4xl ${color}`
 })
 </script>
@@ -61,14 +64,28 @@ const iconClass = computed(() => {
     <Card>
       <template #content>
         <div class="flex flex-col gap-4">
-          <div class="flex items-center gap-3">
+          <div class="flex md:hidden items-start gap-3">
             <div class="border rounded p-3 text-primary">
               <i :class="iconClass" aria-hidden="true"></i>
             </div>
 
+            <div class="flex-1">
+              <router-link
+                  v-if="buildLink"
+                  :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('skillTagDetails'), params: { tagId: skillTagOverview.tagId } }"
+                  :data-cy="`tagLinkSm-${skillTagOverview.tagId}`">{{ tagName }}</router-link>
+              <span v-else class="text-3xl" data-cy="skillTagName">{{ tagName }}</span>
+            </div>
+          </div>
+
+          <div class="flex flex-col md:flex-row md:items-center gap-3">
+            <div class="hidden md:block border rounded p-3 text-primary">
+              <i :class="iconClass" aria-hidden="true"></i>
+            </div>
+
             <div class="flex-1 flex flex-col gap-2">
-              <div class="flex items-end gap-1">
-                <div class="flex-1">
+              <div class="flex flex-col md:flex-row md:items-end gap-2 md:gap-1">
+                <div class="hidden md:block flex-1">
                   <router-link
                       v-if="buildLink"
                       :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('skillTagDetails'), params: { tagId: skillTagOverview.tagId } }"
@@ -76,11 +93,11 @@ const iconClass = computed(() => {
                   <span v-else class="text-3xl" data-cy="skillTagName">{{ tagName }}</span>
                 </div>
 
-                <div data-cy="skillTagProgress">
-                  <span>{{ nF.pretty(skillsAchieved) }}</span>
-                  /
-                  <span>{{ nF.pretty(totalSkills) }}</span>
-                  {{ attributes.skillDisplayNamePlural }}
+                <div data-cy="skillTagProgress" class="flex flex-col md:flex-row gap-3 flex-wrap">
+                  <compact-progress-status :completed-num="skillsAchieved" :total-num="totalSkills"
+                                           :label="attributes.skillDisplayNamePlural" data-cy="skillsAchievedProgress"/>
+                  <compact-progress-status :completed-num="totalPointsEarned" :total-num="totalPointsAvailable" icon-class="fa-solid fa-circle-arrow-up"
+                                           :label="attributes.pointDisplayNamePlural" data-cy="pointsEarnedProgress"/>
                 </div>
               </div>
 
@@ -98,8 +115,8 @@ const iconClass = computed(() => {
               </div>
               <div v-else>
                 <vertical-progress-bar
-                  :total-progress="progressPercent"
-                  :disable-daily-color="true" />
+                    :total-progress="progressPercent"
+                    :disable-daily-color="true"/>
               </div>
             </div>
           </div>
