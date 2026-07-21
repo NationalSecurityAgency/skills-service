@@ -14,20 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import UsersTableMetric from "@/components/metrics/userTags/UsersTableMetric.vue";
 
-import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
-import NoContent2 from "@/components/utils/NoContent2.vue";
 </script>
 
 <template>
-  <div>
-    <sub-page-header title="Users"/>
-    <Card>
-      <template #content>
-        <no-content2 title="Coming Soon!" class="my-10"/>
-      </template>
-    </Card>
-  </div>
+  <users-table-metric title="Users" />
 </template>
 
 <style scoped>

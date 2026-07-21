@@ -1271,6 +1271,11 @@ class SkillsService {
         return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}&userTagFilter=${userTagFilter}&includeImported=${includeImported}".toString())
     }
 
+    def getSkillTagUsers(String projectId, String tagId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = '', boolean includeImported = true) {
+        String url = "/projects/${projectId}/skills/tags/${tagId}/users".toString()
+        return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}&userTagFilter=${userTagFilter}&includeImported=${includeImported}".toString())
+    }
+
     def getBadgeUsers(String projectId, String badgeId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = '', boolean includeImported = true) {
         return wsHelper.adminGet("${getBadgeUrl(projectId, badgeId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}${userTagFilter ? '&userTagFilter='+userTagFilter : ''}&includeImported=${includeImported}".toString())
     }

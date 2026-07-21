@@ -669,7 +669,7 @@ const routes = [
       },
     }, {
       name: 'SkillTagUsers',
-      path: '',
+      path: 'users',
       component: SkillTagUsers,
       meta: {
         requiresAuth: true,

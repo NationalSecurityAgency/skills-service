@@ -1617,7 +1617,7 @@ Cypress.Commands.add('addUserTag', (userTags) => {
 
             const userIdsWithAssociatedTags = []
             userTags.forEach((element, index) => {
-                const userId =  `user${index + 1}`;
+                const userId =  element.userId || `user${index + 1}`;
                 cy.register(userId, 'password');
                 cy.log(`Registered [${userId}] user`);
                 userIdsWithAssociatedTags.push({
