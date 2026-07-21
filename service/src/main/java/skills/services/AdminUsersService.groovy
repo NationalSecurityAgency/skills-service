@@ -184,6 +184,7 @@ class AdminUsersService {
         if (!tagId) {
             return TableResultWithTotalPoints.EMPTY
         }
+        tagId = tagId.toLowerCase()
         query = query ? query.trim() : ''
         Integer totalPoints = skillDefRepo.getTotalPointsForTag(projectId, tagId, includeImported) ?: 0
         Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)

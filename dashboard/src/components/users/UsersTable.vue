@@ -400,7 +400,7 @@ const tableStoredStateId = computed(() => {
             <span class="mr-1 lg:mr-0 lg:hidden"><i class="fas fa-check-double" aria-hidden="true"></i> Select Rows:</span>
           </template>
         </Column>
-        <Column field="userId" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
+        <Column field="userIdForDisplay" header="User" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="fas fa-user skills-color-users mr-1" :class="colors.getTextClass(1)" aria-hidden="true"></i>
           </template>

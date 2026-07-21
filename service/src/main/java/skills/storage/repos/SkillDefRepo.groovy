@@ -838,19 +838,18 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
     Integer getTotalPointsByProjectIdAndSkillId(String projectId, String skillId)
 
     @Nullable
-    @Query('''SELECT sum(skillDef.totalPoints) 
-        FROM SkillDef tagDef 
-            join SkillRelDef rel on (rel.parent.id = tagDef.id and rel.type = RelationshipType.Tag)
-            join SkillDef skillDef on(
-                rel.child.id = skillDef.id 
-                and rel.type = RelationshipType.Tag 
-                and skillDef.type = ContainerType.Skill
-                and (:includeImported = true OR skillDef.copiedFrom is null )
-            ) 
-        WHERE 
-            tagDef.projectId = :projectId
-            and tagDef.skillId in :tagId
-    ''')
+    @Query(value = '''SELECT sum(skill_def.total_points) 
+        FROM skill_definition tag_def
+            join skill_relationship_definition rel on (rel.parent_ref_id = tag_def.id and rel.type = 'Tag')
+            join skill_definition skill_def on (
+                rel.child_ref_id = skill_def.id 
+                and rel.type = 'Tag'
+                and skill_def.type = 'Skill'
+                and (:includeImported = true OR skill_def.copied_from_skill_ref is null)
+            )
+        WHERE tag_def.project_id = :projectId
+            and tag_def.skill_id = :tagId
+    ''', nativeQuery = true)
     Integer getTotalPointsForTag(@Param("projectId") String projectId, @Param("tagId") String tagId, @Param("includeImported") Boolean includeImported)
 
     @Nullable

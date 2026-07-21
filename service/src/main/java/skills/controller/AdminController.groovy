@@ -1931,7 +1931,7 @@ class AdminController {
                                    @RequestParam(required = false, defaultValue = "true") boolean includeImported,
                                    @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        SkillsValidator.isNotBlank(tagId, "Skills Group Id", tagId)
+        SkillsValidator.isNotBlank(tagId, "Tag Id", tagId)
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
         SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
 
