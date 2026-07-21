@@ -566,7 +566,7 @@ class QuizDefService {
                 // find questions awaiting grading
                 boolean hasOutstandingGrades = hasUngradedQuestions(quizDef.quizId, existingQuestion.id)
                 if(hasOutstandingGrades) {
-                    throw new SkillQuizException("Not allowed to change a skill when there are attempts awaiting grading", quizDef.quizId, ErrorCode.InternalError)
+                    throw new SkillQuizException("Not allowed to change a question's QuestionType when there are attempts awaiting grading", quizDef.quizId, ErrorCode.InternalError)
                 }
             }
             savedQuestion = updateQuizQuestionDef(quizId, existingQuestionId, questionDefRequest)

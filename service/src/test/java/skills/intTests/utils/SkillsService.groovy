@@ -2132,6 +2132,10 @@ class SkillsService {
         String url = "${getQuizDefUrl(quizId)}/questions/${questionRefId}"
         return wsHelper.adminDelete(url)
     }
+    def getQuizGrading(String quizId, Integer questionId) {
+        String url = "${getQuizDefUrl(quizId)}/questions/${questionId}/gradingStatus";
+        return wsHelper.adminGet(url)
+    }
     def copyQuiz(String quizId, Map props) {
          String url = "${getQuizDefUrl(quizId)}/copy"
          wsHelper.adminPost(url, props)
