@@ -24,6 +24,10 @@ import BadgeHeaderIcons from '@/skills-display/components/badges/BadgeHeaderIcon
 import ExtraBadgeAward from '@/skills-display/components/badges/ExtraBadgeAward.vue'
 import HighlightedValue from '@/components/utils/table/HighlightedValue.vue'
 import {useRoute} from "vue-router";
+import {
+  calculateBadgeCompletionPercentByOccurrences,
+  calculateBadgeCompletionPercentByWholeSkills
+} from '@/skills-display/components/badges/BadgeProgressUtil.js'
 
 const props = defineProps({
   badge: {
@@ -51,12 +55,20 @@ const props = defineProps({
 const timeUtils = useTimeUtils()
 const route = useRoute()
 const iconCss = computed(() => `${props.badge.iconClass} ${props.iconColor}`)
-const percent = computed(() => {
-  if (props.badge.numTotalSkills === 0) {
-    return 0
+// The Badges summary pages under /progress-and-rankings (the "Local" route tree)
+// and the My Badges page keep the whole-skill calculation. Everywhere else the
+// Global Badge and Project Badge details pages use the occurrences calculation
+// so partial progress is reflected without high-point skills skewing the result.
+const useWholeSkillsPercent = computed(() => {
+  const routeName = route?.name
+  if (!routeName) {
+    return false
   }
-  return Math.trunc((props.badge.numSkillsAchieved / props.badge.numTotalSkills) * 100)
+  return routeName === 'MyBadges' || `${routeName}`.endsWith('Local')
 })
+const percent = computed(() => (useWholeSkillsPercent.value
+  ? calculateBadgeCompletionPercentByWholeSkills(props.badge)
+  : calculateBadgeCompletionPercentByOccurrences(props.badge)))
 
 const showHeader = computed(() => props.badge.gem || props.badge.global)
 const iconCardPt = computed(() => {
