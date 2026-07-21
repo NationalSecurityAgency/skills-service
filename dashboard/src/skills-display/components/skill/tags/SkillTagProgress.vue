@@ -73,7 +73,7 @@ const iconClass = computed(() => {
               <router-link
                   v-if="buildLink"
                   :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('skillTagDetails'), params: { tagId: skillTagOverview.tagId } }"
-                  :data-cy="`tagLink-${skillTagOverview.tagId}`">{{ tagName }}</router-link>
+                  :data-cy="`tagLinkSm-${skillTagOverview.tagId}`">{{ tagName }}</router-link>
               <span v-else class="text-3xl" data-cy="skillTagName">{{ tagName }}</span>
             </div>
           </div>
