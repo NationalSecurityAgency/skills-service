@@ -851,7 +851,7 @@ describe('Skills Table Tests', () => {
   })
 
 
-  it('deleting a selected skill updates the count appropriately', () => {
+  it('deleting a selected skill clears the selected skills', () => {
     const numSkills = 3
     for (let skillsCounter = 1; skillsCounter <= numSkills; skillsCounter += 1) {
       cy.request('POST', `/admin/projects/proj1/subjects/subj1/skills/skill${skillsCounter}`, {
@@ -878,7 +878,7 @@ describe('Skills Table Tests', () => {
     cy.get('[data-cy=saveDialogBtn]').click()
 
     cy.get('[data-cy="skillActionsBtn"] [data-cy="skillActionsNumSelected"]')
-        .should('have.text', 2);
+        .should('have.text', 0);
 
   })
 })

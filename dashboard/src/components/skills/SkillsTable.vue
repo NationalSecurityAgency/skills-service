@@ -216,7 +216,7 @@ const onFilter = (filterEvent) => {
   if (filterEvent.filters?.global?.value) {
     reorderEnable.value = false
     announcer.polite(`Filtered by ${filterEvent.filters?.global?.value} and returned ${filterEvent.filteredValue.length} results`)
-                         }
+  }
 }
 
 const selectedRows = ref([])
@@ -279,7 +279,7 @@ const doDeleteSkill = () => {
       for (let i = 0; i < skills.length; i++) {
         skills[i].displayOrder = i + 1
       }
-      selectedRows.value = selectedRows.value.filter((item) => item.skillId !== skill.skillId)
+      removeSelectedRows()
       if (skill.groupId) {
         subjectSkillsState.setGroupSkills(skill.groupId, skills)
         const totalPoints = skills
@@ -485,7 +485,6 @@ const removeSelectedRows = () => {
   selectedRows.value = []
 }
 
-
 const editImportedSkillInfo = ref({
   show: false,
   skill: {}
@@ -567,6 +566,10 @@ const onRowExpand = () => {
 const pageChanged = (pagingInfo) => {
   pageSize.value = pagingInfo.rows
 }
+
+defineExpose({
+  removeSelectedRows
+})
 </script>
 
 <template>
