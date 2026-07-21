@@ -569,4 +569,11 @@ class QuizController {
         return openAIService.gradeTextInputQuizAnswer(questionDef.question, textInputAIGradingRequest.correctAnswer, textInputAIGradingRequest.minimumConfidenceLevel, textInputAIGradingRequest.studentAnswer)
     }
 
+    @RequestMapping(value = "/{quizId}/questions/{questionId}/gradingStatus", method = RequestMethod.GET, produces = "application/json")
+    RequestResult getGradingStatus(@PathVariable("quizId") String quizId, @PathVariable("questionId") Integer questionId) {
+        QuizValidator.isNotBlank(quizId, "Quiz Id")
+        QuizValidator.isNotNull(questionId, "Question Id")
+
+        return new RequestResult(success: true, data: [ hasPendingGrades: quizDefService.hasUngradedQuestions(questionId) ])
+    }
 }

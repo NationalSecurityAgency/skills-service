@@ -24,6 +24,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  }
 })
 const model = defineModel()
 const emit = defineEmits(['selection-changed'])
@@ -37,6 +41,7 @@ function questionTypeChanged(inputItem) {
   <SkillsDropDown
       :name="name"
       :data-cy="dataCy"
+      :disabled="disabled"
       v-model="model"
       aria-label="Selection Question Type"
       @update:modelValue="questionTypeChanged"

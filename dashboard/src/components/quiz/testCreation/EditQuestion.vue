@@ -48,6 +48,7 @@ const loadingComponent = ref(false)
 const currentScaleOptions = ref([3, 4, 5, 6, 7, 8, 9, 10])
 const answersRef = ref(null)
 const showHint = ref(false)
+const editTypeDisabled = ref(false);
 
 const modalTitle = computed(() => {
   if( props.isEdit ) {
@@ -66,6 +67,13 @@ onMounted(() => {
   }
   if (props.isEdit || props.isCopy) {
     questionType.value.selectedType = questionType.value.options.find((o) => o.id === props.questionDef.questionType)
+    if (props.isEdit) {
+      loadingComponent.value = true;
+      QuizService.getGradingStatus(props.questionDef.quizId, props.questionDef.id).then((gradingStatus) => {
+        editTypeDisabled.value = gradingStatus.data.hasPendingGrades;
+        loadingComponent.value = false;
+      })
+    }
   }
   if (isQuizType.value && props.questionDef.answerHint) {
     showHint.value = true;
@@ -440,6 +448,7 @@ const startAiAssistant = () => {
           v-if="showGenQDialog"
           ref="generateDescriptionDialogRef"
           v-model="showGenQDialog"
+          :edit-type-disabled="editTypeDisabled"
           :question-type="questionType"
           :existing-question="existingQuestionInfo"
           @question-generated="onQuestionGenerated"
@@ -488,9 +497,11 @@ const startAiAssistant = () => {
         <span class="font-bold text-primary">Answers</span>
       </div>
       <div class="mb-2">
+        <Message v-if="editTypeDisabled" class="mb-2" severity="error" data-cy="disabledMsg" :closable="false">The question type can not be changed as there are currently answers to this question waiting to be graded</Message>
         <question-type-drop-down
             name="questionType"
             data-cy="answerTypeSelector"
+            :disabled="editTypeDisabled"
             v-model="questionType.selectedType"
             :options="questionType.options"
             @selection-changed="questionTypeChanged"

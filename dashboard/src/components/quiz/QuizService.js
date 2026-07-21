@@ -194,5 +194,10 @@ export default {
     return axios
         .post(`/admin/quiz-definitions/${encodeURIComponent(quizId)}/testTextInputAiGrading/${questionId}`, attrs, { handleError: false })
         .then((response) => response.data)
-  }
+  },
+  getGradingStatus(quizId, questionId) {
+    return axios
+        .get(`/admin/quiz-definitions/${quizId}/questions/${questionId}/gradingStatus`)
+        .then((response) => response.data)
+  },
 }

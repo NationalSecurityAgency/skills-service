@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
+import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.SkillDef
 import skills.storage.repos.QuizQuestionDefRepo
@@ -821,6 +822,108 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         quizDefs.name == ["Test & Quiz"]
         quizDef.name == "Test & Quiz"
         quizDefSummary.name == "Test & Quiz"
+    }
+
+    def "update question definition - can not change question type from TextInput when grades are pending"() {
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questionDef = QuizDefFactory.createTextInputQuestion(1, 1)
+        def q1 = skillsService.createQuizQuestionDef(questionDef).body
+
+        String quizId = quiz.quizId
+        def quizAttempt =  skillsService.startQuizAttempt(quizId).body
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: "answer"])
+        skillsService.completeQuizAttempt(quizId, quizAttempt.id)
+
+        q1.quizId = quizId
+        q1.questionType = QuizQuestionType.MultipleChoice.toString()
+        q1.answers = [
+                [isCorrect: true, answer: 'abc'],
+                [isCorrect: true, answer: 'def'],
+                [isCorrect: false, answer: 'ghi'],
+        ]
+
+        when:
+        skillsService.updateQuizQuestionDef(q1)
+
+        then:
+        SkillsClientException e = thrown()
+        e.message.contains( "Not allowed to change a question's QuestionType when there are attempts awaiting grading")
+
+    }
+
+    def "update question definition - can change question type from TextInput after question is graded"() {
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questionDef = QuizDefFactory.createTextInputQuestion(1, 1)
+        def q1 = skillsService.createQuizQuestionDef(questionDef).body
+
+        String quizId = quiz.quizId
+        def quizAttempt =  skillsService.startQuizAttempt(quizId).body
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: "answer"])
+        skillsService.completeQuizAttempt(quizId, quizAttempt.id)
+
+        def q1Status = skillsService.getQuizGrading(quizId, q1.id)
+        assert q1Status.data.hasPendingGrades == true
+
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer")
+
+        q1Status = skillsService.getQuizGrading(quizId, q1.id)
+        assert q1Status.data.hasPendingGrades == false
+
+        q1.quizId = quizId
+        q1.questionType = QuizQuestionType.MultipleChoice.toString()
+        q1.answers = [
+                [isCorrect: true, answer: 'abc'],
+                [isCorrect: true, answer: 'def'],
+                [isCorrect: false, answer: 'ghi'],
+        ]
+
+        when:
+        def updated = skillsService.updateQuizQuestionDef(q1).body
+
+        then:
+        updated
+        updated.id == q1.id
+        updated.questionType == QuizQuestionType.MultipleChoice.toString()
+    }
+
+    def "pending quiz grade does not impact other TextInput questions"() {
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def questionDef = QuizDefFactory.createTextInputQuestion(1, 1)
+        def q1 = skillsService.createQuizQuestionDef(questionDef).body
+        def question2Def = QuizDefFactory.createTextInputQuestion(1, 2)
+        def q2 = skillsService.createQuizQuestionDef(question2Def).body
+        def question3Def = QuizDefFactory.createTextInputQuestion(1, 3)
+        def q3 = skillsService.createQuizQuestionDef(question3Def).body
+
+        String quizId = quiz.quizId
+        def quizAttempt =  skillsService.startQuizAttempt(quizId).body
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText: "answer"])
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText: "answer"])
+        skillsService.reportQuizAnswer(quizId, quizAttempt.id, quizAttempt.questions[2].answerOptions[0].id, [isSelected: true, answerText: "answer"])
+        skillsService.completeQuizAttempt(quizId, quizAttempt.id)
+
+        when:
+        def q1Status = skillsService.getQuizGrading(quizId, q1.id)
+        def q2Status = skillsService.getQuizGrading(quizId, q2.id)
+        def q3Status = skillsService.getQuizGrading(quizId, q3.id)
+        skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, true, "Good answer")
+        def q1StatusUpdated = skillsService.getQuizGrading(quizId, q1.id)
+        def q2StatusUpdated = skillsService.getQuizGrading(quizId, q2.id)
+        def q3StatusUpdated = skillsService.getQuizGrading(quizId, q3.id)
+
+        then:
+        q1Status.data.hasPendingGrades == true
+        q2Status.data.hasPendingGrades == true
+        q3Status.data.hasPendingGrades == true
+        q1StatusUpdated.data.hasPendingGrades == true
+        q2StatusUpdated.data.hasPendingGrades == false
+        q3StatusUpdated.data.hasPendingGrades == true
     }
 }
 
