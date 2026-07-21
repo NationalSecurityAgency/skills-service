@@ -574,6 +574,6 @@ class QuizController {
         QuizValidator.isNotBlank(quizId, "Quiz Id")
         QuizValidator.isNotNull(questionId, "Question Id")
 
-        return new RequestResult(success: true, data: [ hasPendingGrades: quizDefService.hasUngradedQuestions(quizId, questionId) ])
+        return new RequestResult(success: true, data: [ hasPendingGrades: quizDefService.hasUngradedQuestions(questionId) ])
     }
 }

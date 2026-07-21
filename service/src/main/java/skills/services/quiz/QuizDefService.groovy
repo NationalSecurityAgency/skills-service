@@ -564,7 +564,7 @@ class QuizDefService {
             def existingQuestion = getQuestionDef(quizId, existingQuestionId)
             if(existingQuestion.questionType == QuizQuestionType.TextInput && questionDefRequest.questionType !== existingQuestion.questionType) {
                 // find questions awaiting grading
-                boolean hasOutstandingGrades = hasUngradedQuestions(quizDef.quizId, existingQuestion.id)
+                boolean hasOutstandingGrades = hasUngradedQuestions(existingQuestion.id)
                 if(hasOutstandingGrades) {
                     throw new SkillQuizException("Not allowed to change a question's QuestionType when there are attempts awaiting grading", quizDef.quizId, ErrorCode.InternalError)
                 }
@@ -583,8 +583,8 @@ class QuizDefService {
         return convert(savedQuestion, savedAnswers)
     }
 
-    boolean hasUngradedQuestions(String quizId, Integer questionId) {
-        return userQuizAnswerAttemptRepo.hasUngradedQuestions(quizId, questionId)
+    boolean hasUngradedQuestions(Integer questionId) {
+        return userQuizAnswerAttemptRepo.hasUngradedQuestions(questionId)
     }
 
     void addSavedQuestionUserAction(String quizId, QuizQuestionDef savedQuestion, List<QuizAnswerDef> savedAnswers, boolean isEdit = false) {
