@@ -68,8 +68,10 @@ onMounted(() => {
   if (props.isEdit || props.isCopy) {
     questionType.value.selectedType = questionType.value.options.find((o) => o.id === props.questionDef.questionType)
     if (props.isEdit) {
+      loadingComponent.value = true;
       QuizService.getGradingStatus(props.questionDef.quizId, props.questionDef.id).then((gradingStatus) => {
         editTypeDisabled.value = gradingStatus.data.hasPendingGrades;
+        loadingComponent.value = false;
       })
     }
   }
