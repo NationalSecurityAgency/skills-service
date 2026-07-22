@@ -33,10 +33,13 @@ import LoadingContainer from '@/components/utils/LoadingContainer.vue'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useStorage} from "@vueuse/core";
 import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
+import ContactProjectAdminsDialog from "@/components/contact/ContactProjectAdminsDialog.vue";
+import {useAppInfoState} from "@/stores/UseAppInfoState.js";
 
 const route = useRoute()
 const userInfo = useUserInfo()
 const appConfig = useAppConfig()
+const appInfoState = useAppInfoState()
 const responsive = useResponsiveBreakpoints()
 const skillRouteUtil = useSkillOverviewRouteUtil()
 
@@ -116,6 +119,16 @@ const toRouteProps = (skill) => {
   return { name: routeProps.name, params: routeProps.params }
 }
 
+const contactModal = ref({
+  show: false,
+  projectId: null,
+  projectName: null
+})
+const contactProject = (name, id) => {
+  contactModal.value.projectName = name
+  contactModal.value.projectId = id
+  contactModal.value.show = true
+}
 </script>
 
 <template>
@@ -191,6 +204,17 @@ const toRouteProps = (skill) => {
                     </div>
                     <div v-else>
                       {{ slotProps.data.projectId }}
+                        <SkillsButton
+                            v-if="appInfoState.emailEnabled"
+                            label="Contact"
+                            icon="fas fas fa-mail-bulk"
+                            outlined
+                            class="ml-2"
+                            severity="info"
+                            :aria-label="`Contact ${slotProps.data.name} project owner`"
+                            size="small"
+                            @click="contactProject(slotProps.data.name, slotProps.data.projectId)"
+                            :data-cy="`contactOwnerBtn_${ slotProps.data.projectId }`"/>
                     </div>
                   </div>
                   <div v-else-if="slotProps.field === 'skillName'">
@@ -221,6 +245,12 @@ const toRouteProps = (skill) => {
             </a>
           </NoContent2>
         </LoadingContainer>
+
+        <contact-project-admins-dialog
+            v-if="contactModal.show && appInfoState.emailEnabled"
+            v-model="contactModal.show"
+            :projectId="contactModal.projectId"
+            :use-project-id-as-name="true"/>
       </template>
     </Card>
   </div>
