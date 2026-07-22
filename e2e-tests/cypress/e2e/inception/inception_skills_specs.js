@@ -589,7 +589,7 @@ describe('Inception Skills Tests', () => {
         cy.createSkill(1, 1, 1);
         cy.addTagToSkills(1, [], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.get('[data-cy="noContent"]').contains('No Skills Added Yet...')
 
         cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 0)
@@ -606,7 +606,7 @@ describe('Inception Skills Tests', () => {
 
         cy.addTagToSkills(1, ['skill1'], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
 
         cy.get('[data-cy="deleteSkill_skill1"]').click()
         cy.get('[data-p="modal"]').contains('Are you sure you want to remove Skill "Very Great Skill 1" from Tag "TAG 1"?')

@@ -33,6 +33,7 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 
 const idsToExcludeFromPath = ['subjects', 'skills', 'projects', 'crossProject', 'dependency', 'global', 'groups']
 const keysToExcludeFromPath = ['questions']
+const labelsMapping = new Map([['skill-tag', 'Tag']])
 
 const build = () => {
   handleCustomLabels().then(() => {
@@ -216,7 +217,11 @@ const prepKey = (key) => {
     res = key.endsWith('s') ? key.substring(0, key.length - 1) : key
   }
 
+  res = applyMapping(res)
   return capitalize(substituteCustomLabels(res))
+}
+const applyMapping = (label) => {
+  return labelsMapping.get(label.toLowerCase()) || label
 }
 const substituteCustomLabels = (label) => {
   if (label.toLowerCase() === 'project') {

@@ -77,7 +77,7 @@ const isSubmitting = useIsSubmitting()
 </script>
 
 <template>
-  <div :class="{ 'flex flex-wrap md:flex-nowrap' : isInline }">
+  <div :class="{ 'flex flex-wrap md:flex-nowrap' : isInline, 'flex flex-col gap-2' : !isInline }">
     <div :class="{ 'md:mr-1 flex-1' : isInline }">
       <div class="flex gap-4 flex-col sm:flex-row">
         <slot name="beforeName"></slot>

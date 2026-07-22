@@ -66,7 +66,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="flex flex-col gap-2">
+  <div class="flex flex-col gap-1">
     <label for="idInput">* {{ label }}</label>
     <InputGroup>
       <InputGroupAddon>

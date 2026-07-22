@@ -364,14 +364,15 @@ export default {
       })
       .then((res) => res.data)
   },
-  addTagToSkills(projectId, skillIds, tagId, tagValue) {
+  addTagToSkills(projectId, skillIds, tagId, tagValue, origTagId=null) {
     // const tagId = this.getTagIdFromValue(tagValue);
     const url = `/admin/projects/${encodeURIComponent(projectId)}/skills/tag`
     return axios
       .post(url, {
         tagId,
+        origTagId,
         tagValue,
-        skillIds
+        skillIds,
       })
       .then((res) => res.data)
   }

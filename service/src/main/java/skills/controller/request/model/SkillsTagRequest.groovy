@@ -22,6 +22,7 @@ import groovy.transform.ToString
 @ToString(includePackage = false)
 class SkillsTagRequest {
     String tagId
+    String origTagId
     String tagValue
     List<String> skillIds
 }

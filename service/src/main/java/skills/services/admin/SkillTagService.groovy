@@ -65,7 +65,13 @@ class SkillTagService {
     void addTag(String projectId, SkillsTagRequest skillsTagRequest) {
         lockingService.lockProject(projectId)
         SkillDef.ContainerType type = SkillDef.ContainerType.Tag
-        SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillsTagRequest.tagId, type)
+
+        if (skillsTagRequest.tagId && !skillsTagRequest.tagId.matches(/^[a-zA-Z0-9]+$/)) {
+            throw new SkillException("Tag ID [${skillsTagRequest.tagId}] may only contain alphanumeric characters", projectId, skillsTagRequest.tagId, ErrorCode.BadParam)
+        }
+
+        String currentTagId = skillsTagRequest.origTagId ?: skillsTagRequest.tagId
+        SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, currentTagId, type)
 
         if (!skillDefinition) {
             ProjDef projDef = projDefAccessor.getProjDef(projectId)
@@ -85,8 +91,13 @@ class SkillTagService {
             }
             log.debug("Saved [{}]", savedSkill)
         } else {
-            if (skillsTagRequest.tagValue && skillsTagRequest.tagValue != skillDefinition.name) {
+            boolean isTagValueDifferent = skillsTagRequest.tagValue && skillsTagRequest.tagValue != skillDefinition.name
+            boolean isTagIdDifferent = skillsTagRequest.tagId != skillDefinition.skillId
+            if (isTagValueDifferent || isTagIdDifferent) {
                 skillDefinition.name = skillsTagRequest.tagValue
+                if (isTagIdDifferent) {
+                    skillDefinition.skillId = skillsTagRequest.tagId
+                }
                 SkillDefWithExtra savedSkill
                 DataIntegrityExceptionHandlers.tagDataIntegrityViolationExceptionHandler.handle(projectId) {
                     savedSkill = skillDefWithExtraRepo.save(skillDefinition)

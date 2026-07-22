@@ -17,7 +17,7 @@ limitations under the License.
 import ProjectPageHeader from "@/components/utils/pages/ProjectPageHeader.vue";
 import {computed, onMounted, ref, watch} from "vue";
 import {useSingleSkillTagState} from "@/stores/UseSingleSkillTagState.js";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import Navigation from "@/components/utils/Navigation.vue";
 import CreateTagDialog from "@/components/skills/tags/CreateTagDialog.vue";
 import {useProjConfig} from "@/stores/UseProjConfig.js";
@@ -25,10 +25,10 @@ import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnounc
 
 const skillTagState = useSingleSkillTagState()
 const route = useRoute()
+const router = useRouter()
 const projConf = useProjConfig()
 const announcer = useSkillsAnnouncer()
 
-const tagId = route.params.tagId.toString()
 const navItems = computed(() => {
   return [
     { name: 'Tagged Skills', iconClass: 'fa-graduation-cap', page: 'SkillTagSkills' },
@@ -37,7 +37,7 @@ const navItems = computed(() => {
 })
 
 onMounted(() => {
-  skillTagState.loadSkillTagInfo(route.params.projectId, tagId)
+  skillTagState.loadSkillTagInfo(route.params.projectId, route.params.tagId)
 })
 
 watch(() => route.params.tagId, (newTagId) => {
@@ -66,6 +66,17 @@ const editExistingTag = () => {
 const onTagEdited = (newTag) => {
   skillTagState.skillTag.tagValue = newTag.tagValue
   announcer.polite(`Changed tag to ${newTag.tagValue}`)
+
+  const origId = route.params.tagId.toString().toLowerCase()
+  const newTagId = newTag.tagId.toString().toLowerCase()
+  if (origId !== newTagId) {
+    router.replace({
+      name: route.name,
+      params: { ...route.params, tagId: newTagId },
+      query: { preventReload: true }
+    })
+    skillTagState.loadSkillTagInfo(route.params.projectId, newTagId)
+  }
 }
 </script>
 
@@ -75,7 +86,7 @@ const onTagEdited = (newTag) => {
       <template #subSubTitle>
         <div class="mt-2">
           <SkillsButton v-if="!projConf.isReadOnlyProj"
-                        :id="`editTag_${tagId}`"
+                        :id="`editTag_${route.params.tagId}`"
                         @click="editExistingTag()"
                         label="Edit Tag"
                         icon="fa-solid fa-edit"
@@ -95,7 +106,7 @@ const onTagEdited = (newTag) => {
         v-if="!projConf.isReadOnlyProj && showSkillTagDialog"
         id="addSkillsToBadgeModal"
         v-model="showSkillTagDialog"
-        :tag-id-to-edit="tagId"
+        :tag-id-to-edit="route.params.tagId"
         @added-tag="onTagEdited"
     />
   </div>
