@@ -189,12 +189,7 @@ class ProjectCopyService {
 
         List<SkillIdAndName> itemsToCheck = itemsToCopy.collect { new SkillIdAndName(skillId: it.skillId, skillName: it.name, description: it.description) }
         List<String> validationErrors = checkForSkillIdAndNameCollisions(itemsToCheck, otherProjectId, projectId)
-        if (otherSubject && !Boolean.valueOf(otherSubject.enabled)) {
-            List<String> enabledSkillIds = itemsToCopy.findAll { Boolean.valueOf(it.enabled) }.collect { it.skillId }
-            if (enabledSkillIds) {
-                validationErrors.add("The following Skills are enabled and cannot be added to the destination subject because it is currently disabled: ${enabledSkillIds.sort().subList(0, Math.min(enabledSkillIds.size(), 10)).join(", ")}.".toString())
-            }
-        }
+
         int currentSubjectSkillCount = skillRelDefRepo.countSubjectSkillsIncDisabled(otherSubject.projectId, otherSubject.skillId)
         if (currentSubjectSkillCount + itemsToCopy?.size() > maxSkillsPerSubject) {
             validationErrors.add(("Each Subject is limited to [${maxSkillsPerSubject}] Skills, " +
@@ -229,9 +224,8 @@ class ProjectCopyService {
 
             List<SkillDefWithExtra> skillDefs = getSkillsToCopy(projectId, skillIds)
             if (!Boolean.valueOf(destinationSubject.enabled)) {
-                List<SkillDefWithExtra> enabledSkills = skillDefs.findAll { Boolean.valueOf(it.enabled) }
-                if (enabledSkills) {
-                    throw new SkillException("Can't copy enabled skills into a disabled subject, following skills are enabled: ${enabledSkills.collect { it.skillId }.sort()}", projectId, null, ErrorCode.BadParam)
+                skillDefs.forEach {
+                    it.enabled = false;
                 }
             }
 
