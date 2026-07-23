@@ -29,6 +29,8 @@ import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import SkillsService from '@/components/skills/SkillsService.js'
 import SkillsNameAndIdInput from "@/components/utils/inputForm/SkillsNameAndIdInput.vue";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
+import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 
 const model = defineModel()
 const emit = defineEmits(['added-tag'])
@@ -46,11 +48,15 @@ const appConfig = useAppConfig()
 const route = useRoute()
 const skillsState = useSubjectSkillsState()
 const focusState = useFocusState()
+const pluralize = usePluralize()
+const numberFormat = useNumberFormat()
+
 const schema = object({
   'tagValue': string()
-    .trim()
-    .max(appConfig.maxSkillTagLength)
-    .label('Tag'),
+      .trim()
+      .noHtml()
+      .max(appConfig.maxSkillTagLength)
+      .label('Tag'),
   'tagId': string()
       .trim()
       .matches(/^[a-zA-Z0-9]*$/, ({label}) => `${label} may only contain alpha-numeric characters`)
@@ -59,7 +65,7 @@ const schema = object({
   'existingTag': object()
     .test(
     'existingOrNewTagMustBePresent',
-    () => 'New or existing tag must be supplied',
+    () => 'Existing tag must be supplied',
     async (value, testContext) => {
       return value?.tagId || (testContext.parent.tagValue && testContext.parent.tagId)
     }
@@ -89,6 +95,7 @@ const loadExistingTags = () => {
       return {}
     })
 }
+const hasExistingTags = computed(() => existingTags.value.length > 0)
 const initialData = {
   'tagValue': '',
   'tagId': '',
@@ -134,15 +141,24 @@ const afterSave = (taggedInfo) => {
     :enable-input-form-resiliency="false"
     data-cy="addSkillTagDialog"
   >
-    <Tabs v-model:value="currentTab">
+    <p class="text-xl pb-3" data-cy="instructionsMsg">To tag
+      <Tag>{{ numberFormat.pretty(skills.length) }}</Tag>
+      selected {{ pluralize.plural('skill', skills.length) }}, please select an existing tag or create a new one:
+    </p>
+    <Tabs v-model:value="currentTab" class="mx-2">
       <TabList >
-        <Tab :value="existingTagTabId">Select Existing Tag</Tab>
-        <Tab :value="newTagTabId">Create New Tag</Tab>
+        <Tab :value="existingTagTabId"><i class="fa-solid fa-list-check" aria-hidden="true"></i> Select Existing Tag</Tab>
+        <Tab :value="newTagTabId"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Create New Tag</Tab>
       </TabList>
       <TabPanels>
         <TabPanel :value="existingTagTabId">
           <div class="p-5">
+            <Message
+                v-if="!hasExistingTags"
+                data-cy="noTagsMessage"
+                :closable="false">No tags have been created yet. Please create a new tag using the "Create New Tag" tab.</Message>
             <SkillsDropDown
+                v-if="hasExistingTags"
                 label="Existing Tag"
                 :options="existingTags"
                 optionLabel="tagValue"

@@ -99,6 +99,7 @@ const schema = object({
           ({label}) => `${label} needs to be different`,
           async (value, context) => tagValueDifferentDuringEdit(value, context)
       )
+      .noHtml()
       .label('Tag'),
   'tagId': string()
       .trim()

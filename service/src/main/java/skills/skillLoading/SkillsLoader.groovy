@@ -35,6 +35,7 @@ import skills.controller.exceptions.SkillExceptionBuilder
 import skills.controller.result.model.AvailableProjectResult
 import skills.controller.result.model.GlobalBadgeLevelRes
 import skills.controller.result.model.SettingsResult
+import skills.controller.result.model.SkillTagRes
 import skills.services.BadgeUtils
 import skills.services.DependencyValidator
 import skills.services.GlobalBadgesService
@@ -1412,12 +1413,8 @@ class SkillsLoader {
     }
 
     @Profile
-    List<SkillTag> loadSkillTags(Integer skillRefId) {
-        List<SkillTag> tags = []
-        skillTagService.getTagsForSkill(skillRefId)?.each { tag ->
-            tags.add(new SkillTag(tagId: tag.tagId, tagValue: tag.tagValue))
-        }
-        return tags
+    List<SkillTagRes> loadSkillTags(Integer skillRefId) {
+        return skillTagService.getTagsForSkill(skillRefId)
     }
 
     @Profile

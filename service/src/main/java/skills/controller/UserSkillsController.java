@@ -652,22 +652,8 @@ class UserSkillsController {
     List<SkillTagRes> getTagsForProject(@PathVariable("projectId") String projectId,
                                         @RequestParam(required = false, value = "includeDisabled", defaultValue = "false") Boolean includeDisabled) {
         SkillsValidator.isNotBlank(projectId, "projectId");
-        List<SkillTagRes> tagResponses = null;
-        List<SkillTag> tags = skillTagService.getTagsForProject(projectId, includeDisabled);
-
-        if (tags != null) {
-            tagResponses = tags.stream()
-                    .filter(tag -> tag.getNumSkills() > 0)
-                    .map(tag -> {
-                    SkillTagRes res = new SkillTagRes();
-                    res.setTagId(tag.getTagId());
-                    res.setTagValue(tag.getTagValue());
-                    res.setNumSkills(tag.getNumSkills());
-                    return res;
-                })
-                .collect(Collectors.toList());
-        }
-        return tagResponses;
+        List<SkillTagRes> tags = skillTagService.getTagsForProject(projectId, includeDisabled);
+        return tags != null ? tags.stream().filter(tag -> tag.getNumSkills() > 0).collect(Collectors.toList()) : null;
     }
 
     @RequestMapping(value = "/projects/{projectId}/subjects/{subjectId}/skills/tags", method = RequestMethod.GET, produces = "application/json")
@@ -677,20 +663,7 @@ class UserSkillsController {
         SkillsValidator.isNotBlank(projectId, "projectId");
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId);
         List<SkillTagRes> tagResponses = null;
-        List<SkillTag> tags = skillTagService.getTagsForSubject(projectId, subjectId, includeDisabled);
-
-        if (tags != null) {
-            tagResponses = tags.stream()
-                .filter(tag -> tag.getNumSkills() > 0)
-                .map(tag -> {
-                    SkillTagRes res = new SkillTagRes();
-                    res.setTagId(tag.getTagId());
-                    res.setTagValue(tag.getTagValue());
-                    res.setNumSkills(tag.getNumSkills());
-                    return res;
-                })
-                .collect(Collectors.toList());
-        }
-        return tagResponses;
+        List<SkillTagRes> tags = skillTagService.getTagsForSubject(projectId, subjectId, includeDisabled);
+        return tags != null ? tags.stream().filter(tag -> tag.getNumSkills() > 0).collect(Collectors.toList()) : null;
     }
 }

@@ -103,6 +103,35 @@ describe('Tag Skills on Subject Page - Validation and Focus Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
     });
 
+    it('tag ids cannot exceed maxSkillTagLength', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Create New Tag').click()
+
+        cy.get('[data-cy="tagValue"]').type('new')
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'new')
+        cy.get('[data-cy="enableIdInput"]').click()
+        cy.get('[data-cy="idInputValue"]').should('be.enabled')
+
+        const invalidName = Array(51).fill('a').join('');
+        cy.get('[data-p="modal"] [data-cy="idInputValue"]').type(`{selectAll}${invalidName}`)
+        cy.get('[data-cy="idError"]').contains('Tag ID must be at most 50 characters')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+
+        cy.get('[data-p="modal"] [data-cy="idInputValue"]').type('{backspace}');
+        cy.get('[data-cy="idError"]').should('not.be.visible');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+    });
+
     it('after tagging skill selection is removed and focus is returned to the new skill button', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
@@ -186,4 +215,110 @@ describe('Tag Skills on Subject Page - Validation and Focus Tests', () => {
         cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
     });
 
+    it('special characters are not allow in tag id', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
+
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Create New Tag').click()
+
+        cy.get('[data-cy="tagValue"]').type('NeW')
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'NeW')
+        cy.get('[data-cy="enableIdInput"]').click()
+        cy.get('[data-cy="idInputValue"]').should('be.enabled')
+        cy.get('[data-p="modal"] [data-cy="idInputValue"]').type('&')
+
+        cy.get('[data-cy=idError]').contains('Tag ID may only contain alpha-numeric characters')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+    })
+
+    it('no html allowed in tag value', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+
+        cy.get(`[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"] input`).should('not.be.checked')
+        cy.get(`[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"] input`).should('be.checked')
+
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Create New Tag').click()
+
+        cy.get('[data-cy="tagValue"]').type('NeW<blah>ee')
+        cy.get('[data-cy=tagValueError]').contains('HTML tags are not allowed')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+    })
+
+    it('selected existing tag is cleared when new tag tab is selected', () => {
+        cy.addTagToSkills(1, ['skill1'], 1)
+        cy.addTagToSkills(1, ['skill1'], 3)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="existingTag"]').click();
+        cy.get('[data-pc-section="list"]').contains('TAG 1').click()
+        cy.get('[data-cy="existingTag"]').contains('TAG 1')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+
+        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Create New Tag').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Select Existing Tag').click()
+        cy.get('[data-cy="existingTag"]').should('not.contain', 'TAG 1')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="existingTagError"]').contains('Existing tag must be supplied')
+    });
+
+    it('selected existing tag tab clears new tag fields', () => {
+        cy.addTagToSkills(1, ['skill1'], 1)
+        cy.addTagToSkills(1, ['skill1'], 3)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Create New Tag').click()
+        cy.get('[data-cy="tagValue"]').type('New')
+
+        cy.get('[data-cy="tagValue"]').should('have.value', 'New')
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'New')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+
+        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Select Existing Tag').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Create New Tag').click()
+        cy.get('[data-cy="tagValue"]').should('have.value', '')
+        cy.get('[data-cy="idInputValue"]').should('have.value', '')
+    });
 })

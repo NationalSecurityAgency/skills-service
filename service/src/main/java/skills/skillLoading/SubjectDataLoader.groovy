@@ -20,6 +20,7 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.controller.result.model.SkillTagRes
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.settings.ClientPrefKey
 import skills.services.settings.ClientPrefService
@@ -37,6 +38,7 @@ import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.UserQuizAttemptRepo
+import skills.utils.InputSanitizer
 
 @Component
 @Slf4j
@@ -99,7 +101,7 @@ class SubjectDataLoader {
         List<SkillsAndPoints> children = []
         SkillApproval approval
         List<SimpleBadgeRes> badges = []
-        List<SkillTag> tags = []
+        List<SkillTagRes> tags = []
         SkillAttributesDef attributes
         Date expiredOn
         Date achievedOn
@@ -234,12 +236,16 @@ class SubjectDataLoader {
     private List<SkillsAndPoints> handleSkillTags(String projectId, List<SkillsAndPoints> skillsAndPoints) {
         if(projectId) {
             List<String> skillIds = collectSkillIds(skillsAndPoints)
-            def tagWithSkillIds = skillDefRepo.getTagsForSkillsWithSkillId(projectId, skillIds);
-            def tagsById = tagWithSkillIds.groupBy{ it.skillId }
-            skillsAndPoints.forEach{ it ->
-                it.tags = tagsById[it.skillDef.skillId]?.collect { new SkillTag(tagId: it.tagId, tagValue: it.tagValue)}?.sort { a, b -> a.tagValue <=> b.tagValue }
+            List<SkillTagWithSkillId> tagWithSkillIds = skillDefRepo.getTagsForSkillsWithSkillId(projectId, skillIds);
+            Map<String, List<SkillTagWithSkillId>> tagsById = tagWithSkillIds.groupBy{ it.skillId }
+            skillsAndPoints.forEach{ SkillsAndPoints it ->
+                it.tags = tagsById[it.skillDef.skillId]
+                        ?.collect { new SkillTagRes(tagId: it.tagId, tagValue: InputSanitizer.unsanitizeName(it.tagValue)) }
+                        ?.sort { a, b -> a.tagValue <=> b.tagValue }
                 it.children.forEach{ child ->
-                    child.tags = tagsById[child.skillDef.skillId]?.collect { new SkillTag(tagId: it.tagId, tagValue: it.tagValue)}?.sort { a, b -> a.tagValue <=> b.tagValue }
+                    child.tags = tagsById[child.skillDef.skillId]
+                            ?.collect { new SkillTagRes(tagId: it.tagId, tagValue: InputSanitizer.unsanitizeName(it.tagValue))}
+                            ?.sort { a, b -> a.tagValue <=> b.tagValue }
                 }
             }
         }

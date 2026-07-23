@@ -1057,8 +1057,9 @@ class SkillsAdminService {
         res.reusedSkill = SkillReuseIdUtil.isTagged(res.skillId)
         res.name = SkillReuseIdUtil.removeTag(res.name)
 
-        skillTagService.getTagsForSkill(skillDef.id)?.each { tag ->
-            res.tags.push(new SkillTagRes(tagId: tag.tagId, tagValue: tag.tagValue, numSkills: tag.numSkills))
+        List<SkillTagRes> tags = skillTagService.getTagsForSkill(skillDef.id)
+        if (tags) {
+            res.tags.addAll(tags)
         }
         return res
     }
@@ -1136,12 +1137,11 @@ class SkillsAdminService {
         }
 
         if (loadTags) {
-            skillTagService.getTagsForSkill(partial.id)?.each { tag ->
-                res.tags.push(new SkillTagRes(tagId: tag.tagId, tagValue: tag.tagValue, numSkills: tag.numSkills))
+            List<SkillTagRes> tags = skillTagService.getTagsForSkill(partial.id)
+            if (tags) {
+                res.tags.addAll(tags)
             }
         }
-
-
 
         if (partial.skillType == SkillDef.ContainerType.SkillsGroup) {
             List<SkillDef> groupChildSkills = skillsGroupAdminService.getSkillsGroupChildSkills(partial.getId())

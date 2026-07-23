@@ -18,6 +18,7 @@ package skills.metrics.builders.skills
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.controller.result.model.SkillTagRes
 import skills.metrics.builders.ProjectMetricsBuilder
 import skills.services.admin.SkillTagService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
@@ -50,16 +51,16 @@ class SkillUsageNavigatorMetricsBuilder implements ProjectMetricsBuilder {
         Long lastReportedTimestamp
         Long lastAchievedTimestamp
         Boolean isReusedSkill
-        List <SkillTag> skillTags
+        List <SkillTagRes> skillTags
     }
 
     def build(String projectId, String chartId, Map<String, String> props) {
-        def res = userAchievedRepo.findAllForSkillsNavigator(projectId)
-        def skillTags = skillTagService.getTagsForProject(projectId)
-        def results = res.collect {
+        List<UserAchievedLevelRepo.SkillUsageItem> res = userAchievedRepo.findAllForSkillsNavigator(projectId)
+        List<SkillTagRes> skillTags = skillTagService.getTagsForProject(projectId)
+        List<SkillUsageNavigatorItem> results = res.collect {
             Integer numAchieved = it.getNumUserAchieved() ?: 0
             Integer numProgress = it.getNumUsersInProgress() ?: 0
-            List <SkillTag> tags = skillTagService.getTagsForSkill(projectId, it.getSkillId())
+            List <SkillTagRes> tags = skillTagService.getTagsForSkill(projectId, it.getSkillId())
             new SkillUsageNavigatorItem(
                     skillId: it.getSkillId(),
                     skillName: SkillReuseIdUtil.removeTag(InputSanitizer.unsanitizeName(it.getSkillName())),

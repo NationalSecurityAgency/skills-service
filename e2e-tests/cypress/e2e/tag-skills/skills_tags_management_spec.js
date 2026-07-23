@@ -82,11 +82,11 @@ describe('Manage Tag Skills Tests', () => {
         cy.get('[data-cy="btn_Skill Tags"]').should('have.focus')
 
         cy.validateTable(tagsTableSelector, [
-            [{colIndex: 0, value: 't%^&amp;*() ag'}, {colIndex: 1, value: '0'}],
+            [{colIndex: 0, value: 't%^&*() ag'}, {colIndex: 1, value: '0'}],
         ], 25);
-        cy.get('[data-cy="manageTag_t%^&amp;*() ag"]').click()
+        cy.get('[data-cy="manageTag_t%^&*() ag"]').click()
         cy.url().should('match', /\/administrator\/projects\/proj1\/skill-tags\/tag$/)
-        cy.get('[data-cy="title"]').contains('TAG: t%^&amp;*() ag')
+        cy.get('[data-cy="title"]').contains('TAG: t%^&*() ag')
 
     });
 
@@ -453,5 +453,82 @@ describe('Manage Tag Skills Tests', () => {
             [{colIndex: 0, value: 'TAG 3'}, {colIndex: 1, value: '3'}],
         ], 25);
     });
+
+    it('validate special chars not allowed in tag id', () => {
+        cy.visit('/administrator/projects/proj1/skill-tags/');
+        cy.get('[data-cy="btn_Skill Tags"]').click();
+        cy.get('[data-cy="tagValue"]').should("have.focus")
+        cy.get('[data-cy="closeDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
+        cy.get('[data-cy="tagValue"]').type('tAg');
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="enableIdInput"]').click()
+        cy.get('[data-cy="idInputValue"]').should('be.enabled')
+        cy.get('[data-cy="idInputValue"]').type('$');
+
+        cy.get('[data-cy="idError"]').contains('Tag ID may only contain alpha-numeric characters')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+    })
+
+    it('max len for the tag id', () => {
+        cy.visit('/administrator/projects/proj1/skill-tags/');
+        cy.get('[data-cy="btn_Skill Tags"]').click();
+        cy.get('[data-cy="tagValue"]').should("have.focus")
+        cy.get('[data-cy="closeDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
+        cy.get('[data-cy="tagValue"]').type('tAg');
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="enableIdInput"]').click()
+        cy.get('[data-cy="idInputValue"]').should('be.enabled')
+
+        const invalidName = Array(51).fill('a').join('');
+        cy.get('[data-p="modal"] [data-cy="idInputValue"]').type(`{selectAll}${invalidName}`)
+        cy.get('[data-cy="idError"]').contains('Tag ID must be at most 50 characters')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+
+        cy.get('[data-p="modal"] [data-cy="idInputValue"]').type('{backspace}');
+        cy.get('[data-cy="idError"]').should('not.be.visible');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+    })
+
+    it('tag values cannot exceed maxSkillTagLength', () => {
+
+        cy.visit('/administrator/projects/proj1/skill-tags/');
+        cy.get('[data-cy="btn_Skill Tags"]').click();
+        cy.get('[data-cy="tagValue"]').should("have.focus")
+        cy.get('[data-cy="closeDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
+
+        const invalidName = Array(51).fill('a').join('');
+        cy.get('[data-cy="tagValue"]').type(invalidName)
+        cy.get('[data-cy=tagValueError]').contains('Tag must be at most 50 characters').should('be.visible');
+        cy.get('[data-cy=saveDialogBtn]').should('be.disabled');
+
+        cy.get('[data-cy="tagValue"]').type('{backspace}');
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+    });
+
+    it('no html allowed in tag value', () => {
+        cy.visit('/administrator/projects/proj1/skill-tags/');
+        cy.get('[data-cy="btn_Skill Tags"]').click();
+        cy.get('[data-cy="tagValue"]').should("have.focus")
+        cy.get('[data-cy="closeDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
+
+        cy.get('[data-cy="tagValue"]').type('NeW<blah>ee')
+        cy.get('[data-cy=tagValueError]').contains('HTML tags are not allowed')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+    })
 
 });

@@ -24,6 +24,18 @@ describe('Tag Skills on Subject Page Tests', () => {
         cy.createSkill(1, 1, 3);
     });
 
+
+    it('no tags have been creatd message', () => {
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+        cy.get('[data-cy="instructionsMsg"]').contains('To tag 2 selected skills, please select an existing tag or create a new one:')
+        cy.get('[data-cy="noTagsMessage"]').should('be.visible')
+    })
+
     it('tag skills with new tag', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
@@ -51,8 +63,7 @@ describe('Tag Skills on Subject Page Tests', () => {
         cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
     });
 
-    it('tag skills with existing tag', () => {
-
+    it('tag skills with new tag - special characters are removed from tag id', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
 
         // must exist initially
@@ -66,13 +77,51 @@ describe('Tag Skills on Subject Page Tests', () => {
         cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
         cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Create New Tag').click()
 
-        cy.get('[data-cy="existingTagDropdown"]').should('not.exist')
-        cy.get('[data-cy="tagValue"]').type('New Tag 1')
+        cy.get('[data-cy="tagValue"]').type('  C%^o&*() O^&*L  ')
         cy.clickSaveDialogBtn()
 
-        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('exist')
+        cy.get('[data-cy="skillTag-skill1-cool"]').should('have.attr', 'href', '/administrator/projects/proj1/skill-tags/cool')
+        cy.get('[data-cy="skillTag-skill2-cool"]').should('not.exist')
+        cy.get('[data-cy="skillTag-skill3-cool"]').should('have.attr', 'href', '/administrator/projects/proj1/skill-tags/cool')
+        cy.get('[data-cy="skillTag-skill1-cool"]').contains('C%^o&*() O^&*L')
+        cy.get('[data-cy="skillTag-skill3-cool"]').contains('C%^o&*() O^&*L')
+
+        cy.get('[data-cy="skillTag-skill1-cool"]').click()
+        const skillsTable = '[data-cy="skillTagSkillsTable"]'
+        cy.validateTable(skillsTable, [
+            [{colIndex: 0, value: 'Very Great Skill 1'}],
+            [{colIndex: 0, value: 'Very Great Skill 3'}],
+        ], 25);
+        cy.get('[data-cy="title"]').contains('TAG: C%^o&*() O^&*L')
+    });
+
+    it('tag skills with existing tag', () => {
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+        cy.get('[data-cy="noTagsMessage"]').should('be.visible')
+        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Create New Tag').click()
+
+        cy.get('[data-cy="existingTagDropdown"]').should('not.exist')
+        cy.get('[data-cy="tagValue"]').type('New Tag 1')
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'NewTag1')
+        cy.get('[data-cy="enableIdInput"]').click()
+        cy.get('[data-cy="idInputValue"]').should('be.enabled')
+        cy.get('[data-p="modal"] [data-cy="idInputValue"]').type('a')
+        cy.clickSaveDialogBtn()
+
+        cy.get('[data-cy="skillTag-skill1-newtag1a"]').should('exist')
         cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
-        cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
+        cy.get('[data-cy="skillTag-skill3-newtag1a"]').should('exist')
 
         cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]').click();
@@ -80,16 +129,17 @@ describe('Tag Skills on Subject Page Tests', () => {
 
         cy.get('[data-cy="existingTag"]').click();
         cy.get('[data-pc-section="list"]').contains('New Tag 1').click()
+        cy.get('[data-cy="noTagsMessage"]').should('not.exist')
 
         cy.clickSaveDialogBtn()
-        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('exist')
-        cy.get('[data-cy="skillTag-skill2-newtag1"]').should('exist')
-        cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
+        cy.get('[data-cy="skillTag-skill1-newtag1a"]').should('exist')
+        cy.get('[data-cy="skillTag-skill2-newtag1a"]').should('exist')
+        cy.get('[data-cy="skillTag-skill3-newtag1a"]').should('exist')
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('exist')
-        cy.get('[data-cy="skillTag-skill2-newtag1"]').should('exist')
-        cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
+        cy.get('[data-cy="skillTag-skill1-newtag1a"]').should('exist')
+        cy.get('[data-cy="skillTag-skill2-newtag1a"]').should('exist')
+        cy.get('[data-cy="skillTag-skill3-newtag1a"]').should('exist')
     });
 
     it('remove a tag from a skill', () => {
