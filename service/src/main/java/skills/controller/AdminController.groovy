@@ -1884,7 +1884,7 @@ class AdminController {
 
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSkillTagLength, "Tag Value", skillsTagRequest.tagValue)
         if (skillsTagRequest.tagId) {
-            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSkillTagLength, "Tag Value", skillsTagRequest.tagId)
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSkillTagLength, "Tag ID", skillsTagRequest.tagId)
         }
 
         skillTagService.addTag(projectId, skillsTagRequest)
