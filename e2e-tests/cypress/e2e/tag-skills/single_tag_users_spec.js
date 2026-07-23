@@ -33,7 +33,7 @@ describe('Users Page for a Single Skill Tag Tests', () => {
     });
 
     it('no users', () => {
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1/users');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1/users');
         cy.get(`${tableSelector} [data-pc-section="emptymessage"]`).contains('There are no records to show')
     })
 
@@ -71,7 +71,7 @@ describe('Users Page for a Single Skill Tag Tests', () => {
         cy.doReportSkill({ project: 1, skill: 5, subjNum: 2, userId: 'user3', date: '2026-07-10 08:09' })
         cy.doReportSkill({ project: 1, skill: 6, subjNum: 2, userId: 'user3', date: '2026-07-11 14:10' })
         cy.doReportSkill({ project: 1, skill: 7, subjNum: 2, userId: 'user3', date: '2026-07-14 08:09' })
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1/users');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1/users');
         cy.validateTable(tableSelector, [
             [{colIndex: 0, value: 'user1'}, {colIndex: 2, value: '200 / 1,000'}, {colIndex: 3, value: '2026-07-14 10:11'}, {colIndex: 4, value: '2026-07-16 14:12'}],
             [{colIndex: 0, value: 'user2'}, {colIndex: 2, value: '1,000 / 1,000'}, {colIndex: 3, value: '2026-07-01 08:09'}, {colIndex: 4, value: '2026-07-12 14:10'}],
@@ -83,7 +83,7 @@ describe('Users Page for a Single Skill Tag Tests', () => {
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: 'user1', date: '2026-07-16 14:12' })
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: 'user2', date: '2026-07-01 08:09' })
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: 'user3', date: '2026-07-01 08:09' })
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1/users');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1/users');
         cy.validateTable(tableSelector, [
             [{colIndex: 0, value: 'user1'}],
             [{colIndex: 0, value: 'user2'}],
@@ -104,7 +104,7 @@ describe('Users Page for a Single Skill Tag Tests', () => {
         cy.doReportSkill({ project: 1, skill: 2, subjNum: 1, userId: 'user3', date: '2026-07-01 08:09' })
         cy.doReportSkill({ project: 1, skill: 3, subjNum: 1, userId: 'user3', date: '2026-07-01 08:09' })
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1/users');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1/users');
         cy.validateTable(tableSelector, [
             [{colIndex: 0, value: 'user1'}],
             [{colIndex: 0, value: 'user2'}],
@@ -139,7 +139,7 @@ describe('Users Page for a Single Skill Tag Tests', () => {
             tags: ['AC1']
         }]);
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1/users');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1/users');
         cy.validateTable(tableSelector, [
             [{colIndex: 0, value: 'user1'}],
             [{colIndex: 0, value: 'user2'}],
@@ -162,12 +162,12 @@ describe('Users Page for a Single Skill Tag Tests', () => {
         }
         const reversedExpected = [...expected].reverse()
         
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1/users');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1/users');
         cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
         cy.validateTable(tableSelector, expected, 10);
 
         // saved into local storage
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1/users');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1/users');
         cy.validateTable(tableSelector, expected, 10);
 
         cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('User').click();
@@ -189,7 +189,7 @@ describe('Users Page for a Single Skill Tag Tests', () => {
         const reversedExpected = [...expected].reverse()
         cy.addUserTag(tagsToAdd)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1/users');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1/users');
         cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('Org').click();
         cy.validateTable(tableSelector, expected, 10);
 
@@ -214,7 +214,7 @@ describe('Users Page for a Single Skill Tag Tests', () => {
         }
         const reversedExpected = [...expected].reverse()
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1/users');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1/users');
         cy.get(`${tableSelector} [data-pc-section="columntitle"]`).contains('Progress').click();
         cy.validateTable(tableSelector, expected, 10);
 
@@ -232,7 +232,7 @@ describe('Users Page for a Single Skill Tag Tests', () => {
 
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: 'user1', date: '2026-07-16 14:12' })
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1/users');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1/users');
         cy.validateTable(tableSelector, [
             [{colIndex: 0, value: 'user1'}],
         ], 10);

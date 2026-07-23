@@ -26,63 +26,141 @@ describe('Single Skill Tag Management Tests', () => {
         cy.createSkill(1, 1, 3);
     });
 
-    it('edit existing tag', () => {
+    it('edit existing tag value', () => {
         cy.addTagToSkills(1, ['skill1'], 1)
         cy.addTagToSkills(1, ['skill1'], 2)
         cy.addTagToSkills(1, ['skill1'], 3)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.get('[data-cy="title"]').contains('TAG: TAG 1')
         cy.get('[data-cy="editTag"]').click()
-        cy.get('[data-cy="newTag"]').should('have.value', 'TAG 1')
-        cy.get('[data-cy="newTag"]').click()
-        cy.get('[data-cy="newTag"]').type('a')
+        cy.get('[data-cy="tagValue"]').should('have.value', 'TAG 1')
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'tag1')
+        cy.get('[data-cy="tagValue"]').click()
+        cy.get('[data-cy="tagValue"]').type('a')
         cy.get('[data-cy="saveDialogBtn"]').click();
 
         cy.get('[data-cy="title"]').contains('TAG: TAG 1a')
 
         cy.get('[data-cy="editTag"]').click()
-        cy.get('[data-cy="newTag"]').should('have.value', 'TAG 1a')
-        cy.get('[data-cy="newTag"]').click()
-        cy.get('[data-cy="newTag"]').type('b')
+        cy.get('[data-cy="tagValue"]').should('have.value', 'TAG 1a')
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'tag1')
+        cy.get('[data-cy="tagValue"]').click()
+        cy.get('[data-cy="tagValue"]').type('b')
         cy.get('[data-cy="saveDialogBtn"]').click();
 
         cy.get('[data-cy="title"]').contains('TAG: TAG 1ab')
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.get('[data-cy="title"]').contains('TAG: TAG 1ab')
+    });
+
+    it('edit existing tag id', () => {
+        cy.addTagToSkills(1, ['skill1'], 1)
+        cy.addTagToSkills(1, ['skill1'], 2)
+        cy.addTagToSkills(1, ['skill1'], 3)
+
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
+        cy.get('[data-cy="title"]').contains('TAG: TAG 1')
+        cy.get('[data-cy="breadcrumb-tag1"] [data-cy="breadcrumbItemValue"]').should('have.text', 'tag1')
+        cy.get('[data-cy="editTag"]').click()
+        cy.get('[data-cy="tagValue"]').should('have.value', 'TAG 1')
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'tag1')
+        cy.get('[data-cy="enableIdInput"]').click()
+        cy.get('[data-cy="idInputValue"]').should('be.enabled')
+        cy.get('[data-p="modal"] [data-cy="idInputValue"]').type('a')
+        cy.get('[data-cy="saveDialogBtn"]').click();
+
+        cy.get('[data-cy="breadcrumb-tag1a"] [data-cy="breadcrumbItemValue"]').should('have.text', 'tag1a')
+        cy.url().should('include', '/administrator/projects/proj1/skill-tags/tag1a?preventReload=true')
+
+        cy.reload()
+        cy.get('[data-cy="breadcrumb-tag1a"] [data-cy="breadcrumbItemValue"]').should('have.text', 'tag1a')
+        cy.url().should('include', '/administrator/projects/proj1/skill-tags/tag1a')
+    });
+
+    it('edit existing tag id then navigate to users and back', () => {
+        cy.addTagToSkills(1, ['skill1'], 1)
+        cy.addTagToSkills(1, ['skill1'], 2)
+        cy.addTagToSkills(1, ['skill1'], 3)
+
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
+        cy.get('[data-cy="title"]').contains('TAG: TAG 1')
+        cy.get('[data-cy="breadcrumb-tag1"] [data-cy="breadcrumbItemValue"]').should('have.text', 'tag1')
+        cy.get('[data-cy="editTag"]').click()
+        cy.get('[data-cy="tagValue"]').should('have.value', 'TAG 1')
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'tag1')
+        cy.get('[data-cy="enableIdInput"]').click()
+        cy.get('[data-cy="idInputValue"]').should('be.enabled')
+        cy.get('[data-p="modal"] [data-cy="idInputValue"]').type('a')
+        cy.get('[data-cy="saveDialogBtn"]').click();
+
+        cy.get('[data-cy="breadcrumb-tag1a"] [data-cy="breadcrumbItemValue"]').should('have.text', 'tag1a')
+        cy.url().should('include', '/administrator/projects/proj1/skill-tags/tag1a?preventReload=true')
+
+        cy.get('[data-cy="nav-Users"]').click()
+        const tableSelector = '[data-cy="usersTableMetric"]'
+        cy.get(`${tableSelector} [data-pc-section="emptymessage"]`).contains('There are no records to show')
+
+        cy.get('[data-cy="nav-Tagged Skills"]').click()
+        cy.validateTable(skillsTable, [
+            [{colIndex: 0, value: 'Very Great Skill 1'}],
+        ], 25);
+
     });
 
     it('tag edit in the dialog must validate against saving the same tag name', () => {
         cy.addTagToSkills(1, ['skill1'], 1)
         cy.addTagToSkills(1, ['skill1'], 2)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.get('[data-cy="editTag"]').click()
-        cy.get('[data-cy="newTag"]').should('have.value', 'TAG 1')
+        cy.get('[data-cy="tagValue"]').should('have.value', 'TAG 1')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
-        cy.get('[data-cy="newTagError"]').should('not.be.visible')
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
 
-        cy.get('[data-cy="newTag"]').click()
-        cy.get('[data-cy="newTag"]').type('a')
-        cy.get('[data-cy="newTagError"]').should('not.be.visible')
+        cy.get('[data-cy="tagValue"]').click()
+        cy.get('[data-cy="tagValue"]').type('a')
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
-        cy.get('[data-cy="newTag"]').click()
-        cy.get('[data-cy="newTag"]').type('{backspace}')
-        cy.get('[data-cy="newTagError"]').contains('Tag Name needs to be different')
+        cy.get('[data-cy="tagValue"]').click()
+        cy.get('[data-cy="tagValue"]').type('{backspace}')
+        cy.get('[data-cy="tagValueError"]').contains('Tag needs to be different')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         // id will remove special chars but it for the edit is not validated
-        cy.get('[data-cy="newTag"]').click()
-        cy.get('[data-cy="newTag"]').type('$')
-        cy.get('[data-cy="newTagError"]').should('not.be.visible')
+        cy.get('[data-cy="tagValue"]').click()
+        cy.get('[data-cy="tagValue"]').type('$')
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         // still validates against other tags
-        cy.get('[data-cy="newTag"]').click()
-        cy.get('[data-cy="newTag"]').type('{backspace}{backspace}2')
-        cy.get('[data-cy="newTagError"]').contains('Tag Name already exist')
+        cy.get('[data-cy="tagValue"]').click()
+        cy.get('[data-cy="tagValue"]').type('{backspace}{backspace}2')
+        cy.get('[data-cy="tagValueError"]').contains('Tag already exists')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+    });
+
+    it('tag edit in the dialog must validate against saving the same tag id', () => {
+        cy.addTagToSkills(1, ['skill1'], 1)
+        cy.addTagToSkills(1, ['skill1'], 2)
+
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
+        cy.get('[data-cy="editTag"]').click()
+        cy.get('[data-cy="tagValue"]').should('have.value', 'TAG 1')
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'tag1')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
+
+        cy.get('[data-cy="enableIdInput"]').click()
+        cy.get('[data-cy="idInputValue"]').should('be.enabled')
+        cy.get('[data-p="modal"] [data-cy="idInputValue"]').type('a')
+        cy.get('[data-cy="idError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-p="modal"] [data-cy="idInputValue"]').type('{backspace}')
+        cy.get('[data-cy="idError"]').contains('Tag ID needs to be different')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
     });
 
@@ -93,7 +171,7 @@ describe('Single Skill Tag Management Tests', () => {
         cy.addSkillToGroup(1, 1, 20, 21)
         cy.addTagToSkills(1, [], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.get('[data-cy="noContent"]').contains('No Skills Added Yet...')
         cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
         cy.get('[data-cy="skillsSelector"] button').should('have.focus');
@@ -119,7 +197,7 @@ describe('Single Skill Tag Management Tests', () => {
         ], 25);
         cy.get('[data-cy="pageHeaderStat_Tagged Skills"] [data-cy="statValue"]').should('have.text', '3');
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
 
         cy.validateTable(skillsTable, [
             [{colIndex: 0, value: 'Very Great Skill 21'}, {colIndex: 1, value: 'Subject 1'}, {colIndex: 2, value: 'Group 20 Subj1'}],
@@ -132,7 +210,7 @@ describe('Single Skill Tag Management Tests', () => {
     it('remove skills', () => {
         cy.addTagToSkills(1, ['skill1', 'skill2', 'skill3'], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.validateTable(skillsTable, [
             [{colIndex: 0, value: 'Very Great Skill 3'}],
             [{colIndex: 0, value: 'Very Great Skill 2'}],
@@ -149,7 +227,7 @@ describe('Single Skill Tag Management Tests', () => {
         ], 25);
         cy.get('[data-cy="skillsSelector"] button').should('have.focus');
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.validateTable(skillsTable, [
             [{colIndex: 0, value: 'Very Great Skill 3'}],
             [{colIndex: 0, value: 'Very Great Skill 1'}],
@@ -172,7 +250,7 @@ describe('Single Skill Tag Management Tests', () => {
     it('cancelling remove returns focus to the return button', () => {
         cy.addTagToSkills(1, ['skill1', 'skill2', 'skill3'], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.validateTable(skillsTable, [
             [{colIndex: 0, value: 'Very Great Skill 3'}],
             [{colIndex: 0, value: 'Very Great Skill 2'}],
@@ -187,7 +265,7 @@ describe('Single Skill Tag Management Tests', () => {
     it('adding skill returns focus to the skill selector', () => {
         cy.addTagToSkills(1, [], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.get('[data-cy="noContent"]').contains('No Skills Added Yet...')
         cy.selectSkill('[data-cy="skillsSelector"]', 'skill1');
         cy.get('[data-cy="skillsSelector"] button').should('have.focus');
@@ -200,7 +278,7 @@ describe('Single Skill Tag Management Tests', () => {
         cy.addSkillToGroup(1, 1, 20, 21)
         cy.addTagToSkills(1, ['skill1', 'skill2', 'skill4Subj2', 'skill21'], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.validateTable(skillsTable, [
             [{colIndex: 0, value: 'Skill 21'}],
             [{colIndex: 0, value: 'Skill 4'}],
@@ -252,7 +330,7 @@ describe('Single Skill Tag Management Tests', () => {
         cy.addSkillToGroup(1, 1, 20, 21)
         cy.addTagToSkills(1, ['skill1', 'skill2', 'skill4Subj2', 'skill21'], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.validateTable(skillsTable, [
             [{colIndex: 0, value: 'Skill 21'}],
             [{colIndex: 0, value: 'Skill 4'}],
@@ -287,7 +365,7 @@ describe('Single Skill Tag Management Tests', () => {
 
         cy.addTagToSkills(1, ['skill21', 'skill31Subj2'], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.validateTable(skillsTable, [
             [{colIndex: 0, value: 'Skill 31'}],
             [{colIndex: 0, value: 'Skill 21'}],
@@ -322,7 +400,7 @@ describe('Single Skill Tag Management Tests', () => {
         const expectedReversed = expected.toReversed();
         cy.addTagToSkills(1, skillIds, 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.get(`${skillsTable} [data-pc-section="columntitle"]`).contains('Skill').click()
         cy.validateTable(skillsTable, expected, 25);
 
@@ -337,7 +415,7 @@ describe('Single Skill Tag Management Tests', () => {
     it('sorting preference is preserved after page refresh', () => {
         cy.addTagToSkills(1, ['skill1', 'skill2', 'skill3'], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.validateTable(skillsTable, [
             [{colIndex: 0, value: 'Very Great Skill 3'}],
             [{colIndex: 0, value: 'Very Great Skill 2'}],
@@ -351,7 +429,7 @@ describe('Single Skill Tag Management Tests', () => {
             [{colIndex: 0, value: 'Very Great Skill 3'}],
         ], 25);
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.validateTable(skillsTable, [
             [{colIndex: 0, value: 'Very Great Skill 1'}],
             [{colIndex: 0, value: 'Very Great Skill 2'}],
@@ -365,7 +443,7 @@ describe('Single Skill Tag Management Tests', () => {
             [{colIndex: 0, value: 'Very Great Skill 1'}],
         ], 25);
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.validateTable(skillsTable, [
             [{colIndex: 0, value: 'Very Great Skill 3'}],
             [{colIndex: 0, value: 'Very Great Skill 2'}],
@@ -380,7 +458,7 @@ describe('Single Skill Tag Management Tests', () => {
         cy.createSkill(1, 3, 5);
         cy.addTagToSkills(1, ['skill1', 'skill4Subj2', 'skill5Subj3'], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.validateTable(skillsTable, [
             [{colIndex: 1, value: 'Subject 3'}],
             [{colIndex: 1, value: 'Subject 2'}],
@@ -411,7 +489,7 @@ describe('Single Skill Tag Management Tests', () => {
         cy.addSkillToGroup(1, 1, 6, 13)
         cy.addTagToSkills(1, ['skill2', 'skill11', 'skill12', 'skill13'], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.validateTable(skillsTable, [
             [{colIndex: 0, value: 'Skill 13'}, {colIndex: 2, value: 'Group 6'}],
             [{colIndex: 0, value: 'Skill 12'}, {colIndex: 2, value: 'Group 5'}],

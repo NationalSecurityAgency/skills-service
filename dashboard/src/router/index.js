@@ -416,7 +416,7 @@ const routes = [
       },
     },  {
       name: 'SkillTags',
-      path: 'skills-tags',
+      path: 'skill-tags',
       component: SkillTagsPage,
       meta: {
         requiresAuth: true,
@@ -653,7 +653,7 @@ const routes = [
     children: createAdminSkillChildRoutes('SingleSkillOverview')
   },
   {
-    path: '/administrator/projects/:projectId/skills-tags/:tagId',
+    path: '/administrator/projects/:projectId/skill-tags/:tagId',
     component: SingleSkillTagPage,
     meta: { requiresAuth: true },
     children: [{

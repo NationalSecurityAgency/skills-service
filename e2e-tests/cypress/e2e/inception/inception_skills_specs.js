@@ -550,9 +550,10 @@ describe('Inception Skills Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]', true)
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Create New Tag').click()
 
-        cy.get('[data-cy="newTag"]').type('New Tag 1')
+        cy.get('[data-cy="tagValue"]').type('New Tag 1')
 
         cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 0)
         cy.clickSaveDialogBtn()
@@ -589,7 +590,7 @@ describe('Inception Skills Tests', () => {
         cy.createSkill(1, 1, 1);
         cy.addTagToSkills(1, [], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.get('[data-cy="noContent"]').contains('No Skills Added Yet...')
 
         cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 0)
@@ -606,7 +607,7 @@ describe('Inception Skills Tests', () => {
 
         cy.addTagToSkills(1, ['skill1'], 1)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
 
         cy.get('[data-cy="deleteSkill_skill1"]').click()
         cy.get('[data-p="modal"]').contains('Are you sure you want to remove Skill "Very Great Skill 1" from Tag "TAG 1"?')

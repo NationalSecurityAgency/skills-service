@@ -215,7 +215,7 @@ describe('Project Admin Training Wide Search Tests', () => {
         cy.addTagToSkills(1, ['skill1', 'skill2'], 2)
         cy.addTagToSkills(1, ['skill1'], 3)
 
-        cy.visit('/administrator/projects/proj1/skills-tags/tag1');
+        cy.visit('/administrator/projects/proj1/skill-tags/tag1');
         cy.get('[data-cy="pageHeader"] [data-cy="title"]').contains('TAG: TAG 1')
         cy.get('[data-cy="pageHeaderStat_Tagged Skills"] [data-cy="statValue"]').should('have.text', '3');
 

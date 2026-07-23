@@ -1883,6 +1883,9 @@ class AdminController {
         skillsTagRequest.tagValue = InputSanitizer.sanitize(skillsTagRequest.tagValue)?.trim()
 
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSkillTagLength, "Tag Value", skillsTagRequest.tagValue)
+        if (skillsTagRequest.tagId) {
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxSkillTagLength, "Tag ID", skillsTagRequest.tagId)
+        }
 
         skillTagService.addTag(projectId, skillsTagRequest)
 
@@ -1897,16 +1900,14 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "projectId")
         SkillsValidator.isNotNull(skillsTagRequest, "skillsTagRequest", projectId)
         SkillsValidator.isNotEmpty(skillsTagRequest.skillIds, "skillsTagRequest.skillIds", projectId)
-        return skillTagService.getTagsForSkills(projectId, skillsTagRequest.skillIds)?.collect { new SkillTagRes(tagId: it.tagId, tagValue: it.tagValue, numSkills: it.numSkills) }
+        return skillTagService.getTagsForSkills(projectId, skillsTagRequest.skillIds)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/tags", method = RequestMethod.GET, produces = "application/json")
     List<SkillTagRes> getTagsForProject(@PathVariable("projectId") String projectId,
                                         @RequestParam(required = false, value = "includeDisabled", defaultValue = "true") Boolean includeDisabled) {
         SkillsValidator.isNotBlank(projectId, "projectId")
-        return skillTagService.getTagsForProject(projectId, includeDisabled)?.collect {
-            new SkillTagRes(tagId: it.tagId, tagValue: it.tagValue, numSkills: it.numSkills, createdOn: it.createdOn)
-        }
+        return skillTagService.getTagsForProject(projectId, includeDisabled)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/tags/{tagId}", method = RequestMethod.GET, produces = "application/json")

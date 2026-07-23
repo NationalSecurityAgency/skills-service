@@ -15,6 +15,7 @@
  */
 package skills.skillLoading.model
 
+import skills.controller.result.model.SkillTagRes
 import skills.storage.model.SimpleBadgeRes
 
 class SkillSummary extends SkillSummaryParent {
@@ -44,7 +45,7 @@ class SkillSummary extends SkillSummaryParent {
     Boolean isLastViewed
 
     List<SimpleBadgeRes> badges
-    List<SkillTag> tags = []
+    List<SkillTagRes> tags = []
 
     VideoSummary videoSummary
     SlidesSummary slidesSummary

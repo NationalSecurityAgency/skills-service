@@ -541,6 +541,46 @@ class AdminTagSkillsSpecs extends DefaultIntSpec {
         ex.message.contains("[Tag Value] must not exceed [50]")
     }
 
+    def "tag id cannot exceed maxSkillTagLength"(){
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> skillIds = skills.collect {it.skillId}
+        String invalidTagId = (1..51).collect{"A"}.join()
+
+        when:
+        skillsService.addTagToSkills(proj.projectId, skillIds, "blah", invalidTagId)
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("[Tag ID] must not exceed [50]")
+    }
+
+    def "tag id does not allow special chars"(){
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(1)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+
+        List<String> skillIds = skills.collect {it.skillId}
+        String invalidTagId = "ok&not"
+
+        when:
+        skillsService.addTagToSkills(proj.projectId, skillIds, "blah", invalidTagId)
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("may only contain alphanumeric characters")
+    }
+
     def "validate tag id's are case insensitive on tag creation and deletion"(){
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -752,5 +792,57 @@ class AdminTagSkillsSpecs extends DefaultIntSpec {
         proj2Res.tagId == tagId
         proj2Res.tagValue == tagValue
         proj2Res.skills.skillId == [proj2Subj1Skills[0].skillId]
+    }
+
+    void "update tag id"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(4)
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkills(skills)
+        String tagOrig = "orig"
+        String tagUpdated = "updated"
+        skillsService.addTagToSkills(proj.projectId, [], "val", tagOrig)
+        skillsService.addTagToSkills(proj.projectId, [], "val1", "another")
+
+        when:
+        def res_t0 = skillsService.getTagInfo(proj.projectId, tagOrig)
+        skillsService.addTagToSkills(proj.projectId, [], "val", tagUpdated, tagOrig)
+        def res_t1 = skillsService.getTagInfo(proj.projectId, tagUpdated)
+        then:
+        res_t0.tagId == tagOrig
+        res_t0.tagValue == "val"
+        res_t1.tagId == tagUpdated
+        res_t1.tagValue == "val"
+    }
+
+    void "special characters properly decoded in the tag name"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(4)
+        skillsService.createProjectAndSubjectAndSkills(proj, subj, skills)
+
+        String tagId = "justid"
+        String tagValue = "!@#\$%^&*()_+"
+        List<String> skillIds = skills.collect { it.skillId }
+        skillsService.addTagToSkills(proj.projectId, skillIds, tagValue, tagId)
+
+        when:
+        def tagInfo = skillsService.getTagInfo(proj.projectId, tagId)
+        def tagsForProj = skillsService.getTagsForProject(proj.projectId)
+        def tagsForSkills = skillsService.getTagsForSkills(proj.projectId, skills.skillId)
+        def apiTagsForProj = skillsService.getApiTagsForProject(proj.projectId)
+        def apiSubjTags = skillsService.getApiTagsForSubject(proj.projectId, subj.subjectId)
+        def subjSummary = skillsService.getSubjectSummaryForCurrentUser(proj.projectId, subj.subjectId)
+
+        then:
+        tagInfo.tagValue == tagValue
+        tagsForProj.tagValue == [tagValue]
+        tagsForSkills.tagValue == [tagValue]
+        apiTagsForProj.tagValue == [tagValue]
+        apiSubjTags.tagValue == [tagValue]
+        subjSummary.skills.tags.tagValue.flatten() == [tagValue,tagValue,tagValue,tagValue,]
     }
 }

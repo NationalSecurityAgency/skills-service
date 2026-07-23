@@ -24,6 +24,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.request.model.SkillsTagDeleteRequest
 import skills.controller.request.model.SkillsTagRequest
 import skills.controller.result.model.SkillTagInfoRes
+import skills.controller.result.model.SkillTagRes
 import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.userActions.DashboardAction
@@ -35,6 +36,7 @@ import skills.storage.model.*
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillDefWithExtraRepo
 import skills.storage.repos.SkillRelDefRepo
+import skills.utils.InputSanitizer
 
 @Service
 @Slf4j
@@ -65,15 +67,22 @@ class SkillTagService {
     void addTag(String projectId, SkillsTagRequest skillsTagRequest) {
         lockingService.lockProject(projectId)
         SkillDef.ContainerType type = SkillDef.ContainerType.Tag
-        SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, skillsTagRequest.tagId, type)
 
+        if (skillsTagRequest.tagId && !skillsTagRequest.tagId.matches(/^[a-zA-Z0-9]+$/)) {
+            throw new SkillException("Tag ID [${skillsTagRequest.tagId}] may only contain alphanumeric characters", projectId, skillsTagRequest.tagId, ErrorCode.BadParam)
+        }
+
+        String currentTagId = skillsTagRequest.origTagId ?: skillsTagRequest.tagId
+        SkillDefWithExtra skillDefinition = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, currentTagId, type)
+
+        String incomingTagValue = InputSanitizer.sanitize(skillsTagRequest.tagValue)
         if (!skillDefinition) {
             ProjDef projDef = projDefAccessor.getProjDef(projectId)
             skillDefinition = new SkillDefWithExtra(
                     type: type,
                     projectId: projectId,
                     skillId: skillsTagRequest.tagId,
-                    name: skillsTagRequest.tagValue,
+                    name: incomingTagValue,
                     projRefId: projDef.id,
                     displayOrder: 0,
                     enabled: Boolean.TRUE.toString()
@@ -85,8 +94,13 @@ class SkillTagService {
             }
             log.debug("Saved [{}]", savedSkill)
         } else {
-            if (skillsTagRequest.tagValue && skillsTagRequest.tagValue != skillDefinition.name) {
-                skillDefinition.name = skillsTagRequest.tagValue
+            boolean isTagValueDifferent = incomingTagValue && incomingTagValue != skillDefinition.name
+            boolean isTagIdDifferent = skillsTagRequest.tagId != skillDefinition.skillId
+            if (isTagValueDifferent || isTagIdDifferent) {
+                skillDefinition.name = incomingTagValue
+                if (isTagIdDifferent) {
+                    skillDefinition.skillId = skillsTagRequest.tagId
+                }
                 SkillDefWithExtra savedSkill
                 DataIntegrityExceptionHandlers.tagDataIntegrityViolationExceptionHandler.handle(projectId) {
                     savedSkill = skillDefWithExtraRepo.save(skillDefinition)
@@ -108,7 +122,7 @@ class SkillTagService {
                         item: DashboardItem.Tag,
                         actionAttributes: [
                                 tagId: skillsTagRequest.tagId,
-                                tagValue: skillsTagRequest.tagValue,
+                                tagValue: incomingTagValue,
                         ],
                         itemId: skillId,
                         projectId: projectId,
@@ -119,7 +133,7 @@ class SkillTagService {
                     action: DashboardAction.Create,
                     item: DashboardItem.Tag,
                     actionAttributes: [
-                            tagValue: skillsTagRequest.tagValue,
+                            tagValue: incomingTagValue,
                     ],
                     itemId: skillsTagRequest.tagId,
                     projectId: projectId,
@@ -127,12 +141,13 @@ class SkillTagService {
         }
 
 
-        log.debug("Added [{}] tag to skills [{}]", skillsTagRequest.tagValue, skillsTagRequest.skillIds)
+        log.debug("Added [{}] tag to skills [{}]", incomingTagValue, skillsTagRequest.skillIds)
     }
 
     @Transactional
-    List<SkillTag> getTagsForProject(String projectId, Boolean includeDisabled=true) {
-        skillDefRepo.getTagsForProject(projectId, includeDisabled.toString())
+    List<SkillTagRes> getTagsForProject(String projectId, Boolean includeDisabled=true) {
+        List<SkillTag> tags = skillDefRepo.getTagsForProject(projectId, includeDisabled.toString())
+        return convertToRes(tags)
     }
 
     @Transactional
@@ -147,7 +162,7 @@ class SkillTagService {
 
         return new SkillTagInfoRes(
                 tagId: tagSkillDef.skillId,
-                tagValue: tagSkillDef.name,
+                tagValue: InputSanitizer.unsanitizeName(tagSkillDef.name),
                 skills: skillsForTag?.sort { it.relationshipCreated }?.reversed().collect {
                     new SkillTagInfoRes.SkillInfo(
                             skillId: it.skillId,
@@ -165,28 +180,31 @@ class SkillTagService {
 
 
     @Transactional
-    List<SkillTag> getTagsForSubject(String projectId, String subjectId, Boolean includeDisabled=true) {
-        skillDefRepo.getTagsForSubject(projectId, subjectId, includeDisabled.toString())
+    List<SkillTagRes> getTagsForSubject(String projectId, String subjectId, Boolean includeDisabled=true) {
+        List<SkillTag> tags = skillDefRepo.getTagsForSubject(projectId, subjectId, includeDisabled.toString())
+        return convertToRes(tags)
     }
 
     @Transactional
-    List<SkillTag> getTagsForSkill(Integer skillRefId) {
-        skillDefRepo.getTagsForSkill(skillRefId)
+    List<SkillTagRes> getTagsForSkill(Integer skillRefId) {
+        List<SkillTag> tags = skillDefRepo.getTagsForSkill(skillRefId)
+        return convertToRes(tags)
     }
 
     @Transactional
-    List<SkillTag> getTagsForSkill(String projectId, String skillId) {
-        skillDefRepo.getTagsForSkillWithSkillId(projectId, skillId)
+    List<SkillTagRes> getTagsForSkill(String projectId, String skillId) {
+        List<SkillTag> tags = skillDefRepo.getTagsForSkillWithSkillId(projectId, skillId)
+        return convertToRes(tags)
     }
 
-    @Transactional
-    List<SkillDefPartial> getSkillsForTag(String projectId, String tagId) {
+    private List<SkillDefPartial> getSkillsForTag(String projectId, String tagId) {
         return skillRelDefRepo.getChildrenPartial(projectId, tagId, SkillRelDef.RelationshipType.Tag)
     }
 
     @Transactional
-    List<SkillTag> getTagsForSkills(String projectId, List<String> skillIds) {
-        skillDefRepo.getTagsForSkills(projectId, skillIds)
+    List<SkillTagRes> getTagsForSkills(String projectId, List<String> skillIds) {
+        List<SkillTag> tags = skillDefRepo.getTagsForSkills(projectId, skillIds)
+        return convertToRes(tags)
     }
 
     @Transactional
@@ -211,7 +229,7 @@ class SkillTagService {
                     action: DashboardAction.Delete,
                     item: DashboardItem.Tag,
                     actionAttributes: [
-                            tagValue: tag.name,
+                            tagValue: InputSanitizer.unsanitizeName(tag.name),
                             removedFromSkills: skillIds,
                     ],
                     itemId: tagId,
@@ -224,7 +242,7 @@ class SkillTagService {
                         item: DashboardItem.Tag,
                         actionAttributes: [
                                 tagId: tag.skillId,
-                                tagValue: tag.name,
+                                tagValue: InputSanitizer.unsanitizeName(tag.name),
                         ],
                         itemId: skillId,
                         projectId: projectId,
@@ -239,6 +257,16 @@ class SkillTagService {
         if (!skillsTagRequest.retainTag && skillsWithTag <= 0) {
             log.info("Tag [${tagId}] removed from all skills, removing tag definition")
             skillDefWithExtraRepo.delete(tag)
+        }
+    }
+
+    private List<SkillTagRes> convertToRes(List<SkillTag> tags) {
+        return tags?.collect {
+            new SkillTagRes(
+                    tagId: it.tagId,
+                    tagValue: InputSanitizer.unsanitizeName(it.tagValue),
+                    numSkills: it.numSkills,
+                    createdOn: it.createdOn)
         }
     }
 }

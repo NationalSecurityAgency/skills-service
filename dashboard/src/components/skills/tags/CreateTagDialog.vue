@@ -20,7 +20,7 @@ import {useRoute} from 'vue-router'
 import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import SkillsService from '@/components/skills/SkillsService.js'
-import InputSanitizer from '@/components/utils/InputSanitizer.js'
+import SkillsNameAndIdInput from "@/components/utils/inputForm/SkillsNameAndIdInput.vue";
 
 const model = defineModel()
 const emit = defineEmits(['added-tag'])
@@ -34,49 +34,91 @@ const appConfig = useAppConfig()
 const route = useRoute()
 
 const header = props.tagIdToEdit ? 'Edit Skill Tag' : 'Create New Skill Tag'
+const isEdit = !!props.tagIdToEdit
 
 const loadingExistingTags = ref(true)
 const existingTags = ref([])
-const origTagValue = ref('')
-const validateAgainstCurrentTags = (value) => {
+const origTagValue = ref({tagId: '', tagValue: ''})
+
+const isTagValueAlreadyPresent = (value) => {
   if (!value) {
     return true
   }
-  const tagInfo = constructTagInfo(value)
-  const tagId = tagInfo.tagId?.toString()?.toLowerCase()
-  const tagValue = tagInfo.tagValue?.toString()?.toLowerCase()
-  const existingTag = existingTags.value.find((item) => item.tagId?.toString()?.toLowerCase() === tagId)
-  const existingValue = existingTags.value.find((item) => item.tagValue?.toString()?.toLowerCase() === tagValue)
-  return existingTag === undefined && existingValue === undefined
+  const searchFor = value.toString().trim().toLocaleLowerCase()
+  const existingTag = existingTags.value.find((item) => item.tagValue?.toString()?.toLowerCase() === searchFor)
+  return existingTag === undefined
 }
 
-const differentDuringEdit = (value) => {
-  if (!value || !props.tagIdToEdit || !origTagValue.value) {
+const isTagIdAlreadyPresent = (value) => {
+  if (!value) {
     return true
   }
-  const tagInfo = constructTagInfo(value)
-  const tagValue = tagInfo.tagValue?.toString()?.toLowerCase()
-  return origTagValue.value?.toString()?.toLowerCase() !== tagValue
+  const searchFor = value.toString().trim().toLocaleLowerCase()
+  const existingTag = existingTags.value.find((item) => item.tagId?.toString()?.toLowerCase() === searchFor)
+  return existingTag === undefined
 }
+
+const tagValueDifferentDuringEdit = (value, context) => {
+  if (!value || !isEdit || !origTagValue.value?.tagValue) {
+    return true
+  }
+  const originalTagValue = origTagValue.value.tagValue?.toString()?.trim()?.toLowerCase()
+  const incomingTagValue = value?.toString()?.trim()?.toLowerCase()
+
+  const originalIdValue = origTagValue.value.tagId?.toString()?.trim()?.toLowerCase()
+  const incomingIdValue = context.parent?.tagId?.toString()?.trim()?.toLowerCase()
+
+  return originalTagValue !== incomingTagValue || originalIdValue !== incomingIdValue
+}
+
+const tagIdDifferentDuringEdit = (value, context) => {
+  if (!value || !isEdit || !origTagValue.value?.tagId) {
+    return true
+  }
+  const originalTagValue = origTagValue.value.tagValue?.toString()?.trim()?.toLowerCase()
+  const incomingTagValue = context.parent?.tagValue?.toString()?.trim()?.toLowerCase()
+
+  const originalTagId = origTagValue.value.tagId?.toString()?.trim()?.toLowerCase()
+  const incomingTagId = value?.toString()?.trim()?.toLowerCase()
+
+  return originalTagId !== incomingTagId || originalTagValue !== incomingTagValue
+}
+
 const schema = object({
-  'newTag': string()
+  'tagValue': string()
       .trim()
       .required()
       .max(appConfig.maxSkillTagLength)
       .test(
           'isNotAnExistingTag',
-          ({label}) => `${label} already exist`,
-          async (value) => validateAgainstCurrentTags(value)
+          ({label}) => `${label} already exists`,
+          async (value) => isTagValueAlreadyPresent(value)
       )
       .test(
           'isNotSameTagDuringEdit',
           ({label}) => `${label} needs to be different`,
-          async (value) => differentDuringEdit(value)
+          async (value, context) => tagValueDifferentDuringEdit(value, context)
       )
-      .label('Tag Name'),
+      .noHtml()
+      .label('Tag'),
+  'tagId': string()
+      .trim()
+      .required()
+      .matches(/^[a-zA-Z0-9]+$/, ({label}) => `${label} may only contain alpha-numeric characters`)
+      .max(appConfig.maxSkillTagLength)
+      .test(
+          'isNotAnExistingIdTag',
+          ({label}) => `${label} already exists`,
+          async (value) => isTagIdAlreadyPresent(value)
+      )
+      .test(
+          'isNotSameTagIdDuringEdit',
+          ({label}) => `${label} needs to be different`,
+          async (value, context) => tagIdDifferentDuringEdit(value, context)
+      )
+      .label('Tag ID'),
 })
 
-const createTagDialog = ref(null)
 const loadExistingTags = () => {
   loadingExistingTags.value = true
   return SkillsService.getTagsForProject(route.params.projectId)
@@ -85,9 +127,8 @@ const loadExistingTags = () => {
       if (props.tagIdToEdit) {
         const foundTag = existingTags.value.find((item) => item.tagId?.toString()?.toLowerCase() === props.tagIdToEdit?.toString()?.toLowerCase())
         if (foundTag) {
-          createTagDialog.value.setFieldValue('newTag', foundTag.tagValue)
-          origTagValue.value = foundTag.tagValue
-          initialData.newTag = foundTag.tagValue
+          origTagValue.value = ({...foundTag})
+          initialData.value = ({...foundTag})
           existingTags.value = existingTags.value.filter((item) => item.tagId !== foundTag.tagId)
         }
       }
@@ -96,24 +137,17 @@ const loadExistingTags = () => {
         loadingExistingTags.value = false
       })
 }
-const initialData = {
-  'newTag': '',
-}
-const constructTagInfo = (tagToSave) => {
-  const valToSave = tagToSave.trim()
-  const tagValue = valToSave;
-  const tagId = InputSanitizer.removeSpecialChars(valToSave)?.toLowerCase();
-  const skillIds = []
-  const taggedInfo = { tagId: tagId, tagValue: tagValue, skillIds };
-  return taggedInfo
-}
+const initialData = ref({
+  'tagValue': '',
+  'tagId': '',
+})
 const saveTag = (tagToSave) => {
-  const taggedInfo = constructTagInfo(tagToSave.newTag)
-
-  const tagId = props.tagIdToEdit || taggedInfo.tagId;
-  return SkillsService.addTagToSkills(route.params.projectId, taggedInfo.skillIds, tagId, taggedInfo.tagValue)
+  const tagValue = tagToSave.tagValue?.trim()
+  const tagId = tagToSave.tagId?.trim();
+  const origTagId = props.tagIdToEdit || null
+  return SkillsService.addTagToSkills(route.params.projectId, [], tagId, tagValue, origTagId)
     .then(() => {
-      return taggedInfo
+      return {tagId, tagValue, origTagId}
     });
 }
 const afterSave = (taggedInfo) => {
@@ -125,7 +159,6 @@ const afterSave = (taggedInfo) => {
 <template>
   <SkillsInputFormDialog
     id="createTagDialog"
-    ref="createTagDialog"
     :header="header"
     v-model="model"
     :save-data-function="saveTag"
@@ -137,10 +170,15 @@ const afterSave = (taggedInfo) => {
     :enable-return-focus="true"
     :enable-input-form-resiliency="false"
     data-cy="createTagDialog"
+    dialog-class="w-11/12 sm:w-10/12 lg:w-9/12 xl:w-7/12"
   >
-    <SkillsTextInput
-      label="New Tag"
-      name="newTag" />
+    <SkillsNameAndIdInput
+        name-label="Tag"
+        name-field-name="tagValue"
+        id-label="Tag ID"
+        id-field-name="tagId"
+        :name-to-id-sync-enabled="!isEdit">
+    </SkillsNameAndIdInput>
   </SkillsInputFormDialog>
 </template>
 
