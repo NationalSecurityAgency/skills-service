@@ -95,6 +95,43 @@ describe('Tag Skills on Subject Page Tests', () => {
         cy.get('[data-cy="title"]').contains('TAG: C%^o&*() O^&*L')
     });
 
+    it('validate in tag create dialog for existing tag names and ids', () => {
+        cy.addTagToSkills(1, ['skill1'], 1)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        // must exist initially
+        cy.get('[data-cy="manageSkillLink_skill1"]');
+        cy.get('[data-cy="manageSkillLink_skill2"]');
+        cy.get('[data-cy="manageSkillLink_skill3"]');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Create New Tag').click()
+
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
+        cy.get('[data-cy="tagValue"]').type('tAg ');
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="tagValue"]').type('1');
+        cy.get('[data-cy="tagValueError"]').contains('Tag already exists')
+        cy.get('[data-cy="idError"]').contains('Tag ID already exists')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="tagValue"]').type('{backspace}');
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
+        cy.get('[data-cy="idError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        // validation hits on the id since special chars are removed
+        cy.get('[data-cy="tagValue"]').type('$%^&*1');
+        cy.get('[data-cy="idError"]').contains('Tag ID already exists')
+        cy.get('[data-cy="tagValueError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+    })
+
     it('tag skills with existing tag', () => {
 
         cy.visit('/administrator/projects/proj1/subjects/subj1');
