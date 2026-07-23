@@ -294,7 +294,7 @@ describe('Approver Role Tests', () => {
     it('/skill-tags page - approver role has no mutation controls', function () {
         const runCheck = (projNum, manageButtonTxt = 'Manage', assertChainPrepend = null) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
-            cy.visit(`/administrator/projects/proj${projNum}/skills-tags`);
+            cy.visit(`/administrator/projects/proj${projNum}/skill-tags`);
             cy.wait(`@getSettingsProj${projNum}`);
             cy.get('[data-cy="btn_Skill Tags"]').should(`${chainerPrepend}exist`)
             cy.get('[data-cy="editTag_tag1"]').should(`${chainerPrepend}exist`)

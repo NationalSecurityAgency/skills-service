@@ -38,7 +38,7 @@ describe('Skill Tags Accessibility Tests', () => {
     it(`skill tags page${darkMode}`, () => {
       cy.setDarkModeIfNeeded(darkMode)
       // Test page header and navigation
-      cy.visit('/administrator/projects/proj1/skills-tags')
+      cy.visit('/administrator/projects/proj1/skill-tags')
       cy.injectAxe()
 
       const tagsTableSelector = '[data-cy="skillsTagsTable"]'
