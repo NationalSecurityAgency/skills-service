@@ -14,16 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref } from 'vue'
+import {ref, computed, watch} from 'vue'
 import { object, string } from 'yup'
 import { useRoute } from 'vue-router'
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
 import { SkillsReporter } from '@skilltree/skills-client-js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
 import SkillsService from '@/components/skills/SkillsService.js'
-import InputSanitizer from '@/components/utils/InputSanitizer.js'
+import SkillsNameAndIdInput from "@/components/utils/inputForm/SkillsNameAndIdInput.vue";
 
 const model = defineModel()
 const emit = defineEmits(['added-tag'])
@@ -42,19 +47,40 @@ const route = useRoute()
 const skillsState = useSubjectSkillsState()
 const focusState = useFocusState()
 const schema = object({
-  'newTag': string()
+  'tagValue': string()
     .trim()
     .max(appConfig.maxSkillTagLength)
-    .label('Tag Name'),
+    .label('Tag'),
+  'tagId': string()
+      .trim()
+      .matches(/^[a-zA-Z0-9]*$/, ({label}) => `${label} may only contain alpha-numeric characters`)
+      .max(appConfig.maxSkillTagLength)
+      .label('Tag ID'),
   'existingTag': object()
     .test(
     'existingOrNewTagMustBePresent',
     () => 'New or existing tag must be supplied',
     async (value, testContext) => {
-      return value || testContext.parent.newTag
+      return value?.tagId || (testContext.parent.tagValue && testContext.parent.tagId)
     }
   )
 })
+
+const addSkillTagDialog = ref(null)
+const existingTagTabId = 'existingTagTab'
+const newTagTabId = 'newTagTab'
+const currentTab = ref(existingTagTabId)
+const isExistingTag = computed(() => currentTab.value === existingTagTabId)
+watch(() => currentTab.value,
+    () => {
+      if (isExistingTag.value) {
+        addSkillTagDialog.value.setFieldValue('tagId', '')
+        addSkillTagDialog.value.setFieldValue('tagValue', '')
+      } else {
+        addSkillTagDialog.value.setFieldValue('existingTag', {})
+      }
+    })
+
 const existingTags = ref([])
 const loadExistingTags = () => {
   return SkillsService.getTagsForProject(route.params.projectId)
@@ -64,19 +90,17 @@ const loadExistingTags = () => {
     })
 }
 const initialData = {
-  'newTag': '',
+  'tagValue': '',
+  'tagId': '',
 }
 const saveTags = (values) => {
-  const valToSave = values.newTag?.trim() || values.existingTag.tagValue.trim()
-  const tagValue = valToSave;
-  const tagId = InputSanitizer.removeSpecialChars(valToSave)?.toLowerCase();
-
   const skillIds = props.skills.map((skill) => skill.skillId);
-  const taggedInfo = { tagId: tagId, tagValue: tagValue, skillIds };
+  const tagId = isExistingTag.value ? values.existingTag.tagId?.toString()?.toLowerCase() : values.tagId?.toString()?.toLowerCase()
+  const tagValue = isExistingTag.value ? values.existingTag.tagValue : values.tagValue
   return SkillsService.addTagToSkills(route.params.projectId, skillIds, tagId, tagValue)
-    .then(() => {
-      return taggedInfo
-    });
+      .then(() => {
+        return {tagId, tagValue, skillIds}
+      });
 }
 const afterSave = (taggedInfo) => {
   const skills = props.groupId ? skillsState.getGroupSkills(props.groupId) : skillsState.subjectSkills
@@ -92,16 +116,13 @@ const afterSave = (taggedInfo) => {
   focusState.setElementId(focusOn)
   focusState.focusOnLastElement()
 }
-const disableExistingTagsSelector = ref(false)
 
-const onNewTagChange = (newValue) => {
- disableExistingTagsSelector.value = (newValue && newValue.trim().length > 0) || false
-}
 </script>
 
 <template>
   <SkillsInputFormDialog
     id="addSkillTagDialog"
+    ref="addSkillTagDialog"
     header="Tag Selected Skills"
     v-model="model"
     :save-data-function="saveTags"
@@ -110,21 +131,36 @@ const onNewTagChange = (newValue) => {
     :validation-schema="schema"
     :initial-values="initialData"
     :enable-return-focus="true"
+    :enable-input-form-resiliency="false"
     data-cy="addSkillTagDialog"
   >
-    <SkillsDropDown
-      label="Select Existing Tag"
-      :options="existingTags"
-      optionLabel="tagValue"
-      name="existingTag"
-      :disabled="disableExistingTagsSelector"/>
-    <Divider align="left" type="dotted">
-      <b>OR</b>
-    </Divider>
-    <SkillsTextInput
-      label="Create New Tag"
-      name="newTag"
-      @input="onNewTagChange"/>
+    <Tabs v-model:value="currentTab">
+      <TabList >
+        <Tab :value="existingTagTabId">Select Existing Tag</Tab>
+        <Tab :value="newTagTabId">Create New Tag</Tab>
+      </TabList>
+      <TabPanels>
+        <TabPanel :value="existingTagTabId">
+          <div class="p-5">
+            <SkillsDropDown
+                label="Existing Tag"
+                :options="existingTags"
+                optionLabel="tagValue"
+                name="existingTag"/>
+          </div>
+        </TabPanel>
+        <TabPanel :value="newTagTabId">
+          <div class="p-5">
+            <SkillsNameAndIdInput
+                name-label="Tag"
+                name-field-name="tagValue"
+                id-label="Tag ID"
+                id-field-name="tagId">
+            </SkillsNameAndIdInput>
+          </div>
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
   </SkillsInputFormDialog>
 </template>
 
