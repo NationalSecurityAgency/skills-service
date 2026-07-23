@@ -550,9 +550,10 @@ describe('Inception Skills Tests', () => {
         cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="skillActionsBtn"]')
             .click();
-        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]', true)
+        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
+        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Create New Tag').click()
 
-        cy.get('[data-cy="newTag"]').type('New Tag 1')
+        cy.get('[data-cy="tagValue"]').type('New Tag 1')
 
         cy.assertInceptionPoints('Skills', 'AddOrModifyTags', 0)
         cy.clickSaveDialogBtn()
