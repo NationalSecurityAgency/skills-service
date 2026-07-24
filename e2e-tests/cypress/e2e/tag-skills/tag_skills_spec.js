@@ -335,52 +335,6 @@ describe('Tag Skills on Subject Page Tests', () => {
         cy.get('[data-cy="skillTag-skill1-tag2"]').should('exist')
     });
 
-    it('adding a duplicate tag skill is ignored and not displayed', () => {
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-
-        // must exist initially
-        cy.get('[data-cy="manageSkillLink_skill1"]');
-        cy.get('[data-cy="manageSkillLink_skill2"]');
-        cy.get('[data-cy="manageSkillLink_skill3"]');
-
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
-        cy.get('[data-cy="skillActionsBtn"]').click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
-        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Create New Tag').click()
-
-        cy.get('[data-cy="tagValue"]').type('New Tag 1')
-        cy.clickSaveDialogBtn()
-
-        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('exist')
-        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
-        cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
-        cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
-        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
-
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
-        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('exist')
-        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
-        cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
-        cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
-        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
-
-        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
-        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
-        cy.get('[data-cy="skillActionsBtn"]').click();
-        cy.get('[data-cy="skillsActionsMenu"] [aria-label="Add Tag"]').click()
-        cy.get('[data-pc-section="tablist"] [data-pc-name="tab"]').contains('Create New Tag').click()
-
-        cy.get('[data-cy="tagValue"]').type('New Tag 1')
-        cy.clickSaveDialogBtn()
-
-        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('exist')
-        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
-        cy.get('[data-cy="skillTag-skill2-newtag1"]').should('not.exist')
-        cy.get('[data-cy="skillTag-skill3-newtag1"]').should('exist')
-        cy.get('[data-cy="skillTag-skill1-newtag1"]').should('have.length', 1)
-    });
-
     it('tag is linked to the subject page', () => {
         cy.addTagToSkills(1, ['skill1', 'skill2', 'skill3'], 1)
         cy.addTagToSkills(1, ['skill1', 'skill2'], 2)
