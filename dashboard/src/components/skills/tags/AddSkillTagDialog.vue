@@ -51,16 +51,44 @@ const focusState = useFocusState()
 const pluralize = usePluralize()
 const numberFormat = useNumberFormat()
 
+const isTagValueAlreadyPresent = (value) => {
+  if (!value) {
+    return true
+  }
+  const searchFor = value.toString().trim().toLocaleLowerCase()
+  const existingTag = existingTags.value.find((item) => item.tagValue?.toString()?.toLowerCase() === searchFor)
+  return existingTag === undefined
+}
+
+const isTagIdAlreadyPresent = (value) => {
+  if (!value) {
+    return true
+  }
+  const searchFor = value.toString().trim().toLocaleLowerCase()
+  const existingTag = existingTags.value.find((item) => item.tagId?.toString()?.toLowerCase() === searchFor)
+  return existingTag === undefined
+}
+
 const schema = object({
   'tagValue': string()
       .trim()
       .noHtml()
       .max(appConfig.maxSkillTagLength)
+      .test(
+          'isNotAnExistingTag',
+          ({label}) => `${label} already exists`,
+          async (value) => isTagValueAlreadyPresent(value)
+      )
       .label('Tag'),
   'tagId': string()
       .trim()
       .matches(/^[a-zA-Z0-9]*$/, ({label}) => `${label} may only contain alpha-numeric characters`)
       .max(appConfig.maxSkillTagLength)
+      .test(
+          'isNotAnExistingIdTag',
+          ({label}) => `${label} already exists`,
+          async (value) => isTagIdAlreadyPresent(value)
+      )
       .label('Tag ID'),
   'existingTag': object()
     .test(
