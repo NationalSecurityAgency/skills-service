@@ -237,9 +237,10 @@ const showChangeWarning = (newValue) => {
           </div>
         </StepPanel>
         <StepPanel value="2" v-slot="{ activateCallback }">
-          <div v-if="hasUserSuggestOptions" class="flex gap-1 items-center mb-3">
+          <div class="flex gap-1 items-center mb-3">
             <div class="flex flex-1 px-1 gap-2">
             <Select  data-cy="userSuggestOptionsDropdown"
+                     v-if="hasUserSuggestOptions"
                      :defaultValue="selectedSuggestOption"
                      @value-change="showChangeWarning"
                      :options="userSuggestOptions" />
