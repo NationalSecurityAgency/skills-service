@@ -70,7 +70,7 @@
     "eslint-plugin-vue": "10.9.0",
     "jsdom": "29.1.1",
     "license-checker": "25.0.1",
-    "postcss": "8.5.12",
+    "postcss": "8.5.18",
     "prettier": "3.8.3",
     "rollup-plugin-visualizer": "7.0.1",
     "tailwindcss": "4.2.4",
