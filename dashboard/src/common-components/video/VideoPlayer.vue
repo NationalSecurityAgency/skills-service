@@ -19,6 +19,7 @@ import videojs from 'video.js';
 import WatchedSegmentsUtil from '@/common-components/video/WatchedSegmentsUtil';
 import {useStorage} from "@vueuse/core";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import registerDownloadPlugin from './registerDownloadPlugin.js';
 
 const props = defineProps({
   videoPlayerId: {
@@ -95,10 +96,17 @@ onMounted(() => {
     playerWidth.value = videoPlayerSizeInStorage.value.width;
     playerHeight.value = videoPlayerSizeInStorage.value.height;
   }
+  registerDownloadPlugin();
   const player = videojs(vidPlayerId, {
     playbackRates: [0.5, 1, 1.5, 2],
     enableSmoothSeeking: true,
     audioOnlyMode: props.options.isAudio,
+    plugins: {
+      downloadButton: {
+        // fileName: 'ocean-waves.mp4' // Optional custom file name
+        // downloadUrl: 'https://example.com/direct-download.mp4' // Optional override URL
+      }
+    }
   }, () => {
     player.on('durationchange', () => {
       const videoDuration = getVideoDuration(player)
@@ -304,5 +312,12 @@ const createResizeSupport = () => {
   cursor: ew-resize;
 }
 
+/* Custom icon styling for the download button using standard CSS */
+:deep(.vjs-download-button .vjs-icon-placeholder::before) {
+  /* Video.js comes with a built-in download icon class or unicode character */
+  content: "\f110";
+  font-family: "VideoJS";
+  cursor: pointer;
+}
 
 </style>
