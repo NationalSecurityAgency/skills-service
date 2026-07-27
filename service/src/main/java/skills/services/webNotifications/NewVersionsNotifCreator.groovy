@@ -49,6 +49,19 @@ class NewVersionsNotifCreator {
         assert docsRootHost // must have it configured
         List<WebNotifWrapper> newVersionsNotifications = [
                 new WebNotifWrapper(
+                        releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-08-12'),
+                        notif: new WebNotification(
+                                notifiedOn: new Date(),
+                                showUntil: Date.parse('yyyy-MM-dd', '2026-09-23'),
+                                lookupId: "new-versions-11",
+                                title: "Version 4.6 Released",
+                                notification: """- Elevated Skill Tag support to the project level, introducing comprehensive tag management and interactive trainee overview displays across the application.
+- Implemented admin project-wide search with direct navigation to skills, subjects, badges, groups, and tags
+- Implemented ability to filter earned achievements using user tags
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)
+""")
+                ),
+                new WebNotifWrapper(
                         releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-07-13'),
                         notif: new WebNotification(
                                 notifiedOn: new Date(),
