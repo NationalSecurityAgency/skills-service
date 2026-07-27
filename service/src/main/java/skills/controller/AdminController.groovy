@@ -693,7 +693,8 @@ class AdminController {
                             @RequestParam(name = "captions", required = false) String captions,
                             @RequestParam(name = "transcript", required = false) String transcript,
                             @RequestParam(name = "width", required = false) Double width,
-                            @RequestParam(name = "height", required = false) Double height) {
+                            @RequestParam(name = "height", required = false) Double height,
+                            @RequestParam(name = "allowDownloads", required = false, defaultValue = "false") Boolean allowDownloads) {
 
         if (captions) {
             propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxVideoCaptionsLength, "Captions", captions)
@@ -702,7 +703,7 @@ class AdminController {
             propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxVideoTranscriptLength, "Transcript", transcript)
         }
 
-        SkillVideoAttrs res = adminVideoService.saveVideo(projectId, skillId, isAlreadyHosted, file, videoUrl, captions, transcript, width, height)
+        SkillVideoAttrs res = adminVideoService.saveVideo(projectId, skillId, isAlreadyHosted, file, videoUrl, captions, transcript, width, height, allowDownloads)
         return res
     }
 

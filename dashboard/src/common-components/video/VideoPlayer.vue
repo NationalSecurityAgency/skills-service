@@ -96,17 +96,21 @@ onMounted(() => {
     playerWidth.value = videoPlayerSizeInStorage.value.width;
     playerHeight.value = videoPlayerSizeInStorage.value.height;
   }
-  registerDownloadPlugin();
+
+  if(!videojs.getPlugin('downloadButton')) {
+    registerDownloadPlugin();
+  }
+  
   const player = videojs(vidPlayerId, {
     playbackRates: [0.5, 1, 1.5, 2],
     enableSmoothSeeking: true,
     audioOnlyMode: props.options.isAudio,
-    plugins: {
+    plugins: props.options.allowDownloads ? {
       downloadButton: {
         // fileName: 'ocean-waves.mp4' // Optional custom file name
         // downloadUrl: 'https://example.com/direct-download.mp4' // Optional override URL
       }
-    }
+    } : null
   }, () => {
     player.on('durationchange', () => {
       const videoDuration = getVideoDuration(player)
