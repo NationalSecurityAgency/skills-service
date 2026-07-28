@@ -54,7 +54,7 @@ const hasTags = computed(() => tags.value?.length > 0)
         <div data-cy="skillTags" class="flex flex-wrap gap-2 items-start justify-center md:justify-start">
           <div v-for="(tag, index) in tags"
                class="border rounded-xl px-2 py-1 text-slate-900 dark:text-slate-100 dark:bg-slate-800 dark:border-slate-600"
-               :class="getBgColor(index)"
+               :class="[getBgColor(index), 'sd-theme-tile-background']"
                icon="fa-solid fa-tag"
                severity="secondary">
             <router-link
@@ -62,7 +62,7 @@ const hasTags = computed(() => tags.value?.length > 0)
                 :data-cy="`tagLink-${tag.tagId}`">
               <div class="flex gap-1 items-center">
                 <i class="fa-solid fa-tag" aria-hidden="true" :class="colors.getTextClass(index)"></i>
-                <div data-cy="tagName" class="sd-theme-tile-background-color">{{ tag.tagValue }}</div>
+                <div data-cy="tagName">{{ tag.tagValue }}</div>
                 <div data-cy="numSkills" class="border rounded-3xl px-2 bg-gray-200 text-slate-900 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-500">
                   {{ tag.numSkills }}
                 </div>
