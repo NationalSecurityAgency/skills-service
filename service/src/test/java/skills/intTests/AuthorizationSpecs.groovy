@@ -17,17 +17,14 @@ package skills.intTests
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.web.client.HttpClientErrorException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
-import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.UserRoleRepo
 import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
-import spock.lang.Specification
+import spock.lang.Unroll
 
 class AuthorizationSpecs extends DefaultIntSpec {
 
@@ -368,5 +365,73 @@ class AuthorizationSpecs extends DefaultIntSpec {
         then:
         SkillsClientException ex = thrown()
         ex.httpStatus == HttpStatus.FORBIDDEN
+    }
+
+    def 'api - user cannot get another user\'s project summary if they are not an admin for said project, even though they are an admin for a different project'() {
+        when:
+
+        SkillsService skillsServiceUser2 = createService("newUser")
+
+        // make sure skillsServiceUser2 is a project admin, but not for projId
+        String projId3 = 'skillsServiceUser2Project'
+        def project3 = skillsServiceUser2.createProject([projectId: projId3, name: "My Project3"]).body
+        assert project3.success == true
+        project3 = skillsServiceUser2.getProject(projId3)
+
+        skillsServiceUser2.getSkillsSummaryForUser(projId, 'aUser')
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.httpStatus == HttpStatus.FORBIDDEN
+    }
+
+    @Unroll
+    def 'api - user cannot access another user\'s #endpointName if they are not an admin for said project, even though they are an admin for a different project'() {
+
+        Map subj1 = [
+                projectId: projId,
+                subjectId: "subj1",
+                name: "Test Subject 1"
+        ]
+        Map skill1 = [
+                projectId: projId,
+                subjectId: subj1.subjectId,
+                skillId: "skill1",
+                name: "Test Skill 1",
+                type: "Skill",
+                pointIncrement: 100,
+                numPerformToCompletion: 1,
+                pointIncrementInterval: 0,
+                numMaxOccurrencesIncrementInterval: 1
+        ]
+        skillsService.createSubject(subj1)
+        skillsService.createSkill(skill1)
+
+        // make sure skillsServiceUser2 is a project admin, but not for projId
+        SkillsService skillsServiceUser2 = createService("newUser")
+        String projId3 = 'skillsServiceUser2Project'
+        def project3 = skillsServiceUser2.createProject([projectId: projId3, name: "My Project3"]).body
+        assert project3.success == true
+        project3 = skillsServiceUser2.getProject(projId3)
+
+        when:
+        endpointCall(skillsServiceUser2, projId)
+
+        then:
+        SkillsClientException ex = thrown()
+        ex.httpStatus == HttpStatus.FORBIDDEN
+
+        where:
+        endpointName                         | endpointCall
+        'project summary'                    | { SkillsService svc, String otherProjectId -> svc.getSkillsSummaryForUser(otherProjectId, 'aUser') }
+        'subject summary'                    | { SkillsService svc, String otherProjectId -> svc.getSubjectSummaryForUser('aUser', otherProjectId, 'subj1') }
+        'skill summary'                      | { SkillsService svc, String otherProjectId -> svc.getSingleSkillSummary('aUser', otherProjectId, 'skill1') }
+        'point history'                      | { SkillsService svc, String otherProjectId -> svc.getPointHistory('aUser', otherProjectId) }
+        'rank'                               | { SkillsService svc, String otherProjectId -> svc.getRank('aUser', otherProjectId) }
+        'rank distribution'                  | { SkillsService svc, String otherProjectId -> svc.getRankDistribution('aUser', otherProjectId) }
+        'leaderboard'                        | { SkillsService svc, String otherProjectId -> svc.getLeaderboard('aUser', otherProjectId) }
+        'badges summary'                     | { SkillsService svc, String otherProjectId -> svc.getBadgesSummary('aUser', otherProjectId) }
+        'tags summary'                       | { SkillsService svc, String otherProjectId -> svc.wsHelper.apiGet("/projects/${otherProjectId}/tags/summary?userId=aUser") }
+        'remove rejection from view'         | { SkillsService svc, String otherProjectId -> svc.removeRejectionFromView(otherProjectId, 1, 'aUser') }
     }
 }
