@@ -74,7 +74,7 @@ const hasBadges = computed(() => {
         </div>
       </div>
 
-      <tag-list class="mt-4" />
+      <tag-list class="mt-4" data-cy="skillTagsCard" />
 
       <subject-tiles class="mt-4"/>
 

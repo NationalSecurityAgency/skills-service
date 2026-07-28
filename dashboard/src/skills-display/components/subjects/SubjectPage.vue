@@ -79,7 +79,7 @@ watch( () => route.params.subjectId, () => {
         </template>
       </Card>
 
-      <tag-list class="mt-4" />
+      <tag-list class="mt-4" data-cy="skillTagsCard" />
 
       <skills-progress-list
         class="mt-4" />
