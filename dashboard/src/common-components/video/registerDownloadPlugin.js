@@ -30,8 +30,10 @@ class DownloadButton extends Button {
     // Triggered when the user clicks the button
     handleClick() {
         const player = this.player();
+        const currentSrc = player.currentSrc();
+        const filenameFromSrc = currentSrc.substring(currentSrc.lastIndexOf('/') + 1);
         // Use custom download URL if provided in options, otherwise fallback to current src
-        const src = this.options().downloadUrl || player.currentSrc();
+        const src = this.options().downloadUrl || currentSrc;
 
         if (!src) {
             console.warn('No video source available for download.');
@@ -41,7 +43,7 @@ class DownloadButton extends Button {
         // Trigger standard browser download
         const link = document.createElement('a');
         link.href = src;
-        link.download = this.options().fileName || 'video.mp4';
+        link.download = filenameFromSrc || 'video.mp4';
         link.target = '_blank';
         document.body.appendChild(link);
         link.click();

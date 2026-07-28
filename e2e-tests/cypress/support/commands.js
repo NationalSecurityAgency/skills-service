@@ -231,6 +231,9 @@ Cypress.Commands.add("saveVideoAttrs", (container, item, videoAttrs, quiz = fals
     if (videoAttrs.isAlreadyHosted !== null && videoAttrs.isAlreadyHosted !== undefined) {
         formData.set('isAlreadyHosted', videoAttrs.isAlreadyHosted);
     }
+    if (videoAttrs.allowDownloads) {
+        formData.set('allowDownloads', videoAttrs.allowDownloads);
+    }
     let requestDone = false;
     cy.getCookie('XSRF-TOKEN').should('exist').then((xsrfCookie) => {
         if (videoAttrs.file) {

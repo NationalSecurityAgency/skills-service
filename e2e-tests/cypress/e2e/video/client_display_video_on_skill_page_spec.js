@@ -406,4 +406,27 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
 
     });
+
+    it('videos can be downloaded', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
+        const vidAttr = { videoUrl: testVideo, allowDownloads: true }
+        cy.saveVideoAttrs(1, 1, vidAttr)
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
+        cy.get('.vjs-download-button').should('exist');
+
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
+        cy.get('.vjs-download-button').click();
+
+        cy.fixture('create-quiz.mp4').then(fixture => {
+            cy.readFile('cypress/downloads/create-quiz.mp4').then(download => {
+                // expect(fixture).to.eq(download)
+                assert(fixture === download, 'files are matching')
+            })
+        })
+
+    });
 });

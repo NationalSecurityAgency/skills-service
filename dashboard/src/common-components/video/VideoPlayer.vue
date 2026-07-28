@@ -100,7 +100,7 @@ onMounted(() => {
   if(!videojs.getPlugin('downloadButton')) {
     registerDownloadPlugin();
   }
-  
+
   const player = videojs(vidPlayerId, {
     playbackRates: [0.5, 1, 1.5, 2],
     enableSmoothSeeking: true,

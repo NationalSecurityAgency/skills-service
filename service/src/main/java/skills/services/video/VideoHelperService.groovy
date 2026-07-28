@@ -72,6 +72,7 @@ class VideoHelperService {
         videoAttrs.internallyHostedAttachmentUuid = existingVideoAttributes.internallyHostedAttachmentUuid
         videoAttrs.width = existingVideoAttributes.width
         videoAttrs.height = existingVideoAttributes.height
+        videoAttrs.allowDownloads = existingVideoAttributes.allowDownloads
 
         return videoAttrs
     }

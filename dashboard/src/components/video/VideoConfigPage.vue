@@ -108,6 +108,7 @@ const computedVideoConf = computed(() => {
     captionsUrl,
     width: configuredWidth.value,
     height: configuredHeight.value,
+    allowDownloads: videoConf.value.allowDownloads,
   };
 });
 const lengthyOperationLoadingBarTimeout = computed(() => {
@@ -607,17 +608,18 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
 
             <div data-cy="allowDownloadsInput" class="mt-4">
               <div class="flex mb-2">
-                <div class="flex-1 content-end">
+                <div class="flex items-center flex-1">
                   <label for="allowDownloads">Allow Downloads:</label>
+                  <SkillsInputSwitch data-cy="allowDownloads"
+                                     aria-labelledby="allowDownloads"
+                                     inputId="allowDownloads"
+                                     style="height:1rem !important;"
+                                     class="ml-3"
+                                     size="small"
+                                     name="enabled"
+                                     v-model="videoConf.allowDownloads" />
                 </div>
               </div>
-              <SkillsInputSwitch data-cy="allowDownloads"
-                                 aria-labelledby="allowDownloads"
-                                 inputId="allowDownloads"
-                                 style="height:1rem !important;"
-                                 size="small"
-                                 name="enabled"
-                                 v-model="videoConf.allowDownloads" />
             </div>
 
             <Message severity="error" v-if="overallErrMsg">
