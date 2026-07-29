@@ -464,22 +464,27 @@ class CopySkillsToAnotherProjSubjSpecs extends CopyIntSpec {
         p2Skill1VideoAttributes.videoType == p1Skill1VideoAttributes.videoType
     }
 
-    def "copy an enabled skill to a destination subject that is not enabled disables the skill"() {
+    def "copying an enabled skill to a destination subject that is not enabled disables the skill"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         def p1Subj1Skills = createSkills(3, 1, 1, 100)
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1Subj1Skills)
 
         def p2 = createProject(2)
-        def p2subj1 = createSubject(2, 2)
+        def p2subj1 = createSubject(2, 1)
         p2subj1.enabled = false
         skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [])
 
         when:
+        def originalSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
         skillsService.copySkillDefsIntoAnotherProjectSubject(p1.projectId, p1Subj1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId)
         def copiedSkills = skillsService.getSkillsForSubject(p2.projectId, p2subj1.subjectId)
 
         then:
+        originalSkills
+        originalSkills.size() == 3
+        originalSkills.enabled == [true, true, true]
+        originalSkills.skillId == p1Subj1Skills.collect { it.skillId }
         copiedSkills
         copiedSkills.size() == 3
         copiedSkills.enabled == [false, false, false]
