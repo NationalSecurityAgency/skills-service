@@ -19,8 +19,10 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome
-import org.springframework.boot.autoconfigure.security.oauth2.client.ClientsConfiguredCondition
+import org.springframework.boot.autoconfigure.condition.SpringBootCondition
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.bind.Bindable
+import org.springframework.boot.context.properties.bind.Binder
 import org.springframework.context.annotation.ConditionContext
 import org.springframework.context.annotation.Conditional
 import org.springframework.context.annotation.Configuration
@@ -62,7 +64,7 @@ class CreateAccountController {
     AutoLoginService autoLoginService
 
     @Autowired
-    private ClientRegistrationRepository clientRegistrationRepository;
+    private ClientRegistrationRepository clientRegistrationRepository
 
     @Autowired(required = false)
     OAuth2ProviderProperties oAuth2ProviderProperties
@@ -172,7 +174,7 @@ class CreateAccountController {
     @Configuration
     @Conditional(NoClientsConfiguredCondition)
     /*
-      EmptyOauth2ClientRegistrationRepository will only be created if there are not OAuth2 clients configured (i.e.
+      EmptyOauth2ClientRegistrationRepository will only be created if there are no OAuth2 clients configured (i.e.
       when there are no security.oauth2.client.registration.XXX properties configured)
      */
     static class EmptyOauth2ClientRegistrationRepository implements ClientRegistrationRepository, Iterable<ClientRegistration> {
@@ -187,11 +189,21 @@ class CreateAccountController {
             return null
         }
     }
+}
 
-    static class NoClientsConfiguredCondition extends ClientsConfiguredCondition {
-        @Override
-        ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
-            return ConditionOutcome.inverse(super.getMatchOutcome(context, metadata))
+class NoClientsConfiguredCondition extends SpringBootCondition {
+
+    private static final String PREFIX = "spring.security.oauth2.client.registration"
+
+    @Override
+    ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
+        Map<String, Object> properties = Binder.get(context.environment)
+                .bind(PREFIX, Bindable.mapOf(String, Object))
+                .orElse(Collections.emptyMap())
+
+        if (properties.isEmpty()) {
+            return ConditionOutcome.match("No OAuth2 client registrations configured. Creating placeholder repository.")
         }
+        return ConditionOutcome.noMatch("OAuth2 client registrations were detected.")
     }
 }

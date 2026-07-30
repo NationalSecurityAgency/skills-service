@@ -15,8 +15,8 @@
  */
 package skills.dbupgrade
 
-import com.fasterxml.jackson.databind.MappingIterator
-import com.fasterxml.jackson.databind.json.JsonMapper
+import tools.jackson.databind.MappingIterator
+import tools.jackson.databind.json.JsonMapper
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.FileUtils
 import org.springframework.beans.factory.annotation.Autowired

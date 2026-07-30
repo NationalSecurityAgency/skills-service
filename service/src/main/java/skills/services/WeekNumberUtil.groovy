@@ -27,7 +27,7 @@ class WeekNumberUtil {
     static final LocalDate epoch = LocalDate.ofEpochDay ( 0 ).with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
 
     public static int getWeekNumber(Date aDate) {
-        return ChronoUnit.WEEKS.between(epoch, aDate.toLocalDate())
+        return (int) ChronoUnit.WEEKS.between(epoch, aDate.toLocalDate())
     }
 
     public static LocalDate getStartOfWeekFromWeekNumber(Integer weekNumber) {

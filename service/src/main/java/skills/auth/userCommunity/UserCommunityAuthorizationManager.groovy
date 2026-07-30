@@ -30,7 +30,7 @@ import org.springframework.security.authorization.AuthorizationManager
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext
 import org.springframework.security.web.util.UrlUtils
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher
+import org.springframework.security.authorization.AuthorizationResult
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
 import skills.auth.UserAuthService
@@ -79,19 +79,37 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     @PostConstruct
     void init() {
         authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
-        projectsRequestMatcher = new AntPathRequestMatcher("/**/*projects/**")
-        quizzesAdminRequestMatcher = new AntPathRequestMatcher("/**/quiz-definitions/**")
-        quizzesApiRequestMatcher = new AntPathRequestMatcher("/**/quizzes/**")
-        attachmentsRequestMatcher = new AntPathRequestMatcher("/api/download/**")
-        adminGroupRequestMatcher = new AntPathRequestMatcher("/**/admin-group-definitions/**")
-        badgeRequestMatcher = new AntPathRequestMatcher("/**/badge*/**")
+        projectsRequestMatcher = { HttpServletRequest request ->
+            String requestUri = request.getRequestURI() ?: ''
+            return requestUri.contains('/projects/')
+        } as RequestMatcher
+        quizzesAdminRequestMatcher = { HttpServletRequest request ->
+            String requestUri = request.getRequestURI() ?: ''
+            return requestUri.contains('/quiz-definitions/')
+        } as RequestMatcher
+        quizzesApiRequestMatcher = { HttpServletRequest request ->
+            String requestUri = request.getRequestURI() ?: ''
+            return requestUri.contains('/quizzes/')
+        } as RequestMatcher
+        attachmentsRequestMatcher = { HttpServletRequest request ->
+            String requestUri = request.getRequestURI() ?: ''
+            return requestUri.startsWith('/api/download/')
+        } as RequestMatcher
+        adminGroupRequestMatcher = { HttpServletRequest request ->
+            String requestUri = request.getRequestURI() ?: ''
+            return requestUri.contains('/admin-group-definitions/')
+        } as RequestMatcher
+        badgeRequestMatcher = { HttpServletRequest request ->
+            String requestUri = request.getRequestURI() ?: ''
+            return requestUri.contains('/badge')
+        } as RequestMatcher
     }
 
     @Override
-    AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext authorizationContext) {
+    AuthorizationResult authorize(Supplier<? extends Authentication> authentication, RequestAuthorizationContext authorizationContext) {
         HttpServletRequest request = authorizationContext.getRequest()
         log.debug("evaluating request [{}] for invite-only protection", request.getRequestURI())
-        AuthorizationDecision authenticatedDecision = authenticatedAuthorizationManager.check(authentication, authorizationContext)
+        AuthorizationResult authenticatedDecision = authenticatedAuthorizationManager.authorize(authentication, authorizationContext)
         if (!authenticatedDecision.isGranted()) {
             log.debug("unauthenticated access attempt to protected resource", request.getRequestURI())
             return authenticatedDecision

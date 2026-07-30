@@ -16,10 +16,6 @@
 package skills.storage.model
 
 import groovy.transform.ToString
-import org.hibernate.annotations.Where
-import skills.storage.model.CustomIcon
-import skills.storage.model.SkillDef
-
 import jakarta.persistence.*
 
 @Entity

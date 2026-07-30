@@ -15,25 +15,23 @@
  */
 package skills.auth.inviteOnly
 
-import com.github.benmanes.caffeine.cache.Caffeine
-import com.github.benmanes.caffeine.cache.LoadingCache
+
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import jakarta.servlet.http.HttpServletRequest
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Lazy
 import org.springframework.core.annotation.Order
 import org.springframework.security.authorization.AuthenticatedAuthorizationManager
 import org.springframework.security.authorization.AuthorizationDecision
 import org.springframework.security.authorization.AuthorizationManager
+import org.springframework.security.authorization.AuthorizationResult
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext
 import org.springframework.security.web.util.UrlUtils
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
 import skills.auth.UserAuthService
@@ -42,7 +40,6 @@ import skills.auth.UserSkillsGrantedAuthority
 import skills.services.admin.InviteOnlyProjectService
 import skills.storage.model.auth.RoleName
 
-import java.time.Duration
 import java.util.function.Supplier
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -82,15 +79,18 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
     @PostConstruct
     void init() {
         authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
-        projectsApiRequestMatcher = new AntPathRequestMatcher("/**/*projects/**")
+        projectsApiRequestMatcher = { HttpServletRequest request ->
+            String requestUri = request.getRequestURI() ?: ''
+            return requestUri.contains('/projects/')
+        } as RequestMatcher
     }
 
     @Override
-    AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext authorizationContext) {
+    AuthorizationResult authorize(Supplier<? extends Authentication> authentication, RequestAuthorizationContext authorizationContext) {
 
         HttpServletRequest request = authorizationContext.getRequest()
         log.debug("evaluating request [{}] for invite-only protection", request.getRequestURI())
-        AuthorizationDecision authenticatedDecision = authenticatedAuthorizationManager.check(authentication, authorizationContext)
+        AuthorizationResult authenticatedDecision = authenticatedAuthorizationManager.authorize(authentication, authorizationContext)
         if (!authenticatedDecision.isGranted()) {
             log.debug("unauthenticated access attempt to protected resource", request.getRequestURI())
             return authenticatedDecision

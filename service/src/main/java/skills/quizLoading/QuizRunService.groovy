@@ -16,7 +16,7 @@
 package skills.quizLoading
 
 import callStack.profiler.Profile
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
 import groovy.util.logging.Slf4j

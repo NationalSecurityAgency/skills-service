@@ -22,6 +22,7 @@ import org.springframework.ai.openai.OpenAiChatModel
 import org.springframework.ai.openai.OpenAiChatOptions
 import org.springframework.ai.openai.api.OpenAiApi
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
@@ -78,6 +79,7 @@ class OpenAIChatConfig {
     String completionsEndpoint
 
     @Bean
+    @ConditionalOnProperty(prefix = 'skills.openai', name = 'enabled', havingValue = 'true', matchIfMissing = true)
     OpenAiChatModel openAiChatModel(WebClient.Builder webClientBuilder) {
         if (!aiHost) {
             log.debug("skills.openai.host is not configured")

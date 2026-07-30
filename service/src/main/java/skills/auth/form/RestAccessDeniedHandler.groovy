@@ -15,7 +15,7 @@
  */
 package skills.auth.form
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
@@ -49,7 +49,7 @@ class RestAccessDeniedHandler implements AccessDeniedHandler {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN)
         if(explanation) {
             String asJson = om.writeValueAsString(explanation)
-            response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE)
             response.setContentLength(asJson.bytes.length)
             response.getWriter().print(asJson)
             response.getWriter().flush()

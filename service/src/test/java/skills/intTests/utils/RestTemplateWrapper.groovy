@@ -30,12 +30,14 @@ import org.springframework.http.converter.GenericHttpMessageConverter
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.lang.Nullable
 import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MimeTypeUtils
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.ResponseErrorHandler
 import org.springframework.web.client.RestTemplate
 
 import javax.net.ssl.HostnameVerifier
+import java.net.URI
 import javax.net.ssl.SSLContext
 import java.lang.reflect.Type
 import java.nio.charset.Charset
@@ -119,7 +121,7 @@ class RestTemplateWrapper extends RestTemplate {
             }
 
             @Override
-            void handleError(ClientHttpResponse clientHttpResponse) throws IOException {
+            void handleError(URI url, HttpMethod method, ClientHttpResponse clientHttpResponse) throws IOException {
             }
         })
     }
@@ -265,7 +267,7 @@ class RestTemplateWrapper extends RestTemplate {
                 .collect {getSupportedMediaTypes(it)}
                 .flatten()
                 .unique()
-        allSupportedMediaTypes.sort(MediaType.SPECIFICITY_COMPARATOR)
+        MimeTypeUtils.sortBySpecificity(allSupportedMediaTypes)
         headers.setAccept(allSupportedMediaTypes)
     }
 

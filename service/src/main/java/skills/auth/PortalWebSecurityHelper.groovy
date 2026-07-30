@@ -34,7 +34,7 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import org.springframework.security.web.csrf.*
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
 import org.springframework.security.web.util.matcher.OrRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
@@ -86,7 +86,7 @@ class PortalWebSecurityHelper {
 
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
         if (disableCsrfProtection) {
-            http.csrf().disable()
+            http.csrf((csrf) -> csrf.disable())
         } else {
             http.csrf((csrf) -> csrf
                     .requireCsrfProtectionMatcher(new MultipartRequestMatcher())
@@ -111,7 +111,10 @@ class PortalWebSecurityHelper {
                                   "/resetPassword/**", "/performPasswordReset",
                                   "/resendEmailVerification/**", "/verifyEmail", "/userEmailIsVerified/*","/saml2/**"]
         RequestMatcher permitAllMatcher = new OrRequestMatcher(
-                permitAllPatterns.collect { new AntPathRequestMatcher(it) }
+                permitAllPatterns.collect { String pattern ->
+                    String normalizedPattern = StringUtils.hasText(pattern) && !pattern.startsWith('/') ? "/${pattern}" : pattern
+                    PathPatternRequestMatcher.pathPattern(normalizedPattern)
+                }
         )
 
         http.addFilterAfter(new SkillsAuthorityFilter(userAuthService, permitAllMatcher), CsrfCookieFilter.class)
@@ -134,7 +137,7 @@ class PortalWebSecurityHelper {
                 .requestMatchers("/openai/**").access(AuthorizationManagers.allOf(openAIAuthorizationManager))
                 .anyRequest().authenticated()
         )
-        http.headers().frameOptions().disable()
+        http.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.disable()))
 
         return http
     }
@@ -194,10 +197,10 @@ final class MultipartRequestMatcher implements RequestMatcher {
 
     private final HashSet<String> allowedMethods = new HashSet<>(Arrays.asList("GET", "HEAD", "TRACE", "OPTIONS"))
     private final OrRequestMatcher pathMatcher = new OrRequestMatcher(
-            new AntPathRequestMatcher("**/upload"),
-            new AntPathRequestMatcher("/admin/*/*/*/*/video"),
-            new AntPathRequestMatcher("/admin/*/*/*/*/slides"),
-            new AntPathRequestMatcher("/admin/*/*/slides"),
+            PathPatternRequestMatcher.pathPattern("/**/upload"),
+            PathPatternRequestMatcher.pathPattern("/admin/*/*/*/*/video"),
+            PathPatternRequestMatcher.pathPattern("/admin/*/*/*/*/slides"),
+            PathPatternRequestMatcher.pathPattern("/admin/*/*/slides"),
     )
 
     @Override

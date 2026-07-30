@@ -31,7 +31,7 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.saml2.provider.service.authentication.OpenSaml4AuthenticationProvider;
+import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider
 import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 import org.springframework.stereotype.Component
@@ -85,9 +85,9 @@ class SAML2SecurityConfiguration{
      @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception   {
 
-         OpenSaml4AuthenticationProvider authenticationProvider = new OpenSaml4AuthenticationProvider();
+         OpenSaml5AuthenticationProvider authenticationProvider = new OpenSaml5AuthenticationProvider();
          authenticationProvider.setResponseAuthenticationConverter(responseToken -> {
-             Saml2Authentication authentication = OpenSaml4AuthenticationProvider.createDefaultResponseAuthenticationConverter()
+             Saml2Authentication authentication = OpenSaml5AuthenticationProvider.createDefaultResponseAuthenticationConverter()
                                                                                  .convert(responseToken);
              Saml2AuthenticatedPrincipal principal = (Saml2AuthenticatedPrincipal) authentication.getPrincipal();
             // Assertion assertion = responseToken.getResponse().getAssertions().get(0);

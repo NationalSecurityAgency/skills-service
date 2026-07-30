@@ -15,11 +15,18 @@
  */
 package skills.services.userActions
 
-import com.fasterxml.jackson.annotation.JsonFilter
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.ser.FilterProvider
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.databind.ser.FilterProvider
+import tools.jackson.databind.ser.std.SimpleBeanPropertyFilter
+import tools.jackson.databind.ser.std.SimpleFilterProvider
+import com.fasterxml.jackson.annotation.JsonFilter;
+
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ser.std.SimpleBeanPropertyFilter;
+import tools.jackson.databind.ser.std.SimpleFilterProvider;
+import java.text.SimpleDateFormat
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,8 +46,6 @@ import skills.services.inception.InceptionProjectService
 import skills.storage.model.UserActionsHistory
 import skills.storage.repos.UserActionsHistoryRepo
 
-import java.text.SimpleDateFormat
-
 @Service
 @Slf4j
 class UserActionsHistoryService {
@@ -58,12 +63,20 @@ class UserActionsHistoryService {
     ObjectMapper mapper
     @PostConstruct
     void init() {
-        mapper = new ObjectMapper().addMixIn(Object.class, DynamicFilterMixIn.class)
-        SimpleBeanPropertyFilter simpleBeanPropertyFilter = SimpleBeanPropertyFilter.serializeAllExcept("clientSecret", "password")
-        FilterProvider filterProvider = new SimpleFilterProvider()
-                .addFilter("DynamicFilter", (SimpleBeanPropertyFilter)simpleBeanPropertyFilter);
-        mapper.setFilterProvider(filterProvider)
-        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z"));
+        mapper = JsonMapper.builder()
+            .addMixIn(Object.class, DynamicFilterMixIn.class)
+            .filterProvider(
+                new SimpleFilterProvider()
+                    .addFilter(
+                        "DynamicFilter",
+                        SimpleBeanPropertyFilter.serializeAllExcept(
+                            "clientSecret",
+                            "password"
+                        )
+                    )
+            )
+            .defaultDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z"))
+            .build();
     }
 
     @Transactional
