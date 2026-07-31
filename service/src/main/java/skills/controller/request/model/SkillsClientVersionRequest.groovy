@@ -15,9 +15,6 @@
  */
 package skills.controller.request.model
 
-import groovy.transform.Immutable
-
-@Immutable
 class SkillsClientVersionRequest {
     String skillsClientVersion
 }
