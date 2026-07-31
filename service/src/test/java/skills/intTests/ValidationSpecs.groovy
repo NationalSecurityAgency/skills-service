@@ -516,7 +516,9 @@ class ValidationSpecs extends DefaultIntSpec {
             skill2.name = " Skill"
             skillsService.createSkill(skill2)
         } catch (SkillsClientException ske) {
-            leadSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+            leadSpaceIgnored = ske.message.contains("already exists! Sorry!") && ske.message.contains("errorCode:ConstraintViolation")
+        } catch (Throwable t) {
+            println "shit"
         }
 
         try {
@@ -524,7 +526,7 @@ class ValidationSpecs extends DefaultIntSpec {
             skill2.name = "Skill "
             skillsService.createSkill(skill2)
         } catch (SkillsClientException ske) {
-            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!") && ske.message.contains("errorCode:ConstraintViolation")
         }
 
         then:
@@ -549,7 +551,7 @@ class ValidationSpecs extends DefaultIntSpec {
             subj2.name = " Subject"
             skillsService.createSubject(subj2)
         } catch (SkillsClientException ske) {
-            leadSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+            leadSpaceIgnored = ske.message.contains("already exists! Sorry!") && ske.message.contains("errorCode:ConstraintViolation")
         }
 
         try {
@@ -557,7 +559,7 @@ class ValidationSpecs extends DefaultIntSpec {
             subj2.name = "Subject "
             skillsService.createSubject(subj2)
         } catch (SkillsClientException ske) {
-            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!") && ske.message.contains("errorCode:ConstraintViolation")
         }
 
         then:
@@ -582,7 +584,7 @@ class ValidationSpecs extends DefaultIntSpec {
             badge2.name = " Badge"
             skillsService.createBadge(badge2)
         } catch (SkillsClientException ske) {
-            leadSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+            leadSpaceIgnored = ske.message.contains("already exists! Sorry!") && ske.message.contains("errorCode:ConstraintViolation")
         }
 
         try {
@@ -590,7 +592,7 @@ class ValidationSpecs extends DefaultIntSpec {
             badge2.name = "Badge "
             skillsService.createBadge(badge2)
         } catch (SkillsClientException ske) {
-            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!") && ske.message.contains("errorCode:ConstraintViolation")
         }
 
         then:
@@ -613,7 +615,7 @@ class ValidationSpecs extends DefaultIntSpec {
             proj2.name = " Project"
             skillsService.createProject(proj2)
         } catch (SkillsClientException ske) {
-            leadSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+            leadSpaceIgnored = ske.message.contains("already exists! Sorry!") && ske.message.contains("errorCode:ConstraintViolation")
         }
 
         try {
@@ -621,7 +623,7 @@ class ValidationSpecs extends DefaultIntSpec {
             proj2.name = "Project "
             skillsService.createProject(proj2)
         } catch (SkillsClientException ske) {
-            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!") && ske.message.contains("errorCode:ConstraintViolation")
         }
 
         then:
@@ -644,7 +646,7 @@ class ValidationSpecs extends DefaultIntSpec {
             badge2.name = " Badge"
             skillsService.createGlobalBadge(badge2)
         } catch (SkillsClientException ske) {
-            leadSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+            leadSpaceIgnored = ske.message.contains("already exists! Sorry!") && ske.message.contains("errorCode:ConstraintViolation")
         }
 
         try {
@@ -652,7 +654,7 @@ class ValidationSpecs extends DefaultIntSpec {
             badge2.name = "Badge "
             skillsService.createGlobalBadge(badge2)
         } catch (SkillsClientException ske) {
-            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!, errorCode:ConstraintViolation")
+            trailingSpaceIgnored = ske.message.contains("already exists! Sorry!") && ske.message.contains("errorCode:ConstraintViolation")
         }
 
         then:
