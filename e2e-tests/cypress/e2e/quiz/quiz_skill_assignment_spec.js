@@ -397,8 +397,6 @@ describe('Quiz Skill Assignment Tests', () => {
         cy.intercept('/public/isFeatureSupported?feature=emailservice', 'true').as('isEmailServiceSupported');
         cy.fixture('vars.json').then((vars) => {
             cy.logout();
-            // cy.login(vars.rootUser, vars.defaultPass, true);
-            // cy.logout();
 
             cy.register("user1", "password");
             cy.logout();
@@ -408,7 +406,6 @@ describe('Quiz Skill Assignment Tests', () => {
             cy.logout();
 
             cy.login(vars.defaultUser, vars.defaultPass);
-
 
         });
 
