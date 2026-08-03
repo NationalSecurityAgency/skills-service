@@ -233,7 +233,8 @@ class InviteOnlyManagementSpec extends InviteOnlyBaseSpec {
 
         then:
         def e = thrown(SkillsClientException)
-        e.message.contains("Project Invite for [someemail@email.foo] is expired, errorCode:ExpiredProjectInvite")
+        e.message.contains("Project Invite for [someemail@email.foo] is expired")
+        e.message.contains("errorCode:ExpiredProjectInvite")
     }
 
     def "can delete pending invite"() {

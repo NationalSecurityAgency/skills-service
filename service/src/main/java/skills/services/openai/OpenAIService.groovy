@@ -198,10 +198,10 @@ class OpenAIService {
             throw new UnsupportedOperationException("ai grading model is not configured" )
         }
         String promptStr = textInputQuestionGradingMsg
-                .replace('{{ question }}', question)
-                .replace('{{ studentAnswer }}', studentAnswer)
-                .replace('{{ correctAnswer }}', correctAnswer)
-                .replace('{{ minimumConfidenceLevel }}', minimumConfidenceLevel.toString())
+                ?.replace('{{ question }}', question)
+                ?.replace('{{ studentAnswer }}', studentAnswer)
+                ?.replace('{{ correctAnswer }}', correctAnswer)
+                ?.replace('{{ minimumConfidenceLevel }}', minimumConfidenceLevel.toString())
         log.debug("Prompt: {}", promptStr)
         List<Message> messages = [
                 new UserMessage(promptStr)

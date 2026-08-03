@@ -51,6 +51,9 @@ import skills.utils.ClientSecretGenerator
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
+import java.time.LocalDateTime
+import java.time.ZoneId
+
 @Service
 @Slf4j
 class ProjAdminService {
@@ -739,7 +742,8 @@ class ProjAdminService {
     }
 
     LatestEvent getLastReportedSkillEvent(String projectId) {
-        Date date = eventsRepo.getLatestEventDateForProject(projectId)
+        LocalDateTime ldt = eventsRepo.getLatestEventDateForProject(projectId)
+        Date date = (ldt != null) ? Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant()) : null;
         new LatestEvent(lastReportedSkillDate: date)
     }
 

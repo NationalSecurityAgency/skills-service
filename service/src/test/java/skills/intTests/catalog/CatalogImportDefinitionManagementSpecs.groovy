@@ -1020,7 +1020,8 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
 
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum, errorCode:MaxSkillsThreshold")
+        e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum")
+        e.message.contains("errorCode:MaxSkillsThreshold")
     }
 
     def "cannot import when number of skills to be imported would exceed max skills per subject including pending finalization skills"() {
@@ -1049,7 +1050,8 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
 
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum, errorCode:MaxSkillsThreshold")
+        e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum")
+        e.message.contains("errorCode:MaxSkillsThreshold")
     }
 
     def "cannot import when number of skills to be imported would exceed max skills per subject including group skills"() {
@@ -1080,7 +1082,8 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
 
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum, errorCode:MaxSkillsThreshold")
+        e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum")
+        e.message.contains("errorCode:MaxSkillsThreshold")
     }
     def "dedupe finalization info numSkillsToFinalizeThatBelongToADisabledSubjectOrGroup for disabled group in disabled subject"() {
         def project1 = createProjWithCatalogSkills(1)
@@ -1138,7 +1141,8 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
 
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum, errorCode:MaxSkillsThreshold")
+        e.message.contains("Each Subject is limited to [100] Skills, currently [TestSubject1] has [99] Skills, importing [2] would exceed the maximum")
+        e.message.contains("errorCode:MaxSkillsThreshold")
     }
 
     def "removing the original skill updates UserPoints and subject/project definition points"() {

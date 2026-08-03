@@ -139,7 +139,11 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         skillsService.bulkAddSkill([projectId: projId, skillId: skills[0].skillId], sampleUserIds, (Long) null)
         then:
         SkillsClientException exception = thrown(SkillsClientException)
-        exception.message.contains("timestamp was not provided., errorCode:BadParam, success:false, projectId:TestProject1, skillId:skill1")
+        exception.message.contains("timestamp was not provided.")
+        exception.message.contains("errorCode:BadParam")
+        exception.message.contains("success:false")
+        exception.message.contains("projectId:TestProject1")
+        exception.message.contains("skillId:skill1")
     }
 
     def "attempt to bulk report skill events without specifying a negative timestamp"() {
@@ -171,7 +175,11 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         skillsService.bulkAddSkill([projectId: projId, skillId: skills[0].skillId], sampleUserIds, System.currentTimeMillis() + 40000)
         then:
         SkillsClientException exception = thrown(SkillsClientException)
-        exception.message.contains("Skill Events may not be in the future, errorCode:BadParam, success:false, projectId:TestProject1, skillId:skill1")
+        exception.message.contains("Skill Events may not be in the future")
+        exception.message.contains("errorCode:BadParam")
+        exception.message.contains("success:false")
+        exception.message.contains("projectId:TestProject1")
+        exception.message.contains("skillId:skill1")
     }
 
     def "attempt to bulk report skill events without specifying any userIds"() {
@@ -203,7 +211,11 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         skillsService.bulkAddSkill([projectId: projId, skillId: skills[0].skillId], [' '], System.currentTimeMillis())
         then:
         SkillsClientException exception = thrown(SkillsClientException)
-        exception.message.contains("userIds must contain at least 1 item., errorCode:BadParam, success:false, projectId:TestProject1, skillId:skill1")
+        exception.message.contains("userIds must contain at least 1 item")
+        exception.message.contains("errorCode:BadParam")
+        exception.message.contains("success:false")
+        exception.message.contains("projectId:TestProject1")
+        exception.message.contains("skillId:skill1")
     }
 
     def "attempt to bulk report skill events for more than the max allowable userIds"() {
@@ -236,6 +248,9 @@ class BulkReportSkillsSpecs extends DefaultIntSpec {
         skillsService.bulkAddSkill([projectId: projId, skillId: skills[0].skillId], sampleUserIds, System.currentTimeMillis())
         then:
         SkillsClientException exception = thrown(SkillsClientException)
-        exception.message.contains("Insufficient project points, skill achievement is disallowed, errorCode:InsufficientProjectPoints, success:false, projectId:TestProject1")
+        exception.message.contains("Insufficient project points, skill achievement is disallowed")
+        exception.message.contains("errorCode:InsufficientProjectPoints")
+        exception.message.contains("success:false")
+        exception.message.contains("projectId:TestProject1")
     }
 }

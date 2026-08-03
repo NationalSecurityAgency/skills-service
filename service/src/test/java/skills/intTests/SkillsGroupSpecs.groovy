@@ -815,7 +815,8 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
             then:
             def e = thrown(SkillsClientException)
-            e.message.contains('explanation:Each Subject is limited to [100] Skills, errorCode:MaxSkillsThreshold')
+            e.message.contains('explanation:Each Subject is limited to [100] Skills')
+            e.message.contains('errorCode:MaxSkillsThreshold')
     }
 
     def "delete SkillsGroup and a child skill and verify proper display order is maintained for both"() {

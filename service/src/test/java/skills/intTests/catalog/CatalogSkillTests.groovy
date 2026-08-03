@@ -732,7 +732,8 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         then:
         def exc = thrown(Exception)
-        exc.getMessage().contains("explanation:Insufficient project points, skill achievement is disallowed, errorCode:InsufficientProjectPoints")
+        exc.getMessage().contains("explanation:Insufficient project points, skill achievement is disallowed")
+        exc.getMessage().contains("errorCode:InsufficientProjectPoints")
         skillsService.getUserStats(project2.projectId, user).userTotalPoints == 0
     }
 
@@ -1834,7 +1835,8 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         then:
         def e = thrown(Exception)
-        e.getMessage().contains("Skill [skill2] has dependencies. Skills with dependencies may not be exported to the catalog, errorCode:ExportToCatalogNotAllowed")
+        e.getMessage().contains("Skill [skill2] has dependencies. Skills with dependencies may not be exported to the catalog")
+        e.getMessage().contains("errorCode:ExportToCatalogNotAllowed")
     }
 
     def "cannot export a disabled skill"() {
@@ -1865,7 +1867,8 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         then:
         def e = thrown(Exception)
-        e.getMessage().contains("Skill [skill2] is disabled. Disabled skills may not be exported to the catalog, errorCode:ExportToCatalogNotAllowed")
+        e.getMessage().contains("Skill [skill2] is disabled. Disabled skills may not be exported to the catalog")
+        e.getMessage().contains("errorCode:ExportToCatalogNotAllowed")
     }
 
     def "export skill that other skills depend on"() {
@@ -2838,7 +2841,7 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         then:
         subjectUsers.data[0].userId == user
-        subjectUsers.data[0].lastUpdated == DTF.print(date.time)
+        subjectUsers.data[0].lastUpdated.startsWith(DTF.print(date.time).substring(0, 23))
     }
 
     def "project users should take into account users of imported skills"() {

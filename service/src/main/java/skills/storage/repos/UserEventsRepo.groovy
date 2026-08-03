@@ -33,6 +33,8 @@ import skills.storage.model.WeekCountItem
 import skills.storage.model.MonthlyCountItem
 
 import jakarta.persistence.QueryHint
+
+import java.time.LocalDateTime
 import java.util.stream.Stream
 
 @CompileStatic
@@ -601,5 +603,5 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
         WHERE ue.project_id = ?1
           AND not exists (select 1 from archived_users au where au.user_id = ue.user_id and au.project_id = ue.project_id)
     ''', nativeQuery = true)
-    Date getLatestEventDateForProject(String projectId)
+    LocalDateTime getLatestEventDateForProject(String projectId)
 }
