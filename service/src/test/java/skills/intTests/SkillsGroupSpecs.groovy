@@ -28,8 +28,6 @@ import skills.storage.repos.SkillRelDefRepo
 
 class SkillsGroupSpecs extends DefaultIntSpec {
 
-    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
-
     void "create and get initial SkillsGroup" () {
         def proj = SkillsFactory.createProject()
         def subj = SkillsFactory.createSubject()
@@ -1514,7 +1512,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         then:
         subjectUsers.data[0].userId == user
-        subjectUsers.data[0].lastUpdated == DTF.print(date.time)
+        subjectUsers.data[0].lastUpdated == date.toInstant().toString()
     }
 
     void "get subject for SkillsGroup" () {

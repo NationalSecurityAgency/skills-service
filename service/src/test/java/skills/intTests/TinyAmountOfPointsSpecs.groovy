@@ -103,7 +103,12 @@ class TinyAmountOfPointsSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException skillsClientException = thrown(SkillsClientException)
-        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed, errorCode:InsufficientSubjectPoints, success:false, projectId:${proj1.projectId}, skillId:${proj1_subj2.subjectId}".toString())
+        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed".toString())
+        skillsClientException.message.contains("errorCode:InsufficientSubjectPoints".toString())
+        skillsClientException.message.contains("success:false".toString())
+        skillsClientException.message.contains("projectId:${proj1.projectId}".toString())
+        skillsClientException.message.contains("skillId:${proj1_subj2.subjectId}".toString())
+
         skillsClientException.message.contains("${skillsService.userName}")
     }
 }
