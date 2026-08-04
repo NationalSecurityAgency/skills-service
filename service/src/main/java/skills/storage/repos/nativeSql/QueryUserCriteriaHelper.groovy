@@ -29,14 +29,14 @@ class QueryUserCriteriaHelper {
         }
 
         if (queryUsersCriteria.allProjectUsers) {
-            return '''SELECT COUNT(DISTINCT user_id) FROM user_events WHERE project_id = :projectId '''
+            return '''SELECT COUNT(DISTINCT user_id) FROM user_events WHERE project_id = :projectId  and user_id not in (select user_id from archived_users where project_id = :projectId) '''
         }
 
         //handle special case for only notAchievedSkills
         if (isOnlyNotAcheived(queryUsersCriteria)) {
             return '''SELECT COUNT(DISTINCT ue.user_id) FROM user_events ue 
                         WHERE ue.project_id = :projectId 
-                        AND ue.user_id NOT IN (SELECT DISTINCT nsk.user_id FROM user_achievement nsk WHERE nsk.skill_id IN (:notSkillIds))'''
+                        AND ue.user_id NOT IN (SELECT DISTINCT nsk.user_id FROM user_achievement nsk WHERE nsk.skill_id IN (:notSkillIds))  and user_id not in (select user_id from archived_users where project_id = :projectId)'''
         }
 
         String sql = 'SELECT COUNT(DISTINCT ua.user_id) FROM user_achievement ua '
@@ -70,7 +70,7 @@ class QueryUserCriteriaHelper {
                 """
             }
         }
-        sql += " WHERE ua.project_id = :projectId "
+        sql += " WHERE ua.project_id = :projectId and ua.user_id not in (select user_id from archived_users where project_id = :projectId) "
         if (queryUsersCriteria.notAchievedSkillIds) {
             sql += 'AND ua.user_id NOT IN (SELECT DISTINCT nsk.user_id FROM user_achievement nsk WHERE nsk.skill_id IN (:notSkillIds))'
         }
@@ -84,14 +84,15 @@ class QueryUserCriteriaHelper {
         }
 
         if (queryUsersCriteria.allProjectUsers) {
-            return '''SELECT DISTINCT user_id FROM user_events WHERE project_id = :projectId '''
+            return '''SELECT DISTINCT user_id FROM user_events WHERE project_id = :projectId and user_id not in (select user_id from archived_users where project_id = :projectId)'''
         }
 
         //handle special case for only notAchievedSkills
         if (isOnlyNotAcheived(queryUsersCriteria)) {
             return '''SELECT DISTINCT ue.user_id FROM user_events ue 
                         WHERE ue.project_id = :projectId 
-                        AND ue.user_id NOT IN (SELECT DISTINCT nsk.user_id FROM user_achievement nsk WHERE nsk.skill_id IN (:notSkillIds))'''
+                        AND ue.user_id NOT IN (SELECT DISTINCT nsk.user_id FROM user_achievement nsk WHERE nsk.skill_id IN (:notSkillIds))
+                        and user_id not in (select user_id from archived_users where project_id = :projectId)'''
         }
 
         String sql = 'SELECT DISTINCT ua.user_id FROM user_achievement ua '
@@ -125,7 +126,7 @@ class QueryUserCriteriaHelper {
             """
             }
         }
-        sql += " WHERE ua.project_id = :projectId "
+        sql += " WHERE ua.project_id = :projectId  and user_id not in (select user_id from archived_users where project_id = :projectId) "
         if (queryUsersCriteria.notAchievedSkillIds) {
             sql += 'AND ua.user_id NOT IN (SELECT DISTINCT nsk.user_id FROM user_achievement nsk WHERE nsk.skill_id IN (:notSkillIds))'
         }
