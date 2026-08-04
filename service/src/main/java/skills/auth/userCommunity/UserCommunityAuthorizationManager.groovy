@@ -35,6 +35,8 @@ import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
 import skills.auth.UserAuthService
 import skills.auth.UserInfo
+import skills.auth.requestMatchers.ContainsStrRequestMatcher
+import skills.auth.requestMatchers.StartsWithStrRequestMatcher
 import skills.services.AttachmentService
 import skills.services.admin.UserCommunityService
 import skills.storage.model.Attachment
@@ -79,30 +81,12 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     @PostConstruct
     void init() {
         authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
-        projectsRequestMatcher = { HttpServletRequest request ->
-            String requestUri = request.getRequestURI() ?: ''
-            return requestUri.contains('/projects/')
-        } as RequestMatcher
-        quizzesAdminRequestMatcher = { HttpServletRequest request ->
-            String requestUri = request.getRequestURI() ?: ''
-            return requestUri.contains('/quiz-definitions/')
-        } as RequestMatcher
-        quizzesApiRequestMatcher = { HttpServletRequest request ->
-            String requestUri = request.getRequestURI() ?: ''
-            return requestUri.contains('/quizzes/')
-        } as RequestMatcher
-        attachmentsRequestMatcher = { HttpServletRequest request ->
-            String requestUri = request.getRequestURI() ?: ''
-            return requestUri.startsWith('/api/download/')
-        } as RequestMatcher
-        adminGroupRequestMatcher = { HttpServletRequest request ->
-            String requestUri = request.getRequestURI() ?: ''
-            return requestUri.contains('/admin-group-definitions/')
-        } as RequestMatcher
-        badgeRequestMatcher = { HttpServletRequest request ->
-            String requestUri = request.getRequestURI() ?: ''
-            return requestUri.contains('/badge')
-        } as RequestMatcher
+        projectsRequestMatcher =  new ContainsStrRequestMatcher('projects/')
+        quizzesAdminRequestMatcher = new ContainsStrRequestMatcher('/quiz-definitions/')
+        quizzesApiRequestMatcher = new ContainsStrRequestMatcher('/quizzes/')
+        attachmentsRequestMatcher = new StartsWithStrRequestMatcher('/api/download/')
+        adminGroupRequestMatcher = new ContainsStrRequestMatcher('/admin-group-definitions/')
+        badgeRequestMatcher = new ContainsStrRequestMatcher('/badge')
     }
 
     @Override

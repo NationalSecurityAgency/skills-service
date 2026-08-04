@@ -37,6 +37,7 @@ import org.springframework.stereotype.Component
 import skills.auth.UserAuthService
 import skills.auth.UserInfo
 import skills.auth.UserSkillsGrantedAuthority
+import skills.auth.requestMatchers.ContainsStrRequestMatcher
 import skills.services.admin.InviteOnlyProjectService
 import skills.storage.model.auth.RoleName
 
@@ -79,10 +80,7 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
     @PostConstruct
     void init() {
         authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
-        projectsApiRequestMatcher = { HttpServletRequest request ->
-            String requestUri = request.getRequestURI() ?: ''
-            return requestUri.contains('/projects/')
-        } as RequestMatcher
+        projectsApiRequestMatcher = new ContainsStrRequestMatcher('projects/')
     }
 
     @Override
