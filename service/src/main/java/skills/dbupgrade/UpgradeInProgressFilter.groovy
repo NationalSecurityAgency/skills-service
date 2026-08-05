@@ -25,6 +25,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.http.converter.HttpMessageConverter
+import org.springframework.http.converter.HttpMessageConverters
 import org.springframework.http.server.ServletServerHttpRequest
 import org.springframework.http.server.ServletServerHttpResponse
 import org.springframework.security.core.Authentication
@@ -32,6 +33,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.User
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
 import skills.auth.UserInfo
 import skills.controller.exceptions.ErrorCode
 import skills.controller.request.model.SkillEventRequest
@@ -60,8 +62,12 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
     @Autowired
     ReportedSkillEventQueue skillEventQueue
 
-    @Autowired
-    List<HttpMessageConverter> configuredMessageConverters
+    private final List<HttpMessageConverter<?>> httpMessageConverters
+
+    // Inject the adapter to extract all active server converters
+    UpgradeInProgressFilter(RequestMappingHandlerAdapter adapter) {
+        this.httpMessageConverters = adapter.getMessageConverters();
+    }
 
     static class DbUpgradeErrBody {
         String explanation
@@ -140,7 +146,7 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
     private SkillEventRequest readEventRequest(ServletServerHttpRequest serverHttpRequest) {
         MediaType mediaType = serverHttpRequest.getHeaders().getContentType()
         if (serverHttpRequest?.getHeaders() && serverHttpRequest.getHeaders().getContentLength() > 0) {
-            for (HttpMessageConverter messageConverter : configuredMessageConverters) {
+            for (HttpMessageConverter messageConverter : httpMessageConverters) {
                 if (messageConverter.canRead(SkillEventRequest, mediaType)) {
                     SkillEventRequest skillEventRequest = (SkillEventRequest) messageConverter.read(SkillEventRequest, serverHttpRequest)
                     return skillEventRequest
@@ -158,7 +164,7 @@ class UpgradeInProgressFilter extends OncePerRequestFilter {
         }
 
         for (MediaType accept : acceptTypes) {
-            for (HttpMessageConverter messageConverter : configuredMessageConverters) {
+            for (HttpMessageConverter messageConverter : httpMessageConverters) {
                 if (messageConverter.canWrite(clazz, accept)) {
                     messageConverter.write(eventResult, accept, serverHttpResponse)
                     return true
