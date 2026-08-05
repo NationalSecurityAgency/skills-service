@@ -392,5 +392,137 @@ describe('Quiz Skill Assignment Tests', () => {
             }],
         ], 5);
     });
+
+    it('contact button appears in skills table', function() {
+        cy.intercept('/public/isFeatureSupported?feature=emailservice', 'true').as('isEmailServiceSupported');
+        cy.fixture('vars.json').then((vars) => {
+            cy.logout();
+
+            cy.register("user1", "password");
+            cy.logout();
+            cy.register("user2", "password");
+            cy.logout();
+            cy.register("user3", "password");
+            cy.logout();
+
+            cy.login(vars.defaultUser, vars.defaultPass);
+
+        });
+
+        cy.createProject(1)
+        cy.createSubject(1,1)
+        cy.createProject(2)
+        cy.createSubject(2,1)
+        cy.createProject(3)
+        cy.createSubject(3,1)
+
+        cy.assignUserAsAdmin('proj1', 'user1')
+        cy.assignUserAsAdmin('proj2', 'user2')
+        cy.assignUserAsAdmin('proj3', 'user3')
+
+        cy.createQuizDef(1, {name: 'Test Your Trivia Knowledge'});
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(2, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.createSkill(3, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
+
+        const tableSelector = '[data-cy="quizSkills"]';
+
+        cy.logout();
+        cy.login("user1", "password")
+        cy.visit('/administrator/quizzes/quiz1/skills')
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'proj3 Contact'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 1ID: skill1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'proj2 Contact'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 1ID: skill1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'proj1'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 1ID: skill1'
+            }],
+        ], 5);
+
+        cy.get('[data-cy="contactOwnerBtn_proj1"]').should('not.exist')
+        cy.get('[data-cy="contactOwnerBtn_proj2"]').should('exist')
+        cy.get('[data-cy="contactOwnerBtn_proj3"]').should('exist')
+
+
+        cy.logout();
+        cy.login("user2", "password")
+        cy.visit('/administrator/quizzes/quiz1/skills')
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'proj3 Contact'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 1ID: skill1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'proj2'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 1ID: skill1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'proj1 Contact'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 1ID: skill1'
+            }],
+        ], 5);
+
+        cy.get('[data-cy="contactOwnerBtn_proj1"]').should('exist')
+        cy.get('[data-cy="contactOwnerBtn_proj2"]').should('not.exist')
+        cy.get('[data-cy="contactOwnerBtn_proj3"]').should('exist')
+
+        cy.logout();
+        cy.login("user3", "password")
+        cy.visit('/administrator/quizzes/quiz1/skills')
+
+        cy.validateTable(tableSelector, [
+            [{
+                colIndex: 0,
+                value: 'proj3'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 1ID: skill1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'proj2 Contact'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 1ID: skill1'
+            }],
+            [{
+                colIndex: 0,
+                value: 'proj1 Contact'
+            }, {
+                colIndex: 1,
+                value: 'Very Great Skill 1ID: skill1'
+            }],
+        ], 5);
+
+        cy.get('[data-cy="contactOwnerBtn_proj1"]').should('exist')
+        cy.get('[data-cy="contactOwnerBtn_proj2"]').should('exist')
+        cy.get('[data-cy="contactOwnerBtn_proj3"]').should('not.exist')
+    });
 });
 
