@@ -145,7 +145,7 @@ class MockLlmServer {
 
         // Log requests
         mockServer.addMockServiceRequestListener { request, _ ->
-            log.info("Received request to: {}", request.getUrl())
+            log.info("Received request to: {}", request.getAbsoluteUrl())
             log.info("Headers: {}", request.getHeaders())
             log.info("Body: {}", request.getBodyAsString())
         }

@@ -131,7 +131,9 @@ class OpenAIService {
         if (!systemMsg) {
             throw new UnsupportedOperationException("ai systemMsg is not configured" )
         }
-
+        if (!chatModel) {
+            throw new IllegalStateException("chatModel was not injected" )
+        }
         long startTime = System.currentTimeMillis()
         boolean isFirstMessage = genDescRequest.messages.size() == 1
         List<Message> messages = isFirstMessage ? [new SystemMessage(systemMsg)] : []
@@ -196,6 +198,9 @@ class OpenAIService {
         }
         if (!gradingModel) {
             throw new UnsupportedOperationException("ai grading model is not configured" )
+        }
+        if (!chatModel) {
+            throw new IllegalStateException("chatModel was not injected" )
         }
         String promptStr = textInputQuestionGradingMsg
                 ?.replace('{{ question }}', question)

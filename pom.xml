@@ -41,8 +41,8 @@
         <!-- !!!!!IMPORTANT!!!!!: when changing the springboot.version property, make sure you also change it in the spring-boot-starter-parent definition -->
         <springboot.version>4.0.7</springboot.version>
 
-        <springcloud.version>3.4.0</springcloud.version>
-        <spring-ai.version>1.1.6</spring-ai.version>
+        <springcloud.version>4.1.0</springcloud.version>
+        <spring-ai.version>2.0.0</spring-ai.version>
 
         <logback-access.version>2.0.12</logback-access.version>
 
@@ -52,7 +52,7 @@
 
         <micrometer-registry.version>1.10.3</micrometer-registry.version>
 
-        <db-scheduler.version>15.5.0</db-scheduler.version>
+        <db-scheduler.version>16.12.0</db-scheduler.version>
 
         <caffeine.version>3.1.1</caffeine.version>
 

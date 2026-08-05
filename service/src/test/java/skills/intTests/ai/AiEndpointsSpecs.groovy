@@ -63,7 +63,7 @@ class AiEndpointsSpecs extends DefaultAiIntSpec {
         when:
         List<String> response = chatClient.chat(chatRequest)
         then:
-        response == ["Hello! " , "How can I help " , "you today?"]
+        response == ["Hello! " , "How can I help " , "you today?", ""]
     }
 
 }

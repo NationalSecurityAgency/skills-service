@@ -15,24 +15,17 @@
  */
 package skills.services.openai
 
+
 import groovy.util.logging.Slf4j
-import io.netty.handler.ssl.SslContext
-import io.netty.handler.ssl.SslContextBuilder
 import org.springframework.ai.openai.OpenAiChatModel
 import org.springframework.ai.openai.OpenAiChatOptions
-import org.springframework.ai.openai.api.OpenAiApi
+import org.springframework.ai.openai.http.okhttp.OpenAiHttpClientBuilderCustomizer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
-import org.springframework.web.reactive.function.client.WebClient
-import reactor.netty.http.client.HttpClient
-import reactor.netty.resources.ConnectionProvider
 
-import javax.net.ssl.KeyManagerFactory
-import javax.net.ssl.TrustManagerFactory
-import javax.net.ssl.X509TrustManager
+import javax.net.ssl.*
 import java.security.KeyStore
 import java.security.cert.CertificateException
 import java.security.cert.X509Certificate
@@ -57,105 +50,110 @@ class OpenAIChatConfig {
     @Value('#{"${skills.openai.stream.maxLifeTime:60}"}')
     Integer maxLifeTime = 60
 
-    @Value('#{"${skills.openai.stream.handshakeTimeout:30000}"}') // 30 seconds
-    Integer handshakeTimeout = 30000
-
-    @Value('#{"${skills.openai.stream.responseTimeout:60}"}')
-    Integer responseTimeout = 60
+    @Value('#{"${skills.openai.options.timeoutInSecs:60}"}') // 60 seconds
+    Integer timeoutInSecs = 60
 
     @Value('#{"${skills.openai.stream.stream-usage:true}"}')
     Boolean streamUsage
 
-    @Value('#{"${skills.openai.stream.closeNotifyFlushTimeout:5000}"}')
-    Integer closeNotifyFlushTimeout = 5000
-
-    @Value('#{"${skills.openai.stream.closeNotifyReadTimeout:5000}"}')
-    Integer closeNotifyReadTimeout = 5000
-
     @Value('#{"${skills.openai.host}"}')
     String aiHost
 
-    @Value('#{"${skills.openai.completionsEndpoint:/v1/chat/completions}"}')
-    String completionsEndpoint
-
+    /**
+     * 1. The HttpClient Customizer Bean.
+     * Conditionally loaded based on the primary 2-way SSL property toggle.
+     */
     @Bean
-    @ConditionalOnProperty(prefix = 'skills.openai', name = 'enabled', havingValue = 'true', matchIfMissing = true)
-    OpenAiChatModel openAiChatModel(WebClient.Builder webClientBuilder) {
+    @ConditionalOnProperty(prefix = 'skills.openai.ssl.two-way', name = 'enabled', havingValue = 'true', matchIfMissing = false)
+    OpenAiHttpClientBuilderCustomizer mutualTlsCustomizer() {
         if (!aiHost) {
             log.debug("skills.openai.host is not configured")
             return null
         }
-        // Get system properties
-        String keyStorePath = System.getProperty("javax.net.ssl.keyStore");
-        String keyStorePassword = System.getProperty("javax.net.ssl.keyStorePassword");
-        String keyStoreType = System.getProperty("javax.net.ssl.keyStoreType", "JKS");
-        String trustStorePath = System.getProperty("javax.net.ssl.trustStore");
-        String trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
-        String trustStoreType = System.getProperty("javax.net.ssl.trustStoreType", "JKS");
 
-        ConnectionProvider connectionProvider = ConnectionProvider.builder("OpenAIConnections")
-                .maxConnections(maxConnections)
-                .maxIdleTime(Duration.ofSeconds(maxIdleTime))
-                .maxLifeTime(Duration.ofSeconds(maxLifeTime))
-                .build()
+        return { builder ->
+            try {
 
-        HttpClient httpClient =  HttpClient.create(connectionProvider)
-                .responseTimeout(Duration.ofSeconds(responseTimeout))
-        if (keyStorePath) {
-            assert keyStorePath && keyStorePassword, "useKeystore set to true for JWT, but missing keystore resource and/or password"
-            assert trustStorePath && trustStorePassword, "useKeystore set to true for JWT, but missing truststore resource and/or password"
+                String keyStorePath = System.getProperty("javax.net.ssl.keyStore")
+                String keyStorePassword = System.getProperty("javax.net.ssl.keyStorePassword")
+                String keyStoreType = System.getProperty("javax.net.ssl.keyStoreType", "JKS")
+                String trustStorePath = System.getProperty("javax.net.ssl.trustStore")
+                String trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword")
+                String trustStoreType = System.getProperty("javax.net.ssl.trustStoreType", "JKS")
 
-            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-            try (FileInputStream keyStoreStream = new FileInputStream(keyStorePath)) {
-                keyStore.load(keyStoreStream, keyStorePassword.toCharArray());
+                if (keyStorePath) {
+                    assert keyStorePath && keyStorePassword, "useKeystore set to true for JWT, but missing keystore resource and/or password"
+                    assert trustStorePath && trustStorePassword, "useKeystore set to true for JWT, but missing truststore resource and/or password"
+
+                    // 1. Load Client KeyStore (For Client Certificate / Private Key)
+                    KeyStore keyStore = KeyStore.getInstance(keyStoreType)
+                    try (FileInputStream keyStoreStream = new FileInputStream(keyStorePath)) {
+                        keyStore.load(keyStoreStream, keyStorePassword.toCharArray())
+                    }
+                    KeyManagerFactory keyManagerFactory = KeyManagerFactory
+                            .getInstance(KeyManagerFactory.getDefaultAlgorithm())
+                    keyManagerFactory.init(keyStore, keyStorePassword.toCharArray())
+
+                    // 2. Load TrustStore (To validate OpenAI/Gateway server certificate)
+                    KeyStore trustStore = KeyStore.getInstance(trustStoreType)
+                    try (FileInputStream trustStoreStream = new FileInputStream(trustStorePath)) {
+                        trustStore.load(trustStoreStream, trustStorePassword.toCharArray())
+                    }
+                    TrustManagerFactory trustManagerFactory = TrustManagerFactory
+                            .getInstance(TrustManagerFactory.getDefaultAlgorithm())
+                    trustManagerFactory.init(trustStore)
+
+
+                    // 3. Initialize SSLContext
+                    X509TrustManager trustManager = getTrustedManager(trustManagerFactory)
+                    SSLContext sslContext = SSLContext.getInstance("TLS")
+                    sslContext.init(keyManagerFactory.keyManagers, [trustManager] as X509TrustManager[], null)
+
+                    // 4. Inject into OkHttp Builder wrapper
+                    builder.sslSocketFactory(sslContext.socketFactory, trustManager)
+
+                    // 5. Optionally bypass hostname verification
+                    if (disableHostnameVerification) {
+                        // This closure matches the HostnameVerifier functional interface (boolean verify(String hostname, SSLSession session))
+                        builder.hostnameVerifier({ String hostname, javax.net.ssl.SSLSession session -> true } as HostnameVerifier)
+                    }
+                }
+
+            } catch (Exception e) {
+                throw new IllegalStateException('Failed to configure 2-way SSL for OpenAI Client', e)
             }
+        } as OpenAiHttpClientBuilderCustomizer
+    }
 
-            // Load TrustStore
-            KeyStore trustStore = KeyStore.getInstance(trustStoreType);
-            try (FileInputStream trustStoreStream = new FileInputStream(trustStorePath)) {
-                trustStore.load(trustStoreStream, trustStorePassword.toCharArray());
-            }
 
-            // Set up KeyManagerFactory
-            KeyManagerFactory keyManagerFactory = KeyManagerFactory
-                    .getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
-
-            // Set up TrustManagerFactory
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory
-                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init(trustStore);
-
-            // Configure SslContext
-            SslContextBuilder sslContextBuilder = SslContextBuilder
-                    .forClient()
-                    .keyManager(keyManagerFactory)
-                    .trustManager(getTrustedManager(trustManagerFactory));
-
-            // Create HttpClient with SSL configuration
-            SslContext sslContext = sslContextBuilder.build();
-            httpClient = httpClient.secure(spec -> spec.sslContext(sslContext)
-                    .handshakeTimeout(Duration.ofMillis(handshakeTimeout))
-                    .closeNotifyFlushTimeout(Duration.ofMillis(closeNotifyFlushTimeout))
-                    .closeNotifyReadTimeout(Duration.ofMillis(closeNotifyReadTimeout))
-            );
+    /**
+     * 2. The Manually Configured Chat Model Bean.
+     * Accepts the optional 'mutualTlsCustomizer' if it exists in the ApplicationContext.
+     */
+    @Bean
+    @ConditionalOnProperty(prefix = 'skills.openai', name = 'enabled', havingValue = 'true', matchIfMissing = true)
+    OpenAiChatModel openAiChatModel(Optional<OpenAiHttpClientBuilderCustomizer> customizerOptional) {
+        if (!aiHost) {
+            log.debug("skills.openai.host is not configured")
+            return null
         }
 
-        webClientBuilder = webClientBuilder.clientConnector(new ReactorClientHttpConnector(httpClient))
-        OpenAiApi openAiApi = OpenAiApi.builder()
-                .apiKey(openAiKey ?: 'NoKeyProvided')
+        // Define default runtime options
+        OpenAiChatOptions chatOptions = OpenAiChatOptions.builder()
                 .baseUrl(aiHost)
-                .completionsPath(completionsEndpoint)
-                .webClientBuilder(webClientBuilder)
-                .build();
-        OpenAiChatOptions openAiChatOptions = OpenAiChatOptions.builder()
+                .apiKey(openAiKey ?: 'NoKeyProvided')
                 .streamUsage(streamUsage)
-                .build();
-
-        return OpenAiChatModel.builder()
-                .openAiApi(openAiApi)
-                .defaultOptions(openAiChatOptions)
+                .timeout(Duration.ofSeconds(timeoutInSecs))
                 .build()
+        // Construct the model via its builder pattern
+        OpenAiChatModel.Builder modelBuilder = OpenAiChatModel.builder().options(chatOptions)
+
+        // Bind the 2-way SSL customizer directly if it was created/enabled
+        customizerOptional.ifPresent { customizer ->
+            modelBuilder.httpClientBuilderCustomizer(customizer)
+        }
+
+        return modelBuilder.build()
     }
 
     private X509TrustManager getTrustedManager(TrustManagerFactory tmf) {
