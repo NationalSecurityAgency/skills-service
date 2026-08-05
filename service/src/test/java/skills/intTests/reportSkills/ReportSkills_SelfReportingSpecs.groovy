@@ -965,7 +965,11 @@ Always yours, <br/> -SkillTree Bot
 
         then:
         SkillsClientException skillsClientException = thrown(SkillsClientException)
-        skillsClientException.message.contains("Insufficient project points, skill achievement is disallowed, errorCode:InsufficientProjectPoints, success:false, projectId:${subj.projectId}, skillId:null")
+        skillsClientException.message.contains("Insufficient project points, skill achievement is disallowed")
+        skillsClientException.message.contains("errorCode:InsufficientProjectPoints")
+        skillsClientException.message.contains("success:false")
+        skillsClientException.message.contains("projectId:${subj.projectId}")
+        skillsClientException.message.contains("skillId:null")
         skillsClientException.message.contains(userId)
     }
 
@@ -989,8 +993,8 @@ Always yours, <br/> -SkillTree Bot
 
         then:
         SkillsClientException skillsClientException = thrown(SkillsClientException)
-        skillsClientException.message.contains("Insufficient project points, skill achievement is disallowed")
-        skillsClientException.message.contains("errorCode:InsufficientProjectPoints")
+        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed")
+        skillsClientException.message.contains("errorCode:InsufficientSubjectPoints")
         skillsClientException.message.contains("success:false")
         skillsClientException.message.contains("projectId:${subj.projectId}")
         skillsClientException.message.contains("skillId:${subj.subjectId}")
@@ -1017,7 +1021,11 @@ Always yours, <br/> -SkillTree Bot
 
         then:
         SkillsClientException skillsClientException = thrown(SkillsClientException)
-        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed, errorCode:InsufficientSubjectPoints, success:false, projectId:${subj.projectId}, skillId:${subj.subjectId}")
+        skillsClientException.message.contains("Insufficient Subject points, skill achievement is disallowed")
+        skillsClientException.message.contains("errorCode:InsufficientSubjectPoints")
+        skillsClientException.message.contains("success:false")
+        skillsClientException.message.contains("projectId:${subj.projectId}")
+        skillsClientException.message.contains("skillId:${subj.subjectId}")
         skillsClientException.message.contains(userId)
     }
 

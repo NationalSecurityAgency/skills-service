@@ -16,8 +16,6 @@
 package skills.intTests.skillExpiration
 
 import groovy.util.logging.Slf4j
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -32,8 +30,6 @@ import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
 class SkillExpirationConfigSpecs extends DefaultIntSpec {
-
-    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     @Autowired
     SkillAttributesDefRepo skillAttributesDefRepo
@@ -113,7 +109,7 @@ class SkillExpirationConfigSpecs extends DefaultIntSpec {
         attributes.expirationType == ExpirationAttrs.YEARLY
         attributes.every == 1
         attributes.monthlyDay == expirationDate.dayOfMonth.toString()
-        attributes.nextExpirationDate == DTF.print(expirationDate.toDate().time)
+        attributes.nextExpirationDate == expirationDate.toDate().toInstant().toString()
     }
 
     def "delete expiration attributes" () {
@@ -146,7 +142,7 @@ class SkillExpirationConfigSpecs extends DefaultIntSpec {
         t1_attributes.expirationType == ExpirationAttrs.YEARLY
         t1_attributes.every == 1
         t1_attributes.monthlyDay == expirationDate.dayOfMonth.toString()
-        t1_attributes.nextExpirationDate == DTF.print(expirationDate.toDate().time)
+        t1_attributes.nextExpirationDate == expirationDate.toDate().toInstant().toString()
         t1_skillAttributes
 
         t2_attributes.expirationType == ExpirationAttrs.NEVER

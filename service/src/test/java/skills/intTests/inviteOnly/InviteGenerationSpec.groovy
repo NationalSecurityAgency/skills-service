@@ -246,7 +246,8 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
 
         then:
         def err = thrown(SkillsClientException)
-        err.message.contains("explanation:Invitation Code does not exist for Project, errorCode:InvalidInvitationCode")
+        err.message.contains("explanation:Invitation Code does not exist for Project")
+        err.message.contains("errorCode:InvalidInvitationCode")
     }
 
     def "cannot use invite for a different project"() {
@@ -291,7 +292,9 @@ class InviteGenerationSpec extends InviteOnlyBaseSpec {
                 "authEnabled": "",
                 "tlsEnabled" : "",
                 "publicUrl" : "",
-                "fromEmail" : ""
+                "fromEmail" : "",
+                "authEnabled": false,
+                "tlsEnabled": false
         ])
 
         def proj = SkillsFactory.createProject(99)

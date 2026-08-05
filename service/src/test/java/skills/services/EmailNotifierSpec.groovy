@@ -38,7 +38,7 @@ class EmailNotifierSpec extends Specification {
 
 
     def "failed recipients are added back to notification"() {
-        EmailSendingService mockSendingService = Mock()
+        EmailSendingService mockSendingService = Mock(EmailSendingService)
         UserAttrsRepo mockAttrRepo = Mock(UserAttrsRepo)
         SettingsService mockSettingsService = Mock(SettingsService)
         NotificationsRepo notificationsRepo = Mock(NotificationsRepo)
@@ -72,7 +72,8 @@ class EmailNotifierSpec extends Specification {
         notificationEmailBuilderManager.build(notification, _) >> new NotificationEmailBuilder.Res(subject: "subject", html: "body", plainText: "body")
 
         mockAttrRepo.findEmailByUserId(*_) >>> ['fake1@fake.fake', 'fake2@fake.fake']
-        2 * mockSendingService.sendEmail(*_) >>> { throw new RuntimeException("sending failed ") } >>> null
+        1 * mockSendingService.sendEmail(*_) >> { throw new RuntimeException("sending failed ") }
+        1 * mockSendingService.sendEmail(*_)
 
         EmailNotifier emailNotifier = new EmailNotifier()
         emailNotifier.retainFailedNotificationsForNumSecs = TimeUnit.MINUTES.toSeconds(30)

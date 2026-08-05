@@ -15,8 +15,7 @@
  */
 package skills.intTests
 
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
+
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException

@@ -213,23 +213,23 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         def reusedSkillUsers = skillsService.getSkillUsers(p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
         then:
         subj1Users.data.userId.sort() == [users[0], users[1], users[2]].sort()
-        subj1Users.data.lastUpdated.sort() == [DTF.print(dates[4].time), DTF.print(dates[1].time), DTF.print(dates[3].time)].sort()
+        subj1Users.data.lastUpdated.sort() == [dates[4].toInstant().toString(), dates[1].toInstant().toString(), dates[3].toInstant().toString()].sort()
         subj1Users.data.totalPoints.sort() == [100, 200, 200].sort()
 
         subj2Users.data.userId.sort() == [users[0], users[1], users[2]].sort()
-        subj2Users.data.lastUpdated.sort() == [DTF.print(dates[4].time), DTF.print(dates[1].time), DTF.print(dates[3].time)].sort()
+        subj2Users.data.lastUpdated.sort() == [dates[4].toInstant().toString(), dates[1].toInstant().toString(), dates[3].toInstant().toString()].sort()
         subj2Users.data.totalPoints.sort() == [100, 200, 200].sort()
 
         projectUsers.data.userId.sort() == [users[0], users[1], users[2]].sort()
-        projectUsers.data.lastUpdated.sort() == [DTF.print(dates[4].time), DTF.print(dates[1].time), DTF.print(dates[3].time)].sort()
+        projectUsers.data.lastUpdated.sort() == [dates[4].toInstant().toString(), dates[1].toInstant().toString(), dates[3].toInstant().toString()].sort()
         projectUsers.data.totalPoints.sort() == [200, 400, 400].sort()
 
         skillUsers.data.userId.sort() == [users[0], users[1], users[2]].sort()
-        skillUsers.data.lastUpdated.sort() == [DTF.print(dates[4].time), DTF.print(dates[1].time), DTF.print(dates[3].time)].sort()
+        skillUsers.data.lastUpdated.sort() == [dates[4].toInstant().toString(), dates[1].toInstant().toString(), dates[3].toInstant().toString()].sort()
         skillUsers.data.totalPoints.sort() == [100, 200, 200].sort()
 
         reusedSkillUsers.data.userId.sort() == [users[0], users[1], users[2]].sort()
-        reusedSkillUsers.data.lastUpdated.sort() == [DTF.print(dates[4].time), DTF.print(dates[1].time), DTF.print(dates[3].time)].sort()
+        reusedSkillUsers.data.lastUpdated.sort() == [dates[4].toInstant().toString(), dates[1].toInstant().toString(), dates[3].toInstant().toString()].sort()
         reusedSkillUsers.data.totalPoints.sort() == [100, 200, 200].sort()
     }
 
@@ -271,23 +271,23 @@ class VariousEndpointsAndSkillReuseSpec extends CatalogIntSpec {
         def reusedSkillUsers = skillsService.getSkillUsers(p1.projectId, SkillReuseIdUtil.addTag(p1Skills[0].skillId, 0))
         then:
         subj1Users.data.userId.sort() == [users[0], users[1], users[2]].sort()
-        subj1Users.data.lastUpdated.sort() == [DTF.print(dates[4].time), DTF.print(dates[1].time), DTF.print(dates[3].time)].sort()
+        subj1Users.data.lastUpdated.sort() == [dates[4].toInstant().toString(), dates[1].toInstant().toString(), dates[3].toInstant().toString()].sort()
         subj1Users.data.totalPoints.sort() == [100, 200, 200].sort()
 
         subj2Users.data.userId.sort() == [users[0], users[1], users[2]].sort()
-        subj2Users.data.lastUpdated.sort() == [DTF.print(dates[4].time), DTF.print(dates[1].time), DTF.print(dates[3].time)].sort()
+        subj2Users.data.lastUpdated.sort() == [dates[4].toInstant().toString(), dates[1].toInstant().toString(), dates[3].toInstant().toString()].sort()
         subj2Users.data.totalPoints.sort() == [100, 200, 200].sort()
 
         projectUsers.data.userId.sort() == [users[0], users[1], users[2]].sort()
-        projectUsers.data.lastUpdated.sort() == [DTF.print(dates[4].time), DTF.print(dates[1].time), DTF.print(dates[3].time)].sort()
+        projectUsers.data.lastUpdated.sort() == [dates[4].toInstant().toString(), dates[1].toInstant().toString(), dates[3].toInstant().toString()].sort()
         projectUsers.data.totalPoints.sort() == [200, 400, 400].sort()
 
         skillUsers.data.userId.sort() == [users[0], users[1], users[2]].sort()
-        skillUsers.data.lastUpdated.sort() == [DTF.print(dates[4].time), DTF.print(dates[1].time), DTF.print(dates[3].time)].sort()
+        skillUsers.data.lastUpdated.sort() == [dates[4].toInstant().toString(), dates[1].toInstant().toString(), dates[3].toInstant().toString()].sort()
         skillUsers.data.totalPoints.sort() == [100, 200, 200].sort()
 
         reusedSkillUsers.data.userId.sort() == [users[0], users[1], users[2]].sort()
-        reusedSkillUsers.data.lastUpdated.sort() == [DTF.print(dates[4].time), DTF.print(dates[1].time), DTF.print(dates[3].time)].sort()
+        reusedSkillUsers.data.lastUpdated.sort() == [dates[4].toInstant().toString(), dates[1].toInstant().toString(), dates[3].toInstant().toString()].sort()
         reusedSkillUsers.data.totalPoints.sort() == [100, 200, 200].sort()
     }
 

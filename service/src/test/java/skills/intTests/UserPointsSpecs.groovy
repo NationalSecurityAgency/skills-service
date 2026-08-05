@@ -39,7 +39,6 @@ class UserPointsSpecs extends DefaultIntSpec {
     Date threeDaysAgo = new Date() - 3
     Date twoDaysAgo = new Date() - 2
     Date yesterday = new Date() - 1
-    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     String ultimateRoot = 'jh@dojo.com'
     SkillsService rootSkillsService

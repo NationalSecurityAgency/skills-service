@@ -17,8 +17,6 @@ package skills.intTests.catalog
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.controller.result.model.LevelDefinitionRes
@@ -47,8 +45,6 @@ class CatalogSkillTests extends CatalogIntSpec {
 
     @Autowired
     LevelDefinitionStorageService levelDefinitionStorageService
-
-    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     def "add skill to catalog"() {
         def project1 = createProject(1)
@@ -2841,7 +2837,7 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         then:
         subjectUsers.data[0].userId == user
-        subjectUsers.data[0].lastUpdated.startsWith(DTF.print(date.time).substring(0, 23))
+        subjectUsers.data[0].lastUpdated == date.toInstant().toString()
     }
 
     def "project users should take into account users of imported skills"() {
