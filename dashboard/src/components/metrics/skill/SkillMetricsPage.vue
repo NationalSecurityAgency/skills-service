@@ -106,7 +106,7 @@ onMounted(() => {
           </div>
           <div class="flex">
             <div class="w-full mb-4">
-              <post-achievement-users-table class="h-100" />
+              <post-achievement-users-table />
             </div>
           </div>
         </template>
