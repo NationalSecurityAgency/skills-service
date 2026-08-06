@@ -79,6 +79,11 @@ spring:
       location: ${java.io.tmpdir}
       max-file-size: ${skills.config.maxAttachmentSize}
       max-request-size: ${skills.config.maxAttachmentSize}
+  jackson:
+    deserialization:
+      # Allows null JSON values to map to Java primitive defaults (e.g., null becomes false for boolean, 0 for int)
+      # instead of throwing a MismatchedInputException.
+      fail-on-null-for-primitives: false
 #  http:
 #    client:
 #      factory: simple
