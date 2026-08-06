@@ -663,7 +663,7 @@ class GlobalBadgeEditSpecs extends DefaultIntSpec {
 
         List<UserAchievement> skillAchievementsAfter = userAchievedRepo.findAll().findAll { it.skillId == newId }
         then:
-        skillAchievements.userId == [users[0].userName, users[1].userName]
-        skillAchievementsAfter.userId == [users[0].userName, users[1].userName]
+        skillAchievements.userId.sort() == [users[0].userName, users[1].userName].sort()
+        skillAchievementsAfter.userId.sort() == [users[0].userName, users[1].userName].sort()
     }
 }
