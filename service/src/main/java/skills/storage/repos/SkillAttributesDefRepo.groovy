@@ -44,6 +44,8 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
         Double getWidth()
         @Nullable
         Double getHeight()
+        @Nullable
+        Boolean getAllowDownloads()
     }
 
     static interface SlidesSummaryAttributes {
@@ -59,7 +61,8 @@ interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long
            attributes ->> 'videoType' as type,
            case when attributes ->> 'captions' is not null then true else false end   as hasCaptions,
            case when attributes ->> 'transcript' is not null then true else false end as hasTranscript,
-           attributes ->> 'height' as height, attributes ->> 'width' as width
+           attributes ->> 'height' as height, attributes ->> 'width' as width,
+           attributes ->> 'allowDownloads' as allowDownloads
         from skill_attributes_definition
         where type= 'Video' and skill_ref_id = ?1''', nativeQuery = true)
     VideoSummaryAttributes getVideoSummary(Integer skillRefId)

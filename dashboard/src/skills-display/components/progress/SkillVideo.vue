@@ -90,6 +90,7 @@ const videoConf = computed(() => {
     captionsUrl,
     width: props.skill.videoSummary.width,
     height: props.skill.videoSummary.height,
+    allowDownloads: props.skill.videoSummary.allowDownloads,
   };
 });
 const isSelfReportTypeVideo = computed(() => {
