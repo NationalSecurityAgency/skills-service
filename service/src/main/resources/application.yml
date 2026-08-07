@@ -19,9 +19,6 @@ server:
 #  ssl:
 #    enabled: true
 #    client-auth:  want
-  error:
-    whitelabel:
-      enabled: false
   servlet:
     session:
       timeout: 24h
@@ -84,6 +81,10 @@ spring:
       # Allows null JSON values to map to Java primitive defaults (e.g., null becomes false for boolean, 0 for int)
       # instead of throwing a MismatchedInputException.
       fail-on-null-for-primitives: false
+  web:
+    error:
+      whitelabel:
+        enabled: false
 #  http:
 #    client:
 #      factory: simple

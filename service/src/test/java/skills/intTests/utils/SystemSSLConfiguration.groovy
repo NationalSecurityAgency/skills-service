@@ -102,4 +102,8 @@ class SystemSSLConfiguration {
             restTemplate.setRequestFactory(requestFactory)
         }
     }
+
+    static boolean isPki () {
+        return System.getenv("SPRING_PROFILES_ACTIVE") == 'pki'
+    }
 }
