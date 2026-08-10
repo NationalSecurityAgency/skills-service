@@ -71,15 +71,16 @@ class RestTemplateWrapper extends RestTemplate {
      * Need for load balancer support as it uses cookies to keep track which server currently connected to
      */
     static class StatefulRestTemplateInterceptor implements ClientHttpRequestInterceptor {
-        private List<String> cookies;
+        private Map<String, String> cookiesByName = [:]
         private String xsrfToken;
 
         @Override
         public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
 
             HttpHeaders requstHeaders = request.getHeaders()
-            if (cookies) {
-                requstHeaders.addAll(HttpHeaders.COOKIE, cookies);
+            if (!cookiesByName.isEmpty()) {
+                String cookieHeader = cookiesByName.collect { key, value -> "${key}=${value}" }.join("; ")
+                requstHeaders.set(HttpHeaders.COOKIE, cookieHeader)
             }
             if (xsrfToken != null) {
                 requstHeaders.add("X-XSRF-TOKEN" , xsrfToken);
@@ -90,19 +91,18 @@ class RestTemplateWrapper extends RestTemplate {
             HttpHeaders headers = response.getHeaders();
 
             List<String> returnedCookies = headers.getOrEmpty(HttpHeaders.SET_COOKIE)
-            if (returnedCookies /*&& cookies == null*/) {
-                if (cookies == null) {
-                    cookies = []
+            if (returnedCookies) {
+                returnedCookies.each { String setCookieHeader ->
+                    List<java.net.HttpCookie> parsedCookies = java.net.HttpCookie.parse(setCookieHeader)
+                    parsedCookies.each { java.net.HttpCookie cookie ->
+                        cookiesByName.put(cookie.name, cookie.value)
+                        if (!xsrfToken && cookie.name == "XSRF-TOKEN") {
+                            xsrfToken = cookie.value
+                            log.debug("Response: [{}], set xsrfToken to [{}]", request.URI, xsrfToken)
+                        }
+                    }
                 }
-                cookies.addAll(returnedCookies)
                 log.info("Setting cookies to {}", returnedCookies)
-            }
-            if (returnedCookies && !xsrfToken) {
-                String cookieXSRF  = returnedCookies.find { it.startsWith("XSRF-TOKEN=") }
-                if (cookieXSRF) {
-                    xsrfToken = (cookieXSRF =~ /XSRF-TOKEN=([^;]*)/)[0][1]
-                    log.debug("Response: [{}], set xsrfToken to [{}]", request.URI, xsrfToken)
-                }
             }
             return response;
         }
