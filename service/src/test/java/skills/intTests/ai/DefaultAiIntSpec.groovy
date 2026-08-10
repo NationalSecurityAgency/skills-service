@@ -50,21 +50,6 @@ import java.time.Duration
 @Slf4j
 class DefaultAiIntSpec extends DefaultIntSpec {
 
-    static {
-        // for pki mode need to initialize system properties before
-        // skills.services.openai.OpenAIChatConfig.mutualTlsCustomizer bean is created
-        if (SystemSSLConfiguration.isPki()) {
-            File ksFile = ResourceUtils.getFile("classpath:certs/test.skilltree.service.p12")
-            System.setProperty("javax.net.ssl.keyStore", ksFile.getPath())
-            System.setProperty("javax.net.ssl.keyStorePassword", "skillspass")
-            System.setProperty("javax.net.ssl.keyStoreType", "PKCS12")
-            File trustFile = ResourceUtils.getFile("classpath:certs/truststore.jks")
-            System.setProperty("javax.net.ssl.trustStore", trustFile.getPath())
-            System.setProperty("javax.net.ssl.trustStorePassword", "skillspass")
-            System.setProperty("javax.net.ssl.trustStoreType", "JKS")
-        }
-    }
-
     @LocalServerPort
     int localPort
 
