@@ -20,6 +20,7 @@ import WatchedSegmentsUtil from '@/common-components/video/WatchedSegmentsUtil';
 import {useStorage} from "@vueuse/core";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 import registerDownloadPlugin from './registerDownloadPlugin.js';
+import registerResizePlugin from './registerResizePlugin.js';
 
 const props = defineProps({
   videoPlayerId: {
@@ -101,6 +102,10 @@ onMounted(() => {
     registerDownloadPlugin();
   }
 
+  // if(!videojs.getPlugin('resizeButton')) {
+  //   registerResizePlugin()
+  // }
+
   const player = videojs(vidPlayerId, {
     playbackRates: [0.5, 1, 1.5, 2],
     enableSmoothSeeking: true,
@@ -109,7 +114,8 @@ onMounted(() => {
       downloadButton: {
         // fileName: 'ocean-waves.mp4' // Optional custom file name
         // downloadUrl: 'https://example.com/direct-download.mp4' // Optional override URL
-      }
+      },
+      // resizeButton: {}
     } : null
   }, () => {
     player.on('durationchange', () => {
@@ -322,6 +328,17 @@ const createResizeSupport = () => {
   content: "\f110";
   font-family: "VideoJS";
   cursor: pointer;
+}
+
+:deep(.vjs-resize-button .vjs-icon-placeholder::before) {
+  /* Video.js comes with a built-in download icon class or unicode character */
+  cursor: pointer;
+}
+
+:deep(.video-js:not(.vjs-has-started) .vjs-control-bar) {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 </style>

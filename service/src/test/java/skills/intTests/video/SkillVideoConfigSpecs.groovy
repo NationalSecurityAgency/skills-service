@@ -73,6 +73,7 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
                 videoUrl: "http://some.url",
                 transcript: "transcript",
                 captions: "captions",
+                allowDownloads: true
         ])
 
         when:
@@ -81,6 +82,7 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         attributes.videoUrl == "http://some.url"
         attributes.captions == "captions"
         attributes.transcript == "transcript"
+        attributes.allowDownloads == true
     }
 
     def "upload video" () {
@@ -102,6 +104,7 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         attributes.videoUrl.toString().startsWith('/api/download/')
         attributes.captions == "captions"
         attributes.transcript == "transcript"
+        attributes.allowDownloads == false
     }
 
     @Autowired
@@ -371,7 +374,8 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
                 transcript: "transcript1",
                 captions: "captions1",
                 height: 300,
-                width: 600
+                width: 600,
+                allowDownloads: true
         ])
 
         skillsService.saveSkillVideoAttributes(p1.projectId, p1Skills[1].skillId, [
@@ -379,7 +383,8 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
                 transcript: "transcript2",
                 captions: "captions2",
                 height: 300,
-                width: 600
+                width: 600,
+                allowDownloads: true
         ])
 
         when:
@@ -392,18 +397,22 @@ class SkillVideoConfigSpecs extends DefaultIntSpec {
         skill1Attributes.videoUrl == "http://some1.url"
         skill1Attributes.captions == "captions1"
         skill1Attributes.transcript == "transcript1"
+        skill1Attributes.allowDownloads == true
 
         skill2Attributes.videoUrl == "http://some2.url"
         skill2Attributes.captions == "captions2"
         skill2Attributes.transcript == "transcript2"
+        skill2Attributes.allowDownloads == true
 
         skill1AttributesAfter.videoUrl == "http://some1.url"
         skill1AttributesAfter.captions == "captions1"
         skill1AttributesAfter.transcript == "transcript1"
+        skill1AttributesAfter.allowDownloads == true
 
         !skill2AttributesAfter.videoUrl
         !skill2AttributesAfter.height
         !skill2AttributesAfter.width
+        !skill2AttributesAfter.allowDownloads
     }
 
     def "delete video attributes unsets self-report=video" () {
