@@ -15,75 +15,118 @@
  */
 import videojs from 'video.js';
 
-// Get the base Component and Button classes from Video.js
 const Button = videojs.getComponent('Button');
 
 class ResizeButton extends Button {
     constructor(player, options) {
         super(player, options);
-        // Add a custom CSS class for styling/icon placement
+        this.controlText('Click and Drag to Resize');
         this.addClass('vjs-resize-button fas fa-expand-alt fa-rotate-90');
-        this.setAttribute('id', 'resizeHandle')
-        // Set screen reader text and tooltip
-        this.controlText('Drag to resize');
-
-        this.on('mousedown', this.handleMouseDown);
+        this.isDragging = false;
+        this.startX = 0;
+        this.startWidth = 0;
     }
 
-    handleMouseDown(e) {
-        e.preventDefault()
-        this.on('mousemove', this.resize)
-        this.on('mouseup', this.stopResize)
+    handleClick(event) {
+        // Prevent default actions
+        event.preventDefault();
     }
 
-    resize(e) {
-        console.log('resizing...')
-        console.log(this.player().currentWidth())
-        console.log(this.player().currentHeight())
-        // isResizing.value = true
-        // const element = getResizableElement();
-        // const clientRect = element.getBoundingClientRect()
-        console.log(e);
-        this.player().width(this.player().currentWidth() + e.movementX)
-        // element.style.width = e.pageX - clientRect.left + 'px'
-        // updateResizableInfo()
+    createEl() {
+        const el = super.createEl();
+
+        // Listen for mousedown to initiate dragging
+        el.addEventListener('mousedown', this.onMouseDown.bind(this));
+
+        el.addEventListener('keydown', this.onKeyDown.bind(this));
+        el.addEventListener('keyup', this.onKeyUp.bind(this));
+
+        return el;
     }
 
-    stopResize() {
-        console.log('resize stopped')
-        this.off('mousemove', this.resize)
-        // isResizing.value = false
-        // if (playerWidth.value && playerHeight.value) {
-        //     announcer.polite(`Resized the video player to ${playerWidth.value} x ${playerHeight.value}`)
-        // }
+    onMouseDown(e) {
+        e.preventDefault();
+        this.isDragging = true;
+        this.startX = e.clientX;
+
+        // Get initial width of the container
+        const container = this.player_.el().parentElement;
+        this.startWidth = container.offsetWidth;
+
+        // Bind global move and up handlers
+        this.boundOnMouseMove = this.onMouseMove.bind(this);
+        this.boundOnMouseUp = this.onMouseUp.bind(this);
+
+        window.addEventListener('mousemove', this.boundOnMouseMove);
+        window.addEventListener('mouseup', this.boundOnMouseUp);
+
+        this.player_.trigger('resizeStart');
     }
 
-    // Triggered when the user clicks the button
-    handleClick() {
-        // const player = this.player();
-        // const currentSrc = player.currentSrc();
-        // const filenameFromSrc = currentSrc.substring(currentSrc.lastIndexOf('/') + 1);
-        // // Use custom download URL if provided in options, otherwise fallback to current src
-        // const src = this.options().downloadUrl || currentSrc;
-        //
-        // if (!src) {
-        //     console.warn('No video source available for download.');
-        //     return;
-        // }
-        //
-        // // Trigger standard browser download
-        // const link = document.createElement('a');
-        // link.href = src;
-        // link.download = filenameFromSrc || 'video.mp4';
-        // link.target = '_blank';
-        // document.body.appendChild(link);
-        // link.click();
-        // document.body.removeChild(link);
+    onMouseMove(e) {
+        if (!this.isDragging) return;
+
+        // Calculate distance moved from starting point
+        const deltaX = e.clientX - this.startX;
+        const newWidth = Math.max(300, this.startWidth + deltaX); // Minimum width enforcement (300px)
+
+        // Broadcast the new width to Vue
+        this.player_.trigger('resizeDragging', { width: newWidth });
+    }
+
+    onMouseUp() {
+        if (!this.isDragging) return;
+        this.isDragging = false;
+
+        window.removeEventListener('mousemove', this.boundOnMouseMove);
+        window.removeEventListener('mouseup', this.boundOnMouseUp);
+
+        this.player_.trigger('resizeEnd');
+    }
+
+    onKeyDown(e) {
+        const resizeKeys = ['ArrowRight', 'ArrowLeft', '+', '-', '=', '_'];
+
+        if (resizeKeys.includes(e.key)) {
+            e.preventDefault();
+
+            // Trigger start event on initial press down if not already active
+            if (!this.isKeyResizing) {
+                this.isKeyResizing = true;
+                this.player_.trigger('resizeStart');
+            }
+
+            const step = e.shiftKey ? 50 : 20;
+            let currentWidth = this.player_.el().parentElement.offsetWidth;
+
+            if (e.key === 'ArrowRight' || e.key === '+' || e.key === '=') {
+                const newWidth = Math.min(1920, currentWidth + step);
+                this.player_.trigger('resizeDragging', { width: newWidth });
+            } else if (e.key === 'ArrowLeft' || e.key === '-' || e.key === '_') {
+                const newWidth = Math.max(300, currentWidth - step);
+                this.player_.trigger('resizeDragging', { width: newWidth });
+            }
+        }
+    }
+
+    onKeyUp(e) {
+        const resizeKeys = ['ArrowRight', 'ArrowLeft', '+', '-', '=', '_'];
+
+        if (resizeKeys.includes(e.key)) {
+            e.preventDefault();
+
+            // Trigger end event when the sizing key is released
+            if (this.isKeyResizing) {
+                this.isKeyResizing = false;
+                this.player_.trigger('resizeEnd');
+            }
+        }
     }
 }
 
-// Register the custom component with Video.js
 videojs.registerComponent('ResizeButton', ResizeButton);
+
+// export default ResizeButton;
 
 // Register the plugin wrapper
 function registerDownloadPlugin() {
