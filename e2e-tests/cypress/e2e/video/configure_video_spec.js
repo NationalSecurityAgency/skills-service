@@ -364,12 +364,27 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', '100%')
         cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTimeWatched"]').should('have.text', '7 seconds')
 
+        cy.get('.vjs-download-button').click();
+
+        cy.fixture(`${videoFile}`).then(fixture => {
+            cy.readFile(`cypress/downloads/${videoFile}`).then(download => {
+                assert(fixture === download, 'files are matching')
+            })
+        })
+
         // refresh and re-validate
         cy.visitVideoConfPage();
         cy.get('[data-cy="allowDownloads"] [role="switch"]').should('be.checked')
         cy.get('.vjs-download-button').should('exist');
 
+        cy.get('[data-cy="allowDownloads"]').click()
+        cy.get('[data-cy="allowDownloads"] [role="switch"]').should('not.be.checked')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
 
+        cy.visitVideoConfPage();
+        cy.get('[data-cy="allowDownloads"] [role="switch"]').should('not.be.checked')
+        cy.get('.vjs-download-button').should('not.exist');
     });
 
 });
