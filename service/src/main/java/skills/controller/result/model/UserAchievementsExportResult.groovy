@@ -20,12 +20,11 @@ import jakarta.servlet.http.HttpServletResponse
 import org.apache.poi.ss.usermodel.Workbook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import org.springframework.web.servlet.view.document.AbstractXlsxStreamingView
 import skills.metrics.builders.project.UserAchievementsMetricsBuilder
 import skills.services.ExcelExportService
 
 @Component
-class UserAchievementsExportResult extends AbstractXlsxStreamingView {
+class UserAchievementsExportResult extends AbstractSkillsXlsxStreamingView {
     static final String PROJECT_ID = "projectId"
     static final String QUERY_PARAMS = "queryParams"
 
