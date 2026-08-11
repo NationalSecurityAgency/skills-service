@@ -18,13 +18,12 @@ package skills.auth.pki
 import groovy.util.logging.Slf4j
 import org.apache.hc.client5.http.classic.HttpClient
 import org.apache.hc.client5.http.config.RequestConfig
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
-import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder
+import org.apache.hc.client5.http.ssl.ClientTlsStrategyBuilder
+import org.apache.hc.client5.http.ssl.HostnameVerificationPolicy
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory
-import org.apache.hc.core5.http.config.RegistryBuilder
 import org.apache.hc.core5.ssl.SSLContexts
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -36,7 +35,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.web.client.RestTemplate
 import skills.auth.SecurityMode
 
-import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLContext
 import java.util.concurrent.TimeUnit
 
@@ -55,6 +53,9 @@ class HttpClientRestTemplateConfig {
     @Autowired
     HttpClientConfig httpClientConfig
 
+    @Value('#{"${skills.disableHostnameVerifier:false}"}')
+    Boolean disableHostnameVerification = false
+
     @Configuration
     @ConfigurationProperties(prefix = 'skills.user-info-service.connection')
     static class HttpClientConfig {
@@ -72,21 +73,21 @@ class HttpClientRestTemplateConfig {
 
     PoolingHttpClientConnectionManager createPoolingHttpClientConnectionManager() {
         SSLContext sslContext = SSLContexts.createSystemDefault()
-        HostnameVerifier allowAllHosts = new NoopHostnameVerifier();
-        SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(
-                sslContext,
-                ['TLSv1.2'] as String[],
-                null,
-                allowAllHosts);
 
-        PoolingHttpClientConnectionManager result =
-                new PoolingHttpClientConnectionManager(RegistryBuilder.create()
-                .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                .register("https", sslConnectionSocketFactory).build())
+        ClientTlsStrategyBuilder tlsStrategyBuilder = ClientTlsStrategyBuilder.create()
+                .setSslContext(sslContext)
+                .setTlsVersions("TLSv1.2")
+        if (disableHostnameVerification) {
+            tlsStrategyBuilder
+                    .setHostVerificationPolicy(HostnameVerificationPolicy.CLIENT)
+                    .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
+        }
 
-        result.setMaxTotal(this.httpClientConfig.getMaxTotal())
-        result.setDefaultMaxPerRoute(this.httpClientConfig.getDefaultMaxPerRoute())
-        return result
+        return PoolingHttpClientConnectionManagerBuilder.create()
+                .setTlsSocketStrategy(tlsStrategyBuilder.buildClassic())
+                .setMaxConnTotal(httpClientConfig.maxTotal)
+                .setMaxConnPerRoute(httpClientConfig.defaultMaxPerRoute)
+                .build()
     }
 
     @Bean
