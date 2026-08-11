@@ -346,4 +346,64 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="videoCaptions"]').should('not.have.value',defaultCaption)
 
     });
+
+    it('upload a video, enable downloading, preview the video', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="add-video-question-1"]').contains("Add Audio/Video");
+        cy.get('[data-cy="add-video-question-1"]').click()
+
+        cy.get('[data-cy="saveVideoSettingsBtn"]').should('be.disabled')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.visible')
+        cy.get('[data-cy="videoFileUpload"] input[type=file]').selectFile(`cypress/fixtures/${videoFile}`,  { force: true })
+        // cy.get('[data-cy="videoFileUpload"]').attachFile({ filePath: videoFile, encoding: 'binary'});
+        cy.get('[data-cy="allowDownloads"] [role="switch"]').should('not.be.checked')
+        cy.get('[data-cy="allowDownloads"]').click()
+        cy.get('[data-cy="allowDownloads"] [role="switch"]').should('be.checked')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+        cy.get('[data-cy="showFileUploadBtn"]').should('not.exist')
+        cy.get('[data-cy="showExternalUrlBtn"]').should('be.visible')
+        cy.get('.vjs-download-button').should('exist');
+
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTotalDuration"]').should('have.text', '7 seconds')
+        cy.get('[data-cy="videoPreviewCard"] [title="Play Video"]').click()
+
+        // video is 7 seconds
+        cy.wait(7000)
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="percentWatched"]').should('have.text', '100%')
+        cy.get('[data-cy="videoPreviewCard"] [data-cy="videoTimeWatched"]').should('have.text', '7 seconds')
+
+        cy.get('.vjs-download-button').click();
+
+        cy.fixture(`${videoFile}`).then(fixture => {
+            cy.readFile(`cypress/downloads/${videoFile}`).then(download => {
+                assert(fixture === download, 'files are matching')
+            })
+        })
+
+        // refresh and re-validate
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="add-video-question-1"]').contains("Edit Audio/Video");
+        cy.get('[data-cy="add-video-question-1"]').click()
+
+        cy.get('[data-cy="allowDownloads"] [role="switch"]').should('be.checked')
+        cy.get('.vjs-download-button').should('exist');
+
+        cy.get('[data-cy="allowDownloads"]').click()
+        cy.get('[data-cy="allowDownloads"] [role="switch"]').should('not.be.checked')
+        cy.get('[data-cy="saveVideoSettingsBtn"]').click()
+        cy.get('[data-cy="savedMsg"]')
+
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="add-video-question-1"]').contains("Edit Audio/Video");
+        cy.get('[data-cy="add-video-question-1"]').click()
+        cy.get('[data-cy="allowDownloads"] [role="switch"]').should('not.be.checked')
+        cy.get('.vjs-download-button').should('not.exist');
+    });
 });
