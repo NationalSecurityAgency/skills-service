@@ -61,6 +61,8 @@
         <bouncycastle.version>1.84</bouncycastle.version>
         <velocity.version>2.4.1</velocity.version>
 
+        <jsoup.version>1.23.1</jsoup.version>
+
         <commonmark.version>0.26.0</commonmark.version>
 
         <maven.artifact.version>3.9.15</maven.artifact.version>

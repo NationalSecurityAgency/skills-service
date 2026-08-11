@@ -762,13 +762,21 @@ ___
         String prefix = "(B) "
         String text = "<p>paragraph 1</p><p><br></p><p>(A) paragraph 2 </p><p><br></p><p>paragraph 3</p><p><br></p><p>(A) paragraph 4</p><p><br></p><p>paragraph 5</p>"
         String expect = '''<p>(B) paragraph 1</p>
-<p><br></p>
+<p>
+ <br>
+</p>
 <p>(A) paragraph 2</p>
-<p><br></p>
+<p>
+ <br>
+</p>
 <p>(B) paragraph 3</p>
-<p><br></p>
+<p>
+ <br>
+</p>
 <p>(A) paragraph 4</p>
-<p><br></p>
+<p>
+ <br>
+</p>
 <p>(B) paragraph 5</p>
 '''
 
