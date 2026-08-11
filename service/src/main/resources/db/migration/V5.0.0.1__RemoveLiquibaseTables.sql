@@ -15,5 +15,5 @@
 --
 
 -- Migrated to flyway, let's remove Liquibase tables
-drop table databasechangelog;
-drop table databasechangeloglock;
+drop table IF EXISTS databasechangelog;
+drop table IF EXISTS databasechangeloglock;
