@@ -35,11 +35,9 @@ class WebNotificationAck {
 
     Integer webNotificationsRefId
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 }

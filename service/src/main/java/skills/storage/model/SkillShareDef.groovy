@@ -40,11 +40,9 @@ class SkillShareDef {
     @JoinColumn(name="shared_to_project_ref_id", nullable = true)
     ProjDef sharedToProject
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 }

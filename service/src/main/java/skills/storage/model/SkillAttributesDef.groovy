@@ -46,11 +46,9 @@ class SkillAttributesDef {
     @Column(columnDefinition = "jsonb")
     String attributes
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 }

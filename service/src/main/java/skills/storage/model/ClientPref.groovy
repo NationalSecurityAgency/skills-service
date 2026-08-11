@@ -41,11 +41,9 @@ class ClientPref {
     //nullable
     String userId
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 

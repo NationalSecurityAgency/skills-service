@@ -67,11 +67,9 @@ class Setting {
     @Enumerated(EnumType.STRING)
     SettingType type
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 

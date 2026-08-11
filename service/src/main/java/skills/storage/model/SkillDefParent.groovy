@@ -54,19 +54,15 @@ class SkillDefParent {
     @Enumerated(EnumType.STRING)
     SkillDef.SelfReportingType selfReportingType
 
-    @Temporal(TemporalType.TIMESTAMP)
     Date startDate // optional, used for "gem" badges only currently
 
-    @Temporal(TemporalType.TIMESTAMP)
     Date endDate  // optional, used for "gem" badges only currently
 
     Integer projRefId
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 

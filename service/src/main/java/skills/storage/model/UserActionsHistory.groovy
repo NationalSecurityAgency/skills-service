@@ -50,7 +50,6 @@ class UserActionsHistory {
     @Column(columnDefinition = "jsonb")
     String actionAttributes
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
 }

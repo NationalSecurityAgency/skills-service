@@ -60,11 +60,9 @@ class SkillApproval {
     String approverUserId
     Date approverActionTakenOn
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 
