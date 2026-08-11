@@ -12,9 +12,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 -- creating Inception project is expensive so lets not delete it
-drop table IF EXISTS databasechangeloglock CASCADE;
-
-drop table IF EXISTS databasechangelog CASCADE;
+drop table IF EXISTS flyway_schema_history CASCADE;
 
 drop table IF EXISTS skills_db_locks CASCADE;
 
