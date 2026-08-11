@@ -68,7 +68,7 @@ spring:
 #    show-sql: true
   flyway:
     baseline-on-migrate: true
-    baseline-version: "4.7.0"
+    baseline-version: "5.0.0"
   session:
     store-type: none
   servlet:
