@@ -66,8 +66,9 @@ spring:
     hibernate:
       ddl-auto: none
 #    show-sql: true
-  liquibase:
-    "changelog": "classpath:db/changelog/db.changelog-master.xml"
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: "4.7.0"
   session:
     store-type: none
   servlet:
