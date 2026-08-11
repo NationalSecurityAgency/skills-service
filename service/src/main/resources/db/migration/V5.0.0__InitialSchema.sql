@@ -15,9 +15,9 @@
 --
 
 -- *********************************************************************
--- Initial Schema to support 4.7.0 Release
---   Prior to 4.7.0, Liquibase was utilized.
---   Users upgrading to 4.7.0+ from a version earlier than 4.6.0 must first upgrade to 4.6.0 before upgrading to 4.7.0.
+-- Initial Schema to support 5.0.0 Release
+--   Prior to 5.0.0, Liquibase was utilized.
+--   Users upgrading to 5.0.0+ from a version earlier than 4.6.0 must first upgrade to 4.6.0 before upgrading to 5.0.0.
 -- *********************************************************************
 -- Generated from: src/main/resources/db/changelog/db.changelog-master.xml
 -- Command: mvn liquibase:updateSQL -Dliquibase.url=offline:postgresql
