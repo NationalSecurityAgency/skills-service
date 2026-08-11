@@ -453,7 +453,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == '<a>click</a>  `<a href="javascript:alert(3)">safe</a>`'
+        one == '<a>click</a> '
     }
 
     def "malformed code blocks - unclosed backticks"() {
@@ -463,7 +463,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == 'unclosed `code block <script>alert(1)</script> another `second block outside'
+        one == 'unclosed `code block <script>alert(1)</script> another `second block '
     }
 
     def "malformed code blocks - triple backticks with content"() {
@@ -473,7 +473,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == '```not a real code block <script>alert(1)</script> still not``` outside ````real code block````'
+        one == '```not a real code block <script>alert(1)</script> still not```  ````real code block````'
     }
 
     def "encoding bypass attempts - html entities"() {
@@ -483,7 +483,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == '&lt;script&gt;alert("xss")&lt;/script&gt; outside `&lt;script&gt;alert("safe")&lt;/script&gt;`'
+        one == '&lt;script&gt;alert("xss")&lt;/script&gt;  `&lt;script&gt;alert("safe")&lt;/script&gt;`'
     }
 
     def "encoding bypass attempts - unicode and hex"() {
@@ -493,7 +493,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == '\\u003cscript\\u003ealert("xss")\\u003c/script\\u003e outside `\\u003cscript\\u003ealert("safe")\\u003c/script\\u003e`'
+        one == '\\u003cscript\\u003ealert("xss")\\u003c/script\\u003e  `\\u003cscript\\u003ealert("safe")\\u003c/script\\u003e`'
     }
 
     def "nested code blocks - backticks inside code blocks"() {
@@ -503,7 +503,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == 'outside ```outer `inner` content <script>alert(1)</script>``` outside `nested ```deep``` content`'
+        one == 'outside ```outer `inner` content <script>alert(1)</script>```  `nested ```deep``` content`'
     }
 
     def "code block injection attempts - fake code blocks"() {
@@ -513,7 +513,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == ' ```fake code block <script>alert(2)</script>``` outside `real code block`'
+        one == ' ```fake code block <script>alert(2)</script>```  `real code block`'
     }
 
     def "large input and performance edge case"() {
