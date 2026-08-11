@@ -68,7 +68,7 @@ class ResizeButton extends Button {
 
         // Calculate distance moved from starting point
         const deltaX = e.clientX - this.startX;
-        const newWidth = Math.max(300, this.startWidth + deltaX); // Minimum width enforcement (300px)
+        const newWidth = Math.max(360, this.startWidth + deltaX); // Minimum width enforcement (300px)
 
         // Broadcast the new width to Vue
         this.player_.trigger('resizeDragging', { width: newWidth });
@@ -103,7 +103,7 @@ class ResizeButton extends Button {
                 const newWidth = Math.min(1920, currentWidth + step);
                 this.player_.trigger('resizeDragging', { width: newWidth });
             } else if (e.key === 'ArrowLeft' || e.key === '-' || e.key === '_') {
-                const newWidth = Math.max(300, currentWidth - step);
+                const newWidth = Math.max(360, currentWidth - step);
                 this.player_.trigger('resizeDragging', { width: newWidth });
             }
         }

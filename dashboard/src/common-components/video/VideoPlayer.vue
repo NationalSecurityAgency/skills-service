@@ -237,33 +237,8 @@ const resetProgress = () => {
 .videoPlayerContainer {
   overflow: hidden;
   max-width: 100%;
-  min-width: 222px;
+  min-width: 360px;
   position: relative;
-}
-
-.handle{
-  font-size: 1.1rem;
-  right: 0;
-  bottom: 0;
-  position: absolute;
-  z-index: 500;
-  padding: 1px 2px 0px 1px;
-}
-
-.handle:hover{
-  cursor: ew-resize;
-}
-
-.handle:active{
-  cursor: ew-resize;
-}
-
-.handle:focus{
-  cursor: ew-resize;
-}
-
-.handle:current{
-  cursor: ew-resize;
 }
 
 /* Custom icon styling for the download button using standard CSS */
