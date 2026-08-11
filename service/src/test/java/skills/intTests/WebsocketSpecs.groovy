@@ -499,9 +499,7 @@ class WebsocketSpecs extends DefaultIntSpec {
                 .loadTrustMaterial(trustStore, TrustAllStrategy.INSTANCE)
                 .loadKeyMaterial(keyStore, "skillspass".toCharArray()).build()
 
-        def userProps = [:]
-        userProps.put("org.apache.tomcat.websocket.SSL_CONTEXT", sslContext)
-        standardWebSocketClient.setUserProperties(userProps)
+        standardWebSocketClient.setSslContext(sslContext)
     }
 
     RestTemplate configureSslRestTemplate(String user) {
