@@ -126,10 +126,8 @@ class ResizeButton extends Button {
 
 videojs.registerComponent('ResizeButton', ResizeButton);
 
-// export default ResizeButton;
-
 // Register the plugin wrapper
-function registerDownloadPlugin() {
+function registerResizePlugin() {
     videojs.registerPlugin('resizeButton', function (options = {}) {
         this.ready(() => {
             // Add the ResizeButton to the controlBar if it isn't already there
@@ -140,4 +138,4 @@ function registerDownloadPlugin() {
     });
 }
 
-export default registerDownloadPlugin;
+export default registerResizePlugin;
