@@ -16,9 +16,11 @@
 package skills.utils
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.safety.Safelist
+import org.springframework.web.util.UriComponents
 import org.springframework.web.util.UriComponentsBuilder
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
@@ -173,9 +175,16 @@ class InputSanitizer {
 
             // UriComponentsBuilder natively handles parsing, structural space decoding,
             // query parameter splitting, and strict RFC-compliant query component encoding.
-            return UriComponentsBuilder.fromUriString(spaceNormalizedUri)
-                    .build()
-                    .toUriString()
+            UriComponents uriComponents = UriComponentsBuilder.fromUriString(spaceNormalizedUri).build()
+
+            // Ensure the host (domain) is present and not empty
+            String scheme = uriComponents.getScheme();
+            String host = uriComponents.getHost();
+            if (StringUtils.isNotBlank(scheme) && StringUtils.isBlank(host)) {
+                throw new IllegalArgumentException("Domain name (host) is missing");
+            }
+
+            return uriComponents.toUriString()
         } catch (Exception e) {
             SkillException ske = new SkillException("url [$uri] is invalid: ${e.getMessage()}")
             ske.errorCode = ErrorCode.BadParam

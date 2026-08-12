@@ -133,6 +133,16 @@ class InputSanitizerSpec extends Specification{
         ex.message.contains("url [https://:[illegal-host-format]] is invalid")
     }
 
+    def "Must ensure that domain is provided"() {
+        when:
+        InputSanitizer.sanitizeUrl("https://")
+
+        then:
+        def ex = thrown(SkillException)
+        ex.errorCode == ErrorCode.BadParam
+        ex.message.contains("url [https://] is invalid")
+    }
+
     def "unsanitize markdown with gt html entity encoded"() {
         def input = "markdown markdown markdown &gt;blockquote markdown markdown markdown"
 
