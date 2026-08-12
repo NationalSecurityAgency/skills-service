@@ -21,7 +21,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.*
 import org.springframework.http.converter.HttpMessageNotReadableException
-import org.jspecify.annotations.Nullable
+import org.springframework.lang.Nullable
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler

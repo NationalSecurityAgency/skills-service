@@ -17,7 +17,7 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
-import org.jspecify.annotations.Nullable
+import org.springframework.lang.Nullable
 import skills.storage.model.QuizSetting
 
 interface QuizSettingsRepo extends CrudRepository<QuizSetting, Long> {

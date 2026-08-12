@@ -17,7 +17,7 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
-import org.jspecify.annotations.Nullable
+import org.springframework.lang.Nullable
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillShareDef

@@ -28,7 +28,7 @@ import org.springframework.http.*
 import org.springframework.http.client.*
 import org.springframework.http.converter.GenericHttpMessageConverter
 import org.springframework.http.converter.HttpMessageConverter
-import org.jspecify.annotations.Nullable
+import org.springframework.lang.Nullable
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MimeTypeUtils
 import org.springframework.util.MultiValueMap

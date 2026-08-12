@@ -15,7 +15,7 @@
  */
 package skills.storage.model
 
-import org.jspecify.annotations.Nullable
+import org.springframework.lang.Nullable
 
 interface SkillRequestApprovalStats {
     @Nullable

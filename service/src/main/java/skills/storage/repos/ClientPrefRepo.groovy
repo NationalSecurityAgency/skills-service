@@ -17,7 +17,7 @@ package skills.storage.repos
 
 
 import org.springframework.data.repository.CrudRepository
-import org.jspecify.annotations.Nullable
+import org.springframework.lang.Nullable
 import skills.storage.model.ClientPref
 
 interface ClientPrefRepo extends CrudRepository<ClientPref, Integer> {

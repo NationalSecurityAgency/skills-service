@@ -19,7 +19,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
-import org.jspecify.annotations.Nullable
+import org.springframework.lang.Nullable
 import skills.storage.model.ProjDef
 import skills.storage.model.ProjSummaryResult
 import skills.storage.model.ProjectLastTouched

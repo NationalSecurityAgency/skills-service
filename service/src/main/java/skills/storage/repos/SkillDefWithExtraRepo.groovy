@@ -20,7 +20,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
-import org.jspecify.annotations.Nullable
+import org.springframework.lang.Nullable
 import skills.skillLoading.model.SkillBadgeSummary
 import skills.storage.model.SimpleBadgeRes
 import skills.storage.model.SkillDef
