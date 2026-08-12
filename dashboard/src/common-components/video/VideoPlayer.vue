@@ -19,6 +19,8 @@ import videojs from 'video.js';
 import WatchedSegmentsUtil from '@/common-components/video/WatchedSegmentsUtil';
 import {useStorage} from "@vueuse/core";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
+import registerDownloadPlugin from './registerDownloadPlugin.js';
+import registerResizePlugin from './registerResizePlugin.js';
 
 const props = defineProps({
   videoPlayerId: {
@@ -95,10 +97,29 @@ onMounted(() => {
     playerWidth.value = videoPlayerSizeInStorage.value.width;
     playerHeight.value = videoPlayerSizeInStorage.value.height;
   }
+
+  if(!videojs.getPlugin('downloadButton')) {
+    registerDownloadPlugin();
+  }
+
+  if(!videojs.getPlugin('resizeButton')) {
+    registerResizePlugin()
+  }
+
+  const playerPlugins = {}
+
+  if(props.options.allowDownloads) {
+    playerPlugins.downloadButton = {}
+  }
+  if(!props.options.isAudio) {
+    playerPlugins.resizeButton = {};
+  }
+
   const player = videojs(vidPlayerId, {
     playbackRates: [0.5, 1, 1.5, 2],
     enableSmoothSeeking: true,
     audioOnlyMode: props.options.isAudio,
+    plugins: playerPlugins
   }, () => {
     player.on('durationchange', () => {
       const videoDuration = getVideoDuration(player)
@@ -129,9 +150,6 @@ onMounted(() => {
     });
     player.on('pause', () => {
       isPlaying.value = false
-      nextTick(() => {
-        createResizeSupport()
-      })
     });
     player.on('ended', () => {
       isPlaying.value = false;
@@ -140,7 +158,29 @@ onMounted(() => {
     playerContainer.player = player
   });
 
-  createResizeSupport()
+  player.on('resizeEnd', (e, data) => {
+    isResizing.value = false;
+    if (playerWidth.value && playerHeight.value) {
+      announcer.polite(`Resized the video player to ${playerWidth.value} x ${playerHeight.value}`)
+    }
+  });
+
+  player.on('resizeDragging', (e, data) => {
+    isResizing.value = true
+
+    // Maintain a 16:9 aspect ratio scaling calculation
+    const newHeight = Math.round(data.width * (9 / 16));
+    const width = data.width;
+    const height = newHeight;
+    playerWidth.value = width;
+    playerHeight.value = height;
+
+    if (props.storeAndRecoverSizeFromStorage) {
+      videoPlayerSizeInStorage.value = { width, height }
+    }
+    emit('on-resize', width, height);
+
+  });
 })
 onBeforeUnmount(() => {
   if (playerContainer.player) {
@@ -166,91 +206,13 @@ const resetProgress = () => {
   WatchedSegmentsUtil.updateProgress(watchProgress.value, 0)
   emit('reset-video-progress', watchProgress.value)
 }
-
-const getResizableElement = () => {
-  const resizableDiv = `#${vidPlayerId}Container`
-  return document.querySelector(resizableDiv)
-}
-
-const getResizableElementRect = () => {
-  const element = getResizableElement();
-  return element.getBoundingClientRect()
-}
-
-const resizePlayerSmaller = () => resizePlayer(-50)
-const resizePlayerBigger = () => resizePlayer(50)
-
-const resizePlayer = (resizeWidth) => {
-  const element = getResizableElement();
-  const clientRect = element.getBoundingClientRect()
-  element.style.width = (clientRect.width + resizeWidth) + 'px'
-  updateResizableInfo()
-  announcer.polite(`Resized the video player by ${resizeWidth} pixels`)
-}
-
-const updateResizableInfo = () => {
-  const clientRect = getResizableElementRect()
-  const width = Math.trunc(clientRect.width)
-  const height = Math.trunc(clientRect.height)
-  playerWidth.value = width;
-  playerHeight.value = height;
-  if (props.storeAndRecoverSizeFromStorage) {
-    videoPlayerSizeInStorage.value = { width, height }
-  }
-  emit('on-resize', width, height);
-}
-const createResizeSupport = () => {
-  if(props.options.isAudio) {
-    return
-  }
-  function makeResizableDiv() {
-    const handle = document.querySelectorAll( `#${vidPlayerId}ResizeHandle`)[0]
-
-    handle.addEventListener('mousedown', function (e) {
-      e.preventDefault()
-      window.addEventListener('mousemove', resize)
-      window.addEventListener('mouseup', stopResize)
-    })
-
-    function resize(e) {
-      isResizing.value = true
-      const element = getResizableElement();
-      const clientRect = element.getBoundingClientRect()
-      element.style.width = e.pageX - clientRect.left + 'px'
-      updateResizableInfo()
-    }
-
-    function stopResize() {
-      window.removeEventListener('mousemove', resize)
-      isResizing.value = false
-      if (playerWidth.value && playerHeight.value) {
-        announcer.polite(`Resized the video player to ${playerWidth.value} x ${playerHeight.value}`)
-      }
-    }
-  }
-
-  makeResizableDiv()
-}
-
-
 </script>
 
 <template>
   <div :class="`flex ${ alignCenter ? 'justify-center' : ''} mt-2`">
     <div :class="{ 'flex-1' : !isConfiguredVideoSize }">
-      <div :id="`${vidPlayerId}Container`" data-cy="videoPlayer"  :style="playerWidth ? `width: ${playerWidth}px;` : ''"
+      <div :id="`${vidPlayerId}Container`" data-cy="videoPlayer" :style="playerWidth ? `width: ${playerWidth}px;` : ''"
            class="videoPlayerContainer p-0 border rounded-sm border-surface-200 dark:border-surface-600">
-        <div v-if="!isPlaying && !options.isAudio"
-             :id="`${vidPlayerId}ResizeHandle`"
-             data-cy="videoResizeHandle"
-             role="button"
-             aria-label="Resize video dimensions control. Press right or left to resize the video player."
-             @keyup.right="resizePlayerBigger"
-             @keyup.left="resizePlayerSmaller"
-             tabindex="0"
-             class="handle border border-surface-500 dark:border-surface-300 text-primary bg-primary-contrast rounded-border">
-          <i class="fas fa-expand-alt fa-rotate-90" />
-        </div>
         <div v-if="isResizing" class="text-center flex items-center justify-center ">
           <div class="absolute z-40 top-0 left-0 right-0 bottom-0 bg-gray-600 opacity-50 text-center flex items-center justify-center " >
           </div>
@@ -275,34 +237,27 @@ const createResizeSupport = () => {
 .videoPlayerContainer {
   overflow: hidden;
   max-width: 100%;
-  min-width: 222px;
+  min-width: 360px;
   position: relative;
 }
 
-.handle{
-  font-size: 1.1rem;
-  right: 0;
-  bottom: 0;
-  position: absolute;
-  z-index: 500;
-  padding: 1px 2px 0px 1px;
+/* Custom icon styling for the download button using standard CSS */
+:deep(.vjs-download-button .vjs-icon-placeholder::before) {
+  /* Video.js comes with a built-in download icon class or unicode character */
+  content: "\f110";
+  font-family: "VideoJS";
+  cursor: pointer;
 }
 
-.handle:hover{
-  cursor: ew-resize;
+:deep(.vjs-resize-button .vjs-icon-placeholder::before) {
+  /* Video.js comes with a built-in download icon class or unicode character */
+  cursor: pointer;
 }
 
-.handle:active{
-  cursor: ew-resize;
+:deep(.video-js:not(.vjs-has-started) .vjs-control-bar) {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
-
-.handle:focus{
-  cursor: ew-resize;
-}
-
-.handle:current{
-  cursor: ew-resize;
-}
-
 
 </style>

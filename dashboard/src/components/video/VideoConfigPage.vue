@@ -40,6 +40,7 @@ import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseU
 import { useProjectCommunityReplacement } from '@/components/customization/UseProjectCommunityReplacement.js'
 import { WebVTTParser } from 'webvtt-parser';
 import {useQuizConfig} from "@/stores/UseQuizConfig.js";
+import SkillsInputSwitch from "@/components/utils/inputForm/SkillsInputSwitch.vue";
 
 const parser = new WebVTTParser();
 const dialogMessages = useDialogMessages()
@@ -70,6 +71,7 @@ const videoConf = ref({
   transcript: '',
   isInternallyHosted: false,
   hostedFileName: '',
+  allowDownloads: false
 })
 
 const watchedProgress = ref(null);
@@ -106,6 +108,7 @@ const computedVideoConf = computed(() => {
     captionsUrl,
     width: configuredWidth.value,
     height: configuredHeight.value,
+    allowDownloads: videoConf.value.allowDownloads,
   };
 });
 const lengthyOperationLoadingBarTimeout = computed(() => {
@@ -185,6 +188,7 @@ const onFileSelectedEvent = (selectFileEvent) => {
   // basically a placeholder
   videoConf.value.url = `/${newFile.name}`;
   videoConf.value.videoType = newFile.type
+  videoConf.value.allowDownloads = false;
   validate();
 }
 const switchToFileUploadOption = () => {
@@ -200,6 +204,7 @@ const clearVideoOptions = () => {
   videoConf.value.hostedFileName = '';
   videoConf.value.url = '';
   videoConf.value.file = null;
+  videoConf.value.allowDownloads = false;
   delete videoConf.value.videoType;
   preview.value = false;
   validate();
@@ -229,6 +234,7 @@ const saveSettings = () => {
     data.append('width', configuredWidth.value)
     data.append('height', configuredHeight.value)
   }
+  data.append('allowDownloads', videoConf.value.allowDownloads);
 
   const endpoint = `/admin/${requestEndpoint.value}/video`;
   FileUploadService.upload(endpoint, data, (response) => {
@@ -300,6 +306,7 @@ const updateVideoSettings = (settingRes) => {
   videoConf.value.transcript = settingRes.transcript;
   videoConf.value.isInternallyHosted = settingRes.isInternallyHosted;
   videoConf.value.hostedFileName = settingRes.internallyHostedFileName;
+  videoConf.value.allowDownloads = settingRes.allowDownloads;
   configuredWidth.value = settingRes.width
   configuredHeight.value = settingRes.height
   if (videoConf.value.url) {
@@ -597,6 +604,22 @@ const videoSettingGridCss = computed(() => 'grid sm:grid-cols-[10rem_1fr] sm:gap
                   data-cy="videoTranscript"
                   :disabled="isReadOnly"
               />
+            </div>
+
+            <div data-cy="allowDownloadsInput" class="mt-4">
+              <div class="flex mb-2">
+                <div class="flex items-center flex-1">
+                  <label for="allowDownloads">Allow Downloads:</label>
+                  <SkillsInputSwitch data-cy="allowDownloads"
+                                     aria-labelledby="allowDownloads"
+                                     inputId="allowDownloads"
+                                     style="height:1rem !important;"
+                                     class="ml-3"
+                                     size="small"
+                                     name="enabled"
+                                     v-model="videoConf.allowDownloads" />
+                </div>
+              </div>
             </div>
 
             <Message severity="error" v-if="overallErrMsg">

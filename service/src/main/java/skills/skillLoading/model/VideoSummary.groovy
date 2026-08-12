@@ -25,4 +25,6 @@ class VideoSummary {
 
     Double height
     Double width
+
+    Boolean allowDownloads
 }

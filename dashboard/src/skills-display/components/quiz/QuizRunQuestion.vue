@@ -65,6 +65,7 @@ const mediaAttributes = computed(() => {
       width: attr.width,
       height: attr.height,
       transcript: attr.transcript,
+      allowDownloads: attr.allowDownloads,
     };
   }
   return null;

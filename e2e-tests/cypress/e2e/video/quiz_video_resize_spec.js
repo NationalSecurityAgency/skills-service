@@ -48,9 +48,9 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="updateVideoSettings"]').should('not.exist')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
 
-        cy.get('[data-cy="videoResizeHandle"]').should('be.visible')
+        cy.get('.vjs-resize-button').should('be.visible')
             .trigger('mousedown', )
-            .trigger('mousemove', )
+            .trigger('mousemove', { clientX: 800, clientY: 400 } )
             .trigger('mouseup', { force: true })
 
         cy.useVideoDimensions().then((dimensionsResize1) =>  {
@@ -60,9 +60,9 @@ describe('Configure Video Tests', () => {
                 const qNum = url.split('/')[7]
                 cy.get(`#videoConfigFor-quiz1-${qNum}`).should('have.css', 'width', `${dimensionsResize1.width - 2}px`)
 
-                cy.get('[data-cy="videoResizeHandle"]').should('be.visible')
+                cy.get('.vjs-resize-button').should('be.visible')
                     .trigger('mousedown', )
-                    .trigger('mousemove', )
+                    .trigger('mousemove', { clientX: 600 , clientY: 300})
                     .trigger('mouseup', { force: true })
                 cy.useVideoDimensions().then((dimensionsResize2) => {
                     cy.wrap(dimensionsResize1.width).should('be.gt', dimensionsResize2.width);
@@ -90,7 +90,7 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="updateVideoSettings"]').should('not.exist')
         cy.get('[data-cy="unsavedVideoSizeChanges"]').should('not.exist')
 
-        cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{leftArrow}')
+        cy.get('.vjs-resize-button').focus().type('{leftArrow}')
         cy.useVideoDimensions().then((dimensionsResize1) => {
             cy.url().then((url) => {
                 const qNum = url.split('/')[7]
@@ -99,14 +99,14 @@ describe('Configure Video Tests', () => {
                 cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
 
 
-                cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{leftArrow}')
+                cy.get('.vjs-resize-button').focus().type('{leftArrow}')
                 cy.useVideoDimensions().then((dimensionsResize2) => {
                     cy.wrap(dimensionsResize1.width).should('be.gt', dimensionsResize2.width);
                     cy.get('[data-cy="updateVideoSettings"]').should('exist')
                     cy.get(`#videoConfigFor-quiz1-${qNum}Container`).should('have.css', 'width', `${dimensionsResize2.width}px`)
                     cy.get('[data-cy="unsavedVideoSizeChanges"]').should('exist')
 
-                    cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{rightArrow}')
+                    cy.get('.vjs-resize-button').focus().type('{rightArrow}')
                     cy.useVideoDimensions().then((dimensionsResize3) => {
                         cy.wrap(dimensionsResize3.width).should('be.gt', dimensionsResize2.width);
                         cy.get('[data-cy="updateVideoSettings"]').click()
@@ -126,8 +126,8 @@ describe('Configure Video Tests', () => {
         cy.visitVideoConfPage('quiz1', 1)
 
         cy.get('[data-cy="defaultVideoSize"]').contains('Not Configured')
-        cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{leftArrow}')
-        cy.get('[data-cy="clearVideoSettingsBtn"]').tab().type('{enter}{leftArrow}')
+        cy.get('.vjs-resize-button').focus().type('{leftArrow}')
+        cy.get('.vjs-resize-button').focus().type('{leftArrow}')
         cy.useVideoDimensions().then((dimensionsResize1) => {
             cy.get('[data-cy="updateVideoSettings"]').click()
             cy.get('[data-cy="savedMsg"]')
@@ -138,7 +138,7 @@ describe('Configure Video Tests', () => {
             cy.get(`.video-js`).should('have.css', 'width', `${dimensionsResize1.width - 2}px`)
 
             // user overrides the video size
-            cy.get('body').tab().type('{enter}{leftArrow}')
+            cy.get('.vjs-resize-button').focus().type('{leftArrow}')
             cy.get(`.video-js`).invoke('css', 'width').then((widthInPx) => {
                 // console.log(width);
                 const playerWidth = parseInt(widthInPx.replace('px', ''))
@@ -161,30 +161,15 @@ describe('Configure Video Tests', () => {
         cy.get(`.video-js`)
 
         cy.get(`.video-js`).should('have.css', 'width').and('match', /88[\d.]*px/)
-        cy.get('[data-cy="helpButton"]').tab().tab().type('{enter}{leftArrow}')
-        cy.get('[data-cy="helpButton"]').tab().tab().type('{enter}{leftArrow}')
-        cy.get('[data-cy="helpButton"]').tab().tab().type('{enter}{leftArrow}')
+        cy.get('.vjs-resize-button').focus().type('{shift}{leftArrow}')
+        cy.get('.vjs-resize-button').focus().type('{shift}{leftArrow}')
+        cy.get('.vjs-resize-button').focus().type('{shift}{leftArrow}')
 
         cy.get(`.video-js`).should('have.css', 'width').and('match', /73[\d]px/)
 
         // user-set new size is used
         cy.visit('/progress-and-rankings/quizzes/quiz1');
         cy.get(`.video-js`).should('have.css', 'width').and('match', /73[\d.]*px/)
-    });
-
-    it('playing the video removes the resize button', () => {
-        cy.createQuizDef(1);
-        cy.createQuizQuestionDef(1, 1, null,  { videoUrl: testVideo, captions: defaultCaption, transcript: 'another' })
-
-        cy.visit('/progress-and-rankings/quizzes/quiz1');
-        cy.get('[data-cy="startQuizAttempt"]').click()
-        cy.get(`.video-js`)
-
-        cy.get('[data-cy="videoResizeHandle"]')
-        cy.get('[data-cy="videoPlayer"] [title="Play Video"]').click()
-        cy.get('[data-cy="videoResizeHandle"]').should('not.exist')
-        cy.get('[data-cy="videoPlayer"] [title="Pause"]').click()
-        cy.get('[data-cy="videoResizeHandle"]')
     });
 
     it('player will resize after playing then pausing the video', () => {
@@ -195,28 +180,27 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get(`.video-js`)
 
-        cy.get('[data-cy="videoResizeHandle"]').should('be.visible')
+        cy.get('.vjs-resize-button').should('be.visible')
             .trigger('mousedown', )
-            .trigger('mousemove', )
+            .trigger('mousemove', { clientX: 600 , clientY: 300})
             .trigger('mouseup', { force: true })
-        cy.get('[data-cy="videoResizeHandle"]').should('be.visible')
+        cy.get('.vjs-resize-button').should('be.visible')
             .trigger('mousedown', )
-            .trigger('mousemove', )
+            .trigger('mousemove', { clientX: 600 , clientY: 300})
             .trigger('mouseup', { force: true })
-        cy.get(`.video-js`).should('have.css', 'width').and('match', /85[\d]px/)
+        cy.get(`.video-js`).should('have.css', 'width').and('match', /55[\d]px/)
 
-        cy.get('[data-cy="videoResizeHandle"]')
+        cy.get('.vjs-resize-button')
         cy.get('[data-cy="videoPlayer"] [title="Play Video"]').click()
-        cy.get('[data-cy="videoResizeHandle"]').should('not.exist')
         cy.wait(1000)
         cy.get('[data-cy="videoPlayer"] [title="Pause"]').click()
-        cy.get('[data-cy="videoResizeHandle"]')
+        cy.get('.vjs-resize-button')
 
-        cy.get('[data-cy="videoResizeHandle"]').should('be.visible')
+        cy.get('.vjs-resize-button').should('be.visible')
             .trigger('mousedown', )
-            .trigger('mousemove', )
+            .trigger('mousemove', { clientX: 900 , clientY: 600})
             .trigger('mouseup', { force: true })
-        cy.get(`.video-js`).should('have.css', 'width').and('match', /84[\d]px/)
+        cy.get(`.video-js`).should('have.css', 'width').and('match', /85[\d]px/)
     });
 
     it('audio only does not have a resize button', () => {
@@ -227,6 +211,6 @@ describe('Configure Video Tests', () => {
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get(`.video-js`)
 
-        cy.get('[data-cy="videoResizeHandle"]').should('not.exist')
+        cy.get('.vjs-resize-button').should('not.exist')
     });
 });

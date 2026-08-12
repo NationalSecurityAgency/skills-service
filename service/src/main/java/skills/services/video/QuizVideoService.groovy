@@ -80,7 +80,7 @@ class QuizVideoService {
     @Transactional
     SkillVideoAttrs saveVideo(String quizId, Integer questionId, Boolean isAlreadyHosted,
                               MultipartFile file, String videoUrl, String captions, String transcript,
-                              Double width, Double height) {
+                              Double width, Double height, Boolean allowDownloads) {
         quizValidatorService.validateQuestion(quizId, questionId)
         SkillVideoAttrs existingVideoAttributes = quizDefService.getVideoAttributesForQuestion(quizId, questionId)
         final boolean isEdit = existingVideoAttributes?.videoUrl
@@ -104,6 +104,7 @@ class QuizVideoService {
 
         videoAttrs = videoHelperService.verifyCaptionsAndTranscript(videoAttrs, captions, transcript)
         videoAttrs = videoHelperService.setDimensions(videoAttrs, width, height)
+        videoAttrs.allowDownloads = allowDownloads
 
         quizDefService.saveVideoAttributesForQuestion(quizId, questionId, videoAttrs)
 

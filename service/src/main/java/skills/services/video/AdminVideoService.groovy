@@ -72,7 +72,7 @@ class AdminVideoService {
     @Transactional
     SkillVideoAttrs saveVideo(String projectId, String skillId, Boolean isAlreadyHosted,
                               MultipartFile file, String videoUrl, String captions, String transcript,
-                              Double width, Double height) {
+                              Double width, Double height, Boolean allowDownloads) {
 
         SkillVideoAttrs existingVideoAttributes = skillAttributeService.getVideoAttrs(projectId, skillId)
         final boolean isEdit = existingVideoAttributes?.videoUrl
@@ -96,6 +96,7 @@ class AdminVideoService {
 
         videoAttrs = videoHelperService.verifyCaptionsAndTranscript(videoAttrs, captions, transcript)
         videoAttrs = videoHelperService.setDimensions(videoAttrs, width, height)
+        videoAttrs.allowDownloads = allowDownloads
 
         boolean isReadOnly = skillDefRepo.isImportedFromCatalog(projectId, skillId)
         SkillsValidator.isTrue(!isReadOnly, "Cannot set video attributes of read-only skill", projectId, skillId)

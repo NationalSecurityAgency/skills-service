@@ -28,4 +28,5 @@ class SkillVideoAttrs {
     String internallyHostedAttachmentUuid
     Double width
     Double height
+    Boolean allowDownloads
 }

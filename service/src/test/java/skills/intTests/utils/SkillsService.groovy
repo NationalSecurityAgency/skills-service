@@ -2327,6 +2327,7 @@ class SkillsService {
         if (videoAttrs.transcript) { body.put("transcript", videoAttrs.transcript)}
         if (videoAttrs.height) { body.put("height", videoAttrs.height)}
         if (videoAttrs.width) { body.put("width", videoAttrs.width)}
+        if (videoAttrs.allowDownloads) { body.put("allowDownloads", videoAttrs.allowDownloads)}
 
         String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId}/video"
         return wsHelper.adminUpload(url, body, true)

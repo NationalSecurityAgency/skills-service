@@ -82,4 +82,22 @@ describe('Display Video on Quiz Page Tests', () => {
         cy.get('[data-cy="videoTranscript"]').should('have.text', 'another')
     });
 
+    it('videos can be downloaded', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1, null,  { videoUrl: testVideo, captions: 'some', transcript: 'another', allowDownloads: true })
+
+        cy.visit('/progress-and-rankings/quizzes/quiz1');
+        cy.get('[data-cy="startQuizAttempt"]').click()
+
+        cy.get('.vjs-download-button').should('exist');
+        cy.get('.vjs-download-button').click();
+
+        cy.fixture('create-quiz.mp4').then(fixture => {
+            cy.readFile('cypress/downloads/create-quiz.mp4').then(download => {
+                // expect(fixture).to.eq(download)
+                assert(fixture === download, 'files are matching')
+            })
+        })
+
+    });
 });
