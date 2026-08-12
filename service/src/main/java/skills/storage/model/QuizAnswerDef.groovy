@@ -17,20 +17,11 @@ package skills.storage.model
 
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
-import io.hypersistence.utils.hibernate.type.json.JsonType
-import org.hibernate.annotations.Type
+import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
-
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EntityListeners
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
-import jakarta.persistence.Temporal
-import jakarta.persistence.TemporalType
 
 @Entity
 @Table(name = 'quiz_answer_definition')
@@ -57,7 +48,7 @@ class QuizAnswerDef {
     @LastModifiedDate
     Date updated
 
-    @Type(JsonType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     String multiPartAnswer
 

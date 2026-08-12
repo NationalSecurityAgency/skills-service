@@ -16,16 +16,15 @@
 package skills.utils
 
 import groovy.util.logging.Slf4j
-import org.apache.hc.core5.http.NameValuePair
-import org.apache.hc.core5.net.URLEncodedUtils
+import org.apache.commons.lang3.StringUtils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.safety.Safelist
-import org.owasp.encoder.Encode
+import org.springframework.web.util.UriComponents
+import org.springframework.web.util.UriComponentsBuilder
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 
-import java.nio.charset.Charset
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -170,49 +169,23 @@ class InputSanitizer {
         }
 
         try {
-            URI u = new URI(handleSpacesInUrl(uri))
-            String scheme = u.getScheme()
-            String authority = u.getAuthority()
-            String userInfo = u.getUserInfo()
-            String path = u.getPath()
-            String queryString = u.getQuery()
-            String fragment = u.getFragment()
+            // Replace all raw spaces with %20 so that components like paths,
+            // query parameters, and fragments are cleanly normalized.
+            String spaceNormalizedUri = uri.replace(" ", "%20")
 
-            StringBuilder reassembled = new StringBuilder()
-            if (scheme) {
-                reassembled.append(scheme).append("://")
-            }
-            if (userInfo) {
-                reassembled.append(userInfo).append("@")
-            }
-            if (authority) {
-                authority = SPACE.matcher(authority).replaceAll("%20")
-                reassembled.append(authority)
-            }
-            if (path) {
-                path = SPACE.matcher(path).replaceAll("%20")
-                reassembled.append(path)
-            }
-            if (queryString) {
-                List<NameValuePair> params = URLEncodedUtils.parse(u, Charset.forName("utf-8"))
-                Iterator<NameValuePair> itr = params.iterator()
-                reassembled.append("?")
-                while (itr.hasNext()) {
-                    NameValuePair paramPair = itr.next()
-                    reassembled.append(paramPair.name).append("=")
-                    reassembled.append(Encode.forUriComponent(paramPair.value))
-                    if (itr.hasNext()) {
-                        reassembled.append("&")
-                    }
-                }
-            }
-            if (fragment) {
-                fragment = SPACE.matcher(fragment).replaceAll("%20")
-                reassembled.append("#").append(fragment)
+            // UriComponentsBuilder natively handles parsing, structural space decoding,
+            // query parameter splitting, and strict RFC-compliant query component encoding.
+            UriComponents uriComponents = UriComponentsBuilder.fromUriString(spaceNormalizedUri).build()
+
+            // Ensure the host (domain) is present and not empty
+            String scheme = uriComponents.getScheme();
+            String host = uriComponents.getHost();
+            if (StringUtils.isNotBlank(scheme) && StringUtils.isBlank(host)) {
+                throw new IllegalArgumentException("Domain name (host) is missing");
             }
 
-            return reassembled.toString()
-        } catch (URISyntaxException e) {
+            return uriComponents.toUriString()
+        } catch (Exception e) {
             SkillException ske = new SkillException("url [$uri] is invalid: ${e.getMessage()}")
             ske.errorCode = ErrorCode.BadParam
             throw ske
