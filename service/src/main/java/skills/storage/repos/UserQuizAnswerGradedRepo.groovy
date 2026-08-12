@@ -17,7 +17,7 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
-import org.springframework.lang.Nullable
+import org.jspecify.annotations.Nullable
 import skills.storage.model.UserQuizAnswerAttempt
 import skills.storage.model.UserQuizAnswerGraded
 

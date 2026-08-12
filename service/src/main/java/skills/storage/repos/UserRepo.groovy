@@ -17,7 +17,7 @@ package skills.storage.repos
 
 
 import org.springframework.data.repository.CrudRepository
-import org.springframework.lang.Nullable
+import org.jspecify.annotations.Nullable
 import skills.storage.model.auth.User
 
 interface UserRepo extends CrudRepository<User, Integer> {

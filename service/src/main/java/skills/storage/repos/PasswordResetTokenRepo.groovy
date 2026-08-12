@@ -17,7 +17,7 @@ package skills.storage.repos
 
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
-import org.springframework.lang.Nullable
+import org.jspecify.annotations.Nullable
 import skills.storage.model.auth.UserToken
 
 interface PasswordResetTokenRepo extends CrudRepository<UserToken, Integer> {

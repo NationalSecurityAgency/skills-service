@@ -30,7 +30,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
 import org.springframework.core.SpringVersion
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
-import org.springframework.lang.Nullable
+import org.jspecify.annotations.Nullable
 import org.springframework.messaging.converter.MappingJackson2MessageConverter
 import org.springframework.messaging.simp.stomp.*
 import org.springframework.web.client.RestTemplate

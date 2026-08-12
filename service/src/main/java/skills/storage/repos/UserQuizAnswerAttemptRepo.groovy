@@ -19,7 +19,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
-import org.springframework.lang.Nullable
+import org.jspecify.annotations.Nullable
 import skills.controller.result.model.UserQuizAnswer
 import skills.storage.model.UserQuizAnswerAttempt
 

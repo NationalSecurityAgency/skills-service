@@ -25,7 +25,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.jpa.repository.QueryHints
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
-import org.springframework.lang.Nullable
+import org.jspecify.annotations.Nullable
 import skills.controller.result.model.GlobalBadgeUser
 import skills.controller.result.model.ProjectUser
 import skills.storage.model.SkillRelDef
