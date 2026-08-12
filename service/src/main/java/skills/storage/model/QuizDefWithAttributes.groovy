@@ -17,12 +17,12 @@ package skills.storage.model
 
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
-import io.hypersistence.utils.hibernate.type.json.JsonType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.Table
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
 @Entity
@@ -32,7 +32,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 @ToString(includeNames = true)
 class QuizDefWithAttributes extends QuizDefParent {
 
-    @Type(JsonType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     String attributes
 }
