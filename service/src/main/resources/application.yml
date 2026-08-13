@@ -114,7 +114,6 @@ skills:
   openai:
     host: null
   config:
-    publiclyExposePrometheusMetrics: false
     # Changing this to a larger value once events have been compacted into WEEKLY events will cause
     # those WEEKLY events which are now newer than the compactDailyEventsOlderThan to no longer be visible in the system
     # Decreasing this value will temporarily cause any DAILY events older than the new value to not be visible until the next

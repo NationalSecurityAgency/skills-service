@@ -54,15 +54,6 @@ class PortalWebSecurityHelper {
     @Value('#{"${server.port:8080}"}')
     Integer serverPort
 
-    @Value('#{"${skills.config.publiclyExposePrometheusMetrics:false}"}')
-    Boolean publiclyExposePrometheusMetrics
-
-    @Value('#{"${management.endpoints.web.base-path:/actuator}"}')
-    String managementPath
-
-    @Value('#{"${management.endpoints.web.path-mapping.prometheus:prometheus}"}')
-    String prometheusPath
-
     @Value('#{"${skills.config.disableCsrfProtection:false}"}')
     Boolean disableCsrfProtection
 
@@ -119,9 +110,6 @@ class PortalWebSecurityHelper {
 
         http.addFilterAfter(new SkillsAuthorityFilter(userAuthService, permitAllMatcher), CsrfCookieFilter.class)
 
-        if (publiclyExposePrometheusMetrics) {
-            http.authorizeHttpRequests().requestMatchers(HttpMethod.GET, "${managementPath}/${prometheusPath}").permitAll()
-        }
         http.authorizeHttpRequests((authorize) ->
             authorize
                 .requestMatchers(permitAllMatcher).permitAll()
@@ -133,7 +121,6 @@ class PortalWebSecurityHelper {
                 .requestMatchers('/admin/**').access(hasAnyAuthorityPlus([inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager], RoleName.ROLE_PROJECT_ADMIN.name(), RoleName.ROLE_SUPER_DUPER_USER.name(), RoleName.ROLE_PROJECT_APPROVER.name()))
                 .requestMatchers('/app/**').access(AuthorizationManagers.allOf(inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager))
                 .requestMatchers('/api/**').access(AuthorizationManagers.allOf(inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager))
-                .requestMatchers("/${managementPath}/**").hasAuthority(RoleName.ROLE_SUPER_DUPER_USER.name())
                 .requestMatchers("/openai/**").access(AuthorizationManagers.allOf(openAIAuthorizationManager))
                 .anyRequest().authenticated()
         )
