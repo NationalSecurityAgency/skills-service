@@ -172,20 +172,28 @@ class ManageTheApproverRoleSpecs extends DefaultIntSpec {
         skillsService.addUserRole(user1Service.userName, proj.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
 
         then:
+        def subject = SkillsFactory.createSubject(1, 2)
         hasPermissionException {
-            user1Service.createSubject(SkillsFactory.createSubject(1, 2))
+            user1Service.createSubject(subject)
         }
-        skillsService.createSubject(SkillsFactory.createSubject(1, 2))
+        skillsService.createSubject(subject)
+
+        def skill = SkillsFactory.createSkill(1, 1, 10)
+        hasPermissionException {
+            user1Service.createSkill(skill)
+        }
+        skillsService.createSkill(skill)
+
+        def badge = SkillsFactory.createBadge()
+        hasPermissionException {
+            user1Service.createBadge(badge)
+        }
+        skillsService.createBadge(badge)
 
         hasPermissionException {
-            user1Service.createSkill(SkillsFactory.createSkill(1, 1, 10))
+            user1Service.assignSkillToBadge(proj.projectId, badge.badgeId, skill.skillId)
         }
-        skillsService.createSkill(SkillsFactory.createSkill(1, 1, 10))
-
-        hasPermissionException {
-            user1Service.createBadge(SkillsFactory.createBadge())
-        }
-        skillsService.createBadge(SkillsFactory.createBadge())
+        skillsService.assignSkillToBadge(proj.projectId, badge.badgeId, skill.skillId)
 
         hasPermissionException {
             user1Service.addOrUpdateProjectSetting(proj.projectId, "one", "two")
@@ -206,6 +214,31 @@ class ManageTheApproverRoleSpecs extends DefaultIntSpec {
             user1Service.archiveUsers([users[0]], proj.projectId)
         }
         skillsService.archiveUsers([users[0]], proj.projectId)
+
+        hasPermissionException {
+            user1Service.removeSkillFromBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
+        }
+        skillsService.removeSkillFromBadge([projectId: proj.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
+
+        hasPermissionException {
+            user1Service.removeBadge(badge)
+        }
+        skillsService.removeBadge(badge)
+
+        hasPermissionException {
+            user1Service.deleteSkill(skill)
+        }
+        skillsService.deleteSkill(skill)
+
+        hasPermissionException {
+            user1Service.deleteSubject(subject)
+        }
+        skillsService.deleteSubject(subject)
+
+        hasPermissionException {
+            user1Service.deleteProject(proj.projectId)
+        }
+        skillsService.deleteProject(proj.projectId)
     }
 
     def "approver can approve self reporting requests"() {

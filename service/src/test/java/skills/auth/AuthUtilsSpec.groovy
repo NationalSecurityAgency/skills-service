@@ -53,6 +53,9 @@ class AuthUtilsSpec extends Specification {
         matched | url
         true    | "/admin/projects/proj1/approvals/approve"
         true    | "/admin/projects/proj2/approvals/approve"
+        false   | "/admin/projects/proj2/approvals/approve/"
+        false   | "/admin/projects/proj2/approvals/apProve/"
+        false   | "/admin/projects/proj2/approvals/approve/a"
         false   | "/admin/projects/proj2/approvals/approv"
         false   | "/admin/projects/proj2/approvals/approve1"
         false   | "/admin/bdea/projects/proj2/approvals/approve"
@@ -65,6 +68,10 @@ class AuthUtilsSpec extends Specification {
 
         true    | "/admin/projects/proj1/approvals/reject"
         true    | "/admin/projects/proj2/approvals/reject"
+        false   | "/admin/projects/proj2/approvals/reject/"
+        false   | "/admin/projects/proj2/approvals/reject/a"
+        false   | "/admin/projects/proj2/approvals/reJect/"
+        false   | "/admin/projects/proj2/approvals/reJect/a"
         false   | "/admin/projects/proj2/approvals/rejec"
         false   | "/admin/projects/proj2/approvals/reject1"
         false   | "/admin/bdea/projects/proj2/approvals/rejecte"
