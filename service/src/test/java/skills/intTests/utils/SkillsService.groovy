@@ -1517,10 +1517,10 @@ class SkillsService {
         return wsHelper.rootPut("/global/settings/${setting}", value)
     }
 
-    def configuredProjectAsInviteOnly(String projectId){
+    def configuredProjectAsInviteOnly(String projectId, Boolean setting = true){
         return changeSetting(projectId, "invite_only", [
                 projectId: projectId, setting: Settings.INVITE_ONLY_PROJECT.settingName,
-                value: Boolean.TRUE.toString().toLowerCase()
+                value: setting.toString().toLowerCase()
         ])
     }
     def requestNewProjectInvite(String projectId) {

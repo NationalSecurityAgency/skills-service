@@ -38,7 +38,8 @@ class QueryUserCriteriaHelper {
                             SELECT DISTINCT user_id
                             FROM user_roles
                             WHERE project_id = :projectId
-                              and role_name = 'ROLE_PRIVATE_PROJECT_USER')
+                              and role_name = 'ROLE_PRIVATE_PROJECT_USER'
+                              and EXISTS(SELECT 1 FROM settings s WHERE s.setting = 'invite_only' and s.value = 'true' and s.project_id = :projectId))
                     where user_id not in (select au.user_id from archived_users au where au.project_id = :projectId) '''
         }
 
@@ -52,7 +53,8 @@ class QueryUserCriteriaHelper {
                             SELECT DISTINCT user_id
                             FROM user_roles
                             WHERE project_id = :projectId
-                              and role_name = 'ROLE_PRIVATE_PROJECT_USER')
+                              and role_name = 'ROLE_PRIVATE_PROJECT_USER'
+                              and EXISTS(SELECT 1 FROM settings s WHERE s.setting = 'invite_only' and s.value = 'true' and s.project_id = :projectId))
                 where user_id not in (select au.user_id from archived_users au where au.project_id = :projectId)
                 AND user_id NOT IN (SELECT DISTINCT nsk.user_id FROM user_achievement nsk WHERE nsk.skill_id IN (:notSkillIds))
                
@@ -114,7 +116,8 @@ class QueryUserCriteriaHelper {
                             SELECT DISTINCT user_id
                             FROM user_roles
                             WHERE project_id = :projectId
-                              and role_name = 'ROLE_PRIVATE_PROJECT_USER')
+                              and role_name = 'ROLE_PRIVATE_PROJECT_USER'
+                              and EXISTS(SELECT 1 FROM settings s WHERE s.setting = 'invite_only' and s.value = 'true' and s.project_id = :projectId))
                 where user_id not in (select au.user_id from archived_users au where au.project_id = :projectId)'''
         }
 
@@ -128,7 +131,8 @@ class QueryUserCriteriaHelper {
                             SELECT DISTINCT user_id
                             FROM user_roles
                             WHERE project_id = :projectId
-                              and role_name = 'ROLE_PRIVATE_PROJECT_USER')
+                              and role_name = 'ROLE_PRIVATE_PROJECT_USER'
+                              and EXISTS(SELECT 1 FROM settings s WHERE s.setting = 'invite_only' and s.value = 'true' and s.project_id = :projectId))
                 where user_id not in (select au.user_id from archived_users au where au.project_id = :projectId)
                 AND user_id NOT IN (SELECT DISTINCT nsk.user_id FROM user_achievement nsk WHERE nsk.skill_id IN (:notSkillIds))'''
         }
