@@ -43,6 +43,27 @@ describe('Quiz and Survey Metrics', () => {
     });
 
 
+    it('question metrics show the wrong-answer percent with the same precision as the correct percent', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1)
+
+        // 5 of 6 attempts correct puts the correct percent at 83.3, and the wrong side is
+        // derived from it as 100 - 83.3, which in floating point is 16.700000000000003.
+        cy.runQuizForUser(1, 1, [{selectedIndex: [0]}]);
+        cy.runQuizForUser(1, 2, [{selectedIndex: [0]}]);
+        cy.runQuizForUser(1, 3, [{selectedIndex: [0]}]);
+        cy.runQuizForUser(1, 4, [{selectedIndex: [0]}]);
+        cy.runQuizForUser(1, 5, [{selectedIndex: [0]}]);
+        cy.runQuizForUser(1, 6, [{selectedIndex: [1]}]);
+
+        cy.visit('/administrator/quizzes/quiz1/results');
+
+        cy.get('[data-cy="metrics-q1"] [data-cy="numCorrect"]').should('have.text', '5')
+        cy.get('[data-cy="metrics-q1"] [data-cy="percentCorrect"]').should('have.text', '(83.3%)')
+        cy.get('[data-cy="metrics-q1"] [data-cy="numWrong"]').should('have.text', '1')
+        cy.get('[data-cy="metrics-q1"] [data-cy="percentWrong"]').should('have.text', '(16.7%)')
+    });
+
     it('quiz metrics summary cards', function () {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1)
