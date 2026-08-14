@@ -30,6 +30,10 @@ server:
     min-response-size: 2048
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,images/x-icon
   shutdown: graceful
+  tomcat:
+    accesslog:
+      stdout:
+        enabled: true
 
 logging:
   level:
