@@ -210,16 +210,6 @@
         </dependency>
 
         <dependency>
-            <groupId>ch.qos.logback.access</groupId>
-            <artifactId>logback-access-common</artifactId>
-            <version>${logback-access.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback.access</groupId>
-            <artifactId>logback-access-tomcat</artifactId>
-            <version>${logback-access.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
         </dependency>

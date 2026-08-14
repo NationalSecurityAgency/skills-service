@@ -39,8 +39,6 @@
         <springcloud.version>4.1.0</springcloud.version>
         <spring-ai.version>2.0.0</spring-ai.version>
 
-        <logback-access.version>2.0.14</logback-access.version>
-
         <greenmail.version>2.1.12</greenmail.version>
         <wiremock-standalone.version>3.13.2</wiremock-standalone.version>
         <owasp.encoder.version>1.4.0</owasp.encoder.version>
