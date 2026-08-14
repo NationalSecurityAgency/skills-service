@@ -260,7 +260,7 @@ class AdminEditSpecs extends DefaultIntSpec {
         ResponseEntity result = wsHelper.restTemplateWrapper.postForEntity("${wsHelper.skillsService}/app/projects/aProject", jsonRequest, String.class)
 
         then:
-        result.statusCodeValue == 400
+        result.statusCode.value() == 400
         result.body
         result.body.contains('"explanation":"JSON parse error: ')
     }

@@ -43,9 +43,10 @@ class OpenAIAuthorizationManager implements AuthorizationManager<RequestAuthoriz
     UserRoleRepo userRoleRepo
 
     @Override
-    AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext authorizationContext) {
+    AuthorizationDecision authorize(Supplier<? extends Authentication> authentication, RequestAuthorizationContext authorizationContext) {
         String userName = userInfoService?.currentUser?.username
         boolean isLoggedIn = StringUtils.isNoneBlank(userName)
         return new AuthorizationDecision(isLoggedIn)
     }
 }
+

@@ -38,7 +38,7 @@ import static skills.intTests.utils.SkillsFactory.*
 
 class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
 
-    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
+    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZoneUTC()
 
     String projId = SkillsFactory.defaultProjId
 

@@ -46,10 +46,8 @@ class UserPoints {
 
     int points
 
-    @Temporal(TemporalType.TIMESTAMP)
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     Date updated
 
     // set to `false` when these points do not contribute to the parent skills group because

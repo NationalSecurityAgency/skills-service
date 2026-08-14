@@ -15,37 +15,37 @@
  */
 package skills.tasks
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.kagkarlsson.scheduler.serializer.Serializer;
+import tools.jackson.core.JacksonException
+import tools.jackson.databind.json.JsonMapper
+import com.github.kagkarlsson.scheduler.serializer.Serializer
 import groovy.util.logging.Slf4j
 
 @Slf4j
 class JsonSerializer implements Serializer {
 
-    static final ObjectMapper mapper = new ObjectMapper()
+    static final JsonMapper mapper = JsonMapper.builder().build()
 
     @Override
     byte[] serialize(Object o) {
         Optional<String> objectAsString = Optional.empty()
 
         try {
-            objectAsString = Optional.ofNullable(mapper.writeValueAsString(o));
-        } catch (JsonProcessingException squash){
+            objectAsString = Optional.ofNullable(mapper.writeValueAsString(o))
+        } catch (JacksonException squash) {
             log.error("error serializing db-scheduled task data", squash)
         }
 
-        return objectAsString.isEmpty() ? null :objectAsString.get().getBytes()
+        return objectAsString.isEmpty() ? null : objectAsString.get().getBytes()
     }
 
     @Override
     <T> T deserialize(Class<T> aClass, byte[] bytes) {
-        T o;
+        T o
         def map = null
         try {
             map = mapper.readValue(new String(bytes), Map.class)
-        } catch (IOException ioe) {
-            log.error("error deserializing db-scheduled task data", ioe)
+        } catch (JacksonException je) {
+            log.error("error deserializing db-scheduled task data", je)
         }
         o = mapper.convertValue(map, aClass)
         return o

@@ -27,6 +27,7 @@ import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
 import skills.auth.UserInfo
 import skills.controller.exceptions.ErrorCode
 import skills.controller.request.model.SkillEventRequest
@@ -46,7 +47,8 @@ class UpgradeInProgressFilterSpec extends Specification {
         def authentication = Mock(Authentication)
         def securityContext = Mock(SecurityContext)
         def userInfo = Mock(UserInfo)
-
+        def mockRequestMappingHandlerAdapter = Mock(RequestMappingHandlerAdapter)
+        mockRequestMappingHandlerAdapter.getMessageConverters() >> [mockMessageConverter]
 
         //need to properly mock the HttpServletRequest headers not the spring class as that's created after we run
 
@@ -66,8 +68,8 @@ class UpgradeInProgressFilterSpec extends Specification {
                 .content("{fake}").buildRequest()
 
         when:
-        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter()
-        progressFilter.configuredMessageConverters = [mockMessageConverter]
+        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter(mockRequestMappingHandlerAdapter)
+
         progressFilter.safeUrlDecider = upgradeSafeUrlDecider
         progressFilter.skillEventQueue = skillEventQueue
 
@@ -102,6 +104,8 @@ class UpgradeInProgressFilterSpec extends Specification {
         def authentication = Mock(Authentication)
         def securityContext = Mock(SecurityContext)
         def userInfo = Mock(UserInfo)
+        def mockRequestMappingHandlerAdapter = Mock(RequestMappingHandlerAdapter)
+        mockRequestMappingHandlerAdapter.getMessageConverters() >> [mockMessageConverter]
 
         securityContext.getAuthentication() >> authentication
         authentication.isAuthenticated() >> true
@@ -116,8 +120,7 @@ class UpgradeInProgressFilterSpec extends Specification {
                 .contentType(MediaType.APPLICATION_JSON).buildRequest()
 
         when:
-        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter()
-        progressFilter.configuredMessageConverters = [mockMessageConverter]
+        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter(mockRequestMappingHandlerAdapter)
         progressFilter.safeUrlDecider = upgradeSafeUrlDecider
         progressFilter.skillEventQueue = skillEventQueue
 
@@ -136,6 +139,8 @@ class UpgradeInProgressFilterSpec extends Specification {
         def authentication = Mock(Authentication)
         def securityContext = Mock(SecurityContext)
         def userInfo = Mock(UserInfo)
+        def mockRequestMappingHandlerAdapter = Mock(RequestMappingHandlerAdapter)
+        mockRequestMappingHandlerAdapter.getMessageConverters() >> [mockMessageConverter]
 
         securityContext.getAuthentication() >> authentication
         authentication.isAuthenticated() >> true
@@ -150,8 +155,7 @@ class UpgradeInProgressFilterSpec extends Specification {
                 .contentType(MediaType.APPLICATION_JSON).buildRequest()
 
         when:
-        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter()
-        progressFilter.configuredMessageConverters = [mockMessageConverter]
+        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter(mockRequestMappingHandlerAdapter)
         progressFilter.safeUrlDecider = upgradeSafeUrlDecider
         progressFilter.skillEventQueue = skillEventQueue
 
@@ -169,6 +173,8 @@ class UpgradeInProgressFilterSpec extends Specification {
         def mockFilterChain = Mock(FilterChain)
         def authentication = Mock(Authentication)
         def securityContext = Mock(SecurityContext)
+        def mockRequestMappingHandlerAdapter = Mock(RequestMappingHandlerAdapter)
+        mockRequestMappingHandlerAdapter.getMessageConverters() >> [mockMessageConverter]
 
         securityContext.getAuthentication() >> authentication
         authentication.isAuthenticated() >> false
@@ -181,8 +187,7 @@ class UpgradeInProgressFilterSpec extends Specification {
                 .contentType(MediaType.APPLICATION_JSON).buildRequest()
 
         when:
-        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter()
-        progressFilter.configuredMessageConverters = [mockMessageConverter]
+        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter(mockRequestMappingHandlerAdapter)
         progressFilter.safeUrlDecider = upgradeSafeUrlDecider
         progressFilter.skillEventQueue = skillEventQueue
 
@@ -202,6 +207,8 @@ class UpgradeInProgressFilterSpec extends Specification {
         def securityContext = Mock(SecurityContext)
         def userInfo = Mock(UserInfo)
         def mockHeaders = Mock(HttpHeaders)
+        def mockRequestMappingHandlerAdapter = Mock(RequestMappingHandlerAdapter)
+        mockRequestMappingHandlerAdapter.getMessageConverters() >> [mockMessageConverter]
 
         securityContext.getAuthentication() >> authentication
         authentication.isAuthenticated() >> true
@@ -215,8 +222,7 @@ class UpgradeInProgressFilterSpec extends Specification {
                 .contentType(MediaType.APPLICATION_JSON).buildRequest()
 
         when:
-        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter()
-        progressFilter.configuredMessageConverters = [mockMessageConverter]
+        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter(mockRequestMappingHandlerAdapter)
         progressFilter.safeUrlDecider = upgradeSafeUrlDecider
         progressFilter.skillEventQueue = skillEventQueue
 
@@ -235,6 +241,8 @@ class UpgradeInProgressFilterSpec extends Specification {
         def authentication = Mock(Authentication)
         def securityContext = Mock(SecurityContext)
         def userInfo = Mock(UserInfo)
+        def mockRequestMappingHandlerAdapter = Mock(RequestMappingHandlerAdapter)
+        mockRequestMappingHandlerAdapter.getMessageConverters() >> [mockMessageConverter]
 
         securityContext.getAuthentication() >> authentication
         authentication.isAuthenticated() >> true
@@ -249,8 +257,7 @@ class UpgradeInProgressFilterSpec extends Specification {
                 .content("{fake}").buildRequest()
 
         when:
-        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter()
-        progressFilter.configuredMessageConverters = [mockMessageConverter]
+        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter(mockRequestMappingHandlerAdapter)
         progressFilter.safeUrlDecider = upgradeSafeUrlDecider
         progressFilter.skillEventQueue = skillEventQueue
 
@@ -272,6 +279,8 @@ class UpgradeInProgressFilterSpec extends Specification {
         def securityContext = Mock(SecurityContext)
         def userInfo = Mock(UserInfo)
         def mockHeaders = Mock(HttpHeaders)
+        def mockRequestMappingHandlerAdapter = Mock(RequestMappingHandlerAdapter)
+        mockRequestMappingHandlerAdapter.getMessageConverters() >> [mockMessageConverter]
 
         securityContext.getAuthentication() >> authentication
         authentication.isAuthenticated() >> true
@@ -289,8 +298,7 @@ class UpgradeInProgressFilterSpec extends Specification {
                 .content("{fake}").buildRequest()
 
         when:
-        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter()
-        progressFilter.configuredMessageConverters = [mockMessageConverter]
+        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter(mockRequestMappingHandlerAdapter)
         progressFilter.safeUrlDecider = upgradeSafeUrlDecider
         progressFilter.skillEventQueue = skillEventQueue
 
@@ -314,6 +322,8 @@ class UpgradeInProgressFilterSpec extends Specification {
         def securityContext = Mock(SecurityContext)
         def userInfo = Mock(UserInfo)
         def mockHeaders = Mock(HttpHeaders)
+        def mockRequestMappingHandlerAdapter = Mock(RequestMappingHandlerAdapter)
+        mockRequestMappingHandlerAdapter.getMessageConverters() >> [mockMessageConverter]
 
         securityContext.getAuthentication() >> authentication
         authentication.isAuthenticated() >> true
@@ -331,8 +341,7 @@ class UpgradeInProgressFilterSpec extends Specification {
                 .content("{fake}").buildRequest()
 
         when:
-        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter()
-        progressFilter.configuredMessageConverters = [mockMessageConverter]
+        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter(mockRequestMappingHandlerAdapter)
         progressFilter.safeUrlDecider = upgradeSafeUrlDecider
         progressFilter.skillEventQueue = skillEventQueue
 
@@ -356,6 +365,8 @@ class UpgradeInProgressFilterSpec extends Specification {
         def securityContext = Mock(SecurityContext)
         def userInfo = Mock(UserInfo)
         def mockHeaders = Mock(HttpHeaders)
+        def mockRequestMappingHandlerAdapter = Mock(RequestMappingHandlerAdapter)
+        mockRequestMappingHandlerAdapter.getMessageConverters() >> [mockMessageConverter]
 
         securityContext.getAuthentication() >> authentication
         authentication.isAuthenticated() >> true
@@ -373,8 +384,7 @@ class UpgradeInProgressFilterSpec extends Specification {
                 .content("{fake}").buildRequest()
 
         when:
-        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter()
-        progressFilter.configuredMessageConverters = [mockMessageConverter]
+        UpgradeInProgressFilter progressFilter = new UpgradeInProgressFilter(mockRequestMappingHandlerAdapter)
         progressFilter.safeUrlDecider = upgradeSafeUrlDecider
         progressFilter.skillEventQueue = skillEventQueue
 

@@ -30,12 +30,14 @@ import org.springframework.http.converter.GenericHttpMessageConverter
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.lang.Nullable
 import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MimeTypeUtils
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.ResponseErrorHandler
 import org.springframework.web.client.RestTemplate
 
 import javax.net.ssl.HostnameVerifier
+import java.net.URI
 import javax.net.ssl.SSLContext
 import java.lang.reflect.Type
 import java.nio.charset.Charset
@@ -69,15 +71,16 @@ class RestTemplateWrapper extends RestTemplate {
      * Need for load balancer support as it uses cookies to keep track which server currently connected to
      */
     static class StatefulRestTemplateInterceptor implements ClientHttpRequestInterceptor {
-        private List<String> cookies;
+        private Map<String, String> cookiesByName = [:]
         private String xsrfToken;
 
         @Override
         public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
 
             HttpHeaders requstHeaders = request.getHeaders()
-            if (cookies) {
-                requstHeaders.addAll(HttpHeaders.COOKIE, cookies);
+            if (!cookiesByName.isEmpty()) {
+                String cookieHeader = cookiesByName.collect { key, value -> "${key}=${value}" }.join("; ")
+                requstHeaders.set(HttpHeaders.COOKIE, cookieHeader)
             }
             if (xsrfToken != null) {
                 requstHeaders.add("X-XSRF-TOKEN" , xsrfToken);
@@ -88,19 +91,18 @@ class RestTemplateWrapper extends RestTemplate {
             HttpHeaders headers = response.getHeaders();
 
             List<String> returnedCookies = headers.getOrEmpty(HttpHeaders.SET_COOKIE)
-            if (returnedCookies /*&& cookies == null*/) {
-                if (cookies == null) {
-                    cookies = []
+            if (returnedCookies) {
+                returnedCookies.each { String setCookieHeader ->
+                    List<java.net.HttpCookie> parsedCookies = java.net.HttpCookie.parse(setCookieHeader)
+                    parsedCookies.each { java.net.HttpCookie cookie ->
+                        cookiesByName.put(cookie.name, cookie.value)
+                        if (!xsrfToken && cookie.name == "XSRF-TOKEN") {
+                            xsrfToken = cookie.value
+                            log.debug("Response: [{}], set xsrfToken to [{}]", request.URI, xsrfToken)
+                        }
+                    }
                 }
-                cookies.addAll(returnedCookies)
                 log.info("Setting cookies to {}", returnedCookies)
-            }
-            if (returnedCookies && !xsrfToken) {
-                String cookieXSRF  = returnedCookies.find { it.startsWith("XSRF-TOKEN=") }
-                if (cookieXSRF) {
-                    xsrfToken = (cookieXSRF =~ /XSRF-TOKEN=([^;]*)/)[0][1]
-                    log.debug("Response: [{}], set xsrfToken to [{}]", request.URI, xsrfToken)
-                }
             }
             return response;
         }
@@ -119,7 +121,7 @@ class RestTemplateWrapper extends RestTemplate {
             }
 
             @Override
-            void handleError(ClientHttpResponse clientHttpResponse) throws IOException {
+            void handleError(URI url, HttpMethod method, ClientHttpResponse clientHttpResponse) throws IOException {
             }
         })
     }
@@ -265,7 +267,7 @@ class RestTemplateWrapper extends RestTemplate {
                 .collect {getSupportedMediaTypes(it)}
                 .flatten()
                 .unique()
-        allSupportedMediaTypes.sort(MediaType.SPECIFICITY_COMPARATOR)
+        MimeTypeUtils.sortBySpecificity(allSupportedMediaTypes)
         headers.setAccept(allSupportedMediaTypes)
     }
 

@@ -16,10 +16,9 @@
 package skills.controller.filters;
 
 
-import com.google.common.collect.Lists;
 import groovy.util.logging.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilterProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -29,12 +28,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 
 @Component
-@Order(SecurityProperties.DEFAULT_FILTER_ORDER - 2)
+@Order(SecurityFilterProperties.DEFAULT_FILTER_ORDER-2)
 @Slf4j
 public class ClientLibVersionFilter extends OncePerRequestFilter {
 
@@ -44,8 +40,8 @@ public class ClientLibVersionFilter extends OncePerRequestFilter {
     @Value("${skills.config.db-upgrade-in-progress:false}")
     String upgradeInProgress;
 
-    private static String HEADER_SKILLS_CLIENT_LIB_VERSION = "Skills-Client-Lib-Version".toLowerCase();
-    private static String HEADER_UPGRADE_IN_PROGRESS = "upgrade-in-progress".toLowerCase();
+    private static final String HEADER_SKILLS_CLIENT_LIB_VERSION = "Skills-Client-Lib-Version".toLowerCase();
+    private static final String HEADER_UPGRADE_IN_PROGRESS = "upgrade-in-progress".toLowerCase();
     private static final String ALLOWED_HEADERS = HEADER_SKILLS_CLIENT_LIB_VERSION+", "+HEADER_UPGRADE_IN_PROGRESS;
 
     @Override

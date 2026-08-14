@@ -320,11 +320,7 @@ class ManageTheApproverRoleSpecs extends DefaultIntSpec {
         try {
             c.call()
         } catch (SkillsClientException sk) {
-            // pki and pass seem to emit different messages
-            if (sk.message.contains("You do not have permission to view/manage this Project") || sk.message.contains("HTTP Status 403 – Forbidden")) {
-                return true
-            }
-            throw sk
+            return sk.httpStatus == HttpStatus.FORBIDDEN
         }
 
         return false

@@ -31,6 +31,8 @@ import skills.utils.MatomoReporter
 import skills.utils.MetricsLogger
 import spock.lang.Specification
 
+import java.util.concurrent.atomic.AtomicInteger
+
 class SkillEventServiceUnitSpecs extends Specification {
 
     String userId = 'userId'
@@ -265,9 +267,9 @@ class SkillEventServiceUnitSpecs extends Specification {
         SkillEventPublisher skillEventPublisher = new SkillEventPublisher(messagingTemplate: mockMessagingTemplate, queueCapacity: 2, maxNumOfThreads: 2, minNumOfThreads: 1)
         SkillEventResult result = new SkillEventResult(projectId: 'project1')
 
-        int invocations = 0
+        AtomicInteger invocations = new AtomicInteger(0)
         mockMessagingTemplate.convertAndSendToUser(*_) >> { args ->
-            invocations++
+            invocations.incrementAndGet()
             Thread.sleep(500)
         }
 
@@ -280,7 +282,7 @@ class SkillEventServiceUnitSpecs extends Specification {
         Thread.sleep(3000)
 
         then:
-        invocations == 4
+        invocations.get() == 4
     }
 
     def "notify user of achievements does not fail with project level achievements"() {

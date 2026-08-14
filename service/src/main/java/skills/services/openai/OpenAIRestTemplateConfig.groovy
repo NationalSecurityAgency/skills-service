@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClient
 
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLContext
@@ -47,6 +48,11 @@ class OpenAIRestTemplateConfig {
     RestTemplate openAIRestTemplate(OpenAIClientConfig openAIClientConfig) {
         HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(openAIClientHttpClient(openAIClientConfig))
         return new RestTemplate(requestFactory)
+    }
+
+    @Bean
+    WebClient.Builder webClientBuilder() {
+        return WebClient.builder()
     }
 
     @Bean

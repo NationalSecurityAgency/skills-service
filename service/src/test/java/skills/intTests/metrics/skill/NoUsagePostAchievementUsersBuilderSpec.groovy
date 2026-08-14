@@ -79,15 +79,15 @@ class NoUsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
         result.totalCount == 2
         result.users[0].userId == users[2]
         result.users[0].count == 2
-        result.users[0].date.toString() == date.format('yyyy-MM-dd 00:00:00.0')
+        result.users[0].date.format("yyyy-MM-dd'T'HH:mm:ss") == date.format("yyyy-MM-dd'T'00:00:00")
         result.users[1].userId == users[6]
         result.users[1].count == 2
-        result.users[1].date.toString() == date.format('yyyy-MM-dd 00:00:00.0')
+        result.users[1].date.format("yyyy-MM-dd'T'HH:mm:ss") == date.format("yyyy-MM-dd'T'00:00:00")
 
         resultAfterArchive.totalCount == 1
         resultAfterArchive.users[0].userId == users[6]
         resultAfterArchive.users[0].count == 2
-        resultAfterArchive.users[0].date.toString() == date.format('yyyy-MM-dd 00:00:00.0')
+        resultAfterArchive.users[0].date.format("yyyy-MM-dd'T'HH:mm:ss") == date.format("yyyy-MM-dd'T'00:00:00")
     }
 
     def "pages appropriately"() {

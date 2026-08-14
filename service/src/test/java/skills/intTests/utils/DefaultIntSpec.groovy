@@ -27,6 +27,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionCallback
 import org.springframework.transaction.support.TransactionTemplate
+import org.springframework.util.ResourceUtils
 import skills.SpringBootApp
 import skills.services.LevelDefinitionStorageService
 import skills.services.LockingService
@@ -43,7 +44,20 @@ class DefaultIntSpec extends Specification {
         // must call in the main method and not in @PostConstruct method as H2 jdbc driver will cache timezone prior @PostConstruct method is called
         // alternatively we could pass in -Duser.timezone=UTC
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
-    };
+
+        // for pki mode need to initialize system properties before
+        // skills.services.openai.OpenAIChatConfig.mutualTlsCustomizer bean is created
+        if (SystemSSLConfiguration.isPki()) {
+            File ksFile = ResourceUtils.getFile("classpath:certs/test.skilltree.service.p12")
+            System.setProperty("javax.net.ssl.keyStore", ksFile.getPath())
+            System.setProperty("javax.net.ssl.keyStorePassword", "skillspass")
+            System.setProperty("javax.net.ssl.keyStoreType", "PKCS12")
+            File trustFile = ResourceUtils.getFile("classpath:certs/truststore.jks")
+            System.setProperty("javax.net.ssl.trustStore", trustFile.getPath())
+            System.setProperty("javax.net.ssl.trustStorePassword", "skillspass")
+            System.setProperty("javax.net.ssl.trustStoreType", "JKS")
+        }
+    }
 
     SkillsService skillsService
     SkillsService localRootSkillsService

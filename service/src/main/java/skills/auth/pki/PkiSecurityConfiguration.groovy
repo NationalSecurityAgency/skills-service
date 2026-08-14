@@ -61,14 +61,10 @@ class PkiSecurityConfiguration {
         // Portal endpoints config
         portalWebSecurityHelper.configureHttpSecurity(http)
         http
-                .x509()
-                .subjectPrincipalRegex(/(.*)/)
-                .and()
-                .securityContext().securityContextRepository(securityContextRepository)
-                .and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .sessionManagement().sessionFixation().none()
+                .x509((x509) -> x509.subjectPrincipalRegex(/(.*)/))
+                .securityContext((securityContext) -> securityContext.securityContextRepository(securityContextRepository))
+                .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement((sessionManagement) -> sessionManagement.sessionFixation().none())
         http.build()
     }
 

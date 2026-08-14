@@ -39,7 +39,6 @@ class UserPointsSpecs extends DefaultIntSpec {
     Date threeDaysAgo = new Date() - 3
     Date twoDaysAgo = new Date() - 2
     Date yesterday = new Date() - 1
-    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     String ultimateRoot = 'jh@dojo.com'
     SkillsService rootSkillsService
@@ -123,16 +122,16 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.data.size() == 2
 
         // lastUpdated is null for H2 (see UserPointsRepo.findDistinctProjectUsersByProjectIdAndSubjectIdAndUserIdLike)
-        results1.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
+        results1.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == threeDaysAgo.toInstant().toString()
         def result2User = results2.data.find { it -> it.userId == sampleUserIds.get(1).toLowerCase() }
         def result3User = results3.data.find { it -> it.userId == sampleUserIds.get(1).toLowerCase() }
         result2User
         result3User
         result2User.lastUpdated != result3User.lastUpdated
-        result2User.firstUpdated == DTF.print(threeDaysAgo.time)
-        result2User.lastUpdated == DTF.print(yesterday.time)
-        result3User.firstUpdated == DTF.print(twoDaysAgo.time)
-        result3User.lastUpdated == DTF.print(twoDaysAgo.time)
+        result2User.firstUpdated == threeDaysAgo.toInstant().toString()
+        result2User.lastUpdated == yesterday.toInstant().toString()
+        result3User.firstUpdated == twoDaysAgo.toInstant().toString()
+        result3User.lastUpdated == twoDaysAgo.toInstant().toString()
     }
 
     def 'get project users returns correct firstUpdated and lastUpdated date'() {
@@ -152,8 +151,8 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.data.size() == 2
 
         def result2User = results.data.find { it -> it.userId == sampleUserIds.get(1).toLowerCase() }
-        result2User.lastUpdated == DTF.print(yesterday.time)
-        result2User.firstUpdated == DTF.print(threeDaysAgo.time)
+        result2User.lastUpdated == yesterday.toInstant().toString()
+        result2User.firstUpdated == threeDaysAgo.toInstant().toString()
     }
 
     def 'get skill users returns correct firstUpdated and lastUpdated date'() {
@@ -173,8 +172,8 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.data.size() == 2
 
         def result2User = results.data.find { it -> it.userId == sampleUserIds.get(1).toLowerCase() }
-        result2User.lastUpdated == DTF.print(yesterday.time)
-        result2User.firstUpdated == DTF.print(threeDaysAgo.time)
+        result2User.lastUpdated == yesterday.toInstant().toString()
+        result2User.firstUpdated == threeDaysAgo.toInstant().toString()
     }
 
     def 'get skill users returns correct firstUpdated and lastUpdated date for imported skill'() {
@@ -198,8 +197,8 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.data.size() == 1
 
         def result2User = results.data.find { it -> it.userId == sampleUserIds.get(0).toLowerCase() }
-        result2User.lastUpdated == DTF.print(threeDaysAgo.time)
-        result2User.firstUpdated == DTF.print(threeDaysAgo.time)
+        result2User.lastUpdated == threeDaysAgo.toInstant().toString()
+        result2User.firstUpdated == threeDaysAgo.toInstant().toString()
     }
 
     def 'get badge users returns correct firstUpdated and lastUpdated date'() {
@@ -215,12 +214,12 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.data.size() == 2
 
         def resultUser = results.data.find { it -> it.userId == sampleUserIds.get(0).toLowerCase() }
-        resultUser.lastUpdated == DTF.print(yesterday.time)
-        resultUser.firstUpdated == DTF.print(threeDaysAgo.time)
+        resultUser.lastUpdated == yesterday.toInstant().toString()
+        resultUser.firstUpdated == threeDaysAgo.toInstant().toString()
 
         def result2User = results.data.find { it -> it.userId == sampleUserIds.get(1).toLowerCase() }
-        result2User.lastUpdated == DTF.print(threeDaysAgo.time)
-        result2User.firstUpdated == DTF.print(threeDaysAgo.time)
+        result2User.lastUpdated == threeDaysAgo.toInstant().toString()
+        result2User.firstUpdated == threeDaysAgo.toInstant().toString()
     }
 
     def 'get project users when project exists'() {
@@ -237,7 +236,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.data.get(0).totalPoints == 70
         results.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results.data.get(1).totalPoints == 35
-        results.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
+        results.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == threeDaysAgo.toInstant().toString()
     }
 
     def 'get project users with paging'() {
@@ -375,7 +374,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.data.size() == 1
         results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
-        results1.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
+        results1.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == threeDaysAgo.toInstant().toString()
 
         results2
         results2.count == 2
@@ -385,7 +384,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.data.get(0).totalPoints == 35
         results2.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results2.data.get(1).totalPoints == 35
-        results2.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
+        results2.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == threeDaysAgo.toInstant().toString()
 
         results3
         results3.count == 0
@@ -511,7 +510,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.data.size() == 1
         results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
         results1.data.get(0).totalPoints == 35
-        results2.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
+        results2.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == threeDaysAgo.toInstant().toString()
 
         results2
         results2.count == 2
@@ -521,7 +520,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.data.get(0).totalPoints == 35
         results2.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
         results2.data.get(1).totalPoints == 35
-        results2.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == DTF.print(threeDaysAgo.time)
+        results2.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == threeDaysAgo.toInstant().toString()
 
         results3
         results3.count == 0
@@ -1900,12 +1899,12 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.data.size() == 4
 
         def resultUser = results.data.find { it -> it.userId.contains(users[0].toLowerCase()) }
-        resultUser.lastUpdated == DTF.print(date4.time)
-        resultUser.firstUpdated == DTF.print(date1.time)
+        resultUser.lastUpdated == date4.toInstant().toString()
+        resultUser.firstUpdated == date1.toInstant().toString()
 
         def result2User = results.data.find { it -> it.userId.contains(users[1].toLowerCase()) }
-        result2User.lastUpdated == DTF.print(date4.time)
-        result2User.firstUpdated == DTF.print(date2.time)
+        result2User.lastUpdated == date4.toInstant().toString()
+        result2User.firstUpdated == date2.toInstant().toString()
     }
 
     def 'get skill group users returns empty result for group with no skills'() {

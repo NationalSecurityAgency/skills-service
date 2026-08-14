@@ -55,7 +55,6 @@ class UserQuizAnswerAttempt {
     @Column(name="created", updatable = false, insertable = false)
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 

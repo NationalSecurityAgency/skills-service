@@ -427,7 +427,9 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
 
         then:
         def e = thrown(SkillsClientException)
-        e.message.contains("explanation:Invitation Code is for a different user, errorCode:NotYourInvitationCode, success:false")
+        e.message.contains("explanation:Invitation Code is for a different user")
+        e.message.contains("errorCode:NotYourInvitationCode")
+        e.message.contains("success:false")
 
         cleanup:
         inviteOnlyProjectService.validateInviteEmail = false

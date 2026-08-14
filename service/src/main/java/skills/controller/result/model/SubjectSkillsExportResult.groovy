@@ -20,11 +20,10 @@ import jakarta.servlet.http.HttpServletResponse
 import org.apache.poi.ss.usermodel.Workbook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import org.springframework.web.servlet.view.document.AbstractXlsxStreamingView
 import skills.services.ExcelExportService
 
 @Component
-class SubjectSkillsExportResult extends AbstractXlsxStreamingView {
+class SubjectSkillsExportResult extends AbstractSkillsXlsxStreamingView {
     static final String PROJECT_ID = "projectId"
     static final String SUBJECT_ID = "subjectId"
 

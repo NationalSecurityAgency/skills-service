@@ -30,11 +30,13 @@ import org.springframework.security.authorization.AuthorizationManager
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext
 import org.springframework.security.web.util.UrlUtils
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher
+import org.springframework.security.authorization.AuthorizationResult
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
 import skills.auth.UserAuthService
 import skills.auth.UserInfo
+import skills.auth.requestMatchers.ContainsStrRequestMatcher
+import skills.auth.requestMatchers.StartsWithStrRequestMatcher
 import skills.services.AttachmentService
 import skills.services.admin.UserCommunityService
 import skills.storage.model.Attachment
@@ -79,19 +81,19 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     @PostConstruct
     void init() {
         authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
-        projectsRequestMatcher = new AntPathRequestMatcher("/**/*projects/**")
-        quizzesAdminRequestMatcher = new AntPathRequestMatcher("/**/quiz-definitions/**")
-        quizzesApiRequestMatcher = new AntPathRequestMatcher("/**/quizzes/**")
-        attachmentsRequestMatcher = new AntPathRequestMatcher("/api/download/**")
-        adminGroupRequestMatcher = new AntPathRequestMatcher("/**/admin-group-definitions/**")
-        badgeRequestMatcher = new AntPathRequestMatcher("/**/badge*/**")
+        projectsRequestMatcher =  new ContainsStrRequestMatcher('projects/')
+        quizzesAdminRequestMatcher = new ContainsStrRequestMatcher('/quiz-definitions/')
+        quizzesApiRequestMatcher = new ContainsStrRequestMatcher('/quizzes/')
+        attachmentsRequestMatcher = new StartsWithStrRequestMatcher('/api/download/')
+        adminGroupRequestMatcher = new ContainsStrRequestMatcher('/admin-group-definitions/')
+        badgeRequestMatcher = new ContainsStrRequestMatcher('/badge')
     }
 
     @Override
-    AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext authorizationContext) {
+    AuthorizationResult authorize(Supplier<? extends Authentication> authentication, RequestAuthorizationContext authorizationContext) {
         HttpServletRequest request = authorizationContext.getRequest()
         log.debug("evaluating request [{}] for invite-only protection", request.getRequestURI())
-        AuthorizationDecision authenticatedDecision = authenticatedAuthorizationManager.check(authentication, authorizationContext)
+        AuthorizationResult authenticatedDecision = authenticatedAuthorizationManager.authorize(authentication, authorizationContext)
         if (!authenticatedDecision.isGranted()) {
             log.debug("unauthenticated access attempt to protected resource", request.getRequestURI())
             return authenticatedDecision

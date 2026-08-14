@@ -17,8 +17,6 @@ package skills.intTests.catalog
 
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import skills.controller.result.model.LevelDefinitionRes
@@ -47,8 +45,6 @@ class CatalogSkillTests extends CatalogIntSpec {
 
     @Autowired
     LevelDefinitionStorageService levelDefinitionStorageService
-
-    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     def "add skill to catalog"() {
         def project1 = createProject(1)
@@ -732,7 +728,8 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         then:
         def exc = thrown(Exception)
-        exc.getMessage().contains("explanation:Insufficient project points, skill achievement is disallowed, errorCode:InsufficientProjectPoints")
+        exc.getMessage().contains("explanation:Insufficient project points, skill achievement is disallowed")
+        exc.getMessage().contains("errorCode:InsufficientProjectPoints")
         skillsService.getUserStats(project2.projectId, user).userTotalPoints == 0
     }
 
@@ -1834,7 +1831,8 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         then:
         def e = thrown(Exception)
-        e.getMessage().contains("Skill [skill2] has dependencies. Skills with dependencies may not be exported to the catalog, errorCode:ExportToCatalogNotAllowed")
+        e.getMessage().contains("Skill [skill2] has dependencies. Skills with dependencies may not be exported to the catalog")
+        e.getMessage().contains("errorCode:ExportToCatalogNotAllowed")
     }
 
     def "cannot export a disabled skill"() {
@@ -1865,7 +1863,8 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         then:
         def e = thrown(Exception)
-        e.getMessage().contains("Skill [skill2] is disabled. Disabled skills may not be exported to the catalog, errorCode:ExportToCatalogNotAllowed")
+        e.getMessage().contains("Skill [skill2] is disabled. Disabled skills may not be exported to the catalog")
+        e.getMessage().contains("errorCode:ExportToCatalogNotAllowed")
     }
 
     def "export skill that other skills depend on"() {
@@ -2838,7 +2837,7 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         then:
         subjectUsers.data[0].userId == user
-        subjectUsers.data[0].lastUpdated == DTF.print(date.time)
+        subjectUsers.data[0].lastUpdated == date.toInstant().toString()
     }
 
     def "project users should take into account users of imported skills"() {

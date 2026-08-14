@@ -31,6 +31,21 @@ import static com.google.common.net.HttpHeaders.CONTENT_TYPE
 @Slf4j
 @Component
 class MockLlmServer {
+    /**
+     * Mock LLM server using WireMock for integration testing.
+     * 
+     * Supports two operational modes:
+     * - HTTP mode (default): Standard HTTP on configured port (default 50001)
+     * - HTTPS with 2-way SSL mode: Enabled when 'pki' Spring profile is active
+     * 
+     * In HTTPS/2-way SSL mode, the server requires:
+     * - Client certificate authentication (needClientAuth=true)
+     * - Server certificate from: classpath:certs/test.skilltree.service.p12
+     * - Client certificate validation via: classpath:certs/truststore.jks
+     * - Password: skillspass (for both keystore and truststore)
+     *
+     * This follows the similar pattern as MockUserInfoService for PKI testing scenarios.
+     */
 
     @Value('#{"${skills.tests.mockLlmServerPort:50001}"}')
     Integer mockLlmServerPort
@@ -39,15 +54,35 @@ class MockLlmServer {
 
     void start() {
         try {
-            mockServer = new WireMockServer(wireMockConfig()
-                    .port(mockLlmServerPort)
-                    .extensions(new DynamicGradingResponseTransformer()))
+            boolean isPkiMode = SystemSSLConfiguration.isPki()
+            
+            if (isPkiMode) {
+                mockServer = new WireMockServer(wireMockConfig()
+                        .httpsPort(mockLlmServerPort)
+                        .keystorePath("classpath:certs/test.skilltree.service.p12")
+                        .keystorePassword("skillspass")
+                        .keyManagerPassword("skillspass")
+                        .keystoreType("PKCS12")
+                        .trustStorePath("classpath:certs/truststore.jks")
+                        .trustStorePassword("skillspass")
+                        .trustStoreType("JKS")
+                        .httpDisabled(true)
+                        .needClientAuth(true)
+                        .extensions(new DynamicGradingResponseTransformer()))
+                log.info("WireMock server configured for 2-way SSL (HTTPS) on port {}", mockLlmServerPort)
+            } else {
+                mockServer = new WireMockServer(wireMockConfig()
+                        .port(mockLlmServerPort)
+                        .extensions(new DynamicGradingResponseTransformer()))
+                log.info("WireMock server configured for HTTP on port {}", mockLlmServerPort)
+            }
+            
             stubModelsEndpoint()
             stubChatCompletionsStreamingEndpoint()
             stubTextInputQuizGradingEndpoint()
 
             mockServer.start()
-            log.info("WireMock server started on port {}", mockLlmServerPort)
+            log.info("WireMock server started on port {} (mode: {})", mockLlmServerPort, isPkiMode ? "HTTPS with 2-way SSL" : "HTTP")
 
         } catch (Exception e) {
             log.error("Failed to start WireMock server", e)
@@ -145,7 +180,7 @@ class MockLlmServer {
 
         // Log requests
         mockServer.addMockServiceRequestListener { request, _ ->
-            log.info("Received request to: {}", request.getUrl())
+            log.info("Received request to: {}", request.getAbsoluteUrl())
             log.info("Headers: {}", request.getHeaders())
             log.info("Body: {}", request.getBodyAsString())
         }

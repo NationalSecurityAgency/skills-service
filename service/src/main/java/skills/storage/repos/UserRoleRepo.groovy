@@ -273,7 +273,7 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
         from UserRole ur, UserAttrs ua 
         where
             ur.userId = ua.userId and
-            ur.roleName IN (:#{#roleNames.![name()]}) and
+            ur.roleName IN ?2 and
             ur.adminGroupId = ?1''')
     List<UserRoleWithAttrs> findRoleWithAttrsByAdminGroupIdAndRoleNameIn(String adminGroupId, List<RoleName> roleNames)
 

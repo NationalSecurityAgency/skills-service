@@ -34,7 +34,7 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import org.springframework.security.web.csrf.*
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
 import org.springframework.security.web.util.matcher.OrRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
@@ -53,15 +53,6 @@ class PortalWebSecurityHelper {
 
     @Value('#{"${server.port:8080}"}')
     Integer serverPort
-
-    @Value('#{"${skills.config.publiclyExposePrometheusMetrics:false}"}')
-    Boolean publiclyExposePrometheusMetrics
-
-    @Value('#{"${management.endpoints.web.base-path:/actuator}"}')
-    String managementPath
-
-    @Value('#{"${management.endpoints.web.path-mapping.prometheus:prometheus}"}')
-    String prometheusPath
 
     @Value('#{"${skills.config.disableCsrfProtection:false}"}')
     Boolean disableCsrfProtection
@@ -86,7 +77,7 @@ class PortalWebSecurityHelper {
 
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
         if (disableCsrfProtection) {
-            http.csrf().disable()
+            http.csrf((csrf) -> csrf.disable())
         } else {
             http.csrf((csrf) -> csrf
                     .requireCsrfProtectionMatcher(new MultipartRequestMatcher())
@@ -111,14 +102,14 @@ class PortalWebSecurityHelper {
                                   "/resetPassword/**", "/performPasswordReset",
                                   "/resendEmailVerification/**", "/verifyEmail", "/userEmailIsVerified/*","/saml2/**"]
         RequestMatcher permitAllMatcher = new OrRequestMatcher(
-                permitAllPatterns.collect { new AntPathRequestMatcher(it) }
+                permitAllPatterns.collect { String pattern ->
+                    String normalizedPattern = StringUtils.hasText(pattern) && !pattern.startsWith('/') ? "/${pattern}" : pattern
+                    PathPatternRequestMatcher.pathPattern(normalizedPattern)
+                }
         )
 
         http.addFilterAfter(new SkillsAuthorityFilter(userAuthService, permitAllMatcher), CsrfCookieFilter.class)
 
-        if (publiclyExposePrometheusMetrics) {
-            http.authorizeHttpRequests().requestMatchers(HttpMethod.GET, "${managementPath}/${prometheusPath}").permitAll()
-        }
         http.authorizeHttpRequests((authorize) ->
             authorize
                 .requestMatchers(permitAllMatcher).permitAll()
@@ -130,11 +121,10 @@ class PortalWebSecurityHelper {
                 .requestMatchers('/admin/**').access(hasAnyAuthorityPlus([inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager], RoleName.ROLE_PROJECT_ADMIN.name(), RoleName.ROLE_SUPER_DUPER_USER.name(), RoleName.ROLE_PROJECT_APPROVER.name()))
                 .requestMatchers('/app/**').access(AuthorizationManagers.allOf(inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager))
                 .requestMatchers('/api/**').access(AuthorizationManagers.allOf(inviteOnlyProjectAuthorizationManager, userCommunityAuthorizationManager))
-                .requestMatchers("/${managementPath}/**").hasAuthority(RoleName.ROLE_SUPER_DUPER_USER.name())
                 .requestMatchers("/openai/**").access(AuthorizationManagers.allOf(openAIAuthorizationManager))
                 .anyRequest().authenticated()
         )
-        http.headers().frameOptions().disable()
+        http.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.disable()))
 
         return http
     }
@@ -194,10 +184,10 @@ final class MultipartRequestMatcher implements RequestMatcher {
 
     private final HashSet<String> allowedMethods = new HashSet<>(Arrays.asList("GET", "HEAD", "TRACE", "OPTIONS"))
     private final OrRequestMatcher pathMatcher = new OrRequestMatcher(
-            new AntPathRequestMatcher("**/upload"),
-            new AntPathRequestMatcher("/admin/*/*/*/*/video"),
-            new AntPathRequestMatcher("/admin/*/*/*/*/slides"),
-            new AntPathRequestMatcher("/admin/*/*/slides"),
+            PathPatternRequestMatcher.pathPattern("/**/upload"),
+            PathPatternRequestMatcher.pathPattern("/admin/*/*/*/*/video"),
+            PathPatternRequestMatcher.pathPattern("/admin/*/*/*/*/slides"),
+            PathPatternRequestMatcher.pathPattern("/admin/*/*/slides"),
     )
 
     @Override

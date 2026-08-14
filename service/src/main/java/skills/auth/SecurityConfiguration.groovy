@@ -15,7 +15,7 @@
  */
 package skills.auth
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.ObjectMapper
 import groovy.util.logging.Slf4j
 import jakarta.servlet.ServletException
 import jakarta.servlet.http.HttpServletRequest
@@ -91,6 +91,9 @@ class SecurityConfiguration {
         @Autowired
         private RestAuthenticationEntryPoint restAuthenticationEntryPoint
 
+        @Autowired
+        CorsConfigurationSource corsConfigurationSource
+
         @Autowired(required = false)  // not required for PKI_AUTH
         SecurityContextRepository securityContextRepository
 
@@ -100,18 +103,17 @@ class SecurityConfiguration {
         @Bean('corsSecurityFilterChain')
         @Order(102)
         SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-            http.securityMatcher("/api/**").cors()
+            http.securityMatcher("/api/**").cors((cors) -> cors.configurationSource(corsConfigurationSource))
             portalWebSecurityHelper.configureHttpSecurity(http)
-                    .securityContext().securityContextRepository(securityContextRepository)
-            .and()
-                    .exceptionHandling().accessDeniedHandler(accessDeniedHandler).authenticationEntryPoint(restAuthenticationEntryPoint)
+                    .securityContext((securityContext) -> securityContext.securityContextRepository(securityContextRepository))
+                    .exceptionHandling((exceptionHandling) -> exceptionHandling
+                            .accessDeniedHandler(accessDeniedHandler)
+                            .authenticationEntryPoint(restAuthenticationEntryPoint))
 
             if (this.authMode == AuthMode.PKI) {
                 http
-                        .x509()
-                        .subjectPrincipalRegex(/(.*)/)
-                        .and()
-                        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .x509((x509) -> x509.subjectPrincipalRegex(/(.*)/))
+                        .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             }
 
             return http.build()

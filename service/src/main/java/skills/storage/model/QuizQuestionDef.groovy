@@ -17,13 +17,12 @@ package skills.storage.model
 
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
+import jakarta.persistence.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import skills.services.quiz.QuizQuestionType
-import org.hibernate.annotations.Type
-import io.hypersistence.utils.hibernate.type.json.JsonType
-
-import jakarta.persistence.*
 
 @Entity
 @Table(name = 'quiz_question_definition')
@@ -50,11 +49,10 @@ class QuizQuestionDef {
     @Column(name="created", updatable = false, insertable = false)
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 
-    @Type(JsonType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     String attributes
 }

@@ -56,11 +56,17 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Value('#{"${skills.websocket.relayHost:skills-stomp-broker}"}')
     String relayHost
 
+    @Value('#{"${skills.websocket.relayVirtualHost:/}"}')
+    String relayVirtualHost
+
     @Value('#{"${skills.websocket.relayPort:61613}"}')
     Integer relayPort
 
     @Value('#{"${skills.websocket.enableRelayTls:false}"}')
     Boolean enableRelayTls
+
+    @Value('#{"${skills.disableHostnameVerifier:false}"}')
+    Boolean disableHostnameVerification = false
 
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
@@ -75,6 +81,7 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             StompBrokerRelayRegistration stompBrokerRelayRegistration = registry.enableStompBrokerRelay('/topic', '/queue')
                     .setRelayHost(relayHost)
                     .setRelayPort(relayPort)
+                    .setVirtualHost(relayVirtualHost)
                     .setUserRegistryBroadcast('/topic/registry')
                     .setUserDestinationBroadcast('/topic/unresolved-user-destination')
 
@@ -102,10 +109,15 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                              TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                              trustManagerFactory.init(trustStore);
 
-                             spec.sslContext(SslContextBuilder.forClient()
+                             SslContextBuilder sslContextBuilder = SslContextBuilder.forClient()
                                      .keyManager(keyManagerFactory)
                                      .trustManager(trustManagerFactory)
-                                     .build());
+
+                             if (disableHostnameVerification) {
+                                 sslContextBuilder.endpointIdentificationAlgorithm(null)
+                             }
+
+                             spec.sslContext(sslContextBuilder.build())
                          }), new StompReactorNettyCodec())
                  stompBrokerRelayRegistration.setTcpClient(tcpClient)
              }

@@ -15,11 +15,16 @@
  */
 package skills.tasks.config
 
-import com.github.kagkarlsson.scheduler.serializer.Serializer;
+import com.github.kagkarlsson.scheduler.Scheduler
+import com.github.kagkarlsson.scheduler.SchedulerBuilder
+import com.github.kagkarlsson.scheduler.SchedulerName
 import com.github.kagkarlsson.scheduler.boot.config.DbSchedulerCustomizer
+import com.github.kagkarlsson.scheduler.boot.config.DbSchedulerProperties
+import com.github.kagkarlsson.scheduler.serializer.Serializer
 import com.github.kagkarlsson.scheduler.task.ExecutionComplete
 import com.github.kagkarlsson.scheduler.task.ExecutionOperations
 import com.github.kagkarlsson.scheduler.task.FailureHandler
+import com.github.kagkarlsson.scheduler.task.Task
 import com.github.kagkarlsson.scheduler.task.helper.OneTimeTask
 import com.github.kagkarlsson.scheduler.task.helper.RecurringTask
 import com.github.kagkarlsson.scheduler.task.helper.Tasks
@@ -27,9 +32,13 @@ import com.github.kagkarlsson.scheduler.task.schedule.Schedules
 import groovy.util.logging.Slf4j
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.context.properties.bind.Binder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 import skills.tasks.JsonSerializer
 import skills.tasks.data.CatalogFinalizeRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
@@ -50,6 +59,7 @@ import skills.tasks.executors.UnachievableLevelIdentificationTaskExecutor
 
 import java.time.Duration
 import java.time.Instant
+import javax.sql.DataSource
 
 @Slf4j
 @Configuration
@@ -84,6 +94,7 @@ class TaskConfig {
 
 
     @Bean
+    @ConditionalOnMissingBean(DbSchedulerCustomizer)
     DbSchedulerCustomizer customizer() {
         return new DbSchedulerCustomizer() {
             @Override
@@ -91,6 +102,64 @@ class TaskConfig {
                 return Optional.of(new JsonSerializer())
             }
         }
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(DbSchedulerProperties)
+    DbSchedulerProperties dbSchedulerProperties(Environment environment) {
+        return Binder.get(environment).bindOrCreate('db-scheduler', DbSchedulerProperties)
+    }
+
+    @Bean(initMethod = 'start', destroyMethod = 'stop')
+    @ConditionalOnMissingBean(Scheduler)
+    Scheduler scheduler(DataSource dataSource, List<Task<?>> tasks, DbSchedulerProperties dbSchedulerProperties, ObjectProvider<DbSchedulerCustomizer> customizerProvider) {
+        SchedulerBuilder builder = Scheduler.create(dataSource, tasks)
+        if (dbSchedulerProperties.threads > 0) {
+            builder.threads(dbSchedulerProperties.threads)
+        }
+        if (dbSchedulerProperties.pollingInterval != null) {
+            builder.pollingInterval(dbSchedulerProperties.pollingInterval)
+        }
+        if (dbSchedulerProperties.heartbeatInterval != null) {
+            builder.heartbeatInterval(dbSchedulerProperties.heartbeatInterval)
+        }
+        if (dbSchedulerProperties.missedHeartbeatsLimit > 0) {
+            builder.missedHeartbeatsLimit(dbSchedulerProperties.missedHeartbeatsLimit)
+        }
+        if (dbSchedulerProperties.schedulerName) {
+            builder.schedulerName(new SchedulerName.Fixed(dbSchedulerProperties.schedulerName))
+        }
+        if (dbSchedulerProperties.tableName) {
+            builder.tableName(dbSchedulerProperties.tableName)
+        }
+        if (dbSchedulerProperties.immediateExecutionEnabled) {
+            builder.enableImmediateExecution()
+        }
+        if (dbSchedulerProperties.deleteUnresolvedAfter != null) {
+            builder.deleteUnresolvedAfter(dbSchedulerProperties.deleteUnresolvedAfter)
+        }
+        if (dbSchedulerProperties.shutdownMaxWait != null) {
+            builder.shutdownMaxWait(dbSchedulerProperties.shutdownMaxWait)
+        }
+        if (dbSchedulerProperties.failureLoggerLevel != null) {
+            builder.failureLogging(dbSchedulerProperties.failureLoggerLevel, dbSchedulerProperties.failureLoggerLogStackTrace)
+        }
+        if (dbSchedulerProperties.alwaysPersistTimestampInUtc) {
+            builder.alwaysPersistTimestampInUTC()
+        }
+        if (dbSchedulerProperties.priorityEnabled) {
+            builder.enablePriority()
+        }
+        DbSchedulerCustomizer customizer = customizerProvider.getIfAvailable()
+        if (customizer != null) {
+            customizer.serializer().ifPresent({ Serializer serializer ->
+                builder.serializer(serializer)
+            })
+            customizer.schedulerName().ifPresent({ SchedulerName schedulerName ->
+                builder.schedulerName(schedulerName)
+            })
+        }
+        return builder.build()
     }
 
     static class DoNotRetryAsyncTaskException extends RuntimeException {

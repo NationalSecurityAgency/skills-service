@@ -26,7 +26,7 @@ import org.springframework.http.*
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
-import org.springframework.web.client.HttpClientErrorException
+import org.springframework.util.ResourceUtils
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
@@ -37,11 +37,7 @@ import skills.controller.request.model.AiChatRequest
 import skills.intTests.utils.CertificateRegistry
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.MockLlmServer
-import skills.intTests.utils.QuizDefFactory
-import skills.quizLoading.QuizSettings
-import skills.storage.model.UserAttrs
-import skills.storage.model.UserQuizAttempt
-import spock.lang.IgnoreIf
+import skills.intTests.utils.SystemSSLConfiguration
 
 import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.TrustManagerFactory

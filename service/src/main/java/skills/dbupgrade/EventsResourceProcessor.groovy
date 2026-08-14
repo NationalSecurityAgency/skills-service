@@ -16,9 +16,9 @@
 package skills.dbupgrade
 
 import callStack.profiler.CProf
-import com.fasterxml.jackson.databind.MappingIterator
-import com.fasterxml.jackson.databind.ObjectWriter
-import com.fasterxml.jackson.databind.json.JsonMapper
+import tools.jackson.databind.MappingIterator
+import tools.jackson.databind.ObjectWriter
+import tools.jackson.databind.json.JsonMapper
 import groovy.util.logging.Slf4j
 import org.apache.commons.io.IOUtils
 import org.springframework.beans.factory.annotation.Autowired

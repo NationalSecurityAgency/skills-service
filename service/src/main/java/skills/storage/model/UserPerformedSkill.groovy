@@ -53,11 +53,9 @@ class UserPerformedSkill {
 
     Date performedOn
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 }

@@ -286,7 +286,7 @@ class SkillsLoader {
     @Profile
     @Transactional(readOnly = true)
     List<? extends SkillBadgeSummary> getBadgesForUserMyProjects(String userId) {
-        List<? extends SkillBadgeSummary> badges = []
+        List<SkillBadgeSummary> badges = []
 
         skillDefWithExtraRepo.findAllMyBadgesForUser(userId).withCloseable { Stream<SkillDefWithExtra> rawBadges ->
             rawBadges?.forEach({

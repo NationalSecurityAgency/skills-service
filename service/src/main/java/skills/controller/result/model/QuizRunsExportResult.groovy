@@ -21,11 +21,10 @@ import org.apache.poi.ss.usermodel.Workbook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
-import org.springframework.web.servlet.view.document.AbstractXlsxStreamingView
 import skills.services.ExcelExportService
 
 @Component
-class QuizRunsExportResult extends AbstractXlsxStreamingView {
+class QuizRunsExportResult extends AbstractSkillsXlsxStreamingView {
 
     static final String QUIZ_IDS = "quizIds"
     static final String USER_QUERY = "userQuery"

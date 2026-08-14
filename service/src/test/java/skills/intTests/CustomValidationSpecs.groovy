@@ -192,18 +192,21 @@ paragraph"""
 
     def "check against url validation endpoint"() {
         when:
-        def res1 = skillsService.checkCustomUrlValidation("http://thisShouldBeFine.com/veryGood/ok/blah")
-        def res2WithSpaces = skillsService.checkCustomUrlValidation("http://thisShouldBeFine.com/this one has spaces")
-        def res3WithSpaces = skillsService.checkCustomUrlValidation("/this one has spaces")
+        def res = skillsService.checkCustomUrlValidation(url)
 
-        def res4BadFormat = skillsService.checkCustomUrlValidation("htt://thisShouldBeFine.com")
         then:
-        res1.body.valid
-        res2WithSpaces.body.valid
-        res3WithSpaces.body.valid
+        res.body.valid == expectedValid
+        if (expectedMsg != null) {
+            assert res.body.msg == expectedMsg
+        }
 
-        !res4BadFormat.body.valid
-        res4BadFormat.body.msg == "only local urls or http/https protocols are allowed"
+        where:
+        url                                              | expectedValid | expectedMsg
+        "http://thisShouldBeFine.com/veryGood/ok/blah"   | true          | null
+        "http://thisShouldBeFine.com/this one has spaces"| true          | null
+        "/this one has spaces"                           | true          | null
+        "htt://thisShouldBeFine.com"                     | false         | "only local urls or http/https protocols are allowed"
+        "https://"                                       | false         | "url [https://] is invalid: Domain name (host) is missing"
     }
 
     def "create badge with empty description"() {

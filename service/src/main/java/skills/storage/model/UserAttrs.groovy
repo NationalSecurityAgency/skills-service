@@ -42,7 +42,6 @@ class UserAttrs {
     @CreatedDate
     LocalDateTime created
 
-    @Temporal(TemporalType.TIMESTAMP)
     Date userTagsLastUpdated
 
     String emailVerified = 'false'

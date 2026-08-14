@@ -51,7 +51,6 @@ import skills.storage.repos.UserTagRepo
 import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
 import skills.utils.InputSanitizer
 
-import javax.xml.bind.DatatypeConverter
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.security.Principal
@@ -267,8 +266,7 @@ class RootController {
             MessageDigest md = MessageDigest.getInstance("MD5")
             md.update(settings.userAgreement.getBytes())
             byte[] digest = md.digest()
-            String agreementVersion = DatatypeConverter
-                    .printHexBinary(digest).toUpperCase()
+            String agreementVersion = HexFormat.of().withUpperCase().formatHex(digest).toUpperCase()
             settings.userAgreemmentVersion = agreementVersion
         }
         systemSettingsService.save(settings)

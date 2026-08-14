@@ -36,11 +36,9 @@ class QueuedSkillUpdate implements Serializable{
     @JoinColumn(name="skill_ref_id")
     SkillDefWithExtra skill
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 

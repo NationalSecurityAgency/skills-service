@@ -17,7 +17,7 @@ package skills.controller.filters;
 
 import groovy.util.logging.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.boot.security.autoconfigure.web.servlet.SecurityFilterProperties;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 @Component
-@Order(SecurityProperties.DEFAULT_FILTER_ORDER-1)
+@Order(SecurityFilterProperties.DEFAULT_FILTER_ORDER-1)
 @Slf4j
 public class VueEntryPointFilter implements Filter {
 

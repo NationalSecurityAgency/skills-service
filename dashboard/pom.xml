@@ -14,7 +14,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <frontend-maven-plugin.version>1.13.4</frontend-maven-plugin.version>
     </properties>
 
 
@@ -47,7 +46,7 @@
                                     mvn com.mycila:license-maven-plugin:3.0:format-->
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-
+                <version>${mycila.license-maven-plugin.version}</version>
                 <configuration>
                     <mapping>
                         <vue>VUE_STYLE</vue>
@@ -102,6 +101,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>exec-npm-install</id>

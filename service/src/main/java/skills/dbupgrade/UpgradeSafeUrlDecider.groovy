@@ -16,7 +16,7 @@
 package skills.dbupgrade
 
 import groovy.util.logging.Slf4j
-import org.reflections.Reflections
+import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.ApplicationContext
@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Conditional
 import org.springframework.core.io.Resource
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import org.springframework.core.io.support.ResourcePatternResolver
-import org.springframework.core.type.AnnotationMetadata
 import org.springframework.core.type.MethodMetadata
 import org.springframework.core.type.classreading.MetadataReader
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory
@@ -32,11 +31,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import skills.controller.AdminController
 
-import jakarta.annotation.PostConstruct
-import java.lang.annotation.Annotation
-import java.lang.reflect.Method
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 

@@ -15,11 +15,8 @@
  */
 package skills.intTests.badges
 
-import groovy.json.JsonOutput
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
+
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
@@ -33,8 +30,6 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
     @Autowired
     UserAchievedLevelRepo userAchievedLevelRepo
-
-    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     def "removing level satisfies global badge for some of the existing users"() {
 
@@ -963,7 +958,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsers.data[0].skillsAchieved == 0
         badgeUsers.data[0].numLevelsAchieved == 0
         badgeUsers.data[0].totalProgress == 0
-        badgeUsers.data[0].lastUpdated == DTF.print(twoDaysAgo.time)
+        badgeUsers.data[0].lastUpdated == twoDaysAgo.toInstant().toString()
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })

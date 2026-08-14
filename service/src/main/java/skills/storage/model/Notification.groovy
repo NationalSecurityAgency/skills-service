@@ -61,11 +61,9 @@ class Notification {
     // this will be incremented if notification fails to run
     int failedCount
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 }

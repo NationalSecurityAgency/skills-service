@@ -79,16 +79,16 @@ class UsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
         result.totalCount == 2
         result.users[0].userId == users[0]
         result.users[0].count == 1
-        result.users[0].date.toString() == date.format('YYYY-MM-dd 00:00:00.0')
+        result.users[0].date.format("yyyy-MM-dd'T'HH:mm:ss") == date.format("yyyy-MM-dd'T'00:00:00")
         result.users[1].userId == users[3]
         result.users[1].count == 3
-        result.users[1].date.toString() == dateFiveDaysAgo.format('YYYY-MM-dd 00:00:00.0')
+        result.users[1].date.format("yyyy-MM-dd'T'HH:mm:ss") == dateFiveDaysAgo.format("yyyy-MM-dd'T'00:00:00")
 
         resultAfterArchive
         resultAfterArchive.totalCount == 1
         resultAfterArchive.users[0].userId == users[0]
         resultAfterArchive.users[0].count == 1
-        resultAfterArchive.users[0].date.toString() == date.format('YYYY-MM-dd 00:00:00.0')
+        resultAfterArchive.users[0].date.format("yyyy-MM-dd'T'HH:mm:ss") == date.format("yyyy-MM-dd'T'00:00:00")
     }
 
     def "pages appropriately"() {
@@ -153,6 +153,6 @@ class UsagePostAchievementUsersBuilderSpec extends DefaultIntSpec {
         result.totalCount == 1
         result.users[0].userId == users[0]
         result.users[0].count == 15
-        result.users[0].date.toString() == date.format('yyyy-MM-dd 00:00:00.0')
+        result.users[0].date.format("yyyy-MM-dd'T'HH:mm:ss") == date.format("yyyy-MM-dd'T'00:00:00")
     }
 }

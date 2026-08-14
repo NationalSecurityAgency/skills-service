@@ -17,7 +17,6 @@ package skills.services.admin
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
-import org.ocpsoft.prettytime.PrettyTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.dao.DataIntegrityViolationException
@@ -53,7 +52,8 @@ import skills.utils.Expiration
 import skills.utils.ExpirationUtils
 import skills.utils.PatternsUtil
 
-import java.util.regex.Pattern
+import java.time.Duration
+import java.time.Instant
 
 @Slf4j
 @Component
@@ -472,8 +472,7 @@ class InviteOnlyProjectService {
             throw new SkillException("Project Invite for [${existingToken.recipientEmail}] is expired", projectId, null, ErrorCode.ExpiredProjectInvite)
         }
 
-        PrettyTime prettyTime = new PrettyTime()
-        String relativeTime = prettyTime.format(existingToken.expires)
+        String relativeTime = getRelativeTime(existingToken)
         Notifier.NotificationRequest request = new Notifier.NotificationRequest(
                 userIds: [recipientEmail],
                 type: Notification.Type.InviteOnlyReminder.toString(),
@@ -494,6 +493,34 @@ class InviteOnlyProjectService {
                 itemId: recipientEmail,
                 projectId: projectId,
         ))
+    }
+
+    private String getRelativeTime(ProjectAccessToken existingToken) {
+        Instant now = Instant.now()
+        Instant expires = existingToken.expires.toInstant()
+
+        // Check if already expired
+        if (now.isAfter(expires)) {
+            return "Expired"
+        }
+
+        Duration duration = Duration.between(now, expires)
+        long days = duration.toDays()
+        long hours = duration.toHoursPart()
+        long minutes = duration.toMinutesPart()
+
+        // Build the string dynamically based on remaining time
+        List parts = []
+        if (days > 0) parts << "${days} day" + (days > 1 ? "s" : "")
+        if (hours > 0) parts << "${hours} hour" + (hours > 1 ? "s" : "")
+        if (minutes > 0) parts << "${minutes} minute" + (minutes > 1 ? "s" : "")
+
+        // Fallback if everything is 0 (less than a minute left)
+        if (parts.isEmpty()) {
+            return "moments from now"
+        }
+
+        return parts.join(", ") + " from now"
     }
 
     private ProjectInviteStatus convert(ProjectAccessToken token) {

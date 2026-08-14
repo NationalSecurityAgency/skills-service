@@ -87,9 +87,6 @@ class FormSecurityConfiguration {
     PasswordEncoder passwordEncoder
 
     @Autowired
-    UserDetailsService userDetailsService
-
-    @Autowired
     @Lazy
     SecurityContextRepository securityContextRepository
 
@@ -100,29 +97,23 @@ class FormSecurityConfiguration {
 
         // Portal endpoints config
         portalWebSecurityHelper.configureHttpSecurity(http)
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-        .and()
-                .securityContext().securityContextRepository(securityContextRepository)
-        .and()
-                .exceptionHandling()
-                .accessDeniedHandler(restAccessDeniedHandler)
-                .authenticationEntryPoint(restAuthenticationEntryPoint)
-        .and()
-                .formLogin()
-                    .loginPage("/skills-login")
-                    .loginProcessingUrl("/performLogin")
-                    .successHandler(restAuthenticationSuccessHandler)
-                    .failureHandler(restAuthenticationFailureHandler)
-        .and()
-                .logout()
-                    .logoutSuccessHandler(restLogoutSuccessHandler)
-        .and()
-                .oauth2Login()
-                    .loginPage("/skills-login")
-                    .successHandler(oauthAuthenticationSuccessHandler)
-                    .failureHandler(restAuthenticationFailureHandler)
-                    .authorizationEndpoint()
-                        .authorizationRequestRepository(skillsClientOAuth2AuthorizationRequestRepository)
+               .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+               .securityContext((securityContext) -> securityContext.securityContextRepository(securityContextRepository))
+               .exceptionHandling((exceptionHandling) -> exceptionHandling
+                       .accessDeniedHandler(restAccessDeniedHandler)
+                       .authenticationEntryPoint(restAuthenticationEntryPoint))
+               .formLogin((formLogin) -> formLogin
+                       .loginPage("/skills-login")
+                       .loginProcessingUrl("/performLogin")
+                       .successHandler(restAuthenticationSuccessHandler)
+                       .failureHandler(restAuthenticationFailureHandler))
+               .logout((logout) -> logout.logoutSuccessHandler(restLogoutSuccessHandler))
+               .oauth2Login((oauth2Login) -> oauth2Login
+                       .loginPage("/skills-login")
+                       .successHandler(oauthAuthenticationSuccessHandler)
+                       .failureHandler(restAuthenticationFailureHandler)
+                       .authorizationEndpoint((authorizationEndpoint) -> authorizationEndpoint
+                               .authorizationRequestRepository(skillsClientOAuth2AuthorizationRequestRepository)))
 
         http.build()
     }
@@ -135,20 +126,19 @@ class FormSecurityConfiguration {
         return http.getSharedObject(AuthenticationManager.class);
     }
 
-    @Bean
+    @Bean(name = 'userDetailsService')
     @Conditional(SecurityMode.FormAuth)
+    @Primary
     UserDetailsService localUserDetailsService() {
-        LocalUserDetailsService localUserDetailsService = new LocalUserDetailsService()
-        return localUserDetailsService;
+        return new LocalUserDetailsService()
     }
 
     @Bean
     @Conditional(SecurityMode.FormAuth)
-    AuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(passwordEncoder);
-        provider.setUserDetailsService(userDetailsService);
-        return provider;
+    AuthenticationProvider daoAuthenticationProvider(PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService)
+        provider.setPasswordEncoder(passwordEncoder)
+        return provider
     }
 
     @Bean
@@ -237,7 +227,7 @@ class FormSecurityConfiguration {
 
     static final String NULL_JSON = 'null'
     static writeNullJson(HttpServletResponse response) {
-        response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE)
         response.setContentLength(NULL_JSON.bytes.length)
         response.getWriter().write(NULL_JSON)
         response.getWriter().flush()

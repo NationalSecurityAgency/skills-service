@@ -31,7 +31,7 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.security.saml2.provider.service.authentication.OpenSaml4AuthenticationProvider;
+import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider
 import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
 import org.springframework.stereotype.Component
@@ -85,9 +85,9 @@ class SAML2SecurityConfiguration{
      @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception   {
 
-         OpenSaml4AuthenticationProvider authenticationProvider = new OpenSaml4AuthenticationProvider();
+         OpenSaml5AuthenticationProvider authenticationProvider = new OpenSaml5AuthenticationProvider();
          authenticationProvider.setResponseAuthenticationConverter(responseToken -> {
-             Saml2Authentication authentication = OpenSaml4AuthenticationProvider.createDefaultResponseAuthenticationConverter()
+             Saml2Authentication authentication = OpenSaml5AuthenticationProvider.createDefaultResponseAuthenticationConverter()
                                                                                  .convert(responseToken);
              Saml2AuthenticatedPrincipal principal = (Saml2AuthenticatedPrincipal) authentication.getPrincipal();
             // Assertion assertion = responseToken.getResponse().getAssertions().get(0);
@@ -110,32 +110,36 @@ class SAML2SecurityConfiguration{
                .fromMetadataLocation(assertingPartyMetadataLocation)
                .registrationId(registrationId);
 
-       // Check if AuthnRequests need signing
-       boolean wantAuthnRequestsSigned = builder.build()
-               .getAssertingPartyDetails()
-               .getWantAuthnRequestsSigned();
+       // extract metadata preferences and apply conditional configurations
+       builder.assertingPartyMetadata(metadataBuilder -> {
+           // Build the metadata object to safely access parsed properties
+           var assertingPartyDetails = metadataBuilder.build();
+           boolean wantAuthnRequestsSigned = assertingPartyDetails.getWantAuthnRequestsSigned();
 
-       if (wantAuthnRequestsSigned) {
-           if (privateKeyLocation == null || privateKeyLocation.isEmpty()) {
-               throw new IllegalArgumentException("Missing required property: 'saml2.rp.signing.key-location'");
+           if (wantAuthnRequestsSigned) {
+               if (privateKeyLocation == null || privateKeyLocation.isEmpty()) {
+                   throw new IllegalArgumentException("Missing required property: 'saml2.rp.signing.key-location'");
+               }
+               if (certificateLocation == null || certificateLocation.isEmpty()) {
+                   throw new IllegalArgumentException("Missing required property: 'saml2.rp.signing.cert-location'");
+               }
+
+               // Load the private key and certificate
+               PrivateKey privateKey = loadPrivateKey(privateKeyLocation);
+               X509Certificate certificate = loadCertificate(certificateLocation);
+
+               // Add signing credential
+               Saml2X509Credential signingCredential = new Saml2X509Credential(
+                       privateKey,
+                       certificate,
+                       Saml2X509Credential.Saml2X509CredentialType.SIGNING
+               );
+
+               // Configure the outer builder to use this credential and enforce signing
+               builder.signingX509Credentials(c -> c.add(signingCredential));
+               builder.authnRequestsSigned(true);
            }
-           if (certificateLocation == null || certificateLocation.isEmpty()) {
-               throw new IllegalArgumentException("Missing required property: 'saml2.rp.signing.cert-location'");
-           }
-
-           // Load the private key and certificate
-           PrivateKey privateKey = loadPrivateKey(privateKeyLocation);
-           X509Certificate certificate = loadCertificate(certificateLocation);
-
-           // Add signing credential
-           Saml2X509Credential signingCredential = new Saml2X509Credential(
-                   privateKey,
-                   certificate,
-                   Saml2X509Credential.Saml2X509CredentialType.SIGNING
-           );
-
-           builder.signingX509Credentials(c -> c.add(signingCredential));
-       }
+       });
 
        RelyingPartyRegistration registration = builder.build();
        return new InMemoryRelyingPartyRegistrationRepository(registration);

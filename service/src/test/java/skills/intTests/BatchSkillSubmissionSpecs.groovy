@@ -1112,7 +1112,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         def skillRequest = [
                 userIds: [users[0]],
                 skillIds: ['skill1'],
-                timestamp: dateToAchieve,
+                timestamp: dateToAchieve.time,
         ]
 
         def result = skillsService.addBatchSkillsForBatchUsers(proj1.projectId, skillRequest).body
@@ -1147,7 +1147,7 @@ class BatchSkillSubmissionSpecs extends DefaultIntSpec {
         def skillRequest = [
                 userIds: [users[0]],
                 skillIds: ['skill1'],
-                timestamp: new Date() + 10,
+                timestamp: (new Date() + 10).time,
         ]
 
         when:

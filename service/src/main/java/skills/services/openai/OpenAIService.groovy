@@ -32,14 +32,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
-import org.springframework.lang.Nullable
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
 import skills.controller.exceptions.SkillException
-import skills.controller.result.model.TextInputAIGradingResult
 import skills.controller.request.model.AiChatRequest
+import skills.controller.result.model.TextInputAIGradingResult
 
 @Service
 @Slf4j
@@ -50,9 +51,6 @@ class OpenAIService {
 
     @Value('${skills.openai.host:#{null}}')
     String openAiBaseUrl
-
-    @Value('#{"${skills.openai.completionsEndpoint:/v1/chat/completions}"}')
-    String completionsEndpoint
 
     @Value('#{"${skills.openai.modelsEndpoint:/v1/models}"}')
     String modelsEndpoint
@@ -97,6 +95,7 @@ class OpenAIService {
         }
 
         String url = String.join("/", openAiBaseUrl, modelsEndpoint)
+        log.debug("Fetching available models from OpenAI. URL=[{}]", url)
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -119,8 +118,7 @@ class OpenAIService {
 
             return new AvailableModels(models: models)
         } catch (Exception e) {
-            log.error("Failed to call external service", e)
-            throw new RuntimeException("Failed to fetch data from external service", e)
+            throw new SkillException("Failed to fetch models from OpenAI: ${e.message}", e)
         }
     }
 
@@ -131,7 +129,9 @@ class OpenAIService {
         if (!systemMsg) {
             throw new UnsupportedOperationException("ai systemMsg is not configured" )
         }
-
+        if (!chatModel) {
+            throw new IllegalStateException("chatModel was not injected" )
+        }
         long startTime = System.currentTimeMillis()
         boolean isFirstMessage = genDescRequest.messages.size() == 1
         List<Message> messages = isFirstMessage ? [new SystemMessage(systemMsg)] : []
@@ -153,40 +153,53 @@ class OpenAIService {
                         .build()
         )
         List<ChatResponse> collectedResponses = Collections.synchronizedList([] as List<ChatResponse>)
-        Flux<ChatResponse> response = chatModel.stream(prompt)
-        return response.mapNotNull { ChatResponse chatResponse ->
-            try {
-                if (streamUsage && chatResponse?.getMetadata()?.getUsage()?.getTotalTokens() > 0) {
-                    collectedResponses << chatResponse
-                }
-                List<Generation> genList = chatResponse.getResults()
-                if (!genList) {
-                    return ""
-                }
-                String res = (String) genList.get(0).getOutput().getText()
-                res = res?.replaceAll('\\n', '<<newline>>')
-                log.debug("Response: [{}]", res)
-                return res
-            } catch (Throwable t) {
-                String chatResponseAsStr = ""
+
+        try {
+            Flux<ChatResponse> response = chatModel.stream(prompt)
+            return response.mapNotNull { ChatResponse chatResponse ->
                 try {
-                    chatResponseAsStr = JsonOutput.toJson(chatResponse)
-                } catch (Throwable t2) {
+                    if (streamUsage && chatResponse?.getMetadata()?.getUsage()?.getTotalTokens() > 0) {
+                        collectedResponses << chatResponse
+                    }
+                    List<Generation> genList = chatResponse.getResults()
+                    if (!genList) {
+                        return ""
+                    }
+                    String res = (String) genList.get(0).getOutput().getText()
+                    res = res?.replaceAll('\\n', '<<newline>>')
+                    log.debug("Response: [{}]", res)
+                    return res
+                } catch (Throwable t) {
+                    String chatResponseAsStr = ""
+                    try {
+                        chatResponseAsStr = JsonOutput.toJson(chatResponse)
+                    } catch (Throwable t2) {
+                    }
+                    log.error("Failed to process response from OpenAI, chatResponse=[${chatResponseAsStr}]", t)
+                    throw t
                 }
-                log.error("Failed to get response from OpenAI, chatResponse=[${chatResponseAsStr}]", t)
-                throw t
-            }
-        }.doOnComplete {
-            if (streamUsage) {
-                long totalRuntimeMs = (System.currentTimeMillis() - startTime)
-                if (!collectedResponses.isEmpty()) {
-                    // Use the last response which should have the complete usage info
-                    Usage usage = collectedResponses.last().getMetadata().getUsage()
-                    log.info("Chat Usage: totalTokens=[${usage.totalTokens}], promptTokens=[${usage.promptTokens}], completionTokens=[${usage.completionTokens}], totalRuntimeMs=[${totalRuntimeMs}]")
+            }.doOnComplete {
+                if (streamUsage) {
+                    long totalRuntimeMs = (System.currentTimeMillis() - startTime)
+                    if (!collectedResponses.isEmpty()) {
+                        Usage usage = collectedResponses.last().getMetadata().getUsage()
+                        log.info("Chat Usage: totalTokens=[${usage.totalTokens}], promptTokens=[${usage.promptTokens}], completionTokens=[${usage.completionTokens}], totalRuntimeMs=[${totalRuntimeMs}]")
+                    } else {
+                        log.warn("Failed to collect chat usage. Total runtime: [${totalRuntimeMs}]")
+                    }
+                }
+            }.doOnError { Throwable t ->
+                if (t instanceof HttpClientErrorException) {
+                    log.error("OpenAI client error in streamChat. Model=[${genDescRequest.model}], Status=[${((HttpClientErrorException)t).statusCode.value()}]", t)
+                } else if (t instanceof HttpServerErrorException) {
+                    log.error("OpenAI server error in streamChat. Model=[${genDescRequest.model}], Status=[${((HttpServerErrorException)t).statusCode.value()}]", t)
                 } else {
-                    log.warn("Failed to collect chat usage. Total runtime: [${totalRuntimeMs}]")
+                    log.error("Error in streamChat. Model=[${genDescRequest.model}]", t)
                 }
             }
+        } catch (Throwable e) {
+            log.error("Failed to call OpenAI for streaming chat. Model=[{}]", genDescRequest.model, e)
+            throw new SkillException("Failed to stream chat from OpenAI: ${e.message}", e)
         }
     }
 
@@ -197,11 +210,14 @@ class OpenAIService {
         if (!gradingModel) {
             throw new UnsupportedOperationException("ai grading model is not configured" )
         }
+        if (!chatModel) {
+            throw new IllegalStateException("chatModel was not injected" )
+        }
         String promptStr = textInputQuestionGradingMsg
-                .replace('{{ question }}', question)
-                .replace('{{ studentAnswer }}', studentAnswer)
-                .replace('{{ correctAnswer }}', correctAnswer)
-                .replace('{{ minimumConfidenceLevel }}', minimumConfidenceLevel.toString())
+                ?.replace('{{ question }}', question)
+                ?.replace('{{ studentAnswer }}', studentAnswer)
+                ?.replace('{{ correctAnswer }}', correctAnswer)
+                ?.replace('{{ minimumConfidenceLevel }}', minimumConfidenceLevel.toString())
         log.debug("Prompt: {}", promptStr)
         List<Message> messages = [
                 new UserMessage(promptStr)
@@ -213,7 +229,14 @@ class OpenAIService {
                         .temperature(gradingModelTemperature)
                         .build()
         )
-        ChatResponse chatResponse = chatModel.call(prompt)
+        ChatResponse chatResponse
+        try {
+            chatResponse = chatModel.call(prompt)
+        } catch (Throwable e) {
+            log.error("Failed to call OpenAI for text input grading. Model=[{}]", gradingModel, e)
+            throw new SkillException("Failed to grade text input answer from OpenAI: ${e.message}", e)
+        }
+        
         List<Generation> genList = chatResponse.getResults()
         if (!genList) {
             throw new SkillException("Failed to get response from OpenAI")

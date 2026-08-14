@@ -15,8 +15,7 @@
  */
 package skills.intTests
 
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
+
 import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -27,8 +26,6 @@ import skills.storage.model.UserPoints
 import skills.storage.repos.SkillRelDefRepo
 
 class SkillsGroupSpecs extends DefaultIntSpec {
-
-    DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").withZoneUTC()
 
     void "create and get initial SkillsGroup" () {
         def proj = SkillsFactory.createProject()
@@ -815,7 +812,8 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
             then:
             def e = thrown(SkillsClientException)
-            e.message.contains('explanation:Each Subject is limited to [100] Skills, errorCode:MaxSkillsThreshold')
+            e.message.contains('explanation:Each Subject is limited to [100] Skills')
+            e.message.contains('errorCode:MaxSkillsThreshold')
     }
 
     def "delete SkillsGroup and a child skill and verify proper display order is maintained for both"() {
@@ -1513,7 +1511,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         then:
         subjectUsers.data[0].userId == user
-        subjectUsers.data[0].lastUpdated == DTF.print(date.time)
+        subjectUsers.data[0].lastUpdated == date.toInstant().toString()
     }
 
     void "get subject for SkillsGroup" () {

@@ -19,9 +19,6 @@ server:
 #  ssl:
 #    enabled: true
 #    client-auth:  want
-  error:
-    whitelabel:
-      enabled: false
   servlet:
     session:
       timeout: 24h
@@ -33,12 +30,32 @@ server:
     min-response-size: 2048
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,images/x-icon
   shutdown: graceful
+  tomcat:
+    accesslog:
+      stdout:
+        enabled: true
 
 logging:
   level:
     org.springframework.core.LocalVariableTableParameterNameDiscoverer: ERROR
 
 spring:
+  ai:
+    model:
+      # disable Spring AI auto-configurations
+      chat: none
+      audio:
+        speech: none
+        transcription: none
+      embedding: none
+      image: none
+      moderation: none
+    openai:
+      api-key: none
+  cloud:
+    aws:
+      s3:
+        enabled: false
   lifecycle:
     timeout-per-shutdown-phase: 1m
   main:
@@ -53,8 +70,9 @@ spring:
     hibernate:
       ddl-auto: none
 #    show-sql: true
-  liquibase:
-    "change-log": "classpath:db/changelog/db.changelog-master.xml"
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: "5.0.0"
   session:
     store-type: none
   servlet:
@@ -63,6 +81,15 @@ spring:
       location: ${java.io.tmpdir}
       max-file-size: ${skills.config.maxAttachmentSize}
       max-request-size: ${skills.config.maxAttachmentSize}
+  jackson:
+    deserialization:
+      # Allows null JSON values to map to Java primitive defaults (e.g., null becomes false for boolean, 0 for int)
+      # instead of throwing a MismatchedInputException.
+      fail-on-null-for-primitives: false
+  web:
+    error:
+      whitelabel:
+        enabled: false
 #  http:
 #    client:
 #      factory: simple
@@ -91,7 +118,6 @@ skills:
   openai:
     host: null
   config:
-    publiclyExposePrometheusMetrics: false
     # Changing this to a larger value once events have been compacted into WEEKLY events will cause
     # those WEEKLY events which are now newer than the compactDailyEventsOlderThan to no longer be visible in the system
     # Decreasing this value will temporarily cause any DAILY events older than the new value to not be visible until the next
@@ -211,19 +237,5 @@ skills:
     active: default
 db-scheduler:
   threads: 3
----
-spring:
-  ai:
-    model:
-      chat: none
-    openai:
-      api-key: none
-  cloud:
-    aws:
-      s3:
-        enabled: false
-  config:
-    activate:
-      on-profile: default
 
----
+

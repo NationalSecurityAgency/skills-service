@@ -17,7 +17,7 @@ package skills.services.video
 
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
-import org.hibernate.engine.jdbc.BlobProxy
+import org.hibernate.engine.jdbc.proxy.BlobProxy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType

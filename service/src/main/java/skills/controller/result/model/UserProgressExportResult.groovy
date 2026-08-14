@@ -21,11 +21,10 @@ import org.apache.poi.ss.usermodel.Workbook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
-import org.springframework.web.servlet.view.document.AbstractXlsxStreamingView
 import skills.services.ExcelExportService
 
 @Component
-class UserProgressExportResult extends AbstractXlsxStreamingView {
+class UserProgressExportResult extends AbstractSkillsXlsxStreamingView {
     static final String PROJECT_ID = "projectId"
     static final String QUERY = "query"
     static final String MINIMUM_POINTS = "minimumPoints"

@@ -15,21 +15,16 @@
  */
 package skills
 
-import ch.qos.logback.access.common.pattern.AccessConverter
-import ch.qos.logback.access.common.spi.IAccessEvent
-import ch.qos.logback.access.tomcat.LogbackValve
 import org.apache.catalina.connector.Connector
 import org.apache.coyote.http2.Http2Protocol
 import org.apache.tomcat.util.http.Rfc6265CookieProcessor
 import org.apache.tomcat.util.http.SameSiteCookies
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer
-import org.springframework.boot.web.embedded.tomcat.TomcatContextCustomizer
-import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
+import org.springframework.boot.tomcat.TomcatConnectorCustomizer
+import org.springframework.boot.tomcat.TomcatContextCustomizer
+import org.springframework.boot.tomcat.servlet.TomcatServletWebServerFactory
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.Configuration
-
-import java.security.cert.X509Certificate
 
 @Configuration
 class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
@@ -59,14 +54,6 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
                 }
             })
         }
-        if (enabledAccessLog) {
-            LogbackValve valve = new LogbackValve()
-            // must set to true on the logback valve otherwise servlet async
-            // support will be disabled, which is required for web-socket
-            // HTTP-based transport fallback options (HTTP polling/streaming)
-            valve.setAsyncSupported(true)
-            factory.addContextValves(valve)
-        }
 
         if (disableOverheadThresholds) {
             factory.addConnectorCustomizers(new TomcatConnectorCustomizer() {
@@ -83,37 +70,4 @@ class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerF
         }
     }
 
-    static class UserIdConverter extends AccessConverter {
-
-        static final String CERT_HEADER = 'jakarta.servlet.request.X509Certificate'
-
-        @Override
-        String convert(IAccessEvent accessEvent) {
-            try {
-                String dn = getSubjectDN(accessEvent)
-                if (dn) {
-                    return dn
-                }
-                String userIdForLogging = UserIdLoggingFilter.USER_ID.get()
-                if (userIdForLogging) {
-                    return userIdForLogging
-                }
-                return IAccessEvent.NA
-            } finally {
-                UserIdLoggingFilter.USER_ID.remove()
-            }
-        }
-
-        private static String getSubjectDN(IAccessEvent accessEvent) {
-            def certificateAttr = accessEvent.getRequest().getAttribute(CERT_HEADER)
-            if (certificateAttr instanceof X509Certificate) {
-                return certificateAttr?.getSubjectX500Principal()?.name
-            } else if (certificateAttr instanceof X509Certificate[]) {
-                // use the first one
-                if (certificateAttr.length > 0) {
-                    return certificateAttr[0]?.getSubjectX500Principal()?.name
-                }
-            }
-        }
-    }
 }

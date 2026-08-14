@@ -15,7 +15,7 @@
  */
 package skills.intTests.approverRole
 
-
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -560,7 +560,8 @@ class ManageTheApproverConfSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException e = thrown()
-        e.resBody.contains("You do not have permission to view/manage this Project") || e.resBody.contains("HTTP Status 403 – Forbidden")
+        e.resBody.contains("You do not have permission to view/manage this Project") || e.resBody.contains("Forbidden")
+        e.httpStatus == HttpStatus.FORBIDDEN
     }
 
     def "explicitly designate user to catch all unmatched requests"() {

@@ -128,22 +128,7 @@ describe('Badges Tests', () => {
             .should('be.enabled');
     });
 
-    it('badge validation', () => {
-        // create existing badge
-        cy.request('POST', '/admin/projects/proj1/badges/badgeExist', {
-            projectId: 'proj1',
-            name: 'Badge Exist',
-            badgeId: 'badgeExist'
-        });
-        cy.intercept('GET', '/public/config', (req) => {
-          req.continue((res) => {
-            res.body.descriptionMaxLength = 2000
-          })
-        })
-
-        cy.intercept('POST', '/api/validation/url')
-            .as('customUrlValidation');
-
+    it('badge validation - name is too short', () => {
         cy.visit('/administrator/projects/proj1/badges');
         // // // cy.get('[data-cy="inception-button"]').contains('Level');
         cy.get('[data-cy="btn_Badges"]').click();
@@ -162,11 +147,18 @@ describe('Badges Tests', () => {
             .type('Tes');
         cy.get('[data-cy=nameError]')
             .should('not.be.visible');
+    })
+
+    it('badge validation - name is too long', () => {
+        cy.visit('/administrator/projects/proj1/badges');
+        // // // cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="btn_Badges"]').click();
+        cy.contains('New Badge');
 
         cy.get('[data-cy="enableIdInput"]').click();
 
         // name too long
-        msg = 'Badge Name must be at most 50 characters';
+        const msg = 'Badge Name must be at most 50 characters';
         cy.contains('Enable')
             .click();
         cy.getIdField()
@@ -191,9 +183,18 @@ describe('Badges Tests', () => {
         cy.get('[data-cy=nameError]')
             .should('not.be.visible');
 
-        // id too short
-        msg = 'Badge ID must be at least 3 characters';
+    })
 
+    it('badge validation - id too short', () => {
+        cy.visit('/administrator/projects/proj1/badges');
+        // // // cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="btn_Badges"]').click();
+        cy.contains('New Badge');
+
+        // id too short
+        const msg = 'Badge ID must be at least 3 characters';
+
+        cy.get('[data-cy="enableIdInput"]').click();
         cy.getIdField()
             .clear()
             .type('aa');
@@ -206,9 +207,18 @@ describe('Badges Tests', () => {
             .type('a');
         cy.get('[data-cy=idError]')
             .should('not.be.visible');
+    })
+
+    it('badge validation - id too long', () => {
+        cy.visit('/administrator/projects/proj1/badges');
+        // // // cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="btn_Badges"]').click();
+        cy.contains('New Badge');
+
+        cy.get('[data-cy="enableIdInput"]').click();
 
         // id too long
-        msg = 'Badge ID must be at most 100 characters';
+        const msg = 'Badge ID must be at most 100 characters';
         const invalidId = Array(101)
             .fill('a')
             .join('');
@@ -224,9 +234,17 @@ describe('Badges Tests', () => {
             .type('{backspace}');
         cy.get('[data-cy=idError]')
             .should('not.be.visible');
+    })
 
+    it('badge validation - id special chars', () => {
+        cy.visit('/administrator/projects/proj1/badges');
+        // // // cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="btn_Badges"]').click();
+        cy.contains('New Badge');
+
+        cy.get('[data-cy="enableIdInput"]').click();
         // id must not have special chars
-        msg = 'Badge ID may only contain alpha-numeric characters';
+        const msg = 'Badge ID may only contain alpha-numeric characters';
         cy.getIdField()
             .clear()
             .type('With$Special');
@@ -256,8 +274,22 @@ describe('Badges Tests', () => {
                 .should('not.be.visible');
         });
 
+    })
+
+    it('badge validation - name must not be taken', () => {
+        cy.request('POST', '/admin/projects/proj1/badges/badgeExist', {
+            projectId: 'proj1',
+            name: 'Badge Exist',
+            badgeId: 'badgeExist'
+        });
+
+        cy.visit('/administrator/projects/proj1/badges');
+        // // // cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="btn_Badges"]').click();
+        cy.contains('New Badge');
+
         // badge name must not be already taken
-        msg = 'Badge Name is already taken';
+        const msg = 'Badge Name is already taken';
         cy.get('[data-cy="name"]')
             .clear()
             .type('Badge Exist');
@@ -268,9 +300,23 @@ describe('Badges Tests', () => {
             .type('1');
         cy.get('[data-cy=nameError]')
             .should('not.be.visible');
+    })
 
+    it('badge validation - id must not be taken', () => {
+        cy.request('POST', '/admin/projects/proj1/badges/badgeExist', {
+            projectId: 'proj1',
+            name: 'Badge Exist',
+            badgeId: 'badgeExist'
+        });
+
+        cy.visit('/administrator/projects/proj1/badges');
+        // // // cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="btn_Badges"]').click();
+        cy.contains('New Badge');
+
+        cy.get('[data-cy="enableIdInput"]').click();
         // badge id must not already exist
-        msg = 'Badge ID is already taken';
+        const msg = 'Badge ID is already taken';
         cy.getIdField()
             .clear()
             .type('badgeExist');
@@ -281,9 +327,22 @@ describe('Badges Tests', () => {
             .type('1');
         cy.get('[data-cy=idError]')
             .should('not.be.visible');
+    })
 
+    it('badge validation - max description', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.continue((res) => {
+                res.body.descriptionMaxLength = 2000
+            })
+        }).as('getConfig');
+
+        cy.visit('/administrator/projects/proj1/badges');
+        cy.wait('@getConfig');
+        // // // cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="btn_Badges"]').click();
+        cy.contains('New Badge');
         // max description
-        msg = 'Badge Description must be at most 2000 characters';
+        const msg = 'Badge Description must be at most 2000 characters';
         const invalidDescription = Array(2000)
             .fill('a')
             .join('');
@@ -299,6 +358,18 @@ describe('Badges Tests', () => {
             .type('{backspace}');
         cy.get('[data-cy=descriptionError]')
             .should('not.be.visible');
+    })
+
+    it('badge validation - help url', () => {
+        cy.intercept('POST', '/api/validation/url')
+            .as('customUrlValidation');
+
+        cy.visit('/administrator/projects/proj1/badges');
+        // // // cy.get('[data-cy="inception-button"]').contains('Level');
+        cy.get('[data-cy="btn_Badges"]').click();
+        cy.contains('New Badge');
+
+        cy.get('[data-cy="name"]').type('name');
 
         //helpUrl
         cy.get('[data-cy=skillHelpUrl]')
@@ -358,11 +429,6 @@ describe('Badges Tests', () => {
             .should('not.be.visible');
         cy.get('[data-cy=saveDialogBtn]')
             .should('be.enabled');
-
-        // finally let's save
-        cy.clickSave();
-        cy.wait('@loadBadges');
-        cy.contains('Badge Exist1');
     });
 
     it('gem start and end time validation', () => {

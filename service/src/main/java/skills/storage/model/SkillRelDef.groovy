@@ -45,11 +45,9 @@ class SkillRelDef {
     @Enumerated(EnumType.STRING)
     RelationshipType type = RelationshipType.RuleSetDefinition
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 }

@@ -42,11 +42,9 @@ class SkillApprovalConf {
     String userTagValue
     Integer skillRefId
 
-    @Temporal(TemporalType.TIMESTAMP)
     @CreatedDate
     Date created
 
-    @Temporal(TemporalType.TIMESTAMP)
     @LastModifiedDate
     Date updated
 

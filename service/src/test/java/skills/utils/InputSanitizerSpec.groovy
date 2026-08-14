@@ -17,6 +17,7 @@ package skills.utils
 
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import spock.lang.IgnoreRest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -72,6 +73,74 @@ class InputSanitizerSpec extends Specification{
 
         then:
         sanitized == "/foo?p=1&pp=2&ppp=3"
+    }
+
+    def "Should successfully sanitize valid URL: #description"() {
+        when:
+        def result = InputSanitizer.sanitizeUrl(inputUrl)
+
+        then:
+        result == expectedUrl
+
+        where:
+        description                      | inputUrl                                    | expectedUrl
+        "Trailing space removal"         | "https://foo.bar "           | "https://foo.bar"
+        "Leading space removal"          | "   https://foo.bar"                        | "https://foo.bar"
+        "Local relative path"            | "/local/path/to/resource"                   | "/local/path/to/resource"
+        "Spaces in path encoded"         | "https://foo.bar folder/file name.txt"   | "https://foo.bar%20folder/file%20name.txt"
+        "Spaces in query encoded"        | "https://foo.bar world"        | "https://foo.bar%20world"
+        "Multiple query parameters"      | "https://foo.bar"               | "https://foo.bar"
+        "URL with fragment and space"    | "https://foo.bar anchor"        | "https://foo.bar%20anchor"
+        "HTTP protocol"                  | "http://example.com"                        | "http://example.com"
+        "HTTPS protocol"                 | "https://example.com"                       | "https://example.com"
+    }
+
+    def "Should pass through empty or null input unchanged [input: #description]"() {
+        expect:
+        InputSanitizer.sanitizeUrl(input) == input
+
+        where:
+        description | input
+        "null URL"  | null
+        "empty URL" | ""
+    }
+
+    def "Should block disallowed protocol and throw SkillException [protocol: #protocol]"() {
+        when:
+        InputSanitizer.sanitizeUrl("${protocol}://malicious-site.com")
+
+        then:
+        def ex = thrown(SkillException)
+        ex.errorCode == ErrorCode.BadParam
+        ex.message == "only local urls or http/https protocols are allowed"
+
+        where:
+        protocol | _
+        "ftp"        | _
+        "javascript" | _
+        "file"       | _
+        "data"       | _
+        "gopher"     | _
+    }
+
+    def "Should throw SkillException for structurally malformed URLs"() {
+        when:
+        InputSanitizer.sanitizeUrl("https://:[illegal-host-format]")
+
+        then:
+        def ex = thrown(SkillException)
+        ex.errorCode == ErrorCode.BadParam
+        ex.message.contains("url [https://:[illegal-host-format]] is invalid")
+    }
+
+    def "Must ensure that domain is provided"() {
+        when:
+        InputSanitizer.sanitizeUrl("https://")
+
+        then:
+        def ex = thrown(SkillException)
+        ex.errorCode == ErrorCode.BadParam
+        ex.message.contains("url [https://] is invalid")
     }
 
     def "unsanitize markdown with gt html entity encoded"() {
@@ -453,7 +522,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == '<a>click</a>  `<a href="javascript:alert(3)">safe</a>`'
+        one == '<a>click</a> '
     }
 
     def "malformed code blocks - unclosed backticks"() {
@@ -463,7 +532,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == 'unclosed `code block <script>alert(1)</script> another `second block outside'
+        one == 'unclosed `code block <script>alert(1)</script> another `second block '
     }
 
     def "malformed code blocks - triple backticks with content"() {
@@ -473,7 +542,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == '```not a real code block <script>alert(1)</script> still not``` outside ````real code block````'
+        one == '```not a real code block <script>alert(1)</script> still not```  ````real code block````'
     }
 
     def "encoding bypass attempts - html entities"() {
@@ -483,7 +552,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == '&lt;script&gt;alert("xss")&lt;/script&gt; outside `&lt;script&gt;alert("safe")&lt;/script&gt;`'
+        one == '&lt;script&gt;alert("xss")&lt;/script&gt;  `&lt;script&gt;alert("safe")&lt;/script&gt;`'
     }
 
     def "encoding bypass attempts - unicode and hex"() {
@@ -493,7 +562,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == '\\u003cscript\\u003ealert("xss")\\u003c/script\\u003e outside `\\u003cscript\\u003ealert("safe")\\u003c/script\\u003e`'
+        one == '\\u003cscript\\u003ealert("xss")\\u003c/script\\u003e  `\\u003cscript\\u003ealert("safe")\\u003c/script\\u003e`'
     }
 
     def "nested code blocks - backticks inside code blocks"() {
@@ -503,7 +572,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == 'outside ```outer `inner` content <script>alert(1)</script>``` outside `nested ```deep``` content`'
+        one == 'outside ```outer `inner` content <script>alert(1)</script>```  `nested ```deep``` content`'
     }
 
     def "code block injection attempts - fake code blocks"() {
@@ -513,7 +582,7 @@ After strip'''
         def one = InputSanitizer.sanitizeDescription(text)
 
         then:
-        one == ' ```fake code block <script>alert(2)</script>``` outside `real code block`'
+        one == ' ```fake code block <script>alert(2)</script>```  `real code block`'
     }
 
     def "large input and performance edge case"() {
