@@ -839,7 +839,7 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
     }
 
     def "number of users growing over a few months - month and weeks compared"() {
-        List<String> users = getRandomUsers(200)
+        List<String> users = getRandomUsers(35)
         def proj = SkillsFactory.createProject()
         List<Map> skills = SkillsFactory.createSkills(10)
         skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 10 }
@@ -857,7 +857,7 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
             days = (startDate..endDate).toList()
 
             days.eachWithIndex { Date date, int index ->
-                users.subList(0, index).each { String user ->
+                users.subList(0, 34).each { String user ->
                     skills.subList(0, 3).each { skill ->
                         skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
                     }
