@@ -144,14 +144,9 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
         Collection<? extends GrantedAuthority> grantedAuthorities = authentication.getAuthorities()
         if (!grantedAuthorities && authentication.getPrincipal() instanceof UserInfo) {
             UserInfo userInfo = (UserInfo) authentication.getPrincipal()
-            grantedAuthorities = load(userInfo.getUsername())
+            grantedAuthorities = userAuthService.loadAuthorities(userInfo)
         }
         return grantedAuthorities
-    }
-
-    Collection<GrantedAuthority> load(String username) throws Exception {
-        Collection<GrantedAuthority> grantedAuthorities = userAuthService.loadAuthorities(username)
-        return grantedAuthorities ?: Collections.EMPTY_LIST
     }
 
     private static boolean isPermitted(String projectId, UserSkillsGrantedAuthority grantedAuthority) {
