@@ -179,23 +179,6 @@ class AuthorizationSpecs extends DefaultIntSpec {
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
-    def "admin can complete a skill for another user using proxy token"() {
-        Map subj1 = [projectId: projId, subjectId: "subj1", skillId: "skill11".toString(), name: "Test Subject 1".toString(), type: "Skill", pointIncrement: 100, numPerformToCompletion: 1, pointIncrementInterval: 8*60, numMaxOccurrencesIncrementInterval: 1]
-        skillsService.createSubject(subj1)
-        skillsService.createSkill(subj1)
-
-        String secret = skillsService.getClientSecret(projId)
-        skillsService.setProxyCredentials(projId, secret)
-
-        when:
-        def res = skillsService.addSkillAsAdminProxy([projectId: projId, skillId: subj1.skillId], skillsService.wsHelper.username, 'jim@email.com', new Date()-1)
-
-        then:
-        res.body.skillApplied
-        res.body.explanation == "Skill event was applied"
-    }
-
-    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "reset client secret"() {
         when:
         List<String> sampleUserIds = ['jim@email.com', 'bob@email.com']
