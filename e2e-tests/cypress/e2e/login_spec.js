@@ -18,7 +18,7 @@ describe('Login Tests', () => {
     beforeEach(() => {
         cy.logout();
 
-        cy.intercept('GET', '/app/projects/**')
+        cy.intercept('GET', '/app/projects')
             .as('getProjects')
             .intercept('GET', '/api/icons/customIconCss')
             .as('getProjectsCustomIcons')
@@ -27,11 +27,14 @@ describe('Login Tests', () => {
             .intercept('GET', '/app/oAuthProviders')
             .as('getOAuthProviders')
             .intercept('POST', '/performLogin')
-            .as('postPerformLogin');
+            .as('postPerformLogin')
+            .intercept('GET', '/admin/projects/proj1')
+            .as('loadProject1');
     });
 
     it('form: successful dashboard login', () => {
         cy.visit('/administrator/');
+        cy.wait('@getProjects').its('response.statusCode').should('eq', 401)
 
         cy.get('#username')
             .type('root@skills.org');
@@ -40,24 +43,9 @@ describe('Login Tests', () => {
         cy.get('[data-cy=login]')
             .click();
 
-        cy.wait('@getProjects')
-            .then(({
-                       request,
-                       response
-                   }) => {
-                expect(response.statusCode)
-                    .to
-                    .eq(200);
-            });
-        cy.wait('@getUserInfo')
-            .then(({
-                       request,
-                       response
-                   }) => {
-                expect(response.statusCode)
-                    .to
-                    .eq(200);
-            });
+
+        cy.wait('@getUserInfo').its('response.statusCode').should('eq', 200)
+        cy.wait('@getProjects').its('response.statusCode').should('eq', 200)
 
         cy.contains('Project');
         cy.get('[data-cy=subPageHeader]')
@@ -84,6 +72,7 @@ describe('Login Tests', () => {
             });
 
         cy.visit('/administrator/projects/proj1/');
+        cy.wait('@loadProject1').its('response.statusCode').should('eq', 401)
 
         cy.get('#username')
             .type('root@skills.org');
@@ -92,24 +81,8 @@ describe('Login Tests', () => {
         cy.get('[data-cy=login]')
             .click();
 
-        cy.wait('@getProjects')
-            .then(({
-                       request,
-                       response
-                   }) => {
-                expect(response.statusCode)
-                    .to
-                    .eq(200);
-            });
-        cy.wait('@getUserInfo')
-            .then(({
-                       request,
-                       response
-                   }) => {
-                expect(response.statusCode)
-                    .to
-                    .eq(200);
-            });
+        cy.wait('@loadProject1').its('response.statusCode').should('eq', 200)
+        cy.wait('@getUserInfo').its('response.statusCode').should('eq', 200)
 
         cy.contains('PROJECT: This is project 1')
             .should('be.visible');
