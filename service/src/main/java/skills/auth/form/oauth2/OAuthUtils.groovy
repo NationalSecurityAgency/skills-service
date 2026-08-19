@@ -65,11 +65,13 @@ class OAuthUtils {
                     lastName: null
             )
 
-            // if the user exists, make sure to load them so that user roles are populated
+            // if the user exists, make sure to load them so all attributes are populated EXCEPT authorities (proxied users should only have basic app auth)
             UserInfo existingUser = userAuthService.get(currentUser)
             if (existingUser) {
                 currentUser = existingUser
+                currentUser.proxied = true
                 currentUser.proxyingSystemId = auth.name
+                currentUser.authorities = []
             }
 
             skillsAuth = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.authorities)

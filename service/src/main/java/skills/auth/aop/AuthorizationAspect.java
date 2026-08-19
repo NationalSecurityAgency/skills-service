@@ -69,7 +69,7 @@ class AuthorizationAspect {
 
     @Profile
     private void checkAccess(UserInfo userInfo) {
-        Collection<GrantedAuthority> authorities = !userInfo.isProxied() ? userInfo.getAuthorities() : userAuthService.loadAuthorities(userInfo.getUsername());
+        Collection<GrantedAuthority> authorities = !userInfo.isProxied() ? userInfo.getAuthorities() : null;
         boolean foundRole = false;
 
         if (authorities != null) {
