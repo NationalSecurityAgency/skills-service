@@ -94,9 +94,12 @@ class UserAuthService {
     AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
 
     @Transactional(readOnly = true)
-    Collection<GrantedAuthority> loadAuthorities(String userId) {
+    Collection<GrantedAuthority> loadAuthorities(UserInfo userInfo) {
+        if (!userInfo || userInfo.proxied) {
+            return []
+        }
         RequestAttributes requestAttributes = AuthUtils.getRequestAttributes()
-        List<UserRole> userRoles = userRoleRepo.findAllByUserId(userId?.toLowerCase())
+        List<UserRole> userRoles = userRoleRepo.findAllByUserId(userInfo.username?.toLowerCase())
         return convertRoles(userRoles, requestAttributes)
     }
 
@@ -172,10 +175,14 @@ class UserAuthService {
     UserInfo get(UserInfo userInfo) {
         RequestAttributes requestAttributes = AuthUtils.getRequestAttributes()
         AccessSettingsStorageService.UserAndUserAttrsHolder userAndUserAttrs = accessSettingsStorageService.get(userInfo)
+        UserInfo retVal = null
         if (userAndUserAttrs) {
-            return createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs, requestAttributes)
+            retVal = createUserInfo(userAndUserAttrs.user, userAndUserAttrs.userAttrs, requestAttributes)
+            if (userInfo.proxied) {
+                retVal.authorities = []
+            }
         }
-        return null
+        return retVal
     }
 
     private Collection<GrantedAuthority> convertRoles(List<UserRole> roles, RequestAttributes requestAttributes) {

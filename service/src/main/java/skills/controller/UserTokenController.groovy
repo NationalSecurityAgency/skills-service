@@ -69,13 +69,12 @@ class UserTokenController {
 
     private Map<String, TokenFilterChain> tokenFilterChainMap = [:]
 
-    public static final String INCEPTION_USER_TOKEN_ENDPOINT = '/app/projects/Inception/users/{userId}/token'
     public static final String CURRENT_USER_TOKEN_ENDPOINT = '/api/projects/{projectId}/token'
     public static final String PROJECT_USER_TOKEN_ENDPOINT = '/admin/projects/{projectId}/token/{userId}'
 
     @PostConstruct
     void init() {
-        List<String> tokenEndpoints = [INCEPTION_USER_TOKEN_ENDPOINT, CURRENT_USER_TOKEN_ENDPOINT, PROJECT_USER_TOKEN_ENDPOINT]
+        List<String> tokenEndpoints = [CURRENT_USER_TOKEN_ENDPOINT, PROJECT_USER_TOKEN_ENDPOINT]
         tokenEndpoints.each { endpoint ->
             tokenFilterChainMap.put(endpoint, getTokenEndpointFilterChain(endpoint))
         }
@@ -95,18 +94,6 @@ class UserTokenController {
         clientAuth.authenticated = true
         SecurityContextHolder.clearContext()
         SecurityContextHolder.getContext().setAuthentication(clientAuth)
-    }
-
-    /**
-     * token for inception
-     * @param userId
-     * @return
-     */
-    @RequestMapping(value = INCEPTION_USER_TOKEN_ENDPOINT, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    void getInceptionUserToken(HttpServletRequest request, HttpServletResponse response, @PathVariable("userId") String userId) {
-        setOAuth2ClientAuthenticationToken(InceptionProjectService.inceptionProjectId)
-        tokenFilterChainMap.get(INCEPTION_USER_TOKEN_ENDPOINT).init().doFilter(new TokenServletRequestWrapper(request, userId), response)
     }
 
     /**

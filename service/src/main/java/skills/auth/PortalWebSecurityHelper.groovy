@@ -216,7 +216,7 @@ final class SkillsAuthorityFilter extends OncePerRequestFilter {
                 (!permitAllMatcher.matches(request) || request.requestURI == '/app/userInfo')) {
             // Update the security context with roles based on the current request
             UserInfo userInfo = currentAuth.principal.clone() as UserInfo
-            userInfo.authorities = userAuthService.loadAuthorities(userInfo.username)
+            userInfo.authorities =  userAuthService.loadAuthorities(userInfo)
             SecurityContextHolder.getContext().authentication = new UsernamePasswordAuthenticationToken(userInfo, currentAuth.credentials, userInfo.authorities)
         }
 

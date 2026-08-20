@@ -345,7 +345,7 @@ describe('Manage My Projects Tests', () => {
         cy.enableProdMode(1);
         cy.enableProdMode(2);
 
-        cy.intercept('GET', '/app/projects/Inception/users/*/token').as('getToken');
+        cy.intercept('GET', '/api/projects/Inception/token').as('getToken');
         cy.intercept('GET', '/api/availableForMyProjects').as('loadMyProjects');
 
         cy.visit('/progress-and-rankings/manage-my-projects');
