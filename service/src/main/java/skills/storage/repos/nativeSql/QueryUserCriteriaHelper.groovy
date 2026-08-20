@@ -53,10 +53,10 @@ class QueryUserCriteriaHelper {
             nullSafeAddAll(allIds, queryUsersCriteria.achievedSkillIds)
             nullSafeAddAll(allIds, queryUsersCriteria.badgeIds)
             allIds.eachWithIndex { String skillId, int i ->
-                final String tableAlias = "ua_${skillId}_${i}"
+                final String tableAlias = "ua_${i}"
                 sql += """
                 JOIN user_achievement ${tableAlias} ON ${tableAlias}.user_id = ua.user_id
-                AND ${tableAlias}.skill_id = '${skillId}'
+                AND ${tableAlias}.skill_id = :skillId_${i}
                 AND ${tableAlias}.project_id = :projectId
                 """
             }
@@ -66,7 +66,7 @@ class QueryUserCriteriaHelper {
                 String joinAlias = "sl${i}"
                 sql += """
                 JOIN user_achievement ${joinAlias}  on ua.user_id = ${joinAlias}.user_id 
-                AND ${joinAlias}.skill_id = '${entry.subjectId}' AND ${joinAlias}.level >= ${entry.level}
+                AND ${joinAlias}.skill_id = :subjectId_${i} AND ${joinAlias}.level >= :subjectLevel_${i}
                 """
             }
         }
@@ -107,11 +107,11 @@ class QueryUserCriteriaHelper {
             List<String> allIds = []
             nullSafeAddAll(allIds, queryUsersCriteria.achievedSkillIds)
             nullSafeAddAll(allIds, queryUsersCriteria.badgeIds)
-            allIds.each { String skillId ->
-                final String tableAlias = "ua_${skillId}"
+            allIds.eachWithIndex { String skillId, int i ->
+                final String tableAlias = "ua_${i}"
                 sql += """
                 JOIN user_achievement ${tableAlias} ON ${tableAlias}.user_id = ua.user_id
-                AND ${tableAlias}.skill_id = '${skillId}'
+                AND ${tableAlias}.skill_id = :skillId_${i}
                 AND ${tableAlias}.project_id = :projectId
                 """
             }
@@ -121,7 +121,7 @@ class QueryUserCriteriaHelper {
                 String joinAlias = "sl${i}"
                 sql += """
             JOIN user_achievement ${joinAlias}  on ua.user_id = ${joinAlias}.user_id 
-            AND ${joinAlias}.skill_id = '${entry.subjectId}' AND ${joinAlias}.level >= ${entry.level}
+            AND ${joinAlias}.skill_id = :subjectId_${i} AND ${joinAlias}.level >= :subjectLevel_${i}
             """
             }
         }
@@ -165,6 +165,22 @@ class QueryUserCriteriaHelper {
         query.setParameter("projectId", queryUsersCriteria.projectId)
         if (queryUsersCriteria.projectLevel) {
             query.setParameter("projectLevel", queryUsersCriteria.projectLevel)
+        }
+
+        if (queryUsersCriteria.achievedSkillIds || queryUsersCriteria.badgeIds) {
+            List<String> allIds = []
+            nullSafeAddAll(allIds, queryUsersCriteria.achievedSkillIds)
+            nullSafeAddAll(allIds, queryUsersCriteria.badgeIds)
+            allIds.eachWithIndex { String skillId, int i ->
+                query.setParameter("skillId_${i}", skillId)
+            }
+        }
+
+        if (queryUsersCriteria.subjectLevels) {
+            queryUsersCriteria.subjectLevels.eachWithIndex { SubjectLevelCriteria entry, int i ->
+                query.setParameter("subjectId_${i}", entry.subjectId)
+                query.setParameter("subjectLevel_${i}", entry.level)
+            }
         }
 
         if (queryUsersCriteria.notAchievedSkillIds) {

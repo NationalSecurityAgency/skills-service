@@ -163,7 +163,7 @@ export const useAuthState = defineStore('authState', () => {
                 if (appConfig.isPkiAuthenticated) {
                     authenticator = 'pki'
                 } else {
-                    authenticator = `/app/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userInfoState.value.userId)}/token`
+                    authenticator = `/api/projects/${encodeURIComponent(projectId)}/token`
                 }
 
                 SkillsConfiguration.configure({
