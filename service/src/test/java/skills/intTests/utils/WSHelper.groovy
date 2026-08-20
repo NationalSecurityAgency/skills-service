@@ -220,9 +220,9 @@ class WSHelper {
        return post(endpoint, "server", params)
     }
 
-    def proxyApiGet(String token, String endpoint, def params=null) {
+    def proxyApiGet(String token, String endpoint, String type= 'api', def params=null) {
         this.restTemplateWrapper.authenticationToken = "Bearer ${token}"
-        def result = get(endpoint, "api", params)
+        def result = get(endpoint, type, params)
         this.restTemplateWrapper.authenticationToken = null
         return result
     }
