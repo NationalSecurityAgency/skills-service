@@ -284,7 +284,7 @@ class QuizRunService {
         QuizSetting quizLength = quizSettings?.find( { it.setting == QuizSettings.QuizLength.setting })
         boolean randomizeQuestions = quizSettings?.find( { it.setting == QuizSettings.RandomizeQuestions.setting })?.value?.toBoolean()
         boolean randomizeAnswers = quizSettings?.find( { it.setting == QuizSettings.RandomizeAnswers.setting })?.value?.toBoolean()
-        boolean forceRandomizationOfQuestions = quizLength?.value != null && Integer.valueOf(quizLength.value) < dbQuestionDefs.size()
+        boolean forceRandomizationOfQuestions = quizLength?.value != null && Integer.valueOf(quizLength.value) > 0 && Integer.valueOf(quizLength.value) < dbQuestionDefs.size()
         QuizSetting onlyIncorrect = quizSettings?.find({it.setting == QuizSettings.RetakeIncorrectQuestionsOnly.setting})
         boolean onlyIncorrectQuestions = onlyIncorrect?.value?.toBoolean()
         Boolean showAnswerHintsOnRetakesOnly = quizSettings?.find( { it.setting == QuizSettings.ShowAnswerHintsOnRetakeAttemptsOnly.setting })?.value?.toBoolean()
