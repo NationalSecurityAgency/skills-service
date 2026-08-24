@@ -905,4 +905,57 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         q3.answers.answer == ["sanitized  answer ampersand & less than < greater than >", "Answer #2"]
     }
 
+    def "Randomization stops when questions are not limited"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 6, 2)
+        skillsService.createQuizQuestionDefs(questions)
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RandomizeQuestions.setting, value: 'true'],
+                [setting: QuizSettings.QuizLength.setting, value: 5],
+        ])
+
+        def quizInfoAfterStartUser1NotRandom = skillsService.startQuizAttempt(quiz.quizId, 'user1').body
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RandomizeQuestions.setting, value: 'false'],
+                [setting: QuizSettings.QuizLength.setting, value: 5],
+        ])
+
+        def quizInfoAfterStartRandom = skillsService.startQuizAttempt(quiz.quizId, 'user2').body
+
+        when:
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RandomizeQuestions.setting, value: 'false'],
+                [setting: QuizSettings.QuizLength.setting, value: -1],
+        ])
+        def quizInfoAfterStartNotRandom = skillsService.startQuizAttempt(quiz.quizId, 'user3').body
+
+        then:
+        quizInfoAfterStartUser1NotRandom.questions.question != [
+                "This is questions #1",
+                "This is questions #2",
+                "This is questions #3",
+                "This is questions #4",
+                "This is questions #5",
+        ]
+
+        quizInfoAfterStartRandom.questions.questions != [
+                "This is questions #1",
+                "This is questions #2",
+                "This is questions #3",
+                "This is questions #4",
+                "This is questions #5",
+        ]
+
+        quizInfoAfterStartNotRandom.questions.question == [
+                "This is questions #1",
+                "This is questions #2",
+                "This is questions #3",
+                "This is questions #4",
+                "This is questions #5",
+                "This is questions #6",
+        ]
+    }
 }
