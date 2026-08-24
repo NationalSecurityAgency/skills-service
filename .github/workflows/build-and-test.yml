@@ -20,11 +20,7 @@ env:
 
 on:
   workflow_dispatch:
-  push:
-    paths-ignore:
-      - 'README.md'
-      - '.github/workflows/build-and-test-postgres.yml'
-      - '.github/workflows/generate-images-for-regression-tests.yml'
+  # Runs while the PR is open and being updated
   pull_request:
     paths-ignore:
       - 'README.md'
