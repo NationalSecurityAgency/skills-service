@@ -223,15 +223,10 @@ class ProjectCopyService {
             SkillDefWithExtra destinationSubject = loadSubject(otherProject.projectId, otherSubjectId)
 
             List<SkillDefWithExtra> skillDefs = getSkillsToCopy(projectId, skillIds)
-            if (!Boolean.valueOf(destinationSubject.enabled)) {
-                skillDefs.forEach {
-                    it.enabled = false;
-                }
-            }
 
             List<SkillInfo> allCollectedSkills = []
             List<SkillDefWithExtra> skillDefsSorted = skillDefs.sort { skillIds.indexOf(it.skillId) }
-            createSkills(skillDefsSorted, fromProject.projectId, otherProject.projectId, destinationSubject.skillId, allCollectedSkills, otherGroupId, true)
+            createSkills(skillDefsSorted, fromProject.projectId, otherProject.projectId, destinationSubject.skillId, allCollectedSkills, otherGroupId, true, Boolean.valueOf(destinationSubject.enabled))
         } finally {
             copiedAttachmentUuidsThreadLocal.set([:])
         }
@@ -709,7 +704,8 @@ class ProjectCopyService {
     private void createSkills(List<SkillDefWithExtra> skillsToCopy, String originalProjectId,
                               String desProjectId, String subjectId,
                               List<SkillInfo> allCollectedSkills, String groupId = null,
-                              boolean validateNameAndIdCollisions = false) {
+                              boolean validateNameAndIdCollisions = false,
+                              boolean subjectEnabled = null) {
         allCollectedSkills.addAll(skillsToCopy.collect { new SkillInfo(skillDef: it, subjectId: subjectId, groupId: groupId) })
         skillsToCopy?.findAll { (!it.copiedFrom) }
                 ?.each { SkillDefWithExtra fromSkill ->
@@ -730,6 +726,9 @@ class ProjectCopyService {
                         skillRequest.version = 0
                         skillRequest.description = handleAttachmentsInDescription(skillRequest.description, desProjectId)
                         skillRequest.iconClass = fromSkill.iconClass
+                        if(!subjectEnabled) {
+                            skillRequest.enabled = false
+                        }
                         skillRequest.selfReportingType = fromSkill.selfReportingType?.toString()
                         if (skillRequest.selfReportingType && skillRequest.selfReportingType == SkillDef.SelfReportingType.Quiz.toString()) {
                             QuizToSkillDefRepo.QuizNameAndId quizNameAndId = quizToSkillDefRepo.getQuizIdBySkillIdRef(fromSkill.id)

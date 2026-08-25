@@ -478,6 +478,7 @@ class CopySkillsToAnotherProjSubjSpecs extends CopyIntSpec {
         when:
         def originalSkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
         skillsService.copySkillDefsIntoAnotherProjectSubject(p1.projectId, p1Subj1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId)
+        def originalAfterCopySkills = skillsService.getSkillsForSubject(p1.projectId, p1subj1.subjectId)
         def copiedSkills = skillsService.getSkillsForSubject(p2.projectId, p2subj1.subjectId)
 
         then:
@@ -485,6 +486,7 @@ class CopySkillsToAnotherProjSubjSpecs extends CopyIntSpec {
         originalSkills.size() == 3
         originalSkills.enabled == [true, true, true]
         originalSkills.skillId == p1Subj1Skills.collect { it.skillId }
+        originalAfterCopySkills == originalSkills
         copiedSkills
         copiedSkills.size() == 3
         copiedSkills.enabled == [false, false, false]
