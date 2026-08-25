@@ -705,7 +705,7 @@ class ProjectCopyService {
                               String desProjectId, String subjectId,
                               List<SkillInfo> allCollectedSkills, String groupId = null,
                               boolean validateNameAndIdCollisions = false,
-                              boolean subjectEnabled = null) {
+                              Boolean subjectEnabled = null) {
         allCollectedSkills.addAll(skillsToCopy.collect { new SkillInfo(skillDef: it, subjectId: subjectId, groupId: groupId) })
         skillsToCopy?.findAll { (!it.copiedFrom) }
                 ?.each { SkillDefWithExtra fromSkill ->
@@ -726,7 +726,7 @@ class ProjectCopyService {
                         skillRequest.version = 0
                         skillRequest.description = handleAttachmentsInDescription(skillRequest.description, desProjectId)
                         skillRequest.iconClass = fromSkill.iconClass
-                        if(!subjectEnabled) {
+                        if(subjectEnabled != null && !subjectEnabled) {
                             skillRequest.enabled = false
                         }
                         skillRequest.selfReportingType = fromSkill.selfReportingType?.toString()
