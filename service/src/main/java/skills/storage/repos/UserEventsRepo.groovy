@@ -457,8 +457,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
     Stream<WeekCountItem> getDistinctUserCountForProjectGroupedByWeek(@Param("projectId") String projectId, @Param("start") Date start, @Param("newUsersOnly") Boolean newUsersOnly)
 
     @Query(value="""
-        SELECT ue.projectId as projectId, date_trunc('month', ue.performedOn) AS month,  count(distinct ue.userId) as count
-        FROM UserPerformedSkill ue WHERE ue.projectId = :projectId and ue.performedOn >= :start
+        select ue.projectId, date_trunc('month', ue.eventTime) as month, count(distinct ue.userId) as count from UserEvent ue where ue.eventTime >= :start and ue.projectId = :projectId
         AND not exists (select 1 from ArchivedUser au where au.userId = ue.userId and au.projectId = :projectId)
         AND (
             :newUsersOnly = false or 
@@ -466,7 +465,7 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                 select 1 from UserPerformedSkill ue2
                 where ue2.userId = ue.userId
                       and ue2.projectId = ue.projectId
-                      and (ue2.performedOn < :start or ue2.performedOn < ue.performedOn)
+                      and (ue2.performedOn < :start or ue2.performedOn < ue.eventTime)
                 order by ue2.performedOn)
         )                
         GROUP BY ue.projectId, month

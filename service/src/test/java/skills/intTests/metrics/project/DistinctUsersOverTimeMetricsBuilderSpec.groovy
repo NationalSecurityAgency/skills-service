@@ -30,7 +30,10 @@ import skills.storage.model.EventType
 import skills.utils.TestDates
 
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.YearMonth
+import java.time.ZoneId
 
 import static skills.intTests.utils.SkillsFactory.createSkill
 
@@ -551,7 +554,6 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         }
 
         assert maxDailyDays == 3, "test data constructed with the assumption that skills.config.compactDailyEventsOlderThan is set to 3"
-        userEventService.compactDailyEvents()
 
         Duration duration = Duration.between(testDates.getFirstOfMonth(1), LocalDateTime.now())
 
@@ -635,7 +637,6 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         }
 
         assert maxDailyDays == 3, "test data constructed with the assumption that skills.config.compactDailyEventsOlderThan is set to 3"
-        userEventService.compactDailyEvents()
 
         Duration duration = Duration.between(testDates.getDateInPreviousWeek().minusDays(28), LocalDateTime.now())
         Duration monthAgo = Duration.between(testDates.getFirstOfMonth(1), LocalDateTime.now())
@@ -705,8 +706,6 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
                 }
             }
         }
-
-        userEventService.compactDailyEvents()
 
         Duration monthAgo = Duration.between(testDates.getFirstOfMonth(1), LocalDateTime.now())
         Duration twoMonthsAgo = Duration.between(testDates.getFirstOfMonth(2), LocalDateTime.now())
@@ -789,7 +788,7 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         // If today is the first few days of the month, we expect different monthly groupings
         LocalDateTime now = LocalDateTime.now()
         int currentDayOfMonth = now.getDayOfMonth()
-        
+
         if (currentDayOfMonth <= 3) {
             // First few days of month - expect different grouping
             res30days.users.size() == 4
@@ -839,6 +838,64 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         }
     }
 
+    def "number of users growing over a few months - month and weeks compared"() {
+        List<String> users = getRandomUsers(35)
+        def proj = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkills(10)
+        skills.each { it.pointIncrement = 100; it.numPerformToCompletion = 10 }
+
+
+        skillsService.createProject(proj)
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkills(skills)
+
+        List<Date> days = []
+
+        use(TimeCategory) {
+            Date endDate = new Date().clearTime()
+            Date startDate = endDate - 1.months
+            days = (startDate..endDate).toList()
+
+            days.eachWithIndex { Date date, int index ->
+                users.subList(0, 34).each { String user ->
+                    skills.subList(0, 3).each { skill ->
+                        skillsService.addSkill([projectId: proj.projectId, skillId: skill.skillId], user, date)
+                    }
+                }
+            }
+        }
+
+        TestDates testDates = new TestDates()
+        userEventService.compactDailyEvents()
+
+        Duration monthAgo = Duration.between(testDates.getFirstOfMonth(1), LocalDateTime.now())
+
+        when:
+        def res30days = skillsService.getMetricsData(proj.projectId, metricsId, getProps(monthAgo.toDays().toInteger(), null, true))
+        def res30daysByDay = skillsService.getMetricsData(proj.projectId, metricsId, getProps(monthAgo.toDays().toInteger()))
+
+        then:
+
+        def monthlyGroups = groupByMonth(res30days.users)
+        def dailyGroups = groupByMonth(res30daysByDay.users)
+
+        monthlyGroups.each { month, counts ->
+            def count = counts[0]
+            def weeklyCounts = dailyGroups[month]
+            weeklyCounts.each { weeklyCount ->
+                assert weeklyCount <= count
+            }
+        }
+
+        res30daysByDay.newUsers.collect {it.count}.sum() == res30days.newUsers.collect {it.count}.sum()
+
+    }
+
+    Map<YearMonth, List<Number>> groupByMonth(List<Map> items, ZoneId zone = ZoneId.systemDefault()) {
+        items.groupBy { YearMonth.from(Instant.ofEpochMilli(it.value as Long).atZone(zone)) }
+        .collectEntries { month, list -> [month, list*.count] }
+    }
+
     private Map getProps(int numDaysAgo, String skillId = null, Boolean byMonth = false) {
         Map props = [:]
         use(TimeCategory) {
@@ -850,4 +907,5 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         }
         return props
     }
+
 }
