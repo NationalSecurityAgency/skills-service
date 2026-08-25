@@ -75,7 +75,7 @@ spring:
     baseline-version: "5.0.0"
   autoconfigure:
     # Disable Spring Session JDBC by default
-    exclude: org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
+    exclude: org.springframework.boot.session.autoconfigure.SessionAutoConfiguration,org.springframework.boot.session.jdbc.autoconfigure.JdbcSessionAutoConfiguration
   servlet:
     multipart:
       enabled: true
