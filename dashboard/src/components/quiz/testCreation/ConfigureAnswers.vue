@@ -95,7 +95,7 @@ defineExpose( {
   <div v-if="model && model.length > 0" class="mt-2">
     <div v-for="(answer, index) in fields" :key="answer.key" class="flex flex-wrap items-center gap-0" :data-cy="`answer-${index}`">
       <SelectCorrectAnswer
-          v-if="isQuizType"
+          v-if="isQuizType && !QuestionType.isFillInTheBlank(questionType)"
           :id="`answers[${index}].isCorrect`"
           :answer-number="index+1"
           ref="answersRef"
