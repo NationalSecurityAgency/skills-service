@@ -118,7 +118,7 @@ const toggleQuestionState = () => {
       <div class="flex flex-initial items-start flex-col gap-1">
         <div v-if="isDragAndDropControlsVisible"
              :id="`questionSortControl-${question.id}`"
-             class="sort-control border-r border-b border-surface text-muted-color rounded-br-md"
+             class="sort-control border-r border-b border-surface text-muted-color rounded-br-md w-full"
              @click.prevent.self
              tabindex="0"
              aria-label="Questions Sort Control. Press up or down to change the order of this question."
@@ -319,10 +319,11 @@ const toggleQuestionState = () => {
   border-bottom-right-radius: .25rem !important
 }
 
-.sort-control:hover, .sort-control i:hover {
+.sort-control i:hover {
   cursor: grab !important;
   color: #146c75 !important;
   font-size: 1.5rem;
+  padding: 0.25rem;
 }
 
 .answerText {
