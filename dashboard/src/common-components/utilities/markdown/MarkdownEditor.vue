@@ -239,6 +239,31 @@ onMounted(() => {
 })
 function onLoad() {
   markdownAccessibilityFixes.fixAccessibilityIssues(idForToastUIEditor, props.allowInsertImages)
+
+  const injectFooterLink = (retries = 0, maxRetries = 100) => {
+    // Check for standard mode switch container class name variants
+    const footerContainer = toastuiEditor.value.$el.querySelector('.toastui-editor-mode-switch') || toastuiEditor.value.$el.querySelector('.toastui-editor-md-mode-switch')
+
+    // If the element exists and our Vue ref is ready, prepend it
+    if (footerContainer && editorFeatureLinkRef.value) {
+      footerContainer.prepend(editorFeatureLinkRef.value);
+      return;
+    }
+
+    // Stop trying if we hit our maximum attempts limit (e.g., 100 retries * 100ms = 10 seconds)
+    if (retries >= maxRetries) {
+      console.warn('TOAST UI Editor footer container did not appear in time.');
+      return;
+    }
+
+    // Re-check again after a short delay
+    setTimeout(() => {
+      injectFooterLink(retries + 1, maxRetries);
+    }, 100);
+  };
+
+  // Kick off the checking loop
+  injectFooterLink();
 }
 
 const updateValue = () => {
@@ -534,7 +559,6 @@ defineExpose({
       <toast-ui-editor v-show="!previewingMissing"
                        :id="idForToastUIEditor"
                        :style="editorStyle"
-                       class="no-bottom-border"
                        :class="{'editor-theme-dark' : themeHelper.isDarkTheme, 'is-resizable': resizable, 'no-top-border' : descriptionWarningMsg }"
                        data-cy="markdownEditorInput"
                        ref="toastuiEditor"
@@ -550,28 +574,23 @@ defineExpose({
                        @focus="handleFocus"
                        @load="onLoad" />
 
-      <div v-if="!previewingMissing" class="border border-surface bg-surface-100 dark:bg-surface-700 rounded-b px-2 py-2 sd-theme-tile-background">
-      <div  class="flex text-xs">
-        <div v-if="allowInsertImages" class="">
-          Insert images and attach files by pasting, dragging & dropping, or selecting from toolbar.
-        </div>
-        <div class="flex-1 text-right">
-          <a data-cy="editorFeaturesUrl" ref="editorFeatureLinkRef"
-             aria-label="SkillTree documentation of rich text editor features"
-             :href="`${appConfig.docsHost}/dashboard/user-guide/rich-text-editor.html`"
-             target="_blank">
-            <i class="far fa-question-circle editor-help-footer-help-icon" />
-          </a>
-        </div>
-      </div>
-        <Message
+      <a v-if="!previewingMissing"
+         data-cy="editorFeaturesUrl"
+         ref="editorFeatureLinkRef"
+         aria-label="SkillTree documentation of rich text editor features"
+         :href="`${appConfig.docsHost}/dashboard/user-guide/rich-text-editor.html`"
+         class="editor-footer-link"
+         target="_blank">
+        <i class="far fa-question-circle editor-help-footer-help-icon"/>
+      </a>
+
+      <Message
           v-if="attachmentWarningMessage && hasNewAttachment"
           severity="error"
           data-cy="attachmentWarningMessage"
           class="m-0 mt-2">
-          {{ attachmentWarningMessage }}
-        </Message>
-    </div>
+        {{ attachmentWarningMessage }}
+      </Message>
     </BlockUI>
     <div v-show="!previewingMissing" class="flex gap-2">
       <Message severity="error"
@@ -677,12 +696,6 @@ defineExpose({
   border: 1px solid #424b57
 }
 
-.no-bottom-border .toastui-editor-defaultUI {
-  border-bottom: none !important;
-  border-bottom-left-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
-}
-
 .no-top-border .toastui-editor-defaultUI {
   border-top: none !important;
   border-top-left-radius: 0 !important;
@@ -712,5 +725,20 @@ div.toastui-editor-contents {
 
 .toastui-editor .toastui-editor-contents  blockquote p {
   color: #636363;
+}
+
+/* Flex rules to push the link to the left and keep the layout neat */
+.toastui-editor-mode-switch {
+  display: flex !important;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.editor-footer-link {
+  margin-right: auto;
+  margin-left: 12px;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
 }
 </style>
