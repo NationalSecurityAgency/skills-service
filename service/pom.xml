@@ -5,7 +5,7 @@
     <parent>
         <artifactId>skills-service-parent</artifactId>
         <groupId>skill-tree</groupId>
-        <version>4.7.0-SNAPSHOT</version>
+        <version>5.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -195,13 +195,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.session</groupId>
-            <artifactId>spring-session-jdbc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.lettuce</groupId>
-            <artifactId>lettuce-core</artifactId>
-        </dependency>
+       		<groupId>org.springframework.boot</groupId>
+       		<artifactId>spring-boot-starter-session-jdbc</artifactId>
+       	</dependency>
 
         <dependency>
             <groupId>com.github.kagkarlsson</groupId>
