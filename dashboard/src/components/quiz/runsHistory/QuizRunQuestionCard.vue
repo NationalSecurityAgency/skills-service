@@ -54,6 +54,9 @@ const isRatingType = computed(() => {
 const isMatchingType = computed(() => {
   return props.question.questionType === QuestionType.Matching;
 })
+const isFillInTheBlankType = computed(() => {
+  return props.question.questionType === QuestionType.FillInTheBlank;
+})
 const hasAnswer = computed(() => {
   if (isMatchingType.value) {
     return props.question.answers.find((a) => a.answer?.selectedMatch === null || a.answer?.selectedMatch === undefined || a.answer?.selectedMatch === '') === undefined;

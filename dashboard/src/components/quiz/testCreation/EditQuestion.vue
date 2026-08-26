@@ -142,6 +142,12 @@ if (QuizType.isSurvey(props.questionDef.quizType)) {
     description: 'Match terms',
     id: QuestionType.Matching,
     icon: 'fas fa-diagram-project',
+  },
+  {
+    label: 'Fill In the Blank',
+    description: 'Fill in the blanks',
+    id: QuestionType.FillInTheBlank,
+    icon: 'fas fa-arrows-down-to-line'
   })
 }
 
@@ -174,6 +180,9 @@ const isQuestionTypeMultipleChoice = computed(() => {
 const isQuestionTypeSingleChoice = computed(() => {
   return questionType.value.selectedType && questionType.value.selectedType.id === QuestionType.SingleChoice;
 })
+const isQuestionTypeFillInTheBlank = computed(() => {
+  return questionType.value.selectedType && questionType.value.selectedType.id === QuestionType.FillInTheBlank;
+})
 const quizType = computed(() => {
   return props.questionDef.quizType;
 })
@@ -193,7 +202,7 @@ const quizId = computed(() => {
 const isDirty = ref(false)
 const answersErrorMessage = ref('')
 const atLeastOneCorrectAnswer = (value) => {
-  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
+  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value || isQuestionTypeFillInTheBlank.value) {
     return true;
   }
   if (value === undefined) {
@@ -540,6 +549,7 @@ const startAiAssistant = () => {
               class="text-secondary">Check one correct answer on the left:</span>
           <span
             v-if="isQuestionTypeMatching" class="text-secondary">Add pairs of terms and their matching values:</span>
+          <span v-if="isQuestionTypeFillInTheBlank" class="text-secondary">Add acceptable matches for each space above:</span>
         </div>
         <ConfigureAnswers
             v-if="!isQuestionTypeMatching && props.questionDef.quizType"
