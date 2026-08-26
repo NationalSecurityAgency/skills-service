@@ -64,7 +64,7 @@ const props = defineProps({
   },
   resizable: {
     type: Boolean,
-    default: false
+    default: true
   },
   allowAttachments: {
     type: Boolean,
@@ -152,7 +152,7 @@ if (props.allowAttachments) {
   })
 }
 const options = {
-  hideModeSwitch: true,
+  hideModeSwitch: false,
   usageStatistics: false,
   autofocus: false,
   placeholder: props.placeholder,

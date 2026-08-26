@@ -92,7 +92,6 @@ const afterSave = (res) => {
     <MarkdownEditor data-cy="feedback"
                     :id="`qFeedback-${question.id}`"
                     :allow-community-elevation="true"
-                    markdownHeight="150px"
                     label="Your Feedback (optional)"
                     :disable-ai-prompt="true"
                     :allow-attachments="false"

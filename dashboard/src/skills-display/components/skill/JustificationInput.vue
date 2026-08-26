@@ -76,7 +76,6 @@ const submit = handleSubmit(formValues => {
                        :allow-community-elevation="true"
                        data-cy="selfReportMsgInput"
                        :aria-describedby="`reportSkillMsg-${skill.skillId}`"
-                       markdownHeight="250px"
                        label="Justification"
                        name="justification"
                        :show-label="false"

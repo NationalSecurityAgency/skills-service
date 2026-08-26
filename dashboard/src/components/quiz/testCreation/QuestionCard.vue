@@ -152,8 +152,7 @@ const toggleQuestionState = () => {
                              :allow-attachments="false"
                              :allow-insert-images="false"
                              @value-changed="questionUpdatedDebounced"
-                             label="Question"
-                             markdownHeight="150px"/>
+                             label="Question" />
           </div>
 
           <markdown-text v-if="!showEditQuestionInline"
