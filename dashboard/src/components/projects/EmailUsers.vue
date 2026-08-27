@@ -44,13 +44,14 @@ const schema = object({
   emailBody: string().required().max(appConfig.descriptionMaxLength).customDescriptionValidator('Email Body', false).label('Email Body')
 });
 
-const { defineField, meta } = useForm({
+const { defineField, resetForm, meta } = useForm({
   validationSchema: schema,
 })
 
 const [emailBody] = defineField('emailBody');
 const [subjectLine] = defineField('subjectLine');
 
+const markdownEditorRef = ref(null);
 const sentMsg = ref('');
 const maxCriteria = ref(15);
 const alreadyApplied = ref(false);
@@ -484,7 +485,8 @@ const removeFromArray = (array, findCallback) => {
 };
 
 const updateCount = (latestTag) => {
-  ProjectService.countUsersMatchingCriteria(route.params.projectId, criteria.value).then((count) => {
+  ProjectService.countUsersMatchingCriteria(route.params.projectId, criteria.value).then((res) => {
+    const { count } = res;
     let msg = `There are ${count} Project Users matching your specified criteria`;
     if (latestTag) {
       msg = `Added criteria ${latestTag.display}, there are ${count} matching Project Users`;
@@ -506,9 +508,9 @@ const emailUsers = () => {
     nextTick(() => {
       resetTags();
       resetCriteria();
-      emailBody.value = '';
-      subjectLine.value = '';
+      resetForm();
       currentCount.value = 0;
+      markdownEditorRef.value.setMarkdownText('');
     });
     setTimeout(() => { emailSent.value = false; }, 8000);
   }).finally(() => {
@@ -620,6 +622,7 @@ const previewEmail = () => {
           </div>
           <div class="flex w-full mt-2">
             <markdown-editor class="w-full"
+                             ref="markdownEditorRef"
                              data-cy="emailUsers_body"
                              label="Email Body"
                              name="emailBody"
