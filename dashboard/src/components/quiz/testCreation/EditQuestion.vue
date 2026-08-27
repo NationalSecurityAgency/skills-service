@@ -465,7 +465,6 @@ const startAiAssistant = () => {
           label="Question"
           label-class="text-primary font-bold"
           :resizable="true"
-          markdownHeight="150px"
           name="question" />
       <div data-cy="answerHintSection" v-if="isQuizType">
         <div class="flex mb-2">

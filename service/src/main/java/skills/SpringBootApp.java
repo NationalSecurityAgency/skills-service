@@ -37,8 +37,7 @@ import java.util.TimeZone;
 @EnableScheduling
 @EnableWebSecurity
 @Configuration
-//@Import(SpringBootApp.SkillsAutoConfigurationImportSelector.class)
-@SpringBootApplication//(exclude = { DataRedisRepositoriesAutoConfiguration.class, ErrorMvcAutoConfiguration.class})
+@SpringBootApplication
 @EnableJpaRepositories(basePackages = {"skills.storage.repos"})
 public class SpringBootApp {
 
@@ -78,28 +77,4 @@ public class SpringBootApp {
         public void checkServerTrusted(X509Certificate[] certs, String authType) { }
     } };
 
-//    static final class SkillsAutoConfigurationImportSelector extends AutoConfigurationImportSelector {
-//        static final String REDIS = "redis";
-//        static final String NONE = "none";
-//        static final String SESSION_STORE_PROP = "spring.session.store-type";
-//        public static final String REDIS_SESSION_AUTO_CONFIGURATION = "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration";
-//
-//        @Override
-//        protected Set<String> getExclusions(AnnotationMetadata metadata, AnnotationAttributes attributes) {
-//            Set<String> exclusions = super.getExclusions(metadata, attributes);
-//            Environment environment = getEnvironment();
-//            // disable spring boot auto-config for Redis unless 'spring.session.store-type=redis' is configured
-//            if (!StringUtils.equalsIgnoreCase(environment.getProperty(SESSION_STORE_PROP), REDIS)) {
-//                exclusions.add(REDIS_SESSION_AUTO_CONFIGURATION);
-//            } else {
-//                log.info("Enabling Spring Boot RedisAutoConfiguration");
-//            }
-//
-//            if (StringUtils.equalsIgnoreCase(environment.getProperty(SESSION_STORE_PROP), NONE)) {
-//                exclusions.add("org.springframework.boot.autoconfigure.session.SessionAutoConfiguration");
-//                log.info("Disabling Spring Boot SessionAutoConfiguration");
-//            }
-//            return exclusions;
-//        }
-//    }
 }

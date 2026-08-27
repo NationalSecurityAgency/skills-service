@@ -279,7 +279,6 @@ const updateAnswerOrder = (newOrder) => {
                              class="form-text"
                              :id="`question-${num}`"
                              data-cy="textInputAnswer"
-                             markdownHeight="250px"
                              label="Answer"
                              @value-changed="textAnswerChangedDebounced"
                              :show-label="false"

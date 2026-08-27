@@ -106,6 +106,7 @@ export default {
         'body #app .sd-theme-home .toastui-editor-contents h6,' +
         'body #app .sd-theme-home .toastui-editor-tabs .tab-item,' +
         'body #app .sd-theme-home .toastui-editor-popup label,' +
+        'body #app .sd-theme-home .toastui-editor-mode-switch .tab-item,' +
         'body #app .sd-theme-home .p-chip.p-component,' +
         'body #app .sd-theme-home .p-inputtext.p-component,' +
         '.p-listbox-option,' +
@@ -199,8 +200,15 @@ export default {
           + '.p-popover.p-component .p-panelmenu-panel,'
           + '.sd-theme-home .p-avatar.p-component,'
           + '.sd-theme-home .toastui-editor-ww-container,'
+          + '.sd-theme-home .toastui-editor-md-container,'
           + '.sd-theme-home .toastui-editor-defaultUI-toolbar,'
           + '.sd-theme-home .toastui-editor-popup,'
+          + '.sd-theme-home .toastui-editor-md-tab-container,'
+          + '.sd-theme-home .toastui-editor-md-tab-container .toastui-editor-tabs,'
+          + '.sd-theme-home .toastui-editor-md-tab-container .toastui-editor-tabs .tab-item,'
+          + '.sd-theme-home .toastui-editor-mode-switch,'
+          + '.sd-theme-home .toastui-editor-mode-switch .tab-item,'
+          + '.sd-theme-home .toastui-editor-mode-switch .tab-item.active,'
           + '.sd-theme-home .editor-help-footer,'
           + '.sd-theme-home .sd-theme-tile-background,'
           + '.sd-theme-home .p-fieldset, .sd-theme-home .p-fieldset-legend,'
@@ -407,12 +415,18 @@ export default {
     }
 
 
-    const cssBasedOnKeyPathMapping = {
-      'tiles.borderColor': '.sd-theme-home .p-card, .p-autocomplete-panel.p-component { border-style: solid !important; border-width: 1px !important; }',
-      'tiles.backgroundColor': '.sd-theme-home .sd-theme-summary-cards .p-card.p-component { border-style: solid !important; border-width: 1px !important; } ' +
+    let tilesBackgroundColor = '.sd-theme-home .sd-theme-summary-cards .p-card.p-component { border-style: solid !important; border-width: 1px !important; } ' +
         '.sd-theme-home .badge-catalog-item .p-card { border-style: solid !important; border-width: 1px !important; } ' +
         '.sd-theme-home .toastui-editor-toolbar-group button { background-color: #f5f5f5 !important; color: #454545 !important; } ' +
-        '.sd-theme-home .attachment-button.toastui-editor-toolbar-icons { color: #454545 !important; }',
+        '.sd-theme-home .attachment-button.toastui-editor-toolbar-icons { color: #454545 !important; }';
+    if (theme?.tiles?.backgroundColor) {
+      tilesBackgroundColor = tilesBackgroundColor + ` .sd-theme-home .toastui-editor-mode-switch .tab-item.active { border-top: ${theme.tiles.backgroundColor} !important; } ` +
+          `.sd-theme-home .toastui-editor-tabs .tab-item.active { border-bottom: ${theme.tiles.backgroundColor} !important; } `;
+    }
+
+    const cssBasedOnKeyPathMapping = {
+      'tiles.borderColor': '.sd-theme-home .p-card, .p-autocomplete-panel.p-component { border-style: solid !important; border-width: 1px !important; }',
+      'tiles.backgroundColor':  tilesBackgroundColor,
       'textPrimaryColor': '.sd-theme-home .p-avatar.p-component { border-style: solid !important; border-width: 1px !important; } body #app .sd-theme-home .p-chip.p-component  { border-style: solid !important; border-width: 1px !important; }  body #app .sd-theme-home .skills-card-theme-border { border-style: solid !important; border-width: 1px !important; }',
       'pageTitle.borderColor': '.sd-theme-home .skills-theme-page-title.p-card { border-width: 2px !important; }',
       'pageTitle.borderStyle': '.sd-theme-home .skills-theme-page-title.p-card { border-width: 2px !important; }',
