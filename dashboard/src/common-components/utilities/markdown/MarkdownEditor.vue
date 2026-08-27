@@ -241,19 +241,21 @@ function onLoad() {
   markdownAccessibilityFixes.fixAccessibilityIssues(idForToastUIEditor, props.allowInsertImages)
 
   const injectFooterLink = (retries = 0, maxRetries = 100) => {
-    // Check for standard mode switch container class name variants
-    const footerContainer = toastuiEditor.value.$el.querySelector('.toastui-editor-mode-switch') || toastuiEditor.value.$el.querySelector('.toastui-editor-md-mode-switch')
+    if (toastuiEditor.value) {
+      // Check for standard mode switch container class name variants
+      const footerContainer = toastuiEditor.value.$el.querySelector('.toastui-editor-mode-switch') || toastuiEditor.value.$el.querySelector('.toastui-editor-md-mode-switch')
 
-    // If the element exists and our Vue ref is ready, prepend it
-    if (footerContainer && editorFeatureLinkRef.value) {
-      footerContainer.prepend(editorFeatureLinkRef.value);
-      return;
-    }
+      // If the element exists and our Vue ref is ready, prepend it
+      if (footerContainer && editorFeatureLinkRef.value) {
+        footerContainer.prepend(editorFeatureLinkRef.value);
+        return;
+      }
 
-    // Stop trying if we hit our maximum attempts limit (e.g., 100 retries * 100ms = 10 seconds)
-    if (retries >= maxRetries) {
-      console.warn('TOAST UI Editor footer container did not appear in time.');
-      return;
+      // Stop trying if we hit our maximum attempts limit (e.g., 100 retries * 100ms = 10 seconds)
+      if (retries >= maxRetries) {
+        console.warn('TOAST UI Editor footer container did not appear in time.');
+        return;
+      }
     }
 
     // Re-check again after a short delay
@@ -579,7 +581,7 @@ defineExpose({
          ref="editorFeatureLinkRef"
          aria-label="SkillTree documentation of rich text editor features"
          :href="`${appConfig.docsHost}/dashboard/user-guide/rich-text-editor.html`"
-         class="editor-footer-link"
+         class="editor-footer-link text-gray-700"
          target="_blank">
         <i class="far fa-question-circle editor-help-footer-help-icon"/>
       </a>
@@ -645,27 +647,29 @@ defineExpose({
   min-height: 238px !important;
 }
 
-.editor-theme-dark .toastui-editor-ww-container {
-  background-color: #1f2937 !important;
-}
-.editor-theme-dark .toastui-editor-defaultUI-toolbar {
-  background-color: #374151 !important;
-}
-.editor-theme-dark .toastui-editor-ww-code-block pre,
-.editor-theme-dark .toastui-editor-contents code {
-  background-color: #374151 !important;
-}
+.editor-theme-dark .toastui-editor-ww-container,
+.editor-theme-dark .toastui-editor-md-container,
 .editor-theme-dark .toastui-editor-popup-body {
   background-color: #1f2937 !important;
 }
+.editor-theme-dark .toastui-editor-defaultUI-toolbar,
+.editor-theme-dark .toastui-editor-md-tab-container,
+.editor-theme-dark .toastui-editor-ww-code-block pre,
+.editor-theme-dark .toastui-editor-contents code,
+.editor-theme-dark .toastui-editor-md-code-block-line-background {
+  background-color: #374151 !important;
+}
+
 .editor-theme-dark .toastui-editor-popup-body li:hover {
   background-color: #41444a !important;
   color: #dadde6 !important;
 }
+
 .editor-theme-dark .toastui-editor-popup-body input,
 .editor-theme-dark .toastui-editor-popup-add-image .toastui-editor-file-name.has-file {
   color: #dadde6 !important;
 }
+
 .editor-theme-dark .toastui-editor-contents p,
 .editor-theme-dark .toastui-editor-contents hr,
 .editor-theme-dark .toastui-editor-popup-add-image .toastui-editor-tabs .tab-item,
@@ -677,7 +681,10 @@ defineExpose({
 .editor-theme-dark .toastui-editor-contents h3,
 .editor-theme-dark .toastui-editor-contents h4,
 .editor-theme-dark .toastui-editor-contents h5,
-.editor-theme-dark .toastui-editor-contents h6 {
+.editor-theme-dark .toastui-editor-contents h6,
+.editor-theme-dark .ProseMirror div,
+.editor-theme-dark .toastui-editor-md-marked-text,
+.editor-theme-dark .toastui-editor-md-table-cell{
   color: rgba(255, 255, 255, 0.87) !important;
 }
 
@@ -741,4 +748,72 @@ div.toastui-editor-contents {
   align-items: center;
   text-decoration: none;
 }
+.editor-theme-dark .editor-footer-link {
+  color: #c2ccda !important;
+}
+
+
+.toastui-editor-mode-switch .tab-item {
+  color: #606060 !important;
+}
+.toastui-editor-mode-switch .tab-item.active {
+  color: #000000 !important;
+}
+
+.editor-theme-dark .toastui-editor-mode-switch {
+  background-color: #1f2937 !important;
+}
+
+.toastui-editor-mode-switch {
+  padding-bottom: 5px !important;;
+}
+
+
+.toastui-editor-mode-switch .tab-item.active {
+  font-width: bold;
+}
+
+.editor-theme-dark .toastui-editor-mode-switch .tab-item {
+  background-color: #374151 !important;
+  color: #c2ccda !important;
+}
+.editor-theme-dark .toastui-editor-mode-switch .tab-item.active {
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+  border-top: none !important;
+}
+
+.toastui-editor-toolbar {
+  height: 45px !important;
+}
+
+.toastui-editor-toolbar .toastui-editor-md-tab-container .tab-item {
+  height: 32px !important;
+}
+
+.toastui-editor-defaultUI-toolbar button[disabled="true"] {
+  opacity: 0.3 !important;;
+}
+
+
+/* .toastui-editor-md-tab-container is the container for tabs in the markdown mode */
+.toastui-editor-md-tab-container .tab-item.active {
+  font-weight: bold;
+}
+
+.toastui-editor-md-tab-container .tab-item:not(.active) {
+  color: #686868 !important;
+}
+
+.editor-theme-dark .toastui-editor-md-tab-container .tab-item {
+  background-color: #374151 !important;
+  color: #c2ccda !important;
+}
+
+.editor-theme-dark .toastui-editor-md-tab-container .tab-item.active {
+  color: #ffffff !important;
+  background-color: #1f2937 !important;
+  border-bottom: none !important;
+}
+
 </style>
