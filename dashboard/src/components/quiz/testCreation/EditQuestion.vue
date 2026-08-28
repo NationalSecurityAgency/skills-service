@@ -29,6 +29,7 @@ import MatchingQuestion from "@/components/quiz/testCreation/MatchingQuestion.vu
 import GenerateSingleQuestionDialog
   from "@/common-components/utilities/learning-conent-gen/GenerateSingleQuestionDialog.vue";
 import QuestionTypeDropDown from "@/components/quiz/testCreation/QuestionTypeDropDown.vue";
+import ConfigureBlanks from "@/components/quiz/testCreation/ConfigureBlanks.vue";
 
 const model = defineModel()
 const props = defineProps({
@@ -425,6 +426,17 @@ const startAiAssistant = () => {
   }
   showGenQDialog.value = true
 }
+
+const numberOfBlanks = computed(() => {
+  if(isQuestionTypeFillInTheBlank.value) {
+    const fieldValues = skillsInputFormDialogRef.value.getFieldValues()
+    const question = fieldValues.question.replace(/\\_/g, '_');
+    const numBlanks = question.match(/_{2,}/g)?.length || 0;
+    return numBlanks;
+  } else {
+    return 0;
+  }
+})
 </script>
 
 <template>
@@ -552,7 +564,7 @@ const startAiAssistant = () => {
           <span v-if="isQuestionTypeFillInTheBlank" class="text-secondary">Add acceptable matches for each space above:</span>
         </div>
         <ConfigureAnswers
-            v-if="!isQuestionTypeMatching && props.questionDef.quizType"
+            v-if="!isQuestionTypeMatching && !isQuestionTypeFillInTheBlank && props.questionDef.quizType"
             ref="answersRef"
             v-model="props.questionDef.answers"
             :quiz-type="props.questionDef.quizType"
@@ -561,6 +573,18 @@ const startAiAssistant = () => {
             :aria-invalid="!!answersErrorMessage"
             aria-errormessage="answersError"
               aria-describedby="answersError" />
+
+        <ConfigureBlanks
+            v-if="isQuestionTypeFillInTheBlank && props.questionDef.quizType"
+            ref="answersRef"
+            v-model="props.questionDef.answers"
+            :quiz-type="props.questionDef.quizType"
+            :question-type="questionType.selectedType.id "
+            :number-of-blanks="numberOfBlanks"
+            :class="{ 'p-invalid': answersErrorMessage }"
+            :aria-invalid="!!answersErrorMessage"
+            aria-errormessage="answersError"
+            aria-describedby="answersError" />
 
         <matching-question ref="answersRef" v-model="props.questionDef.answers" v-if="isQuestionTypeMatching" />
 

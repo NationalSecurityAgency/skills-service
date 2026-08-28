@@ -71,6 +71,9 @@ const isRatingType = computed(() => {
 const isMatchingType = computed(() => {
   return props.question.questionType === QuestionType.Matching;
 })
+const isFillInTheBlankType = computed(() => {
+  return props.question.questionType === QuestionType.FillInTheBlank;
+})
 const isDragAndDropControlsVisible = computed(() => {
   return !quizConfig.isReadOnlyQuiz && props.showDragAndDropControls;
 })
@@ -175,7 +178,7 @@ const toggleQuestionState = () => {
             <span class="" aria-label="This question is graded by AI">Graded via AI</span>
           </div>
         </div>
-        <div v-if="!isTextInputType && !isRatingType && !isMatchingType && !collapsed">
+        <div v-if="!isTextInputType && !isRatingType && !isMatchingType && !isFillInTheBlankType && !collapsed">
           <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
             <div class="flex items-center justify-center pb-1" :data-cy="`answerDisplay-${index}`">
               <SelectCorrectAnswer v-model="a.isCorrect"
@@ -188,6 +191,11 @@ const toggleQuestionState = () => {
             <div class="flex items-center justify-center ml-2 pb-1">
               <div class="answerText" :data-cy="`answer-${index}_displayText`">{{ a.answer }}</div>
             </div>
+          </div>
+        </div>
+        <div v-if="isFillInTheBlankType && !collapsed" class="flex">
+          <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
+            <div class="flex items-center justify-center pb-1" >{{index}}: {{ a.answer }}</div>
           </div>
         </div>
         <div v-if="isRatingType && !collapsed" class="flex">
