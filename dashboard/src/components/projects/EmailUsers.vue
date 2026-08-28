@@ -44,13 +44,14 @@ const schema = object({
   emailBody: string().required().max(appConfig.descriptionMaxLength).customDescriptionValidator('Email Body', false).label('Email Body')
 });
 
-const { defineField, meta } = useForm({
+const { defineField, resetForm, meta } = useForm({
   validationSchema: schema,
 })
 
 const [emailBody] = defineField('emailBody');
 const [subjectLine] = defineField('subjectLine');
 
+const markdownEditorRef = ref(null);
 const sentMsg = ref('');
 const maxCriteria = ref(15);
 const alreadyApplied = ref(false);
@@ -506,9 +507,9 @@ const emailUsers = () => {
     nextTick(() => {
       resetTags();
       resetCriteria();
-      emailBody.value = '';
-      subjectLine.value = '';
+      resetForm();
       currentCount.value = 0;
+      markdownEditorRef.value.setMarkdownText('');
     });
     setTimeout(() => { emailSent.value = false; }, 8000);
   }).finally(() => {
@@ -620,6 +621,7 @@ const previewEmail = () => {
           </div>
           <div class="flex w-full mt-2">
             <markdown-editor class="w-full"
+                             ref="markdownEditorRef"
                              data-cy="emailUsers_body"
                              label="Email Body"
                              name="emailBody"

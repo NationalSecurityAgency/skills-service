@@ -592,4 +592,80 @@ describe('Contact Project Users Specs', () => {
         cy.get('#emailBodyError').contains('paragraphs may not contain jabberwocky')
         cy.get('[data-cy="previewUsersEmail"]').should('be.disabled');
     });
+
+  it('email body validation error cleared after successful email send', () => {
+          // Create a fresh project for isolated testing
+          cy.request('POST', '/app/projects/proj3', {
+              projectId: 'proj3',
+              name: 'proj3',
+          }).as('createProject');
+
+          // Intercept the preview endpoint (not used directly here but keeps the app happy)
+          cy.intercept('POST', '/admin/projects/proj3/previewEmail', {
+              statusCode: 200,
+              body: { success: true },
+          }).as('previewEmail');
+
+          // Intercept the contactUsersCount endpoint – needed when adding a filter
+          cy.intercept('POST', '/admin/projects/proj3/contactUsersCount', {
+              statusCode: 200,
+              body: 1,
+          }).as('updateCount3');
+
+          // Enable email feature flag
+          cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
+              .as('emailSupported');
+
+          cy.visit('/administrator/projects/proj3/contact-users');
+          cy.get('[data-cy="nav-Contact Users"]').click();
+          cy.wait('@emailSupported');
+
+          // ---------------------------------------------------------------
+          // SELECT USERS – the send button is disabled until at least one
+          // user (filter) is chosen. Add the "All Users" filter for the project.
+          // ---------------------------------------------------------------
+          cy.selectItem('[data-cy="filterSelector"]', 'Project');
+          cy.get('[data-cy=emailUsers-addBtn]').click();
+          cy.wait('@updateCount3'); // wait for the count to be refreshed
+          cy.get('[data-cy=filterBadge]').eq(0).contains('All Users');
+          
+          cy.get('[data-cy="usersMatchingFilters"]')
+            .should('have.text', '1 Users Selected');
+
+          // ---------------------------------------------------------------
+          // VALID INPUT – fill in a valid subject and body so the form is
+          // considered valid and the submit button becomes enabled.
+          // ---------------------------------------------------------------
+          cy.get('[data-cy="emailUsers_subject"]').type('Test Subject');
+          cy.get('[data-cy="emailUsers_body"]').type('Hello world');
+
+          // Ensure the submit button is now enabled
+          cy.get('[data-cy="emailUsers-submitBtn"]').should('be.enabled');
+
+          // ---------------------------------------------------------------
+          // SEND EMAIL – intercept the actual send request and verify success.
+          // ---------------------------------------------------------------
+          cy.intercept('POST', '/admin/projects/proj3/contactUsers', {
+              statusCode: 200,
+              body: { success: true },
+          }).as('sendEmail');
+
+          cy.get('[data-cy="emailUsers-submitBtn"]').click();
+          cy.wait('@sendEmail');
+
+          // Expect the success toast/message
+          cy.get('[data-cy=emailSent]').should('be.visible');
+
+          // ---------------------------------------------------------------
+          // AFTER SEND – the subject field is cleared, and the validation
+          // error (if any) for the body should no longer be displayed.
+          // ---------------------------------------------------------------
+          cy.get('[data-cy=descriptionError]').should('not.be.visible');
+
+          // Verify that the subject and body fields are cleared after a successful send
+          cy.get('[data-cy=emailUsers_subject]')
+              .should('have.value', '');
+          cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents p')
+            .should('have.value', '');
+      });
 });
