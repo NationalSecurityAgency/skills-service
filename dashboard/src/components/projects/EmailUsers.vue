@@ -485,8 +485,7 @@ const removeFromArray = (array, findCallback) => {
 };
 
 const updateCount = (latestTag) => {
-  ProjectService.countUsersMatchingCriteria(route.params.projectId, criteria.value).then((res) => {
-    const { count } = res;
+  ProjectService.countUsersMatchingCriteria(route.params.projectId, criteria.value).then((count) => {
     let msg = `There are ${count} Project Users matching your specified criteria`;
     if (latestTag) {
       msg = `Added criteria ${latestTag.display}, there are ${count} matching Project Users`;

@@ -609,7 +609,7 @@ describe('Contact Project Users Specs', () => {
           // Intercept the contactUsersCount endpoint – needed when adding a filter
           cy.intercept('POST', '/admin/projects/proj3/contactUsersCount', {
               statusCode: 200,
-              body: { count: 1 },
+              body: 1,
           }).as('updateCount3');
 
           // Enable email feature flag
